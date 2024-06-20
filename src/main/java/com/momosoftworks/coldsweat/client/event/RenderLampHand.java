@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.api.distmarker.Dist;
@@ -51,19 +52,26 @@ public class RenderLampHand
             ms.mulPose(Vector3f.YP.rotationDegrees((float) Math.sin(event.getSwingProgress()*Math.PI) * (isRightHand ? -30 : 30)));
             ms.mulPose(Vector3f.ZP.rotationDegrees((float) Math.sin(event.getSwingProgress()*Math.PI) * (isRightHand ? -30 : 30)));
             // Render the item/hand
-            renderHand(ms, event.getBuffers(), event.getLight(), player, isRightHand, handRenderer, playerRenderer, event.getItemStack());
+            renderHand(ms, event.getBuffers(), event.getLight(), player, isRightHand, event.getHand(), handRenderer, playerRenderer, event.getItemStack());
             ms.popPose();
         }
     }
 
-    private static void renderHand(MatrixStack ms, IRenderTypeBuffer bufferSource, int light, ClientPlayerEntity player, boolean isRightHand, FirstPersonRenderer handRenderer, PlayerRenderer playerRenderer, ItemStack itemStack)
+    private static void renderHand(MatrixStack ms, IRenderTypeBuffer bufferSource, int light, ClientPlayerEntity player, boolean isRightHand, Hand hand, FirstPersonRenderer handRenderer, PlayerRenderer playerRenderer, ItemStack itemStack)
     {
+        boolean isSelected = player.getItemInHand(hand).getItem() == ModItems.SOULSPRING_LAMP;
         // Render arm
         ms.pushPose();
         ms.pushPose();
         ms.scale(1, 1.2f, 1);
         ms.mulPose(Vector3f.XP.rotationDegrees(-25));
         ms.translate(0, -0.2, 0.25);
+        // The hand moves a little bit when being put away. I don't know why
+        if (!isSelected)
+        {   ms.translate(0, isRightHand ? -0.012 : 0.015, 0);
+            ms.mulPose(Vector3f.ZP.rotationDegrees(2.3f * (isRightHand ? -1 : 1)));
+        }
+        // Render arm for the correct side
         if (isRightHand)
         {   playerRenderer.renderRightHand(ms, bufferSource, light, player);
         }
