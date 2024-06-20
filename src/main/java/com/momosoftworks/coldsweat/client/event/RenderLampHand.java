@@ -73,7 +73,7 @@ public class RenderLampHand
         // The hand moves a little bit when being put away. I don't know why
         if (!isSelected)
         {   ms.translate(0, isRightHand ? -0.012 : 0.015, 0);
-            ms.mulPose(Axis.ZP.rotationDegrees(2.3f * (isRightHand ? -1 : 1)));
+            ms.mulPose(Vector3f.ZP.rotationDegrees(2.3f * (isRightHand ? -1 : 1)));
         }
         // Render arm for the correct side
         if (isRightHand)
