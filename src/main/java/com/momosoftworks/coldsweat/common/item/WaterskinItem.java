@@ -5,6 +5,7 @@ import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
+import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -14,6 +15,7 @@ import net.minecraft.fluid.Fluids;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUseContext;
+import net.minecraft.particles.ParticleTypes;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.*;
@@ -51,6 +53,8 @@ public class WaterskinItem extends Item
                 level.setBlockAndUpdate(pos, newLevel == 0 ? Blocks.CAULDRON.defaultBlockState() : state.setValue(BlockStateProperties.LEVEL_CAULDRON, newLevel));
             }
             fillWaterskinItem(player, context.getItemInHand(), context.getHand(), pos);
+            WorldHelper.spawnParticleBatch(level, ParticleTypes.SPLASH, pos.getX() + 0.5, pos.getY() + 0.65, pos.getZ() + 0.5, 0.5, 0.5, 0.5, 10, 0);
+            level.playSound(null, pos, ModSounds.WATERSKIN_FILL, SoundCategory.PLAYERS, 2f, (float) Math.random() / 5 + 0.9f);
 
             return ActionResultType.SUCCESS;
         }
@@ -64,7 +68,8 @@ public class WaterskinItem extends Item
         ItemStack itemstack = ar.getObject();
 
         BlockRayTraceResult blockhitresult = getPlayerPOVHitResult(level, player, RayTraceContext.FluidMode.SOURCE_ONLY);
-        BlockState lookingAt = level.getBlockState(blockhitresult.getBlockPos());
+        BlockPos hitPos = blockhitresult.getBlockPos();
+        BlockState lookingAt = level.getBlockState(hitPos);
 
         if (blockhitresult.getType() != RayTraceResult.Type.BLOCK)
         {   return ActionResult.pass(itemstack);
@@ -72,7 +77,10 @@ public class WaterskinItem extends Item
         else
         {
             if (lookingAt.getFluidState().isSource() && lookingAt.getFluidState().getType().isSame(Fluids.WATER))
-            {   fillWaterskinItem(player, itemstack, hand, blockhitresult.getBlockPos());
+            {
+                fillWaterskinItem(player, itemstack, hand, hitPos);
+                level.playSound(null, hitPos, ModSounds.WATERSKIN_FILL, SoundCategory.PLAYERS, 2f, (float) Math.random() / 5 + 0.9f);
+                WorldHelper.spawnParticleBatch(level, ParticleTypes.SPLASH, hitPos.getX() + 0.5, hitPos.getY() + 1, hitPos.getZ() + 0.5, 0.5, 0.5, 0.5, 10, 0);
             }
             return ar;
         }

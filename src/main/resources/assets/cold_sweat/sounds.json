@@ -149,5 +149,27 @@
         "stream": true
       }
     ]
+  },
+  "item.waterskin.pour":
+  {
+    "subtitle": "item.waterskin.pour",
+    "sounds":
+    [
+      {
+        "name": "cold_sweat:item/waterskin_pour",
+        "stream": true
+      }
+    ]
+  },
+  "item.waterskin.fill":
+  {
+    "subtitle": "item.waterskin.fill",
+    "sounds":
+    [
+      {
+        "name": "cold_sweat:item/waterskin_fill",
+        "stream": true
+      }
+    ]
   }
 }

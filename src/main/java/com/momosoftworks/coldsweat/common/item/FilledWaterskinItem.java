@@ -13,8 +13,11 @@ import com.momosoftworks.coldsweat.core.network.message.ParticleBatchMessage;
 import com.momosoftworks.coldsweat.core.network.message.UseFilledWaterskinMessage;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
+import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.CauldronBlock;
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.ITooltipFlag;
@@ -23,6 +26,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemUseContext;
 import net.minecraft.item.UseAction;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.*;
@@ -170,22 +174,11 @@ public class FilledWaterskinItem extends Item
         Temperature.addModifier(player, new WaterskinTempModifier(amount).expires(0), Temperature.Trait.CORE, Placement.Duplicates.ALLOW);
 
         // Play empty sound
-        level.playLocalSound(player.getX(), player.getY(), player.getZ(), SoundEvents.AMBIENT_UNDERWATER_EXIT,
-                             SoundCategory.PLAYERS, 1, (float) ((Math.random() / 5) + 0.9), false);
-
-        // Create empty waterskin item
-        ItemStack emptyStack = getEmpty(stack);
-        emptyStack.getOrCreateTag().remove("Purity");
-
-        // Add the item to the player's inventory
-        if (player.inventory.contains(emptyStack))
-        {   player.addItem(emptyStack);
-            player.setItemInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
-        }
-        else
-        {   player.setItemInHand(Hand.MAIN_HAND, emptyStack);
+        if (!player.level.isClientSide)
+        {   WorldHelper.playEntitySound(ModSounds.WATERSKIN_POUR, player, player.getSoundSource(), 2f, (float) ((Math.random() / 5) + 0.9));
         }
 
+        consumeWaterskin(stack, player, player.getUsedItemHand());
         player.swing(Hand.MAIN_HAND);
 
         // spawn falling water particles
@@ -210,6 +203,22 @@ public class FilledWaterskinItem extends Item
         return true;
     }
 
+    public static void consumeWaterskin(ItemStack stack, PlayerEntity player, Hand usedHand)
+    {
+        // Create empty waterskin item
+        ItemStack emptyStack = getEmpty(stack);
+        emptyStack.getOrCreateTag().remove("Purity");
+
+        // Add the item to the player's inventory
+        if (player.inventory.contains(emptyStack))
+        {   player.addItem(emptyStack);
+            player.setItemInHand(usedHand, ItemStack.EMPTY);
+        }
+        else
+        {   player.setItemInHand(usedHand, emptyStack);
+        }
+    }
+
     public ActionResult<ItemStack> use(World level, PlayerEntity player, Hand hand)
     {
         if (player.isCrouching())
@@ -219,6 +228,36 @@ public class FilledWaterskinItem extends Item
         {   return ActionResult.consume(player.getItemInHand(hand));
         }
         return ActionResult.pass(player.getItemInHand(hand));
+    }
+
+    @Override
+    public ActionResultType useOn(ItemUseContext context)
+    {
+        World level = context.getLevel();
+        BlockPos pos = context.getClickedPos();
+        BlockState state = level.getBlockState(pos);
+        PlayerEntity player = context.getPlayer();
+
+        if (state.is(Blocks.CAULDRON))
+        {
+            // Fill cauldron
+            int waterLevel = state.getValue(CauldronBlock.LEVEL);
+            if (waterLevel >= 3) return ActionResultType.PASS;
+            state = state.setValue(CauldronBlock.LEVEL, waterLevel + 1);
+            level.setBlock(pos, state, 3);
+            // Pouring sound / visuals
+            if (!level.isClientSide)
+            {   level.playSound(null, pos, ModSounds.WATERSKIN_FILL, SoundCategory.BLOCKS, 2f, (float) Math.random() / 5 + 0.9f);
+                WorldHelper.spawnParticleBatch(level, ParticleTypes.SPLASH, pos.getX() + 0.5, pos.getY() + 0.65, pos.getZ() + 0.5, 0.5, 0.5, 0.5, 10, 0);
+            }
+            // Consume waterskin
+            if (player != null)
+            {   consumeWaterskin(context.getItemInHand(), player, context.getHand());
+                player.getCooldowns().addCooldown(ModItems.WATERSKIN, 10);
+            }
+            return ActionResultType.SUCCESS;
+        }
+        return ActionResultType.PASS;
     }
 
     @Override
