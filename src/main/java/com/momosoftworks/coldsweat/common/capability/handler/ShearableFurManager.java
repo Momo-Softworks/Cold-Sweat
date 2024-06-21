@@ -132,13 +132,20 @@ public class ShearableFurManager
                 }
 
                 // Random chance to ram the player when sheared
+                stopGoals:
                 if (!player.isCreative() && goat.level.getDifficulty() != Difficulty.PEACEFUL
                 && !goat.level.isClientSide && goat.getRandom().nextDouble() < 0.4)
                 {
                     // Set ram cooldown ticks
                     goat.getBrain().setMemory(MemoryModuleType.RAM_COOLDOWN_TICKS, 30);
                     // Stop active goals
-                    goat.goalSelector.getRunningGoals().forEach(WrappedGoal::stop);
+                    for (WrappedGoal goal : goat.goalSelector.getAvailableGoals())
+                    {
+                        if (goal.isInterruptable())
+                        {   goal.stop();
+                        }
+                        else break stopGoals;
+                    }
 
                     // Start lowering head
                     TaskScheduler.scheduleServer(() ->
