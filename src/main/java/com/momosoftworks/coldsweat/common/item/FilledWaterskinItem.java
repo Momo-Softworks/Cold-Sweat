@@ -183,7 +183,7 @@ public class FilledWaterskinItem extends Item
         }
 
         consumeWaterskin(stack, player, player.getUsedItemHand());
-        player.swing(InteractionHand.MAIN_HAND);
+        player.swing(player.getUsedItemHand());
 
         // spawn falling water particles
         Random rand = new Random();
@@ -259,7 +259,7 @@ public class FilledWaterskinItem extends Item
             }
             // Consume waterskin
             if (player != null)
-            {   consumeWaterskin(context.getItemInHand(), player, player.getUsedItemHand());
+            {   consumeWaterskin(context.getItemInHand(), player, context.getHand());
                 player.getCooldowns().addCooldown(ModItems.WATERSKIN, 10);
             }
             return InteractionResult.SUCCESS;
