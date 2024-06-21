@@ -10,7 +10,6 @@ import com.momosoftworks.coldsweat.core.init.ItemInit;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.ParticleBatchMessage;
-import com.momosoftworks.coldsweat.core.network.message.UseFilledWaterskinMessage;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
@@ -32,6 +31,7 @@ import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.*;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
@@ -164,7 +164,7 @@ public class FilledWaterskinItem extends Item
         }
     }
 
-    public static boolean performPourAction(ItemStack stack, LivingEntity entity)
+    public static boolean performPourAction(ItemStack stack, LivingEntity entity, Hand hand)
     {
         if (!(entity instanceof PlayerEntity && stack.getItem() == ModItems.FILLED_WATERSKIN)) return false;
 
@@ -178,8 +178,8 @@ public class FilledWaterskinItem extends Item
         {   WorldHelper.playEntitySound(ModSounds.WATERSKIN_POUR, player, player.getSoundSource(), 2f, (float) ((Math.random() / 5) + 0.9));
         }
 
-        consumeWaterskin(stack, player, player.getUsedItemHand());
-        player.swing(player.getUsedItemHand());
+        consumeWaterskin(stack, player, hand);
+        player.swing(hand);
 
         // spawn falling water particles
         Random rand = new Random();
@@ -187,12 +187,14 @@ public class FilledWaterskinItem extends Item
         {
             TaskScheduler.scheduleClient(() ->
             {
-                for (int p = 0; p < rand.nextInt(5) + 5; p++)
+                for (int p = 0; p < 10; p++)
                 {
+                    AxisAlignedBB playerBB = player.getDimensions(player.getPose()).makeBoundingBox(player.position()).inflate(0.2);
                     level.addParticle(ParticleTypes.FALLING_WATER,
-                                      player.getX() + rand.nextFloat() * player.getBbWidth() - (player.getBbWidth() / 2),
-                                      player.getY() + player.getBbHeight() + rand.nextFloat() * 0.5,
-                                      player.getZ() + rand.nextFloat() * player.getBbWidth() - (player.getBbWidth() / 2), 0.3, 0.3, 0.3);
+                                      MathHelper.lerp(rand.nextFloat(), playerBB.minX, playerBB.maxX),
+                                      playerBB.maxY,
+                                      MathHelper.lerp(rand.nextFloat(), playerBB.minZ, playerBB.maxZ),
+                                      0.3, 0.3, 0.3);
                 }
             }, i);
         }
@@ -224,7 +226,7 @@ public class FilledWaterskinItem extends Item
         if (player.isCrouching())
         {   return DrinkHelper.useDrink(level, player, hand);
         }
-        else if (performPourAction(player.getItemInHand(hand), player))
+        else if (performPourAction(player.getItemInHand(hand), player, hand))
         {   return ActionResult.consume(player.getItemInHand(hand));
         }
         return ActionResult.pass(player.getItemInHand(hand));
