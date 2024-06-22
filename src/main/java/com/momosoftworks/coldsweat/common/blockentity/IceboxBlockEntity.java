@@ -121,7 +121,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
                     CompoundTag tag = NBTHelper.getTagOrEmpty(stack);
                     double itemTemp = tag.getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
 
-                    if (stack.getItem() == ModItems.FILLED_WATERSKIN && itemTemp > -50)
+                    if (stack.is(ModItems.FILLED_WATERSKIN) && itemTemp > -50)
                     {   hasItemStacks = true;
                         tag.putDouble(FilledWaterskinItem.NBT_TEMPERATURE, Math.max(-50, itemTemp - 1));
                     }

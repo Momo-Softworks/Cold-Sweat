@@ -121,13 +121,9 @@ public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider
                     CompoundTag tag = NBTHelper.getTagOrEmpty(stack);
                     double itemTemp = tag.getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
 
-                    if (stack.is(ModItemTags.BOILER_VALID))
-                    {
-                        // If item is a filled waterskin not at max temp yet
-                        if (itemTemp < 50 && stack.is(ModItems.FILLED_WATERSKIN))
-                        {   hasItemStacks = true;
-                            tag.putDouble(FilledWaterskinItem.NBT_TEMPERATURE, Math.min(50, itemTemp + 1));
-                        }
+                    if (stack.is(ModItems.FILLED_WATERSKIN) && itemTemp < 50)
+                    {   hasItemStacks = true;
+                        tag.putDouble(FilledWaterskinItem.NBT_TEMPERATURE, Math.min(50, itemTemp + 1));
                     }
                 }
             }
