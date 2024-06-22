@@ -33,6 +33,7 @@ public class MixinHeartRender
     {
         double heartsFreezePercentage = ConfigSettings.HEARTS_FREEZING_PERCENTAGE.get();
         Player player = Minecraft.getInstance().player;
+        boolean isHardcore = player.level().getLevelData().isHardcore();
 
         if (heartsFreezePercentage == 0
         || player.hasEffect(ModEffects.GRACE)) return;
@@ -58,13 +59,21 @@ public class MixinHeartRender
 
             // Render frozen hearts
             if (HEART_INDEX > 0 && HEART_INDEX < frozenHearts + 1)
-            {   guiGraphics.blit(HEART_TEXTURE, x, y, 21, 0, 9, 9, 30, 14);
+            {
+                guiGraphics.blit(HEART_TEXTURE, x, y, 21, 0, 9, 9, 30, 14);
                 guiGraphics.blit(HEART_TEXTURE, x + 1, y + 1, u, 0, 7, 7, 30, 14);
+                if (isHardcore)
+                {   guiGraphics.blit(HEART_TEXTURE, x + 1, y + 1, 23, 10, 7, 4, 30, 14);
+                }
                 ci.cancel();
             }
             // Render half-frozen heart if needed
             else if (HEART_INDEX == frozenHearts + 1 && frozenHealth % 2 == 1)
-            {   guiGraphics.blit(HEART_TEXTURE, x + 1, y + 1, u, 7, 7, 7, 30, 14);
+            {
+                guiGraphics.blit(HEART_TEXTURE, x + 1, y + 1, u, 7, 7, 7, 30, 14);
+                if (isHardcore)
+                {   guiGraphics.blit(HEART_TEXTURE, x + 4, y + 1, 26, 10, 4, 4, 30, 14);
+                }
             }
         }
     }
