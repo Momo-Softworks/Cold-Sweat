@@ -105,7 +105,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
                     ItemStack stack = getItem(i);
                     double itemTemp = stack.getOrDefault(ModItemComponents.WATER_TEMPERATURE.value(), 0d);
 
-                    if (stack.getItem() == ModItems.FILLED_WATERSKIN.value() && itemTemp > -50)
+                    if (stack.is(ModItems.FILLED_WATERSKIN) && itemTemp > -50)
                     {   hasItemStacks = true;
                         stack.set(ModItemComponents.WATER_TEMPERATURE.value(), Math.max(-50, itemTemp - 1));
                     }

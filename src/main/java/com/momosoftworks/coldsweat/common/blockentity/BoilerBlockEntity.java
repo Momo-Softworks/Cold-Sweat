@@ -114,13 +114,9 @@ public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider
                     ItemStack stack = getItem(i);
                     double itemTemp = stack.getOrDefault(ModItemComponents.WATER_TEMPERATURE, 0d);
 
-                    if (stack.is(ModItemTags.BOILER_VALID))
-                    {
-                        // If item is a filled waterskin not at max temp yet
-                        if (itemTemp < 50 && stack.is(ModItems.FILLED_WATERSKIN))
-                        {   hasItemStacks = true;
-                            stack.set(ModItemComponents.WATER_TEMPERATURE, Math.min(50, itemTemp + 1));
-                        }
+                    if (stack.is(ModItems.FILLED_WATERSKIN) && itemTemp < 50)
+                    {   hasItemStacks = true;
+                        stack.set(ModItemComponents.WATER_TEMPERATURE, Math.min(50, itemTemp + 1));
                     }
                 }
             }
