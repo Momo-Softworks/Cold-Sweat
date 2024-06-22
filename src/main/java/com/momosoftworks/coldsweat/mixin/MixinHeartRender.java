@@ -53,6 +53,7 @@ public abstract class MixinHeartRender
         int lastHeartIndex = (int) (healthMax / 2 - hearts);
         boolean half = HEART_INDEX == lastHeartIndex + 1 && health % 2 == 1;
         double temp = Overlays.BODY_TEMP;
+        boolean isHardcore = player.level.getLevelData().isHardcore();
 
         if (heartsFreezePercentage == 0
         || player.hasEffect(ModEffects.GRACE)) return;
@@ -68,11 +69,20 @@ public abstract class MixinHeartRender
         // Render frozen hearts
         bind(HEART_TEXTURE);
         if (HEART_INDEX < frozenHearts + 1)
-        {   AbstractGui.blit(ps, x + 1, y + 1, u, 0, 7, 7, 30, 14);
+        {
+            AbstractGui.blit(ps, x + 1, y + 1, u, 0, 7, 7, 30, 14);
+            if (isHardcore)
+            {   AbstractGui.blit(ps, x + 1, y + 1, 23, 10, 7, 4, 30, 14);
+            }
+            ci.cancel();
         }
         // Render half-frozen heart if needed
         else if (HEART_INDEX == frozenHearts + 1 && frozenHealth % 2 == 1)
-        {   AbstractGui.blit(ps, x + 1, y + 1, u, 7, 7, 7, 30, 14);
+        {
+            AbstractGui.blit(ps, x + 1, y + 1, u, 7, 7, 7, 30, 14);
+            if (isHardcore)
+            {   AbstractGui.blit(ps, x + 4, y + 1, 26, 10, 4, 4, 30, 14);
+            }
         }
         bind(GUI_ICONS_LOCATION);
         IS_CONTAINER = false;
