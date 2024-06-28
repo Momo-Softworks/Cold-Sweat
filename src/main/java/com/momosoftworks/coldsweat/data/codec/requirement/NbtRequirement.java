@@ -135,11 +135,11 @@ public record NbtRequirement(CompoundTag tag)
         return tag.equals(that.tag);
     }
 
-    @Override
+    /*@Override
     public String toString()
     {
         return "NbtRequirement{" +
                 "tag=" + tag +
                 '}';
-    }
+    }*/
 }

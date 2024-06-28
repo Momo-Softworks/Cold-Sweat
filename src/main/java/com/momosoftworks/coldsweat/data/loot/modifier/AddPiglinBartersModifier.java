@@ -49,8 +49,8 @@ public class AddPiglinBartersModifier extends LootModifier
     static Field ENTRIES;
     static
     {
-        POOLS = ObfuscationReflectionHelper.findField(LootTable.class, "f_79109_");
-        ENTRIES = ObfuscationReflectionHelper.findField(LootPool.class, "f_79023_");
+        POOLS = ObfuscationReflectionHelper.findField(LootTable.class, "pools");
+        ENTRIES = ObfuscationReflectionHelper.findField(LootPool.class, "entries");
         POOLS.setAccessible(true);
         ENTRIES.setAccessible(true);
     }
@@ -66,7 +66,7 @@ public class AddPiglinBartersModifier extends LootModifier
             // Build vanilla items
             for (LootPool pool : ((List<LootPool>) POOLS.get(context.getLevel().getServer().reloadableRegistries().getLootTable(BuiltInLootTables.PIGLIN_BARTERING))))
             {
-                for (LootPoolEntryContainer container : ((LootPoolEntryContainer[]) ENTRIES.get(pool)))
+                for (LootPoolEntryContainer container : ((List<LootPoolEntryContainer>) ENTRIES.get(pool)))
                 {
                     container.expand(context, entry ->
                     {   entries.add(entry);

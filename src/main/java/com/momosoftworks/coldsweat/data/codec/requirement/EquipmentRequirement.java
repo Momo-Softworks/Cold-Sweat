@@ -73,7 +73,7 @@ public record EquipmentRequirement(Optional<ItemRequirement> head, Optional<Item
         return head.equals(that.head) && chest.equals(that.chest) && legs.equals(that.legs) && feet.equals(that.feet) && mainHand.equals(that.mainHand) && offHand.equals(that.offHand);
     }
 
-    @Override
+    /*@Override
     public String toString()
     {
         StringBuilder builder = new StringBuilder();
@@ -85,5 +85,5 @@ public record EquipmentRequirement(Optional<ItemRequirement> head, Optional<Item
         offHand.ifPresent(requirement  -> builder.append("Off Hand: ").append(requirement.toString()));
 
         return builder.toString();
-    }
+    }*/
 }

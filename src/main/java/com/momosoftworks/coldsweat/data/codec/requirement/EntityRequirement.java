@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD)
 public record EntityRequirement(Optional<EntityType<?>> type, Optional<LocationRequirement> location, Optional<LocationRequirement> steppingOn,
                                 Optional<EffectsRequirement> effects, Optional<NbtRequirement> nbt, Optional<EntityFlagsRequirement> flags,
                                 Optional<EquipmentRequirement> equipment, Optional<PlayerDataRequirement> playerData,
@@ -197,7 +196,7 @@ public record EntityRequirement(Optional<EntityType<?>> type, Optional<LocationR
             && target.equals(that.target);
     }
 
-    @Override
+    /*@Override
     public String toString()
     {
         StringBuilder builder = new StringBuilder();
@@ -216,5 +215,5 @@ public record EntityRequirement(Optional<EntityType<?>> type, Optional<LocationR
         builder.append('}');
 
         return builder.toString();
-    }
+    }*/
 }

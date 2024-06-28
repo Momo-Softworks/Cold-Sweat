@@ -159,7 +159,7 @@ public record EffectsRequirement(Map<Holder<MobEffect>, Instance> effects)
             return visible.equals(instance.visible);
         }
 
-        @Override
+        /*@Override
         public String toString()
         {
             StringBuilder builder = new StringBuilder();
@@ -170,12 +170,12 @@ public record EffectsRequirement(Map<Holder<MobEffect>, Instance> effects)
             builder.append('}');
 
             return builder.toString();
-        }
+        }*/
     }
 
-    @Override
+    /*@Override
     public String toString()
     {
         return "Effects{" + effects + '}';
-    }
+    }*/
 }

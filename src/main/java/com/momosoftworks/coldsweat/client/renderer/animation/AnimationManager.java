@@ -26,7 +26,7 @@ public class AnimationManager
     {
         try
         {
-            CHILDREN_FIELD = ObfuscationReflectionHelper.findField(ModelPart.class, "f_104213_");
+            CHILDREN_FIELD = ObfuscationReflectionHelper.findField(ModelPart.class, "children");
             CHILDREN_FIELD.setAccessible(true);
         } catch (Exception ignored) {}
     }

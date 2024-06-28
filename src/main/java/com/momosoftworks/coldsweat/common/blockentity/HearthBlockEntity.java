@@ -74,7 +74,6 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.StreamSupport;
 
-@EventBusSubscriber
 public class HearthBlockEntity extends RandomizableContainerBlockEntity
 {
     // List of SpreadPaths, which determine where the Hearth is affecting and how it spreads through/around blocks
@@ -128,7 +127,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     static
     {
         try
-        {   TICK_DOWN_EFFECT = ObfuscationReflectionHelper.findMethod(MobEffectInstance.class, "m_19579_");
+        {   TICK_DOWN_EFFECT = ObfuscationReflectionHelper.findMethod(MobEffectInstance.class, "tickDownDuration");
             TICK_DOWN_EFFECT.setAccessible(true);
         }
         catch (Exception ignored) {}

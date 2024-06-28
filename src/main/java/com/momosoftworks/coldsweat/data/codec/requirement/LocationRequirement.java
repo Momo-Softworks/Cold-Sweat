@@ -131,7 +131,7 @@ public record LocationRequirement(Optional<Integer> x, Optional<Integer> y, Opti
             && fluid.equals(that.fluid);
     }
 
-    @Override
+    /*@Override
     public String toString()
     {
         StringBuilder builder = new StringBuilder();
@@ -148,5 +148,5 @@ public record LocationRequirement(Optional<Integer> x, Optional<Integer> y, Opti
         builder.append("}");
 
         return builder.toString();
-    }
+    }*/
 }

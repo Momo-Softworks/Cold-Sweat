@@ -61,13 +61,13 @@ public class SyncConfigSettingsMessage implements CustomPacketPayload
         return new SyncConfigSettingsMessage(values, menuOpener);
     }
 
-    public static void handle(SyncConfigSettingsMessage message, IPayloadContext context, boolean isServer)
+    public static void handle(SyncConfigSettingsMessage message, IPayloadContext context)
     {
         context.enqueueWork(() ->
         {
             message.configValues.forEach(ConfigSettings::decode);
 
-            if (isServer)
+            if (context.flow().isServerbound())
             {
                 if (context.player().hasPermissions(2))
                 {   ConfigSettings.saveValues();

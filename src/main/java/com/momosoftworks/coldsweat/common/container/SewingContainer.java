@@ -5,10 +5,9 @@ import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
 import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.init.MenuInit;
-import com.momosoftworks.coldsweat.core.network.ModPacketHandlers;
+import com.momosoftworks.coldsweat.core.init.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.core.network.message.SyncContainerSlotMessage;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.core.BlockPos;
@@ -267,7 +266,7 @@ public class SewingContainer extends AbstractContainerMenu
 
             // Trigger advancement criteria
             if (player instanceof ServerPlayer serverPlayer)
-                ModAdvancementTriggers.ARMOR_INSULATED.trigger(serverPlayer, input1, input2);
+                ModAdvancementTriggers.ARMOR_INSULATED.value().trigger(serverPlayer, input1, input2);
         }
 
         // Get equip sound for the armor item

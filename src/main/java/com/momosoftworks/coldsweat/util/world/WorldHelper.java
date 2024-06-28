@@ -6,7 +6,7 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ModBlocks;
 import com.momosoftworks.coldsweat.core.network.message.BlockDataUpdateMessage;
 import com.momosoftworks.coldsweat.core.network.message.ParticleBatchMessage;
-import com.momosoftworks.coldsweat.core.network.message.PlaySoundMessage;
+import com.momosoftworks.coldsweat.core.network.message.PlayEntityAttachedSoundMessage;
 import com.momosoftworks.coldsweat.core.network.message.SyncForgeDataMessage;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
@@ -254,7 +254,7 @@ public abstract class WorldHelper
             {   ClientOnlyHelper.playEntitySound(sound, source, volume, pitch, entity);
             }
             else
-            {   PacketDistributor.sendToPlayersTrackingEntityAndSelf(entity, new PlaySoundMessage(sound, source, volume, pitch, entity.getId()));
+            {   PacketDistributor.sendToPlayersTrackingEntityAndSelf(entity, new PlayEntityAttachedSoundMessage(sound, source, volume, pitch, entity.getId()));
             }
         }
     }
@@ -407,7 +407,7 @@ public abstract class WorldHelper
         ItemEntity item = new ItemEntity(level, pos.getX(), pos.getY(), pos.getZ(), stack);
 
         item.setDeltaMovement(item.getDeltaMovement().add(((rand.nextFloat() - rand.nextFloat()) * 0.1F), (rand.nextFloat() * 0.05F), ((rand.nextFloat() - rand.nextFloat()) * 0.1F)));
-        Field age = ObfuscationReflectionHelper.findField(ItemEntity.class, "f_31985_");
+        Field age = ObfuscationReflectionHelper.findField(ItemEntity.class, "age");
         age.setAccessible(true);
         try
         {   age.set(item, 6000 - lifeTime);
@@ -428,7 +428,7 @@ public abstract class WorldHelper
         ItemEntity item = entity.spawnAtLocation(stack, entity.getBbHeight());
         if (item != null)
         {   item.setDeltaMovement(item.getDeltaMovement().add(((rand.nextFloat() - rand.nextFloat()) * 0.1F), (rand.nextFloat() * 0.05F), ((rand.nextFloat() - rand.nextFloat()) * 0.1F)));
-            Field age = ObfuscationReflectionHelper.findField(ItemEntity.class, "f_31985_");
+            Field age = ObfuscationReflectionHelper.findField(ItemEntity.class, "age");
             age.setAccessible(true);
             try
             {   age.set(item, 6000 - lifeTime);

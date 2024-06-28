@@ -9,13 +9,12 @@ import com.momosoftworks.coldsweat.core.network.ModPacketHandlers;
 import com.momosoftworks.coldsweat.core.network.message.ClientConfigAskMessage;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.AbstractButton;
-import net.minecraft.client.gui.components.AbstractSliderButton;
-import net.minecraft.client.gui.components.ImageButton;
-import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.screens.options.OptionsScreen;
 import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -63,6 +62,11 @@ public class DrawConfigButton
                                          }
                                          else ClientOnlyHelper.openConfigScreen();
                                      });
+            if (Minecraft.getInstance().level == null)
+            {
+                mainButton.active = false;
+                mainButton.setTooltip(Tooltip.create(Component.translatable("tooltip.cold_sweat.config.must_be_in_game").withStyle(ChatFormatting.RED)));
+            }
             // Add main button
             event.addListener(mainButton);
 

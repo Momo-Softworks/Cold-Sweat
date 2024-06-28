@@ -28,11 +28,11 @@ public class DisableHearthParticlesMessage implements CustomPacketPayload
     {   return new DisableHearthParticlesMessage(buffer.readNbt());
     }
 
-    public static void handle(DisableHearthParticlesMessage message, IPayloadContext context, boolean isServer)
+    public static void handle(DisableHearthParticlesMessage message, IPayloadContext context)
     {
         context.enqueueWork(() ->
         {
-            if (isServer)
+            if (context.flow().isServerbound())
             {   context.player().getPersistentData().put("DisabledHearths", message.nbt);
             }
             else

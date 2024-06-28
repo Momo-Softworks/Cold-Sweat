@@ -6,17 +6,13 @@ import com.momosoftworks.coldsweat.api.event.common.TempModifierEvent;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
-import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
-import com.momosoftworks.coldsweat.core.network.ModPacketHandlers;
-import com.momosoftworks.coldsweat.core.network.message.TempModifiersSyncMessage;
-import com.momosoftworks.coldsweat.core.network.message.TemperatureSyncMessage;
+import com.momosoftworks.coldsweat.core.network.message.SyncTempModifiersMessage;
+import com.momosoftworks.coldsweat.core.network.message.SyncTemperatureMessage;
 import com.momosoftworks.coldsweat.util.entity.DummyPlayer;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.InterruptableStreamer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
@@ -376,14 +372,14 @@ public class Temperature
     public static void updateTemperature(LivingEntity entity, ITemperatureCap cap, boolean instant)
     {
         if (!entity.level().isClientSide)
-        {   PacketDistributor.sendToPlayersTrackingEntityAndSelf(entity, new TemperatureSyncMessage(entity, cap.serializeTraits(), instant));
+        {   PacketDistributor.sendToPlayersTrackingEntityAndSelf(entity, new SyncTemperatureMessage(entity, cap.serializeTraits(), instant));
         }
     }
 
     public static void updateModifiers(LivingEntity entity, ITemperatureCap cap)
     {
         if (!entity.level().isClientSide)
-        {   PacketDistributor.sendToPlayersTrackingEntityAndSelf(entity, new TempModifiersSyncMessage(entity, cap.serializeModifiers()));
+        {   PacketDistributor.sendToPlayersTrackingEntityAndSelf(entity, new SyncTempModifiersMessage(entity, cap.serializeModifiers()));
         }
     }
 

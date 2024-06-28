@@ -246,7 +246,7 @@ public class CompatManager
     }
 
     @SubscribeEvent
-    public static void onLivingTempDamage(LivingDamageEvent event)
+    public static void onLivingTempDamage(LivingDamageEvent.Pre event)
     {   doLivingTempDamage(event);
     }
 
@@ -292,7 +292,7 @@ public class CompatManager
 
     //TODO: Reimplement when this mod is updated
     /*@SubscribeEvent
-    public static void drainCreateBacktank(PlayerTickEvent event)
+    public static void drainCreateBacktank(PlayerTickEvent.Post event)
     {
         Player player = event.getEntity();
         if (!CompatManager.isCreateLoaded()) return;

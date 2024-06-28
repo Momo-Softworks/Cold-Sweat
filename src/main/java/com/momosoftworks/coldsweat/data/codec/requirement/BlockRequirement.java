@@ -297,7 +297,7 @@ public record BlockRequirement(Optional<List<Block>> blocks, Optional<TagKey<Blo
         }
     }
 
-    @Override
+    /*@Override
     public String toString()
     {
         StringBuilder builder = new StringBuilder();
@@ -309,5 +309,5 @@ public record BlockRequirement(Optional<List<Block>> blocks, Optional<TagKey<Blo
         builder.append("}");
 
         return builder.toString();
-    }
+    }*/
 }

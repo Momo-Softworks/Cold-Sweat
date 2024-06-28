@@ -145,7 +145,7 @@ public class ShearableFurManager
 
     // Regrow goat fur
     @SubscribeEvent
-    public static void onGoatTick(EntityTickEvent event)
+    public static void onGoatTick(EntityTickEvent.Post event)
     {
         Entity entity = event.getEntity();
         if (!(entity instanceof Goat goat)) return;

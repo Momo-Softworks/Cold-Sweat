@@ -5,6 +5,7 @@ import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.serialization.ObjectBuilder;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
@@ -38,10 +39,10 @@ public class EntityHelper
         return player instanceof ServerPlayer serverPlayer
                ? ObjectBuilder.build((() ->
                  {
-                     Field gameMode = ObfuscationReflectionHelper.findField(ServerPlayer.class, "f_8941_");
+                     Field gameMode = ObfuscationReflectionHelper.findField(ServerPlayer.class, "gameMode");
                      gameMode.setAccessible(true);
                      try
-                     {   return (GameType) gameMode.get(serverPlayer);
+                     {   return ((ServerPlayerGameMode) gameMode.get(serverPlayer)).getGameModeForPlayer();
                      }
                      catch (IllegalAccessException e)
                      {   throw new RuntimeException(e);

@@ -15,22 +15,22 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public class TemperatureSyncMessage implements CustomPacketPayload
+public class SyncTemperatureMessage implements CustomPacketPayload
 {
-    public static final CustomPacketPayload.Type<TemperatureSyncMessage> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "sync_temperature"));
-    public static final StreamCodec<FriendlyByteBuf, TemperatureSyncMessage> CODEC = CustomPacketPayload.codec(TemperatureSyncMessage::encode, TemperatureSyncMessage::decode);
+    public static final CustomPacketPayload.Type<SyncTemperatureMessage> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "sync_temperature"));
+    public static final StreamCodec<FriendlyByteBuf, SyncTemperatureMessage> CODEC = CustomPacketPayload.codec(SyncTemperatureMessage::encode, SyncTemperatureMessage::decode);
 
     int entityId;
     CompoundTag traits;
     boolean instant;
 
-    public TemperatureSyncMessage(LivingEntity entity, CompoundTag traits, boolean instant)
+    public SyncTemperatureMessage(LivingEntity entity, CompoundTag traits, boolean instant)
     {   this.entityId = entity.getId();
         this.traits = traits;
         this.instant = instant;
     }
 
-    TemperatureSyncMessage(int entityId, CompoundTag traits, boolean instant)
+    SyncTemperatureMessage(int entityId, CompoundTag traits, boolean instant)
     {   this.entityId = entityId;
         this.traits = traits;
         this.instant = instant;
@@ -42,11 +42,11 @@ public class TemperatureSyncMessage implements CustomPacketPayload
         buffer.writeBoolean(this.instant);
     }
 
-    public static TemperatureSyncMessage decode(FriendlyByteBuf buffer)
-    {   return new TemperatureSyncMessage(buffer.readInt(), buffer.readNbt(), buffer.readBoolean());
+    public static SyncTemperatureMessage decode(FriendlyByteBuf buffer)
+    {   return new SyncTemperatureMessage(buffer.readInt(), buffer.readNbt(), buffer.readBoolean());
     }
 
-    public static void handle(TemperatureSyncMessage message, IPayloadContext context)
+    public static void handle(SyncTemperatureMessage message, IPayloadContext context)
     {
         context.enqueueWork(() ->
         {

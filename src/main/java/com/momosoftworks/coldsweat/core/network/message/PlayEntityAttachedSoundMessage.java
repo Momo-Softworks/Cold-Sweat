@@ -16,10 +16,10 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.nio.charset.StandardCharsets;
 
-public class PlaySoundMessage implements CustomPacketPayload
+public class PlayEntityAttachedSoundMessage implements CustomPacketPayload
 {
-    public static final CustomPacketPayload.Type<PlaySoundMessage> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "play_sound"));
-    public static final StreamCodec<FriendlyByteBuf, PlaySoundMessage> CODEC = CustomPacketPayload.codec(PlaySoundMessage::encode, PlaySoundMessage::decode);
+    public static final CustomPacketPayload.Type<PlayEntityAttachedSoundMessage> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "play_sound"));
+    public static final StreamCodec<FriendlyByteBuf, PlayEntityAttachedSoundMessage> CODEC = CustomPacketPayload.codec(PlayEntityAttachedSoundMessage::encode, PlayEntityAttachedSoundMessage::decode);
 
     String sound;
     SoundSource source;
@@ -27,11 +27,11 @@ public class PlaySoundMessage implements CustomPacketPayload
     float pitch;
     int entityID;
 
-    public PlaySoundMessage(SoundEvent sound, SoundSource source, float volume, float pitch, int entityID)
+    public PlayEntityAttachedSoundMessage(SoundEvent sound, SoundSource source, float volume, float pitch, int entityID)
     {   this(RegistryHelper.getRegistry(Registries.SOUND_EVENT).getKey(sound).toString(), source, volume, pitch, entityID);
     }
 
-    PlaySoundMessage(String sound, SoundSource source, float volume, float pitch, int entityID)
+    PlayEntityAttachedSoundMessage(String sound, SoundSource source, float volume, float pitch, int entityID)
     {
         this.sound = sound;
         this.source = source;
@@ -40,7 +40,7 @@ public class PlaySoundMessage implements CustomPacketPayload
         this.entityID = entityID;
     }
 
-    public static void encode(PlaySoundMessage message, FriendlyByteBuf buffer)
+    public static void encode(PlayEntityAttachedSoundMessage message, FriendlyByteBuf buffer)
     {
         buffer.writeInt(message.sound.length());
         buffer.writeCharSequence(message.sound, StandardCharsets.UTF_8);
@@ -50,13 +50,13 @@ public class PlaySoundMessage implements CustomPacketPayload
         buffer.writeInt(message.entityID);
     }
 
-    public static PlaySoundMessage decode(FriendlyByteBuf buffer)
+    public static PlayEntityAttachedSoundMessage decode(FriendlyByteBuf buffer)
     {
         int soundChars = buffer.readInt();
-        return new PlaySoundMessage(buffer.readCharSequence(soundChars, StandardCharsets.UTF_8).toString(), buffer.readEnum(SoundSource.class), buffer.readFloat(), buffer.readFloat(), buffer.readInt());
+        return new PlayEntityAttachedSoundMessage(buffer.readCharSequence(soundChars, StandardCharsets.UTF_8).toString(), buffer.readEnum(SoundSource.class), buffer.readFloat(), buffer.readFloat(), buffer.readInt());
     }
 
-    public static void handle(PlaySoundMessage message, IPayloadContext context)
+    public static void handle(PlayEntityAttachedSoundMessage message, IPayloadContext context)
     {
         context.enqueueWork(() ->
         {

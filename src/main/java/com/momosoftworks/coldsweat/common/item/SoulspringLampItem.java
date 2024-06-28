@@ -4,9 +4,9 @@ import com.momosoftworks.coldsweat.api.temperature.modifier.SoulLampTempModifier
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
-import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.type.PredicateItem;
+import com.momosoftworks.coldsweat.core.init.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.core.init.ModItemComponents;
 import com.momosoftworks.coldsweat.core.init.ModSounds;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
@@ -15,7 +15,6 @@ import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.EntityTypeTags;
@@ -224,7 +223,7 @@ public class SoulspringLampItem extends Item
             }
 
             if (player instanceof ServerPlayer serverPlayer)
-            {   ModAdvancementTriggers.SOUL_LAMP_FUELED.trigger(serverPlayer, fuelStack, thisStack);
+            {   ModAdvancementTriggers.SOUL_LAMP_FUELED.value().trigger(serverPlayer, fuelStack, thisStack);
             }
 
             return true;

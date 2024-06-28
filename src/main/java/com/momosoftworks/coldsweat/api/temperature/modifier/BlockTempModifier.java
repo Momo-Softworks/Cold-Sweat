@@ -4,7 +4,7 @@ import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
+import com.momosoftworks.coldsweat.core.init.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
@@ -145,7 +145,7 @@ public class BlockTempModifier extends TempModifier
         if (entity instanceof ServerPlayer player && shouldTickAdvancements)
         {
             for (Triplet<BlockPos, BlockTemp, Double> trigger : triggers)
-            {   ModAdvancementTriggers.BLOCK_AFFECTS_TEMP.trigger(player, trigger.getA(), trigger.getC(), affectMap.get(trigger.getB()));
+            {   ModAdvancementTriggers.BLOCK_AFFECTS_TEMP.value().trigger(player, trigger.getA(), trigger.getC(), affectMap.get(trigger.getB()));
             }
         }
 

@@ -1,45 +1,25 @@
 package com.momosoftworks.coldsweat;
 
 import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
-import com.momosoftworks.coldsweat.common.capability.ModCapabilities;
-import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
-import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
-import com.momosoftworks.coldsweat.common.capability.shearing.ShearableFurCap;
-import com.momosoftworks.coldsweat.common.capability.temperature.EntityTempCap;
-import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
 import com.momosoftworks.coldsweat.common.entity.Chameleon;
 import com.momosoftworks.coldsweat.config.*;
 import com.momosoftworks.coldsweat.config.spec.*;
-import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.core.init.*;
-import com.momosoftworks.coldsweat.core.network.ModPacketHandlers;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
-import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.SpawnPlacementTypes;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.capabilities.EntityCapability;
-import net.neoforged.neoforge.capabilities.ICapabilityProvider;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.SpawnPlacementRegisterEvent;
-import net.neoforged.neoforge.event.tick.LevelTickEvent;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.registries.DataPackRegistryEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.List;
 
 @Mod(ColdSweat.MOD_ID)
 public class ColdSweat
@@ -72,6 +52,7 @@ public class ColdSweat
         ModAttributes.ATTRIBUTES.register(bus);
         CommandInit.ARGUMENTS.register(bus);
         ModArmorMaterials.ARMOR_MATERIALS.register(bus);
+        ModAdvancementTriggers.TRIGGERS.register(bus);
 
         // Setup configs
         WorldSettingsConfig.setup(modContainer);
@@ -96,14 +77,6 @@ public class ColdSweat
 
     public void commonSetup(final FMLCommonSetupEvent event)
     {
-        event.enqueueWork(() ->
-        {   // Register advancement triggers
-            CriteriaTriggers.register("temperature_changed", ModAdvancementTriggers.TEMPERATURE_CHANGED);
-            CriteriaTriggers.register("soulspring_lamp_fueled", ModAdvancementTriggers.SOUL_LAMP_FUELED);
-            CriteriaTriggers.register("block_affects_temperature", ModAdvancementTriggers.BLOCK_AFFECTS_TEMP);
-            CriteriaTriggers.register("armor_insulated", ModAdvancementTriggers.ARMOR_INSULATED);
-        });
-
         // Load configs to memory
         ConfigSettings.load(null);
     }

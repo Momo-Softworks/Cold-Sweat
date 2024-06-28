@@ -5,12 +5,11 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.api.util.Temperature.Trait;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
+import com.momosoftworks.coldsweat.core.init.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.core.init.ModEffects;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModDamageSources;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
-import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -97,7 +96,7 @@ public class AbstractTempCap implements ITemperatureCap
         double oldTemp = this.getTrait(trait);
         this.setTrait(trait, value);
         if (oldTemp != value && entity instanceof ServerPlayer player)
-        {   ModAdvancementTriggers.TEMPERATURE_CHANGED.trigger(player, this.getTraits());
+        {   ModAdvancementTriggers.TEMPERATURE_CHANGED.value().trigger(player, this.getTraits());
         }
     }
 

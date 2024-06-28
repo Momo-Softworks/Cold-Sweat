@@ -22,7 +22,7 @@ public class SystemMessageHandler
     private static MultiPlayerGameMode GAME_MODE = null;
 
     @SubscribeEvent
-    public static void onPlayerEnterCreative(PlayerTickEvent event)
+    public static void onPlayerEnterCreative(PlayerTickEvent.Pre event)
     {
         Player player = event.getEntity();
         if (Minecraft.getInstance().gameMode != GAME_MODE && Minecraft.getInstance().gameMode.getPlayerMode().isCreative()

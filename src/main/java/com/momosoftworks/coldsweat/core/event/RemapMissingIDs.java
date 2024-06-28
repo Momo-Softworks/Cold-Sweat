@@ -7,7 +7,7 @@ import net.minecraft.world.item.Item;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 
-@EventBusSubscriber
+//@EventBusSubscriber
 public class RemapMissingIDs
 {
     //@SubscribeEvent

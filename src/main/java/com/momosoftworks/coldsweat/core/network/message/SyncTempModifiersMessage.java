@@ -12,38 +12,38 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public class TempModifiersSyncMessage implements CustomPacketPayload
+public class SyncTempModifiersMessage implements CustomPacketPayload
 {
-    public static final CustomPacketPayload.Type<TempModifiersSyncMessage> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "sync_temp_modifiers"));
-    public static final StreamCodec<FriendlyByteBuf, TempModifiersSyncMessage> CODEC = CustomPacketPayload.codec(TempModifiersSyncMessage::encode, TempModifiersSyncMessage::decode);
+    public static final CustomPacketPayload.Type<SyncTempModifiersMessage> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "sync_temp_modifiers"));
+    public static final StreamCodec<FriendlyByteBuf, SyncTempModifiersMessage> CODEC = CustomPacketPayload.codec(SyncTempModifiersMessage::encode, SyncTempModifiersMessage::decode);
 
     int entityId;
     CompoundTag modifiers;
 
-    public TempModifiersSyncMessage(LivingEntity entity, CompoundTag modifiers)
+    public SyncTempModifiersMessage(LivingEntity entity, CompoundTag modifiers)
     {
         this.entityId = entity.getId();
         this.modifiers = modifiers;
     }
 
-    TempModifiersSyncMessage(int entityId, CompoundTag modifiers)
+    SyncTempModifiersMessage(int entityId, CompoundTag modifiers)
     {
         this.entityId = entityId;
         this.modifiers = modifiers;
     }
 
-    public static void encode(TempModifiersSyncMessage message, FriendlyByteBuf buffer)
+    public static void encode(SyncTempModifiersMessage message, FriendlyByteBuf buffer)
     {
         buffer.writeInt(message.entityId);
         buffer.writeNbt(message.modifiers);
     }
 
-    public static TempModifiersSyncMessage decode(FriendlyByteBuf buffer)
+    public static SyncTempModifiersMessage decode(FriendlyByteBuf buffer)
     {
-        return new TempModifiersSyncMessage(buffer.readInt(), buffer.readNbt());
+        return new SyncTempModifiersMessage(buffer.readInt(), buffer.readNbt());
     }
 
-    public static void handle(TempModifiersSyncMessage message, IPayloadContext context)
+    public static void handle(SyncTempModifiersMessage message, IPayloadContext context)
     {
         context.enqueueWork(() ->
         {

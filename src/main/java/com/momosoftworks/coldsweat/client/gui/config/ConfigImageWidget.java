@@ -2,7 +2,6 @@ package com.momosoftworks.coldsweat.client.gui.config;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.ImageWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
@@ -11,12 +10,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
 // TODO: Check if this works
-public class ConfigImage extends AbstractWidget implements GuiEventListener, NarratableEntry
+public class ConfigImageWidget extends AbstractWidget implements GuiEventListener, NarratableEntry
 {
     ResourceLocation texture;
     int x, y, width, height, u, v;
 
-    public ConfigImage(ResourceLocation texture, int x, int y, int width, int height, int u, int v)
+    public ConfigImageWidget(ResourceLocation texture, int x, int y, int width, int height, int u, int v)
     {
         super(x, y, width, height, Component.empty());
         this.texture = texture;
@@ -30,7 +29,7 @@ public class ConfigImage extends AbstractWidget implements GuiEventListener, Nar
 
     @Override
     public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
-    {   graphics.blit(texture, this.x, this.y, u, v, width, height);
+    {   graphics.blit(texture, this.x, this.y, u, v, width, height, width, height);
     }
 
     @Override

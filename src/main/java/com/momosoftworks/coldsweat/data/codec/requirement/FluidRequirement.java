@@ -94,7 +94,7 @@ public record FluidRequirement(Optional<List<Fluid>> fluids, Optional<TagKey<Flu
         return nbt.equals(that.nbt);
     }
 
-    @Override
+    /*@Override
     public String toString()
     {
         StringBuilder lBuilder = new StringBuilder();
@@ -104,5 +104,5 @@ public record FluidRequirement(Optional<List<Fluid>> fluids, Optional<TagKey<Flu
         this.nbt.ifPresent(nbt -> lBuilder.append("NBT: ").append(nbt.toString()));
 
         return lBuilder.toString();
-    }
+    }*/
 }

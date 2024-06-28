@@ -2,7 +2,6 @@ package com.momosoftworks.coldsweat.util.item;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BucketItem;
@@ -13,14 +12,13 @@ import net.neoforged.fml.util.ObfuscationReflectionHelper;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.stream.Stream;
 
 public class ItemStackHelper
 {
     public static void playBucketEmptySound(ItemStack stack, @Nullable Player pPlayer, LevelAccessor pLevel, BlockPos pPos)
     {
-        Method playEmptySound = ObfuscationReflectionHelper.findMethod(BucketItem.class, "m_7718_", Player.class, LevelAccessor.class, BlockPos.class);
+        Method playEmptySound = ObfuscationReflectionHelper.findMethod(BucketItem.class, "playEmptySound", Player.class, LevelAccessor.class, BlockPos.class);
         playEmptySound.setAccessible(true);
         try
         {   playEmptySound.invoke(stack.getItem(), pPlayer, pLevel, pPos);

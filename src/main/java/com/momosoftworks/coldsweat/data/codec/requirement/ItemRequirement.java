@@ -198,7 +198,7 @@ public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
         return components.equals(that.components);
     }
 
-    @Override
+    /*@Override
     public String toString()
     {
         StringBuilder builder = new StringBuilder();
@@ -214,5 +214,5 @@ public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
         builder.append("}");
 
         return builder.toString();
-    }
+    }*/
 }

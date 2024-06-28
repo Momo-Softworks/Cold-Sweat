@@ -74,50 +74,50 @@ public abstract class AbstractConfigPage extends Screen
     private static final int BOTTOM_BUTTON_WIDTH = ConfigScreen.BOTTOM_BUTTON_WIDTH;
     public static Minecraft MINECRAFT = Minecraft.getInstance();
 
-    private static final String GUI_TEXTURE_PATH = "textures/gui/screen/config/";
+    private static final String GUI_TEXTURE_PATH = "config/";
 
-    static ResourceLocation BACKGROUND_TEXTURE = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_gui.png");
-    public static final ResourceLocation CLIENTSIDE_ICON_TEXTURE = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_clientside_icon.png");
+    public static final ResourceLocation CLIENTSIDE_ICON_TEXTURE = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/sprites/config/clientside_icon.png");
+    public static final ResourceLocation DIVIDER_TEXTURE = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/sprites/config/divider.png");
 
-    public static final WidgetSprites CONFIG_BUTTON_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_button.png"),
-                                                                                ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_button_disabled.png"),
-                                                                                ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_button_focus.png"));
+    public static final WidgetSprites CONFIG_BUTTON_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_button"),
+                                                                                ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_button_disabled"),
+                                                                                ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_button_focus"));
 
-    public static final WidgetSprites DIRECTION_RIGHT_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_direction_panel_right.png"),
-                                                                                  ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_direction_panel_right_focus.png"));
+    public static final WidgetSprites DIRECTION_RIGHT_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_right"),
+                                                                                  ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_right_focus"));
 
-    public static final WidgetSprites DIRECTION_LEFT_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_direction_panel_left.png"),
-                                                                                 ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_direction_panel_left_focus.png"));
+    public static final WidgetSprites DIRECTION_LEFT_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_left"),
+                                                                                 ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_left_focus"));
 
-    public static final WidgetSprites DIRECTION_UP_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_direction_panel_up.png"),
-                                                                               ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_direction_panel_up_focus.png"));
+    public static final WidgetSprites DIRECTION_UP_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_up"),
+                                                                               ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_up_focus"));
 
-    public static final WidgetSprites DIRECTION_DOWN_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_direction_panel_down.png"),
-                                                                                 ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_direction_panel_down_focus.png"));
+    public static final WidgetSprites DIRECTION_DOWN_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_down"),
+                                                                                 ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_down_focus"));
 
-    public static final WidgetSprites DIRECTION_RESET_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_direction_panel_reset.png"),
-                                                                                  ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_direction_panel_reset_focus.png"));
+    public static final WidgetSprites DIRECTION_RESET_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_reset"),
+                                                                                  ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_reset_focus"));
 
-    public static final WidgetSprites DIRECTION_RESET_SMALL_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_direction_panel_reset_small.png"),
-                                                                                        ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_direction_panel_reset_small_focus.png"));
+    public static final WidgetSprites DIRECTION_RESET_SMALL_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_reset_small"),
+                                                                                        ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_reset_small_focus"));
 
-    public static final WidgetSprites DIRECTION_VISIBILITY_ON_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_direction_panel_visibility_on.png"),
-                                                                                          ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_direction_panel_visibility_on_focus.png"));
+    public static final WidgetSprites DIRECTION_VISIBILITY_ON_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_visibility_on"),
+                                                                                          ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_visibility_on_focus"));
 
-    public static final WidgetSprites DIRECTION_VISIBILITY_OFF_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_direction_panel_visibility_off.png"),
-                                                                                           ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_direction_panel_visibility_off_focus.png"));
+    public static final WidgetSprites DIRECTION_VISIBILITY_OFF_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_visibility_off"),
+                                                                                           ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_visibility_off_focus"));
 
-    public static final WidgetSprites NEXT_PAGE_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_next_page.png"),
-                                                                            ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_next_page_focus.png"));
+    public static final WidgetSprites NEXT_PAGE_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "next_page"),
+                                                                            ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "next_page_focus"));
 
-    public static final WidgetSprites PREV_PAGE_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_prev_page.png"),
-                                                                            ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_prev_page_focus.png"));
+    public static final WidgetSprites PREV_PAGE_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "prev_page"),
+                                                                            ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "prev_page_focus"));
 
-    public static final WidgetSprites SLIDER_BAR_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_slider_bar.png"),
-                                                                             ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_slider_bar_focus.png"));
+    public static final WidgetSprites SLIDER_BAR_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "slider_bar"),
+                                                                             ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "slider_bar_focus"));
 
-    public static final WidgetSprites SLIDER_HEAD_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_slider_head.png"),
-                                                                              ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_slider_head_focus.png"));
+    public static final WidgetSprites SLIDER_HEAD_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "slider_head"),
+                                                                              ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "slider_head_focus"));
 
     ImageButton nextNavButton;
     ImageButton prevNavButton;
@@ -165,6 +165,10 @@ public abstract class AbstractConfigPage extends Screen
         }
     }
 
+    protected void addClientsideIcon(int x, int y)
+    {   this.addRenderableOnly(new ConfigImageWidget(CLIENTSIDE_ICON_TEXTURE, x, y, 16, 15, 0, 0));
+    }
+
     protected void addLabel(String id, Side side, String text)
     {   this.addLabel(id, side, text, 16777215);
     }
@@ -209,7 +213,7 @@ public abstract class AbstractConfigPage extends Screen
 
         // Add the clientside indicator
         if (clientside)
-        {   this.addRenderableOnly(new ConfigImage(BACKGROUND_TEXTURE, this.width / 2 + xOffset - 18, buttonY + 3, 16, 15, 0, 144));
+        {   this.addClientsideIcon(this.width / 2 + xOffset - 18, buttonY + 3);
         }
 
         List<Component> tooltipList = new ArrayList<>(Arrays.asList(tooltip));
@@ -301,7 +305,7 @@ public abstract class AbstractConfigPage extends Screen
         ConfigLabel configLabel = new ConfigLabel(id, label.getString(), this.width / 2 + xOffset - 95, this.height / 4 + yOffset, shouldBeActive ? 16777215 : 8421504);
         // Add the clientside indicator
         if (clientside)
-        {   this.addRenderableOnly(new ConfigImage(BACKGROUND_TEXTURE, this.width / 2 + xOffset - 115, this.height / 4 - 4 + yOffset, 16, 15, 0, 144));
+        {   this.addClientsideIcon(this.width / 2 + xOffset - 115, this.height / 4 - 4 + yOffset);
         }
 
         List<Component> tooltipList = new ArrayList<>(Arrays.asList(tooltip));
@@ -426,7 +430,7 @@ public abstract class AbstractConfigPage extends Screen
         ConfigLabel configLabel = new ConfigLabel(id, label.getString(), this.width / 2 + xOffset - 79, this.height / 4 + yOffset, shouldBeActive ? 16777215 : 8421504);
         // Add the clientside indicator
         if (clientside)
-        {   this.addRenderableOnly(new ConfigImage(BACKGROUND_TEXTURE, this.width / 2 + xOffset - 98, this.height / 4 - 8 + yOffset + 5, 16, 15, 0, 144));
+        {   this.addClientsideIcon(this.width / 2 + xOffset - 98, this.height / 4 - 8 + yOffset + 5);
         }
         widgetBatch.add(configLabel);
 
@@ -480,7 +484,7 @@ public abstract class AbstractConfigPage extends Screen
 
         // Add the clientside indicator
         if (clientside)
-        {   this.addRenderableOnly(new ConfigImage(BACKGROUND_TEXTURE, this.width / 2 + xOffset - 115, buttonY, 16, 15, 0, 144));
+        {   this.addClientsideIcon(this.width / 2 + xOffset - 115, buttonY);
         }
 
         List<Component> tooltipList = new ArrayList<>(Arrays.asList(tooltip));
@@ -538,7 +542,7 @@ public abstract class AbstractConfigPage extends Screen
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks)
     {
-        this.renderBackground(graphics, mouseX, mouseY, partialTicks);
+        super.render(graphics, mouseX, mouseY, partialTicks);
         Font font = this.font;
 
         // Page Title
@@ -551,17 +555,17 @@ public abstract class AbstractConfigPage extends Screen
         graphics.drawString(this.font, this.sectionOneTitle(), this.width / 2 - 204, this.height / 4 - 28, 16777215, true);
 
         // Section 1 Divider
-        graphics.blit(BACKGROUND_TEXTURE, this.width / 2 - 202, this.height / 4 - 16, 255, 0, 1, 154);
+        graphics.blit(DIVIDER_TEXTURE, this.width / 2 - 202, this.height / 4 - 16, 0, 0, 1, 154);
 
         if (this.sectionTwoTitle() != null)
         {   // Section 2 Title
             graphics.drawString(this.font, this.sectionTwoTitle(), this.width / 2 + 32, this.height / 4 - 28, 16777215, true);
 
             // Section 2 Divider
-            graphics.blit(BACKGROUND_TEXTURE, this.width / 2 + 34, this.height / 4 - 16, 255, 0, 1, 154);
+            graphics.blit(DIVIDER_TEXTURE, this.width / 2 + 34, this.height / 4 - 16, 0, 0, 1, 154);
         }
 
-        super.render(graphics, mouseX, mouseY, partialTicks);
+
 
         // Render tooltip
         if (this.isDragging())
@@ -637,7 +641,7 @@ public abstract class AbstractConfigPage extends Screen
 
     public static void setButtonSprites(ImageButton button, WidgetSprites sprites)
     {
-        Field spritesField = ObfuscationReflectionHelper.findField(ImageButton.class, "f_290407_");
+        Field spritesField = ObfuscationReflectionHelper.getPrivateValue(ImageButton.class, button, "f_290407_");
         spritesField.setAccessible(true);
         try
         {   spritesField.set(button, sprites);

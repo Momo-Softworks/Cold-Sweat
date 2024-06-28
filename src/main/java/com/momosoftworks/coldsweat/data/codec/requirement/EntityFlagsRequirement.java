@@ -78,7 +78,7 @@ public record EntityFlagsRequirement(Optional<Boolean> onFire, Optional<Boolean>
             && baby.equals(that.baby);
     }
 
-    @Override
+    /*@Override
     public String toString()
     {
         StringBuilder builder = new StringBuilder();
@@ -91,5 +91,5 @@ public record EntityFlagsRequirement(Optional<Boolean> onFire, Optional<Boolean>
         baby.ifPresent(value -> builder.append(", is_baby=").append(value));
 
         return builder.toString();
-    }
+    }*/
 }

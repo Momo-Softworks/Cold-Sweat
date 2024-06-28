@@ -158,7 +158,7 @@ public class EntityTempManager
      * Tick TempModifiers and update temperature for living entities
      */
     @SubscribeEvent
-    public static void onLivingTick(EntityTickEvent event)
+    public static void onLivingTick(EntityTickEvent.Pre event)
     {
         if (!(event.getEntity() instanceof LivingEntity entity) || !TEMPERATURE_ENABLED_ENTITIES.contains(entity.getType())) return;
 
@@ -431,22 +431,27 @@ public class EntityTempManager
      * Handle HearthTempModifier when the player has the Insulation effect
      */
     @SubscribeEvent
-    public static void onInsulationUpdate(MobEffectEvent event)
+    public static void onInsulationAdded(MobEffectEvent.Added event)
     {
         if (!event.getEntity().level().isClientSide && event.getEntity() instanceof Player player && event.getEffectInstance() != null
         && event.getEffectInstance().getEffect() == ModEffects.INSULATED)
         {
             // Add TempModifier on potion effect added
-            if (event instanceof MobEffectEvent.Added)
-            {   MobEffectInstance effect = event.getEffectInstance();
-                // New HearthTempModifier
-                TempModifier newMod = new BlockInsulationTempModifier(effect.getAmplifier() + 1).expires(effect.getDuration());
-                Temperature.addOrReplaceModifier(player, newMod, Temperature.Trait.WORLD, Placement.Duplicates.BY_CLASS);
-            }
+            MobEffectInstance effect = event.getEffectInstance();
+            // New HearthTempModifier
+            TempModifier newMod = new BlockInsulationTempModifier(effect.getAmplifier() + 1).expires(effect.getDuration());
+            Temperature.addOrReplaceModifier(player, newMod, Temperature.Trait.WORLD, Placement.Duplicates.BY_CLASS);
+        }
+    }
+
+    @SubscribeEvent
+    public static void onInsulationRemoved(MobEffectEvent.Remove event)
+    {
+        if (!event.getEntity().level().isClientSide && event.getEntity() instanceof Player player && event.getEffectInstance() != null
+        && event.getEffectInstance().getEffect() == ModEffects.INSULATED)
+        {
             // Remove TempModifier on potion effect removed
-            else if (event instanceof MobEffectEvent.Remove)
-            {   Temperature.removeModifiers(player, Temperature.Trait.WORLD, mod -> mod instanceof BlockInsulationTempModifier);
-            }
+            Temperature.removeModifiers(player, Temperature.Trait.WORLD, mod -> mod instanceof BlockInsulationTempModifier);
         }
     }
 

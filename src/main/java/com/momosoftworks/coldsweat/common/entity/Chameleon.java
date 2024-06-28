@@ -70,10 +70,10 @@ import java.util.UUID;
 @EventBusSubscriber
 public class Chameleon extends Animal
 {
-    static Method GET_DATA_ITEM = ObfuscationReflectionHelper.findMethod(SynchedEntityData.class, "m_135379_", EntityDataAccessor.class);
-    static
-    {   GET_DATA_ITEM.setAccessible(true);
-    }
+    //static Method GET_DATA_ITEM = ObfuscationReflectionHelper.findMethod(SynchedEntityData.class, "m_135379_", EntityDataAccessor.class);
+    //static
+    //{   GET_DATA_ITEM.setAccessible(true);
+    //}
 
     static final EntityDataAccessor<Boolean> SHEDDING = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.BOOLEAN);
     static final EntityDataAccessor<Integer> LAST_SHED = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.INT);
@@ -579,13 +579,14 @@ public class Chameleon extends Animal
         }
     }
 
-    public void manualSync(EntityDataAccessor<?> accessor)
-    {
-        // Forge refuses to sync some DataItems, like CompoundTags
-        try
-        {   ((SynchedEntityData.DataItem<?>) GET_DATA_ITEM.invoke(this.entityData, accessor)).setDirty(true);
-        } catch (Exception ignored) {}
-    }
+    // TODO: See if this is necessary anymore
+    //public void manualSync(EntityDataAccessor<?> accessor)
+    //{
+    //    // Forge refuses to sync some DataItems, like CompoundTags
+    //    try
+    //    {   ((SynchedEntityData.DataItem<?>) GET_DATA_ITEM.invoke(this.entityData, accessor)).setDirty(true);
+    //    } catch (Exception ignored) {}
+    //}
 
     public float getEatTimer()
     {
@@ -618,7 +619,7 @@ public class Chameleon extends Animal
         trustedPlayers.put("Players", players);
 
         this.entityData.set(TRUSTED_PLAYERS, trustedPlayers);
-        this.manualSync(TRUSTED_PLAYERS);
+        //this.manualSync(TRUSTED_PLAYERS);
     }
 
     public void removeTrustedPlayer(UUID player)

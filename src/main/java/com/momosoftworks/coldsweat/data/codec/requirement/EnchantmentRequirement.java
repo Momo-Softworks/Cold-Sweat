@@ -69,7 +69,7 @@ public record EnchantmentRequirement(Holder<Enchantment> enchantment, Optional<I
         return level.equals(that.level);
     }
 
-    @Override
+    /*@Override
     public String toString()
     {
         StringBuilder builder = new StringBuilder();
@@ -77,5 +77,5 @@ public record EnchantmentRequirement(Holder<Enchantment> enchantment, Optional<I
         level.ifPresent(bounds -> builder.append(bounds));
 
         return builder.toString();
-    }
+    }*/
 }

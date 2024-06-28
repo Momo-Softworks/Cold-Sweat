@@ -11,6 +11,7 @@ import io.netty.buffer.Unpooled;
 import net.minecraft.commands.arguments.item.ItemParser;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.*;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -50,7 +51,11 @@ public record ItemComponentsRequirement(PatchedDataComponentMap components)
 
     public static ItemComponentsRequirement parse(String data)
     {
-        ItemParser parser = new ItemParser(RegistryHelper.getRegistryAccess());
+        RegistryAccess registryAccess = RegistryHelper.getRegistryAccess();
+        if (registryAccess == null)
+        {   return new ItemComponentsRequirement();
+        }
+        ItemParser parser = new ItemParser(registryAccess);
         PatchedDataComponentMap parsedComponents = new PatchedDataComponentMap(DataComponentMap.builder().build());
         try
         {
@@ -204,11 +209,11 @@ public record ItemComponentsRequirement(PatchedDataComponentMap components)
         return components.equals(that.components);
     }
 
-    @Override
+    /*@Override
     public String toString()
     {
-        return "NbtRequirement{" +
+        return "ItemComponents{" +
                 "tag=" + components +
                 '}';
-    }
+    }*/
 }

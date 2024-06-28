@@ -209,7 +209,7 @@ public class TempEffectsClient
     {
         try
         {
-            POST_PASSES = ObfuscationReflectionHelper.findField(PostChain.class, "f_110009_");
+            POST_PASSES = ObfuscationReflectionHelper.findField(PostChain.class, "passes");
         } catch (Exception e) { e.printStackTrace(); }
     }
 
