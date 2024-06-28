@@ -257,7 +257,7 @@ public abstract class WorldHelper
             }
             else
             {   ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity),
-                        new PlayEntityAttachedSoundMessage(ForgeRegistries.SOUND_EVENTS.getKey(sound).toString(), source, volume, pitch, entity.getId()));
+                        new PlayEntityAttachedSoundMessage(sound, source, volume, pitch, entity.getId()));
             }
         }
     }
@@ -471,16 +471,16 @@ public abstract class WorldHelper
     {   return ServerLifecycleHooks.getCurrentServer();
     }
 
-    public static Pair<Double, Double> getBiomeTemperature(Biome biome)
+    public static Pair<Double, Double> getBiomeTemperature(Level level, Biome biome)
     {
         double variance = 1 / Math.max(1, 2 + biome.getModifiedClimateSettings().downfall() * 2);
         double baseTemp = biome.getBaseTemperature();
 
         // Get the biome's temperature, either overridden by config or calculated
         // Start with biome override
-        Triplet<Double, Double, Temperature.Units> configTemp = ConfigSettings.BIOME_TEMPS.get().getOrDefault(biome,
+        Triplet<Double, Double, Temperature.Units> configTemp = ConfigSettings.BIOME_TEMPS.get(level.registryAccess()).getOrDefault(biome,
                                                                 new Triplet<>(baseTemp - variance, baseTemp + variance, Temperature.Units.MC));
-        Triplet<Double, Double, Temperature.Units> configOffset = ConfigSettings.BIOME_OFFSETS.get().getOrDefault(biome,
+        Triplet<Double, Double, Temperature.Units> configOffset = ConfigSettings.BIOME_OFFSETS.get(level.registryAccess()).getOrDefault(biome,
                                                                   new Triplet<>(0d, 0d, Temperature.Units.MC));
         return CSMath.addPairs(Pair.of(configTemp.getA(), configTemp.getB()), Pair.of(configOffset.getA(), configOffset.getB()));
     }

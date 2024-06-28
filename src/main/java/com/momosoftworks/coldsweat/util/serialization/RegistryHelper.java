@@ -107,32 +107,32 @@ public class RegistryHelper
     }
 
     @Nullable
-    public static Biome getBiome(ResourceLocation biomeId)
-    {   return getVanillaRegistryValue(Registries.BIOME, biomeId).orElse(null);
+    public static Biome getBiome(ResourceLocation biomeId, RegistryAccess registryAccess)
+    {   return registryAccess.registryOrThrow(Registries.BIOME).get(biomeId);
     }
 
     @Nullable
-    public static ResourceLocation getBiomeId(Biome biome)
-    {   return getVanillaRegistryKey(Registries.BIOME, biome).orElse(null);
+    public static ResourceLocation getBiomeId(Biome biome, RegistryAccess registryAccess)
+    {   return registryAccess.registryOrThrow(Registries.BIOME).getKey(biome);
     }
 
     @Nullable
-    public static DimensionType getDimension(ResourceLocation dimensionId)
-    {   return getVanillaRegistryValue(Registries.DIMENSION_TYPE, dimensionId).orElse(null);
+    public static DimensionType getDimension(ResourceLocation dimensionId, RegistryAccess registryAccess)
+    {   return registryAccess.registryOrThrow(Registries.DIMENSION_TYPE).get(dimensionId);
     }
 
     @Nullable
-    public static ResourceLocation getDimensionId(DimensionType dimension)
-    {   return getVanillaRegistryKey(Registries.DIMENSION_TYPE, dimension).orElse(null);
+    public static ResourceLocation getDimensionId(DimensionType dimension, RegistryAccess registryAccess)
+    {   return registryAccess.registryOrThrow(Registries.DIMENSION_TYPE).getKey(dimension);
     }
 
     @Nullable
-    public static StructureType<?> getStructure(ResourceLocation structureId)
-    {   return getVanillaRegistryValue(Registries.STRUCTURE_TYPE, structureId).orElse(null);
+    public static StructureType<?> getStructure(ResourceLocation structureId, RegistryAccess registryAccess)
+    {   return registryAccess.registryOrThrow(Registries.STRUCTURE_TYPE).get(structureId);
     }
 
     @Nullable
-    public static ResourceLocation getStructureId(StructureType<?> structure)
-    {   return getVanillaRegistryKey(Registries.STRUCTURE_TYPE, structure).orElse(null);
+    public static ResourceLocation getStructureId(StructureType<?> structure, RegistryAccess registryAccess)
+    {   return registryAccess.registryOrThrow(Registries.STRUCTURE_TYPE).getKey(structure);
     }
 }

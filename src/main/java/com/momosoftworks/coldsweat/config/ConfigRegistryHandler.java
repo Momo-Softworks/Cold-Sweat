@@ -90,12 +90,12 @@ public class ConfigRegistryHandler
                                                               {   ColdSweat.LOGGER.info("Disabling sleeping conditions check for block {}", holder.get());
                                                                   return holder.get();
                                                               }).toList());
-        ConfigSettings.LAMP_DIMENSIONS.get().addAll(registries.registryOrThrow(Registries.DIMENSION_TYPE)
-                                                    .getTag(ModDimensionTags.SOUL_LAMP_VALID).orElseThrow()
-                                                    .stream().map(holder ->
-                                                    {   ColdSweat.LOGGER.info("Enabling dimension {} for soulspring lamp", holder.get());
-                                                        return holder.get();
-                                                    }).toList());
+        ConfigSettings.LAMP_DIMENSIONS.get(registries).addAll(registries.registryOrThrow(Registries.DIMENSION_TYPE)
+                                                              .getTag(ModDimensionTags.SOUL_LAMP_VALID).orElseThrow()
+                                                              .stream().map(holder ->
+                                                              {   ColdSweat.LOGGER.info("Enabling dimension {} for soulspring lamp", holder.value());
+                                                                  return holder.value();
+                                                              }).toList());
         ConfigSettings.INSULATION_BLACKLIST.get().addAll(registries.registryOrThrow(Registries.ITEM)
                                                         .getTag(ModItemTags.NOT_INSULATABLE).orElseThrow()
                                                         .stream().map(holder ->
@@ -380,12 +380,12 @@ public class ConfigRegistryHandler
             {
                 Temperature.Units units = biomeTempData.units();
                 if (biomeTempData.isOffset())
-                {   ConfigSettings.BIOME_OFFSETS.get().put(biome, new Triplet<>(Temperature.convert(biomeTempData.min(), units, Temperature.Units.MC, true),
+                {   ConfigSettings.BIOME_OFFSETS.get(registryAccess).put(biome, new Triplet<>(Temperature.convert(biomeTempData.min(), units, Temperature.Units.MC, true),
                                                                                 Temperature.convert(biomeTempData.max(), units, Temperature.Units.MC, true),
                                                                                 biomeTempData.units()));
                 }
                 else
-                {   ConfigSettings.BIOME_TEMPS.get().put(biome, new Triplet<>(Temperature.convert(biomeTempData.min(), units, Temperature.Units.MC, true),
+                {   ConfigSettings.BIOME_TEMPS.get(registryAccess).put(biome, new Triplet<>(Temperature.convert(biomeTempData.min(), units, Temperature.Units.MC, true),
                                                                               Temperature.convert(biomeTempData.max(), units, Temperature.Units.MC, true),
                                                                               biomeTempData.units()));
                 }
@@ -410,11 +410,11 @@ public class ConfigRegistryHandler
             {
                 Temperature.Units units = dimensionTempData.units();
                 if (dimensionTempData.isOffset())
-                {   ConfigSettings.DIMENSION_OFFSETS.get().put(dimension, Pair.of(Temperature.convert(dimensionTempData.temperature(), units, Temperature.Units.MC, true),
+                {   ConfigSettings.DIMENSION_OFFSETS.get(registryAccess).put(dimension, Pair.of(Temperature.convert(dimensionTempData.temperature(), units, Temperature.Units.MC, true),
                                                                                   dimensionTempData.units()));
                 }
                 else
-                {   ConfigSettings.DIMENSION_TEMPS.get().put(dimension, Pair.of(Temperature.convert(dimensionTempData.temperature(), units, Temperature.Units.MC, true),
+                {   ConfigSettings.DIMENSION_TEMPS.get(registryAccess).put(dimension, Pair.of(Temperature.convert(dimensionTempData.temperature(), units, Temperature.Units.MC, true),
                                                                                 dimensionTempData.units()));
                 }
             }
@@ -438,10 +438,10 @@ public class ConfigRegistryHandler
             {
                 double temperature = Temperature.convert(structureTempData.temperature(), structureTempData.units(), Temperature.Units.MC, !structureTempData.isOffset());
                 if (structureTempData.isOffset())
-                {   ConfigSettings.STRUCTURE_OFFSETS.get().put(structure.type(), Pair.of(temperature, structureTempData.units()));
+                {   ConfigSettings.STRUCTURE_OFFSETS.get(registryAccess).put(structure.type(), Pair.of(temperature, structureTempData.units()));
                 }
                 else
-                {   ConfigSettings.STRUCTURE_TEMPS.get().put(structure.type(), Pair.of(temperature, structureTempData.units()));
+                {   ConfigSettings.STRUCTURE_TEMPS.get(registryAccess).put(structure.type(), Pair.of(temperature, structureTempData.units()));
                 }
             }
         });
@@ -480,7 +480,7 @@ public class ConfigRegistryHandler
                 }
             }
             for (Biome biome : RegistryHelper.mapVanillaRegistryTagList(Registries.BIOME, spawnBiomeData.biomes(), registryAccess))
-            {   ConfigSettings.ENTITY_SPAWN_BIOMES.get().put(biome, spawnBiomeData);
+            {   ConfigSettings.ENTITY_SPAWN_BIOMES.get(registryAccess).put(biome, spawnBiomeData);
             }
         });
     }

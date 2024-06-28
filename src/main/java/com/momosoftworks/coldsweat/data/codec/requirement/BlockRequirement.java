@@ -74,7 +74,13 @@ public record BlockRequirement(Optional<List<Block>> blocks, Optional<TagKey<Blo
 
     public static BlockRequirement deserialize(CompoundTag tag)
     {
-        Optional<List<Block>> blocks = tag.contains("blocks") ? Optional.of(NBTHelper.listTagOf(tag.getList("blocks", 8)).stream().map(string -> ForgeRegistries.BLOCKS.getValue(new net.minecraft.resources.ResourceLocation(string.getAsString()))).collect(Collectors.toList())) : Optional.empty();
+        Optional<List<Block>> blocks = tag.contains("blocks")
+                                       ? Optional.of(NBTHelper.listTagOf(tag.getList("blocks", 8))
+                                         .stream()
+                                         .map(string ->
+                                         {  return ForgeRegistries.BLOCKS.getValue(new ResourceLocation(string.getAsString()));
+                                         }).collect(Collectors.toList()))
+                                       : Optional.empty();
         Optional<TagKey<Block>> tagKey = tag.contains("tag") ? Optional.of(TagKey.create(Registries.BLOCK, new ResourceLocation(tag.getString("tag")))) : Optional.empty();
         Optional<StateRequirement> state = tag.contains("state") ? Optional.of(StateRequirement.deserialize(tag.getCompound("state"))) : Optional.empty();
         Optional<NbtRequirement> nbt = tag.contains("nbt") ? Optional.of(NbtRequirement.deserialize(tag.getCompound("nbt"))) : Optional.empty();
