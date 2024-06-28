@@ -22,7 +22,11 @@ public class PlayEntityAttachedSoundMessage
     float pitch;
     int entityID;
 
-    public PlayEntityAttachedSoundMessage(String sound, SoundCategory category, float volume, float pitch, int entityID)
+    public PlayEntityAttachedSoundMessage(SoundEvent sound, SoundCategory source, float volume, float pitch, int entityID)
+    {   this(ForgeRegistries.SOUND_EVENTS.getKey(sound).toString(), source, volume, pitch, entityID);
+    }
+
+    PlayEntityAttachedSoundMessage(String sound, SoundCategory source, float volume, float pitch, int entityID)
     {
         this.sound = sound;
         this.category = category;

@@ -15,16 +15,17 @@ import net.minecraftforge.registries.ForgeRegistries;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class EffectsRequirement
 {
     public final Map<Effect, Instance> effects;
-    
+
     public EffectsRequirement(Map<Effect, Instance> effects)
     {
         this.effects = effects;
     }
-    
+
     public static final Codec<EffectsRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.unboundedMap(Registry.MOB_EFFECT, Instance.CODEC).fieldOf("effects").forGetter(predicate -> predicate.effects)
     ).apply(instance, EffectsRequirement::new));
@@ -92,7 +93,7 @@ public class EffectsRequirement
     public static EffectsRequirement deserialize(CompoundNBT tag)
     {
         Map<Effect, Instance> effects = tag.getAllKeys().stream().collect(
-                java.util.stream.Collectors.toMap(key -> ForgeRegistries.POTIONS.getValue(new ResourceLocation(key)),
+                Collectors.toMap(key -> ForgeRegistries.POTIONS.getValue(new ResourceLocation(key)),
                                                   key -> Instance.deserialize(tag.getCompound(key))));
         return new EffectsRequirement(effects);
     }

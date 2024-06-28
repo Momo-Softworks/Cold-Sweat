@@ -11,9 +11,9 @@ public class HotBiomeEdible extends BiomeSearchingEdible
 {
     public HotBiomeEdible()
     {
-        super(biome ->
+        super((level, biome) ->
         {
-            Pair<Double, Double> minMaxTemp = WorldHelper.getBiomeTemperature(biome);
+            Pair<Double, Double> minMaxTemp = WorldHelper.getBiomeTemperature(level, biome);
             double biomeTemp = CSMath.averagePair(minMaxTemp);
 
             return biomeTemp >= 1.5;

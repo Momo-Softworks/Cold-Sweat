@@ -4,8 +4,10 @@ import com.momosoftworks.coldsweat.config.spec.MainSettingsConfig;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.fml.network.PacketDistributor;
 
@@ -21,14 +23,12 @@ public class SyncConfigSettingsMessage
     Map<String, CompoundNBT> configValues;
     UUID menuOpener;
 
-    public SyncConfigSettingsMessage()
-    {
-        this(EMPTY_UUID);
+    public SyncConfigSettingsMessage(DynamicRegistries registryAccess)
+    {   this(EMPTY_UUID, registryAccess);
     }
 
-    public SyncConfigSettingsMessage(UUID menuOpener)
-    {
-        this(ConfigSettings.encode(), menuOpener);
+    public SyncConfigSettingsMessage(UUID menuOpener, DynamicRegistries registryAccess)
+    {   this(ConfigSettings.encode(registryAccess), menuOpener);
     }
 
     private SyncConfigSettingsMessage(Map<String, CompoundNBT> values, UUID menuOpener)
@@ -65,16 +65,17 @@ public class SyncConfigSettingsMessage
         NetworkEvent.Context context = contextSupplier.get();
         context.enqueueWork(() ->
         {
-            message.configValues.forEach(ConfigSettings::decode);
+            DynamicRegistries registryAccess = RegistryHelper.getDynamicRegistries();
+            message.configValues.forEach((name, values) -> ConfigSettings.decode(name, values, registryAccess));
 
             if (context.getDirection().getReceptionSide().isServer())
             {
                 if (context.getSender() != null && context.getSender().hasPermissions(2))
-                {   ConfigSettings.saveValues();
+                {   ConfigSettings.saveValues(registryAccess);
                     MainSettingsConfig.getInstance().save();
                 }
 
-                ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new SyncConfigSettingsMessage(EMPTY_UUID));
+                ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new SyncConfigSettingsMessage(EMPTY_UUID, registryAccess));
             }
             else if (context.getDirection().getReceptionSide().isClient())
             {

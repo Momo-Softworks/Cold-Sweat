@@ -31,7 +31,7 @@ public class BlockRequirement
     public final Optional<ITag<Block>> tag;
     public final Optional<StateRequirement> state;
     public final Optional<NbtRequirement> nbt;
-    
+
     public BlockRequirement(Optional<List<Block>> blocks, Optional<ITag<Block>> tag, Optional<StateRequirement> state, Optional<NbtRequirement> nbt)
     {
         this.blocks = blocks;
@@ -87,8 +87,14 @@ public class BlockRequirement
 
     public static BlockRequirement deserialize(CompoundNBT tag)
     {
-        Optional<List<Block>> blocks = tag.contains("blocks") ? Optional.of(NBTHelper.listTagOf(tag.getList("blocks", 8)).stream().map(string -> ForgeRegistries.BLOCKS.getValue(new ResourceLocation(string.getAsString()))).collect(Collectors.toList())) : Optional.empty();
-        Optional<ITag<Block>> tagKey = tag.contains("tag") ? Optional.of(BlockTags.getAllTags().getTag(new ResourceLocation(tag.getString("tag")))) : Optional.empty();
+        Optional<List<Block>> blocks = tag.contains("blocks")
+                                       ? Optional.of(NBTHelper.listTagOf(tag.getList("blocks", 8))
+                                         .stream()
+                                         .map(string ->
+                                         {  return ForgeRegistries.BLOCKS.getValue(new ResourceLocation(string.getAsString()));
+                                         }).collect(Collectors.toList()))
+                                       : Optional.empty();
+        Optional<ITag<Block>> tagKey = tag.contains("tag") ? Optional.ofNullable(BlockTags.getAllTags().getTag(new ResourceLocation(tag.getString("tag")))) : Optional.empty();
         Optional<StateRequirement> state = tag.contains("state") ? Optional.of(StateRequirement.deserialize(tag.getCompound("state"))) : Optional.empty();
         Optional<NbtRequirement> nbt = tag.contains("nbt") ? Optional.of(NbtRequirement.deserialize(tag.getCompound("nbt"))) : Optional.empty();
 
@@ -122,11 +128,11 @@ public class BlockRequirement
     public static class StateRequirement
     {
         private final List<Either<StateProperty, RangedProperty>> properties;
-        
+
         public StateRequirement(List<Either<StateProperty, RangedProperty>> properties)
         {   this.properties = properties;
         }
-        
+
         public static final Codec<StateRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 Codec.either(StateProperty.CODEC, RangedProperty.CODEC).listOf().fieldOf("properties").forGetter(state -> state.properties)
         ).apply(instance, StateRequirement::new));
@@ -196,7 +202,7 @@ public class BlockRequirement
     {
         private final String name;
         private final String value;
-        
+
         public StateProperty(String name, String value)
         {
             this.name = name;

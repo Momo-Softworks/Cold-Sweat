@@ -150,20 +150,20 @@ public class ConfigRegistryHandler
         addBlockTempConfigs(blockTemps);
         logRegistryLoaded(String.format("Loaded %s block temperatures", blockTemps.size()), blockTemps);
         // biome temperatures
-        addBiomeTempConfigs(biomeTemps);
+        addBiomeTempConfigs(biomeTemps, registries);
         logRegistryLoaded(String.format("Loaded %s biome temperatures", biomeTemps.size()), biomeTemps);
         // dimension temperatures
-        addDimensionTempConfigs(dimensionTemps);
+        addDimensionTempConfigs(dimensionTemps, registries);
         logRegistryLoaded(String.format("Loaded %s dimension temperatures", dimensionTemps.size()), dimensionTemps);
         // structure temperatures
-        addStructureTempConfigs(structureTemps);
+        addStructureTempConfigs(structureTemps, registries);
         logRegistryLoaded(String.format("Loaded %s structure temperatures", structureTemps.size()), structureTemps);
 
         // mounts
         addMountConfigs(mounts);
         logRegistryLoaded(String.format("Loaded %s insulated mounts", mounts.size()), mounts);
         // spawn biomes
-        addSpawnBiomeConfigs(spawnBiomes);
+        addSpawnBiomeConfigs(spawnBiomes, registries);
         logRegistryLoaded(String.format("Loaded %s entity spawn biomes", spawnBiomes.size()), spawnBiomes);
     }
 
@@ -343,7 +343,7 @@ public class ConfigRegistryHandler
         });
     }
 
-    private static void addBiomeTempConfigs(Set<BiomeTempData> biomeTemps)
+    private static void addBiomeTempConfigs(Set<BiomeTempData> biomeTemps, DynamicRegistries registryAccess)
     {
         biomeTemps.forEach(biomeTempData ->
         {
@@ -359,12 +359,12 @@ public class ConfigRegistryHandler
             {
                 Temperature.Units units = biomeTempData.units;
                 if (biomeTempData.isOffset)
-                {   ConfigSettings.BIOME_OFFSETS.get().put(biome, new Triplet<>(Temperature.convert(biomeTempData.min, units, Temperature.Units.MC, true),
+                {   ConfigSettings.BIOME_OFFSETS.get(registryAccess).put(biome, new Triplet<>(Temperature.convert(biomeTempData.min, units, Temperature.Units.MC, true),
                                                                                 Temperature.convert(biomeTempData.max, units, Temperature.Units.MC, true),
                                                                                 biomeTempData.units));
                 }
                 else
-                {   ConfigSettings.BIOME_TEMPS.get().put(biome, new Triplet<>(Temperature.convert(biomeTempData.min, units, Temperature.Units.MC, true),
+                {   ConfigSettings.BIOME_TEMPS.get(registryAccess).put(biome, new Triplet<>(Temperature.convert(biomeTempData.min, units, Temperature.Units.MC, true),
                                                                               Temperature.convert(biomeTempData.max, units, Temperature.Units.MC, true),
                                                                               biomeTempData.units));
                 }
@@ -372,7 +372,7 @@ public class ConfigRegistryHandler
         });
     }
 
-    private static void addDimensionTempConfigs(Set<DimensionTempData> dimensionTemps)
+    private static void addDimensionTempConfigs(Set<DimensionTempData> dimensionTemps, DynamicRegistries registryAccess)
     {
         dimensionTemps.forEach(dimensionTempData ->
         {
@@ -388,18 +388,18 @@ public class ConfigRegistryHandler
             {
                 Temperature.Units units = dimensionTempData.units;
                 if (dimensionTempData.isOffset)
-                {   ConfigSettings.DIMENSION_OFFSETS.get().put(dimension, Pair.of(Temperature.convert(dimensionTempData.temperature, units, Temperature.Units.MC, true),
+                {   ConfigSettings.DIMENSION_OFFSETS.get(registryAccess).put(dimension, Pair.of(Temperature.convert(dimensionTempData.temperature, units, Temperature.Units.MC, true),
                                                                                   dimensionTempData.units));
                 }
                 else
-                {   ConfigSettings.DIMENSION_TEMPS.get().put(dimension, Pair.of(Temperature.convert(dimensionTempData.temperature, units, Temperature.Units.MC, true),
+                {   ConfigSettings.DIMENSION_TEMPS.get(registryAccess).put(dimension, Pair.of(Temperature.convert(dimensionTempData.temperature, units, Temperature.Units.MC, true),
                                                                                 dimensionTempData.units));
                 }
             }
         });
     }
 
-    private static void addStructureTempConfigs(Set<StructureTempData> structureTemps)
+    private static void addStructureTempConfigs(Set<StructureTempData> structureTemps, DynamicRegistries registryAccess)
     {
         structureTemps.forEach(structureTempData ->
         {
@@ -415,10 +415,10 @@ public class ConfigRegistryHandler
             {
                 double temperature = Temperature.convert(structureTempData.temperature, structureTempData.units, Temperature.Units.MC, !structureTempData.isOffset);
                 if (structureTempData.isOffset)
-                {   ConfigSettings.STRUCTURE_OFFSETS.get().put(structure, Pair.of(temperature, structureTempData.units));
+                {   ConfigSettings.STRUCTURE_OFFSETS.get(registryAccess).put(structure, Pair.of(temperature, structureTempData.units));
                 }
                 else
-                {   ConfigSettings.STRUCTURE_TEMPS.get().put(structure, Pair.of(temperature, structureTempData.units));
+                {   ConfigSettings.STRUCTURE_TEMPS.get(registryAccess).put(structure, Pair.of(temperature, structureTempData.units));
                 }
             }
         });
@@ -442,7 +442,7 @@ public class ConfigRegistryHandler
         });
     }
 
-    private static void addSpawnBiomeConfigs(Set<SpawnBiomeData> spawnBiomes)
+    private static void addSpawnBiomeConfigs(Set<SpawnBiomeData> spawnBiomes, DynamicRegistries registryAccess)
     {
         spawnBiomes.forEach(spawnBiomeData ->
         {
@@ -455,7 +455,7 @@ public class ConfigRegistryHandler
                 }
             }
             for (Biome biome : spawnBiomeData.biomes)
-            {   ConfigSettings.ENTITY_SPAWN_BIOMES.get().put(biome, spawnBiomeData);
+            {   ConfigSettings.ENTITY_SPAWN_BIOMES.get(registryAccess).put(biome, spawnBiomeData);
             }
         });
     }

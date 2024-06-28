@@ -28,11 +28,11 @@ public class RegistryHelper
 {
     @Nullable
     public static <T> Registry<T> getRegistry(RegistryKey<Registry<T>> registry)
-    {   return CSMath.getIfNotNull(getRegistryAccess(), access -> access.registryOrThrow(registry), null);
+    {   return CSMath.getIfNotNull(getDynamicRegistries(), access -> access.registryOrThrow(registry), null);
     }
 
     @Nullable
-    public static DynamicRegistries getRegistryAccess()
+    public static DynamicRegistries getDynamicRegistries()
     {
         DynamicRegistries access = null;
 
@@ -87,48 +87,32 @@ public class RegistryHelper
     }
 
     @Nullable
-    public static Biome getBiome(ResourceLocation biomeId)
-    {   return getVanillaRegistryValue(Registry.BIOME_REGISTRY, biomeId).orElse(null);
+    public static Biome getBiome(ResourceLocation biomeId, DynamicRegistries registryAccess)
+    {   return registryAccess.registryOrThrow(Registry.BIOME_REGISTRY).get(biomeId);
     }
 
     @Nullable
-    public static ResourceLocation getBiomeId(Biome biome)
-    {   return getVanillaRegistryKey(Registry.BIOME_REGISTRY, biome).orElse(null);
+    public static ResourceLocation getBiomeId(Biome biome, DynamicRegistries registryAccess)
+    {   return registryAccess.registryOrThrow(Registry.BIOME_REGISTRY).getKey(biome);
     }
 
     @Nullable
-    public static DimensionType getDimension(ResourceLocation dimensionId)
-    {   return getVanillaRegistryValue(Registry.DIMENSION_TYPE_REGISTRY, dimensionId).orElse(null);
+    public static DimensionType getDimension(ResourceLocation dimensionId, DynamicRegistries registryAccess)
+    {   return registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get(dimensionId);
     }
 
     @Nullable
-    public static ResourceLocation getDimensionId(DimensionType dimension)
-    {   return getVanillaRegistryKey(Registry.DIMENSION_TYPE_REGISTRY, dimension).orElse(null);
+    public static ResourceLocation getDimensionId(DimensionType dimension, DynamicRegistries registryAccess)
+    {   return registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).getKey(dimension);
     }
 
     @Nullable
-    public static Structure<?> getStructure(ResourceLocation structureId)
-    {
-        return getRegistryAccess().registry(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY)
-                                  .flatMap(reg -> reg.entrySet().stream()
-                                  .filter(entry -> entry.getKey().equals(structureId))
-                                  .map(Map.Entry::getValue).map(str -> (Structure) str.feature).findFirst())
-                                  // If the configured structure registry isn't present, use the structure feature registry
-                                  .orElse(getRegistryAccess().registry(Registry.STRUCTURE_FEATURE_REGISTRY)
-                                                             .map(reg -> reg.get(structureId))
-                                                             .orElse(null));
+    public static Structure<?> getStructure(ResourceLocation structureId, DynamicRegistries registryAccess)
+    {   return registryAccess.registryOrThrow(Registry.STRUCTURE_FEATURE_REGISTRY).get(structureId);
     }
 
     @Nullable
-    public static ResourceLocation getStructureId(Structure<?> structure)
-    {
-        return getRegistryAccess().registry(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY)
-                                  .flatMap(reg -> reg.entrySet().stream()
-                                  .filter(entry -> entry.getValue().feature == structure)
-                                  .map(Map.Entry::getKey).map(RegistryKey::location).findFirst())
-                                  // If the configured structure registry isn't present, use the structure feature registry
-                                  .orElse(getRegistryAccess().registry(Registry.STRUCTURE_FEATURE_REGISTRY)
-                                                             .map(reg -> reg.getKey(structure))
-                                                             .orElse(null));
+    public static ResourceLocation getStructureId(Structure<?> structure, DynamicRegistries registryAccess)
+    {   return registryAccess.registryOrThrow(Registry.STRUCTURE_FEATURE_REGISTRY).getKey(structure);
     }
 }

@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.api.insulation;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
 import com.momosoftworks.coldsweat.util.serialization.StringRepresentable;
@@ -11,6 +12,25 @@ import java.util.List;
 
 public abstract class Insulation implements NbtSerializable
 {
+    public static Codec<Insulation> getCodec()
+    {
+        return Codec.either(StaticInsulation.CODEC, AdaptiveInsulation.CODEC)
+               .xmap(either ->
+               {
+                   if (either.left().isPresent())
+                   {   return either.left().get();
+                   }
+                   return either.right().get();
+               },
+               insul ->
+               {
+                   if (insul instanceof StaticInsulation)
+                   {   return Either.left(((StaticInsulation) insul));
+                   }
+                   return Either.right(((AdaptiveInsulation) insul));
+               });
+    }
+
     /**
      * @return True if this insulation has no value.
      */

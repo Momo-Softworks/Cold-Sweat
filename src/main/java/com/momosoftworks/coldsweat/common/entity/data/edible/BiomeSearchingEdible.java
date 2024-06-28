@@ -9,16 +9,17 @@ import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.server.ServerWorld;
 
-import java.util.function.Predicate;
+import java.util.function.BiPredicate;
 
 public abstract class BiomeSearchingEdible extends Edible
 {
-    private final Predicate<Biome> biomePredicate;
+    private final BiPredicate<World, Biome> biomePredicate;
 
-    public BiomeSearchingEdible(Predicate<Biome> biomePredicate)
+    public BiomeSearchingEdible(BiPredicate<World, Biome> biomePredicate)
     {   this.biomePredicate = biomePredicate;
     }
 
@@ -35,7 +36,7 @@ public abstract class BiomeSearchingEdible extends Edible
             {
                 BlockPos pos = entity.blockPosition();
                 BlockPos biomePos = ((ServerWorld) entity.level).getChunkSource().getGenerator().getBiomeSource().findBiomeHorizontal(pos.getX(), pos.getY(), pos.getZ(), 2000,
-                                                                                                                                      biomePredicate, entity.getRandom());
+                                                                                                                                      biome -> this.biomePredicate.test(entity.level, biome), entity.getRandom());
                 if (biomePos != null)
                 {
                     Pair<BlockPos, Biome> biomePair = Pair.of(biomePos, entity.level.getBiome(biomePos));

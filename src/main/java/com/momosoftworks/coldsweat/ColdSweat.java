@@ -95,9 +95,6 @@ public class ColdSweat
             CriteriaTriggers.register(ModAdvancementTriggers.BLOCK_AFFECTS_TEMP);
             CriteriaTriggers.register(ModAdvancementTriggers.ARMOR_INSULATED);
 
-            // Load configs to memory
-            ConfigSettings.load(null);
-
             // Register insulation items tab
             InsulationItemsGroup.INSULATION_ITEMS.register();
 
