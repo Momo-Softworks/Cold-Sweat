@@ -294,6 +294,29 @@ public class ClientSettingsConfig
     {   tempSmoothing.set(smoothing);
     }
 
+    public synchronized void writeAndSave()
+    {   this.setCelsius(ConfigSettings.CELSIUS.get());
+        this.setTempOffset(ConfigSettings.TEMP_OFFSET.get());
+        this.setTempSmoothing(ConfigSettings.TEMP_SMOOTHING.get());
+        this.setBodyIconX(ConfigSettings.BODY_ICON_POS.get().x());
+        this.setBodyIconY(ConfigSettings.BODY_ICON_POS.get().y());
+        this.setBodyReadoutX(ConfigSettings.BODY_READOUT_POS.get().x());
+        this.setBodyReadoutY(ConfigSettings.BODY_READOUT_POS.get().y());
+        this.setWorldGaugeX(ConfigSettings.WORLD_GAUGE_POS.get().x());
+        this.setWorldGaugeY(ConfigSettings.WORLD_GAUGE_POS.get().y());
+        this.setCustomHotbar(ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get());
+        this.setIconBobbing(ConfigSettings.ICON_BOBBING.get());
+        this.setHearthDebug(ConfigSettings.HEARTH_DEBUG.get());
+        this.setCreativeWarningEnabled(ConfigSettings.SHOW_CREATIVE_WARNING.get());
+        this.setBodyIconEnabled(ConfigSettings.BODY_ICON_ENABLED.get());
+        this.setBodyReadoutEnabled(ConfigSettings.BODY_READOUT_ENABLED.get());
+        this.setWorldGaugeEnabled(ConfigSettings.WORLD_GAUGE_ENABLED.get());
+        this.setDistortionsEnabled(ConfigSettings.DISTORTION_EFFECTS.get());
+        this.setHighContrast(ConfigSettings.HIGH_CONTRAST.get());
+        this.setConfigButtonPos(List.of(ConfigSettings.CONFIG_BUTTON_POS.get().x(),
+                                        ConfigSettings.CONFIG_BUTTON_POS.get().y()));
+        this.save();
+    }
 
     public void save()
     {   SPEC.save();

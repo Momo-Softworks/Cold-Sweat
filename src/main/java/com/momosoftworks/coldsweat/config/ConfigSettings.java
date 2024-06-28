@@ -11,10 +11,10 @@ import com.momosoftworks.coldsweat.config.spec.*;
 import com.momosoftworks.coldsweat.config.type.InsulatingMount;
 import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.config.type.PredicateItem;
+import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.util.serialization.*;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
-import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.data.codec.configuration.SpawnBiomeData;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -41,10 +41,7 @@ import oshi.util.tuples.Triplet;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.function.*;
 import java.util.stream.Collectors;
 
 /**
@@ -162,94 +159,94 @@ public class ConfigSettings
     static
     {
         DIFFICULTY = addSyncedSetting("difficulty", () -> MainSettingsConfig.getInstance().getDifficulty(),
-        encoder -> ConfigHelper.serializeNbtInt(encoder, "Difficulty"),
-        decoder -> decoder.getInt("Difficulty"),
-        saver -> MainSettingsConfig.getInstance().setDifficulty(saver));
+        (encoder) -> ConfigHelper.serializeNbtInt(encoder, "Difficulty"),
+        (decoder) -> decoder.getInt("Difficulty"),
+        (saver) -> MainSettingsConfig.getInstance().setDifficulty(saver));
 
         MAX_TEMP = addSyncedSetting("max_temp", () -> MainSettingsConfig.getInstance().getMaxTempHabitable(),
-        encoder -> ConfigHelper.serializeNbtDouble(encoder, "MaxTemp"),
-        decoder -> decoder.getDouble("MaxTemp"),
-        saver -> MainSettingsConfig.getInstance().setMaxHabitable(saver));
+        (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "MaxTemp"),
+        (decoder) -> decoder.getDouble("MaxTemp"),
+        (saver) -> MainSettingsConfig.getInstance().setMaxHabitable(saver));
 
         MIN_TEMP = addSyncedSetting("min_temp", () -> MainSettingsConfig.getInstance().getMinTempHabitable(),
-        encoder -> ConfigHelper.serializeNbtDouble(encoder, "MinTemp"),
-        decoder -> decoder.getDouble("MinTemp"),
-        saver -> MainSettingsConfig.getInstance().setMinHabitable(saver));
+        (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "MinTemp"),
+        (decoder) -> decoder.getDouble("MinTemp"),
+        (saver) -> MainSettingsConfig.getInstance().setMinHabitable(saver));
 
         TEMP_RATE = addSyncedSetting("temp_rate", () -> MainSettingsConfig.getInstance().getRateMultiplier(),
-        encoder -> ConfigHelper.serializeNbtDouble(encoder, "TempRate"),
-        decoder -> decoder.getDouble("TempRate"),
-        saver -> MainSettingsConfig.getInstance().setRateMultiplier(saver));
+        (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "TempRate"),
+        (decoder) -> decoder.getDouble("TempRate"),
+        (saver) -> MainSettingsConfig.getInstance().setRateMultiplier(saver));
 
         TEMP_DAMAGE = addSyncedSetting("temp_damage", () -> MainSettingsConfig.getInstance().getTempDamage(),
-        encoder -> ConfigHelper.serializeNbtDouble(encoder, "TempDamage"),
-        decoder -> decoder.getDouble("TempDamage"),
-        saver -> MainSettingsConfig.getInstance().setTempDamage(saver));
+        (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "TempDamage"),
+        (decoder) -> decoder.getDouble("TempDamage"),
+        (saver) -> MainSettingsConfig.getInstance().setTempDamage(saver));
 
         FIRE_RESISTANCE_ENABLED = addSyncedSetting("fire_resistance_enabled", () -> MainSettingsConfig.getInstance().isFireResistanceEnabled(),
-        encoder -> ConfigHelper.serializeNbtBool(encoder, "FireResistanceEnabled"),
-        decoder -> decoder.getBoolean("FireResistanceEnabled"),
-        saver -> MainSettingsConfig.getInstance().setFireResistanceEnabled(saver));
+        (encoder) -> ConfigHelper.serializeNbtBool(encoder, "FireResistanceEnabled"),
+        (decoder) -> decoder.getBoolean("FireResistanceEnabled"),
+        (saver) -> MainSettingsConfig.getInstance().setFireResistanceEnabled(saver));
 
         ICE_RESISTANCE_ENABLED = addSyncedSetting("ice_resistance_enabled", () -> MainSettingsConfig.getInstance().isIceResistanceEnabled(),
-        encoder -> ConfigHelper.serializeNbtBool(encoder, "IceResistanceEnabled"),
-        decoder -> decoder.getBoolean("IceResistanceEnabled"),
-        saver -> MainSettingsConfig.getInstance().setIceResistanceEnabled(saver));
+        (encoder) -> ConfigHelper.serializeNbtBool(encoder, "IceResistanceEnabled"),
+        (decoder) -> decoder.getBoolean("IceResistanceEnabled"),
+        (saver) -> MainSettingsConfig.getInstance().setIceResistanceEnabled(saver));
 
         DAMAGE_SCALING = addSyncedSetting("damage_scaling", () -> MainSettingsConfig.getInstance().doDamageScaling(),
-        encoder -> ConfigHelper.serializeNbtBool(encoder, "DamageScaling"),
-        decoder -> decoder.getBoolean("DamageScaling"),
-        saver -> MainSettingsConfig.getInstance().setDamageScaling(saver));
+        (encoder) -> ConfigHelper.serializeNbtBool(encoder, "DamageScaling"),
+        (decoder) -> decoder.getBoolean("DamageScaling"),
+        (saver) -> MainSettingsConfig.getInstance().setDamageScaling(saver));
 
         REQUIRE_THERMOMETER = addSyncedSetting("require_thermometer", () -> MainSettingsConfig.getInstance().thermometerRequired(),
-        encoder -> ConfigHelper.serializeNbtBool(encoder, "RequireThermometer"),
-        decoder -> decoder.getBoolean("RequireThermometer"),
-        saver -> MainSettingsConfig.getInstance().setRequireThermometer(saver));
+        (encoder) -> ConfigHelper.serializeNbtBool(encoder, "RequireThermometer"),
+        (decoder) -> decoder.getBoolean("RequireThermometer"),
+        (saver) -> MainSettingsConfig.getInstance().setRequireThermometer(saver));
 
         GRACE_LENGTH = addSyncedSetting("grace_length", () -> MainSettingsConfig.getInstance().getGracePeriodLength(),
-        encoder -> ConfigHelper.serializeNbtInt(encoder, "GraceLength"),
-        decoder -> decoder.getInt("GraceLength"),
-        saver -> MainSettingsConfig.getInstance().setGracePeriodLength(saver));
+        (encoder) -> ConfigHelper.serializeNbtInt(encoder, "GraceLength"),
+        (decoder) -> decoder.getInt("GraceLength"),
+        (saver) -> MainSettingsConfig.getInstance().setGracePeriodLength(saver));
 
         GRACE_ENABLED = addSyncedSetting("grace_enabled", () -> MainSettingsConfig.getInstance().isGracePeriodEnabled(),
-        encoder -> ConfigHelper.serializeNbtBool(encoder, "GraceEnabled"),
-        decoder -> decoder.getBoolean("GraceEnabled"),
-        saver -> MainSettingsConfig.getInstance().setGracePeriodEnabled(saver));
+        (encoder) -> ConfigHelper.serializeNbtBool(encoder, "GraceEnabled"),
+        (decoder) -> decoder.getBoolean("GraceEnabled"),
+        (saver) -> MainSettingsConfig.getInstance().setGracePeriodEnabled(saver));
 
 
         HEARTS_FREEZING_PERCENTAGE = addSyncedSetting("hearts_freezing_percentage", () -> MainSettingsConfig.getInstance().getHeartsFreezingPercentage(),
-        encoder -> ConfigHelper.serializeNbtDouble(encoder, "HeartsFreezingPercentage"),
-        decoder -> decoder.getDouble("HeartsFreezingPercentage"),
-        saver -> MainSettingsConfig.getInstance().setHeartsFreezingPercentage(saver));
+        (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "HeartsFreezingPercentage"),
+        (decoder) -> decoder.getDouble("HeartsFreezingPercentage"),
+        (saver) -> MainSettingsConfig.getInstance().setHeartsFreezingPercentage(saver));
 
         COLD_MINING_IMPAIRMENT = addSyncedSetting("cold_mining_slowdown", () -> MainSettingsConfig.getInstance().getColdMiningImpairment(),
-        encoder -> ConfigHelper.serializeNbtDouble(encoder, "ColdMiningImpairment"),
-        decoder -> decoder.getDouble("ColdMiningImpairment"),
-        saver -> MainSettingsConfig.getInstance().setColdMiningImpairment(saver));
+        (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "ColdMiningImpairment"),
+        (decoder) -> decoder.getDouble("ColdMiningImpairment"),
+        (saver) -> MainSettingsConfig.getInstance().setColdMiningImpairment(saver));
 
         COLD_MOVEMENT_SLOWDOWN = addSyncedSetting("cold_movement_slowdown", () -> MainSettingsConfig.getInstance().getColdMovementSlowdown(),
-        encoder -> ConfigHelper.serializeNbtDouble(encoder, "ColdMovementSlowdown"),
-        decoder -> decoder.getDouble("ColdMovementSlowdown"),
-        saver -> MainSettingsConfig.getInstance().setColdMovementSlowdown(saver));
+        (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "ColdMovementSlowdown"),
+        (decoder) -> decoder.getDouble("ColdMovementSlowdown"),
+        (saver) -> MainSettingsConfig.getInstance().setColdMovementSlowdown(saver));
 
         COLD_KNOCKBACK_REDUCTION = addSyncedSetting("cold_knockback_reduction", () -> MainSettingsConfig.getInstance().getColdKnockbackReduction(),
-        encoder -> ConfigHelper.serializeNbtDouble(encoder, "ColdKnockbackReduction"),
-        decoder -> decoder.getDouble("ColdKnockbackReduction"),
-        saver -> MainSettingsConfig.getInstance().setColdKnockbackReduction(saver));
+        (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "ColdKnockbackReduction"),
+        (decoder) -> decoder.getDouble("ColdKnockbackReduction"),
+        (saver) -> MainSettingsConfig.getInstance().setColdKnockbackReduction(saver));
 
         HEATSTROKE_FOG_DISTANCE = addSyncedSetting("heatstroke_fog_distance", () -> MainSettingsConfig.getInstance().getHeatstrokeFogDistance(),
-        encoder -> ConfigHelper.serializeNbtDouble(encoder, "HeatstrokeFogDistance"),
-        decoder -> decoder.getDouble("HeatstrokeFogDistance"),
-        saver -> MainSettingsConfig.getInstance().setHeatstrokeFogDistance(saver));
+        (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "HeatstrokeFogDistance"),
+        (decoder) -> decoder.getDouble("HeatstrokeFogDistance"),
+        (saver) -> MainSettingsConfig.getInstance().setHeatstrokeFogDistance(saver));
 
 
-        BIOME_TEMPS = addSyncedSetting("biome_temps", () -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().getBiomeTemperatures(), true),
-        encoder -> ConfigHelper.serializeBiomeTemps(encoder, "BiomeTemps"),
-        decoder -> ConfigHelper.deserializeBiomeTemps(decoder, "BiomeTemps"),
-        saver -> WorldSettingsConfig.getInstance().setBiomeTemperatures(saver.entrySet().stream()
+        BIOME_TEMPS = addSyncedSettingWithRegistries("biome_temps", (registryAccess) -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().getBiomeTemperatures(), true, registryAccess),
+        (encoder, registryAccess) -> ConfigHelper.serializeBiomeTemps(encoder, "BiomeTemps", registryAccess),
+        (decoder, registryAccess) -> ConfigHelper.deserializeBiomeTemps(decoder, "BiomeTemps", registryAccess),
+        (saver, registryAccess) -> WorldSettingsConfig.getInstance().setBiomeTemperatures(saver.entrySet().stream()
                                                             .map(entry ->
                                                             {
-                                                                ResourceLocation biome = RegistryHelper.getBiomeId(entry.getKey());
+                                                                ResourceLocation biome = RegistryHelper.getBiomeId(entry.getKey(), registryAccess);
                                                                 if (biome == null) return null;
 
                                                                 Temperature.Units units = entry.getValue().getC();
@@ -261,13 +258,13 @@ public class ConfigSettings
                                                             .filter(Objects::nonNull)
                                                             .collect(Collectors.toList())));
 
-        BIOME_OFFSETS = addSyncedSetting("biome_offsets", () -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().getBiomeTempOffsets(), false),
-        encoder -> ConfigHelper.serializeBiomeTemps(encoder, "BiomeOffsets"),
-        decoder -> ConfigHelper.deserializeBiomeTemps(decoder, "BiomeOffsets"),
-        saver -> WorldSettingsConfig.getInstance().setBiomeTempOffsets(saver.entrySet().stream()
+        BIOME_OFFSETS = addSyncedSettingWithRegistries("biome_offsets", (registryAccess) -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().getBiomeTempOffsets(), false, registryAccess),
+        (encoder, registryAccess) -> ConfigHelper.serializeBiomeTemps(encoder, "BiomeOffsets", registryAccess),
+        (decoder, registryAccess) -> ConfigHelper.deserializeBiomeTemps(decoder, "BiomeOffsets", registryAccess),
+        (saver, registryAccess) -> WorldSettingsConfig.getInstance().setBiomeTempOffsets(saver.entrySet().stream()
                                                             .map(entry ->
                                                             {
-                                                                ResourceLocation biome = RegistryHelper.getBiomeId(entry.getKey());
+                                                                ResourceLocation biome = RegistryHelper.getBiomeId(entry.getKey(), registryAccess);
                                                                 if (biome == null) return null;
 
                                                                 Temperature.Units units = entry.getValue().getC();
@@ -279,13 +276,13 @@ public class ConfigSettings
                                                             .filter(Objects::nonNull)
                                                             .collect(Collectors.toList())));
 
-        DIMENSION_TEMPS = addSyncedSetting("dimension_temps", () -> ConfigHelper.getDimensionsWithValues(WorldSettingsConfig.getInstance().getDimensionTemperatures(), true),
-        encoder -> ConfigHelper.serializeDimensionTemps(encoder, "DimensionTemps"),
-        decoder -> ConfigHelper.deserializeDimensionTemps(decoder, "DimensionTemps"),
-        saver -> WorldSettingsConfig.getInstance().setDimensionTemperatures(saver.entrySet().stream()
+        DIMENSION_TEMPS = addSyncedSettingWithRegistries("dimension_temps", (registryAccess) -> ConfigHelper.getDimensionsWithValues(WorldSettingsConfig.getInstance().getDimensionTemperatures(), true, registryAccess),
+        (encoder, registryAccess) -> ConfigHelper.serializeDimensionTemps(encoder, "DimensionTemps", registryAccess),
+        (decoder, registryAccess) -> ConfigHelper.deserializeDimensionTemps(decoder, "DimensionTemps", registryAccess),
+        (saver, registryAccess) -> WorldSettingsConfig.getInstance().setDimensionTemperatures(saver.entrySet().stream()
                                                      .map(entry ->
                                                      {
-                                                         ResourceLocation dim = RegistryHelper.getDimensionId(entry.getKey());
+                                                         ResourceLocation dim = RegistryHelper.getDimensionId(entry.getKey(), registryAccess);
                                                          if (dim == null) return null;
 
                                                          Temperature.Units units = entry.getValue().getSecond();
@@ -296,13 +293,13 @@ public class ConfigSettings
                                                      .filter(Objects::nonNull)
                                                      .collect(Collectors.toList())));
 
-        DIMENSION_OFFSETS = addSyncedSetting("dimension_offsets", () -> ConfigHelper.getDimensionsWithValues(WorldSettingsConfig.getInstance().getDimensionTempOffsets(), false),
-        encoder -> ConfigHelper.serializeDimensionTemps(encoder, "DimensionOffsets"),
-        decoder -> ConfigHelper.deserializeDimensionTemps(decoder, "DimensionOffsets"),
-        saver -> WorldSettingsConfig.getInstance().setDimensionTempOffsets(saver.entrySet().stream()
+        DIMENSION_OFFSETS = addSyncedSettingWithRegistries("dimension_offsets", (registryAccess) -> ConfigHelper.getDimensionsWithValues(WorldSettingsConfig.getInstance().getDimensionTempOffsets(), false, registryAccess),
+        (encoder, registryAccess) -> ConfigHelper.serializeDimensionTemps(encoder, "DimensionOffsets", registryAccess),
+        (decoder, registryAccess) -> ConfigHelper.deserializeDimensionTemps(decoder, "DimensionOffsets", registryAccess),
+        (saver, registryAccess) -> WorldSettingsConfig.getInstance().setDimensionTempOffsets(saver.entrySet().stream()
                                                      .map(entry ->
                                                      {
-                                                         ResourceLocation dim = RegistryHelper.getDimensionId(entry.getKey());
+                                                         ResourceLocation dim = RegistryHelper.getDimensionId(entry.getKey(), registryAccess);
                                                          if (dim == null) return null;
 
                                                          Temperature.Units units = entry.getValue().getSecond();
@@ -313,13 +310,13 @@ public class ConfigSettings
                                                      .filter(Objects::nonNull)
                                                      .collect(Collectors.toList())));
 
-        STRUCTURE_TEMPS = addSyncedSetting("structure_temperatures", () -> ConfigHelper.getStructuresWithValues(WorldSettingsConfig.getInstance().getStructureTemperatures(), true),
-        encoder -> ConfigHelper.serializeStructureTemps(encoder, "StructureTemperatures"),
-        decoder -> ConfigHelper.deserializeStructureTemps(decoder, "StructureTemperatures"),
-        saver -> WorldSettingsConfig.getInstance().setStructureTemperatures(saver.entrySet().stream()
+        STRUCTURE_TEMPS = addSyncedSettingWithRegistries("structure_temperatures", (registryAccess) -> ConfigHelper.getStructuresWithValues(WorldSettingsConfig.getInstance().getStructureTemperatures(), true, registryAccess),
+        (encoder, registryAccess) -> ConfigHelper.serializeStructureTemps(encoder, "StructureTemperatures", registryAccess),
+        (decoder, registryAccess) -> ConfigHelper.deserializeStructureTemps(decoder, "StructureTemperatures", registryAccess),
+        (saver, registryAccess) -> WorldSettingsConfig.getInstance().setStructureTemperatures(saver.entrySet().stream()
                                                      .map(entry ->
                                                      {
-                                                         ResourceLocation struct = RegistryHelper.getStructureId(entry.getKey());
+                                                         ResourceLocation struct = RegistryHelper.getStructureId(entry.getKey(), registryAccess);
                                                          if (struct == null) return null;
 
                                                          Temperature.Units units = entry.getValue().getSecond();
@@ -330,13 +327,13 @@ public class ConfigSettings
                                                      .filter(Objects::nonNull)
                                                      .collect(Collectors.toList())));
 
-        STRUCTURE_OFFSETS = addSyncedSetting("structure_offsets", () -> ConfigHelper.getStructuresWithValues(WorldSettingsConfig.getInstance().getStructureTempOffsets(), false),
-        encoder -> ConfigHelper.serializeStructureTemps(encoder, "StructureOffsets"),
-        decoder -> ConfigHelper.deserializeStructureTemps(decoder, "StructureOffsets"),
-        saver -> WorldSettingsConfig.getInstance().setStructureTempOffsets(saver.entrySet().stream()
+        STRUCTURE_OFFSETS = addSyncedSettingWithRegistries("structure_offsets", (registryAccess) -> ConfigHelper.getStructuresWithValues(WorldSettingsConfig.getInstance().getStructureTempOffsets(), false, registryAccess),
+        (encoder, registryAccess) -> ConfigHelper.serializeStructureTemps(encoder, "StructureOffsets", registryAccess),
+        (decoder, registryAccess) -> ConfigHelper.deserializeStructureTemps(decoder, "StructureOffsets", registryAccess),
+        (saver, registryAccess) -> WorldSettingsConfig.getInstance().setStructureTempOffsets(saver.entrySet().stream()
                                                      .map(entry ->
                                                      {
-                                                         ResourceLocation struct = RegistryHelper.getStructureId(entry.getKey());
+                                                         ResourceLocation struct = RegistryHelper.getStructureId(entry.getKey(), registryAccess);
                                                          if (struct == null) return null;
 
                                                          Temperature.Units units = entry.getValue().getSecond();
@@ -348,9 +345,9 @@ public class ConfigSettings
                                                      .collect(Collectors.toList())));
 
         CAVE_INSULATION = addSyncedSetting("cave_insulation", () -> WorldSettingsConfig.getInstance().getCaveInsulation(),
-                                           encoder -> ConfigHelper.serializeNbtDouble(encoder, "CaveInsulation"),
-                                           decoder -> decoder.getDouble("CaveInsulation"),
-                                           saver -> WorldSettingsConfig.getInstance().setCaveInsulation(saver));
+                                           (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "CaveInsulation"),
+                                           (decoder) -> decoder.getDouble("CaveInsulation"),
+                                           (saver) -> WorldSettingsConfig.getInstance().setCaveInsulation(saver));
 
         BiFunction<Item, List<?>, PredicateItem> fuelMapper = (item, args) ->
         {
@@ -371,9 +368,9 @@ public class ConfigSettings
         HEARTH_FUEL = addSetting("hearth_fuel_items", () -> ConfigHelper.readItemMap(ItemSettingsConfig.getInstance().getHearthFuelItems(), fuelMapper));
 
         SOULSPRING_LAMP_FUEL = addSyncedSetting("lamp_fuel_items", () -> ConfigHelper.readItemMap(ItemSettingsConfig.getInstance().getSoulLampFuelItems(), fuelMapper),
-        encoder -> ConfigHelper.serializeItemMap(encoder, "LampFuelItems", fuel -> fuel.serialize()),
-        decoder -> ConfigHelper.deserializeItemMap(decoder, "LampFuelItems", nbt -> PredicateItem.deserialize(nbt)),
-        saver -> ConfigHelper.writeItemMap(saver,
+        (encoder) -> ConfigHelper.serializeItemMap(encoder, "LampFuelItems", fuel -> fuel.serialize()),
+        (decoder) -> ConfigHelper.deserializeItemMap(decoder, "LampFuelItems", nbt -> PredicateItem.deserialize(nbt)),
+        (saver) -> ConfigHelper.writeItemMap(saver,
                                            list -> ItemSettingsConfig.getInstance().setSoulLampFuelItems(list),
                                            fuel -> List.of(fuel.value(), fuel.data().nbt().tag().toString())));
 
@@ -384,22 +381,22 @@ public class ConfigSettings
                                                                           .collect(ArrayList::new, List::add, List::addAll));
 
         INSULATION_ITEMS = addSyncedSetting("insulation_items", () -> ConfigHelper.readItemInsulations(ItemSettingsConfig.getInstance().getInsulationItems(), Insulation.Slot.ITEM),
-        encoder -> ConfigHelper.serializeItemInsulations(encoder, "InsulationItems"),
-        decoder -> ConfigHelper.deserializeItemInsulations(decoder, "InsulationItems"),
-        saver -> ConfigHelper.writeItemInsulations(saver, list -> ItemSettingsConfig.getInstance().setInsulationItems(list)));
+        (encoder) -> ConfigHelper.serializeItemInsulations(encoder, "InsulationItems"),
+        (decoder) -> ConfigHelper.deserializeItemInsulations(decoder, "InsulationItems"),
+        (saver) -> ConfigHelper.writeItemInsulations(saver, list -> ItemSettingsConfig.getInstance().setInsulationItems(list)));
 
         INSULATING_ARMORS = addSyncedSetting("insulating_armors", () -> ConfigHelper.readItemInsulations(ItemSettingsConfig.getInstance().getInsulatingArmorItems(), Insulation.Slot.ARMOR),
-        encoder -> ConfigHelper.serializeItemInsulations(encoder, "InsulatingArmors"),
-        decoder -> ConfigHelper.deserializeItemInsulations(decoder, "InsulatingArmors"),
-        saver -> ConfigHelper.writeItemInsulations(saver, list -> ItemSettingsConfig.getInstance().setInsulatingArmorItems(list)));
+        (encoder) -> ConfigHelper.serializeItemInsulations(encoder, "InsulatingArmors"),
+        (decoder) -> ConfigHelper.deserializeItemInsulations(decoder, "InsulatingArmors"),
+        (saver) -> ConfigHelper.writeItemInsulations(saver, list -> ItemSettingsConfig.getInstance().setInsulatingArmorItems(list)));
 
         INSULATING_CURIOS = addSyncedSetting("insulating_curios", () ->
         {   if (!CompatManager.isCuriosLoaded()) return new HashMap<>();
             return ConfigHelper.readItemInsulations(ItemSettingsConfig.getInstance().getInsulatingCurios(), Insulation.Slot.CURIO);
         },
-        encoder -> ConfigHelper.serializeItemInsulations(encoder, "InsulatingCurios"),
-        decoder -> ConfigHelper.deserializeItemInsulations(decoder, "InsulatingCurios"),
-        saver ->
+        (encoder) -> ConfigHelper.serializeItemInsulations(encoder, "InsulatingCurios"),
+        (decoder) -> ConfigHelper.deserializeItemInsulations(decoder, "InsulatingCurios"),
+        (saver) ->
         {   if (CompatManager.isCuriosLoaded())
             {   ConfigHelper.writeItemInsulations(saver, list -> ItemSettingsConfig.getInstance().setInsulatingCurios(list));
             }
@@ -410,7 +407,7 @@ public class ConfigSettings
             List<? extends Number> list = ItemSettingsConfig.getInstance().getArmorInsulationSlots();
             return new Integer[] { list.get(0).intValue(), list.get(1).intValue(), list.get(2).intValue(), list.get(3).intValue() };
         },
-        encoder ->
+        (encoder) ->
         {   CompoundTag tag = new CompoundTag();
             tag.putInt("Head", encoder[0]);
             tag.putInt("Chest", encoder[1]);
@@ -418,8 +415,8 @@ public class ConfigSettings
             tag.putInt("Feet", encoder[3]);
             return tag;
         },
-        decoder -> new Integer[] { decoder.getInt("Head"), decoder.getInt("Chest"), decoder.getInt("Legs"), decoder.getInt("Feet") },
-        saver -> ItemSettingsConfig.getInstance().setArmorInsulationSlots(Arrays.asList(saver[0], saver[1], saver[2], saver[3])));
+        (decoder) -> new Integer[] { decoder.getInt("Head"), decoder.getInt("Chest"), decoder.getInt("Legs"), decoder.getInt("Feet") },
+        (saver) -> ItemSettingsConfig.getInstance().setArmorInsulationSlots(Arrays.asList(saver[0], saver[1], saver[2], saver[3])));
 
         INSULATION_BLACKLIST = addSetting("insulation_blacklist", () -> ItemSettingsConfig.getInstance().getInsulationBlacklist()
                                                                         .stream()
@@ -447,39 +444,37 @@ public class ConfigSettings
             }
             return new PredicateItem(value, itemRequirement, EntityRequirement.NONE, tag);
         }),
-        encoder -> ConfigHelper.serializeItemMap(encoder, "FoodTemperatures", food -> food.serialize()),
-        decoder -> ConfigHelper.deserializeItemMap(decoder, "FoodTemperatures", nbt -> PredicateItem.deserialize(nbt)),
-        saver -> ConfigHelper.writeItemMap(saver,
+        (encoder) -> ConfigHelper.serializeItemMap(encoder, "FoodTemperatures", food -> food.serialize()),
+        (decoder) -> ConfigHelper.deserializeItemMap(decoder, "FoodTemperatures", nbt -> PredicateItem.deserialize(nbt)),
+        (saver) -> ConfigHelper.writeItemMap(saver,
                                            list -> ItemSettingsConfig.getInstance().setFoodTemperatures(list),
                                            food -> List.of(food.value(), food.data().nbt().tag().toString())));
 
         WATERSKIN_STRENGTH = addSetting("waterskin_strength", () -> ItemSettingsConfig.getInstance().getWaterskinStrength());
 
-        LAMP_DIMENSIONS = addSetting("valid_lamp_dimensions", () -> new ArrayList<>(ItemSettingsConfig.getInstance().getValidSoulLampDimensions()
+        LAMP_DIMENSIONS = addSettingWithRegistries("valid_lamp_dimensions", (registryAccess) -> new ArrayList<>(ItemSettingsConfig.getInstance().getValidSoulLampDimensions()
                                                                                     .stream()
-                                                                                    .map(entry -> CSMath.getIfNotNull(WorldHelper.getServer(),
-                                                                                                                      server -> server.registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get(new ResourceLocation(entry)),
-                                                                                                                      null))
+                                                                                    .map(entry -> registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get(new ResourceLocation(entry)))
                                                                                     .collect(ArrayList::new, List::add, List::addAll)));
 
         FUR_TIMINGS = addSyncedSetting("fur_timings", () ->
         {   List<?> entry = EntitySettingsConfig.getInstance().getGoatFurStats();
             return new Triplet<>(((Number) entry.get(0)).intValue(), ((Number) entry.get(1)).intValue(), ((Number) entry.get(2)).doubleValue());
         },
-        encoder ->
+        (encoder) ->
         {   CompoundTag tag = new CompoundTag();
             tag.put("Interval", IntTag.valueOf(encoder.getA()));
             tag.put("Cooldown", IntTag.valueOf(encoder.getB()));
             tag.put("Chance", DoubleTag.valueOf(encoder.getC()));
             return tag;
         },
-        decoder ->
+        (decoder) ->
         {   int interval = decoder.getInt("Interval");
             int cooldown = decoder.getInt("Cooldown");
             double chance = decoder.getDouble("Chance");
             return new Triplet<>(interval, cooldown, chance);
         },
-        saver ->
+        (saver) ->
         {   List<Number> list = new ArrayList<>();
             list.add(saver.getA());
             list.add(saver.getB());
@@ -491,20 +486,20 @@ public class ConfigSettings
         {   List<?> entry = EntitySettingsConfig.getInstance().getChameleonShedStats();
             return new Triplet<>(((Number) entry.get(0)).intValue(), ((Number) entry.get(1)).intValue(), ((Number) entry.get(2)).doubleValue());
         },
-        encoder ->
+        (encoder) ->
         {   CompoundTag tag = new CompoundTag();
             tag.put("Interval", IntTag.valueOf(encoder.getA()));
             tag.put("Cooldown", IntTag.valueOf(encoder.getB()));
             tag.put("Chance", DoubleTag.valueOf(encoder.getC()));
             return tag;
         },
-        decoder ->
+        (decoder) ->
         {   int interval = decoder.getInt("Interval");
             int cooldown = decoder.getInt("Cooldown");
             double chance = decoder.getDouble("Chance");
             return new Triplet<>(interval, cooldown, chance);
         },
-        saver ->
+        (saver) ->
         {   List<Number> list = new ArrayList<>();
             list.add(saver.getA());
             list.add(saver.getB());
@@ -512,7 +507,7 @@ public class ConfigSettings
             EntitySettingsConfig.getInstance().setChameleonShedStats(list);
         });
 
-        ENTITY_SPAWN_BIOMES = addSetting("entity_spawn_biomes", () ->
+        ENTITY_SPAWN_BIOMES = addSettingWithRegistries("entity_spawn_biomes", (registryAccess) ->
         {
             Multimap<Biome, SpawnBiomeData> map = HashMultimap.create();
             // Function to read biomes from configs and put them in the config settings
@@ -521,13 +516,13 @@ public class ConfigSettings
                 for (List<?> entry : configBiomes)
                 {
                     String biomeId = ((String) entry.get(0));
-                    List<Biome> biomes = ConfigHelper.parseRegistryItems(Registry.BIOME_REGISTRY, biomeId);
+                    List<Biome> biomes = ConfigHelper.parseRegistryItems(Registry.BIOME_REGISTRY, registryAccess, biomeId);
                     Either<TagKey<Biome>, Biome> biomeEither;
                     if (biomeId.charAt(0) == '#')
                     {   biomeEither = Either.left(TagKey.create(Registry.BIOME_REGISTRY, new ResourceLocation(biomeId.substring(1))));
                     }
                     else
-                    {   Biome biome = RegistryHelper.getBiome(new ResourceLocation(biomeId));
+                    {   Biome biome = RegistryHelper.getBiome(new ResourceLocation(biomeId), registryAccess);
                         if (biome != null)
                             biomeEither = Either.right(biome);
                         else
@@ -575,14 +570,14 @@ public class ConfigSettings
         })));
 
         BLOCK_RANGE = addSyncedSetting("block_range", () -> WorldSettingsConfig.getInstance().getBlockRange(),
-        encoder -> ConfigHelper.serializeNbtInt(encoder, "BlockRange"),
-        decoder -> decoder.getInt("BlockRange"),
-        saver -> WorldSettingsConfig.getInstance().setBlockRange(saver));
+        (encoder) -> ConfigHelper.serializeNbtInt(encoder, "BlockRange"),
+        (decoder) -> decoder.getInt("BlockRange"),
+        (saver) -> WorldSettingsConfig.getInstance().setBlockRange(saver));
 
         COLD_SOUL_FIRE = addSetting("cold_soul_fire", () -> WorldSettingsConfig.getInstance().isSoulFireCold());
 
         HEARTH_SPREAD_WHITELIST = addSyncedSetting("hearth_spread_whitelist", () -> ConfigHelper.getBlocks(WorldSettingsConfig.getInstance().getHearthSpreadWhitelist().toArray(new String[0])),
-        encoder ->
+        (encoder) ->
         {
             CompoundTag tag = new CompoundTag();
             ListTag list = new ListTag();
@@ -592,7 +587,7 @@ public class ConfigSettings
             tag.put("HearthWhitelist", list);
             return tag;
         },
-        decoder ->
+        (decoder) ->
         {
             List<Block> list = new ArrayList<>();
             for (Tag entry : decoder.getList("HearthWhitelist", 8))
@@ -603,7 +598,7 @@ public class ConfigSettings
         saver -> WorldSettingsConfig.getInstance().setHearthSpreadWhitelist(saver.stream().map(ForgeRegistries.BLOCKS::getKey).toList()));
 
         HEARTH_SPREAD_BLACKLIST = addSyncedSetting("hearth_spread_blacklist", () -> ConfigHelper.getBlocks(WorldSettingsConfig.getInstance().getHearthSpreadBlacklist().toArray(new String[0])),
-        encoder ->
+        (encoder) ->
         {
             CompoundTag tag = new CompoundTag();
             ListTag list = new ListTag();
@@ -613,7 +608,7 @@ public class ConfigSettings
             tag.put("HearthBlacklist", list);
             return tag;
         },
-        decoder ->
+        (decoder) ->
         {
             List<Block> list = new ArrayList<>();
             for (Tag entry : decoder.getList("HearthBlacklist", 8))
@@ -730,14 +725,26 @@ public class ConfigSettings
         }
     }
 
+    public static <T> DynamicHolder<T> addSetting(String id, Supplier<T> supplier)
+    {   DynamicHolder<T> loader = DynamicHolder.create(supplier);
+        CONFIG_SETTINGS.put(id, loader);
+        return loader;
+    }
+
+    public static <T> DynamicHolder<T> addSettingWithRegistries(String id, DynamicHolder.Getter<T> supplier)
+    {   DynamicHolder<T> loader = DynamicHolder.createWithRegistries(supplier);
+        CONFIG_SETTINGS.put(id, loader);
+        return loader;
+    }
+
     public static <T> DynamicHolder<T> addSyncedSetting(String id, Supplier<T> supplier, Function<T, CompoundTag> writer, Function<CompoundTag, T> reader, Consumer<T> saver)
     {   DynamicHolder<T> loader = DynamicHolder.createSynced(supplier, writer, reader, saver);
         CONFIG_SETTINGS.put(id, loader);
         return loader;
     }
 
-    public static <T> DynamicHolder<T> addSetting(String id, Supplier<T> supplier)
-    {   DynamicHolder<T> loader = DynamicHolder.create(supplier);
+    public static <T> DynamicHolder<T> addSyncedSettingWithRegistries(String id, DynamicHolder.Getter<T> supplier, DynamicHolder.Writer<T> writer, DynamicHolder.Reader<T> reader, DynamicHolder.Saver<T> saver)
+    {   DynamicHolder<T> loader = DynamicHolder.createSyncedWithRegistries(supplier, writer, reader, saver);
         CONFIG_SETTINGS.put(id, loader);
         return loader;
     }
@@ -746,39 +753,40 @@ public class ConfigSettings
     {
         return FMLEnvironment.dist == Dist.CLIENT
              ? addSetting(id, supplier)
-             : new DynamicHolder<>(() -> null);
+             : DynamicHolder.create(() -> null);
     }
 
-    public static Map<String, CompoundTag> encode()
+    public static Map<String, CompoundTag> encode(RegistryAccess registryAccess)
     {
         Map<String, CompoundTag> map = new HashMap<>();
         CONFIG_SETTINGS.forEach((key, value) ->
         {   if (value.isSynced())
-            {   map.put(key, value.encode());
+            {   map.put(key, value.encode(registryAccess));
             }
         });
         return map;
     }
 
-    public static void decode(String key, CompoundTag tag)
+    public static void decode(String key, CompoundTag tag, RegistryAccess registryAccess)
     {
         CONFIG_SETTINGS.computeIfPresent(key, (k, value) ->
-        {   value.decode(tag);
+        {   value.decode(tag, registryAccess);
             return value;
         });
     }
 
-    public static void saveValues()
+    public static void saveValues(RegistryAccess registryAccess)
     {
         CONFIG_SETTINGS.values().forEach(value ->
         {   if (value.isSynced())
-            {   value.save();
+            {   value.save(registryAccess);
             }
         });
     }
 
     public static void load(RegistryAccess registryAccess)
-    {   CONFIG_SETTINGS.values().forEach(DynamicHolder::load);
+    {
+        CONFIG_SETTINGS.values().forEach(DynamicHolder::load);
         if (registryAccess != null)
         {   ConfigRegistryHandler.collectConfigRegistries(registryAccess);
         }

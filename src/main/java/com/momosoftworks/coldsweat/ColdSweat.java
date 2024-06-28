@@ -75,7 +75,8 @@ public class ColdSweat
         EntitySettingsConfig.setup();
 
         // Setup JSON data-driven handlers
-        bus.addListener((NewRegistryEvent event) -> {
+        bus.addListener((NewRegistryEvent event) ->
+        {
             event.create(new RegistryBuilder<InsulatorData>().setType(InsulatorData.class).setName(ModRegistries.INSULATOR_DATA.location()).dataPackRegistry(InsulatorData.CODEC));
             event.create(new RegistryBuilder<FuelData>().setType(FuelData.class).setName(ModRegistries.FUEL_DATA.location()).dataPackRegistry(FuelData.CODEC));
             event.create(new RegistryBuilder<FoodData>().setType(FoodData.class).setName(ModRegistries.FOOD_DATA.location()).dataPackRegistry(FoodData.CODEC));
@@ -99,9 +100,6 @@ public class ColdSweat
             CriteriaTriggers.register(ModAdvancementTriggers.SOUL_LAMP_FUELLED);
             CriteriaTriggers.register(ModAdvancementTriggers.BLOCK_AFFECTS_TEMP);
             CriteriaTriggers.register(ModAdvancementTriggers.ARMOR_INSULATED);
-
-            // Load configs to memory
-            ConfigSettings.load(null);
 
             // Register insulation items tab
             InsulationItemsGroup.INSULATION_ITEMS.register();

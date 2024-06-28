@@ -1,14 +1,19 @@
 package com.momosoftworks.coldsweat.client.gui.config;
 
+import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.gui.config.pages.ConfigPageDifficulty;
 import com.momosoftworks.coldsweat.client.gui.config.pages.ConfigPageOne;
 import com.momosoftworks.coldsweat.client.gui.config.pages.ConfigPageThree;
 import com.momosoftworks.coldsweat.client.gui.config.pages.ConfigPageTwo;
+import com.momosoftworks.coldsweat.config.spec.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.core.network.message.SyncConfigSettingsMessage;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.core.network.message.SyncPreferredUnitsMessage;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.RegistryAccess;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -51,13 +56,21 @@ public class ConfigScreen
 
     public static void saveConfig()
     {
+        RegistryAccess registryAccess = RegistryHelper.getRegistryAccess();
         if (Minecraft.getInstance().player != null)
         {
             if (!MC.isLocalServer())
-                ColdSweatPacketHandler.INSTANCE.sendToServer(new SyncConfigSettingsMessage());
-            else ConfigSettings.saveValues();
+            {   ColdSweatPacketHandler.INSTANCE.sendToServer(new SyncConfigSettingsMessage(registryAccess));
+            }
+            else
+            {   ConfigSettings.saveValues(registryAccess);
+            }
+            ColdSweatPacketHandler.INSTANCE.sendToServer(new SyncPreferredUnitsMessage(ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F));
         }
-        else ConfigSettings.saveValues();
+        else
+        {   ConfigSettings.saveValues(registryAccess);
+        }
+        ClientSettingsConfig.getInstance().writeAndSave();
     }
 
     @SubscribeEvent

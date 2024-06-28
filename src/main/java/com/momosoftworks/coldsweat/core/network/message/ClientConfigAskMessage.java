@@ -39,7 +39,7 @@ public class ClientConfigAskMessage
             if (context.getDirection().getReceptionSide().isServer()
             && context.getSender() != null)
             {
-                ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(context::getSender), new SyncConfigSettingsMessage(message.openerUUID));
+                ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(context::getSender), new SyncConfigSettingsMessage(message.openerUUID, context.getSender().level.registryAccess()));
             }
         });
         context.setPacketHandled(true);
