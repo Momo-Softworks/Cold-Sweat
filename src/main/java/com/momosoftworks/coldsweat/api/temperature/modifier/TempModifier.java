@@ -7,7 +7,7 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.core.init.TempModifierInit;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.common.MinecraftForge;
+import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.function.Function;
 
@@ -54,7 +54,7 @@ public abstract class TempModifier
     public final double update(double temp, LivingEntity entity, Temperature.Trait trait)
     {
         TempModifierEvent.Calculate.Override override = new TempModifierEvent.Calculate.Override(this, entity, temp, trait);
-        MinecraftForge.EVENT_BUS.post(override);
+        NeoForge.EVENT_BUS.post(override);
         if (override.isCanceled())
         {
             this.function = t -> override.getTemperature();
@@ -62,7 +62,7 @@ public abstract class TempModifier
         }
 
         TempModifierEvent.Calculate.Modify modify = new TempModifierEvent.Calculate.Modify(this, entity, override.getTemperature(), this.calculate(entity, trait), trait);
-        MinecraftForge.EVENT_BUS.post(modify);
+        NeoForge.EVENT_BUS.post(modify);
 
         this.function = modify.getFunction();
 

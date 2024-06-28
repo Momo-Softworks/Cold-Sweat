@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.common.block;
 
 
-import com.momosoftworks.coldsweat.util.registries.ModItems;
+import com.momosoftworks.coldsweat.core.init.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.Item;
@@ -12,7 +12,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootParams;
 
 import java.util.Collections;
@@ -34,11 +33,10 @@ public class MinecartInsulationBlock extends Block
     }
 
     public Item asItem()
-    {
-        return ModItems.MINECART_INSULATION;
+    {   return ModItems.MINECART_INSULATION.value();
     }
 
-    public MinecartInsulationBlock(Block.Properties properties)
+    public MinecartInsulationBlock(Properties properties)
     {
         super(properties);
         this.registerDefaultState(this.defaultBlockState());

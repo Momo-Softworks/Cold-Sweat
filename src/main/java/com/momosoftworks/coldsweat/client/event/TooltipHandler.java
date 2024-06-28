@@ -10,20 +10,27 @@ import com.momosoftworks.coldsweat.client.gui.tooltip.ClientSoulspringTooltip;
 import com.momosoftworks.coldsweat.client.gui.tooltip.InsulationTooltip;
 import com.momosoftworks.coldsweat.client.gui.tooltip.SoulspringTooltip;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
+import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
 import com.momosoftworks.coldsweat.common.item.SoulspringLampItem;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.config.type.PredicateItem;
+import com.momosoftworks.coldsweat.core.init.ModAttributes;
+import com.momosoftworks.coldsweat.core.init.ModItemComponents;
+import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.registries.ModAttributes;
-import com.momosoftworks.coldsweat.util.registries.ModItems;
+import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
@@ -38,21 +45,20 @@ import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderTooltipEvent;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RenderTooltipEvent;
+import net.neoforged.neoforge.client.event.ScreenEvent;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-@Mod.EventBusSubscriber(Dist.CLIENT)
+@EventBusSubscriber(Dist.CLIENT)
 public class TooltipHandler
 {
     public static final Style COLD = Style.EMPTY.withColor(3767039);
@@ -88,7 +94,7 @@ public class TooltipHandler
         {
             for (--tooltipEndIndex; tooltipEndIndex > 0; tooltipEndIndex--)
             {
-                if (tooltip.get(tooltipEndIndex).left().map(text -> text.getString().equals(ForgeRegistries.ITEMS.getKey(stack.getItem()).toString())).orElse(false))
+                if (tooltip.get(tooltipEndIndex).left().map(text -> text.getString().equals(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString())).orElse(false))
                 {   break;
                 }
             }
@@ -104,31 +110,30 @@ public class TooltipHandler
             for (AttributeModifier.Operation operation : AttributeModifier.Operation.values())
             {
                 double value = 0;
-                for (AttributeModifier modifier : modifiers.stream().filter(mod -> mod.getOperation() == operation).toList())
-                {   value += modifier.getAmount();
+                for (AttributeModifier modifier : modifiers.stream().filter(mod -> mod.operation() == operation).toList())
+                {   value += modifier.amount();
                 }
                 if (value != 0)
-                {   tooltip.add(getFormattedAttributeModifier(attribute, value, operation));
+                {   tooltip.add(getFormattedAttributeModifier(Holder.direct(attribute), value, operation));
                 }
             }
         });
     }
 
-    public static MutableComponent getFormattedAttributeModifier(Attribute attribute, double amount, AttributeModifier.Operation operation)
+    public static MutableComponent getFormattedAttributeModifier(Holder<Attribute> attribute, double value, AttributeModifier.Operation operation)
     {
         if (attribute == null) return Component.empty();
-        double value = amount;
-        String attributeName = attribute.getDescriptionId().replace("attribute.", "");
+        String attributeName = attribute.value().getDescriptionId().replace("attribute.", "");
 
-        if (operation == AttributeModifier.Operation.ADDITION
-        && (attribute == ModAttributes.FREEZING_POINT
-        || attribute == ModAttributes.BURNING_POINT
-        || attribute == ModAttributes.WORLD_TEMPERATURE
-        || attribute == ModAttributes.BASE_BODY_TEMPERATURE))
+        if (operation == AttributeModifier.Operation.ADD_VALUE
+        && (attribute == ModAttributes.FREEZING_POINT.value()
+        || attribute == ModAttributes.BURNING_POINT.value()
+        || attribute == ModAttributes.WORLD_TEMPERATURE.value()
+        || attribute == ModAttributes.BASE_BODY_TEMPERATURE.value()))
         {
             value = Temperature.convert(value, Temperature.Units.MC, ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F, false);
         }
-        String operationString = operation == AttributeModifier.Operation.ADDITION ? "add" : "multiply";
+        String operationString = operation == AttributeModifier.Operation.ADD_VALUE ? "add" : "multiply";
         ChatFormatting color;
         String sign;
         if (value >= 0)
@@ -141,11 +146,11 @@ public class TooltipHandler
             sign = "";
         }
         String percent;
-        if (operation != AttributeModifier.Operation.ADDITION
-        || attribute == ModAttributes.HEAT_RESISTANCE
-        || attribute == ModAttributes.COLD_RESISTANCE
-        || attribute == ModAttributes.HEAT_DAMPENING
-        || attribute == ModAttributes.COLD_DAMPENING)
+        if (operation != AttributeModifier.Operation.ADD_VALUE
+        || attribute == ModAttributes.HEAT_RESISTANCE.value()
+        || attribute == ModAttributes.COLD_RESISTANCE.value()
+        || attribute == ModAttributes.HEAT_DAMPENING.value()
+        || attribute == ModAttributes.COLD_DAMPENING.value())
         {   percent = "%";
             value *= 100;
         }
@@ -179,7 +184,7 @@ public class TooltipHandler
         {   if (!Screen.hasShiftDown())
             {   elements.add(tooltipStartIndex, Either.left(EXPAND_TOOLTIP));
             }
-            elements.add(tooltipStartIndex, Either.right(new SoulspringTooltip(stack.getOrCreateTag().getDouble("Fuel"))));
+            elements.add(tooltipStartIndex, Either.right(new SoulspringTooltip(stack.getOrDefault(ModItemComponents.SOULSPRING_LAMP_FUEL, 0d))));
         }
         // If the item is edible
         else if (stack.getUseAnimation() == UseAnim.DRINK || stack.getUseAnimation() == UseAnim.EAT)
@@ -194,7 +199,7 @@ public class TooltipHandler
                                                   Component.translatable("tooltip.cold_sweat.temperature_effect", CSMath.formatDoubleOrInt(temp.value())).withStyle(COLD);
                 // Add a duration to the tooltip if it exists
                 if (temp.extraData().contains("duration", Tag.TAG_INT))
-                {   consumeEffects.append(" (" + StringUtil.formatTickDuration(temp.extraData().getInt("duration")) + ")");
+                {   consumeEffects.append(" (" + StringUtil.formatTickDuration(temp.extraData().getInt("duration"), 20) + ")");
                 }
                 // Check if Diet has their own tooltip already
                 int dietTooltipSectionIndex = CSMath.getIndexOf(elements, line -> line.left().map(text -> text.getString().equalsIgnoreCase(Component.translatable("tooltip.diet.eaten").getString())).orElse(false));
@@ -231,22 +236,20 @@ public class TooltipHandler
         {
             List<Insulation> insulation = new ArrayList<>();
 
-            ItemInsulationManager.getInsulationCap(stack).ifPresent(cap ->
-            {
-                cap.deserializeNBT(stack.getOrCreateTag());
+            IInsulatableCap cap = ItemInsulationManager.getInsulationCap(stack);
+            cap.deserialize(stack.getOrDefault(ModItemComponents.INSULATION_DATA, new CompoundTag()));
 
-                // Create the list of insulation pairs from NBT
-                insulation.addAll(cap.getInsulation().stream()
-                                  // Filter out insulation that doesn't match the predicate
-                                  .filter(pair ->
-                                  {
-                                      ItemStack stack1 = pair.getFirst();
-                                      return CSMath.getIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(stack1.getItem()),
-                                                                 insulator -> insulator.test(player, stack),
-                                                                 true);
-                                  })
-                                  .map(Pair::getSecond).flatMap(List::stream).toList());
-            });
+            // Create the list of insulation pairs from NBT
+            insulation.addAll(cap.getInsulation().stream()
+                              // Filter out insulation that doesn't match the predicate
+                              .filter(pair ->
+                              {
+                                  ItemStack stack1 = pair.getFirst();
+                                  return CSMath.getIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(stack1.getItem()),
+                                                             insulator -> insulator.test(player, stack),
+                                                             true);
+                              })
+                              .map(Pair::getSecond).flatMap(List::stream).toList());
 
             // If the armor has intrinsic insulation due to configs, add it to the list
             if (armorInsulator != null)
@@ -269,9 +272,9 @@ public class TooltipHandler
     {
         if (event.getScreen() instanceof AbstractContainerScreen<?> screen)
         {
-            if (screen.getSlotUnderMouse() != null && screen.getSlotUnderMouse().getItem().getItem() == ModItems.SOULSPRING_LAMP)
+            if (screen.getSlotUnderMouse() != null && screen.getSlotUnderMouse().getItem().getItem() == ModItems.SOULSPRING_LAMP.value())
             {
-                double fuel = screen.getSlotUnderMouse().getItem().getOrCreateTag().getDouble("Fuel");
+                double fuel = screen.getSlotUnderMouse().getItem().getOrDefault(ModItemComponents.SOULSPRING_LAMP_FUEL, 0d);
                 ItemStack carriedStack = screen.getMenu().getCarried();
 
                 PredicateItem itemFuel;
@@ -311,10 +314,7 @@ public class TooltipHandler
     }
 
     @SubscribeEvent
-    public static void tickSoulLampInsertTooltip(TickEvent.ClientTickEvent event)
-    {
-        if (event.phase == TickEvent.Phase.END)
-        {   FUEL_FADE_TIMER++;
-        }
+    public static void tickSoulLampInsertTooltip(ClientTickEvent.Post event)
+    {   FUEL_FADE_TIMER++;
     }
 }

@@ -1,8 +1,8 @@
 package com.momosoftworks.coldsweat.common.block;
 
 import com.momosoftworks.coldsweat.common.blockentity.ThermolithBlockEntity;
+import com.momosoftworks.coldsweat.core.init.ModBlockEntities;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.registries.ModBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -106,7 +106,7 @@ public class ThermolithBlock extends Block implements EntityBlock
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return type == ModBlockEntities.THERMOLITH ? ThermolithBlockEntity::tick : null;
+        return type == ModBlockEntities.THERMOLITH.value() ? ThermolithBlockEntity::tick : null;
     }
 
     @Override

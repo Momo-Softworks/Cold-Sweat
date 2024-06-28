@@ -18,7 +18,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
 
 public class SewingTableBlock extends Block implements MenuProvider
@@ -36,7 +35,7 @@ public class SewingTableBlock extends Block implements MenuProvider
         return new Item.Properties();
     }
 
-    public SewingTableBlock(Block.Properties properties)
+    public SewingTableBlock(Properties properties)
     {
         super(properties);
         this.registerDefaultState(this.defaultBlockState());
@@ -44,13 +43,13 @@ public class SewingTableBlock extends Block implements MenuProvider
 
     @SuppressWarnings("deprecation")
     @Override
-    public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
+    public InteractionResult useWithoutItem(BlockState state, Level worldIn, BlockPos pos, Player player, BlockHitResult rayTraceResult)
     {
         if (worldIn.isClientSide)
         {   return InteractionResult.SUCCESS;
         }
         else
-        {   NetworkHooks.openScreen((ServerPlayer)player, this, pos);
+        {   player.openMenu(this, pos);
             return InteractionResult.CONSUME;
         }
     }

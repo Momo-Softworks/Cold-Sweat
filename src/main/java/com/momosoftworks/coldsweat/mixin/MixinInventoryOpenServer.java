@@ -6,8 +6,8 @@ import net.minecraft.network.protocol.game.ServerboundPlayerCommandPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.PlayerContainerEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.player.PlayerContainerEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -30,7 +30,7 @@ class MixinInventoryOpenServer
         if (packet.getAction() == ServerboundPlayerCommandPacket.Action.OPEN_INVENTORY
         && !(player.getVehicle() instanceof AbstractHorse))
         {
-            MinecraftForge.EVENT_BUS.post(new PlayerContainerEvent.Open(player, player.containerMenu));
+            NeoForge.EVENT_BUS.post(new PlayerContainerEvent.Open(player, player.containerMenu));
         }
     }
 }

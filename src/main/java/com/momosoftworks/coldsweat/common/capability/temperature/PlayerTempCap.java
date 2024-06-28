@@ -2,8 +2,8 @@ package com.momosoftworks.coldsweat.common.capability.temperature;
 
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
-import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
@@ -45,9 +45,9 @@ public class PlayerTempCap extends AbstractTempCap
     {
         showWorldTemp = !ConfigSettings.REQUIRE_THERMOMETER.get()
                 || player.isCreative()
-                || player.getInventory().items.stream().limit(9).anyMatch(stack -> stack.getItem() == ModItems.THERMOMETER)
-                || player.getOffhandItem().getItem() == ModItems.THERMOMETER
-                || CompatManager.hasCurio(player, ModItems.THERMOMETER);
+                || player.getInventory().items.stream().limit(9).anyMatch(stack -> stack.getItem() == ModItems.THERMOMETER.value())
+                || player.getOffhandItem().getItem() == ModItems.THERMOMETER.value()
+                || CompatManager.hasCurio(player, ModItems.THERMOMETER.value());
         showBodyTemp = !player.isCreative() && !player.isSpectator();
     }
 }

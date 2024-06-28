@@ -1,98 +1,13 @@
-buildscript {
-    repositories {
-        // These repositories are only for Gradle plugins, put any other repositories in the repository block further below
-        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
-    }
-}
-
 plugins {
-    id 'maven-publish'
     id 'java-library'
-    id 'signing'
+    id 'eclipse'
     id 'idea'
-    id 'net.neoforged.gradle' version '[6.0.13, 6.2)'
-    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
+    id 'maven-publish'
+    id 'net.neoforged.gradle.userdev' version '7.0.145'
 }
 
-apply plugin: 'net.neoforged.gradle'
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
-apply plugin: 'org.spongepowered.mixin'
-
-group = group_id
 version = mod_version
-
-java {
-    archivesBaseName = mod_name
-    toolchain.languageVersion = JavaLanguageVersion.of(17)
-    //withJavadocJar()
-    withSourcesJar()
-}
-
-minecraft {
-    mappings channel: 'parchment', version: '2023.09.03-1.20.1'
-    accessTransformer = file("src/main/resources/META-INF/coldsweat_at.cfg")
-    runs {
-        client {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-            property 'forge.enabledGameTestNamespaces', 'coldsweat'
-            mods {
-                coldsweat {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        server {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-            property 'forge.enabledGameTestNamespaces', 'coldsweat'
-            mods {
-                coldsweat {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        gameTestServer {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-            property 'forge.enabledGameTestNamespaces', 'coldsweat'
-            mods {
-                coldsweat {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        data {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-            args '--mod', 'cold_sweat', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
-            mods {
-                cold_sweat {
-                    source sourceSets.main
-                }
-            }
-        }
-    }
-}
-
-mixin {
-    add sourceSets.main, "cold_sweat.mixin-refmap.json"
-    config 'cold_sweat.mixin.json'
-}
-
-sourceSets.main.resources { srcDir 'src/generated/resources' }
+group = mod_group_id
 
 repositories {
     maven {
@@ -101,124 +16,145 @@ repositories {
             includeGroup "curse.maven"
         }
     }
-    mavenCentral()
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        filter {
+            includeGroup "maven.modrinth"
+        }
+    }
+    mavenLocal()
+}
+
+base {
+    archivesName = mod_id
+}
+
+// Mojang ships Java 21 to end users starting in 1.20.5, so mods should target Java 21.
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+//minecraft.accessTransformers.file rootProject.file('src/main/resources/META-INF/accesstransformer.cfg')
+//minecraft.accessTransformers.entry public net.minecraft.client.Minecraft textureManager # textureManager
+minecraft {
+    accessTransformers {
+        file("src/main/resources/META-INF/coldsweat_at.cfg")
+    }
+}
+
+// Default run configurations.
+// These can be tweaked, removed, or duplicated as needed.
+runs {
+    // applies to all the run configs below
+    configureEach {
+        // Recommended logging data for a userdev environment
+        // The markers can be added/remove as needed separated by commas.
+        // "SCAN": For mods scan.
+        // "REGISTRIES": For firing of registry events.
+        // "REGISTRYDUMP": For getting the contents of all registries.
+        systemProperty 'forge.logging.markers', 'REGISTRIES'
+
+        // Recommended logging level for the console
+        // You can set various levels here.
+        // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
+        systemProperty 'forge.logging.console.level', 'debug'
+
+        modSource project.sourceSets.main
+    }
+
+    client {
+        // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
+        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+    }
+
+    server {
+        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+        programArgument '--nogui'
+    }
+
+    // This run config launches GameTestServer and runs all registered gametests, then exits.
+    // By default, the server will crash when no gametests are provided.
+    // The gametest system is also enabled by default for other run configs under the /test command.
+    gameTestServer {
+        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+    }
+
+    data {
+        // example of overriding the workingDirectory set in configureEach above, uncomment if you want to use it
+        // workingDirectory project.file('run-data')
+
+        // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
+        programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+    }
+}
+
+// Include resources generated by data generators.
+sourceSets.main.resources { srcDir 'src/generated/resources' }
+
+// Sets up a dependency configuration called 'localRuntime'.
+// This configuration should be used instead of 'runtimeOnly' to declare
+// a dependency that will be present for runtime testing but that is
+// "optional", meaning it will not be pulled by dependents of this mod.
+configurations {
+    runtimeClasspath.extendsFrom localRuntime
 }
 
 dependencies {
-    implementation 'com.github.t9t.minecraft-rcon-client:minecraft-rcon-client:1.0.0'
-    minecraft 'net.neoforged:forge:1.20.1-47.1.79'
-    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-
-    compileOnly fg.deobf("curse.maven:sereneapi-291874:4761605")
-    compileOnly fg.deobf("curse.maven:werewolves-become-a-beast-417851:4710810")
-    compileOnly fg.deobf("curse.maven:vampirism-233029:4783000")
-    compileOnly fg.deobf("curse.maven:weather-storms-tornadoes-237746:4931290")
-    compileOnly fg.deobf("curse.maven:coroutil-237749:4995502")
-    compileOnly fg.deobf("curse.maven:iceberg-520110:4953572")
-    //compileOnly fg.deobf("curse.maven:armorunderwear-310383:4383256") // no 1.19.2 version
-    //compileOnly fg.deobf("curse.maven:carrots-311327:4382778") // no 1.19.2 version
-
-    implementation fg.deobf("curse.maven:create-328085:4762216")
-    implementation fg.deobf("curse.maven:curios-309927:4780205-sources-5175957")
-    implementation fg.deobf("curse.maven:thirst-was-taken-679270:5071555")
-    //runtimeOnly fg.deobf("curse.maven:apotheosis-313970:5180049")
-    //runtimeOnly fg.deobf("curse.maven:placebo-283644:5098182")
-    //runtimeOnly fg.deobf("curse.maven:patchouli-306770:4966125")
-    //runtimeOnly fg.deobf("curse.maven:apothic-attributes-898963:5182713")
-
-    runtimeOnly fg.deobf("curse.maven:spark-361579:4738952")
-    runtimeOnly fg.deobf("curse.maven:biomes-o-plenty-220318:4764804")
-    runtimeOnly fg.deobf("curse.maven:terrablender-563928:5378180")
-    //runtimeOnly fg.deobf("curse.maven:legendary-tooltips-532127:4662781")
-    //runtimeOnly fg.deobf("curse.maven:prism-lib-638111:4650325")
-    runtimeOnly fg.deobf("curse.maven:alexs-mobs-426558:4959531")
-    runtimeOnly fg.deobf("curse.maven:citadel-331936:5075402")
-    //runtimeOnly fg.deobf("curse.maven:irons-spells-855414:5061897")
-    //runtimeOnly fg.deobf("curse.maven:geckolib-388172:5188427")
-    runtimeOnly fg.deobf("curse.maven:playeranimator-658587:4587214")
-    runtimeOnly fg.deobf("curse.maven:caelus-308989:4581481")
-    runtimeOnly fg.deobf("curse.maven:comforts-276951:5068863")
-
-    //runtimeOnly fg.deobf("curse.maven:byg-247560:4426501")
-    compileOnly fg.deobf("curse.maven:serene-seasons-291874:4761603")
-    //runtimeOnly fg.deobf("curse.maven:biomesoplenty-220318:4473556")
-    //runtimeOnly fg.deobf("curse.maven:terrablender-563928:4205732")
-    //runtimeOnly fg.deobf("curse.maven:atmospheric-362393:4415516")
-  //runtimeOnly fg.deobf("curse.maven:tough-as-nails-246391:3871450")
-  //runtimeOnly fg.deobf("curse.maven:environmental-388992:4415514") // Causes weird issues IDK
-    //runtimeOnly fg.deobf("curse.maven:blueprint-382216:4442628")
-    //runtimeOnly fg.deobf("curse.maven:jei-238222:4494410")
-    //runtimeOnly fg.deobf("curse.maven:geckolib-388172:4407241")
-    //runtimeOnly fg.deobf("maven.modrinth:corgilib:1.19.2-1.0.0.32-forge")
-    //runtimeOnly fg.deobf("curse.maven:terralith-513688:4549496")
-    //runtimeOnly fg.deobf("curse.maven:wythers-490686:4127875")
-    //runtimeOnly fg.deobf("curse.maven:smooth-boot-633412:4162940")
-    //runtimeOnly fg.deobf("curse.maven:modernfix-790626:4728399")
-    runtimeOnly fg.deobf("curse.maven:attributefix-280510:4844658")
+    implementation "net.neoforged:neoforge:${neo_version}"
+    compileOnly "curse.maven:serene-seasons-291874:5429913-deobf"
+    implementation "maven.modrinth:thirst-was-taken:1.21.0-2.0.0"
 }
 
+// This block of code expands all declared replace properties in the specified resource targets.
+// A missing property will result in an error. Properties are expanded using ${} Groovy notation.
+// When "copyIdeResources" is enabled, this will also run before the game launches in IDE environments.
+// See https://docs.gradle.org/current/dsl/org.gradle.language.jvm.tasks.ProcessResources.html
+tasks.withType(ProcessResources).configureEach {
+    var replaceProperties = [
+            minecraft_version      : minecraft_version,
+            minecraft_version_range: minecraft_version_range,
+            neo_version            : neo_version,
+            neo_version_range      : neo_version_range,
+            loader_version_range   : loader_version_range,
+            mod_id                 : mod_id,
+            mod_name               : mod_name,
+            mod_license            : mod_license,
+            mod_version            : mod_version,
+            mod_authors            : mod_authors,
+            mod_description        : mod_description
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/neoforge.mods.toml']) {
+        expand replaceProperties
+    }
+}
+
+// Example configuration to allow publishing using the maven-publish plugin
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        register('mavenJava', MavenPublication) {
             from components.java
-            artifactId = 'coldsweat'
-            pom {
-                name = 'Cold Sweat'
-                description = 'A Minecraft temperature mod with a powerful framework'
-                url = 'https://github.com/Momo-Softworks/Cold-Sweat'
-                licenses {
-                    license {
-                        name = 'GNU General Public License v3.0'
-                        url = 'https://www.gnu.org/licenses/gpl-3.0.en.html'
-                    }
-                }
-                developers {
-                    developer {
-                        id = 'mikul'
-                        name = 'Mikul'
-                    }
-                }
-                /*scm = {
-                    connection = 'scm:git:git://github.com/Momo-Softworks/Cold-Sweat.git'
-                    developerConnection = 'scm:git:ssh://github.com/Momo-Softworks/Cold-Sweat.git'
-                    url = 'https://github.com/Momo-Softworks/Cold-Sweat'
-                }*/
-            }
         }
     }
-
     repositories {
         maven {
-            name = "OSSRH"
-            url = "https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"
-            credentials {
-                username = System.getenv("SONATYPE_USERNAME")
-                password = System.getenv("SONATYPE_PASSWORD")
-            }
+            url "file://${project.projectDir}/repo"
         }
     }
 }
-
-// Example for how to get properties into the manifest for reading at runtime.
-jar {
-    manifest {
-        attributes([
-                "Specification-Title"     : "cold_sweat",
-                "Specification-Vendor"    : "Mikul",
-                "Specification-Version"   : "1", // We are version 1 of ourselves
-                "Implementation-Title"    : project.name,
-                "Implementation-Version"  : project.jar.archiveVersion,
-                "Implementation-Vendor"   : "Mikul",
-                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                "TweakerClass"            : "org.spongepowered.asm.launch.MixinTweaker",
-                "TweakOrder"              : 0,
-                "MixinConfigs"            : "cold_sweat.mixin.json"
-        ])
-    }
-}
-
-jar.finalizedBy('reobfJar')
 
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}
+
+// IDEA no longer automatically downloads sources/javadoc jars for dependencies, so we need to explicitly enable the behavior.
+idea {
+    module {
+        downloadSources = true
+        downloadJavadoc = true
+    }
 }

@@ -2,9 +2,10 @@ package com.momosoftworks.coldsweat.config.spec;
 
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.serialization.ListBuilder;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.loading.FMLPaths;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,26 +15,26 @@ import java.util.List;
 
 public class ItemSettingsConfig
 {
-    private static final ForgeConfigSpec SPEC;
-    public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
+    private static final ModConfigSpec SPEC;
+    public static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
-    private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> boilerItems;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> iceboxItems;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> hearthItems;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> blacklistedPotions;
-    private static final ForgeConfigSpec.BooleanValue allowPotionsInHearth;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> soulLampItems;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> soulLampDimensions;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> temperatureFoods;
+    private static final ModConfigSpec.ConfigValue<List<? extends List<?>>> boilerItems;
+    private static final ModConfigSpec.ConfigValue<List<? extends List<?>>> iceboxItems;
+    private static final ModConfigSpec.ConfigValue<List<? extends List<?>>> hearthItems;
+    private static final ModConfigSpec.ConfigValue<List<? extends String>> blacklistedPotions;
+    private static final ModConfigSpec.BooleanValue allowPotionsInHearth;
+    private static final ModConfigSpec.ConfigValue<List<? extends List<?>>> soulLampItems;
+    private static final ModConfigSpec.ConfigValue<List<? extends String>> soulLampDimensions;
+    private static final ModConfigSpec.ConfigValue<List<? extends List<?>>> temperatureFoods;
 
-    private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> insulatingItems;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends String>> insulationBlacklist;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> insulatingArmor;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends Number>> insulationSlots;
+    private static final ModConfigSpec.ConfigValue<List<? extends List<?>>> insulatingItems;
+    private static final ModConfigSpec.ConfigValue<List<? extends String>> insulationBlacklist;
+    private static final ModConfigSpec.ConfigValue<List<? extends List<?>>> insulatingArmor;
+    private static final ModConfigSpec.ConfigValue<List<? extends Number>> insulationSlots;
 
-    private static final ForgeConfigSpec.IntValue waterskinStrength;
+    private static final ModConfigSpec.IntValue waterskinStrength;
 
-    private static ForgeConfigSpec.ConfigValue<List<? extends List<?>>> insulatingCurios;
+    private static ModConfigSpec.ConfigValue<List<? extends List<?>>> insulatingCurios;
 
     static final ItemSettingsConfig INSTANCE = new ItemSettingsConfig();
 
@@ -264,7 +265,7 @@ public class ItemSettingsConfig
         SPEC = BUILDER.build();
     }
 
-    public static void setup()
+    public static void setup(ModContainer modContainer)
     {
         Path configPath = FMLPaths.CONFIGDIR.get();
         Path csConfigPath = Paths.get(configPath.toAbsolutePath().toString(), "coldsweat");
@@ -275,7 +276,7 @@ public class ItemSettingsConfig
         }
         catch (Exception ignored) {}
 
-        ModLoadingContext.get().registerConfig(net.minecraftforge.fml.config.ModConfig.Type.COMMON, SPEC, "coldsweat/item_settings.toml");
+        modContainer.registerConfig(ModConfig.Type.COMMON, SPEC, "coldsweat/item_settings.toml");
     }
 
     public static ItemSettingsConfig getInstance()

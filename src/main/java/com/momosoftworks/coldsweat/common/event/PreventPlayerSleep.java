@@ -5,20 +5,20 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.player.CanPlayerSleepEvent;
 
-@Mod.EventBusSubscriber
+@EventBusSubscriber
 public class PreventPlayerSleep
 {
     @SubscribeEvent
-    public static void onTrySleep(PlayerSleepInBedEvent event)
+    public static void onTrySleep(CanPlayerSleepEvent event)
     {
         Player player = event.getEntity();
 
         // There's already something blocking the player from sleeping
-        if (event.getResultStatus() != null || !ConfigSettings.CHECK_SLEEP_CONDITIONS.get()
+        if (event.getProblem() != null || !ConfigSettings.CHECK_SLEEP_CONDITIONS.get()
         || ConfigSettings.SLEEP_CHECK_IGNORE_BLOCKS.get().contains(player.level().getBlockState(event.getPos()).getBlock()))
         {   return;
         }
@@ -36,7 +36,7 @@ public class PreventPlayerSleep
             }
             // Prevent sleep with message
             player.displayClientMessage(Component.translatable("cold_sweat.message.sleep.body." + (bodyTemp > 99 ? "hot" : "cold")), true);
-            event.setResult(Player.BedSleepingProblem.OTHER_PROBLEM);
+            event.setProblem(Player.BedSleepingProblem.OTHER_PROBLEM);
         }
         // If the player's world temperature is critical
         else if (!CSMath.betweenExclusive(worldTemp, minTemp, maxTemp))
@@ -46,7 +46,7 @@ public class PreventPlayerSleep
             }
             // Prevent sleep with message
             player.displayClientMessage(Component.translatable("cold_sweat.message.sleep.world." + (worldTemp > maxTemp ? "hot" : "cold")), true);
-            event.setResult(Player.BedSleepingProblem.OTHER_PROBLEM);
+            event.setProblem(Player.BedSleepingProblem.OTHER_PROBLEM);
         }
     }
 }

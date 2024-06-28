@@ -4,21 +4,21 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.init.MenuInit;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.FriendlyByteBuf;
 import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
 
-import java.util.Collection;
 import java.util.Objects;
+import java.util.stream.StreamSupport;
 
 public class HearthContainer extends AbstractContainerMenu
 {
@@ -36,9 +36,8 @@ public class HearthContainer extends AbstractContainerMenu
             {
                 if (te.getItemFuel(stack) != 0 || stack.is(Items.MILK_BUCKET)) return true;
                 // Check if the potion is blacklisted
-                Collection< MobEffectInstance> effects = PotionUtils.getMobEffects(stack);
-                return !effects.isEmpty()
-                    && effects.stream().noneMatch(eff -> ConfigSettings.HEARTH_POTION_BLACKLIST.get().contains(eff.getEffect()));
+                PotionContents potioncontents = stack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
+                return StreamSupport.stream(potioncontents.getAllEffects().spliterator(), false).noneMatch(eff -> ConfigSettings.HEARTH_POTION_BLACKLIST.get().contains(eff.getEffect()));
             }
 
             @Override

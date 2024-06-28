@@ -1,18 +1,18 @@
 package com.momosoftworks.coldsweat.core.event;
 
 import com.momosoftworks.coldsweat.api.event.core.EnableTemperatureEvent;
-import com.momosoftworks.coldsweat.util.registries.ModAttributes;
-import com.momosoftworks.coldsweat.util.registries.ModEntities;
+import com.momosoftworks.coldsweat.core.init.ModAttributes;
+import com.momosoftworks.coldsweat.core.init.ModEntities;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModLoader;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModLoader;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.EntityAttributeModificationEvent;
 
 import static com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager.TEMPERATURE_ENABLED_ENTITIES;
 
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD)
 public class AddTempAttributes
 {
     @SubscribeEvent
@@ -22,7 +22,7 @@ public class AddTempAttributes
         {
             if (type != EntityType.PLAYER)
             {   EnableTemperatureEvent enableEvent = new EnableTemperatureEvent(type);
-                ModLoader.get().postEvent(enableEvent);
+                ModLoader.postEvent(enableEvent);
                 if (!enableEvent.isEnabled() || enableEvent.isCanceled()) continue;
             }
             TEMPERATURE_ENABLED_ENTITIES.add(type);
@@ -44,7 +44,7 @@ public class AddTempAttributes
     @SubscribeEvent
     public static void onEnableTemperatureEvent(EnableTemperatureEvent event)
     {
-        if (event.getEntityType() == ModEntities.CHAMELEON)
+        if (event.getEntityType() == ModEntities.CHAMELEON.value())
         {   event.setEnabled(true);
         }
     }

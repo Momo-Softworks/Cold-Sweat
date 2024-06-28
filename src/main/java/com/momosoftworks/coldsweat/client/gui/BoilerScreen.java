@@ -15,7 +15,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class BoilerScreen extends AbstractHearthScreen<BoilerContainer>
 {
-    private static final ResourceLocation BOILER_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/boiler_gui.png");
+    private static final ResourceLocation BOILER_GUI = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/screen/boiler_gui.png");
 
     @Override
     HearthBlockEntity getBlockEntity()

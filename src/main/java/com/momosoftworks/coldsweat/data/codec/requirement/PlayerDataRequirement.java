@@ -7,6 +7,7 @@ import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.entity.EntityHelper;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.CriterionProgress;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
@@ -21,7 +22,6 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Map;
 import java.util.Optional;
@@ -82,7 +82,7 @@ public record PlayerDataRequirement(Optional<GameType> gameType, Optional<Map<St
         {
             for (Map.Entry<ResourceLocation, Either<AdvancementCompletionRequirement, AdvancementCriteriaRequirement>> entry : advancements.get().entrySet())
             {
-                AdvancementProgress progress = serverPlayer.getAdvancements().getOrStartProgress(serverPlayer.getServer().getAdvancements().getAdvancement(entry.getKey()));
+                AdvancementProgress progress = serverPlayer.getAdvancements().getOrStartProgress(serverPlayer.getServer().getAdvancements().get(entry.getKey()));
                 if (entry.getValue().map(complete -> complete.test(progress), criteria -> criteria.test(progress)))
                 {   return false;
                 }
@@ -165,10 +165,10 @@ public record PlayerDataRequirement(Optional<GameType> gameType, Optional<Map<St
         ) : Optional.empty();
 
         Optional<Map<ResourceLocation, Boolean>> recipes = tag.contains("recipes") ? Optional.of(tag.getCompound("recipes").getAllKeys().stream()
-                .collect(java.util.stream.Collectors.toMap(key -> new ResourceLocation(key), key -> tag.getCompound("recipes").getBoolean(key)))) : Optional.empty();
+                .collect(Collectors.toMap(key -> ResourceLocation.parse(key), key -> tag.getCompound("recipes").getBoolean(key)))) : Optional.empty();
 
         Optional<Map<ResourceLocation, Either<AdvancementCompletionRequirement, AdvancementCriteriaRequirement>>> advancements = tag.contains("advancements") ? Optional.of(tag.getCompound("advancements").getAllKeys().stream()
-                .collect(java.util.stream.Collectors.toMap(key -> new ResourceLocation(key), key -> {
+                .collect(Collectors.toMap(key -> ResourceLocation.parse(key), key -> {
                     CompoundTag advancementTag = tag.getCompound("advancements").getCompound(key);
                     if (advancementTag.contains("complete"))
                     {   return Either.left(new AdvancementCompletionRequirement(advancementTag.getBoolean("complete")));
@@ -219,7 +219,7 @@ public record PlayerDataRequirement(Optional<GameType> gameType, Optional<Map<St
         private final IntegerBounds value;
 
         public static final Codec<StatRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                ForgeRegistries.STAT_TYPES.getCodec().fieldOf("type").forGetter(stat -> stat.type),
+                BuiltInRegistries.STAT_TYPE.byNameCodec().fieldOf("type").forGetter(stat -> stat.type),
                 ResourceLocation.CODEC.fieldOf("stat").forGetter(stat -> stat.statId),
                 IntegerBounds.CODEC.fieldOf("value").forGetter(stat -> stat.value)
         ).apply(instance, StatRequirement::new));
@@ -250,14 +250,14 @@ public record PlayerDataRequirement(Optional<GameType> gameType, Optional<Map<St
 
         public CompoundTag serialize()
         {   CompoundTag tag = new CompoundTag();
-            tag.putString("type", ForgeRegistries.STAT_TYPES.getKey(type).toString());
+            tag.putString("type", BuiltInRegistries.STAT_TYPE.getKey(type).toString());
             tag.putString("stat", serializeStat(stat));
             tag.put("value", this.value.serialize());
             return tag;
         }
 
         public static StatRequirement deserialize(CompoundTag tag)
-        {   StatType<?> type = ForgeRegistries.STAT_TYPES.getValue(new ResourceLocation(tag.getString("type")));
+        {   StatType<?> type = BuiltInRegistries.STAT_TYPE.get(ResourceLocation.parse(tag.getString("type")));
             Stat<?> stat = deserializeStat(type, tag);
             IntegerBounds value = IntegerBounds.deserialize(tag.getCompound("value"));
             return new StatRequirement(type, stat, value);
@@ -268,7 +268,7 @@ public record PlayerDataRequirement(Optional<GameType> gameType, Optional<Map<St
         }
 
         private static <T> Stat<T> deserializeStat(StatType<T> type, CompoundTag tag)
-        {   return type.get(type.getRegistry().get(new ResourceLocation(tag.getString("stat"))));
+        {   return type.get(type.getRegistry().get(ResourceLocation.parse(tag.getString("stat"))));
         }
 
         @Override
@@ -374,7 +374,7 @@ public record PlayerDataRequirement(Optional<GameType> gameType, Optional<Map<St
         }
 
         public static AdvancementCriteriaRequirement deserialize(CompoundTag tag)
-        {   return new AdvancementCriteriaRequirement(tag.getAllKeys().stream().collect(java.util.stream.Collectors.toMap(key -> key, key -> tag.getBoolean(key))));
+        {   return new AdvancementCriteriaRequirement(tag.getAllKeys().stream().collect(Collectors.toMap(key -> key, key -> tag.getBoolean(key))));
         }
 
         @Override

@@ -1,11 +1,13 @@
 package com.momosoftworks.coldsweat.mixin;
 
-import com.momosoftworks.coldsweat.util.registries.ModBlocks;
-import com.momosoftworks.coldsweat.util.registries.ModItems;
+import com.momosoftworks.coldsweat.core.init.ModBlocks;
+import com.momosoftworks.coldsweat.core.init.ModItems;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.vehicle.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.Minecart;
+import net.minecraft.world.entity.vehicle.VehicleEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
@@ -14,31 +16,31 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(AbstractMinecart.class)
+@Mixin(VehicleEntity.class)
 public class MixinMinecart
 {
-    AbstractMinecart minecart = (AbstractMinecart) (Object) this;
+    VehicleEntity vehicle = (VehicleEntity) (Object) this;
 
     @Inject(method = "hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z",
             at = @At
             (
                 value = "INVOKE",
-                target = "Lnet/minecraft/world/entity/vehicle/AbstractMinecart;destroy(Lnet/minecraft/world/damagesource/DamageSource;)V"
+                target = "Lnet/minecraft/world/entity/vehicle/VehicleEntity;destroy(Lnet/minecraft/world/damagesource/DamageSource;)V"
             ), cancellable = true)
     public void hurt(DamageSource source, float amount, CallbackInfoReturnable<Boolean> ci)
     {
-        if (minecart instanceof Minecart)
+        if (vehicle instanceof Minecart minecart)
         {
             ItemStack carryStack = minecart.getDisplayBlockState().getBlock().asItem().getDefaultInstance();
             if (!carryStack.isEmpty())
             {
                 if (minecart.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS))
                 {
-                    if (minecart.getDisplayBlockState().getBlock() == ModBlocks.MINECART_INSULATION)
+                    if (minecart.getDisplayBlockState().getBlock() == ModBlocks.MINECART_INSULATION.value())
                     {
-                        ItemStack itemstack = new ItemStack(ModItems.INSULATED_MINECART);
+                        ItemStack itemstack = new ItemStack(ModItems.INSULATED_MINECART.value());
                         if (minecart.hasCustomName())
-                        {   itemstack.setHoverName(minecart.getCustomName());
+                        {   itemstack.set(DataComponents.CUSTOM_NAME, minecart.getCustomName());
                         }
                         minecart.spawnAtLocation(itemstack);
                     }
@@ -46,8 +48,7 @@ public class MixinMinecart
                     {
                         ItemStack itemstack = new ItemStack(Items.MINECART);
                         if (minecart.hasCustomName())
-                        {
-                            itemstack.setHoverName(minecart.getCustomName());
+                        {   itemstack.set(DataComponents.CUSTOM_NAME, minecart.getCustomName());
                         }
                         minecart.spawnAtLocation(itemstack);
                         minecart.spawnAtLocation(carryStack);

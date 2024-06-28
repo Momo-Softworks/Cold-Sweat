@@ -8,8 +8,8 @@ import com.momosoftworks.coldsweat.client.renderer.ChameleonAnimations;
 import com.momosoftworks.coldsweat.client.renderer.entity.ChameleonEntityRenderer;
 import com.momosoftworks.coldsweat.client.renderer.animation.AnimationManager;
 import com.momosoftworks.coldsweat.common.entity.Chameleon;
+import com.momosoftworks.coldsweat.core.init.ModEntities;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.registries.ModEntities;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.AgeableListModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
@@ -23,10 +23,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +32,7 @@ import java.util.Map;
 public class ChameleonModel<T extends Chameleon> extends AgeableListModel<T>
 {
 	// This layer location should be baked with EntityRendererProvider.Context in the entity renderer and passed into this model's constructor
-	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(ColdSweat.MOD_ID, "chameleon"), "main");
+	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "chameleon"), "main");
 
 	final Map<String, ModelPart> modelParts;
 	final ModelPart body;
@@ -51,7 +49,7 @@ public class ChameleonModel<T extends Chameleon> extends AgeableListModel<T>
 		body.y -= 0.5f;
 		modelParts = AnimationManager.getChildrenMap(root);
 
-		AnimationManager.storeDefaultPoses(ModEntities.CHAMELEON, modelParts);
+		AnimationManager.storeDefaultPoses(ModEntities.CHAMELEON.value(), modelParts);
 	}
 
 	public static LayerDefinition createBodyLayer()
@@ -125,8 +123,9 @@ public class ChameleonModel<T extends Chameleon> extends AgeableListModel<T>
 		chameleon = entity;
 		AnimationManager.loadAnimationStates(entity, modelParts);
 
-		float tickDelta = Minecraft.getInstance().getDeltaFrameTime();
-		float partialTick = Minecraft.getInstance().getFrameTime();
+		// TODO: See if this works
+		float tickDelta = Minecraft.getInstance().getTimer().getRealtimeDeltaTicks();
+		float partialTick = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true);
 		ModelPart head = modelParts.get("Head");
 		ModelPart rightEye = modelParts.get("RightEye");
 		ModelPart leftEye = modelParts.get("LeftEye");
@@ -282,7 +281,7 @@ public class ChameleonModel<T extends Chameleon> extends AgeableListModel<T>
 			// Eat animation (applied on top of other anims)
 			if (entity.getEatTimer() > 0)
 			{	tongueVisible = true;
-				ChameleonAnimations.EAT.animateAll(modelParts, CSMath.blend(0.5f, 0f, entity.getEatTimer() - Minecraft.getInstance().getFrameTime(), 0, entity.getEatAnimLength()), true);
+				ChameleonAnimations.EAT.animateAll(modelParts, CSMath.blend(0.5f, 0f, entity.getEatTimer() - Minecraft.getInstance().getTimer().getRealtimeDeltaTicks(), 0, entity.getEatAnimLength()), true);
 			}
 			else tongueVisible = false;
 
@@ -302,7 +301,7 @@ public class ChameleonModel<T extends Chameleon> extends AgeableListModel<T>
 				float speed = (float) Math.sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
 				float tailSpeed = Math.min(0.1f, speed / 2) + 0.01f;
 
-				float deltaTime = Minecraft.getInstance().getDeltaFrameTime();
+				float deltaTime = Minecraft.getInstance().getTimer().getRealtimeDeltaTicks();
 				chameleon.tailPhase += 2 * Math.PI * deltaTime * tailSpeed;
 
 				// Calculate sine wave value with phase shift
@@ -331,9 +330,9 @@ public class ChameleonModel<T extends Chameleon> extends AgeableListModel<T>
 	}
 
 	@Override
-	public void renderToBuffer(@NotNull PoseStack poseStack, @NotNull VertexConsumer vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha)
+	public void renderToBuffer(@NotNull PoseStack poseStack, @NotNull VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int something)
 	{
-		renderToBuffer(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, alpha, false);
+		renderToBuffer(poseStack, vertexConsumer, packedLight, packedOverlay, something, false);
 	}
 
 	@Override
@@ -348,13 +347,15 @@ public class ChameleonModel<T extends Chameleon> extends AgeableListModel<T>
 		return List.of(body);
 	}
 
-	public void renderToBuffer(@NotNull PoseStack poseStack, @NotNull VertexConsumer vertexConsumer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha, boolean isOverlay)
+	public void renderToBuffer(@NotNull PoseStack poseStack, @NotNull VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int something, boolean isOverlay)
 	{
 		if (chameleon == null) return;
 
+		// TODO: Test if this is actually alpha
+		float alpha = something / 255f;
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
-		float partialTick = Minecraft.getInstance().getFrameTime();
+		float partialTick = Minecraft.getInstance().getTimer().getRealtimeDeltaTicks();
 		long tickCount = chameleon.tickCount;
 		long hurtTime = chameleon.getHurtTimestamp();
 
@@ -363,7 +364,7 @@ public class ChameleonModel<T extends Chameleon> extends AgeableListModel<T>
 		if (!isOverlay && chameleon.isAlive())
 		{
 			if (CSMath.betweenInclusive(tickCount - hurtTime, 10, 120) && hurtTime != 0)
-			{	chameleon.opacity += (alpha * 0.15f - chameleon.opacity) * Minecraft.getInstance().getDeltaFrameTime() / 10;
+			{	chameleon.opacity += (alpha * 0.15f - chameleon.opacity) * Minecraft.getInstance().getTimer().getRealtimeDeltaTicks() / 10;
 			}
 			else if (chameleon.opacity < alpha)
 			{	chameleon.opacity = CSMath.blend(alpha * 0.15f, alpha, tickCount - hurtTime + partialTick, 120, 180);
@@ -373,7 +374,7 @@ public class ChameleonModel<T extends Chameleon> extends AgeableListModel<T>
 		ModelPart tongue1 = modelParts.get("Tongue1");
 		tongue1.visible = false;
 
-		super.renderToBuffer(poseStack, vertexConsumer, packedLight, packedOverlay, red, green, blue, isOverlay ? alpha : chameleon.opacity);
+		super.renderToBuffer(poseStack, vertexConsumer, packedLight, packedOverlay, (int) (isOverlay ? alpha : chameleon.opacity));
 
 		// Render the tongue with a different VertexConsumer that culls backfaces
 		if (tongueVisible && !isOverlay)
@@ -388,7 +389,7 @@ public class ChameleonModel<T extends Chameleon> extends AgeableListModel<T>
 			poseStack.translate(0, 1.1555, -0.18755);
 			tongue1.xRot = head.xRot + jaw.xRot / 2;
 			tongue1.yRot = head.yRot;
-			tongue1.render(poseStack, tongueConsumer, packedLight, packedOverlay, red, green, blue, chameleon.opacity);
+			tongue1.render(poseStack, tongueConsumer, packedLight, packedOverlay, (int) chameleon.opacity);
 			poseStack.popPose();
 		}
 		RenderSystem.disableBlend();

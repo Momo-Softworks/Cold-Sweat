@@ -16,7 +16,7 @@ public class LazyLookGoal extends Goal
 
     public LazyLookGoal(Mob mob) {
         this.mob = mob;
-        this.setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
+        this.setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
     }
 
     public boolean canUse()

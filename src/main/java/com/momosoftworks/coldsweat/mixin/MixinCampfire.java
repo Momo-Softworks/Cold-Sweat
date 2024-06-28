@@ -2,10 +2,11 @@ package com.momosoftworks.coldsweat.mixin;
 
 import com.momosoftworks.coldsweat.common.item.FilledWaterskinItem;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
+import com.momosoftworks.coldsweat.core.init.ModItemComponents;
+import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
@@ -13,7 +14,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.CampfireBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.registries.ForgeRegistries;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -38,19 +38,18 @@ public class MixinCampfire
             ItemStack stack = blockEntity.getItems().get(i);
             if (stack.is(ModItems.FILLED_WATERSKIN) && (level.getGameTime() & 4) == 0)
             {
-                CompoundTag tag = stack.getOrCreateTag();
-                double temperature = tag.getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
+                double temperature = stack.get(ModItemComponents.WATER_TEMPERATURE);
 
                 // If the block ID contains "soul", it's a soul campfire
-                if (state.is(BlockTags.CAMPFIRES) && CSMath.getIfNotNull(ForgeRegistries.BLOCKS.getKey(state.getBlock()), ResourceLocation::toString, "").contains("soul")
-                && tag.getDouble(FilledWaterskinItem.NBT_TEMPERATURE) > -waterskinStrength * 0.6)
+                if (state.is(BlockTags.CAMPFIRES) && CSMath.getIfNotNull(BuiltInRegistries.BLOCK.getKey(state.getBlock()), ResourceLocation::toString, "").contains("soul")
+                && temperature > -waterskinStrength * 0.6)
                 {
-                    tag.putDouble(FilledWaterskinItem.NBT_TEMPERATURE,
+                    stack.set(ModItemComponents.WATER_TEMPERATURE,
                                   temperature + tempRate * 0.1 * (ConfigSettings.COLD_SOUL_FIRE.get() ? -1 : 1));
                 }
-                else if (state.is(BlockTags.CAMPFIRES) && tag.getDouble(FilledWaterskinItem.NBT_TEMPERATURE) < waterskinStrength * 0.6)
+                else if (state.is(BlockTags.CAMPFIRES) && temperature < waterskinStrength * 0.6)
                 {
-                    tag.putDouble(FilledWaterskinItem.NBT_TEMPERATURE,
+                    stack.set(ModItemComponents.WATER_TEMPERATURE,
                                   temperature + tempRate * 0.1);
                 }
             }
@@ -67,17 +66,16 @@ public class MixinCampfire
         if (result.is(ModItems.FILLED_WATERSKIN))
         {
             double waterskinStrength = ConfigSettings.WATERSKIN_STRENGTH.get();
-            CompoundTag tag = result.getOrCreateTag();
             BlockState state = level.getBlockState(BlockPos.containing(x, y, z));
 
-            if (state.is(BlockTags.CAMPFIRES) && CSMath.getIfNotNull(ForgeRegistries.BLOCKS.getKey(state.getBlock()), ResourceLocation::toString, "").contains("soul"))
+            if (state.is(BlockTags.CAMPFIRES) && CSMath.getIfNotNull(BuiltInRegistries.BLOCK.getKey(state.getBlock()), ResourceLocation::toString, "").contains("soul"))
             {
-                tag.putDouble(FilledWaterskinItem.NBT_TEMPERATURE,
+                result.set(ModItemComponents.WATER_TEMPERATURE,
                               waterskinStrength * 0.6 * (ConfigSettings.COLD_SOUL_FIRE.get() ? -1 : 1));
             }
             else if (state.is(BlockTags.CAMPFIRES))
             {
-                tag.putDouble(FilledWaterskinItem.NBT_TEMPERATURE,
+                result.set(ModItemComponents.WATER_TEMPERATURE,
                               waterskinStrength * 0.6);
             }
         }

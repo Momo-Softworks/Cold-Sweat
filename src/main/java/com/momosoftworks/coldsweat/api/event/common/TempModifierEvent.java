@@ -1,18 +1,15 @@
 package com.momosoftworks.coldsweat.api.event.common;
 
-import com.mojang.datafixers.types.Func;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.Cancelable;
-import net.minecraftforge.eventbus.api.Event;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
+import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.ICancellableEvent;
 
 import java.util.function.Function;
 
 /**
- * These events are fired when dealing with {@link TempModifier}s. <br>
- * They should not be side-specific. Do not limit them to run on any one side as it will cause desyncs.
+ * These events are fired when dealing with {@link TempModifier}s.
  */
 public class TempModifierEvent extends Event
 {
@@ -45,13 +42,12 @@ public class TempModifierEvent extends Event
      * {@link #entity} is the player the TempModifier is being applied to. <br>
      * {@link #trait} determines the modifier's {@link Temperature.Trait}. It will never be {@link Temperature.Trait#BODY} <br>
      * <br>
-     * This event is {@link net.minecraftforge.eventbus.api.Cancelable}. <br>
+     * This is an {@link ICancellableEvent}. <br>
      * Canceling this event will prevent the TempModifier from being added.<br>
      * <br>
-     * This event is fired on the {@link MinecraftForge#EVENT_BUS}.
+     * This event is fired on the {@link net.neoforged.neoforge.common.NeoForge#EVENT_BUS}.
      */
-    @Cancelable
-    public static class Add extends TempModifierEvent
+    public static class Add extends TempModifierEvent implements ICancellableEvent
     {
         public Add(LivingEntity entity, Temperature.Trait trait, TempModifier modifier)
         {   super(entity, trait, modifier);
@@ -74,13 +70,12 @@ public class TempModifierEvent extends Event
      * {@link #count} is the number of TempModifiers of the specified class being removed. <br>
      * {@link #modifier} is the TempModifier being removed. <br>
      * <br>
-     * This event is {@link net.minecraftforge.eventbus.api.Cancelable}. <br>
+     * This is an {@link ICancellableEvent}. <br>
      * Canceling this event will prevent the TempModifier from being removed. <br>
      * <br>
-     * This event is fired on the {@link MinecraftForge#EVENT_BUS}.
+     * This event is fired on the {@link net.neoforged.neoforge.common.NeoForge#EVENT_BUS}.
      */
-    @Cancelable
-    public static class Remove extends TempModifierEvent
+    public static class Remove extends TempModifierEvent implements ICancellableEvent
     {
         int count;
 
@@ -99,10 +94,9 @@ public class TempModifierEvent extends Event
         }
     }
 
-
     /**
      * Fired when a TempModifier runs the {@code calculate()} method. <br>
-     * {@code Pre} and {@code Post} are fired on the {@link MinecraftForge#EVENT_BUS} before/after the calculation respectively. <br>
+     * {@code Pre} and {@code Post} are fired on the {@link net.neoforged.neoforge.common.NeoForge#EVENT_BUS} before/after the calculation respectively. <br>
      */
     public static class Calculate extends TempModifierEvent
     {
@@ -129,11 +123,10 @@ public class TempModifierEvent extends Event
          * {@link #modifier} - The TempModifier running the method. <br>
          * {@link #temperature} - The Temperature being passed into the {@code getValue()} method. <br>
          * <br>
-         * This event is {@link Cancelable}. <br>
+         * This is an {@link ICancellableEvent}. <br>
          * Cancelling this event results in the modifier not being processed, remaining unchanged. <br>
          */
-        @Cancelable
-        public static class Override extends Calculate
+        public static class Override extends Calculate implements ICancellableEvent
         {
             public Override(TempModifier modifier, LivingEntity entity, double temperature, Temperature.Trait trait)
             {   super(modifier, entity, temperature, trait);
@@ -147,7 +140,7 @@ public class TempModifierEvent extends Event
          * {@link #modifier} is the TempModifier running the method. <br>
          * {@link #temperature} is the Temperature after the {@code getValue())} method has been called. <br>
          * <br>
-         * This event is NOT {@link Cancelable}. <br>
+         * This event is NOT {@link ICancellableEvent}. <br>
          */
         public static class Modify extends Calculate
         {

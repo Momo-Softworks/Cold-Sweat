@@ -3,7 +3,7 @@ package com.momosoftworks.coldsweat.mixin;
 import com.momosoftworks.coldsweat.api.event.common.ChatComponentClickedEvent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Style;
-import net.minecraftforge.common.MinecraftForge;
+import net.neoforged.neoforge.common.NeoForge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -16,6 +16,6 @@ public class MixinChatClicked
 
     @Inject(method = "handleComponentClicked", at = @At("HEAD"))
     private void onChatComponentClicked(Style style, CallbackInfoReturnable<Boolean> ci)
-    {   MinecraftForge.EVENT_BUS.post(new ChatComponentClickedEvent(style, self.getMinecraft().player));
+    {   NeoForge.EVENT_BUS.post(new ChatComponentClickedEvent(style, self.getMinecraft().player));
     }
 }

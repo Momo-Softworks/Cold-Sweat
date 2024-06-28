@@ -12,11 +12,13 @@ import com.momosoftworks.coldsweat.core.network.message.SyncPreferredUnitsMessag
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
+import com.momosoftworks.coldsweat.core.network.ModPacketHandlers;
+import net.minecraft.server.packs.repository.Pack;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -25,7 +27,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-@Mod.EventBusSubscriber(value = Dist.CLIENT)
+@EventBusSubscriber(value = Dist.CLIENT)
 public class ConfigScreen
 {
     public static final int TITLE_HEIGHT = 16;
@@ -57,23 +59,28 @@ public class ConfigScreen
         if (Minecraft.getInstance().player != null)
         {
             if (!MC.isLocalServer())
-                ColdSweatPacketHandler.INSTANCE.sendToServer(new SyncConfigSettingsMessage());
-            else ConfigSettings.saveValues();
-            ColdSweatPacketHandler.INSTANCE.sendToServer(new SyncPreferredUnitsMessage(ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F));
+            {   PacketDistributor.sendToServer(new SyncConfigSettingsMessage());
+            }
+            else
+            {   ConfigSettings.saveValues();
+            }
+            PacketDistributor.sendToServer(new SyncPreferredUnitsMessage(ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F));
         }
-        else ConfigSettings.saveValues();
+        else
+        {   ConfigSettings.saveValues();
+        }
         ClientSettingsConfig.getInstance().writeAndSave();
     }
 
     @SubscribeEvent
-    public static void onClicked(ScreenEvent.MouseButtonPressed event)
+    public static void onClicked(ScreenEvent.MouseButtonPressed.Pre event)
     {
         if (event.getButton() == 0 && Minecraft.getInstance().screen instanceof ConfigPageDifficulty)
             IS_MOUSE_DOWN = true;
     }
 
     @SubscribeEvent
-    public static void onReleased(ScreenEvent.MouseButtonReleased event)
+    public static void onReleased(ScreenEvent.MouseButtonReleased.Pre event)
     {
         if (event.getButton() == 0 && Minecraft.getInstance().screen instanceof ConfigPageDifficulty)
             IS_MOUSE_DOWN = false;

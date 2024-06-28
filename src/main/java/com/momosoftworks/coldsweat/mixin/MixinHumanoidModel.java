@@ -35,7 +35,7 @@ public class MixinHumanoidModel
     {
         boolean holdingLamp = EntityHelper.holdingLamp(entity, HumanoidArm.RIGHT);
         Pair<Float, Float> armRot = HandleSoulLampAnim.RIGHT_ARM_ROTATIONS.getOrDefault(entity, Pair.of(0f, 0f));
-        float rightArmRot = CSMath.toRadians(CSMath.blend(armRot.getSecond(), armRot.getFirst(), Minecraft.getInstance().getFrameTime(), 0, 1));
+        float rightArmRot = CSMath.toRadians(CSMath.blend(armRot.getSecond(), armRot.getFirst(), Minecraft.getInstance().getTimer().getRealtimeDeltaTicks(), 0, 1));
 
         if (!CSMath.betweenInclusive(rightArmRot, -0.01, 0.01))
         {
@@ -63,7 +63,8 @@ public class MixinHumanoidModel
     {
         boolean holdingLamp = EntityHelper.holdingLamp(entity, HumanoidArm.LEFT);
         Pair<Float, Float> armRot = HandleSoulLampAnim.LEFT_ARM_ROTATIONS.getOrDefault(entity, Pair.of(0f, 0f));
-        float leftArmRot = CSMath.blend(CSMath.toRadians(armRot.getSecond()), CSMath.toRadians(armRot.getFirst()), Minecraft.getInstance().getFrameTime(), 0, 1);
+        // TODO: Make sure this works
+        float leftArmRot = CSMath.blend(CSMath.toRadians(armRot.getSecond()), CSMath.toRadians(armRot.getFirst()), Minecraft.getInstance().getTimer().getRealtimeDeltaTicks(), 0, 1);
 
         if (!CSMath.betweenInclusive(leftArmRot, -0.01, 0.01))
         {

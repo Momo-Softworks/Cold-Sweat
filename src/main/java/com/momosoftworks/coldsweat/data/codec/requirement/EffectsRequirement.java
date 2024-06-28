@@ -3,21 +3,25 @@ package com.momosoftworks.coldsweat.data.codec.requirement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
+import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-public record EffectsRequirement(Map<MobEffect, Instance> effects)
+public record EffectsRequirement(Map<Holder<MobEffect>, Instance> effects)
 {
     public static final Codec<EffectsRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.unboundedMap(ForgeRegistries.MOB_EFFECTS.getCodec(), Instance.CODEC).fieldOf("effects").forGetter(predicate -> predicate.effects)
+            Codec.unboundedMap(MobEffect.CODEC, Instance.CODEC).fieldOf("effects").forGetter(predicate -> predicate.effects)
     ).apply(instance, EffectsRequirement::new));
 
     public boolean test(Entity entity)
@@ -26,9 +30,9 @@ public record EffectsRequirement(Map<MobEffect, Instance> effects)
 
     public boolean test(Collection<MobEffectInstance> effects)
     {
-        for (Map.Entry<MobEffect, Instance> entry : this.effects.entrySet())
+        for (Map.Entry<Holder<MobEffect>, Instance> entry : this.effects.entrySet())
         {
-            MobEffect effect = entry.getKey();
+            MobEffect effect = entry.getKey().value();
             Instance instance = entry.getValue();
             int amplifier = 0;
             int duration = 0;
@@ -73,17 +77,17 @@ public record EffectsRequirement(Map<MobEffect, Instance> effects)
     public CompoundTag serialize()
     {
         CompoundTag tag = new CompoundTag();
-        for (Map.Entry<MobEffect, Instance> entry : effects.entrySet())
+        for (Map.Entry<Holder<MobEffect>, Instance> entry : effects.entrySet())
         {
-            tag.put(ForgeRegistries.MOB_EFFECTS.getKey(entry.getKey()).toString(), entry.getValue().serialize());
+            tag.put(entry.getKey().unwrapKey().get().location().toString(), entry.getValue().serialize());
         }
         return tag;
     }
 
     public static EffectsRequirement deserialize(CompoundTag tag)
     {
-        Map<MobEffect, Instance> effects = tag.getAllKeys().stream().collect(
-                java.util.stream.Collectors.toMap(key -> ForgeRegistries.MOB_EFFECTS.getValue(new net.minecraft.resources.ResourceLocation(key)),
+        Map<Holder<MobEffect>, Instance> effects = tag.getAllKeys().stream().collect(
+                Collectors.toMap(key -> Holder.direct(RegistryHelper.getRegistry(Registries.MOB_EFFECT).get(ResourceLocation.parse(key))),
                                                   key -> Instance.deserialize(tag.getCompound(key))));
         return new EffectsRequirement(effects);
     }

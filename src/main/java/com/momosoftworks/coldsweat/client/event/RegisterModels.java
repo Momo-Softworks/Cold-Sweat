@@ -3,15 +3,15 @@ package com.momosoftworks.coldsweat.client.event;
 import com.momosoftworks.coldsweat.client.renderer.entity.ChameleonEntityRenderer;
 import com.momosoftworks.coldsweat.client.renderer.model.armor.*;
 import com.momosoftworks.coldsweat.client.renderer.model.entity.ChameleonModel;
-import com.momosoftworks.coldsweat.core.init.EntityInit;
+import com.momosoftworks.coldsweat.core.init.ModEntities;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.EntityRenderersEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class RegisterModels
 {
     public static HoglinHeadpieceModel<?> HOGLIN_HEADPIECE_MODEL = null;
@@ -60,6 +60,6 @@ public class RegisterModels
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event)
     {
-        event.registerEntityRenderer(EntityInit.CHAMELEON.get(), ChameleonEntityRenderer::new);
+        event.registerEntityRenderer(ModEntities.CHAMELEON.get(), ChameleonEntityRenderer::new);
     }
 }

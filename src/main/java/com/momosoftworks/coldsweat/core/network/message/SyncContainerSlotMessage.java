@@ -1,16 +1,24 @@
 package com.momosoftworks.coldsweat.core.network.message;
 
+import com.mojang.serialization.DynamicOps;
+import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
+import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
-
-public class SyncContainerSlotMessage
+public class SyncContainerSlotMessage implements CustomPacketPayload
 {
+    public static final CustomPacketPayload.Type<SyncContainerSlotMessage> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "sync_container_slot"));
+    public static final StreamCodec<FriendlyByteBuf, SyncContainerSlotMessage> CODEC = CustomPacketPayload.codec(SyncContainerSlotMessage::encode, SyncContainerSlotMessage::decode);
+
     int slot;
     ItemStack stack;
     int containerId = -1;
@@ -30,33 +38,33 @@ public class SyncContainerSlotMessage
     public static void encode(SyncContainerSlotMessage msg, FriendlyByteBuf buffer)
     {
         buffer.writeInt(msg.slot);
-        buffer.writeItemStack(ItemStack.of(msg.stack.save(new CompoundTag())), false);
+        buffer.writeNbt(msg.stack.save(RegistryHelper.getRegistryAccess()));
         buffer.writeVarInt(msg.containerId);
     }
 
     public static SyncContainerSlotMessage decode(FriendlyByteBuf buffer)
     {
         int slot = buffer.readInt();
-        ItemStack stack = buffer.readItem();
+        ItemStack stack = ItemStack.CODEC.decode(NbtOps.INSTANCE, buffer.readNbt()).result().orElseThrow().getFirst();
         int containerId = buffer.readVarInt();
         return new SyncContainerSlotMessage(slot, stack, containerId);
     }
 
-    public static void handle(SyncContainerSlotMessage message, Supplier<NetworkEvent.Context> contextSupplier)
+    public static void handle(SyncContainerSlotMessage message, IPayloadContext context)
     {
-        NetworkEvent.Context context = contextSupplier.get();
-        if (context.getDirection().getReceptionSide().isClient())
+        context.enqueueWork(() ->
         {
-            context.enqueueWork(() ->
-            {
-                AbstractContainerMenu container = ClientOnlyHelper.getClientPlayer().containerMenu;
+            AbstractContainerMenu container = ClientOnlyHelper.getClientPlayer().containerMenu;
 
-                if (container.containerId == message.containerId
-                && container.isValidSlotIndex(message.slot))
-                {   container.slots.get(message.slot).set(message.stack);
-                }
-            });
-        }
-        context.setPacketHandled(true);
+            if (container.containerId == message.containerId
+            && container.isValidSlotIndex(message.slot))
+            {   container.slots.get(message.slot).set(message.stack);
+            }
+        });
+    }
+
+    @Override
+    public Type<? extends CustomPacketPayload> type()
+    {   return TYPE;
     }
 }

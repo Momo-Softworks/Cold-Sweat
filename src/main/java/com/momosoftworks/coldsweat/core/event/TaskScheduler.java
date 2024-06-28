@@ -1,27 +1,34 @@
 package com.momosoftworks.coldsweat.core.event;
 
 import com.momosoftworks.coldsweat.ColdSweat;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-@Mod.EventBusSubscriber
+@EventBusSubscriber
 public class TaskScheduler
 {
     static final ConcurrentLinkedQueue<QueueEntry> SERVER_SCHEDULE = new ConcurrentLinkedQueue<>();
     static final ConcurrentLinkedQueue<QueueEntry> CLIENT_SCHEDULE = new ConcurrentLinkedQueue<>();
 
     @SubscribeEvent
-    public static void runScheduledTasks(TickEvent event)
-    {
-        if ((event instanceof TickEvent.ServerTickEvent || event instanceof TickEvent.ClientTickEvent) && event.phase == TickEvent.Phase.START)
-        {
-            ConcurrentLinkedQueue<QueueEntry> schedule = event.side.isClient() ? CLIENT_SCHEDULE : SERVER_SCHEDULE;
+    public static void tickClient(ClientTickEvent.Pre event)
+    {   tickScheduledTasks(CLIENT_SCHEDULE);
+    }
 
-            // Iterate through all active tasks
-            if (!schedule.isEmpty())
+    @SubscribeEvent
+    public static void tickServer(ServerTickEvent.Pre event)
+    {   tickScheduledTasks(SERVER_SCHEDULE);
+    }
+
+    private static void tickScheduledTasks(ConcurrentLinkedQueue<QueueEntry> schedule)
+    {
+        // Iterate through all active tasks
+        if (!schedule.isEmpty())
+        {
             schedule.removeIf(entry ->
             {
                 int ticks = entry.time;
@@ -33,7 +40,8 @@ public class TaskScheduler
                     {   entry.task.run();
                     }
                     catch (Exception e)
-                    {   ColdSweat.LOGGER.error("Error while running scheduled task", e);
+                    {
+                        ColdSweat.LOGGER.error("Error while running scheduled task", e);
                         throw e;
                     }
                     return true;

@@ -11,7 +11,7 @@ import net.minecraft.world.entity.LivingEntity;
 
 public class HoglinTrousersModel<T extends LivingEntity> extends HumanoidModel<T>
 {
-    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(ColdSweat.MOD_ID, "hoglin_trousers"), "main");
+    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hoglin_trousers"), "main");
 
     public HoglinTrousersModel(ModelPart root)
     {   super(root);

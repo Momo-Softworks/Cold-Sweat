@@ -1,9 +1,11 @@
 package com.momosoftworks.coldsweat.client.event;
 
+import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.client.gui.config.AbstractConfigPage;
 import com.momosoftworks.coldsweat.client.gui.config.ConfigScreen;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
-import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
+import com.momosoftworks.coldsweat.core.network.ModPacketHandlers;
 import com.momosoftworks.coldsweat.core.network.message.ClientConfigAskMessage;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -11,20 +13,22 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.ImageButton;
-import net.minecraft.client.gui.screens.OptionsScreen;
+import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.client.gui.screens.options.OptionsScreen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.ScreenEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.joml.Vector2i;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
-@Mod.EventBusSubscriber(Dist.CLIENT)
+@EventBusSubscriber(Dist.CLIENT)
 public class DrawConfigButton
 {
     public static boolean EDIT_MODE = false;
@@ -50,14 +54,12 @@ public class DrawConfigButton
             }
 
             // Main config button
-            ImageButton mainButton = new ImageButton(buttonX + xOffset.get(), buttonY + yOffset.get(),
-                                     24, 24, 40, 40, 24,
-                                     new ResourceLocation("cold_sweat:textures/gui/screen/config_gui.png"),
+            ImageButton mainButton = new ImageButton(buttonX + xOffset.get(), buttonY + yOffset.get(), 24, 24, AbstractConfigPage.CONFIG_BUTTON_SPRITES,
                                      button ->
                                      {
                                          ConfigScreen.CURRENT_PAGE = 0;
                                          if (!Minecraft.getInstance().isLocalServer() && Minecraft.getInstance().player != null)
-                                         {   ColdSweatPacketHandler.INSTANCE.sendToServer(new ClientConfigAskMessage(Minecraft.getInstance().player.getUUID()));
+                                         {   PacketDistributor.sendToServer(new ClientConfigAskMessage(Minecraft.getInstance().player.getUUID()));
                                          }
                                          else ClientOnlyHelper.openConfigScreen();
                                      });
@@ -101,8 +103,8 @@ public class DrawConfigButton
                 AbstractButton doneButton = doneButtonAtomic.get();
 
                 // Create "left" button
-                ImageButton leftButton = new ImageButton(doneButton.getX() + doneButton.getWidth() + 2, doneButton.getY(), 14, 20, 0, 0, 20,
-                                     new ResourceLocation("cold_sweat:textures/gui/screen/config_gui.png"),
+                ImageButton leftButton = new ImageButton(doneButton.getX() + doneButton.getWidth() + 2, doneButton.getY(), 14, 20,
+                                     AbstractConfigPage.DIRECTION_LEFT_SPRITES,
                                      button ->
                                      {   xOffset.set(xOffset.get() - ConfigScreen.SHIFT_AMOUNT.get());
                                          saveAndClamp.run();
@@ -111,8 +113,8 @@ public class DrawConfigButton
                 event.addListener(leftButton);
 
                 // Create "up" button
-                ImageButton upButton = new ImageButton(leftButton.getX() + leftButton.getWidth(), leftButton.getY(), 20, 10, 14, 0, 20,
-                                     new ResourceLocation("cold_sweat:textures/gui/screen/config_gui.png"),
+                ImageButton upButton = new ImageButton(leftButton.getX() + leftButton.getWidth(), leftButton.getY(), 20, 10,
+                                     AbstractConfigPage.DIRECTION_UP_SPRITES,
                                      button ->
                                      {   yOffset.set(yOffset.get() - ConfigScreen.SHIFT_AMOUNT.get());
                                          saveAndClamp.run();
@@ -121,8 +123,8 @@ public class DrawConfigButton
                 event.addListener(upButton);
 
                 // Create "down" button
-                ImageButton downButton = new ImageButton(upButton.getX(), upButton.getY() + upButton.getHeight(), 20, 10, 14, 10, 20,
-                                     new ResourceLocation("cold_sweat:textures/gui/screen/config_gui.png"),
+                ImageButton downButton = new ImageButton(upButton.getX(), upButton.getY() + upButton.getHeight(), 20, 10,
+                                     AbstractConfigPage.DIRECTION_DOWN_SPRITES,
                                      button ->
                                      {   yOffset.set(yOffset.get() + ConfigScreen.SHIFT_AMOUNT.get());
                                          saveAndClamp.run();
@@ -131,8 +133,8 @@ public class DrawConfigButton
                 event.addListener(downButton);
 
                 // Create "right" button
-                ImageButton rightButton = new ImageButton(upButton.getX() + upButton.getWidth(), upButton.getY(), 14, 20, 34, 0, 20,
-                                     new ResourceLocation("cold_sweat:textures/gui/screen/config_gui.png"),
+                ImageButton rightButton = new ImageButton(upButton.getX() + upButton.getWidth(), upButton.getY(), 14, 20,
+                                     AbstractConfigPage.DIRECTION_RIGHT_SPRITES,
                                      button ->
                                      {   xOffset.set(xOffset.get() + ConfigScreen.SHIFT_AMOUNT.get());
                                          saveAndClamp.run();
@@ -141,8 +143,8 @@ public class DrawConfigButton
                 event.addListener(rightButton);
 
                 // Create "reset" button
-                ImageButton resetButton = new ImageButton(rightButton.getX() + rightButton.getWidth() + 2, rightButton.getY(), 20, 20, 48, 0, 20,
-                                     new ResourceLocation("cold_sweat:textures/gui/screen/config_gui.png"),
+                ImageButton resetButton = new ImageButton(rightButton.getX() + rightButton.getWidth() + 2, rightButton.getY(), 20, 20,
+                                     AbstractConfigPage.DIRECTION_RESET_SPRITES,
                                      button ->
                                      {   xOffset.set(0);
                                          yOffset.set(0);

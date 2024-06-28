@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.client.gui.tooltip;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
@@ -13,19 +14,17 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-@OnlyIn(Dist.CLIENT)
 public class ClientInsulationTooltip implements ClientTooltipComponent
 {
-    public static final ResourceLocation TOOLTIP = new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar.png");
-    public static final ResourceLocation TOOLTIP_HC = new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar_hc.png");
+    public static final ResourceLocation TOOLTIP = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/tooltip/insulation_bar.png");
+    public static final ResourceLocation TOOLTIP_HC = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/tooltip/insulation_bar_hc.png");
     public static final Supplier<ResourceLocation> TOOLTIP_LOCATION = () ->
             ConfigSettings.HIGH_CONTRAST.get() ? TOOLTIP_HC
                                                : TOOLTIP;
@@ -157,7 +156,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         List<Insulation> sortedInsulation = Insulation.sort(insulations);
         boolean overflow = sortedInsulation.size() >= 10;
         int insulSlotCount = Math.max(type == Insulation.Slot.ARMOR
-                                  ? ConfigSettings.INSULATION_SLOTS.get()[3 - LivingEntity.getEquipmentSlotForItem(stack).getIndex()]
+                                  ? ConfigSettings.INSULATION_SLOTS.get()[3 - Minecraft.getInstance().player.getEquipmentSlotForItem(stack).getIndex()]
                                   : 0,
                                   insulations.size());
 

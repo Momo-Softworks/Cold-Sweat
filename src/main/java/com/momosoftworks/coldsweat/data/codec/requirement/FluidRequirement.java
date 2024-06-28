@@ -3,7 +3,9 @@ package com.momosoftworks.coldsweat.data.codec.requirement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
+import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -11,7 +13,6 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
 import java.util.Optional;
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
 public record FluidRequirement(Optional<List<Fluid>> fluids, Optional<TagKey<Fluid>> tag, Optional<BlockRequirement.StateRequirement> state, Optional<NbtRequirement> nbt)
 {
     public static final Codec<FluidRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ForgeRegistries.FLUIDS.getCodec().listOf().optionalFieldOf("fluids").forGetter(predicate -> predicate.fluids),
+            BuiltInRegistries.FLUID.byNameCodec().listOf().optionalFieldOf("fluids").forGetter(predicate -> predicate.fluids),
             TagKey.codec(Registries.FLUID).optionalFieldOf("tag").forGetter(predicate -> predicate.tag),
             BlockRequirement.StateRequirement.CODEC.optionalFieldOf("state").forGetter(predicate -> predicate.state),
             NbtRequirement.CODEC.optionalFieldOf("nbt").forGetter(predicate -> predicate.nbt)
@@ -53,7 +54,7 @@ public record FluidRequirement(Optional<List<Fluid>> fluids, Optional<TagKey<Flu
     public CompoundTag serialize()
     {
         CompoundTag lTag = new CompoundTag();
-        this.fluids.ifPresent(fluids -> lTag.put("fluids", NBTHelper.listTagOf(fluids.stream().map(ForgeRegistries.FLUIDS::getKey).map(Object::toString).collect(Collectors.toList()))));
+        this.fluids.ifPresent(fluids -> lTag.put("fluids", NBTHelper.listTagOf(fluids.stream().map(RegistryHelper.getRegistry(Registries.FLUID)::getKey).map(Object::toString).collect(Collectors.toList()))));
         this.tag.ifPresent(tag -> lTag.putString("tag", tag.location().toString()));
         this.state.ifPresent(state -> lTag.put("state", state.serialize()));
         this.nbt.ifPresent(nbt -> lTag.put("nbt", nbt.serialize()));
@@ -62,8 +63,8 @@ public record FluidRequirement(Optional<List<Fluid>> fluids, Optional<TagKey<Flu
 
     public static FluidRequirement deserialize(CompoundTag pTag)
     {
-        Optional<List<Fluid>> lFluids = pTag.contains("fluids") ? Optional.of(pTag.getList("fluids", 8).stream().map(tag -> ForgeRegistries.FLUIDS.getValue(new ResourceLocation(tag.getAsString()))).collect(Collectors.toList())) : Optional.empty();
-        Optional<TagKey<Fluid>> lTag = pTag.contains("tag") ? Optional.of(TagKey.create(Registries.FLUID, new ResourceLocation(pTag.getString("tag")))) : Optional.empty();
+        Optional<List<Fluid>> lFluids = pTag.contains("fluids") ? Optional.of(pTag.getList("fluids", 8).stream().map(tag -> RegistryHelper.getRegistry(Registries.FLUID).get(ResourceLocation.parse(tag.getAsString()))).collect(Collectors.toList())) : Optional.empty();
+        Optional<TagKey<Fluid>> lTag = pTag.contains("tag") ? Optional.of(TagKey.create(Registries.FLUID, ResourceLocation.parse(pTag.getString("tag")))) : Optional.empty();
         Optional<BlockRequirement.StateRequirement> lState = pTag.contains("state") ? Optional.of(BlockRequirement.StateRequirement.deserialize(pTag.getCompound("state"))) : Optional.empty();
         Optional<NbtRequirement> lNbt = pTag.contains("nbt") ? Optional.of(NbtRequirement.deserialize(pTag.getCompound("nbt"))) : Optional.empty();
         return new FluidRequirement(lFluids, lTag, lState, lNbt);

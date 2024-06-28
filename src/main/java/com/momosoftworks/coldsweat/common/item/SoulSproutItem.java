@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.common.item;
 
 import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
@@ -25,7 +26,7 @@ public class SoulSproutItem extends ItemNameBlockItem
         {
             // Grant the player the "A Seedy Place" advancement
             if (player.getServer() != null)
-            {   Advancement seedyPlace = player.getServer().getAdvancements().getAdvancement(new ResourceLocation("minecraft", "husbandry/plant_seed"));
+            {   AdvancementHolder seedyPlace = player.getServer().getAdvancements().get(ResourceLocation.withDefaultNamespace("husbandry/plant_seed"));
                 if (seedyPlace != null)
                 {   player.getAdvancements().award(seedyPlace, "nether_wart");
                 }

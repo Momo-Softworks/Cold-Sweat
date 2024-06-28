@@ -46,7 +46,7 @@ public record Insulator(Insulation insulation, Insulation.Slot slot, ItemRequire
         AttributeModifierMap attributes = AttributeModifierMap.deserialize(tag.getCompound("attributes"));
         CompoundTag immuneTempModifiersTag = tag.getCompound("immune_temp_modifiers");
         Map<ResourceLocation, Double> immuneTempModifiers = new HashMap<>();
-        immuneTempModifiersTag.getAllKeys().forEach(key -> immuneTempModifiers.put(new ResourceLocation(key), immuneTempModifiersTag.getDouble(key)));
+        immuneTempModifiersTag.getAllKeys().forEach(key -> immuneTempModifiers.put(ResourceLocation.parse(key), immuneTempModifiersTag.getDouble(key)));
 
         return new Insulator(insulation, slot, data, predicate, attributes, immuneTempModifiers);
     }

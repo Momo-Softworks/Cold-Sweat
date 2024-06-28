@@ -19,9 +19,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.structure.StructureType;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.registries.IForgeRegistry;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforgespi.Environment;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -51,7 +50,7 @@ public class RegistryHelper
             else access = server.registryAccess();
         }
 
-        if (access == null && FMLEnvironment.dist == Dist.CLIENT)
+        if (access == null && Environment.get().getDist() == Dist.CLIENT)
         {
             if (Minecraft.getInstance().level != null)
             {   access = Minecraft.getInstance().level.registryAccess();
@@ -67,18 +66,7 @@ public class RegistryHelper
         return access;
     }
 
-    public static <T> List<T> mapForgeRegistryTagList(IForgeRegistry<T> registry, List<Either<TagKey<T>, T>> eitherList)
-    {
-        List<T> list = new ArrayList<>();
-        for (Either<TagKey<T>, T> either : eitherList)
-        {
-            either.ifLeft(tagKey -> list.addAll(registry.tags().getTag(tagKey).stream().toList()));
-            either.ifRight(object -> list.add(object));
-        }
-        return list;
-    }
-
-    public static <T> List<T> mapVanillaRegistryTagList(ResourceKey<Registry<T>> registry, List<Either<TagKey<T>, T>> eitherList, @Nullable RegistryAccess registryAccess)
+    public static <T> List<T> mapRegistryTagList(ResourceKey<Registry<T>> registry, List<Either<TagKey<T>, T>> eitherList, @Nullable RegistryAccess registryAccess)
     {
         Registry<T> reg = registryAccess != null ? registryAccess.registryOrThrow(registry) : getRegistry(registry);
         List<T> list = new ArrayList<>();
@@ -96,34 +84,16 @@ public class RegistryHelper
         return list;
     }
 
-    public static <T> Codec<Either<TagKey<T>, T>> createForgeTagCodec(IForgeRegistry<T> forgeRegistry, ResourceKey<Registry<T>> vanillaRegistry)
+    public static <T> Codec<Either<TagKey<T>, T>> createTagCodec(ResourceKey<Registry<T>> vanillaRegistry)
     {
         return Codec.STRING.xmap(
                objectPath ->
                {
                    if (objectPath.startsWith("#"))
-                   {   return Either.left(TagKey.create(vanillaRegistry, new ResourceLocation(objectPath.substring(1))));
+                   {   return Either.left(TagKey.create(vanillaRegistry, ResourceLocation.parse(objectPath.substring(1))));
                    }
                    else
-                   {   return Either.right(forgeRegistry.getValue(new ResourceLocation(objectPath)));
-                   }
-               },
-               objectEither -> objectEither.map(
-                       tagKey -> "#" + tagKey.location(),
-                       object -> forgeRegistry.getKey(object).toString()
-               ));
-    }
-
-    public static <T> Codec<Either<TagKey<T>, T>> createVanillaTagCodec(ResourceKey<Registry<T>> vanillaRegistry)
-    {
-        return Codec.STRING.xmap(
-               objectPath ->
-               {
-                   if (objectPath.startsWith("#"))
-                   {   return Either.left(TagKey.create(vanillaRegistry, new ResourceLocation(objectPath.substring(1))));
-                   }
-                   else
-                   {   return Either.right(getVanillaRegistryValue(vanillaRegistry, new ResourceLocation(objectPath)).orElseThrow());
+                   {   return Either.right(getVanillaRegistryValue(vanillaRegistry, ResourceLocation.parse(objectPath)).orElseThrow());
                    }
                },
                objectEither -> objectEither.map(

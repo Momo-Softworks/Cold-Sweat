@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.client.gui.config.pages;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.gui.config.ConfigScreen;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -39,7 +40,7 @@ public class ConfigPageDifficulty extends Screen
     private static final List<Component> CUSTOM_DESCRIPTION = Collections.singletonList(
                     Component.translatable("cold_sweat.config.difficulty.description.custom"));
 
-    static final ResourceLocation CONFIG_BUTTONS_LOCATION = new ResourceLocation("cold_sweat:textures/gui/screen/config_gui.png");
+    static final ResourceLocation CONFIG_BUTTONS_LOCATION = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/screen/config_gui.png");
 
     private final Screen parentScreen;
 
@@ -136,7 +137,7 @@ public class ConfigPageDifficulty extends Screen
         {   graphics.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
         }
         else
-        {   this.renderDirtBackground(graphics);
+        {   // Rest in peace, dirt background... this.renderDirtBackground(graphics);
         }
 
         int difficulty = ConfigSettings.DIFFICULTY.get();
@@ -224,7 +225,7 @@ public class ConfigPageDifficulty extends Screen
             int newDifficulty = (int) Math.round(CSMath.blend(0, 4, x, this.width / 2.0 - 76, this.width / 2.0 + 76));
 
             if (newDifficulty != ConfigSettings.DIFFICULTY.get())
-            {   ConfigScreen.MC.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvent.createFixedRangeEvent(new ResourceLocation("minecraft:block.note_block.hat"), 1.8f), 0.5f));
+            {   ConfigScreen.MC.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvent.createFixedRangeEvent(ResourceLocation.withDefaultNamespace("block.note_block.hat"), 1.8f), 0.5f));
             }
             ConfigSettings.DIFFICULTY.set(newDifficulty);
         }

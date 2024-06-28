@@ -4,21 +4,14 @@ import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.nbt.*;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
-
-import java.util.Arrays;
 
 import static net.minecraft.advancements.critereon.NbtPredicate.getEntityTagToCompare;
 
 public record NbtRequirement(CompoundTag tag)
 {
     public static final Codec<NbtRequirement> CODEC = CompoundTag.CODEC.xmap(NbtRequirement::deserialize, NbtRequirement::serialize);
-
-    public boolean test(ItemStack pStack)
-    {   return this.tag().isEmpty() || this.test(pStack.getTag());
-    }
 
     public boolean test(Entity pEntity)
     {   return this.tag().isEmpty() || this.test(getEntityTagToCompare(pEntity));

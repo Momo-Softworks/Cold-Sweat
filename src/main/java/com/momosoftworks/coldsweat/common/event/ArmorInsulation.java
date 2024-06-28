@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.common.event;
 
+import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
@@ -11,36 +12,37 @@ import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCa
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.type.Insulator;
+import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-@Mod.EventBusSubscriber
+@EventBusSubscriber
 public class ArmorInsulation
 {
     @SubscribeEvent
-    public static void applyArmorInsulation(TickEvent.PlayerTickEvent event)
+    public static void applyArmorInsulation(PlayerTickEvent.Post event)
     {
-        Player player = event.player;
-        if (event.phase == TickEvent.Phase.END && player instanceof ServerPlayer serverPlayer
+        Player player = event.getEntity();
+        if (player instanceof ServerPlayer serverPlayer
         && player.tickCount % 20 == 0 && !player.level().isClientSide)
         {
             int fullyInsulatedSlots = 0;
@@ -69,8 +71,8 @@ public class ArmorInsulation
                     }
                     else
                     {   // Add the armor's insulation value from the Sewing Table
-                        LazyOptional<IInsulatableCap> iCap = ItemInsulationManager.getInsulationCap(armorStack);
-                        List<Insulation> insulation = ItemInsulationManager.getInsulationCap(armorStack)
+                        IInsulatableCap iCap = ItemInsulationManager.getInsulationCap(armorStack);
+                        List<Insulation> insulation = Optional.ofNullable(ItemInsulationManager.getInsulationCap(armorStack))
                                                       .map(IInsulatableCap::getInsulation).orElse(new ArrayList<>())
                                                       .stream()
                                                       .filter(pair -> CSMath.getIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(pair.getFirst().getItem()),
@@ -97,15 +99,15 @@ public class ArmorInsulation
                         {   fullyInsulatedSlots++;
                         }
 
-                        if (iCap.resolve().isPresent() && iCap.resolve().get() instanceof ItemInsulationCap cap)
+                        if (iCap instanceof ItemInsulationCap cap)
                         {   cap.calcAdaptiveInsulation(worldTemp, minTemp, maxTemp);
                         }
                     }
 
                     // Add the armor's defense value to the insulation value.
-                    double armorAmount = armorStack.getAttributeModifiers(LivingEntity.getEquipmentSlotForItem(armorStack)).entries()
-                                         .stream().filter(entry -> entry.getKey().equals(Attributes.ARMOR))
-                                         .map(entry -> entry.getValue().getAmount())
+                    double armorAmount = armorStack.getAttributeModifiers().modifiers()
+                                         .stream().filter(entry -> entry.attribute() == Attributes.ARMOR && entry.slot() == EquipmentSlotGroup.ARMOR)
+                                         .map(entry -> entry.modifier().amount())
                                          .mapToDouble(Double::doubleValue).sum();
                     cold += Math.min(armorAmount, 20);
                     heat += Math.min(armorAmount, 20);
@@ -132,7 +134,7 @@ public class ArmorInsulation
             {
                 if (serverPlayer.getServer() != null)
                 {
-                    Advancement advancement = serverPlayer.getServer().getAdvancements().getAdvancement(new ResourceLocation("cold_sweat:full_insulation"));
+                    AdvancementHolder advancement = serverPlayer.getServer().getAdvancements().get(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "full_insulation"));
                     if (advancement != null)
                     {   serverPlayer.getAdvancements().award(advancement, "requirement");
                     }
@@ -145,7 +147,7 @@ public class ArmorInsulation
      * Prevent damage by magma blocks if the player has hoglin hooves
      */
     @SubscribeEvent
-    public static void onDamageTaken(LivingAttackEvent event)
+    public static void onDamageTaken(LivingIncomingDamageEvent event)
     {
         DamageSource source = event.getSource();
         if (source == event.getEntity().level().damageSources().hotFloor() && event.getEntity().getItemBySlot(EquipmentSlot.FEET).is(ModItems.HOGLIN_HOOVES))

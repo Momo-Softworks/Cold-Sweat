@@ -2,7 +2,7 @@ package com.momosoftworks.coldsweat.api.temperature.block_temp;
 
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.block.IceboxBlock;
-import com.momosoftworks.coldsweat.util.registries.ModBlocks;
+import com.momosoftworks.coldsweat.core.init.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
@@ -13,7 +13,7 @@ public class IceboxBlockTemp extends BlockTemp
 {
     public IceboxBlockTemp()
     {
-        super(ModBlocks.ICEBOX);
+        super(ModBlocks.ICEBOX.value());
     }
 
     @Override

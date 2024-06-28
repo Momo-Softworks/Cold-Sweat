@@ -1,20 +1,21 @@
 package com.momosoftworks.coldsweat.common.item;
 
 import com.momosoftworks.coldsweat.client.event.RegisterModels;
-import com.momosoftworks.coldsweat.util.registries.ModItems;
+import com.momosoftworks.coldsweat.core.init.ModItems;
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.core.Holder;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
+import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 
 import java.util.function.Consumer;
 
 public class HoglinArmorItem extends ArmorItem
 {
-    public HoglinArmorItem(ArmorMaterial material, ArmorItem.Type type, Properties properties)
+    public HoglinArmorItem(Holder<ArmorMaterial> material, Type type, Properties properties)
     {   super(material, type, properties);
     }
 

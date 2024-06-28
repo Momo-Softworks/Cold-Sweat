@@ -1,20 +1,24 @@
 package com.momosoftworks.coldsweat.client.gui.config;
 
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.ImageWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
-public class ConfigImage extends ImageWidget implements GuiEventListener, NarratableEntry
+// TODO: Check if this works
+public class ConfigImage extends AbstractWidget implements GuiEventListener, NarratableEntry
 {
     ResourceLocation texture;
     int x, y, width, height, u, v;
 
     public ConfigImage(ResourceLocation texture, int x, int y, int width, int height, int u, int v)
-    {   super(x, y, width, height, texture);
+    {
+        super(x, y, width, height, Component.empty());
         this.texture = texture;
         this.x = x;
         this.y = y;

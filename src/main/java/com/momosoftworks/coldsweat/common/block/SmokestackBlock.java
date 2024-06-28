@@ -23,7 +23,7 @@ public class SmokestackBlock extends Block
                 .dynamicShape();
     }
 
-    public SmokestackBlock(Block.Properties properties)
+    public SmokestackBlock(Properties properties)
     {   super(properties);
         this.registerDefaultState(this.defaultBlockState());
     }

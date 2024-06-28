@@ -4,10 +4,11 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.serialization.ListBuilder;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.loading.FMLPaths;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,34 +18,34 @@ import java.util.stream.Collectors;
 
 public class WorldSettingsConfig
 {
-    private static final ForgeConfigSpec SPEC;
-    public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
+    private static final ModConfigSpec SPEC;
+    public static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
-    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> biomeOffsets;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> biomeTemps;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> dimensionOffsets;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> dimensionTemps;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> structureOffsets;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> structureTemps;
+    public static final ModConfigSpec.ConfigValue<List<? extends List<?>>> biomeOffsets;
+    public static final ModConfigSpec.ConfigValue<List<? extends List<?>>> biomeTemps;
+    public static final ModConfigSpec.ConfigValue<List<? extends List<?>>> dimensionOffsets;
+    public static final ModConfigSpec.ConfigValue<List<? extends List<?>>> dimensionTemps;
+    public static final ModConfigSpec.ConfigValue<List<? extends List<?>>> structureOffsets;
+    public static final ModConfigSpec.ConfigValue<List<? extends List<?>>> structureTemps;
 
-    public static final ForgeConfigSpec.ConfigValue<Double> caveInsulation;
+    public static final ModConfigSpec.ConfigValue<Double> caveInsulation;
 
-    public static final ForgeConfigSpec.ConfigValue<List<? extends List<Object>>> blockTemps;
-    public static final ForgeConfigSpec.IntValue blockRange;
+    public static final ModConfigSpec.ConfigValue<List<? extends List<Object>>> blockTemps;
+    public static final ModConfigSpec.IntValue blockRange;
 
-    public static final ForgeConfigSpec.ConfigValue<Boolean> coldSoulFire;
+    public static final ModConfigSpec.ConfigValue<Boolean> coldSoulFire;
 
-    public static ForgeConfigSpec.ConfigValue<List<? extends Number>> summerTemps;
-    public static ForgeConfigSpec.ConfigValue<List<? extends Number>> autumnTemps;
-    public static ForgeConfigSpec.ConfigValue<List<? extends Number>> winterTemps;
-    public static ForgeConfigSpec.ConfigValue<List<? extends Number>> springTemps;
+    public static ModConfigSpec.ConfigValue<List<? extends Number>> summerTemps;
+    public static ModConfigSpec.ConfigValue<List<? extends Number>> autumnTemps;
+    public static ModConfigSpec.ConfigValue<List<? extends Number>> winterTemps;
+    public static ModConfigSpec.ConfigValue<List<? extends Number>> springTemps;
 
-    public static final ForgeConfigSpec.ConfigValue<Double> hearthEffect;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> hearthSpreadWhitelist;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> hearthSpreadBlacklist;
+    public static final ModConfigSpec.ConfigValue<Double> hearthEffect;
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> hearthSpreadWhitelist;
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> hearthSpreadBlacklist;
 
-    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> sleepingOverrideBlocks;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> checkSleep;
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> sleepingOverrideBlocks;
+    public static final ModConfigSpec.ConfigValue<Boolean> checkSleep;
 
     public static final WorldSettingsConfig INSTANCE = new WorldSettingsConfig();
 
@@ -588,7 +589,7 @@ public class WorldSettingsConfig
         SPEC = BUILDER.build();
     }
 
-    public static void setup()
+    public static void setup(ModContainer modContainer)
     {
         Path configPath = FMLPaths.CONFIGDIR.get();
         Path csConfigPath = Paths.get(configPath.toAbsolutePath().toString(), "coldsweat");
@@ -599,7 +600,7 @@ public class WorldSettingsConfig
         }
         catch (Exception ignored) {}
 
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, SPEC, "coldsweat/world_settings.toml");
+        modContainer.registerConfig(ModConfig.Type.COMMON, SPEC, "coldsweat/world_settings.toml");
     }
 
     public static WorldSettingsConfig getInstance()

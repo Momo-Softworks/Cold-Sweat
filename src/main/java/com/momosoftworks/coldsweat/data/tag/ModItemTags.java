@@ -20,7 +20,6 @@ public class ModItemTags
     public static final TagKey<Item> CHAMELEON_HUMID = createTag("chameleon/find_humid_biomes");
 
     private static TagKey<Item> createTag(String name)
-    {
-        return ItemTags.create(new ResourceLocation(ColdSweat.MOD_ID, name));
+    {   return ItemTags.create(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, name));
     }
 }

@@ -1,10 +1,9 @@
 package com.momosoftworks.coldsweat.common.block;
 
-import com.momosoftworks.coldsweat.common.blockentity.BoilerBlockEntity;
 import com.momosoftworks.coldsweat.common.blockentity.IceboxBlockEntity;
-import com.momosoftworks.coldsweat.core.init.ParticleTypesInit;
-import com.momosoftworks.coldsweat.util.registries.ModBlockEntities;
-import com.momosoftworks.coldsweat.util.registries.ModItems;
+import com.momosoftworks.coldsweat.core.init.ModBlockEntities;
+import com.momosoftworks.coldsweat.core.init.ModItems;
+import com.momosoftworks.coldsweat.core.init.ModParticleTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
@@ -14,6 +13,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -30,7 +30,6 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Random;
@@ -52,7 +51,7 @@ public class IceboxBlock extends Block implements EntityBlock
         return new Item.Properties();
     }
 
-    public IceboxBlock(Block.Properties properties)
+    public IceboxBlock(Properties properties)
     {
         super(properties);
         this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH).setValue(FROSTED, false));
@@ -61,20 +60,19 @@ public class IceboxBlock extends Block implements EntityBlock
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return type == ModBlockEntities.ICEBOX ? IceboxBlockEntity::tick : null;
+        return type == ModBlockEntities.ICEBOX.value() ? IceboxBlockEntity::tick : null;
     }
 
     @SuppressWarnings("deprecation")
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
+    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
     {
         if (level.getBlockEntity(pos) instanceof IceboxBlockEntity icebox)
         {
-            ItemStack stack = player.getItemInHand(hand);
             // If the player is trying to put a smokestack on top, don't do anything
-            if (stack.getItem() == ModItems.SMOKESTACK && rayTraceResult.getDirection() == Direction.UP
+            if (stack.getItem() == ModItems.SMOKESTACK.value() && rayTraceResult.getDirection() == Direction.UP
             && level.getBlockState(pos.above()).getBlock() instanceof AirBlock)
-            {   return InteractionResult.FAIL;
+            {   return ItemInteractionResult.FAIL;
             }
             int itemFuel = icebox.getItemFuel(stack);
 
@@ -97,10 +95,10 @@ public class IceboxBlock extends Block implements EntityBlock
                 level.playSound(null, pos, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
             }
             else if (!level.isClientSide)
-            {   NetworkHooks.openScreen((ServerPlayer) player, icebox, pos);
+            {   player.openMenu(icebox, pos);
             }
         }
-        return InteractionResult.SUCCESS;
+        return ItemInteractionResult.SUCCESS;
     }
 
 
@@ -165,6 +163,6 @@ public class IceboxBlock extends Block implements EntityBlock
         double d5 = side ? Math.random() - 0.5 : (Math.random() < 0.5 ? 0.55 : -0.55);
         double d6 = Math.random() * 0.3;
         double d7 = !side ? Math.random() - 0.5 : (Math.random() < 0.5 ? 0.55 : -0.55);
-        level.addParticle(ParticleTypesInit.GROUND_MIST.get(), d0 + d5, d1 + d6, d2 + d7, d5 / 40, 0.0D, d7 / 40);
+        level.addParticle(ModParticleTypes.GROUND_MIST.get(), d0 + d5, d1 + d6, d2 + d7, d5 / 40, 0.0D, d7 / 40);
     }
 }

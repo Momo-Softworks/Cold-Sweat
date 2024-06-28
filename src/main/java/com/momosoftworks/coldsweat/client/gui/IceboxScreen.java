@@ -12,7 +12,7 @@ import net.minecraft.world.entity.player.Inventory;
 
 public class IceboxScreen extends AbstractHearthScreen<IceboxContainer>
 {
-    private static final ResourceLocation ICEBOX_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/icebox_gui.png");
+    private static final ResourceLocation ICEBOX_GUI = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/screen/icebox_gui.png");
 
     @Override
     HearthBlockEntity getBlockEntity()

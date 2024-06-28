@@ -1,110 +1,57 @@
 package com.momosoftworks.coldsweat.common.capability.handler;
 
 import com.mojang.datafixers.util.Pair;
-import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.common.capability.ModCapabilities;
 import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
+import com.momosoftworks.coldsweat.common.capability.temperature.EntityTempCap;
+import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.type.Insulator;
+import com.momosoftworks.coldsweat.core.init.ModItemComponents;
+import com.momosoftworks.coldsweat.util.item.ItemStackHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
-import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Equipable;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.common.capabilities.ICapabilitySerializable;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.event.AttachCapabilitiesEvent;
-import net.minecraftforge.event.entity.player.PlayerContainerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerContainerEvent;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
-@Mod.EventBusSubscriber
+@EventBusSubscriber
 public class ItemInsulationManager
 {
-    public static Map<ItemStack, LazyOptional<IInsulatableCap>> ITEM_INSULATION_CAPS = new WeakHashMap<>();
+    public static Map<ItemStack, IInsulatableCap> ITEM_INSULATION_CAPS = new WeakHashMap<>();
 
-    @SubscribeEvent
-    public static void attachCapabilityToItemHandler(AttachCapabilitiesEvent<ItemStack> event)
-    {
-        ItemStack stack = event.getObject();
-        if (isInsulatable(stack))
-        {
-            // Make a new capability instance to attach to the item
-            ItemInsulationCap itemInsulationCap = new ItemInsulationCap();
-            // Optional that holds the capability instance
-            final LazyOptional<IInsulatableCap> capOptional = LazyOptional.of(() -> itemInsulationCap);
-            Capability<IInsulatableCap> capability = ModCapabilities.ITEM_INSULATION;
-
-            ICapabilityProvider provider = new ICapabilitySerializable<CompoundTag>()
-            {
-                @Nonnull
-                @Override
-                public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction direction)
-                {
-                    // If the requested cap is the insulation cap, return the insulation cap
-                    if (cap == capability)
-                    {   return capOptional.cast();
-                    }
-                    return LazyOptional.empty();
-                }
-
-                @Override
-                public CompoundTag serializeNBT()
-                {   return itemInsulationCap.serializeNBT();
-                }
-
-                @Override
-                public void deserializeNBT(CompoundTag nbt)
-                {   itemInsulationCap.deserializeNBT(nbt);
-                }
-            };
-
-            // Attach the capability to the item
-            event.addCapability(new ResourceLocation(ColdSweat.MOD_ID, "item_insulation"), provider);
-
-            // Legacy code for updating items using the pre-2.2 insulation system
-            CompoundTag stackNBT = NBTHelper.getTagOrEmpty(stack);
-            if (stack.getItem() instanceof ArmorItem armor)
-            {
-                if (stackNBT.getBoolean("insulated"))
-                {   stackNBT.remove("insulated");
-                    switch (armor.getType().getSlot())
-                    {   case HEAD  : itemInsulationCap.addInsulationItem(Items.LEATHER_HELMET.getDefaultInstance()); break;
-                        case CHEST : itemInsulationCap.addInsulationItem(Items.LEATHER_CHESTPLATE.getDefaultInstance()); break;
-                        case LEGS  : itemInsulationCap.addInsulationItem(Items.LEATHER_LEGGINGS.getDefaultInstance()); break;
-                        case FEET  : itemInsulationCap.addInsulationItem(Items.LEATHER_BOOTS.getDefaultInstance()); break;
-                        default    : itemInsulationCap.addInsulationItem(ItemStack.EMPTY); break;
-                    }
-                }
-            }
-        }
+    public static IInsulatableCap getInsulationCap(ItemStack stack)
+    {   return ITEM_INSULATION_CAPS.computeIfAbsent(stack, s -> stack.getCapability(ModCapabilities.ITEM_INSULATION));
     }
 
-    public static LazyOptional<IInsulatableCap> getInsulationCap(ItemStack stack)
+    public static void attachCapabilityToItemHandler(RegisterCapabilitiesEvent event)
     {
-        return ITEM_INSULATION_CAPS.computeIfAbsent(stack, s -> stack.getCapability(ModCapabilities.ITEM_INSULATION));
+        event.registerItem(ModCapabilities.ITEM_INSULATION, (stack, context) ->
+        {   return new ItemInsulationCap();
+        },
+        BuiltInRegistries.ITEM.stream().filter(item -> item instanceof Equipable).toArray(Item[]::new));
     }
 
     @SubscribeEvent
@@ -118,10 +65,8 @@ public class ItemInsulationManager
         public void slotChanged(AbstractContainerMenu sendingContainer, int slot, ItemStack stack)
         {
             ItemStack containerStack = sendingContainer.getSlot(slot).getItem();
-            getInsulationCap(containerStack).ifPresent(cap ->
-            {
-                containerStack.getOrCreateTag().merge(cap.serializeNBT());
-            });
+            IInsulatableCap cap = getInsulationCap(containerStack);
+            containerStack.set(ModItemComponents.INSULATION_DATA, cap.serialize());
         }
 
         @Override
@@ -146,7 +91,10 @@ public class ItemInsulationManager
     public static int getInsulationSlots(ItemStack item)
     {
         Integer[] slots = ConfigSettings.INSULATION_SLOTS.get();
-        return switch (LivingEntity.getEquipmentSlotForItem(item))
+        if (!(item.getItem() instanceof ArmorItem))
+        {   return 0;
+        }
+        return switch (((ArmorItem) item.getItem()).getEquipmentSlot())
         {
             case HEAD  -> slots[0];
             case CHEST -> slots[1];
@@ -167,13 +115,10 @@ public class ItemInsulationManager
         List<Insulator> insulators = new ArrayList<>();
         if (isInsulatable(stack))
         {
-            getInsulationCap(stack).ifPresent(cap ->
-            {
-                for (Pair<ItemStack, List<Insulation>> pair : cap.getInsulation())
-                {
-                    CSMath.doIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(pair.getFirst().getItem()), insulators::add);
-                }
-            });
+            IInsulatableCap cap = getInsulationCap(stack);
+            for (Pair<ItemStack, List<Insulation>> pair : cap.getInsulation())
+            {   CSMath.doIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(pair.getFirst().getItem()), insulators::add);
+            }
         }
 
         CSMath.doIfNotNull(ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem()), insulators::add);
@@ -191,7 +136,7 @@ public class ItemInsulationManager
             {
                 modifiers.addAll(insulator.attributes().get(attribute)
                                           .stream()
-                                          .filter(mod -> operation == null || mod.getOperation() == operation)
+                                          .filter(mod -> operation == null || mod.operation() == operation)
                                           .toList());
             }
         }
@@ -200,12 +145,14 @@ public class ItemInsulationManager
 
     public static List<AttributeModifier> getAttributeModifiersForSlot(ItemStack stack, Attribute attribute, EquipmentSlot slot, @Nullable AttributeModifier.Operation operation, @Nullable Entity owner)
     {
-        List<AttributeModifier> modifiers = new ArrayList<>(operation != null
-                                                  ? stack.getAttributeModifiers(slot).get(attribute)
-                                                         .stream()
-                                                         .filter(mod -> mod.getOperation() == operation)
-                                                         .toList()
-                                                  : stack.getAttributeModifiers(slot).get(attribute));
+        List<AttributeModifier> modifiers = new ArrayList<>((operation != null
+                                                             ? ItemStackHelper.getAttributeModifiers(stack, slot)
+                                                                              .filter(entry -> entry.attribute().equals(Holder.direct(attribute)))
+                                                                              .filter(entry -> entry.modifier().operation() == operation)
+                                                             : ItemStackHelper.getAttributeModifiers(stack, slot)
+                                                                              .filter(entry -> entry.attribute().equals(Holder.direct(attribute))))
+                                                             .map(ItemAttributeModifiers.Entry::modifier)
+                                                             .toList());
         modifiers.addAll(getInsulationAttributeModifiers(stack, attribute, operation, owner));
         return modifiers;
     }

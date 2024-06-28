@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.data.codec.requirement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
+import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
@@ -57,7 +58,7 @@ public record LocationRequirement(Optional<Integer> x, Optional<Integer> y, Opti
         }
 
         if (this.structure.isPresent()
-        && WorldHelper.getServerLevel(level).structureManager().getStructureWithPieceAt(pos, this.structure.get()) == StructureStart.INVALID_START)
+        && WorldHelper.getServerLevel(level).structureManager().getStructureWithPieceAt(pos, RegistryHelper.getRegistry(Registries.STRUCTURE).get(this.structure.get())) == StructureStart.INVALID_START)
         {   return false;
         }
 
@@ -98,9 +99,9 @@ public record LocationRequirement(Optional<Integer> x, Optional<Integer> y, Opti
         Optional<Integer> x = tag.contains("x") ? Optional.of(tag.getInt("x")) : Optional.empty();
         Optional<Integer> y = tag.contains("y") ? Optional.of(tag.getInt("y")) : Optional.empty();
         Optional<Integer> z = tag.contains("z") ? Optional.of(tag.getInt("z")) : Optional.empty();
-        Optional<ResourceKey<Biome>> biome = tag.contains("biome") ? Optional.of(ResourceKey.create(Registries.BIOME, new ResourceLocation(tag.getString("biome"))) ) : Optional.empty();
-        Optional<ResourceKey<Structure>> structure = tag.contains("structure") ? Optional.of(ResourceKey.create(Registries.STRUCTURE, new ResourceLocation(tag.getString("structure"))) ) : Optional.empty();
-        Optional<ResourceKey<Level>> dimension = tag.contains("dimension") ? Optional.of(ResourceKey.create(Registries.DIMENSION, new ResourceLocation(tag.getString("dimension"))) ) : Optional.empty();
+        Optional<ResourceKey<Biome>> biome = tag.contains("biome") ? Optional.of(ResourceKey.create(Registries.BIOME, ResourceLocation.parse(tag.getString("biome"))) ) : Optional.empty();
+        Optional<ResourceKey<Structure>> structure = tag.contains("structure") ? Optional.of(ResourceKey.create(Registries.STRUCTURE, ResourceLocation.parse(tag.getString("structure"))) ) : Optional.empty();
+        Optional<ResourceKey<Level>> dimension = tag.contains("dimension") ? Optional.of(ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(tag.getString("dimension"))) ) : Optional.empty();
         Optional<IntegerBounds> light = tag.contains("light") ? Optional.of(IntegerBounds.deserialize(tag.getCompound("light"))) : Optional.empty();
         Optional<BlockRequirement> block = tag.contains("block") ? Optional.of(BlockRequirement.deserialize(tag.getCompound("block"))) : Optional.empty();
         Optional<FluidRequirement> fluid = tag.contains("fluid") ? Optional.of(FluidRequirement.deserialize(tag.getCompound("fluid"))) : Optional.empty();

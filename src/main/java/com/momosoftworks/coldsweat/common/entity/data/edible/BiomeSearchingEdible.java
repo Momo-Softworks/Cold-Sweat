@@ -3,7 +3,7 @@ package com.momosoftworks.coldsweat.common.entity.data.edible;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.common.entity.Chameleon;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
-import com.momosoftworks.coldsweat.util.registries.ModSounds;
+import com.momosoftworks.coldsweat.core.init.ModSounds;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -43,7 +43,7 @@ public abstract class BiomeSearchingEdible extends Edible
                         // Set the chameleon to track this position
                         entity.setTrackingPos(biomePair.getFirst());
 
-                        WorldHelper.playEntitySound(ModSounds.CHAMELEON_FIND, entity, entity.getSoundSource(), 1.2f, entity.getVoicePitch());
+                        WorldHelper.playEntitySound(ModSounds.CHAMELEON_FIND.value(), entity, entity.getSoundSource(), 1.2f, entity.getVoicePitch());
                         WorldHelper.spawnParticleBatch(entity.level(), ParticleTypes.HAPPY_VILLAGER, entity.getX(), entity.getY() + entity.getBbHeight() / 2, entity.getZ(), 1, 1, 1, 6, 0.01);
 
                         // Stop searching

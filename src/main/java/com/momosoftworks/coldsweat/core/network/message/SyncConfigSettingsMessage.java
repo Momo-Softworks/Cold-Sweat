@@ -1,22 +1,26 @@
 package com.momosoftworks.coldsweat.core.network.message;
 
-import com.momosoftworks.coldsweat.config.spec.MainSettingsConfig;
-import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
-import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
+import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.config.spec.MainSettingsConfig;
+import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Supplier;
 
-public class SyncConfigSettingsMessage
+public class SyncConfigSettingsMessage implements CustomPacketPayload
 {
     public static final UUID EMPTY_UUID = new UUID(0, 0);
+    public static final CustomPacketPayload.Type<SyncConfigSettingsMessage> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "sync_config_settings"));
+    public static final StreamCodec<FriendlyByteBuf, SyncConfigSettingsMessage> CODEC = CustomPacketPayload.codec(SyncConfigSettingsMessage::encode, SyncConfigSettingsMessage::decode);
 
     Map<String, CompoundTag> configValues;
     UUID menuOpener;
@@ -57,29 +61,31 @@ public class SyncConfigSettingsMessage
         return new SyncConfigSettingsMessage(values, menuOpener);
     }
 
-    public static void handle(SyncConfigSettingsMessage message, Supplier<NetworkEvent.Context> contextSupplier)
+    public static void handle(SyncConfigSettingsMessage message, IPayloadContext context, boolean isServer)
     {
-        NetworkEvent.Context context = contextSupplier.get();
         context.enqueueWork(() ->
         {
             message.configValues.forEach(ConfigSettings::decode);
 
-            if (context.getDirection().getReceptionSide().isServer())
+            if (isServer)
             {
-                if (context.getSender() != null && context.getSender().hasPermissions(2))
+                if (context.player().hasPermissions(2))
                 {   ConfigSettings.saveValues();
                     MainSettingsConfig.getInstance().save();
                 }
-
-                ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new SyncConfigSettingsMessage(EMPTY_UUID));
+                PacketDistributor.sendToAllPlayers(new SyncConfigSettingsMessage(EMPTY_UUID));
             }
-            else if (context.getDirection().getReceptionSide().isClient())
+            else
             {
                 if (message.menuOpener.equals(ClientOnlyHelper.getClientPlayer().getUUID()))
                 {   ClientOnlyHelper.openConfigScreen();
                 }
             }
         });
-        context.setPacketHandled(true);
+    }
+
+    @Override
+    public Type<? extends CustomPacketPayload> type()
+    {   return TYPE;
     }
 }

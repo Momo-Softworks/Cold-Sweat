@@ -11,7 +11,7 @@ import net.minecraft.world.entity.player.Inventory;
 
 public class HearthScreen extends AbstractHearthScreen<HearthContainer>
 {
-    private static final ResourceLocation HEARTH_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/hearth_gui.png");
+    private static final ResourceLocation HEARTH_GUI = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/screen/hearth_gui.png");
 
     @Override
     HearthBlockEntity getBlockEntity()

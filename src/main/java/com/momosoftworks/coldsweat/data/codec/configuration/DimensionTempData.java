@@ -16,7 +16,7 @@ public record DimensionTempData(List<Either<TagKey<DimensionType>, DimensionType
                                 Temperature.Units units, boolean isOffset, Optional<List<String>> requiredMods)
 {
     public static final Codec<DimensionTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            RegistryHelper.createVanillaTagCodec(Registries.DIMENSION_TYPE).listOf().fieldOf("dimensions").forGetter(DimensionTempData::dimensions),
+            RegistryHelper.createTagCodec(Registries.DIMENSION_TYPE).listOf().fieldOf("dimensions").forGetter(DimensionTempData::dimensions),
             Codec.DOUBLE.fieldOf("temperature").forGetter(DimensionTempData::temperature),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(DimensionTempData::units),
             Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(DimensionTempData::isOffset),

@@ -5,11 +5,13 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.gui.Overlays;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.core.init.ItemInit;
+import com.momosoftworks.coldsweat.core.init.ModItemComponents;
+import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -17,12 +19,12 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class RegisterItemOverrides
 {
     @SubscribeEvent
@@ -30,18 +32,19 @@ public class RegisterItemOverrides
     {
         event.enqueueWork(() ->
         {
-            ItemProperties.register(ItemInit.SOULSPRING_LAMP.get(), new ResourceLocation(ColdSweat.MOD_ID, "soulspring_state"), (stack, level, entity, id) ->
+            ItemProperties.register(ModItems.SOULSPRING_LAMP.get(), ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "soulspring_state"), (stack, level, entity, id) ->
             {
-                CompoundTag tag = stack.getOrCreateTag();
-                if (tag.getBoolean("Lit"))
+                Boolean isLit = CSMath.orElse(stack.get(ModItemComponents.SOULSPRING_LAMP_LIT), false);
+                Double fuel = CSMath.orElse(stack.get(ModItemComponents.SOULSPRING_LAMP_FUEL), 0d);
+                if (isLit)
                 {
-                    return tag.getInt("Fuel") > 43 ? 3 :
-                           tag.getInt("Fuel") > 22 ? 2 : 1;
+                    return fuel > 43 ? 3 :
+                           fuel > 22 ? 2 : 1;
                 }
                 return 0;
             });
 
-            ItemProperties.register(ItemInit.THERMOMETER.get(), new ResourceLocation(ColdSweat.MOD_ID, "temperature"), (stack, level, livingEntity, id) ->
+            ItemProperties.register(ModItems.THERMOMETER.get(), ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "temperature"), (stack, level, livingEntity, id) ->
             {
                 Entity entity = (livingEntity != null ? livingEntity : stack.getEntityRepresentation());
                 if (entity != null)
@@ -54,7 +57,7 @@ public class RegisterItemOverrides
                     || (entity.tickCount % 20 == 0 || (entity instanceof Player && entity.tickCount % 2 == 0)) && entity.getPersistentData().getInt("WorldTempTimestamp") != entity.tickCount)
                     {
                         worldTemp = entity instanceof LivingEntity living
-                                ? EntityTempManager.getTemperatureCap(living).map(cap -> cap.getTrait(Temperature.Trait.WORLD)).orElse(0.0)
+                                ? EntityTempManager.getTemperatureCap(living).getTrait(Temperature.Trait.WORLD)
                                 : Temperature.getTemperatureAt(entity.blockPosition(), entity.level());
 
                         entity.getPersistentData().putDouble("WorldTemp", worldTemp);
@@ -77,8 +80,8 @@ public class RegisterItemOverrides
                                 default -> ChatFormatting.RESET;
                             };
                             int convertedTemp = (int) Temperature.convert(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true) + ConfigSettings.TEMP_OFFSET.get();
-                            frame.getItem().setHoverName(Component.literal(convertedTemp + " " + (celsius ? Temperature.Units.C.getFormattedName()
-                                                                                                          : Temperature.Units.F.getFormattedName())).withStyle(tempColor));
+                            frame.getItem().set(DataComponents.CUSTOM_NAME, Component.literal(convertedTemp + " " + (celsius ? Temperature.Units.C.getFormattedName()
+                                                                                                                             : Temperature.Units.F.getFormattedName())).withStyle(tempColor));
                         }
                     }
 

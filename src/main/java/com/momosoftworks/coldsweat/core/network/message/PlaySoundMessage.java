@@ -1,39 +1,48 @@
 package com.momosoftworks.coldsweat.core.network.message;
 
+import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
+import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.nio.charset.StandardCharsets;
-import java.util.function.Supplier;
 
-public class PlaySoundMessage
+public class PlaySoundMessage implements CustomPacketPayload
 {
+    public static final CustomPacketPayload.Type<PlaySoundMessage> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "play_sound"));
+    public static final StreamCodec<FriendlyByteBuf, PlaySoundMessage> CODEC = CustomPacketPayload.codec(PlaySoundMessage::encode, PlaySoundMessage::decode);
+
     String sound;
-    int soundChars;
     SoundSource source;
     float volume;
     float pitch;
     int entityID;
 
-    public PlaySoundMessage(String sound, SoundSource source, float volume, float pitch, int entityID)
+    public PlaySoundMessage(SoundEvent sound, SoundSource source, float volume, float pitch, int entityID)
+    {   this(RegistryHelper.getRegistry(Registries.SOUND_EVENT).getKey(sound).toString(), source, volume, pitch, entityID);
+    }
+
+    PlaySoundMessage(String sound, SoundSource source, float volume, float pitch, int entityID)
     {
         this.sound = sound;
         this.source = source;
-        soundChars = sound.length();
         this.volume = volume;
         this.pitch = pitch;
         this.entityID = entityID;
     }
 
-    public static void encode(PlaySoundMessage message, FriendlyByteBuf buffer) {
-        buffer.writeInt(message.soundChars);
+    public static void encode(PlaySoundMessage message, FriendlyByteBuf buffer)
+    {
+        buffer.writeInt(message.sound.length());
         buffer.writeCharSequence(message.sound, StandardCharsets.UTF_8);
         buffer.writeEnum(message.source);
         buffer.writeFloat(message.volume);
@@ -47,22 +56,21 @@ public class PlaySoundMessage
         return new PlaySoundMessage(buffer.readCharSequence(soundChars, StandardCharsets.UTF_8).toString(), buffer.readEnum(SoundSource.class), buffer.readFloat(), buffer.readFloat(), buffer.readInt());
     }
 
-    public static void handle(PlaySoundMessage message, Supplier<NetworkEvent.Context> contextSupplier)
+    public static void handle(PlaySoundMessage message, IPayloadContext context)
     {
-        NetworkEvent.Context context = contextSupplier.get();
         context.enqueueWork(() ->
         {
-            if (context.getDirection().getReceptionSide().isClient())
-            {
-                SoundEvent sound = ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation(message.sound));
-                Entity entity = Minecraft.getInstance().level.getEntity(message.entityID);
+            SoundEvent sound = RegistryHelper.getRegistry(Registries.SOUND_EVENT).get(ResourceLocation.parse(message.sound));
+            Entity entity = Minecraft.getInstance().level.getEntity(message.entityID);
 
-                if (entity != null && sound != null)
-                {
-                    ClientOnlyHelper.playEntitySound(sound, message.source, message.volume, message.pitch, entity);
-                }
+            if (entity != null && sound != null)
+            {   ClientOnlyHelper.playEntitySound(sound, message.source, message.volume, message.pitch, entity);
             }
         });
-        context.setPacketHandled(true);
+    }
+
+    @Override
+    public Type<? extends CustomPacketPayload> type()
+    {   return TYPE;
     }
 }

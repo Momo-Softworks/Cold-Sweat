@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.client.gui.config;
 
+import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.ChatFormatting;
@@ -12,12 +13,12 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.*;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ScreenEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.util.ObfuscationReflectionHelper;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.ScreenEvent;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
@@ -26,7 +27,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-@Mod.EventBusSubscriber(Dist.CLIENT)
+@EventBusSubscriber(Dist.CLIENT)
 public abstract class AbstractConfigPage extends Screen
 {
     // Count how many ticks the mouse has been still for
@@ -37,7 +38,7 @@ public abstract class AbstractConfigPage extends Screen
     public final String OFF = CommonComponents.OPTION_OFF.getString();
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event)
+    public static void onClientTick(ClientTickEvent.Pre event)
     {   MOUSE_STILL_TIMER++;
     }
 
@@ -48,7 +49,7 @@ public abstract class AbstractConfigPage extends Screen
     }
 
     @SubscribeEvent
-    public static void onMouseClicked(ScreenEvent.MouseButtonPressed event)
+    public static void onMouseClicked(ScreenEvent.MouseButtonPressed.Post event)
     {
         if (Minecraft.getInstance().screen instanceof AbstractConfigPage screen)
         {   screen.children().forEach(child ->
@@ -73,7 +74,50 @@ public abstract class AbstractConfigPage extends Screen
     private static final int BOTTOM_BUTTON_WIDTH = ConfigScreen.BOTTOM_BUTTON_WIDTH;
     public static Minecraft MINECRAFT = Minecraft.getInstance();
 
-    static ResourceLocation TEXTURE = new ResourceLocation("cold_sweat:textures/gui/screen/config_gui.png");
+    private static final String GUI_TEXTURE_PATH = "textures/gui/screen/config/";
+
+    static ResourceLocation BACKGROUND_TEXTURE = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_gui.png");
+    public static final ResourceLocation CLIENTSIDE_ICON_TEXTURE = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_clientside_icon.png");
+
+    public static final WidgetSprites CONFIG_BUTTON_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_button.png"),
+                                                                                ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_button_disabled.png"),
+                                                                                ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_button_focus.png"));
+
+    public static final WidgetSprites DIRECTION_RIGHT_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_direction_panel_right.png"),
+                                                                                  ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_direction_panel_right_focus.png"));
+
+    public static final WidgetSprites DIRECTION_LEFT_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_direction_panel_left.png"),
+                                                                                 ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_direction_panel_left_focus.png"));
+
+    public static final WidgetSprites DIRECTION_UP_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_direction_panel_up.png"),
+                                                                               ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_direction_panel_up_focus.png"));
+
+    public static final WidgetSprites DIRECTION_DOWN_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_direction_panel_down.png"),
+                                                                                 ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_direction_panel_down_focus.png"));
+
+    public static final WidgetSprites DIRECTION_RESET_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_direction_panel_reset.png"),
+                                                                                  ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_direction_panel_reset_focus.png"));
+
+    public static final WidgetSprites DIRECTION_RESET_SMALL_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_direction_panel_reset_small.png"),
+                                                                                        ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_direction_panel_reset_small_focus.png"));
+
+    public static final WidgetSprites DIRECTION_VISIBILITY_ON_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_direction_panel_visibility_on.png"),
+                                                                                          ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_direction_panel_visibility_on_focus.png"));
+
+    public static final WidgetSprites DIRECTION_VISIBILITY_OFF_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_direction_panel_visibility_off.png"),
+                                                                                           ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_direction_panel_visibility_off_focus.png"));
+
+    public static final WidgetSprites NEXT_PAGE_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_next_page.png"),
+                                                                            ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_next_page_focus.png"));
+
+    public static final WidgetSprites PREV_PAGE_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_prev_page.png"),
+                                                                            ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_prev_page_focus.png"));
+
+    public static final WidgetSprites SLIDER_BAR_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_slider_bar.png"),
+                                                                             ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_slider_bar_focus.png"));
+
+    public static final WidgetSprites SLIDER_HEAD_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_slider_head.png"),
+                                                                              ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_slider_head_focus.png"));
 
     ImageButton nextNavButton;
     ImageButton prevNavButton;
@@ -165,7 +209,7 @@ public abstract class AbstractConfigPage extends Screen
 
         // Add the clientside indicator
         if (clientside)
-        {   this.addRenderableOnly(new ConfigImage(TEXTURE, this.width / 2 + xOffset - 18, buttonY + 3, 16, 15, 0, 144));
+        {   this.addRenderableOnly(new ConfigImage(BACKGROUND_TEXTURE, this.width / 2 + xOffset - 18, buttonY + 3, 16, 15, 0, 144));
         }
 
         List<Component> tooltipList = new ArrayList<>(Arrays.asList(tooltip));
@@ -257,7 +301,7 @@ public abstract class AbstractConfigPage extends Screen
         ConfigLabel configLabel = new ConfigLabel(id, label.getString(), this.width / 2 + xOffset - 95, this.height / 4 + yOffset, shouldBeActive ? 16777215 : 8421504);
         // Add the clientside indicator
         if (clientside)
-        {   this.addRenderableOnly(new ConfigImage(TEXTURE, this.width / 2 + xOffset - 115, this.height / 4 - 4 + yOffset, 16, 15, 0, 144));
+        {   this.addRenderableOnly(new ConfigImage(BACKGROUND_TEXTURE, this.width / 2 + xOffset - 115, this.height / 4 - 4 + yOffset, 16, 15, 0, 144));
         }
 
         List<Component> tooltipList = new ArrayList<>(Arrays.asList(tooltip));
@@ -306,7 +350,7 @@ public abstract class AbstractConfigPage extends Screen
         List<GuiEventListener> widgetBatch = new ArrayList<>();
 
         // Left button
-        ImageButton leftButton = new ImageButton(this.width / 2 + xOffset + labelOffset, this.height / 4 - 8 + yOffset, 14, 20, 0, 0, 20, TEXTURE, button ->
+        ImageButton leftButton = new ImageButton(this.width / 2 + xOffset + labelOffset, this.height / 4 - 8 + yOffset, 14, 20, DIRECTION_LEFT_SPRITES, button ->
         {
             leftRightPressed.accept(-1);
             if (setsCustomDifficulty)
@@ -317,7 +361,7 @@ public abstract class AbstractConfigPage extends Screen
         widgetBatch.add(leftButton);
 
         // Up button
-        ImageButton upButton = new ImageButton(this.width / 2 + xOffset + 14 + labelOffset, this.height / 4 - 8 + yOffset, 20, 10, 14, 0, 20, TEXTURE, button ->
+        ImageButton upButton = new ImageButton(this.width / 2 + xOffset + 14 + labelOffset, this.height / 4 - 8 + yOffset, 20, 10, DIRECTION_UP_SPRITES, button ->
         {
             upDownPressed.accept(-1);
             if (setsCustomDifficulty)
@@ -328,7 +372,7 @@ public abstract class AbstractConfigPage extends Screen
         widgetBatch.add(upButton);
 
         // Down button
-        ImageButton downButton = new ImageButton(this.width / 2 + xOffset + 14 + labelOffset, this.height / 4 + 2 + yOffset, 20, 10, 14, 10, 20, TEXTURE, button ->
+        ImageButton downButton = new ImageButton(this.width / 2 + xOffset + 14 + labelOffset, this.height / 4 + 2 + yOffset, 20, 10, DIRECTION_DOWN_SPRITES, button ->
         {
             upDownPressed.accept(1);
             if (setsCustomDifficulty)
@@ -339,7 +383,7 @@ public abstract class AbstractConfigPage extends Screen
         widgetBatch.add(downButton);
 
         // Right button
-        ImageButton rightButton = new ImageButton(this.width / 2 + xOffset + 34 + labelOffset, this.height / 4 - 8 + yOffset, 14, 20, 34, 0, 20, TEXTURE, button ->
+        ImageButton rightButton = new ImageButton(this.width / 2 + xOffset + 34 + labelOffset, this.height / 4 - 8 + yOffset, 14, 20, DIRECTION_RIGHT_SPRITES, button ->
         {
             leftRightPressed.accept(1);
             if (setsCustomDifficulty)
@@ -350,7 +394,9 @@ public abstract class AbstractConfigPage extends Screen
         widgetBatch.add(rightButton);
 
         // Reset button
-        ImageButton resetButton = new ImageButton(this.width / 2 + xOffset + 52 + labelOffset, this.height / 4 - 8 + yOffset, 20, canHide ? 10 : 20, canHide ? 68 : 48, 0, 20, TEXTURE, button ->
+        ImageButton resetButton = new ImageButton(this.width / 2 + xOffset + 52 + labelOffset, this.height / 4 - 8 + yOffset, 20, canHide ? 10 : 20,
+                                                  canHide ? DIRECTION_RESET_SMALL_SPRITES : DIRECTION_RESET_SPRITES,
+                                                  button ->
         {
             reset.run();
             if (setsCustomDifficulty)
@@ -363,15 +409,15 @@ public abstract class AbstractConfigPage extends Screen
         // hide button, displayed directly under the reset button if canHide is true
         if (canHide)
         {
-            ImageButton hideButton = new ImageButton(this.width / 2 + xOffset + 52 + labelOffset, this.height / 4 + 2 + yOffset, 20, 10, 68, 10, 20, TEXTURE, button ->
+            ImageButton hideButton = new ImageButton(this.width / 2 + xOffset + 52 + labelOffset, this.height / 4 + 2 + yOffset, 20, 10, DIRECTION_VISIBILITY_ON_SPRITES, button ->
             {
                 if (setsCustomDifficulty)
                 {   ConfigSettings.DIFFICULTY.set(4);
                 }
-                setImageX((ImageButton) button, hide.get());
+                setButtonSprites((ImageButton) button, hide.get() ? DIRECTION_VISIBILITY_OFF_SPRITES : DIRECTION_VISIBILITY_ON_SPRITES);
             });
             hide.get();
-            setImageX(hideButton, hide.get());
+            setButtonSprites(hideButton, hide.get() ? DIRECTION_VISIBILITY_OFF_SPRITES : DIRECTION_VISIBILITY_ON_SPRITES);
             hideButton.active = shouldBeActive;
             widgetBatch.add(hideButton);
         }
@@ -380,7 +426,7 @@ public abstract class AbstractConfigPage extends Screen
         ConfigLabel configLabel = new ConfigLabel(id, label.getString(), this.width / 2 + xOffset - 79, this.height / 4 + yOffset, shouldBeActive ? 16777215 : 8421504);
         // Add the clientside indicator
         if (clientside)
-        {   this.addRenderableOnly(new ConfigImage(TEXTURE, this.width / 2 + xOffset - 98, this.height / 4 - 8 + yOffset + 5, 16, 15, 0, 144));
+        {   this.addRenderableOnly(new ConfigImage(BACKGROUND_TEXTURE, this.width / 2 + xOffset - 98, this.height / 4 - 8 + yOffset + 5, 16, 15, 0, 144));
         }
         widgetBatch.add(configLabel);
 
@@ -434,7 +480,7 @@ public abstract class AbstractConfigPage extends Screen
 
         // Add the clientside indicator
         if (clientside)
-        {   this.addRenderableOnly(new ConfigImage(TEXTURE, this.width / 2 + xOffset - 115, buttonY, 16, 15, 0, 144));
+        {   this.addRenderableOnly(new ConfigImage(BACKGROUND_TEXTURE, this.width / 2 + xOffset - 115, buttonY, 16, 15, 0, 144));
         }
 
         List<Component> tooltipList = new ArrayList<>(Arrays.asList(tooltip));
@@ -472,7 +518,7 @@ public abstract class AbstractConfigPage extends Screen
         );
 
         // Navigation
-        nextNavButton = new ImageButton(this.width - 32, 12, 20, 20, 0, 88, 20, TEXTURE,
+        nextNavButton = new ImageButton(this.width - 32, 12, 20, 20, NEXT_PAGE_SPRITES,
                 button ->
                 {   ConfigScreen.CURRENT_PAGE++;
                     MINECRAFT.setScreen(ConfigScreen.getPage(ConfigScreen.CURRENT_PAGE, parentScreen));
@@ -480,7 +526,7 @@ public abstract class AbstractConfigPage extends Screen
         if (ConfigScreen.CURRENT_PAGE < ConfigScreen.LAST_PAGE)
             this.addRenderableWidget(nextNavButton);
 
-        prevNavButton = new ImageButton(this.width - 76, 12, 20, 20, 20, 88, 20, TEXTURE,
+        prevNavButton = new ImageButton(this.width - 76, 12, 20, 20, PREV_PAGE_SPRITES,
                 button ->
                 {   ConfigScreen.CURRENT_PAGE--;
                     MINECRAFT.setScreen(ConfigScreen.getPage(ConfigScreen.CURRENT_PAGE, parentScreen));
@@ -492,7 +538,7 @@ public abstract class AbstractConfigPage extends Screen
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks)
     {
-        this.renderBackground(graphics);
+        this.renderBackground(graphics, mouseX, mouseY, partialTicks);
         Font font = this.font;
 
         // Page Title
@@ -505,14 +551,14 @@ public abstract class AbstractConfigPage extends Screen
         graphics.drawString(this.font, this.sectionOneTitle(), this.width / 2 - 204, this.height / 4 - 28, 16777215, true);
 
         // Section 1 Divider
-        graphics.blit(TEXTURE, this.width / 2 - 202, this.height / 4 - 16, 255, 0, 1, 154);
+        graphics.blit(BACKGROUND_TEXTURE, this.width / 2 - 202, this.height / 4 - 16, 255, 0, 1, 154);
 
         if (this.sectionTwoTitle() != null)
         {   // Section 2 Title
             graphics.drawString(this.font, this.sectionTwoTitle(), this.width / 2 + 32, this.height / 4 - 28, 16777215, true);
 
             // Section 2 Divider
-            graphics.blit(TEXTURE, this.width / 2 + 34, this.height / 4 - 16, 255, 0, 1, 154);
+            graphics.blit(BACKGROUND_TEXTURE, this.width / 2 + 34, this.height / 4 - 16, 255, 0, 1, 154);
         }
 
         super.render(graphics, mouseX, mouseY, partialTicks);
@@ -589,12 +635,12 @@ public abstract class AbstractConfigPage extends Screen
         this.tooltips.put(id, wrappedTooltip);
     }
 
-    public static void setImageX(ImageButton button, boolean enabled)
+    public static void setButtonSprites(ImageButton button, WidgetSprites sprites)
     {
-        Field imageX = ObfuscationReflectionHelper.findField(ImageButton.class, "f_94224_");
-        imageX.setAccessible(true);
+        Field spritesField = ObfuscationReflectionHelper.findField(ImageButton.class, "f_290407_");
+        spritesField.setAccessible(true);
         try
-        {   imageX.set(button, enabled ? 68 : 88);
+        {   spritesField.set(button, sprites);
         }
         catch (Exception ignored) {}
     }

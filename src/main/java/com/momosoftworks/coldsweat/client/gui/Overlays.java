@@ -2,37 +2,40 @@ package com.momosoftworks.coldsweat.client.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
+import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.LayeredDraw;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
-import net.minecraftforge.client.gui.overlay.IGuiOverlay;
-import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
 import java.util.function.Supplier;
 
-@Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public class Overlays
 {
-    public static final ResourceLocation BODY_TEMP_GAUGE = new ResourceLocation("cold_sweat:textures/gui/overlay/body_temp_gauge.png");
-    public static final ResourceLocation BODY_TEMP_GAUGE_HC = new ResourceLocation("cold_sweat:textures/gui/overlay/body_temp_gauge_hc.png");
-    public static final ResourceLocation WORLD_TEMP_GAUGE = new ResourceLocation("cold_sweat:textures/gui/overlay/world_temp_gauge.png");
-    public static final ResourceLocation WORLD_TEMP_GAUGE_HC = new ResourceLocation("cold_sweat:textures/gui/overlay/world_temp_gauge_hc.png");
-    public static final ResourceLocation VAGUE_TEMP_GAUGE = new ResourceLocation("cold_sweat:textures/gui/overlay/vague_temp_gauge.png");
-    public static final ResourceLocation VAGUE_TEMP_GAUGE_HC = new ResourceLocation("cold_sweat:textures/gui/overlay/vague_temp_gauge_hc.png");
+    public static final ResourceLocation BODY_TEMP_GAUGE = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/body_temp_gauge.png");
+    public static final ResourceLocation BODY_TEMP_GAUGE_HC = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/body_temp_gauge_hc.png");
+    public static final ResourceLocation WORLD_TEMP_GAUGE = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/world_temp_gauge.png");
+    public static final ResourceLocation WORLD_TEMP_GAUGE_HC = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/world_temp_gauge_hc.png");
+    public static final ResourceLocation VAGUE_TEMP_GAUGE = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/vague_temp_gauge.png");
+    public static final ResourceLocation VAGUE_TEMP_GAUGE_HC = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/vague_temp_gauge_hc.png");
 
     public static final Supplier<ResourceLocation> BODY_TEMP_GAUGE_LOCATION  = () ->
             ConfigSettings.HIGH_CONTRAST.get() ? BODY_TEMP_GAUGE_HC
@@ -60,17 +63,16 @@ public class Overlays
     static int PREV_BODY_ICON = 0;
     static double BODY_TEMP_SEVERITY = 0;
 
-    public static IGuiOverlay WORLD_TEMP_OVERLAY = (gui, graphics, partialTick, width, height) ->
+    public static LayeredDraw.Layer WORLD_TEMP_OVERLAY = (graphics, deltaTracker) ->
     {
-        PoseStack poseStack = graphics.pose();
+        int width = graphics.guiWidth();
+        int height = graphics.guiHeight();
         Font font = Minecraft.getInstance().font;
         LocalPlayer player = Minecraft.getInstance().player;
         if (player != null && ADVANCED_WORLD_TEMP
         && Minecraft.getInstance().gameMode.getPlayerMode() != GameType.SPECTATOR
         && !Minecraft.getInstance().options.hideGui && ConfigSettings.WORLD_GAUGE_ENABLED.get())
         {
-            gui.setupOverlayRenderState(true, false);
-
             // Get player world temperature
             double temp = Temperature.convert(WORLD_TEMP, ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
 
@@ -89,7 +91,6 @@ public class Overlays
 
             /* Render gauge */
 
-            poseStack.pushPose();
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -106,24 +107,24 @@ public class Overlays
             int bob = ConfigSettings.ICON_BOBBING.get() && !CSMath.betweenInclusive(temp, MIN_TEMP, MAX_TEMP) && player.tickCount % 2 == 0 ? 1 : 0;
 
             // Render text
-            int blendedTemp = (int) CSMath.blend(PREV_WORLD_TEMP, WORLD_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
+            int blendedTemp = (int) CSMath.blend(PREV_WORLD_TEMP, WORLD_TEMP, deltaTracker.getGameTimeDeltaPartialTick(true), 0, 1);
 
             graphics.drawString(font, (blendedTemp + ConfigSettings.TEMP_OFFSET.get())+"",
                     /* X */ width / 2 + 105 + (Integer.toString(blendedTemp + ConfigSettings.TEMP_OFFSET.get()).length() * -3) + ConfigSettings.WORLD_GAUGE_POS.get().x(),
                     /* Y */ height - 15 - bob + ConfigSettings.WORLD_GAUGE_POS.get().y(), color, false);
-            poseStack.popPose();
         }
     };
 
-    public static IGuiOverlay BODY_TEMP_OVERLAY = (gui, graphics, partialTick, width, height) ->
+    public static LayeredDraw.Layer BODY_TEMP_OVERLAY = (graphics, deltaTracker) ->
     {
-        gui.setupOverlayRenderState(true, false);
         Minecraft mc = Minecraft.getInstance();
+        int width = graphics.guiWidth();
+        int height = graphics.guiHeight();
 
-        if (gui.shouldDrawSurvivalElements() && !Minecraft.getInstance().options.hideGui)
+        if (shouldDrawSurvivalElements() && !Minecraft.getInstance().options.hideGui)
         {
             // Blend body temperature (per frame)
-            BLEND_BODY_TEMP = (int) CSMath.blend(PREV_BODY_TEMP, BODY_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
+            BLEND_BODY_TEMP = (int) CSMath.blend(PREV_BODY_TEMP, BODY_TEMP, deltaTracker.getGameTimeDeltaPartialTick(true), 0, 1);
 
             // Get text color
             int color = switch (((int) BODY_TEMP_SEVERITY))
@@ -202,16 +203,17 @@ public class Overlays
         }
     };
 
-    public static IGuiOverlay VAGUE_TEMP_OVERLAY = (gui, graphics, partialTick, width, height) ->
+    public static LayeredDraw.Layer VAGUE_TEMP_OVERLAY = (graphics, deltaTracker) ->
     {
         PoseStack poseStack = graphics.pose();
         Minecraft mc = Minecraft.getInstance();
+        int width = graphics.guiWidth();
+        int height = graphics.guiHeight();
         Player player = mc.player;
-        if (player != null && !ADVANCED_WORLD_TEMP && mc.gameMode.getPlayerMode() != GameType.SPECTATOR
-        && !mc.options.hideGui && ConfigSettings.WORLD_GAUGE_ENABLED.get() && gui.shouldDrawSurvivalElements())
-        {
-            gui.setupOverlayRenderState(true, false);
 
+        if (player != null && !ADVANCED_WORLD_TEMP && mc.gameMode.getPlayerMode() != GameType.SPECTATOR
+        && !mc.options.hideGui && ConfigSettings.WORLD_GAUGE_ENABLED.get() && shouldDrawSurvivalElements())
+        {
             // Get player world temperature
             double temp = Temperature.convert(WORLD_TEMP, ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
             // Get the temperature severity
@@ -245,68 +247,71 @@ public class Overlays
     };
 
     @SubscribeEvent
-    public static void registerOverlays(RegisterGuiOverlaysEvent event)
-    {   event.registerBelow(VanillaGuiOverlay.CHAT_PANEL.id(), "world_temp", WORLD_TEMP_OVERLAY);
-        event.registerBelow(VanillaGuiOverlay.CHAT_PANEL.id(), "body_temp", BODY_TEMP_OVERLAY);
-        event.registerBelow(VanillaGuiOverlay.CHAT_PANEL.id(), "vague_temp", VAGUE_TEMP_OVERLAY);
+    public static void registerOverlays(RegisterGuiLayersEvent event)
+    {
+        event.registerBelow(VanillaGuiLayers.CHAT, ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "world_temp"), WORLD_TEMP_OVERLAY);
+        event.registerBelow(VanillaGuiLayers.CHAT, ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "body_temp"), BODY_TEMP_OVERLAY);
+        event.registerBelow(VanillaGuiLayers.CHAT, ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "vague_temp"), VAGUE_TEMP_OVERLAY);
     }
 
-    @Mod.EventBusSubscriber(value = Dist.CLIENT)
+    @EventBusSubscriber(value = Dist.CLIENT)
     public static final class TickOverlays
     {
         @SubscribeEvent
-        public static void onClientTick(TickEvent.ClientTickEvent event)
+        public static void onClientTick(ClientTickEvent.Pre event)
         {
             Player player = Minecraft.getInstance().player;
-            if (event.phase == TickEvent.Phase.START && player != null)
+            if (player != null)
             {
-                EntityTempManager.getTemperatureCap(player).ifPresent(icap ->
-                {
-                    if (!(icap instanceof PlayerTempCap cap)) return;
+                ITemperatureCap icap = EntityTempManager.getTemperatureCap(player);
+                if (!(icap instanceof PlayerTempCap cap)) return;
 
-                    cap.calculateHudVisibility(player);
-                    ADVANCED_WORLD_TEMP = cap.showAdvancedWorldTemp();
+                cap.calculateHudVisibility(player);
+                ADVANCED_WORLD_TEMP = cap.showAdvancedWorldTemp();
 
-                    /* World Temp */
+                /* World Temp */
 
-                    // Get temperature in actual degrees
-                    boolean celsius = ConfigSettings.CELSIUS.get();
-                    double worldTemp = cap.getTrait(Temperature.Trait.WORLD);
-                    double realTemp = Temperature.convert(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true);
-                    // Calculate the blended world temperature for this tick
-                    double diff = realTemp - WORLD_TEMP;
-                    PREV_WORLD_TEMP = WORLD_TEMP;
-                    WORLD_TEMP += Math.abs(diff) <= 1 ? diff : CSMath.maxAbs(diff / ConfigSettings.TEMP_SMOOTHING.get(), 0.25 * CSMath.sign(diff));
+                // Get temperature in actual degrees
+                boolean celsius = ConfigSettings.CELSIUS.get();
+                double worldTemp = cap.getTrait(Temperature.Trait.WORLD);
+                double realTemp = Temperature.convert(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true);
+                // Calculate the blended world temperature for this tick
+                double diff = realTemp - WORLD_TEMP;
+                PREV_WORLD_TEMP = WORLD_TEMP;
+                WORLD_TEMP += Math.abs(diff) <= 1 ? diff : CSMath.maxAbs(diff / ConfigSettings.TEMP_SMOOTHING.get(), 0.25 * CSMath.sign(diff));
 
-                    // Update max/min offset
-                    MAX_TEMP = cap.getTrait(Temperature.Trait.BURNING_POINT);
-                    MIN_TEMP = cap.getTrait(Temperature.Trait.FREEZING_POINT);
+                // Update max/min offset
+                MAX_TEMP = cap.getTrait(Temperature.Trait.BURNING_POINT);
+                MIN_TEMP = cap.getTrait(Temperature.Trait.FREEZING_POINT);
 
 
-                    /* Body Temp */
+                /* Body Temp */
 
-                    // Blend body temp (per tick)
-                    PREV_BODY_TEMP = BODY_TEMP;
-                    double currentTemp = cap.getTrait(Temperature.Trait.BODY);
-                    BODY_TEMP = Math.abs(currentTemp - BODY_TEMP) < 0.1 ? currentTemp : BODY_TEMP + (cap.getTrait(Temperature.Trait.BODY) - BODY_TEMP) / 5;
+                // Blend body temp (per tick)
+                PREV_BODY_TEMP = BODY_TEMP;
+                double currentTemp = cap.getTrait(Temperature.Trait.BODY);
+                BODY_TEMP = Math.abs(currentTemp - BODY_TEMP) < 0.1 ? currentTemp : BODY_TEMP + (cap.getTrait(Temperature.Trait.BODY) - BODY_TEMP) / 5;
 
-                    // Handle effects for the icon (bobbing, stage, transition)
-                    // Get icon bob
-                    ICON_BOB = player.tickCount % 3 == 0 && Math.random() < 0.3 ? 1 : 0;
+                // Handle effects for the icon (bobbing, stage, transition)
+                // Get icon bob
+                ICON_BOB = player.tickCount % 3 == 0 && Math.random() < 0.3 ? 1 : 0;
 
-                    // Get the severity of the player's body temperature
-                    BODY_TEMP_SEVERITY = getBodySeverity(BLEND_BODY_TEMP);
+                // Get the severity of the player's body temperature
+                BODY_TEMP_SEVERITY = getBodySeverity(BLEND_BODY_TEMP);
 
-                    // Get the icon to be displayed
-                    int neededIcon = ((int) CSMath.clamp(BODY_TEMP_SEVERITY, -4, 4));
+                // Get the icon to be displayed
+                int neededIcon = ((int) CSMath.clamp(BODY_TEMP_SEVERITY, -4, 4));
 
-                    // Start transition
-                    if (BODY_ICON != neededIcon)
-                    {   BODY_ICON = neededIcon;
-                    }
-                });
+                // Start transition
+                if (BODY_ICON != neededIcon)
+                {   BODY_ICON = neededIcon;
+                }
             }
         }
+    }
+
+    private static boolean shouldDrawSurvivalElements()
+    {   return Minecraft.getInstance().gameMode.canHurtPlayer() && Minecraft.getInstance().getCameraEntity() instanceof Player;
     }
 
     public static int getWorldSeverity(double temp, double min, double max)

@@ -2,7 +2,6 @@ package com.momosoftworks.coldsweat.data.codec.configuration;
 
 import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Either;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
@@ -13,11 +12,11 @@ import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
 import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
 
@@ -69,7 +68,7 @@ public record InsulatorData(Insulation.Slot slot,
             CompoundTag attributesTag = new CompoundTag();
             attributes1.forEach((attribute, modifier) ->
             {
-                attributesTag.put(ForgeRegistries.ATTRIBUTES.getKey(attribute).toString(),
+                attributesTag.put(BuiltInRegistries.ATTRIBUTE.getKey(attribute).toString(),
                                   AttributeCodecs.MODIFIER_CODEC.encodeStart(NbtOps.INSTANCE, modifier).result().orElseThrow());
             });
             tag.put("attributes", attributesTag);
@@ -95,7 +94,7 @@ public record InsulatorData(Insulation.Slot slot,
             Map<Attribute, AttributeModifier> attributes1 = new HashMap<>();
             attributesTag.getAllKeys().forEach(key ->
             {
-                Attribute attribute = ForgeRegistries.ATTRIBUTES.getValue(new ResourceLocation(key));
+                Attribute attribute = BuiltInRegistries.ATTRIBUTE.get(ResourceLocation.parse(key));
                 AttributeModifier modifier = AttributeCodecs.MODIFIER_CODEC.decode(NbtOps.INSTANCE, attributesTag.get(key)).result().orElseThrow().getFirst();
                 attributes1.put(attribute, modifier);
             });
@@ -104,7 +103,7 @@ public record InsulatorData(Insulation.Slot slot,
 
         CompoundTag immuneTempModifiersTag = nbt.getCompound("immune_temp_modifiers");
         Map<ResourceLocation, Double> immuneTempModifiers = new HashMap<>();
-        immuneTempModifiersTag.getAllKeys().forEach(key -> immuneTempModifiers.put(new ResourceLocation(key), immuneTempModifiersTag.getDouble(key)));
+        immuneTempModifiersTag.getAllKeys().forEach(key -> immuneTempModifiers.put(ResourceLocation.parse(key), immuneTempModifiersTag.getDouble(key)));
 
         Optional<List<String>> mods = Optional.of(nbt.getList("required_mods", 8).stream().map(Tag::getAsString).toList());
 

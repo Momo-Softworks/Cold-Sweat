@@ -5,8 +5,10 @@ import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
@@ -67,7 +69,7 @@ public class ItemInsulationCap implements IInsulatableCap
     }
 
     @Override
-    public CompoundTag serializeNBT()
+    public CompoundTag serialize()
     {
         // Save the insulation items
         ListTag insulNBT = new ListTag();
@@ -78,7 +80,7 @@ public class ItemInsulationCap implements IInsulatableCap
             CompoundTag entryNBT = new CompoundTag();
             List<Insulation> pairList = entry.getSecond();
             // Store ItemStack data
-            entryNBT.put("Item", entry.getFirst().save(new CompoundTag()));
+            entryNBT.put("Item", entry.getFirst().save(RegistryHelper.getRegistryAccess()));
             // Store insulation data
             ListTag pairListNBT = serializeInsulation(pairList);
             entryNBT.put("Values", pairListNBT);
@@ -104,7 +106,7 @@ public class ItemInsulationCap implements IInsulatableCap
     }
 
     @Override
-    public void deserializeNBT(CompoundTag tag)
+    public void deserialize(CompoundTag tag)
     {
         this.insulation.clear();
 
@@ -115,7 +117,7 @@ public class ItemInsulationCap implements IInsulatableCap
         for (int i = 0; i < insulList.size(); i++)
         {
             CompoundTag entryNBT = insulList.getCompound(i);
-            ItemStack stack = ItemStack.of(entryNBT.getCompound("Item"));
+            ItemStack stack = ItemStack.parseOptional(RegistryHelper.getRegistryAccess(), entryNBT.getCompound("Item"));
             List<Insulation> pairList = entryNBT.getList("Values", 10).stream().map(tg -> Insulation.deserialize(((CompoundTag) tg)))
                                                                       .filter(Objects::nonNull)
                                                                       .map(Insulation::split)

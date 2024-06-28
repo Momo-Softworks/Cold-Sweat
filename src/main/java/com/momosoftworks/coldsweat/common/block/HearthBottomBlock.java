@@ -2,18 +2,19 @@ package com.momosoftworks.coldsweat.common.block;
 
 import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 
+import com.momosoftworks.coldsweat.core.init.ModBlockEntities;
+import com.momosoftworks.coldsweat.core.init.ModBlocks;
+import com.momosoftworks.coldsweat.util.item.ItemStackHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.registries.ModBlockEntities;
-import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
@@ -34,14 +35,9 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
-import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.network.NetworkHooks;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -71,7 +67,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
     {   return new Item.Properties().stacksTo(1);
     }
 
-    public HearthBottomBlock(Block.Properties properties)
+    public HearthBottomBlock(Properties properties)
     {
         super(properties);
         this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH).setValue(WATER, 0).setValue(LAVA, 0));
@@ -86,7 +82,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type)
-    {   return type == ModBlockEntities.HEARTH ? HearthBlockEntity::tickSelf : null;
+    {   return type == ModBlockEntities.HEARTH.value() ? HearthBlockEntity::tickSelf : null;
     }
 
     @Nullable
@@ -95,14 +91,21 @@ public class HearthBottomBlock extends Block implements EntityBlock
     {   return new HearthBlockEntity(pos, state);
     }
 
+    @Override
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult rayTraceResult)
+    {
+        if (level.getBlockEntity(pos) instanceof HearthBlockEntity te)
+        {   player.openMenu(te, pos);
+        }
+        return super.useWithoutItem(state, level, pos, player, rayTraceResult);
+    }
+
     @SuppressWarnings("deprecation")
     @Override
-    public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
+    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
     {
         if (worldIn.getBlockEntity(pos) instanceof HearthBlockEntity te)
         {
-            ItemStack stack = player.getItemInHand(hand);
-
             // If the held item is a bucket, try to extract fluids
             if (player.getItemInHand(hand).getItem() == Items.BUCKET)
             {
@@ -117,7 +120,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
                 boolean isLava = clickedPos.distanceTo(lavaSidePos) < clickedPos.distanceTo(waterSidePos);
                 Vec3 sidePos = isLava ? lavaSidePos : waterSidePos;
                 BucketItem filledBucket = isLava ? ((BucketItem) Items.LAVA_BUCKET)
-                                               : ((BucketItem) Items.WATER_BUCKET);
+                                                 : ((BucketItem) Items.WATER_BUCKET);
                 int itemFuel = Math.abs(te.getItemFuel(filledBucket.getDefaultInstance()));
                 int hearthFuel = isLava ? te.getHotFuel() : te.getColdFuel();
 
@@ -134,15 +137,12 @@ public class HearthBottomBlock extends Block implements EntityBlock
                             stack.shrink(1);
                             player.addItem(filledBucket.getDefaultInstance());
                             // Play bucket sound
-                            worldIn.playSound(null, pos, filledBucket.getFluid().getPickupSound().get(), SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
+                            ItemStackHelper.playBucketEmptySound(stack, player, worldIn, pos);
 
-                            return InteractionResult.SUCCESS;
+                            return ItemInteractionResult.SUCCESS;
                         }
                     }
                 }
-                // Open the GUI
-                if (!worldIn.isClientSide)
-                    NetworkHooks.openScreen((ServerPlayer) player, te, pos);
             }
             else
             {
@@ -171,20 +171,16 @@ public class HearthBottomBlock extends Block implements EntityBlock
                     worldIn.playSound(null, pos, itemFuel > 0 ? SoundEvents.BUCKET_EMPTY_LAVA : SoundEvents.BUCKET_EMPTY,
                             SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
                 }
-                // Open the GUI
-                else if (!worldIn.isClientSide)
-                {   NetworkHooks.openScreen((ServerPlayer) player, te, pos);
-                }
             }
         }
-        return InteractionResult.SUCCESS;
+        return ItemInteractionResult.SUCCESS;
     }
 
     @Override
     public void onPlace(BlockState state, Level level, BlockPos pos, BlockState lastState, boolean p_60570_)
     {
         if (level.getBlockState(pos.above()).isAir())
-        {   level.setBlock(pos.above(), ModBlocks.HEARTH_TOP.defaultBlockState().setValue(HearthTopBlock.FACING, state.getValue(FACING)), 2);
+        {   level.setBlock(pos.above(), ModBlocks.HEARTH_TOP.value().defaultBlockState().setValue(HearthTopBlock.FACING, state.getValue(FACING)), 2);
         }
     }
 
@@ -192,7 +188,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
     public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving)
     {
         super.neighborChanged(state, level, pos, block, fromPos, isMoving);
-        if (level.getBlockState(pos.above()).getBlock() != ModBlocks.HEARTH_TOP)
+        if (level.getBlockState(pos.above()).getBlock() != ModBlocks.HEARTH_TOP.value())
         {   this.destroy(level, pos, state);
         }
     }
@@ -203,7 +199,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
     {
         if (state.getBlock() != newState.getBlock())
         {
-            if (level.getBlockState(pos.above()).getBlock() == ModBlocks.HEARTH_TOP)
+            if (level.getBlockState(pos.above()).getBlock() == ModBlocks.HEARTH_TOP.value())
             {   level.destroyBlock(pos.above(), false);
             }
 

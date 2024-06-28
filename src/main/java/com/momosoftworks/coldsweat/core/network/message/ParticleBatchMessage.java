@@ -1,22 +1,25 @@
 package com.momosoftworks.coldsweat.core.network.message;
 
 import com.mojang.datafixers.util.Pair;
+import com.momosoftworks.coldsweat.ColdSweat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.Supplier;
 
-public class ParticleBatchMessage
+public class ParticleBatchMessage implements CustomPacketPayload
 {
+    public static final CustomPacketPayload.Type<ParticleBatchMessage> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "particle_batch"));
+    public static final StreamCodec<RegistryFriendlyByteBuf, ParticleBatchMessage> CODEC = CustomPacketPayload.codec(ParticleBatchMessage::encode, ParticleBatchMessage::decode);
+
     Set<Pair<ParticleOptions, ParticlePlacement>> particles = new HashSet<>();
 
     public void addParticle(ParticleOptions particle, ParticlePlacement placement)
@@ -24,28 +27,23 @@ public class ParticleBatchMessage
         particles.add(Pair.of(particle, placement));
     }
 
-    public static void encode(ParticleBatchMessage message, FriendlyByteBuf buffer)
+    public static void encode(ParticleBatchMessage message, RegistryFriendlyByteBuf buffer)
     {
         buffer.writeInt(message.particles.size());
         for (Pair<ParticleOptions, ParticlePlacement> entry : message.particles)
         {
-            String particleID = ForgeRegistries.PARTICLE_TYPES.getKey(entry.getFirst().getType()).toString();
-            buffer.writeInt(particleID.length());
-            buffer.writeCharSequence(particleID, StandardCharsets.UTF_8);
-            entry.getFirst().writeToNetwork(buffer);
+            ParticleTypes.STREAM_CODEC.encode(buffer, entry.getFirst());
             buffer.writeNbt(entry.getSecond().toNBT());
         }
     }
 
-    public static ParticleBatchMessage decode(FriendlyByteBuf buffer)
+    public static ParticleBatchMessage decode(RegistryFriendlyByteBuf buffer)
     {
         ParticleBatchMessage message = new ParticleBatchMessage();
         int size = buffer.readInt();
         for (int i = 0; i < size; i++)
         {
-            int particleIDLength = buffer.readInt();
-            ParticleType type = ForgeRegistries.PARTICLE_TYPES.getValue(new ResourceLocation(buffer.readCharSequence(particleIDLength, StandardCharsets.UTF_8).toString()));
-            ParticleOptions particle = type.getDeserializer().fromNetwork(type, buffer);
+            ParticleOptions particle = ParticleTypes.STREAM_CODEC.decode(buffer);
             ParticlePlacement placement = ParticlePlacement.fromNBT(buffer.readNbt());
             message.addParticle(particle, placement);
         }
@@ -53,10 +51,8 @@ public class ParticleBatchMessage
         return message;
     }
 
-    public static void handle(ParticleBatchMessage message, Supplier<NetworkEvent.Context> contextSupplier)
+    public static void handle(ParticleBatchMessage message, IPayloadContext context)
     {
-        NetworkEvent.Context context = contextSupplier.get();
-        if (context.getDirection().getReceptionSide().isClient())
         context.enqueueWork(() ->
         {
             for (Pair<ParticleOptions, ParticlePlacement> entry : message.particles)
@@ -66,7 +62,12 @@ public class ParticleBatchMessage
                 Minecraft.getInstance().level.addParticle(particle, placement.x, placement.y, placement.z, placement.vx, placement.vy, placement.vz);
             }
         });
-        context.setPacketHandled(true);
+    }
+
+    @Override
+    public Type<? extends CustomPacketPayload> type()
+    {
+        return TYPE;
     }
 
     public static class ParticlePlacement

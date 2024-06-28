@@ -1,18 +1,16 @@
 package com.momosoftworks.coldsweat.api.event.core;
 
 import net.minecraft.world.entity.EntityType;
-import net.minecraftforge.eventbus.api.Cancelable;
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.IModBusEvent;
+import net.neoforged.bus.api.Event;
+import net.neoforged.bus.api.ICancellableEvent;
+import net.neoforged.fml.event.IModBusEvent;
 
 /**
  * Called during startup to enable temperature for every entity type.<br>
  * This even is {@link Cancelable} and is called on the Mod event bus. <br>
  * Cancelling this event will prevent temperature from being enabled for the entity type if it is already enabled.
  */
-@Cancelable
-public class EnableTemperatureEvent extends Event implements IModBusEvent
+public class EnableTemperatureEvent extends Event implements IModBusEvent, ICancellableEvent
 {
     final EntityType<?> entityType;
     boolean enabled = false;

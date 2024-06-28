@@ -2,8 +2,8 @@ package com.momosoftworks.coldsweat.common.world.feature;
 
 import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.common.block.SoulStalkBlock;
+import com.momosoftworks.coldsweat.core.init.ModBlocks;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
-import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.WorldGenLevel;
@@ -62,13 +62,13 @@ public class SoulStalkFeature extends Feature<SoulStalkFeatureConfig>
             // Place the soul stalk
             if (level.getBlockState(pos.below()).is(ModBlockTags.SOUL_STALK_PLACEABLE_ON) && level.getBlockState(pos.above()).isAir())
             {
-                level.setBlock(pos, ModBlocks.SOUL_STALK.defaultBlockState(), 2);
+                level.setBlock(pos, ModBlocks.SOUL_STALK.value().defaultBlockState(), 2);
                 int height = new Random().nextInt(5) + 2;
                 for (int i = 0; i < height && isAirOrLeaves(level, pos.above()); i++)
                 {   pos.move(0, 1, 0);
-                    level.setBlock(pos, ModBlocks.SOUL_STALK.defaultBlockState().setValue(SoulStalkBlock.SECTION, new Random().nextInt(2) + 1), 2);
+                    level.setBlock(pos, ModBlocks.SOUL_STALK.value().defaultBlockState().setValue(SoulStalkBlock.SECTION, new Random().nextInt(2) + 1), 2);
                 }
-                level.setBlock(pos, ModBlocks.SOUL_STALK.defaultBlockState().setValue(SoulStalkBlock.SECTION, 3), 2);
+                level.setBlock(pos, ModBlocks.SOUL_STALK.value().defaultBlockState().setValue(SoulStalkBlock.SECTION, 3), 2);
 
                 successes++;
                 int minCount = config.minCount();

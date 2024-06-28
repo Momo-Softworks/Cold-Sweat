@@ -3,20 +3,22 @@ package com.momosoftworks.coldsweat.data.codec.requirement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Monster;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.fml.common.EventBusSubscriber;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD)
 public record EntityRequirement(Optional<EntityType<?>> type, Optional<LocationRequirement> location, Optional<LocationRequirement> steppingOn,
                                 Optional<EffectsRequirement> effects, Optional<NbtRequirement> nbt, Optional<EntityFlagsRequirement> flags,
                                 Optional<EquipmentRequirement> equipment, Optional<PlayerDataRequirement> playerData,
@@ -28,7 +30,7 @@ public record EntityRequirement(Optional<EntityType<?>> type, Optional<LocationR
                                                                  Optional.empty(), Optional.empty());
 
     public static Codec<EntityRequirement> SIMPLE_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ForgeRegistries.ENTITY_TYPES.getCodec().optionalFieldOf("type").forGetter(requirement -> requirement.type),
+            BuiltInRegistries.ENTITY_TYPE.byNameCodec().optionalFieldOf("type").forGetter(requirement -> requirement.type),
             LocationRequirement.CODEC.optionalFieldOf("location").forGetter(requirement -> requirement.location),
             LocationRequirement.CODEC.optionalFieldOf("stepping_on").forGetter(requirement -> requirement.steppingOn),
             EffectsRequirement.CODEC.optionalFieldOf("effects").forGetter(requirement -> requirement.effects),
@@ -54,7 +56,7 @@ public record EntityRequirement(Optional<EntityType<?>> type, Optional<LocationR
     {
         var latestCodec = REQUIREMENT_CODEC_STACK.get(REQUIREMENT_CODEC_STACK.size() - 1);
         var codec = RecordCodecBuilder.<EntityRequirement>create(instance -> instance.group(
-                ForgeRegistries.ENTITY_TYPES.getCodec().optionalFieldOf("type").forGetter(requirement -> requirement.type),
+                BuiltInRegistries.ENTITY_TYPE.byNameCodec().optionalFieldOf("type").forGetter(requirement -> requirement.type),
                 LocationRequirement.CODEC.optionalFieldOf("location").forGetter(requirement -> requirement.location),
                 LocationRequirement.CODEC.optionalFieldOf("stepping_on").forGetter(requirement -> requirement.steppingOn),
                 EffectsRequirement.CODEC.optionalFieldOf("effects").forGetter(requirement -> requirement.effects),
@@ -124,7 +126,7 @@ public record EntityRequirement(Optional<EntityType<?>> type, Optional<LocationR
     {
         try
         {   CompoundTag tag = new CompoundTag();
-            type.ifPresent(type -> tag.putString("type", ForgeRegistries.ENTITY_TYPES.getKey(type).toString()));
+            type.ifPresent(type -> tag.putString("type", RegistryHelper.getRegistry(Registries.ENTITY_TYPE).getKey(type).toString()));
             location.ifPresent(location -> tag.put("location", location.serialize()));
             steppingOn.ifPresent(standingOn -> tag.put("standing_on", standingOn.serialize()));
             effects.ifPresent(effects -> tag.put("effects", effects.serialize()));
@@ -148,7 +150,7 @@ public record EntityRequirement(Optional<EntityType<?>> type, Optional<LocationR
     public static EntityRequirement deserialize(CompoundTag tag)
     {
         try
-        {   Optional<EntityType<?>> type = tag.contains("type") ? Optional.of(ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(tag.getString("type")))) : Optional.empty();
+        {   Optional<EntityType<?>> type = tag.contains("type") ? Optional.of(RegistryHelper.getRegistry(Registries.ENTITY_TYPE).get(ResourceLocation.parse(tag.getString("type")))) : Optional.empty();
             Optional<LocationRequirement> location = tag.contains("location") ? Optional.of(LocationRequirement.deserialize(tag.getCompound("location"))) : Optional.empty();
             Optional<LocationRequirement> standingOn = tag.contains("standing_on") ? Optional.of(LocationRequirement.deserialize(tag.getCompound("standing_on"))) : Optional.empty();
             Optional<EffectsRequirement> effects = tag.contains("effects") ? Optional.of(EffectsRequirement.deserialize(tag.getCompound("effects"))) : Optional.empty();

@@ -1,25 +1,20 @@
 package com.momosoftworks.coldsweat.common.event;
 
 import com.mojang.datafixers.util.Pair;
-import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
+import com.momosoftworks.coldsweat.core.network.ModPacketHandlers;
 import com.momosoftworks.coldsweat.core.network.message.DisableHearthParticlesMessage;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.*;
 
-@Mod.EventBusSubscriber
+@EventBusSubscriber
 public class HearthSaveDataHandler
 {
     public static final Set<Pair<BlockPos, ResourceLocation>> HEARTH_POSITIONS = new HashSet<>();
@@ -48,7 +43,7 @@ public class HearthSaveDataHandler
     public static void loadDisabledHearths(EntityJoinLevelEvent event)
     {
         if (!event.getEntity().level().isClientSide && event.getEntity() instanceof ServerPlayer player)
-        {   ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new DisableHearthParticlesMessage(player.getPersistentData().getCompound("DisabledHearths")));
+        {   PacketDistributor.sendToPlayer(player, new DisableHearthParticlesMessage(player.getPersistentData().getCompound("DisabledHearths")));
         }
     }
 
@@ -58,7 +53,7 @@ public class HearthSaveDataHandler
         for (String key : disabledHearths.getAllKeys())
         {
             CompoundTag hearthData = disabledHearths.getCompound(key);
-            DISABLED_HEARTHS.add(Pair.of(BlockPos.of(hearthData.getLong("Pos")), new ResourceLocation(hearthData.getString("Level"))));
+            DISABLED_HEARTHS.add(Pair.of(BlockPos.of(hearthData.getLong("Pos")), ResourceLocation.parse(hearthData.getString("Level"))));
         }
     }
 }

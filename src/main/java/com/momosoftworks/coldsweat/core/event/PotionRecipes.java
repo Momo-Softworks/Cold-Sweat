@@ -1,35 +1,31 @@
 package com.momosoftworks.coldsweat.core.event;
 
-import com.momosoftworks.coldsweat.core.init.PotionInit;
-import com.momosoftworks.coldsweat.util.registries.ModItems;
+import com.momosoftworks.coldsweat.core.init.ModItems;
+import com.momosoftworks.coldsweat.core.init.ModPotions;
+import com.momosoftworks.coldsweat.util.item.PotionUtils;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraftforge.common.brewing.BrewingRecipeRegistry;
-import net.minecraftforge.common.brewing.IBrewingRecipe;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.common.brewing.IBrewingRecipe;
+import net.neoforged.neoforge.event.brewing.RegisterBrewingRecipesEvent;
 
 import java.util.Arrays;
 
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber
 public class PotionRecipes
 {
     @SubscribeEvent
-    public static void register(FMLCommonSetupEvent event)
+    public static void register(RegisterBrewingRecipesEvent event)
     {
-        event.enqueueWork(() ->
-        {
-            ItemStack awkward = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.AWKWARD);
-            ItemStack icePotion = PotionUtils.setPotion(Items.POTION.getDefaultInstance(), PotionInit.ICE_RESISTANCE.get());
-            ItemStack longIcePotion = PotionUtils.setPotion(Items.POTION.getDefaultInstance(), PotionInit.LONG_ICE_RESISTANCE.get());
+        ItemStack awkward = PotionUtils.setPotion(new ItemStack(Items.POTION), Potions.AWKWARD);
+        ItemStack icePotion = PotionUtils.setPotion(Items.POTION.getDefaultInstance(), ModPotions.ICE_RESISTANCE);
+        ItemStack longIcePotion = PotionUtils.setPotion(Items.POTION.getDefaultInstance(), ModPotions.LONG_ICE_RESISTANCE);
 
-            BrewingRecipeRegistry.addRecipe(new WorkingBrewingRecipe(Ingredient.of(awkward), Ingredient.of(ModItems.SOUL_SPROUT), icePotion));
-            BrewingRecipeRegistry.addRecipe(new WorkingBrewingRecipe(Ingredient.of(icePotion), Ingredient.of(Items.REDSTONE), longIcePotion));
-        });
+        event.getBuilder().addRecipe(new WorkingBrewingRecipe(Ingredient.of(awkward), Ingredient.of(ModItems.SOUL_SPROUT), icePotion));
+        event.getBuilder().addRecipe(new WorkingBrewingRecipe(Ingredient.of(icePotion), Ingredient.of(Items.REDSTONE), longIcePotion));
     }
 
     /**
@@ -50,12 +46,12 @@ public class PotionRecipes
 
         @Override
         public boolean isInput(ItemStack input)
-        {   return Arrays.stream(potionIn.getItems()).anyMatch(ingredient -> ItemStack.isSameItemSameTags(ingredient, input));
+        {   return Arrays.stream(potionIn.getItems()).anyMatch(ingredient -> ItemStack.isSameItemSameComponents(ingredient, input));
         }
 
         @Override
         public boolean isIngredient(ItemStack ingredient)
-        {   return Arrays.stream(reagent.getItems()).anyMatch(ing -> ItemStack.isSameItemSameTags(ing, ingredient));
+        {   return Arrays.stream(reagent.getItems()).anyMatch(ing -> ItemStack.isSameItemSameComponents(ing, ingredient));
         }
 
         @Override

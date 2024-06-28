@@ -4,15 +4,12 @@ import com.momosoftworks.coldsweat.common.entity.Chameleon;
 import com.momosoftworks.coldsweat.common.entity.data.edible.ChameleonEdibles;
 import com.momosoftworks.coldsweat.common.entity.data.edible.Edible;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
-import com.momosoftworks.coldsweat.util.registries.ModSounds;
+import com.momosoftworks.coldsweat.core.init.ModSounds;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
-import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.TemptGoal;
+import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.navigation.PathNavigation;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -58,8 +55,9 @@ public class EatObjectsGoal extends Goal
             {
                 ItemStack item = itemEntity.getItem();
                 Optional<Edible> edible = ChameleonEdibles.getEdible(item);
+                String recipient = NBTHelper.getTagOrEmpty(item).getString("Recipient");
                 if (edible.isPresent()
-                && (!NBTHelper.getTagOrEmpty(item).contains("Recipient") || NBTHelper.getTagOrEmpty(item).getString("Recipient").equals(this.entity.getUUID().toString())))
+                && (recipient.isEmpty() || recipient.equals(this.entity.getUUID().toString())))
                 {
                     if (this.entity.getCooldown(edible.get()) <= 0 && edible.get().shouldEat(this.entity, itemEntity)
                     || isBreedingItem(itemEntity.getItem()))
@@ -121,7 +119,7 @@ public class EatObjectsGoal extends Goal
                 this.entity.eatAnimation();
 
                 // Play tongue out sound
-                WorldHelper.playEntitySound(ModSounds.CHAMELEON_TONGUE_OUT, this.entity, this.entity.getSoundSource(), 1, (float) Math.random() * 0.2f + 0.9f);
+                WorldHelper.playEntitySound(ModSounds.CHAMELEON_TONGUE_OUT.value(), this.entity, this.entity.getSoundSource(), 1, (float) Math.random() * 0.2f + 0.9f);
 
                 // Remove target item
                 TaskScheduler.scheduleServer(() ->
@@ -141,14 +139,14 @@ public class EatObjectsGoal extends Goal
                                 {   ItemStack stack = item.getItem().copy();
                                     stack.shrink(1);
                                     if (!stack.isEmpty())
-                                    {   WorldHelper.entityDropItem(this.entity, stack).setThrower(thrower.getUUID());
+                                    {   WorldHelper.entityDropItem(this.entity, stack).setThrower(thrower);
                                     }
                                 }
                             }
                         }
 
                         // Play tongue in sound
-                        WorldHelper.playEntitySound(ModSounds.CHAMELEON_TONGUE_IN, this.entity, this.entity.getSoundSource(), 1, (float) Math.random() * 0.2f + 0.9f);
+                        WorldHelper.playEntitySound(ModSounds.CHAMELEON_TONGUE_IN.value(), this.entity, this.entity.getSoundSource(), 1, (float) Math.random() * 0.2f + 0.9f);
                     }
                 }, this.entity.getEatAnimLength() / 2 + 2);
 
@@ -159,26 +157,31 @@ public class EatObjectsGoal extends Goal
                 }, this.entity.getEatAnimLength() / 2);
             }
 
-            this.entity.goalSelector.getRunningGoals().forEach(goal ->
+            for (WrappedGoal goal : this.entity.goalSelector.getAvailableGoals())
             {
                 Goal g = goal.getGoal();
                 if (g instanceof TemptGoal || g instanceof LookAtPlayerGoal || g instanceof RandomLookAroundGoal || g instanceof LazyLookGoal)
                 {
-                    this.stoppedTasks = true;
-                    goal.stop();
+                    if (g.isInterruptable())
+                    {
+                        this.stoppedTasks = true;
+                        goal.stop();
+                    }
+                    else
+                    {   stoppedTasks = false;
+                        break;
+                    }
                 }
-            });
+            }
         }
     }
 
     @Override
     public boolean canUse()
-    {
-        return this.entity.getLastHurtByMob() == null;
+    {   return this.entity.getLastHurtByMob() == null;
     }
 
     private boolean isBreedingItem(ItemStack stack)
-    {
-        return this.entity.canFallInLove() && this.entity.isFood(stack);
+    {   return this.entity.canFallInLove() && this.entity.isFood(stack);
     }
 }

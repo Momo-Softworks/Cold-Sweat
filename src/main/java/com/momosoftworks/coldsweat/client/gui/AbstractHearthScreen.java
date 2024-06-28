@@ -1,16 +1,16 @@
 package com.momosoftworks.coldsweat.client.gui;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import com.momosoftworks.coldsweat.common.event.HearthSaveDataHandler;
-import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
+import com.momosoftworks.coldsweat.core.network.ModPacketHandlers;
 import com.momosoftworks.coldsweat.core.network.message.DisableHearthParticlesMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.screens.inventory.EffectRenderingInventoryScreen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
@@ -19,21 +19,24 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
-import net.minecraftforge.network.NetworkDirection;
+import net.neoforged.fml.util.ObfuscationReflectionHelper;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.lang.reflect.Field;
 
 public abstract class AbstractHearthScreen<T extends AbstractContainerMenu> extends EffectRenderingInventoryScreen<T>
 {
-    private static final ResourceLocation HEARTH_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/hearth_gui.png");
+    private static final ResourceLocation HEARTH_GUI = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/screen/hearth_gui.png");
+    private static final WidgetSprites PARTICLES_ENABLED_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/screen/hearth/hearth_particle_button_on.png"),
+                                                                                     ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/screen/hearth/hearth_particle_button_on_focus.png"));
+    private static final WidgetSprites PARTICLES_DISABLED_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/screen/hearth/hearth_particle_button_off.png"),
+                                                                                      ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/screen/hearth/hearth_particle_button_off_focus.png"));
 
     ImageButton particleButton = null;
     Pair<BlockPos, ResourceLocation> levelPos = Pair.of(this.getBlockEntity().getBlockPos(), this.getBlockEntity().getLevel().dimension().location());
     boolean hideParticles = HearthSaveDataHandler.DISABLED_HEARTHS.contains(levelPos);
     boolean hideParticlesOld = hideParticles;
+    private WidgetSprites particleButtonSprites = hideParticles ? PARTICLES_DISABLED_SPRITES : PARTICLES_ENABLED_SPRITES;
 
     abstract HearthBlockEntity getBlockEntity();
 
@@ -50,7 +53,7 @@ public abstract class AbstractHearthScreen<T extends AbstractContainerMenu> exte
     {   super.init();
         if (this.getBlockEntity().hasSmokeStack())
         {
-            particleButton = this.addRenderableWidget(new ImageButton(leftPos + 82, topPos + 68, 12, 12, 176 + (!hideParticles ? 0 : 12), 36, 12, HEARTH_GUI, (button) ->
+            particleButton = this.addRenderableWidget(new ImageButton(leftPos + 82, topPos + 68, 12, 12, particleButtonSprites, (button) ->
             {
                 hideParticles = !hideParticles;
                 // If particles are disabled, add the hearth to the list of disabled hearths
@@ -61,18 +64,13 @@ public abstract class AbstractHearthScreen<T extends AbstractContainerMenu> exte
                     if (HearthSaveDataHandler.DISABLED_HEARTHS.size() > 64)
                     {   HearthSaveDataHandler.DISABLED_HEARTHS.remove(HearthSaveDataHandler.DISABLED_HEARTHS.iterator().next());
                     }
+                    particleButtonSprites = PARTICLES_DISABLED_SPRITES;
                 }
                 // Otherwise, remove it from the list
                 else
                 {   HearthSaveDataHandler.DISABLED_HEARTHS.remove(levelPos);
+                    particleButtonSprites = PARTICLES_ENABLED_SPRITES;
                 }
-
-                Field imageX = ObfuscationReflectionHelper.findField(ImageButton.class, "f_94224_");
-                imageX.setAccessible(true);
-                try
-                {   imageX.set(button, 176 + (!hideParticles ? 0 : 12));
-                }
-                catch (Exception ignored) {}
             })
             {
                 @Override
@@ -94,7 +92,7 @@ public abstract class AbstractHearthScreen<T extends AbstractContainerMenu> exte
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks)
-    {   this.renderBackground(graphics);
+    {   this.renderBackground(graphics, mouseX, mouseY, partialTicks);
         super.render(graphics, mouseX, mouseY, partialTicks);
         this.renderTooltip(graphics, mouseX, mouseY);
         this.children().forEach(child -> child.setFocused(false));
@@ -104,7 +102,7 @@ public abstract class AbstractHearthScreen<T extends AbstractContainerMenu> exte
     public void onClose()
     {   super.onClose();
         if (this.minecraft.player != null && hideParticlesOld != hideParticles)
-        {   ColdSweatPacketHandler.INSTANCE.sendTo(new DisableHearthParticlesMessage(HearthSaveDataHandler.serializeDisabledHearths()), Minecraft.getInstance().getConnection().getConnection(), NetworkDirection.PLAY_TO_SERVER);
+        {   PacketDistributor.sendToServer(new DisableHearthParticlesMessage(HearthSaveDataHandler.serializeDisabledHearths()));
         }
     }
 }

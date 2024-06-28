@@ -2,27 +2,26 @@ package com.momosoftworks.coldsweat.common.container;
 
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
-import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
+import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.init.MenuInit;
-import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
+import com.momosoftworks.coldsweat.core.network.ModPacketHandlers;
 import com.momosoftworks.coldsweat.core.network.message.SyncContainerSlotMessage;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -31,15 +30,13 @@ import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ShearsItem;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class SewingContainer extends AbstractContainerMenu
@@ -215,8 +212,7 @@ public class SewingContainer extends AbstractContainerMenu
         {
             TaskScheduler.scheduleServer(() -> {
                 // Send the new item to the client
-                ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> serverPlayer),
-                                                     new SyncContainerSlotMessage(index, this.getItem(index), this));
+                PacketDistributor.sendToPlayer(serverPlayer, new SyncContainerSlotMessage(index, this.getItem(index), this));
             }, 0);
 
         }
@@ -243,41 +239,40 @@ public class SewingContainer extends AbstractContainerMenu
         ItemStack input1 = this.getItem(0);
         ItemStack input2 = this.getItem(1);
 
-        ItemInsulationManager.getInsulationCap(input1).ifPresent(cap ->
+        IInsulatableCap cap = ItemInsulationManager.getInsulationCap(input1);
+        // If insulation is being removed
+        if (input2.getItem() instanceof ShearsItem)
         {
-            // If insulation is being removed
-            if (input2.getItem() instanceof ShearsItem)
-            {
-                if (!cap.getInsulation().isEmpty())
-                {   // Damage shears
-                    if (!player.isCreative())
-                    {   input2.hurt(1, player.getRandom(), null);
-                    }
-
-                    // Remove the last insulation item added
-                    cap.removeInsulationItem(cap.getInsulationItem(cap.getInsulation().size() - 1));
-                    // Play shear sound
-                    player.level().playSound(null, player.blockPosition(), SoundEvents.SHEEP_SHEAR, SoundSource.PLAYERS, 0.8F, 1.0F);
-
-                    input1.getOrCreateTag().merge(cap.serializeNBT());
+            if (!cap.getInsulation().isEmpty())
+            {   // Damage shears
+                if (!player.isCreative() && player.level() instanceof ServerLevel level)
+                {   input2.hurtAndBreak(1, level, player, (item) -> {});
                 }
-            }
-            // If insulation is being added
-            else
-            {   // Remove input items
-                this.growItem(0, -1);
-                this.growItem(1, -1);
-                player.level().playSound(null, player.blockPosition(), SoundEvents.LLAMA_SWAG, SoundSource.BLOCKS, 0.5f, 1f);
 
-                // Trigger advancement criteria
-                if (player instanceof ServerPlayer serverPlayer)
-                    ModAdvancementTriggers.ARMOR_INSULATED.trigger(serverPlayer, input1, input2);
+                // Remove the last insulation item added
+                cap.removeInsulationItem(cap.getInsulationItem(cap.getInsulation().size() - 1));
+                // Play shear sound
+                player.level().playSound(null, player.blockPosition(), SoundEvents.SHEEP_SHEAR, SoundSource.PLAYERS, 0.8F, 1.0F);
+
+                // TODO: Test if this is necessary
+                //input1.getOrCreateTag().merge(cap.serializeNBT());
             }
-        });
+        }
+        // If insulation is being added
+        else
+        {   // Remove input items
+            this.growItem(0, -1);
+            this.growItem(1, -1);
+            player.level().playSound(null, player.blockPosition(), SoundEvents.LLAMA_SWAG.value(), SoundSource.BLOCKS, 0.5f, 1f);
+
+            // Trigger advancement criteria
+            if (player instanceof ServerPlayer serverPlayer)
+                ModAdvancementTriggers.ARMOR_INSULATED.trigger(serverPlayer, input1, input2);
+        }
 
         // Get equip sound for the armor item
         if (stack.getItem() instanceof ArmorItem armor)
-        {   SoundEvent equipSound = armor.getMaterial().getEquipSound();
+        {   SoundEvent equipSound = armor.getMaterial().value().equipSound().value();
             player.level().playSound(null, player.blockPosition(), equipSound, SoundSource.BLOCKS, 1f, 1f);
         }
     }
@@ -288,25 +283,23 @@ public class SewingContainer extends AbstractContainerMenu
         ItemStack insulatorItem = this.getItem(1);
 
         // Is the first item armor, and the second item an insulator
-        if (wearableItem.getItem() instanceof Equipable)
+        if (wearableItem.getItem() instanceof Equipable armor)
         {
             // Shears are used to remove insulation
             if (insulatorItem.getItem() instanceof ShearsItem)
             {
-                ItemInsulationManager.getInsulationCap(wearableItem).ifPresent(cap ->
-                {
-                    if (!cap.getInsulation().isEmpty())
-                    {   this.setItem(2, cap.getInsulationItem(cap.getInsulation().size() - 1).copy());
-                    }
-                });
+                IInsulatableCap cap = ItemInsulationManager.getInsulationCap(wearableItem);
+                if (!cap.getInsulation().isEmpty())
+                {   this.setItem(2, cap.getInsulationItem(cap.getInsulation().size() - 1).copy());
+                }
             }
             // Item is for insulation
             else if (ConfigSettings.INSULATION_ITEMS.get().get(insulatorItem.getItem()) != null
-            && (!(insulatorItem.getItem() instanceof Equipable)
-            || LivingEntity.getEquipmentSlotForItem(wearableItem) == LivingEntity.getEquipmentSlotForItem(insulatorItem)))
+            && (!(insulatorItem.getItem() instanceof Equipable otherArmor)
+            || armor.getEquipmentSlot() == otherArmor.getEquipmentSlot()))
             {
                 ItemStack processed = wearableItem.copy();
-                IInsulatableCap insulCap = ItemInsulationManager.getInsulationCap(processed).orElseThrow(() -> new IllegalStateException("Item does not have insulation capability"));
+                IInsulatableCap insulCap = ItemInsulationManager.getInsulationCap(processed);
                 ItemStack insulator = insulatorItem.copy();
                 insulator.setCount(1);
                 insulCap.addInsulationItem(insulator);
@@ -325,30 +318,25 @@ public class SewingContainer extends AbstractContainerMenu
                 }
 
                 // Transfer enchantments
-                Map<Enchantment, Integer> armorEnch = EnchantmentHelper.getEnchantments(processed);
-                insulator.getEnchantmentTags().removeIf(nbt ->
+                if (processed.has(DataComponents.ENCHANTMENTS) && insulator.has(DataComponents.ENCHANTMENTS))
                 {
-                    CompoundTag enchantTag = ((CompoundTag) nbt);
-                    Enchantment ench = ForgeRegistries.ENCHANTMENTS.getValue(new ResourceLocation(enchantTag.getString("id")));
-                    if (ench == null) return false;
+                    ItemEnchantments armorEnch = processed.get(DataComponents.ENCHANTMENTS);
+                    ItemEnchantments.Mutable insulatorEnch = new ItemEnchantments.Mutable(insulator.get(DataComponents.ENCHANTMENTS));
+                    insulatorEnch.removeIf(ench ->
+                    {
+                        if (ench == null) return false;
 
-                    if (ench.canEnchant(wearableItem) && armorEnch.keySet().stream().allMatch(ench2 -> ench2.isCompatibleWith(ench)))
-                    {   processed.enchant(ench, enchantTag.getInt("lvl"));
-                        return true;
-                    }
-                    return false;
-                });
-
-                if (this.playerInventory.player instanceof ServerPlayer serverPlayer)
-                {
-                    TaskScheduler.scheduleServer(() -> {
-                        // Send the new item to the client
-                        ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> serverPlayer),
-                                                             new SyncContainerSlotMessage(2, processed, this));
-                    }, 1);
-
+                        if (ench.value().canEnchant(wearableItem) && EnchantmentHelper.isEnchantmentCompatible(armorEnch.keySet(), ench))
+                        {   processed.enchant(ench, insulatorEnch.getLevel(ench));
+                            return true;
+                        }
+                        return false;
+                    });
                 }
+
                 this.setItem(2, processed);
+                //TODO: Test if this works
+                syncSlot(2);
                 //this.syncSlot(2);
                 this.sendAllDataToRemote();
             }

@@ -2,14 +2,15 @@ package com.momosoftworks.coldsweat.common.block;
 
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.core.init.ModBlocks;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -24,11 +25,11 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.IPlantable;
+import net.neoforged.neoforge.common.CommonHooks;
+import net.neoforged.neoforge.common.SpecialPlantable;
 import org.jetbrains.annotations.Nullable;
 
-public class SoulStalkBlock extends Block implements IPlantable
+public class SoulStalkBlock extends Block implements SpecialPlantable
 {
     public static final IntegerProperty AGE = BlockStateProperties.AGE_15;
     public static final IntegerProperty SECTION = IntegerProperty.create("section", 0, 3);
@@ -70,7 +71,7 @@ public class SoulStalkBlock extends Block implements IPlantable
             if (i < 6 && rand.nextDouble() < 0.05 + CSMath.blend(ConfigSettings.MIN_TEMP.get(), ConfigSettings.MAX_TEMP.get(), Temperature.getTemperatureAt(pos.below(i - 1), level), 0, 0.95))
             {
                 int j = state.getValue(AGE);
-                if (ForgeHooks.onCropsGrowPre(level, pos, state, true))
+                if (CommonHooks.canCropGrow(level, pos, state, true))
                 {   if (j >= 8)
                     {   level.setBlockAndUpdate(pos.above(), this.defaultBlockState().setValue(SECTION, 3));
                         int section = rand.nextDouble() < 0.3 ? 2 : 1;
@@ -97,7 +98,7 @@ public class SoulStalkBlock extends Block implements IPlantable
         if (level.getBlockState(pos.below()).is(ModBlockTags.SOUL_STALK_PLACEABLE_ON))
         {
             if (level.getBlockState(pos.above()).isAir())
-            {   level.setBlock(pos.above(), ModBlocks.SOUL_STALK.defaultBlockState().setValue(SECTION, 3), 3);
+            {   level.setBlock(pos.above(), ModBlocks.SOUL_STALK.value().defaultBlockState().setValue(SECTION, 3), 3);
             }
         }
     }
@@ -132,13 +133,20 @@ public class SoulStalkBlock extends Block implements IPlantable
     }
 
     @Override
-    public BlockState getPlant(BlockGetter level, BlockPos pos)
-    {   return this.defaultBlockState();
-    }
-
-    @Override
     public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos)
     {   BlockState below = level.getBlockState(pos.below());
         return below.is(ModBlockTags.SOUL_STALK_PLACEABLE_ON) || below.getBlock() == this;
+    }
+
+    @Override
+    public boolean canPlacePlantAtPosition(ItemStack itemStack, LevelReader level, BlockPos pos, @Nullable Direction direction)
+    {
+        return canSurvive(this.defaultBlockState(), level, pos) && level.isEmptyBlock(pos) && level.isEmptyBlock(pos.above());
+    }
+
+    @Override
+    public void spawnPlantAtPosition(ItemStack itemStack, LevelReader level, BlockPos pos, @Nullable Direction direction)
+    {
+
     }
 }

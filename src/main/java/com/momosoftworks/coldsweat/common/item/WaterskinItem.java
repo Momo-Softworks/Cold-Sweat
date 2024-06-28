@@ -2,13 +2,13 @@ package com.momosoftworks.coldsweat.common.item;
 
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.core.init.ModItemComponents;
+import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.registries.ModItems;
-import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
@@ -56,8 +56,6 @@ public class WaterskinItem extends Item
             {   LayeredCauldronBlock.lowerFillLevel(state, level, pos);
             }
             fillWaterskinItem(player, context.getItemInHand(), context.getHand(), pos);
-            WorldHelper.spawnParticleBatch(level, ParticleTypes.SPLASH, pos.getX() + 0.5, pos.getY() + 0.65, pos.getZ() + 0.5, 0.5, 0.5, 0.5, 10, 0);
-            level.playSound(null, pos, ModSounds.WATERSKIN_FILL, SoundSource.PLAYERS, 2f, (float) Math.random() / 5 + 0.9f);
 
             return InteractionResult.SUCCESS;
         }
@@ -71,8 +69,7 @@ public class WaterskinItem extends Item
         ItemStack itemstack = ar.getObject();
 
         BlockHitResult blockhitresult = getPlayerPOVHitResult(level, player, ClipContext.Fluid.SOURCE_ONLY);
-        BlockPos hitPos = blockhitresult.getBlockPos();
-        BlockState lookingAt = level.getBlockState(hitPos);
+        BlockState lookingAt = level.getBlockState(blockhitresult.getBlockPos());
 
         if (blockhitresult.getType() != HitResult.Type.BLOCK)
         {   return InteractionResultHolder.pass(itemstack);
@@ -80,10 +77,7 @@ public class WaterskinItem extends Item
         else
         {
             if (lookingAt.getFluidState().isSource() && lookingAt.getFluidState().getType().isSame(Fluids.WATER))
-            {
-                fillWaterskinItem(player, itemstack, hand, hitPos);
-                level.playSound(null, hitPos, ModSounds.WATERSKIN_FILL, SoundSource.PLAYERS, 2f, (float) Math.random() / 5 + 0.9f);
-                WorldHelper.spawnParticleBatch(level, ParticleTypes.SPLASH, hitPos.getX() + 0.5, hitPos.getY() + 1, hitPos.getZ() + 0.5, 0.5, 0.5, 0.5, 10, 0);
+            {   fillWaterskinItem(player, itemstack, hand, blockhitresult.getBlockPos());
             }
             return ar;
         }
@@ -91,12 +85,12 @@ public class WaterskinItem extends Item
 
     public static ItemStack getFilledItem(ItemStack stack, Level level, BlockPos pos)
     {
-        ItemStack filledWaterskin = ModItems.FILLED_WATERSKIN.getDefaultInstance();
+        ItemStack filledWaterskin = ModItems.FILLED_WATERSKIN.value().getDefaultInstance();
         // copy NBT to new item
-        filledWaterskin.setTag(stack.getTag());
+        filledWaterskin.applyComponents(stack.getComponents());
         // Set temperature based on temperature of the biome
-        filledWaterskin.getOrCreateTag().putDouble(FilledWaterskinItem.NBT_TEMPERATURE,
-                                                   CSMath.clamp((Temperature.getTemperatureAt(pos, level)
+        filledWaterskin.set(ModItemComponents.WATER_TEMPERATURE,
+                            CSMath.clamp((Temperature.getTemperatureAt(pos, level)
                                                            - (CSMath.average(ConfigSettings.MAX_TEMP.get(), ConfigSettings.MIN_TEMP.get()))) * 15, -50, 50));
         // Set purity of water based on water source, if Thirst Was Taken is loaded
         if (CompatManager.isThirstLoaded())
@@ -118,7 +112,7 @@ public class WaterskinItem extends Item
                 ItemEntity itementity = player.drop(filledWaterskin, false);
                 if (itementity != null)
                 {   itementity.setNoPickUpDelay();
-                    itementity.setThrower(player.getUUID());
+                    itementity.setThrower(player);
                 }
             }
             thisStack.shrink(1);
@@ -126,9 +120,11 @@ public class WaterskinItem extends Item
         else
         {   player.setItemInHand(usedHand, filledWaterskin);
         }
+        //Play filling sound
+        level.playSound(null, player, SoundEvents.AMBIENT_UNDERWATER_ENTER, SoundSource.PLAYERS, 1, (float) Math.random() / 5 + 0.9f);
         player.swing(usedHand);
-        player.getCooldowns().addCooldown(ModItems.FILLED_WATERSKIN, 10);
-        player.getCooldowns().addCooldown(ModItems.WATERSKIN, 10);
+        player.getCooldowns().addCooldown(ModItems.FILLED_WATERSKIN.value(), 10);
+        player.getCooldowns().addCooldown(ModItems.WATERSKIN.value(), 10);
         player.awardStat(Stats.ITEM_USED.get(thisStack.getItem()));
     }
 

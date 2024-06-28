@@ -10,7 +10,7 @@ import net.minecraft.network.chat.MutableComponent;
 
 public class ConfigButton extends Button
 {
-    public ConfigButton(int x, int y, int width, int height, Component title, Button.OnPress pressedAction)
+    public ConfigButton(int x, int y, int width, int height, Component title, OnPress pressedAction)
     {   super(x, y, width, height, title, pressedAction, (button) -> MutableComponent.create(title.getContents()));
     }
 

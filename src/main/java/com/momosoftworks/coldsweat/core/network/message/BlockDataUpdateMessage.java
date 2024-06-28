@@ -1,25 +1,29 @@
 package com.momosoftworks.coldsweat.core.network.message;
 
+import com.momosoftworks.coldsweat.ColdSweat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
-
-public class BlockDataUpdateMessage
+public class BlockDataUpdateMessage implements CustomPacketPayload
 {
+    public static final CustomPacketPayload.Type<BlockDataUpdateMessage> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "block_data_update"));
+    public static final StreamCodec<FriendlyByteBuf, BlockDataUpdateMessage> CODEC = CustomPacketPayload.codec(BlockDataUpdateMessage::encode, BlockDataUpdateMessage::decode);
+
     BlockPos blockPos;
-    BlockEntity blockEntity;
     CompoundTag tag;
 
     public BlockDataUpdateMessage(BlockEntity blockEntity)
     {
         this.blockPos = blockEntity.getBlockPos();
-        this.blockEntity = blockEntity;
+        this.tag = blockEntity.getUpdateTag(blockEntity.getLevel().registryAccess());
     }
 
     public BlockDataUpdateMessage(BlockPos blockPos, CompoundTag tag)
@@ -28,10 +32,10 @@ public class BlockDataUpdateMessage
         this.tag = tag;
     }
 
-    public static void encode(BlockDataUpdateMessage message, FriendlyByteBuf buffer)
+    public void encode(FriendlyByteBuf buffer)
     {
-        buffer.writeBlockPos(message.blockPos);
-        buffer.writeNbt(message.blockEntity.getUpdateTag());
+        buffer.writeBlockPos(this.blockPos);
+        buffer.writeNbt(this.tag);
     }
 
     public static BlockDataUpdateMessage decode(FriendlyByteBuf buffer)
@@ -39,24 +43,24 @@ public class BlockDataUpdateMessage
         return new BlockDataUpdateMessage(buffer.readBlockPos(), buffer.readNbt());
     }
 
-    public static void handle(BlockDataUpdateMessage message, Supplier<NetworkEvent.Context> contextSupplier)
+    public static void handle(BlockDataUpdateMessage message, IPayloadContext context)
     {
-        NetworkEvent.Context context = contextSupplier.get();
-        if (context.getDirection().getReceptionSide().isClient())
+        context.enqueueWork(() ->
         {
-            context.enqueueWork(() ->
+            ClientLevel level = Minecraft.getInstance().level;
+            if (level != null)
             {
-                ClientLevel level = Minecraft.getInstance().level;
-                if (level != null)
-                {
-                    BlockEntity be = level.getBlockEntity(message.blockPos);
-                    if (be != null)
-                    {
-                        be.handleUpdateTag(message.tag);
-                    }
+                BlockEntity be = level.getBlockEntity(message.blockPos);
+                if (be != null)
+                {   be.handleUpdateTag(message.tag, context.player().registryAccess());
                 }
-            });
-        }
-        context.setPacketHandled(true);
+            }
+        });
+    }
+
+    @Override
+    public Type<? extends CustomPacketPayload> type()
+    {
+        return TYPE;
     }
 }

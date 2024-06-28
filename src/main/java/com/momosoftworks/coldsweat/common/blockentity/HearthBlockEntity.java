@@ -9,29 +9,25 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.block.HearthBottomBlock;
 import com.momosoftworks.coldsweat.common.block.SmokestackBlock;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
+import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
 import com.momosoftworks.coldsweat.common.container.HearthContainer;
 import com.momosoftworks.coldsweat.common.event.HearthSaveDataHandler;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.core.init.BlockEntityInit;
-import com.momosoftworks.coldsweat.core.init.ParticleTypesInit;
-import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
+import com.momosoftworks.coldsweat.core.init.*;
+import com.momosoftworks.coldsweat.core.network.ModPacketHandlers;
 import com.momosoftworks.coldsweat.core.network.message.HearthResetMessage;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.registries.ModBlocks;
-import com.momosoftworks.coldsweat.util.registries.ModEffects;
-import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.world.SpreadPath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
-import com.simibubi.create.content.fluids.pipes.EncasedPipeBlock;
-import com.simibubi.create.content.fluids.pipes.FluidPipeBlock;
-import com.simibubi.create.content.fluids.pipes.GlassFluidPipeBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.ParticleStatus;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.particles.SimpleParticleType;
@@ -54,35 +50,31 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.PotionItem;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.PipeBlock;
-import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.util.ObfuscationReflectionHelper;
+import net.neoforged.neoforge.capabilities.BlockCapability;
+import net.neoforged.neoforge.capabilities.ICapabilityProvider;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.stream.StreamSupport;
 
-@Mod.EventBusSubscriber
+@EventBusSubscriber
 public class HearthBlockEntity extends RandomizableContainerBlockEntity
 {
     // List of SpreadPaths, which determine where the Hearth is affecting and how it spreads through/around blocks
@@ -96,14 +88,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     FluidStack coldFuel = new FluidStack(Fluids.WATER, 0);
     FluidStack hotFuel = new FluidStack(Fluids.LAVA, 0);
 
-    FluidHandler bottomFuelHandler = new BottomFluidHandler();
-    final LazyOptional<IFluidHandler> bottomFuelHolder = LazyOptional.of(() -> {
-        return this.bottomFuelHandler;
-    });
-    FluidHandler sidesFuelHandler = new SidesFluidHandler();
-    final LazyOptional<IFluidHandler> sidesFuelHolder = LazyOptional.of(() -> {
-        return this.sidesFuelHandler;
-    });
+
+    public static final BlockCapability<IFluidHandler, @Nullable Direction> FLUID_HANDLER =
+            BlockCapability.createSided(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "fuel_handler"), IFluidHandler.class);
 
     NonNullList<ItemStack> items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
     Pair<BlockPos, ResourceLocation> levelPos = Pair.of(null, null);
@@ -149,11 +136,11 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
     public HearthBlockEntity(BlockEntityType type, BlockPos pos, BlockState state)
     {   super(type, pos, state);
-        MinecraftForge.EVENT_BUS.register(this);
+        NeoForge.EVENT_BUS.register(this);
     }
 
     public HearthBlockEntity(BlockPos pos, BlockState state)
-    {   this(BlockEntityInit.HEARTH_BLOCK_ENTITY_TYPE.get(), pos, state);
+    {   this(ModBlockEntities.HEARTH.get(), pos, state);
     }
 
     @SubscribeEvent
@@ -453,7 +440,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                 // Air Particles
                 if (this.getLevel().isClientSide && showParticles)
                 {   Random rand = new Random();
-                    if (!(Minecraft.getInstance().options.renderDebug && ConfigSettings.HEARTH_DEBUG.get()))
+                    if (!(Minecraft.getInstance().getDebugOverlay().showDebugScreen() && ConfigSettings.HEARTH_DEBUG.get()))
                     {   this.spawnAirParticle(spX, spY, spZ, rand);
                     }
                 }
@@ -467,7 +454,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         ItemStack fuelStack = this.getItems().get(0);
         if (!fuelStack.isEmpty())
         {   // Potion items
-            List<MobEffectInstance> itemEffects = PotionUtils.getMobEffects(fuelStack);
+            List<MobEffectInstance> itemEffects = CSMath.getIfNotNull(fuelStack.get(DataComponents.POTION_CONTENTS),
+                                                                      potions -> StreamSupport.stream(potions.getAllEffects().spliterator(), true).toList(),
+                                                                      new ArrayList<>());
             if (ConfigSettings.HEARTH_POTIONS_ENABLED.get()
             && !itemEffects.isEmpty() && !itemEffects.equals(effects)
             && itemEffects.stream().noneMatch(eff -> ConfigSettings.HEARTH_POTION_BLACKLIST.get().contains(eff.getEffect())))
@@ -485,7 +474,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                 level.playSound(null, pos.getX(), pos.getY(), pos.getZ(), SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 1, 1);
                 effects.clear();
                 // Convert to NBT and back again to create new instances of the effects (otherwise we would be ticking down the global instances)
-                effects.addAll(itemEffects.stream().map(eff -> eff.save(new CompoundTag())).map(MobEffectInstance::load).toList());
+                effects.addAll(itemEffects.stream().map(MobEffectInstance::save).map(nbt -> MobEffectInstance.load(((CompoundTag) nbt))).toList());
                 WorldHelper.syncBlockEntityData(this);
             }
             else if (fuelStack.is(Items.MILK_BUCKET) && !effects.isEmpty())
@@ -559,8 +548,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         }
         // Apply the insulation effect
         if (!shouldUseColdFuel || !shouldUseHotFuel)
-        EntityTempManager.getTemperatureCap(player).ifPresent(cap ->
         {
+            ITemperatureCap cap = EntityTempManager.getTemperatureCap(player);
             double temp = cap.getTrait(Temperature.Trait.WORLD);
             double min = cap.getTrait(Temperature.Trait.FREEZING_POINT);
             double max = cap.getTrait(Temperature.Trait.BURNING_POINT);
@@ -592,11 +581,11 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
             // Tell the hearth to use cold fuel
             shouldUseColdFuel |= this.getColdFuel() > 0 && temp > max;
 
-        });
+        }
         if (shouldUseHotFuel || shouldUseColdFuel)
         {   int maxEffect = this.getMaxInsulationLevel() - 1;
             int effectLevel = (int) Math.min(maxEffect, (insulationLevel / (double) this.getInsulationTime()) * maxEffect);
-            player.addEffect(new MobEffectInstance(ModEffects.INSULATION, 120, effectLevel, false, false, true));
+            player.addEffect(new MobEffectInstance(ModEffects.INSULATED, 120, effectLevel, false, false, true));
         }
     }
 
@@ -605,22 +594,26 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         if (!isPipe(fromState)) return true;
         if (CompatManager.isCreateLoaded())
         {
-            Block block = fromState.getBlock();
-            if ((block instanceof FluidPipeBlock && fromState.getValue(PipeBlock.PROPERTY_BY_DIRECTION.get(direction)))
-            || (block instanceof GlassFluidPipeBlock && fromState.getValue(RotatedPillarBlock.AXIS) == direction.getAxis())
-            || (block instanceof EncasedPipeBlock && fromState.getValue(EncasedPipeBlock.FACING_TO_PROPERTY_MAP.get(direction))))
-            {   newPath.setOrigin(newPos);
-                return true;
-            }
-            return false;
+            // TODO: Create compatibility
+            //Block block = fromState.getBlock();
+            //if ((block instanceof FluidPipeBlock && fromState.getValue(PipeBlock.PROPERTY_BY_DIRECTION.get(direction)))
+            //|| (block instanceof GlassFluidPipeBlock && fromState.getValue(RotatedPillarBlock.AXIS) == direction.getAxis())
+            //|| (block instanceof EncasedPipeBlock && fromState.getValue(EncasedPipeBlock.FACING_TO_PROPERTY_MAP.get(direction))))
+            //{   newPath.setOrigin(newPos);
+            //    return true;
+            //}
+            //return false;
         }
         return true;
     }
 
     protected boolean isPipe(BlockState state)
-    {   return CompatManager.isCreateLoaded() && (state.getBlock() instanceof FluidPipeBlock
-                                               || state.getBlock() instanceof GlassFluidPipeBlock
-                                               || state.getBlock() instanceof EncasedPipeBlock);
+    {
+        // TODO: Create compatibility
+        //return CompatManager.isCreateLoaded() && (state.getBlock() instanceof FluidPipeBlock
+        //                                       || state.getBlock() instanceof GlassFluidPipeBlock
+        //                                       || state.getBlock() instanceof EncasedPipeBlock);
+        return false;
     }
     
     private void registerLocation()
@@ -756,7 +749,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     }
 
     protected SoundEvent getFuelDepleteSound()
-    {   return ModSounds.HEARTH_FUEL;
+    {   return ModSounds.HEARTH_FUEL.value();
     }
 
     public void checkForSmokestack()
@@ -764,7 +757,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         if (level == null) return;
 
         boolean hadSmokestack = this.hasSmokestack;
-        this.hasSmokestack = level.getBlockState(this.getBlockPos().above()).getBlock() == ModBlocks.SMOKESTACK;
+        this.hasSmokestack = level.getBlockState(this.getBlockPos().above()).getBlock() == ModBlocks.SMOKESTACK.value();
         if (!this.hasSmokestack && hadSmokestack)
         {   this.resetPaths();
             HearthSaveDataHandler.HEARTH_POSITIONS.remove(Pair.of(this.getBlockPos(), this.getLevel().dimension().location()));
@@ -800,7 +793,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
             double d3 = (rand.nextDouble() - 0.5) / 4;
             double d4 = (rand.nextDouble() - 0.5) / 4;
             double d5 = (rand.nextDouble() - 0.5) / 4;
-            level.addParticle(ParticleTypesInit.STEAM.get(), d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.04D, 0.0D);
+            level.addParticle(ModParticleTypes.STEAM.get(), d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.04D, 0.0D);
         }
         if (rand.nextDouble() < this.getHotFuel() / 3000d)
         {   double d0 = this.x + 0.5d;
@@ -815,7 +808,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     }
 
     public ParticleOptions getAirParticle()
-    {   return ParticleTypesInit.HEARTH_AIR.get();
+    {   return ModParticleTypes.HEARTH_AIR.get();
     }
 
     public void spawnAirParticle(int x, int y, int z, Random rand)
@@ -842,23 +835,23 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     }
 
     @Override
-    public void load(CompoundTag tag)
-    {   super.load(tag);
+    public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    {   super.loadAdditional(tag, registries);
         this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
-        ContainerHelper.loadAllItems(tag, this.items);
+        ContainerHelper.loadAllItems(tag, this.items, registries);
         this.loadEffects(tag);
-        this.coldFuel = FluidStack.loadFluidStackFromNBT(tag.getCompound("ColdFuel"));
-        this.hotFuel = FluidStack.loadFluidStackFromNBT(tag.getCompound("HotFuel"));
+        this.coldFuel = FluidStack.parse(registries, tag.getCompound("ColdFuel")).orElse(FluidStack.EMPTY);
+        this.hotFuel = FluidStack.parse(registries, tag.getCompound("HotFuel")).orElse(FluidStack.EMPTY);
         this.insulationLevel = tag.getInt("InsulationLevel");
     }
 
     @Override
-    public void saveAdditional(CompoundTag tag)
-    {   super.saveAdditional(tag);
-        ContainerHelper.saveAllItems(tag, this.items);
+    public void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
+    {   super.saveAdditional(tag, registries);
+        ContainerHelper.saveAllItems(tag, this.items, registries);
         saveEffects(tag);
-        tag.put("ColdFuel", this.coldFuel.writeToNBT(new CompoundTag()));
-        tag.put("HotFuel", this.hotFuel.writeToNBT(new CompoundTag()));
+        tag.put("ColdFuel", this.coldFuel.save(registries));
+        tag.put("HotFuel", this.hotFuel.save(registries));
         tag.putInt("InsulationLevel", this.insulationLevel);
     }
 
@@ -867,7 +860,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         if (!this.effects.isEmpty())
         {   ListTag list = new ListTag();
             for (MobEffectInstance effect : this.effects)
-            {   list.add(effect.save(new CompoundTag()));
+            {   list.add(effect.save());
             }
             tag.put("Effects", list);
         }
@@ -884,9 +877,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     }
 
     @Override
-    public CompoundTag getUpdateTag()
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries)
     {
-        CompoundTag tag = super.getUpdateTag();
+        CompoundTag tag = super.getUpdateTag(registries);
         tag.putInt("HotFuel",  this.getHotFuel());
         tag.putInt("ColdFuel", this.getColdFuel());
         tag.putInt("InsulationLevel", insulationLevel);
@@ -896,7 +889,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     }
 
     @Override
-    public void handleUpdateTag(CompoundTag tag)
+    public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries)
     {   this.setHotFuel(tag.getInt("HotFuel"), false);
         this.setColdFuel(tag.getInt("ColdFuel"), false);
         this.updateFuelState();
@@ -905,23 +898,13 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     }
 
     @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt)
-    {   handleUpdateTag(pkt.getTag());
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider registries)
+    {   handleUpdateTag(pkt.getTag(), registries);
     }
 
     @Override
     public ClientboundBlockEntityDataPacket getUpdatePacket()
     {   return ClientboundBlockEntityDataPacket.create(this);
-    }
-
-    public <T> @NotNull LazyOptional<T> getCapability(@NotNull Capability<T> capability, @Nullable Direction facing)
-    {
-        return capability == ForgeCapabilities.FLUID_HANDLER && facing != null
-             ? facing == Direction.DOWN
-                       ? bottomFuelHolder.cast()
-             : facing != Direction.UP && facing != this.getBlockState().getValue(HearthBottomBlock.FACING)
-                       ? sidesFuelHolder.cast()
-             : super.getCapability(capability, facing) : super.getCapability(capability, facing);
     }
 
     public void replacePaths(ArrayList<SpreadPath> newPaths)
@@ -944,9 +927,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     }
 
     public void sendResetPacket()
-    {   if (level instanceof ServerLevel)
-        {   ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() ->
-                                 (LevelChunk) WorldHelper.getChunk(level, this.getBlockPos())), new HearthResetMessage(this.getBlockPos()));
+    {
+        if (level instanceof ServerLevel serverLevel)
+        {   PacketDistributor.sendToPlayersTrackingChunk(serverLevel, new ChunkPos(x >> 4, z >> 4), new HearthResetMessage(this.getBlockPos()));
         }
     }
 
@@ -972,8 +955,28 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     {   return this.pathLookup;
     }
 
-    public abstract class FluidHandler implements IFluidHandler
+    public static class FluidProvider implements ICapabilityProvider<HearthBlockEntity, Direction, FluidHandler>
     {
+        @Nullable
+        @Override
+        public FluidHandler getCapability(HearthBlockEntity hearth, Direction facing)
+        {
+            return facing == Direction.DOWN
+                           ? new BottomFluidHandler(hearth)
+                 : facing != Direction.UP
+                           ? new SidesFluidHandler(hearth)
+                 : null;
+        }
+    }
+
+    public abstract static class FluidHandler implements IFluidHandler
+    {
+        HearthBlockEntity hearth;
+
+        public FluidHandler(HearthBlockEntity hearth)
+        {   this.hearth = hearth;
+        }
+
         @Override
         public int getTanks()
         {   return 2;
@@ -981,12 +984,12 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
         @Override
         public @NotNull FluidStack getFluidInTank(int tank)
-        {   return tank == 0 ? coldFuel : hotFuel;
+        {   return tank == 0 ? hearth.coldFuel : hearth.hotFuel;
         }
 
         @Override
         public int getTankCapacity(int tank)
-        {   return HearthBlockEntity.this.getMaxFuel();
+        {   return hearth.getMaxFuel();
         }
 
         @Override
@@ -1000,24 +1003,24 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         public int fill(FluidStack fluidStack, FluidAction fluidAction)
         {
             if (fluidStack.getFluid() == Fluids.WATER)
-            {   int amount = Math.min(fluidStack.getAmount(), this.getTankCapacity(0) - coldFuel.getAmount());
+            {   int amount = Math.min(fluidStack.getAmount(), this.getTankCapacity(0) - hearth.coldFuel.getAmount());
                 if (fluidAction.execute())
                 {
-                    if (coldFuel.isEmpty())
-                    {   coldFuel = fluidStack.copy();
+                    if (hearth.coldFuel.isEmpty())
+                    {   hearth.coldFuel = fluidStack.copy();
                     }
-                    else coldFuel.grow(amount);
+                    else hearth.coldFuel.grow(amount);
                 }
                 return amount;
             }
             else if (fluidStack.getFluid() == Fluids.LAVA)
-            {   int amount = Math.min(fluidStack.getAmount(), this.getTankCapacity(1) - hotFuel.getAmount());
+            {   int amount = Math.min(fluidStack.getAmount(), this.getTankCapacity(1) - hearth.hotFuel.getAmount());
                 if (fluidAction.execute())
                 {
-                    if (hotFuel.isEmpty())
-                    {   hotFuel = fluidStack.copy();
+                    if (hearth.hotFuel.isEmpty())
+                    {   hearth.hotFuel = fluidStack.copy();
                     }
-                    else hotFuel.grow(amount);
+                    else hearth.hotFuel.grow(amount);
                 }
                 return amount;
             }
@@ -1039,18 +1042,22 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     /**
      * Drains from water storage by default
      */
-    private class SidesFluidHandler extends FluidHandler
+    public static class SidesFluidHandler extends FluidHandler
     {
+        public SidesFluidHandler(HearthBlockEntity hearth)
+        {   super(hearth);
+        }
+
         @Override
         public FluidStack drain(int amount, FluidAction fluidAction)
         {
-            int drained = Math.min(coldFuel.getAmount(), amount);
+            int drained = Math.min(hearth.coldFuel.getAmount(), amount);
 
-            FluidStack stack = new FluidStack(coldFuel, drained);
+            FluidStack stack = new FluidStack(hearth.coldFuel.getFluidHolder(), drained);
             if (fluidAction.execute() && drained > 0)
-            {   coldFuel.shrink(drained);
+            {   hearth.coldFuel.shrink(drained);
             }
-            HearthBlockEntity.this.setChanged();
+            hearth.setChanged();
 
             return stack;
         }
@@ -1059,18 +1066,22 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     /**
      * Drains from lava storage by default
      */
-    private class BottomFluidHandler extends FluidHandler
+    public static class BottomFluidHandler extends FluidHandler
     {
+        public BottomFluidHandler(HearthBlockEntity hearth)
+        {   super(hearth);
+        }
+
         @Override
         public FluidStack drain(int amount, FluidAction fluidAction)
         {
-            int drained = Math.min(hotFuel.getAmount(), amount);
+            int drained = Math.min(hearth.hotFuel.getAmount(), amount);
 
-            FluidStack stack = new FluidStack(hotFuel, drained);
+            FluidStack stack = new FluidStack(hearth.hotFuel.getFluidHolder(), drained);
             if (fluidAction.execute() && drained > 0)
-            {   hotFuel.shrink(drained);
+            {   hearth.hotFuel.shrink(drained);
             }
-            HearthBlockEntity.this.setChanged();
+            hearth.setChanged();
 
             return stack;
         }

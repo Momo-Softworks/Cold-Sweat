@@ -45,14 +45,14 @@ public class ChameleonColorLayer<T extends Entity, M extends EntityModel<T>> ext
                     VertexConsumer vertexConsumer = bufferSource.getBuffer(CHAMELEON_RED);
                     float alpha = chameleon.hurtTime > 0 ? 0 : (float) CSMath.blend(0f, 1f, chameleon.getTemperature(), CSMath.average(ConfigSettings.MAX_TEMP.get(), midTemp), ConfigSettings.MAX_TEMP.get());
                     if (alpha > 0)
-                        ((ChameleonModel<Chameleon>) this.getParentModel()).renderToBuffer(poseStack, vertexConsumer, light, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, alpha * chameleon.opacity, true);
+                        ((ChameleonModel<Chameleon>) this.getParentModel()).renderToBuffer(poseStack, vertexConsumer, light, OverlayTexture.NO_OVERLAY, (int) (alpha * chameleon.opacity * 255), true);
                 }
                 else
                 {
                     VertexConsumer vertexConsumer = bufferSource.getBuffer(CHAMELEON_BLUE);
                     float alpha = chameleon.hurtTime > 0 ? 0 : (float) CSMath.blend(1f, 0f, chameleon.getTemperature(), ConfigSettings.MIN_TEMP.get(), CSMath.average(ConfigSettings.MIN_TEMP.get(), midTemp));
                     if (alpha > 0)
-                        ((ChameleonModel<Chameleon>) this.getParentModel()).renderToBuffer(poseStack, vertexConsumer, light, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, alpha * chameleon.opacity, true);
+                        ((ChameleonModel<Chameleon>) this.getParentModel()).renderToBuffer(poseStack, vertexConsumer, light, OverlayTexture.NO_OVERLAY, (int) (alpha * chameleon.opacity * 255), true);
                 }
             }
 
@@ -62,7 +62,7 @@ public class ChameleonColorLayer<T extends Entity, M extends EntityModel<T>> ext
                 VertexConsumer vertexConsumer = bufferSource.getBuffer(CHAMELEON_SHED);
                 float alpha = chameleon.hurtTime > 0 || chameleon.getLastShed() == 0 ? 0 : CSMath.blend(0, 0.7f, chameleon.getAgeSecs() * 20 - chameleon.getLastShed(), 0, chameleon.getTimeToShed());
                 if (alpha > 0)
-                    ((ChameleonModel<Chameleon>) this.getParentModel()).renderToBuffer(poseStack, vertexConsumer, light, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, alpha * chameleon.opacity, true);
+                    ((ChameleonModel<Chameleon>) this.getParentModel()).renderToBuffer(poseStack, vertexConsumer, light, OverlayTexture.NO_OVERLAY, (int) (alpha * chameleon.opacity * 255), true);
             }
             RenderSystem.disableBlend();
         }

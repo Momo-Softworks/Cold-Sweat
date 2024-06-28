@@ -1,44 +1,48 @@
 package com.momosoftworks.coldsweat.core.network.message;
 
+import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.event.HearthSaveDataHandler;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.network.NetworkEvent;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
-
-public class DisableHearthParticlesMessage
+public class DisableHearthParticlesMessage implements CustomPacketPayload
 {
+    public static final CustomPacketPayload.Type<DisableHearthParticlesMessage> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "disable_hearth_particles"));
+    public static final StreamCodec<FriendlyByteBuf, DisableHearthParticlesMessage> CODEC = CustomPacketPayload.codec(DisableHearthParticlesMessage::encode, DisableHearthParticlesMessage::decode);
+
     CompoundTag nbt;
 
     public DisableHearthParticlesMessage(CompoundTag nbt)
     {   this.nbt = nbt;
     }
 
-    public static void encode(DisableHearthParticlesMessage message, FriendlyByteBuf buffer)
-    {   buffer.writeNbt(message.nbt);
+    public void encode(FriendlyByteBuf buffer)
+    {   buffer.writeNbt(this.nbt);
     }
 
     public static DisableHearthParticlesMessage decode(FriendlyByteBuf buffer)
     {   return new DisableHearthParticlesMessage(buffer.readNbt());
     }
 
-    public static void handle(DisableHearthParticlesMessage message, Supplier<NetworkEvent.Context> contextSupplier)
+    public static void handle(DisableHearthParticlesMessage message, IPayloadContext context, boolean isServer)
     {
-        NetworkEvent.Context context = contextSupplier.get();
-        if (context.getSender() != null && context.getDirection().getReceptionSide() == LogicalSide.SERVER)
+        context.enqueueWork(() ->
         {
-            context.enqueueWork(() ->
-            {   context.getSender().getPersistentData().put("DisabledHearths", message.nbt);
-            });
-        }
-        else if (context.getDirection().getReceptionSide() == LogicalSide.CLIENT)
-        {
-            context.enqueueWork(() ->
+            if (isServer)
+            {   context.player().getPersistentData().put("DisabledHearths", message.nbt);
+            }
+            else
             {   HearthSaveDataHandler.deserializeDisabledHearths(message.nbt);
-            });
-        }
-        context.setPacketHandled(true);
+            }
+        });
+    }
+
+    @Override
+    public Type<? extends CustomPacketPayload> type()
+    {   return TYPE;
     }
 }

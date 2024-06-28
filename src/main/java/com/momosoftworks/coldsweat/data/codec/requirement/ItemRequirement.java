@@ -5,6 +5,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
+import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.StringTag;
@@ -14,10 +17,11 @@ import net.minecraft.world.item.EnchantedBookItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.Potion;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 
 import java.util.List;
 import java.util.Map;
@@ -27,33 +31,16 @@ import java.util.stream.Collectors;
 public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
                               Optional<IntegerBounds> count, Optional<IntegerBounds> durability,
                               Optional<List<EnchantmentRequirement>> enchantments, Optional<List<EnchantmentRequirement>> storedEnchantments,
-                              Optional<Potion> potion, NbtRequirement nbt)
+                              Optional<Potion> potion, ItemComponentsRequirement components)
 {
     public static final Codec<ItemRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.STRING.xmap(
-            // Convert from a string to a TagKey
-            string ->
-            {
-                ResourceLocation itemLocation = new ResourceLocation(string.replace("#", ""));
-                if (!string.contains("#")) return Either.<TagKey<Item>, Item>right(ForgeRegistries.ITEMS.getValue(itemLocation));
-
-                return Either.<TagKey<Item>, Item>left(TagKey.create(Registries.ITEM, itemLocation));
-            },
-            // Convert from a TagKey to a string
-            either ->
-            {   return either.left().isPresent()
-                       ? "#" + either.left().get().location()
-                       : either.right().map(item -> ForgeRegistries.ITEMS.getKey(item).toString()).orElse("");
-
-            })
-            .listOf()
-            .fieldOf("items").forGetter(ItemRequirement::items),
+            RegistryHelper.createTagCodec(Registries.ITEM).listOf().fieldOf("items").forGetter(ItemRequirement::items),
             IntegerBounds.CODEC.optionalFieldOf("count").forGetter(predicate -> predicate.count),
             IntegerBounds.CODEC.optionalFieldOf("durability").forGetter(predicate -> predicate.durability),
             EnchantmentRequirement.CODEC.listOf().optionalFieldOf("enchantments").forGetter(predicate -> predicate.enchantments),
             EnchantmentRequirement.CODEC.listOf().optionalFieldOf("stored_enchantments").forGetter(predicate -> predicate.storedEnchantments),
-            ForgeRegistries.POTIONS.getCodec().optionalFieldOf("potion").forGetter(predicate -> predicate.potion),
-            NbtRequirement.CODEC.optionalFieldOf("nbt", new NbtRequirement(new CompoundTag())).forGetter(predicate -> predicate.nbt)
+            BuiltInRegistries.POTION.byNameCodec().optionalFieldOf("potion").forGetter(predicate -> predicate.potion),
+            ItemComponentsRequirement.CODEC.optionalFieldOf("nbt", new ItemComponentsRequirement()).forGetter(predicate -> predicate.components)
     ).apply(instance, ItemRequirement::new));
 
     public boolean test(ItemStack stack, boolean ignoreCount)
@@ -62,7 +49,7 @@ public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
         {   return false;
         }
 
-        if (this.nbt.tag().isEmpty())
+        if (this.components.components().isEmpty())
         {   return true;
         }
         for (int i = 0; i < items.size(); i++)
@@ -83,15 +70,18 @@ public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
         else if (durability.isPresent() && !durability.get().test(stack.getMaxDamage() - stack.getDamageValue()))
         {   return false;
         }
-        else if (potion.isPresent() && !potion.get().getEffects().equals(PotionUtils.getPotion(stack).getEffects()))
+        else if (potion.isPresent() && !potion.get().getEffects().equals(stack.getOrDefault(DataComponents.POTION_CONTENTS, new PotionContents(Potions.AWKWARD)).potion().get().value().getEffects()))
         {   return false;
         }
-        else if (!nbt.test(stack.getTag()))
+        else if (!components.test(stack.getComponents()))
         {   return false;
         }
         else if (enchantments.isPresent())
         {
-            Map<Enchantment, Integer> stackEnchantments = EnchantmentHelper.deserializeEnchantments(stack.getEnchantmentTags());
+            ItemEnchantments stackEnchantments = stack.get(DataComponents.ENCHANTMENTS);
+            if (stackEnchantments == null)
+            {   return false;
+            }
             for (EnchantmentRequirement enchantment : enchantments.get())
             {
                 if (!enchantment.test(stackEnchantments))
@@ -101,7 +91,10 @@ public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
         }
         else if (storedEnchantments.isPresent())
         {
-            Map<Enchantment, Integer> stackEnchantments = EnchantmentHelper.deserializeEnchantments(EnchantedBookItem.getEnchantments(stack));
+            ItemEnchantments stackEnchantments = stack.get(DataComponents.STORED_ENCHANTMENTS);
+            if (stackEnchantments == null)
+            {   return false;
+            }
             for (EnchantmentRequirement enchantment : storedEnchantments.get())
             {   if (!enchantment.test(stackEnchantments))
                 {   return false;
@@ -115,14 +108,14 @@ public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
     {
         CompoundTag nbt = new CompoundTag();
         nbt.put("items", NBTHelper.listTagOf(items.stream().map(either -> StringTag.valueOf(either.map(tag -> "#" + tag.location(),
-                                                                                                       item -> ForgeRegistries.ITEMS.getKey(item).toString())))
+                                                                                                       item -> BuiltInRegistries.ITEM.getKey(item).toString())))
                                                            .collect(Collectors.toList())));
         count.ifPresent(count -> nbt.put("count", count.serialize()));
         durability.ifPresent(durability -> nbt.put("durability", durability.serialize()));
         enchantments.ifPresent(enchantments -> nbt.put("enchantments", NBTHelper.listTagOf(enchantments.stream().map(EnchantmentRequirement::serialize).collect(Collectors.toList()))));
         storedEnchantments.ifPresent(enchantments -> nbt.put("stored_enchantments", NBTHelper.listTagOf(enchantments.stream().map(EnchantmentRequirement::serialize).collect(Collectors.toList()))));
-        potion.ifPresent(potion -> nbt.putString("potion", ForgeRegistries.POTIONS.getKey(potion).toString()));
-        if (!this.nbt.tag().isEmpty()) nbt.put("nbt", this.nbt.serialize());
+        potion.ifPresent(potion -> nbt.putString("potion", BuiltInRegistries.POTION.getKey(potion).toString()));
+        if (!this.components.components().isEmpty()) nbt.put("nbt", this.components.serialize());
         return nbt;
     }
 
@@ -133,9 +126,9 @@ public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
                                                      .map(tg ->
                                                      {
                                                            String string = tg.getAsString();
-                                                           ResourceLocation location = new ResourceLocation(string.replace("#", ""));
+                                                           ResourceLocation location = ResourceLocation.parse(string.replace("#", ""));
                                                            if (!string.contains("#"))
-                                                           {   return Either.<TagKey<Item>, Item>right(ForgeRegistries.ITEMS.getValue(location));
+                                                           {   return Either.<TagKey<Item>, Item>right(BuiltInRegistries.ITEM.get(location));
                                                            }
 
                                                            return Either.<TagKey<Item>, Item>left(TagKey.create(Registries.ITEM, location));
@@ -160,11 +153,11 @@ public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
                                                                                                                       .toList())
                                                                                                         : Optional.empty();
 
-        Optional<Potion> potion = nbt.contains("potion") ? Optional.ofNullable(ForgeRegistries.POTIONS.getValue(new ResourceLocation(nbt.getString("potion"))))
+        Optional<Potion> potion = nbt.contains("potion") ? Optional.ofNullable(BuiltInRegistries.POTION.get(ResourceLocation.parse(nbt.getString("potion"))))
                                                          : Optional.empty();
 
-        NbtRequirement nbtReq = nbt.contains("nbt") ? NbtRequirement.deserialize(nbt.getCompound("nbt"))
-                                                      : new NbtRequirement(new CompoundTag());
+        ItemComponentsRequirement nbtReq = nbt.contains("nbt") ? ItemComponentsRequirement.deserialize(nbt.getCompound("nbt"))
+                                                               : new ItemComponentsRequirement();
 
         return new ItemRequirement(items, count, durability, enchantments, storedEnchantments, potion, nbtReq);
     }
@@ -202,7 +195,7 @@ public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
         if (!potion.equals(that.potion))
         {   return false;
         }
-        return nbt.equals(that.nbt);
+        return components.equals(that.components);
     }
 
     @Override
@@ -211,13 +204,13 @@ public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
         StringBuilder builder = new StringBuilder();
         builder.append("ItemRequirement{");
         items.forEach(either -> builder.append(either.map(tag -> "#" + tag.location(),
-                                                          item -> ForgeRegistries.ITEMS.getKey(item)).toString()).append(", "));
+                                                          item -> BuiltInRegistries.ITEM.getKey(item)).toString()).append(", "));
         count.ifPresent(bounds -> builder.append(bounds.toString()).append(", "));
         durability.ifPresent(bounds -> builder.append(bounds.toString()).append(", "));
         enchantments.ifPresent(enchantments -> builder.append("Enchantments: {").append(enchantments.stream().map(EnchantmentRequirement::toString).collect(Collectors.joining(", "))).append("}, "));
         storedEnchantments.ifPresent(enchantments -> builder.append("Stored Enchantments: {").append(enchantments.stream().map(EnchantmentRequirement::toString).collect(Collectors.joining(", "))).append("}, "));
-        potion.ifPresent(potion -> builder.append("Potion: ").append(ForgeRegistries.POTIONS.getKey(potion).toString()));
-        builder.append("NBT: ").append(nbt.toString()).append(", ");
+        potion.ifPresent(potion -> builder.append("Potion: ").append(BuiltInRegistries.POTION.getKey(potion).toString()));
+        builder.append("NBT: ").append(components.toString()).append(", ");
         builder.append("}");
 
         return builder.toString();

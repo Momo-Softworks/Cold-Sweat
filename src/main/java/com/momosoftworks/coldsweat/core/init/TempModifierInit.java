@@ -20,15 +20,15 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.server.ServerStartingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.server.ServerStartingEvent;
 
 import java.util.*;
 import java.util.function.Predicate;
 
-@Mod.EventBusSubscriber
+@EventBusSubscriber
 public class TempModifierInit
 {
     @SubscribeEvent
@@ -42,14 +42,14 @@ public class TempModifierInit
         TempModifierRegistry.flush();
         BlockTempRegistry.flush();
 
-        try { MinecraftForge.EVENT_BUS.post(new TempModifierRegisterEvent()); }
+        try { NeoForge.EVENT_BUS.post(new TempModifierRegisterEvent()); }
         catch (Exception e)
         {
             ColdSweat.LOGGER.error("Registering TempModifiers failed!");
             throw e;
         }
 
-        try { MinecraftForge.EVENT_BUS.post(new BlockTempRegisterEvent()); }
+        try { NeoForge.EVENT_BUS.post(new BlockTempRegisterEvent()); }
         catch (Exception e)
         {
             ColdSweat.LOGGER.error("Registering BlockTemps failed!");
@@ -113,7 +113,7 @@ public class TempModifierInit
                                 BlockEntity blockEntity = level.getBlockEntity(pos);
                                 if (blockEntity != null)
                                 {
-                                    CompoundTag blockTag = blockEntity.saveWithFullMetadata();
+                                    CompoundTag blockTag = blockEntity.saveWithFullMetadata(level.registryAccess());
                                     for (String key : tag.get().getAllKeys())
                                     {
                                         if (!tag.get().get(key).equals(blockTag.get(key)))
@@ -164,35 +164,35 @@ public class TempModifierInit
         String weatherStorms = compatPath + "StormTempModifier";
         String curios = compatPath + "CuriosTempModifier";
 
-        event.register(new ResourceLocation(ColdSweat.MOD_ID, "blocks"), BlockTempModifier::new);
-        event.register(new ResourceLocation(ColdSweat.MOD_ID, "biomes"), BiomeTempModifier::new);
-        event.register(new ResourceLocation(ColdSweat.MOD_ID, "underground"), UndergroundTempModifier::new);
-        event.register(new ResourceLocation(ColdSweat.MOD_ID, "armor"), ArmorInsulationTempModifier::new);
-        event.register(new ResourceLocation(ColdSweat.MOD_ID, "mount"), MountTempModifier::new);
-        event.register(new ResourceLocation(ColdSweat.MOD_ID, "waterskin"), WaterskinTempModifier::new);
-        event.register(new ResourceLocation(ColdSweat.MOD_ID, "soulspring_lamp"), SoulLampTempModifier::new);
-        event.register(new ResourceLocation(ColdSweat.MOD_ID, "water"), WaterTempModifier::new);
-        event.register(new ResourceLocation(ColdSweat.MOD_ID, "air_conditioning"), BlockInsulationTempModifier::new);
-        event.register(new ResourceLocation(ColdSweat.MOD_ID, "food"), FoodTempModifier::new);
-        event.register(new ResourceLocation(ColdSweat.MOD_ID, "freezing"), FreezingTempModifier::new);
-        event.register(new ResourceLocation(ColdSweat.MOD_ID, "on_fire"), FireTempModifier::new);
-        event.register(new ResourceLocation(ColdSweat.MOD_ID, "soul_sprout"), SoulSproutTempModifier::new);
+        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "blocks"), BlockTempModifier::new);
+        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "biomes"), BiomeTempModifier::new);
+        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "underground"), UndergroundTempModifier::new);
+        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "armor"), ArmorInsulationTempModifier::new);
+        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "mount"), MountTempModifier::new);
+        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "waterskin"), WaterskinTempModifier::new);
+        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "soulspring_lamp"), SoulLampTempModifier::new);
+        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "water"), WaterTempModifier::new);
+        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "air_conditioning"), BlockInsulationTempModifier::new);
+        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "food"), FoodTempModifier::new);
+        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "freezing"), FreezingTempModifier::new);
+        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "on_fire"), FireTempModifier::new);
+        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "soul_sprout"), SoulSproutTempModifier::new);
 
         // Compat
         if (CompatManager.isSereneSeasonsLoaded())
-        {   event.registerByClassName(new ResourceLocation("sereneseasons", "season"), sereneSeasons);
+        {   event.registerByClassName(ResourceLocation.fromNamespaceAndPath("sereneseasons", "season"), sereneSeasons);
         }
 
         if (CompatManager.isArmorUnderwearLoaded())
-        {   event.registerByClassName(new ResourceLocation("armorunder", "lining"), armorUnder);
+        {   event.registerByClassName(ResourceLocation.fromNamespaceAndPath("armorunder", "lining"), armorUnder);
         }
 
         if (CompatManager.isWeather2Loaded())
-        {   event.registerByClassName(new ResourceLocation("weather2", "storm"), weatherStorms);
+        {   event.registerByClassName(ResourceLocation.fromNamespaceAndPath("weather2", "storm"), weatherStorms);
         }
 
         if (CompatManager.isCuriosLoaded())
-        {   event.registerByClassName(new ResourceLocation("curios", "curios"), curios);
+        {   event.registerByClassName(ResourceLocation.fromNamespaceAndPath("curios", "curios"), curios);
         }
 
         ColdSweat.LOGGER.debug("Registered TempModifiers in {}ms", System.currentTimeMillis() - startMS);

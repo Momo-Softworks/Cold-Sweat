@@ -16,7 +16,7 @@ public record BiomeTempData(List<Either<TagKey<Biome>, Biome>> biomes, double mi
                             Temperature.Units units, boolean isOffset, Optional<List<String>> requiredMods)
 {
     public static final Codec<BiomeTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            RegistryHelper.createVanillaTagCodec(Registries.BIOME).listOf().fieldOf("biomes").forGetter(BiomeTempData::biomes),
+            RegistryHelper.createTagCodec(Registries.BIOME).listOf().fieldOf("biomes").forGetter(BiomeTempData::biomes),
             Codec.mapEither(Codec.DOUBLE.fieldOf("temperature"), Codec.DOUBLE.fieldOf("min_temp")).xmap(
             either ->
             {

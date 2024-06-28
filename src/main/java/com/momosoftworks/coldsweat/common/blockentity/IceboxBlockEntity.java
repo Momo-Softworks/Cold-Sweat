@@ -6,23 +6,19 @@ import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.block.IceboxBlock;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
+import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
 import com.momosoftworks.coldsweat.common.container.IceboxContainer;
 import com.momosoftworks.coldsweat.common.item.FilledWaterskinItem;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
-import com.momosoftworks.coldsweat.core.init.ParticleTypesInit;
-import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
+import com.momosoftworks.coldsweat.core.init.*;
 import com.momosoftworks.coldsweat.core.network.message.BlockDataUpdateMessage;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.registries.ModBlockEntities;
-import com.momosoftworks.coldsweat.util.registries.ModEffects;
-import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -36,12 +32,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.wrapper.SidedInvWrapper;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -54,19 +46,11 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
     public static int[] WATERSKIN_SLOTS = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     public static int[] FUEL_SLOT = {0};
 
-    LazyOptional<? extends IItemHandler>[] slotHandlers =
-            SidedInvWrapper.create(this, Direction.UP, Direction.DOWN, Direction.NORTH);
-
     List<ServerPlayer> usingPlayers = new ArrayList<>();
 
     public IceboxBlockEntity(BlockPos pos, BlockState state)
-    {   super(ModBlockEntities.ICEBOX, pos, state);
+    {   super(ModBlockEntities.ICEBOX.value(), pos, state);
         TaskScheduler.schedule(this::checkForSmokestack, 5);
-    }
-
-    @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt)
-    {   handleUpdateTag(pkt.getTag());
     }
 
     @Override
@@ -80,8 +64,9 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
         usingPlayers.removeIf(player -> !(player.containerMenu instanceof IceboxContainer iceboxContainer && iceboxContainer.te == this));
 
         // Send data to all players with this block's menu open
-        ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.NMLIST.with(()-> usingPlayers.stream().map(player -> player.connection.connection).toList()),
-                                             new BlockDataUpdateMessage(this));
+        for (ServerPlayer player : usingPlayers)
+        {   PacketDistributor.sendToPlayer(player, new BlockDataUpdateMessage(this));
+        }
     }
 
     @Override
@@ -118,12 +103,11 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
                 for (int i = 1; i < 10; i++)
                 {
                     ItemStack stack = getItem(i);
-                    CompoundTag tag = NBTHelper.getTagOrEmpty(stack);
-                    double itemTemp = tag.getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
+                    double itemTemp = stack.getOrDefault(ModItemComponents.WATER_TEMPERATURE.value(), 0d);
 
-                    if (stack.is(ModItems.FILLED_WATERSKIN) && itemTemp > -50)
+                    if (stack.getItem() == ModItems.FILLED_WATERSKIN.value() && itemTemp > -50)
                     {   hasItemStacks = true;
-                        tag.putDouble(FilledWaterskinItem.NBT_TEMPERATURE, Math.max(-50, itemTemp - 1));
+                        stack.set(ModItemComponents.WATER_TEMPERATURE.value(), Math.max(-50, itemTemp - 1));
                     }
                 }
                 if (hasItemStacks) setFuel(getFuel() - 1);
@@ -168,8 +152,9 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
     {
         // Apply the insulation effect
         if (!shouldUseColdFuel)
-        EntityTempManager.getTemperatureCap(player).ifPresent(cap ->
-        {   double temp = cap.getTrait(Temperature.Trait.WORLD);
+        {
+            ITemperatureCap cap = EntityTempManager.getTemperatureCap(player);
+            double temp = cap.getTrait(Temperature.Trait.WORLD);
             double min = cap.getTrait(Temperature.Trait.FREEZING_POINT);
             double max = cap.getTrait(Temperature.Trait.BURNING_POINT);
 
@@ -192,11 +177,11 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
 
             // Tell the icebox to use cold fuel
             shouldUseColdFuel |= this.getColdFuel() > 0 && temp > max;
-        });
+        }
         if (shouldUseColdFuel)
         {   int maxEffect = this.getMaxInsulationLevel() - 1;
             int effectLevel = (int) Math.min(maxEffect, (insulationLevel / (double) this.getInsulationTime()) * maxEffect);
-            player.addEffect(new MobEffectInstance(ModEffects.INSULATION, 120, effectLevel, false, false, true));
+            player.addEffect(new MobEffectInstance(ModEffects.INSULATED, 120, effectLevel, false, false, true));
         }
     }
 
@@ -268,7 +253,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
 
     @Override
     public ParticleOptions getAirParticle()
-    {   return ParticleTypesInit.GROUND_MIST.get();
+    {   return ModParticleTypes.GROUND_MIST.get();
     }
 
     @Override
@@ -286,8 +271,8 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
         float xm = rand.nextFloat() / 20 - 0.025f;
         float zm = rand.nextFloat() / 20 - 0.025f;
 
-        level.addParticle(onGround ? ParticleTypesInit.GROUND_MIST.get()
-                                   : ParticleTypesInit.MIST.get(), false, x + xr, y + yr, z + zr, xm, 0, zm);
+        level.addParticle(onGround ? ModParticleTypes.GROUND_MIST.get()
+                                   : ModParticleTypes.MIST.get(), false, x + xr, y + yr, z + zr, xm, 0, zm);
     }
 
     @Override
@@ -311,20 +296,5 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
     @Override
     public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction direction)
     {   return true;
-    }
-
-    @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction facing)
-    {
-        if (!this.remove && facing != null && capability == ForgeCapabilities.ITEM_HANDLER)
-        {
-            if (facing == Direction.UP)
-                return slotHandlers[0].cast();
-            else if (facing == Direction.DOWN)
-                return slotHandlers[1].cast();
-            else
-                return slotHandlers[2].cast();
-        }
-        return super.getCapability(capability, facing);
     }
 }

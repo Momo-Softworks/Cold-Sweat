@@ -12,6 +12,6 @@ public class ModDimensionTags
 
     private static TagKey<DimensionType> createTag(String name)
     {
-        return TagKey.create(Registries.DIMENSION_TYPE, new ResourceLocation(ColdSweat.MOD_ID, name));
+        return TagKey.create(Registries.DIMENSION_TYPE, ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, name));
     }
 }

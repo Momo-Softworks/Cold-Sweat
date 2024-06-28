@@ -7,35 +7,37 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.type.PredicateItem;
+import com.momosoftworks.coldsweat.core.init.ModItemComponents;
+import com.momosoftworks.coldsweat.core.init.ModSounds;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import org.jetbrains.annotations.Nullable;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
 import java.util.List;
 import java.util.Optional;
 
-@Mod.EventBusSubscriber
+@EventBusSubscriber
 public class SoulspringLampItem extends Item
 {
     public SoulspringLampItem()
@@ -99,18 +101,18 @@ public class SoulspringLampItem extends Item
             }
             finally
             {
-                CompoundTag itemTag = stack.getOrCreateTag();
+                CustomData itemTag = stack.get(DataComponents.CUSTOM_DATA);
                 // If the conditions are not met, turn off the lamp
-                if (itemTag.getInt("stateChangeTimer") <= 0
-                && itemTag.getBoolean("Lit") != shouldBeOn)
+                if (itemTag.copyTag().getInt("stateChangeTimer") <= 0
+                && CSMath.orElse(stack.get(ModItemComponents.SOULSPRING_LAMP_LIT), false) != shouldBeOn)
                 {
-                    itemTag.putInt("stateChangeTimer", 2);
-                    itemTag.putBoolean("Lit", shouldBeOn);
+                    stack.set(DataComponents.CUSTOM_DATA, itemTag.update(tag -> tag.putInt("stateChangeTimer", 2)));
+                    stack.set(ModItemComponents.SOULSPRING_LAMP_LIT, shouldBeOn);
 
                     if (getFuel(stack) < 0.5)
                         setFuel(stack, 0);
 
-                    WorldHelper.playEntitySound(shouldBeOn ? ModSounds.NETHER_LAMP_ON : ModSounds.NETHER_LAMP_OFF, player, entityIn.getSoundSource(), 1.5f, (float) Math.random() / 5f + 0.9f);
+                    WorldHelper.playEntitySound(shouldBeOn ? ModSounds.SOUL_LAMP_ON.value() : ModSounds.SOUL_LAMP_OFF.value(), player, entityIn.getSoundSource(), 1.5f, (float) Math.random() / 5f + 0.9f);
                 }
                 else
                 {   // Decrement the state change timer
@@ -126,7 +128,7 @@ public class SoulspringLampItem extends Item
     }
 
     private static void setFuel(ItemStack stack, double fuel)
-    {   stack.getOrCreateTag().putDouble("Fuel", fuel);
+    {   stack.set(ModItemComponents.SOULSPRING_LAMP_FUEL, fuel);
     }
 
     private static void addFuel(ItemStack stack, double amount)
@@ -138,7 +140,7 @@ public class SoulspringLampItem extends Item
     }
 
     private static double getFuel(ItemStack stack)
-    {   return stack.getOrCreateTag().getDouble("Fuel");
+    {   return stack.getOrDefault(ModItemComponents.SOULSPRING_LAMP_FUEL, 0d);
     }
 
     public static double getFuelForStack(ItemStack item)
@@ -149,7 +151,7 @@ public class SoulspringLampItem extends Item
 
     // Restore fuel if player hits an enemy
     @SubscribeEvent
-    public static void onEntityHit(LivingAttackEvent event)
+    public static void onEntityHit(LivingIncomingDamageEvent event)
     {
         if (event.getSource().getEntity() instanceof Player attacker && !(event.getEntity() instanceof Player))
         {
@@ -161,7 +163,7 @@ public class SoulspringLampItem extends Item
 
             // If fuel < 64 and target NOT player
             if (getFuel(stack) < 64
-            && target.getMobType() != MobType.UNDEAD
+            && !target.getType().is(EntityTypeTags.UNDEAD)
             && !target.getPersistentData().getBoolean("SoulSucked"))
             {
                 target.getPersistentData().putBoolean("SoulSucked", true);
@@ -181,7 +183,7 @@ public class SoulspringLampItem extends Item
                 }
                 // Play soul stealing sound
                 if (attacker.level().isClientSide)
-                {   WorldHelper.playEntitySound(ModSounds.NETHER_LAMP_ON, attacker, attacker.getSoundSource(), 1f, (float) Math.random() / 5f + 1.3f);
+                {   WorldHelper.playEntitySound(ModSounds.SOUL_LAMP_ON.value(), attacker, attacker.getSoundSource(), 1f, (float) Math.random() / 5f + 1.3f);
                 }
             }
         }
@@ -193,12 +195,12 @@ public class SoulspringLampItem extends Item
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag advanced)
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag advanced)
     {
         if (advanced.isAdvanced())
-        {   tooltip.add(Component.literal("Fuel: " + (int) stack.getOrCreateTag().getDouble("Fuel") + " / " + 64));
+        {   tooltip.add(Component.literal("Fuel: " + (int) getFuel(stack) + " / " + 64));
         }
-        super.appendHoverText(stack, level, tooltip, advanced);
+        super.appendHoverText(stack, context, tooltip, advanced);
     }
 
     @Override
@@ -222,7 +224,7 @@ public class SoulspringLampItem extends Item
             }
 
             if (player instanceof ServerPlayer serverPlayer)
-            {   ModAdvancementTriggers.SOUL_LAMP_FUELLED.trigger(serverPlayer, fuelStack, thisStack);
+            {   ModAdvancementTriggers.SOUL_LAMP_FUELED.trigger(serverPlayer, fuelStack, thisStack);
             }
 
             return true;

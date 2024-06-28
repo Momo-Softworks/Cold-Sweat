@@ -45,7 +45,7 @@ public record FoodData(ItemRequirement data, Double value, Optional<Integer> dur
         ItemRequirement items = ItemRequirement.deserialize(nbt.getCompound("data"));
         Double value = nbt.getDouble("value");
         Optional<Integer> duration = Optional.ofNullable(nbt.contains("duration") ? nbt.getInt("duration") : null);
-        Optional<EntityRequirement> entityRequirement = java.util.Optional.ofNullable(nbt.contains("entity_requirement")
+        Optional<EntityRequirement> entityRequirement = Optional.ofNullable(nbt.contains("entity_requirement")
                                                                             ? EntityRequirement.deserialize(nbt.getCompound("entity_requirement"))
                                                                             : null);
         Optional<List<String>> requiredMods = Optional.of(nbt.getList("required_mods", 8)).map(mods ->

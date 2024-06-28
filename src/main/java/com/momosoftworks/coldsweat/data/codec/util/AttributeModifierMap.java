@@ -2,17 +2,14 @@ package com.momosoftworks.coldsweat.data.codec.util;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.registries.ForgeRegistries;
-import org.antlr.v4.runtime.misc.MultiMap;
 
 import java.util.*;
 
@@ -74,7 +71,7 @@ public class AttributeModifierMap implements NbtSerializable
     {
         CompoundTag tag = new CompoundTag();
         map.asMap().forEach((attribute, modifier) ->
-        {   String key = ForgeRegistries.ATTRIBUTES.getKey(attribute).toString();
+        {   String key = BuiltInRegistries.ATTRIBUTE.getKey(attribute).toString();
             ListTag list = new ListTag();
             modifier.forEach(mod -> list.add(mod.save()));
             tag.put(key, list);
@@ -86,7 +83,7 @@ public class AttributeModifierMap implements NbtSerializable
     {
         Multimap<Attribute, AttributeModifier> map = HashMultimap.create();
         tag.getAllKeys().forEach(key ->
-        {   Attribute attribute = ForgeRegistries.ATTRIBUTES.getValue(new ResourceLocation(key));
+        {   Attribute attribute = BuiltInRegistries.ATTRIBUTE.get(ResourceLocation.parse(key));
             ListTag list = tag.getList(key, 10);
             list.forEach(mod -> map.put(attribute, AttributeModifier.load(((CompoundTag) mod))));
         });

@@ -2,8 +2,8 @@ package com.momosoftworks.coldsweat.api.temperature.block_temp;
 
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.block.BoilerBlock;
+import com.momosoftworks.coldsweat.core.init.ModBlocks;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
@@ -13,7 +13,7 @@ public class BoilerBlockTemp extends BlockTemp
 {
     public BoilerBlockTemp()
     {
-        super(ModBlocks.BOILER);
+        super(ModBlocks.BOILER.value());
     }
 
     @Override

@@ -2,12 +2,12 @@ package com.momosoftworks.coldsweat.core.init;
 
 import com.momosoftworks.coldsweat.api.event.core.EdiblesRegisterEvent;
 import com.momosoftworks.coldsweat.common.entity.data.edible.*;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.server.ServerStartingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.server.ServerStartingEvent;
 
-@Mod.EventBusSubscriber
+@EventBusSubscriber
 public class EdibleInit
 {
     @SubscribeEvent
@@ -23,6 +23,6 @@ public class EdibleInit
     public static void onServerStart(ServerStartingEvent event)
     {
         EdiblesRegisterEvent edibleEvent = new EdiblesRegisterEvent();
-        MinecraftForge.EVENT_BUS.post(edibleEvent);
+        NeoForge.EVENT_BUS.post(edibleEvent);
     }
 }

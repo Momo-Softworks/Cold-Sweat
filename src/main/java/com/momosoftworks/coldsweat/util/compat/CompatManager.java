@@ -1,56 +1,38 @@
 package com.momosoftworks.coldsweat.util.compat;
 
-import com.anthonyhilyard.iceberg.util.Tooltips;
 import com.mojang.datafixers.util.Either;
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.api.util.Temperature;
-import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
+import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModDamageSources;
-import com.momosoftworks.coldsweat.util.registries.ModItems;
-import com.momosoftworks.coldsweat.util.world.WorldHelper;
-import com.simibubi.create.content.equipment.armor.BacktankItem;
-import com.simibubi.create.content.equipment.armor.BacktankUtil;
-import com.simibubi.create.content.equipment.armor.DivingHelmetItem;
-import de.teamlapen.werewolves.entities.player.werewolf.WerewolfPlayer;
 import dev.ghen.thirst.api.ThirstHelper;
 import dev.ghen.thirst.content.purity.ContainerWithPurity;
 import dev.ghen.thirst.content.purity.WaterPurity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
-import net.minecraftforge.event.entity.living.LivingDamageEvent;
-import net.minecraftforge.event.entity.living.LivingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.bus.api.ICancellableEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
+import net.neoforged.neoforge.event.entity.living.LivingEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import sereneseasons.season.SeasonHooks;
-import top.theillusivec4.curios.api.CuriosCapability;
-import top.theillusivec4.curios.api.event.CurioChangeEvent;
-import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
-import weather2.ServerTickHandler;
-import weather2.weathersystem.WeatherManagerServer;
-import weather2.weathersystem.storm.StormObject;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
-@Mod.EventBusSubscriber
+@EventBusSubscriber
 public class CompatManager
 {
     private static final boolean BOP_LOADED = modLoaded("biomesoplenty");
@@ -149,13 +131,16 @@ public class CompatManager
     {   return ICEBERG_LOADED;
     }
 
+    // TODO: Reimplement when this mod is updated
     public static boolean hasCurio(Player player, Item curio)
-    {   return CURIOS_LOADED && player.getCapability(CuriosCapability.INVENTORY).map(cap -> cap.findFirstCurio(curio)).map(Optional::isPresent).orElse(false);
+    {   return false;//return CURIOS_LOADED && player.getCapability(CuriosCapability.INVENTORY).map(cap -> cap.findFirstCurio(curio)).map(Optional::isPresent).orElse(false);
     }
 
+    // TODO: Reimplement when this mod is updated
     public static List<ItemStack> getCurios(LivingEntity entity)
     {
-        if (!CURIOS_LOADED) return new ArrayList<>();
+        return List.of();
+        /*if (!CURIOS_LOADED) return new ArrayList<>();
         return entity.getCapability(CuriosCapability.INVENTORY)
                      .map(ICuriosItemHandler::getEquippedCurios)
                      .map(stacks ->
@@ -165,7 +150,7 @@ public class CompatManager
                          {   list.add(stacks.getStackInSlot(i));
                          }
                          return list;
-                     }).orElse(new ArrayList<>());
+                     }).orElse(new ArrayList<>());*/
     }
 
     public static boolean hasOzzyLiner(ItemStack stack)
@@ -181,13 +166,15 @@ public class CompatManager
         //return ARMOR_UNDERWEAR_LOADED && Armory.getXLining(stack).has(Armory.XLining.ANTIBURN_SHIELD);
     }
 
+    //TODO: Reimplement when this mod is updated
     public static boolean isWerewolf(Player player)
-    {   return WEREWOLVES_LOADED && WerewolfPlayer.getOpt(player).filter(w -> w.getLevel() > 0).map(w -> w.getForm().isTransformed()).orElse(false);
+    {   return false;//return WEREWOLVES_LOADED && WerewolfPlayer.getOpt(player).filter(w -> w.getLevel() > 0).map(w -> w.getForm().isTransformed()).orElse(false);
     }
 
+    //TODO: Reimplement when this mod is updated
     public static boolean isRainstormAt(Level level, BlockPos pos)
     {
-        if (WEATHER_LOADED)
+        /*if (WEATHER_LOADED)
         {
             WeatherManagerServer weatherManager = ServerTickHandler.getWeatherManagerFor(level.dimension());
             if (weatherManager == null) return false;
@@ -198,7 +185,7 @@ public class CompatManager
             && Math.sqrt(Math.pow(pos.getX() - rainStorm.pos.x, 2) + Math.pow(pos.getX() - rainStorm.pos.x, 2)) < rainStorm.getSize())
             {   return true;
             }
-        }
+        }*/
         return false;
     }
 
@@ -231,10 +218,11 @@ public class CompatManager
         return item;
     }
 
+    //TODO: Reimplement when this mod is updated
     public static int getLegendaryTTStartIndex(List<Either<FormattedText, TooltipComponent>> tooltip)
     {
         if (isIcebergLoaded())
-        {   return CSMath.getIndexOf(tooltip, element -> element.right().map(component -> component instanceof Tooltips.TitleBreakComponent).orElse(false));
+        {   return -1;//return CSMath.getIndexOf(tooltip, element -> element.right().map(component -> component instanceof Tooltips.TitleBreakComponent).orElse(false));
         }
         return -1;
     }
@@ -245,28 +233,38 @@ public class CompatManager
     {
         if (CURIOS_LOADED)
         {
-            MinecraftForge.EVENT_BUS.register(new Object()
+            NeoForge.EVENT_BUS.register(new Object()
             {
-                @SubscribeEvent
+                //TODO: Reimplement when this mod is updated
+                /*@SubscribeEvent
                 public void onCurioChange(CurioChangeEvent event)
                 {
                     EntityTempManager.updateInsulationAttributeModifiers(event.getEntity());
-                }
+                }*/
             });
         }
     }
 
     @SubscribeEvent
-    public static void onLivingTempDamage(LivingEvent event)
+    public static void onLivingTempDamage(LivingDamageEvent event)
+    {   doLivingTempDamage(event);
+    }
+
+    @SubscribeEvent
+    public static void onLivingTempDamage(LivingIncomingDamageEvent event)
+    {   doLivingTempDamage(event);
+    }
+
+    private static void doLivingTempDamage(LivingEvent event)
     {
-        if (!(event instanceof LivingDamageEvent || event instanceof LivingAttackEvent)) return;
+        if (!(event instanceof LivingDamageEvent.Pre || event instanceof LivingIncomingDamageEvent)) return;
         // Armor Underwear compat
         if (ARMOR_UNDERWEAR_LOADED && !event.getEntity().level().isClientSide)
         {
             // Get the damage source from the event (different methods for LivingDamage/LivingAttack)
             DamageSource source = event instanceof LivingDamageEvent
-                                  ? ((LivingDamageEvent) event).getSource()
-                                  : ((LivingAttackEvent) event).getSource();
+                                  ? ((LivingDamageEvent.Pre) event).getContainer().getSource()
+                                  : ((LivingIncomingDamageEvent) event).getSource();
             if (source == null) return;
 
             boolean isDamageCold;
@@ -280,22 +278,23 @@ public class CompatManager
                 }
                 // Cancel the event if full liners
                 if (liners >= 4)
-                {   event.setCanceled(true);
+                {   ((ICancellableEvent) event).setCanceled(true);
                     return;
                 }
                 // Dampen the damage as the number of liners increases
-                if (event instanceof LivingDamageEvent damageEvent)
-                    damageEvent.setAmount(CSMath.blend(damageEvent.getAmount(), 0, liners, 0, 4));
+                if (event instanceof LivingDamageEvent.Pre damageEvent)
+                    damageEvent.getContainer().setNewDamage(CSMath.blend(damageEvent.getContainer().getOriginalDamage(), 0, liners, 0, 4));
             }
         }
     }
 
     public static boolean USING_BACKTANK = false;
 
-    @SubscribeEvent
-    public static void drainCreateBacktank(TickEvent.PlayerTickEvent event)
+    //TODO: Reimplement when this mod is updated
+    /*@SubscribeEvent
+    public static void drainCreateBacktank(PlayerTickEvent event)
     {
-        Player player = event.player;
+        Player player = event.getEntity();
         if (!CompatManager.isCreateLoaded()) return;
         ItemStack backTank = player.getItemBySlot(EquipmentSlot.CHEST);
 
@@ -342,18 +341,19 @@ public class CompatManager
         else if (player.level().isClientSide)
         {   USING_BACKTANK = false;
         }
-    }
+    }*/
 
-    @Mod.EventBusSubscriber(modid = ColdSweat.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
+    @EventBusSubscriber(modid = ColdSweat.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
     public static class ModEvents
     {
         @SubscribeEvent
         public static void addThirstDrinks(FMLCommonSetupEvent event)
         {
+            // TODO: Find out how this works now
             if (isThirstLoaded())
-            {   ThirstHelper.addDrink(ModItems.FILLED_WATERSKIN, 6, 12);
-                WaterPurity.addContainer(new ContainerWithPurity(ModItems.WATERSKIN.getDefaultInstance(),
-                                                                 ModItems.FILLED_WATERSKIN.getDefaultInstance()));
+            {   ThirstHelper.addDrink(ModItems.FILLED_WATERSKIN.value(), 6, 12);
+                WaterPurity.addContainer(new ContainerWithPurity(ModItems.WATERSKIN.value(),
+                                                                 ModItems.FILLED_WATERSKIN.value()));
             }
         }
     }

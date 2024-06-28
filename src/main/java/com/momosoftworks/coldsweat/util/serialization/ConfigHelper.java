@@ -8,12 +8,13 @@ import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
+import com.momosoftworks.coldsweat.data.codec.requirement.ItemComponentsRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
 import com.momosoftworks.coldsweat.util.exceptions.ArgumentCountException;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.world.WorldHelper;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
@@ -31,8 +32,6 @@ import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureType;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.tags.ITag;
 import oshi.util.tuples.Triplet;
 
 import java.util.*;
@@ -56,12 +55,12 @@ public class ConfigHelper
             if (objString.startsWith("#"))
             {
                 final String tagID = objString.replace("#", "");
-                Optional<HolderSet.Named<T>> tag = reg.getTag(TagKey.create(registry, new ResourceLocation(tagID)));
+                Optional<HolderSet.Named<T>> tag = reg.getTag(TagKey.create(registry, ResourceLocation.parse(tagID)));
                 tag.ifPresent(tg -> biomeList.addAll(tg.stream().map(Holder::value).toList()));
             }
             else
             {
-                ResourceLocation id = new ResourceLocation(objString);
+                ResourceLocation id = ResourceLocation.parse(objString);
                 Optional<T> obj = RegistryHelper.getVanillaRegistryValue(registry, id);
                 if (obj.isEmpty())
                 {
@@ -82,16 +81,16 @@ public class ConfigHelper
             if (id.startsWith("#"))
             {
                 final String tagID = id.replace("#", "");
-                CSMath.doIfNotNull(ForgeRegistries.BLOCKS.tags(), tags ->
-                {   Optional<ITag<Block>> optionalTag = tags.stream().filter(tag -> tag.getKey() != null && tag.getKey().location().toString().equals(tagID)).findFirst();
-                    optionalTag.ifPresent(blockITag -> blocks.addAll(blockITag.stream().toList()));
+                CSMath.doIfNotNull(BuiltInRegistries.BLOCK.getTags(), tags ->
+                {   Optional<Pair<TagKey<Block>, HolderSet.Named<Block>>> optionalTag = tags.filter(tag -> tag != null && tag.getFirst().location().toString().equals(tagID)).findFirst();
+                    optionalTag.ifPresent(blockITag -> blocks.addAll(optionalTag.get().getSecond().stream().map(Holder::value).toList()));
                 });
             }
             else
             {
-                ResourceLocation blockId = new ResourceLocation(id);
-                if (ForgeRegistries.BLOCKS.containsKey(blockId))
-                {   blocks.add(ForgeRegistries.BLOCKS.getValue(blockId));
+                ResourceLocation blockId = ResourceLocation.parse(id);
+                if (BuiltInRegistries.BLOCK.containsKey(blockId))
+                {   blocks.add(BuiltInRegistries.BLOCK.get(blockId));
                 }
                 else
                 {   ColdSweat.LOGGER.error("Error parsing block config: block \"{}\" does not exist", id);
@@ -109,16 +108,16 @@ public class ConfigHelper
             if (itemId.startsWith("#"))
             {
                 final String tagID = itemId.replace("#", "");
-                CSMath.doIfNotNull(ForgeRegistries.ITEMS.tags(), tags ->
-                {   Optional<ITag<Item>> optionalTag = tags.stream().filter(tag -> tag.getKey() != null && tag.getKey().location().toString().equals(tagID)).findFirst();
-                    optionalTag.ifPresent(itemITag -> items.addAll(itemITag.stream().toList()));
+                CSMath.doIfNotNull(BuiltInRegistries.ITEM.getTags(), tags ->
+                {   Optional<Pair<TagKey<Item>, HolderSet.Named<Item>>> optionalTag = tags.filter(tag -> tag != null && tag.getFirst().location().toString().equals(tagID)).findFirst();
+                    optionalTag.ifPresent(itemITag -> items.addAll(optionalTag.get().getSecond().stream().map(Holder::value).toList()));
                 });
             }
             else
             {
-                ResourceLocation itemID = new ResourceLocation(itemId);
-                if (ForgeRegistries.ITEMS.containsKey(itemID))
-                {   items.add(ForgeRegistries.ITEMS.getValue(itemID));
+                ResourceLocation itemID = ResourceLocation.parse(itemId);
+                if (BuiltInRegistries.ITEM.containsKey(itemID))
+                {   items.add(BuiltInRegistries.ITEM.get(itemID));
                 }
                 else
                 {   ColdSweat.LOGGER.error("Error parsing item config: item \"{}\" does not exist", itemId);
@@ -270,17 +269,16 @@ public class ConfigHelper
             if (entity.startsWith("#"))
             {
                 final String tagID = entity.replace("#", "");
-                CSMath.doIfNotNull(ForgeRegistries.ENTITY_TYPES.tags(), tags ->
-                {
-                    Optional<ITag<EntityType<?>>> optionalTag = tags.stream().filter(tag -> tag.getKey() != null && tag.getKey().location().toString().equals(tagID)).findFirst();
-                    optionalTag.ifPresent(entityITag -> entityList.addAll(entityITag.stream().toList()));
+                CSMath.doIfNotNull(BuiltInRegistries.ENTITY_TYPE.getTags(), tags ->
+                {   Optional<Pair<TagKey<EntityType<?>>, HolderSet.Named<EntityType<?>>>> optionalTag = tags.filter(tag -> tag != null && tag.getFirst().location().toString().equals(tagID)).findFirst();
+                    optionalTag.ifPresent(entityITag -> entityList.addAll(optionalTag.get().getSecond().stream().map(Holder::value).toList()));
                 });
             }
             else
             {
-                ResourceLocation entityId = new ResourceLocation(entity);
-                if (ForgeRegistries.ENTITY_TYPES.containsKey(entityId))
-                {   entityList.add(ForgeRegistries.ENTITY_TYPES.getValue(entityId));
+                ResourceLocation entityId = ResourceLocation.parse(entity);
+                if (BuiltInRegistries.ENTITY_TYPE.containsKey(entityId))
+                {   entityList.add(BuiltInRegistries.ENTITY_TYPE.get(entityId));
                 }
                 else
                 {   ColdSweat.LOGGER.error("Error parsing entity config: entity \"{}\" does not exist", entity);
@@ -346,7 +344,7 @@ public class ConfigHelper
         for (String biomeID : mapTag.getAllKeys())
         {
             CompoundTag biomeTag = mapTag.getCompound(biomeID);
-            Biome biome = RegistryHelper.getBiome(new ResourceLocation(biomeID));
+            Biome biome = RegistryHelper.getBiome(ResourceLocation.parse(biomeID));
             if (biome == null)
             {   ColdSweat.LOGGER.error("Error deserializing biome temperatures: biome \"{}\" does not exist", biomeID);
                 continue;
@@ -384,7 +382,7 @@ public class ConfigHelper
         for (String dimensionId : mapTag.getAllKeys())
         {
             CompoundTag biomeTag = mapTag.getCompound(dimensionId);
-            DimensionType dimension = RegistryHelper.getDimension(new ResourceLocation(dimensionId));
+            DimensionType dimension = RegistryHelper.getDimension(ResourceLocation.parse(dimensionId));
             if (dimension == null)
             {   ColdSweat.LOGGER.error("Error deserializing dimension temperatures: dimension \"{}\" does not exist", dimensionId);
                 continue;
@@ -423,7 +421,7 @@ public class ConfigHelper
         for (String structureId : mapTag.getAllKeys())
         {
             CompoundTag biomeTag = mapTag.getCompound(structureId);
-            StructureType<?> structure = RegistryHelper.getStructure(new ResourceLocation(structureId));
+            StructureType<?> structure = RegistryHelper.getStructure(ResourceLocation.parse(structureId));
             if (structure == null)
             {   ColdSweat.LOGGER.error("Error deserializing structure temperatures: structure \"{}\" does not exist", structureId);
                 continue;
@@ -439,12 +437,12 @@ public class ConfigHelper
         CompoundTag mapTag = new CompoundTag();
         for (Map.Entry<Item, T> entry : map.entrySet())
         {
-            ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(entry.getKey());
-            if (itemId == null)
+            if (!BuiltInRegistries.ITEM.containsValue(entry.getKey()))
             {
                 ColdSweat.LOGGER.error("Error serializing item map: item \"{}\" does not exist", entry.getKey());
                 continue;
             }
+            ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(entry.getKey());
             mapTag.put(itemId.toString(), serializer.apply(entry.getValue()));
         }
         tag.put(key, mapTag);
@@ -458,7 +456,7 @@ public class ConfigHelper
         CompoundTag mapTag = tag.getCompound(key);
         for (String itemID : mapTag.getAllKeys())
         {
-            Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemID));
+            Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(itemID));
             map.put(item, deserializer.apply(mapTag.getCompound(itemID)));
         }
         return map;
@@ -486,11 +484,11 @@ public class ConfigHelper
             Item item = entry.getKey();
             T value = entry.getValue();
             List<Object> itemData = new ArrayList<>();
-            ResourceLocation itemID = ForgeRegistries.ITEMS.getKey(item);
-            if (itemID == null)
+            if (!BuiltInRegistries.ITEM.containsValue(item))
             {   ColdSweat.LOGGER.error("Error writing item map: item \"{}\" does not exist", item);
                 continue;
             }
+            ResourceLocation itemID = BuiltInRegistries.ITEM.getKey(item);
             itemData.add(itemID.toString());
             itemData.addAll(valueWriter.apply(value));
             list.add(itemData);
@@ -506,11 +504,11 @@ public class ConfigHelper
         {
             Item item = entry.getKey();
             Insulator insulator = entry.getValue();
-            ResourceLocation itemID = ForgeRegistries.ITEMS.getKey(item);
-            if (itemID == null)
+            if (!BuiltInRegistries.ITEM.containsValue(item))
             {   ColdSweat.LOGGER.error("Error serializing item insulations: item \"{}\" does not exist", item);
                 continue;
             }
+            ResourceLocation itemID = BuiltInRegistries.ITEM.getKey(item);
             if (insulator == null)
             {   ColdSweat.LOGGER.error("Error serializing item insulations: insulation value for item \"{}\" is null", item);
                 continue;
@@ -529,11 +527,12 @@ public class ConfigHelper
         for (String itemID : mapTag.getAllKeys())
         {
             CompoundTag insulatorTag = mapTag.getCompound(itemID);
-            Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemID));
-            if (item == null)
+            ResourceLocation itemLocation = ResourceLocation.parse(itemID);
+            if (!BuiltInRegistries.ITEM.containsKey(itemLocation))
             {   ColdSweat.LOGGER.error("Error deserializing item insulations: item \"{}\" does not exist", itemID);
                 continue;
             }
+            Item item = BuiltInRegistries.ITEM.get(itemLocation);
             Insulator insulator = Insulator.deserialize(insulatorTag);
             map.put(item, insulator);
         }
@@ -551,13 +550,13 @@ public class ConfigHelper
             double value1 = ((Number) args.get(0)).doubleValue();
             double value2 = ((Number) args.get(1)).doubleValue();
             String type = args.size() > 2 ? (String) args.get(2) : "static";
-            CompoundTag nbt = args.size() > 3 ? NBTHelper.parseCompoundNbt(((String) args.get(3))) : new CompoundTag();
+            ItemComponentsRequirement components = args.size() > 3 ? ItemComponentsRequirement.parse(((String) args.get(3))) : new ItemComponentsRequirement();
             Insulation insulation = type.equals("static")
                                     ? new StaticInsulation(value1, value2)
                                     : new AdaptiveInsulation(value1, value2);
             ItemRequirement requirement = new ItemRequirement(List.of(), Optional.empty(),
                                                               Optional.empty(), Optional.empty(),
-                                                              Optional.empty(), Optional.empty(), new NbtRequirement(nbt));
+                                                              Optional.empty(), Optional.empty(), components);
 
             return new Insulator(insulation, slot, requirement, EntityRequirement.NONE, new AttributeModifierMap(), new HashMap<>());
         });
@@ -584,7 +583,7 @@ public class ConfigHelper
             itemData.add(insulator.insulation() instanceof StaticInsulation
                          ? "static"
                          : "adaptive");
-            itemData.add(insulator.data().nbt().serialize().toString());
+            itemData.add(insulator.data().components().serialize().toString());
 
             return itemData;
         });

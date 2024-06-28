@@ -3,18 +3,20 @@ package com.momosoftworks.coldsweat.api.temperature.block_temp;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import net.minecraft.core.BlockPos;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.AbstractFurnaceBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.registries.ForgeRegistries;
+
+import java.util.stream.StreamSupport;
 
 public class FurnaceBlockTemp extends BlockTemp
 {
     public FurnaceBlockTemp()
     {
-        super(ForgeRegistries.BLOCKS.getValues().stream().filter(block -> block instanceof AbstractFurnaceBlock).toArray(Block[]::new));
+        super(StreamSupport.stream(BuiltInRegistries.BLOCK.spliterator(), true).filter(block -> block instanceof AbstractFurnaceBlock).toArray(Block[]::new));
     }
 
     @Override

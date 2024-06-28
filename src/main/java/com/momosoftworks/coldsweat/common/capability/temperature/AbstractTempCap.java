@@ -6,11 +6,13 @@ import com.momosoftworks.coldsweat.api.util.Temperature.Trait;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
+import com.momosoftworks.coldsweat.core.init.ModEffects;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModDamageSources;
-import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
+import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -25,7 +27,6 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -81,7 +82,7 @@ public class AbstractTempCap implements ITemperatureCap
         changed |= switch (trait)
         {
             case CORE  -> ((int) value) != ((int) getTrait(Trait.CORE));
-            case BASE  -> ((int) value) != ((int) getTrait(Temperature.Trait.BASE));
+            case BASE  -> ((int) value) != ((int) getTrait(Trait.BASE));
             case WORLD -> Math.abs(value - getTrait(Trait.WORLD)) >= 0.02;
             default -> true;
         };
@@ -167,7 +168,7 @@ public class AbstractTempCap implements ITemperatureCap
         if (!(entity instanceof Player player)) return;
 
         Temperature.apply(0, player, Trait.WORLD, getModifiers(Trait.WORLD));
-        Temperature.apply(getTrait(Trait.CORE), player, Temperature.Trait.CORE, getModifiers(Trait.CORE));
+        Temperature.apply(getTrait(Trait.CORE), player, Trait.CORE, getModifiers(Trait.CORE));
         Temperature.apply(0, player, Trait.BASE, getModifiers(Trait.BASE));
     }
 
@@ -224,7 +225,7 @@ public class AbstractTempCap implements ITemperatureCap
                             // Heat dampening is positive; apply the change as a percentage of the dampening
                             : CSMath.blend(changeBy, 0, heatDampening, 0, 1));
             }
-            newCoreTemp += Temperature.apply(changeBy, entity, Trait.RATE, this.getModifiers(Temperature.Trait.RATE));
+            newCoreTemp += Temperature.apply(changeBy, entity, Trait.RATE, this.getModifiers(Trait.RATE));
         }
 
         // Get the sign of the player's core temperature (-1, 0, or 1)
@@ -277,7 +278,7 @@ public class AbstractTempCap implements ITemperatureCap
         this.tickHurting(entity, heatResistance, coldResistance);
     }
 
-    private double modifyFromAttribute(LivingEntity entity, Temperature.Trait type, double baseValue)
+    private double modifyFromAttribute(LivingEntity entity, Trait type, double baseValue)
     {
         Supplier<Double> defaultSupplier = () -> Temperature.apply(baseValue, entity, type, this.getModifiers(type));
         AttributeInstance attribute = EntityTempManager.getAttribute(type, entity);
@@ -290,15 +291,15 @@ public class AbstractTempCap implements ITemperatureCap
         {
             double base = CSMath.safeDouble(attribute.getBaseValue()).orElse(defaultSupplier.get());
 
-            for (AttributeModifier mod : EntityTempManager.getAllAttributeModifiers(entity, attribute, AttributeModifier.Operation.ADDITION))
-            {   base += mod.getAmount();
+            for (AttributeModifier mod : EntityTempManager.getAllAttributeModifiers(entity, attribute, AttributeModifier.Operation.ADD_VALUE))
+            {   base += mod.amount();
             }
             double value = base;
-            for (AttributeModifier mod : EntityTempManager.getAllAttributeModifiers(entity, attribute, AttributeModifier.Operation.MULTIPLY_BASE))
-            {   value += base * mod.getAmount();
+            for (AttributeModifier mod : EntityTempManager.getAllAttributeModifiers(entity, attribute, AttributeModifier.Operation.ADD_MULTIPLIED_BASE))
+            {   value += base * mod.amount();
             }
-            for (AttributeModifier mod : EntityTempManager.getAllAttributeModifiers(entity, attribute, AttributeModifier.Operation.MULTIPLY_TOTAL))
-            {   value *= 1.0D + mod.getAmount();
+            for (AttributeModifier mod : EntityTempManager.getAllAttributeModifiers(entity, attribute, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL))
+            {   value *= 1.0D + mod.amount();
             }
             return value;
         }
@@ -312,7 +313,7 @@ public class AbstractTempCap implements ITemperatureCap
 
     public void tickHurting(LivingEntity entity, double heatResistance, double coldResistance)
     {
-        double bodyTemp = getTrait(Temperature.Trait.BODY);
+        double bodyTemp = getTrait(Trait.BODY);
 
         boolean hasGrace = entity.hasEffect(ModEffects.GRACE);
         boolean hasFireResist = entity.hasEffect(MobEffects.FIRE_RESISTANCE);
@@ -370,7 +371,7 @@ public class AbstractTempCap implements ITemperatureCap
         // Save the player's persistent attributes
         ListTag attributes = new ListTag();
         for (Attribute attribute : this.getPersistentAttributes())
-        {   attributes.add(StringTag.valueOf(ForgeRegistries.ATTRIBUTES.getKey(attribute).toString()));
+        {   attributes.add(StringTag.valueOf(BuiltInRegistries.ATTRIBUTE.getKey(attribute).toString()));
         }
         nbt.put("PersistentAttributes", attributes);
         return nbt;
@@ -415,7 +416,7 @@ public class AbstractTempCap implements ITemperatureCap
         // Load the player's persistent attributes
         ListTag attributes = nbt.getList("PersistentAttributes", 8);
         for (int i = 0; i < attributes.size(); i++)
-        {   this.markPersistentAttribute(ForgeRegistries.ATTRIBUTES.getValue(new ResourceLocation(attributes.getString(i))));
+        {   this.markPersistentAttribute(BuiltInRegistries.ATTRIBUTE.get(ResourceLocation.parse(attributes.getString(i))));
         }
     }
 

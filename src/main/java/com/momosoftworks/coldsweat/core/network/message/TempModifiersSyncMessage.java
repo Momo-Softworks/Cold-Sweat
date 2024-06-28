@@ -1,17 +1,22 @@
 package com.momosoftworks.coldsweat.core.network.message;
 
+import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
-
-public class TempModifiersSyncMessage
+public class TempModifiersSyncMessage implements CustomPacketPayload
 {
+    public static final CustomPacketPayload.Type<TempModifiersSyncMessage> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "sync_temp_modifiers"));
+    public static final StreamCodec<FriendlyByteBuf, TempModifiersSyncMessage> CODEC = CustomPacketPayload.codec(TempModifiersSyncMessage::encode, TempModifiersSyncMessage::decode);
+
     int entityId;
     CompoundTag modifiers;
 
@@ -38,23 +43,21 @@ public class TempModifiersSyncMessage
         return new TempModifiersSyncMessage(buffer.readInt(), buffer.readNbt());
     }
 
-    public static void handle(TempModifiersSyncMessage message, Supplier<NetworkEvent.Context> contextSupplier)
+    public static void handle(TempModifiersSyncMessage message, IPayloadContext context)
     {
-        NetworkEvent.Context context = contextSupplier.get();
-
-        if (context.getDirection().getReceptionSide().isClient())
         context.enqueueWork(() ->
         {
             Entity entity = Minecraft.getInstance().level.getEntity(message.entityId);
 
             if (entity instanceof LivingEntity living)
             {
-                EntityTempManager.getTemperatureCap(living).ifPresent(cap ->
-                {   cap.deserializeModifiers(message.modifiers);
-                });
+                EntityTempManager.getTemperatureCap(living).deserializeModifiers(message.modifiers);
             }
         });
+    }
 
-        context.setPacketHandled(true);
+    @Override
+    public Type<? extends CustomPacketPayload> type()
+    {   return TYPE;
     }
 }

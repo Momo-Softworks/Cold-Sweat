@@ -3,7 +3,7 @@ package com.momosoftworks.coldsweat.api.event.common;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
 
 public class BlockStateChangedEvent extends Event
 {

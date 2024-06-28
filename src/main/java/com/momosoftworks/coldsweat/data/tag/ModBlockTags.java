@@ -18,6 +18,6 @@ public class ModBlockTags
 
     private static TagKey<Block> createTag(String name)
     {
-        return BlockTags.create(new ResourceLocation(ColdSweat.MOD_ID, name));
+        return BlockTags.create(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, name));
     }
 }

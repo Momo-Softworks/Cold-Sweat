@@ -9,7 +9,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,7 +17,7 @@ public record BlockTempData(List<Either<TagKey<Block>, Block>> blocks, double te
                             BlockPredicate condition, Optional<CompoundTag> nbt, Optional<List<String>> requiredMods)
 {
     public static final Codec<BlockTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            RegistryHelper.createForgeTagCodec(ForgeRegistries.BLOCKS, Registries.BLOCK).listOf().fieldOf("blocks").forGetter(BlockTempData::blocks),
+            RegistryHelper.createTagCodec(Registries.BLOCK).listOf().fieldOf("blocks").forGetter(BlockTempData::blocks),
             Codec.DOUBLE.fieldOf("temperature").forGetter(BlockTempData::temperature),
             Codec.DOUBLE.optionalFieldOf("max_effect", Double.MAX_VALUE).forGetter(BlockTempData::maxEffect),
             Codec.DOUBLE.optionalFieldOf("range", Double.MAX_VALUE).forGetter(BlockTempData::range),

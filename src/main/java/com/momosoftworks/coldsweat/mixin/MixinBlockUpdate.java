@@ -1,11 +1,10 @@
 package com.momosoftworks.coldsweat.mixin;
 
-import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.common.BlockStateChangedEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.MinecraftForge;
+import net.neoforged.neoforge.common.NeoForge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -13,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
  * Called when a block state is changed.<br>
- * This event is not {@link net.minecraftforge.eventbus.api.Cancelable}.<br>
+ * This is not an {@link net.neoforged.bus.api.ICancellableEvent}.<br>
  * <br>
  * Updates must be delayed by 1 tick to prevent chunk deadlocking.
  */
@@ -26,7 +25,7 @@ public class MixinBlockUpdate
     private void onBlockUpdate(BlockPos pos, BlockState oldState, BlockState newState, CallbackInfo ci)
     {
         if (!oldState.equals(newState))
-        {   level.getServer().execute(() -> MinecraftForge.EVENT_BUS.post(new BlockStateChangedEvent(pos, level, oldState, newState)));
+        {   level.getServer().execute(() -> NeoForge.EVENT_BUS.post(new BlockStateChangedEvent(pos, level, oldState, newState)));
         }
     }
 }

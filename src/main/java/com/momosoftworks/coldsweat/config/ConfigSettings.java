@@ -11,6 +11,8 @@ import com.momosoftworks.coldsweat.config.spec.*;
 import com.momosoftworks.coldsweat.config.type.InsulatingMount;
 import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.config.type.PredicateItem;
+import com.momosoftworks.coldsweat.core.init.ModEntities;
+import com.momosoftworks.coldsweat.data.codec.requirement.ItemComponentsRequirement;
 import com.momosoftworks.coldsweat.util.serialization.*;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
@@ -18,9 +20,9 @@ import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.data.codec.configuration.SpawnBiomeData;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.registries.ModEntities;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
@@ -33,9 +35,8 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.structure.StructureType;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
 import org.joml.Vector2i;
 import oshi.util.tuples.Triplet;
 
@@ -355,15 +356,15 @@ public class ConfigSettings
         BiFunction<Item, List<?>, PredicateItem> fuelMapper = (item, args) ->
         {
             double fuel = ((Number) args.get(0)).doubleValue();
-            NbtRequirement nbtRequirement;
+            ItemComponentsRequirement componentsRequirement;
             if (args.size() > 2)
-            {   nbtRequirement = new NbtRequirement(NBTHelper.parseCompoundNbt((String) args.get(2)));
+            {   componentsRequirement = ItemComponentsRequirement.parse((String) args.get(2));
             }
-            else nbtRequirement = new NbtRequirement(new CompoundTag());
+            else componentsRequirement = new ItemComponentsRequirement();
             return new PredicateItem(fuel, new ItemRequirement(List.of(), Optional.empty(),
                                                                Optional.empty(), Optional.empty(),
                                                                Optional.empty(), Optional.empty(),
-                                                               nbtRequirement),
+                                                               componentsRequirement),
                                      EntityRequirement.NONE);
         };
         BOILER_FUEL = addSetting("boiler_fuel_items", () -> ConfigHelper.readItemMap(ItemSettingsConfig.getInstance().getBoilerFuelItems(), fuelMapper));
@@ -375,12 +376,12 @@ public class ConfigSettings
         decoder -> ConfigHelper.deserializeItemMap(decoder, "LampFuelItems", nbt -> PredicateItem.deserialize(nbt)),
         saver -> ConfigHelper.writeItemMap(saver,
                                            list -> ItemSettingsConfig.getInstance().setSoulLampFuelItems(list),
-                                           fuel -> List.of(fuel.value(), fuel.data().nbt().tag().toString())));
+                                           fuel -> List.of(fuel.value(), fuel.data().components().components().toString())));
 
         HEARTH_POTIONS_ENABLED = addSetting("hearth_potions_enabled", () -> ItemSettingsConfig.getInstance().arePotionsEnabled());
         HEARTH_POTION_BLACKLIST = addSetting("hearth_potion_blacklist", () -> ItemSettingsConfig.getInstance().getPotionBlacklist()
                                                                           .stream()
-                                                                          .map(entry -> ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation(entry)))
+                                                                          .map(entry -> BuiltInRegistries.MOB_EFFECT.get(ResourceLocation.parse(entry)))
                                                                           .collect(ArrayList::new, List::add, List::addAll));
 
         INSULATION_ITEMS = addSyncedSetting("insulation_items", () -> ConfigHelper.readItemInsulations(ItemSettingsConfig.getInstance().getInsulationItems(), Insulation.Slot.ITEM),
@@ -423,7 +424,7 @@ public class ConfigSettings
 
         INSULATION_BLACKLIST = addSetting("insulation_blacklist", () -> ItemSettingsConfig.getInstance().getInsulationBlacklist()
                                                                         .stream()
-                                                                        .map(entry -> ForgeRegistries.ITEMS.getValue(new ResourceLocation(entry)))
+                                                                        .map(entry -> RegistryHelper.getRegistry(Registries.ITEM).get(ResourceLocation.parse(entry)))
                                                                         .collect(ArrayList::new, List::add, List::addAll));
 
         CHECK_SLEEP_CONDITIONS = addSetting("check_sleep_conditions", () -> WorldSettingsConfig.getInstance().isSleepChecked());
@@ -433,14 +434,14 @@ public class ConfigSettings
         FOOD_TEMPERATURES = addSyncedSetting("food_temperatures", () -> ConfigHelper.readItemMap(ItemSettingsConfig.getInstance().getFoodTemperatures(), (item, args) ->
         {
             double value = ((Number) args.get(0)).doubleValue();
-            NbtRequirement nbtRequirement = args.size() > 1
-                                            ? new NbtRequirement(NBTHelper.parseCompoundNbt((String) args.get(1)))
-                                            : new NbtRequirement(new CompoundTag());
+            ItemComponentsRequirement componentsRequirement = args.size() > 1
+                                                              ? ItemComponentsRequirement.parse((String) args.get(1))
+                                                              : new ItemComponentsRequirement();
             Integer duration = args.size() > 2 ? ((Number) args.get(2)).intValue() : null;
             ItemRequirement itemRequirement = new ItemRequirement(List.of(), Optional.empty(),
                                                                   Optional.empty(), Optional.empty(),
                                                                   Optional.empty(), Optional.empty(),
-                                                                  nbtRequirement);
+                                                                  componentsRequirement);
             CompoundTag tag = new CompoundTag();
             if (duration != null)
             {   tag.putInt("duration", duration);
@@ -451,14 +452,14 @@ public class ConfigSettings
         decoder -> ConfigHelper.deserializeItemMap(decoder, "FoodTemperatures", nbt -> PredicateItem.deserialize(nbt)),
         saver -> ConfigHelper.writeItemMap(saver,
                                            list -> ItemSettingsConfig.getInstance().setFoodTemperatures(list),
-                                           food -> List.of(food.value(), food.data().nbt().tag().toString())));
+                                           food -> List.of(food.value(), food.data().components().components().toString())));
 
         WATERSKIN_STRENGTH = addSetting("waterskin_strength", () -> ItemSettingsConfig.getInstance().getWaterskinStrength());
 
         LAMP_DIMENSIONS = addSetting("valid_lamp_dimensions", () -> new ArrayList<>(ItemSettingsConfig.getInstance().getValidSoulLampDimensions()
                                                                                     .stream()
                                                                                     .map(entry -> CSMath.getIfNotNull(WorldHelper.getServer(),
-                                                                                                                      server -> server.registryAccess().registryOrThrow(Registries.DIMENSION_TYPE).get(new ResourceLocation(entry)),
+                                                                                                                      server -> server.registryAccess().registryOrThrow(Registries.DIMENSION_TYPE).get(ResourceLocation.parse(entry)),
                                                                                                                       null))
                                                                                     .collect(ArrayList::new, List::add, List::addAll)));
 
@@ -524,10 +525,10 @@ public class ConfigSettings
                     List<Biome> biomes = ConfigHelper.parseRegistryItems(Registries.BIOME, biomeId);
                     Either<TagKey<Biome>, Biome> biomeEither;
                     if (biomeId.charAt(0) == '#')
-                    {   biomeEither = Either.left(TagKey.create(Registries.BIOME, new ResourceLocation(biomeId.substring(1))));
+                    {   biomeEither = Either.left(TagKey.create(Registries.BIOME, ResourceLocation.parse(biomeId.substring(1))));
                     }
                     else
-                    {   Biome biome = RegistryHelper.getBiome(new ResourceLocation(biomeId));
+                    {   Biome biome = RegistryHelper.getBiome(ResourceLocation.parse(biomeId));
                         if (biome != null)
                             biomeEither = Either.right(biome);
                         else
@@ -536,7 +537,7 @@ public class ConfigSettings
                     for (Biome biome : biomes)
                     {
                         SpawnBiomeData spawnData = new SpawnBiomeData(List.of(biomeEither), MobCategory.CREATURE, ((Number) entry.get(1)).intValue(),
-                                                                      List.of(Either.right(ModEntities.CHAMELEON)),
+                                                                      List.of(Either.right(ModEntities.CHAMELEON.value())),
                                                                       Optional.empty());
                         map.put(biome, spawnData);
                     }
@@ -570,7 +571,7 @@ public class ConfigSettings
         .distinct()
         .filter(entry -> entry.getKey() != null)
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> {
-            ColdSweat.LOGGER.warn("Duplicate entity entry for \"{}\" found in config. Using the first entry.", ForgeRegistries.ENTITY_TYPES.getKey(a.entityType()).toString());
+            ColdSweat.LOGGER.warn("Duplicate entity entry for \"{}\" found in config. Using the first entry.", RegistryHelper.getRegistry(Registries.ENTITY_TYPE).getKey(a.entityType()).toString());
             return a;
         })));
 
@@ -587,7 +588,7 @@ public class ConfigSettings
             CompoundTag tag = new CompoundTag();
             ListTag list = new ListTag();
             for (Block entry : encoder)
-            {   list.add(StringTag.valueOf(ForgeRegistries.BLOCKS.getKey(entry).toString()));
+            {   list.add(StringTag.valueOf(RegistryHelper.getRegistry(Registries.BLOCK).getKey(entry).toString()));
             }
             tag.put("HearthWhitelist", list);
             return tag;
@@ -596,11 +597,11 @@ public class ConfigSettings
         {
             List<Block> list = new ArrayList<>();
             for (Tag entry : decoder.getList("HearthWhitelist", 8))
-            {   list.add(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(entry.getAsString())));
+            {   list.add(RegistryHelper.getRegistry(Registries.BLOCK).get(ResourceLocation.parse(entry.getAsString())));
             }
             return list;
         },
-        saver -> WorldSettingsConfig.getInstance().setHearthSpreadWhitelist(saver.stream().map(ForgeRegistries.BLOCKS::getKey).toList()));
+        saver -> WorldSettingsConfig.getInstance().setHearthSpreadWhitelist(saver.stream().map(block -> RegistryHelper.getRegistry(Registries.BLOCK).getKey(block)).toList()));
 
         HEARTH_SPREAD_BLACKLIST = addSyncedSetting("hearth_spread_blacklist", () -> ConfigHelper.getBlocks(WorldSettingsConfig.getInstance().getHearthSpreadBlacklist().toArray(new String[0])),
         encoder ->
@@ -608,7 +609,7 @@ public class ConfigSettings
             CompoundTag tag = new CompoundTag();
             ListTag list = new ListTag();
             for (Block entry : encoder)
-            {   list.add(StringTag.valueOf(ForgeRegistries.BLOCKS.getKey(entry).toString()));
+            {   list.add(StringTag.valueOf(RegistryHelper.getRegistry(Registries.BLOCK).getKey(entry).toString()));
             }
             tag.put("HearthBlacklist", list);
             return tag;
@@ -617,11 +618,11 @@ public class ConfigSettings
         {
             List<Block> list = new ArrayList<>();
             for (Tag entry : decoder.getList("HearthBlacklist", 8))
-            {   list.add(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(entry.getAsString())));
+            {   list.add(RegistryHelper.getRegistry(Registries.BLOCK).get(ResourceLocation.parse(entry.getAsString())));
             }
             return list;
         },
-        saver -> WorldSettingsConfig.getInstance().setHearthSpreadBlacklist(saver.stream().map(ForgeRegistries.BLOCKS::getKey).toList()));
+        saver -> WorldSettingsConfig.getInstance().setHearthSpreadBlacklist(saver.stream().map(block -> RegistryHelper.getRegistry(Registries.BLOCK).getKey(block)).toList()));
 
         HEARTH_STRENGTH = addSetting("hearth_effect", () -> WorldSettingsConfig.getInstance().getHearthEffect());
 

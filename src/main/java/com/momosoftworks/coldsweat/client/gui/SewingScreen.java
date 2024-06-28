@@ -14,7 +14,7 @@ import javax.annotation.Nonnull;
 
 public class SewingScreen extends AbstractContainerScreen<SewingContainer>
 {
-    private static final ResourceLocation SEWING_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/sewing_gui.png");
+    private static final ResourceLocation SEWING_GUI = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/screen/sewing_gui.png");
 
     public SewingScreen(SewingContainer screenContainer, Inventory inv, Component titleIn)
     {
@@ -27,7 +27,7 @@ public class SewingScreen extends AbstractContainerScreen<SewingContainer>
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks)
-    {   this.renderBackground(graphics);
+    {   this.renderBackground(graphics, mouseX, mouseY, partialTicks);
         super.render(graphics, mouseX, mouseY, partialTicks);
         this.renderTooltip(graphics, mouseX, mouseY);
     }

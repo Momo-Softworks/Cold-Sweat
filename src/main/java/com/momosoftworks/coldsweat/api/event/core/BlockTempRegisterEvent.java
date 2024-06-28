@@ -2,8 +2,7 @@ package com.momosoftworks.coldsweat.api.event.core;
 
 import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
 
 /**
  * Fired when the {@link BlockTemp} registry is being built ({@link BlockTempRegistry}). <br>

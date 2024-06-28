@@ -12,6 +12,7 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.DebugScreenOverlay;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -29,11 +30,11 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -44,7 +45,7 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Mod.EventBusSubscriber(Dist.CLIENT)
+@EventBusSubscriber(Dist.CLIENT)
 public class HearthDebugRenderer
 {
     public static Map<BlockPos, Map<BlockPos, Collection<Direction>>> HEARTH_LOCATIONS = new HashMap<>();
@@ -53,7 +54,7 @@ public class HearthDebugRenderer
     public static void onLevelRendered(RenderLevelStageEvent event)
     {
         if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES
-        && Minecraft.getInstance().options.renderDebug && ConfigSettings.HEARTH_DEBUG.get())
+        && Minecraft.getInstance().getDebugOverlay().showDebugScreen() && ConfigSettings.HEARTH_DEBUG.get())
         {
             Player player = Minecraft.getInstance().player;
             if (player == null) return;
@@ -73,56 +74,56 @@ public class HearthDebugRenderer
             ps.pushPose();
             ps.translate(-camPos.x, -camPos.y, -camPos.z);
             Matrix4f matrix4f = ps.last().pose();
-            Matrix3f matrix3f = ps.last().normal();
+            PoseStack.Pose pose = ps.last();
 
             // Points to draw lines
             BiConsumer<Vector3f, Vector4f> nw = (pos, color) -> {
-                vertexes.vertex(matrix4f, pos.x(), pos.y(), pos.z()).color(color.x(), color.y(), color.z(), color.w()).normal(matrix3f, 0, 1, 0).endVertex();
-                vertexes.vertex(matrix4f, pos.x(), pos.y()+1, pos.z()).color(color.x(), color.y(), color.z(), color.w()).normal(matrix3f, 0, 1, 0).endVertex();
+                vertexes.addVertex(matrix4f, pos.x(), pos.y(), pos.z()).setColor(color.x(), color.y(), color.z(), color.w()).setNormal(pose, 0, 1, 0);
+                vertexes.addVertex(matrix4f, pos.x(), pos.y()+1, pos.z()).setColor(color.x(), color.y(), color.z(), color.w()).setNormal(pose, 0, 1, 0);
             };
             BiConsumer<Vector3f, Vector4f> ne = (pos, color) -> {
-                vertexes.vertex(matrix4f, pos.x()+1, pos.y(), pos.z()).color(color.x(), color.y(), color.z(), color.w()).normal(matrix3f, 0, 1, 0).endVertex();
-                vertexes.vertex(matrix4f, pos.x()+1, pos.y()+1, pos.z()).color(color.x(), color.y(), color.z(), color.w()).normal(matrix3f, 0, 1, 0).endVertex();
+                vertexes.addVertex(matrix4f, pos.x()+1, pos.y(), pos.z()).setColor(color.x(), color.y(), color.z(), color.w()).setNormal(pose, 0, 1, 0);
+                vertexes.addVertex(matrix4f, pos.x()+1, pos.y()+1, pos.z()).setColor(color.x(), color.y(), color.z(), color.w()).setNormal(pose, 0, 1, 0);
             };
             BiConsumer<Vector3f, Vector4f> sw = (pos, color) -> {
-                vertexes.vertex(matrix4f, pos.x(), pos.y(), pos.z()+1).color(color.x(), color.y(), color.z(), color.w()).normal(matrix3f, 0, -1, 0).endVertex();
-                vertexes.vertex(matrix4f, pos.x(), pos.y()+1, pos.z()+1).color(color.x(), color.y(), color.z(), color.w()).normal(matrix3f, 0, -1, 0).endVertex();
+                vertexes.addVertex(matrix4f, pos.x(), pos.y(), pos.z()+1).setColor(color.x(), color.y(), color.z(), color.w()).setNormal(pose, 0, -1, 0);
+                vertexes.addVertex(matrix4f, pos.x(), pos.y()+1, pos.z()+1).setColor(color.x(), color.y(), color.z(), color.w()).setNormal(pose, 0, -1, 0);
             };
             BiConsumer<Vector3f, Vector4f> se = (pos, color) -> {
-                vertexes.vertex(matrix4f, pos.x()+1, pos.y(), pos.z()+1).color(color.x(), color.y(), color.z(), color.w()).normal(matrix3f, 0, 1, 0).endVertex();
-                vertexes.vertex(matrix4f, pos.x()+1, pos.y()+1, pos.z()+1).color(color.x(), color.y(), color.z(), color.w()).normal(matrix3f, 0, 1, 0).endVertex();
+                vertexes.addVertex(matrix4f, pos.x()+1, pos.y(), pos.z()+1).setColor(color.x(), color.y(), color.z(), color.w()).setNormal(pose, 0, 1, 0);
+                vertexes.addVertex(matrix4f, pos.x()+1, pos.y()+1, pos.z()+1).setColor(color.x(), color.y(), color.z(), color.w()).setNormal(pose, 0, 1, 0);
             };
             BiConsumer<Vector3f, Vector4f> nu = (pos, color) -> {
-                vertexes.vertex(matrix4f, pos.x(), pos.y()+1, pos.z()).color(color.x(), color.y(), color.z(), color.w()).normal(matrix3f, -1, 0, 0).endVertex();
-                vertexes.vertex(matrix4f, pos.x()+1, pos.y()+1, pos.z()).color(color.x(), color.y(), color.z(), color.w()).normal(matrix3f, -1, 0, 0).endVertex();
+                vertexes.addVertex(matrix4f, pos.x(), pos.y()+1, pos.z()).setColor(color.x(), color.y(), color.z(), color.w()).setNormal(pose, -1, 0, 0);
+                vertexes.addVertex(matrix4f, pos.x()+1, pos.y()+1, pos.z()).setColor(color.x(), color.y(), color.z(), color.w()).setNormal(pose, -1, 0, 0);
             };
             BiConsumer<Vector3f, Vector4f> nd = (pos, color) -> {
-                vertexes.vertex(matrix4f, pos.x(), pos.y(), pos.z()).color(color.x(), color.y(), color.z(), color.w()).normal(matrix3f, 1, 0, 0).endVertex();
-                vertexes.vertex(matrix4f, pos.x()+1, pos.y(), pos.z()).color(color.x(), color.y(), color.z(), color.w()).normal(matrix3f, 1, 0, 0).endVertex();
+                vertexes.addVertex(matrix4f, pos.x(), pos.y(), pos.z()).setColor(color.x(), color.y(), color.z(), color.w()).setNormal(pose, 1, 0, 0);
+                vertexes.addVertex(matrix4f, pos.x()+1, pos.y(), pos.z()).setColor(color.x(), color.y(), color.z(), color.w()).setNormal(pose, 1, 0, 0);
             };
             BiConsumer<Vector3f, Vector4f> su = (pos, color) -> {
-                vertexes.vertex(matrix4f, pos.x(), pos.y()+1, pos.z()+1).color(color.x(), color.y(), color.z(), color.w()).normal(matrix3f, 1, 0, 0).endVertex();
-                vertexes.vertex(matrix4f, pos.x()+1, pos.y()+1, pos.z()+1).color(color.x(), color.y(), color.z(), color.w()).normal(matrix3f, 1, 0, 0).endVertex();
+                vertexes.addVertex(matrix4f, pos.x(), pos.y()+1, pos.z()+1).setColor(color.x(), color.y(), color.z(), color.w()).setNormal(pose, 1, 0, 0);
+                vertexes.addVertex(matrix4f, pos.x()+1, pos.y()+1, pos.z()+1).setColor(color.x(), color.y(), color.z(), color.w()).setNormal(pose, 1, 0, 0);
             };
             BiConsumer<Vector3f, Vector4f> sd = (pos, color) -> {
-                vertexes.vertex(matrix4f, pos.x(), pos.y(), pos.z()+1).color(color.x(), color.y(), color.z(), color.w()).normal(matrix3f, 1, 0, 0).endVertex();
-                vertexes.vertex(matrix4f, pos.x()+1, pos.y(), pos.z()+1).color(color.x(), color.y(), color.z(), color.w()).normal(matrix3f, 1, 0, 0).endVertex();
+                vertexes.addVertex(matrix4f, pos.x(), pos.y(), pos.z()+1).setColor(color.x(), color.y(), color.z(), color.w()).setNormal(pose, 1, 0, 0);
+                vertexes.addVertex(matrix4f, pos.x()+1, pos.y(), pos.z()+1).setColor(color.x(), color.y(), color.z(), color.w()).setNormal(pose, 1, 0, 0);
             };
             BiConsumer<Vector3f, Vector4f> eu = (pos, color) -> {
-                vertexes.vertex(matrix4f, pos.x()+1, pos.y()+1, pos.z()).color(color.x(), color.y(), color.z(), color.w()).normal(matrix3f, 0, 0, 1).endVertex();
-                vertexes.vertex(matrix4f, pos.x()+1, pos.y()+1, pos.z()+1).color(color.x(), color.y(), color.z(), color.w()).normal(matrix3f, 0, 0, 1).endVertex();
+                vertexes.addVertex(matrix4f, pos.x()+1, pos.y()+1, pos.z()).setColor(color.x(), color.y(), color.z(), color.w()).setNormal(pose, 0, 0, 1);
+                vertexes.addVertex(matrix4f, pos.x()+1, pos.y()+1, pos.z()+1).setColor(color.x(), color.y(), color.z(), color.w()).setNormal(pose, 0, 0, 1);
             };
             BiConsumer<Vector3f, Vector4f> ed = (pos, color) -> {
-                vertexes.vertex(matrix4f, pos.x()+1, pos.y(), pos.z()).color(color.x(), color.y(), color.z(), color.w()).normal(matrix3f, 0, 0, -1).endVertex();
-                vertexes.vertex(matrix4f, pos.x()+1, pos.y(), pos.z()+1).color(color.x(), color.y(), color.z(), color.w()).normal(matrix3f, 0, 0, -1).endVertex();
+                vertexes.addVertex(matrix4f, pos.x()+1, pos.y(), pos.z()).setColor(color.x(), color.y(), color.z(), color.w()).setNormal(pose, 0, 0, -1);
+                vertexes.addVertex(matrix4f, pos.x()+1, pos.y(), pos.z()+1).setColor(color.x(), color.y(), color.z(), color.w()).setNormal(pose, 0, 0, -1);
             };
             BiConsumer<Vector3f, Vector4f> wu = (pos, color) -> {
-                vertexes.vertex(matrix4f, pos.x(), pos.y()+1, pos.z()).color(color.x(), color.y(), color.z(), color.w()).normal(matrix3f, 0, 0, 1).endVertex();
-                vertexes.vertex(matrix4f, pos.x(), pos.y()+1, pos.z()+1).color(color.x(), color.y(), color.z(), color.w()).normal(matrix3f, 0, 0, 1).endVertex();
+                vertexes.addVertex(matrix4f, pos.x(), pos.y()+1, pos.z()).setColor(color.x(), color.y(), color.z(), color.w()).setNormal(pose, 0, 0, 1);
+                vertexes.addVertex(matrix4f, pos.x(), pos.y()+1, pos.z()+1).setColor(color.x(), color.y(), color.z(), color.w()).setNormal(pose, 0, 0, 1);
             };
             BiConsumer<Vector3f, Vector4f> wd = (pos, color) -> {
-                vertexes.vertex(matrix4f, pos.x(), pos.y(), pos.z()).color(color.x(), color.y(), color.z(), color.w()).normal(matrix3f, 0, 0, 1).endVertex();
-                vertexes.vertex(matrix4f, pos.x(), pos.y(), pos.z()+1).color(color.x(), color.y(), color.z(), color.w()).normal(matrix3f, 0, 0, 1).endVertex();
+                vertexes.addVertex(matrix4f, pos.x(), pos.y(), pos.z()).setColor(color.x(), color.y(), color.z(), color.w()).setNormal(pose, 0, 0, 1);
+                vertexes.addVertex(matrix4f, pos.x(), pos.y(), pos.z()+1).setColor(color.x(), color.y(), color.z(), color.w()).setNormal(pose, 0, 0, 1);
             };
 
             ChunkAccess workingChunk = null;
@@ -189,11 +190,11 @@ public class HearthDebugRenderer
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event)
+    public static void onClientTick(ClientTickEvent.Post event)
     {
         ClientLevel level = Minecraft.getInstance().level;
-        if (event.phase == TickEvent.Phase.END && level != null
-        && level.getGameTime() % 20 == 0 && Minecraft.getInstance().options.renderDebug
+        if (level != null
+        && level.getGameTime() % 20 == 0 && Minecraft.getInstance().getDebugOverlay().showDebugScreen()
         && ConfigSettings.HEARTH_DEBUG.get())
         {
             for (Pair<BlockPos, ResourceLocation> entry : HearthSaveDataHandler.HEARTH_POSITIONS)

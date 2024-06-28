@@ -1,7 +1,8 @@
 package com.momosoftworks.coldsweat.common.item;
 
-import com.momosoftworks.coldsweat.util.registries.ModBlocks;
+import com.momosoftworks.coldsweat.core.init.ModBlocks;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.vehicle.Minecart;
@@ -13,7 +14,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public class InsulatedMinecartItem extends Item
 {
-    public InsulatedMinecartItem(Item.Properties itemProperties)
+    public InsulatedMinecartItem(Properties itemProperties)
     {
         super(itemProperties);
     }
@@ -30,10 +31,10 @@ public class InsulatedMinecartItem extends Item
             if (!level.isClientSide)
             {
                 Minecart minecart = new Minecart(level, blockpos.getX() + 0.5D, blockpos.getY() + 0.5D, blockpos.getZ() + 0.5D);
-                if (itemstack.hasCustomHoverName())
+                if (itemstack.has(DataComponents.CUSTOM_NAME))
                 {   minecart.setCustomName(itemstack.getHoverName());
                 }
-                minecart.setDisplayBlockState(ModBlocks.MINECART_INSULATION.defaultBlockState());
+                minecart.setDisplayBlockState(ModBlocks.MINECART_INSULATION.value().defaultBlockState());
                 minecart.setDisplayOffset(5);
                 level.addFreshEntity(minecart);
             }

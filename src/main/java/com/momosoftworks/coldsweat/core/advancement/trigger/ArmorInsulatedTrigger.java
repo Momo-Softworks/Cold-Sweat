@@ -2,6 +2,8 @@ package com.momosoftworks.coldsweat.core.advancement.trigger;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.ColdSweat;
 import net.minecraft.advancements.critereon.*;
 import net.minecraft.resources.ResourceLocation;
@@ -9,63 +11,32 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 public class ArmorInsulatedTrigger extends SimpleCriterionTrigger<ArmorInsulatedTrigger.Instance>
 {
-    static final ResourceLocation ID = new ResourceLocation(ColdSweat.MOD_ID, "armor_insulated");
-
     @Override
-    protected Instance createInstance(JsonObject json, ContextAwarePredicate player, DeserializationContext context)
-    {
-        ItemPredicate armorStack = ItemPredicate.fromJson(json.get("armor_item"));
-        ItemPredicate[] insulStack = ItemPredicate.fromJsonArray(json.get("insulation_item"));
-
-        return new Instance(player, armorStack, insulStack);
-    }
-
-    @Override
-    public ResourceLocation getId()
-    {
-        return ID;
+    public Codec<Instance> codec()
+    {   return Instance.CODEC;
     }
 
     public void trigger(ServerPlayer player, ItemStack fuelStack, ItemStack lampStack)
-    {
-        this.trigger(player, triggerInstance -> triggerInstance.matches(fuelStack, lampStack));
+    {   this.trigger(player, triggerInstance -> triggerInstance.matches(fuelStack, lampStack));
     }
 
-    public static class Instance extends AbstractCriterionTriggerInstance
+    public record Instance(Optional<ContextAwarePredicate> player, ItemPredicate armorStack, ItemPredicate[] insulStack) implements SimpleInstance
     {
-        private final ItemPredicate armorStack;
-        private final ItemPredicate[] insulStack;
-
-        public Instance(ContextAwarePredicate player, ItemPredicate armorStack, ItemPredicate[] insulStack)
-        {
-            super(ID, player);
-            this.armorStack = armorStack;
-            this.insulStack = insulStack;
-        }
+        public static final Codec<Instance> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            ContextAwarePredicate.CODEC.optionalFieldOf("player").forGetter(Instance::player),
+            ItemPredicate.CODEC.fieldOf("armor").forGetter(Instance::armorStack),
+            ItemPredicate.CODEC.listOf().xmap(list -> list.toArray(new ItemPredicate[0]), arr -> List.of(arr)).fieldOf("insulated").forGetter(Instance::insulStack)
+        ).apply(instance, Instance::new));
 
         public boolean matches(ItemStack fuelStack, ItemStack lampStack)
         {
-            return this.armorStack.matches(fuelStack)
-                && (this.insulStack.length == 0 || Arrays.stream(this.insulStack).anyMatch(predicate -> predicate.matches(lampStack)));
-        }
-
-        @Override
-        public JsonObject serializeToJson(SerializationContext context)
-        {
-            JsonObject obj = super.serializeToJson(context);
-
-            obj.add("armor_item", this.armorStack.serializeToJson());
-
-            JsonArray jsonarray = new JsonArray();
-            for (ItemPredicate itemPredicate : insulStack)
-            {   jsonarray.add(itemPredicate.serializeToJson());
-            }
-            obj.add("insulation_item", jsonarray);
-
-            return obj;
+            return this.armorStack.test(fuelStack)
+                && (this.insulStack.length == 0 || Arrays.stream(this.insulStack).anyMatch(predicate -> predicate.test(lampStack)));
         }
     }
 }

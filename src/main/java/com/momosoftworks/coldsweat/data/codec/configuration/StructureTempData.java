@@ -16,7 +16,7 @@ public record StructureTempData(List<Either<TagKey<Structure>, Structure>> struc
                                 Temperature.Units units, boolean isOffset, Optional<List<String>> requiredMods)
 {
     public static final Codec<StructureTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            RegistryHelper.createVanillaTagCodec(Registries.STRUCTURE).listOf().fieldOf("structures").forGetter(StructureTempData::structures),
+            RegistryHelper.createTagCodec(Registries.STRUCTURE).listOf().fieldOf("structures").forGetter(StructureTempData::structures),
             Codec.DOUBLE.fieldOf("temperature").forGetter(StructureTempData::temperature),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(StructureTempData::units),
             Codec.BOOL.optionalFieldOf("offset", false).forGetter(StructureTempData::isOffset),

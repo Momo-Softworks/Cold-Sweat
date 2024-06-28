@@ -8,17 +8,19 @@ import com.momosoftworks.coldsweat.common.entity.data.edible.Edible;
 import com.momosoftworks.coldsweat.common.entity.goals.EatObjectsGoal;
 import com.momosoftworks.coldsweat.common.entity.goals.LazyLookGoal;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.core.init.EntityInit;
-import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
+import com.momosoftworks.coldsweat.core.init.ModEntities;
+import com.momosoftworks.coldsweat.core.init.ModItems;
+import com.momosoftworks.coldsweat.core.init.ModSounds;
+import com.momosoftworks.coldsweat.core.network.ModPacketHandlers;
 import com.momosoftworks.coldsweat.core.network.message.ChameleonEatMessage;
 import com.momosoftworks.coldsweat.data.loot.ModLootTables;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.registries.ModItems;
-import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -49,13 +51,14 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.phys.Vec2;
-import net.minecraftforge.common.util.ITeleporter;
-import net.minecraftforge.event.entity.EntityEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
-import net.minecraftforge.network.PacketDistributor;
+import net.minecraft.world.phys.Vec3;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.util.ObfuscationReflectionHelper;
+import net.neoforged.neoforge.event.entity.EntityEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -64,7 +67,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
-@Mod.EventBusSubscriber
+@EventBusSubscriber
 public class Chameleon extends Animal
 {
     static Method GET_DATA_ITEM = ObfuscationReflectionHelper.findMethod(SynchedEntityData.class, "m_135379_", EntityDataAccessor.class);
@@ -129,22 +132,20 @@ public class Chameleon extends Animal
                 .add(Attributes.MOVEMENT_SPEED, 0.16D)
                 .add(Attributes.ATTACK_KNOCKBACK, 0.0D)
                 .add(Attributes.ATTACK_DAMAGE, 4.0D);
-    }
-
-    @Override
-    protected void defineSynchedData()
+    }@Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder)
     {
-        super.defineSynchedData();
-        this.entityData.define(SHEDDING, false);
-        this.entityData.define(LAST_SHED, 0);
-        this.entityData.define(HURT_TIMESTAMP, 0);
-        this.entityData.define(TRUSTED_PLAYERS, new CompoundTag());
-        this.entityData.define(TRACKING_POS, BlockPos.ZERO);
-        this.entityData.define(EAT_TIMESTAMP, 0);
-        this.entityData.define(TEMPERATURE, (float) CSMath.average(ConfigSettings.MIN_TEMP.get(), ConfigSettings.MAX_TEMP.get()));
-        this.entityData.define(EDIBLE_COOLDOWNS, new CompoundTag());
-        this.entityData.define(SEARCHING, false);
-        this.entityData.define(AGE_SECS, 0);
+        super.defineSynchedData(builder);
+        builder.define(SHEDDING, false);
+        builder.define(LAST_SHED, 0);
+        builder.define(HURT_TIMESTAMP, 0);
+        builder.define(TRUSTED_PLAYERS, new CompoundTag());
+        builder.define(TRACKING_POS, BlockPos.ZERO);
+        builder.define(EAT_TIMESTAMP, 0);
+        builder.define(TEMPERATURE, (float) CSMath.average(ConfigSettings.MIN_TEMP.get(), ConfigSettings.MAX_TEMP.get()));
+        builder.define(EDIBLE_COOLDOWNS, new CompoundTag());
+        builder.define(SEARCHING, false);
+        builder.define(AGE_SECS, 0);
     }
 
     @Override
@@ -197,7 +198,7 @@ public class Chameleon extends Animal
                 {
                     ItemStack dropStack = stack.copy();
                     dropStack.setCount(1);
-                    dropStack.getOrCreateTag().put("Recipient", StringTag.valueOf(this.getUUID().toString()));
+                    dropStack.get(DataComponents.CUSTOM_DATA).update(tag -> tag.put("Recipient", StringTag.valueOf(this.getUUID().toString())));
                     player.drop(dropStack, true);
                     player.stopUsingItem();
                     this.usePlayerItem(player, hand, stack);
@@ -249,12 +250,7 @@ public class Chameleon extends Animal
         for (ItemStack stack : ModLootTables.getDropsLootTable(this, null, ModLootTables.CHAMELEON_SHEDDING))
         {   WorldHelper.entityDropItem(this, stack, 40000);
         }
-        WorldHelper.playEntitySound(ModSounds.CHAMELEON_SHED, this, this.getSoundSource(), 1, this.getVoicePitch());
-    }
-
-    @Override
-    public float getEyeHeight(Pose pose)
-    {   return this.isBaby() ? 0.25F : 0.35F;
+        WorldHelper.playEntitySound(ModSounds.CHAMELEON_SHED.value(), this, this.getSoundSource(), 1, this.getVoicePitch());
     }
 
     @SubscribeEvent
@@ -263,10 +259,9 @@ public class Chameleon extends Animal
         if (event.getEntity() instanceof Chameleon chameleon)
         {
             if (chameleon.isBaby())
-            {   event.setNewSize(EntityDimensions.fixed(0.65f, 0.5f));
+            {   event.setNewSize(EntityDimensions.fixed(0.65f, 0.5f).withEyeHeight(0.25F));
             }
         }
-
     }
 
     public int getTimeToShed()
@@ -282,25 +277,25 @@ public class Chameleon extends Animal
     @Nullable
     @Override
     public AgeableMob getBreedOffspring(@NotNull ServerLevel level, @NotNull AgeableMob parent)
-    {   return EntityInit.CHAMELEON.get().create(level);
+    {   return ModEntities.CHAMELEON.get().create(level);
     }
 
     @Nullable
     @Override
     protected SoundEvent getAmbientSound()
-    {   return ModSounds.CHAMELEON_AMBIENT;
+    {   return ModSounds.CHAMELEON_AMBIENT.value();
     }
 
     @Nullable
     @Override
     protected SoundEvent getHurtSound(@NotNull DamageSource source)
-    {   return ModSounds.CHAMELEON_HURT;
+    {   return ModSounds.CHAMELEON_HURT.value();
     }
 
     @Nullable
     @Override
     protected SoundEvent getDeathSound()
-    {   return ModSounds.CHAMELEON_DEATH;
+    {   return ModSounds.CHAMELEON_DEATH.value();
     }
 
     @Override
@@ -448,7 +443,7 @@ public class Chameleon extends Animal
                 || this.getTrackingPos().equals(BlockPos.ZERO))
                 && this.getServer() != null)
                 {
-                    Advancement advancement = this.getServer().getAdvancements().getAdvancement(new ResourceLocation(ColdSweat.MOD_ID, "chameleon_find_biome"));
+                    AdvancementHolder advancement = this.getServer().getAdvancements().get(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "chameleon_find_biome"));
                     for (ServerPlayer player : this.level().getEntitiesOfClass(ServerPlayer.class, this.getBoundingBox().inflate(20)))
                     {
                         if (advancement != null)
@@ -488,9 +483,9 @@ public class Chameleon extends Animal
 
     @Nullable
     @Override
-    public Entity changeDimension(ServerLevel p_20118_, ITeleporter teleporter)
+    public Entity changeDimension(DimensionTransition teleportData)
     {   this.clearTrackingPos();
-        return super.changeDimension(p_20118_, teleporter);
+        return super.changeDimension(teleportData);
     }
 
     public void onEatEntity(Entity entity)
@@ -539,12 +534,15 @@ public class Chameleon extends Animal
     }
 
     @Override
-    public double getMyRidingOffset()
+    public Vec3 getVehicleAttachmentPoint(Entity vehicle)
     {
-        return this.getVehicle() instanceof Player player
-               ? player.getItemBySlot(EquipmentSlot.HEAD).is(ModItems.HOGLIN_HEADPIECE)
-                    ? 0.65 : 0.5
-               : 0;
+        Vec3 mountPoint = super.getVehicleAttachmentPoint(vehicle);
+        return mountPoint.add(0,
+                              this.getVehicle() instanceof Player player
+                              ? player.getItemBySlot(EquipmentSlot.HEAD).is(ModItems.HOGLIN_HEADPIECE)
+                                ? 0.65 : 0.5
+                              : 0,
+                              0);
     }
 
     public static boolean canSpawn(EntityType<Chameleon> type, LevelAccessor level, MobSpawnType spawnType, BlockPos pos, RandomSource random)
@@ -572,7 +570,7 @@ public class Chameleon extends Animal
         if (this.eatAnimationTimer <= 0)
         {
             if (!this.level().isClientSide)
-            {   ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> this), new ChameleonEatMessage(this.getId()));
+            {   PacketDistributor.sendToPlayersTrackingEntity(this, new ChameleonEatMessage(this.getId()));
             }
             else
             {   AnimationManager.ANIMATION_TIMERS.put(this, 0f);

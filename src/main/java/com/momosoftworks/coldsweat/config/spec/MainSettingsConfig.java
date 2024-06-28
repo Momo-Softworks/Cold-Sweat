@@ -2,10 +2,11 @@ package com.momosoftworks.coldsweat.config.spec;
 
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.loading.FMLPaths;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,31 +14,31 @@ import java.nio.file.Paths;
 
 public class MainSettingsConfig
 {
-    private static final ForgeConfigSpec SPEC;
+    private static final ModConfigSpec SPEC;
     private static final MainSettingsConfig INSTANCE = new MainSettingsConfig();
-    public  static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
+    public  static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
-    public static final ForgeConfigSpec.ConfigValue<Integer> difficulty;
+    public static final ModConfigSpec.ConfigValue<Integer> difficulty;
 
-    public static final ForgeConfigSpec.ConfigValue<Double> maxHabitable;
-    public static final ForgeConfigSpec.ConfigValue<Double> minHabitable;
-    public static final ForgeConfigSpec.ConfigValue<Double> rateMultiplier;
-    public static final ForgeConfigSpec.ConfigValue<Double> tempDamage;
+    public static final ModConfigSpec.ConfigValue<Double> maxHabitable;
+    public static final ModConfigSpec.ConfigValue<Double> minHabitable;
+    public static final ModConfigSpec.ConfigValue<Double> rateMultiplier;
+    public static final ModConfigSpec.ConfigValue<Double> tempDamage;
 
-    public static final ForgeConfigSpec.ConfigValue<Boolean> fireResistanceEffect;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> iceResistanceEffect;
+    public static final ModConfigSpec.ConfigValue<Boolean> fireResistanceEffect;
+    public static final ModConfigSpec.ConfigValue<Boolean> iceResistanceEffect;
 
-    public static final ForgeConfigSpec.ConfigValue<Boolean> damageScaling;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> requireThermometer;
+    public static final ModConfigSpec.ConfigValue<Boolean> damageScaling;
+    public static final ModConfigSpec.ConfigValue<Boolean> requireThermometer;
 
-    public static final ForgeConfigSpec.ConfigValue<Integer> gracePeriodLength;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> gracePeriodEnabled;
+    public static final ModConfigSpec.ConfigValue<Integer> gracePeriodLength;
+    public static final ModConfigSpec.ConfigValue<Boolean> gracePeriodEnabled;
 
-    public static final ForgeConfigSpec.ConfigValue<Double> heatstrokeFog;
-    public static final ForgeConfigSpec.ConfigValue<Double> freezingHearts;
-    public static final ForgeConfigSpec.ConfigValue<Double> coldKnockback;
-    public static final ForgeConfigSpec.ConfigValue<Double> coldMining;
-    public static final ForgeConfigSpec.ConfigValue<Double> coldMovement;
+    public static final ModConfigSpec.ConfigValue<Double> heatstrokeFog;
+    public static final ModConfigSpec.ConfigValue<Double> freezingHearts;
+    public static final ModConfigSpec.ConfigValue<Double> coldKnockback;
+    public static final ModConfigSpec.ConfigValue<Double> coldMining;
+    public static final ModConfigSpec.ConfigValue<Double> coldMovement;
 
     static 
     {
@@ -151,7 +152,7 @@ public class MainSettingsConfig
         SPEC = BUILDER.build();
     }
 
-    public static void setup()
+    public static void setup(ModContainer modContainer)
     {
         Path configPath = FMLPaths.CONFIGDIR.get();
         Path csConfigPath = Paths.get(configPath.toAbsolutePath().toString(), "coldsweat");
@@ -162,7 +163,7 @@ public class MainSettingsConfig
         }
         catch (Exception ignored) {}
 
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, SPEC, "coldsweat/main.toml");
+        modContainer.registerConfig(ModConfig.Type.COMMON, SPEC, "coldsweat/main.toml");
     }
 
     public static MainSettingsConfig getInstance()

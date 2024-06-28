@@ -1,47 +1,53 @@
 package com.momosoftworks.coldsweat.core.network.message;
 
-import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
+import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.core.network.ModPacketHandlers;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.PacketDistributor;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 import java.util.UUID;
-import java.util.function.Supplier;
 
-public class ClientConfigAskMessage
+public class ClientConfigAskMessage implements CustomPacketPayload
 {
+    public static final CustomPacketPayload.Type<ClientConfigAskMessage> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "client_config_ask"));
+    public static final StreamCodec<FriendlyByteBuf, ClientConfigAskMessage> CODEC = CustomPacketPayload.codec(ClientConfigAskMessage::encode, ClientConfigAskMessage::decode);
+
     UUID openerUUID;
 
     public ClientConfigAskMessage(UUID openerUUID)
-    {
-        this.openerUUID = openerUUID;
+    {   this.openerUUID = openerUUID;
     }
 
     public ClientConfigAskMessage()
-    {
-        this(SyncConfigSettingsMessage.EMPTY_UUID);
+    {   this(SyncConfigSettingsMessage.EMPTY_UUID);
     }
 
-    public static void encode(ClientConfigAskMessage message, FriendlyByteBuf buffer) {
-        buffer.writeUUID(message.openerUUID);
+    public void encode(FriendlyByteBuf buffer)
+    {   buffer.writeUUID(this.openerUUID);
     }
 
     public static ClientConfigAskMessage decode(FriendlyByteBuf buffer)
-    {
-        return new ClientConfigAskMessage(buffer.readUUID());
+    {   return new ClientConfigAskMessage(buffer.readUUID());
     }
 
-    public static void handle(ClientConfigAskMessage message, Supplier<NetworkEvent.Context> contextSupplier)
+    public static void handle(ClientConfigAskMessage message, IPayloadContext context)
     {
-        NetworkEvent.Context context = contextSupplier.get();
         context.enqueueWork(() ->
         {
-            if (context.getDirection().getReceptionSide().isServer()
-            && context.getSender() != null)
-            {
-                ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(context::getSender), new SyncConfigSettingsMessage(message.openerUUID));
+            if (context.player() instanceof ServerPlayer serverPlayer)
+            {   PacketDistributor.sendToPlayer(serverPlayer, new SyncConfigSettingsMessage(message.openerUUID));
             }
+
         });
-        context.setPacketHandled(true);
+    }
+
+    @Override
+    public Type<? extends CustomPacketPayload> type()
+    {   return TYPE;
     }
 }

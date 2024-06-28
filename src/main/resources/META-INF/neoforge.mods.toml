@@ -1,0 +1,30 @@
+modLoader="javafml"
+loaderVersion="${loader_version_range}"
+license="GNU General Public License v3.1"
+[[mods]]
+modId="cold_sweat"
+version="${mod_version}"
+displayName="Cold Sweat"
+#logoFile="cold_sweat.png"
+authors="iMikul, chubbymomo, skinnymomo"
+description='''
+Cold Sweat is a highly-extensible temperature mod for Minecraft. See the documentation here:
+https://mikul.gitbook.io/cold-sweat/
+'''
+
+[[accessTransformers]]
+   file="META-INF/coldsweat_at.cfg"
+
+[[dependencies.cold_sweat]]
+   modId="neoforge"
+   mandatory=true
+   versionRange="${neo_version_range}"
+   ordering="NONE"
+   side="BOTH"
+
+[[dependencies.cold_sweat]]
+   modId="minecraft"
+   mandatory=true
+   versionRange="${minecraft_version_range}"
+   ordering="NONE"
+   side="BOTH"

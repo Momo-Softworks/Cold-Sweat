@@ -11,8 +11,8 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.gui.Overlays;
 import com.momosoftworks.coldsweat.common.event.TempEffectsCommon;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.core.init.ModEffects;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.PostChain;
@@ -20,20 +20,20 @@ import net.minecraft.client.renderer.PostPass;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.client.event.ViewportEvent;
-import net.minecraftforge.client.gui.overlay.VanillaGuiOverlay;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.util.ObfuscationReflectionHelper;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
+import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
+import net.neoforged.neoforge.client.event.ViewportEvent;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
 import java.lang.reflect.Field;
 import java.util.List;
 
-@Mod.EventBusSubscriber(Dist.CLIENT)
+@EventBusSubscriber(Dist.CLIENT)
 public class TempEffectsClient
 {
     static float BLEND_TEMP = 0;
@@ -57,7 +57,8 @@ public class TempEffectsClient
         if (!Minecraft.getInstance().isPaused() && player != null)
         {
             // Get the FPS of the game
-            float frameTime = Minecraft.getInstance().getDeltaFrameTime();
+            // TODO: Check this
+            float frameTime = Minecraft.getInstance().getTimer().getRealtimeDeltaTicks();
             float temp = (float) Temperature.get(player, Temperature.Trait.BODY);
             // Get a blended version of the player's temperature
             // More important for fog stuff
@@ -108,69 +109,70 @@ public class TempEffectsClient
     }
 
     @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event)
+    public static void onClientTick(ClientTickEvent.Post event)
     {
-        if (event.phase == net.minecraftforge.event.TickEvent.Phase.END)
+        Player player = Minecraft.getInstance().player;
+        if (player != null && player.tickCount % 5 == 0)
         {
-            Player player = Minecraft.getInstance().player;
-            if (player != null && player.tickCount % 5 == 0)
-            {
-                boolean hasGrace = player.hasEffect(ModEffects.GRACE);
-                if (player.hasEffect(ModEffects.ICE_RESISTANCE) || hasGrace) COLD_IMMUNITY = 4;
-                else COLD_IMMUNITY = 0;
-                if (player.hasEffect(MobEffects.FIRE_RESISTANCE) || hasGrace) HOT_IMMUNITY = 4;
-                else HOT_IMMUNITY = 0;
+            boolean hasGrace = player.hasEffect(ModEffects.GRACE);
+            if (player.hasEffect(ModEffects.ICE_RESISTANCE) || hasGrace) COLD_IMMUNITY = 4;
+            else COLD_IMMUNITY = 0;
+            if (player.hasEffect(MobEffects.FIRE_RESISTANCE) || hasGrace) HOT_IMMUNITY = 4;
+            else HOT_IMMUNITY = 0;
 
-                if (COLD_IMMUNITY != 4) COLD_IMMUNITY = TempEffectsCommon.getColdResistance(player);
-                if (HOT_IMMUNITY  != 4) HOT_IMMUNITY  = TempEffectsCommon.getHeatResistance(player);
-            }
+            if (COLD_IMMUNITY != 4) COLD_IMMUNITY = TempEffectsCommon.getColdResistance(player);
+            if (HOT_IMMUNITY  != 4) HOT_IMMUNITY  = TempEffectsCommon.getHeatResistance(player);
         }
     }
 
     @SubscribeEvent
-    public static void renderFog(ViewportEvent event)
+    public static void setFogDistance(ViewportEvent.RenderFog event)
     {
-        if (!(event instanceof ViewportEvent.RenderFog || event instanceof ViewportEvent.ComputeFogColor)) return;
-
         Player player = Minecraft.getInstance().player;
         double fogDistance = ConfigSettings.HEATSTROKE_FOG_DISTANCE.get();
         if (fogDistance >= 64) return;
         if (fogDistance < Double.POSITIVE_INFINITY && player != null && BLEND_TEMP >= 50 && HOT_IMMUNITY < 4)
         {
             float tempWithResistance = CSMath.blend(BLEND_TEMP, 50, HOT_IMMUNITY, 0, 4);
-            if (event instanceof ViewportEvent.RenderFog fog)
-            {
-                if (fogDistance > (fog.getFarPlaneDistance())) return;
-                fog.setFarPlaneDistance(CSMath.blend(fog.getFarPlaneDistance(), (float) fogDistance, tempWithResistance, 50f, 90f));
-                fog.setNearPlaneDistance(CSMath.blend(fog.getNearPlaneDistance(), (float) (fogDistance * 0.3), tempWithResistance, 50f, 90f));
-                fog.setCanceled(true);
-            }
-            else
-            {   ViewportEvent.ComputeFogColor fogColor = (ViewportEvent.ComputeFogColor) event;
-                fogColor.setRed(CSMath.blend(fogColor.getRed(), 0.01f, tempWithResistance, 50, 90));
-                fogColor.setGreen(CSMath.blend(fogColor.getGreen(), 0.01f, tempWithResistance, 50, 90));
-                fogColor.setBlue(CSMath.blend(fogColor.getBlue(), 0.05f, tempWithResistance, 50, 90));
-            }
+            if (fogDistance > (event.getFarPlaneDistance())) return;
+            event.setFarPlaneDistance(CSMath.blend(event.getFarPlaneDistance(), (float) fogDistance, tempWithResistance, 50f, 90f));
+            event.setNearPlaneDistance(CSMath.blend(event.getNearPlaneDistance(), (float) (fogDistance * 0.3), tempWithResistance, 50f, 90f));
+            event.setCanceled(true);
         }
     }
 
-    static ResourceLocation HAZE_TEXTURE = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/overlay/haze.png");
-    static final ResourceLocation FREEZE_TEXTURE = new ResourceLocation("textures/misc/powder_snow_outline.png");
-
     @SubscribeEvent
-    public static void vignette(RenderGuiOverlayEvent.Pre event)
+    public static void setFogColor(ViewportEvent.ComputeFogColor event)
     {
         Player player = Minecraft.getInstance().player;
-        if (player != null && event.getOverlay() == VanillaGuiOverlay.VIGNETTE.type()
+        double fogDistance = ConfigSettings.HEATSTROKE_FOG_DISTANCE.get();
+        if (fogDistance >= 64) return;
+        if (fogDistance < Double.POSITIVE_INFINITY && player != null && BLEND_TEMP >= 50 && HOT_IMMUNITY < 4)
+        {
+            float tempWithResistance = CSMath.blend(BLEND_TEMP, 50, HOT_IMMUNITY, 0, 4);
+            event.setRed(CSMath.blend(event.getRed(), 0.01f, tempWithResistance, 50, 90));
+            event.setGreen(CSMath.blend(event.getGreen(), 0.01f, tempWithResistance, 50, 90));
+            event.setBlue(CSMath.blend(event.getBlue(), 0.05f, tempWithResistance, 50, 90));
+        }
+    }
+
+    static ResourceLocation HAZE_TEXTURE = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/haze.png");
+    static final ResourceLocation FREEZE_TEXTURE = ResourceLocation.withDefaultNamespace("textures/misc/powder_snow_outline.png");
+
+    @SubscribeEvent
+    public static void vignette(RenderGuiLayerEvent.Pre event)
+    {
+        Player player = Minecraft.getInstance().player;
+        if (player != null && event.getName().equals(ResourceLocation.withDefaultNamespace("textures/misc/vignette.png"))
         && ((BLEND_TEMP > 0 && HOT_IMMUNITY < 4) || (BLEND_TEMP < 0 && COLD_IMMUNITY < 4)))
         {
             float resistance = CSMath.blend(1, 0, BLEND_TEMP > 0 ? HOT_IMMUNITY : COLD_IMMUNITY, 0, 4);
             float opacity = CSMath.blend(0f, 1f, Math.abs(BLEND_TEMP), 50, 100) * resistance;
-            float tickTime = player.tickCount + event.getPartialTick();
+            float tickTime = player.tickCount + event.getPartialTick().getGameTimeDeltaPartialTick(true);
             if (opacity == 0) return;
-            double width = event.getWindow().getWidth();
-            double height = event.getWindow().getHeight();
-            double scale = event.getWindow().getGuiScale();
+            float width  = event.getGuiGraphics().guiWidth();
+            float height = event.getGuiGraphics().guiHeight();
+            float scale = Minecraft.getInstance().getWindow().calculateScale(Minecraft.getInstance().options.guiScale().get(), Minecraft.getInstance().isEnforceUnicode());
 
             RenderSystem.disableDepthTest();
             RenderSystem.depthMask(false);
@@ -187,13 +189,11 @@ public class TempEffectsClient
             }
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             Tesselator tesselator = Tesselator.getInstance();
-            BufferBuilder bufferbuilder = tesselator.getBuilder();
-            bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-            bufferbuilder.vertex(0.0D, height / scale, -90.0D).uv(0.0F, 1.0F).endVertex();
-            bufferbuilder.vertex(width / scale, height / scale, -90.0D).uv(1.0F, 1.0F).endVertex();
-            bufferbuilder.vertex(width / scale, 0.0D, -90.0D).uv(1.0F, 0.0F).endVertex();
-            bufferbuilder.vertex(0.0D, 0.0D, -90.0D).uv(0.0F, 0.0F).endVertex();
-            tesselator.end();
+            BufferBuilder bufferbuilder = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+            bufferbuilder.addVertex(0.0f, height / scale, -90.0f).setUv(0.0F, 1.0F);
+            bufferbuilder.addVertex(width / scale, height / scale, -90.0f).setUv(1.0F, 1.0F);
+            bufferbuilder.addVertex(width / scale, 0.0f, -90.0f).setUv(1.0F, 0.0F);
+            bufferbuilder.addVertex(0.0f, 0.0f, -90.0f).setUv(0.0F, 0.0F);
             RenderSystem.depthMask(true);
             RenderSystem.enableDepthTest();
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -229,7 +229,7 @@ public class TempEffectsClient
                     {   BLUR_APPLIED = false;
                     }
                     if (!BLUR_APPLIED)
-                    {   mc.gameRenderer.loadEffect(new ResourceLocation("shaders/post/blobs2.json"));
+                    {   mc.gameRenderer.loadEffect(ResourceLocation.withDefaultNamespace("shaders/post/blobs2.json"));
                         BLUR_RADIUS = ((List<PostPass>) POST_PASSES.get(mc.gameRenderer.currentEffect())).get(0).getEffect().getUniform("Radius");
                         BLUR_APPLIED = true;
                     }

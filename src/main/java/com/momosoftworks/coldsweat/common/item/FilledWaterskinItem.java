@@ -6,12 +6,11 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.event.TooltipHandler;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
-import com.momosoftworks.coldsweat.core.init.ItemInit;
-import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
+import com.momosoftworks.coldsweat.core.init.ModItemComponents;
+import com.momosoftworks.coldsweat.core.init.ModItems;
+import com.momosoftworks.coldsweat.core.network.ModPacketHandlers;
 import com.momosoftworks.coldsweat.core.network.message.ParticleBatchMessage;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.registries.ModItems;
-import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
@@ -20,29 +19,25 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
-import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DispenserBlock;
-import net.minecraft.world.level.block.LayeredCauldronBlock;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.AABB;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -52,18 +47,17 @@ import java.util.Random;
 public class FilledWaterskinItem extends Item
 {
     public static final double EFFECT_RATE = 0.4;
-    public static final String NBT_TEMPERATURE = "Temperature";
 
     public FilledWaterskinItem()
     {
-        super(new Properties().stacksTo(1).craftRemainder(ItemInit.WATERSKIN.get()));
+        super(new Properties().stacksTo(1).craftRemainder(ModItems.WATERSKIN.get()));
 
         DispenserBlock.registerBehavior(this, (source, stack) ->
         {
-            BlockPos pos = source.getPos().relative(source.getBlockState().getValue(DispenserBlock.FACING));
-            Level level = source.getLevel();
+            BlockPos pos = source.pos().relative(source.state().getValue(DispenserBlock.FACING));
+            Level level = source.level();
             ChunkAccess chunk = WorldHelper.getChunk(level, pos);
-            double itemTemp = stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
+            double itemTemp = stack.getOrDefault(ModItemComponents.WATER_TEMPERATURE, 0d);
 
             if (chunk == null) return stack;
 
@@ -85,7 +79,9 @@ public class FilledWaterskinItem extends Item
                                                                            pos.getY() + rand.nextDouble(),
                                                                            pos.getZ() + rand.nextDouble(), 0, 0, 0));
                     }
-                    ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> (LevelChunk) chunk), particles);
+                    if (level instanceof ServerLevel serverLevel)
+                    {   PacketDistributor.sendToPlayersTrackingChunk(serverLevel, new ChunkPos(pos.getX() >> 4, pos.getZ() >> 4), particles);
+                    }
                 }, i);
             }
 
@@ -99,13 +95,13 @@ public class FilledWaterskinItem extends Item
                 List<Player> affectedPlayers = new ArrayList<>();
 
                 void start()
-                {   MinecraftForge.EVENT_BUS.register(this);
+                {   NeoForge.EVENT_BUS.register(this);
                 }
 
                 @SubscribeEvent
-                public void onTick(TickEvent.LevelTickEvent event)
+                public void onTick(LevelTickEvent.Pre event)
                 {
-                    if (event.level.isClientSide == level.isClientSide && event.phase == TickEvent.Phase.START)
+                    if (event.getLevel().isClientSide == level.isClientSide)
                     {
                         // Temperature of waterskin weakens over time
                         double waterTemp = CSMath.blend(itemTemp, itemTemp / 5, tick, 20, 100);
@@ -116,7 +112,7 @@ public class FilledWaterskinItem extends Item
                         // If there's ground, stop
                         BlockPos pos = BlockPos.containing(aabb.minX, aabb.minY, aabb.minZ);
                         if (WorldHelper.isSpreadBlocked(level, chunk.getBlockState(pos), pos, Direction.DOWN, Direction.DOWN))
-                        {   MinecraftForge.EVENT_BUS.unregister(this);
+                        {   NeoForge.EVENT_BUS.unregister(this);
                             return;
                         }
 
@@ -136,8 +132,7 @@ public class FilledWaterskinItem extends Item
 
                         // Expire after 5 seconds
                         if (tick > 100)
-                        {
-                            MinecraftForge.EVENT_BUS.unregister(this);
+                        {   NeoForge.EVENT_BUS.unregister(this);
                         }
                     }
                 }
@@ -148,38 +143,50 @@ public class FilledWaterskinItem extends Item
     }
 
     @Override
-    public void inventoryTick(ItemStack itemstack, Level world, Entity entity, int slot, boolean isSelected)
+    public void inventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean isSelected)
     {
-        super.inventoryTick(itemstack, world, entity, slot, isSelected);
+        super.inventoryTick(stack, world, entity, slot, isSelected);
         if (entity.tickCount % 5 == 0 && entity instanceof Player player)
         {
-            double itemTemp = itemstack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
-            if (itemTemp != 0 && slot <= 8 || player.getOffhandItem().equals(itemstack))
+            double itemTemp = stack.get(ModItemComponents.WATER_TEMPERATURE);
+            if (itemTemp != 0 && slot <= 8 || player.getOffhandItem().equals(stack))
             {
                 double temp = (EFFECT_RATE / 20) * ConfigSettings.TEMP_RATE.get();
                 double newTemp = CSMath.shrink(itemTemp, temp * 5);
 
-                itemstack.getOrCreateTag().putDouble(FilledWaterskinItem.NBT_TEMPERATURE, newTemp);
+                stack.set(ModItemComponents.WATER_TEMPERATURE, newTemp);
                 Temperature.addModifier(player, new WaterskinTempModifier(temp * CSMath.sign(itemTemp)).expires(5), Temperature.Trait.CORE, Placement.Duplicates.ALLOW);
             }
         }
     }
 
-    public static boolean performPourAction(ItemStack stack, LivingEntity entity, InteractionHand hand)
+    public static boolean performPourAction(ItemStack stack, LivingEntity entity)
     {
-        if (!(entity instanceof Player player && stack.is(ModItems.FILLED_WATERSKIN))) return false;
+        if (!(entity instanceof Player player && stack.is(ModItems.FILLED_WATERSKIN) && stack.has(ModItemComponents.WATER_TEMPERATURE))) return false;
 
         Level level = player.level();
-        double amount = stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE) * (ConfigSettings.WATERSKIN_STRENGTH.get() / 50d);
+        double amount = stack.get(ModItemComponents.WATER_TEMPERATURE) * (ConfigSettings.WATERSKIN_STRENGTH.get() / 50d);
         Temperature.addModifier(player, new WaterskinTempModifier(amount).expires(0), Temperature.Trait.CORE, Placement.Duplicates.ALLOW);
 
         // Play empty sound
-        if (!player.level().isClientSide)
-        {   WorldHelper.playEntitySound(ModSounds.WATERSKIN_POUR, player, player.getSoundSource(), 2f, (float) ((Math.random() / 5) + 0.9));
+        level.playLocalSound(player.getX(), player.getY(), player.getZ(), SoundEvents.AMBIENT_UNDERWATER_EXIT,
+                             SoundSource.PLAYERS, 1, (float) ((Math.random() / 5) + 0.9), false);
+
+        // Create empty waterskin item
+        ItemStack emptyStack = getEmpty(stack);
+        // TODO: Add this back if TWT is for this version
+        //emptyStack.getOrCreateTag().remove("Purity");
+
+        // Add the item to the player's inventory
+        if (player.getInventory().contains(emptyStack))
+        {   player.addItem(emptyStack);
+            player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+        }
+        else
+        {   player.setItemInHand(InteractionHand.MAIN_HAND, emptyStack);
         }
 
-        consumeWaterskin(stack, player, hand);
-        player.swing(hand);
+        player.swing(InteractionHand.MAIN_HAND);
 
         // spawn falling water particles
         Random rand = new Random();
@@ -187,38 +194,20 @@ public class FilledWaterskinItem extends Item
         {
             TaskScheduler.scheduleClient(() ->
             {
-                for (int p = 0; p < 10; p++)
+                for (int p = 0; p < rand.nextInt(5) + 5; p++)
                 {
-                    AABB playerBB = player.getDimensions(player.getPose()).makeBoundingBox(player.position()).inflate(0.2);
                     level.addParticle(ParticleTypes.FALLING_WATER,
-                                      Mth.lerp(rand.nextFloat(), playerBB.minX, playerBB.maxX),
-                                      playerBB.maxY,
-                                      Mth.lerp(rand.nextFloat(), playerBB.minZ, playerBB.maxZ),
-                                      0.3, 0.3, 0.3);
+                                      player.getX() + rand.nextFloat() * player.getBbWidth() - (player.getBbWidth() / 2),
+                                      player.getY() + player.getBbHeight() + rand.nextFloat() * 0.5,
+                                      player.getZ() + rand.nextFloat() * player.getBbWidth() - (player.getBbWidth() / 2), 0.3, 0.3, 0.3);
                 }
             }, i);
         }
         player.clearFire();
-        player.getCooldowns().addCooldown(ModItems.FILLED_WATERSKIN, 10);
-        player.getCooldowns().addCooldown(ModItems.WATERSKIN, 10);
+        player.getCooldowns().addCooldown(ModItems.FILLED_WATERSKIN.value(), 10);
+        player.getCooldowns().addCooldown(ModItems.WATERSKIN.value(), 10);
 
         return true;
-    }
-
-    public static void consumeWaterskin(ItemStack stack, Player player, InteractionHand usedHand)
-    {
-        // Create empty waterskin item
-        ItemStack emptyStack = getEmpty(stack);
-        emptyStack.getOrCreateTag().remove("Purity");
-
-        // Add the item to the player's inventory
-        if (player.getInventory().contains(emptyStack))
-        {   player.addItem(emptyStack);
-            player.setItemInHand(usedHand, ItemStack.EMPTY);
-        }
-        else
-        {   player.setItemInHand(usedHand, emptyStack);
-        }
     }
 
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand)
@@ -226,43 +215,10 @@ public class FilledWaterskinItem extends Item
         if (player.isCrouching())
         {   return ItemUtils.startUsingInstantly(level, player, hand);
         }
-        else if (performPourAction(player.getItemInHand(hand), player, hand))
+        else if (performPourAction(player.getItemInHand(hand), player))
         {   return InteractionResultHolder.consume(player.getItemInHand(hand));
         }
         return InteractionResultHolder.pass(player.getItemInHand(hand));
-    }
-
-    @Override
-    public InteractionResult useOn(UseOnContext context)
-    {
-        Level level = context.getLevel();
-        BlockPos pos = context.getClickedPos();
-        BlockState state = level.getBlockState(pos);
-        Player player = context.getPlayer();
-
-        if (state.is(Blocks.CAULDRON) || state.is(Blocks.WATER_CAULDRON))
-        {
-            boolean hasWater = state.is(Blocks.WATER_CAULDRON);
-            // Fill cauldron
-            int waterLevel = hasWater ? state.getValue(LayeredCauldronBlock.LEVEL) : 0;
-            if (waterLevel >= 3) return InteractionResult.PASS;
-            state = hasWater
-                    ? state.setValue(LayeredCauldronBlock.LEVEL, waterLevel + 1)
-                    : Blocks.WATER_CAULDRON.defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, 1);
-            level.setBlock(pos, state, 3);
-            // Pouring sound / visuals
-            if (!level.isClientSide)
-            {   level.playSound(null, pos, ModSounds.WATERSKIN_FILL, SoundSource.BLOCKS, 2f, (float) Math.random() / 5 + 0.9f);
-                WorldHelper.spawnParticleBatch(level, ParticleTypes.SPLASH, pos.getX() + 0.5, pos.getY() + 0.65, pos.getZ() + 0.5, 0.5, 0.5, 0.5, 10, 0);
-            }
-            // Consume waterskin
-            if (player != null)
-            {   consumeWaterskin(context.getItemInHand(), player, context.getHand());
-                player.getCooldowns().addCooldown(ModItems.WATERSKIN, 10);
-            }
-            return InteractionResult.SUCCESS;
-        }
-        return InteractionResult.PASS;
     }
 
     @Override
@@ -271,13 +227,14 @@ public class FilledWaterskinItem extends Item
     }
 
     @Override
-    public int getUseDuration(ItemStack stack)
+    public int getUseDuration(ItemStack stack, LivingEntity entity)
     {   return 32;
     }
 
     @Override
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity)
-    {   double amount = stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE) * (ConfigSettings.WATERSKIN_STRENGTH.get() / 50d);
+    {
+        double amount = stack.get(ModItemComponents.WATER_TEMPERATURE) * (ConfigSettings.WATERSKIN_STRENGTH.get() / 50d);
         Temperature.addModifier(entity, new WaterskinTempModifier(amount / 100).expires(100), Temperature.Trait.CORE, Placement.Duplicates.ALLOW);
         return entity instanceof Player player && player.isCreative()
                ? stack
@@ -288,20 +245,18 @@ public class FilledWaterskinItem extends Item
     {
         if (stack.getItem() instanceof FilledWaterskinItem)
         {
-            ItemStack emptyWaterskin = new ItemStack(ModItems.WATERSKIN);
+            ItemStack emptyWaterskin = new ItemStack(ModItems.WATERSKIN.value());
 
             // Preserve NBT (except temperature)
-            emptyWaterskin.setTag(stack.getTag());
-            emptyWaterskin.removeTagKey(FilledWaterskinItem.NBT_TEMPERATURE);
+            emptyWaterskin.applyComponents(stack.getComponents());
+            emptyWaterskin.remove(ModItemComponents.WATER_TEMPERATURE);
             return emptyWaterskin;
         }
         return stack;
-    }
-
-    @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag advanced)
+    }@Override
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag advanced)
     {
-        double temp = CSMath.round(stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE), 2);
+        double temp = CSMath.round(stack.get(ModItemComponents.WATER_TEMPERATURE), 2);
         if (Screen.hasShiftDown())
         {
             // Info tooltip for hotbar functionality
@@ -345,7 +300,7 @@ public class FilledWaterskinItem extends Item
                        .append(Component.literal((int) temp + " \u00B0" + tempUnits).withStyle(color))
                        .append(Component.literal(")").withStyle(ChatFormatting.GRAY)));
 
-        super.appendHoverText(stack, level, tooltip, advanced);
+        super.appendHoverText(stack, context, tooltip, advanced);
     }
 
     @Override
@@ -360,8 +315,10 @@ public class FilledWaterskinItem extends Item
 
     @Override
     public ItemStack getCraftingRemainingItem(ItemStack itemStack)
-    {   ItemStack empty = getEmpty(itemStack);
-        empty.getOrCreateTag().remove("Purity");
+    {
+        ItemStack empty = getEmpty(itemStack);
+        // TODO: Add this back if TWT is for this version
+        //empty.getOrCreateTag().remove("Purity");
         return empty;
     }
 

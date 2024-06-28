@@ -11,7 +11,7 @@ import net.minecraft.world.entity.LivingEntity;
 
 public class GoatPantsModel<T extends LivingEntity> extends HumanoidModel<T>
 {
-    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(ColdSweat.MOD_ID, "goat_pants"), "main");
+    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "goat_pants"), "main");
 
     public GoatPantsModel(ModelPart root)
     {   super(root);

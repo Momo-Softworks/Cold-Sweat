@@ -1,10 +1,11 @@
 package com.momosoftworks.coldsweat.config.spec;
 
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.loading.FMLPaths;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,35 +14,35 @@ import java.util.List;
 
 public class ClientSettingsConfig
 {
-    private static final ForgeConfigSpec SPEC;
-    public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
+    private static final ModConfigSpec SPEC;
+    public static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
-    private static final ForgeConfigSpec.BooleanValue celsius;
-    private static final ForgeConfigSpec.IntValue tempOffset;
-    private static final ForgeConfigSpec.DoubleValue tempSmoothing;
+    private static final ModConfigSpec.BooleanValue celsius;
+    private static final ModConfigSpec.IntValue tempOffset;
+    private static final ModConfigSpec.DoubleValue tempSmoothing;
 
-    private static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> bodyIconPos;
-    private static final ForgeConfigSpec.BooleanValue bodyIconEnabled;
-    private static final ForgeConfigSpec.BooleanValue moveBodyIconWhenAdvanced;
+    private static final ModConfigSpec.ConfigValue<List<? extends Integer>> bodyIconPos;
+    private static final ModConfigSpec.BooleanValue bodyIconEnabled;
+    private static final ModConfigSpec.BooleanValue moveBodyIconWhenAdvanced;
 
-    private static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> bodyReadoutPos;
-    private static final ForgeConfigSpec.BooleanValue bodyReadoutEnabled;
+    private static final ModConfigSpec.ConfigValue<List<? extends Integer>> bodyReadoutPos;
+    private static final ModConfigSpec.BooleanValue bodyReadoutEnabled;
 
-    private static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> worldGaugePos;
-    private static final ForgeConfigSpec.BooleanValue worldGaugeEnabled;
+    private static final ModConfigSpec.ConfigValue<List<? extends Integer>> worldGaugePos;
+    private static final ModConfigSpec.BooleanValue worldGaugeEnabled;
 
-    private static final ForgeConfigSpec.BooleanValue customHotbarLayout;
-    private static final ForgeConfigSpec.BooleanValue iconBobbing;
+    private static final ModConfigSpec.BooleanValue customHotbarLayout;
+    private static final ModConfigSpec.BooleanValue iconBobbing;
 
-    private static final ForgeConfigSpec.BooleanValue hearthDebug;
+    private static final ModConfigSpec.BooleanValue hearthDebug;
 
-    private static final ForgeConfigSpec.BooleanValue showConfigButton;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> configButtonPos;
-    private static final ForgeConfigSpec.BooleanValue distortionEffects;
+    private static final ModConfigSpec.BooleanValue showConfigButton;
+    private static final ModConfigSpec.ConfigValue<List<? extends Integer>> configButtonPos;
+    private static final ModConfigSpec.BooleanValue distortionEffects;
 
-    private static final ForgeConfigSpec.BooleanValue highContrast;
+    private static final ModConfigSpec.BooleanValue highContrast;
 
-    private static final ForgeConfigSpec.BooleanValue enableCreativeWarning;
+    private static final ModConfigSpec.BooleanValue enableCreativeWarning;
 
 
     static 
@@ -122,7 +123,7 @@ public class ClientSettingsConfig
         SPEC = BUILDER.build();
     }
 
-    public static void setup()
+    public static void setup(ModContainer modContainer)
     {
         Path configPath = FMLPaths.CONFIGDIR.get();
         Path csConfigPath = Paths.get(configPath.toAbsolutePath().toString(), "coldsweat");
@@ -133,7 +134,7 @@ public class ClientSettingsConfig
         }
         catch (Exception ignored) {}
 
-        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, SPEC, "coldsweat/client.toml");
+        modContainer.registerConfig(ModConfig.Type.CLIENT, SPEC, "coldsweat/client.toml");
     }
 
     public static ClientSettingsConfig getInstance()

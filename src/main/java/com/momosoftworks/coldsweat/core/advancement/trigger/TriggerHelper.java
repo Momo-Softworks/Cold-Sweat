@@ -4,6 +4,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 
@@ -65,7 +67,7 @@ public class TriggerHelper
     {
         JsonArray values = new JsonArray();
 
-        for (TriggerHelper.TempCondition condition : conditions)
+        for (TempCondition condition : conditions)
         {
             double above = condition.above();
             double below = condition.below();
@@ -87,6 +89,12 @@ public class TriggerHelper
 
     record TempCondition(Temperature.Trait trait, double below, double above)
     {
+        public static final Codec<TempCondition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                Temperature.Trait.CODEC.fieldOf("trait").forGetter(TempCondition::trait),
+                Codec.doubleRange(0, Double.MAX_VALUE).optionalFieldOf("below", Double.MAX_VALUE).forGetter(TempCondition::below),
+                Codec.doubleRange(-Double.MAX_VALUE, 0).optionalFieldOf("above", -Double.MAX_VALUE).forGetter(TempCondition::above)
+        ).apply(instance, TempCondition::new));
+
         public boolean matches(double value)
         {   return below > above
                  ? value >= above && value <= below

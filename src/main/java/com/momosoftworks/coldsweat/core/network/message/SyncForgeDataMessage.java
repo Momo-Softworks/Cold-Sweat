@@ -1,16 +1,21 @@
 package com.momosoftworks.coldsweat.core.network.message;
 
+import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
-
-public class SyncForgeDataMessage
+public class SyncForgeDataMessage implements CustomPacketPayload
 {
+    public static final Type<SyncForgeDataMessage> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "sync_forge_data"));
+    public static final StreamCodec<FriendlyByteBuf, SyncForgeDataMessage> CODEC = CustomPacketPayload.codec(SyncForgeDataMessage::encode, SyncForgeDataMessage::decode);
+
     CompoundTag forgeData;
     int entityID;
     String dimension;
@@ -29,24 +34,22 @@ public class SyncForgeDataMessage
         this.dimension = dimension;
     }
 
-    public static void encode(SyncForgeDataMessage message, FriendlyByteBuf buffer)
+    public void encode(FriendlyByteBuf buffer)
     {
-        buffer.writeNbt(message.forgeData);
-        buffer.writeInt(message.entityID);
-        buffer.writeUtf(message.dimension);
+        buffer.writeNbt(this.forgeData);
+        buffer.writeInt(this.entityID);
+        buffer.writeUtf(this.dimension);
     }
 
     public static SyncForgeDataMessage decode(FriendlyByteBuf buffer)
-    {
-        return new SyncForgeDataMessage(buffer.readNbt(), buffer.readInt(), buffer.readUtf());
+    {   return new SyncForgeDataMessage(buffer.readNbt(), buffer.readInt(), buffer.readUtf());
     }
 
-    public static void handle(SyncForgeDataMessage message, Supplier<NetworkEvent.Context> contextSupplier)
+    public static void handle(SyncForgeDataMessage message, IPayloadContext context)
     {
-        NetworkEvent.Context context = contextSupplier.get();
         context.enqueueWork(() ->
         {
-            if (context.getDirection().getReceptionSide().isClient() && ClientOnlyHelper.getClientLevel().dimension().location().toString().equals(message.dimension))
+            if (ClientOnlyHelper.getClientLevel().dimension().location().toString().equals(message.dimension))
             {
                 Level level = ClientOnlyHelper.getClientLevel();
                 if (level != null)
@@ -58,6 +61,10 @@ public class SyncForgeDataMessage
                 }
             }
         });
-        context.setPacketHandled(true);
+    }
+
+    @Override
+    public Type<? extends CustomPacketPayload> type()
+    {   return TYPE;
     }
 }

@@ -1,19 +1,25 @@
 package com.momosoftworks.coldsweat.core.network.message;
 
+import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.gui.Overlays;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
+import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-import java.util.function.Supplier;
-
-public class TemperatureSyncMessage
+public class TemperatureSyncMessage implements CustomPacketPayload
 {
+    public static final CustomPacketPayload.Type<TemperatureSyncMessage> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "sync_temperature"));
+    public static final StreamCodec<FriendlyByteBuf, TemperatureSyncMessage> CODEC = CustomPacketPayload.codec(TemperatureSyncMessage::encode, TemperatureSyncMessage::decode);
+
     int entityId;
     CompoundTag traits;
     boolean instant;
@@ -30,39 +36,35 @@ public class TemperatureSyncMessage
         this.instant = instant;
     }
 
-    public static void encode(TemperatureSyncMessage message, FriendlyByteBuf buffer)
-    {   buffer.writeInt(message.entityId);
-        buffer.writeNbt(message.traits);
-        buffer.writeBoolean(message.instant);
+    public void encode(FriendlyByteBuf buffer)
+    {   buffer.writeInt(this.entityId);
+        buffer.writeNbt(this.traits);
+        buffer.writeBoolean(this.instant);
     }
 
     public static TemperatureSyncMessage decode(FriendlyByteBuf buffer)
     {   return new TemperatureSyncMessage(buffer.readInt(), buffer.readNbt(), buffer.readBoolean());
     }
 
-    public static void handle(TemperatureSyncMessage message, Supplier<NetworkEvent.Context> contextSupplier)
+    public static void handle(TemperatureSyncMessage message, IPayloadContext context)
     {
-        NetworkEvent.Context context = contextSupplier.get();
-
-        if (context.getDirection().getReceptionSide().isClient())
+        context.enqueueWork(() ->
         {
-            context.enqueueWork(() ->
+            LivingEntity entity = (LivingEntity) Minecraft.getInstance().level.getEntity(message.entityId);
+
+            if (entity != null)
             {
-                LivingEntity entity = (LivingEntity) Minecraft.getInstance().level.getEntity(message.entityId);
-
-                if (entity != null)
-                {
-                    EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
-                    {
-                        cap.deserializeTraits(message.traits);
-                        if (message.instant && cap instanceof PlayerTempCap)
-                        {   Overlays.setBodyTempInstant(cap.getTrait(Temperature.Trait.BODY));
-                        }
-                    });
+                ITemperatureCap cap = EntityTempManager.getTemperatureCap(entity);
+                cap.deserializeTraits(message.traits);
+                if (message.instant && cap instanceof PlayerTempCap)
+                {   Overlays.setBodyTempInstant(cap.getTrait(Temperature.Trait.BODY));
                 }
-            });
-        }
+            }
+        });
+    }
 
-        context.setPacketHandled(true);
+    @Override
+    public Type<? extends CustomPacketPayload> type()
+    {   return TYPE;
     }
 }

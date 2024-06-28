@@ -4,19 +4,22 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.core.init.ModItemComponents;
+import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.registries.ModItems;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.event.entity.player.PlayerContainerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.player.PlayerContainerEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -24,7 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-@Mod.EventBusSubscriber
+@EventBusSubscriber
 public class NBTHelper
 {
     private NBTHelper() {}
@@ -55,7 +58,7 @@ public class NBTHelper
     public static Optional<TempModifier> tagToModifier(CompoundTag modifierTag)
     {
         // Create a new modifier from the CompoundTag
-        Optional<TempModifier> optional = TempModifierRegistry.getValue(new ResourceLocation(modifierTag.getString("Id")));
+        Optional<TempModifier> optional = TempModifierRegistry.getValue(ResourceLocation.parse(modifierTag.getString("Id")));
         optional.ifPresent(modifier ->
         {
             modifier.setNBT(modifierTag.getCompound("ModifierData"));
@@ -88,7 +91,7 @@ public class NBTHelper
         {   tag = entity.getPersistentData();
         }
         else if (owner instanceof ItemStack stack)
-        {   tag = stack.getOrCreateTag();
+        {   tag = stack.get(DataComponents.CUSTOM_DATA).copyTag();
         }
         else if (owner instanceof BlockEntity blockEntity)
         {   tag = blockEntity.getPersistentData();
@@ -97,20 +100,25 @@ public class NBTHelper
 
         int value = tag.getInt(key);
         if (predicate.test(value))
-        {   tag.putInt(key, value + amount);
+        {
+            tag.putInt(key, value + amount);
+            if (owner instanceof ItemStack stack)
+            {   stack.set(DataComponents.CUSTOM_DATA, stack.get(DataComponents.CUSTOM_DATA).update(tg -> tg.putInt(key, value + amount)));
+            }
         }
         return value + amount;
     }
 
+    //TODO: delete this method
     /**
      * Gets an item's tag, without creating a new one if it is not present.<br>
      * An empty {@link CompoundTag} will be returned in that case, so a null check will not be necessary.<br>
      * <br>
-     * Use {@link ItemStack#getOrCreateTag()} if you need to write to the tag.<br>
+     * Use the item's data component directly if you need to write to the tag.<br>
      * @return The item's tag, or an empty tag if it is not present
      */
     public static CompoundTag getTagOrEmpty(ItemStack stack)
-    {   return CSMath.orElse(stack.getTag(), new CompoundTag());
+    {   return stack.has(DataComponents.CUSTOM_DATA) ? stack.get(DataComponents.CUSTOM_DATA).copyTag() : new CompoundTag();
     }
 
     /**
@@ -133,21 +141,32 @@ public class NBTHelper
         for (ItemStack stack : items)
         {
             Item item = stack.getItem();
-            CompoundTag tag = NBTHelper.getTagOrEmpty(stack);
+            if (!stack.has(DataComponents.CUSTOM_DATA)) return;
+            CompoundTag tag = stack.get(DataComponents.CUSTOM_DATA).copyTag();
 
             // Convert old tags on existing items
-            if (item == ModItems.SOULSPRING_LAMP)
+            if (item == ModItems.SOULSPRING_LAMP.value())
             {
-                if (tag.contains("fuel"))
-                {   tag.putDouble("Fuel", tag.getDouble("fuel"));
-                    tag.remove("fuel");
+                IntTag oldTemp = ((IntTag) CSMath.orElse(tag.get("fuel"), tag.get("Fuel")));
+                if (oldTemp != null)
+                {
+                    stack.set(ModItemComponents.WATER_TEMPERATURE, oldTemp.getAsDouble());
+                    stack.get(DataComponents.CUSTOM_DATA).update(tg ->
+                    {   tg.remove("fuel");
+                        tg.remove("Fuel");
+                    });
                 }
             }
-            else if (item == ModItems.FILLED_WATERSKIN)
+            else if (item == ModItems.FILLED_WATERSKIN.value())
             {
-                if (tag.contains("temperature"))
-                {   tag.putDouble("Temperature", tag.getDouble("temperature"));
-                    tag.remove("temperature");
+                DoubleTag oldTemp = ((DoubleTag) CSMath.orElse(tag.get("temperature"), tag.get("Temperature")));
+                if (oldTemp != null)
+                {
+                    stack.set(ModItemComponents.WATER_TEMPERATURE, oldTemp.getAsDouble());
+                    stack.get(DataComponents.CUSTOM_DATA).update(tg ->
+                    {   tg.remove("temperature");
+                        tg.remove("Temperature");
+                    });
                 }
             }
         }
@@ -247,5 +266,32 @@ public class NBTHelper
         {   return StringTag.valueOf(string);
         }
         return null;
+    }
+
+    public static class ItemMutator
+    {
+        private final ItemStack stack;
+
+        public ItemMutator(ItemStack stack)
+        {   this.stack = stack;
+        }
+
+        public void put(String key, Object value)
+        {
+            if (stack.has(DataComponents.CUSTOM_DATA))
+            {   Tag tagValue = writeValue(value);
+                if (tagValue == null) throw new IllegalArgumentException("Invalid value type for NBT: " + value.getClass().getName());
+                stack.set(DataComponents.CUSTOM_DATA, stack.get(DataComponents.CUSTOM_DATA).update(tag -> tag.put(key, tagValue)));
+            }
+        }
+
+        public <T> T get(String key)
+        {
+            if (stack.has(DataComponents.CUSTOM_DATA))
+            {   Tag tag = stack.get(DataComponents.CUSTOM_DATA).copyTag().get(key);
+                if (tag != null) return (T) getValue(tag);
+            }
+            return null;
+        }
     }
 }

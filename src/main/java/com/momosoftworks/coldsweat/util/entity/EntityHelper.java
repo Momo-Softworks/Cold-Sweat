@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.util.entity;
 
+import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
-import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.serialization.ObjectBuilder;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -11,9 +11,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
-import net.minecraftforge.common.util.LogicalSidedProvider;
-import net.minecraftforge.fml.LogicalSide;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import net.neoforged.fml.LogicalSide;
+import net.neoforged.fml.util.ObfuscationReflectionHelper;
+import net.neoforged.neoforge.common.util.LogicalSidedProvider;
 
 import java.lang.reflect.Field;
 
@@ -30,7 +30,7 @@ public class EntityHelper
     }
 
     public static boolean holdingLamp(LivingEntity player, HumanoidArm arm)
-    {   return getItemInHand(player, arm).getItem() == ModItems.SOULSPRING_LAMP;
+    {   return getItemInHand(player, arm).getItem() == ModItems.SOULSPRING_LAMP.value();
     }
 
     public static GameType getGameModeForPlayer(Player player)

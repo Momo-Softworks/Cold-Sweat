@@ -2,22 +2,22 @@ package com.momosoftworks.coldsweat.common.event;
 
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.core.init.ModAttributes;
+import com.momosoftworks.coldsweat.core.init.ModEffects;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.registries.ModAttributes;
-import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.living.LivingHealEvent;
-import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
-import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.living.LivingHealEvent;
+import net.neoforged.neoforge.event.entity.living.LivingKnockBackEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 import java.util.Collection;
 
-@Mod.EventBusSubscriber
+@EventBusSubscriber
 public class TempEffectsCommon
 {
     @SubscribeEvent
@@ -45,31 +45,28 @@ public class TempEffectsCommon
 
     // Decrease the player's movement speed if their temperature is below -50
     @SubscribeEvent
-    public static void onPlayerTick(TickEvent.PlayerTickEvent event)
+    public static void onPlayerTick(PlayerTickEvent.Post event)
     {
-        Player player = event.player;
-        if (event.phase == TickEvent.Phase.END)
+        Player player = event.getEntity();
+        float temp = (float) Temperature.get(player, Temperature.Trait.BODY);
+        if (temp < -50)
         {
-            float temp = (float) Temperature.get(player, Temperature.Trait.BODY);
-            if (temp < -50)
+            double movementReduction = ConfigSettings.COLD_MOVEMENT_SLOWDOWN.get();
+            double movementSpeed = 1 - movementReduction;
+
+            if (movementSpeed == 1
+            || player.hasEffect(ModEffects.ICE_RESISTANCE)
+            || player.hasEffect(ModEffects.GRACE)) return;
+
+            // If not elytra flying
+            if (!player.isFallFlying())
             {
-                double movementReduction = ConfigSettings.COLD_MOVEMENT_SLOWDOWN.get();
-                double movementSpeed = 1 - movementReduction;
-
-                if (movementSpeed == 1
-                || player.hasEffect(ModEffects.ICE_RESISTANCE)
-                || player.hasEffect(ModEffects.GRACE)) return;
-
-                // If not elytra flying
-                if (!player.isFallFlying())
+                // Get protection from armor underwear
+                float minMoveMultiplier = (float) CSMath.blend(player.onGround() ? movementSpeed : movementSpeed * 1.25, 1d, getColdResistance(player), 0d, 4d);
+                if (minMoveMultiplier != 1)
                 {
-                    // Get protection from armor underwear
-                    float minMoveMultiplier = (float) CSMath.blend(player.onGround() ? movementSpeed : movementSpeed * 1.25, 1d, getColdResistance(player), 0d, 4d);
-                    if (minMoveMultiplier != 1)
-                    {
-                        float moveSpeed = CSMath.blend(minMoveMultiplier, 1, temp, -100, -50);
-                        player.setDeltaMovement(player.getDeltaMovement().multiply(moveSpeed, 1, moveSpeed));
-                    }
+                    float moveSpeed = CSMath.blend(minMoveMultiplier, 1, temp, -100, -50);
+                    player.setDeltaMovement(player.getDeltaMovement().multiply(moveSpeed, 1, moveSpeed));
                 }
             }
         }

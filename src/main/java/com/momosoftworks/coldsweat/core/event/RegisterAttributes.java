@@ -1,17 +1,17 @@
 package com.momosoftworks.coldsweat.core.event;
 
 import com.momosoftworks.coldsweat.common.entity.Chameleon;
-import com.momosoftworks.coldsweat.core.init.EntityInit;
-import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import com.momosoftworks.coldsweat.core.init.ModEntities;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD)
 public class RegisterAttributes
 {
     @SubscribeEvent
     public static void registerAttributes(EntityAttributeCreationEvent event)
     {
-        event.put(EntityInit.CHAMELEON.get(), Chameleon.createAttributes().build());
+        event.put(ModEntities.CHAMELEON.get(), Chameleon.createAttributes().build());
     }
 }

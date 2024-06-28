@@ -6,30 +6,26 @@ import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.momosoftworks.coldsweat.core.init.ParticleTypesInit;
+import com.momosoftworks.coldsweat.core.init.ModParticleTypes;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.RegisterParticleProvidersEvent;
 
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ParticleUtil
 {
     public static ParticleRenderType PARTICLE_SHEET_TRANSPARENT = new ParticleRenderType()
     {
-        public void begin(BufferBuilder builder, TextureManager textureManager)
+        public BufferBuilder begin(Tesselator tesselator, TextureManager textureManager)
         {   RenderSystem.depthMask(true);
             RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_PARTICLES);
             RenderSystem.enableBlend();
             RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-            builder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
-        }
-
-        public void end(Tesselator tesselator)
-        {   tesselator.end();
+            return tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
         }
 
         public String toString()
@@ -39,9 +35,9 @@ public class ParticleUtil
 
     @SubscribeEvent
     public static void registerParticles(RegisterParticleProvidersEvent event)
-    {   event.registerSpriteSet(ParticleTypesInit.HEARTH_AIR.get(), HearthParticle.Factory::new);
-        event.registerSpriteSet(ParticleTypesInit.STEAM.get(), VaporParticle.SteamFactory::new);
-        event.registerSpriteSet(ParticleTypesInit.GROUND_MIST.get(), VaporParticle.GroundMistFactory::new);
-        event.registerSpriteSet(ParticleTypesInit.MIST.get(), VaporParticle.MistFactory::new);
+    {   event.registerSpriteSet(ModParticleTypes.HEARTH_AIR.get(), HearthParticle.Factory::new);
+        event.registerSpriteSet(ModParticleTypes.STEAM.get(), VaporParticle.SteamFactory::new);
+        event.registerSpriteSet(ModParticleTypes.GROUND_MIST.get(), VaporParticle.GroundMistFactory::new);
+        event.registerSpriteSet(ModParticleTypes.MIST.get(), VaporParticle.MistFactory::new);
     }
 }

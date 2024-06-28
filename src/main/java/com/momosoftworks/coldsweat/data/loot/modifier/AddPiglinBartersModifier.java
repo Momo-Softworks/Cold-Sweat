@@ -1,21 +1,26 @@
 package com.momosoftworks.coldsweat.data.loot.modifier;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.LootEntry;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
+import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntry;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import net.minecraftforge.common.loot.IGlobalLootModifier;
-import net.minecraftforge.common.loot.LootModifier;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import net.neoforged.fml.util.ObfuscationReflectionHelper;
+import net.neoforged.neoforge.common.loot.IGlobalLootModifier;
+import net.neoforged.neoforge.common.loot.LootModifier;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.jetbrains.annotations.NotNull;
 
@@ -27,9 +32,9 @@ import java.util.function.Consumer;
 
 public class AddPiglinBartersModifier extends LootModifier
 {
-    public static Codec<AddPiglinBartersModifier> CODEC = RecordCodecBuilder.create(inst -> inst.group(
-            IGlobalLootModifier.LOOT_CONDITIONS_CODEC.fieldOf("conditions").forGetter(modifier -> modifier.conditions),
-            LootEntry.CODEC.listOf().fieldOf("additions").forGetter(modifier -> modifier.additions))
+    public static MapCodec<AddPiglinBartersModifier> CODEC = RecordCodecBuilder.mapCodec(inst -> inst.group(
+                    IGlobalLootModifier.LOOT_CONDITIONS_CODEC.fieldOf("conditions").forGetter(modifier -> modifier.conditions),
+                    LootEntry.CODEC.listOf().fieldOf("additions").forGetter(modifier -> modifier.additions))
     .apply(inst, AddPiglinBartersModifier::new));
 
     private final List<LootEntry> additions;
@@ -39,7 +44,7 @@ public class AddPiglinBartersModifier extends LootModifier
         this.additions = additions;
     }
 
-    static ResourceLocation PIGLIN_BARTER_LOCATION = new ResourceLocation("gameplay/piglin_bartering");
+    static ResourceLocation PIGLIN_BARTER_LOCATION = ResourceLocation.withDefaultNamespace("gameplay/piglin_bartering");
     static Field POOLS;
     static Field ENTRIES;
     static
@@ -59,7 +64,7 @@ public class AddPiglinBartersModifier extends LootModifier
             List<LootPoolEntry> entries = new ArrayList<>();
             MutableInt totalWeight = new MutableInt();
             // Build vanilla items
-            for (LootPool pool : ((List<LootPool>) POOLS.get(context.getResolver().getLootTable(PIGLIN_BARTER_LOCATION))))
+            for (LootPool pool : ((List<LootPool>) POOLS.get(context.getLevel().getServer().reloadableRegistries().getLootTable(BuiltInLootTables.PIGLIN_BARTERING))))
             {
                 for (LootPoolEntryContainer container : ((LootPoolEntryContainer[]) ENTRIES.get(pool)))
                 {
@@ -104,7 +109,7 @@ public class AddPiglinBartersModifier extends LootModifier
     }
 
     @Override
-    public Codec<AddPiglinBartersModifier> codec()
+    public MapCodec<AddPiglinBartersModifier> codec()
     {   return CODEC;
     }
 }

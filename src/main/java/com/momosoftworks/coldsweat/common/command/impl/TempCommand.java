@@ -21,6 +21,7 @@ import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
@@ -31,7 +32,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -114,7 +114,7 @@ public class TempCommand extends BaseCommand
                                                                                                 source.getSource(), EntityArgument.getEntities(source, "entities"),
                                                                                                 AbilityOrTempTypeArgument.getAttribute(source, "type"),
                                                                                                 DoubleArgumentType.getDouble(source, "amount"),
-                                                                                                AttributeModifier.Operation.ADDITION, BoolArgumentType.getBool(source, "permanent"))
+                                                                                                AttributeModifier.Operation.ADD_VALUE, BoolArgumentType.getBool(source, "permanent"))
                                                                                         )
                                                                           )
                                                                           /* Default to non-permanent if not specified */
@@ -122,7 +122,7 @@ public class TempCommand extends BaseCommand
                                                                                   source.getSource(), EntityArgument.getEntities(source, "entities"),
                                                                                   AbilityOrTempTypeArgument.getAttribute(source, "type"),
                                                                                   DoubleArgumentType.getDouble(source, "amount"),
-                                                                                  AttributeModifier.Operation.ADDITION, false)
+                                                                                  AttributeModifier.Operation.ADD_VALUE, false)
                                                                           )
                                                             )
                                               )
@@ -136,14 +136,14 @@ public class TempCommand extends BaseCommand
                                                                                                 source.getSource(), EntityArgument.getEntities(source, "entities"),
                                                                                                 AbilityOrTempTypeArgument.getAttribute(source, "type"),
                                                                                                 DoubleArgumentType.getDouble(source, "amount"),
-                                                                                                AttributeModifier.Operation.MULTIPLY_BASE, BoolArgumentType.getBool(source, "permanent"))
+                                                                                                AttributeModifier.Operation.ADD_MULTIPLIED_BASE, BoolArgumentType.getBool(source, "permanent"))
                                                                                         )
                                                                           )
                                                                           .executes(source -> executeModifyEntityTemp(
                                                                                   source.getSource(), EntityArgument.getEntities(source, "entities"),
                                                                                   AbilityOrTempTypeArgument.getAttribute(source, "type"),
                                                                                   DoubleArgumentType.getDouble(source, "amount"),
-                                                                                  AttributeModifier.Operation.MULTIPLY_BASE, false)
+                                                                                  AttributeModifier.Operation.ADD_MULTIPLIED_BASE, false)
                                                                           )
                                                             )
                                               )
@@ -157,14 +157,14 @@ public class TempCommand extends BaseCommand
                                                                                                 source.getSource(), EntityArgument.getEntities(source, "entities"),
                                                                                                 AbilityOrTempTypeArgument.getAttribute(source, "type"),
                                                                                                 DoubleArgumentType.getDouble(source, "amount"),
-                                                                                                AttributeModifier.Operation.MULTIPLY_TOTAL, BoolArgumentType.getBool(source, "permanent"))
+                                                                                                AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, BoolArgumentType.getBool(source, "permanent"))
                                                                                         )
                                                                           )
                                                                           .executes(source -> executeModifyEntityTemp(
                                                                                   source.getSource(), EntityArgument.getEntities(source, "entities"),
                                                                                   AbilityOrTempTypeArgument.getAttribute(source, "type"),
                                                                                   DoubleArgumentType.getDouble(source, "amount"),
-                                                                                  AttributeModifier.Operation.MULTIPLY_TOTAL, false)
+                                                                                  AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, false)
                                                                           )
                                                             )
                                               )
@@ -203,10 +203,9 @@ public class TempCommand extends BaseCommand
         for (Entity entity : entities)
         {
             if (!(entity instanceof LivingEntity)) continue;
-            EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
-            {   cap.setTrait(Temperature.Trait.CORE, temp);
-                Temperature.updateTemperature((LivingEntity) entity, cap, true);
-            });
+            ITemperatureCap cap = EntityTempManager.getTemperatureCap(entity);
+            cap.setTrait(Temperature.Trait.CORE, temp);
+            Temperature.updateTemperature((LivingEntity) entity, cap, true);
         }
 
         //Compose & send message
@@ -236,14 +235,12 @@ public class TempCommand extends BaseCommand
 
     private int executeGetWorldTemp(CommandSourceStack source, int x , int y, int z, ServerLevel level)
     {   //Compose & send message
-        EntityTempManager.getTemperatureCap(source.getPlayer()).ifPresent(cap ->
-        {
-            int worldTemp = (int) Temperature.convert(Temperature.getTemperatureAt(new BlockPos(x, y, z), level != null
-                                                                                                               ? level
-                                                                                                               : source.getLevel()),
-                                                           Temperature.Units.MC, cap.getPreferredUnits(), true);
-            source.sendSuccess(() -> Component.translatable("commands.cold_sweat.temperature.get.world.result", x, y, z, worldTemp, cap.getPreferredUnits().getFormattedName()), true);
-        });
+        ITemperatureCap cap = EntityTempManager.getTemperatureCap(source.getPlayer());
+        int worldTemp = (int) Temperature.convert(Temperature.getTemperatureAt(new BlockPos(x, y, z), level != null
+                                                                                                           ? level
+                                                                                                           : source.getLevel()),
+                                                       Temperature.Units.MC, cap.getPreferredUnits(), true);
+        source.sendSuccess(() -> Component.translatable("commands.cold_sweat.temperature.get.world.result", x, y, z, worldTemp, cap.getPreferredUnits().getFormattedName()), true);
         return Command.SINGLE_SUCCESS;
     }
 
@@ -258,7 +255,7 @@ public class TempCommand extends BaseCommand
         AttributeInstance attribute = Arrays.asList(EntityTempManager.VALID_ATTRIBUTE_TYPES).contains(trait)
                                       ? EntityTempManager.getAttribute(trait, living)
                                       : null;
-        Temperature.Units preferredUnits = EntityTempManager.getTemperatureCap(entity).map(ITemperatureCap::getPreferredUnits).orElse(Temperature.Units.F);
+        Temperature.Units preferredUnits = EntityTempManager.getTemperatureCap(entity).getPreferredUnits();
         double lastValue = trait == Temperature.Trait.BURNING_POINT ? ConfigSettings.MAX_TEMP.get()
                          : trait == Temperature.Trait.FREEZING_POINT ? ConfigSettings.MIN_TEMP.get()
                          : 0;
@@ -268,7 +265,7 @@ public class TempCommand extends BaseCommand
         if (attribute != null && CSMath.safeDouble(attribute.getBaseValue()).isPresent())
         {
             source.sendSuccess(() ->
-                               Component.literal(ForgeRegistries.ATTRIBUTES.getKey(attribute.getAttribute()).toString()).withStyle(ChatFormatting.GOLD)
+                               Component.literal(BuiltInRegistries.ATTRIBUTE.getKey(attribute.getAttribute().value()).toString()).withStyle(ChatFormatting.GOLD)
                        .append(Component.literal(" → ").withStyle(ChatFormatting.WHITE))
                        .append(Component.literal(attribute.getValue()+"").withStyle(ChatFormatting.AQUA)), false);
             lastValue = attribute.getBaseValue();
@@ -294,20 +291,20 @@ public class TempCommand extends BaseCommand
         if (attribute != null)
         {
             double newBase = lastValue;
-            for (AttributeModifier modifier : attribute.getModifiers(AttributeModifier.Operation.ADDITION))
+            for (AttributeModifier modifier : attribute.getModifiers().stream().filter(mod -> mod.operation() == AttributeModifier.Operation.ADD_VALUE).toList())
             {
-                newBase += modifier.getAmount();
+                newBase += modifier.amount();
                 printAttributeModifierLine(source, modifier, lastValue, newBase, trait, preferredUnits);
             }
             double newValue = newBase;
-            for (AttributeModifier modifier : attribute.getModifiers(AttributeModifier.Operation.MULTIPLY_BASE))
+            for (AttributeModifier modifier : attribute.getModifiers().stream().filter(mod -> mod.operation() == AttributeModifier.Operation.ADD_MULTIPLIED_BASE).toList())
             {
-                newValue += newBase * modifier.getAmount();
+                newValue += newBase * modifier.amount();
                 printAttributeModifierLine(source, modifier, lastValue, newValue, trait, preferredUnits);
             }
-            for (AttributeModifier modifier : attribute.getModifiers(AttributeModifier.Operation.MULTIPLY_TOTAL))
+            for (AttributeModifier modifier : attribute.getModifiers().stream().filter(mod -> mod.operation() == AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL).toList())
             {
-                newValue *= 1.0D + modifier.getAmount();
+                newValue *= 1.0D + modifier.amount();
                 printAttributeModifierLine(source, modifier, lastValue, newValue, trait, preferredUnits);
             }
         }
@@ -321,13 +318,13 @@ public class TempCommand extends BaseCommand
                                           .withColor(ChatFormatting.WHITE)
                                           .withHoverEvent(getConvertedUnitHover(trait, lastValueStore, preferredUnits)))
                          .append(Component.literal(" → ").withStyle(ChatFormatting.WHITE))
-                         .append(Component.literal(modifier.getName())
+                         .append(Component.literal(modifier.id().toString())
                                           .withStyle(Style.EMPTY
                                           .withColor(ChatFormatting.LIGHT_PURPLE)
-                                          .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(modifier.getId().toString())
+                                          .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(modifier.id().toString())
                                           .append(Component.literal("\n"))
                                           .append(Component.translatable("chat.copy.click").withStyle(ChatFormatting.GRAY))))
-                                          .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, modifier.getId().toString()))))
+                                          .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, modifier.id().toString()))))
                          .append(Component.literal(" → ").withStyle(ChatFormatting.WHITE))
                          .append(Component.literal(CSMath.truncate(newValueStore, 2)+"")
                                           .withStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)
@@ -363,21 +360,26 @@ public class TempCommand extends BaseCommand
         {
             if (EntityTempManager.getEntitiesWithTemperature().contains(entity.getType()) && entity instanceof LivingEntity living)
             {
-                EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
-                {   AttributeInstance instance = EntityTempManager.getAttribute(attribute, living);
-                    if (instance == null) return;
+                checkAttribute:
+                {
+                    ITemperatureCap cap = EntityTempManager.getTemperatureCap(entity);
+                    AttributeInstance instance = EntityTempManager.getAttribute(attribute, living);
+                    if (instance == null) break checkAttribute;
                     if (operation != null)
-                    {   AttributeModifier modifier = EntityTempManager.makeAttributeModifier(attribute, amount, operation);
+                    {
+                        AttributeModifier modifier = EntityTempManager.makeAttributeModifier(attribute, amount, operation);
                         instance.addPermanentModifier(modifier);
                     }
                     else
-                    {   EntityTempManager.getAttribute(attribute, living).setBaseValue(amount);
+                    {
+                        EntityTempManager.getAttribute(attribute, living).setBaseValue(amount);
                     }
                     if (permanent)
-                    {   cap.markPersistentAttribute(instance.getAttribute());
+                    {
+                        cap.markPersistentAttribute(instance.getAttribute().value());
                     }
-                    else cap.clearPersistentAttribute(instance.getAttribute());
-                });
+                    else cap.clearPersistentAttribute(instance.getAttribute().value());
+                }
             }
             else
             {   source.sendFailure(Component.translatable("commands.cold_sweat.temperature.invalid"));
@@ -417,13 +419,15 @@ public class TempCommand extends BaseCommand
         {
             if (EntityTempManager.getEntitiesWithTemperature().contains(entity.getType()) && entity instanceof LivingEntity living)
             {
-                EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
-                {   AttributeInstance instance = EntityTempManager.getAttribute(attribute, living);
-                    if (instance == null) return;
+                ITemperatureCap cap = EntityTempManager.getTemperatureCap(entity);
+                checkAttribute:
+                {
+                    AttributeInstance instance = EntityTempManager.getAttribute(attribute, living);
+                    if (instance == null) break checkAttribute;
                     instance.removeModifiers();
                     EntityTempManager.getAttribute(attribute, living).setBaseValue(Double.NaN);
-                    cap.clearPersistentAttribute(instance.getAttribute());
-                });
+                    cap.clearPersistentAttribute(instance.getAttribute().value());
+                }
             }
             else
             {   source.sendFailure(Component.translatable("commands.cold_sweat.temperature.invalid"));
@@ -451,17 +455,15 @@ public class TempCommand extends BaseCommand
         {
             if (EntityTempManager.getEntitiesWithTemperature().contains(entity.getType()) && entity instanceof LivingEntity living)
             {
-                EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
+                ITemperatureCap cap = EntityTempManager.getTemperatureCap(entity);
+                for (Temperature.Trait attribute : EntityTempManager.VALID_ATTRIBUTE_TYPES)
                 {
-                    for (Temperature.Trait attribute : EntityTempManager.VALID_ATTRIBUTE_TYPES)
-                    {
-                        AttributeInstance instance = EntityTempManager.getAttribute(attribute, living);
-                        if (instance == null) continue;
-                        instance.removeModifiers();
-                        EntityTempManager.getAttribute(attribute, living).setBaseValue(Double.NaN);
-                        cap.clearPersistentAttribute(instance.getAttribute());
-                    }
-                });
+                    AttributeInstance instance = EntityTempManager.getAttribute(attribute, living);
+                    if (instance == null) continue;
+                    instance.removeModifiers();
+                    EntityTempManager.getAttribute(attribute, living).setBaseValue(Double.NaN);
+                    cap.clearPersistentAttribute(instance.getAttribute().value());
+                }
             }
             else
             {   source.sendFailure(Component.translatable("commands.cold_sweat.temperature.invalid"));

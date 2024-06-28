@@ -5,7 +5,7 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import net.neoforged.fml.util.ObfuscationReflectionHelper;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -81,6 +81,7 @@ public class AnimationManager
     public static void animateEntity(Entity entity, BiFunction<Float, Float, Float> animator)
     {
         float timer = ANIMATION_TIMERS.computeIfAbsent(entity, ent -> 0f);
-        ANIMATION_TIMERS.put(entity, animator.apply(timer, Minecraft.getInstance().getDeltaFrameTime() / 20));
+        // TODO: Check if this works
+        ANIMATION_TIMERS.put(entity, animator.apply(timer, Minecraft.getInstance().getTimer().getGameTimeDeltaTicks() / 20));
     }
 }

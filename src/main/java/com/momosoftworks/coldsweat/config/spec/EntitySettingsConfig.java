@@ -2,10 +2,11 @@ package com.momosoftworks.coldsweat.config.spec;
 
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.serialization.ListBuilder;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.loading.FMLPaths;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,14 +16,14 @@ import java.util.List;
 
 public class EntitySettingsConfig
 {
-    public static final ForgeConfigSpec SPEC;
-    private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
+    public static final ModConfigSpec SPEC;
+    private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
-    private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> insulatedEntities;
-    private static final ForgeConfigSpec.ConfigValue<List<?>> goatFurGrowth;
-    private static final ForgeConfigSpec.ConfigValue<List<?>> chameleonShedTimings;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> chameleonBiomes;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> goatBiomes;
+    private static final ModConfigSpec.ConfigValue<List<? extends List<?>>> insulatedEntities;
+    private static final ModConfigSpec.ConfigValue<List<?>> goatFurGrowth;
+    private static final ModConfigSpec.ConfigValue<List<?>> chameleonShedTimings;
+    private static final ModConfigSpec.ConfigValue<List<? extends List<?>>> chameleonBiomes;
+    private static final ModConfigSpec.ConfigValue<List<? extends List<?>>> goatBiomes;
     private static final EntitySettingsConfig INSTANCE = new EntitySettingsConfig();
 
     static
@@ -151,7 +152,7 @@ public class EntitySettingsConfig
         SPEC = BUILDER.build();
     }
 
-    public static void setup()
+    public static void setup(ModContainer modContainer)
     {
         Path configPath = FMLPaths.CONFIGDIR.get();
         Path csConfigPath = Paths.get(configPath.toAbsolutePath().toString(), "coldsweat");
@@ -162,7 +163,7 @@ public class EntitySettingsConfig
         }
         catch (Exception ignored) {}
 
-        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, SPEC, "coldsweat/entity_settings.toml");
+        modContainer.registerConfig(ModConfig.Type.COMMON, SPEC, "coldsweat/entity_settings.toml");
     }
 
     public static EntitySettingsConfig getInstance()

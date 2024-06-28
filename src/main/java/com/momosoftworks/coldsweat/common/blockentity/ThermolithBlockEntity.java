@@ -2,7 +2,7 @@ package com.momosoftworks.coldsweat.common.blockentity;
 
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.block.ThermolithBlock;
-import com.momosoftworks.coldsweat.core.init.BlockEntityInit;
+import com.momosoftworks.coldsweat.core.init.ModBlockEntities;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.core.BlockPos;
@@ -16,7 +16,7 @@ public class ThermolithBlockEntity extends BlockEntity
 
     public ThermolithBlockEntity(BlockPos pos, BlockState state)
     {
-        super(BlockEntityInit.THERMOLITH_BLOCK_ENTITY_TYPE.get(), pos, state);
+        super(ModBlockEntities.THERMOLITH.get(), pos, state);
     }
 
     public static <T extends BlockEntity> void tick(Level level, BlockPos pos, BlockState state, T te)
