@@ -106,32 +106,32 @@ public class RegistryHelper
     }
 
     @Nullable
-    public static Biome getBiome(ResourceLocation biomeId)
-    {   return getVanillaRegistryValue(Registry.BIOME_REGISTRY, biomeId).orElse(null);
+    public static Biome getBiome(ResourceLocation biomeId, RegistryAccess registryAccess)
+    {   return registryAccess.registryOrThrow(Registry.BIOME_REGISTRY).get(biomeId);
     }
 
     @Nullable
-    public static ResourceLocation getBiomeId(Biome biome)
-    {   return getVanillaRegistryKey(Registry.BIOME_REGISTRY, biome).orElse(null);
+    public static ResourceLocation getBiomeId(Biome biome, RegistryAccess registryAccess)
+    {   return registryAccess.registryOrThrow(Registry.BIOME_REGISTRY).getKey(biome);
     }
 
     @Nullable
-    public static DimensionType getDimension(ResourceLocation dimensionId)
-    {   return getVanillaRegistryValue(Registry.DIMENSION_TYPE_REGISTRY, dimensionId).orElse(null);
+    public static DimensionType getDimension(ResourceLocation dimensionId, RegistryAccess registryAccess)
+    {   return registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get(dimensionId);
     }
 
     @Nullable
-    public static ResourceLocation getDimensionId(DimensionType dimension)
-    {   return getVanillaRegistryKey(Registry.DIMENSION_TYPE_REGISTRY, dimension).orElse(null);
+    public static ResourceLocation getDimensionId(DimensionType dimension, RegistryAccess registryAccess)
+    {   return registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).getKey(dimension);
     }
 
     @Nullable
-    public static StructureType<?> getStructure(ResourceLocation structureId)
-    {   return getVanillaRegistryValue(Registry.STRUCTURE_TYPE_REGISTRY, structureId).orElse(null);
+    public static StructureType<?> getStructure(ResourceLocation structureId, RegistryAccess registryAccess)
+    {   return registryAccess.registryOrThrow(Registry.STRUCTURE_TYPE_REGISTRY).get(structureId);
     }
 
     @Nullable
-    public static ResourceLocation getStructureId(StructureType<?> structure)
-    {   return getVanillaRegistryKey(Registry.STRUCTURE_TYPE_REGISTRY, structure).orElse(null);
+    public static ResourceLocation getStructureId(StructureType<?> structure, RegistryAccess registryAccess)
+    {   return registryAccess.registryOrThrow(Registry.STRUCTURE_TYPE_REGISTRY).getKey(structure);
     }
 }

@@ -7,7 +7,7 @@ import net.minecraft.world.item.Item;
 public class HumidBiomeEdible extends BiomeSearchingEdible
 {
     public HumidBiomeEdible()
-    {   super(holder -> holder.value().getModifiedClimateSettings().downfall() > 0.85f);
+    {   super((level, biome) -> biome.value().getModifiedClimateSettings().downfall() > 0.85f);
     }
 
     @Override

@@ -50,8 +50,8 @@ public class UndergroundTempModifier extends TempModifier
                 Biome biome = holder.value();
                 double baseTemp = biome.getBaseTemperature();
 
-                Triplet<Double, Double, Temperature.Units> cTemp = ConfigSettings.BIOME_TEMPS.get().getOrDefault(biome, new Triplet<>(baseTemp, baseTemp, Temperature.Units.MC));
-                Triplet<Double, Double, Temperature.Units> cOffset = ConfigSettings.BIOME_OFFSETS.get().getOrDefault(biome, new Triplet<>(0d, 0d, Temperature.Units.MC));
+                Triplet<Double, Double, Temperature.Units> cTemp = ConfigSettings.BIOME_TEMPS.get(entity.level.registryAccess()).getOrDefault(biome, new Triplet<>(baseTemp, baseTemp, Temperature.Units.MC));
+                Triplet<Double, Double, Temperature.Units> cOffset = ConfigSettings.BIOME_OFFSETS.get(entity.level.registryAccess()).getOrDefault(biome, new Triplet<>(0d, 0d, Temperature.Units.MC));
 
                 double biomeTemp = CSMath.averagePair(Pair.of(cTemp.getA(), cTemp.getB()))
                                  + CSMath.averagePair(Pair.of(cOffset.getA(), cOffset.getB()));
