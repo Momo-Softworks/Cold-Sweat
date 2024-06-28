@@ -40,7 +40,7 @@ public class ClientConfigAskMessage implements CustomPacketPayload
         context.enqueueWork(() ->
         {
             if (context.player() instanceof ServerPlayer serverPlayer)
-            {   PacketDistributor.sendToPlayer(serverPlayer, new SyncConfigSettingsMessage(message.openerUUID));
+            {   PacketDistributor.sendToPlayer(serverPlayer, new SyncConfigSettingsMessage(message.openerUUID, serverPlayer.registryAccess()));
             }
 
         });

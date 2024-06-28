@@ -10,9 +10,11 @@ import com.momosoftworks.coldsweat.core.network.message.SyncConfigSettingsMessag
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.network.message.SyncPreferredUnitsMessage;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import com.momosoftworks.coldsweat.core.network.ModPacketHandlers;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.packs.repository.Pack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -56,18 +58,19 @@ public class ConfigScreen
 
     public static void saveConfig()
     {
+        RegistryAccess registryAccess = RegistryHelper.getRegistryAccess();
         if (Minecraft.getInstance().player != null)
         {
             if (!MC.isLocalServer())
-            {   PacketDistributor.sendToServer(new SyncConfigSettingsMessage());
+            {   PacketDistributor.sendToServer(new SyncConfigSettingsMessage(registryAccess));
             }
             else
-            {   ConfigSettings.saveValues();
+            {   ConfigSettings.saveValues(registryAccess);
             }
             PacketDistributor.sendToServer(new SyncPreferredUnitsMessage(ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F));
         }
         else
-        {   ConfigSettings.saveValues();
+        {   ConfigSettings.saveValues(registryAccess);
         }
         ClientSettingsConfig.getInstance().writeAndSave();
     }

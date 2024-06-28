@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -87,7 +88,7 @@ public record EffectsRequirement(Map<Holder<MobEffect>, Instance> effects)
     public static EffectsRequirement deserialize(CompoundTag tag)
     {
         Map<Holder<MobEffect>, Instance> effects = tag.getAllKeys().stream().collect(
-                Collectors.toMap(key -> Holder.direct(RegistryHelper.getRegistry(Registries.MOB_EFFECT).get(ResourceLocation.parse(key))),
+                Collectors.toMap(key -> Holder.direct(BuiltInRegistries.MOB_EFFECT.get(ResourceLocation.parse(key))),
                                                   key -> Instance.deserialize(tag.getCompound(key))));
         return new EffectsRequirement(effects);
     }

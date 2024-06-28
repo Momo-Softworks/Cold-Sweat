@@ -4,6 +4,7 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -28,7 +29,7 @@ public class PlayEntityAttachedSoundMessage implements CustomPacketPayload
     int entityID;
 
     public PlayEntityAttachedSoundMessage(SoundEvent sound, SoundSource source, float volume, float pitch, int entityID)
-    {   this(RegistryHelper.getRegistry(Registries.SOUND_EVENT).getKey(sound).toString(), source, volume, pitch, entityID);
+    {   this(BuiltInRegistries.SOUND_EVENT.getKey(sound).toString(), source, volume, pitch, entityID);
     }
 
     PlayEntityAttachedSoundMessage(String sound, SoundSource source, float volume, float pitch, int entityID)
@@ -60,7 +61,7 @@ public class PlayEntityAttachedSoundMessage implements CustomPacketPayload
     {
         context.enqueueWork(() ->
         {
-            SoundEvent sound = RegistryHelper.getRegistry(Registries.SOUND_EVENT).get(ResourceLocation.parse(message.sound));
+            SoundEvent sound = BuiltInRegistries.SOUND_EVENT.get(ResourceLocation.parse(message.sound));
             Entity entity = Minecraft.getInstance().level.getEntity(message.entityID);
 
             if (entity != null && sound != null)

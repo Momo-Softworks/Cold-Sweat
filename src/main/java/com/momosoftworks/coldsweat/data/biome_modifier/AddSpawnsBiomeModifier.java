@@ -27,7 +27,7 @@ public record AddSpawnsBiomeModifier(boolean useConfigs) implements BiomeModifie
     {
         if (phase == Phase.ADD && useConfigs)
         {
-            Collection<SpawnBiomeData> spawns = ConfigSettings.ENTITY_SPAWN_BIOMES.get().get(biome.value());
+            Collection<SpawnBiomeData> spawns = ConfigSettings.ENTITY_SPAWN_BIOMES.get(RegistryHelper.getRegistryAccess()).get(biome.value());
             for (SpawnBiomeData spawn : spawns)
             {
                 RegistryHelper.mapRegistryTagList(Registries.ENTITY_TYPE, spawn.entities(), RegistryHelper.getRegistryAccess())

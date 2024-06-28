@@ -69,7 +69,7 @@ public record BlockRequirement(Optional<List<Block>> blocks, Optional<TagKey<Blo
     {
         CompoundTag compound = new CompoundTag();
 
-        blocks.ifPresent(blocks -> compound.put("blocks", NBTHelper.listTagOf(blocks.stream().map(block -> RegistryHelper.getRegistry(Registries.BLOCK).getKey(block).toString()).toList())));
+        blocks.ifPresent(blocks -> compound.put("blocks", NBTHelper.listTagOf(blocks.stream().map(block -> BuiltInRegistries.BLOCK.getKey(block).toString()).toList())));
         tag.ifPresent(tag -> compound.putString("tag", tag.location().toString()));
         state.ifPresent(state -> compound.put("state", state.serialize()));
         nbt.ifPresent(nbt -> compound.put("nbt", nbt.serialize()));
@@ -81,7 +81,7 @@ public record BlockRequirement(Optional<List<Block>> blocks, Optional<TagKey<Blo
     {
         Optional<List<Block>> blocks = tag.contains("blocks")
                                        ? Optional.of(NBTHelper.listTagOf(tag.getList("blocks", 8)).stream().map(string ->
-                                         {  return RegistryHelper.getRegistry(Registries.BLOCK).get(ResourceLocation.parse(string.getAsString()));
+                                         {  return BuiltInRegistries.BLOCK.get(ResourceLocation.parse(string.getAsString()));
                                          }).collect(Collectors.toList()))
                                        : Optional.empty();
         Optional<TagKey<Block>> tagKey = tag.contains("tag") ? Optional.of(TagKey.create(Registries.BLOCK, ResourceLocation.parse(tag.getString("tag")))) : Optional.empty();

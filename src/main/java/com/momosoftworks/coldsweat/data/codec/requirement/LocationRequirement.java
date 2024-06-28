@@ -58,7 +58,7 @@ public record LocationRequirement(Optional<Integer> x, Optional<Integer> y, Opti
         }
 
         if (this.structure.isPresent()
-        && WorldHelper.getServerLevel(level).structureManager().getStructureWithPieceAt(pos, RegistryHelper.getRegistry(Registries.STRUCTURE).get(this.structure.get())) == StructureStart.INVALID_START)
+        && WorldHelper.getServerLevel(level).structureManager().getStructureWithPieceAt(pos, level.registryAccess().registryOrThrow(Registries.STRUCTURE).get(this.structure.get())) == StructureStart.INVALID_START)
         {   return false;
         }
 

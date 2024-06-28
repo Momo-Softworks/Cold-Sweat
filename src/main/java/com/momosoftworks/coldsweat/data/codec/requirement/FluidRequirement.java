@@ -54,7 +54,7 @@ public record FluidRequirement(Optional<List<Fluid>> fluids, Optional<TagKey<Flu
     public CompoundTag serialize()
     {
         CompoundTag lTag = new CompoundTag();
-        this.fluids.ifPresent(fluids -> lTag.put("fluids", NBTHelper.listTagOf(fluids.stream().map(RegistryHelper.getRegistry(Registries.FLUID)::getKey).map(Object::toString).collect(Collectors.toList()))));
+        this.fluids.ifPresent(fluids -> lTag.put("fluids", NBTHelper.listTagOf(fluids.stream().map(BuiltInRegistries.FLUID::getKey).map(Object::toString).collect(Collectors.toList()))));
         this.tag.ifPresent(tag -> lTag.putString("tag", tag.location().toString()));
         this.state.ifPresent(state -> lTag.put("state", state.serialize()));
         this.nbt.ifPresent(nbt -> lTag.put("nbt", nbt.serialize()));
@@ -63,7 +63,7 @@ public record FluidRequirement(Optional<List<Fluid>> fluids, Optional<TagKey<Flu
 
     public static FluidRequirement deserialize(CompoundTag pTag)
     {
-        Optional<List<Fluid>> lFluids = pTag.contains("fluids") ? Optional.of(pTag.getList("fluids", 8).stream().map(tag -> RegistryHelper.getRegistry(Registries.FLUID).get(ResourceLocation.parse(tag.getAsString()))).collect(Collectors.toList())) : Optional.empty();
+        Optional<List<Fluid>> lFluids = pTag.contains("fluids") ? Optional.of(pTag.getList("fluids", 8).stream().map(tag -> BuiltInRegistries.FLUID.get(ResourceLocation.parse(tag.getAsString()))).collect(Collectors.toList())) : Optional.empty();
         Optional<TagKey<Fluid>> lTag = pTag.contains("tag") ? Optional.of(TagKey.create(Registries.FLUID, ResourceLocation.parse(pTag.getString("tag")))) : Optional.empty();
         Optional<BlockRequirement.StateRequirement> lState = pTag.contains("state") ? Optional.of(BlockRequirement.StateRequirement.deserialize(pTag.getCompound("state"))) : Optional.empty();
         Optional<NbtRequirement> lNbt = pTag.contains("nbt") ? Optional.of(NbtRequirement.deserialize(pTag.getCompound("nbt"))) : Optional.empty();

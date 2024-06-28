@@ -80,11 +80,10 @@ public record ItemComponentsRequirement(PatchedDataComponentMap components)
 
     public CompoundTag serialize()
     {
-        Registry<DataComponentType<?>> registry = RegistryHelper.getRegistry(Registries.DATA_COMPONENT_TYPE);
         CompoundTag tag = new CompoundTag();
         for (DataComponentType<?> componentType : this.components().keySet())
         {
-            String key = registry.getKey(componentType).toString();
+            String key = BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(componentType).toString();
             RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.buffer(), RegistryHelper.getRegistryAccess(), ConnectionType.NEOFORGE);
             TypedDataComponent.STREAM_CODEC.encode(buf, this.components().getTyped(componentType));
             byte[] bytes = new byte[buf.readableBytes()];
@@ -97,11 +96,10 @@ public record ItemComponentsRequirement(PatchedDataComponentMap components)
 
     public static ItemComponentsRequirement deserialize(CompoundTag nbt)
     {
-        Registry<DataComponentType<?>> registry = RegistryHelper.getRegistry(Registries.DATA_COMPONENT_TYPE);
         PatchedDataComponentMap tag = new PatchedDataComponentMap(DataComponentMap.builder().build());
         for (String key : nbt.getAllKeys())
         {
-            DataComponentType componentType = registry.get(ResourceLocation.parse(key));
+            DataComponentType componentType = BuiltInRegistries.DATA_COMPONENT_TYPE.get(ResourceLocation.parse(key));
             if (componentType != null)
             {
                 RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(Unpooled.wrappedBuffer(nbt.getByteArray(key)), RegistryHelper.getRegistryAccess(), ConnectionType.NEOFORGE);

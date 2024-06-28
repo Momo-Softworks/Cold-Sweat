@@ -125,7 +125,7 @@ public record EntityRequirement(Optional<EntityType<?>> type, Optional<LocationR
     {
         try
         {   CompoundTag tag = new CompoundTag();
-            type.ifPresent(type -> tag.putString("type", RegistryHelper.getRegistry(Registries.ENTITY_TYPE).getKey(type).toString()));
+            type.ifPresent(type -> tag.putString("type", BuiltInRegistries.ENTITY_TYPE.getKey(type).toString()));
             location.ifPresent(location -> tag.put("location", location.serialize()));
             steppingOn.ifPresent(standingOn -> tag.put("standing_on", standingOn.serialize()));
             effects.ifPresent(effects -> tag.put("effects", effects.serialize()));
@@ -149,7 +149,7 @@ public record EntityRequirement(Optional<EntityType<?>> type, Optional<LocationR
     public static EntityRequirement deserialize(CompoundTag tag)
     {
         try
-        {   Optional<EntityType<?>> type = tag.contains("type") ? Optional.of(RegistryHelper.getRegistry(Registries.ENTITY_TYPE).get(ResourceLocation.parse(tag.getString("type")))) : Optional.empty();
+        {   Optional<EntityType<?>> type = tag.contains("type") ? Optional.of(BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation.parse(tag.getString("type")))) : Optional.empty();
             Optional<LocationRequirement> location = tag.contains("location") ? Optional.of(LocationRequirement.deserialize(tag.getCompound("location"))) : Optional.empty();
             Optional<LocationRequirement> standingOn = tag.contains("standing_on") ? Optional.of(LocationRequirement.deserialize(tag.getCompound("standing_on"))) : Optional.empty();
             Optional<EffectsRequirement> effects = tag.contains("effects") ? Optional.of(EffectsRequirement.deserialize(tag.getCompound("effects"))) : Optional.empty();

@@ -4,6 +4,8 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.spec.MainSettingsConfig;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
+import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -25,12 +27,12 @@ public class SyncConfigSettingsMessage implements CustomPacketPayload
     Map<String, CompoundTag> configValues;
     UUID menuOpener;
 
-    public SyncConfigSettingsMessage()
-    {   this(EMPTY_UUID);
+    public SyncConfigSettingsMessage(RegistryAccess registryAccess)
+    {   this(EMPTY_UUID, registryAccess);
     }
 
-    public SyncConfigSettingsMessage(UUID menuOpener)
-    {   this(ConfigSettings.encode(), menuOpener);
+    public SyncConfigSettingsMessage(UUID menuOpener, RegistryAccess registryAccess)
+    {   this(ConfigSettings.encode(registryAccess), menuOpener);
     }
 
     private SyncConfigSettingsMessage(Map<String, CompoundTag> values, UUID menuOpener)
@@ -65,15 +67,16 @@ public class SyncConfigSettingsMessage implements CustomPacketPayload
     {
         context.enqueueWork(() ->
         {
-            message.configValues.forEach(ConfigSettings::decode);
+            RegistryAccess registryAccess = RegistryHelper.getRegistryAccess();
+            message.configValues.forEach((name, values) -> ConfigSettings.decode(name, values, registryAccess));
 
             if (context.flow().isServerbound())
             {
                 if (context.player().hasPermissions(2))
-                {   ConfigSettings.saveValues();
+                {   ConfigSettings.saveValues(registryAccess);
                     MainSettingsConfig.getInstance().save();
                 }
-                PacketDistributor.sendToAllPlayers(new SyncConfigSettingsMessage(EMPTY_UUID));
+                PacketDistributor.sendToAllPlayers(new SyncConfigSettingsMessage(EMPTY_UUID, registryAccess));
             }
             else
             {
