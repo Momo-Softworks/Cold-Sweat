@@ -7,15 +7,14 @@ import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
 import com.momosoftworks.coldsweat.api.temperature.modifier.ArmorInsulationTempModifier;
 import com.momosoftworks.coldsweat.api.util.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
-import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
-import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
+import com.momosoftworks.coldsweat.common.item.component.ArmorInsulation;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.type.Insulator;
+import com.momosoftworks.coldsweat.core.init.ModItemComponents;
 import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -24,19 +23,17 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @EventBusSubscriber
-public class ArmorInsulation
+public class ProcessEquipmentInsulation
 {
     @SubscribeEvent
     public static void applyArmorInsulation(PlayerTickEvent.Post event)
@@ -55,7 +52,7 @@ public class ArmorInsulation
 
             for (ItemStack armorStack : player.getArmorSlots())
             {
-                if (armorStack.getItem() instanceof ArmorItem)
+                if (armorStack.getItem() instanceof Equipable)
                 {
                     // Add the armor's intrinsic insulation value (defined in configs)
                     // Mutually exclusive with Sewing Table insulation
@@ -71,9 +68,8 @@ public class ArmorInsulation
                     }
                     else
                     {   // Add the armor's insulation value from the Sewing Table
-                        IInsulatableCap iCap = ItemInsulationManager.getInsulationCap(armorStack);
-                        List<Insulation> insulation = Optional.ofNullable(ItemInsulationManager.getInsulationCap(armorStack))
-                                                      .map(IInsulatableCap::getInsulation).orElse(new ArrayList<>())
+                        ArmorInsulation cap = ItemInsulationManager.getInsulationCap(armorStack);
+                        List<Insulation> insulation = cap.getInsulation()
                                                       .stream()
                                                       .filter(pair -> CSMath.getIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(pair.getFirst().getItem()),
                                                                                           insulator -> insulator.test(serverPlayer, pair.getFirst()),
@@ -99,9 +95,8 @@ public class ArmorInsulation
                         {   fullyInsulatedSlots++;
                         }
 
-                        if (iCap instanceof ItemInsulationCap cap)
-                        {   cap.calcAdaptiveInsulation(worldTemp, minTemp, maxTemp);
-                        }
+                        cap = cap.calcAdaptiveInsulation(worldTemp, minTemp, maxTemp);
+                        armorStack.set(ModItemComponents.ARMOR_INSULATION, cap);
                     }
 
                     // Add the armor's defense value to the insulation value.

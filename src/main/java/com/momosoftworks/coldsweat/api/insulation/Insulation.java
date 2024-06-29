@@ -1,8 +1,12 @@
 package com.momosoftworks.coldsweat.api.insulation;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.StringRepresentable;
 
 import java.util.ArrayList;
@@ -11,6 +15,56 @@ import java.util.List;
 
 public abstract class Insulation implements NbtSerializable
 {
+    public static Codec<Insulation> getCodec()
+    {
+        return Codec.either(StaticInsulation.CODEC, AdaptiveInsulation.CODEC)
+               .xmap(either ->
+               {
+                   if (either.left().isPresent())
+                   {   return either.left().get();
+                   }
+                   return either.right().get();
+               },
+               insul ->
+               {
+                   if (insul instanceof StaticInsulation)
+                   {   return Either.left(((StaticInsulation) insul));
+                   }
+                   return Either.right(((AdaptiveInsulation) insul));
+               });
+    }
+
+    public static StreamCodec<FriendlyByteBuf, Insulation> getNetworkCodec()
+    {
+        return StreamCodec.of((buf, insul) ->
+        {
+            if (insul instanceof StaticInsulation st)
+            {
+                buf.writeUtf("static");
+                buf.writeDouble(st.getCold());
+                buf.writeDouble(st.getHeat());
+            }
+            else if (insul instanceof AdaptiveInsulation ad)
+            {
+                buf.writeUtf("adaptive");
+                buf.writeDouble(ad.getInsulation());
+                buf.writeDouble(ad.getFactor());
+                buf.writeDouble(ad.getSpeed());
+            }
+        },
+        (buf) ->
+        {
+            String type = buf.readUtf();
+            if (type.equals("static"))
+            {   return new StaticInsulation(buf.readDouble(), buf.readDouble());
+            }
+            else if (type.equals("adaptive"))
+            {   return new AdaptiveInsulation(buf.readDouble(), buf.readDouble(), buf.readDouble());
+            }
+            return null;
+        });
+    }
+
     /**
      * @return True if this insulation has no value.
      */

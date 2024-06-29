@@ -3,11 +3,12 @@ package com.momosoftworks.coldsweat.common.container;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
-import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
+import com.momosoftworks.coldsweat.common.item.component.ArmorInsulation;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.init.MenuInit;
 import com.momosoftworks.coldsweat.core.init.ModAdvancementTriggers;
+import com.momosoftworks.coldsweat.core.init.ModItemComponents;
 import com.momosoftworks.coldsweat.core.network.message.SyncContainerSlotMessage;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.core.BlockPos;
@@ -238,24 +239,26 @@ public class SewingContainer extends AbstractContainerMenu
         ItemStack input1 = this.getItem(0);
         ItemStack input2 = this.getItem(1);
 
-        IInsulatableCap cap = ItemInsulationManager.getInsulationCap(input1);
+
         // If insulation is being removed
         if (input2.getItem() instanceof ShearsItem)
         {
-            if (!cap.getInsulation().isEmpty())
-            {   // Damage shears
-                if (!player.isCreative() && player.level() instanceof ServerLevel level)
-                {   input2.hurtAndBreak(1, level, player, (item) -> {});
+            CSMath.doIfNotNull(input1.get(ModItemComponents.ARMOR_INSULATION), cap ->
+            {
+                if (!cap.getInsulation().isEmpty())
+                {   // Damage shears
+                    if (!player.isCreative() && player.level() instanceof ServerLevel level)
+                    {   input2.hurtAndBreak(1, level, player, (item) -> {});
+                    }
+
+                    // Remove the last insulation item added
+                    cap = cap.removeInsulationItem(cap.getInsulationItem(cap.getInsulation().size() - 1));
+                    // Play shear sound
+                    player.level().playSound(null, player.blockPosition(), SoundEvents.SHEEP_SHEAR, SoundSource.PLAYERS, 0.8F, 1.0F);
+
+                    input1.set(ModItemComponents.ARMOR_INSULATION, cap);
                 }
-
-                // Remove the last insulation item added
-                cap.removeInsulationItem(cap.getInsulationItem(cap.getInsulation().size() - 1));
-                // Play shear sound
-                player.level().playSound(null, player.blockPosition(), SoundEvents.SHEEP_SHEAR, SoundSource.PLAYERS, 0.8F, 1.0F);
-
-                // TODO: Test if this is necessary
-                //input1.getOrCreateTag().merge(cap.serializeNBT());
-            }
+            });
         }
         // If insulation is being added
         else
@@ -287,7 +290,7 @@ public class SewingContainer extends AbstractContainerMenu
             // Shears are used to remove insulation
             if (insulatorItem.getItem() instanceof ShearsItem)
             {
-                IInsulatableCap cap = ItemInsulationManager.getInsulationCap(wearableItem);
+                ArmorInsulation cap = ItemInsulationManager.getInsulationCap(wearableItem);
                 if (!cap.getInsulation().isEmpty())
                 {   this.setItem(2, cap.getInsulationItem(cap.getInsulation().size() - 1).copy());
                 }
@@ -298,10 +301,10 @@ public class SewingContainer extends AbstractContainerMenu
             || armor.getEquipmentSlot() == otherArmor.getEquipmentSlot()))
             {
                 ItemStack processed = wearableItem.copy();
-                IInsulatableCap insulCap = ItemInsulationManager.getInsulationCap(processed);
+                ArmorInsulation insulCap = ItemInsulationManager.getInsulationCap(processed);
                 ItemStack insulator = insulatorItem.copy();
                 insulator.setCount(1);
-                insulCap.addInsulationItem(insulator);
+                insulCap = insulCap.addInsulationItem(insulator);
 
                 // Cancel crafting if the insulation provided by the insulator is too much
                 AtomicInteger positiveInsul = new AtomicInteger();
@@ -309,7 +312,7 @@ public class SewingContainer extends AbstractContainerMenu
                 insulCap.getInsulation().stream().map(Pair::getSecond).flatMap(Collection::stream).forEach(insul ->
                 {
                     if (insul.getHeat() >= 0 || insul.getCold() >= 0)
-                    {   positiveInsul.getAndIncrement();
+                    {   positiveInsul.set(positiveInsul.get() + (int) ((insul.getHeat() + insul.getCold()) / 2));
                     }
                 });
                 if (positiveInsul.get() > ItemInsulationManager.getInsulationSlots(wearableItem))
@@ -333,10 +336,8 @@ public class SewingContainer extends AbstractContainerMenu
                     });
                 }
 
+                processed.set(ModItemComponents.ARMOR_INSULATION, insulCap);
                 this.setItem(2, processed);
-                //TODO: Test if this works
-                syncSlot(2);
-                //this.syncSlot(2);
                 this.sendAllDataToRemote();
             }
         }

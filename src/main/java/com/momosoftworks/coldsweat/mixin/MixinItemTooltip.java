@@ -4,7 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.client.event.TooltipHandler;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
-import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
+import com.momosoftworks.coldsweat.common.item.component.ArmorInsulation;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -81,7 +81,7 @@ public abstract class MixinItemTooltip
                 }
             }
         });
-        IInsulatableCap cap = ItemInsulationManager.getInsulationCap(stack);
+        ArmorInsulation cap = ItemInsulationManager.getInsulationCap(stack);
         cap.getInsulation().stream().map(Pair::getFirst).forEach(item ->
         {
             Optional.ofNullable(ConfigSettings.INSULATION_ITEMS.get().get(item.getItem())).ifPresent(insulator ->
