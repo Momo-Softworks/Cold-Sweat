@@ -57,7 +57,8 @@ public class FilledWaterskinItem extends Item
 
     public FilledWaterskinItem()
     {
-        super(new Properties().stacksTo(1).craftRemainder(ModItems.WATERSKIN.get()));
+        super(new Properties().stacksTo(1).craftRemainder(ModItems.WATERSKIN.get())
+                              .component(ModItemComponents.WATER_TEMPERATURE, 0d));
 
         DispenserBlock.registerBehavior(this, (source, stack) ->
         {
@@ -300,7 +301,9 @@ public class FilledWaterskinItem extends Item
             return emptyWaterskin;
         }
         return stack;
-    }@Override
+    }
+
+    @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag advanced)
     {
         double temp = CSMath.round(stack.get(ModItemComponents.WATER_TEMPERATURE), 2);

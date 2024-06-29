@@ -135,7 +135,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
     public HearthBlockEntity(BlockEntityType type, BlockPos pos, BlockState state)
     {   super(type, pos, state);
-        NeoForge.EVENT_BUS.register(this);
+        NeoForge.EVENT_BUS.addListener(this::onBlockUpdate);
     }
 
     public HearthBlockEntity(BlockPos pos, BlockState state)
@@ -849,8 +849,10 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     {   super.saveAdditional(tag, registries);
         ContainerHelper.saveAllItems(tag, this.items, registries);
         saveEffects(tag);
-        tag.put("ColdFuel", this.coldFuel.save(registries));
-        tag.put("HotFuel", this.hotFuel.save(registries));
+        if (!this.coldFuel.isEmpty())
+            tag.put("ColdFuel", this.coldFuel.save(registries));
+        if (!this.hotFuel.isEmpty())
+            tag.put("HotFuel", this.hotFuel.save(registries));
         tag.putInt("InsulationLevel", this.insulationLevel);
     }
 

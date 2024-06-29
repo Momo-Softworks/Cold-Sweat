@@ -16,6 +16,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 public class CreativeTabInit
 {
@@ -69,9 +70,19 @@ public class CreativeTabInit
             .icon(() -> ModItems.CHAMELEON_MOLT.value().getDefaultInstance())
             .displayItems((params, list) ->
             {
-                list.acceptAll(sort(ConfigSettings.INSULATION_ITEMS.get().entrySet()));
-                list.acceptAll(sort(ConfigSettings.INSULATING_ARMORS.get().entrySet()));
-                list.acceptAll(sort(ConfigSettings.INSULATING_CURIOS.get().entrySet()));
+                List<ItemStack> allInsulators = new ArrayList<>();
+                Stream.of(
+                        sort(ConfigSettings.INSULATION_ITEMS.get().entrySet()),
+                        sort(ConfigSettings.INSULATING_ARMORS.get().entrySet()),
+                        sort(ConfigSettings.INSULATING_CURIOS.get().entrySet())
+                ).flatMap(Collection::stream).forEach(stack ->
+                {
+                    if (allInsulators.stream().noneMatch(s -> s.getItem() == stack.getItem()))
+                    {   allInsulators.add(stack);
+                    }
+                });
+
+                list.acceptAll(allInsulators);
             })
             .title(Component.translatable("itemGroup.cs_insulation_items"))
             .build());

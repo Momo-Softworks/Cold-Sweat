@@ -58,13 +58,6 @@ public class ShearableFurManager
         return cache.computeIfAbsent(entity, e -> e.getCapability(ModCapabilities.SHEARABLE_FUR));
     }
 
-    public static void attachCapabilityToEntityHandler(RegisterCapabilitiesEvent event)
-    {
-        event.registerEntity(ModCapabilities.SHEARABLE_FUR, EntityType.GOAT, (entity, context) ->
-        {   return new ShearableFurCap();
-        });
-    }
-
     @SubscribeEvent
     public static void onShearGoat(PlayerInteractEvent.EntityInteract event)
     {

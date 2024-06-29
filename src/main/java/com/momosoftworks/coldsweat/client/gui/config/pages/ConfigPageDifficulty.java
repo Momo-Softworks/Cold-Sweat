@@ -132,13 +132,8 @@ public class ConfigPageDifficulty extends Screen
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks)
     {
-        // Render Background
-        if (this.minecraft.level != null)
-        {   graphics.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
-        }
-        else
-        {   // Rest in peace, dirt background... this.renderDirtBackground(graphics);
-        }
+        // Render Button(s)
+        super.render(graphics, mouseX, mouseY, partialTicks);
 
         int difficulty = ConfigSettings.DIFFICULTY.get();
 
@@ -186,9 +181,6 @@ public class ConfigPageDifficulty extends Screen
         Component difficultyName = getDifficultyName(difficulty);
         graphics.drawString(font, difficultyName, this.width / 2 - (font.width(difficultyName) / 2),
                              this.height / 2 - 84, getDifficultyColor(difficulty), true);
-
-        // Render Button(s)
-        super.render(graphics, mouseX, mouseY, partialTicks);
     }
 
     @Override

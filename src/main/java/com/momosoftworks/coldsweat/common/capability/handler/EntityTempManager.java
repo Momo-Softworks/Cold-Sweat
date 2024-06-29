@@ -12,9 +12,7 @@ import com.momosoftworks.coldsweat.api.util.Placement.Mode;
 import com.momosoftworks.coldsweat.api.util.Placement.Order;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.ModCapabilities;
-import com.momosoftworks.coldsweat.common.capability.temperature.EntityTempCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
-import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.type.InsulatingMount;
 import com.momosoftworks.coldsweat.config.type.Insulator;
@@ -25,13 +23,10 @@ import com.momosoftworks.coldsweat.core.init.ModEffects;
 import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
@@ -49,7 +44,6 @@ import net.minecraft.world.item.UseAnim;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.capabilities.*;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
@@ -105,24 +99,6 @@ public class EntityTempManager
         return cache.computeIfAbsent(entity, e -> e.getCapability(entity instanceof Player
                                                                   ? ModCapabilities.PLAYER_TEMPERATURE
                                                                   : ModCapabilities.ENTITY_TEMPERATURE));
-    }
-
-    public static void attachCapabilityToEntityHandler(RegisterCapabilitiesEvent event)
-    {
-        for (EntityType<?> type : EntityTempManager.getEntitiesWithTemperature())
-        {
-            if (type == EntityType.PLAYER)
-            {   event.registerEntity(ModCapabilities.PLAYER_TEMPERATURE, type, (entity, context) ->
-                {   return new PlayerTempCap();
-                });
-            }
-            else
-            {
-                event.registerEntity(ModCapabilities.ENTITY_TEMPERATURE, type, (entity, context) ->
-                {   return new EntityTempCap();
-                });
-            }
-        }
     }
 
     /**

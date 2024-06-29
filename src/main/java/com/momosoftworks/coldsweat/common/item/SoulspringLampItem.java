@@ -40,7 +40,10 @@ import java.util.Optional;
 public class SoulspringLampItem extends Item
 {
     public SoulspringLampItem()
-    {   super(new Properties().stacksTo(1).fireResistant().rarity(Rarity.UNCOMMON));
+    {
+        super(new Properties().stacksTo(1).fireResistant().rarity(Rarity.UNCOMMON)
+                              .component(ModItemComponents.SOULSPRING_LAMP_LIT, false)
+                              .component(ModItemComponents.SOULSPRING_LAMP_FUEL, 0d));
     }
 
     @Override

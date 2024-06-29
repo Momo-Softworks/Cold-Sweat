@@ -18,7 +18,7 @@ public class ModPacketHandlers
 
         registrar.playToClient(BlockDataUpdateMessage.TYPE, BlockDataUpdateMessage.CODEC, BlockDataUpdateMessage::handle);
         registrar.playToClient(ChameleonEatMessage.TYPE, ChameleonEatMessage.CODEC, ChameleonEatMessage::handle);
-        registrar.playToClient(ClientConfigAskMessage.TYPE, ClientConfigAskMessage.CODEC, ClientConfigAskMessage::handle);
+        registrar.playToServer(ClientConfigAskMessage.TYPE, ClientConfigAskMessage.CODEC, ClientConfigAskMessage::handle);
         registrar.playBidirectional(DisableHearthParticlesMessage.TYPE, DisableHearthParticlesMessage.CODEC, DisableHearthParticlesMessage::handle);
         registrar.playToClient(HearthResetMessage.TYPE, HearthResetMessage.CODEC, HearthResetMessage::handle);
         registrar.playToClient(ParticleBatchMessage.TYPE, ParticleBatchMessage.CODEC, ParticleBatchMessage::handle);

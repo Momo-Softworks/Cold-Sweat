@@ -641,7 +641,7 @@ public abstract class AbstractConfigPage extends Screen
 
     public static void setButtonSprites(ImageButton button, WidgetSprites sprites)
     {
-        Field spritesField = ObfuscationReflectionHelper.getPrivateValue(ImageButton.class, button, "f_290407_");
+        Field spritesField = ObfuscationReflectionHelper.findField(ImageButton.class, "sprites");
         spritesField.setAccessible(true);
         try
         {   spritesField.set(button, sprites);
