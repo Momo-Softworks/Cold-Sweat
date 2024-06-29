@@ -2,10 +2,7 @@ package com.momosoftworks.coldsweat.client.event;
 
 import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.*;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.gui.Overlays;
@@ -156,14 +153,14 @@ public class TempEffectsClient
         }
     }
 
-    static ResourceLocation HAZE_TEXTURE = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/haze.png");
+    static final ResourceLocation HAZE_TEXTURE = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/haze.png");
     static final ResourceLocation FREEZE_TEXTURE = ResourceLocation.withDefaultNamespace("textures/misc/powder_snow_outline.png");
 
     @SubscribeEvent
     public static void vignette(RenderGuiLayerEvent.Pre event)
     {
         Player player = Minecraft.getInstance().player;
-        if (player != null && event.getName().equals(ResourceLocation.withDefaultNamespace("textures/misc/vignette.png"))
+        if (player != null && event.getName() == VanillaGuiLayers.CAMERA_OVERLAYS
         && ((BLEND_TEMP > 0 && HOT_IMMUNITY < 4) || (BLEND_TEMP < 0 && COLD_IMMUNITY < 4)))
         {
             float resistance = CSMath.blend(1, 0, BLEND_TEMP > 0 ? HOT_IMMUNITY : COLD_IMMUNITY, 0, 4);
@@ -178,22 +175,23 @@ public class TempEffectsClient
             RenderSystem.depthMask(false);
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
+            ResourceLocation texture;
+            int texSizeX;
+            int texSizeY;
             if (BLEND_TEMP > 0)
             {   float vignetteBrightness = opacity + ((float) Math.sin((tickTime + 3) / (Math.PI * 1.0132f)) / 5f - 0.2f) * opacity;
                 RenderSystem.setShaderColor(0.231f, 0f, 0f, vignetteBrightness);
-                RenderSystem.setShaderTexture(0, HAZE_TEXTURE);
+                texture = HAZE_TEXTURE;
+                texSizeX = (int) (2560 / scale);
+                texSizeY = (int) (1440 / scale);
             }
             else
             {   RenderSystem.setShaderColor(1f, 1f, 1f, opacity);
-                RenderSystem.setShaderTexture(0, FREEZE_TEXTURE);
+                texture = FREEZE_TEXTURE;
+                texSizeX = 256;
+                texSizeY = 256;
             }
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            Tesselator tesselator = Tesselator.getInstance();
-            BufferBuilder bufferbuilder = tesselator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-            bufferbuilder.addVertex(0.0f, height / scale, -90.0f).setUv(0.0F, 1.0F);
-            bufferbuilder.addVertex(width / scale, height / scale, -90.0f).setUv(1.0F, 1.0F);
-            bufferbuilder.addVertex(width / scale, 0.0f, -90.0f).setUv(1.0F, 0.0F);
-            bufferbuilder.addVertex(0.0f, 0.0f, -90.0f).setUv(0.0F, 0.0F);
+            event.getGuiGraphics().blit(texture, 0, 0, -90, 0.0F, 0.0F, (int) width, (int) height, texSizeX, texSizeY);
             RenderSystem.depthMask(true);
             RenderSystem.enableDepthTest();
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
