@@ -76,6 +76,11 @@
   "entity.chameleon.shed":         "Chameleon sheds",
   "item.soulspring_lamp.on":       "Soulspring Lamp ignites",
   "item.soulspring_lamp.off":      "Soulspring Lamp extinguishes",
+  "block.hearth.fuel_deplete":     "Hearth sputters",
+  "block.boiler.fuel_deplete":     "Boiler sputters",
+  "block.icebox.fuel_deplete":     "Icebox sputters",
+  "item.waterskin.pour":           "Waterskin is poured",
+  "item.waterskin.fill":           "Waterskin is filled",
 
 
   "cold_sweat.screen.hearth.show_particles": "Show air particles",

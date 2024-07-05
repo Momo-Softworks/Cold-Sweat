@@ -20,5 +20,7 @@ public class ModSounds
     public static SoundEvent WATERSKIN_POUR = SoundInit.WATERSKIN_POUR_SOUND_REGISTRY.get();
     public static SoundEvent WATERSKIN_FILL = SoundInit.WATERSKIN_FILL_SOUND_REGISTRY.get();
 
-    public static SoundEvent HEARTH_FUEL = SoundInit.HEARTH_FUEL_SOUND_REGISTRY.get();
+    public static SoundEvent HEARTH_DEPLETE = SoundInit.HEARTH_DEPLETE_SOUND_REGISTRY.get();
+    public static SoundEvent BOILER_DEPLETE = SoundInit.BOILER_DEPLETE_SOUND_REGISTRY.get();
+    public static SoundEvent ICEBOX_DEPLETE = SoundInit.ICEBOX_DEPLETE_SOUND_REGISTRY.get();
 }

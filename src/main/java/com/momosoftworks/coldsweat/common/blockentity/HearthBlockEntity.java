@@ -740,7 +740,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     }
 
     protected SoundEvent getFuelDepleteSound()
-    {   return ModSounds.HEARTH_FUEL;
+    {   return ModSounds.HEARTH_DEPLETE;
     }
 
     public void checkForSmokestack()
