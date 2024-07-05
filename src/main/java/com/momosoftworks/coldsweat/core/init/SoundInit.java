@@ -24,8 +24,12 @@ public class SoundInit
     public static final RegistryObject<SoundEvent> WATERSKIN_FILL_SOUND_REGISTRY = SOUNDS.register("item.waterskin.fill",
             () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "item.waterskin.fill")));
 
-    public static final RegistryObject<SoundEvent> HEARTH_FUEL_SOUND_REGISTRY = SOUNDS.register("block.hearth.fuel",
-            () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "block.hearth.fuel")));
+    public static final RegistryObject<SoundEvent> HEARTH_DEPLETE_SOUND_REGISTRY = SOUNDS.register("block.hearth.fuel_deplete",
+            () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "block.hearth.fuel_deplete")));
+    public static final RegistryObject<SoundEvent> BOILER_DEPLETE_SOUND_REGISTRY = SOUNDS.register("block.hearth.fuel_deplete",
+            () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "block.hearth.fuel_deplete")));
+    public static final RegistryObject<SoundEvent> ICEBOX_DEPLETE_SOUND_REGISTRY = SOUNDS.register("block.hearth.fuel_deplete",
+            () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "block.hearth.fuel_deplete")));
 
     public static final RegistryObject<SoundEvent> CHAMELEON_AMBIENT_SOUND_REGISTRY = SOUNDS.register("entity.chameleon.ambient",
             () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "entity.chameleon.ambient")));
