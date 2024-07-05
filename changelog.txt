@@ -2188,3 +2188,12 @@ Fixes:
 - Fixed performance issue with updating the player's equipped insulation items
 - Fixed hacky soulspring lamp rendering in 1st-person
 - Fixed temperature sometimes not working when updating existing worlds
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.3-b04d
+
+Fixes:
+- Fixed player temperature not updating after joining a world or dying in some cases
+- Fixed missing subtitles for hearth-like blocks running out of fuel
+- Fixed missing subtitles for filling/emptying a waterskin
