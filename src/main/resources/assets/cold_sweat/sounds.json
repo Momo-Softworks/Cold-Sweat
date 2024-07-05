@@ -139,13 +139,35 @@
       }
     ]
   },
-  "block.hearth.fuel":
+  "block.hearth.fuel_deplete":
   {
-    "subtitle": "block.hearth.fuel",
+    "subtitle": "block.hearth.fuel_deplete",
     "sounds":
     [
       {
-        "name": "cold_sweat:block/hearth/hearth_ready",
+        "name": "cold_sweat:block/hearth/hearth_fuel_deplete",
+        "stream": true
+      }
+    ]
+  },
+  "block.boiler.fuel_deplete":
+  {
+    "subtitle": "block.boiler.fuel_deplete",
+    "sounds":
+    [
+      {
+        "name": "cold_sweat:block/hearth/hearth_fuel_deplete",
+        "stream": true
+      }
+    ]
+  },
+  "block.icebox.fuel_deplete":
+  {
+    "subtitle": "block.icebox.fuel_deplete",
+    "sounds":
+    [
+      {
+        "name": "cold_sweat:block/hearth/hearth_fuel_deplete",
         "stream": true
       }
     ]
