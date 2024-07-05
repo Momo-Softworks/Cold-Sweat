@@ -8,8 +8,8 @@ import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
-import com.momosoftworks.coldsweat.core.network.message.TempModifiersSyncMessage;
-import com.momosoftworks.coldsweat.core.network.message.TemperatureSyncMessage;
+import com.momosoftworks.coldsweat.core.network.message.SyncTempModifiersMessage;
+import com.momosoftworks.coldsweat.core.network.message.SyncTemperatureMessage;
 import com.momosoftworks.coldsweat.util.entity.DummyPlayer;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.InterruptableStreamer;
@@ -389,7 +389,7 @@ public class Temperature
             ColdSweatPacketHandler.INSTANCE.send(entity instanceof ServerPlayer player
                                                  ? PacketDistributor.PLAYER.with(() -> player)
                                                  : PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity),
-            new TemperatureSyncMessage(entity, cap.serializeTraits(), instant));
+            new SyncTemperatureMessage(entity, cap.serializeTraits(), instant));
         }
     }
 
@@ -400,7 +400,7 @@ public class Temperature
             ColdSweatPacketHandler.INSTANCE.send(entity instanceof ServerPlayer player
                                                  ? PacketDistributor.PLAYER.with(() -> player)
                                                  : PacketDistributor.TRACKING_ENTITY.with(() -> entity),
-            new TempModifiersSyncMessage(entity, cap.serializeModifiers()));
+            new SyncTempModifiersMessage(entity, cap.serializeModifiers()));
         }
     }
 

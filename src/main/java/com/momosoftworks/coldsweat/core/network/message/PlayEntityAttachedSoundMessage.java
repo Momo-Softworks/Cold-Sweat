@@ -13,7 +13,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Supplier;
 
-public class PlaySoundMessage
+public class PlayEntityAttachedSoundMessage
 {
     String sound;
     int soundChars;
@@ -22,7 +22,7 @@ public class PlaySoundMessage
     float pitch;
     int entityID;
 
-    public PlaySoundMessage(String sound, SoundSource source, float volume, float pitch, int entityID)
+    public PlayEntityAttachedSoundMessage(String sound, SoundSource source, float volume, float pitch, int entityID)
     {
         this.sound = sound;
         this.source = source;
@@ -32,7 +32,7 @@ public class PlaySoundMessage
         this.entityID = entityID;
     }
 
-    public static void encode(PlaySoundMessage message, FriendlyByteBuf buffer) {
+    public static void encode(PlayEntityAttachedSoundMessage message, FriendlyByteBuf buffer) {
         buffer.writeInt(message.soundChars);
         buffer.writeCharSequence(message.sound, StandardCharsets.UTF_8);
         buffer.writeEnum(message.source);
@@ -41,13 +41,13 @@ public class PlaySoundMessage
         buffer.writeInt(message.entityID);
     }
 
-    public static PlaySoundMessage decode(FriendlyByteBuf buffer)
+    public static PlayEntityAttachedSoundMessage decode(FriendlyByteBuf buffer)
     {
         int soundChars = buffer.readInt();
-        return new PlaySoundMessage(buffer.readCharSequence(soundChars, StandardCharsets.UTF_8).toString(), buffer.readEnum(SoundSource.class), buffer.readFloat(), buffer.readFloat(), buffer.readInt());
+        return new PlayEntityAttachedSoundMessage(buffer.readCharSequence(soundChars, StandardCharsets.UTF_8).toString(), buffer.readEnum(SoundSource.class), buffer.readFloat(), buffer.readFloat(), buffer.readInt());
     }
 
-    public static void handle(PlaySoundMessage message, Supplier<NetworkEvent.Context> contextSupplier)
+    public static void handle(PlayEntityAttachedSoundMessage message, Supplier<NetworkEvent.Context> contextSupplier)
     {
         NetworkEvent.Context context = contextSupplier.get();
         context.enqueueWork(() ->
