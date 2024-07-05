@@ -13,35 +13,35 @@ import net.minecraftforge.fml.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public class TemperatureSyncMessage
+public class SyncTemperatureMessage
 {
     int entityId;
     CompoundNBT traits;
     boolean instant;
 
-    public TemperatureSyncMessage(LivingEntity entity, CompoundNBT traits, boolean instant)
+    public SyncTemperatureMessage(LivingEntity entity, CompoundNBT traits, boolean instant)
     {   this.entityId = entity.getId();
         this.traits = traits;
         this.instant = instant;
     }
 
-    TemperatureSyncMessage(int entityId, CompoundNBT traits, boolean instant)
+    SyncTemperatureMessage(int entityId, CompoundNBT traits, boolean instant)
     {   this.entityId = entityId;
         this.traits = traits;
         this.instant = instant;
     }
 
-    public static void encode(TemperatureSyncMessage message, PacketBuffer buffer)
+    public static void encode(SyncTemperatureMessage message, PacketBuffer buffer)
     {   buffer.writeInt(message.entityId);
         buffer.writeNbt(message.traits);
         buffer.writeBoolean(message.instant);
     }
 
-    public static TemperatureSyncMessage decode(PacketBuffer buffer)
-    {   return new TemperatureSyncMessage(buffer.readInt(), buffer.readNbt(), buffer.readBoolean());
+    public static SyncTemperatureMessage decode(PacketBuffer buffer)
+    {   return new SyncTemperatureMessage(buffer.readInt(), buffer.readNbt(), buffer.readBoolean());
     }
 
-    public static void handle(TemperatureSyncMessage message, Supplier<NetworkEvent.Context> contextSupplier)
+    public static void handle(SyncTemperatureMessage message, Supplier<NetworkEvent.Context> contextSupplier)
     {
         NetworkEvent.Context context = contextSupplier.get();
 

@@ -18,11 +18,11 @@ public class ColdSweatPacketHandler
 
     public static void init()
     {
-        INSTANCE.registerMessage(0, TemperatureSyncMessage.class, TemperatureSyncMessage::encode, TemperatureSyncMessage::decode, TemperatureSyncMessage::handle);
-        INSTANCE.registerMessage(1, TempModifiersSyncMessage.class, TempModifiersSyncMessage::encode, TempModifiersSyncMessage::decode, TempModifiersSyncMessage::handle);
+        INSTANCE.registerMessage(0, SyncTemperatureMessage.class, SyncTemperatureMessage::encode, SyncTemperatureMessage::decode, SyncTemperatureMessage::handle);
+        INSTANCE.registerMessage(1, SyncTempModifiersMessage.class, SyncTempModifiersMessage::encode, SyncTempModifiersMessage::decode, SyncTempModifiersMessage::handle);
         INSTANCE.registerMessage(2, SyncConfigSettingsMessage.class, SyncConfigSettingsMessage::encode, SyncConfigSettingsMessage::decode, SyncConfigSettingsMessage::handle);
         INSTANCE.registerMessage(3, ClientConfigAskMessage.class, ClientConfigAskMessage::encode, ClientConfigAskMessage::decode, ClientConfigAskMessage::handle);
-        INSTANCE.registerMessage(4, PlaySoundMessage.class, PlaySoundMessage::encode, PlaySoundMessage::decode, PlaySoundMessage::handle);
+        INSTANCE.registerMessage(4, PlayEntityAttachedSoundMessage.class, PlayEntityAttachedSoundMessage::encode, PlayEntityAttachedSoundMessage::decode, PlayEntityAttachedSoundMessage::handle);
         INSTANCE.registerMessage(5, BlockDataUpdateMessage.class, BlockDataUpdateMessage::encode, BlockDataUpdateMessage::decode, BlockDataUpdateMessage::handle);
         INSTANCE.registerMessage(6, HearthResetMessage.class, HearthResetMessage::encode, HearthResetMessage::decode, HearthResetMessage::handle);
         INSTANCE.registerMessage(7, DisableHearthParticlesMessage.class, DisableHearthParticlesMessage::encode, DisableHearthParticlesMessage::decode, DisableHearthParticlesMessage::handle);
