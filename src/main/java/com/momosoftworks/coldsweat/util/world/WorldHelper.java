@@ -7,7 +7,7 @@ import com.momosoftworks.coldsweat.util.serialization.DynamicHolder;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.BlockDataUpdateMessage;
 import com.momosoftworks.coldsweat.core.network.message.ParticleBatchMessage;
-import com.momosoftworks.coldsweat.core.network.message.PlaySoundMessage;
+import com.momosoftworks.coldsweat.core.network.message.PlayEntityAttachedSoundMessage;
 import com.momosoftworks.coldsweat.core.network.message.SyncForgeDataMessage;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
@@ -256,7 +256,7 @@ public abstract class WorldHelper
             }
             else
             {   ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> entity),
-                        new PlaySoundMessage(ForgeRegistries.SOUND_EVENTS.getKey(sound).toString(), source, volume, pitch, entity.getId()));
+                        new PlayEntityAttachedSoundMessage(ForgeRegistries.SOUND_EVENTS.getKey(sound).toString(), source, volume, pitch, entity.getId()));
             }
         }
     }
