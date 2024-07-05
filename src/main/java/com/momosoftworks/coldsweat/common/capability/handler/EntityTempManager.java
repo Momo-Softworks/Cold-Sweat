@@ -53,12 +53,12 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.SleepFinishedTimeEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -95,7 +95,7 @@ public class EntityTempManager
         Temperature.Trait.BURNING_POINT
     };
 
-    public static final Set<EntityType<? extends LivingEntity>> TEMPERATURE_ENABLED_ENTITIES = new HashSet<>(ImmutableSet.<EntityType<? extends LivingEntity>>builder().add(EntityType.PLAYER).build());
+    public static final Set<EntityType<? extends LivingEntity>> TEMPERATURE_ENABLED_ENTITIES = new HashSet<>(List.of(EntityType.PLAYER));
 
     public static final Map<Entity, LazyOptional<ITemperatureCap>> SERVER_CAP_CACHE = new HashMap<>();
     public static final Map<Entity, LazyOptional<ITemperatureCap>> CLIENT_CAP_CACHE = new HashMap<>();
@@ -104,11 +104,10 @@ public class EntityTempManager
     {
         Map<Entity, LazyOptional<ITemperatureCap>> cache = entity.level().isClientSide ? CLIENT_CAP_CACHE : SERVER_CAP_CACHE;
         return cache.computeIfAbsent(entity, e ->
-        {   LazyOptional<ITemperatureCap> cap = e.getCapability(entity instanceof Player ? ModCapabilities.PLAYER_TEMPERATURE : ModCapabilities.ENTITY_TEMPERATURE);
+        {
+            LazyOptional<ITemperatureCap> cap = e.getCapability(ModCapabilities.ENTITY_TEMPERATURE);
             cap.addListener((opt) ->
-            {
-                SERVER_CAP_CACHE.remove(entity);
-                CLIENT_CAP_CACHE.remove(entity);
+            {   SERVER_CAP_CACHE.remove(e);
             });
             return cap;
         });
@@ -120,10 +119,8 @@ public class EntityTempManager
     @SubscribeEvent
     public static void attachCapabilityToEntityHandler(AttachCapabilitiesEvent<Entity> event)
     {
-        if (event.getObject() instanceof LivingEntity entity)
+        if (event.getObject() instanceof LivingEntity entity && TEMPERATURE_ENABLED_ENTITIES.contains(entity.getType()))
         {
-            if (!TEMPERATURE_ENABLED_ENTITIES.contains(entity.getType())) return;
-
             // Make a new capability instance to attach to the entity
             ITemperatureCap tempCap = entity instanceof Player ? new PlayerTempCap() : new EntityTempCap();
             // Optional that holds the capability instance
@@ -137,7 +134,7 @@ public class EntityTempManager
                 public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction direction)
                 {
                     // If the requested cap is the temperature cap, return the temperature cap
-                    if (cap == ModCapabilities.PLAYER_TEMPERATURE)
+                    if (cap == ModCapabilities.ENTITY_TEMPERATURE)
                     {   return capOptional.cast();
                     }
                     return LazyOptional.empty();
@@ -224,6 +221,15 @@ public class EntityTempManager
         });
     }
 
+    @SubscribeEvent
+    public static void clearClientCapCache(TickEvent.LevelTickEvent event)
+    {
+        if (event.side == LogicalSide.CLIENT && event.phase == TickEvent.Phase.END
+        && event.level.getGameTime() % 2 == 0)
+        {   CLIENT_CAP_CACHE.clear();
+        }
+    }
+
     /**
      * Transfer the player's capability when traveling from the End
      */
@@ -271,12 +277,12 @@ public class EntityTempManager
         });
     }
 
-    @SubscribeEvent
-    public static void invalidateDespawnedEntity(EntityLeaveLevelEvent event)
-    {
-        SERVER_CAP_CACHE.remove(event.getEntity());
-        CLIENT_CAP_CACHE.remove(event.getEntity());
-    }
+    //@SubscribeEvent
+    //public static void invalidateDespawnedEntity(EntityLeaveLevelEvent event)
+    //{
+    //    SERVER_CAP_CACHE.remove(event.getEntity());
+    //    CLIENT_CAP_CACHE.remove(event.getEntity());
+    //}
 
     /**
      * Add default modifiers to players and temperature-enabled entities
