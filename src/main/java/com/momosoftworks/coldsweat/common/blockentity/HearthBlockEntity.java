@@ -748,7 +748,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     }
 
     protected SoundEvent getFuelDepleteSound()
-    {   return ModSounds.HEARTH_FUEL.value();
+    {   return ModSounds.HEARTH_DEPLETE.value();
     }
 
     public void checkForSmokestack()

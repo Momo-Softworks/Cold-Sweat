@@ -24,8 +24,12 @@ public class ModSounds
     public static final DeferredHolder<SoundEvent, SoundEvent> WATERSKIN_FILL = SOUNDS.register("item.waterskin.fill",
                                               () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "item.waterskin.fill")));
 
-    public static final DeferredHolder<SoundEvent, SoundEvent> HEARTH_FUEL = SOUNDS.register("block.hearth.fuel",
-                                              () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "block.hearth.fuel")));
+    public static final DeferredHolder<SoundEvent, SoundEvent> HEARTH_DEPLETE = SOUNDS.register("block.hearth.fuel_deplete",
+                                              () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "block.hearth.fuel_deplete")));
+    public static final DeferredHolder<SoundEvent, SoundEvent> BOILER_DEPLETE = SOUNDS.register("block.hearth.fuel_deplete",
+                                              () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "block.hearth.fuel_deplete")));
+    public static final DeferredHolder<SoundEvent, SoundEvent> ICEBOX_DEPLETE = SOUNDS.register("block.hearth.fuel_deplete",
+                                              () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "block.hearth.fuel_deplete")));
 
     public static final DeferredHolder<SoundEvent, SoundEvent> CHAMELEON_AMBIENT = SOUNDS.register("entity.chameleon.ambient",
                                               () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "entity.chameleon.ambient")));

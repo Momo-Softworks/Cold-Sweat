@@ -19,6 +19,7 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -128,6 +129,11 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
     @Override
     public int getMaxInsulationLevel()
     {   return 5;
+    }
+
+    @Override
+    public SoundEvent getFuelDepleteSound()
+    {   return ModSounds.ICEBOX_DEPLETE.value();
     }
 
     @Override

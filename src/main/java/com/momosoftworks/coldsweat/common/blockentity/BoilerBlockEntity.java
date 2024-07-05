@@ -10,10 +10,7 @@ import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap
 import com.momosoftworks.coldsweat.common.container.BoilerContainer;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
-import com.momosoftworks.coldsweat.core.init.ModBlockEntities;
-import com.momosoftworks.coldsweat.core.init.ModEffects;
-import com.momosoftworks.coldsweat.core.init.ModItemComponents;
-import com.momosoftworks.coldsweat.core.init.ModItems;
+import com.momosoftworks.coldsweat.core.init.*;
 import com.momosoftworks.coldsweat.core.network.message.BlockDataUpdateMessage;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
@@ -25,6 +22,7 @@ import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -154,6 +152,11 @@ public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider
     @Override
     public int getMaxInsulationLevel()
     {   return 5;
+    }
+
+    @Override
+    public SoundEvent getFuelDepleteSound()
+    {   return ModSounds.BOILER_DEPLETE.value();
     }
 
     @Override
