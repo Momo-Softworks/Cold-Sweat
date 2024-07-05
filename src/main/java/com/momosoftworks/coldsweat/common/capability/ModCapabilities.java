@@ -9,9 +9,6 @@ import net.minecraftforge.common.capabilities.CapabilityInject;
 public class ModCapabilities
 {
     @CapabilityInject(ITemperatureCap.class)
-    public static Capability<ITemperatureCap> PLAYER_TEMPERATURE = null;
-
-    @CapabilityInject(ITemperatureCap.class)
     public static final Capability<ITemperatureCap> ENTITY_TEMPERATURE = null;
 
     @CapabilityInject(IInsulatableCap.class)

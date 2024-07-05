@@ -79,7 +79,7 @@ public class Temperature
     }
 
     public static void set(LivingEntity entity, Trait trait, double value)
-    {   EntityTempManager.getTemperatureCap(entity).orElse(new PlayerTempCap()).setTrait(trait, value);
+    {   EntityTempManager.getTemperatureCap(entity).ifPresent(cap -> cap.setTrait(trait, value));
     }
 
     public static void add(LivingEntity entity, Trait trait, double value)
