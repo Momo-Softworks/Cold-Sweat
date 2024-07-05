@@ -121,10 +121,7 @@ dependencies {
     implementation fg.deobf("curse.maven:create-328085:4762216")
     implementation fg.deobf("curse.maven:curios-309927:4780205-sources-5175957")
     implementation fg.deobf("curse.maven:thirst-was-taken-679270:5071555")
-    //runtimeOnly fg.deobf("curse.maven:apotheosis-313970:5180049")
-    //runtimeOnly fg.deobf("curse.maven:placebo-283644:5098182")
-    //runtimeOnly fg.deobf("curse.maven:patchouli-306770:4966125")
-    //runtimeOnly fg.deobf("curse.maven:apothic-attributes-898963:5182713")
+    implementation fg.deobf("curse.maven:serene-seasons-291874:4761603")
 
     runtimeOnly fg.deobf("curse.maven:spark-361579:4738952")
     runtimeOnly fg.deobf("curse.maven:biomes-o-plenty-220318:4764804")
@@ -138,22 +135,8 @@ dependencies {
     runtimeOnly fg.deobf("curse.maven:playeranimator-658587:4587214")
     runtimeOnly fg.deobf("curse.maven:caelus-308989:4581481")
     runtimeOnly fg.deobf("curse.maven:comforts-276951:5068863")
+    runtimeOnly fg.deobf("curse.maven:packet-fixer-689467:5416166")
 
-    //runtimeOnly fg.deobf("curse.maven:byg-247560:4426501")
-    compileOnly fg.deobf("curse.maven:serene-seasons-291874:4761603")
-    //runtimeOnly fg.deobf("curse.maven:biomesoplenty-220318:4473556")
-    //runtimeOnly fg.deobf("curse.maven:terrablender-563928:4205732")
-    //runtimeOnly fg.deobf("curse.maven:atmospheric-362393:4415516")
-  //runtimeOnly fg.deobf("curse.maven:tough-as-nails-246391:3871450")
-  //runtimeOnly fg.deobf("curse.maven:environmental-388992:4415514") // Causes weird issues IDK
-    //runtimeOnly fg.deobf("curse.maven:blueprint-382216:4442628")
-    //runtimeOnly fg.deobf("curse.maven:jei-238222:4494410")
-    //runtimeOnly fg.deobf("curse.maven:geckolib-388172:4407241")
-    //runtimeOnly fg.deobf("maven.modrinth:corgilib:1.19.2-1.0.0.32-forge")
-    //runtimeOnly fg.deobf("curse.maven:terralith-513688:4549496")
-    //runtimeOnly fg.deobf("curse.maven:wythers-490686:4127875")
-    //runtimeOnly fg.deobf("curse.maven:smooth-boot-633412:4162940")
-    //runtimeOnly fg.deobf("curse.maven:modernfix-790626:4728399")
     runtimeOnly fg.deobf("curse.maven:attributefix-280510:4844658")
 }
 
