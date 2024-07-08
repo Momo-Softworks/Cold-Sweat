@@ -176,22 +176,16 @@ public class TempEffectsClient
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
             ResourceLocation texture;
-            int texSizeX;
-            int texSizeY;
             if (BLEND_TEMP > 0)
             {   float vignetteBrightness = opacity + ((float) Math.sin((tickTime + 3) / (Math.PI * 1.0132f)) / 5f - 0.2f) * opacity;
                 RenderSystem.setShaderColor(0.231f, 0f, 0f, vignetteBrightness);
                 texture = HAZE_TEXTURE;
-                texSizeX = (int) (2560 / scale);
-                texSizeY = (int) (1440 / scale);
             }
             else
             {   RenderSystem.setShaderColor(1f, 1f, 1f, opacity);
                 texture = FREEZE_TEXTURE;
-                texSizeX = 256;
-                texSizeY = 256;
             }
-            event.getGuiGraphics().blit(texture, 0, 0, -90, 0.0F, 0.0F, (int) width, (int) height, texSizeX, texSizeY);
+            event.getGuiGraphics().blit(texture, 0, 0, -90, 0.0F, 0.0F, (int) width, (int) height, (int) width, (int) height);
             RenderSystem.depthMask(true);
             RenderSystem.enableDepthTest();
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
