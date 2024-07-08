@@ -290,14 +290,14 @@ public class AbstractTempCap implements ITemperatureCap
             double base = CSMath.safeDouble(attribute.getBaseValue()).orElse(defaultSupplier.get());
             Collection<AttributeModifier> attributeModifiers = EntityTempManager.getAllAttributeModifiers(entity, attribute, AttributeModifier.Operation.ADDITION);
 
-            for (AttributeModifier mod : attributeModifiers.stream().filter(mod -> mod.getOperation() == AttributeModifier.Operation.ADDITION).toList())
+            for (AttributeModifier mod : attributeModifiers.stream().filter(mod -> mod.getOperation() == AttributeModifier.Operation.ADDITION).collect(Collectors.toList()))
             {   base += mod.getAmount();
             }
             double value = base;
-            for (AttributeModifier mod : attributeModifiers.stream().filter(mod -> mod.getOperation() == AttributeModifier.Operation.MULTIPLY_BASE).toList())
+            for (AttributeModifier mod : attributeModifiers.stream().filter(mod -> mod.getOperation() == AttributeModifier.Operation.MULTIPLY_BASE).collect(Collectors.toList()))
             {   value += base * mod.getAmount();
             }
-            for (AttributeModifier mod : attributeModifiers.stream().filter(mod -> mod.getOperation() == AttributeModifier.Operation.MULTIPLY_TOTAL).toList())
+            for (AttributeModifier mod : attributeModifiers.stream().filter(mod -> mod.getOperation() == AttributeModifier.Operation.MULTIPLY_TOTAL).collect(Collectors.toList()))
             {   value *= 1.0D + mod.getAmount();
             }
             return value;
