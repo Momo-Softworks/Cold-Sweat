@@ -23,6 +23,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
@@ -479,5 +480,13 @@ public abstract class WorldHelper
         Triplet<Double, Double, Temperature.Units> configOffset = ConfigSettings.BIOME_OFFSETS.get(level.registryAccess()).getOrDefault(biome,
                                                                   new Triplet<>(0d, 0d, Temperature.Units.MC));
         return CSMath.addPairs(Pair.of(configTemp.getA(), configTemp.getB()), Pair.of(configOffset.getA(), configOffset.getB()));
+    }
+
+    public static Vec3 getClosestPointOnEntity(LivingEntity entity, Vec3 pos)
+    {
+        double playerRadius = entity.getBbWidth() / 2;
+        return new Vec3(CSMath.clamp(pos.x, entity.getX() - playerRadius, entity.getX() + playerRadius),
+                        CSMath.clamp(pos.y, entity.getY(), entity.getY() + entity.getBbHeight()),
+                        CSMath.clamp(pos.z, entity.getZ() - playerRadius, entity.getZ() + playerRadius));
     }
 }
