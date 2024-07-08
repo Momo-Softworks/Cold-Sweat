@@ -21,6 +21,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -488,5 +489,13 @@ public abstract class WorldHelper
         Triplet<Double, Double, Temperature.Units> configOffset = ConfigSettings.BIOME_OFFSETS.get().getOrDefault(biome,
                                                                   new Triplet<>(0d, 0d, Temperature.Units.MC));
         return CSMath.addPairs(Pair.of(configTemp.getFirst(), configTemp.getSecond()), Pair.of(configOffset.getFirst(), configOffset.getSecond()));
+    }
+
+    public static Vector3d getClosestPointOnEntity(LivingEntity entity, Vector3d pos)
+    {
+        double playerRadius = entity.getBbWidth() / 2;
+        return new Vector3d(CSMath.clamp(pos.x, entity.getX() - playerRadius, entity.getX() + playerRadius),
+                            CSMath.clamp(pos.y, entity.getY(), entity.getY() + entity.getBbHeight()),
+                            CSMath.clamp(pos.z, entity.getZ() - playerRadius, entity.getZ() + playerRadius));
     }
 }

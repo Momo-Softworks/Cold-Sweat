@@ -19,6 +19,7 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.IChunk;
+import org.codehaus.plexus.util.FastMap;
 
 import java.util.*;
 import java.util.function.Function;
@@ -31,13 +32,13 @@ public class BlockTempModifier extends TempModifier
     {   this.getNBT().putInt("RangeOverride", range);
     }
 
-    Map<ChunkPos, IChunk> chunks = new HashMap<>(16);
+    Map<ChunkPos, IChunk> chunks = new FastMap<>(16);
 
     @Override
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
-        Map<BlockTemp, Double> affectMap = new HashMap<>(128);
-        Map<BlockPos, BlockState> stateCache = new HashMap<>(4096);
+        Map<BlockTemp, Double> blockTempEffects = new FastMap<>(128);
+        Map<BlockPos, BlockState> stateCache = new FastMap<>(4096);
         List<Triplet<BlockPos, BlockTemp, Double>> triggers = new ArrayList<>(128);
 
         World world = entity.level;
@@ -48,6 +49,7 @@ public class BlockTempModifier extends TempModifier
         int entZ = entity.blockPosition().getZ();
         BlockPos.Mutable blockpos = new BlockPos.Mutable();
 
+        // Only tick advancements every second, because Minecraft advancements are not performant at all
         boolean shouldTickAdvancements = this.getTicksExisted() % 20 == 0;
 
         for (int x = -range; x < range; x++)
@@ -79,31 +81,17 @@ public class BlockTempModifier extends TempModifier
 
                         if (blockTemps.isEmpty() || (blockTemps.size() == 1 && blockTemps.contains(BlockTempRegistry.DEFAULT_BLOCK_TEMP))) continue;
 
-                        // Get the amount that this block has affected the player so far
+                        // Get the amount that this block has affected the entity so far
 
-                        // Is totalTemp within the bounds of any BlockTemp's min/max range?
-                        boolean isInTempRange = affectMap.isEmpty();
-                        if (!isInTempRange)
-                        {   for (Map.Entry<BlockTemp, Double> entry : affectMap.entrySet())
-                            {   BlockTemp key = entry.getKey();
-                                Double value = entry.getValue();
-
-                                if (!blockTemps.contains(key) || CSMath.betweenInclusive(value, key.minEffect(), key.maxEffect()))
-                                {   isInTempRange = true;
-                                    break;
-                                }
-                            }
-                        }
-                        if (isInTempRange)
+                        // Are any of the block temps able to affect the entity?
+                        // This check prevents costly calculations if the block can't affect the entity anyway
+                        if (areAnyBlockTempsInRange(blockTempEffects, blockTemps))
                         {
                             // Get Vector positions of the centers of the source block and player
                             Vector3d pos = Vector3d.atCenterOf(blockpos);
 
                             // Gets the closest point in the player's BB to the block
-                            double playerRadius = entity.getBbWidth() / 2;
-                            Vector3d playerClosest = new Vector3d(CSMath.clamp(pos.x, entity.getX() - playerRadius, entity.getX() + playerRadius),
-                                                                  CSMath.clamp(pos.y, entity.getY(), entity.getY() + entity.getBbHeight()),
-                                                                  CSMath.clamp(pos.z, entity.getZ() - playerRadius, entity.getZ() + playerRadius));
+                            Vector3d playerClosest = WorldHelper.getClosestPointOnEntity(entity, pos);
 
                             // Cast a ray between the player and the block
                             // Lessen the effect with each block between the player and the block
@@ -127,9 +115,9 @@ public class BlockTempModifier extends TempModifier
 
                                 // Store this block type's total effect on the player
                                 // Dampen the effect with each block between the player and the block
-                                double blockTempTotal = affectMap.getOrDefault(blockTemp, 0d) + tempToAdd / (blocks[0] + 1);
+                                double blockTempTotal = blockTempEffects.getOrDefault(blockTemp, 0d) + tempToAdd / (blocks[0] + 1);
                                 if (blockTempTotal < blockTemp.minEffect() || blockTempTotal > blockTemp.maxEffect()) continue;
-                                affectMap.put(blockTemp, CSMath.clamp(blockTempTotal, blockTemp.minEffect(), blockTemp.maxEffect()));
+                                blockTempEffects.put(blockTemp, CSMath.clamp(blockTempTotal, blockTemp.minEffect(), blockTemp.maxEffect()));
                                 // Used to trigger advancements
                                 if (shouldTickAdvancements)
                                 {   triggers.add(new Triplet<>(blockpos, blockTemp, distance));
@@ -145,7 +133,7 @@ public class BlockTempModifier extends TempModifier
         if (entity instanceof ServerPlayerEntity && shouldTickAdvancements)
         {
             for (Triplet<BlockPos, BlockTemp, Double> trigger : triggers)
-            {   ModAdvancementTriggers.BLOCK_AFFECTS_TEMP.trigger(((ServerPlayerEntity) entity), trigger.getFirst(), trigger.getThird(), affectMap.get(trigger.getSecond()));
+            {   ModAdvancementTriggers.BLOCK_AFFECTS_TEMP.trigger(((ServerPlayerEntity) entity), trigger.getFirst(), trigger.getThird(), blockTempEffects.get(trigger.getSecond()));
             }
         }
 
@@ -157,7 +145,7 @@ public class BlockTempModifier extends TempModifier
         // Add the effects of all the blocks together and return the result
         return temp ->
         {
-            for (Map.Entry<BlockTemp, Double> effect : affectMap.entrySet())
+            for (Map.Entry<BlockTemp, Double> effect : blockTempEffects.entrySet())
             {
                 BlockTemp be = effect.getKey();
                 double min = be.minTemperature();
@@ -167,5 +155,23 @@ public class BlockTempModifier extends TempModifier
             }
             return temp;
         };
+    }
+
+    private static boolean areAnyBlockTempsInRange(Map<BlockTemp, Double> blockTempEffects, Collection<BlockTemp> blockTemps)
+    {
+        boolean isInTempRange = blockTempEffects.isEmpty();
+        if (!isInTempRange)
+        {
+            for (Map.Entry<BlockTemp, Double> entry : blockTempEffects.entrySet())
+            {   BlockTemp key = entry.getKey();
+                Double value = entry.getValue();
+
+                if (!blockTemps.contains(key) || CSMath.betweenInclusive(value, key.minEffect(), key.maxEffect()))
+                {   isInTempRange = true;
+                    break;
+                }
+            }
+        }
+        return isInTempRange;
     }
 }
