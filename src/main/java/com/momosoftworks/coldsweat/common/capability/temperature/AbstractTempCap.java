@@ -286,7 +286,7 @@ public class AbstractTempCap implements ITemperatureCap
         else
         {
             double base = CSMath.safeDouble(attribute.getBaseValue()).orElse(defaultSupplier.get());
-            Collection<AttributeModifier> attributeModifiers = EntityTempManager.getAllAttributeModifiers(entity, attribute, AttributeModifier.Operation.ADDITION);
+            Collection<AttributeModifier> attributeModifiers = EntityTempManager.getAllAttributeModifiers(entity, attribute, null);
 
             for (AttributeModifier mod : attributeModifiers.stream().filter(mod -> mod.getOperation() == AttributeModifier.Operation.ADDITION).toList())
             {   base += mod.getAmount();
