@@ -21,7 +21,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.event.entity.SpawnPlacementRegisterEvent;
+import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
 import net.neoforged.neoforge.registries.DataPackRegistryEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -88,10 +88,10 @@ public class ColdSweat
         //ConfigSettings.load(null);
     }
 
-    public void spawnPlacements(SpawnPlacementRegisterEvent event)
+    public void spawnPlacements(RegisterSpawnPlacementsEvent event)
     {
         event.register(ModEntities.CHAMELEON.value(), SpawnPlacementTypes.ON_GROUND,
-                       Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Chameleon::canSpawn, SpawnPlacementRegisterEvent.Operation.REPLACE);
+                       Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Chameleon::canSpawn, RegisterSpawnPlacementsEvent.Operation.REPLACE);
     }
 
     public void registerCaps(RegisterCapabilitiesEvent event)
