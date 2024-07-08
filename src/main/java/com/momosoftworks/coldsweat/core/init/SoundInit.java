@@ -26,10 +26,10 @@ public class SoundInit
 
     public static final RegistryObject<SoundEvent> HEARTH_DEPLETE_SOUND_REGISTRY = SOUNDS.register("block.hearth.fuel_deplete",
             () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(ColdSweat.MOD_ID, "block.hearth.fuel_deplete")));
-    public static final RegistryObject<SoundEvent> BOILER_DEPLETE_SOUND_REGISTRY = SOUNDS.register("block.hearth.fuel_deplete",
-            () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(ColdSweat.MOD_ID, "block.hearth.fuel_deplete")));
-    public static final RegistryObject<SoundEvent> ICEBOX_DEPLETE_SOUND_REGISTRY = SOUNDS.register("block.hearth.fuel_deplete",
-            () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(ColdSweat.MOD_ID, "block.hearth.fuel_deplete")));
+    public static final RegistryObject<SoundEvent> BOILER_DEPLETE_SOUND_REGISTRY = SOUNDS.register("block.boiler.fuel_deplete",
+            () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(ColdSweat.MOD_ID, "block.boiler.fuel_deplete")));
+    public static final RegistryObject<SoundEvent> ICEBOX_DEPLETE_SOUND_REGISTRY = SOUNDS.register("block.icebox.fuel_deplete",
+            () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(ColdSweat.MOD_ID, "block.icebox.fuel_deplete")));
 
     public static final RegistryObject<SoundEvent> CHAMELEON_AMBIENT_SOUND_REGISTRY = SOUNDS.register("entity.chameleon.ambient",
             () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(ColdSweat.MOD_ID, "entity.chameleon.ambient")));
