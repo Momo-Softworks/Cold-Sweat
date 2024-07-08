@@ -1,13 +1,18 @@
 package com.momosoftworks.coldsweat;
 
 import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
+import com.momosoftworks.coldsweat.common.capability.ModCapabilities;
+import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
+import com.momosoftworks.coldsweat.common.capability.shearing.ShearableFurCap;
+import com.momosoftworks.coldsweat.common.capability.temperature.EntityTempCap;
+import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
 import com.momosoftworks.coldsweat.common.entity.Chameleon;
-import com.momosoftworks.coldsweat.config.*;
 import com.momosoftworks.coldsweat.config.spec.*;
 import com.momosoftworks.coldsweat.core.init.*;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import net.minecraft.core.Direction;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.SpawnPlacementTypes;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.bus.api.IEventBus;
@@ -53,6 +58,7 @@ public class ColdSweat
         CommandInit.ARGUMENTS.register(bus);
         ModArmorMaterials.ARMOR_MATERIALS.register(bus);
         ModAdvancementTriggers.TRIGGERS.register(bus);
+        ModItemComponents.DATA_COMPONENTS.register(bus);
 
         // Setup configs
         WorldSettingsConfig.setup(modContainer);
@@ -90,14 +96,35 @@ public class ColdSweat
 
     public void registerCaps(RegisterCapabilitiesEvent event)
     {
+        // Register temperature for temperature-enabled entities
+        for (EntityType<?> type : EntityTempManager.getEntitiesWithTemperature())
+        {
+            if (type == EntityType.PLAYER)
+            {
+                event.registerEntity(ModCapabilities.PLAYER_TEMPERATURE, type, (entity, context) ->
+                {   return new PlayerTempCap();
+                });
+            }
+            else
+            {   event.registerEntity(ModCapabilities.ENTITY_TEMPERATURE, type, (entity, context) ->
+                {   return new EntityTempCap();
+                });
+            }
+        }
+
+        // Register shearable fur for goats
+        event.registerEntity(ModCapabilities.SHEARABLE_FUR, EntityType.GOAT, (entity, context) ->
+        {   return new ShearableFurCap();
+        });
+
         // Register fluid handlers for hearth-like blocks
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.HEARTH.value(), (hearth, facing) ->
         {
             return facing == Direction.DOWN
-                   ? new HearthBlockEntity.BottomFluidHandler(hearth)
-                   : facing != Direction.UP
-                     ? new HearthBlockEntity.SidesFluidHandler(hearth)
-                     : null;
+                           ? new HearthBlockEntity.BottomFluidHandler(hearth)
+                 : facing != Direction.UP
+                           ? new HearthBlockEntity.SidesFluidHandler(hearth)
+                 : null;
         });
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.BOILER.value(), (boiler, facing) -> new HearthBlockEntity.BottomFluidHandler(boiler));
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.ICEBOX.value(), (icebox, facing) -> new HearthBlockEntity.SidesFluidHandler(icebox));

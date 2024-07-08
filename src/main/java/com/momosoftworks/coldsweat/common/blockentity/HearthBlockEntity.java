@@ -956,20 +956,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     {   return this.pathLookup;
     }
 
-    public static class FluidProvider implements ICapabilityProvider<HearthBlockEntity, Direction, FluidHandler>
-    {
-        @Nullable
-        @Override
-        public FluidHandler getCapability(HearthBlockEntity hearth, Direction facing)
-        {
-            return facing == Direction.DOWN
-                           ? new BottomFluidHandler(hearth)
-                 : facing != Direction.UP
-                           ? new SidesFluidHandler(hearth)
-                 : null;
-        }
-    }
-
     public abstract static class FluidHandler implements IFluidHandler
     {
         HearthBlockEntity hearth;
