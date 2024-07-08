@@ -26,11 +26,10 @@ import java.lang.reflect.Field;
 
 public abstract class AbstractHearthScreen<T extends AbstractContainerMenu> extends EffectRenderingInventoryScreen<T>
 {
-    private static final ResourceLocation HEARTH_GUI = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/screen/hearth_gui.png");
-    private static final WidgetSprites PARTICLES_ENABLED_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/screen/hearth/hearth_particle_button_on.png"),
-                                                                                     ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/screen/hearth/hearth_particle_button_on_focus.png"));
-    private static final WidgetSprites PARTICLES_DISABLED_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/screen/hearth/hearth_particle_button_off.png"),
-                                                                                      ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/screen/hearth/hearth_particle_button_off_focus.png"));
+    private static final WidgetSprites PARTICLES_ENABLED_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/hearth_particle_button_on"),
+                                                                                     ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/hearth_particle_button_on_focus"));
+    private static final WidgetSprites PARTICLES_DISABLED_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/hearth_particle_button_off"),
+                                                                                      ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/hearth_particle_button_off_focus"));
 
     ImageButton particleButton = null;
     Pair<BlockPos, ResourceLocation> levelPos = Pair.of(this.getBlockEntity().getBlockPos(), this.getBlockEntity().getLevel().dimension().location());
@@ -71,6 +70,7 @@ public abstract class AbstractHearthScreen<T extends AbstractContainerMenu> exte
                 {   HearthSaveDataHandler.DISABLED_HEARTHS.remove(levelPos);
                     particleButtonSprites = PARTICLES_ENABLED_SPRITES;
                 }
+                setImageButtonSprites(particleButton, particleButtonSprites);
             })
             {
                 @Override
@@ -103,6 +103,19 @@ public abstract class AbstractHearthScreen<T extends AbstractContainerMenu> exte
     {   super.onClose();
         if (this.minecraft.player != null && hideParticlesOld != hideParticles)
         {   PacketDistributor.sendToServer(new DisableHearthParticlesMessage(HearthSaveDataHandler.serializeDisabledHearths()));
+        }
+    }
+
+    private static void setImageButtonSprites(ImageButton button, WidgetSprites sprites)
+    {
+        try
+        {
+            Field field = ObfuscationReflectionHelper.findField(ImageButton.class, "sprites");
+            field.setAccessible(true);
+            field.set(button, sprites);
+        }
+        catch (IllegalAccessException e)
+        {   e.printStackTrace();
         }
     }
 }
