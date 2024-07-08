@@ -119,7 +119,7 @@ public class DynamicHolder<T>
         {  throw ColdSweat.LOGGER.throwing(SerializationException.serialize(this.value, "Tried to encode non-synced DynamicHolder", null));
         }
         try
-        {   return encoder.write(this.get(), registryAccess);
+        {   return encoder.write(this.get(registryAccess), registryAccess);
         }
         catch (Exception e)
         {   throw ColdSweat.LOGGER.throwing(SerializationException.serialize(this.value, "Failed to encode DynamicHolder for type " + this.value.getClass().getSimpleName(), e));
@@ -145,7 +145,7 @@ public class DynamicHolder<T>
         {  throw ColdSweat.LOGGER.throwing(new SerializationException("Tried to save non-synced DynamicHolder", null));
         }
         try
-        {   saver.save(this.get(), registryAccess);
+        {   saver.save(this.get(registryAccess), registryAccess);
         }
         catch (Exception e)
         {   throw ColdSweat.LOGGER.throwing(new SerializationException("Failed to save DynamicHolder for type " + this.value.getClass().getSimpleName(), e));
