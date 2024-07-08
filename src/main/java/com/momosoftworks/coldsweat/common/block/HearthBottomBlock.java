@@ -143,6 +143,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
                         }
                     }
                 }
+                player.openMenu(te, pos);
             }
             else
             {
@@ -171,6 +172,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
                     worldIn.playSound(null, pos, itemFuel > 0 ? SoundEvents.BUCKET_EMPTY_LAVA : SoundEvents.BUCKET_EMPTY,
                             SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
                 }
+                else player.openMenu(te, pos);
             }
         }
         return ItemInteractionResult.SUCCESS;
