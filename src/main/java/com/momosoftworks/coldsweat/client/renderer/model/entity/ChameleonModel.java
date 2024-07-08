@@ -19,6 +19,7 @@ import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
@@ -123,7 +124,6 @@ public class ChameleonModel<T extends Chameleon> extends AgeableListModel<T>
 		chameleon = entity;
 		AnimationManager.loadAnimationStates(entity, modelParts);
 
-		// TODO: See if this works
 		float tickDelta = Minecraft.getInstance().getTimer().getRealtimeDeltaTicks();
 		float partialTick = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true);
 		ModelPart head = modelParts.get("Head");
@@ -330,9 +330,9 @@ public class ChameleonModel<T extends Chameleon> extends AgeableListModel<T>
 	}
 
 	@Override
-	public void renderToBuffer(@NotNull PoseStack poseStack, @NotNull VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int something)
+	public void renderToBuffer(@NotNull PoseStack poseStack, @NotNull VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int color)
 	{
-		renderToBuffer(poseStack, vertexConsumer, packedLight, packedOverlay, something, false);
+		renderToBuffer(poseStack, vertexConsumer, packedLight, packedOverlay, color, false);
 	}
 
 	@Override
@@ -347,12 +347,15 @@ public class ChameleonModel<T extends Chameleon> extends AgeableListModel<T>
 		return List.of(body);
 	}
 
-	public void renderToBuffer(@NotNull PoseStack poseStack, @NotNull VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int something, boolean isOverlay)
+	public void renderToBuffer(@NotNull PoseStack poseStack, @NotNull VertexConsumer vertexConsumer, int packedLight, int packedOverlay, int color, boolean isOverlay)
 	{
 		if (chameleon == null) return;
 
-		// TODO: Test if this is actually alpha
-		float alpha = something / 255f;
+		float alpha = FastColor.ARGB32.alpha(color) / 255f;
+        float red = 1f;
+        float green = 1f;
+        float blue = 1f;
+
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
 		float partialTick = Minecraft.getInstance().getTimer().getRealtimeDeltaTicks();
@@ -374,7 +377,8 @@ public class ChameleonModel<T extends Chameleon> extends AgeableListModel<T>
 		ModelPart tongue1 = modelParts.get("Tongue1");
 		tongue1.visible = false;
 
-		super.renderToBuffer(poseStack, vertexConsumer, packedLight, packedOverlay, (int) (isOverlay ? alpha : chameleon.opacity));
+		super.renderToBuffer(poseStack, vertexConsumer, packedLight, packedOverlay, FastColor.ARGB32.colorFromFloat(isOverlay ? alpha : chameleon.opacity,
+                                                                                                                    red, green, blue));
 
 		// Render the tongue with a different VertexConsumer that culls backfaces
 		if (tongueVisible && !isOverlay)
@@ -389,7 +393,7 @@ public class ChameleonModel<T extends Chameleon> extends AgeableListModel<T>
 			poseStack.translate(0, 1.1555, -0.18755);
 			tongue1.xRot = head.xRot + jaw.xRot / 2;
 			tongue1.yRot = head.yRot;
-			tongue1.render(poseStack, tongueConsumer, packedLight, packedOverlay, (int) chameleon.opacity);
+			tongue1.render(poseStack, tongueConsumer, packedLight, packedOverlay, FastColor.ARGB32.colorFromFloat(chameleon.opacity, red, green, blue));
 			poseStack.popPose();
 		}
 		RenderSystem.disableBlend();

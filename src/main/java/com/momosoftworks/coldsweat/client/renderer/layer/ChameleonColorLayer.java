@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.Entity;
 
 public class ChameleonColorLayer<T extends Entity, M extends EntityModel<T>> extends RenderLayer<T, M>
@@ -28,12 +29,11 @@ public class ChameleonColorLayer<T extends Entity, M extends EntityModel<T>> ext
     }
 
     @Override
-    public void render(PoseStack poseStack, MultiBufferSource bufferSource, int light, T entity, float p_117353_, float p_117354_, float partialTick, float p_117356_, float p_117357_, float p_117358_)
+    public void render(PoseStack poseStack, MultiBufferSource bufferSource, int light, T entity, float limbSwing, float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw, float headPitch)
     {
         if (entity instanceof Chameleon chameleon)
         {
             // Overlay color
-
             float midTemp = (float) CSMath.average(ConfigSettings.MIN_TEMP.get(), ConfigSettings.MAX_TEMP.get());
 
             RenderSystem.enableBlend();
@@ -45,14 +45,16 @@ public class ChameleonColorLayer<T extends Entity, M extends EntityModel<T>> ext
                     VertexConsumer vertexConsumer = bufferSource.getBuffer(CHAMELEON_RED);
                     float alpha = chameleon.hurtTime > 0 ? 0 : (float) CSMath.blend(0f, 1f, chameleon.getTemperature(), CSMath.average(ConfigSettings.MAX_TEMP.get(), midTemp), ConfigSettings.MAX_TEMP.get());
                     if (alpha > 0)
-                        ((ChameleonModel<Chameleon>) this.getParentModel()).renderToBuffer(poseStack, vertexConsumer, light, OverlayTexture.NO_OVERLAY, (int) (alpha * chameleon.opacity * 255), true);
+                        ((ChameleonModel<Chameleon>) this.getParentModel()).renderToBuffer(poseStack, vertexConsumer, light, OverlayTexture.NO_OVERLAY,
+                                                                                           FastColor.ARGB32.colorFromFloat(alpha * chameleon.opacity, 1, 1, 1), true);
                 }
                 else
                 {
                     VertexConsumer vertexConsumer = bufferSource.getBuffer(CHAMELEON_BLUE);
                     float alpha = chameleon.hurtTime > 0 ? 0 : (float) CSMath.blend(1f, 0f, chameleon.getTemperature(), ConfigSettings.MIN_TEMP.get(), CSMath.average(ConfigSettings.MIN_TEMP.get(), midTemp));
                     if (alpha > 0)
-                        ((ChameleonModel<Chameleon>) this.getParentModel()).renderToBuffer(poseStack, vertexConsumer, light, OverlayTexture.NO_OVERLAY, (int) (alpha * chameleon.opacity * 255), true);
+                        ((ChameleonModel<Chameleon>) this.getParentModel()).renderToBuffer(poseStack, vertexConsumer, light, OverlayTexture.NO_OVERLAY,
+                                                                                           FastColor.ARGB32.colorFromFloat(alpha * chameleon.opacity, 1, 1, 1), true);
                 }
             }
 
@@ -62,7 +64,8 @@ public class ChameleonColorLayer<T extends Entity, M extends EntityModel<T>> ext
                 VertexConsumer vertexConsumer = bufferSource.getBuffer(CHAMELEON_SHED);
                 float alpha = chameleon.hurtTime > 0 || chameleon.getLastShed() == 0 ? 0 : CSMath.blend(0, 0.7f, chameleon.getAgeSecs() * 20 - chameleon.getLastShed(), 0, chameleon.getTimeToShed());
                 if (alpha > 0)
-                    ((ChameleonModel<Chameleon>) this.getParentModel()).renderToBuffer(poseStack, vertexConsumer, light, OverlayTexture.NO_OVERLAY, (int) (alpha * chameleon.opacity * 255), true);
+                    ((ChameleonModel<Chameleon>) this.getParentModel()).renderToBuffer(poseStack, vertexConsumer, light, OverlayTexture.NO_OVERLAY,
+                                                                                       FastColor.ARGB32.colorFromFloat(alpha * chameleon.opacity, 1, 1, 1), true);
             }
             RenderSystem.disableBlend();
         }
