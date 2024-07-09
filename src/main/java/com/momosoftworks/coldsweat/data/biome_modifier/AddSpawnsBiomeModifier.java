@@ -1,13 +1,11 @@
 package com.momosoftworks.coldsweat.data.biome_modifier;
 
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.core.init.BiomeModifierInit;
+import com.momosoftworks.coldsweat.core.init.ModBiomeModifiers;
 import com.momosoftworks.coldsweat.data.codec.configuration.SpawnBiomeData;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.biome.Biome;
@@ -20,8 +18,6 @@ import java.util.Collection;
 
 public record AddSpawnsBiomeModifier(boolean useConfigs) implements BiomeModifier
 {
-
-
     @Override
     public void modify(Holder<Biome> biome, Phase phase, ModifiableBiomeInfo.BiomeInfo.Builder builder)
     {
@@ -43,6 +39,6 @@ public record AddSpawnsBiomeModifier(boolean useConfigs) implements BiomeModifie
     @Override
     public MapCodec<? extends BiomeModifier> codec()
     {
-        return BiomeModifierInit.ADD_SPAWNS_CODEC.value();
+        return ModBiomeModifiers.ADD_SPAWNS_CODEC.value();
     }
 }
