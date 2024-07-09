@@ -1,6 +1,5 @@
 package com.momosoftworks.coldsweat.data.loot.modifier;
 
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.LootEntry;
@@ -39,12 +38,15 @@ public class AddDropsModifier extends LootModifier
     @Override
     protected ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> generatedLoot, LootContext context)
     {
+        int lootLevel = context.hasParam(LootContextParams.ENCHANTMENT_LEVEL)
+                        ? context.getParam(LootContextParams.ENCHANTMENT_LEVEL)
+                        : 1;
         for (LootEntry entry : additions)
         {
             int countRange = entry.count().max() - entry.count().min();
             generatedLoot.add(new ItemStack(entry.item(),
                                             context.getRandom().nextIntBetweenInclusive(entry.count().min(), entry.count().max())
-                                          + context.getRandom().nextIntBetweenInclusive(0, countRange * context.getParam(LootContextParams.ENCHANTMENT_LEVEL))));
+                                          + context.getRandom().nextIntBetweenInclusive(0, countRange * lootLevel)));
         }
         if (!removals.isEmpty())
         {   generatedLoot.removeIf(stack -> removals.contains(stack.getItem()));
