@@ -25,6 +25,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 @EventBusSubscriber
@@ -109,7 +110,6 @@ public class NBTHelper
         return value + amount;
     }
 
-    //TODO: delete this method
     /**
      * Gets an item's tag, without creating a new one if it is not present.<br>
      * An empty {@link CompoundTag} will be returned in that case, so a null check will not be necessary.<br>
@@ -119,6 +119,14 @@ public class NBTHelper
      */
     public static CompoundTag getTagOrEmpty(ItemStack stack)
     {   return stack.has(DataComponents.CUSTOM_DATA) ? stack.get(DataComponents.CUSTOM_DATA).copyTag() : new CompoundTag();
+    }
+
+    public static void ensureTagAndDo(ItemStack stack, Consumer<CompoundTag> action)
+    {
+        if (!stack.has(DataComponents.CUSTOM_DATA))
+        {   stack.set(DataComponents.CUSTOM_DATA, CustomData.of(new CompoundTag()));
+        }
+        stack.get(DataComponents.CUSTOM_DATA).update(action);
     }
 
     /**
