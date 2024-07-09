@@ -22,6 +22,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -64,11 +65,6 @@ import java.util.UUID;
 @EventBusSubscriber
 public class Chameleon extends Animal
 {
-    //static Method GET_DATA_ITEM = ObfuscationReflectionHelper.findMethod(SynchedEntityData.class, "m_135379_", EntityDataAccessor.class);
-    //static
-    //{   GET_DATA_ITEM.setAccessible(true);
-    //}
-
     static final EntityDataAccessor<Boolean> SHEDDING = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.BOOLEAN);
     static final EntityDataAccessor<Integer> LAST_SHED = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.INT);
     static final EntityDataAccessor<Integer> HURT_TIMESTAMP = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.INT);
@@ -561,15 +557,6 @@ public class Chameleon extends Animal
         }
     }
 
-    // TODO: See if this is necessary anymore
-    //public void manualSync(EntityDataAccessor<?> accessor)
-    //{
-    //    // Forge refuses to sync some DataItems, like CompoundTags
-    //    try
-    //    {   ((SynchedEntityData.DataItem<?>) GET_DATA_ITEM.invoke(this.entityData, accessor)).setDirty(true);
-    //    } catch (Exception ignored) {}
-    //}
-
     public float getEatTimer()
     {
         return this.eatAnimationTimer;
@@ -600,8 +587,7 @@ public class Chameleon extends Animal
         }
         trustedPlayers.put("Players", players);
 
-        this.entityData.set(TRUSTED_PLAYERS, trustedPlayers);
-        //this.manualSync(TRUSTED_PLAYERS);
+        this.entityData.set(TRUSTED_PLAYERS, trustedPlayers, true);
     }
 
     public void removeTrustedPlayer(UUID player)
@@ -763,7 +749,7 @@ public class Chameleon extends Animal
 
         CompoundTag players = new CompoundTag();
         players.put("Players", Objects.requireNonNullElseGet(nbt.get("TrustedPlayers"), ListTag::new));
-        this.entityData.set(TRUSTED_PLAYERS, players);
+        this.entityData.set(TRUSTED_PLAYERS, players, true);
 
         this.setLastShed(nbt.getInt("LastShed"));
         this.setShedding(nbt.getBoolean("Shedding"));
