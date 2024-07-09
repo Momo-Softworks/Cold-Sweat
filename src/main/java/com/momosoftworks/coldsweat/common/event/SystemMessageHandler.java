@@ -21,7 +21,7 @@ public class SystemMessageHandler
 {
     private static MultiPlayerGameMode GAME_MODE = null;
 
-    @SubscribeEvent
+    //@SubscribeEvent
     public static void onPlayerEnterCreative(PlayerTickEvent.Pre event)
     {
         Player player = event.getEntity();
