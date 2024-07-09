@@ -3,8 +3,8 @@ package com.momosoftworks.coldsweat.core.event;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.SpawnBiomeData;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraftforge.event.world.BiomeLoadingEvent;
@@ -19,7 +19,10 @@ public class AddEntitySpawns
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onBiomeLoading(BiomeLoadingEvent event)
     {
-        CSMath.doIfNotNull(ConfigSettings.ENTITY_SPAWN_BIOMES.get().get(RegistryHelper.getBiome(event.getName())), spawns ->
+        RegistryAccess registryAccess = RegistryHelper.getRegistryAccess();
+        if (registryAccess == null) return;
+
+        CSMath.doIfNotNull(ConfigSettings.ENTITY_SPAWN_BIOMES.get(registryAccess).get(RegistryHelper.getBiome(event.getName(), registryAccess)), spawns ->
         {
             for (SpawnBiomeData spawnBiomeData : spawns)
             {
