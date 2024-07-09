@@ -1,12 +1,9 @@
 package com.momosoftworks.coldsweat.data.codec.configuration;
 
 import com.google.common.collect.Multimap;
-import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
-import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeCodecs;
@@ -28,21 +25,7 @@ public record InsulatorData(Insulation.Slot slot,
 {
     public static final Codec<InsulatorData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Insulation.Slot.CODEC.fieldOf("type").forGetter(InsulatorData::slot),
-            Codec.either(StaticInsulation.CODEC, AdaptiveInsulation.CODEC).xmap(either ->
-            {
-                return either.left().isPresent() ? either.left().get() : either.right().get();
-            },
-            insulation ->
-            {
-                if (insulation instanceof StaticInsulation)
-                {   return Either.left((StaticInsulation) insulation);
-                }
-                if (insulation instanceof AdaptiveInsulation)
-                {   return Either.right((AdaptiveInsulation) insulation);
-                }
-                return null;
-            })
-            .fieldOf("insulation").forGetter(InsulatorData::insulation),
+            Insulation.getCodec().fieldOf("insulation").forGetter(InsulatorData::insulation),
             ItemRequirement.CODEC.fieldOf("data").forGetter(InsulatorData::data),
             EntityRequirement.getCodec().optionalFieldOf("predicate", EntityRequirement.NONE).forGetter(InsulatorData::predicate),
             AttributeModifierMap.CODEC.optionalFieldOf("attributes").forGetter(InsulatorData::attributes),
