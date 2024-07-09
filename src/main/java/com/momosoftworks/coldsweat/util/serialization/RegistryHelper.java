@@ -1,33 +1,28 @@
 package com.momosoftworks.coldsweat.util.serialization;
 
 import com.mojang.datafixers.util.Either;
-import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.network.play.ClientPlayNetHandler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tags.ITag;
-import net.minecraft.tags.TagRegistry;
-import net.minecraft.tags.TagRegistryManager;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.DefaultedRegistry;
 import net.minecraft.util.registry.DynamicRegistries;
-import net.minecraft.util.registry.MutableRegistry;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.gen.feature.StructureFeature;
 import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public class RegistryHelper
 {
@@ -81,62 +76,10 @@ public class RegistryHelper
         return list;
     }
 
-    public static <T extends IForgeRegistryEntry<T>> Codec<Either<ITag<T>, T>> createForgeTagCodec(IForgeRegistry<T> forgeRegistry, DefaultedRegistry<T> registry)
-    {
-        TagRegistry<T> tagRegistry = (TagRegistry<T>) TagRegistryManager.get(registry.key().location());
-        return Codec.STRING.xmap(
-               id ->
-               {
-                   if (id.startsWith("#"))
-                   {   return Either.left(tagRegistry.getAllTags().getTag(new ResourceLocation(id.substring(1))));
-                   }
-                   else
-                   {   return Either.right(forgeRegistry.getValue(new ResourceLocation(id)));
-                   }
-               },
-               either ->
-               {
-                   return either.left().isPresent()
-                          ? "#" + tagRegistry.getAllTags().getId(either.left().get()).toString()
-                          : forgeRegistry.getKey(either.right().get()).toString();
-               });
-    }
-
-    public static <T> Codec<Either<ITag<T>, T>> createVanillaTagCodec(DefaultedRegistry<T> registry)
-    {
-        TagRegistry<T> tagRegistry = (TagRegistry<T>) TagRegistryManager.get(registry.key().location());
-        return Codec.STRING.xmap(
-                id ->
-                {
-                    if (id.startsWith("#"))
-                    {   return Either.left(tagRegistry.getAllTags().getTag(new ResourceLocation(id.substring(1))));
-                    }
-                    else
-                    {   return Either.right(registry.get(new ResourceLocation(id)));
-                    }
-                },
-                either ->
-                {
-                    return either.left().isPresent()
-                           ? "#" + tagRegistry.getAllTags().getId(either.left().get()).toString()
-                           : registry.getKey(either.right().get()).toString();
-                });
-    }
-
     public static <T> Optional<T> getVanillaRegistryValue(RegistryKey<Registry<T>> registry, ResourceLocation id)
     {
         try
         {   return Optional.ofNullable(getRegistry(registry)).map(reg -> reg.get(id));
-        }
-        catch (Exception e)
-        {   return Optional.empty();
-        }
-    }
-
-    public static <T> Optional<ResourceLocation> getVanillaRegistryKey(RegistryKey<Registry<T>> registry, T value)
-    {
-        try
-        {   return Optional.ofNullable(getRegistry(registry)).map(reg -> reg.getKey(value));
         }
         catch (Exception e)
         {   return Optional.empty();

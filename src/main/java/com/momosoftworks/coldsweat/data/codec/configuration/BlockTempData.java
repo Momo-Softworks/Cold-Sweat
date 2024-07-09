@@ -4,10 +4,10 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ITag;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
@@ -45,13 +45,13 @@ public class BlockTempData
     }
 
     public static final Codec<BlockTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            RegistryHelper.createForgeTagCodec(ForgeRegistries.BLOCKS, Registry.BLOCK).listOf().fieldOf("blocks").forGetter(data -> data.blocks),
+            Codec.either(ITag.codec(BlockTags::getAllTags), Registry.BLOCK).listOf().fieldOf("blocks").forGetter(data -> data.blocks),
             Codec.DOUBLE.fieldOf("temperature").forGetter(data -> data.temperature),
             Codec.DOUBLE.optionalFieldOf("max_effect", Double.MAX_VALUE).forGetter(data -> data.maxEffect),
             Codec.DOUBLE.optionalFieldOf("range", Double.MAX_VALUE).forGetter(data -> data.range),
             Codec.BOOL.optionalFieldOf("fade", true).forGetter(data -> data.fade),
             BlockState.CODEC.listOf().optionalFieldOf("conditions", Arrays.asList()).forGetter(data -> data.conditions),
-            CompoundNBT.CODEC.optionalFieldOf("tag").forGetter(data -> data.tag),
+            CompoundNBT.CODEC.optionalFieldOf("nbt").forGetter(data -> data.tag),
             Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(data -> data.requiredMods)
     ).apply(instance, BlockTempData::new));
 

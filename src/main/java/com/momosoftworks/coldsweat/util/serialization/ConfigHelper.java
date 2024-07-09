@@ -27,6 +27,7 @@ import net.minecraft.world.DimensionType;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.ForgeRegistryEntry;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -40,22 +41,55 @@ public class ConfigHelper
 
     public static <T> List<T> parseRegistryItems(RegistryKey<Registry<T>> registry, String objects)
     {
-        List<T> biomeList = new ArrayList<>();
-        Registry<T> reg = RegistryHelper.getRegistry(registry);
-        if (reg == null) return biomeList;
+        List<T> parsedObjects = new ArrayList<>();
+        Optional<Registry<T>> optReg = registryAccess.registry(registry);
+        if (!optReg.isPresent()) return parsedObjects;
+
+        Registry<T> reg = optReg.get();
 
         for (String objString : objects.split(","))
         {
-            ResourceLocation id = new ResourceLocation(objString);
-            Optional<T> obj = RegistryHelper.getVanillaRegistryValue(registry, id);
-            if (!obj.isPresent())
+            if (objString.startsWith("#"))
             {
-                ColdSweat.LOGGER.error("Error parsing config: \"{}\" does not exist", objString);
-                continue;
+                ITagCollection<T> tags = getTagsForRegistry(registry);
+                if (tags == null) continue;
+
+                final String tagID = objString.replace("#", "");
+                ITag<T> itemTag = tags.getTag(new ResourceLocation(tagID));
+                if (itemTag != null)
+                {   parsedObjects.addAll(itemTag.getValues());
+                }
             }
-            biomeList.add(obj.get());
+            else
+            {
+                ResourceLocation id = new ResourceLocation(objString);
+                Optional<T> obj = Optional.ofNullable(reg.get(id));
+                if (!obj.isPresent())
+                {
+                    ColdSweat.LOGGER.error("Error parsing config: \"{}\" does not exist", objString);
+                    continue;
+                }
+                parsedObjects.add(obj.get());
+            }
         }
-        return biomeList;
+        return parsedObjects;
+    }
+
+    private static <T>ITagCollection<T> getTagsForRegistry(RegistryKey<Registry<T>> registry)
+    {
+        if (registry.equals(Registry.ITEM_REGISTRY))
+        {   return ((ITagCollection<T>) ItemTags.getAllTags());
+        }
+        else if (registry.equals(Registry.BLOCK_REGISTRY))
+        {   return ((ITagCollection<T>) BlockTags.getAllTags());
+        }
+        else if (registry.equals(Registry.FLUID_REGISTRY))
+        {   return ((ITagCollection<T>) FluidTags.getAllTags());
+        }
+        else if (registry.equals(Registry.ENTITY_TYPE_REGISTRY))
+        {   return ((ITagCollection<T>) EntityTypeTags.getAllTags());
+        }
+        return null;
     }
 
     public static List<Block> getBlocks(String... ids)

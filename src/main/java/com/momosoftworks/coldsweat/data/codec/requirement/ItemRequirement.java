@@ -50,24 +50,7 @@ public class ItemRequirement
     }
 
     public static final Codec<ItemRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.STRING.xmap(
-            // Convert from a string to a TagKey
-            string ->
-            {
-                ResourceLocation itemLocation = new ResourceLocation(string.replace("#", ""));
-                if (!string.contains("#")) return Either.<ITag<Item>, Item>right(ForgeRegistries.ITEMS.getValue(itemLocation));
-
-                return Either.<ITag<Item>, Item>left(ItemTags.getAllTags().getTag(itemLocation));
-            },
-            // Convert from a TagKey to a string
-            either ->
-            {   return either.left().isPresent()
-                       ? "#" + ItemTags.getAllTags().getId(either.left().get())
-                       : either.right().map(item -> ForgeRegistries.ITEMS.getKey(item).toString()).orElse("");
-
-            })
-            .listOf()
-            .fieldOf("items").forGetter(predicate -> predicate.items),
+            Codec.either(ITag.codec(ItemTags::getAllTags), Registry.ITEM).listOf().fieldOf("items").forGetter(predicate -> predicate.items),
             IntegerBounds.CODEC.optionalFieldOf("count").forGetter(predicate -> predicate.count),
             IntegerBounds.CODEC.optionalFieldOf("durability").forGetter(predicate -> predicate.durability),
             EnchantmentRequirement.CODEC.listOf().optionalFieldOf("enchantments").forGetter(predicate -> predicate.enchantments),
