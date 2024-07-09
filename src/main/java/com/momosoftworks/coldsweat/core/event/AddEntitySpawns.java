@@ -5,12 +5,12 @@ import com.momosoftworks.coldsweat.data.codec.configuration.SpawnBiomeData;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.entity.EntityClassification;
+import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.world.biome.MobSpawnInfo;
 import net.minecraftforge.event.world.BiomeLoadingEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
 
 @Mod.EventBusSubscriber
 public class AddEntitySpawns
@@ -18,7 +18,10 @@ public class AddEntitySpawns
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onBiomeLoading(BiomeLoadingEvent event)
     {
-        CSMath.doIfNotNull(ConfigSettings.ENTITY_SPAWN_BIOMES.get().get(RegistryHelper.getBiome(event.getName(), RegistryHelper.getDynamicRegistries())), spawns ->
+        DynamicRegistries registryAccess = RegistryHelper.getDynamicRegistries();
+        if (registryAccess == null) return;
+
+        CSMath.doIfNotNull(ConfigSettings.ENTITY_SPAWN_BIOMES.get(registryAccess).get(RegistryHelper.getBiome(event.getName(), registryAccess)), spawns ->
         {
             for (SpawnBiomeData spawnBiomeData : spawns)
             {
