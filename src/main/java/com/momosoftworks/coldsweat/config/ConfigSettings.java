@@ -787,12 +787,20 @@ public class ConfigSettings
 
     public static void load(RegistryAccess registryAccess)
     {
-        CONFIG_SETTINGS.values().forEach(DynamicHolder::load);
         if (registryAccess != null)
-        {   ConfigRegistryHandler.collectConfigRegistries(registryAccess);
+        {
+            CONFIG_SETTINGS.values().forEach(dynamicHolder -> dynamicHolder.load(registryAccess));
+            ConfigRegistryHandler.collectConfigRegistries(registryAccess);
         }
         else
-        {   ColdSweat.LOGGER.warn("Loading Cold Sweat config settings without loading registries. This is normal during startup.");
+        {
+            ColdSweat.LOGGER.warn("Loading Cold Sweat config settings without registry access. This is normal during startup.");
+            CONFIG_SETTINGS.values().forEach(dynamicHolder ->
+            {
+                if (!dynamicHolder.requiresRegistries())
+                {   dynamicHolder.load();
+                }
+            });
         }
     }
 }
