@@ -45,8 +45,10 @@ public class ConfigHelper
     public static <T> List<T> parseRegistryItems(ResourceKey<Registry<T>> registry, String objects)
     {
         List<T> biomeList = new ArrayList<>();
-        Registry<T> reg = RegistryHelper.getRegistry(registry);
-        if (reg == null) return biomeList;
+        Optional<Registry<T>> optReg = registryAccess.registry(registry);
+        if (!optReg.isPresent()) return biomeList;
+
+        Registry<T> reg = optReg.get();
 
         for (String objString : objects.split(","))
         {
@@ -59,7 +61,7 @@ public class ConfigHelper
             else
             {
                 ResourceLocation id = new ResourceLocation(objString);
-                Optional<T> obj = RegistryHelper.getVanillaRegistryValue(registry, id);
+                Optional<T> obj = Optional.ofNullable(reg.get(id));
                 if (obj.isEmpty())
                 {
                     ColdSweat.LOGGER.error("Error parsing config: \"{}\" does not exist", objString);

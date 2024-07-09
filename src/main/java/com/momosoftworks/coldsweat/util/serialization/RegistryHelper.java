@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.util.serialization;
 
 import com.mojang.datafixers.util.Either;
-import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.client.Minecraft;
@@ -96,56 +95,10 @@ public class RegistryHelper
         return list;
     }
 
-    public static <T extends IForgeRegistryEntry<T>> Codec<Either<TagKey<T>, T>> createForgeTagCodec(IForgeRegistry<T> forgeRegistry, ResourceKey<Registry<T>> vanillaRegistry)
-    {
-        return Codec.STRING.xmap(
-               objectPath ->
-               {
-                   if (objectPath.startsWith("#"))
-                   {   return Either.left(TagKey.create(vanillaRegistry, new ResourceLocation(objectPath.substring(1))));
-                   }
-                   else
-                   {   return Either.right(forgeRegistry.getValue(new ResourceLocation(objectPath)));
-                   }
-               },
-               objectEither -> objectEither.map(
-                       tagKey -> "#" + tagKey.location(),
-                       object -> forgeRegistry.getKey(object).toString()
-               ));
-    }
-
-    public static <T> Codec<Either<TagKey<T>, T>> createVanillaTagCodec(ResourceKey<Registry<T>> vanillaRegistry)
-    {
-        return Codec.STRING.xmap(
-               objectPath ->
-               {
-                   if (objectPath.startsWith("#"))
-                   {   return Either.left(TagKey.create(vanillaRegistry, new ResourceLocation(objectPath.substring(1))));
-                   }
-                   else
-                   {   return Either.right(getVanillaRegistryValue(vanillaRegistry, new ResourceLocation(objectPath)).orElseThrow());
-                   }
-               },
-               objectEither -> objectEither.map(
-                       tagKey -> "#" + tagKey.location(),
-                       object -> getVanillaRegistryKey(vanillaRegistry, object).orElseThrow().toString()
-               ));
-    }
-
-    public static <T> Optional<T> getVanillaRegistryValue(ResourceKey< Registry<T>> registry, ResourceLocation id)
+    public static <T> Optional<T> getVanillaRegistryValue(ResourceKey<Registry<T>> registry, ResourceLocation id)
     {
         try
         {   return Optional.ofNullable(getRegistry(registry)).map(reg -> reg.get(id));
-        }
-        catch (Exception e)
-        {   return Optional.empty();
-        }
-    }
-
-    public static <T> Optional<ResourceLocation> getVanillaRegistryKey(ResourceKey<Registry<T>> registry, T value)
-    {
-        try
-        {   return Optional.ofNullable(getRegistry(registry)).map(reg -> reg.getKey(value));
         }
         catch (Exception e)
         {   return Optional.empty();
