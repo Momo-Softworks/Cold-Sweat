@@ -6,7 +6,7 @@ import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManag
 import com.momosoftworks.coldsweat.common.item.component.ArmorInsulation;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
-import com.momosoftworks.coldsweat.core.init.MenuInit;
+import com.momosoftworks.coldsweat.core.init.ModMenus;
 import com.momosoftworks.coldsweat.core.init.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.core.init.ModItemComponents;
 import com.momosoftworks.coldsweat.core.network.message.SyncContainerSlotMessage;
@@ -112,7 +112,7 @@ public class SewingContainer extends AbstractContainerMenu
 
     public SewingContainer(final int windowId, final Inventory playerInv)
     {
-        super(MenuInit.SEWING_CONTAINER_TYPE.get(), windowId);
+        super(ModMenus.SEWING_CONTAINER_TYPE.get(), windowId);
         this.pos = playerInv.player.blockPosition();
         this.playerInventory = playerInv;
         sewingInventory = new SewingInventory(this);

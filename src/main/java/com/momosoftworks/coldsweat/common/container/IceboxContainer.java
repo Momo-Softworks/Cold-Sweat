@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.common.container;
 
 import com.momosoftworks.coldsweat.common.blockentity.IceboxBlockEntity;
-import com.momosoftworks.coldsweat.core.init.MenuInit;
+import com.momosoftworks.coldsweat.core.init.ModMenus;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.network.FriendlyByteBuf;
@@ -20,7 +20,7 @@ public class IceboxContainer extends AbstractContainerMenu
 
     public IceboxContainer(final int windowId, final Inventory playerInv, final IceboxBlockEntity te)
     {
-        super(MenuInit.ICEBOX_CONTAINER_TYPE.get(), windowId);
+        super(ModMenus.ICEBOX_CONTAINER_TYPE.get(), windowId);
         this.te = te;
 
         // Fuel slot

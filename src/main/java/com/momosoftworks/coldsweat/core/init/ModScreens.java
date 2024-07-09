@@ -15,9 +15,9 @@ public class ModScreens
     @SubscribeEvent
     public static void clientSetup(RegisterMenuScreensEvent event)
     {
-        event.register(MenuInit.BOILER_CONTAINER_TYPE.get(), BoilerScreen::new);
-        event.register(MenuInit.ICEBOX_CONTAINER_TYPE.get(), IceboxScreen::new);
-        event.register(MenuInit.SEWING_CONTAINER_TYPE.get(), SewingScreen::new);
-        event.register(MenuInit.HEARTH_CONTAINER_TYPE.get(), HearthScreen::new);
+        event.register(ModMenus.BOILER_CONTAINER_TYPE.get(), BoilerScreen::new);
+        event.register(ModMenus.ICEBOX_CONTAINER_TYPE.get(), IceboxScreen::new);
+        event.register(ModMenus.SEWING_CONTAINER_TYPE.get(), SewingScreen::new);
+        event.register(ModMenus.HEARTH_CONTAINER_TYPE.get(), HearthScreen::new);
     }
 }

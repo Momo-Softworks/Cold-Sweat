@@ -2,7 +2,7 @@ package com.momosoftworks.coldsweat.common.container;
 
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
-import com.momosoftworks.coldsweat.core.init.MenuInit;
+import com.momosoftworks.coldsweat.core.init.ModMenus;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.FriendlyByteBuf;
@@ -25,7 +25,7 @@ public class HearthContainer extends AbstractContainerMenu
     public final HearthBlockEntity te;
     public HearthContainer(final int windowId, final Inventory playerInv, final HearthBlockEntity te)
     {
-        super(MenuInit.HEARTH_CONTAINER_TYPE.get(), windowId);
+        super(ModMenus.HEARTH_CONTAINER_TYPE.get(), windowId);
         this.te = te;
 
         // Block entity slots

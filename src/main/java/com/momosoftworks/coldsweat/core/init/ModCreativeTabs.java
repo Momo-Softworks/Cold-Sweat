@@ -18,7 +18,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import java.util.*;
 import java.util.stream.Stream;
 
-public class CreativeTabInit
+public class ModCreativeTabs
 {
     public static final DeferredRegister<CreativeModeTab> ITEM_GROUPS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, ColdSweat.MOD_ID);
 

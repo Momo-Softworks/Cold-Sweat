@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.common.container;
 
 import com.momosoftworks.coldsweat.common.blockentity.BoilerBlockEntity;
-import com.momosoftworks.coldsweat.core.init.MenuInit;
+import com.momosoftworks.coldsweat.core.init.ModMenus;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.network.FriendlyByteBuf;
@@ -20,7 +20,7 @@ public class BoilerContainer extends AbstractContainerMenu
 
     public BoilerContainer(final int windowId, final Inventory playerInv, final BoilerBlockEntity te)
     {
-        super(MenuInit.BOILER_CONTAINER_TYPE.get(), windowId);
+        super(ModMenus.BOILER_CONTAINER_TYPE.get(), windowId);
         this.te = te;
 
         // Fuel slot

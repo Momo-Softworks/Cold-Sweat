@@ -20,7 +20,7 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 import java.util.ArrayList;
 
 @EventBusSubscriber
-public class CommandInit
+public class ModCommands
 {
     private static final ArrayList<BaseCommand> COMMANDS = new ArrayList<>();
 
