@@ -156,6 +156,10 @@ public class DynamicHolder<T>
     {   return synced;
     }
 
+    public boolean requiresRegistries()
+    {   return requireRegistries;
+    }
+
     @FunctionalInterface
     public interface Getter<T>
     {
