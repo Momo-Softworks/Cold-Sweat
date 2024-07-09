@@ -3,15 +3,12 @@ package com.momosoftworks.coldsweat.data.codec.requirement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Monster;
-import net.neoforged.fml.common.EventBusSubscriber;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,12 +45,12 @@ public record EntityRequirement(Optional<EntityType<?>> type, Optional<LocationR
     }
 
     public static Codec<EntityRequirement> getCodec()
-    {   return REQUIREMENT_CODEC_STACK.get(REQUIREMENT_CODEC_STACK.size() - 1);
+    {   return REQUIREMENT_CODEC_STACK.getLast();
     }
 
     private static void addCodecStack()
     {
-        var latestCodec = REQUIREMENT_CODEC_STACK.get(REQUIREMENT_CODEC_STACK.size() - 1);
+        var latestCodec = REQUIREMENT_CODEC_STACK.getLast();
         var codec = RecordCodecBuilder.<EntityRequirement>create(instance -> instance.group(
                 BuiltInRegistries.ENTITY_TYPE.byNameCodec().optionalFieldOf("type").forGetter(requirement -> requirement.type),
                 LocationRequirement.CODEC.optionalFieldOf("location").forGetter(requirement -> requirement.location),

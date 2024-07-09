@@ -3,7 +3,6 @@ package com.momosoftworks.coldsweat.data.codec.configuration;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
@@ -18,7 +17,7 @@ public record SpawnBiomeData(List<Either<TagKey<Biome>, Biome>> biomes, MobCateg
                              int weight, List<Either<TagKey<EntityType<?>>, EntityType<?>>> entities, Optional<List<String>> requiredMods)
 {
     public static final Codec<SpawnBiomeData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            RegistryHelper.createTagCodec(Registries.BIOME).listOf().fieldOf("biomes").forGetter(SpawnBiomeData::biomes),
+            Codec.either(TagKey.codec(Registries.BIOME), Biome.DIRECT_CODEC).listOf().fieldOf("biomes").forGetter(SpawnBiomeData::biomes),
             MobCategory.CODEC.fieldOf("category").forGetter(SpawnBiomeData::category),
             Codec.INT.fieldOf("weight").forGetter(SpawnBiomeData::weight),
             Codec.either(TagKey.codec(Registries.ENTITY_TYPE), BuiltInRegistries.ENTITY_TYPE.byNameCodec()).listOf().fieldOf("entities").forGetter(SpawnBiomeData::entities),

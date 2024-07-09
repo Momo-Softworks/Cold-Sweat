@@ -84,38 +84,10 @@ public class RegistryHelper
         return list;
     }
 
-    public static <T> Codec<Either<TagKey<T>, T>> createTagCodec(ResourceKey<Registry<T>> vanillaRegistry)
-    {
-        return Codec.STRING.xmap(
-               objectPath ->
-               {
-                   if (objectPath.startsWith("#"))
-                   {   return Either.left(TagKey.create(vanillaRegistry, ResourceLocation.parse(objectPath.substring(1))));
-                   }
-                   else
-                   {   return Either.right(getVanillaRegistryValue(vanillaRegistry, ResourceLocation.parse(objectPath)).orElseThrow());
-                   }
-               },
-               objectEither -> objectEither.map(
-                       tagKey -> "#" + tagKey.location(),
-                       object -> getVanillaRegistryKey(vanillaRegistry, object).orElseThrow().toString()
-               ));
-    }
-
     public static <T> Optional<T> getVanillaRegistryValue(ResourceKey<Registry<T>> registry, ResourceLocation id)
     {
         try
         {   return Optional.ofNullable(getRegistry(registry)).map(reg -> reg.get(id));
-        }
-        catch (Exception e)
-        {   return Optional.empty();
-        }
-    }
-
-    public static <T> Optional<ResourceLocation> getVanillaRegistryKey(ResourceKey<Registry<T>> registry, T value)
-    {
-        try
-        {   return Optional.ofNullable(getRegistry(registry)).map(reg -> reg.getKey(value));
         }
         catch (Exception e)
         {   return Optional.empty();
