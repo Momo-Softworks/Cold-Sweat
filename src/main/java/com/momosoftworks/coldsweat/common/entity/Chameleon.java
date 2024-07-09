@@ -208,7 +208,7 @@ public class Chameleon extends Animal
         }
         else if (this.isPlayerTrusted(player) && player.getPassengers().isEmpty())
         {   this.startRiding(player);
-            return InteractionResult.SUCCESS;
+            return InteractionResult.sidedSuccess(this.level().isClientSide);
         }
 
         return InteractionResult.PASS;
