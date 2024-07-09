@@ -14,8 +14,7 @@
     "MixinItemTooltip",
     "MixinPickEntity",
     "MixinXPBar",
-    "MixinXPBar$MixinItemLabel",
-    "compat.MixinCreateOverlay"
+    "MixinXPBar$MixinItemLabel"
   ],
   "mixins": [
     "MixinBeforeServerStart",
