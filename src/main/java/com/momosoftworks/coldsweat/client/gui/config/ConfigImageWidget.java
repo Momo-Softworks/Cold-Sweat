@@ -9,7 +9,6 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 
-// TODO: Check if this works
 public class ConfigImageWidget extends AbstractWidget implements GuiEventListener, NarratableEntry
 {
     ResourceLocation texture;

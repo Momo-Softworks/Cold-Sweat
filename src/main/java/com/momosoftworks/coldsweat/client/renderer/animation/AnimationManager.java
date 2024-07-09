@@ -81,7 +81,6 @@ public class AnimationManager
     public static void animateEntity(Entity entity, BiFunction<Float, Float, Float> animator)
     {
         float timer = ANIMATION_TIMERS.computeIfAbsent(entity, ent -> 0f);
-        // TODO: Check if this works
         ANIMATION_TIMERS.put(entity, animator.apply(timer, Minecraft.getInstance().getTimer().getGameTimeDeltaTicks() / 20));
     }
 }

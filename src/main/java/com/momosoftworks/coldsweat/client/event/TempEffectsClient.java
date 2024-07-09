@@ -54,7 +54,6 @@ public class TempEffectsClient
         if (!Minecraft.getInstance().isPaused() && player != null)
         {
             // Get the FPS of the game
-            // TODO: Check this
             float frameTime = Minecraft.getInstance().getTimer().getRealtimeDeltaTicks();
             float temp = (float) Temperature.get(player, Temperature.Trait.BODY);
             // Get a blended version of the player's temperature

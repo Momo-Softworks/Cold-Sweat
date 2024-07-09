@@ -37,7 +37,6 @@ public class ChameleonEntityRenderer<T extends Chameleon> extends MobRenderer<Ch
             float playerHeadPitch = player.getViewXRot(partialTick);
             float ridingOffset = player.getItemBySlot(EquipmentSlot.HEAD).is(ModItems.HOGLIN_HEADPIECE)
                                  ? 0.65f : 0.4f;
-            // TODO: Check if this is right
             ps.mulPose(CSMath.toQuaternion(0, -CSMath.toRadians(playerHeadYaw), 0));
             ps.translate(0, -0.4, 0);
             ps.mulPose(CSMath.toQuaternion(CSMath.toRadians(playerHeadPitch), 0, 0));
