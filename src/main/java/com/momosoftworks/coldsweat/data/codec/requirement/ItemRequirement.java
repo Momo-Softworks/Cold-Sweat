@@ -30,24 +30,7 @@ public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
                               Optional<Potion> potion, NbtRequirement nbt)
 {
     public static final Codec<ItemRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.STRING.xmap(
-            // Convert from a string to a TagKey
-            string ->
-            {
-                ResourceLocation itemLocation = new ResourceLocation(string.replace("#", ""));
-                if (!string.contains("#")) return Either.<TagKey<Item>, Item>right(ForgeRegistries.ITEMS.getValue(itemLocation));
-
-                return Either.<TagKey<Item>, Item>left(TagKey.create(Registries.ITEM, itemLocation));
-            },
-            // Convert from a TagKey to a string
-            either ->
-            {   return either.left().isPresent()
-                       ? "#" + either.left().get().location()
-                       : either.right().map(item -> ForgeRegistries.ITEMS.getKey(item).toString()).orElse("");
-
-            })
-            .listOf()
-            .fieldOf("items").forGetter(ItemRequirement::items),
+            Codec.either(TagKey.codec(Registries.ITEM), ForgeRegistries.ITEMS.getCodec()).listOf().fieldOf("items").forGetter(ItemRequirement::items),
             IntegerBounds.CODEC.optionalFieldOf("count").forGetter(predicate -> predicate.count),
             IntegerBounds.CODEC.optionalFieldOf("durability").forGetter(predicate -> predicate.durability),
             EnchantmentRequirement.CODEC.listOf().optionalFieldOf("enchantments").forGetter(predicate -> predicate.enchantments),

@@ -2197,3 +2197,5 @@ Fixes:
 - Fixed player temperature not updating after joining a world or dying in some cases
 - Fixed missing subtitles for hearth-like blocks running out of fuel
 - Fixed missing subtitles for filling/emptying a waterskin
+
+
