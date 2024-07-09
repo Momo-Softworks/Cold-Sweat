@@ -17,7 +17,7 @@ import net.minecraft.world.server.ServerWorld;
 public class HumidBiomeEdible extends BiomeSearchingEdible
 {
     public HumidBiomeEdible()
-    {   super(biome -> biome.getDownfall() > 0.85f);
+    {   super((level, biome) -> biome.getDownfall() > 0.85f);
     }
 
     @Override

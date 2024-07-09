@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.data.codec.configuration;
 
 import com.google.common.collect.Multimap;
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
@@ -59,10 +60,6 @@ public class InsulatorData implements NbtSerializable
     public CompoundNBT serialize()
     {
         CompoundNBT tag = new CompoundNBT();
-        ListNBT items = new ListNBT();
-        ListNBT tags = new ListNBT();
-        tag.put("items", items);
-        tag.put("tags", tags);
         tag.putString("type", slot.name());
         tag.put("insulation", insulation.serialize());
         tag.put("data", data.serialize());
@@ -89,9 +86,6 @@ public class InsulatorData implements NbtSerializable
 
     public static InsulatorData deserialize(CompoundNBT nbt)
     {
-        List<Either<ITag<Item>, Item>> items = new ArrayList<>();
-        ListNBT itemsTag = nbt.getList("items", 8);
-        ListNBT tags = nbt.getList("tags", 8);
         Insulation.Slot slot = Insulation.Slot.valueOf(nbt.getString("type"));
         Insulation insulation = Insulation.deserialize(nbt.getCompound("insulation"));
         ItemRequirement requirement = ItemRequirement.deserialize(nbt.getCompound("data"));
