@@ -12,6 +12,9 @@ Cold Sweat is a highly-extensible temperature mod for Minecraft. See the documen
 https://mikul.gitbook.io/cold-sweat/
 '''
 
+[[mixins]]
+config="cold_sweat.mixin.json"
+
 [[accessTransformers]]
    file="META-INF/coldsweat_at.cfg"
 
