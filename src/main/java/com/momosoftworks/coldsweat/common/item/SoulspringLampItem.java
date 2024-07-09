@@ -15,6 +15,7 @@ import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.EntityTypeTags;
@@ -43,7 +44,8 @@ public class SoulspringLampItem extends Item
     {
         super(new Properties().stacksTo(1).fireResistant().rarity(Rarity.UNCOMMON)
                               .component(ModItemComponents.SOULSPRING_LAMP_LIT, false)
-                              .component(ModItemComponents.SOULSPRING_LAMP_FUEL, 0d));
+                              .component(ModItemComponents.SOULSPRING_LAMP_FUEL, 0d)
+                              .component(DataComponents.CUSTOM_DATA, CustomData.of(new CompoundTag())));
     }
 
     @Override
@@ -103,7 +105,7 @@ public class SoulspringLampItem extends Item
             }
             finally
             {
-                CustomData itemTag = stack.get(DataComponents.CUSTOM_DATA);
+                CustomData itemTag = NBTHelper.getOrCreateTag(stack);
                 // If the conditions are not met, turn off the lamp
                 if (itemTag.copyTag().getInt("stateChangeTimer") <= 0
                 && CSMath.orElse(stack.get(ModItemComponents.SOULSPRING_LAMP_LIT), false) != shouldBeOn)

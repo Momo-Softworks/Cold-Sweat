@@ -121,12 +121,16 @@ public class NBTHelper
     {   return stack.has(DataComponents.CUSTOM_DATA) ? stack.get(DataComponents.CUSTOM_DATA).copyTag() : new CompoundTag();
     }
 
-    public static void ensureTagAndDo(ItemStack stack, Consumer<CompoundTag> action)
+    public static CustomData getOrCreateTag(ItemStack stack)
     {
         if (!stack.has(DataComponents.CUSTOM_DATA))
         {   stack.set(DataComponents.CUSTOM_DATA, CustomData.of(new CompoundTag()));
         }
-        stack.get(DataComponents.CUSTOM_DATA).update(action);
+        return stack.get(DataComponents.CUSTOM_DATA);
+    }
+
+    public static void ensureTagAndDo(ItemStack stack, Consumer<CompoundTag> action)
+    {   getOrCreateTag(stack).update(action);
     }
 
     /**
