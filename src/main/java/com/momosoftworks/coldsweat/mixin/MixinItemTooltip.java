@@ -4,7 +4,6 @@ import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.client.event.TooltipHandler;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
-import com.momosoftworks.coldsweat.common.item.component.ArmorInsulation;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -81,19 +80,20 @@ public abstract class MixinItemTooltip
                 }
             }
         });
-        ArmorInsulation cap = ItemInsulationManager.getInsulationCap(stack);
-        cap.getInsulation().stream().map(Pair::getFirst).forEach(item ->
+        Optional.ofNullable(ItemInsulationManager.getInsulationCap(stack)).ifPresent(cap ->
         {
-            Optional.ofNullable(ConfigSettings.INSULATION_ITEMS.get().get(item.getItem())).ifPresent(insulator ->
+            cap.getInsulation().stream().map(Pair::getFirst).forEach(item ->
             {
-                for (Map.Entry<Attribute, AttributeModifier> entry : insulator.attributes().getMap().entries())
-                {   addModifierTooltip(pTooltipAdder, pPlayer, Holder.direct(entry.getKey()), entry.getValue());
-                }
+                Optional.ofNullable(ConfigSettings.INSULATION_ITEMS.get().get(item.getItem())).ifPresent(insulator ->
+                {
+                    for (Map.Entry<Attribute, AttributeModifier> entry : insulator.attributes().getMap().entries())
+                    {   addModifierTooltip(pTooltipAdder, pPlayer, Holder.direct(entry.getKey()), entry.getValue());
+                    }
+                });
             });
         });
     }
 
-    //TODO: Make sure this works
     @Inject(method = "addModifierTooltip",
             at = @At(value = "INVOKE", target = "Ljava/util/function/Consumer;accept(Ljava/lang/Object;)V"),
             cancellable = true)
