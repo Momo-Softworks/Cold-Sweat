@@ -123,7 +123,7 @@ public class ConfigSettings
     // Entity Settings
     public static final DynamicHolder<Triplet<Integer, Integer, Double>> FUR_TIMINGS;
     public static final DynamicHolder<Triplet<Integer, Integer, Double>> SHED_TIMINGS;
-    public static final DynamicHolder<Multimap<Biome, SpawnBiomeData>> ENTITY_SPAWN_BIOMES;
+    public static final DynamicHolder<Multimap<ResourceLocation, SpawnBiomeData>> ENTITY_SPAWN_BIOMES;
     public static final DynamicHolder<Map<EntityType<?>, InsulatingMount>> INSULATED_ENTITIES;
 
     // Client Settings
@@ -509,20 +509,20 @@ public class ConfigSettings
             EntitySettingsConfig.getInstance().setChameleonShedStats(list);
         });
 
-        ENTITY_SPAWN_BIOMES = addSettingWithRegistries("entity_spawn_biomes", (registryAccess) ->
+        ENTITY_SPAWN_BIOMES = addSetting("entity_spawn_biomes", () ->
         {
-            Multimap<Biome, SpawnBiomeData> map = HashMultimap.create();
+            Multimap<ResourceLocation, SpawnBiomeData> map = HashMultimap.create();
             // Function to read biomes from configs and put them in the config settings
-            Consumer<List<? extends List<?>>> configReader = configBiomes ->
+            BiConsumer<List<? extends List<?>>, EntityType<?>> configReader = (configBiomes, entityType) ->
             {
                 for (List<?> entry : configBiomes)
                 {
                     String biomeId = ((String) entry.get(0));
-                    List<Biome> biomes = ConfigHelper.parseRegistryItems(Registry.BIOME_REGISTRY, registryAccess, biomeId);
-                    for (Biome biome : biomes)
+                    List<ResourceLocation> biomes = Arrays.stream(biomeId.split(",")).map(ResourceLocation::new).collect(Collectors.toList());
+                    for (ResourceLocation biome : biomes)
                     {
-                        SpawnBiomeData spawnData = new SpawnBiomeData(biomes, EntityClassification.CREATURE, ((Number) entry.get(1)).intValue(),
-                                                                      Arrays.asList(Either.right(ModEntities.CHAMELEON)),
+                        SpawnBiomeData spawnData = new SpawnBiomeData(Collections.emptyList(), EntityClassification.CREATURE, ((Number) entry.get(1)).intValue(),
+                                                                      Arrays.asList(Either.right(entityType)),
                                                                       Optional.empty());
                         map.put(biome, spawnData);
                     }
@@ -530,8 +530,8 @@ public class ConfigSettings
             };
 
             // Parse goat and chameleon biomes
-            configReader.accept(EntitySettingsConfig.getInstance().getChameleonSpawnBiomes());
-            configReader.accept(EntitySettingsConfig.getInstance().getLlamaSpawnBiomes());
+            configReader.accept(EntitySettingsConfig.getInstance().getChameleonSpawnBiomes(), ModEntities.CHAMELEON);
+            configReader.accept(EntitySettingsConfig.getInstance().getLlamaSpawnBiomes(), EntityType.LLAMA);
 
             return map;
         });
