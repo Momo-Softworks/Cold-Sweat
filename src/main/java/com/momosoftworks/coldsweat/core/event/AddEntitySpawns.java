@@ -10,6 +10,7 @@ import net.minecraftforge.event.world.BiomeLoadingEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.ForgeRegistries;
 
 @Mod.EventBusSubscriber
 public class AddEntitySpawns
@@ -17,7 +18,7 @@ public class AddEntitySpawns
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onBiomeLoading(BiomeLoadingEvent event)
     {
-        CSMath.doIfNotNull(ConfigSettings.ENTITY_SPAWN_BIOMES.get().get(event.getName()), spawns ->
+        CSMath.doIfNotNull(ConfigSettings.ENTITY_SPAWN_BIOMES.get().get(RegistryHelper.getBiome(event.getName(), RegistryHelper.getDynamicRegistries())), spawns ->
         {
             for (SpawnBiomeData spawnBiomeData : spawns)
             {
