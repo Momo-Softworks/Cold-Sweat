@@ -511,7 +511,7 @@ public class ConfigSettings
         {
             Multimap<Biome, SpawnBiomeData> map = HashMultimap.create();
             // Function to read biomes from configs and put them in the config settings
-            Consumer<List<? extends List<?>>> configReader = configBiomes ->
+            BiConsumer<List<? extends List<?>>, EntityType<?>> configReader = (configBiomes, entityType) ->
             {
                 for (List<?> entry : configBiomes)
                 {
@@ -531,7 +531,7 @@ public class ConfigSettings
                     for (Biome biome : biomes)
                     {
                         SpawnBiomeData spawnData = new SpawnBiomeData(List.of(biomeEither), MobCategory.CREATURE, ((Number) entry.get(1)).intValue(),
-                                                                      List.of(Either.right(ModEntities.CHAMELEON)),
+                                                                      List.of(Either.right(entityType)),
                                                                       Optional.empty());
                         map.put(biome, spawnData);
                     }
@@ -539,8 +539,8 @@ public class ConfigSettings
             };
 
             // Parse goat and chameleon biomes
-            configReader.accept(EntitySettingsConfig.getInstance().getChameleonSpawnBiomes());
-            configReader.accept(EntitySettingsConfig.getInstance().getGoatSpawnBiomes());
+            configReader.accept(EntitySettingsConfig.getInstance().getChameleonSpawnBiomes(), ModEntities.CHAMELEON);
+            configReader.accept(EntitySettingsConfig.getInstance().getGoatSpawnBiomes(), EntityType.GOAT);
 
             return map;
         });
