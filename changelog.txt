@@ -2199,3 +2199,12 @@ Fixes:
 - Fixed missing subtitles for filling/emptying a waterskin
 
 
+------------------------------------------------------------------------------------------------------------------------
+2.3-b04e
+
+Fixes:
+- Fixed the mod failing to load due to duplicate sound registries
+- Fixed redundant attribute modifier queries on the player's armor causing unnecessary performance impact
+
+Technical Changes:
+- Config settings can now be declared to require a RegistryAccess when saving/loading (see ConfigSetings.java)
