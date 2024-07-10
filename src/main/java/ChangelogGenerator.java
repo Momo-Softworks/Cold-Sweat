@@ -45,10 +45,14 @@ public class ChangelogGenerator
                 boolean isImportant = lineText.startsWith("*");
                 boolean isListElement = lineText.startsWith("-") || isImportant || isMajorWarning || isWarning;
                 boolean isSectionTitle = !isListElement && lineText.endsWith(":");
-                boolean isTitleLine = !isListElement && !isSectionTitle;
+                boolean isGroupTitle = !isListElement && lineText.endsWith(":-");
+                boolean isTitleLine = !isListElement && !isSectionTitle && !isGroupTitle;
 
                 if (isTitleLine)
                 {   line = "<span style=\"font-size: 18px; color: #ffffff; font-weight: bold;\">" + line + "</span>";
+                }
+                else if (isGroupTitle)
+                {   line = "<strong style=\"font-size: 13px; color: #1A32CD;\"><u>" + line.substring(0, line.length() - 2) + "</u></strong>";
                 }
                 else if (isSectionTitle)
                 {   line = "<u><strong style=\"font-size: 14px; color: #ffffff;\">" + line + "</strong></u>";
