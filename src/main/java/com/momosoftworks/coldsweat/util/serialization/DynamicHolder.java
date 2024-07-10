@@ -145,7 +145,7 @@ public class DynamicHolder<T>
         {  throw ColdSweat.LOGGER.throwing(new SerializationException("Tried to save non-synced DynamicHolder", null));
         }
         try
-        {   saver.save(this.get(), registryAccess);
+        {   saver.save(this.get(registryAccess), registryAccess);
         }
         catch (Exception e)
         {   throw ColdSweat.LOGGER.throwing(new SerializationException("Failed to save DynamicHolder for type " + this.value.getClass().getSimpleName(), e));
