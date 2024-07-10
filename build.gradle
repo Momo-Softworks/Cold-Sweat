@@ -104,6 +104,7 @@ dependencies {
     implementation "net.neoforged:neoforge:${neo_version}"
     compileOnly "curse.maven:serene-seasons-291874:5429913-deobf"
     compileOnly "maven.modrinth:thirst-was-taken:1.21.0-2.0.0"
+    runtimeOnly "curse.maven:jei-238222:5519368"
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
