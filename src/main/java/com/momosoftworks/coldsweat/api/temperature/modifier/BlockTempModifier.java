@@ -7,6 +7,7 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.Triplet;
+import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.material.Material;
@@ -19,7 +20,6 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.IChunk;
-import org.codehaus.plexus.util.FastMap;
 
 import java.util.*;
 import java.util.function.Function;
