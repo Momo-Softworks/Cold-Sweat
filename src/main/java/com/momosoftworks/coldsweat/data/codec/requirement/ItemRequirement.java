@@ -35,7 +35,7 @@ public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
             EnchantmentRequirement.CODEC.listOf().optionalFieldOf("enchantments").forGetter(predicate -> predicate.enchantments),
             EnchantmentRequirement.CODEC.listOf().optionalFieldOf("stored_enchantments").forGetter(predicate -> predicate.storedEnchantments),
             BuiltInRegistries.POTION.byNameCodec().optionalFieldOf("potion").forGetter(predicate -> predicate.potion),
-            ItemComponentsRequirement.CODEC.optionalFieldOf("nbt", new ItemComponentsRequirement()).forGetter(predicate -> predicate.components)
+            ItemComponentsRequirement.CODEC.optionalFieldOf("components", new ItemComponentsRequirement()).forGetter(predicate -> predicate.components)
     ).apply(instance, ItemRequirement::new));
 
     public boolean test(ItemStack stack, boolean ignoreCount)
