@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern":
+  [
+    "GRG",
+    " R ",
+    " R "
+  ],
+  "key":
+  {
+    "G":
+    {
+      "tag": "c:ingots/gold"
+    },
+    "R":
+    {
+      "tag": "c:dusts/redstone"
+    }
+  },
+  "result":
+  {
+    "id": "cold_sweat:thermometer",
+    "count": 1
+  }
+}

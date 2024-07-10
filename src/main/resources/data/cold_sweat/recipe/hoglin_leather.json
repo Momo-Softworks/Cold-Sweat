@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+    "ingredients": [
+      {
+        "tag": "c:leathers/hoglin"
+      }
+    ],
+  "result":
+  {
+    "id": "minecraft:leather",
+    "count": 2
+  }
+}

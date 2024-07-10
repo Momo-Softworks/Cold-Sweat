@@ -1,0 +1,28 @@
+{
+  "type": "toughasnails:water_purifying",
+  "conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "toughasnails"
+    },
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "thirst"
+    }
+  ],
+  "ingredient": {
+    "type": "neoforge:components",
+    "item": "cold_sweat:filled_waterskin",
+    "components": {
+      "thirst:purity": 1
+    }
+  },
+  "result": {
+    "type": "neoforge:components",
+    "item": "cold_sweat:filled_waterskin",
+    "components": {
+      "thirst:purity": 3
+    }
+  },
+  "purifytime": 200
+}

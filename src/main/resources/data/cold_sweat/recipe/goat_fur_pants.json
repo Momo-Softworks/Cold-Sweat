@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern":
+  [
+    "FFF",
+    "F F",
+    "F F"
+  ],
+  "key":
+  {
+    "F":
+    {
+      "item": "cold_sweat:fur"
+    }
+  },
+  "result":
+  {
+    "id": "cold_sweat:fur_pants",
+    "count": 1
+  }
+}

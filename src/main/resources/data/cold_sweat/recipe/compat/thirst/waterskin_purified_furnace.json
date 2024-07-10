@@ -1,0 +1,34 @@
+{
+  "type": "minecraft:smelting",
+  "conditions": [
+    {
+      "type": "neoforge:mod_loaded",
+      "modid": "thirst"
+    }
+  ],
+  "ingredient": [
+    {
+      "type": "neoforge:components",
+      "item": "cold_sweat:filled_waterskin",
+      "components": {
+        "thirst:purity": 1
+      }
+    },
+    {
+      "type": "neoforge:components",
+      "item": "cold_sweat:filled_waterskin",
+      "components": {
+        "thirst:purity": 2
+      }
+    }
+  ],
+  "result": {
+    "type": "neoforge:components",
+    "item":"cold_sweat:filled_waterskin",
+    "components": {
+      "thirst:purity": 3
+    }
+  },
+  "experience": 0.35,
+  "cookingtime": 200
+}

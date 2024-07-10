@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern":
+  [
+    "   ",
+    "W W",
+    "LLL"
+  ],
+  "key":
+  {
+    "W":
+    {
+      "tag": "minecraft:wool"
+    },
+    "L":
+    {
+      "tag": "c:leathers"
+    }
+  },
+  "result":
+  {
+    "id": "cold_sweat:minecart_insulation",
+    "count": 1
+  }
+}
