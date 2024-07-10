@@ -16,7 +16,6 @@ import java.util.function.Supplier;
 public class PlayEntityAttachedSoundMessage
 {
     String sound;
-    int soundChars;
     SoundCategory category;
     float volume;
     float pitch;
@@ -29,15 +28,14 @@ public class PlayEntityAttachedSoundMessage
     PlayEntityAttachedSoundMessage(String sound, SoundCategory source, float volume, float pitch, int entityID)
     {
         this.sound = sound;
-        this.category = category;
-        soundChars = sound.length();
+        this.category = source;
         this.volume = volume;
         this.pitch = pitch;
         this.entityID = entityID;
     }
 
     public static void encode(PlayEntityAttachedSoundMessage message, PacketBuffer buffer) {
-        buffer.writeInt(message.soundChars);
+        buffer.writeInt(message.sound.length());
         buffer.writeCharSequence(message.sound, StandardCharsets.UTF_8);
         buffer.writeEnum(message.category);
         buffer.writeFloat(message.volume);
