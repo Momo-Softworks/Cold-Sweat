@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.client.event;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.momosoftworks.coldsweat.client.gui.config.ConfigScreen;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
@@ -7,19 +8,25 @@ import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.ClientConfigAskMessage;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import net.minecraft.ChatFormatting;
 import com.momosoftworks.coldsweat.util.math.Vec2i;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.AbstractSliderButton;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
+import java.lang.reflect.Field;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
@@ -61,6 +68,21 @@ public class DrawConfigButton
                                          }
                                          else ClientOnlyHelper.openConfigScreen();
                                      });
+
+            if (Minecraft.getInstance().level == null)
+            {
+                Field onTooltip = ObfuscationReflectionHelper.findField(Button.class, "f_93718_");
+                onTooltip.setAccessible(true);
+                mainButton.active = false;
+                try
+                {
+                    onTooltip.set(mainButton, (Button.OnTooltip) (button, poseStack, mouseX, mouseY) ->
+                    {   event.getScreen().renderTooltip(poseStack, Component.translatable("tooltip.cold_sweat.config.must_be_in_game").withStyle(ChatFormatting.RED), mouseX, mouseY);
+                    });
+                }
+                catch (Exception ignored) {}
+            }
+
             // Add main button
             event.addListener(mainButton);
 
