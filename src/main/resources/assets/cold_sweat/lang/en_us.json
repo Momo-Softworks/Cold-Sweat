@@ -37,6 +37,7 @@
   "entity.cold_sweat.chameleon": "Chameleon",
 
 
+  "tooltip.cold_sweat.config.must_be_in_game": "Must be in-game to edit configs",
   "tooltip.cold_sweat.insulated": "Insulated",
   "tooltip.cold_sweat.hotbar": "When in Hotbar:",
   "tooltip.cold_sweat.consumed": "When Consumed:",
