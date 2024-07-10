@@ -39,7 +39,7 @@ public record EntityRequirement(Optional<EntityType<?>> type, Optional<LocationR
     private static final List<Codec<EntityRequirement>> REQUIREMENT_CODEC_STACK = new ArrayList<>(List.of(SIMPLE_CODEC));
     // Allow for up to 16 layers of inner codecs
     static
-    {   for (int i = 0; i < 16; i++)
+    {   for (int i = 0; i < 4; i++)
         {   addCodecStack();
         }
     }
@@ -193,7 +193,7 @@ public record EntityRequirement(Optional<EntityType<?>> type, Optional<LocationR
             && target.equals(that.target);
     }
 
-    /*@Override
+    @Override
     public String toString()
     {
         StringBuilder builder = new StringBuilder();
@@ -212,5 +212,5 @@ public record EntityRequirement(Optional<EntityType<?>> type, Optional<LocationR
         builder.append('}');
 
         return builder.toString();
-    }*/
+    }
 }
