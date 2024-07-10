@@ -313,7 +313,7 @@ public class ItemSettingsConfig
                             && list.get(0) instanceof String
                             && list.get(1) instanceof Number
                             && (list.size() < 3 || list.get(2) instanceof String)
-                            && (list.size() < 4 || list.get(3) instanceof Integer);
+                            && (list.size() < 4 || list.get(3) instanceof Number);
                     }
                     return false;
                 });
