@@ -255,7 +255,7 @@ public class ItemSettingsConfig
                         && list.get(0) instanceof String
                         && list.get(1) instanceof Number
                         && (list.size() < 3 || list.get(2) instanceof String)
-                        && (list.size() < 4 || list.get(3) instanceof Integer));
+                        && (list.size() < 4 || list.get(3) instanceof Number));
         waterskinStrength = BUILDER
                 .comment("Defines how much a waterskin will change the player's body temperature by when used")
                 .defineInRange("Waterskin Strength", 50, 0, Integer.MAX_VALUE);
