@@ -12,14 +12,19 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.DialogTexts;
 import net.minecraft.client.gui.screen.OptionsScreen;
 import net.minecraft.client.gui.widget.button.AbstractButton;
+import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.gui.widget.button.ImageButton;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.GuiScreenEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.gui.widget.Slider;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
+import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -63,6 +68,21 @@ public class DrawConfigButton
                                          }
                                          else ClientOnlyHelper.openConfigScreen();
                                      });
+
+            if (Minecraft.getInstance().level == null)
+            {
+                Field onTooltip = ObfuscationReflectionHelper.findField(Button.class, "field_238487_u_");
+                onTooltip.setAccessible(true);
+                mainButton.active = false;
+                try
+                {
+                    onTooltip.set(mainButton, (Button.ITooltip) (button, poseStack, mouseX, mouseY) ->
+                    {   event.getGui().renderTooltip(poseStack, new TranslationTextComponent("tooltip.cold_sweat.config.must_be_in_game").withStyle(TextFormatting.RED), mouseX, mouseY);
+                    });
+                }
+                catch (Exception ignored) {}
+            }
+
             // Add main button
             event.addWidget(mainButton);
 
