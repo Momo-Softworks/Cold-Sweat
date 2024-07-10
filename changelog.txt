@@ -2218,6 +2218,7 @@ Technical Changes:
 Fixes:
 - Fixed crash due to missing library
 - Fixed crash when saving config settings in-game
+- Fixed the Temperature-Affecting Foods config for soulsprouts not specifying a duration
 
 
 ------------------------------------------------------------------------------------------------------------------------
