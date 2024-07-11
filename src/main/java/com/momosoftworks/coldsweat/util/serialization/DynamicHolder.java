@@ -80,8 +80,7 @@ public class DynamicHolder<T>
     public T get()
     {
         if (this.requireRegistries)
-        {
-            throw new RuntimeException("DynamicRegistries is required for this DynamicHolder, yet none was provided.");
+        {   throw new RuntimeException("DynamicRegistries is required for this DynamicHolder, yet none was provided.");
         }
         if (this.value == null)
         {   this.load();
@@ -119,7 +118,7 @@ public class DynamicHolder<T>
         {  throw ColdSweat.LOGGER.throwing(SerializationException.serialize(this.value, "Tried to encode non-synced DynamicHolder", null));
         }
         try
-        {   return encoder.write(this.get(), registryAccess);
+        {   return encoder.write(this.get(registryAccess), registryAccess);
         }
         catch (Exception e)
         {   throw ColdSweat.LOGGER.throwing(SerializationException.serialize(this.value, "Failed to encode DynamicHolder for type " + this.value.getClass().getSimpleName(), e));
