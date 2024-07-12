@@ -66,14 +66,14 @@ public abstract class TempModifier
 
         this.function = modify.getFunction();
 
-        return this.process(modify.getTemperature());
+        return this.apply(modify.getTemperature());
     }
 
     /**
      * @param temp the Temperature to calculate with
      * @return The result of this TempModifier's unique stored function. Stores the input and output.
      */
-    public final double process(double temp)
+    public final double apply(double temp)
     {
         lastInput = temp;
         return lastOutput = function.apply(temp);
