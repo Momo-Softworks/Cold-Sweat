@@ -6,7 +6,6 @@ import com.momosoftworks.coldsweat.api.event.common.BlockStateChangedEvent;
 import com.momosoftworks.coldsweat.api.temperature.modifier.BlockInsulationTempModifier;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
-import com.momosoftworks.coldsweat.common.block.HearthBottomBlock;
 import com.momosoftworks.coldsweat.common.block.SmokestackBlock;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
@@ -14,11 +13,11 @@ import com.momosoftworks.coldsweat.common.container.HearthContainer;
 import com.momosoftworks.coldsweat.common.event.HearthSaveDataHandler;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.*;
-import com.momosoftworks.coldsweat.core.network.ModPacketHandlers;
 import com.momosoftworks.coldsweat.core.network.message.HearthResetMessage;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.world.SpreadPath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.client.Minecraft;
@@ -59,16 +58,12 @@ import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
-import net.neoforged.neoforge.capabilities.BlockCapability;
-import net.neoforged.neoforge.capabilities.ICapabilityProvider;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -77,19 +72,15 @@ import java.util.stream.StreamSupport;
 public class HearthBlockEntity extends RandomizableContainerBlockEntity
 {
     // List of SpreadPaths, which determine where the Hearth is affecting and how it spreads through/around blocks
-    List<SpreadPath> paths = new ArrayList<>();
+    List<SpreadPath> paths = new ArrayList<>(this.getMaxPaths());
     // Used as a lookup table for detecting duplicate paths (faster than ArrayList#contains())
-    Set<BlockPos> pathLookup = new HashSet<>();
-    Map<Pair<Integer, Integer>, Pair<Integer, Boolean>> seeSkyMap = new HashMap<>();
+    Set<BlockPos> pathLookup = new HashSet<>(this.getMaxPaths());
+    Map<Pair<Integer, Integer>, Pair<Integer, Boolean>> seeSkyMap = new FastMap<>(this.getMaxPaths());
 
     List<MobEffectInstance> effects = new ArrayList<>();
 
     FluidStack coldFuel = new FluidStack(Fluids.WATER, 0);
     FluidStack hotFuel = new FluidStack(Fluids.LAVA, 0);
-
-
-    public static final BlockCapability<IFluidHandler, @Nullable Direction> FLUID_HANDLER =
-            BlockCapability.createSided(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "fuel_handler"), IFluidHandler.class);
 
     NonNullList<ItemStack> items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
     Pair<BlockPos, ResourceLocation> levelPos = Pair.of(null, null);
@@ -281,9 +272,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                 }
 
                 // Mark as not spreading if all paths are frozen
-                if (this.frozenPaths >= paths.size())
-                {   this.spreading = false;
-                }
+                this.spreading = this.frozenPaths < paths.size();
 
                 /*
                  Partition the points into logical "sub-maps" to be iterated over separately each tick
@@ -300,7 +289,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                 int firstIndex = Math.max(0, lastIndex - partSize);
 
                 // Spread to new blocks
-                this.trySpreading(pathCount, firstIndex, lastIndex);
+                this.tickPaths(pathCount, firstIndex, lastIndex);
 
                 // Give insulation to players
                 if (!isClient && this.ticksExisted % 20 == 0)
@@ -335,7 +324,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         }
     }
 
-    protected void trySpreading(int pathCount, int firstIndex, int lastIndex)
+    protected void tickPaths(int pathCount, int firstIndex, int lastIndex)
     {
         for (int i = firstIndex; i < Math.min(paths.size(), lastIndex); i++)
         {   // This operation is really fast because it's an ArrayList

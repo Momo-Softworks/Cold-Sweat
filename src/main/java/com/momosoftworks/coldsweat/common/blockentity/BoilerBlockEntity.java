@@ -33,8 +33,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.wrapper.SidedInvWrapper;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
@@ -165,10 +163,10 @@ public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider
     }
 
     @Override
-    protected void trySpreading(int pathCount, int firstIndex, int lastIndex)
+    protected void tickPaths(int pathCount, int firstIndex, int lastIndex)
     {
         if (this.hasSmokestack)
-        {   super.trySpreading(pathCount, firstIndex, lastIndex);
+        {   super.tickPaths(pathCount, firstIndex, lastIndex);
         }
     }
 
