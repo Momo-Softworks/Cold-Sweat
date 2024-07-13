@@ -507,15 +507,14 @@ public class FastMap<K, V> implements Map<K, V>, Cloneable, Serializable
      *
      * @return a collection view of the values contained in this map.
      */
-    public Collection values()
+    public Collection<V> values()
     {
         return _values;
     }
 
     private transient Values _values;
 
-    private class Values
-            extends AbstractCollection
+    private class Values extends AbstractCollection
     {
         public Iterator iterator()
         {
@@ -570,7 +569,7 @@ public class FastMap<K, V> implements Map<K, V>, Cloneable, Serializable
      *
      * @return a collection view of the mappings contained in this map.
      */
-    public Set entrySet()
+    public Set<Map.Entry<K, V>> entrySet()
     {
         return _entrySet;
     }
@@ -651,15 +650,14 @@ public class FastMap<K, V> implements Map<K, V>, Cloneable, Serializable
      *
      * @return a set view of the keys contained in this map.
      */
-    public Set keySet()
+    public Set<K> keySet()
     {
         return _keySet;
     }
 
     private transient KeySet _keySet;
 
-    private class KeySet
-            extends AbstractSet
+    private class KeySet extends AbstractSet
     {
         public Iterator iterator()
         {
@@ -949,10 +947,8 @@ public class FastMap<K, V> implements Map<K, V>, Cloneable, Serializable
     /**
      * This class represents a {@link FastMap} entry.
      */
-    private static final class EntryImpl<K, V>
-            implements Map.Entry<K, V>
+    public static final class EntryImpl<K, V> implements Map.Entry<K, V>
     {
-
         /**
          * Holds the entry key (null when in pool).
          */
