@@ -19,6 +19,7 @@ import com.momosoftworks.coldsweat.core.network.message.HearthResetMessage;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
@@ -86,10 +87,10 @@ import java.util.*;
 public class HearthBlockEntity extends RandomizableContainerBlockEntity
 {
     // List of SpreadPaths, which determine where the Hearth is affecting and how it spreads through/around blocks
-    List<SpreadPath> paths = new ArrayList<>();
+    List<SpreadPath> paths = new ArrayList<>(this.getMaxPaths());
     // Used as a lookup table for detecting duplicate paths (faster than ArrayList#contains())
-    Set<BlockPos> pathLookup = new HashSet<>();
-    Map<Pair<Integer, Integer>, Pair<Integer, Boolean>> seeSkyMap = new HashMap<>();
+    Set<BlockPos> pathLookup = new HashSet<>(this.getMaxPaths());
+    Map<Pair<Integer, Integer>, Pair<Integer, Boolean>> seeSkyMap = new FastMap<>(this.getMaxPaths());
 
     List<MobEffectInstance> effects = new ArrayList<>();
 
@@ -295,9 +296,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                 }
 
                 // Mark as not spreading if all paths are frozen
-                if (this.frozenPaths >= paths.size())
-                {   this.spreading = false;
-                }
+                this.spreading = this.frozenPaths < paths.size();
 
                 /*
                  Partition the points into logical "sub-maps" to be iterated over separately each tick
@@ -314,7 +313,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                 int firstIndex = Math.max(0, lastIndex - partSize);
 
                 // Spread to new blocks
-                this.trySpreading(pathCount, firstIndex, lastIndex);
+                this.tickPaths(pathCount, firstIndex, lastIndex);
 
                 // Give insulation to players
                 if (!isClient && this.ticksExisted % 20 == 0)
@@ -349,7 +348,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         }
     }
 
-    protected void trySpreading(int pathCount, int firstIndex, int lastIndex)
+    protected void tickPaths(int pathCount, int firstIndex, int lastIndex)
     {
         for (int i = firstIndex; i < Math.min(paths.size(), lastIndex); i++)
         {   // This operation is really fast because it's an ArrayList
