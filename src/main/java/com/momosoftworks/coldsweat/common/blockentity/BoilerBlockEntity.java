@@ -178,10 +178,10 @@ public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider
     }
 
     @Override
-    protected void trySpreading(int pathCount, int firstIndex, int lastIndex)
+    protected void tickPaths(int pathCount, int firstIndex, int lastIndex)
     {
         if (this.hasSmokestack)
-        {   super.trySpreading(pathCount, firstIndex, lastIndex);
+        {   super.tickPaths(pathCount, firstIndex, lastIndex);
         }
     }
 
