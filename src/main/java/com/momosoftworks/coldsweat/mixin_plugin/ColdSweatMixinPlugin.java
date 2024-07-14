@@ -15,7 +15,8 @@ public class ColdSweatMixinPlugin implements IMixinConfigPlugin
 {
     private static final String compatMixinPackage = "com.momosoftworks.coldsweat.mixin.compat";
     private static final Map<String, Supplier<Boolean>> CONDITIONS = ImmutableMap.of(
-            compatMixinPackage + "MixinCreateOverlay", () -> LoadingModList.get().getModFileById("create") != null
+            compatMixinPackage + "MixinCreateOverlay", () -> LoadingModList.get().getModFileById("create") != null,
+            compatMixinPackage + "MixinSpoiledIcebox", () -> LoadingModList.get().getModFileById("spoiled") != null
     );
 
     @Override

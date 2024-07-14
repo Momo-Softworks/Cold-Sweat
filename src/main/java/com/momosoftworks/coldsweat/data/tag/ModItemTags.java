@@ -10,7 +10,9 @@ public class ModItemTags
 {
     public static final TagKey<Item> BOILER_VALID = createTag("boiler_valid");
     public static final TagKey<Item> BOILER_PURIFIABLE = createTag("compat/boiler_purifiable");
+
     public static final TagKey<Item> ICEBOX_VALID = createTag("icebox_valid");
+    public static final TagKey<Item> ICEBOX_PRESERVABLE = createTag("compat/icebox_preservable");
 
     public static final TagKey<Item> NOT_INSULATABLE = createTag("not_insulatable");
 
