@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.common.container;
 import com.momosoftworks.coldsweat.common.blockentity.IceboxBlockEntity;
 import com.momosoftworks.coldsweat.core.init.MenuInit;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
+import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
@@ -39,7 +40,7 @@ public class IceboxContainer extends AbstractContainerMenu
             {
                 @Override
                 public boolean mayPlace(ItemStack stack)
-                {   return stack.is(ModItemTags.ICEBOX_VALID);
+                {   return stack.is(ModItemTags.ICEBOX_VALID) || (CompatManager.isSpoiledLoaded() && stack.isEdible());
                 }
             });
         }
@@ -104,14 +105,14 @@ public class IceboxContainer extends AbstractContainerMenu
             }
             else
             {
-                if (itemstack.is(ModItemTags.ICEBOX_VALID))
+                if (slots.get(1).mayPlace(itemstack))
                 {
                     if (!this.moveItemStackTo(itemstack1, 1, 10, false))
                     {   slot.onQuickCraft(itemstack1, itemstack);
                         return ItemStack.EMPTY;
                     }
                 }
-                else if (this.te.getItemFuel(itemstack) > 0)
+                else if (slots.get(0).mayPlace(itemstack))
                 {
                     if (!this.moveItemStackTo(itemstack1, 0, 1, false))
                     {   slot.onQuickCraft(itemstack1, itemstack);

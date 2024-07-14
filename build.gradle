@@ -122,6 +122,7 @@ dependencies {
     implementation fg.deobf("curse.maven:curios-309927:4780205-sources-5175957")
     implementation fg.deobf("curse.maven:thirst-was-taken-679270:5071555")
     implementation fg.deobf("curse.maven:serene-seasons-291874:4761603")
+    implementation fg.deobf("curse.maven:spoiled-364918:4803042")
 
     runtimeOnly fg.deobf("curse.maven:spark-361579:4738952")
     runtimeOnly fg.deobf("curse.maven:biomes-o-plenty-220318:4764804")
