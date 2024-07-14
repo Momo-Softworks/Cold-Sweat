@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.common.container;
 import com.momosoftworks.coldsweat.common.blockentity.IceboxBlockEntity;
 import com.momosoftworks.coldsweat.core.init.ContainerInit;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
+import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -11,7 +12,6 @@ import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.vector.Vector3d;
 
 import java.util.Objects;
 
@@ -40,7 +40,7 @@ public class IceboxContainer extends Container
             {
                 @Override
                 public boolean mayPlace(ItemStack stack)
-                {   return ModItemTags.ICEBOX_VALID.contains(stack.getItem());
+                {   return ModItemTags.ICEBOX_VALID.contains(stack.getItem()) || (CompatManager.isSpoiledLoaded() && stack.isEdible());
                 }
             });
         }
