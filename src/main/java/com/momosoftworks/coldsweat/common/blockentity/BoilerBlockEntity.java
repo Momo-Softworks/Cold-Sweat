@@ -10,10 +10,12 @@ import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.item.FilledWaterskinItem;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
+import com.momosoftworks.coldsweat.core.init.BlockEntityInit;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.BlockDataUpdateMessage;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.registries.ModBlockEntities;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
@@ -59,7 +61,7 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
     List<ServerPlayerEntity> usingPlayers = new ArrayList<>();
 
     public BoilerBlockEntity()
-    {   super();
+    {   super(BlockEntityInit.BOILER_BLOCK_ENTITY_TYPE.get());
         TaskScheduler.schedule(this::checkForSmokestack, 5);
     }
 

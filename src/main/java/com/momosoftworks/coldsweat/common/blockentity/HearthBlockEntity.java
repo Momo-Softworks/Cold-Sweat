@@ -50,6 +50,7 @@ import net.minecraft.potion.Effects;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.LockableLootTileEntity;
+import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
@@ -139,7 +140,12 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     }
 
     public HearthBlockEntity()
-    {   super(BlockEntityInit.HEARTH_BLOCK_ENTITY_TYPE.get());
+    {   this(BlockEntityInit.HEARTH_BLOCK_ENTITY_TYPE.get());
+    }
+
+    public HearthBlockEntity(TileEntityType<? extends HearthBlockEntity> type)
+    {
+        super(type);
         MinecraftForge.EVENT_BUS.register(this);
     }
 
