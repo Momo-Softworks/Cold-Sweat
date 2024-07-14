@@ -39,7 +39,7 @@ public abstract class MixinHeartRender
             at = @At(value = "INVOKE", target = "Lnet/minecraftforge/client/gui/ForgeIngameGui;blit(Lcom/mojang/blaze3d/matrix/MatrixStack;IIIIII)V", shift = At.Shift.AFTER),
             slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;ceil(F)I", ordinal = 3),
                            to = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;disableBlend()V")),
-            locals = LocalCapture.CAPTURE_FAILHARD, remap = false)
+            locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
     private void renderHeart(int width, int height, MatrixStack ps, CallbackInfo ci,
                              // Locals
                              PlayerEntity player, int health, boolean blink, int healthLast,
