@@ -25,7 +25,9 @@
     "MixinInventoryOpenServer",
     "MixinMinecart",
     "MixinSoulCampfire",
-    "MixinSoulFire"
+    "MixinSoulFire",
+    "compat.MixinSpoiledIcebox",
+    "compat.MixinSpoiledIcebox$ContainerModifier"
   ],
   "injectors": {
     "defaultRequire": 1

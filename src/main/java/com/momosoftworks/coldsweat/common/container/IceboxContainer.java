@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.common.container;
 import com.momosoftworks.coldsweat.common.blockentity.IceboxBlockEntity;
 import com.momosoftworks.coldsweat.core.init.MenuInit;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
+import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
@@ -39,7 +40,7 @@ public class IceboxContainer extends AbstractContainerMenu
             {
                 @Override
                 public boolean mayPlace(ItemStack stack)
-                {   return stack.is(ModItemTags.ICEBOX_VALID);
+                {   return stack.is(ModItemTags.ICEBOX_VALID) || (CompatManager.isSpoiledLoaded() && stack.isEdible());
                 }
             });
         }

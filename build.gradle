@@ -127,6 +127,7 @@ dependencies {
     implementation fg.deobf("curse.maven:carrots-311327:4382778")
     implementation fg.deobf("curse.maven:thirst-was-taken-679270:5071551")
     implementation fg.deobf("curse.maven:create-328085:4625533")
+    implementation fg.deobf("curse.maven:spoiled-364918:4614781")
 
     compileOnly fg.deobf("curse.maven:tinkers-construct-74072:4509008")
     compileOnly fg.deobf("curse.maven:constructs-armory-1-18-2-port-867883:4559247")
