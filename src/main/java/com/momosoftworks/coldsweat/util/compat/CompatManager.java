@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.util.compat;
 
 import com.mojang.datafixers.util.Either;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModDamageSources;
@@ -29,8 +30,13 @@ import net.neoforged.neoforge.event.entity.living.LivingEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import sereneseasons.season.SeasonHooks;
+import top.theillusivec4.curios.api.CuriosCapability;
+import top.theillusivec4.curios.api.event.CurioChangeEvent;
+import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @EventBusSubscriber
 public class CompatManager
@@ -133,15 +139,14 @@ public class CompatManager
 
     // TODO: Reimplement when this mod is updated
     public static boolean hasCurio(Player player, Item curio)
-    {   return false;//return CURIOS_LOADED && player.getCapability(CuriosCapability.INVENTORY).map(cap -> cap.findFirstCurio(curio)).map(Optional::isPresent).orElse(false);
+    {   return CURIOS_LOADED && Optional.ofNullable(player.getCapability(CuriosCapability.INVENTORY)).map(cap -> cap.findFirstCurio(curio)).map(Optional::isPresent).orElse(false);
     }
 
     // TODO: Reimplement when this mod is updated
     public static List<ItemStack> getCurios(LivingEntity entity)
     {
-        return List.of();
-        /*if (!CURIOS_LOADED) return new ArrayList<>();
-        return entity.getCapability(CuriosCapability.INVENTORY)
+        if (!CURIOS_LOADED) return new ArrayList<>();
+        return Optional.ofNullable(entity.getCapability(CuriosCapability.INVENTORY))
                      .map(ICuriosItemHandler::getEquippedCurios)
                      .map(stacks ->
                      {
@@ -150,7 +155,7 @@ public class CompatManager
                          {   list.add(stacks.getStackInSlot(i));
                          }
                          return list;
-                     }).orElse(new ArrayList<>());*/
+                     }).orElse(new ArrayList<>());
     }
 
     public static boolean hasOzzyLiner(ItemStack stack)
@@ -235,12 +240,11 @@ public class CompatManager
         {
             NeoForge.EVENT_BUS.register(new Object()
             {
-                //TODO: Reimplement when this mod is updated
-                /*@SubscribeEvent
+                @SubscribeEvent
                 public void onCurioChange(CurioChangeEvent event)
                 {
                     EntityTempManager.updateInsulationAttributeModifiers(event.getEntity());
-                }*/
+                }
             });
         }
     }
