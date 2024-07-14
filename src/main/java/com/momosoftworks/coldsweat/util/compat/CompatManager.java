@@ -58,6 +58,7 @@ public class CompatManager
     private static final boolean PRIMAL_WINTER_LOADED = modLoaded("primalwinter");
     private static final boolean THIRST_LOADED = modLoaded("thirst");
     private static final boolean ICEBERG_LOADED = modLoaded("iceberg");
+    private static final boolean SPOILED_LOADED = modLoaded("spoiled");
 
     public static boolean modLoaded(String modID, int minMajorVer, int minMinorVer, int minPatchVer)
     {
@@ -136,13 +137,14 @@ public class CompatManager
     public static boolean isIcebergLoaded()
     {   return ICEBERG_LOADED;
     }
+    public static boolean isSpoiledLoaded()
+    {   return SPOILED_LOADED;
+    }
 
-    // TODO: Reimplement when this mod is updated
     public static boolean hasCurio(Player player, Item curio)
     {   return CURIOS_LOADED && Optional.ofNullable(player.getCapability(CuriosCapability.INVENTORY)).map(cap -> cap.findFirstCurio(curio)).map(Optional::isPresent).orElse(false);
     }
 
-    // TODO: Reimplement when this mod is updated
     public static List<ItemStack> getCurios(LivingEntity entity)
     {
         if (!CURIOS_LOADED) return new ArrayList<>();
