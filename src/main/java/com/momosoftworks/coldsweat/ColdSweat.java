@@ -127,6 +127,6 @@ public class ColdSweat
                  : null;
         });
         event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.BOILER.value(), (boiler, facing) -> new HearthBlockEntity.BottomFluidHandler(boiler));
-        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.ICEBOX.value(), (icebox, facing) -> new HearthBlockEntity.SidesFluidHandler(icebox));
+        //event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.ICEBOX.value(), (icebox, facing) -> new HearthBlockEntity.SidesFluidHandler(icebox));
     }
 }

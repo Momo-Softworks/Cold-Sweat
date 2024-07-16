@@ -15,6 +15,7 @@ import com.momosoftworks.coldsweat.util.serialization.DynamicHolder;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.server.MinecraftServer;
@@ -468,17 +469,21 @@ public abstract class WorldHelper
     {   return ServerLifecycleHooks.getCurrentServer();
     }
 
-    public static Pair<Double, Double> getBiomeTemperature(Level level, Biome biome)
+    public static Pair<Double, Double> getBiomeTemperatureRange(Level level, Biome biome)
+    {   return getBiomeTemperatureRange(level.registryAccess(), biome);
+    }
+
+    public static Pair<Double, Double> getBiomeTemperatureRange(RegistryAccess registryAccess, Biome biome)
     {
         double variance = 1 / Math.max(1, 2 + biome.getModifiedClimateSettings().downfall() * 2);
         double baseTemp = biome.getBaseTemperature();
 
         // Get the biome's temperature, either overridden by config or calculated
         // Start with biome override
-        Triplet<Double, Double, Temperature.Units> configTemp = ConfigSettings.BIOME_TEMPS.get(level.registryAccess()).getOrDefault(biome,
-                                                                new Triplet<>(baseTemp - variance, baseTemp + variance, Temperature.Units.MC));
-        Triplet<Double, Double, Temperature.Units> configOffset = ConfigSettings.BIOME_OFFSETS.get(level.registryAccess()).getOrDefault(biome,
-                                                                  new Triplet<>(0d, 0d, Temperature.Units.MC));
+        Triplet<Double, Double, Temperature.Units> configTemp = ConfigSettings.BIOME_TEMPS.get(registryAccess)
+                                                                .getOrDefault(biome, new Triplet<>(baseTemp - variance, baseTemp + variance, Temperature.Units.MC));
+        Triplet<Double, Double, Temperature.Units> configOffset = ConfigSettings.BIOME_OFFSETS.get(registryAccess)
+                                                                  .getOrDefault(biome, new Triplet<>(0d, 0d, Temperature.Units.MC));
         return CSMath.addPairs(Pair.of(configTemp.getA(), configTemp.getB()), Pair.of(configOffset.getA(), configOffset.getB()));
     }
 
@@ -488,5 +493,21 @@ public abstract class WorldHelper
         return new Vec3(CSMath.clamp(pos.x, entity.getX() - playerRadius, entity.getX() + playerRadius),
                         CSMath.clamp(pos.y, entity.getY(), entity.getY() + entity.getBbHeight()),
                         CSMath.clamp(pos.z, entity.getZ() - playerRadius, entity.getZ() + playerRadius));
+    }
+
+    public static double getBiomeTemperature(Level level, Biome biome)
+    {
+        Pair<Double, Double> temps = getBiomeTemperatureRange(level, biome);
+        return CSMath.blend(temps.getFirst(), temps.getSecond(), Math.sin(level.getDayTime() / (12000 / Math.PI)), -1, 1);
+    }
+
+    public static double getBiomeTemperatureAt(Level level, Biome biome, BlockPos pos)
+    {
+        Pair<Double, Double> temps = getBiomeTemperatureRange(level, biome);
+        double min = temps.getFirst();
+        double max = temps.getSecond();
+        double mid = (min + max) / 2;
+        return CSMath.blend(min, max, Math.sin(level.getDayTime() / (12000 / Math.PI)), -1, 1)
+             + CSMath.blend(0, Math.min(-0.6, (min - mid) * 2), pos.getY(), level.getSeaLevel(), level.getMaxBuildHeight());
     }
 }
