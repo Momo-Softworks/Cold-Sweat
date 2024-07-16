@@ -65,7 +65,7 @@ public class ItemSettingsConfig
                                 List.of("minecraft:ice",                333),
                                 List.of("minecraft:clay",               333),
                                 List.of("minecraft:powder_snow_bucket", 333),
-                                List.of("minecraft:water_bucket",       1000),
+                                //List.of("minecraft:water_bucket",       1000),
                                 List.of("minecraft:packed_ice",         1000)
                         ).build(),
                         it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number);
