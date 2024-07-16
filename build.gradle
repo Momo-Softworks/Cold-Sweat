@@ -102,9 +102,15 @@ configurations {
 
 dependencies {
     implementation "net.neoforged:neoforge:${neo_version}"
+
     compileOnly "curse.maven:serene-seasons-291874:5429913-deobf"
     compileOnly "maven.modrinth:thirst-was-taken:1.21.0-2.0.0"
+
+    implementation "curse.maven:spoiled-364918:5490658"
+    implementation "curse.maven:curios-continuation-1037991:5476603"
+
     runtimeOnly "curse.maven:jei-238222:5519368"
+    runtimeOnly "curse.maven:spark-361579:5434153"
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
