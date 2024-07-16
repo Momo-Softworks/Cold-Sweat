@@ -10,7 +10,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -26,10 +25,9 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.common.CommonHooks;
-import net.neoforged.neoforge.common.SpecialPlantable;
 import org.jetbrains.annotations.Nullable;
 
-public class SoulStalkBlock extends Block implements SpecialPlantable
+public class SoulStalkBlock extends Block
 {
     public static final IntegerProperty AGE = BlockStateProperties.AGE_15;
     public static final IntegerProperty SECTION = IntegerProperty.create("section", 0, 3);
@@ -136,17 +134,5 @@ public class SoulStalkBlock extends Block implements SpecialPlantable
     public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos)
     {   BlockState below = level.getBlockState(pos.below());
         return below.is(ModBlockTags.SOUL_STALK_PLACEABLE_ON) || below.getBlock() == this;
-    }
-
-    @Override
-    public boolean canPlacePlantAtPosition(ItemStack itemStack, LevelReader level, BlockPos pos, @Nullable Direction direction)
-    {
-        return canSurvive(this.defaultBlockState(), level, pos) && level.isEmptyBlock(pos) && level.isEmptyBlock(pos.above());
-    }
-
-    @Override
-    public void spawnPlantAtPosition(ItemStack itemStack, LevelReader level, BlockPos pos, @Nullable Direction direction)
-    {
-
     }
 }
