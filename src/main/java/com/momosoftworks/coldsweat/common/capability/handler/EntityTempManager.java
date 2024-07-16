@@ -360,11 +360,12 @@ public class EntityTempManager
     }
 
     @SubscribeEvent
-    public static void cancelImmuneModifiers(TempModifierEvent.Calculate.Modify event)
+    public static void calcModifierImmunity(TempModifierEvent.Calculate.Modify event)
     {
         if (!Arrays.stream(VALID_ATTRIBUTE_TYPES).collect(Collectors.toList()).contains(event.getTrait())) return;
         TempModifier mod = event.getModifier();
         ResourceLocation modifierKey = TempModifierRegistry.getKey(mod);
+        LivingEntity entity = event.getEntity();
 
         getTemperatureCap(event.getEntity()).ifPresent(cap ->
         {
@@ -377,7 +378,10 @@ public class EntityTempManager
                 if (immunity != null && insulator.test(event.getEntity(), stack))
                 {
                     Function<Double, Double> func = event.getFunction();
-                    event.setFunction(temp -> CSMath.blend(func.apply(temp), mod.getLastInput(), immunity, 0, 1));
+                    double lastInput = mod instanceof BiomeTempModifier
+                                       ? (Temperature.get(entity, Temperature.Trait.FREEZING_POINT) + Temperature.get(entity, Temperature.Trait.BURNING_POINT)) / 2
+                                       : mod.getLastInput();
+                    event.setFunction(temp -> CSMath.blend(func.apply(temp), lastInput, immunity, 0, 1));
                 }
             }
         });
