@@ -64,7 +64,7 @@ public class BiomeTempModifier extends TempModifier
                 biomeCount++;
 
                 // Get min/max temperature of the biome
-                Pair<Double, Double> configTemp = WorldHelper.getBiomeTemperature(level, holder.value());
+                Pair<Double, Double> configTemp = WorldHelper.getBiomeTemperatureRange(level, holder.value());
 
                 // Biome temp at midnight (bottom of the sine wave)
                 double min = configTemp.getFirst();
@@ -74,12 +74,8 @@ public class BiomeTempModifier extends TempModifier
                 DimensionType dimension = level.dimensionType();
                 if (!dimension.hasCeiling())
                 {
-                    double altitude = entity.getY();
-                    double mid = (min + max) / 2;
                     // Biome temp with time of day
-                    double biomeTemp = CSMath.blend(min, max, Math.sin(level.getDayTime() / (12000 / Math.PI)), -1, 1)
-                              // Altitude calculation
-                               + CSMath.blend(0, Math.min(-0.6, (min - mid) * 2), altitude, level.getSeaLevel(), level.getMaxBuildHeight());
+                    double biomeTemp = WorldHelper.getBiomeTemperatureAt(level, holder.value(), entity.blockPosition());
                     if (CompatManager.isPrimalWinterLoaded() && holder.is(BiomeTags.IS_OVERWORLD))
                     {   biomeTemp = Math.min(biomeTemp, biomeTemp / 2) - Math.max(biomeTemp / 2, 0);
                     }
