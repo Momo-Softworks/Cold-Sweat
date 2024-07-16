@@ -14,7 +14,7 @@ public class ColdBiomeEdible extends BiomeSearchingEdible
     {
         super((level, biome) ->
         {
-            Pair<Double, Double> minMaxTemp = WorldHelper.getBiomeTemperature(level, biome);
+            Pair<Double, Double> minMaxTemp = WorldHelper.getBiomeTemperatureRange(level, biome);
             double biomeTemp = CSMath.averagePair(minMaxTemp);
 
             return biomeTemp <= 0.2;

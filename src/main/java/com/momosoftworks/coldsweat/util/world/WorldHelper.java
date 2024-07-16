@@ -25,6 +25,8 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.PickaxeItem;
+import net.minecraft.item.TieredItem;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
@@ -36,6 +38,7 @@ import net.minecraft.util.math.SectionPos;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.IWorld;
@@ -475,17 +478,21 @@ public abstract class WorldHelper
     {   return ServerLifecycleHooks.getCurrentServer();
     }
 
-    public static Pair<Double, Double> getBiomeTemperature(World level, Biome biome)
+    public static Pair<Double, Double> getBiomeTemperatureRange(World level, Biome biome)
+    {   return getBiomeTemperatureRange(level.registryAccess(), biome);
+    }
+
+    public static Pair<Double, Double> getBiomeTemperatureRange(DynamicRegistries registryAccess, Biome biome)
     {
         double variance = 1 / Math.max(1, 2 + biome.getDownfall() * 2);
         double baseTemp = biome.getBaseTemperature();
 
         // Get the biome's temperature, either overridden by config or calculated
         // Start with biome override
-        Triplet<Double, Double, Temperature.Units> configTemp = ConfigSettings.BIOME_TEMPS.get(level.registryAccess()).getOrDefault(biome,
-                                                                new Triplet<>(baseTemp - variance, baseTemp + variance, Temperature.Units.MC));
-        Triplet<Double, Double, Temperature.Units> configOffset = ConfigSettings.BIOME_OFFSETS.get(level.registryAccess()).getOrDefault(biome,
-                                                                  new Triplet<>(0d, 0d, Temperature.Units.MC));
+        Triplet<Double, Double, Temperature.Units> configTemp = ConfigSettings.BIOME_TEMPS.get(registryAccess)
+                                                                .getOrDefault(biome, new Triplet<>(baseTemp - variance, baseTemp + variance, Temperature.Units.MC));
+        Triplet<Double, Double, Temperature.Units> configOffset = ConfigSettings.BIOME_OFFSETS.get(registryAccess)
+                                                                  .getOrDefault(biome, new Triplet<>(0d, 0d, Temperature.Units.MC));
         return CSMath.addPairs(Pair.of(configTemp.getFirst(), configTemp.getSecond()), Pair.of(configOffset.getFirst(), configOffset.getSecond()));
     }
 
@@ -495,5 +502,32 @@ public abstract class WorldHelper
         return new Vector3d(CSMath.clamp(pos.x, entity.getX() - playerRadius, entity.getX() + playerRadius),
                             CSMath.clamp(pos.y, entity.getY(), entity.getY() + entity.getBbHeight()),
                             CSMath.clamp(pos.z, entity.getZ() - playerRadius, entity.getZ() + playerRadius));
+    }
+
+    public static double getBiomeTemperature(World level, Biome biome)
+    {
+        Pair<Double, Double> temps = getBiomeTemperatureRange(level, biome);
+        return CSMath.blend(temps.getFirst(), temps.getSecond(), Math.sin(level.getDayTime() / (12000 / Math.PI)), -1, 1);
+    }
+
+    public static double getBiomeTemperatureAt(World level, Biome biome, BlockPos pos)
+    {
+        Pair<Double, Double> temps = getBiomeTemperatureRange(level, biome);
+        double min = temps.getFirst();
+        double max = temps.getSecond();
+        double mid = (min + max) / 2;
+        return CSMath.blend(min, max, Math.sin(level.getDayTime() / (12000 / Math.PI)), -1, 1)
+             + CSMath.blend(0, Math.min(-0.6, (min - mid) * 2), pos.getY(), level.getSeaLevel(), level.getMaxBuildHeight());
+    }
+
+    public static boolean isEffectivelyPickaxe(ItemStack stack)
+    {
+        if (stack.getItem() instanceof PickaxeItem)
+        {   return true;
+        }
+
+        // Check if the item can mine stone efficiently
+        BlockState stoneState = Blocks.STONE.defaultBlockState();
+        return stack.isCorrectToolForDrops(stoneState);
     }
 }

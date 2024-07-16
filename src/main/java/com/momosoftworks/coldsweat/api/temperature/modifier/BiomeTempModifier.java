@@ -13,6 +13,7 @@ import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.feature.structure.Structure;
+import net.minecraftforge.common.Tags;
 
 import java.util.function.Function;
 
@@ -32,12 +33,12 @@ public class BiomeTempModifier extends TempModifier
     {
         try
         {
-            World world = entity.level;
+            World level = entity.level;
             double worldTemp = 0;
             BlockPos entPos = entity.blockPosition();
 
             // In the case that the dimension temperature is overridden by config, use that and skip everything else
-            Pair<Double, Temperature.Units> dimTempOverride = ConfigSettings.DIMENSION_TEMPS.get(entity.level.registryAccess()).get(world.dimensionType());
+            Pair<Double, Temperature.Units> dimTempOverride = ConfigSettings.DIMENSION_TEMPS.get(entity.level.registryAccess()).get(level.dimensionType());
             if (dimTempOverride != null)
             {   return temp -> temp + dimTempOverride.getFirst();
             }
@@ -54,29 +55,25 @@ public class BiomeTempModifier extends TempModifier
                 // Check if this position is valid
                 if (!World.isInWorldBounds(blockPos) || blockPos.distSqr(entPos) > 30*30) continue;
                 // Get the holder for the biome
-                Biome biome = world.getBiomeManager().getBiome(blockPos);
+                Biome biome = level.getBiomeManager().getBiome(blockPos);
 
                 // Tally number of biomes
                 biomeCount++;
 
                 // Get min/max temperature of the biome
-                Pair<Double, Double> configTemp = WorldHelper.getBiomeTemperature(world, biome);
+                Pair<Double, Double> configTemp = WorldHelper.getBiomeTemperatureRange(level, biome);
 
                 // Biome temp at midnight (bottom of the sine wave)
                 double min = configTemp.getFirst();
                 // Biome temp at noon (top of the sine wave)
                 double max = configTemp.getSecond();
 
-                DimensionType dimension = world.dimensionType();
+                DimensionType dimension = level.dimensionType();
                 if (!dimension.hasCeiling())
                 {
-                    double altitude = entity.getY();
-                    double mid = (min + max) / 2;
                     // Biome temp with time of day
-                    double biomeTemp = CSMath.blend(min, max, Math.sin(world.getDayTime() / (12000 / Math.PI)), -1, 1)
-                            // Altitude calculation
-                            + CSMath.blend(0, Math.min(-0.6, (min - mid) * 2), altitude, world.getSeaLevel(), world.getMaxBuildHeight());
-                    if (CompatManager.isPrimalWinterLoaded() && world.dimension().location().equals(DimensionType.OVERWORLD_LOCATION.location()))
+                    double biomeTemp = WorldHelper.getBiomeTemperatureAt(level, biome, entity.blockPosition());
+                    if (CompatManager.isPrimalWinterLoaded() && level.dimension().location().equals(DimensionType.OVERWORLD_LOCATION.location()))
                     {   biomeTemp = Math.min(biomeTemp, biomeTemp / 2) - Math.max(biomeTemp / 2, 0);
                     }
                     worldTemp += biomeTemp;
@@ -88,7 +85,7 @@ public class BiomeTempModifier extends TempModifier
             worldTemp /= Math.max(1, biomeCount);
 
             // Add dimension offset, if present
-            Pair<Double, Temperature.Units> dimTempOffsetConf = ConfigSettings.DIMENSION_OFFSETS.get(entity.level.registryAccess()).get(world.dimensionType());
+            Pair<Double, Temperature.Units> dimTempOffsetConf = ConfigSettings.DIMENSION_OFFSETS.get(entity.level.registryAccess()).get(level.dimensionType());
             if (dimTempOffsetConf != null)
             {   worldTemp += dimTempOffsetConf.getFirst();
             }
