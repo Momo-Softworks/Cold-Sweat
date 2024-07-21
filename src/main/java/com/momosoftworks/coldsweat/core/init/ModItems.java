@@ -58,7 +58,12 @@ public class ModItems
     public static final DeferredItem<BlockItem> HEARTH = ITEMS.register("hearth", () -> new BlockItem(ModBlocks.HEARTH_BOTTOM.get(), HearthBottomBlock.getItemProperties()));
     public static final DeferredItem<BlockItem> THERMOLITH = ITEMS.register("thermolith", () -> new BlockItem(ModBlocks.THERMOLITH.get(), ThermolithBlock.getItemProperties()));
     public static final DeferredItem<BlockItem> SOUL_SPROUT = ITEMS.register("soul_sprout", () -> new SoulSproutItem(ModBlocks.SOUL_STALK.get(),
-                                                                                                                     SoulStalkBlock.getItemProperties().food(new FoodProperties.Builder().nutrition(4).saturationModifier(1).alwaysEdible().fast().build())));
+                                                                                                                     SoulStalkBlock.getItemProperties().food(new FoodProperties.Builder()
+                                                                                                                                                             .nutrition(3)
+                                                                                                                                                             .saturationModifier(0.5f)
+                                                                                                                                                             .alwaysEdible()
+                                                                                                                                                             .fast()
+                                                                                                                                                             .build())));
     public static final DeferredItem<BlockItem> SMOKESTACK = ITEMS.register("smokestack", () -> new BlockItem(ModBlocks.SMOKESTACK.get(), SmokestackBlock.getItemProperties()));
 
     // Spawn Eggs
