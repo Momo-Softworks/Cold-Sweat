@@ -2227,3 +2227,13 @@ Fixes:
 Fixes:
 - Fixed all loot from all sources yielding piglin barter loot
 - Fixed recipes not working & made them more compatible with modded items
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.3-b04g
+- Reduced the food value of soul sprouts to 3 (from 4), and the saturation to 0.5 (from 1)
+- Significantly reduced the drop rate of sticks from soul stalk blocks
+- Shift-clicking an armor item from the output slot of the sewing table now applies all available insulation at once
+
+Fixes:
+- Fixed adaptive insulation not displaying adaptation state on the client

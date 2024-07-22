@@ -65,12 +65,14 @@ Chameleon Changes:-
 - Slightly decreased the rate at which chameleons shed
 
 Loot Changes:-
-- Increased hoglin hide drop rate to 1-3 per hoglin killed
+- Increased hoglin hide drop rate to between 1 and 3 (from 1)
 - Chameleon molt dropped from chameleons now lasts 20 minutes before despawning
+- Significantly reduced the drop rate of sticks from soul stalk blocks
 
 Misc. Changes:-
 * Added "Cold Sweat: Insulators" creative tab
         - Contains all items that can be used as insulation, or provide insulation when worn
+* Shift-clicking an armor item from the output slot of the sewing table now applies all available insulation at once
 - Removed the Insulated effect from the list of top-tier beacon effects
 - The inside of naturally-generated igloos is now habitable
 - The soulspring lamp can now be given one fuel item at a time by right-clicking
@@ -80,6 +82,7 @@ Misc. Changes:-
 - The soulspring lamp now emits particles while in use to help signify its area of effect
 - Lava cauldrons now emit heat by default
       ! This will not take effect until the config setting for block temperatures is reset
+- Reduced the food value of soul sprouts to 3 (from 4), and the saturation to 0.5 (from 1)
 
 
 Config Changes:
