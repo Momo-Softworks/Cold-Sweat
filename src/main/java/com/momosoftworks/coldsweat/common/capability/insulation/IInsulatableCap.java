@@ -11,6 +11,8 @@ import java.util.List;
 public interface IInsulatableCap extends INBTSerializable<CompoundTag>
 {
     List<Pair<ItemStack, List<Insulation>>> getInsulation();
+    boolean canAddInsulationItem(ItemStack armorItem, ItemStack insulationItem);
+
     void addInsulationItem(ItemStack stack);
     ItemStack removeInsulationItem(ItemStack stack);
     ItemStack getInsulationItem(int index);

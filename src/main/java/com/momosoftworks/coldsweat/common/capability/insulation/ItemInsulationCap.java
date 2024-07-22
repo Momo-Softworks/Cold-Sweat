@@ -3,7 +3,9 @@ package com.momosoftworks.coldsweat.common.capability.insulation;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
+import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -11,6 +13,7 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ItemInsulationCap implements IInsulatableCap
 {
@@ -64,6 +67,28 @@ public class ItemInsulationCap implements IInsulatableCap
 
     public ItemStack getInsulationItem(int index)
     {   return this.insulation.get(index).getFirst();
+    }
+
+    public boolean canAddInsulationItem(ItemStack armorItem, ItemStack insulationItem)
+    {
+        AtomicInteger positiveInsul = new AtomicInteger();
+
+        Insulator insulator = ConfigSettings.INSULATION_ITEMS.get().get(insulationItem.getItem());
+        if (insulator == null)
+        {   return false;
+        }
+
+        List<Pair<ItemStack, List<Insulation>>> insulList = new ArrayList<>(this.insulation);
+        insulList.add(Pair.of(insulationItem, insulator.insulation().split()));
+
+        // Get the total positive/negative insulation of the armor
+        insulList.stream().map(Pair::getSecond).flatMap(Collection::stream).forEach(insul ->
+        {
+            if (insul.getHeat() >= 0 || insul.getCold() >= 0)
+            {   positiveInsul.getAndIncrement();
+            }
+        });
+        return positiveInsul.get() <= ItemInsulationManager.getInsulationSlots(armorItem);
     }
 
     @Override
