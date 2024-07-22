@@ -44,6 +44,7 @@ public class SewingContainer extends AbstractContainerMenu
     BlockPos pos;
     Inventory playerInventory;
     SewingInventory sewingInventory;
+    protected boolean quickMoved = false;
 
     public static class SewingInventory implements Container
     {
@@ -262,10 +263,14 @@ public class SewingContainer extends AbstractContainerMenu
         }
         // If insulation is being added
         else
-        {   // Remove input items
-            this.growItem(0, -1);
-            this.growItem(1, -1);
-            player.level().playSound(null, player.blockPosition(), SoundEvents.LLAMA_SWAG.value(), SoundSource.BLOCKS, 0.5f, 1f);
+        {
+                if (!quickMoved)
+                {   this.growItem(0, -1);
+                    this.growItem(1, -1);
+                }
+                this.quickMoved = false;
+                // Play insulation sound
+                player.level().playSound(null, player.blockPosition(), SoundEvents.LLAMA_SWAG.value(), SoundSource.BLOCKS, 0.5f, 1f);
 
             // Trigger advancement criteria
             if (player instanceof ServerPlayer serverPlayer)
@@ -301,47 +306,46 @@ public class SewingContainer extends AbstractContainerMenu
             || armor.getEquipmentSlot() == otherArmor.getEquipmentSlot()))
             {
                 ItemStack processed = wearableItem.copy();
-                ArmorInsulation insulCap = ItemInsulationManager.getInsulationCap(processed);
-                ItemStack insulator = insulatorItem.copy();
-                insulator.setCount(1);
-                insulCap = insulCap.addInsulationItem(insulator);
-
-                // Cancel crafting if the insulation provided by the insulator is too much
-                AtomicInteger positiveInsul = new AtomicInteger();
-                // Get the total positive/negative insulation of the armor
-                insulCap.getInsulation().stream().map(Pair::getSecond).flatMap(Collection::stream).forEach(insul ->
+                if (insulateArmorItem(processed, insulatorItem))
                 {
-                    if (insul.getHeat() >= 0 || insul.getCold() >= 0)
-                    {   positiveInsul.set(positiveInsul.get() + (int) ((insul.getHeat() + insul.getCold()) / 2));
-                    }
-                });
-                if (positiveInsul.get() > ItemInsulationManager.getInsulationSlots(wearableItem))
-                {   return;
+                    this.setItem(2, processed);
+                    //this.syncSlot(2);
+                    this.sendAllDataToRemote();
                 }
-
-                // Transfer enchantments
-                if (processed.has(DataComponents.ENCHANTMENTS) && insulator.has(DataComponents.ENCHANTMENTS))
-                {
-                    ItemEnchantments armorEnch = processed.get(DataComponents.ENCHANTMENTS);
-                    ItemEnchantments.Mutable insulatorEnch = new ItemEnchantments.Mutable(insulator.get(DataComponents.ENCHANTMENTS));
-                    insulatorEnch.removeIf(ench ->
-                    {
-                        if (ench == null) return false;
-
-                        if (ench.value().canEnchant(wearableItem) && EnchantmentHelper.isEnchantmentCompatible(armorEnch.keySet(), ench))
-                        {   processed.enchant(ench, insulatorEnch.getLevel(ench));
-                            return true;
-                        }
-                        return false;
-                    });
-                }
-
-                processed.set(ModItemComponents.ARMOR_INSULATION, insulCap);
-                this.setItem(2, processed);
-                this.sendAllDataToRemote();
             }
         }
         this.broadcastChanges();
+    }
+
+    private boolean insulateArmorItem(ItemStack armorItem, ItemStack insulatorItem)
+    {
+        ArmorInsulation insulCap = ItemInsulationManager.getInsulationCap(armorItem);
+        ItemStack insulator = insulatorItem.copy();
+        insulator.setCount(1);
+        // Prevent exceeding the armor item's insulation capacity
+        if (!insulCap.canAddInsulationItem(armorItem, insulator)) return false;
+
+        insulCap.addInsulationItem(insulator);
+
+        // Transfer enchantments
+        if (armorItem.has(DataComponents.ENCHANTMENTS) && insulator.has(DataComponents.ENCHANTMENTS))
+        {
+            ItemEnchantments armorEnch = armorItem.get(DataComponents.ENCHANTMENTS);
+            ItemEnchantments.Mutable insulatorEnch = new ItemEnchantments.Mutable(insulator.get(DataComponents.ENCHANTMENTS));
+            insulatorEnch.removeIf(ench ->
+            {
+                if (ench == null) return false;
+
+                if (ench.value().canEnchant(armorItem) && EnchantmentHelper.isEnchantmentCompatible(armorEnch.keySet(), ench))
+                {   armorItem.enchant(ench, insulatorEnch.getLevel(ench));
+                    return true;
+                }
+                return false;
+            });
+        }
+
+        armorItem.set(ModItemComponents.ARMOR_INSULATION, insulCap);
+        return true;
     }
 
     public SewingContainer(final int windowId, final Player playerInv, BlockPos pos)
@@ -389,6 +393,14 @@ public class SewingContainer extends AbstractContainerMenu
             newStack = slotItem.copy();
             if (CSMath.betweenInclusive(index, 0, 2))
             {
+                if (index == 2 && !(this.getItem(1).getItem() instanceof ShearsItem))
+                {   this.quickMoved = true;
+                    do
+                    {   this.growItem(0, -1);
+                        this.growItem(1, -1);
+                    }
+                    while (insulateArmorItem(slotItem, this.getItem(1)));
+                }
                 if (this.moveItemStackTo(slotItem, 3, 39, true))
                 {   slot.onTake(player, newStack);
                 }

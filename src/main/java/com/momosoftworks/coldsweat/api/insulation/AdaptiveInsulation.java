@@ -12,8 +12,8 @@ public class AdaptiveInsulation extends Insulation
 {
     public static final Codec<AdaptiveInsulation> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.DOUBLE.fieldOf("value").forGetter(AdaptiveInsulation::getInsulation),
-            Codec.DOUBLE.fieldOf("factor").forGetter(AdaptiveInsulation::getFactor),
-            Codec.DOUBLE.fieldOf("adapt_speed").forGetter(AdaptiveInsulation::getSpeed)
+            Codec.DOUBLE.fieldOf("adapt_speed").forGetter(AdaptiveInsulation::getSpeed),
+            Codec.DOUBLE.fieldOf("factor").forGetter(AdaptiveInsulation::getFactor)
     ).apply(instance, AdaptiveInsulation::new));
 
     private final double insulation;

@@ -6,7 +6,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
+import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -16,6 +18,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public record ArmorInsulation(List<Pair<ItemStack, List<Insulation>>> insulation)
 {
@@ -99,6 +102,28 @@ public record ArmorInsulation(List<Pair<ItemStack, List<Insulation>>> insulation
 
     public ItemStack getInsulationItem(int index)
     {   return this.insulation().get(index).getFirst();
+    }
+
+    public boolean canAddInsulationItem(ItemStack armorItem, ItemStack insulationItem)
+    {
+        AtomicInteger positiveInsul = new AtomicInteger();
+
+        Insulator insulator = ConfigSettings.INSULATION_ITEMS.get().get(insulationItem.getItem());
+        if (insulator == null)
+        {   return false;
+        }
+
+        List<Pair<ItemStack, List<Insulation>>> insulList = new ArrayList<>(this.insulation);
+        insulList.add(Pair.of(insulationItem, insulator.insulation().split()));
+
+        // Get the total positive/negative insulation of the armor
+        insulList.stream().map(Pair::getSecond).flatMap(Collection::stream).forEach(insul ->
+        {
+            if (insul.getHeat() >= 0 || insul.getCold() >= 0)
+            {   positiveInsul.getAndIncrement();
+            }
+        });
+        return positiveInsul.get() <= ItemInsulationManager.getInsulationSlots(armorItem);
     }
 
     public void serialize(RegistryFriendlyByteBuf buffer)
