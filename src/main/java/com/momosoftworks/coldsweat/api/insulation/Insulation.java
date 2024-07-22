@@ -118,10 +118,10 @@ public abstract class Insulation implements NbtSerializable
     public static Insulation deserialize(CompoundTag tag)
     {
         if (tag.contains("cold") && tag.contains("heat"))
-        {   return new StaticInsulation(tag.getDouble("cold"), tag.getDouble("heat"));
+        {   return StaticInsulation.deserialize(tag);
         }
         else if (tag.contains("insulation"))
-        {   return new AdaptiveInsulation(tag.getDouble("insulation"), tag.getDouble("speed"));
+        {   return AdaptiveInsulation.deserialize(tag);
         }
         return null;
     }
