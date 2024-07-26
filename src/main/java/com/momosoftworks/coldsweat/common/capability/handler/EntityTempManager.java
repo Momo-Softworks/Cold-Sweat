@@ -567,6 +567,10 @@ public class EntityTempManager
     {   return ImmutableSet.copyOf(TEMPERATURE_ENABLED_ENTITIES);
     }
 
+    public static boolean isTemperatureEnabled(EntityType<?> type)
+    {   return TEMPERATURE_ENABLED_ENTITIES.contains(type);
+    }
+
     public static Map<ItemStack, Insulator> getInsulatorsOnEntity(LivingEntity entity)
     {
         Map<ItemStack, Insulator> insulators = new HashMap<>();

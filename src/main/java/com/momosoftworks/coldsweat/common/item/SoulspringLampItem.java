@@ -6,6 +6,7 @@ import com.momosoftworks.coldsweat.api.temperature.modifier.SoulLampTempModifier
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
@@ -53,35 +54,36 @@ public class SoulspringLampItem extends Item
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, World world, Entity entity, int itemSlot, boolean isSelected)
+    public void inventoryTick(ItemStack stack, World level, Entity entity, int itemSlot, boolean isSelected)
     {
-        if (entity instanceof PlayerEntity && !world.isClientSide && entity.tickCount % 5 == 0)
+        if (entity instanceof LivingEntity && !level.isClientSide && entity.tickCount % 5 == 0)
         {
-            PlayerEntity player = (PlayerEntity) entity;
+            LivingEntity living = (LivingEntity) entity;
             boolean shouldBeOn = false;
             try
             {
-                if (!(isSelected || player.getOffhandItem() == stack))
+                if (!(isSelected || living.getOffhandItem() == stack))
                 {   return;
                 }
                 double max = ConfigSettings.MAX_TEMP.get();
 
-                double temp = Temperature.getModifier(player, Temperature.Trait.WORLD, SoulLampTempModifier.class)
-                              .map(TempModifier::getLastInput).orElseGet(() -> Temperature.get(player, Temperature.Trait.WORLD));
+                double temp = Temperature.getModifier(living, Temperature.Trait.WORLD, SoulLampTempModifier.class)
+                              .map(TempModifier::getLastInput).orElseGet(() -> Temperature.get(living, Temperature.Trait.WORLD));
 
                 // Is in valid dimension
-                if ((ConfigSettings.LAMP_DIMENSIONS.get(world.registryAccess()).contains(world.dimensionType()))
+                if ((ConfigSettings.LAMP_DIMENSIONS.get(level.registryAccess()).contains(level.dimensionType()))
                 // Is world temp more than max
                 && temp > max && getFuel(stack) > 0)
                 {
                     // Drain fuel
-                    if (!(player.isCreative() || player.isSpectator()))
-                        addFuel(stack, -0.005 * CSMath.clamp(temp - max, 1, 3));
+                    if (!(living instanceof PlayerEntity && !((PlayerEntity) living).isCreative() || living.isSpectator()))
+                    {   addFuel(stack, -0.005 * CSMath.clamp(temp - max, 1, 3));
+                    }
 
                     // Affect nearby players
                     double radius = 5d;
-                    AxisAlignedBB bb = new AxisAlignedBB(player.getX() - radius, player.getY() + (player.getBbHeight() / 2) - radius, player.getZ() - radius,
-                                                player.getX() + radius, player.getY() + (player.getBbHeight() / 2) + radius, player.getZ() + radius);
+                    AxisAlignedBB bb = new AxisAlignedBB(living.getX() - radius, living.getY() + (living.getBbHeight() / 2) - radius, living.getZ() - radius,
+                                                         living.getX() + radius, living.getY() + (living.getBbHeight() / 2) + radius, living.getZ() + radius);
 
                     if (Math.random() < 0.6)
                     {
@@ -91,18 +93,21 @@ public class SoulspringLampItem extends Item
                         double z = bb2.minZ + (bb2.maxZ - bb2.minZ) * Math.random();
                         double xSpeed = (Math.random() - 0.5) * 0.02;
                         double zSpeed = (Math.random() - 0.5) * 0.02;
-                        WorldHelper.spawnParticle(world, ParticleTypes.SOUL_FIRE_FLAME, x, y, z, xSpeed, 0, zSpeed);
+                        WorldHelper.spawnParticle(level, ParticleTypes.SOUL_FIRE_FLAME, x, y, z, xSpeed, 0, zSpeed);
                     }
 
-                    for (PlayerEntity playerEnt : world.getEntitiesOfClass(PlayerEntity.class, bb))
+                    for (LivingEntity ent : level.getEntitiesOfClass(LivingEntity.class, bb))
                     {
+                        if (!EntityTempManager.isTemperatureEnabled(ent.getType()))
+                        {   continue;
+                        }
                         // Extend modifier time if it is present
-                        Optional<SoulLampTempModifier> mod = Temperature.getModifier(playerEnt, Temperature.Trait.WORLD, SoulLampTempModifier.class);
+                        Optional<SoulLampTempModifier> mod = Temperature.getModifier(ent, Temperature.Trait.WORLD, SoulLampTempModifier.class);
                         if (mod.isPresent())
                         {   mod.get().setTicksExisted(0);
                         }
                         else
-                        {   Temperature.addOrReplaceModifier(playerEnt, new SoulLampTempModifier().expires(5).tickRate(5), Temperature.Trait.WORLD, Placement.Duplicates.BY_CLASS);
+                        {   Temperature.addOrReplaceModifier(ent, new SoulLampTempModifier().expires(5).tickRate(5), Temperature.Trait.WORLD, Placement.Duplicates.BY_CLASS);
                         }
                     }
                     shouldBeOn = true;
@@ -121,7 +126,7 @@ public class SoulspringLampItem extends Item
                     if (getFuel(stack) < 0.5)
                         setFuel(stack, 0);
 
-                    WorldHelper.playEntitySound(shouldBeOn ? ModSounds.NETHER_LAMP_ON : ModSounds.NETHER_LAMP_OFF, player, entity.getSoundSource(), 1.5f, (float) Math.random() / 5f + 0.9f);
+                    WorldHelper.playEntitySound(shouldBeOn ? ModSounds.NETHER_LAMP_ON : ModSounds.NETHER_LAMP_OFF, living, living.getSoundSource(), 1.5f, (float) Math.random() / 5f + 0.9f);
                 }
                 else
                 {   // Decrement the state change timer
