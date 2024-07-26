@@ -5,6 +5,7 @@ import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
+import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.type.PredicateItem;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
@@ -43,20 +44,20 @@ public class SoulspringLampItem extends Item
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, Level level, Entity entityIn, int itemSlot, boolean isSelected)
+    public void inventoryTick(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected)
     {
-        if (entityIn instanceof Player player && !level.isClientSide && player.tickCount % 5 == 0)
+        if (entity instanceof LivingEntity living && !level.isClientSide && living.tickCount % 5 == 0)
         {
             boolean shouldBeOn = false;
             try
             {
-                if (!(isSelected || player.getOffhandItem() == stack))
+                if (!(isSelected || living.getOffhandItem() == stack))
                 {   return;
                 }
                 double max = ConfigSettings.MAX_TEMP.get();
 
-                double temp = Temperature.getModifier(player, Temperature.Trait.WORLD, SoulLampTempModifier.class)
-                              .map(TempModifier::getLastInput).orElseGet(() -> Temperature.get(player, Temperature.Trait.WORLD));
+                double temp = Temperature.getModifier(living, Temperature.Trait.WORLD, SoulLampTempModifier.class)
+                              .map(TempModifier::getLastInput).orElseGet(() -> Temperature.get(living, Temperature.Trait.WORLD));
 
                 // Is in valid dimension
                 if ((ConfigSettings.LAMP_DIMENSIONS.get(level.registryAccess()).contains(level.dimensionType()))
@@ -64,13 +65,14 @@ public class SoulspringLampItem extends Item
                 && temp > max && getFuel(stack) > 0)
                 {
                     // Drain fuel
-                    if (!(player.isCreative() || player.isSpectator()))
-                        addFuel(stack, -0.005 * CSMath.clamp(temp - max, 1, 3));
+                    if (!(living instanceof Player player && !player.isCreative() || living.isSpectator()))
+                    {   addFuel(stack, -0.005 * CSMath.clamp(temp - max, 1, 3));
+                    }
 
                     // Affect nearby players
                     double radius = 5d;
-                    AABB bb = new AABB(player.getX() - radius, player.getY() + (player.getBbHeight() / 2) - radius, player.getZ() - radius,
-                                       player.getX() + radius, player.getY() + (player.getBbHeight() / 2) + radius, player.getZ() + radius);
+                    AABB bb = new AABB(living.getX() - radius, living.getY() + (living.getBbHeight() / 2) - radius, living.getZ() - radius,
+                                       living.getX() + radius, living.getY() + (living.getBbHeight() / 2) + radius, living.getZ() + radius);
 
                     if (Math.random() < 0.6)
                     {
@@ -83,15 +85,18 @@ public class SoulspringLampItem extends Item
                         WorldHelper.spawnParticle(level, ParticleTypes.SOUL_FIRE_FLAME, x, y, z, xSpeed, 0, zSpeed);
                     }
 
-                    for (Player entity : level.getEntitiesOfClass(Player.class, bb))
+                    for (LivingEntity ent : level.getEntitiesOfClass(LivingEntity.class, bb))
                     {
+                        if (!EntityTempManager.isTemperatureEnabled(ent.getType()))
+                        {   continue;
+                        }
                         // Extend modifier time if it is present
-                        Optional<SoulLampTempModifier> mod = Temperature.getModifier(entity, Temperature.Trait.WORLD, SoulLampTempModifier.class);
+                        Optional<SoulLampTempModifier> mod = Temperature.getModifier(ent, Temperature.Trait.WORLD, SoulLampTempModifier.class);
                         if (mod.isPresent())
                         {   mod.get().setTicksExisted(0);
                         }
                         else
-                        {   Temperature.addOrReplaceModifier(entity, new SoulLampTempModifier().expires(5).tickRate(5), Temperature.Trait.WORLD, Placement.Duplicates.BY_CLASS);
+                        {   Temperature.addOrReplaceModifier(ent, new SoulLampTempModifier().expires(5).tickRate(5), Temperature.Trait.WORLD, Placement.Duplicates.BY_CLASS);
                         }
                     }
                     shouldBeOn = true;
@@ -110,7 +115,7 @@ public class SoulspringLampItem extends Item
                     if (getFuel(stack) < 0.5)
                         setFuel(stack, 0);
 
-                    WorldHelper.playEntitySound(shouldBeOn ? ModSounds.NETHER_LAMP_ON : ModSounds.NETHER_LAMP_OFF, player, entityIn.getSoundSource(), 1.5f, (float) Math.random() / 5f + 0.9f);
+                    WorldHelper.playEntitySound(shouldBeOn ? ModSounds.NETHER_LAMP_ON : ModSounds.NETHER_LAMP_OFF, living, living.getSoundSource(), 1.5f, (float) Math.random() / 5f + 0.9f);
                 }
                 else
                 {   // Decrement the state change timer
