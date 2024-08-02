@@ -50,6 +50,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
 import net.minecraftforge.common.util.ITeleporter;
 import net.minecraftforge.event.entity.EntityEvent;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
@@ -266,9 +267,19 @@ public class Chameleon extends Animal
         }
     }
 
-    public int getTimeToShed()
+    @SubscribeEvent
+    public static void onHitFromOwner(LivingHurtEvent event)
     {
-        return 600;
+        if (event.getEntity() instanceof Chameleon chameleon)
+        {
+            if (chameleon.getVehicle() == event.getSource().getEntity())
+            {   event.setCanceled(true);
+            }
+        }
+    }
+
+    public int getTimeToShed()
+    {   return 600;
     }
 
     public int getEatAnimLength()
