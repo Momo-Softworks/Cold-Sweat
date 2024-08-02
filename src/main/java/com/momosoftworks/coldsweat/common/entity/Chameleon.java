@@ -54,6 +54,7 @@ import net.minecraft.world.phys.Vec2;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -254,9 +255,19 @@ public class Chameleon extends Animal
         }
     }
 
-    public int getTimeToShed()
+    @SubscribeEvent
+    public static void onHitFromOwner(LivingIncomingDamageEvent event)
     {
-        return 600;
+        if (event.getEntity() instanceof Chameleon chameleon)
+        {
+            if (chameleon.getVehicle() == event.getSource().getEntity())
+            {   event.setCanceled(true);
+            }
+        }
+    }
+
+    public int getTimeToShed()
+    {   return 600;
     }
 
     public int getEatAnimLength()
