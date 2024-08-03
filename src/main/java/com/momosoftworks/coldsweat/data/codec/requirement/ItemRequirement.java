@@ -4,7 +4,9 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
+import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
+import com.sun.xml.internal.bind.v2.model.core.ID;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.item.EnchantedBookItem;
@@ -27,7 +29,8 @@ import java.util.stream.Collectors;
 
 public class ItemRequirement
 {
-    public final List<Either<ITag<Item>, Item>> items;
+    public final Optional<List<Either<ITag<Item>, Item>>> items;
+    public final Optional<ITag<Item>> tag;
     public final Optional<IntegerBounds> count;
     public final Optional<IntegerBounds> durability;
     public final Optional<List<EnchantmentRequirement>> enchantments;
@@ -35,12 +38,13 @@ public class ItemRequirement
     public final Optional<Potion> potion;
     public final NbtRequirement nbt;
 
-    public ItemRequirement(List<Either<ITag<Item>, Item>> items,
+    public ItemRequirement(Optional<List<Either<ITag<Item>, Item>>> items, Optional<ITag<Item>> tag,
                            Optional<IntegerBounds> count, Optional<IntegerBounds> durability,
                            Optional<List<EnchantmentRequirement>> enchantments, Optional<List<EnchantmentRequirement>> storedEnchantments,
                            Optional<Potion> potion, NbtRequirement nbt)
     {
         this.items = items;
+        this.tag = tag;
         this.count = count;
         this.durability = durability;
         this.enchantments = enchantments;
@@ -50,7 +54,8 @@ public class ItemRequirement
     }
 
     public static final Codec<ItemRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.either(ITag.codec(ItemTags::getAllTags), Registry.ITEM).listOf().fieldOf("items").forGetter(predicate -> predicate.items),
+            Codec.either(ITag.codec(ItemTags::getAllTags), Registry.ITEM).listOf().optionalFieldOf("items").forGetter(predicate -> predicate.items),
+            ITag.codec(ItemTags::getAllTags).optionalFieldOf("tag").forGetter(predicate -> predicate.tag),
             IntegerBounds.CODEC.optionalFieldOf("count").forGetter(predicate -> predicate.count),
             IntegerBounds.CODEC.optionalFieldOf("durability").forGetter(predicate -> predicate.durability),
             EnchantmentRequirement.CODEC.listOf().optionalFieldOf("enchantments").forGetter(predicate -> predicate.enchantments),
@@ -61,24 +66,28 @@ public class ItemRequirement
 
     public boolean test(ItemStack stack, boolean ignoreCount)
     {
-        if (stack.isEmpty() && !items.isEmpty())
+        if (stack.isEmpty() && items.isPresent() && !items.get().isEmpty())
         {   return false;
         }
 
         if (this.nbt.tag.isEmpty())
         {   return true;
         }
-        for (int i = 0; i < items.size(); i++)
+        if (items.isPresent())
         {
-            Either<ITag<Item>, Item> either = items.get(i);
-            if (either.left().isPresent() && either.left().get().contains(stack.getItem())
-                    || either.right().isPresent() && either.right().get() == stack.getItem())
+            for (int i = 0; i < items.get().size(); i++)
             {
-                break;
+                Either<ITag<Item>, Item> either = items.get().get(i);
+                if (either.map(tag -> tag.contains(stack.getItem()), item -> stack.getItem() == item))
+                {   break;
+                }
+                if (i == items.get().size() - 1)
+                {   return false;
+                }
             }
-            if (i == items.size() - 1)
-            {   return false;
-            }
+        }
+        if (tag.isPresent() && !tag.get().contains(stack.getItem()))
+        {   return false;
         }
         if (!ignoreCount && count.isPresent() && !count.get().test(stack.getCount()))
         {   return false;
@@ -117,9 +126,9 @@ public class ItemRequirement
     public CompoundNBT serialize()
     {
         CompoundNBT nbt = new CompoundNBT();
-        nbt.put("items", NBTHelper.listTagOf(items.stream().map(either -> StringNBT.valueOf(either.map(tag -> "#" + ItemTags.getAllTags().getId(tag),
-                                                                                                       item -> ForgeRegistries.ITEMS.getKey(item).toString())))
-                                                           .collect(Collectors.toList())));
+        items.ifPresent(itemList -> nbt.put("items", NBTHelper.listTagOf(itemList.stream().map(either -> StringNBT.valueOf(either.map(tag -> "#" + ItemTags.getAllTags().getId(tag),
+                                                                                                                       item -> ForgeRegistries.ITEMS.getKey(item).toString())))
+                                                                     .collect(Collectors.toList()))));
         count.ifPresent(count -> nbt.put("count", count.serialize()));
         durability.ifPresent(durability -> nbt.put("durability", durability.serialize()));
         enchantments.ifPresent(enchantments -> nbt.put("enchantments", NBTHelper.listTagOf(enchantments.stream().map(EnchantmentRequirement::serialize).collect(Collectors.toList()))));
@@ -131,25 +140,28 @@ public class ItemRequirement
 
     public static ItemRequirement deserialize(CompoundNBT nbt)
     {
-        List<Either<ITag<Item>, Item>> items = nbt.getList("items", 8)
-                                                     .stream()
-                                                     .map(tg ->
-                                                     {
-                                                           String string = tg.getAsString();
-                                                           ResourceLocation location = new ResourceLocation(string.replace("#", ""));
-                                                           if (!string.contains("#"))
-                                                           {   return Either.<ITag<Item>, Item>right(ForgeRegistries.ITEMS.getValue(location));
-                                                           }
+        Optional<List<Either<ITag<Item>, Item>>> items = Optional.of(nbt.getList("items", 8)
+                                                           .stream()
+                                                           .map(tg ->
+                                                           {
+                                                                 String string = tg.getAsString();
+                                                                 ResourceLocation location = new ResourceLocation(string.replace("#", ""));
+                                                                 if (!string.contains("#"))
+                                                                 {   return Either.<ITag<Item>, Item>right(ForgeRegistries.ITEMS.getValue(location));
+                                                                 }
 
-                                                           return Either.<ITag<Item>, Item>left(ItemTags.getAllTags().getTag(location));
-                                                     })
-                                                     .collect(Collectors.toList());
+                                                                 return Either.<ITag<Item>, Item>left(ItemTags.getAllTags().getTag(location));
+                                                           })
+                                                           .collect(Collectors.toList()));
+
+        Optional<ITag<Item>> tag = nbt.contains("tag") ? Optional.ofNullable(ItemTags.getAllTags().getTag(new ResourceLocation(nbt.getString("tag"))))
+                                                         : Optional.empty();
 
         Optional<IntegerBounds> count = nbt.contains("count") ? Optional.of(IntegerBounds.deserialize(nbt.getCompound("count")))
-                                                              : Optional.empty();
+                                                              : java.util.Optional.empty();
 
         Optional<IntegerBounds> durability = nbt.contains("durability") ? Optional.of(IntegerBounds.deserialize(nbt.getCompound("durability")))
-                                                                        : Optional.empty();
+                                                                        : java.util.Optional.empty();
 
         Optional<List<EnchantmentRequirement>> enchantments = nbt.contains("enchantments") ? Optional.of(nbt.getList("enchantments", 10)
                                                                                                          .stream()
@@ -169,7 +181,7 @@ public class ItemRequirement
         NbtRequirement nbtReq = nbt.contains("nbt") ? NbtRequirement.deserialize(nbt.getCompound("nbt"))
                                                       : new NbtRequirement(new CompoundNBT());
 
-        return new ItemRequirement(items, count, durability, enchantments, storedEnchantments, potion, nbtReq);
+        return new ItemRequirement(items, tag, count, durability, enchantments, storedEnchantments, potion, nbtReq);
     }
 
     @Override
@@ -210,8 +222,9 @@ public class ItemRequirement
     {
         StringBuilder builder = new StringBuilder();
         builder.append("ItemRequirement{");
-        items.forEach(either -> builder.append(either.map(tag -> "#" + tag.toString(),
-                                                          item -> ForgeRegistries.ITEMS.getKey(item)).toString()).append(", "));
+        items.ifPresent(itemList -> itemList.forEach(either -> builder.append(either.map(tag -> "#" + ItemTags.getAllTags().getId(tag),
+                                                                                         item -> ForgeRegistries.ITEMS.getKey(item)).toString())
+                                                                      .append(", ")));
         count.ifPresent(bounds -> builder.append(bounds.toString()).append(", "));
         durability.ifPresent(bounds -> builder.append(bounds.toString()).append(", "));
         enchantments.ifPresent(enchantments -> builder.append("Enchantments: {").append(enchantments.stream().map(EnchantmentRequirement::toString).collect(Collectors.joining(", "))).append("}, "));

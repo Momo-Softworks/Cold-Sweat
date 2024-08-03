@@ -1,6 +1,8 @@
 package com.momosoftworks.coldsweat.util.serialization;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
@@ -11,6 +13,7 @@ import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
+import com.momosoftworks.coldsweat.data.codec.util.ResourceKey;
 import com.momosoftworks.coldsweat.util.exceptions.ArgumentCountException;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.block.Block;
@@ -30,6 +33,8 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.ForgeRegistryEntry;
+import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -48,7 +53,7 @@ public class ConfigHelper
         if (!optReg.isPresent()) return parsedObjects;
 
         Registry<T> reg = optReg.get();
-        
+
         for (String objString : objects.split(","))
         {
             if (objString.startsWith("#"))
@@ -561,7 +566,7 @@ public class ConfigHelper
             Insulation insulation = type.equals("static")
                                     ? new StaticInsulation(value1, value2)
                                     : new AdaptiveInsulation(value1, value2);
-            ItemRequirement requirement = new ItemRequirement(Arrays.asList(), Optional.empty(),
+            ItemRequirement requirement = new ItemRequirement(Optional.of(Arrays.asList(Either.right(item))), Optional.empty(), Optional.empty(),
                                                               Optional.empty(), Optional.empty(),
                                                               Optional.empty(), Optional.empty(), new NbtRequirement(nbt));
 
@@ -594,5 +599,26 @@ public class ConfigHelper
 
             return itemData;
         });
+    }
+
+    public static <T extends IForgeRegistryEntry<T>> Codec<Either<ITag<T>, T>> tagOrRegistryCodec(RegistryKey<Registry<T>> vanillaRegistry, IForgeRegistry<T> forgeRegistry)
+    {
+        ITagCollection<T> vanillaTags = getTagsForRegistry(vanillaRegistry);
+        return Codec.STRING.xmap(
+               // Convert from a string to a TagKey
+               string ->
+               {
+                   ResourceLocation itemLocation = new ResourceLocation(string.replace("#", ""));
+                   if (!string.contains("#")) return Either.<ITag<T>, T>right(forgeRegistry.getValue(itemLocation));
+
+                   return Either.<ITag<T>, T>left(vanillaTags.getTag(itemLocation));
+               },
+               // Convert from a TagKey to a string
+               either ->
+               {   return either.left().isPresent()
+                          ? "#" + vanillaTags.getId(either.left().get())
+                          : either.right().map(item -> forgeRegistry.getKey(item).toString()).orElse("");
+
+               });
     }
 }
