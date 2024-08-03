@@ -1,6 +1,8 @@
 package com.momosoftworks.coldsweat.util.serialization;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
@@ -30,6 +32,7 @@ import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.tags.ITag;
 import oshi.util.tuples.Triplet;
 
@@ -553,7 +556,7 @@ public class ConfigHelper
             Insulation insulation = type.equals("static")
                                     ? new StaticInsulation(value1, value2)
                                     : new AdaptiveInsulation(value1, value2);
-            ItemRequirement requirement = new ItemRequirement(List.of(), Optional.empty(),
+            ItemRequirement requirement = new ItemRequirement(Optional.of(List.of(Either.right(item))), Optional.empty(), Optional.empty(),
                                                               Optional.empty(), Optional.empty(),
                                                               Optional.empty(), Optional.empty(), new NbtRequirement(nbt));
 
@@ -586,5 +589,25 @@ public class ConfigHelper
 
             return itemData;
         });
+    }
+
+    public static <T> Codec<Either<TagKey<T>, T>> tagOrRegistryCodec(ResourceKey<Registry<T>> vanillaRegistry, IForgeRegistry<T> forgeRegistry)
+    {
+        return Codec.STRING.xmap(
+               // Convert from a string to a TagKey
+               string ->
+               {
+                   ResourceLocation itemLocation = new ResourceLocation(string.replace("#", ""));
+                   if (!string.contains("#")) return Either.<TagKey<T>, T>right(forgeRegistry.getValue(itemLocation));
+
+                   return Either.<TagKey<T>, T>left(TagKey.create(vanillaRegistry, itemLocation));
+               },
+               // Convert from a TagKey to a string
+               either ->
+               {   return either.left().isPresent()
+                          ? "#" + either.left().get().location()
+                          : either.right().map(item -> forgeRegistry.getKey(item).toString()).orElse("");
+
+               });
     }
 }
