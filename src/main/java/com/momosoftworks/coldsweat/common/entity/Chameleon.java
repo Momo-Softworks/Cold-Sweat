@@ -229,12 +229,6 @@ public class Chameleon extends Animal
     }
 
     @Override
-    public void setInLove(@Nullable Player pPlayer)
-    {   super.setInLove(pPlayer);
-        this.getPersistentData().putBoolean("HasBred", true);
-    }
-
-    @Override
     protected void ageBoundaryReached()
     {
         super.ageBoundaryReached();
@@ -291,6 +285,13 @@ public class Chameleon extends Animal
     @Override
     public AgeableMob getBreedOffspring(@NotNull ServerLevel level, @NotNull AgeableMob parent)
     {   return EntityInit.CHAMELEON.get().create(level);
+    }
+
+    @Override
+    public void spawnChildFromBreeding(ServerLevel pLevel, Animal pMate)
+    {
+        super.spawnChildFromBreeding(pLevel, pMate);
+        this.getPersistentData().putBoolean("HasBred", true);
     }
 
     @Nullable
