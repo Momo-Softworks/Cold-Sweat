@@ -222,12 +222,6 @@ public class ChameleonEntity extends AnimalEntity
     }
 
     @Override
-    public void setInLove(@Nullable PlayerEntity pPlayer)
-    {   super.setInLove(pPlayer);
-        this.getPersistentData().putBoolean("HasBred", true);
-    }
-
-    @Override
     protected void ageBoundaryReached()
     {
         super.ageBoundaryReached();
@@ -264,9 +258,9 @@ public class ChameleonEntity extends AnimalEntity
     @SubscribeEvent
     public static void onHitFromOwner(LivingHurtEvent event)
     {
-        if (event.getEntity() instanceof Chameleon chameleon)
+        if (event.getEntity() instanceof ChameleonEntity)
         {
-            if (chameleon.getVehicle() == event.getSource().getEntity())
+            if (event.getEntityLiving().getVehicle() == event.getSource().getEntity())
             {   event.setCanceled(true);
             }
         }
@@ -286,6 +280,14 @@ public class ChameleonEntity extends AnimalEntity
     {   return EntityInit.CHAMELEON.get().create(world);
     }
 
+    @Override
+    public void spawnChildFromBreeding(ServerWorld pLevel, AnimalEntity pMate)
+    {
+        super.spawnChildFromBreeding(pLevel, pMate);
+        this.getPersistentData().putBoolean("HasBred", true);
+    }
+
+    @Nullable
     @Override
     protected SoundEvent getAmbientSound()
     {   return ModSounds.CHAMELEON_AMBIENT;
