@@ -23,6 +23,7 @@
     "MixinCampfire",
     "MixinInventoryOpenServer",
     "MixinMinecart",
+    "MixinSmithingRecipe",
     "MixinSoulCampfire",
     "MixinSoulFire",
     "compat.MixinSpoiledIcebox",

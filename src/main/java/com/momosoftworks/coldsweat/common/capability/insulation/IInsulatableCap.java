@@ -16,4 +16,6 @@ public interface IInsulatableCap extends INBTSerializable<CompoundTag>
     void addInsulationItem(ItemStack stack);
     ItemStack removeInsulationItem(ItemStack stack);
     ItemStack getInsulationItem(int index);
+
+    void copy(IInsulatableCap cap);
 }
