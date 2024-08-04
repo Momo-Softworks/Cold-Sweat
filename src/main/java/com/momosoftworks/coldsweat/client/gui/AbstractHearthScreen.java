@@ -104,7 +104,7 @@ public abstract class AbstractHearthScreen<T extends AbstractContainerMenu> exte
     public void onClose()
     {   super.onClose();
         if (this.minecraft.player != null && hideParticlesOld != hideParticles)
-        {   ColdSweatPacketHandler.INSTANCE.sendTo(new DisableHearthParticlesMessage(HearthSaveDataHandler.serializeDisabledHearths()), Minecraft.getInstance().getConnection().getConnection(), NetworkDirection.PLAY_TO_SERVER);
+        {   ColdSweatPacketHandler.INSTANCE.sendToServer(new DisableHearthParticlesMessage(HearthSaveDataHandler.serializeDisabledHearths()));
         }
     }
 }
