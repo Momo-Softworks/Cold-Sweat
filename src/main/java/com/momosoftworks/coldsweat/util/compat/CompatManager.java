@@ -238,9 +238,12 @@ public class CompatManager
     public static int getLegendaryTTStartIndex(List<Either<FormattedText, TooltipComponent>> tooltip)
     {
         if (isIcebergLoaded())
-        {   return CSMath.getIndexOf(tooltip, element -> element.right().map(component -> component instanceof Tooltips.TitleBreakComponent).orElse(false));
+        {
+            int index = CSMath.getIndexOf(tooltip, element -> element.right().map(component -> component instanceof Tooltips.TitleBreakComponent).orElse(false));
+            if (index == -1) return 0;
+            return index;
         }
-        return -1;
+        return 0;
     }
 
     /* Compat Events */
