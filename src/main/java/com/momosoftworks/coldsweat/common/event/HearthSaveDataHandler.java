@@ -1,14 +1,21 @@
 package com.momosoftworks.coldsweat.common.event;
 
 import com.mojang.datafixers.util.Pair;
+import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
+import com.momosoftworks.coldsweat.core.network.message.DisableHearthParticlesMessage;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.network.PacketDistributor;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 @Mod.EventBusSubscriber
 public class HearthSaveDataHandler
@@ -27,18 +34,28 @@ public class HearthSaveDataHandler
 
     public static CompoundNBT serializeDisabledHearths()
     {
-        CompoundNBT disabledHearths = new CompoundNBT();
+        CompoundNBT tag = new CompoundNBT();
+        ListNBT disabledHearths = new ListNBT();
 
-        int i = 0;
         for (Pair<BlockPos, ResourceLocation> pair : DISABLED_HEARTHS)
         {
             CompoundNBT hearthData = new CompoundNBT();
-            hearthData.putLong("pos", pair.getFirst().asLong());
-            hearthData.putString("level", pair.getSecond().toString());
-            disabledHearths.put(String.valueOf(i), hearthData);
-            i++;
+            hearthData.putLong("Pos", pair.getFirst().asLong());
+            hearthData.putString("Level", pair.getSecond().toString());
+            disabledHearths.add(hearthData);
         }
-        return disabledHearths;
+        tag.put("DisabledHearths", disabledHearths);
+        return tag;
+    }
+
+    public static void deserializeDisabledHearths(CompoundNBT disabledHearths)
+    {
+        DISABLED_HEARTHS.clear();
+        for (INBT tag : disabledHearths.getList("DisabledHearths", 10))
+        {
+            CompoundNBT hearthData = (CompoundNBT) tag;
+            DISABLED_HEARTHS.add(Pair.of(BlockPos.of(hearthData.getLong("Pos")), new ResourceLocation(hearthData.getString("Level"))));
+        }
     }
 
     /**
@@ -47,16 +64,12 @@ public class HearthSaveDataHandler
     @SubscribeEvent
     public static void loadDisabledHearths(PlayerEvent.PlayerLoggedInEvent event)
     {
-        deserializeDisabledHearths(event.getPlayer().getPersistentData().getCompound("disabledHearths"));
-    }
-
-    public static void deserializeDisabledHearths(CompoundNBT disabledHearths)
-    {
-        DISABLED_HEARTHS.clear();
-        for (String key : disabledHearths.getAllKeys())
+        if (!event.getEntity().level.isClientSide && event.getEntity() instanceof ServerPlayerEntity)
         {
-            CompoundNBT hearthData = disabledHearths.getCompound(key);
-            DISABLED_HEARTHS.add(Pair.of(BlockPos.of(hearthData.getLong("pos")), new ResourceLocation(hearthData.getString("level"))));
+            ServerPlayerEntity player = ((ServerPlayerEntity) event.getEntity());
+            CompoundNBT disabledHearths = new CompoundNBT();
+            disabledHearths.put("DisabledHearths", player.getPersistentData().getList("DisabledHearths", 10));
+            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new DisableHearthParticlesMessage(disabledHearths));
         }
     }
 }
