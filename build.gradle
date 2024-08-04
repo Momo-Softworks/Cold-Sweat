@@ -108,6 +108,7 @@ dependencies {
 
     implementation "curse.maven:spoiled-364918:5490658"
     implementation "curse.maven:curios-continuation-1037991:5476603"
+    implementation "curse.maven:iceberg-520110:5590963"
 
     runtimeOnly "curse.maven:jei-238222:5519368"
     runtimeOnly "curse.maven:spark-361579:5434153"

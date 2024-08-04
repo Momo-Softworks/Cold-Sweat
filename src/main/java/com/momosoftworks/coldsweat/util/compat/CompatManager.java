@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.util.compat;
 
+import com.anthonyhilyard.iceberg.util.Tooltips;
 import com.mojang.datafixers.util.Either;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
@@ -225,13 +226,15 @@ public class CompatManager
         return item;
     }
 
-    //TODO: Reimplement when this mod is updated
     public static int getLegendaryTTStartIndex(List<Either<FormattedText, TooltipComponent>> tooltip)
     {
         if (isIcebergLoaded())
-        {   return -1;//return CSMath.getIndexOf(tooltip, element -> element.right().map(component -> component instanceof Tooltips.TitleBreakComponent).orElse(false));
+        {
+            int index = CSMath.getIndexOf(tooltip, element -> element.right().map(component -> component instanceof Tooltips.TitleBreakComponent).orElse(false));
+            if (index == -1) return 0;
+            return index;
         }
-        return -1;
+        return 0;
     }
 
     /* Compat Events */
