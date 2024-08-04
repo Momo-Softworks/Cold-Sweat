@@ -45,6 +45,18 @@ public class MixinItemTooltip
                 }
             }
         });
+        Optional.ofNullable(ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem())).ifPresent(insulator ->
+        {
+            if (insulator.test(Minecraft.getInstance().player, stack))
+            {
+                if (!insulator.attributes().getMap().isEmpty())
+                {
+                    tooltip.add(CommonComponents.EMPTY);
+                    tooltip.add(Component.translatable("item.modifiers.curio").withStyle(ChatFormatting.GRAY));
+                    TooltipHandler.addModifierTooltipLines(tooltip, insulator.attributes());
+                }
+            }
+        });
     }
 
     @Redirect(method = "getTooltipLines", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;getAttributeModifiers(Lnet/minecraft/world/entity/EquipmentSlot;)Lcom/google/common/collect/Multimap;"))
