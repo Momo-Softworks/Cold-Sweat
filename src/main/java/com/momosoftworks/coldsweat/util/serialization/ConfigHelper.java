@@ -33,6 +33,7 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.tags.ITag;
 import oshi.util.tuples.Triplet;
 
@@ -556,9 +557,11 @@ public class ConfigHelper
             Insulation insulation = type.equals("static")
                                     ? new StaticInsulation(value1, value2)
                                     : new AdaptiveInsulation(value1, value2);
-            ItemRequirement requirement = new ItemRequirement(Optional.of(List.of(Either.right(item))), Optional.empty(), Optional.empty(),
+            ItemRequirement requirement = new ItemRequirement(Optional.of(List.of(Either.right(item))),
                                                               Optional.empty(), Optional.empty(),
-                                                              Optional.empty(), Optional.empty(), new NbtRequirement(nbt));
+                                                              Optional.empty(), Optional.empty(),
+                                                              Optional.empty(), Optional.empty(),
+                                                              new NbtRequirement(nbt));
 
             return new Insulator(insulation, slot, requirement, EntityRequirement.NONE, new AttributeModifierMap(), new HashMap<>());
         });
@@ -591,7 +594,7 @@ public class ConfigHelper
         });
     }
 
-    public static <T> Codec<Either<TagKey<T>, T>> tagOrRegistryCodec(ResourceKey<Registry<T>> vanillaRegistry, IForgeRegistry<T> forgeRegistry)
+    public static <T extends IForgeRegistryEntry<T>> Codec<Either<TagKey<T>, T>> tagOrRegistryCodec(ResourceKey<Registry<T>> vanillaRegistry, IForgeRegistry<T> forgeRegistry)
     {
         return Codec.STRING.xmap(
                // Convert from a string to a TagKey
