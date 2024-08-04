@@ -149,4 +149,11 @@ public class ItemInsulationCap implements IInsulatableCap
             this.insulation.add(Pair.of(stack, new ArrayList<>(pairList)));
         }
     }
+
+    @Override
+    public void copy(IInsulatableCap cap)
+    {
+        this.insulation.clear();
+        this.insulation.addAll(cap.getInsulation());
+    }
 }

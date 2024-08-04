@@ -29,6 +29,7 @@
     "MixinInventoryOpenServer",
     "MixinLlamaInteract",
     "MixinMinecart",
+    "MixinSmithingRecipe",
     "MixinSoulCampfire",
     "MixinSoulFire",
     "MixinTriggerBounds$MixinFloatBound",

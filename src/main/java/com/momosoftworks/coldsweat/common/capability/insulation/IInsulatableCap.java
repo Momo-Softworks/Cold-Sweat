@@ -16,6 +16,8 @@ public interface IInsulatableCap
     ItemStack removeInsulationItem(ItemStack stack);
     ItemStack getInsulationItem(int index);
 
+    void copy(IInsulatableCap cap);
+
     CompoundNBT serializeNBT();
     void deserializeNBT(CompoundNBT tag);
 }
