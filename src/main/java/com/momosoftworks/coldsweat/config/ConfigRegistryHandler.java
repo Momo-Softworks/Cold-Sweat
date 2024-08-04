@@ -33,6 +33,7 @@ import net.minecraft.item.Item;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.resources.IResource;
 import net.minecraft.resources.ResourcePackInfo;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
@@ -44,6 +45,7 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -195,12 +197,20 @@ public class ConfigRegistryHandler
                 }
             }
             AttributeModifierMap attributeModifiers = insulatorData.attributes.orElse(new AttributeModifierMap());
+            Insulator insulator = new Insulator(insulatorData.insulation, insulatorData.slot, insulatorData.data,
+                                                insulatorData.predicate, attributeModifiers, insulatorData.immuneTempModifiers);
 
             // Add listed items as insulators
-            for (Item item : RegistryHelper.mapTaggableList(insulatorData.data.items))
+            List<Item> items = new ArrayList<>();
+            insulatorData.data.items.ifPresent(itemList ->
+            {   items.addAll(RegistryHelper.mapTaggableList(itemList));
+            });
+            insulatorData.data.tag.ifPresent(tag ->
+            {   items.addAll(tag.getValues());
+            });
+
+            for (Item item : items)
             {
-                Insulator insulator = new Insulator(insulatorData.insulation, insulatorData.slot, insulatorData.data,
-                                                    insulatorData.predicate, attributeModifiers, insulatorData.immuneTempModifiers);
                 switch (insulatorData.slot)
                 {
                     case ITEM  : ConfigSettings.INSULATION_ITEMS.get().put(item, insulator); break;
@@ -233,9 +243,18 @@ public class ConfigRegistryHandler
             FuelData.FuelType type = fuelData.type;
             ItemRequirement data = fuelData.data;
             double fuel = fuelData.fuel;
+
             PredicateItem predicateItem = new PredicateItem(fuel, data, EntityRequirement.NONE);
 
-            for (Item item : RegistryHelper.mapTaggableList(fuelData.data.items))
+            List<Item> items = new ArrayList<>();
+            fuelData.data.items.ifPresent(itemList ->
+            {   items.addAll(RegistryHelper.mapTaggableList(itemList));
+            });
+            fuelData.data.tag.ifPresent(tag ->
+            {   items.addAll(tag.getValues());
+            });
+
+            for (Item item : items)
             {
                 switch (type)
                 {
@@ -271,7 +290,15 @@ public class ConfigRegistryHandler
 
             PredicateItem predicateItem = new PredicateItem(foodData.value, foodData.data, predicate, extraData);
 
-            for (Item item : RegistryHelper.mapTaggableList(foodData.data.items))
+            List<Item> items = new ArrayList<>();
+            foodData.data.items.ifPresent(itemList ->
+            {   items.addAll(RegistryHelper.mapTaggableList(itemList));
+            });
+            foodData.data.tag.ifPresent(tag ->
+            {   items.addAll(tag.getValues());
+            });
+
+            for (Item item : items)
             {
                 ConfigSettings.FOOD_TEMPERATURES.get().put(item, predicateItem);
             }

@@ -566,9 +566,11 @@ public class ConfigHelper
             Insulation insulation = type.equals("static")
                                     ? new StaticInsulation(value1, value2)
                                     : new AdaptiveInsulation(value1, value2);
-            ItemRequirement requirement = new ItemRequirement(Optional.of(Arrays.asList(Either.right(item))), Optional.empty(), Optional.empty(),
+            ItemRequirement requirement = new ItemRequirement(Optional.of(Arrays.asList(Either.right(item))),
                                                               Optional.empty(), Optional.empty(),
-                                                              Optional.empty(), Optional.empty(), new NbtRequirement(nbt));
+                                                              Optional.empty(), Optional.empty(),
+                                                              Optional.empty(), Optional.empty(),
+                                                              new NbtRequirement(nbt));
 
             return new Insulator(insulation, slot, requirement, EntityRequirement.NONE, new AttributeModifierMap(), new HashMap<>());
         });

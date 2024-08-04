@@ -359,7 +359,8 @@ public class ConfigSettings
             {   nbtRequirement = new NbtRequirement(NBTHelper.parseCompoundNbt((String) args.get(2)));
             }
             else nbtRequirement = new NbtRequirement(new CompoundNBT());
-            return new PredicateItem(fuel, new ItemRequirement(Arrays.asList(), Optional.empty(),
+            return new PredicateItem(fuel, new ItemRequirement(Optional.of(Arrays.asList(Either.right(item))),
+                                                               Optional.empty(), Optional.empty(),
                                                                Optional.empty(), Optional.empty(),
                                                                Optional.empty(), Optional.empty(),
                                                                nbtRequirement),
@@ -436,7 +437,8 @@ public class ConfigSettings
                                             ? new NbtRequirement(NBTHelper.parseCompoundNbt((String) args.get(1)))
                                             : new NbtRequirement(new CompoundNBT());
             Integer duration = args.size() > 2 ? ((Number) args.get(2)).intValue() : null;
-            ItemRequirement itemRequirement = new ItemRequirement(Arrays.asList(), Optional.empty(),
+            ItemRequirement itemRequirement = new ItemRequirement(Optional.of(Arrays.asList(Either.right(item))),
+                                                                  Optional.empty(), Optional.empty(),
                                                                   Optional.empty(), Optional.empty(),
                                                                   Optional.empty(), Optional.empty(),
                                                                   nbtRequirement);
