@@ -45,6 +45,7 @@
   "tooltip.cold_sweat.per_second": "/sec",
 
   "item.modifiers.insulation": "When Applied to Armor:",
+  "item.modifiers.curio": "When Worn as Curio:",
 
 
   "effect.cold_sweat.insulated":            "Insulation",
