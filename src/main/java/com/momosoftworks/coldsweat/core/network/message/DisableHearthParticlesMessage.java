@@ -30,7 +30,7 @@ public class DisableHearthParticlesMessage
         if (context.getSender() != null && context.getDirection().getReceptionSide() == LogicalSide.SERVER)
         {
             context.enqueueWork(() ->
-            {   context.getSender().getPersistentData().put("DisabledHearths", message.nbt);
+            {   context.getSender().getPersistentData().merge(message.nbt);
             });
         }
         else if (context.getDirection().getReceptionSide() == LogicalSide.CLIENT)
