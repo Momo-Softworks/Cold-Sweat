@@ -24,13 +24,16 @@ public class NetherPortalBlockTemp extends BlockTemp
 
     @Override
     public double maxEffect()
-    {
-        return 1;
+    {   return 1;
     }
 
     @Override
     public double minEffect()
-    {
-        return -1;
+    {   return -1;
+    }
+
+    @Override
+    public double minTemperature()
+    {   return 1;
     }
 }
