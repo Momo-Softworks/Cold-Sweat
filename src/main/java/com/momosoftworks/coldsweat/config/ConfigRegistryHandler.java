@@ -208,12 +208,20 @@ public class ConfigRegistryHandler
                 }
             }
             AttributeModifierMap attributeModifiers = insulatorData.attributes().orElse(new AttributeModifierMap());
+            Insulator insulator = new Insulator(insulatorData.insulation(), insulatorData.slot(), insulatorData.data(),
+                                                insulatorData.predicate(), attributeModifiers, insulatorData.immuneTempModifiers());
 
             // Add listed items as insulators
-            for (Item item : RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, insulatorData.data().items()))
+            List<Item> items = new ArrayList<>();
+            insulatorData.data().items().ifPresent(itemList ->
+            {   items.addAll(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, itemList));
+            });
+            insulatorData.data().tag().ifPresent(tag ->
+            {   items.addAll(ForgeRegistries.ITEMS.tags().getTag(tag).stream().toList());
+            });
+
+            for (Item item : items)
             {
-                Insulator insulator = new Insulator(insulatorData.insulation(), insulatorData.slot(), insulatorData.data(),
-                                                    insulatorData.predicate(), attributeModifiers, insulatorData.immuneTempModifiers());
                 switch (insulatorData.slot())
                 {
                     case ITEM -> ConfigSettings.INSULATION_ITEMS.get().put(item, insulator);
@@ -246,22 +254,26 @@ public class ConfigRegistryHandler
             FuelData.FuelType type = fuelData.type();
             ItemRequirement data = fuelData.data();
             double fuel = fuelData.fuel();
+
             PredicateItem predicateItem = new PredicateItem(fuel, data, EntityRequirement.NONE);
 
-            for (Either<TagKey<Item>, Item> either : fuelData.data().items())
+            List<Item> items = new ArrayList<>();
+            fuelData.data().items().ifPresent(itemList ->
+            {   items.addAll(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, itemList));
+            });
+            fuelData.data().tag().ifPresent(tag ->
+            {   items.addAll(ForgeRegistries.ITEMS.tags().getTag(tag).stream().toList());
+            });
+
+            for (Item item : items)
             {
-                either.map(tagKey -> RegistryHelper.getRegistry(Registries.ITEM).getTag(tagKey).orElseThrow().stream().map(Holder::get),
-                           item -> List.of(item).stream())
-                .forEach(item ->
+                switch (type)
                 {
-                    switch (type)
-                    {
-                        case BOILER -> ConfigSettings.BOILER_FUEL.get().put(item, predicateItem);
-                        case ICEBOX -> ConfigSettings.ICEBOX_FUEL.get().put(item, predicateItem);
-                        case HEARTH -> ConfigSettings.HEARTH_FUEL.get().put(item, predicateItem);
-                        case SOUL_LAMP -> ConfigSettings.SOULSPRING_LAMP_FUEL.get().put(item, predicateItem);
-                    }
-                });
+                    case BOILER -> ConfigSettings.BOILER_FUEL.get().put(item, predicateItem);
+                    case ICEBOX -> ConfigSettings.ICEBOX_FUEL.get().put(item, predicateItem);
+                    case HEARTH -> ConfigSettings.HEARTH_FUEL.get().put(item, predicateItem);
+                    case SOUL_LAMP -> ConfigSettings.SOULSPRING_LAMP_FUEL.get().put(item, predicateItem);
+                }
             }
         });
     }
@@ -290,7 +302,15 @@ public class ConfigRegistryHandler
 
             PredicateItem predicateItem = new PredicateItem(foodData.value(), foodData.data(), predicate, extraData);
 
-            for (Item item : RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, foodData.data().items()))
+            List<Item> items = new ArrayList<>();
+            foodData.data().items().ifPresent(itemList ->
+            {   items.addAll(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, itemList));
+            });
+            foodData.data().tag().ifPresent(tag ->
+            {   items.addAll(ForgeRegistries.ITEMS.tags().getTag(tag).stream().toList());
+            });
+
+            for (Item item : items)
             {
                 ConfigSettings.FOOD_TEMPERATURES.get().put(item, predicateItem);
             }
