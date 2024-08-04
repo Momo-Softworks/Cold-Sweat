@@ -355,7 +355,8 @@ public class ConfigSettings
             {   componentsRequirement = ItemComponentsRequirement.parse((String) args.get(2));
             }
             else componentsRequirement = new ItemComponentsRequirement();
-            return new PredicateItem(fuel, new ItemRequirement(List.of(), Optional.empty(),
+            return new PredicateItem(fuel, new ItemRequirement(Optional.of(List.of(Either.right(item))),
+                                                               Optional.empty(), Optional.empty(),
                                                                Optional.empty(), Optional.empty(),
                                                                Optional.empty(), Optional.empty(),
                                                                componentsRequirement),
@@ -432,7 +433,8 @@ public class ConfigSettings
                                                               ? ItemComponentsRequirement.parse((String) args.get(1))
                                                               : new ItemComponentsRequirement();
             Integer duration = args.size() > 2 ? ((Number) args.get(2)).intValue() : null;
-            ItemRequirement itemRequirement = new ItemRequirement(List.of(), Optional.empty(),
+            ItemRequirement itemRequirement = new ItemRequirement(Optional.of(List.of(Either.right(item))),
+                                                                  Optional.empty(), Optional.empty(),
                                                                   Optional.empty(), Optional.empty(),
                                                                   Optional.empty(), Optional.empty(),
                                                                   componentsRequirement);
