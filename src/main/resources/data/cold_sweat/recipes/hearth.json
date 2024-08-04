@@ -3,17 +3,20 @@
   "pattern": [
     " # ",
     "BBB",
-    "BbB"
+    "SIS"
   ],
   "key": {
     "#": {
       "item": "cold_sweat:smokestack"
     },
     "B": {
-      "item": "minecraft:nether_bricks"
+      "tag": "forge:ingots/nether_brick"
     },
-    "b": {
-      "item": "minecraft:basalt"
+    "S": {
+      "tag": "minecraft:soul_fire_base_blocks"
+    },
+    "I": {
+      "tag": "forge:ingots/iron"
     }
   },
   "result": {
