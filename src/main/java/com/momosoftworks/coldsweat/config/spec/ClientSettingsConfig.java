@@ -56,7 +56,7 @@ public class ClientSettingsConfig
                     .define("Celsius", false);
             tempOffset = BUILDER
                     .comment("Visually offsets the world temperature to better match the user's definition of \"hot\" and \"cold\"")
-                    .defineInRange("Temperature Offset", 0, 0, Integer.MAX_VALUE);
+                    .defineInRange("Temperature Offset", 0, -Integer.MAX_VALUE, Integer.MAX_VALUE);
             tempSmoothing = BUILDER
                     .comment("The amount of smoothing applied to gauges in the UI",
                              "A value of 1 has no smoothing")
