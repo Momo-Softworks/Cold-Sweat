@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.util.serialization;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
@@ -12,7 +13,6 @@ import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemComponentsRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
-import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
 import com.momosoftworks.coldsweat.util.exceptions.ArgumentCountException;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -596,23 +596,182 @@ public class ConfigHelper
         });
     }
 
-    public static <T> Codec<Either<TagKey<T>, T>> tagOrRegistryCodec(ResourceKey<Registry<T>> vanillaRegistry, Registry<T> forgeRegistry)
+    public static <T> Codec<Either<TagKey<T>, T>> tagOrBuiltinCodec(ResourceKey<Registry<T>> vanillaRegistry, Registry<T> forgeRegistry)
     {
-        return Codec.STRING.xmap(
-               // Convert from a string to a TagKey
-               string ->
-               {
-                   ResourceLocation itemLocation = ResourceLocation.parse(string.replace("#", ""));
-                   if (!string.contains("#")) return Either.<TagKey<T>, T>right(forgeRegistry.get(itemLocation));
+        return Codec.either(Codec.STRING.comapFlatMap(str ->
+                                                      {
+                                                          if (!str.startsWith("#"))
+                                                          {   return DataResult.<TagKey<T>>error(() -> "Not a tag key: " + str);
+                                                          }
+                                                          ResourceLocation itemLocation = ResourceLocation.parse(str.replace("#", ""));
+                                                          return DataResult.success(TagKey.create(vanillaRegistry, itemLocation));
+                                                      },
+                                                      key -> "#" + key.location()),
+                            forgeRegistry.byNameCodec());
+    }
 
-                   return Either.<TagKey<T>, T>left(TagKey.create(vanillaRegistry, itemLocation));
-               },
-               // Convert from a TagKey to a string
-               either ->
-               {   return either.left().isPresent()
-                          ? "#" + either.left().get().location()
-                          : either.right().map(item -> forgeRegistry.getKey(item).toString()).orElse("");
+    public static <T> Codec<Either<TagKey<T>, Holder<T>>> tagOrHolderCodec(ResourceKey<Registry<T>> vanillaRegistry)
+    {
+        return Codec.either(Codec.STRING.comapFlatMap(str ->
+                                                      {
+                                                          if (!str.startsWith("#"))
+                                                          {   return DataResult.error(() -> "Not a tag key: " + str);
+                                                          }
+                                                          ResourceLocation itemLocation = ResourceLocation.parse(str.replace("#", ""));
+                                                          return DataResult.success(TagKey.create(vanillaRegistry, itemLocation));
+                                                      },
+                                                      key -> "#" + key.location()),
+                            Codec.STRING.comapFlatMap(str ->
+                                                      {
+                                                          RegistryAccess registryAccess = RegistryHelper.getRegistryAccess();
+                                                          if (registryAccess == null)
+                                                          {   ColdSweat.LOGGER.error("Error deserializing config: registry access is null");
+                                                              return DataResult.error(() -> "Registry access is null");
+                                                          }
+                                                          ResourceLocation itemLocation = ResourceLocation.parse(str);
+                                                          Registry<T> registry = registryAccess.registry(vanillaRegistry).orElse(null);
+                                                          if (registry == null)
+                                                          {   ColdSweat.LOGGER.error("Error deserializing config: registry \"{}\" does not exist", vanillaRegistry.location());
+                                                              return DataResult.error(() -> "Registry does not exist");
+                                                          }
+                                                          return DataResult.<Holder<T>>success(registry.getHolder(itemLocation).get());
+                                                      },
+                                                      holder ->
+                                                      {
+                                                          RegistryAccess registryAccess = RegistryHelper.getRegistryAccess();
+                                                          if (registryAccess == null)
+                                                          {   ColdSweat.LOGGER.error("Error serializing config: registry access is null");
+                                                              return "null";
+                                                          }
+                                                          Registry<T> registry = registryAccess.registry(vanillaRegistry).orElse(null);
+                                                          if (registry == null)
+                                                          {   ColdSweat.LOGGER.error("Error serializing config: registry \"{}\" does not exist", vanillaRegistry.location());
+                                                              return "null";
+                                                          }
+                                                          return registry.getKey(holder.value()).toString();
+                                                      }));
+    }
 
-               });
+    public static <T> Codec<Either<TagKey<T>, Holder<T>>> tagOrBuiltinHolderCodec(ResourceKey<Registry<T>> vanillaRegistry, Registry<T> registry)
+    {
+        return Codec.either(Codec.STRING.comapFlatMap(str ->
+                                                      {
+                                                          if (!str.startsWith("#"))
+                                                          {   return DataResult.error(() -> "Not a tag key: " + str);
+                                                          }
+                                                          ResourceLocation itemLocation = ResourceLocation.parse(str.replace("#", ""));
+                                                          return DataResult.success(TagKey.create(vanillaRegistry, itemLocation));
+                                                      },
+                                                      key -> "#" + key.location()),
+                            Codec.STRING.comapFlatMap(str ->
+                                                      {
+                                                          ResourceLocation itemLocation = ResourceLocation.parse(str);
+                                                          return registry.getHolder(itemLocation).map(DataResult::success).orElse(DataResult.error(() -> "Object does not exist"));
+                                                      },
+                                                      holder ->
+                                                      {
+                                                          ResourceLocation itemLocation = registry.getKey(holder.value());
+                                                          return itemLocation.toString();
+                                                      }));
+    }
+
+    public static <T> Codec<Either<TagKey<T>, ResourceKey<T>>> tagOrResourceKeyCodec(ResourceKey<Registry<T>> vanillaRegistry)
+    {
+        return Codec.either(Codec.STRING.comapFlatMap(str ->
+                                                      {
+                                                          if (!str.startsWith("#"))
+                                                          {   return DataResult.error(() -> "Not a tag key: " + str);
+                                                          }
+                                                          ResourceLocation itemLocation = ResourceLocation.parse(str.replace("#", ""));
+                                                          return DataResult.success(TagKey.create(vanillaRegistry, itemLocation));
+                                                      },
+                                                      key -> "#" + key.location()),
+                            ResourceKey.codec(vanillaRegistry));
+    }
+
+    public static <T> String serializeTagOrResourceKey(Either<TagKey<T>, ResourceKey<T>> obj)
+    {
+        return obj.map(tag -> "#" + tag.location(),
+                       key -> key.location().toString());
+    }
+
+    public static <T> String serializeTagOrBuiltin(Registry<T> forgeRegistry, Either<TagKey<T>, T> obj)
+    {
+        return obj.map(tag -> "#" + tag.location(),
+                       regObj -> forgeRegistry.getKey(regObj).toString());
+    }
+
+    public static <T> String serializeTagOrRegistryObject(ResourceKey<Registry<T>> registry, Either<TagKey<T>, Holder<T>> obj)
+    {
+        RegistryAccess registryAccess = RegistryHelper.getRegistryAccess();
+        if (registryAccess == null)
+        {   ColdSweat.LOGGER.error("Error serializing config: registry access is null");
+            return null;
+        }
+        Registry<T> reg = registryAccess.registry(registry).orElse(null);
+        return obj.map(tag -> "#" + tag.location(),
+                       regObj -> reg.getKey(regObj.value()).toString());
+    }
+
+    public static <T> Either<TagKey<T>, ResourceKey<T>> deserializeTagOrResourceKey(ResourceKey<Registry<T>> registry, String key)
+    {
+        if (key.startsWith("#"))
+        {
+            ResourceLocation tagID = ResourceLocation.parse(key.replace("#", ""));
+            return Either.left(TagKey.create(registry, tagID));
+        }
+        else
+        {
+            ResourceKey<T> biomeKey = ResourceKey.create(registry, ResourceLocation.parse(key));
+            return Either.right(biomeKey);
+        }
+    }
+
+    public static <T> Either<TagKey<T>, T> deserializeTagOrBuiltin(String tagOrRegistryObject, ResourceKey<Registry<T>> vanillaRegistry, Registry<T> forgeRegistry)
+    {
+        if (tagOrRegistryObject.startsWith("#"))
+        {
+            ResourceLocation tagID = ResourceLocation.parse(tagOrRegistryObject.replace("#", ""));
+            return Either.left(TagKey.create(vanillaRegistry, tagID));
+        }
+        else
+        {
+            ResourceLocation id = ResourceLocation.parse(tagOrRegistryObject);
+            T obj = forgeRegistry.get(id);
+            if (obj == null)
+            {   ColdSweat.LOGGER.error("Error deserializing config: object \"{}\" does not exist", tagOrRegistryObject);
+                return null;
+            }
+            return Either.right(obj);
+        }
+    }
+
+    public static <T> Either<TagKey<T>, Holder<T>> deserializeTagOrRegistryObject(String tagOrRegistryObject, ResourceKey<Registry<T>> vanillaRegistry)
+    {
+        if (tagOrRegistryObject.startsWith("#"))
+        {
+            ResourceLocation tagID = ResourceLocation.parse(tagOrRegistryObject.replace("#", ""));
+            return Either.left(TagKey.create(vanillaRegistry, tagID));
+        }
+        else
+        {
+            RegistryAccess registryAccess = RegistryHelper.getRegistryAccess();
+            if (registryAccess == null)
+            {   ColdSweat.LOGGER.error("Error deserializing config: registry access is null");
+                return null;
+            }
+            Registry<T> reg = registryAccess.registry(vanillaRegistry).orElse(null);
+            if (reg == null)
+            {   ColdSweat.LOGGER.error("Error deserializing config: registry \"{}\" does not exist", vanillaRegistry.location());
+                return null;
+            }
+            ResourceLocation id = ResourceLocation.parse(tagOrRegistryObject);
+            Holder<T> obj = reg.getHolder(id).orElse(null);
+            if (obj == null)
+            {   ColdSweat.LOGGER.error("Error deserializing config: object \"{}\" does not exist", tagOrRegistryObject);
+                return null;
+            }
+            return Either.right(obj);
+        }
     }
 }
