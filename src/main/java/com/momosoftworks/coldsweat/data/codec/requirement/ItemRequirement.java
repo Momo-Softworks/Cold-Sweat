@@ -31,7 +31,7 @@ public record ItemRequirement(Optional<List<Either<TagKey<Item>, Item>>> items, 
                               Optional<Potion> potion, NbtRequirement nbt)
 {
     public static final Codec<ItemRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ConfigHelper.tagOrRegistryCodec(Registry.ITEM_REGISTRY, ForgeRegistries.ITEMS).listOf().optionalFieldOf("items").forGetter(predicate -> predicate.items),
+            ConfigHelper.tagOrRegistryObjectCodec(Registry.ITEM_REGISTRY, ForgeRegistries.ITEMS).listOf().optionalFieldOf("items").forGetter(predicate -> predicate.items),
             TagKey.codec(Registry.ITEM_REGISTRY).optionalFieldOf("tag").forGetter(predicate -> predicate.tag),
             IntegerBounds.CODEC.optionalFieldOf("count").forGetter(predicate -> predicate.count),
             IntegerBounds.CODEC.optionalFieldOf("durability").forGetter(predicate -> predicate.durability),

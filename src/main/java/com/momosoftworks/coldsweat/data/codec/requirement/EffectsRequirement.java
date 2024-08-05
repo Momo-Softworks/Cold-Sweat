@@ -1,10 +1,14 @@
 package com.momosoftworks.coldsweat.data.codec.requirement;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
+import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -12,6 +16,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,7 +24,30 @@ import java.util.stream.Collectors;
 public record EffectsRequirement(Map<MobEffect, Instance> effects)
 {
     public static final Codec<EffectsRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.unboundedMap(ForgeRegistries.MOB_EFFECTS.getCodec(), Instance.CODEC).fieldOf("effects").forGetter(predicate -> predicate.effects)
+            Codec.unboundedMap(ConfigHelper.tagOrRegistryObjectCodec(Registry.MOB_EFFECT_REGISTRY, ForgeRegistries.MOB_EFFECTS), Instance.CODEC)
+            .xmap(map ->
+                  {
+                        Map<MobEffect, Instance> effects = new HashMap<>();
+                        for (Map.Entry<Either<TagKey<MobEffect>, MobEffect>, Instance> entry : map.entrySet())
+                        {
+                            entry.getKey().map(
+                            tag ->
+                            {   ForgeRegistries.MOB_EFFECTS.tags().getTag(tag).stream().forEach(effect -> effects.put(effect, entry.getValue()));
+                                return null;
+                            },
+                            effect -> effects.put(effect, entry.getValue()));
+                        }
+                        return effects;
+                  },
+                  effects ->
+                  {
+                      Map<Either<TagKey<MobEffect>, MobEffect>, Instance> map = new HashMap<>();
+                      for (Map.Entry<MobEffect, Instance> entry : effects.entrySet())
+                      {
+                          map.put(Either.right(entry.getKey()), entry.getValue());
+                      }
+                      return map;
+                  }).fieldOf("effects").forGetter(predicate -> predicate.effects)
     ).apply(instance, EffectsRequirement::new));
 
     public boolean test(Entity entity)

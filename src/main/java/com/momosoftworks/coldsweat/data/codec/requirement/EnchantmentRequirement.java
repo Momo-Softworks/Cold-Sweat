@@ -1,24 +1,32 @@
 package com.momosoftworks.coldsweat.data.codec.requirement;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
+import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Map;
 import java.util.Optional;
 
-public record EnchantmentRequirement(Enchantment enchantment, Optional<IntegerBounds> level)
+public record EnchantmentRequirement(Either<TagKey<Enchantment>, Enchantment> enchantment, Optional<IntegerBounds> level)
 {
     public static final Codec<EnchantmentRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ForgeRegistries.ENCHANTMENTS.getCodec().fieldOf("enchantment").forGetter(requirement -> requirement.enchantment),
+            ConfigHelper.tagOrRegistryObjectCodec(Registry.ENCHANTMENT_REGISTRY, ForgeRegistries.ENCHANTMENTS).fieldOf("enchantment").forGetter(requirement -> requirement.enchantment),
             IntegerBounds.CODEC.optionalFieldOf("levels").forGetter(requirement -> requirement.level)
     ).apply(instance, EnchantmentRequirement::new));
 
     public boolean test(Enchantment enchantment, int level)
-    {   return this.enchantment == enchantment && this.level.map(bounds -> bounds.test(level)).orElse(true);
+    {
+        return this.enchantment.map(
+                     tag -> ForgeRegistries.ENCHANTMENTS.tags().getTag(tag).contains(enchantment),
+                     ench -> ench == enchantment)
+               && this.level.map(bounds -> bounds.test(level)).orElse(true);
     }
 
     public boolean test(Map<Enchantment, Integer> enchantments)
@@ -35,14 +43,14 @@ public record EnchantmentRequirement(Enchantment enchantment, Optional<IntegerBo
     public CompoundTag serialize()
     {
         CompoundTag tag = new CompoundTag();
-        tag.putString("enchantment", ForgeRegistries.ENCHANTMENTS.getKey(enchantment).toString());
+        tag.putString("enchantment", ConfigHelper.serializeTagOrRegistryObject(ForgeRegistries.ENCHANTMENTS, enchantment));
         level.ifPresent(bounds -> tag.put("level", bounds.serialize()));
         return tag;
     }
 
     public static EnchantmentRequirement deserialize(CompoundTag tag)
     {
-        Enchantment enchantment = ForgeRegistries.ENCHANTMENTS.getValue(new net.minecraft.resources.ResourceLocation(tag.getString("enchantment")));
+        Either<TagKey<Enchantment>, Enchantment> enchantment = ConfigHelper.deserializeTagOrRegistryObject(tag.getString("enchantment"), Registry.ENCHANTMENT_REGISTRY, ForgeRegistries.ENCHANTMENTS);
         IntegerBounds level = tag.contains("level") ? IntegerBounds.deserialize(tag.getCompound("level")) : null;
         return new EnchantmentRequirement(enchantment, Optional.ofNullable(level));
     }
@@ -69,8 +77,8 @@ public record EnchantmentRequirement(Enchantment enchantment, Optional<IntegerBo
     public String toString()
     {
         StringBuilder builder = new StringBuilder();
-        builder.append(ForgeRegistries.ENCHANTMENTS.getKey(enchantment).toString());
-        level.ifPresent(bounds -> builder.append(bounds.toString()));
+        builder.append(ConfigHelper.serializeTagOrRegistryObject(ForgeRegistries.ENCHANTMENTS, enchantment));
+        level.ifPresent(bounds -> builder.append(bounds));
 
         return builder.toString();
     }

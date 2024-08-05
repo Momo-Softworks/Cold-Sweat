@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.util.serialization;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
@@ -594,23 +595,76 @@ public class ConfigHelper
         });
     }
 
-    public static <T> Codec<Either<TagKey<T>, T>> tagOrRegistryCodec(ResourceKey<Registry<T>> vanillaRegistry, IForgeRegistry<T> forgeRegistry)
+    public static <T> Codec<Either<TagKey<T>, T>> tagOrRegistryObjectCodec(ResourceKey<Registry<T>> vanillaRegistry, IForgeRegistry<T> forgeRegistry)
     {
-        return Codec.STRING.xmap(
-               // Convert from a string to a TagKey
-               string ->
-               {
-                   ResourceLocation itemLocation = new ResourceLocation(string.replace("#", ""));
-                   if (!string.contains("#")) return Either.<TagKey<T>, T>right(forgeRegistry.getValue(itemLocation));
+        return Codec.either(Codec.STRING.comapFlatMap(str ->
+                                                      {
+                                                          if (!str.startsWith("#"))
+                                                          {   return DataResult.error("Not a tag key: " + str);
+                                                          }
+                                                          ResourceLocation itemLocation = new ResourceLocation(str.replace("#", ""));
+                                                          return DataResult.success(TagKey.create(vanillaRegistry, itemLocation));
+                                                      },
+                                                      key -> "#" + key.location()),
+                            forgeRegistry.getCodec());
+    }
 
-                   return Either.<TagKey<T>, T>left(TagKey.create(vanillaRegistry, itemLocation));
-               },
-               // Convert from a TagKey to a string
-               either ->
-               {   return either.left().isPresent()
-                          ? "#" + either.left().get().location()
-                          : either.right().map(item -> forgeRegistry.getKey(item).toString()).orElse("");
+    public static <T> Codec<Either<TagKey<T>, ResourceKey<T>>> tagOrResourceKeyCodec(ResourceKey<Registry<T>> vanillaRegistry)
+    {
+        return Codec.either(Codec.STRING.comapFlatMap(str ->
+                                                      {
+                                                          if (!str.startsWith("#"))
+                                                          {   return DataResult.error("Not a tag key: " + str);
+                                                          }
+                                                          ResourceLocation itemLocation = new ResourceLocation(str.replace("#", ""));
+                                                          return DataResult.success(TagKey.create(vanillaRegistry, itemLocation));
+                                                      },
+                                                      key -> "#" + key.location()),
+                            ResourceKey.codec(vanillaRegistry));
+    }
 
-               });
+    public static <T> String serializeTagOrResourceKey(Either<TagKey<T>, ResourceKey<T>> obj)
+    {
+        return obj.map(tag -> "#" + tag.location(),
+                       key -> key.location().toString());
+    }
+
+    public static <T> String serializeTagOrRegistryObject(IForgeRegistry<T> forgeRegistry, Either<TagKey<T>, T> obj)
+    {
+        return obj.map(tag -> "#" + tag.location(),
+                       regObj -> forgeRegistry.getKey(regObj).toString());
+    }
+
+    public static <T> Either<TagKey<T>, ResourceKey<T>> deserializeTagOrResourceKey(ResourceKey<Registry<T>> registry, String key)
+    {
+        if (key.startsWith("#"))
+        {
+            ResourceLocation tagID = new ResourceLocation(key.replace("#", ""));
+            return Either.left(TagKey.create(registry, tagID));
+        }
+        else
+        {
+            ResourceKey<T> biomeKey = ResourceKey.create(registry, new ResourceLocation(key));
+            return Either.right(biomeKey);
+        }
+    }
+
+    public static <T> Either<TagKey<T>, T> deserializeTagOrRegistryObject(String tagOrRegistryObject, ResourceKey<Registry<T>> vanillaRegistry, IForgeRegistry<T> forgeRegistry)
+    {
+        if (tagOrRegistryObject.startsWith("#"))
+        {
+            ResourceLocation tagID = new ResourceLocation(tagOrRegistryObject.replace("#", ""));
+            return Either.left(TagKey.create(vanillaRegistry, tagID));
+        }
+        else
+        {
+            ResourceLocation id = new ResourceLocation(tagOrRegistryObject);
+            T obj = forgeRegistry.getValue(id);
+            if (obj == null)
+            {   ColdSweat.LOGGER.error("Error deserializing config: object \"{}\" does not exist", tagOrRegistryObject);
+                return null;
+            }
+            return Either.right(obj);
+        }
     }
 }
