@@ -41,7 +41,7 @@
       {
         "name": "cold_sweat:three_bolt_set_bonus",
         "amount": 0.2,
-        "operation": "addition"
+        "operation": "add_value"
       }
     ]
   },
