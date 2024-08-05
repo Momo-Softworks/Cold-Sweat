@@ -13,6 +13,7 @@ import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
+import com.sun.jna.Structure;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.*;
 import net.minecraft.core.particles.ParticleOptions;
@@ -22,6 +23,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -54,10 +56,7 @@ import oshi.util.tuples.Triplet;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
@@ -237,6 +236,27 @@ public abstract class WorldHelper
         }
         return null;
     }
+
+    public static StructureStart getStructureWithPieceAt(StructureFeatureManager structureManager, BlockPos pos, TagKey<ConfiguredStructureFeature<?,?>> structureTag)
+    {
+        Registry<ConfiguredStructureFeature<?,?>> registry = structureManager.registryAccess().registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY);
+        Collection<StructureStart> structureStarts = structureManager.startsForFeature(SectionPos.of(pos), (p_220503_) ->
+        {
+            return registry.getHolder(registry.getId(p_220503_))
+                   .map((p_220472_) -> p_220472_.is(structureTag))
+                   .orElse(false);
+        });
+
+        for (StructureStart structurestart : structureStarts)
+        {
+            if (structureManager.structureHasPieceAt(pos, structurestart))
+            {   return structurestart;
+            }
+        }
+
+        return StructureStart.INVALID_START;
+    }
+
     /**
      * Plays a sound for all tracking clients that follows the source entity around.<br>
      * Why this isn't in Vanilla Minecraft is beyond me
