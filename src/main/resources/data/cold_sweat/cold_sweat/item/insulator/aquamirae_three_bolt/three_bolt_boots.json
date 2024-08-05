@@ -1,0 +1,51 @@
+{
+  "required_mods": [
+    "aquamirae"
+  ],
+  "type": "armor",
+  "data": {
+    "items": [
+      "aquamirae:three_bolt_boots"
+    ]
+  },
+  "insulation": {
+    "heat": 0,
+    "cold": 0
+  },
+  "predicate": {
+    "equipment": {
+      "feet": {
+        "items": [
+          "aquamirae:three_bolt_boots"
+        ]
+      },
+      "head": {
+        "items": [
+          "aquamirae:three_bolt_helmet"
+        ]
+      },
+      "chest": {
+        "items": [
+          "aquamirae:three_bolt_suit"
+        ]
+      },
+      "legs": {
+        "items": [
+          "aquamirae:three_bolt_leggings"
+        ]
+      }
+    }
+  },
+  "attributes": {
+    "cold_sweat:cold_resistance": [
+      {
+        "name": "cs:three_bolt_set_bonus",
+        "amount": 0.2,
+        "operation": "addition"
+      }
+    ]
+  },
+  "immune_temp_modifiers": {
+    "cold_sweat:water": 1.0
+  }
+}
