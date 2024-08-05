@@ -14,14 +14,12 @@ import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemComponentsRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
+import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.exceptions.ArgumentCountException;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.*;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.core.Holder;
-import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -596,18 +594,37 @@ public class ConfigHelper
         });
     }
 
-    public static <T> Codec<Either<TagKey<T>, T>> tagOrBuiltinCodec(ResourceKey<Registry<T>> vanillaRegistry, Registry<T> forgeRegistry)
+    public static <T> Codec<Either<TagKey<T>, T>> tagOrBuiltinCodec(ResourceKey<Registry<T>> vanillaRegistry, DefaultedRegistry<T> forgeRegistry)
     {
         return Codec.either(Codec.STRING.comapFlatMap(str ->
                                                       {
                                                           if (!str.startsWith("#"))
-                                                          {   return DataResult.<TagKey<T>>error(() -> "Not a tag key: " + str);
+                                                          {   return DataResult.<TagKey<T>>error(() -> String.format("Not a tag key for builtin registry %s: %s", vanillaRegistry.location(), str));
                                                           }
                                                           ResourceLocation itemLocation = ResourceLocation.parse(str.replace("#", ""));
                                                           return DataResult.success(TagKey.create(vanillaRegistry, itemLocation));
                                                       },
                                                       key -> "#" + key.location()),
-                            forgeRegistry.byNameCodec());
+                            Codec.STRING.comapFlatMap(str ->
+                                                      {
+                                                          ResourceLocation itemLocation = ResourceLocation.parse(str);
+                                                          Optional<T> obj = forgeRegistry.getOptional(itemLocation);
+                                                          if (obj.isEmpty())
+                                                          {
+                                                              if (CompatManager.modLoaded(itemLocation.getNamespace()))
+                                                              {
+                                                                  ColdSweat.LOGGER.error("Error deserializing config: object \"{}\" does not exist", str);
+                                                                  return DataResult.error(() -> "Object does not exist");
+                                                              }
+                                                              else return DataResult.success(forgeRegistry.get(forgeRegistry.getDefaultKey()));
+                                                          }
+                                                          return DataResult.success(obj.get());
+                                                      },
+                                                      obj ->
+                                                      {
+                                                          ResourceLocation itemLocation = forgeRegistry.getKey(obj);
+                                                          return itemLocation.toString();
+                                                      }));
     }
 
     public static <T> Codec<Either<TagKey<T>, Holder<T>>> tagOrHolderCodec(ResourceKey<Registry<T>> vanillaRegistry)
@@ -615,7 +632,7 @@ public class ConfigHelper
         return Codec.either(Codec.STRING.comapFlatMap(str ->
                                                       {
                                                           if (!str.startsWith("#"))
-                                                          {   return DataResult.error(() -> "Not a tag key: " + str);
+                                                          {   return DataResult.error(() -> String.format("Not a tag key for dynamic holder registry %s: %s", vanillaRegistry.location(), str));
                                                           }
                                                           ResourceLocation itemLocation = ResourceLocation.parse(str.replace("#", ""));
                                                           return DataResult.success(TagKey.create(vanillaRegistry, itemLocation));
@@ -634,7 +651,17 @@ public class ConfigHelper
                                                           {   ColdSweat.LOGGER.error("Error deserializing config: registry \"{}\" does not exist", vanillaRegistry.location());
                                                               return DataResult.error(() -> "Registry does not exist");
                                                           }
-                                                          return DataResult.<Holder<T>>success(registry.getHolder(itemLocation).get());
+                                                          Optional<Holder.Reference<T>> holder = registry.getHolder(itemLocation);
+                                                          if (holder.isEmpty())
+                                                          {
+                                                              if (CompatManager.modLoaded(itemLocation.getNamespace()))
+                                                              {
+                                                                  ColdSweat.LOGGER.error("Error deserializing config: object \"{}\" does not exist", str);
+                                                                  return DataResult.error(() -> "Object does not exist");
+                                                              }
+                                                              else return DataResult.success(Holder.Reference.createIntrusive(new HolderOwner<>(){}, registry.stream().findFirst().get()));
+                                                          }
+                                                          return DataResult.success(holder.get());
                                                       },
                                                       holder ->
                                                       {
@@ -657,7 +684,7 @@ public class ConfigHelper
         return Codec.either(Codec.STRING.comapFlatMap(str ->
                                                       {
                                                           if (!str.startsWith("#"))
-                                                          {   return DataResult.error(() -> "Not a tag key: " + str);
+                                                          {   return DataResult.error(() -> String.format("Not a tag key for builtin holder registry %s: %s", vanillaRegistry.location(), str));
                                                           }
                                                           ResourceLocation itemLocation = ResourceLocation.parse(str.replace("#", ""));
                                                           return DataResult.success(TagKey.create(vanillaRegistry, itemLocation));
@@ -666,7 +693,17 @@ public class ConfigHelper
                             Codec.STRING.comapFlatMap(str ->
                                                       {
                                                           ResourceLocation itemLocation = ResourceLocation.parse(str);
-                                                          return registry.getHolder(itemLocation).map(DataResult::success).orElse(DataResult.error(() -> "Object does not exist"));
+                                                          Optional<Holder.Reference<T>> holder = registry.getHolder(itemLocation);
+                                                          if (holder.isEmpty())
+                                                          {
+                                                              if (CompatManager.modLoaded(itemLocation.getNamespace()))
+                                                              {
+                                                                  ColdSweat.LOGGER.error("Error deserializing config: object \"{}\" does not exist", str);
+                                                                  return DataResult.error(() -> "Object does not exist");
+                                                              }
+                                                              else return DataResult.success(Holder.Reference.createIntrusive(new HolderOwner<>(){}, registry.stream().findFirst().get()));
+                                                          }
+                                                          return DataResult.success(registry.getHolder(itemLocation).get());
                                                       },
                                                       holder ->
                                                       {
@@ -680,7 +717,7 @@ public class ConfigHelper
         return Codec.either(Codec.STRING.comapFlatMap(str ->
                                                       {
                                                           if (!str.startsWith("#"))
-                                                          {   return DataResult.error(() -> "Not a tag key: " + str);
+                                                          {   return DataResult.error(() -> String.format("Not a tag key for dynamic resource registry %s: %s", vanillaRegistry.location(), str));
                                                           }
                                                           ResourceLocation itemLocation = ResourceLocation.parse(str.replace("#", ""));
                                                           return DataResult.success(TagKey.create(vanillaRegistry, itemLocation));
