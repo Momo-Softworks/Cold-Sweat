@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.data.codec.requirement;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
@@ -161,9 +162,9 @@ public class LocationRequirement
         x.ifPresent(value -> builder.append("x=").append(value).append(", "));
         y.ifPresent(value -> builder.append("y=").append(value).append(", "));
         z.ifPresent(value -> builder.append("z=").append(value).append(", "));
-        biome.ifPresent(value -> builder.append("biome=").append(value.location()).append(", "));
-        structure.ifPresent(value -> builder.append("structure=").append(value.location()).append(", "));
-        dimension.ifPresent(value -> builder.append("dimension=").append(value.location()).append(", "));
+        biome.ifPresent(value -> builder.append("biome=").append(value).append(", "));
+        structure.ifPresent(value -> builder.append("structure=").append(value).append(", "));
+        dimension.ifPresent(value -> builder.append("dimension=").append(value).append(", "));
         light.ifPresent(value -> builder.append("light=").append(value).append(", "));
         block.ifPresent(value -> builder.append("block=").append(value).append(", "));
         fluid.ifPresent(value -> builder.append("fluid=").append(value).append(", "));

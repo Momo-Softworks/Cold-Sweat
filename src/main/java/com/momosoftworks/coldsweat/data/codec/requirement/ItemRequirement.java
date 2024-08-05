@@ -54,7 +54,7 @@ public class ItemRequirement
     }
 
     public static final Codec<ItemRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.either(ITag.codec(ItemTags::getAllTags), Registry.ITEM).listOf().optionalFieldOf("items").forGetter(predicate -> predicate.items),
+            ConfigHelper.tagOrRegistryObjectCodec(Registry.ITEM_REGISTRY, Registry.ITEM).listOf().optionalFieldOf("items").forGetter(predicate -> predicate.items),
             ITag.codec(ItemTags::getAllTags).optionalFieldOf("tag").forGetter(predicate -> predicate.tag),
             IntegerBounds.CODEC.optionalFieldOf("count").forGetter(predicate -> predicate.count),
             IntegerBounds.CODEC.optionalFieldOf("durability").forGetter(predicate -> predicate.durability),

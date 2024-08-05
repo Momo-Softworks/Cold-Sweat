@@ -3,11 +3,13 @@ package com.momosoftworks.coldsweat.util.serialization;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
@@ -603,24 +605,18 @@ public class ConfigHelper
         });
     }
 
-    public static <T extends IForgeRegistryEntry<T>> Codec<Either<ITag<T>, T>> tagOrRegistryCodec(RegistryKey<Registry<T>> vanillaRegistry, IForgeRegistry<T> forgeRegistry)
+    public static <T extends IForgeRegistryEntry<T>> Codec<Either<ITag<T>, T>> tagOrRegistryObjectCodec(RegistryKey<Registry<T>> vanillaRegistry, Registry<T> forgeRegistry)
     {
-        ITagCollection<T> vanillaTags = getTagsForRegistry(vanillaRegistry);
-        return Codec.STRING.xmap(
-               // Convert from a string to a TagKey
-               string ->
-               {
-                   ResourceLocation itemLocation = new ResourceLocation(string.replace("#", ""));
-                   if (!string.contains("#")) return Either.<ITag<T>, T>right(forgeRegistry.getValue(itemLocation));
-
-                   return Either.<ITag<T>, T>left(vanillaTags.getTag(itemLocation));
-               },
-               // Convert from a TagKey to a string
-               either ->
-               {   return either.left().isPresent()
-                          ? "#" + vanillaTags.getId(either.left().get())
-                          : either.right().map(item -> forgeRegistry.getKey(item).toString()).orElse("");
-
-               });
+        ITagCollection<T> vanillaTags = ConfigHelper.getTagsForRegistry(vanillaRegistry);
+        return Codec.either(Codec.STRING.comapFlatMap(str ->
+                                                      {
+                                                          if (!str.startsWith("#"))
+                                                          {   return DataResult.error("Not a tag key: " + str);
+                                                          }
+                                                          ResourceLocation itemLocation = new ResourceLocation(str.replace("#", ""));
+                                                          return DataResult.success(vanillaTags.getTag(itemLocation));
+                                                      },
+                                                      key -> "#" + vanillaTags.getId(key)),
+                            forgeRegistry);
     }
 }
