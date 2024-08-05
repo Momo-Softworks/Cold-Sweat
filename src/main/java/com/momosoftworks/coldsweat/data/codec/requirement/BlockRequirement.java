@@ -3,11 +3,13 @@ package com.momosoftworks.coldsweat.data.codec.requirement;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.Level;
@@ -24,10 +26,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public record BlockRequirement(Optional<List<Block>> blocks, Optional<TagKey<Block>> tag, Optional<StateRequirement> state, Optional<NbtRequirement> nbt)
+public record BlockRequirement(Optional<List<Either<TagKey<Block>, Block>>> blocks, Optional<TagKey<Block>> tag, Optional<StateRequirement> state, Optional<NbtRequirement> nbt)
 {
     public static final Codec<BlockRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ForgeRegistries.BLOCKS.getCodec().listOf().optionalFieldOf("blocks").forGetter(predicate -> predicate.blocks),
+            ConfigHelper.tagOrRegistryObjectCodec(Registries.BLOCK, ForgeRegistries.BLOCKS).listOf().optionalFieldOf("blocks").forGetter(predicate -> predicate.blocks),
             TagKey.codec(Registries.BLOCK).optionalFieldOf("tag").forGetter(predicate -> predicate.tag),
             StateRequirement.CODEC.optionalFieldOf("state").forGetter(predicate -> predicate.state),
             NbtRequirement.CODEC.optionalFieldOf("nbt").forGetter(predicate -> predicate.nbt)
@@ -64,7 +66,20 @@ public record BlockRequirement(Optional<List<Block>> blocks, Optional<TagKey<Blo
     public CompoundTag serialize()
     {   CompoundTag compound = new CompoundTag();
 
-        blocks.ifPresent(blocks -> compound.put("blocks", NBTHelper.listTagOf(blocks.stream().map(block -> ForgeRegistries.BLOCKS.getKey(block).toString()).toList())));
+        blocks.ifPresent(blocks ->
+        {
+            compound.put("blocks", NBTHelper.listTagOf(blocks.stream().map(either ->
+                                   {
+                                       return StringTag.valueOf(either.map(
+                                              tag ->
+                                              {    return "#" + tag.location();
+                                              },
+                                              block ->
+                                              {    return ForgeRegistries.BLOCKS.getKey(block).toString();
+                                              }));
+                                   })
+                                   .collect(Collectors.toList())));
+        });
         tag.ifPresent(tag -> compound.putString("tag", tag.location().toString()));
         state.ifPresent(state -> compound.put("state", state.serialize()));
         nbt.ifPresent(nbt -> compound.put("nbt", nbt.serialize()));
@@ -74,13 +89,16 @@ public record BlockRequirement(Optional<List<Block>> blocks, Optional<TagKey<Blo
 
     public static BlockRequirement deserialize(CompoundTag tag)
     {
-        Optional<List<Block>> blocks = tag.contains("blocks")
-                                       ? Optional.of(NBTHelper.listTagOf(tag.getList("blocks", 8))
-                                         .stream()
-                                         .map(string ->
-                                         {  return ForgeRegistries.BLOCKS.getValue(new ResourceLocation(string.getAsString()));
-                                         }).collect(Collectors.toList()))
-                                       : Optional.empty();
+        Optional<List<Either<TagKey<Block>, Block>>> blocks = tag.contains("blocks") ? Optional.of(tag.getList("blocks", 8).stream().map(tg ->
+        {
+            String string = tg.getAsString();
+            if (string.startsWith("#"))
+            {   return Either.<TagKey<Block>, Block>left(TagKey.create(Registries.BLOCK, new ResourceLocation(string.substring(1))));
+            }
+            else
+            {   return Either.<TagKey<Block>, Block>right(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(string)));
+            }
+        }).collect(Collectors.toList())) : Optional.empty();
         Optional<TagKey<Block>> tagKey = tag.contains("tag") ? Optional.of(TagKey.create(Registries.BLOCK, new ResourceLocation(tag.getString("tag")))) : Optional.empty();
         Optional<StateRequirement> state = tag.contains("state") ? Optional.of(StateRequirement.deserialize(tag.getCompound("state"))) : Optional.empty();
         Optional<NbtRequirement> nbt = tag.contains("nbt") ? Optional.of(NbtRequirement.deserialize(tag.getCompound("nbt"))) : Optional.empty();
