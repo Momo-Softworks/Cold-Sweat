@@ -5,7 +5,7 @@
   "type": "armor",
   "data": {
     "items": [
-      "create:netherite_diving_helmet"
+      "minecraft:netherite_leggings"
     ]
   },
   "insulation": {
@@ -43,14 +43,14 @@
   "attributes": {
     "cold_sweat:heat_resistance": [
       {
-        "name": "Netherite Diving Set Bonus",
+        "name": "cs:netherite_diving_set_bonus",
         "amount": 0.1,
         "operation": "addition"
       }
     ],
     "cold_sweat:cold_resistance": [
       {
-        "name": "Netherite Diving Set Bonus",
+        "name": "cs:netherite_diving_set_bonus",
         "amount": 0.25,
         "operation": "addition"
       }

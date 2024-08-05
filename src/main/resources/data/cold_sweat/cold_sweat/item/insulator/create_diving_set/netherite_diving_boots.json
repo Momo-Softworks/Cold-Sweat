@@ -5,7 +5,7 @@
   "type": "armor",
   "data": {
     "items": [
-      "create:netherite_backtank"
+      "create:netherite_diving_boots"
     ]
   },
   "insulation": {
@@ -43,21 +43,17 @@
   "attributes": {
     "cold_sweat:heat_resistance": [
       {
-        "name": "Netherite Diving Set Bonus",
-        "amount": 0.25,
+        "name": "cs:netherite_diving_set_bonus",
+        "amount": 0.1,
         "operation": "addition"
       }
     ],
     "cold_sweat:cold_resistance": [
       {
-        "name": "Netherite Diving Set Bonus",
-        "amount": 0.1,
+        "name": "cs:netherite_diving_set_bonus",
+        "amount": 0.25,
         "operation": "addition"
       }
     ]
-  },
-  "immune_temp_modifiers": {
-    "cold_sweat:blocks": 1.0,
-    "cold_sweat:water": 1.0
   }
 }
