@@ -27,6 +27,7 @@
     "MixinMinecart",
     "MixinSoulCampfire",
     "MixinSoulFire",
+    "compat.MixinSereneIceMelt",
     "compat.MixinSpoiledIcebox",
     "compat.MixinSpoiledIcebox$ContainerModifier"
   ],
