@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.mixin_plugin;
 
 import com.google.common.collect.ImmutableMap;
+import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import net.minecraftforge.fml.loading.LoadingModList;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
@@ -15,8 +16,9 @@ public class ColdSweatMixinPlugin implements IMixinConfigPlugin
 {
     private static final String compatMixinPackage = "com.momosoftworks.coldsweat.mixin.compat";
     private static final Map<String, Supplier<Boolean>> CONDITIONS = ImmutableMap.of(
-            compatMixinPackage + "MixinSpoiledIcebox", () -> LoadingModList.get().getModFileById("spoiled") != null,
-            compatMixinPackage + "MixinSpoiledIcebox$ContainerModifier", () -> LoadingModList.get().getModFileById("spoiled") != null
+            compatMixinPackage + "MixinCreateOverlay", () -> CompatManager.isCreateLoaded(),
+            compatMixinPackage + "MixinSpoiledIcebox", () -> CompatManager.isSpoiledLoaded(),
+            compatMixinPackage + "MixinSereneIceMelt", () -> CompatManager.isSereneSeasonsLoaded()
     );
 
     @Override

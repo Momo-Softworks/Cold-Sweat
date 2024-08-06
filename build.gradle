@@ -115,11 +115,10 @@ dependencies {
     runtimeOnly fg.deobf("curse.maven:blueprint-382216:3607198")
     runtimeOnly fg.deobf("curse.maven:oh-the-biomes-youll-go-247560:4024011")
     runtimeOnly fg.deobf("curse.maven:biomes-o-plenty-220318:3913914")
-    runtimeOnly fg.deobf("curse.maven:serene-seasons-291874:4537666")
     runtimeOnly fg.deobf("curse.maven:coroutil-237749:3586476")
     //runtimeOnly fg.deobf("curse.maven:tinkers-construct-74072:3695126")
     //runtimeOnly fg.deobf("curse.maven:mantle-74924:3631982")
-    runtimeOnly fg.deobf("curse.maven:serene-seasons-291874:4537666")
+    implementation fg.deobf("curse.maven:serene-seasons-291874:4537666")
     runtimeOnly fg.deobf("curse.maven:shutup-experimental-settings-407174:3188120")
     runtimeOnly fg.deobf("curse.maven:cavebiomeapi-441706:3519248")
 
@@ -132,7 +131,6 @@ dependencies {
     implementation fg.deobf("curse.maven:spoiled-364918:3776531")
 
     compileOnly fg.deobf("curse.maven:better-weather-400714:3420517")
-    compileOnly fg.deobf("curse.maven:serene-api-291874:4537669")
     compileOnly fg.deobf("curse.maven:vampirism-233029:4640398")
     compileOnly fg.deobf("curse.maven:werewolves-417851:4662189")
     compileOnly fg.deobf("curse.maven:environmental-388992:3561534")

@@ -37,6 +37,7 @@
     "MixinSoulFire",
     "MixinTriggerBounds$MixinFloatBound",
     "MixinSoulFire",
+    "compat.MixinSereneIceMelt",
     "compat.MixinSpoiledIcebox",
     "compat.MixinSpoiledIcebox$ContainerModifier"
   ],

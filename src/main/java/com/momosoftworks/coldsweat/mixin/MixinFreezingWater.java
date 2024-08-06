@@ -1,43 +1,46 @@
 package com.momosoftworks.coldsweat.mixin;
 
+import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.temperature.modifier.compat.SereneSeasonsTempModifier;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
+import com.momosoftworks.coldsweat.util.serialization.ObjectBuilder;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IWorld;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraftforge.fluids.IFluidBlock;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Biome.class)
 public abstract class MixinFreezingWater
 {
-    @Shadow public abstract float getTemperature(BlockPos pPos);
+    private final ThreadLocal<IWorldReader> level = new ThreadLocal<>();
+    private final ThreadLocal<Boolean> isCheckingFreezing = ThreadLocal.withInitial(() -> false);
+    Biome self = (Biome) (Object) this;
 
     private static IWorldReader LEVEL = null;
 
     @Inject(method = "shouldFreeze(Lnet/minecraft/world/IWorldReader;Lnet/minecraft/util/math/BlockPos;Z)Z",
             at = @At(value = "HEAD"), cancellable = true)
-    private void shouldFreezeBlock(IWorldReader level, BlockPos pos, boolean onlyAtEdge, CallbackInfoReturnable<Boolean> cir)
+    private void shouldFreezeBlock(IWorldReader levelReader, BlockPos pos, boolean mustBeAtEdge, CallbackInfoReturnable<Boolean> cir)
     {
-        LEVEL = level;
+        this.level.set(levelReader);
+        this.isCheckingFreezing.set(true);
+
         if (!ConfigSettings.COLD_SOUL_FIRE.get())
         {   return;
         }
-        BlockState blockstate = level.getBlockState(pos);
-        FluidState fluidstate = level.getFluidState(pos);
+        BlockState blockstate = levelReader.getBlockState(pos);
+        FluidState fluidstate = levelReader.getFluidState(pos);
         if (!(fluidstate.getType() == Fluids.WATER && blockstate.getBlock() instanceof IFluidBlock))
         {   return;
         }
@@ -52,7 +55,7 @@ public abstract class MixinFreezingWater
                     if (!(mutable.getX() == pos.getX() || mutable.getZ() == pos.getZ()))
                     {   continue;
                     }
-                    if (level.getBlockState(mutable).is(Blocks.SOUL_FIRE))
+                    if (levelReader.getBlockState(mutable).is(Blocks.SOUL_FIRE))
                     {   cir.setReturnValue(true);
                     }
                 }
@@ -60,19 +63,20 @@ public abstract class MixinFreezingWater
         }
     }
 
-    @Redirect(method = "shouldFreeze(Lnet/minecraft/world/IWorldReader;Lnet/minecraft/util/math/BlockPos;Z)Z",
-              at = @At(value = "INVOKE", target = "Lnet/minecraft/world/biome/Biome;getTemperature(Lnet/minecraft/util/math/BlockPos;)F"))
-    private float warmEnoughToRain(Biome biome, BlockPos pos)
+    @Inject(method = "getTemperature", at = @At("HEAD"), cancellable = true)
+    private void getTemperature(BlockPos pos, CallbackInfoReturnable<Float> cir)
     {
-        if (LEVEL instanceof World)
+        if (this.isCheckingFreezing.get() && this.level.get() instanceof World)
         {
-            World level = (World) LEVEL;
-            double biomeTemp = WorldHelper.getBiomeTemperatureAt(level, biome, pos);
+            World world = ((World) level.get());
+            double biomeTemp = WorldHelper.getBiomeTemperatureAt(world, self, pos);
             if (CompatManager.isSereneSeasonsLoaded())
-            {   biomeTemp += new SereneSeasonsTempModifier().apply(0);
+            {
+                TempModifier modifier = ObjectBuilder.build(SereneSeasonsTempModifier::new);
+                biomeTemp = modifier.apply(biomeTemp);
             }
-            return (float) biomeTemp;
+            cir.setReturnValue((float) biomeTemp);
         }
-        return getTemperature(pos);
+        this.isCheckingFreezing.set(false);
     }
 }
