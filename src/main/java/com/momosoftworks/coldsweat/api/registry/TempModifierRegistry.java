@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.util.exceptions.RegistryFailureException;
 import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -51,12 +52,15 @@ public class TempModifierRegistry
         }
     }
 
+    @Nullable
     public static ResourceLocation getKey(TempModifier modifier)
     {
-        return TEMP_MODIFIERS.entrySet().stream()
-                .filter(entry -> entry.getValue().get().getClass().equals(modifier.getClass()))
-                .map(Map.Entry::getKey)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Tried to get the key of an unregistered TempModifier! " + modifier.getClass().getSimpleName()));
+        for (Map.Entry<ResourceLocation, Supplier<TempModifier>> entry : TEMP_MODIFIERS.entrySet())
+        {
+            if (entry.getValue().get().getClass() == modifier.getClass())
+            {   return entry.getKey();
+            }
+        }
+        return null;
     }
 }
