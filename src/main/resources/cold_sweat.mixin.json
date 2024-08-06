@@ -29,6 +29,7 @@
     "MixinSmithingRecipe",
     "MixinSoulCampfire",
     "MixinSoulFire",
+    "compat.MixinSereneIceMelt",
     "compat.MixinSpoiledIcebox",
     "compat.MixinSpoiledIcebox$ContainerModifier"
   ],
