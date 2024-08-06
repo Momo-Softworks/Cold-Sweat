@@ -204,13 +204,6 @@ public class EntityTempManager
         }
     }
 
-    @SubscribeEvent
-    public static void invalidateDespawnedEntity(EntityLeaveLevelEvent event)
-    {
-        SERVER_CAP_CACHE.remove(event.getEntity());
-        CLIENT_CAP_CACHE.remove(event.getEntity());
-    }
-
     /**
      * Add default modifiers to players and temperature-enabled entities
      */
