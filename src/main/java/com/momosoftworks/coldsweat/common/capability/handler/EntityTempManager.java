@@ -26,11 +26,9 @@ import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -278,13 +276,6 @@ public class EntityTempManager
         });
     }
 
-    //@SubscribeEvent
-    //public static void invalidateDespawnedEntity(EntityLeaveLevelEvent event)
-    //{
-    //    SERVER_CAP_CACHE.remove(event.getEntity());
-    //    CLIENT_CAP_CACHE.remove(event.getEntity());
-    //}
-
     /**
      * Add default modifiers to players and temperature-enabled entities
      */
@@ -364,23 +355,23 @@ public class EntityTempManager
         LivingEntity entity = event.getEntity();
 
         getTemperatureCap(event.getEntity()).ifPresent(cap ->
-                                                       {
-                                                           for (Map.Entry<ItemStack, Insulator> entry : getInsulatorsOnEntity(event.getEntity()).entrySet())
-                                                           {
-                                                               Insulator insulator = entry.getValue();
-                                                               ItemStack stack = entry.getKey();
+        {
+            for (Map.Entry<ItemStack, Insulator> entry : getInsulatorsOnEntity(event.getEntity()).entrySet())
+            {
+                Insulator insulator = entry.getValue();
+                ItemStack stack = entry.getKey();
 
-                                                               Double immunity = insulator.immuneTempModifiers().get(modifierKey);
-                                                               if (immunity != null && insulator.test(event.getEntity(), stack))
-                                                               {
-                                                                   Function<Double, Double> func = event.getFunction();
-                                                                   double lastInput = mod instanceof BiomeTempModifier
-                                                                                      ? (Temperature.get(entity, Temperature.Trait.FREEZING_POINT) + Temperature.get(entity, Temperature.Trait.BURNING_POINT)) / 2
-                                                                                      : mod.getLastInput();
-                                                                   event.setFunction(temp -> CSMath.blend(func.apply(temp), lastInput, immunity, 0, 1));
-                                                               }
-                                                           }
-                                                       });
+                Double immunity = insulator.immuneTempModifiers().get(modifierKey);
+                if (immunity != null && insulator.test(event.getEntity(), stack))
+                {
+                    Function<Double, Double> func = event.getFunction();
+                    double lastInput = mod instanceof BiomeTempModifier
+                                       ? (Temperature.get(entity, Temperature.Trait.FREEZING_POINT) + Temperature.get(entity, Temperature.Trait.BURNING_POINT)) / 2
+                                       : mod.getLastInput();
+                    event.setFunction(temp -> CSMath.blend(func.apply(temp), lastInput, immunity, 0, 1));
+                }
+            }
+        });
     }
 
     /**
