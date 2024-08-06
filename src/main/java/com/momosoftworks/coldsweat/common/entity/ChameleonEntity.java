@@ -11,6 +11,7 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.EntityInit;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.ChameleonEatMessage;
+import com.momosoftworks.coldsweat.core.network.message.EntityMountMessage;
 import com.momosoftworks.coldsweat.data.loot.ModLootTables;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -203,8 +204,11 @@ public class ChameleonEntity extends AnimalEntity
                 return ActionResultType.CONSUME;
             }
         }
-        else if (this.isPlayerTrusted(player) && player.getPassengers().isEmpty())
-        {   this.startRiding(player);
+        else if (this.isPlayerTrusted(player) && player.getPassengers().isEmpty() && !this.level.isClientSide)
+        {
+            if (this.startRiding(player) && player instanceof ServerPlayerEntity)
+            {   ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new EntityMountMessage(this.getId(), player.getId(), EntityMountMessage.Action.MOUNT));
+            }
             return ActionResultType.SUCCESS;
         }
 
@@ -405,7 +409,7 @@ public class ChameleonEntity extends AnimalEntity
         this.setTemperature(this.getTemperature() + (this.desiredTemp - this.getTemperature()) * 0.03f);
 
         // Handle dismounting
-        if (this.getVehicle() instanceof PlayerEntity)
+        if (this.getVehicle() instanceof PlayerEntity && !this.level.isClientSide)
         {
             PlayerEntity player = (PlayerEntity) this.getVehicle();
             if (player.isCrouching())
@@ -424,6 +428,9 @@ public class ChameleonEntity extends AnimalEntity
                     if (mountSneakCount >= 2)
                     {
                         this.stopRiding();
+                        if (player instanceof ServerPlayerEntity)
+                        {   ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity) player), new EntityMountMessage(this.getId(), player.getId(), EntityMountMessage.Action.DISMOUNT));
+                        }
                         this.boardingCooldown = 10;
                         mountSneakCount = 0;
                     }
