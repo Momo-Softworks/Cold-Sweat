@@ -11,6 +11,7 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ModEntities;
 import com.momosoftworks.coldsweat.core.init.ModSounds;
 import com.momosoftworks.coldsweat.core.network.message.ChameleonEatMessage;
+import com.momosoftworks.coldsweat.core.network.message.EntityMountMessage;
 import com.momosoftworks.coldsweat.data.loot.ModLootTables;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -22,7 +23,6 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -203,8 +203,11 @@ public class Chameleon extends Animal
                 return InteractionResult.CONSUME;
             }
         }
-        else if (this.isPlayerTrusted(player) && player.getPassengers().isEmpty())
-        {   this.startRiding(player);
+        else if (this.isPlayerTrusted(player) && player.getPassengers().isEmpty() && !this.level().isClientSide)
+        {
+            if (this.startRiding(player) && player instanceof ServerPlayer serverPlayer)
+            {   serverPlayer.connection.send(new EntityMountMessage(this.getId(), player.getId(), EntityMountMessage.Action.MOUNT));
+            }
             return InteractionResult.sidedSuccess(this.level().isClientSide);
         }
 
@@ -398,7 +401,7 @@ public class Chameleon extends Animal
         this.setTemperature(this.getTemperature() + (this.desiredTemp - this.getTemperature()) * 0.03f);
 
         // Handle dismounting
-        if (this.getVehicle() instanceof Player player)
+        if (this.getVehicle() instanceof Player player && !this.level().isClientSide)
         {
             if (player.isCrouching())
             {
@@ -416,6 +419,9 @@ public class Chameleon extends Animal
                     if (mountSneakCount >= 2)
                     {
                         this.stopRiding();
+                        if (player instanceof ServerPlayer serverPlayer)
+                        {   serverPlayer.connection.send(new EntityMountMessage(this.getId(), player.getId(), EntityMountMessage.Action.DISMOUNT));
+                        }
                         this.boardingCooldown = 10;
                         mountSneakCount = 0;
                     }

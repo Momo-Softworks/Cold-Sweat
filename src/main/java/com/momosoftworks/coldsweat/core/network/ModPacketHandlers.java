@@ -30,5 +30,6 @@ public class ModPacketHandlers
         registrar.playToClient(SyncShearableDataMessage.TYPE, SyncShearableDataMessage.CODEC, SyncShearableDataMessage::handle);
         registrar.playToClient(SyncTemperatureMessage.TYPE, SyncTemperatureMessage.CODEC, SyncTemperatureMessage::handle);
         registrar.playToClient(SyncTempModifiersMessage.TYPE, SyncTempModifiersMessage.CODEC, SyncTempModifiersMessage::handle);
+        registrar.playToClient(EntityMountMessage.TYPE, EntityMountMessage.CODEC, EntityMountMessage::handle);
     }
 }
