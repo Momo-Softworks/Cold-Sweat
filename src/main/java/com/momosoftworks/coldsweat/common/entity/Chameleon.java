@@ -11,6 +11,7 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.EntityInit;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.ChameleonEatMessage;
+import com.momosoftworks.coldsweat.core.network.message.EntityMountMessage;
 import com.momosoftworks.coldsweat.data.loot.ModLootTables;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -19,6 +20,7 @@ import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.Util;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -210,8 +212,11 @@ public class Chameleon extends Animal
                 return InteractionResult.CONSUME;
             }
         }
-        else if (this.isPlayerTrusted(player) && player.getPassengers().isEmpty())
-        {   this.startRiding(player);
+        else if (this.isPlayerTrusted(player) && player.getPassengers().isEmpty() && !this.level().isClientSide)
+        {
+            if (this.startRiding(player) && player instanceof ServerPlayer serverPlayer)
+            {   ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> serverPlayer), new EntityMountMessage(this.getId(), player.getId(), EntityMountMessage.Action.MOUNT));
+            }
             return InteractionResult.SUCCESS;
         }
 
@@ -410,7 +415,7 @@ public class Chameleon extends Animal
         this.setTemperature(this.getTemperature() + (this.desiredTemp - this.getTemperature()) * 0.03f);
 
         // Handle dismounting
-        if (this.getVehicle() instanceof Player player)
+        if (this.getVehicle() instanceof Player player && !this.level().isClientSide)
         {
             if (player.isCrouching())
             {
@@ -428,6 +433,9 @@ public class Chameleon extends Animal
                     if (mountSneakCount >= 2)
                     {
                         this.stopRiding();
+                        if (player instanceof ServerPlayer serverPlayer)
+                        {   ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> serverPlayer), new EntityMountMessage(this.getId(), player.getId(), EntityMountMessage.Action.DISMOUNT));
+                        }
                         this.boardingCooldown = 10;
                         mountSneakCount = 0;
                     }
