@@ -62,6 +62,7 @@ public class BlockTempRegistry
     public static void flush()
     {
         MAPPED_BLOCKS.clear();
+        BLOCK_TEMPS.clear();
     }
 
     public static Collection<BlockTemp> getBlockTempsFor(BlockState blockstate)
