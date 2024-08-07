@@ -24,6 +24,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerContainerEvent;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @EventBusSubscriber
 public class ItemInsulationManager
@@ -32,15 +33,12 @@ public class ItemInsulationManager
      * Gets the insulation component from the item, or creates one if needed.<br>
      * This will always return {@code null} for non-armor items!
      */
-    public static ArmorInsulation getInsulationCap(ItemStack stack)
+    public static Optional<ArmorInsulation> getInsulationCap(ItemStack stack)
     {
-        if (stack.getItem() instanceof Equipable)
-        {
-            if (!stack.has(ModItemComponents.ARMOR_INSULATION))
-            {   stack.set(ModItemComponents.ARMOR_INSULATION, new ArmorInsulation(new ArrayList<>()));
-            }
+        if (isInsulatable(stack) && !stack.has(ModItemComponents.ARMOR_INSULATION))
+        {   stack.set(ModItemComponents.ARMOR_INSULATION, new ArmorInsulation());
         }
-        return stack.get(ModItemComponents.ARMOR_INSULATION);
+        return Optional.ofNullable(stack.get(ModItemComponents.ARMOR_INSULATION));
     }
 
     @SubscribeEvent
@@ -75,10 +73,12 @@ public class ItemInsulationManager
         List<Insulator> insulators = new ArrayList<>();
         if (isInsulatable(stack))
         {
-            ArmorInsulation cap = getInsulationCap(stack);
-            for (Pair<ItemStack, List<Insulation>> pair : cap.getInsulation())
-            {   CSMath.doIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(pair.getFirst().getItem()), insulators::add);
-            }
+            getInsulationCap(stack).ifPresent(cap ->
+            {
+                for (Pair<ItemStack, List<Insulation>> pair : cap.getInsulation())
+                {   CSMath.doIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(pair.getFirst().getItem()), insulators::add);
+                }
+            });
         }
 
         CSMath.doIfNotNull(ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem()), insulators::add);

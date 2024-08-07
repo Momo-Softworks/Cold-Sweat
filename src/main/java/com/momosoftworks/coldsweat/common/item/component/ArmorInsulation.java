@@ -49,6 +49,10 @@ public record ArmorInsulation(List<Pair<ItemStack, List<Insulation>>> insulation
     public static final StreamCodec<RegistryFriendlyByteBuf, ArmorInsulation> STREAM_CODEC = StreamCodec.of((buf, insul) -> insul.serialize(buf),
                                                                                                             (buf) -> ArmorInsulation.deserialize(buf));
 
+    public ArmorInsulation()
+    {   this(new ArrayList<>());
+    }
+
     public List<Pair<ItemStack, List<Insulation>>> getInsulation()
     {   return ImmutableList.copyOf(this.insulation());
     }

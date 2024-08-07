@@ -31,6 +31,7 @@ import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 import java.util.List;
+import java.util.Optional;
 
 @EventBusSubscriber
 public class ProcessEquipmentInsulation
@@ -68,7 +69,11 @@ public class ProcessEquipmentInsulation
                     }
                     else
                     {   // Add the armor's insulation value from the Sewing Table
-                        ArmorInsulation cap = ItemInsulationManager.getInsulationCap(armorStack);
+                        Optional<ArmorInsulation> icap = ItemInsulationManager.getInsulationCap(armorStack);
+                        if (icap.isEmpty())
+                        {   continue;
+                        }
+                        ArmorInsulation cap = icap.get();
                         List<Insulation> insulation = cap.getInsulation()
                                                       .stream()
                                                       .filter(pair -> CSMath.getIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(pair.getFirst().getItem()),

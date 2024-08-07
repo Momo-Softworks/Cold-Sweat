@@ -92,7 +92,7 @@ public abstract class MixinItemTooltip
                 }
             }
         });
-        Optional.ofNullable(ItemInsulationManager.getInsulationCap(stack)).ifPresent(cap ->
+        ItemInsulationManager.getInsulationCap(stack).ifPresent(cap ->
         {
             cap.getInsulation().stream().map(Pair::getFirst).forEach(item ->
             {

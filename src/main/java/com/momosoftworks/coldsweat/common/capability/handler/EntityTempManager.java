@@ -529,16 +529,16 @@ public class EntityTempManager
             ItemStack stack = entity.getItemBySlot(slot);
             if (!stack.isEmpty())
             {
-                Optional.ofNullable(ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem())).ifPresent(insul -> insulators.put(stack, insul));
-                ItemInsulationManager.getInsulationCap(stack).getInsulation().stream().map(Pair::getFirst)
+                CSMath.doIfNotNull(ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem()), insul -> insulators.put(stack, insul));
+                ItemInsulationManager.getInsulationCap(stack).ifPresent(cap -> cap.getInsulation().stream().map(Pair::getFirst)
                 .forEach(item ->
                 {
-                    Optional.ofNullable(ConfigSettings.INSULATION_ITEMS.get().get(item.getItem())).ifPresent(insul -> insulators.put(item, insul));
-                });
+                    CSMath.doIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(item.getItem()), insul -> insulators.put(item, insul));
+                }));
             }
         }
         for (ItemStack curio : CompatManager.getCurios(entity))
-        {   Optional.ofNullable(ConfigSettings.INSULATING_CURIOS.get().get(curio.getItem())).ifPresent(insul -> insulators.put(curio, insul));
+        {   CSMath.doIfNotNull(ConfigSettings.INSULATING_CURIOS.get().get(curio.getItem()), insul -> insulators.put(curio, insul));
         }
         return insulators;
     }

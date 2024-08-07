@@ -37,6 +37,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class SewingContainer extends AbstractContainerMenu
@@ -295,10 +296,12 @@ public class SewingContainer extends AbstractContainerMenu
             // Shears are used to remove insulation
             if (insulatorItem.getItem() instanceof ShearsItem)
             {
-                ArmorInsulation cap = ItemInsulationManager.getInsulationCap(wearableItem);
-                if (!cap.getInsulation().isEmpty())
-                {   this.setItem(2, cap.getInsulationItem(cap.getInsulation().size() - 1).copy());
-                }
+                ItemInsulationManager.getInsulationCap(wearableItem).ifPresent(cap ->
+                {
+                    if (!cap.getInsulation().isEmpty())
+                    {   this.setItem(2, cap.getInsulationItem(cap.getInsulation().size() - 1).copy());
+                    }
+                });
             }
             // Item is for insulation
             else if (ConfigSettings.INSULATION_ITEMS.get().get(insulatorItem.getItem()) != null
@@ -319,13 +322,16 @@ public class SewingContainer extends AbstractContainerMenu
 
     private boolean insulateArmorItem(ItemStack armorItem, ItemStack insulatorItem)
     {
-        ArmorInsulation insulCap = ItemInsulationManager.getInsulationCap(armorItem);
+        Optional<ArmorInsulation> insulCap = ItemInsulationManager.getInsulationCap(armorItem);
+        if (insulCap.isEmpty()) return false;
+        ArmorInsulation cap = insulCap.get();
+
         ItemStack insulator = insulatorItem.copy();
         insulator.setCount(1);
         // Prevent exceeding the armor item's insulation capacity
-        if (!insulCap.canAddInsulationItem(armorItem, insulator)) return false;
+        if (!cap.canAddInsulationItem(armorItem, insulator)) return false;
 
-        insulCap.addInsulationItem(insulator);
+        cap.addInsulationItem(insulator);
 
         // Transfer enchantments
         if (armorItem.has(DataComponents.ENCHANTMENTS) && insulator.has(DataComponents.ENCHANTMENTS))
@@ -344,7 +350,7 @@ public class SewingContainer extends AbstractContainerMenu
             });
         }
 
-        armorItem.set(ModItemComponents.ARMOR_INSULATION, insulCap);
+        armorItem.set(ModItemComponents.ARMOR_INSULATION, cap);
         return true;
     }
 

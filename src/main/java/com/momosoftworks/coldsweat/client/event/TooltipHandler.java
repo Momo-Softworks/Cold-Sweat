@@ -233,19 +233,20 @@ public class TooltipHandler
         {
             List<Insulation> insulation = new ArrayList<>();
 
-            ArmorInsulation cap = ItemInsulationManager.getInsulationCap(stack);
-
-            // Create the list of insulation pairs from NBT
-            insulation.addAll(cap.getInsulation().stream()
-                              // Filter out insulation that doesn't match the predicate
-                              .filter(pair ->
-                              {
-                                  ItemStack stack1 = pair.getFirst();
-                                  return CSMath.getIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(stack1.getItem()),
-                                                             insulator -> insulator.test(player, stack),
-                                                             true);
-                              })
-                              .map(Pair::getSecond).flatMap(List::stream).toList());
+            ItemInsulationManager.getInsulationCap(stack).ifPresent(cap ->
+            {
+                // Create the list of insulation pairs from NBT
+                insulation.addAll(cap.getInsulation().stream()
+                                  // Filter out insulation that doesn't match the predicate
+                                  .filter(pair ->
+                                  {
+                                      ItemStack stack1 = pair.getFirst();
+                                      return CSMath.getIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(stack1.getItem()),
+                                                                 insulator -> insulator.test(player, stack),
+                                                                 true);
+                                  })
+                                  .map(Pair::getSecond).flatMap(List::stream).toList());
+            });
 
             // If the armor has intrinsic insulation due to configs, add it to the list
             if (armorInsulator != null)
