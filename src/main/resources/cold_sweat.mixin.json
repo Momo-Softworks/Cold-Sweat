@@ -1,9 +1,8 @@
 {
   "required": true,
-  "compatibilityLevel": "JAVA_17",
   "package": "com.momosoftworks.coldsweat.mixin",
-  "minVersion": "0.8.5",
-  "plugin": "com.momosoftworks.coldsweat.mixin_plugin.ColdSweatMixinPlugin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "cold_sweat.mixin-refmap.json",
   "client": [
     "MixinChatClicked",
     "MixinEffectsScreen",
@@ -31,8 +30,6 @@
     "compat.MixinSpoiledIcebox",
     "compat.MixinSpoiledIcebox$ContainerModifier"
   ],
-  "injectors": {
-    "defaultRequire": 1
-  },
-  "refmap": "cold_sweat.mixin-refmap.json"
+  "minVersion": "0.8",
+  "plugin": "com.momosoftworks.coldsweat.mixin_plugin.ColdSweatMixinPlugin"
 }
