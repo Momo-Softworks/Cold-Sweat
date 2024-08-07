@@ -2251,6 +2251,8 @@ Fixes:
             - Ice can now be obtained with a stone pickaxe without silk touch
                   - An iron pickaxe is required for packed ice and blue ice
                   - If ice is mined with a wooden pickaxe or by hand, it will turn into water as normal
+            - Packed and Blue ice can now be un-crafted into their "lower-level" variants (i.e. blue ice yields packed ice) in the crafting table or stonecutter
+                  - The crafting table yields 4 ice blocks, while the stonecutter yields 9
 * The set bonus for Three-Bolt armor from Aquamirae now provides some freezing protection, as well as water immunity
 * Added support for Spoiled:
       - Placing food items in the icebox will stop food spoilage as long as it is fueled
@@ -2274,3 +2276,10 @@ Fixes:
 Technical Changes:
 * Any field in a JSON config that accepts a registry ID, or list of IDs, such as structures, biomes, blocks, etc. can now accept tags
       - Tags and IDs can essentially be used interchangeably, with tags being prefixed with a '#' symbol
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.3-b05a.1
+
+Fixes:
+- Fixed issues with mixin conflicts & mixins not properly loading in some cases
