@@ -33,7 +33,6 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import sereneseasons.season.SeasonHooks;
 import top.theillusivec4.curios.api.CuriosCapability;
 import top.theillusivec4.curios.api.event.CurioChangeEvent;
-import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -143,22 +142,41 @@ public class CompatManager
     }
 
     public static boolean hasCurio(Player player, Item curio)
-    {   return CURIOS_LOADED && Optional.ofNullable(player.getCapability(CuriosCapability.INVENTORY)).map(cap -> cap.findFirstCurio(curio)).map(Optional::isPresent).orElse(false);
+    {
+        if (CURIOS_LOADED)
+        {
+            return new Object()
+            {
+                public boolean hasCurio()
+                {   return Optional.ofNullable(player.getCapability(CuriosCapability.INVENTORY)).map(cap -> cap.findFirstCurio(curio)).map(Optional::isPresent).orElse(false);
+                }
+            }.hasCurio();
+        }
+        return false;
     }
 
     public static List<ItemStack> getCurios(LivingEntity entity)
     {
-        if (!CURIOS_LOADED) return new ArrayList<>();
-        return Optional.ofNullable(entity.getCapability(CuriosCapability.INVENTORY))
-                     .map(ICuriosItemHandler::getEquippedCurios)
-                     .map(stacks ->
-                     {
-                         List<ItemStack> list = new ArrayList<>();
-                         for (int i = 0; i < stacks.getSlots(); i++)
-                         {   list.add(stacks.getStackInSlot(i));
-                         }
-                         return list;
-                     }).orElse(new ArrayList<>());
+        if (CURIOS_LOADED)
+        {
+            return new Object()
+            {
+                public List<ItemStack> getCurios()
+                {
+                    return Optional.ofNullable(entity.getCapability(CuriosCapability.INVENTORY))
+                                   .map(curiosHandler -> curiosHandler.getEquippedCurios())
+                                   .map(stacks ->
+                                        {
+                                            List<ItemStack> list = new ArrayList<>();
+                                            for (int i = 0; i < stacks.getSlots(); i++)
+                                            {   list.add(stacks.getStackInSlot(i));
+                                            }
+                                            return list;
+                                        }).orElse(new ArrayList<>());
+                }
+            }.getCurios();
+        }
+        return new ArrayList<>();
     }
 
     public static boolean hasOzzyLiner(ItemStack stack)
@@ -205,7 +223,12 @@ public class CompatManager
     public static int getWaterPurity(ItemStack stack)
     {
         if (THIRST_LOADED)
-        {   return WaterPurity.getPurity(stack);
+        {   return new Object()
+            {
+                public int getWaterPurity()
+                {   return WaterPurity.getPurity(stack);
+                }
+            }.getWaterPurity();
         }
         return 0;
     }
@@ -213,7 +236,13 @@ public class CompatManager
     public static ItemStack setWaterPurity(ItemStack stack, int purity)
     {
         if (THIRST_LOADED)
-        {   return WaterPurity.addPurity(stack, purity);
+        {
+            return new Object()
+            {
+                public ItemStack setWaterPurity()
+                {   return WaterPurity.addPurity(stack, purity);
+                }
+            }.setWaterPurity();
         }
         return stack;
     }
@@ -221,7 +250,13 @@ public class CompatManager
     public static ItemStack setWaterPurity(ItemStack item, BlockPos pos, Level level)
     {
         if (THIRST_LOADED)
-        {   return WaterPurity.addPurity(item, pos, level);
+        {
+            return new Object()
+            {
+                public ItemStack setWaterPurity()
+                {   return WaterPurity.addPurity(item, pos, level);
+                }
+            }.setWaterPurity();
         }
         return item;
     }
@@ -230,9 +265,15 @@ public class CompatManager
     {
         if (isIcebergLoaded())
         {
-            int index = CSMath.getIndexOf(tooltip, element -> element.right().map(component -> component instanceof Tooltips.TitleBreakComponent).orElse(false));
-            if (index == -1) return 0;
-            return index;
+            return new Object()
+            {
+                public int getLegendaryTTStartIndex()
+                {
+                    int index = CSMath.getIndexOf(tooltip, element -> element.right().map(component -> component instanceof Tooltips.TitleBreakComponent).orElse(false));
+                    if (index == -1) return 0;
+                    return index;
+                }
+            }.getLegendaryTTStartIndex();
         }
         return 0;
     }
@@ -271,7 +312,7 @@ public class CompatManager
         if (ARMOR_UNDERWEAR_LOADED && !event.getEntity().level().isClientSide)
         {
             // Get the damage source from the event (different methods for LivingDamage/LivingAttack)
-            DamageSource source = event instanceof LivingDamageEvent
+            DamageSource source = event instanceof LivingDamageEvent.Pre
                                   ? ((LivingDamageEvent.Pre) event).getContainer().getSource()
                                   : ((LivingIncomingDamageEvent) event).getSource();
             if (source == null) return;
@@ -360,9 +401,16 @@ public class CompatManager
         {
             // TODO: Find out how this works now
             if (isThirstLoaded())
-            {   ThirstHelper.addDrink(ModItems.FILLED_WATERSKIN.value(), 6, 12);
-                WaterPurity.addContainer(new ContainerWithPurity(ModItems.WATERSKIN.value(),
-                                                                 ModItems.FILLED_WATERSKIN.value()));
+            {
+                new Object()
+                {
+                    public void registerDrinks()
+                    {
+                        ThirstHelper.addDrink(ModItems.FILLED_WATERSKIN.value(), 6, 12);
+                        WaterPurity.addContainer(new ContainerWithPurity(ModItems.WATERSKIN.value(),
+                                                                         ModItems.FILLED_WATERSKIN.value()));
+                    }
+                }.registerDrinks();
             }
         }
     }
