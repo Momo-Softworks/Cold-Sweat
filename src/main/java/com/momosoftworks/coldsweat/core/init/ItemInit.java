@@ -22,7 +22,7 @@ public class ItemInit
     public static final RegistryObject<Item> FILLED_WATERSKIN = ITEMS.register("filled_waterskin", FilledWaterskinItem::new);
     public static final RegistryObject<Item> MINECART_INSULATION = ITEMS.register("minecart_insulation", MinecartInsulationItem::new);
     public static final RegistryObject<Item> THERMOMETER = ITEMS.register("thermometer", () ->
-            new Item(new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT).rarity(Rarity.UNCOMMON).stacksTo(1)));
+            new ThermometerItem(new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT).rarity(Rarity.UNCOMMON).stacksTo(1)));
     public static final RegistryObject<Item> SOULSPRING_LAMP = ITEMS.register("soulspring_lamp", SoulspringLampItem::new);
     public static final RegistryObject<Item> FUR = ITEMS.register("fur", () ->
             new Item(new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
