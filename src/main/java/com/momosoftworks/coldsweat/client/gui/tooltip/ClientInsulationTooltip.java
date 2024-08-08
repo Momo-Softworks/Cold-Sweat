@@ -185,14 +185,14 @@ public class ClientInsulationTooltip extends Tooltip
         return 12 + font.width(text);
     }
 
-    static void renderBar(MatrixStack poseStack, int x, int y, List<Insulation> insulations, Insulation.Slot type, boolean showSign, boolean isNegative, ItemStack stack)
+    static void renderBar(MatrixStack poseStack, int x, int y, List<Insulation> insulations, Insulation.Slot slot, boolean showSign, boolean isNegative, ItemStack stack)
     {
         Minecraft.getInstance().textureManager.bind(TOOLTIP_LOCATION.get());
         FontRenderer font = Minecraft.getInstance().font;
         List<Insulation> sortedInsulation = Insulation.sort(insulations);
         boolean overflow = sortedInsulation.size() >= 10;
-        int insulSlotCount = Math.max(type == Insulation.Slot.ARMOR
-                                  ? ConfigSettings.INSULATION_SLOTS.get()[3 - MobEntity.getEquipmentSlotForItem(stack).getIndex()]
+        int insulSlotCount = Math.max(slot == Insulation.Slot.ARMOR
+                                  ? ConfigSettings.INSULATION_SLOTS.get().getSlots(MobEntity.getEquipmentSlotForItem(stack), stack)
                                   : 0,
                                   insulations.size());
 
@@ -368,7 +368,7 @@ public class ClientInsulationTooltip extends Tooltip
         }
 
         // icon
-        switch (type)
+        switch (slot)
         {
             case CURIO : AbstractGui.blit(poseStack, x, y - 1, 401, 24, 16, 8, 8, 24, 32); break;
             case ITEM  : AbstractGui.blit(poseStack, x, y - 1, 401, 24, 0, 8, 8, 24, 32); break;

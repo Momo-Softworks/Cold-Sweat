@@ -127,6 +127,7 @@ public class ItemInsulationManager
             ItemStack containerStack = sendingContainer.getSlot(slot).getItem();
             getInsulationCap(containerStack).ifPresent(cap ->
             {
+                // Serialize insulation for syncing to client
                 containerStack.getOrCreateTag().merge(cap.serializeNBT());
             });
         }
@@ -164,15 +165,7 @@ public class ItemInsulationManager
 
     public static int getInsulationSlots(ItemStack item)
     {
-        Integer[] slots = ConfigSettings.INSULATION_SLOTS.get();
-        switch (MobEntity.getEquipmentSlotForItem(item))
-        {
-            case HEAD  : return slots[0];
-            case CHEST : return slots[1];
-            case LEGS  : return slots[2];
-            case FEET  : return slots[3];
-            default : return 0;
-        }
+        return ConfigSettings.INSULATION_SLOTS.get().getSlots(MobEntity.getEquipmentSlotForItem(item), item);
     }
 
     public static boolean isInsulatable(ItemStack stack)

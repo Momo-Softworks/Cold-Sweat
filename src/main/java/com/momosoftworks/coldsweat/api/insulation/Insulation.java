@@ -121,7 +121,7 @@ public abstract class Insulation implements NbtSerializable
                 {   return type;
                 }
             }
-            throw new IllegalArgumentException("Unknown insulation type: " + name);
+            throw new IllegalArgumentException("Unknown insulation slot: " + name);
         }
     }
 
