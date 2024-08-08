@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.common.event;
 
+import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
@@ -14,16 +15,21 @@ import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
+import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
@@ -98,7 +104,28 @@ public class ArmorInsulation
                         }
 
                         if (iCap.resolve().isPresent() && iCap.resolve().get() instanceof ItemInsulationCap cap)
-                        {   cap.calcAdaptiveInsulation(worldTemp, minTemp, maxTemp);
+                        {
+                            // Calculate adaptive insulation adaptation state
+                            cap.calcAdaptiveInsulation(worldTemp, minTemp, maxTemp);
+
+                            // Remove insulation items if the player has too many
+                            List<Pair<ItemStack, List<Insulation>>> totalInsulation = cap.getInsulation();
+                            int filledInsulationSlots = (int) totalInsulation.stream().map(Pair::getSecond).flatMap(List::stream).map(Insulation::split).flatMap(List::stream).count();
+                            if (filledInsulationSlots > ItemInsulationManager.getInsulationSlots(armorStack))
+                            {   WorldHelper.playEntitySound(SoundEvents.ITEM_FRAME_REMOVE_ITEM, player, SoundSource.PLAYERS, 1.0F, 1.0F);
+                            }
+                            while (filledInsulationSlots > ItemInsulationManager.getInsulationSlots(armorStack))
+                            {
+                                ItemStack removedItem = cap.removeInsulationItem(totalInsulation.get(totalInsulation.size() - 1).getFirst());
+                                ItemEntity droppedInsulation = new ItemEntity(player.level, player.getX(), player.getY() + player.getBbHeight() / 2, player.getZ(), removedItem);
+                                droppedInsulation.setPickUpDelay(8);
+                                droppedInsulation.setDeltaMovement(new Vec3(player.getRandom().nextGaussian() * 0.05,
+                                                                            player.getRandom().nextGaussian() * 0.05 + 0.2,
+                                                                            player.getRandom().nextGaussian() * 0.05));
+                                player.level.addFreshEntity(droppedInsulation);
+
+                                filledInsulationSlots--;
+                            }
                         }
                     }
 
