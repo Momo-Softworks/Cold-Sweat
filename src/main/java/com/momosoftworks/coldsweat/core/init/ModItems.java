@@ -18,7 +18,7 @@ public class ModItems
     public static final DeferredItem<Item> FILLED_WATERSKIN = ITEMS.register("filled_waterskin", FilledWaterskinItem::new);
     public static final DeferredItem<Item> MINECART_INSULATION = ITEMS.register("minecart_insulation", MinecartInsulationItem::new);
     public static final DeferredItem<Item> THERMOMETER = ITEMS.register("thermometer", () ->
-            new Item(new Item.Properties().rarity(Rarity.UNCOMMON).stacksTo(1)));
+            new ThermometerItem(new Item.Properties().rarity(Rarity.UNCOMMON).stacksTo(1)));
     public static final DeferredItem<Item> SOULSPRING_LAMP = ITEMS.register("soulspring_lamp", SoulspringLampItem::new);
     public static final DeferredItem<Item> FUR = ITEMS.register("fur", () ->
             new Item(new Item.Properties()));

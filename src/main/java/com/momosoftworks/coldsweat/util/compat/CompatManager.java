@@ -59,6 +59,7 @@ public class CompatManager
     private static final boolean THIRST_LOADED = modLoaded("thirst");
     private static final boolean ICEBERG_LOADED = modLoaded("iceberg");
     private static final boolean SPOILED_LOADED = modLoaded("spoiled");
+    private static final boolean SUPPLEMENTARIES_LOADED = modLoaded("supplementaries");
 
     public static boolean modLoaded(String modID, int minMajorVer, int minMinorVer, int minPatchVer)
     {
@@ -139,6 +140,9 @@ public class CompatManager
     }
     public static boolean isSpoiledLoaded()
     {   return SPOILED_LOADED;
+    }
+    public static boolean isSupplementariesLoaded()
+    {   return SUPPLEMENTARIES_LOADED;
     }
 
     public static boolean hasCurio(Player player, Item curio)
