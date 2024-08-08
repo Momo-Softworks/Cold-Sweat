@@ -6,6 +6,7 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
+import com.momosoftworks.coldsweat.api.insulation.slot.ScalingFormula;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.spec.*;
 import com.momosoftworks.coldsweat.config.type.InsulatingMount;
@@ -99,7 +100,7 @@ public class ConfigSettings
     public static final DynamicHolder<Map<Item, Insulator>> INSULATION_ITEMS;
     public static final DynamicHolder<Map<Item, Insulator>> INSULATING_ARMORS;
     public static final DynamicHolder<Map<Item, Insulator>> INSULATING_CURIOS;
-    public static final DynamicHolder<Integer[]> INSULATION_SLOTS;
+    public static final DynamicHolder<ScalingFormula> INSULATION_SLOTS;
     public static final DynamicHolder<List<Item>> INSULATION_BLACKLIST;
 
     public static final DynamicHolder<Boolean> CHECK_SLEEP_CONDITIONS;
@@ -405,19 +406,59 @@ public class ConfigSettings
 
         INSULATION_SLOTS = addSyncedSetting("insulation_slots", () ->
         {
-            List<? extends Number> list = ItemSettingsConfig.getInstance().getArmorInsulationSlots();
-            return new Integer[] { list.get(0).intValue(), list.get(1).intValue(), list.get(2).intValue(), list.get(3).intValue() };
+            List<?> list = ItemSettingsConfig.getInstance().getArmorInsulationSlots();
+            // Handle legacy insulation notation
+            if (list.size() == 4 && list.stream().allMatch(el -> el instanceof Integer))
+            {   list = List.of("static", list.get(0), list.get(1), list.get(2), list.get(3));
+            }
+            String mode = ((String) list.get(0));
+
+            ScalingFormula.Type scalingType = ScalingFormula.Type.byName(mode);
+            List<? extends Number> values = list.subList(1, list.size()).stream().map(o -> (Number) o).toList();
+
+            return scalingType == ScalingFormula.Type.STATIC
+                                  ? new ScalingFormula.Static(values.get(0).intValue(),
+                                                              values.get(1).intValue(),
+                                                              values.get(2).intValue(),
+                                                              values.get(3).intValue())
+                                  : new ScalingFormula.Dynamic(scalingType,
+                                                               values.get(0).doubleValue(),
+                                                               values.size() > 2 ? values.get(2).doubleValue() : Double.MAX_VALUE);
         },
         (encoder) ->
-        {   CompoundTag tag = new CompoundTag();
-            tag.putInt("Head", encoder[0]);
-            tag.putInt("Chest", encoder[1]);
-            tag.putInt("Legs", encoder[2]);
-            tag.putInt("Feet", encoder[3]);
+        {
+            CompoundTag tag = new CompoundTag();
+            tag.putString("Mode", encoder.getType().getSerializedName());
+
+            ListTag values = new ListTag();
+            encoder.getValues().forEach(value -> values.add(DoubleTag.valueOf(value.doubleValue())));
+            tag.put("Values", values);
+
             return tag;
         },
-        (decoder) -> new Integer[] { decoder.getInt("Head"), decoder.getInt("Chest"), decoder.getInt("Legs"), decoder.getInt("Feet") },
-        (saver) -> ItemSettingsConfig.getInstance().setArmorInsulationSlots(Arrays.asList(saver[0], saver[1], saver[2], saver[3])));
+        (decoder) ->
+        {
+            ScalingFormula.Type scalingType = ScalingFormula.Type.byName(decoder.getString("Mode"));
+            List<? extends Number> values = decoder.getList("Values", 6)
+                    .stream()
+                    .map(tag -> ((DoubleTag) tag).getAsNumber()).toList();
+
+            return scalingType == ScalingFormula.Type.STATIC
+                                  ? new ScalingFormula.Static(values.get(0).intValue(),
+                                                              values.get(1).intValue(),
+                                                              values.get(2).intValue(),
+                                                              values.get(3).intValue())
+                                  : new ScalingFormula.Dynamic(scalingType,
+                                                               values.get(0).doubleValue(),
+                                                               values.size() > 2 ? values.get(2).doubleValue() : Double.MAX_VALUE);
+        },
+        (saver) ->
+        {
+            List list = new ArrayList<>();
+            list.add(saver.getType().getSerializedName());
+            list.addAll(saver.getValues());
+            ItemSettingsConfig.getInstance().setArmorInsulationSlots(list);
+        });
 
         INSULATION_BLACKLIST = addSetting("insulation_blacklist", () -> ItemSettingsConfig.getInstance().getInsulationBlacklist()
                                                                         .stream()

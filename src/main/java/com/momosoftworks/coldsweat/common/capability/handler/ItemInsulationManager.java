@@ -10,20 +10,27 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
+import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
@@ -39,6 +46,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 @Mod.EventBusSubscriber
 public class ItemInsulationManager
@@ -120,6 +129,7 @@ public class ItemInsulationManager
             ItemStack containerStack = sendingContainer.getSlot(slot).getItem();
             getInsulationCap(containerStack).ifPresent(cap ->
             {
+                // Serialize insulation for syncing to client
                 containerStack.getOrCreateTag().merge(cap.serializeNBT());
             });
         }
@@ -145,15 +155,7 @@ public class ItemInsulationManager
 
     public static int getInsulationSlots(ItemStack item)
     {
-        Integer[] slots = ConfigSettings.INSULATION_SLOTS.get();
-        return switch (LivingEntity.getEquipmentSlotForItem(item))
-        {
-            case HEAD  -> slots[0];
-            case CHEST -> slots[1];
-            case LEGS  -> slots[2];
-            case FEET  -> slots[3];
-            default -> 0;
-        };
+        return ConfigSettings.INSULATION_SLOTS.get().getSlots(LivingEntity.getEquipmentSlotForItem(item), item);
     }
 
     public static boolean isInsulatable(ItemStack stack)
