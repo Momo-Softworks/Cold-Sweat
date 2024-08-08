@@ -48,18 +48,7 @@ public class ItemInsulationManager
 
     public static int getInsulationSlots(ItemStack item)
     {
-        Integer[] slots = ConfigSettings.INSULATION_SLOTS.get();
-        if (!(item.getItem() instanceof ArmorItem))
-        {   return 0;
-        }
-        return switch (((ArmorItem) item.getItem()).getEquipmentSlot())
-        {
-            case HEAD  -> slots[0];
-            case CHEST -> slots[1];
-            case LEGS  -> slots[2];
-            case FEET  -> slots[3];
-            default -> 0;
-        };
+        return ConfigSettings.INSULATION_SLOTS.get().getSlots(((ArmorItem) item.getItem()).getEquipmentSlot(), item);
     }
 
     public static boolean isInsulatable(ItemStack stack)

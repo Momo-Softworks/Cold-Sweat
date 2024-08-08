@@ -30,7 +30,7 @@ public class ItemSettingsConfig
     private static final ModConfigSpec.ConfigValue<List<? extends List<?>>> insulatingItems;
     private static final ModConfigSpec.ConfigValue<List<? extends String>> insulationBlacklist;
     private static final ModConfigSpec.ConfigValue<List<? extends List<?>>> insulatingArmor;
-    private static final ModConfigSpec.ConfigValue<List<? extends Number>> insulationSlots;
+    private static final ModConfigSpec.ConfigValue<List<?>> insulationSlots;
 
     private static final ModConfigSpec.IntValue waterskinStrength;
 
@@ -226,9 +226,16 @@ public class ItemSettingsConfig
 
         insulationSlots = BUILDER
                 .comment("Defines how many insulation slots armor pieces have",
-                         "Format: [head, chest, legs, feet]")
-                .defineList("Insulation Slots", List.of(4, 6, 5, 4),
-                        it -> it instanceof Number);
+                         "There are 4 modes for this setting:",
+                         "Static: Each armor slot (head, body, legs, feet) has a fixed number of insulation slots",
+                         "- Format: [head, body, legs, feet] (a list of integers; insulation slot count for each armor slot)",
+                         " ",
+                         "Linear: Number of slots increases steadily with protection",
+                         "Exponential: Number of slots increases rapidly with protection",
+                         "Logarithmic: Number of slots increases with protection, with diminishing returns",
+                         "- Format: [number, max-slots] (a positive integer or decimal; the rate of increase)")
+                .defineList("Insulation Slots", List.of("static", 4, 6, 5, 4),
+                        it -> it instanceof Number || it instanceof String);
 
         insulationBlacklist = BUILDER
                 .comment("Defines wearable items that cannot be insulated",
@@ -305,7 +312,7 @@ public class ItemSettingsConfig
     {   return insulatingArmor.get();
     }
 
-    public List<? extends Number> getArmorInsulationSlots()
+    public List<?> getArmorInsulationSlots()
     {   return insulationSlots.get();
     }
 
@@ -373,7 +380,7 @@ public class ItemSettingsConfig
         }
     }
 
-    public synchronized void setArmorInsulationSlots(List<? extends Number> slots)
+    public synchronized void setArmorInsulationSlots(List<?> slots)
     {   synchronized (insulationSlots)
         {   insulationSlots.set(slots);
         }

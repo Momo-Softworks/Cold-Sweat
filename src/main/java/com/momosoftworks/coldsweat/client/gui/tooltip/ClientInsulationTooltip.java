@@ -156,7 +156,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         List<Insulation> sortedInsulation = Insulation.sort(insulations);
         boolean overflow = sortedInsulation.size() >= 10;
         int insulSlotCount = Math.max(type == Insulation.Slot.ARMOR
-                                  ? ConfigSettings.INSULATION_SLOTS.get()[3 - Minecraft.getInstance().player.getEquipmentSlotForItem(stack).getIndex()]
+                                  ? ConfigSettings.INSULATION_SLOTS.get().getSlots(Minecraft.getInstance().player.getEquipmentSlotForItem(stack), stack)
                                   : 0,
                                   insulations.size());
 
