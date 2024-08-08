@@ -93,12 +93,12 @@ public class EntityTempManager
     public static final Map<Entity, ITemperatureCap> SERVER_CAP_CACHE = new HashMap<>();
     public static final Map<Entity, ITemperatureCap> CLIENT_CAP_CACHE = new HashMap<>();
 
-    public static ITemperatureCap getTemperatureCap(Entity entity)
+    public static Optional<ITemperatureCap> getTemperatureCap(Entity entity)
     {
         Map<Entity, ITemperatureCap> cache = entity.level().isClientSide ? CLIENT_CAP_CACHE : SERVER_CAP_CACHE;
-        return cache.computeIfAbsent(entity, e -> e.getCapability(entity instanceof Player
-                                                                  ? ModCapabilities.PLAYER_TEMPERATURE
-                                                                  : ModCapabilities.ENTITY_TEMPERATURE));
+        return Optional.ofNullable(cache.computeIfAbsent(entity, e -> e.getCapability(entity instanceof Player
+                                                                                      ? ModCapabilities.PLAYER_TEMPERATURE
+                                                                                      : ModCapabilities.ENTITY_TEMPERATURE)));
     }
 
     /**
@@ -110,23 +110,24 @@ public class EntityTempManager
         if (event.getEntity() instanceof LivingEntity living && !living.level().isClientSide()
         && TEMPERATURE_ENABLED_ENTITIES.contains(living.getType()))
         {
-            ITemperatureCap cap = getTemperatureCap(living);
-            // If entity has never been initialized, add default modifiers
-            List<TempModifier> allModifiers = new ArrayList<>();
-            for (Temperature.Trait trait : VALID_MODIFIER_TRAITS)
-            {   allModifiers.addAll(cap.getModifiers(trait));
-            }
-            if (allModifiers.isEmpty())
+            getTemperatureCap(living).ifPresent(cap ->
             {
+                // If entity has never been initialized, add default modifiers
+                List<TempModifier> allModifiers = new ArrayList<>();
                 for (Temperature.Trait trait : VALID_MODIFIER_TRAITS)
-                {
-                    GatherDefaultTempModifiersEvent gatherEvent = new GatherDefaultTempModifiersEvent(living, trait);
-                    NeoForge.EVENT_BUS.post(gatherEvent);
-
-                    cap.getModifiers(trait).addAll(gatherEvent.getModifiers());
+                {   allModifiers.addAll(cap.getModifiers(trait));
                 }
-                living.getPersistentData().putBoolean("InitializedModifiers", true);
-            }
+                if (allModifiers.isEmpty())
+                {
+                    for (Temperature.Trait trait : VALID_MODIFIER_TRAITS)
+                    {
+                        GatherDefaultTempModifiersEvent gatherEvent = new GatherDefaultTempModifiersEvent(living, trait);
+                        NeoForge.EVENT_BUS.post(gatherEvent);
+
+                        cap.getModifiers(trait).addAll(gatherEvent.getModifiers());
+                    }
+                }
+            });
         }
     }
 
@@ -138,28 +139,30 @@ public class EntityTempManager
     {
         if (!(event.getEntity() instanceof LivingEntity entity) || !TEMPERATURE_ENABLED_ENTITIES.contains(entity.getType())) return;
 
-        ITemperatureCap cap = getTemperatureCap(entity);
-        if (!entity.level().isClientSide)
-        {   // Tick modifiers serverside
-            cap.tick(entity);
-        }
-        else
-        {   // Tick modifiers clientside
-            cap.tickDummy(entity);
-        }
-
-        // Remove expired modifiers
-        for (Temperature.Trait trait : VALID_MODIFIER_TRAITS)
+        getTemperatureCap(entity).ifPresent(cap ->
         {
-            cap.getModifiers(trait).removeIf(modifier ->
-            {   int expireTime = modifier.getExpireTime();
-                return (modifier.setTicksExisted(modifier.getTicksExisted() + 1) > expireTime && expireTime != -1);
-            });
-        }
+            if (!entity.level().isClientSide)
+            {   // Tick modifiers serverside
+                cap.tick(entity);
+            }
+            else
+            {   // Tick modifiers clientside
+                cap.tickDummy(entity);
+            }
 
-        if (entity instanceof Player && entity.tickCount % 60 == 0)
-        {   Temperature.updateModifiers(entity, cap);
-        }
+            // Remove expired modifiers
+            for (Temperature.Trait trait : VALID_MODIFIER_TRAITS)
+            {
+                cap.getModifiers(trait).removeIf(modifier ->
+                {   int expireTime = modifier.getExpireTime();
+                    return (modifier.setTicksExisted(modifier.getTicksExisted() + 1) > expireTime && expireTime != -1);
+                });
+            }
+
+            if (entity instanceof Player && entity.tickCount % 60 == 0)
+            {   Temperature.updateModifiers(entity, cap);
+            }
+        });
     }
 
     /**
@@ -174,7 +177,7 @@ public class EntityTempManager
         if (!newPlayer.level().isClientSide)
         {
             // Get the old player's capability
-            getTemperatureCap(oldPlayer).getPersistentAttributes()
+            getTemperatureCap(oldPlayer).map(ITemperatureCap::getPersistentAttributes).orElse(new HashSet<>())
             .forEach(attr ->
             {   newPlayer.getAttribute(Holder.direct(attr)).setBaseValue(oldPlayer.getAttribute(Holder.direct(attr)).getBaseValue());
             });
@@ -193,15 +196,15 @@ public class EntityTempManager
         SERVER_CAP_CACHE.remove(oldPlayer);
         CLIENT_CAP_CACHE.remove(oldPlayer);
 
-        ITemperatureCap cap = getTemperatureCap(newPlayer);
+        getTemperatureCap(newPlayer).ifPresent(cap ->
         {
             if (!event.isWasDeath())
-            {   cap.copy(getTemperatureCap(oldPlayer));
+            {   getTemperatureCap(oldPlayer).ifPresent(cap::copy);
             }
             if (!newPlayer.level().isClientSide)
             {   Temperature.updateTemperature(newPlayer, cap, true);
             }
-        }
+        });
     }
 
     /**
@@ -441,10 +444,12 @@ public class EntityTempManager
                 if (player.isSleeping())
                 {
                     // Divide the player's current temperature by 4
-                    ITemperatureCap cap = getTemperatureCap(player);
-                    double temp = cap.getTrait(Temperature.Trait.CORE);
-                    cap.setTrait(Temperature.Trait.CORE, temp / 4f);
-                    Temperature.updateTemperature(player, cap, true);
+                    getTemperatureCap(player).ifPresent(cap ->
+                    {
+                        double temp = cap.getTrait(Temperature.Trait.CORE);
+                        cap.setTrait(Temperature.Trait.CORE, temp / 4f);
+                        Temperature.updateTemperature(player, cap, true);
+                    });
                 }
             });
         }

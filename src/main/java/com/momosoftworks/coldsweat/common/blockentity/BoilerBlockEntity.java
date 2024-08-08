@@ -175,8 +175,8 @@ public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider
     {
         // Apply the insulation effect
         if (!shouldUseHotFuel)
+        EntityTempManager.getTemperatureCap(player).ifPresent(cap ->
         {
-            ITemperatureCap cap = EntityTempManager.getTemperatureCap(player);
             double temp = cap.getTrait(Temperature.Trait.WORLD);
             double min = cap.getTrait(Temperature.Trait.FREEZING_POINT);
             double max = cap.getTrait(Temperature.Trait.BURNING_POINT);
@@ -200,7 +200,7 @@ public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider
 
             // Tell the hearth to use hot fuel
             shouldUseHotFuel |= this.getHotFuel() > 0 && temp < min;
-        }
+        });
         if (shouldUseHotFuel)
         {   int maxEffect = this.getMaxInsulationLevel() - 1;
             int effectLevel = (int) Math.min(maxEffect, (insulationLevel / (double) this.getInsulationTime()) * maxEffect);

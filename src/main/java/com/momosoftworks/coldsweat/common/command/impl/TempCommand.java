@@ -203,9 +203,10 @@ public class TempCommand extends BaseCommand
         for (Entity entity : entities)
         {
             if (!(entity instanceof LivingEntity)) continue;
-            ITemperatureCap cap = EntityTempManager.getTemperatureCap(entity);
-            cap.setTrait(Temperature.Trait.CORE, temp);
-            Temperature.updateTemperature((LivingEntity) entity, cap, true);
+            EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
+            {   cap.setTrait(Temperature.Trait.CORE, temp);
+                Temperature.updateTemperature((LivingEntity) entity, cap, true);
+            });
         }
 
         //Compose & send message
@@ -235,12 +236,12 @@ public class TempCommand extends BaseCommand
 
     private int executeGetWorldTemp(CommandSourceStack source, int x , int y, int z, ServerLevel level)
     {   //Compose & send message
-        ITemperatureCap cap = EntityTempManager.getTemperatureCap(source.getPlayer());
-        int worldTemp = (int) Temperature.convert(Temperature.getTemperatureAt(new BlockPos(x, y, z), level != null
-                                                                                                           ? level
-                                                                                                           : source.getLevel()),
-                                                       Temperature.Units.MC, cap.getPreferredUnits(), true);
-        source.sendSuccess(() -> Component.translatable("commands.cold_sweat.temperature.get.world.result", x, y, z, worldTemp, cap.getPreferredUnits().getFormattedName()), true);
+        EntityTempManager.getTemperatureCap(source.getPlayer()).ifPresent(cap ->
+        {
+            int worldTemp = (int) Temperature.convert(Temperature.getTemperatureAt(new BlockPos(x, y, z), level != null ? level : source.getLevel()),
+                                                      Temperature.Units.MC, cap.getPreferredUnits(), true);
+            source.sendSuccess(() -> Component.translatable("commands.cold_sweat.temperature.get.world.result", x, y, z, worldTemp, cap.getPreferredUnits().getFormattedName()), true);
+        });
         return Command.SINGLE_SUCCESS;
     }
 
@@ -255,7 +256,7 @@ public class TempCommand extends BaseCommand
         AttributeInstance attribute = Arrays.asList(EntityTempManager.VALID_ATTRIBUTE_TYPES).contains(trait)
                                       ? EntityTempManager.getAttribute(trait, living)
                                       : null;
-        Temperature.Units preferredUnits = EntityTempManager.getTemperatureCap(entity).getPreferredUnits();
+        Temperature.Units preferredUnits = EntityTempManager.getTemperatureCap(entity).map(ITemperatureCap::getPreferredUnits).orElse(Temperature.Units.F);
         double lastValue = trait == Temperature.Trait.BURNING_POINT ? ConfigSettings.MAX_TEMP.get()
                          : trait == Temperature.Trait.FREEZING_POINT ? ConfigSettings.MIN_TEMP.get()
                          : 0;
@@ -360,26 +361,26 @@ public class TempCommand extends BaseCommand
         {
             if (EntityTempManager.getEntitiesWithTemperature().contains(entity.getType()) && entity instanceof LivingEntity living)
             {
-                checkAttribute:
+                EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
                 {
-                    ITemperatureCap cap = EntityTempManager.getTemperatureCap(entity);
-                    AttributeInstance instance = EntityTempManager.getAttribute(attribute, living);
-                    if (instance == null) break checkAttribute;
-                    if (operation != null)
+                    checkAttribute:
                     {
-                        AttributeModifier modifier = EntityTempManager.makeAttributeModifier(attribute, amount, operation);
-                        instance.addPermanentModifier(modifier);
+                        AttributeInstance instance = EntityTempManager.getAttribute(attribute, living);
+                        if (instance == null) break checkAttribute;
+                        if (operation != null)
+                        {
+                            AttributeModifier modifier = EntityTempManager.makeAttributeModifier(attribute, amount, operation);
+                            instance.addPermanentModifier(modifier);
+                        }
+                        else
+                        {   EntityTempManager.getAttribute(attribute, living).setBaseValue(amount);
+                        }
+                        if (permanent)
+                        {   cap.markPersistentAttribute(instance.getAttribute().value());
+                        }
+                        else cap.clearPersistentAttribute(instance.getAttribute().value());
                     }
-                    else
-                    {
-                        EntityTempManager.getAttribute(attribute, living).setBaseValue(amount);
-                    }
-                    if (permanent)
-                    {
-                        cap.markPersistentAttribute(instance.getAttribute().value());
-                    }
-                    else cap.clearPersistentAttribute(instance.getAttribute().value());
-                }
+                });
             }
             else
             {   source.sendFailure(Component.translatable("commands.cold_sweat.temperature.invalid"));
@@ -419,15 +420,17 @@ public class TempCommand extends BaseCommand
         {
             if (EntityTempManager.getEntitiesWithTemperature().contains(entity.getType()) && entity instanceof LivingEntity living)
             {
-                ITemperatureCap cap = EntityTempManager.getTemperatureCap(entity);
-                checkAttribute:
+                EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
                 {
-                    AttributeInstance instance = EntityTempManager.getAttribute(attribute, living);
-                    if (instance == null) break checkAttribute;
-                    instance.removeModifiers();
-                    EntityTempManager.getAttribute(attribute, living).setBaseValue(Double.NaN);
-                    cap.clearPersistentAttribute(instance.getAttribute().value());
-                }
+                    checkAttribute:
+                    {
+                        AttributeInstance instance = EntityTempManager.getAttribute(attribute, living);
+                        if (instance == null) break checkAttribute;
+                        instance.removeModifiers();
+                        EntityTempManager.getAttribute(attribute, living).setBaseValue(Double.NaN);
+                        cap.clearPersistentAttribute(instance.getAttribute().value());
+                    }
+                });
             }
             else
             {   source.sendFailure(Component.translatable("commands.cold_sweat.temperature.invalid"));
@@ -455,15 +458,17 @@ public class TempCommand extends BaseCommand
         {
             if (EntityTempManager.getEntitiesWithTemperature().contains(entity.getType()) && entity instanceof LivingEntity living)
             {
-                ITemperatureCap cap = EntityTempManager.getTemperatureCap(entity);
-                for (Temperature.Trait attribute : EntityTempManager.VALID_ATTRIBUTE_TYPES)
+                EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
                 {
-                    AttributeInstance instance = EntityTempManager.getAttribute(attribute, living);
-                    if (instance == null) continue;
-                    instance.removeModifiers();
-                    EntityTempManager.getAttribute(attribute, living).setBaseValue(Double.NaN);
-                    cap.clearPersistentAttribute(instance.getAttribute().value());
-                }
+                    for (Temperature.Trait attribute : EntityTempManager.VALID_ATTRIBUTE_TYPES)
+                    {
+                        AttributeInstance instance = EntityTempManager.getAttribute(attribute, living);
+                        if (instance == null) continue;
+                        instance.removeModifiers();
+                        EntityTempManager.getAttribute(attribute, living).setBaseValue(Double.NaN);
+                        cap.clearPersistentAttribute(instance.getAttribute().value());
+                    }
+                });
             }
             else
             {   source.sendFailure(Component.translatable("commands.cold_sweat.temperature.invalid"));

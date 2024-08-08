@@ -31,8 +31,7 @@ public class SyncPreferredUnitsMessage implements CustomPacketPayload
     public static void handle(SyncPreferredUnitsMessage message, IPayloadContext context)
     {
         context.enqueueWork(() ->
-        {
-            EntityTempManager.getTemperatureCap(context.player()).setPreferredUnits(message.units);
+        {   EntityTempManager.getTemperatureCap(context.player()).ifPresent(cap -> cap.setPreferredUnits(message.units));
         });
     }
 

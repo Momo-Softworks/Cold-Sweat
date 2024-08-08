@@ -54,11 +54,13 @@ public class SyncTemperatureMessage implements CustomPacketPayload
 
             if (entity != null)
             {
-                ITemperatureCap cap = EntityTempManager.getTemperatureCap(entity);
-                cap.deserializeTraits(message.traits);
-                if (message.instant && cap instanceof PlayerTempCap)
-                {   Overlays.setBodyTempInstant(cap.getTrait(Temperature.Trait.BODY));
-                }
+                EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
+                {
+                    cap.deserializeTraits(message.traits);
+                    if (message.instant && cap instanceof PlayerTempCap)
+                    {   Overlays.setBodyTempInstant(cap.getTrait(Temperature.Trait.BODY));
+                    }
+                });
             }
         });
     }

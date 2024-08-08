@@ -57,8 +57,8 @@ public class RegisterItemOverrides
                     || (entity.tickCount % 20 == 0 || (entity instanceof Player && entity.tickCount % 2 == 0)) && entity.getPersistentData().getInt("WorldTempTimestamp") != entity.tickCount)
                     {
                         worldTemp = entity instanceof LivingEntity living
-                                ? EntityTempManager.getTemperatureCap(living).getTrait(Temperature.Trait.WORLD)
-                                : Temperature.getTemperatureAt(entity.blockPosition(), entity.level());
+                                    ? EntityTempManager.getTemperatureCap(living).map(cap -> cap.getTrait(Temperature.Trait.WORLD)).orElse(0.0)
+                                    : Temperature.getTemperatureAt(entity.blockPosition(), entity.level());
 
                         entity.getPersistentData().putDouble("WorldTemp", worldTemp);
                         entity.getPersistentData().putInt("WorldTempTimestamp", entity.tickCount);

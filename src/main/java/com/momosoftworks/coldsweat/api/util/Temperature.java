@@ -6,6 +6,7 @@ import com.momosoftworks.coldsweat.api.event.common.TempModifierEvent;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
+import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
 import com.momosoftworks.coldsweat.core.network.message.SyncTempModifiersMessage;
 import com.momosoftworks.coldsweat.core.network.message.SyncTemperatureMessage;
 import com.momosoftworks.coldsweat.util.entity.DummyPlayer;
@@ -70,15 +71,15 @@ public class Temperature
      * Returns the player's temperature of the specified type.
      */
     public static double get(LivingEntity entity, Trait trait)
-    {   return EntityTempManager.getTemperatureCap(entity).getTrait(trait);
+    {   return EntityTempManager.getTemperatureCap(entity).map(cap -> cap.getTrait(trait)).orElse(0.0);
     }
 
     public static void set(LivingEntity entity, Trait trait, double value)
-    {   EntityTempManager.getTemperatureCap(entity).setTrait(trait, value);
+    {   EntityTempManager.getTemperatureCap(entity).ifPresent(cap -> cap.setTrait(trait, value));
     }
 
     public static void add(LivingEntity entity, Trait trait, double value)
-    {   EntityTempManager.getTemperatureCap(entity).setTrait(trait, get(entity, trait) + value);
+    {   EntityTempManager.getTemperatureCap(entity).ifPresent(cap -> cap.setTrait(trait, cap.getTrait(trait) + value));
     }
 
     /**
@@ -139,14 +140,14 @@ public class Temperature
      * @return true if the player has a TempModifier that extends the given class
      */
     public static boolean hasModifier(LivingEntity entity, Trait trait, Class<? extends TempModifier> modClass)
-    {   return EntityTempManager.getTemperatureCap(entity).hasModifier(trait, modClass);
+    {   return EntityTempManager.getTemperatureCap(entity).map(cap -> cap.hasModifier(trait, modClass)).orElse(false);
     }
 
     /**
      * @return The first modifier of the given class that is applied to the player.
      */
     public static <T extends TempModifier> Optional<T> getModifier(LivingEntity entity, Trait trait, Class<T> modClass)
-    {   return getModifier(EntityTempManager.getTemperatureCap(entity), trait, modClass);
+    {   return getModifier(EntityTempManager.getTemperatureCap(entity).orElse(new PlayerTempCap()), trait, modClass);
     }
 
     public static <T extends TempModifier> Optional<T> getModifier(ITemperatureCap cap, Trait trait, Class<T> modClass)
@@ -159,7 +160,7 @@ public class Temperature
     @Nullable
     public static TempModifier getModifier(LivingEntity entity, Trait trait, Predicate<TempModifier> condition)
     {
-        for (TempModifier modifier : EntityTempManager.getTemperatureCap(entity).getModifiers(trait))
+        for (TempModifier modifier : EntityTempManager.getTemperatureCap(entity).orElse(new PlayerTempCap()).getModifiers(trait))
         {
             if (condition.test(modifier))
             {   return modifier;
@@ -229,10 +230,12 @@ public class Temperature
         NeoForge.EVENT_BUS.post(event);
         if (!event.isCanceled())
         {
-            ITemperatureCap cap = EntityTempManager.getTemperatureCap(entity);
-            if (addModifier(cap.getModifiers(trait), event.getModifier(), duplicatePolicy, times, placement))
-            {   updateModifiers(entity, cap);
-            }
+            EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
+            {
+                if (addModifier(cap.getModifiers(trait), event.getModifier(), duplicatePolicy, times, placement))
+                {   updateModifiers(entity, cap);
+                }
+            });
         }
     }
 
@@ -286,11 +289,13 @@ public class Temperature
 
     public static void addModifiers(LivingEntity entity, List<TempModifier> modifiers, Trait trait, Placement.Duplicates duplicatePolicy)
     {
-        ITemperatureCap cap = EntityTempManager.getTemperatureCap(entity);
-        for (TempModifier modifier : modifiers)
-        {   addModifier(entity, modifier, trait, duplicatePolicy);
-        }
-        updateModifiers(entity, cap);
+        EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
+        {
+            for (TempModifier modifier : modifiers)
+            {   addModifier(entity, modifier, trait, duplicatePolicy);
+            }
+            updateModifiers(entity, cap);
+        });
     }
 
     /**
@@ -302,36 +307,38 @@ public class Temperature
      */
     public static void removeModifiers(LivingEntity entity, Trait trait, int maxCount, Placement.Order order, Predicate<TempModifier> condition)
     {
-        ITemperatureCap cap = EntityTempManager.getTemperatureCap(entity);
-        List<TempModifier> modifiers = cap.getModifiers(trait);
-        boolean forwardOrder = order == Placement.Order.FIRST;
-        int removed = 0;
-
-        for (int i = forwardOrder ? 0 : modifiers.size() - 1; i >= 0 && i < modifiers.size(); i += forwardOrder ? 1 : -1)
+        EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
         {
-            if (removed < maxCount)
+            List<TempModifier> modifiers = cap.getModifiers(trait);
+            boolean forwardOrder = order == Placement.Order.FIRST;
+            int removed = 0;
+
+            for (int i = forwardOrder ? 0 : modifiers.size() - 1; i >= 0 && i < modifiers.size(); i += forwardOrder ? 1 : -1)
             {
-                TempModifier modifier = modifiers.get(i);
-                if (condition.test(modifier))
+                if (removed < maxCount)
                 {
-                    TempModifierEvent.Remove event = new TempModifierEvent.Remove(entity, trait, maxCount, modifier);
-                    NeoForge.EVENT_BUS.post(event);
-                    if (!event.isCanceled())
+                    TempModifier modifier = modifiers.get(i);
+                    if (condition.test(modifier))
                     {
-                        removed++;
-                        modifiers.remove(i);
-                        i += forwardOrder ? -1 : 1;
+                        TempModifierEvent.Remove event = new TempModifierEvent.Remove(entity, trait, maxCount, modifier);
+                        NeoForge.EVENT_BUS.post(event);
+                        if (!event.isCanceled())
+                        {
+                            removed++;
+                            modifiers.remove(i);
+                            i += forwardOrder ? -1 : 1;
+                        }
                     }
+
                 }
-
+                else break;
             }
-            else break;
-        }
 
-        // Update modifiers if anything actually changed
-        if (removed > 0)
-        {   updateModifiers(entity, cap);
-        }
+            // Update modifiers if anything actually changed
+            if (removed > 0)
+            {   updateModifiers(entity, cap);
+            }
+        });
     }
 
     public static void removeModifiers(LivingEntity entity, Trait trait, Predicate<TempModifier> condition)
@@ -345,7 +352,7 @@ public class Temperature
      * @return a NEW list of all TempModifiers of the specified type
      */
     public static List<TempModifier> getModifiers(LivingEntity entity, Trait trait)
-    {   return EntityTempManager.getTemperatureCap(entity).getModifiers(trait);
+    {   return EntityTempManager.getTemperatureCap(entity).map(cap -> cap.getModifiers(trait)).orElse(new ArrayList<>());
     }
 
     /**
@@ -355,18 +362,22 @@ public class Temperature
      */
     public static void forEachModifier(LivingEntity entity, Trait trait, Consumer<TempModifier> action)
     {
-        ITemperatureCap cap = EntityTempManager.getTemperatureCap(entity);
-        if (cap.getModifiers(trait) != null)
-        {   cap.getModifiers(trait).forEach(action);
-        }
+        EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
+        {
+            if (cap.getModifiers(trait) != null)
+            {   cap.getModifiers(trait).forEach(action);
+            }
+        });
     }
 
     public static void forEachModifier(LivingEntity entity, Trait trait, BiConsumer<TempModifier, InterruptableStreamer<TempModifier>> action)
     {
-        ITemperatureCap cap = EntityTempManager.getTemperatureCap(entity);
-        if (cap.getModifiers(trait) != null)
-        {   CSMath.breakableForEach(cap.getModifiers(trait), action);
-        }
+        EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
+        {
+            if (cap.getModifiers(trait) != null)
+            {   CSMath.breakableForEach(cap.getModifiers(trait), action);
+            }
+        });
     }
 
     public static void updateTemperature(LivingEntity entity, ITemperatureCap cap, boolean instant)
@@ -384,7 +395,7 @@ public class Temperature
     }
 
     public static Map<Trait, Double> getTemperatures(LivingEntity entity)
-    {   return EntityTempManager.getTemperatureCap(entity).getTraits();
+    {   return EntityTempManager.getTemperatureCap(entity).map(ITemperatureCap::getTraits).orElse(new EnumMap<>(Trait.class));
     }
 
     /**

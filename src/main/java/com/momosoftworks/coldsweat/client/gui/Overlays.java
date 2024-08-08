@@ -263,49 +263,51 @@ public class Overlays
             Player player = Minecraft.getInstance().player;
             if (player != null)
             {
-                ITemperatureCap icap = EntityTempManager.getTemperatureCap(player);
-                if (!(icap instanceof PlayerTempCap cap)) return;
+                EntityTempManager.getTemperatureCap(player).ifPresent(icap ->
+                {
+                    if (!(icap instanceof PlayerTempCap cap)) return;
 
-                cap.calculateHudVisibility(player);
-                ADVANCED_WORLD_TEMP = cap.showAdvancedWorldTemp();
+                    cap.calculateHudVisibility(player);
+                    ADVANCED_WORLD_TEMP = cap.showAdvancedWorldTemp();
 
-                /* World Temp */
+                    /* World Temp */
 
-                // Get temperature in actual degrees
-                boolean celsius = ConfigSettings.CELSIUS.get();
-                double worldTemp = cap.getTrait(Temperature.Trait.WORLD);
-                double realTemp = Temperature.convert(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true);
-                // Calculate the blended world temperature for this tick
-                double diff = realTemp - WORLD_TEMP;
-                PREV_WORLD_TEMP = WORLD_TEMP;
-                WORLD_TEMP += Math.abs(diff) <= 1 ? diff : CSMath.maxAbs(diff / ConfigSettings.TEMP_SMOOTHING.get(), 0.25 * CSMath.sign(diff));
+                    // Get temperature in actual degrees
+                    boolean celsius = ConfigSettings.CELSIUS.get();
+                    double worldTemp = cap.getTrait(Temperature.Trait.WORLD);
+                    double realTemp = Temperature.convert(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true);
+                    // Calculate the blended world temperature for this tick
+                    double diff = realTemp - WORLD_TEMP;
+                    PREV_WORLD_TEMP = WORLD_TEMP;
+                    WORLD_TEMP += Math.abs(diff) <= 1 ? diff : CSMath.maxAbs(diff / ConfigSettings.TEMP_SMOOTHING.get(), 0.25 * CSMath.sign(diff));
 
-                // Update max/min offset
-                MAX_TEMP = cap.getTrait(Temperature.Trait.BURNING_POINT);
-                MIN_TEMP = cap.getTrait(Temperature.Trait.FREEZING_POINT);
+                    // Update max/min offset
+                    MAX_TEMP = cap.getTrait(Temperature.Trait.BURNING_POINT);
+                    MIN_TEMP = cap.getTrait(Temperature.Trait.FREEZING_POINT);
 
 
-                /* Body Temp */
+                    /* Body Temp */
 
-                // Blend body temp (per tick)
-                PREV_BODY_TEMP = BODY_TEMP;
-                double currentTemp = cap.getTrait(Temperature.Trait.BODY);
-                BODY_TEMP = Math.abs(currentTemp - BODY_TEMP) < 0.1 ? currentTemp : BODY_TEMP + (cap.getTrait(Temperature.Trait.BODY) - BODY_TEMP) / 5;
+                    // Blend body temp (per tick)
+                    PREV_BODY_TEMP = BODY_TEMP;
+                    double currentTemp = cap.getTrait(Temperature.Trait.BODY);
+                    BODY_TEMP = Math.abs(currentTemp - BODY_TEMP) < 0.1 ? currentTemp : BODY_TEMP + (cap.getTrait(Temperature.Trait.BODY) - BODY_TEMP) / 5;
 
-                // Handle effects for the icon (bobbing, stage, transition)
-                // Get icon bob
-                ICON_BOB = player.tickCount % 3 == 0 && Math.random() < 0.3 ? 1 : 0;
+                    // Handle effects for the icon (bobbing, stage, transition)
+                    // Get icon bob
+                    ICON_BOB = player.tickCount % 3 == 0 && Math.random() < 0.3 ? 1 : 0;
 
-                // Get the severity of the player's body temperature
-                BODY_TEMP_SEVERITY = getBodySeverity(BLEND_BODY_TEMP);
+                    // Get the severity of the player's body temperature
+                    BODY_TEMP_SEVERITY = getBodySeverity(BLEND_BODY_TEMP);
 
-                // Get the icon to be displayed
-                int neededIcon = ((int) CSMath.clamp(BODY_TEMP_SEVERITY, -4, 4));
+                    // Get the icon to be displayed
+                    int neededIcon = ((int) CSMath.clamp(BODY_TEMP_SEVERITY, -4, 4));
 
-                // Start transition
-                if (BODY_ICON != neededIcon)
-                {   BODY_ICON = neededIcon;
-                }
+                    // Start transition
+                    if (BODY_ICON != neededIcon)
+                    {   BODY_ICON = neededIcon;
+                    }
+                });
             }
         }
     }

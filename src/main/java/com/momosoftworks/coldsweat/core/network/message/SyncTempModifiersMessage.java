@@ -51,7 +51,9 @@ public class SyncTempModifiersMessage implements CustomPacketPayload
 
             if (entity instanceof LivingEntity living)
             {
-                EntityTempManager.getTemperatureCap(living).deserializeModifiers(message.modifiers);
+                EntityTempManager.getTemperatureCap(living).ifPresent(cap ->
+                {   cap.deserializeModifiers(message.modifiers);
+                });
             }
         });
     }
