@@ -7,11 +7,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 
+import java.util.Locale;
+
 public class AttributeCodecs
 {
     public static Codec<AttributeModifier.Operation> OPERATION_CODEC = Codec.STRING.xmap(
-            string -> AttributeModifier.Operation.valueOf(string.toUpperCase()),
-            operation -> operation.name().toLowerCase()
+            string -> AttributeModifier.Operation.valueOf(string.toUpperCase(Locale.ROOT)),
+            operation -> operation.name().toLowerCase(Locale.ROOT)
     );
 
     public static Codec<AttributeModifier> MODIFIER_CODEC = RecordCodecBuilder.create(
