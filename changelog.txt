@@ -2197,3 +2197,96 @@ Fixes:
 - Fixed player temperature not updating after joining a world or dying in some cases
 - Fixed missing subtitles for hearth-like blocks running out of fuel
 - Fixed missing subtitles for filling/emptying a waterskin
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.3-b04e
+
+Fixes:
+- Fixed the mod failing to load due to duplicate sound registries
+- Fixed redundant attribute modifier queries on the player's armor causing unnecessary performance impact
+- Fixed chameleons being added to biomes that should instead spawn goats or llamas
+
+Technical Changes:
+- Config settings can now be declared to require a RegistryAccess when saving/loading (see ConfigSetings.java)
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.3-b04f
+- Due to many configs requiring access to world registries, the Cold Sweat config button is now disabled in the main menu
+
+Fixes:
+- Fixed crash due to missing library
+- Fixed crash when saving config settings in-game
+- Fixed the Temperature-Affecting Foods config for soulsprouts not specifying a duration
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.3-b04f.1 (1.21)
+
+Fixes:
+- Fixed all loot from all sources yielding piglin barter loot
+- Fixed recipes not working & made them more compatible with modded items
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.3-b04g
+- Reduced the food value of soul sprouts to 3 (from 4), and the saturation to 0.5 (from 1)
+- Significantly reduced the drop rate of sticks from soul stalk blocks
+- Shift-clicking an armor item from the output slot of the sewing table now applies all available insulation at once
+
+Fixes:
+- Fixed adaptive insulation not displaying adaptation state on the client
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.3-b05a
+* New (experimental?) ice changes:
+      * The hearth & icebox now no longer accept water by default
+            - Now, the primary cold fuel source is ice
+      * Ice is now much easier to obtain/farm, due to a few key changes:
+            - Ice now freezes/thaws according to Cold Sweat's temperature system
+            - This new system takes altitude, time, and the season into account
+            - Ice freezes at roughly 32 °F (0 °C)
+            - Ice can now be obtained with a stone pickaxe without silk touch
+                  - An iron pickaxe is required for packed ice and blue ice
+                  - If ice is mined with a wooden pickaxe or by hand, it will turn into water as normal
+            - Packed and Blue ice can now be un-crafted into their "lower-level" variants (i.e. blue ice yields packed ice) in the crafting table or stonecutter
+                  - The crafting table yields 4 ice blocks, while the stonecutter yields 9
+* The set bonus for Three-Bolt armor from Aquamirae now provides some freezing protection, as well as water immunity
+* Added support for Spoiled:
+      - Placing food items in the icebox will stop food spoilage as long as it is fueled
+      - This will gradually drain fuel from the icebox
+- The hearth's texture has been reverted to its pre-2.3 version (doesn't it look so friendly?)
+- The hearth's recipe has been tweaked to require less nether bricks, and soul sand instead of basalt
+
+Fixes:
+* Fixed block temperatures multiplying in effectiveness every time the player logs in/out of a world
+* Fixed the smithing table clearing insulation when upgrading diamond armor to netherite
+* Fixed the recipe for ice resistance potion not appearing in JEI
+* Fixed players' settings for hearth particle visibility not being saved when changing dimensions or re-logging
+* Fixed the "Temperature Offset" config not allowing negative numbers
+- Fixed chameleons being marked as un-breedable after being fed a breeding item, even if they didn't actually create a baby
+- Fixed the player being able to attack a chameleon mounted on their head in some cases
+- Fixed item IDs not being parsed properly in JSON configs
+- Fixed nether portals sometimes making the area colder than it should be in the Nether
+- Fixed the insulation tooltip showing before the item's name if the tooltip is only 1 line long and Iceberg is installed
+- Fixed occasional desync between server and client when a player puts on or takes off a chameleon
+
+Technical Changes:
+* Any field in a JSON config that accepts a registry ID, or list of IDs, such as structures, biomes, blocks, etc. can now accept tags
+      - Tags and IDs can essentially be used interchangeably, with tags being prefixed with a '#' symbol
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.3-b05a.1
+
+Fixes:
+- Fixed issues with mixin conflicts & mixins not properly loading in some cases
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.3-b05a.2
+
+Fixes:
+- Fixed crash when calculating the player's armor insulation in some cases
