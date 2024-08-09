@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.api.util;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.api.event.core.GatherDefaultTempModifiersEvent;
 import com.momosoftworks.coldsweat.api.event.common.TempModifierEvent;
@@ -351,10 +352,10 @@ public class Temperature
      * Gets all TempModifiers of the specified type on the player
      * @param entity is the entity being sampled
      * @param trait determines which TempModifier list to pull from
-     * @return a NEW list of all TempModifiers of the specified type
+     * @return an immutable list of all TempModifiers for the specified trait
      */
     public static List<TempModifier> getModifiers(LivingEntity entity, Trait trait)
-    {   return EntityTempManager.getTemperatureCap(entity).map(cap -> cap.getModifiers(trait)).orElse(List.of());
+    {   return EntityTempManager.getTemperatureCap(entity).map(cap -> ImmutableList.copyOf(cap.getModifiers(trait))).orElse(ImmutableList.of());
     }
 
     /**
