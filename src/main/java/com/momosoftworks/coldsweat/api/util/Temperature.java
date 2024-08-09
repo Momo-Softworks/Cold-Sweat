@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.api.util;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.api.event.core.GatherDefaultTempModifiersEvent;
 import com.momosoftworks.coldsweat.api.event.common.TempModifierEvent;
@@ -351,10 +352,10 @@ public class Temperature
      * Gets all TempModifiers of the specified type on the player
      * @param entity is the entity being sampled
      * @param trait determines which TempModifier list to pull from
-     * @return a NEW list of all TempModifiers of the specified type
+     * @return an immutable list of all TempModifiers for the specified trait
      */
     public static List<TempModifier> getModifiers(LivingEntity entity, Trait trait)
-    {   return EntityTempManager.getTemperatureCap(entity).map(cap -> cap.getModifiers(trait)).orElse(List.of());
+    {   return EntityTempManager.getTemperatureCap(entity).map(cap -> ImmutableList.copyOf(cap.getModifiers(trait))).orElse(ImmutableList.of());
     }
 
     /**
@@ -413,13 +414,13 @@ public class Temperature
      * These are used to get temperature stored on the player and/or to apply modifiers to it. <br>
      * <br>
      * {@link #WORLD}: The temperature of the area around the player. Should ONLY be changed by TempModifiers. <br>
-     * <br>
      * {@link #CORE}: The core temperature of the player (This is what "body" temperature typically refers to). <br>
      * {@link #BASE}: A static offset applied to the player's core temperature. <br>
      * {@link #BODY}: The sum of the player's core and base temperatures. (CANNOT be set) <br>
      * {@link #RATE}: Only used by TempModifiers. Affects the rate at which the player's body temperature changes. <br>
-     * {@link #FREEZING_POINT}: An offset to the max temperature threshold, after which a player's body temperature starts rising. <br>
-     * {@link #BURNING_POINT}: An offset to the min temperature threshold, after which a player's body temperature starts falling. <br>
+     * <br>
+     * {@link #FREEZING_POINT}: The minimum temperature threshold, below which an entity starts freezing. <br>
+     * {@link #BURNING_POINT}: The maximum temperature threshold, above which an entity starts overheating. <br>
      * {@link #COLD_RESISTANCE}: Resistance to cold temperature-related damage. <br>
      * {@link #HEAT_RESISTANCE}: Resistance to heat temperature-related damage. <br>
      * {@link #COLD_DAMPENING}: Changes the rate of body temperature increase. <br>
