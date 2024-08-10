@@ -5,6 +5,7 @@ import com.momosoftworks.coldsweat.core.init.ModAttributes;
 import com.momosoftworks.coldsweat.core.init.ModEntities;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModLoader;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -41,7 +42,7 @@ public class AddTempAttributes
     /**
      * Enable temperature handling for chameleons
      */
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onEnableTemperatureEvent(EnableTemperatureEvent event)
     {
         if (event.getEntityType() == ModEntities.CHAMELEON.value())

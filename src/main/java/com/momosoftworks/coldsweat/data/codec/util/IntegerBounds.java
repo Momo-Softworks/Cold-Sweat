@@ -6,7 +6,7 @@ import net.minecraft.nbt.CompoundTag;
 
 import java.util.Objects;
 
-public record IntegerBounds(Integer min, Integer max)
+public record IntegerBounds(int min, int max)
 {
     public static final Codec<IntegerBounds> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.INT.optionalFieldOf("min", -Integer.MAX_VALUE).forGetter(bounds -> bounds.min),
