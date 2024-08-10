@@ -260,6 +260,20 @@ public class CSMath
         return (blendTo - blendFrom) / (float) Math.sqrt(rangeMax - rangeMin) * (float) Math.sqrt(factor - rangeMin) + blendFrom;
     }
 
+    public static double blendExp(double blendFrom, double blendTo, double factor, double rangeMin, double rangeMax)
+    {
+        if (factor <= rangeMin) return blendFrom;
+        if (factor >= rangeMax) return blendTo;
+        return (blendTo - blendFrom) / (rangeMax - rangeMin) * Math.exp(factor - rangeMin) + blendFrom;
+    }
+
+    public static float blendExp(float blendFrom, float blendTo, float factor, float rangeMin, float rangeMax)
+    {
+        if (factor <= rangeMin) return blendFrom;
+        if (factor >= rangeMax) return blendTo;
+        return (blendTo - blendFrom) / (rangeMax - rangeMin) * (float) Math.exp(factor - rangeMin) + blendFrom;
+    }
+
     /**
      * Gets the average of two numbers contained within a {@link Pair}.
      */

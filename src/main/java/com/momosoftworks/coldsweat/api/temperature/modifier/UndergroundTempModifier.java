@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.api.temperature.modifier;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.data.codec.configuration.DepthTempData;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.entity.LivingEntity;
@@ -10,8 +11,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 
 public class UndergroundTempModifier extends TempModifier
@@ -26,19 +26,43 @@ public class UndergroundTempModifier extends TempModifier
         World level = entity.level;
 
         // Depth, Weight
-        List<Pair<Double, Double>> depthTable = new ArrayList<>();
+        List<Pair<BlockPos, Double>> depthTable = new ArrayList<>();
 
         for (BlockPos pos : WorldHelper.getPositionGrid(entity.blockPosition(), 5, 10))
-        {   depthTable.add(Pair.of(Math.max(0d, WorldHelper.getHeight(pos, level) - playerPos.getY()),
-                                   Math.sqrt(pos.distSqr(playerPos))));
+        {   depthTable.add(Pair.of(pos, Math.sqrt(pos.distSqr(playerPos))));
         }
-        if (depthTable.isEmpty()) return temp -> temp;
+        if (depthTable.isEmpty())
+        {   return temp -> temp;
+        }
 
-        double depth = CSMath.blend(0, CSMath.weightedAverage(depthTable), ConfigSettings.CAVE_INSULATION.get(), 0, 1);
+        int skylight = entity.level.getBrightness(LightType.SKY, entity.blockPosition());
+
         return temp ->
         {
-            return CSMath.weightedAverage(CSMath.blend(midTemp, temp, entity.level.getBrightness(LightType.SKY, entity.blockPosition()), 0, 15),
-                                          CSMath.blend(temp, midTemp, depth, 4, 20), 1, 2);
+            List<Pair<Double, Double>> depthTemps = new ArrayList<>();
+
+            for (Pair<BlockPos, Double> pair : depthTable)
+            {
+                BlockPos.Mutable pos = pair.getFirst().mutable();
+                double distance = pair.getSecond();
+
+                // Fudge the height of the position to be influenced by skylight
+                pos.move(0, skylight - 4, 0);
+                // Get the depth region for this position
+                Optional<DepthTempData> depthData = ConfigSettings.DEPTH_REGIONS.get().stream().filter(d -> d.withinBounds(level, pos)).findFirst();
+                if (depthData.isPresent())
+                {
+                    // Get the temperature and weight of this depth region
+                    double depthTemp = depthData.get().getTemperature(temp, pos, level);
+                    double weight = 1 / (distance + 1);
+                    // Add the weighted temperature to the list
+                    depthTemps.add(new Pair<>(depthTemp, weight));
+                }
+            }
+            // Calculate the weighted average of the depth temperatures
+            double weightedDepthTemp = CSMath.weightedAverage(depthTemps);
+            // Weigh the depth temperature against the number of underground biomes with temperature
+            return CSMath.blend(temp, weightedDepthTemp, ConfigSettings.CAVE_INSULATION.get(), 0, 1);
         };
     }
 }

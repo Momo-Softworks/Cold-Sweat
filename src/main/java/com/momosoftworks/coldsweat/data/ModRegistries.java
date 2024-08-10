@@ -33,6 +33,7 @@ public class ModRegistries
     public static CodecRegistry<BiomeTempData> BIOME_TEMP_DATA = new ModRegistries.CodecRegistry<>(new ResourceLocation(ColdSweat.MOD_ID, "world/biome_temp"), BiomeTempData.CODEC);
     public static CodecRegistry<DimensionTempData> DIMENSION_TEMP_DATA = new ModRegistries.CodecRegistry<>(new ResourceLocation(ColdSweat.MOD_ID, "world/dimension_temp"), DimensionTempData.CODEC);
     public static CodecRegistry<StructureTempData> STRUCTURE_TEMP_DATA = new ModRegistries.CodecRegistry<>(new ResourceLocation(ColdSweat.MOD_ID, "world/structure_temp"), StructureTempData.CODEC);
+    public static CodecRegistry<DepthTempData> DEPTH_TEMP_DATA = new ModRegistries.CodecRegistry<>(new ResourceLocation(ColdSweat.MOD_ID, "world/depth_temp"), DepthTempData.CODEC);
 
     // Entity Registries
     public static CodecRegistry<MountData> MOUNT_DATA = new ModRegistries.CodecRegistry<>(new ResourceLocation(ColdSweat.MOD_ID, "entity/mount"), MountData.CODEC);
@@ -47,6 +48,7 @@ public class ModRegistries
                              BIOME_TEMP_DATA,
                              DIMENSION_TEMP_DATA,
                              STRUCTURE_TEMP_DATA,
+                             DEPTH_TEMP_DATA,
                              MOUNT_DATA,
                              ENTITY_SPAWN_BIOME_DATA);
     }

@@ -116,6 +116,7 @@ public class ConfigRegistryHandler
         Set<BiomeTempData> biomeTemps = new HashSet<>(ModRegistries.BIOME_TEMP_DATA.getValues());
         Set<DimensionTempData> dimensionTemps = new HashSet<>(ModRegistries.DIMENSION_TEMP_DATA.getValues());
         Set<StructureTempData> structureTemps = new HashSet<>(ModRegistries.STRUCTURE_TEMP_DATA.getValues());
+        Set<DepthTempData> depthTemps = new HashSet<>(ModRegistries.DEPTH_TEMP_DATA.getValues());
 
         Set<MountData> mounts = new HashSet<>(ModRegistries.MOUNT_DATA.getValues());
         Set<SpawnBiomeData> spawnBiomes = new HashSet<>(ModRegistries.ENTITY_SPAWN_BIOME_DATA.getValues());
@@ -131,6 +132,7 @@ public class ConfigRegistryHandler
         biomeTemps.addAll(parseConfigData(ModRegistries.BIOME_TEMP_DATA, BiomeTempData.CODEC));
         dimensionTemps.addAll(parseConfigData(ModRegistries.DIMENSION_TEMP_DATA, DimensionTempData.CODEC));
         structureTemps.addAll(parseConfigData(ModRegistries.STRUCTURE_TEMP_DATA, StructureTempData.CODEC));
+        depthTemps.addAll(parseConfigData(ModRegistries.DEPTH_TEMP_DATA, DepthTempData.CODEC));
 
         mounts.addAll(parseConfigData(ModRegistries.MOUNT_DATA, MountData.CODEC));
         spawnBiomes.addAll(parseConfigData(ModRegistries.ENTITY_SPAWN_BIOME_DATA, SpawnBiomeData.CODEC));
@@ -160,6 +162,9 @@ public class ConfigRegistryHandler
         // structure temperatures
         addStructureTempConfigs(structureTemps, registries);
         logRegistryLoaded(String.format("Loaded %s structure temperatures", structureTemps.size()), structureTemps);
+        // depth temperatures
+        addDepthTempConfigs(depthTemps);
+        logRegistryLoaded(String.format("Loaded %s depth temperatures", depthTemps.size()), depthTemps);
 
         // mounts
         addMountConfigs(mounts);
@@ -449,6 +454,17 @@ public class ConfigRegistryHandler
                 }
             }
         });
+    }
+
+    private static void addDepthTempConfigs(Set<DepthTempData> depthTemps)
+    {
+        if (!depthTemps.isEmpty())
+        {
+            DepthTempData defaultData = ConfigSettings.DEPTH_REGIONS.get().get(0);
+            ConfigSettings.DEPTH_REGIONS.get().clear();
+            ConfigSettings.DEPTH_REGIONS.get().addAll(depthTemps.stream().collect(Collectors.toList()));
+            ConfigSettings.DEPTH_REGIONS.get().add(defaultData);
+        }
     }
 
     private static void addMountConfigs(Set<MountData> mounts)
