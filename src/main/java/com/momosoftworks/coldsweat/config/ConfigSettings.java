@@ -13,7 +13,9 @@ import com.momosoftworks.coldsweat.config.type.InsulatingMount;
 import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.config.type.PredicateItem;
 import com.momosoftworks.coldsweat.core.init.ModEntities;
+import com.momosoftworks.coldsweat.data.codec.configuration.DepthTempData;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemComponentsRequirement;
+import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.util.serialization.*;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
@@ -81,6 +83,7 @@ public class ConfigSettings
     public static final DynamicHolder<Map<StructureType<?>, Pair<Double, Temperature.Units>>> STRUCTURE_TEMPS;
     public static final DynamicHolder<Map<StructureType<?>, Pair<Double, Temperature.Units>>> STRUCTURE_OFFSETS;
     public static final DynamicHolder<Double> CAVE_INSULATION;
+    public static final DynamicHolder<List<DepthTempData>> DEPTH_REGIONS;
     public static final DynamicHolder<Double[]> SUMMER_TEMPS;
     public static final DynamicHolder<Double[]> AUTUMN_TEMPS;
     public static final DynamicHolder<Double[]> WINTER_TEMPS;
@@ -343,10 +346,40 @@ public class ConfigSettings
                                                      .filter(Objects::nonNull)
                                                      .collect(Collectors.toList())));
 
-        CAVE_INSULATION = addSyncedSetting("cave_insulation", () -> WorldSettingsConfig.getInstance().getCaveInsulation(),
-                                           (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "CaveInsulation"),
-                                           (decoder) -> decoder.getDouble("CaveInsulation"),
-                                           (saver) -> WorldSettingsConfig.getInstance().setCaveInsulation(saver));
+        CAVE_INSULATION = addSetting("cave_insulation", () -> WorldSettingsConfig.getInstance().getCaveInsulation());
+
+        DEPTH_REGIONS = addSetting("depth_regions", () ->
+        {
+            DepthTempData def = new DepthTempData(List.of(new DepthTempData.TempRegion(DepthTempData.RampType.CONSTANT,
+                                                                                       new DepthTempData.VerticalBound(DepthTempData.VerticalAnchor.WORLD_TOP,
+                                                                                                                       0,
+                                                                                                                       Temperature.Units.MC,
+                                                                                                                       DepthTempData.VerticalBound.DEFAULT_PASSTHROUGH),
+                                                                                       new DepthTempData.VerticalBound(DepthTempData.VerticalAnchor.GROUND_LEVEL,
+                                                                                                                       -5,
+                                                                                                                       Temperature.Units.MC,
+                                                                                                                       DepthTempData.VerticalBound.DEFAULT_PASSTHROUGH)),
+                                                          new DepthTempData.TempRegion(DepthTempData.RampType.LINEAR,
+                                                                                       new DepthTempData.VerticalBound(DepthTempData.VerticalAnchor.GROUND_LEVEL,
+                                                                                                                       -5,
+                                                                                                                       Temperature.Units.MC,
+                                                                                                                       DepthTempData.VerticalBound.DEFAULT_PASSTHROUGH),
+                                                                                       new DepthTempData.VerticalBound(DepthTempData.VerticalAnchor.GROUND_LEVEL,
+                                                                                                                       -20,
+                                                                                                                       Temperature.Units.MC,
+                                                                                                                       new DepthTempData.VerticalBound.TempContainer(0, DepthTempData.VerticalBound.ContainerType.MIDPOINT,
+                                                                                                                                                                     CAVE_INSULATION.get()))),
+                                                          new DepthTempData.TempRegion(DepthTempData.RampType.CONSTANT,
+                                                                                       new DepthTempData.VerticalBound(DepthTempData.VerticalAnchor.GROUND_LEVEL,
+                                                                                                                       -20,
+                                                                                                                       Temperature.Units.MC,
+                                                                                                                       DepthTempData.VerticalBound.DEFAULT_MIDPOINT),
+                                                                                       new DepthTempData.VerticalBound(DepthTempData.VerticalAnchor.WORLD_BOTTOM,
+                                                                                                                       0,
+                                                                                                                       Temperature.Units.MC,
+                                                                                                                       DepthTempData.VerticalBound.DEFAULT_MIDPOINT))));
+            return new ArrayList<>(List.of(def));
+        });
 
         BiFunction<Item, List<?>, PredicateItem> fuelMapper = (item, args) ->
         {
