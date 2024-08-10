@@ -8,8 +8,8 @@ import java.util.Objects;
 
 public class IntegerBounds
 {
-    public Integer min;
-    public Integer max;
+    public int min;
+    public int max;
     
     public IntegerBounds(Integer min, Integer max)
     {   this.min = min;
