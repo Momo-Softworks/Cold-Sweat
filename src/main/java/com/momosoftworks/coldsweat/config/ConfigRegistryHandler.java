@@ -119,6 +119,7 @@ public class ConfigRegistryHandler
         Set<Holder<BiomeTempData>> biomeTemps = registries.registryOrThrow(ModRegistries.BIOME_TEMP_DATA).holders().collect(Collectors.toSet());
         Set<Holder<DimensionTempData>> dimensionTemps = registries.registryOrThrow(ModRegistries.DIMENSION_TEMP_DATA).holders().collect(Collectors.toSet());
         Set<Holder<StructureTempData>> structureTemps = registries.registryOrThrow(ModRegistries.STRUCTURE_TEMP_DATA).holders().collect(Collectors.toSet());
+        Set<Holder<DepthTempData>> depthTemps = registries.registryOrThrow(ModRegistries.DEPTH_TEMP_DATA).holders().collect(Collectors.toSet());
 
         Set<Holder<MountData>> mounts = registries.registryOrThrow(ModRegistries.MOUNT_DATA).holders().collect(Collectors.toSet());
         Set<Holder<SpawnBiomeData>> spawnBiomes = registries.registryOrThrow(ModRegistries.ENTITY_SPAWN_BIOME_DATA).holders().collect(Collectors.toSet());
@@ -134,6 +135,7 @@ public class ConfigRegistryHandler
         biomeTemps.addAll(parseConfigData(ModRegistries.BIOME_TEMP_DATA, BiomeTempData.CODEC));
         dimensionTemps.addAll(parseConfigData(ModRegistries.DIMENSION_TEMP_DATA, DimensionTempData.CODEC));
         structureTemps.addAll(parseConfigData(ModRegistries.STRUCTURE_TEMP_DATA, StructureTempData.CODEC));
+        depthTemps.addAll(parseConfigData(ModRegistries.DEPTH_TEMP_DATA, DepthTempData.CODEC));
 
         mounts.addAll(parseConfigData(ModRegistries.MOUNT_DATA, MountData.CODEC));
         spawnBiomes.addAll(parseConfigData(ModRegistries.ENTITY_SPAWN_BIOME_DATA, SpawnBiomeData.CODEC));
@@ -163,6 +165,9 @@ public class ConfigRegistryHandler
         // structure temperatures
         addStructureTempConfigs(structureTemps, registries);
         logRegistryLoaded(String.format("Loaded %s structure temperatures", structureTemps.size()), structureTemps);
+        // depth temperatures
+        addDepthTempConfigs(depthTemps);
+        logRegistryLoaded(String.format("Loaded %s depth temperatures", depthTemps.size()), depthTemps);
 
         // mounts
         addMountConfigs(mounts);
@@ -464,6 +469,17 @@ public class ConfigRegistryHandler
                 }
             }
         });
+    }
+
+    private static void addDepthTempConfigs(Set<Holder<DepthTempData>> depthTemps)
+    {
+        if (!depthTemps.isEmpty())
+        {
+            DepthTempData defaultData = ConfigSettings.DEPTH_REGIONS.get().get(0);
+            ConfigSettings.DEPTH_REGIONS.get().clear();
+            ConfigSettings.DEPTH_REGIONS.get().addAll(depthTemps.stream().map(Holder::value).toList());
+            ConfigSettings.DEPTH_REGIONS.get().add(defaultData);
+        }
     }
 
     private static void addMountConfigs(Set<Holder<MountData>> mounts)
