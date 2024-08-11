@@ -24,16 +24,26 @@ public record DepthTempData(List<TempRegion> temperatures) implements IForgeRegi
     ).apply(instance, DepthTempData::new));
 
     public boolean withinBounds(Level level, BlockPos pos)
-    {   return temperatures.stream().anyMatch(region -> region.withinBounds(level, pos));
+    {
+        for (TempRegion region : temperatures)
+        {
+            if (region.withinBounds(level, pos))
+            {   return true;
+            }
+        }
+        return false;
     }
 
-    public double getTemperature(double temperature, BlockPos pos, Level level)
+    @Nullable
+    public Double getTemperature(double temperature, BlockPos pos, Level level)
     {
-        return temperatures.stream()
-                           .filter(region -> region.withinBounds(level, pos))
-                           .findFirst()
-                           .map(region -> region.getTemperature(temperature, pos, level))
-                           .orElse(temperature);
+        for (TempRegion region : temperatures)
+        {
+            if (region.withinBounds(level, pos))
+            {   return region.getTemperature(temperature, pos, level);
+            }
+        }
+        return null;
     }
 
     public record TempRegion(RampType rampType, VerticalBound top, VerticalBound bottom)
