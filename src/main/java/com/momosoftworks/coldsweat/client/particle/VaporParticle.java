@@ -29,7 +29,7 @@ public class VaporParticle extends TextureSheetParticle
         super(world, x, y, z);
         this.ageSprite = spriteSet;
         this.alpha = 0.0f;
-        this.maxAlpha = (float) (Math.random() / 3 + 0.2f);
+        this.maxAlpha = (float) (Math.random() / 3 + 0.5f);
         this.scale(3f + (float) (Math.random() / 2.5f));
         this.setSize(quadSize / 10f, quadSize / 10f);
         this.lifetime = 40 + (int) (Math.random() * 20 - 10);
@@ -87,9 +87,8 @@ public class VaporParticle extends TextureSheetParticle
             if (this.alpha < 0.035 && this.age > 10)
                 this.remove();
         }
-        else
+        else if (type == VaporType.MIST || type == VaporType.STEAM)
         {
-            if (type == VaporType.MIST)
             if (this.alpha < maxAlpha)
                 this.alpha += maxAlpha / 20;
             else if (this.age > maxAlpha / (maxAlpha / 20))
