@@ -6,10 +6,8 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.DepthTempData;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
@@ -17,7 +15,8 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraftforge.common.Tags;
 import oshi.util.tuples.Triplet;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 
 public class UndergroundTempModifier extends TempModifier
@@ -33,7 +32,7 @@ public class UndergroundTempModifier extends TempModifier
         List<Pair<BlockPos, Double>> depthTable = new ArrayList<>();
 
         // Collect a list of depths taken at regular intervals around the entity, and their distances from the player
-        for (BlockPos pos : WorldHelper.getPositionGrid(entity.blockPosition(), 64, 10))
+        for (BlockPos pos : WorldHelper.getPositionGrid(entity.blockPosition(), 49, 10))
         {
             if (!level.isInWorldBounds(pos))
             {   continue;
@@ -90,21 +89,21 @@ public class UndergroundTempModifier extends TempModifier
                 // Fudge the height of the position to be influenced by skylight
                 pos.move(0, skylight - 4, 0);
                 // Get the depth region for this position
-                Optional<DepthTempData> depthData = ConfigSettings.DEPTH_REGIONS.get().stream().filter(d -> d.withinBounds(level, pos)).findFirst();
-                if (depthData.isPresent())
+                Double depthTemp = null;
+                for (DepthTempData tempData : ConfigSettings.DEPTH_REGIONS.get())
                 {
-                    // Get the temperature and weight of this depth region
-                    double depthTemp = depthData.get().getTemperature(temp, pos, level);
-                    double weight = 1 / (distance + 1);
-                    // Add the weighted temperature to the list
-                    depthTemps.add(new Pair<>(depthTemp, weight));
+                    if ((depthTemp = tempData.getTemperature(temp, pos, level)) != null)
+                    {   break;
+                    }
                 }
+                if (depthTemp == null) continue;
+                double weight = 1 / (distance + 1);
+                // Add the weighted temperature to the list
+                depthTemps.add(new Pair<>(depthTemp, weight));
             }
             // Calculate the weighted average of the depth temperatures
             double weightedDepthTemp = CSMath.weightedAverage(depthTemps);
 
-            if (Minecraft.getInstance().player != null && !Minecraft.getInstance().player.level().isClientSide)
-                Minecraft.getInstance().player.displayClientMessage(Component.literal(CSMath.blend(weightedDepthTemp, biomeTempAvg, finalCaveBiomeCount, 0, depthTable.size())+""), true);
             // Weigh the depth temperature against the number of underground biomes with temperature
             return CSMath.blend(weightedDepthTemp, biomeTempAvg, finalCaveBiomeCount, 0, depthTable.size());
         };
