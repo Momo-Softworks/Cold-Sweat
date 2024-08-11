@@ -6,12 +6,14 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.core.init.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModDamageSources;
 import dev.ghen.thirst.api.ThirstHelper;
 import dev.ghen.thirst.content.purity.ContainerWithPurity;
 import dev.ghen.thirst.content.purity.WaterPurity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.FormattedText;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -416,6 +418,12 @@ public class CompatManager
                     }
                 }.registerDrinks();
             }
+            // TODO: Implement when Create is updated
+            /*if (isCreateLoaded())
+            {
+                ColdSweatDisplayBehaviors.THERMOLITH = AllDisplayBehaviours.register(new ResourceLocation(ColdSweat.MOD_ID, "thermolith"), new ColdSweatDisplayBehaviors.Thermolith());
+                AllDisplayBehaviours.assignBlock(ColdSweatDisplayBehaviors.THERMOLITH, ModBlocks.THERMOLITH);
+            }*/
         }
     }
 }
