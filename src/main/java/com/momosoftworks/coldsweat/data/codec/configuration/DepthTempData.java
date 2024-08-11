@@ -30,16 +30,25 @@ public class DepthTempData implements IForgeRegistryEntry<DepthTempData>
     }
 
     public boolean withinBounds(World level, BlockPos pos)
-    {   return temperatures.stream().anyMatch(region -> region.withinBounds(level, pos));
+    {
+        for (TempRegion region : temperatures)
+        {
+            if (region.withinBounds(level, pos))
+            {   return true;
+            }
+        }
+        return false;
     }
 
-    public double getTemperature(double temperature, BlockPos pos, World level)
+    public Double getTemperature(double temperature, BlockPos pos, World level)
     {
-        return temperatures.stream()
-                           .filter(region -> region.withinBounds(level, pos))
-                           .findFirst()
-                           .map(region -> region.getTemperature(temperature, pos, level))
-                           .orElse(temperature);
+        for (TempRegion region : temperatures)
+        {
+            if (region.withinBounds(level, pos))
+            {   return region.getTemperature(temperature, pos, level);
+            }
+        }
+        return null;
     }
 
     public static class TempRegion

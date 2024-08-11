@@ -11,7 +11,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 
 public class UndergroundTempModifier extends TempModifier
@@ -28,8 +29,13 @@ public class UndergroundTempModifier extends TempModifier
         // Depth, Weight
         List<Pair<BlockPos, Double>> depthTable = new ArrayList<>();
 
-        for (BlockPos pos : WorldHelper.getPositionGrid(entity.blockPosition(), 5, 10))
-        {   depthTable.add(Pair.of(pos, Math.sqrt(pos.distSqr(playerPos))));
+        // Collect a list of depths taken at regular intervals around the entity, and their distances from the player
+        for (BlockPos pos : WorldHelper.getPositionGrid(entity.blockPosition(), 49, 10))
+        {
+            if (!level.isInWorldBounds(pos))
+            {   continue;
+            }
+            depthTable.add(Pair.of(pos, Math.sqrt(pos.distSqr(playerPos))));
         }
         if (depthTable.isEmpty())
         {   return temp -> temp;
@@ -49,18 +55,21 @@ public class UndergroundTempModifier extends TempModifier
                 // Fudge the height of the position to be influenced by skylight
                 pos.move(0, skylight - 4, 0);
                 // Get the depth region for this position
-                Optional<DepthTempData> depthData = ConfigSettings.DEPTH_REGIONS.get().stream().filter(d -> d.withinBounds(level, pos)).findFirst();
-                if (depthData.isPresent())
+                Double depthTemp = null;
+                for (DepthTempData tempData : ConfigSettings.DEPTH_REGIONS.get())
                 {
-                    // Get the temperature and weight of this depth region
-                    double depthTemp = depthData.get().getTemperature(temp, pos, level);
-                    double weight = 1 / (distance + 1);
-                    // Add the weighted temperature to the list
-                    depthTemps.add(new Pair<>(depthTemp, weight));
+                    if ((depthTemp = tempData.getTemperature(temp, pos, level)) != null)
+                    {   break;
+                    }
                 }
+                if (depthTemp == null) continue;
+                double weight = 1 / (distance + 1);
+                // Add the weighted temperature to the list
+                depthTemps.add(new Pair<>(depthTemp, weight));
             }
             // Calculate the weighted average of the depth temperatures
             double weightedDepthTemp = CSMath.weightedAverage(depthTemps);
+
             // Weigh the depth temperature against the number of underground biomes with temperature
             return CSMath.blend(temp, weightedDepthTemp, ConfigSettings.CAVE_INSULATION.get(), 0, 1);
         };
