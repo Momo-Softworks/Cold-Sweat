@@ -4,6 +4,7 @@ import com.momosoftworks.coldsweat.common.blockentity.BoilerBlockEntity;
 import com.momosoftworks.coldsweat.core.init.BlockEntityInit;
 import com.momosoftworks.coldsweat.util.registries.ModBlockEntities;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
+import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -12,6 +13,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.InventoryHelper;
+import net.minecraft.inventory.container.Container;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -27,6 +29,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
+import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -179,5 +182,28 @@ public class BoilerBlock extends Block
     @Override
     public TileEntity createTileEntity(BlockState state, IBlockReader world)
     {   return BlockEntityInit.BOILER_BLOCK_ENTITY_TYPE.get().create();
+    }
+
+    @Override
+    public boolean canConnectRedstone(BlockState state, IBlockReader level, BlockPos pos, Direction direction)
+    {
+        return direction.getAxis() != Direction.Axis.Y
+            && direction != state.getValue(FACING).getOpposite()
+            && level.getBlockState(pos.above()).is(ModBlocks.SMOKESTACK);
+    }
+
+    @Override
+    public boolean shouldCheckWeakPower(BlockState state, IWorldReader level, BlockPos pos, Direction side)
+    {   return true;
+    }
+
+    @Override
+    public boolean hasAnalogOutputSignal(BlockState pState)
+    {   return true;
+    }
+
+    @Override
+    public int getAnalogOutputSignal(BlockState pState, World level, BlockPos pos)
+    {   return Container.getRedstoneSignalFromBlockEntity(level.getBlockEntity(pos));
     }
 }

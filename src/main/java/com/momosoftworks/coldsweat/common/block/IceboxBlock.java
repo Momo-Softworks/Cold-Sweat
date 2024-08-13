@@ -4,6 +4,7 @@ import com.momosoftworks.coldsweat.common.blockentity.IceboxBlockEntity;
 import com.momosoftworks.coldsweat.core.init.BlockEntityInit;
 import com.momosoftworks.coldsweat.core.init.ParticleTypesInit;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
+import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.block.AirBlock;
 import net.minecraft.block.Block;
@@ -13,6 +14,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.InventoryHelper;
+import net.minecraft.inventory.container.Container;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -27,6 +29,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
+import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
 
@@ -160,5 +163,27 @@ public class IceboxBlock extends Block
         double d6 = Math.random() * 0.3;
         double d7 = !side ? Math.random() - 0.5 : (Math.random() < 0.5 ? 0.55 : -0.55);
         level.addParticle(ParticleTypesInit.GROUND_MIST.get(), d0 + d5, d1 + d6, d2 + d7, d5 / 40, 0.0D, d7 / 40);
+    }
+
+    @Override
+    public boolean canConnectRedstone(BlockState state, IBlockReader level, BlockPos pos, Direction direction)
+    {
+        return direction.getAxis() != Direction.Axis.Y
+                && level.getBlockState(pos.above()).is(ModBlocks.SMOKESTACK);
+    }
+
+    @Override
+    public boolean shouldCheckWeakPower(BlockState state, IWorldReader level, BlockPos pos, Direction side)
+    {   return true;
+    }
+
+    @Override
+    public boolean hasAnalogOutputSignal(BlockState state)
+    {   return true;
+    }
+
+    @Override
+    public int getAnalogOutputSignal(BlockState state, World level, BlockPos pos)
+    {   return Container.getRedstoneSignalFromBlockEntity(level.getBlockEntity(pos));
     }
 }

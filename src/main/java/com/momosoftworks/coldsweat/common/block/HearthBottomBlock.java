@@ -27,6 +27,7 @@ import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.IBlockReader;
+import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
 
@@ -36,19 +37,14 @@ import java.util.*;
 public class HearthBottomBlock extends Block
 {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
-    public static final IntegerProperty WATER = IntegerProperty.create("water", 0, 2);
-    public static final IntegerProperty LAVA = IntegerProperty.create("lava", 0, 2);
 
     public static Properties getProperties()
     {
         return Properties
                 .of(Material.STONE)
                 .sound(SoundType.STONE)
-                .strength(2)
-                .requiresCorrectToolForDrops()
-                .noOcclusion()
-                .dynamicShape()
-                .lightLevel(state -> state.getValue(LAVA) * 3);
+                .strength(2.0F, 10)
+                .requiresCorrectToolForDrops();
     }
 
     public static Item.Properties getItemProperties()
@@ -58,7 +54,7 @@ public class HearthBottomBlock extends Block
     public HearthBottomBlock(Block.Properties properties)
     {
         super(properties);
-        this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH).setValue(WATER, 0).setValue(LAVA, 0));
+        this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH));
     }
 
     @Override
@@ -102,7 +98,7 @@ public class HearthBottomBlock extends Block
                 boolean isLava = clickedPos.distanceTo(lavaSidePos) < clickedPos.distanceTo(waterSidePos);
                 Vector3d sidePos = isLava ? lavaSidePos : waterSidePos;
                 BucketItem filledBucket = isLava ? ((BucketItem) Items.LAVA_BUCKET)
-                                               : ((BucketItem) Items.WATER_BUCKET);
+                                                 : ((BucketItem) Items.WATER_BUCKET);
                 int itemFuel = Math.abs(hearth.getItemFuel(filledBucket.getDefaultInstance()));
                 int hearthFuel = isLava ? hearth.getHotFuel() : hearth.getColdFuel();
 
@@ -114,7 +110,7 @@ public class HearthBottomBlock extends Block
                         {
                             // Remove fuel
                             if (isLava) hearth.setHotFuelAndUpdate(hearthFuel - itemFuel);
-                            else        hearth.setColdFuelAndUpdate(hearthFuel - itemFuel);
+                            else hearth.setColdFuelAndUpdate(hearthFuel - itemFuel);
                             // Give filled bucket item
                             stack.shrink(1);
                             player.addItem(filledBucket.getDefaultInstance());
@@ -152,8 +148,10 @@ public class HearthBottomBlock extends Block
                     hearth.addFuel(itemFuel);
 
                     // Play the fuel filling sound
-                    world.playSound(null, pos, itemFuel > 0 ? SoundEvents.BUCKET_EMPTY_LAVA : SoundEvents.BUCKET_EMPTY,
-                            SoundCategory.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
+                    world.playSound(null, pos, itemFuel > 0
+                                                 ? SoundEvents.BUCKET_EMPTY_LAVA
+                                                 : SoundEvents.BUCKET_EMPTY,
+                                    SoundCategory.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
                 }
                 // Open the GUI
                 else if (!world.isClientSide)
@@ -207,15 +205,27 @@ public class HearthBottomBlock extends Block
 
     @Override
     protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder)
-    {   builder.add(FACING, WATER, LAVA);
+    {   builder.add(FACING);
     }
 
     @Override
     public BlockState getStateForPlacement(BlockItemUseContext context)
     {
-        World world = context.getLevel();
-        return world.getBlockState(context.getClickedPos().above()).isAir()
-                ? this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite()).setValue(WATER, 0).setValue(LAVA, 0)
-                : null;
+        World level = context.getLevel();
+        return level.getBlockState(context.getClickedPos().above()).isAir()
+               ? this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite())
+               : null;
+    }
+
+    @Override
+    public boolean canConnectRedstone(BlockState state, IBlockReader level, BlockPos pos, Direction direction)
+    {
+        return direction.getAxis() != Direction.Axis.Y
+            && direction != state.getValue(FACING).getOpposite();
+    }
+
+    @Override
+    public boolean shouldCheckWeakPower(BlockState state, IWorldReader level, BlockPos pos, Direction side)
+    {   return true;
     }
 }
