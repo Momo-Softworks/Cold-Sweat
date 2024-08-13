@@ -52,6 +52,7 @@ public class ColdSweat
         bus.addListener(this::commonSetup);
         bus.addListener(this::clientSetup);
         bus.addListener(this::registerCaps);
+        bus.addListener(this::updateConfigs);
         if (CompatManager.isCuriosLoaded()) bus.addListener(this::registerCurioSlots);
 
         // Register stuff
@@ -124,6 +125,10 @@ public class ColdSweat
         event.register(EntityTempCap.class);
         event.register(ItemInsulationCap.class);
         event.register(ShearableFurCap.class);
+    }
+
+    public void updateConfigs(FMLCommonSetupEvent event)
+    {   ConfigSettings.updateConfigs();
     }
 
     public void registerCurioSlots(InterModEnqueueEvent event)
