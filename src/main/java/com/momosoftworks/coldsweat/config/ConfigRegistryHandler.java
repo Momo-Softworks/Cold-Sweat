@@ -474,13 +474,7 @@ public class ConfigRegistryHandler
 
     private static void addDepthTempConfigs(Set<Holder<DepthTempData>> depthTemps)
     {
-        if (!depthTemps.isEmpty())
-        {
-            DepthTempData defaultData = ConfigSettings.DEPTH_REGIONS.get().get(0);
-            ConfigSettings.DEPTH_REGIONS.get().clear();
-            ConfigSettings.DEPTH_REGIONS.get().addAll(depthTemps.stream().map(Holder::get).toList());
-            ConfigSettings.DEPTH_REGIONS.get().add(defaultData);
-        }
+        ConfigSettings.DEPTH_REGIONS.get().addAll(depthTemps.stream().map(Holder::get).toList());
     }
 
     private static void addMountConfigs(Set<Holder<MountData>> mounts)

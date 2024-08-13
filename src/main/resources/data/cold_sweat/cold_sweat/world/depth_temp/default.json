@@ -1,0 +1,46 @@
+{
+  "regions": [
+    {
+      "type": "constant",
+      "top": {
+        "anchor": "world_top",
+        "depth": 0,
+        "temperature": "passthrough,1"
+      },
+      "bottom": {
+        "anchor": "ground_level",
+        "depth": -4,
+        "temperature": "passthrough,1"
+      }
+    },
+    {
+      "type": "linear",
+      "top": {
+        "anchor": "ground_level",
+        "depth": -5,
+        "temperature": "passthrough,1"
+      },
+      "bottom": {
+        "anchor": "ground_level",
+        "depth": -20,
+        "temperature": 75,
+        "units": "f"
+      }
+    },
+    {
+      "type": "constant",
+      "top": {
+        "anchor": "ground_level",
+        "depth": -21,
+        "temperature": 75,
+        "units": "f"
+      },
+      "bottom": {
+        "anchor": "world_bottom",
+        "depth": 0,
+        "temperature": 75,
+        "units": "f"
+      }
+    }
+  ]
+}
