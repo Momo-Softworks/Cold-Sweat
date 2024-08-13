@@ -42,6 +42,7 @@ public class ColdSweat
         bus.addListener(this::commonSetup);
         bus.addListener(this::spawnPlacements);
         bus.addListener(this::registerCaps);
+        bus.addListener(this::updateConfigs);
 
         // Register stuff
         BlockInit.BLOCKS.register(bus);
@@ -109,5 +110,9 @@ public class ColdSweat
         event.register(EntityTempCap.class);
         event.register(ItemInsulationCap.class);
         event.register(ShearableFurCap.class);
+    }
+
+    public void updateConfigs(FMLCommonSetupEvent event)
+    {   ConfigSettings.updateConfigs();
     }
 }
