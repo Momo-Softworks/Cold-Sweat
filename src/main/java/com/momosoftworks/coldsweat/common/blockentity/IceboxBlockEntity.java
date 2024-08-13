@@ -76,7 +76,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements ITickableTil
         protected void onClose(World level, BlockPos pos, BlockState state)
         {
             if (!IceboxBlockEntity.this.hasSmokeStack())
-            {   IceboxBlockEntity.this.level.playSound(null, pos, ModSounds.ICEBOX_CLOSE, SoundCategory.BLOCKS, 1f, level.random.nextFloat() * 0.2f + 0.9f);
+            {   IceboxBlockEntity.this.level.playSound(null, pos, ModSounds.ICEBOX_CLOSE, SoundCategory.BLOCKS, 1f, 1f);
             }
         }
 
