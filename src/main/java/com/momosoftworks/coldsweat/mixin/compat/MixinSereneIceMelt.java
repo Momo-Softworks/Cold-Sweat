@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import sereneseasons.api.season.Season;
 import sereneseasons.handler.season.RandomUpdateHandler;
 
 @Mixin(RandomUpdateHandler.class)
@@ -20,9 +21,9 @@ public class MixinSereneIceMelt
             at = @At(value = "INVOKE", target = "Lnet/minecraft/core/BlockPos;below()Lnet/minecraft/core/BlockPos;"),
             locals = LocalCapture.CAPTURE_FAILHARD,
             cancellable = true)
-    private static void getBiomeTemperatureOverride(ChunkMap chunkManager, LevelChunk chunkIn, float meltChance, CallbackInfo ci,
-                                                    //locals
-                                                    ServerLevel level, ChunkPos chunkPos, int minX, int minZ, BlockPos topAirPos)
+    private void getBiomeTemperatureOverride(ChunkMap chunkManager, LevelChunk chunkIn, Season.SubSeason subSeason, CallbackInfo ci,
+                                             //locals
+                                             ServerLevel level, ChunkPos chunkpos, int i, int j, int meltRand, BlockPos topAirPos)
     {
         BlockPos groundPos = topAirPos.below();
         if (WorldHelper.getBiomeTemperatureAt(level, level.getBiome(groundPos).value(), groundPos) < 0.15F)
