@@ -286,6 +286,10 @@ public class ItemSettingsConfig
         modContainer.registerConfig(ModConfig.Type.COMMON, SPEC, "coldsweat/item_settings.toml");
     }
 
+    public void save()
+    {   SPEC.save();
+    }
+
     public static ItemSettingsConfig getInstance()
     {   return INSTANCE;
     }

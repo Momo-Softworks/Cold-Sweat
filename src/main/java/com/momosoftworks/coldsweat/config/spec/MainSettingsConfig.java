@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.config.spec;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.loading.FMLPaths;
@@ -19,6 +20,7 @@ public class MainSettingsConfig
     public  static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
     public static final ModConfigSpec.ConfigValue<Integer> difficulty;
+    public static final ModConfigSpec.ConfigValue<String> version;
 
     public static final ModConfigSpec.ConfigValue<Double> maxHabitable;
     public static final ModConfigSpec.ConfigValue<Double> minHabitable;
@@ -44,15 +46,21 @@ public class MainSettingsConfig
     {
         ConfigSettings.Difficulty defaultDiff = ConfigSettings.DEFAULT_DIFFICULTY;
 
+        BUILDER.comment("DO NOT EDIT THE SETTINGS IN THIS SECTION")
+               .push("Builtin");
+
+        difficulty = BUILDER
+                .defineInRange("Difficulty", defaultDiff.ordinal(), 0, ConfigSettings.Difficulty.values().length - 1);
+
+        version = BUILDER
+                .define("Version", ModList.get().getModFileById("cold_sweat").versionString());
+
+        BUILDER.pop();
+
         /*
          Details about how the player is affected by temperature
          */
         BUILDER.push("Difficulty");
-
-        difficulty = BUILDER
-                .comment("Overrides all other config options for easy difficulty management",
-                         "This value is changed by the in-game config. It does nothing otherwise.")
-                .defineInRange("Difficulty", defaultDiff.ordinal(), 0, ConfigSettings.Difficulty.values().length - 1);
 
         minHabitable = BUILDER
                 .comment("Defines the minimum habitable temperature")
@@ -172,6 +180,9 @@ public class MainSettingsConfig
 
     /* Getters */
 
+    public String getVersion()
+    {   return version.get();
+    }
     public int getDifficulty()
     {   return difficulty.get();
     }
@@ -232,6 +243,12 @@ public class MainSettingsConfig
     }
 
     /* Setters */
+
+    public synchronized void setVersion(String version)
+    {   synchronized (MainSettingsConfig.version)
+        {   MainSettingsConfig.version.set(version);
+        }
+    }
 
     public synchronized void setDifficulty(int value)
     {   synchronized (difficulty)
