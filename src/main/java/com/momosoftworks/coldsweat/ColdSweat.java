@@ -60,6 +60,7 @@ public class ColdSweat
         bus.addListener(this::commonSetup);
         bus.addListener(this::clientSetup);
         bus.addListener(this::registerCaps);
+        bus.addListener(this::updateConfigs);
         if (CompatManager.isCuriosLoaded()) bus.addListener(this::registerCurioSlots);
 
         // Register stuff
@@ -121,6 +122,10 @@ public class ColdSweat
     {
         RenderTypeLookup.setRenderLayer(ModBlocks.SOUL_STALK, RenderType.cutoutMipped());
         RenderingRegistry.registerEntityRenderingHandler(ModEntities.CHAMELEON, ChameleonEntityRenderer::new);
+    }
+
+    public void updateConfigs(FMLCommonSetupEvent event)
+    {   ConfigSettings.updateConfigs();
     }
 
     public void registerCurioSlots(InterModEnqueueEvent event)

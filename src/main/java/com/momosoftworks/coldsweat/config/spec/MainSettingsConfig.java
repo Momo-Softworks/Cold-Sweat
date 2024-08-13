@@ -1,8 +1,10 @@
 package com.momosoftworks.coldsweat.config.spec;
 
+import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
@@ -18,6 +20,7 @@ public class MainSettingsConfig
     public  static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
     public static final ForgeConfigSpec.ConfigValue<Integer> difficulty;
+    public static final ForgeConfigSpec.ConfigValue<String> version;
 
     public static final ForgeConfigSpec.ConfigValue<Double> maxHabitable;
     public static final ForgeConfigSpec.ConfigValue<Double> minHabitable;
@@ -43,15 +46,21 @@ public class MainSettingsConfig
     {
         ConfigSettings.Difficulty defaultDiff = ConfigSettings.DEFAULT_DIFFICULTY;
 
+        BUILDER.comment("DO NOT EDIT THE SETTINGS IN THIS SECTION")
+               .push("Builtin");
+
+        difficulty = BUILDER
+                .defineInRange("Difficulty", defaultDiff.ordinal(), 0, ConfigSettings.Difficulty.values().length - 1);
+
+        version = BUILDER
+                .define("Version", ConfigSettings.getVersionString(ModList.get().getModContainerById(ColdSweat.MOD_ID).get().getModInfo().getVersion()));
+
+        BUILDER.pop();
+
         /*
          Details about how the player is affected by temperature
          */
         BUILDER.push("Difficulty");
-
-        difficulty = BUILDER
-                .comment("Overrides all other config options for easy difficulty management",
-                         "This value is changed by the in-game config. It does nothing otherwise.")
-                .defineInRange("Difficulty", defaultDiff.ordinal(), 0, ConfigSettings.Difficulty.values().length - 1);
 
         minHabitable = BUILDER
                 .comment("Defines the minimum habitable temperature")
@@ -171,6 +180,9 @@ public class MainSettingsConfig
 
     /* Getters */
 
+    public String getVersion()
+    {   return version.get();
+    }
     public int getDifficulty()
     {   return difficulty.get();
     }
@@ -231,6 +243,12 @@ public class MainSettingsConfig
     }
 
     /* Setters */
+
+    public synchronized void setVersion(String version)
+    {   synchronized (MainSettingsConfig.version)
+        {   MainSettingsConfig.version.set(version);
+        }
+    }
 
     public synchronized void setDifficulty(int value)
     {   synchronized (difficulty)

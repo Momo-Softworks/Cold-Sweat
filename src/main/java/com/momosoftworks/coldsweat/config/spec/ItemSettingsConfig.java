@@ -346,6 +346,10 @@ public class ItemSettingsConfig
         ModLoadingContext.get().registerConfig(net.minecraftforge.fml.config.ModConfig.Type.COMMON, SPEC, "coldsweat/item_settings.toml");
     }
 
+    public void save()
+    {   SPEC.save();
+    }
+
     public static ItemSettingsConfig getInstance()
     {   return INSTANCE;
     }

@@ -14,12 +14,12 @@ import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.config.type.PredicateItem;
 import com.momosoftworks.coldsweat.data.codec.configuration.DepthTempData;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.*;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.configuration.SpawnBiomeData;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
-import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.Vec2i;
 import com.momosoftworks.coldsweat.util.registries.ModEntities;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
@@ -31,6 +31,7 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.*;
 import net.minecraft.potion.Effect;
 import net.minecraft.util.ResourceLocation;
@@ -40,8 +41,10 @@ import net.minecraft.world.DimensionType;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -98,6 +101,7 @@ public class ConfigSettings
     public static final DynamicHolder<List<Block>> HEARTH_SPREAD_WHITELIST;
     public static final DynamicHolder<List<Block>> HEARTH_SPREAD_BLACKLIST;
     public static final DynamicHolder<Double> HEARTH_STRENGTH;
+    public static final DynamicHolder<Boolean> SMART_HEARTH;
     public static final DynamicHolder<List<Block>> SLEEP_CHECK_IGNORE_BLOCKS;
 
     // Item settings
@@ -686,6 +690,8 @@ public class ConfigSettings
 
         HEARTH_STRENGTH = addSetting("hearth_effect", () -> WorldSettingsConfig.getInstance().getHearthStrength());
 
+        SMART_HEARTH = addSetting("smart_hearth", () -> WorldSettingsConfig.getInstance().isSmartHearth());
+
         CELSIUS = addClientSetting("celsius", () -> ClientSettingsConfig.getInstance().isCelsius());
 
         TEMP_OFFSET = addClientSetting("temp_offset", () -> ClientSettingsConfig.getInstance().getTempOffset());
@@ -867,5 +873,123 @@ public class ConfigSettings
                 }
             });
         }
+    }
+
+    public static void updateConfigs()
+    {
+        String configVersion = MainSettingsConfig.getInstance().getVersion();
+        ItemSettingsConfig itemSettings = ItemSettingsConfig.getInstance();
+
+        if (compareVersions(configVersion, "2.3-b05b") < 0)
+        {
+            String waterBucketID = ForgeRegistries.ITEMS.getKey(Items.WATER_BUCKET).toString();
+            // Remove water as fuel item for hearth
+            itemSettings.setHearthFuelItems(ItemSettingsConfig.getInstance().getHearthFuelItems()
+                                            .stream().filter(entry -> !entry.get(0).equals(waterBucketID))
+                                            .collect(Collectors.toList()));
+            // Remove water as fuel item for icebox
+            itemSettings.setIceboxFuelItems(ItemSettingsConfig.getInstance().getIceboxFuelItems()
+                                            .stream().filter(entry -> !entry.get(0).equals(waterBucketID))
+                                            .collect(Collectors.toList()));
+        }
+        if (compareVersions(configVersion, "2.3-b01a") < 0)
+        {
+            // Update soul sprout food item
+            List<List<?>> foodTemps = new ArrayList<>(itemSettings.getFoodTemperatures());
+            foodTemps.add(Arrays.asList("cold_sweat:soul_sprout", 0.0, "{}", 1200));
+            itemSettings.setFoodTemperatures(foodTemps);
+        }
+        ItemSettingsConfig.getInstance().save();
+        // Update config version
+        MainSettingsConfig.getInstance().setVersion(getVersionString(ModList.get().getModContainerById(ColdSweat.MOD_ID).get().getModInfo().getVersion()));
+    }
+
+    public static int compareVersions(String version, String comparedTo)
+    {
+        String[] v1Parts = version.split("\\.|\\-");
+        String[] v2Parts = comparedTo.split("\\.|\\-");
+
+        int finalValue = 0;
+        try
+        {
+            // If there's no version defined, return -1
+            if (version.isEmpty())
+            {   finalValue = -1;
+                return -1;
+            }
+            // Compare the versions
+            int i = 0;
+            while (i < v1Parts.length && i < v2Parts.length)
+            {
+                if (v1Parts[i].matches("\\d+") && v2Parts[i].matches("\\d+"))
+                {
+                    int num1 = Integer.parseInt(v1Parts[i]);
+                    int num2 = Integer.parseInt(v2Parts[i]);
+                    if (num1 != num2)
+                    {   finalValue = Integer.compare(num1, num2);
+                        return finalValue;
+                    }
+                }
+                else
+                {
+                    int result = comparePreReleaseVersions(v1Parts[i], v2Parts[i]);
+                    if (result != 0)
+                    {   finalValue = result;
+                        return finalValue;
+                    }
+                }
+                i++;
+            }
+            finalValue = Integer.compare(v1Parts.length, v2Parts.length);
+            return finalValue;
+        }
+        // Log config updates
+        finally
+        {
+            if (finalValue < 0)
+            {   ColdSweat.LOGGER.warn("Last launched version is less than {}. Updating config settings...", comparedTo);
+            }
+        }
+    }
+
+    public static String getVersionString(ArtifactVersion version)
+    {   return version.getMajorVersion() + "." + version.getMinorVersion() + "." + version.getIncrementalVersion() + "-" + version.getQualifier();
+    }
+
+    private static int comparePreReleaseVersions(String v1, String v2)
+    {
+        if (v1.startsWith("b") && v2.startsWith("b"))
+        {   return compareWithSubVersions(v1.substring(1), v2.substring(1));
+        }
+        return v1.compareTo(v2);
+    }
+
+    private static int compareWithSubVersions(String v1, String v2)
+    {
+        String[] parts1 = v1.split("(?<=\\d)(?=\\D)|(?<=\\D)(?=\\d)");
+        String[] parts2 = v2.split("(?<=\\d)(?=\\D)|(?<=\\D)(?=\\d)");
+
+        int i = 0;
+        while (i < parts1.length && i < parts2.length)
+        {
+            if (parts1[i].matches("\\d+") && parts2[i].matches("\\d+"))
+            {
+                int num1 = Integer.parseInt(parts1[i]);
+                int num2 = Integer.parseInt(parts2[i]);
+                if (num1 != num2)
+                {   return Integer.compare(num1, num2);
+                }
+            }
+            else
+            {
+                int result = parts1[i].compareTo(parts2[i]);
+                if (result != 0)
+                {  return result;
+                }
+            }
+            i++;
+        }
+
+        return Integer.compare(parts1.length, parts2.length);
     }
 }
