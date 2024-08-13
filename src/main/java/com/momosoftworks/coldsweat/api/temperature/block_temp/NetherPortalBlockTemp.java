@@ -37,10 +37,4 @@ public class NetherPortalBlockTemp extends BlockTemp
     public double minTemperature()
     {   return 1;
     }
-
-    @Override
-    public double minTemperature()
-    {
-        return Temperature.convert(70, Temperature.Units.F, Temperature.Units.MC, true);
-    }
 }

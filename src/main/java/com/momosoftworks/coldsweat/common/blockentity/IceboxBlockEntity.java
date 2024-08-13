@@ -10,11 +10,16 @@ import com.momosoftworks.coldsweat.core.init.BlockEntityInit;
 import com.momosoftworks.coldsweat.core.init.ParticleTypesInit;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.BlockDataUpdateMessage;
+import com.momosoftworks.coldsweat.data.tag.ModItemTags;
+import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlockEntities;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
+import com.momosoftworks.coldsweat.util.render.ChestLidController;
+import com.momosoftworks.coldsweat.util.render.ContainerOpenersCounter;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -26,13 +31,15 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.particles.BasicParticleType;
-import net.minecraft.potion.EffectInstance;
+import net.minecraft.tileentity.IChestLid;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.util.Direction;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fml.network.PacketDistributor;
@@ -47,7 +54,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-public class IceboxBlockEntity extends HearthBlockEntity implements ITickableTileEntity, ISidedInventory
+public class IceboxBlockEntity extends HearthBlockEntity implements ITickableTileEntity, ISidedInventory, IChestLid
 {
     public static int[] WATERSKIN_SLOTS = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     public static int[] FUEL_SLOT = {0};
@@ -57,7 +64,34 @@ public class IceboxBlockEntity extends HearthBlockEntity implements ITickableTil
 
     List<ServerPlayerEntity> usingPlayers = new ArrayList<>();
 
-    public IceboxBlockEntity()
+    private final ContainerOpenersCounter openersCounter = new ContainerOpenersCounter()
+    {
+        protected void onOpen(World level, BlockPos pos, BlockState state)
+        {
+            if (!IceboxBlockEntity.this.hasSmokeStack())
+            {   IceboxBlockEntity.this.level.playSound(null, pos, ModSounds.ICEBOX_OPEN, SoundCategory.BLOCKS, 1f, level.random.nextFloat() * 0.2f + 0.9f);
+            }
+        }
+
+        protected void onClose(World level, BlockPos pos, BlockState state)
+        {
+            if (!IceboxBlockEntity.this.hasSmokeStack())
+            {   IceboxBlockEntity.this.level.playSound(null, pos, ModSounds.ICEBOX_CLOSE, SoundCategory.BLOCKS, 1f, level.random.nextFloat() * 0.2f + 0.9f);
+            }
+        }
+
+        protected void openerCountChanged(World level, BlockPos pos, BlockState state, int eventId, int eventParam)
+        {   IceboxBlockEntity.this.signalOpenCount(level, pos, state, eventId, eventParam);
+        }
+
+        protected boolean isOwnContainer(PlayerEntity player)
+        {   return player.containerMenu instanceof IceboxContainer && ((IceboxContainer) player.containerMenu).te.equals(IceboxBlockEntity.this);
+        }
+    };
+
+    ChestLidController lidController = new ChestLidController();
+
+    public IceboxBlockEntity(BlockPos pos, BlockState state)
     {   super(BlockEntityInit.ICEBOX_BLOCK_ENTITY_TYPE.get());
         TaskScheduler.schedule(this::checkForSmokestack, 5);
     }
@@ -70,6 +104,22 @@ public class IceboxBlockEntity extends HearthBlockEntity implements ITickableTil
     @Override
     public SUpdateTileEntityPacket getUpdatePacket()
     {   return new SUpdateTileEntityPacket(this.worldPosition, 0, this.getUpdateTag());
+    }
+
+    public boolean triggerEvent(int pId, int pType)
+    {
+        if (pId == 1)
+        {   this.lidController.shouldBeOpen(pType > 0);
+            return true;
+        }
+        else
+        {   return super.triggerEvent(pId, pType);
+        }
+    }
+
+    protected void signalOpenCount(World pLevel, BlockPos pPos, BlockState pState, int pEventId, int pEventParam)
+    {   Block block = pState.getBlock();
+        pLevel.blockEvent(pPos, block, 1, pEventParam);
     }
 
     private void sendUpdatePacket()
@@ -95,9 +145,17 @@ public class IceboxBlockEntity extends HearthBlockEntity implements ITickableTil
     @Override
     public void tick()
     {
-        super.tick();
+        // Tick lid animation on client
+        if (level.isClientSide())
+        {   this.lidController.tickLid();
+        }
 
-        BlockState state = this.level.getBlockState(this.worldPosition);
+        BlockState state = this.getBlockState();
+
+        // Recheck openers
+        if (!this.remove)
+        {   this.openersCounter.recheckOpeners(this.getLevel(), this.getBlockPos(), this.getBlockState());
+        }
 
         if (getFuel() > 0)
         {
@@ -106,7 +164,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements ITickableTil
                 level.setBlock(this.worldPosition, state.setValue(IceboxBlock.FROSTED, true), 3);
 
             // Cool down waterskins
-            if (ticksExisted % (20 / ConfigSettings.TEMP_RATE.get()) == 0)
+            if (ticksExisted % (int) (20 / ConfigSettings.TEMP_RATE.get()) == 0)
             {
                 boolean hasItemStacks = false;
                 for (int i = 1; i < 10; i++)
@@ -222,11 +280,28 @@ public class IceboxBlockEntity extends HearthBlockEntity implements ITickableTil
 
     @Override
     protected Container createMenu(int id, PlayerInventory playerInv)
-    {   // Track the players using this block
-        if (playerInv.player instanceof ServerPlayerEntity)
-        {   usingPlayers.add((ServerPlayerEntity) playerInv.player);
+    {   return new IceboxContainer(id, playerInv, this);
+    }
+
+    @Override
+    public void startOpen(PlayerEntity player)
+    {
+        super.startOpen(player);
+        this.openersCounter.incrementOpeners(player, this.level, this.getBlockPos(), this.getBlockState());
+        if (player instanceof ServerPlayerEntity)
+        {   this.usingPlayers.add(((ServerPlayerEntity) player));
+            this.sendUpdatePacket();
         }
-        return new IceboxContainer(id, playerInv, this);
+    }
+
+    @Override
+    public void stopOpen(PlayerEntity player)
+    {
+        super.stopOpen(player);
+        this.openersCounter.decrementOpeners(player, this.level, this.getBlockPos(), this.getBlockState());
+        if (player instanceof ServerPlayerEntity)
+        {   this.usingPlayers.remove(((ServerPlayerEntity) player));
+        }
     }
 
     @Override
@@ -276,7 +351,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements ITickableTil
     {
         if (slot == 0)
             return this.getItemFuel(stack) != 0;
-        else return stack.getItem() == ModItems.WATERSKIN || stack.getItem() == ModItems.FILLED_WATERSKIN;
+        else return ModItemTags.ICEBOX_VALID.contains(stack.getItem()) || (CompatManager.isSpoiledLoaded() && stack.isEdible());
     }
 
     @Override
@@ -297,5 +372,10 @@ public class IceboxBlockEntity extends HearthBlockEntity implements ITickableTil
                 return slotHandlers[2].cast();
         }
         return super.getCapability(capability, facing);
+    }
+
+    @Override
+    public float getOpenNess(float partialTick)
+    {   return this.lidController.getOpenness(partialTick);
     }
 }

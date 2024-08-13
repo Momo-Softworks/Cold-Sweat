@@ -6,10 +6,7 @@ import com.momosoftworks.coldsweat.core.init.ParticleTypesInit;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
-import net.minecraft.block.AirBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.SoundType;
+import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -27,24 +24,35 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.RayTraceContext;
+import net.minecraft.util.math.shapes.ISelectionContext;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
 
+import javax.annotation.Nullable;
 import java.util.Random;
 
 public class IceboxBlock extends Block
 {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty FROSTED = BooleanProperty.create("frosted");
+    public static final BooleanProperty SMOKESTACK = BooleanProperty.create("smokestack");
+
+    public static final VoxelShape SHAPE = VoxelShapes.block();
+    private static final VoxelShape SHAPE_OPEN = VoxelShapes.box(0f, 0f, 0f, 1f, 13/16f, 1f);
+
     public static Properties getProperties()
     {
         return Properties
                 .of(Material.WOOD)
                 .sound(SoundType.WOOD)
-                .strength(2f, 5f);
+                .strength(2f, 5f)
+                .noOcclusion();
     }
 
     public static Item.Properties getItemProperties()
@@ -55,7 +63,31 @@ public class IceboxBlock extends Block
     public IceboxBlock(Block.Properties properties)
     {
         super(properties);
-        this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH).setValue(FROSTED, false));
+        this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH).setValue(FROSTED, false).setValue(SMOKESTACK, false));
+    }
+
+    @Override
+    public BlockRenderType getRenderShape(BlockState pState)
+    {   return BlockRenderType.ENTITYBLOCK_ANIMATED;
+    }
+
+    @Override
+    public VoxelShape getShape(BlockState state, IBlockReader level, BlockPos pos, ISelectionContext selection)
+    {
+        TileEntity te = level.getBlockEntity(pos);
+        if (te instanceof IceboxBlockEntity)
+        {   return ((IceboxBlockEntity) te).getOpenNess(0) > 0 ? SHAPE_OPEN : SHAPE;
+        }
+        return SHAPE;
+    }
+
+    @Override
+    public boolean triggerEvent(BlockState pState, World pLevel, BlockPos pPos, int pId, int pParam)
+    {
+        super.triggerEvent(pState, pLevel, pPos, pId, pParam);
+        TileEntity blockentity = pLevel.getBlockEntity(pPos);
+
+        return blockentity != null && blockentity.triggerEvent(pId, pParam);
     }
 
     @SuppressWarnings("deprecation")
@@ -91,9 +123,8 @@ public class IceboxBlock extends Block
 
                 level.playSound(null, pos, SoundEvents.BUCKET_EMPTY, SoundCategory.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
             }
-            else if (!level.isClientSide)
-            {
-                NetworkHooks.openGui((ServerPlayerEntity) player, te, pos);
+            else if (!level.isClientSide && !ChestBlock.isChestBlockedAt(level, pos))
+            {   NetworkHooks.openGui((ServerPlayerEntity) player, te, pos);
             }
         }
         return ActionResultType.SUCCESS;
@@ -114,7 +145,14 @@ public class IceboxBlock extends Block
     {
         TileEntity te = level.getBlockEntity(pos);
         if (neighborPos.equals(pos.above()) && te instanceof IceboxBlockEntity)
-        {   ((IceboxBlockEntity) te).checkForSmokestack();
+        {
+            IceboxBlockEntity icebox = ((IceboxBlockEntity) te);
+            boolean hasSmokestack = icebox.checkForSmokestack();
+            if (hasSmokestack != state.getValue(SMOKESTACK))
+            {
+                state = state.setValue(SMOKESTACK, hasSmokestack);
+                level.setBlock(pos, state, 3);
+            }
         }
         return super.updateShape(state, direction, neighborState, level, pos, neighborPos);
     }
@@ -141,13 +179,13 @@ public class IceboxBlock extends Block
     }
 
     @Override
-    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder)
-    {   builder.add(FACING, FROSTED);
+    protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder) {
+        builder.add(FACING, FROSTED, SMOKESTACK);
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockItemUseContext context)
-    {   return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite()).setValue(FROSTED, false);
+    public BlockState getStateForPlacement(BlockItemUseContext context) {
+        return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
     }
 
     @Override

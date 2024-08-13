@@ -23,4 +23,6 @@ public class ModSounds
     public static SoundEvent HEARTH_DEPLETE = SoundInit.HEARTH_DEPLETE_SOUND_REGISTRY.get();
     public static SoundEvent BOILER_DEPLETE = SoundInit.BOILER_DEPLETE_SOUND_REGISTRY.get();
     public static SoundEvent ICEBOX_DEPLETE = SoundInit.ICEBOX_DEPLETE_SOUND_REGISTRY.get();
+    public static SoundEvent ICEBOX_OPEN = SoundInit.ICEBOX_OPEN_SOUND_REGISTRY.get();
+    public static SoundEvent ICEBOX_CLOSE = SoundInit.ICEBOX_CLOSE_SOUND_REGISTRY.get();
 }

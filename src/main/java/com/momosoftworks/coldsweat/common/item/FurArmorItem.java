@@ -1,6 +1,5 @@
 package com.momosoftworks.coldsweat.common.item;
 
-import com.jozufozu.flywheel.core.model.ModelPart;
 import com.momosoftworks.coldsweat.client.renderer.model.armor.ArmorModels;
 import com.momosoftworks.coldsweat.client.renderer.model.armor.LlamaParkaModel;
 import com.momosoftworks.coldsweat.util.math.CSMath;
