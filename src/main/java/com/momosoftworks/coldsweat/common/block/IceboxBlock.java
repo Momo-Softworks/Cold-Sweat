@@ -45,12 +45,18 @@ public class IceboxBlock extends Block implements EntityBlock
 {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty FROSTED = BooleanProperty.create("frosted");
+    public static final BooleanProperty SMOKESTACK = BooleanProperty.create("smokestack");
+
+    public static final VoxelShape SHAPE = Shapes.block();
+    private static final VoxelShape SHAPE_OPEN = Shapes.box(0f, 0f, 0f, 1f, 13/16f, 1f);
+
     public static Properties getProperties()
     {
         return Properties
                 .of()
                 .sound(SoundType.WOOD)
-                .strength(2f, 5f);
+                .strength(2f, 5f)
+                .noOcclusion();
     }
 
     public static Item.Properties getItemProperties()
@@ -61,13 +67,34 @@ public class IceboxBlock extends Block implements EntityBlock
     public IceboxBlock(Block.Properties properties)
     {
         super(properties);
-        this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH).setValue(FROSTED, false));
+        this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH).setValue(FROSTED, false).setValue(SMOKESTACK, false));
     }
 
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
         return type == ModBlockEntities.ICEBOX ? IceboxBlockEntity::tick : null;
+    }
+
+    public RenderShape getRenderShape(BlockState pState)
+    {   return RenderShape.ENTITYBLOCK_ANIMATED;
+    }
+
+    @Override
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext selection)
+    {
+        if (level.getBlockEntity(pos) instanceof IceboxBlockEntity icebox)
+        {   return icebox.getOpenNess(0) > 0 ? SHAPE_OPEN : SHAPE;
+        }
+        return SHAPE;
+    }
+
+    public boolean triggerEvent(BlockState pState, Level pLevel, BlockPos pPos, int pId, int pParam)
+    {
+        super.triggerEvent(pState, pLevel, pPos, pId, pParam);
+        BlockEntity blockentity = pLevel.getBlockEntity(pPos);
+
+        return blockentity != null && blockentity.triggerEvent(pId, pParam);
     }
 
     @SuppressWarnings("deprecation")
@@ -102,7 +129,7 @@ public class IceboxBlock extends Block implements EntityBlock
 
                 level.playSound(null, pos, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
             }
-            else if (!level.isClientSide)
+            else if (!level.isClientSide && !ChestBlock.isChestBlockedAt(level, pos))
             {   NetworkHooks.openScreen((ServerPlayer) player, icebox, pos);
             }
         }
@@ -121,11 +148,16 @@ public class IceboxBlock extends Block implements EntityBlock
     public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos)
     {
         if (neighborPos.equals(pos.above()) && level.getBlockEntity(pos) instanceof IceboxBlockEntity icebox)
-        {   icebox.checkForSmokestack();
+        {
+            boolean hasSmokestack = icebox.checkForSmokestack();
+            if (hasSmokestack != state.getValue(SMOKESTACK))
+            {
+                state = state.setValue(SMOKESTACK, hasSmokestack);
+                level.setBlock(pos, state, 3);
+            }
         }
         return super.updateShape(state, direction, neighborState, level, pos, neighborPos);
     }
-
 
     @SuppressWarnings("deprecation")
     @Override
@@ -151,12 +183,12 @@ public class IceboxBlock extends Block implements EntityBlock
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING, FROSTED);
+        builder.add(FACING, FROSTED, SMOKESTACK);
     }
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite()).setValue(FROSTED, false);
+        return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
     }
 
     @Override

@@ -51,7 +51,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider, WorldlyContainer
+public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider, WorldlyContainer, LidBlockEntity
 {
     public static int[] WATERSKIN_SLOTS = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     public static int[] FUEL_SLOT = {0};
@@ -60,6 +60,33 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
             SidedInvWrapper.create(this, Direction.UP, Direction.DOWN, Direction.NORTH);
 
     List<ServerPlayer> usingPlayers = new ArrayList<>();
+
+    private final ContainerOpenersCounter openersCounter = new ContainerOpenersCounter()
+    {
+        protected void onOpen(Level level, BlockPos pos, BlockState state)
+        {
+            if (!IceboxBlockEntity.this.hasSmokeStack())
+            {   IceboxBlockEntity.this.level.playSound(null, pos, ModSounds.ICEBOX_OPEN, SoundSource.BLOCKS, 1f, level.random.nextFloat() * 0.2f + 0.9f);
+            }
+        }
+
+        protected void onClose(Level level, BlockPos pos, BlockState state)
+        {
+            if (!IceboxBlockEntity.this.hasSmokeStack())
+            {   IceboxBlockEntity.this.level.playSound(null, pos, ModSounds.ICEBOX_CLOSE, SoundSource.BLOCKS, 1f, level.random.nextFloat() * 0.2f + 0.9f);
+            }
+        }
+
+        protected void openerCountChanged(Level level, BlockPos pos, BlockState state, int eventId, int eventParam)
+        {   IceboxBlockEntity.this.signalOpenCount(level, pos, state, eventId, eventParam);
+        }
+
+        protected boolean isOwnContainer(Player player)
+        {   return player.containerMenu instanceof IceboxContainer container && container.te.equals(IceboxBlockEntity.this);
+        }
+    };
+
+    ChestLidController lidController = new ChestLidController();
 
     public IceboxBlockEntity(BlockPos pos, BlockState state)
     {   super(ModBlockEntities.ICEBOX, pos, state);
@@ -74,6 +101,22 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
     @Override
     public ClientboundBlockEntityDataPacket getUpdatePacket()
     {   return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    public boolean triggerEvent(int pId, int pType)
+    {
+        if (pId == 1)
+        {   this.lidController.shouldBeOpen(pType > 0);
+            return true;
+        }
+        else
+        {   return super.triggerEvent(pId, pType);
+        }
+    }
+
+    protected void signalOpenCount(Level pLevel, BlockPos pPos, BlockState pState, int pEventId, int pEventParam)
+    {   Block block = pState.getBlock();
+        pLevel.blockEvent(pPos, block, 1, pEventParam);
     }
 
     private void sendUpdatePacket()
@@ -99,13 +142,30 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
     public static <T extends BlockEntity> void tick(Level level, BlockPos pos, BlockState state, T te)
     {
         if (te instanceof IceboxBlockEntity iceboxTE)
-        {   iceboxTE.tick(level, state, pos);
+        {
+            iceboxTE.tick(level, state, pos);
+            // Tick lid animation on client
+            if (level.isClientSide())
+            {   tickAnimateLid(level, pos, state, iceboxTE);
+            }
+        }
+    }
+
+    public static <T extends BlockEntity> void tickAnimateLid(Level level, BlockPos pos, BlockState state, T blockEntity)
+    {
+        if (blockEntity instanceof IceboxBlockEntity icebox)
+        {   icebox.lidController.tickLid();
         }
     }
 
     public void tick(Level level, BlockState state, BlockPos pos)
     {
         super.tick(level, pos);
+
+        // Recheck openers
+        if (!this.remove)
+        {   this.openersCounter.recheckOpeners(this.getLevel(), this.getBlockPos(), this.getBlockState());
+        }
 
         if (getFuel() > 0)
         {
@@ -114,7 +174,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
                 level.setBlock(pos, state.setValue(IceboxBlock.FROSTED, true), 3);
 
             // Cool down waterskins
-            if (ticksExisted % (20 / ConfigSettings.TEMP_RATE.get()) == 0)
+            if (ticksExisted % (int) (20 / ConfigSettings.TEMP_RATE.get()) == 0)
             {
                 boolean hasItemStacks = false;
                 for (int i = 1; i < 10; i++)
@@ -230,12 +290,28 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
 
     @Override
     protected AbstractContainerMenu createMenu(int id, Inventory playerInv)
+    {   return new IceboxContainer(id, playerInv, this);
+    }
+
+    @Override
+    public void startOpen(Player player)
     {
-        // Track the players using this block
-        if (playerInv.player instanceof ServerPlayer serverPlayer)
-        {   usingPlayers.add(serverPlayer);
+        super.startOpen(player);
+        this.openersCounter.incrementOpeners(player, this.level, this.getBlockPos(), this.getBlockState());
+        if (player instanceof ServerPlayer serverPlayer)
+        {   this.usingPlayers.add(serverPlayer);
+            this.sendUpdatePacket();
         }
-        return new IceboxContainer(id, playerInv, this);
+    }
+
+    @Override
+    public void stopOpen(Player player)
+    {
+        super.stopOpen(player);
+        this.openersCounter.decrementOpeners(player, this.level, this.getBlockPos(), this.getBlockState());
+        if (player instanceof ServerPlayer serverPlayer)
+        {   this.usingPlayers.remove(serverPlayer);
+        }
     }
 
     @Override
@@ -285,7 +361,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
     {
         if (slot == 0)
             return this.getItemFuel(stack) != 0;
-        else return stack.is(ModItems.WATERSKIN) || stack.is(ModItems.FILLED_WATERSKIN);
+        else return stack.is(ModItemTags.ICEBOX_VALID) || (CompatManager.isSpoiledLoaded() && stack.isEdible());
     }
 
     @Override
@@ -306,5 +382,10 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
                 return slotHandlers[2].cast();
         }
         return super.getCapability(capability, facing);
+    }
+
+    @Override
+    public float getOpenNess(float partialTick)
+    {   return this.lidController.getOpenness(partialTick);
     }
 }

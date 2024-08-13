@@ -2,12 +2,11 @@
   "parent": "block/cube",
   "textures": {
     "down": "cold_sweat:block/icebox_bottom",
-    "up": "cold_sweat:block/icebox_top",
+    "up": "cold_sweat:block/icebox_top_smokestack",
     "north": "cold_sweat:block/icebox_side",
     "east": "cold_sweat:block/icebox_side",
     "south": "cold_sweat:block/icebox_side",
     "west": "cold_sweat:block/icebox_side",
     "particle": "cold_sweat:block/icebox_bottom"
-  },
-  "render_type": "translucent_moving_block"
+  }
 }

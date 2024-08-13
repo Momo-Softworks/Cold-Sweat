@@ -30,6 +30,10 @@ public class SoundInit
             () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(ColdSweat.MOD_ID, "block.boiler.fuel_deplete")));
     public static final RegistryObject<SoundEvent> ICEBOX_DEPLETE_SOUND_REGISTRY = SOUNDS.register("block.icebox.fuel_deplete",
             () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(ColdSweat.MOD_ID, "block.icebox.fuel_deplete")));
+    public static final RegistryObject<SoundEvent> ICEBOX_OPEN_SOUND_REGISTRY = SOUNDS.register("block.icebox.open",
+            () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(ColdSweat.MOD_ID, "block.icebox.open")));
+    public static final RegistryObject<SoundEvent> ICEBOX_CLOSE_SOUND_REGISTRY = SOUNDS.register("block.icebox.close",
+            () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(ColdSweat.MOD_ID, "block.icebox.close")));
 
     public static final RegistryObject<SoundEvent> CHAMELEON_AMBIENT_SOUND_REGISTRY = SOUNDS.register("entity.chameleon.ambient",
             () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(ColdSweat.MOD_ID, "entity.chameleon.ambient")));
