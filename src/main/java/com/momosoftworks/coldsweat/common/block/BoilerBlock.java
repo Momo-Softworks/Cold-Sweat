@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.common.block;
 import com.momosoftworks.coldsweat.common.blockentity.BoilerBlockEntity;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.util.registries.ModBlockEntities;
+import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -14,11 +15,11 @@ import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.*;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -182,5 +183,28 @@ public class BoilerBlock extends Block implements EntityBlock
     @Override
     public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
     {   return new BoilerBlockEntity(pos, state);
+    }
+
+    @Override
+    public boolean canConnectRedstone(BlockState state, BlockGetter level, BlockPos pos, Direction direction)
+    {
+        return direction.getAxis() != Direction.Axis.Y
+            && direction != state.getValue(FACING).getOpposite()
+            && level.getBlockState(pos.above()).is(ModBlocks.SMOKESTACK);
+    }
+
+    @Override
+    public boolean shouldCheckWeakPower(BlockState state, LevelReader level, BlockPos pos, Direction side)
+    {   return true;
+    }
+
+    @Override
+    public boolean hasAnalogOutputSignal(BlockState pState)
+    {   return true;
+    }
+
+    @Override
+    public int getAnalogOutputSignal(BlockState pState, Level level, BlockPos pos)
+    {   return AbstractContainerMenu.getRedstoneSignalFromBlockEntity(level.getBlockEntity(pos));
     }
 }
