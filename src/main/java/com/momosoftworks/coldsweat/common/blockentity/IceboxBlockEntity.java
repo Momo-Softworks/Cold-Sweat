@@ -1,11 +1,7 @@
 package com.momosoftworks.coldsweat.common.blockentity;
 
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.api.temperature.modifier.BlockInsulationTempModifier;
-import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
-import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.block.IceboxBlock;
-import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.container.IceboxContainer;
 import com.momosoftworks.coldsweat.common.item.FilledWaterskinItem;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -13,9 +9,10 @@ import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.init.ParticleTypesInit;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.BlockDataUpdateMessage;
+import com.momosoftworks.coldsweat.data.tag.ModItemTags;
+import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlockEntities;
-import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
@@ -28,15 +25,19 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.WorldlyContainer;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.ChestLidController;
+import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
+import net.minecraft.world.level.block.entity.LidBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
@@ -48,7 +49,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 
 public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider, WorldlyContainer
@@ -171,40 +171,13 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
     }
 
     @Override
-    void insulatePlayer(Player player)
-    {
-        // Apply the insulation effect
-        if (!shouldUseColdFuel)
-        EntityTempManager.getTemperatureCap(player).ifPresent(cap ->
-        {   double temp = cap.getTrait(Temperature.Trait.WORLD);
-            double min = cap.getTrait(Temperature.Trait.FREEZING_POINT);
-            double max = cap.getTrait(Temperature.Trait.BURNING_POINT);
+    protected boolean hasSignalFromSides()
+    {   return Direction.stream().anyMatch(dir -> dir.getAxis() != Direction.Axis.Y && this.level.hasSignal(this.getBlockPos().relative(dir), dir));
+    }
 
-            // If the player is habitable, check the input temperature reported by their HearthTempModifier (if they have one)
-            if (CSMath.betweenInclusive(temp, min, max))
-            {
-                // Find the player's HearthTempModifier
-                Optional<? extends TempModifier> modifier = Temperature.getModifier(player, Temperature.Trait.WORLD, BlockInsulationTempModifier.class);
-                // If they have one, refresh it
-                if (modifier.isPresent())
-                {
-                    if (modifier.get().getExpireTime() - modifier.get().getTicksExisted() > 20)
-                    {   return;
-                    }
-                    temp = modifier.get().getLastInput();
-                }
-                // This means the player is not insulated, and they are habitable without it
-                else return;
-            }
-
-            // Tell the icebox to use cold fuel
-            shouldUseColdFuel |= this.getColdFuel() > 0 && temp > max;
-        });
-        if (shouldUseColdFuel)
-        {   int maxEffect = this.getMaxInsulationLevel() - 1;
-            int effectLevel = (int) Math.min(maxEffect, (insulationLevel / (double) this.getInsulationTime()) * maxEffect);
-            player.addEffect(new MobEffectInstance(ModEffects.INSULATION, 120, effectLevel, false, false, true));
-        }
+    @Override
+    protected boolean hasSignalFromBack()
+    {   return false;
     }
 
     @Override
