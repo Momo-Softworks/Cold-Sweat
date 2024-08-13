@@ -10,13 +10,13 @@ import java.util.function.Function;
 public class BlockInsulationTempModifier extends TempModifier
 {
     public BlockInsulationTempModifier()
-    {
-       this(0);
+    {   this(0, 0);
     }
 
-    public BlockInsulationTempModifier(int strength)
+    public BlockInsulationTempModifier(int cooling, int warming)
     {
-        this.getNBT().putInt("Strength", strength);
+        this.getNBT().putInt("Cooling", cooling);
+        this.getNBT().putInt("Warming", warming);
     }
 
     @Override
@@ -27,8 +27,18 @@ public class BlockInsulationTempModifier extends TempModifier
         double mid = (min + max) / 2;
         double hearthStrength = ConfigSettings.HEARTH_STRENGTH.get();
 
-        int insulationStrength = this.getNBT().getInt("Strength");
+        double cooling = this.getNBT().getInt("Cooling") * hearthStrength;
+        double warming = this.getNBT().getInt("Warming") * hearthStrength;
 
-        return temp -> CSMath.blend(temp, CSMath.weightedAverage(temp, mid, 1 - hearthStrength, 1.0), insulationStrength, 0, 10);
+        return temp ->
+        {
+            if (temp > mid)
+            {   return CSMath.blend(temp, mid, cooling, 0, 10);
+            }
+            if (temp < mid)
+            {   return CSMath.blend(temp, mid, warming, 0, 10);
+            }
+            return temp;
+        };
     }
 }

@@ -31,5 +31,6 @@ public class ModPacketHandlers
         registrar.playToClient(SyncTemperatureMessage.TYPE, SyncTemperatureMessage.CODEC, SyncTemperatureMessage::handle);
         registrar.playToClient(SyncTempModifiersMessage.TYPE, SyncTempModifiersMessage.CODEC, SyncTempModifiersMessage::handle);
         registrar.playToClient(EntityMountMessage.TYPE, EntityMountMessage.CODEC, EntityMountMessage::handle);
+        registrar.playToClient(UpdateHearthSignalsMessage.TYPE, UpdateHearthSignalsMessage.CODEC, UpdateHearthSignalsMessage::handle);
     }
 }

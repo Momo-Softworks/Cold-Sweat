@@ -171,41 +171,18 @@ public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider
     }
 
     @Override
-    void insulatePlayer(Player player)
+    protected boolean hasSignalFromBack()
     {
-        // Apply the insulation effect
-        if (!shouldUseHotFuel)
-        EntityTempManager.getTemperatureCap(player).ifPresent(cap ->
+        return Direction.stream().anyMatch(direction ->
         {
-            double temp = cap.getTrait(Temperature.Trait.WORLD);
-            double min = cap.getTrait(Temperature.Trait.FREEZING_POINT);
-            double max = cap.getTrait(Temperature.Trait.BURNING_POINT);
-
-            // If the player is habitable, check the input temperature reported by their HearthTempModifier (if they have one)
-            if (CSMath.betweenInclusive(temp, min, max))
-            {
-                // Find the player's HearthTempModifier
-                Optional<? extends TempModifier> modifier = Temperature.getModifier(player, Temperature.Trait.WORLD, BlockInsulationTempModifier.class);
-                // If they have one, refresh it
-                if (modifier.isPresent())
-                {
-                    if (modifier.get().getExpireTime() - modifier.get().getTicksExisted() > 20)
-                    {   return;
-                    }
-                    temp = modifier.get().getLastInput();
-                }
-                // This means the player is not insulated, and they are habitable without it
-                else return;
-            }
-
-            // Tell the hearth to use hot fuel
-            shouldUseHotFuel |= this.getHotFuel() > 0 && temp < min;
+            return direction.getAxis() != Direction.Axis.Y && direction != this.getBlockState().getValue(BoilerBlock.FACING)
+                && this.level.hasSignal(this.worldPosition.relative(direction), direction);
         });
-        if (shouldUseHotFuel)
-        {   int maxEffect = this.getMaxInsulationLevel() - 1;
-            int effectLevel = (int) Math.min(maxEffect, (insulationLevel / (double) this.getInsulationTime()) * maxEffect);
-            player.addEffect(new MobEffectInstance(ModEffects.INSULATED, 120, effectLevel, false, false, true));
-        }
+    }
+
+    @Override
+    protected boolean hasSignalFromSides()
+    {   return false;
     }
 
     @Override
@@ -289,7 +266,7 @@ public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider
     {
         if (slot == 0)
             return this.getItemFuel(stack) != 0;
-        else return stack.is(ModItems.WATERSKIN) || stack.is(ModItems.FILLED_WATERSKIN);
+        else return stack.is(ModItemTags.BOILER_VALID) || (CompatManager.isThirstLoaded() && stack.is(ModItemTags.BOILER_PURIFIABLE));
     }
 
     @Override

@@ -23,6 +23,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.SignalGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.Rotation;
@@ -45,10 +46,6 @@ import java.util.*;
 public class HearthBottomBlock extends Block implements EntityBlock
 {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
-    public static final IntegerProperty WATER = IntegerProperty.create("water", 0, 2);
-    public static final IntegerProperty LAVA = IntegerProperty.create("lava", 0, 2);
-
-    private static final Map<Direction, VoxelShape> SHAPES = new HashMap<>();
 
     public static Properties getProperties()
     {
@@ -57,10 +54,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
                 .sound(SoundType.STONE)
                 .destroyTime(2.0F)
                 .explosionResistance(10.0F)
-                .requiresCorrectToolForDrops()
-                .noOcclusion()
-                .dynamicShape()
-                .lightLevel(state -> state.getValue(LAVA) * 3);
+                .requiresCorrectToolForDrops();
     }
 
     public static Item.Properties getItemProperties()
@@ -70,7 +64,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
     public HearthBottomBlock(Properties properties)
     {
         super(properties);
-        this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH).setValue(WATER, 0).setValue(LAVA, 0));
+        this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH));
     }
 
     @Override
@@ -132,7 +126,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
                         {
                             // Remove fuel
                             if (isLava) te.setHotFuelAndUpdate(hearthFuel - itemFuel);
-                            else        te.setColdFuelAndUpdate(hearthFuel - itemFuel);
+                            else te.setColdFuelAndUpdate(hearthFuel - itemFuel);
                             // Give filled bucket item
                             stack.shrink(1);
                             player.addItem(filledBucket.getDefaultInstance());
@@ -169,8 +163,10 @@ public class HearthBottomBlock extends Block implements EntityBlock
                     te.addFuel(itemFuel);
 
                     // Play the fuel filling sound
-                    worldIn.playSound(null, pos, itemFuel > 0 ? SoundEvents.BUCKET_EMPTY_LAVA : SoundEvents.BUCKET_EMPTY,
-                            SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
+                    worldIn.playSound(null, pos, itemFuel > 0
+                                                 ? SoundEvents.BUCKET_EMPTY_LAVA
+                                                 : SoundEvents.BUCKET_EMPTY,
+                                      SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
                 }
                 else player.openMenu(te, pos);
             }
@@ -221,7 +217,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
-    {   builder.add(FACING, WATER, LAVA);
+    {   builder.add(FACING);
     }
 
     @Override
@@ -229,7 +225,19 @@ public class HearthBottomBlock extends Block implements EntityBlock
     {
         Level level = context.getLevel();
         return level.getBlockState(context.getClickedPos().above()).isAir()
-                ? this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite()).setValue(WATER, 0).setValue(LAVA, 0)
-                : null;
+               ? this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite())
+               : null;
+    }
+
+    @Override
+    public boolean canConnectRedstone(BlockState state, BlockGetter level, BlockPos pos, Direction direction)
+    {
+        return direction.getAxis() != Direction.Axis.Y
+            && direction != state.getValue(FACING).getOpposite();
+    }
+
+    @Override
+    public boolean shouldCheckWeakPower(BlockState state, SignalGetter level, BlockPos pos, Direction side)
+    {   return true;
     }
 }

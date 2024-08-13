@@ -26,6 +26,7 @@ import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -409,25 +410,58 @@ public class EntityTempManager
     @SubscribeEvent
     public static void onInsulationAdded(MobEffectEvent.Added event)
     {
-        if (!event.getEntity().level().isClientSide && event.getEntity() instanceof Player player && event.getEffectInstance() != null
-        && event.getEffectInstance().getEffect() == ModEffects.INSULATED)
+        LivingEntity entity = event.getEntity();
+        MobEffectInstance effect = event.getEffectInstance();
+
+        if (!entity.level().isClientSide && isTemperatureEnabled(entity.getType())
+        && (effect.getEffect() == ModEffects.CHILL || effect.getEffect() == ModEffects.WARMTH))
         {
+            boolean isWarmth = effect.getEffect() == ModEffects.WARMTH;
+            int warming = isWarmth ? effect.getAmplifier() + 1 : 0;
+            int cooling = !isWarmth ? effect.getAmplifier() + 1 : 0;
             // Add TempModifier on potion effect added
-            MobEffectInstance effect = event.getEffectInstance();
-            // New HearthTempModifier
-            TempModifier newMod = new BlockInsulationTempModifier(effect.getAmplifier() + 1).expires(effect.getDuration());
-            Temperature.addOrReplaceModifier(player, newMod, Temperature.Trait.WORLD, Placement.Duplicates.BY_CLASS);
+            Optional<BlockInsulationTempModifier> oldMod = Temperature.getModifier(entity, Temperature.Trait.WORLD, BlockInsulationTempModifier.class);
+            if (oldMod.isPresent())
+            {
+                CompoundTag nbt = oldMod.get().getNBT();
+                nbt.putInt("Warming", Math.max(nbt.getInt("Warming"), warming));
+                nbt.putInt("Cooling", Math.max(nbt.getInt("Cooling"), cooling));
+                oldMod.get().setTicksExisted(0);
+                oldMod.get().expires(effect.getDuration());
+            }
+            else
+            {
+                TempModifier newMod = new BlockInsulationTempModifier(cooling, warming).expires(effect.getDuration());
+                Temperature.addOrReplaceModifier(entity, newMod, Temperature.Trait.WORLD, Placement.Duplicates.BY_CLASS);
+            }
         }
     }
 
     @SubscribeEvent
     public static void onInsulationRemoved(MobEffectEvent.Remove event)
     {
-        if (!event.getEntity().level().isClientSide && event.getEntity() instanceof Player player && event.getEffectInstance() != null
-        && event.getEffectInstance().getEffect() == ModEffects.INSULATED)
+        LivingEntity entity = event.getEntity();
+        MobEffectInstance effect = event.getEffectInstance();
+
+        if (effect != null && !entity.level().isClientSide && isTemperatureEnabled(entity.getType())
+        && (effect.getEffect() == ModEffects.CHILL || effect.getEffect() == ModEffects.WARMTH))
         {
-            // Remove TempModifier on potion effect removed
-            Temperature.removeModifiers(player, Temperature.Trait.WORLD, mod -> mod instanceof BlockInsulationTempModifier);
+            Optional<BlockInsulationTempModifier> modifier = Temperature.getModifier(entity, Temperature.Trait.WORLD, BlockInsulationTempModifier.class);
+            if (modifier.isPresent())
+            {
+                boolean isWarmth = effect.getEffect() == ModEffects.WARMTH;
+                CompoundTag nbt = modifier.get().getNBT();
+
+                if (isWarmth)
+                {   nbt.putInt("Warming", 0);
+                }
+                else
+                {   nbt.putInt("Cooling", 0);
+                }
+                if (isWarmth ? !entity.hasEffect(ModEffects.CHILL) : !entity.hasEffect(ModEffects.WARMTH))
+                {   Temperature.removeModifiers(entity, Temperature.Trait.WORLD, mod -> mod instanceof BlockInsulationTempModifier);
+                }
+            }
         }
     }
 

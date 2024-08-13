@@ -6,6 +6,7 @@ import com.momosoftworks.coldsweat.api.event.common.BlockStateChangedEvent;
 import com.momosoftworks.coldsweat.api.temperature.modifier.BlockInsulationTempModifier;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.common.block.HearthBottomBlock;
 import com.momosoftworks.coldsweat.common.block.SmokestackBlock;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
@@ -14,6 +15,7 @@ import com.momosoftworks.coldsweat.common.event.HearthSaveDataHandler;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.*;
 import com.momosoftworks.coldsweat.core.network.message.HearthResetMessage;
+import com.momosoftworks.coldsweat.core.network.message.UpdateHearthSignalsMessage;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -40,6 +42,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -67,6 +70,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.StreamSupport;
 
 public class HearthBlockEntity extends RandomizableContainerBlockEntity
@@ -90,6 +94,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
     int lastHotFuel = 0;
     int lastColdFuel = 0;
+    boolean isSidePowered = false;
+    boolean isBackPowered = false;
     boolean shouldUseHotFuel = false;
     boolean shouldUseColdFuel = false;
     boolean hasHotFuel = false;
@@ -238,6 +244,17 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
         // Tick down the time for each effect
         this.tickPotionEffects();
+        // Check for redstone power to this block
+        this.checkInputSignal();
+
+        // Determine what types of fuel to use
+        this.shouldUseColdFuel = false;
+        this.shouldUseHotFuel = false;
+        if (!ConfigSettings.SMART_HEARTH.get())
+        {
+            this.shouldUseColdFuel = this.isSidePowered;
+            this.shouldUseHotFuel = this.isBackPowered;
+        }
 
         // Clear paths every 5 minutes to account for calculation errors
         if (this.ticksExisted % 6000 == 0)
@@ -256,7 +273,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
             {   insulationLevel++;
             }
 
-            if (this.isPlayerNearby)
+            if (this.isPlayerNearby && (isSidePowered || isBackPowered || ConfigSettings.SMART_HEARTH.get()))
             {
                 // Determine whether particles are enabled
                 if (this.ticksExisted % 20 == 0)
@@ -307,7 +324,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                 this.tickDrainFuel();
             }
         }
-        
+
         // Input fuel
         if (this.ticksExisted % 20 == 0)
         {   this.checkForFuel();
@@ -436,6 +453,43 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         }
     }
 
+    public void checkInputSignal()
+    {
+        boolean wasBackPowered = this.isBackPowered;
+        boolean wasSidePowered = this.isSidePowered;
+        // Get signals
+        if (!this.level.isClientSide())
+        {
+            this.isBackPowered = this.hasSignalFromBack();
+            this.isSidePowered = this.hasSignalFromSides();
+            // Update signals for client
+            this.syncInputSignal(wasBackPowered, wasSidePowered);
+        }
+    }
+
+    protected boolean hasSignalFromSides()
+    {
+        Direction facing = this.getBlockState().getValue(HearthBottomBlock.FACING);
+        return this.level.hasSignal(this.getBlockPos().relative(facing.getClockWise()), facing.getClockWise())
+            || this.level.hasSignal(this.getBlockPos().relative(facing.getCounterClockWise()), facing.getCounterClockWise());
+    }
+
+    protected boolean hasSignalFromBack()
+    {
+        Direction facing = this.getBlockState().getValue(HearthBottomBlock.FACING);
+        return this.level.hasSignal(this.getBlockPos().relative(facing.getOpposite()), facing.getOpposite());
+    }
+
+    protected void syncInputSignal(boolean wasBackPowered, boolean wasSidePowered)
+    {
+        // Update signals for client
+        if (!this.level.isClientSide() && (wasBackPowered != this.isBackPowered || wasSidePowered != this.isSidePowered))
+        {
+            this.level.getChunkSource().send(PacketDistributor.TRACKING_CHUNK.with(() -> this.level.getChunkSource().getChunkNow(this.getBlockPos().getX() >>4, this.getBlockPos().getZ() >>4)),
+                                                 new UpdateHearthSignalsMessage(isSidePowered, isBackPowered, this.getBlockPos()));
+        }
+    }
+
     public void checkForFuel()
     {
         BlockPos pos = this.getBlockPos();
@@ -509,15 +563,12 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
     protected void drainFuel()
     {
-        if (shouldUseColdFuel)
+        if (this.shouldUseColdFuel)
         {   this.setColdFuel(this.getColdFuel() - 1, true);
         }
-        if (shouldUseHotFuel)
+        if (this.shouldUseHotFuel)
         {   this.setHotFuel(this.getHotFuel() - 1, true);
         }
-
-        shouldUseColdFuel = false;
-        shouldUseHotFuel = false;
     }
 
     protected void tickDrainFuel()
@@ -530,11 +581,31 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     void insulatePlayer(Player player)
     {
         for (int i = 0; i < effects.size(); i++)
-        {   MobEffectInstance effect = effects.get(i);
-            player.addEffect(new MobEffectInstance(effect.getEffect(), effect.getEffect() == MobEffects.NIGHT_VISION ? 399 : 119,
+        {
+            MobEffectInstance effect = effects.get(i);
+            player.addEffect(new MobEffectInstance(effect.getEffect(),
+                                                   effect.getEffect() == MobEffects.NIGHT_VISION
+                                                       ? 399
+                                                       : 119,
                                                    effect.getAmplifier(), effect.isAmbient(), effect.isVisible(), effect.showIcon()));
         }
-        // Apply the insulation effect
+
+        if (!ConfigSettings.SMART_HEARTH.get() || this.shouldInsulatePlayer(player))
+        {
+            int maxEffect = this.getMaxInsulationLevel() - 1;
+            int effectLevel = (int) Math.min(maxEffect, (insulationLevel / (double) this.getInsulationTime()) * maxEffect);
+            if (shouldUseColdFuel)
+            {   player.addEffect(new MobEffectInstance(ModEffects.CHILL, 120, effectLevel, false, false, true));
+            }
+            if (shouldUseHotFuel)
+            {   player.addEffect(new MobEffectInstance(ModEffects.WARMTH, 120, effectLevel, false, false, true));
+            }
+        }
+    }
+
+    protected boolean shouldInsulatePlayer(Player player)
+    {
+        AtomicBoolean shouldInsulate = new AtomicBoolean(false);
         if (!shouldUseColdFuel || !shouldUseHotFuel)
         EntityTempManager.getTemperatureCap(player).ifPresent(cap ->
         {
@@ -568,13 +639,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
             shouldUseHotFuel |= this.getHotFuel() > 0 && temp < min;
             // Tell the hearth to use cold fuel
             shouldUseColdFuel |= this.getColdFuel() > 0 && temp > max;
-
+            shouldInsulate.set(!CSMath.betweenInclusive(temp, min, max));
         });
-        if (shouldUseHotFuel || shouldUseColdFuel)
-        {   int maxEffect = this.getMaxInsulationLevel() - 1;
-            int effectLevel = (int) Math.min(maxEffect, (insulationLevel / (double) this.getInsulationTime()) * maxEffect);
-            player.addEffect(new MobEffectInstance(ModEffects.INSULATED, 120, effectLevel, false, false, true));
-        }
+        return shouldInsulate.get();
     }
 
     protected boolean isValidPipeAt(BlockPos newPos, BlockState fromState, SpreadPath newPath, Direction direction)
@@ -603,7 +670,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         //                                       || state.getBlock() instanceof EncasedPipeBlock);
         return false;
     }
-    
+
     private void registerLocation()
     {
         if (!this.registeredLocation)
@@ -613,6 +680,14 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
             this.y = this.getBlockPos().getY();
             this.z = this.getBlockPos().getZ();
             this.registeredLocation = true;
+        }
+    }
+
+    private void unregisterLocation()
+    {
+        if (this.registeredLocation)
+        {   HearthSaveDataHandler.HEARTH_POSITIONS.remove(levelPos);
+            this.registeredLocation = false;
         }
     }
 
@@ -740,25 +815,28 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     {   return ModSounds.HEARTH_DEPLETE.value();
     }
 
-    public void checkForSmokestack()
+    public boolean checkForSmokestack()
     {
-        if (level == null) return;
+        if (level == null) return false;
 
         boolean hadSmokestack = this.hasSmokestack;
         this.hasSmokestack = level.getBlockState(this.getBlockPos().above()).getBlock() == ModBlocks.SMOKESTACK.value();
-        if (!this.hasSmokestack && hadSmokestack)
-        {   this.resetPaths();
-            HearthSaveDataHandler.HEARTH_POSITIONS.remove(Pair.of(this.getBlockPos(), this.getLevel().dimension().location()));
-            if (this.level.isClientSide)
-            {   ClientOnlyHelper.removeHearthPosition(this.getBlockPos());
-            }
-        }
-        else if (this.hasSmokestack && !hadSmokestack)
-        {   HearthSaveDataHandler.HEARTH_POSITIONS.add(Pair.of(this.getBlockPos(), this.getLevel().dimension().location()));
+        // A smokestack has been added
+        if (this.hasSmokestack && !hadSmokestack)
+        {   this.registerLocation();
             if (this.level.isClientSide)
             {   ClientOnlyHelper.addHearthPosition(this.getBlockPos());
             }
         }
+        // A smokestack has been removed
+        else if (!this.hasSmokestack && hadSmokestack)
+        {   this.resetPaths();
+            this.unregisterLocation();
+            if (this.level.isClientSide)
+            {   ClientOnlyHelper.removeHearthPosition(this.getBlockPos());
+            }
+        }
+        return this.hasSmokestack;
     }
 
     protected void tickParticles()
@@ -768,30 +846,38 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         {   this.smokestackHeight = 2;
             BlockState state = level.getBlockState(this.getBlockPos().above(this.smokestackHeight));
             while (state.getBlock() instanceof WallBlock || state.getBlock() instanceof SmokestackBlock)
-            {   smokestackHeight++;
+            {   this.smokestackHeight++;
                 state = level.getBlockState(this.getBlockPos().above(this.smokestackHeight));
             }
         }
 
-        Random rand = new Random();
-        if (rand.nextDouble() < this.getColdFuel() / 3000d)
-        {   double d0 = this.x + 0.5d;
-            double d1 = this.y + smokestackHeight;
-            double d2 = this.z + 0.5d;
-            double d3 = (rand.nextDouble() - 0.5) / 4;
-            double d4 = (rand.nextDouble() - 0.5) / 4;
-            double d5 = (rand.nextDouble() - 0.5) / 4;
-            level.addParticle(ModParticleTypes.STEAM.get(), d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.04D, 0.0D);
+        RandomSource rand = this.level.random;
+        if (this.shouldUseColdFuel)
+        {
+            if (rand.nextDouble() < this.getColdFuel() / 3000d)
+            {   double d0 = this.x + 0.5d;
+                double d1 = this.y + this.smokestackHeight;
+                double d2 = this.z + 0.5d;
+                double d3 = (rand.nextDouble() - 0.5) / 4;
+                double d4 = (rand.nextDouble() - 0.5) / 4;
+                double d5 = (rand.nextDouble() - 0.5) / 4;
+                level.addParticle(ModParticleTypes.STEAM.get(), d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.04D, 0.0D);
+            }
         }
-        if (rand.nextDouble() < this.getHotFuel() / 3000d)
-        {   double d0 = this.x + 0.5d;
-            double d1 = this.y + smokestackHeight;
-            double d2 = this.z + 0.5d;
-            double d3 = (rand.nextDouble() - 0.5) / 2;
-            double d4 = (rand.nextDouble() - 0.5) / 2;
-            double d5 = (rand.nextDouble() - 0.5) / 2;
-            SimpleParticleType particle = Math.random() < 0.5 ? ParticleTypes.LARGE_SMOKE : ParticleTypes.SMOKE;
-            level.addParticle(particle, d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.0D, 0.0D);
+        if (this.shouldUseHotFuel)
+        {
+            if (rand.nextDouble() < this.getHotFuel() / 3000d)
+            {   double d0 = this.x + 0.5d;
+                double d1 = this.y + this.smokestackHeight;
+                double d2 = this.z + 0.5d;
+                double d3 = (rand.nextDouble() - 0.5) / 2;
+                double d4 = (rand.nextDouble() - 0.5) / 2;
+                double d5 = (rand.nextDouble() - 0.5) / 2;
+                SimpleParticleType particle = rand.nextDouble() < 0.5
+                                              ? ParticleTypes.LARGE_SMOKE
+                                              : ParticleTypes.SMOKE;
+                level.addParticle(particle, d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.0D, 0.0D);
+            }
         }
     }
 
@@ -945,6 +1031,22 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     {   return this.pathLookup;
     }
 
+    public boolean isSidePowered()
+    {   return this.isSidePowered;
+    }
+
+    public boolean isBackPowered()
+    {   return this.isBackPowered;
+    }
+
+    public void setSidePowered(boolean isPowered)
+    {   this.isSidePowered = isPowered;
+    }
+
+    public void setBackPowered(boolean isPowered)
+    {   this.isBackPowered = isPowered;
+    }
+
     public abstract static class FluidHandler implements IFluidHandler
     {
         HearthBlockEntity hearth;
@@ -971,7 +1073,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         @Override
         public boolean isFluidValid(int tank, @NotNull FluidStack fluidStack)
         {
-            return tank == 0 ? fluidStack.getFluid() == Fluids.WATER 
+            return tank == 0 ? fluidStack.getFluid() == Fluids.WATER
                              : fluidStack.getFluid() == Fluids.LAVA;
         }
 
