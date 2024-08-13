@@ -39,6 +39,7 @@ public class WorldSettingsConfig
     public static ForgeConfigSpec.ConfigValue<List<? extends Number>> winterTemps;
     public static ForgeConfigSpec.ConfigValue<List<? extends Number>> springTemps;
 
+    public static final ForgeConfigSpec.ConfigValue<Boolean> smartHearth;
     public static final ForgeConfigSpec.ConfigValue<Double> hearthEffect;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> hearthSpreadWhitelist;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> hearthSpreadBlacklist;
@@ -530,6 +531,11 @@ public class WorldSettingsConfig
 
         BUILDER.push("Hearth");
 
+        smartHearth = BUILDER
+                .comment("Allows the hearth to automatically turn on/off based on nearby players' temperature",
+                         "If false, the hearth turns on/off by redstone signal")
+                .define("Automatic Hearth", false);
+
         hearthEffect = BUILDER
                 .comment("How effective the hearth is at normalizing temperature")
                 .defineInRange("Hearth Strength", 0.75, 0, 1.0);
@@ -642,6 +648,9 @@ public class WorldSettingsConfig
 
     public double getHearthStrength()
     {   return hearthEffect.get();
+    }
+    public boolean isSmartHearth()
+    {   return smartHearth.get();
     }
     public List<String> getHearthSpreadWhitelist()
     {   return (List<String>) hearthSpreadWhitelist.get();
