@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.client.event;
 
+import com.momosoftworks.coldsweat.client.renderer.block.IceboxBlockEntityRenderer;
 import com.momosoftworks.coldsweat.client.renderer.entity.ChameleonEntityRenderer;
 import com.momosoftworks.coldsweat.client.renderer.model.armor.*;
 import com.momosoftworks.coldsweat.client.renderer.model.entity.ChameleonModel;
@@ -55,6 +56,8 @@ public class RegisterModels
         event.registerLayerDefinition(GoatParkaModel.LAYER_LOCATION, GoatParkaModel::createArmorLayer);
         event.registerLayerDefinition(GoatPantsModel.LAYER_LOCATION, GoatPantsModel::createArmorLayer);
         event.registerLayerDefinition(GoatBootsModel.LAYER_LOCATION, GoatBootsModel::createArmorLayer);
+
+        event.registerLayerDefinition(IceboxBlockEntityRenderer.LAYER_LOCATION, IceboxBlockEntityRenderer::createBodyLayer);
     }
 
     @SubscribeEvent

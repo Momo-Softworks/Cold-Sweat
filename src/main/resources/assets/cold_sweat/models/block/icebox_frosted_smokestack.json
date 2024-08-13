@@ -1,0 +1,12 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "down": "cold_sweat:block/icebox_bottom",
+    "up": "cold_sweat:block/icebox_top_smokestack",
+    "north": "cold_sweat:block/icebox_side_frosted",
+    "east": "cold_sweat:block/icebox_side_frosted",
+    "south": "cold_sweat:block/icebox_side_frosted",
+    "west": "cold_sweat:block/icebox_side_frosted",
+    "particle": "cold_sweat:block/icebox_bottom"
+  }
+}

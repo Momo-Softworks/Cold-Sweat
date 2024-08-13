@@ -193,5 +193,27 @@
         "stream": true
       }
     ]
+  },
+  "block.icebox.open":
+  {
+    "subtitle": "block.icebox.open",
+    "sounds":
+    [
+      {
+        "name": "cold_sweat:block/icebox/icebox_open",
+        "stream": true
+      }
+    ]
+  },
+  "block.icebox.close":
+  {
+    "subtitle": "block.icebox.close",
+    "sounds":
+    [
+      {
+          "name": "cold_sweat:block/icebox/icebox_close",
+          "stream": true
+      }
+    ]
   }
 }
