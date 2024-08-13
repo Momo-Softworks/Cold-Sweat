@@ -49,11 +49,11 @@ public class MixinItemTooltip
         {
             if (insulator.test(Minecraft.getInstance().player, stack))
             {
-                if (!insulator.attributes().getMap().isEmpty())
+                if (!insulator.attributes.getMap().isEmpty())
                 {
-                    tooltip.add(CommonComponents.EMPTY);
-                    tooltip.add(Component.translatable("item.modifiers.curio").withStyle(ChatFormatting.GRAY));
-                    TooltipHandler.addModifierTooltipLines(tooltip, insulator.attributes());
+                    tooltip.add(new StringTextComponent(""));
+                    tooltip.add(new TranslationTextComponent("item.modifiers.curio").withStyle(TextFormatting.GRAY));
+                    TooltipHandler.addModifierTooltipLines(tooltip, insulator.attributes);
                 }
             }
         });
