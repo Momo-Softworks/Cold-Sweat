@@ -483,9 +483,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     protected void syncInputSignal(boolean wasBackPowered, boolean wasSidePowered)
     {
         // Update signals for client
-        if (!this.level.isClientSide() && (wasBackPowered != this.isBackPowered || wasSidePowered != this.isSidePowered))
+        if (this.level instanceof ServerLevel serverLevel && (wasBackPowered != this.isBackPowered || wasSidePowered != this.isSidePowered))
         {
-            this.level.getChunkSource().send(PacketDistributor.TRACKING_CHUNK.with(() -> this.level.getChunkSource().getChunkNow(this.getBlockPos().getX() >>4, this.getBlockPos().getZ() >>4)),
+            PacketDistributor.sendToPlayersTrackingChunk(serverLevel, new ChunkPos(this.getBlockPos().getX() >>4, this.getBlockPos().getZ() >>4),
                                                  new UpdateHearthSignalsMessage(isSidePowered, isBackPowered, this.getBlockPos()));
         }
     }
