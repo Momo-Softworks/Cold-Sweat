@@ -18,7 +18,7 @@ import static net.minecraft.world.level.block.entity.BeaconBlockEntity.BEACON_EF
 @Mixin(BeaconBlockEntity.class)
 public class MixinBeaconEffects
 {
-    static
+    /*static
     {
         // get the current top-level effects as a mutable list
         List<Holder<MobEffect>> effects = new ArrayList<>(BEACON_EFFECTS.get(3));
@@ -36,5 +36,5 @@ public class MixinBeaconEffects
         {   return new MobEffectInstance(effect.getEffect(), effect.getDuration(), 4, effect.isAmbient(), effect.isVisible(), effect.showIcon());
         }
         return effect;
-    }
+    }*/
 }
