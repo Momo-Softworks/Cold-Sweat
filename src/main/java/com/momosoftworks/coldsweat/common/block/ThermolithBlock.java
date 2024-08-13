@@ -121,9 +121,19 @@ public class ThermolithBlock extends Block implements EntityBlock
     }
 
     @Override
+    public int getDirectSignal(BlockState state, BlockGetter level, BlockPos pos, Direction direction)
+    {   return state.getSignal(level, pos, direction);
+    }
+
+    @Override
     public boolean canConnectRedstone(BlockState state, BlockGetter level, BlockPos pos, @Nullable Direction direction)
     {
         return direction == state.getValue(FACING).getOpposite();
+    }
+
+    @Override
+    public boolean isSignalSource(BlockState pState)
+    {   return true;
     }
 
     @Override
