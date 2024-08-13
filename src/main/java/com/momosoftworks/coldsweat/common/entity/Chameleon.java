@@ -212,7 +212,7 @@ public class Chameleon extends Animal
                 return InteractionResult.CONSUME;
             }
         }
-        else if (this.isPlayerTrusted(player) && player.getPassengers().isEmpty() && !this.level().isClientSide)
+        else if (this.isPlayerTrusted(player) && player.getPassengers().isEmpty() && !this.level.isClientSide)
         {
             if (this.startRiding(player) && player instanceof ServerPlayer serverPlayer)
             {   ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> serverPlayer), new EntityMountMessage(this.getId(), player.getId(), EntityMountMessage.Action.MOUNT));
@@ -415,7 +415,7 @@ public class Chameleon extends Animal
         this.setTemperature(this.getTemperature() + (this.desiredTemp - this.getTemperature()) * 0.03f);
 
         // Handle dismounting
-        if (this.getVehicle() instanceof Player player && !this.level().isClientSide)
+        if (this.getVehicle() instanceof Player player && !this.level.isClientSide)
         {
             if (player.isCrouching())
             {

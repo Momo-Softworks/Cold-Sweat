@@ -51,8 +51,8 @@ public class MixinItemTooltip
             {
                 if (!insulator.attributes().getMap().isEmpty())
                 {
-                    tooltip.add(CommonComponents.EMPTY);
-                    tooltip.add(Component.translatable("item.modifiers.curio").withStyle(ChatFormatting.GRAY));
+                    tooltip.add(new TextComponent(""));
+                    tooltip.add(new TranslatableComponent("item.modifiers.curio").withStyle(ChatFormatting.GRAY));
                     TooltipHandler.addModifierTooltipLines(tooltip, insulator.attributes());
                 }
             }
