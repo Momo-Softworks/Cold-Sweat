@@ -1,6 +1,6 @@
 package com.momosoftworks.coldsweat.common.block;
 
-import com.momosoftworks.coldsweat.common.blockentity.ThermolithTileEntity;
+import com.momosoftworks.coldsweat.common.blockentity.ThermolithBlockEntity;
 import com.momosoftworks.coldsweat.core.init.BlockEntityInit;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -31,7 +31,6 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.function.ToIntFunction;
@@ -103,7 +102,7 @@ public class ThermolithBlock extends Block
     }
 
     @Override
-    public ThermolithTileEntity createTileEntity(BlockState state, IBlockReader world)
+    public ThermolithBlockEntity createTileEntity(BlockState state, IBlockReader world)
     {   return BlockEntityInit.THERMOLITH_BLOCK_ENTITY_TYPE.get().create();
     }
 
@@ -111,15 +110,25 @@ public class ThermolithBlock extends Block
     public int getSignal(BlockState state, IBlockReader level, BlockPos pos, Direction direction)
     {
         TileEntity blockEntity = level.getBlockEntity(pos);
-        if (direction == state.getValue(FACING).getOpposite() && blockEntity instanceof ThermolithTileEntity)
-        {   return ((ThermolithTileEntity) blockEntity).getSignal();
+        if (direction == state.getValue(FACING).getOpposite() && blockEntity instanceof ThermolithBlockEntity)
+        {   return ((ThermolithBlockEntity) blockEntity).getSignal();
         }
         return 0;
     }
 
     @Override
+    public int getDirectSignal(BlockState state, IBlockReader level, BlockPos pos, Direction direction)
+    {   return state.getSignal(level, pos, direction);
+    }
+
+    @Override
     public boolean canConnectRedstone(BlockState state, IBlockReader level, BlockPos pos, Direction direction)
     {   return direction == state.getValue(FACING).getOpposite();
+    }
+
+    @Override
+    public boolean isSignalSource(BlockState pState)
+    {   return true;
     }
 
     @Override
