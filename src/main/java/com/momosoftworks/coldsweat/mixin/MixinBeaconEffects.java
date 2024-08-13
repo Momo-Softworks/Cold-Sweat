@@ -17,7 +17,7 @@ import java.util.List;
 @Mixin(BeaconTileEntity.class)
 public class MixinBeaconEffects
 {
-    @Shadow @Final public static Effect[][] BEACON_EFFECTS;
+    /*@Shadow @Final public static Effect[][] BEACON_EFFECTS;
 
     static
     {
@@ -38,5 +38,5 @@ public class MixinBeaconEffects
         {   return new EffectInstance(effect.getEffect(), effect.getDuration(), 4, effect.isAmbient(), effect.isVisible(), effect.showIcon());
         }
         return effect;
-    }
+    }*/
 }
