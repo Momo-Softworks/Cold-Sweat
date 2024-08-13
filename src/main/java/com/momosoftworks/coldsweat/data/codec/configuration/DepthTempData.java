@@ -54,8 +54,8 @@ public record DepthTempData(List<TempRegion> temperatures) implements IForgeRegi
                 VerticalBound.CODEC.fieldOf("bottom").forGetter(TempRegion::bottom)
         ).apply(instance, (type, top, bottom) ->
         {
-            if (type == RampType.CONSTANT && top.temperature != bottom.temperature)
-            {   throw new IllegalArgumentException("Constant temperature ramp type must have a single temperature value");
+            if (type == RampType.CONSTANT && !top.temperature.equals(bottom.temperature))
+            {   throw new IllegalArgumentException("Constant temperature ramp type must have a single temperature value; got " + top.temperature + " and " + bottom.temperature);
             }
             return new TempRegion(type, top, bottom);
         }));
@@ -150,6 +150,14 @@ public record DepthTempData(List<TempRegion> temperatures) implements IForgeRegi
                 else return DataResult.success(Either.left(value.temperature));
             });
 
+            @Override
+            public boolean equals(Object obj)
+            {
+                return obj instanceof TempContainer container
+                    && container.temperature == temperature
+                    && container.type == type
+                    && container.strength == strength;
+            }
         }
 
         public int getHeight(BlockPos checkPos, Level level)
