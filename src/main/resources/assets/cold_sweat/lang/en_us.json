@@ -45,12 +45,13 @@
   "tooltip.cold_sweat.per_second": "/sec",
 
   "item.modifiers.insulation": "When Applied to Armor:",
-  "item.modifiers.curio": "When Worn as Curio:",
+  "item.modifiers.curio":      "When Worn as Curio:",
 
 
-  "effect.cold_sweat.insulated":            "Insulation",
-  "effect.cold_sweat.ice_resistance":       "Ice Resistance",
-  "effect.cold_sweat.grace":                "Grace",
+  "effect.cold_sweat.warmth":           "Warmth",
+  "effect.cold_sweat.chill":            "Chill",
+  "effect.cold_sweat.ice_resistance":   "Ice Resistance",
+  "effect.cold_sweat.grace":            "Grace",
 
 
   "container.cold_sweat.boiler":        "Boiler",
