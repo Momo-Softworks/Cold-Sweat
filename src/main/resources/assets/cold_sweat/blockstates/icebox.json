@@ -1,43 +1,83 @@
 {
   "variants":
   {
-    "facing=north,frosted=false":
+    "facing=north,frosted=false,smokestack=false":
     {
       "model": "cold_sweat:block/icebox"
     },
-    "facing=east,frosted=false":
+    "facing=east,frosted=false,smokestack=false":
     {
       "model": "cold_sweat:block/icebox",
       "y": 90
     },
-    "facing=south,frosted=false":
+    "facing=south,frosted=false,smokestack=false":
     {
       "model": "cold_sweat:block/icebox",
       "y": 180
     },
-    "facing=west,frosted=false":
+    "facing=west,frosted=false,smokestack=false":
     {
       "model": "cold_sweat:block/icebox",
       "y": 270
     },
 
-    "facing=north,frosted=true":
+    "facing=north,frosted=true,smokestack=false":
     {
       "model": "cold_sweat:block/icebox_frosted"
     },
-    "facing=east,frosted=true":
+    "facing=east,frosted=true,smokestack=false":
     {
       "model": "cold_sweat:block/icebox_frosted",
       "y": 90
     },
-    "facing=south,frosted=true":
+    "facing=south,frosted=true,smokestack=false":
     {
       "model": "cold_sweat:block/icebox_frosted",
       "y": 180
     },
-    "facing=west,frosted=true":
+    "facing=west,frosted=true,smokestack=false":
     {
       "model": "cold_sweat:block/icebox_frosted",
+      "y": 270
+    },
+
+    "facing=north,frosted=false,smokestack=true":
+    {
+      "model": "cold_sweat:block/icebox_smokestack"
+    },
+    "facing=east,frosted=false,smokestack=true":
+    {
+      "model": "cold_sweat:block/icebox_smokestack",
+      "y": 90
+    },
+    "facing=south,frosted=false,smokestack=true":
+    {
+      "model": "cold_sweat:block/icebox_smokestack",
+      "y": 180
+    },
+    "facing=west,frosted=false,smokestack=true":
+    {
+      "model": "cold_sweat:block/icebox_smokestack",
+      "y": 270
+    },
+
+    "facing=north,frosted=true,smokestack=true":
+    {
+      "model": "cold_sweat:block/icebox_frosted_smokestack"
+    },
+    "facing=east,frosted=true,smokestack=true":
+    {
+      "model": "cold_sweat:block/icebox_frosted_smokestack",
+      "y": 90
+    },
+    "facing=south,frosted=true,smokestack=true":
+    {
+      "model": "cold_sweat:block/icebox_frosted_smokestack",
+      "y": 180
+    },
+    "facing=west,frosted=true,smokestack=true":
+    {
+      "model": "cold_sweat:block/icebox_frosted_smokestack",
       "y": 270
     }
   }
