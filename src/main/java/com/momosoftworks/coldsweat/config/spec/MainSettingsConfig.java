@@ -53,7 +53,7 @@ public class MainSettingsConfig
                 .defineInRange("Difficulty", defaultDiff.ordinal(), 0, ConfigSettings.Difficulty.values().length - 1);
 
         version = BUILDER
-                .define("Version", ConfigSettings.getVersionString(ModList.get().getModContainerById(ColdSweat.MOD_ID).get().getModInfo().getVersion()));
+                .define("Version", "");
 
         BUILDER.pop();
 
