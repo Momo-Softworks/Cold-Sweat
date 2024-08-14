@@ -23,7 +23,7 @@ public class UndergroundTempModifier extends TempModifier
         if (entity.level.dimensionType().hasCeiling()) return temp -> temp;
 
         double midTemp = (ConfigSettings.MAX_TEMP.get() + ConfigSettings.MIN_TEMP.get()) / 2;
-        BlockPos playerPos = new BlockPos(entity.getEyePosition(0));
+        BlockPos playerPos = new BlockPos(entity.getEyePosition(1));
         World level = entity.level;
 
         // Depth, Weight

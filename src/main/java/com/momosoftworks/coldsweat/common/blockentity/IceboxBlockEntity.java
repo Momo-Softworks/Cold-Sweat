@@ -145,6 +145,8 @@ public class IceboxBlockEntity extends HearthBlockEntity implements ITickableTil
     @Override
     public void tick()
     {
+        super.tick();
+
         // Tick lid animation on client
         if (level.isClientSide())
         {   this.lidController.tickLid();

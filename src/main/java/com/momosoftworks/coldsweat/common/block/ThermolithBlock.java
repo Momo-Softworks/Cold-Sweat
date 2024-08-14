@@ -6,6 +6,7 @@ import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.item.BlockItemUseContext;
@@ -30,12 +31,13 @@ import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.function.ToIntFunction;
 
-public class ThermolithBlock extends Block
+public class ThermolithBlock extends Block implements ITileEntityProvider
 {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
@@ -102,7 +104,13 @@ public class ThermolithBlock extends Block
     }
 
     @Override
-    public ThermolithBlockEntity createTileEntity(BlockState state, IBlockReader world)
+    public TileEntity createTileEntity(BlockState state, IBlockReader world)
+    {   return BlockEntityInit.THERMOLITH_BLOCK_ENTITY_TYPE.get().create();
+    }
+
+    @Nullable
+    @Override
+    public TileEntity newBlockEntity(IBlockReader world)
     {   return BlockEntityInit.THERMOLITH_BLOCK_ENTITY_TYPE.get().create();
     }
 
