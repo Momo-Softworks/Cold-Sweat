@@ -29,7 +29,8 @@ import static net.minecraft.client.gui.AbstractGui.GUI_ICONS_LOCATION;
 @Mixin(ForgeIngameGui.class)
 public abstract class MixinHeartRender
 {
-    @Shadow protected abstract void bind(ResourceLocation res);
+    @Shadow(remap = false)
+    protected abstract void bind(ResourceLocation res);
 
     private static final ResourceLocation HEART_TEXTURE = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/overlay/hearts_frozen.png");
     private static int HEART_INDEX = 0;
@@ -39,7 +40,7 @@ public abstract class MixinHeartRender
             at = @At(value = "INVOKE", target = "Lnet/minecraftforge/client/gui/ForgeIngameGui;blit(Lcom/mojang/blaze3d/matrix/MatrixStack;IIIIII)V", shift = At.Shift.AFTER),
             slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;ceil(F)I", ordinal = 3),
                            to = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;disableBlend()V")),
-            locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
+            locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true, remap = false)
     private void renderHeart(int width, int height, MatrixStack ps, CallbackInfo ci,
                              // Locals
                              PlayerEntity player, int health, boolean blink, int healthLast,

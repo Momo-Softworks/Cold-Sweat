@@ -7,7 +7,7 @@ import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.entity.LivingEntity;
 import sereneseasons.api.season.ISeasonState;
 import sereneseasons.api.season.SeasonHelper;
-import sereneseasons.config.ServerConfig;
+import sereneseasons.config.SeasonsConfig;
 
 import java.util.function.Function;
 
@@ -22,7 +22,7 @@ public class SereneSeasonsTempModifier extends TempModifier
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
         if (entity.level.dimensionType().natural()
-        || ServerConfig.whitelistedDimensions.get().contains(entity.level.dimension().location()))
+        || SeasonsConfig.whitelistedDimensions.get().contains(entity.level.dimension().location()))
         {
             ISeasonState season = SeasonHelper.getSeasonState(entity.level);
             double startValue;
