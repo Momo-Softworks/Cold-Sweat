@@ -2283,3 +2283,42 @@ Technical Changes:
 
 Fixes:
 - Fixed issues with mixin conflicts & mixins not properly loading in some cases
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.3-b06a
+* Added config option for armor insulation slots to dynamically scale based on protection value:
+      - There are 4 modes: Static (no scaling), Linear, Exponential, and Logarithmic
+      - A maximum number of slots can be set to prevent excessive scaling
+* Added JSON-only config option to customize how world temperature behaves undergorund
+      - This system is defined in "regions", in which the temperature can be set to a specific value or follow a gradient
+      - By default, the world consists of 3 regions (this replicates how the old system worked):
+            - From ground level to 4 block below ground, the temperature is unchanged
+            - From 5 blocks 20 blocks, the temperature gradually reaches 75 °F (24 °C)
+            - From 20 blocks onward, the temperature is 75 °F (24 °C)
+* Hearth-like blocks (including the boiler and icebox) now require redstone power to emit heat/cold
+      - While one of these blocks are powered, they will constantly heat/cool the area and consume fuel
+      - The thermolith can be used to detect the nearby temperature and power these blocks dynamically
+      * A config option has been added to re-enable the "smart" behavior of these blocks
+      - If a hearth is powered from the sides, it will cool the nearby area
+      - If a hearth is powered from the back, it will heat the nearby area
+      - Powering a hearth from both areas will make it heat and cool
+      - Powering a boiler or icebox from any side will make it heat or cool, respectively
+- Added support for using a Create display link on the thermolith
+      - The current world temperature will be displayed
+      - A field will be added upon placing the display link that allows the user to define the temperature units
+* The icebox now has an animation/sounds when being used, opening like a chest
+- The icebox now has a unique texture for when a smokestack is placed on top
+- Right-clicking the thermometer now displays the world temperature if Supplementaries in installed
+- The thermolith now provides direct power, allowing it to send the signal through blocks
+- Updated the hearth's item texture to be consistent with its block form
+- Ice and snow now have slightly lower fuel values in the icebox and hearth
+
+Fixes:
+- Fixed attribute modifiers failing to parse in non-English locales, causing world loading to fail
+- Fixed steam particles not rendering
+
+Technical Changes:
+* Added an automatic config updater, which will change existing config settings when updating to new versions
+     - This prevents outdated config settings causing new features to not work as intended
+     - This system will be used very sparingly, and only triggers once

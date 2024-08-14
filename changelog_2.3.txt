@@ -1,22 +1,31 @@
 2.3
-!! Several config files have formatting changes. Please backup all configs before updating
+!! Several config files have formatting changes. Please back up all configs before updating
 
 New Boiler & Icebox Behavior:-
 - Added new block: Smokestack
-- A smokestack can be placed on top of these blocks to make them act like a half-power hearth
-    - They give up to Insulation V and can only heat or cool, respectively
-    - They have about 60% of the radius and much less maximum volume
-- They now produce ambient air particles when fueled and have a smokestack
-    - Added a new button to their GUIs to toggle this effect
+      - A smokestack can be placed on top of these blocks to make them act like a half-power hearth
+          - They give up to Insulation V and can only heat or cool, respectively
+          - They have about 60% of the radius and much less maximum volume
+      - They now produce ambient air particles when fueled and have a smokestack
+          - Added a new button to their GUIs to toggle this effect
+* The icebox now has an animation/sounds when being used, opening like a chest
+- The icebox has a unique texture for when a smokestack is placed on top
 - Lava/water can be piped into them, similar to the hearth
 
 Hearth Changes:-
 - The hearth has been altered to be a post-Nether block
-      - Crafted with nether bricks and basalt, as well as the new smokestack block
-      - The texture has been changed accordingly
+      - Crafted with nether bricks and soul sand/soil, as well as the new smokestack block
       - All other functionality is the same. This block is now an "upgrade" to the smokestack/boiler/icebox
 - The hearth-like blocks now protect against temperature 50% more effectively
       - This means the boiler & icebox have ~75% the effectiveness of the old hearth, and the new hearth is better than before
+* Hearth-like blocks (including the boiler and icebox) now require redstone power to emit heat/cold
+      - While one of these blocks are powered, they will constantly heat/cool the area and consume fuel
+      - The thermolith can be used to detect the nearby temperature and power these blocks dynamically
+      * A config option has been added to re-enable the "smart" behavior of these blocks
+      - If a hearth is powered from the sides, it will cool the nearby area
+      - If a hearth is powered from the back, it will heat the nearby area
+      - Powering a hearth from both areas will make it heat and cool
+      - Powering a boiler or icebox from any side will make it heat or cool, respectively
 
 Waterskin Changes:-
 - Waterskins are now drinkable via sneaking and right-clicking
@@ -24,9 +33,38 @@ Waterskin Changes:-
 - Waterskins can now fill (and be filled from) cauldrons
 - Added custom filling and pouring sounds for the waterskin
 
+Chameleon Changes:-
+* Chameleons can now be given items by right-clicking
+      - Aside from being intuitive, this is a way of ensuring which chameleon will eat the item if there are multiple nearby. Only the chosen chameleon will attempt to eat the item
+* Tamed chameleons can now be bred using their normal taming items (fish, spider eye), but only once
+      - This is to make chameleons slightly easier to obtain, and help with potential scarcity on large servers
+      - Baby chameleons shed chameleon molt immediately upon turning in to an adult, but otherwise don't
+- Chameleons now drop 1 chameleon molt when killed, except if they are a baby
+- Made baby chameleons slightly smaller
+- Slightly decreased the rate at which chameleons shed
+
+Loot Changes:-
+- Increased hoglin hide drop rate to between 1 and 3 (from 1)
+- Chameleon molt dropped from chameleons now lasts 20 minutes before despawning
+- Significantly reduced the drop rate of sticks from soul stalk blocks
+
+Ice Changes:-
+* The hearth & icebox now no longer accept water by default
+      - Now, the primary cold fuel source is ice
+* Ice is now much easier to obtain/farm, due to a few key changes:
+      - Ice now freezes/thaws according to Cold Sweat's temperature system
+      - This new system takes altitude, time, and the season into account
+      - Ice freezes at roughly 32 °F (0 °C)
+      - Ice can now be obtained with a stone pickaxe without silk touch
+            - An iron pickaxe is required for packed ice and blue ice
+            - If ice is mined with a wooden pickaxe or by hand, it will turn into water as normal
+      - Packed and Blue ice can now be un-crafted into their "lower-level" variants (i.e. blue ice yields packed ice) in the crafting table or stonecutter
+            - The crafting table yields 4 ice blocks, while the stonecutter yields 9
+- Ice and snow now have slightly lower fuel values in the icebox and hearth
+
 UI Changes:-
 * The "vague" temperature gauge (world temperature gauge without a thermometer) has been turned into a frame around the body temperature icon
-      - Functionality is the same; these UI elements have just been combined to make the UI less cluttered. It look pretty good, too!
+      - Functionality is the same; these UI elements have just been combined to make the UI less cluttered. It looks pretty good, too!
       - The exact world temperature readout will still be shown as normal when the player has a thermometer
 * The body temperature readout is now hidden unless a thermometer is equipped
       - Instead, the body temperature icon will now gradually fill up, turning either orange or blue as the player's temperature increases/decreases
@@ -53,25 +91,17 @@ Mod Compatibility:-
       - This leverages the new entity predicate system added in this update
 - Added Primal Winter support by default
 * (1.20) Added Weather, Storms & Tornadoes (Weather2) support
-
-Chameleon Changes:-
-* Chameleons can now be given items by right-clicking
-      - Aside from being intuitive, this is a way of ensuring which chameleon will eat the item if there are multiple nearby. Only the chosen chameleon will attempt to eat the item
-* Tamed chameleons can now be bred using their normal taming items (fish, spider eye), but only once
-      - This is to make chameleons slightly easier to obtain, and help with potential scarcity on large servers
-      - Baby chameleons shed chameleon molt immediately upon turning in to an adult, but otherwise don't
-- Chameleons now drop 1 chameleon molt when killed, except if they are a baby
-- Made baby chameleons slightly smaller
-- Slightly decreased the rate at which chameleons shed
-
-Loot Changes:-
-- Increased hoglin hide drop rate to between 1 and 3 (from 1)
-- Chameleon molt dropped from chameleons now lasts 20 minutes before despawning
-- Significantly reduced the drop rate of sticks from soul stalk blocks
+* Aquamirae three-bold armor set now provides some freezing protection, as well as water immunity
+* Added support for Spoiled:
+      - Placing food items in the icebox will stop food spoilage as long as it is fueled
+      - This will gradually drain fuel from the icebox
+- Added support for using a Create display link on the thermolith
+      - The current world temperature will be displayed
+      - A field will be added upon placing the display link that allows the user to define the temperature units
 
 Misc. Changes:-
 * Added "Cold Sweat: Insulators" creative tab
-        - Contains all items that can be used as insulation, or provide insulation when worn
+      - Contains all items that can be used as insulation, or provide insulation when worn
 * Shift-clicking an armor item from the output slot of the sewing table now applies all available insulation at once
 - Removed the Insulated effect from the list of top-tier beacon effects
 - The inside of naturally-generated igloos is now habitable
@@ -97,12 +127,14 @@ Config Changes:
       * These settings now have entries in the config menu as well
 * Added config option for setting the temperature of natural structures
       - This controls the world temperature when the player is inside the structure
+* Added config option for armor insulation slots to dynamically scale based on protection value:
+      - There are 4 modes: Static (no scaling), Linear, Exponential, and Logarithmic
+      - A maximum number of slots can be set to prevent excessive scaling
 - Added config option to allow certain blocks to be slept on regardless of the outside temperature
 - The temperature rate config setting now affects how fast waterskins heat/cool in the boiler and icebox
 * Most item configs now support defining NBT tags (i.e. {Color:"blue"}).
       - Item configs with NBT tags defined will require the specified NBT data to be present on the item
 * Added the option for food items to change the player's temperature for a period of time, like soul sprouts
-      ! The soul sprout will lose this effect until item-settings.toml is reset
 - Moved the "Cold Soul Fire" and "Check Sleep Conditions" settings to world-settings.toml
 - Renamed some too-verbose config settings/sections
 - Added new config option to smooth out how rapidly changing temperatures are represented by the world temperature gauge
@@ -119,15 +151,16 @@ Technical Changes:
 * Added support for defining config settings using JSON:
       - This is a more modular way of configuring things, without having to add them to the config files
       * It can be defined by mod developers in the data files, or via datapacks:
-            - Insulation: data/<yourmod>/cold_sweat/insulator
-            - Fuel items: .../fuel
-            - Food temperatures: .../food
-            - Block Temps: .../block_temp
-            - Biome Temps: .../biome_temp
-            - Dimension Temps: .../dimension_temp
-            - Structure temperatures: .../structure_temp
-            - Insulating mounts: .../mount
-            - Entity spawn biomes: .../spawn_biome
+            - Insulation: data/<yourmod>/cold_sweat/item/insulator
+            - Fuel items: .../item/fuel
+            - Food temperatures: .../item/food
+            - Block Temps: .../block/block_temp
+            - Biome Temps: .../world/biome_temp
+            - Dimension Temps: .../world/dimension_temp
+            - Structure temperatures: .../world/structure_temp
+            - Temperature regions: .../world/depth_temp
+            - Insulating mounts: .../entity/mount
+            - Entity spawn biomes: .../entity/spawn_biome
       * It can also be placed in the user config folder (config/coldsweat/data/*) to be globally applied (i.e. config/coldsweat/data/insulator)
       * Insulation items have additional functionality when defined in JSON:
             - They can now contain entity predicates:
@@ -172,4 +205,7 @@ Technical Changes:
             - Otherwise, the event's temperature is passed into the TempModifier for calculation
       - Modify: Fires after the TempModifier is calculated, and allows the resulting function to be modified
             - The event is not cancelable
-* Some config settings now require a RegistryAccess when saving, loading, or getting (see ConfigSetings.java)
+* Some config settings now require a RegistryAccess when saving, loading, or getting (see ConfigSettings.java)
+* Added an automatic config updater, which will change existing config settings when updating to new versions
+     - This prevents outdated config settings causing new features to not work as intended
+     - This system will be used very sparingly, and only triggers once
