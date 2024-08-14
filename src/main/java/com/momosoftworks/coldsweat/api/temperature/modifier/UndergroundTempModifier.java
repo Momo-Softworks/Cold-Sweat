@@ -101,6 +101,7 @@ public class UndergroundTempModifier extends TempModifier
                 // Add the weighted temperature to the list
                 depthTemps.add(new Pair<>(depthTemp, weight));
             }
+            if (depthTemps.isEmpty()) return temp;
             // Calculate the weighted average of the depth temperatures
             double weightedDepthTemp = CSMath.weightedAverage(depthTemps);
 
