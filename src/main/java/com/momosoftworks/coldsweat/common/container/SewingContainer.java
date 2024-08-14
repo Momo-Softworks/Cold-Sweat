@@ -331,7 +331,7 @@ public class SewingContainer extends AbstractContainerMenu
         // Prevent exceeding the armor item's insulation capacity
         if (!cap.canAddInsulationItem(armorItem, insulator)) return false;
 
-        cap.addInsulationItem(insulator);
+        cap = cap.addInsulationItem(insulator);
 
         // Transfer enchantments
         if (armorItem.has(DataComponents.ENCHANTMENTS) && insulator.has(DataComponents.ENCHANTMENTS))
