@@ -128,7 +128,7 @@ public class ColdSweat
     }
 
     public void updateConfigs(FMLCommonSetupEvent event)
-    {   ConfigSettings.updateConfigs();
+    {   ConfigUpdater.updateConfigs();
     }
 
     public void registerCurioSlots(InterModEnqueueEvent event)

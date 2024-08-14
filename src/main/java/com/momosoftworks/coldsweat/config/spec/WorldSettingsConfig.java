@@ -460,7 +460,7 @@ public class WorldSettingsConfig
                                     (
                                             Arrays.asList("minecraft:soul_fire",     -0.476, 7, true, 0.8),
                                             Arrays.asList("minecraft:fire",           0.476, 7, true, 0.8),
-                                            Arrays.asList("minecraft:magma_block",      0.5, 3, true, 0.6),
+                                            Arrays.asList("minecraft:magma_block",      0.25, 3, true, 1),
                                             Arrays.asList("minecraft:soul_campfire", -0.476, 7, true, 0.6, "lit=true"),
                                             Arrays.asList("minecraft:ice",            -0.15, 4, true, 0.5),
                                             Arrays.asList("minecraft:packed_ice",     -0.25, 4, true, 1.0),
@@ -609,6 +609,10 @@ public class WorldSettingsConfig
 
     public static WorldSettingsConfig getInstance()
     {   return INSTANCE;
+    }
+
+    public void save()
+    {   SPEC.save();
     }
 
     /* Getters */
