@@ -91,7 +91,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements ITickableTil
 
     ChestLidController lidController = new ChestLidController();
 
-    public IceboxBlockEntity(BlockPos pos, BlockState state)
+    public IceboxBlockEntity()
     {   super(BlockEntityInit.ICEBOX_BLOCK_ENTITY_TYPE.get());
         TaskScheduler.schedule(this::checkForSmokestack, 5);
     }
