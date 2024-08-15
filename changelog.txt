@@ -2311,12 +2311,14 @@ Fixes:
 - The icebox now has a unique texture for when a smokestack is placed on top
 - Right-clicking the thermometer now displays the world temperature if Supplementaries in installed
 - The thermolith now provides direct power, allowing it to send the signal through blocks
-- Updated the hearth's item texture to be consistent with its block form
+- Updated the hearth's item texture and recipe to be consistent with its block form
 - Ice and snow now have slightly lower fuel values in the icebox and hearth
 
 Fixes:
 - Fixed attribute modifiers failing to parse in non-English locales, causing world loading to fail
 - Fixed steam particles not rendering
+- Fixed crash when clicking unformatted text in chat
+- Fixed the hearth's AOE still showing after the block is removed by unconventional means
 
 Technical Changes:
 * Added an automatic config updater, which will change existing config settings when updating to new versions
