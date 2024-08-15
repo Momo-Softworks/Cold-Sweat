@@ -18,6 +18,7 @@ import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -190,10 +191,20 @@ public class MixinSoulLampRendering
             if (self instanceof PlayerModel playerModel && !ClientOnlyHelper.isPlayerModelSlim(self))
             {
                 if (EntityHelper.holdingLamp(entity, HumanoidArm.RIGHT))
-                {   playerModel.rightArm.y += 1;
+                {
+                    playerModel.rightArm.y += 1;
+                    if (entity instanceof Player player && player.getAttackAnim(Minecraft.getInstance().getFrameTime()) > 0
+                    && EntityHelper.getArmFromHand(player.swingingArm, player) == HumanoidArm.RIGHT)
+                    {   playerModel.rightArm.x -= 1;
+                    }
                 }
                 if (EntityHelper.holdingLamp(entity, HumanoidArm.LEFT))
-                {   playerModel.leftArm.y += 1;
+                {
+                    playerModel.leftArm.y += 1;
+                    if (entity instanceof Player player && player.getAttackAnim(Minecraft.getInstance().getFrameTime()) > 0
+                    && EntityHelper.getArmFromHand(player.swingingArm, player) == HumanoidArm.LEFT)
+                    {   playerModel.leftArm.x += 1;
+                    }
                 }
             }
         }
