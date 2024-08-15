@@ -107,24 +107,45 @@ public class RenderLampHand
             arm.yRot = -arm.xRot * sideMultiplier - (float) (0.5*Math.PI) * sideMultiplier;
             arm.xRot = (float) -Math.PI/2;
             arm.x -= 1 * sideMultiplier;
-            // Fix weird offset when crouching
             if (player.isCrouching())
             {   arm.xRot -= 0.4f;
             }
+
             // Better swinging animation
             if (player.swinging && side == player.getMainArm())
             {
                 float partialTick = Minecraft.getInstance().getFrameTime();
                 float attackAnim = player.getAttackAnim(partialTick);
-                float pitchFactor = 1.5f * CSMath.blend(0.4f, 2f, player.getViewXRot(partialTick), -90, 90);
-                if (attackAnim < 0.125)
-                {   arm.xRot += Math.max(0, Math.sin(attackAnim * Math.PI * 4) / pitchFactor);
+                float playerPitch = player.getViewXRot(partialTick);
+                float pitchFactor = getSwingHorizontalOffset(side, playerPitch);
+                float midSwingPoint = side == HandSide.RIGHT ? 0.125f : 0.0f;
+
+                if (attackAnim < 0.001)
+                {   arm.xRot += CSMath.blend(0, 1, attackAnim, 0, midSwingPoint) / pitchFactor;
                 }
                 else
-                {   arm.xRot += CSMath.blend(1, 0, attackAnim, 0.125, 1) / pitchFactor;
+                {   arm.xRot += CSMath.blend(1, 0, attackAnim, midSwingPoint, 1) / pitchFactor;
                 }
+                float pitchSwingHeight = playerPitch < 0 ? playerPitch/20 : playerPitch/60;
+                arm.yRot += (Math.pow(attackAnim - 0.5, 2) - 0.25) * pitchSwingHeight * sideMultiplier;
             }
         }
+    }
+
+    private static float getSwingHorizontalOffset(HandSide side, float playerPitch)
+    {
+        float pitchFactor;
+        if (side == HandSide.RIGHT)
+        {
+            pitchFactor = playerPitch < 0 ? CSMath.blend(1f, 0.5f, playerPitch, 0, -90)
+                                          : CSMath.blend(1f, 3f, playerPitch, 0, 90);
+        }
+        else
+        {
+            pitchFactor = playerPitch < 0 ? CSMath.blend(1f, 0.7f, playerPitch, 0, -90)
+                                          : CSMath.blend(0.7f, 4f, playerPitch, 0, 90);
+        }
+        return pitchFactor;
     }
 
     private static void renderHand(MatrixStack ms, IRenderTypeBuffer bufferSource, int light, AbstractClientPlayerEntity player, boolean isRightHand,
@@ -182,13 +203,13 @@ public class RenderLampHand
         if (isRightHand)
         {
             ms.mulPose(Vector3f.ZP.rotationDegrees(90));
-            ms.translate(-0.1, 0.155, 0);
-            handRenderer.renderItem(player, itemStack, ItemCameraTransforms.TransformType.THIRD_PERSON_LEFT_HAND, false, ms, bufferSource, light);
+            ms.translate(-0.1, 0.125, 0);
+            handRenderer.renderItem(player, itemStack, ItemCameraTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, false, ms, bufferSource, light);
         }
         else
         {
             ms.mulPose(Vector3f.ZP.rotationDegrees(90));
-            ms.translate(-0.1, 0.155, 0);
+            ms.translate(-0.1, 0.125, 0);
             handRenderer.renderItem(player, itemStack, ItemCameraTransforms.TransformType.THIRD_PERSON_LEFT_HAND, false, ms, bufferSource, light);
         }
         ms.popPose();
