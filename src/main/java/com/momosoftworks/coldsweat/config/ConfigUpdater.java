@@ -9,6 +9,7 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -189,7 +190,7 @@ public class ConfigUpdater
     public static void replaceConfigSetting(Supplier<List<? extends List<?>>> getter, String key,
                                             Consumer<List<Object>> modifier, Consumer<List<? extends List<Object>>> setter)
     {
-        List<List<Object>> setting = (List<List<Object>>) new ArrayList<>(getter.get());
+        List<List<Object>> setting = new ArrayList<>((Collection<? extends List<Object>>) getter.get());
         for (int i = 0; i < setting.size(); i++)
         {
             List<Object> element = new ArrayList<>(setting.get(i));
