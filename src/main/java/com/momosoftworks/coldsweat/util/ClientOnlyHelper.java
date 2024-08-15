@@ -6,6 +6,9 @@ import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.EntityTickableSound;
 import net.minecraft.client.network.play.ClientPlayNetHandler;
+import net.minecraft.client.renderer.entity.layers.LayerRenderer;
+import net.minecraft.client.renderer.entity.model.BipedModel;
+import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.SoundCategory;
@@ -14,7 +17,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.world.GameType;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 
 /**
@@ -54,5 +59,36 @@ public class ClientOnlyHelper
     public static DynamicRegistries getRegistryAccess()
     {   return CSMath.orElse(CSMath.getIfNotNull(Minecraft.getInstance().getConnection(), ClientPlayNetHandler::registryAccess,  null),
                              CSMath.getIfNotNull(Minecraft.getInstance().level, World::registryAccess, null));
+    }
+
+    private static final Field SLIM = ObfuscationReflectionHelper.findField(PlayerModel.class, "field_178735_y");
+    static { SLIM.setAccessible(true); }
+
+    public static boolean isPlayerModelSlim(LayerRenderer<?, ?> layer)
+    {
+        if (layer.getParentModel() instanceof PlayerModel<?>)
+        {
+            try
+            {   return (boolean) SLIM.get(layer.getParentModel());
+            }
+            catch (IllegalAccessException e)
+            {   e.printStackTrace();
+            }
+        }
+        return false;
+    }
+
+    public static boolean isPlayerModelSlim(BipedModel<?> model)
+    {
+        if (model instanceof PlayerModel<?>)
+        {
+            try
+            {   return (boolean) SLIM.get(((PlayerModel<?>) model));
+            }
+            catch (IllegalAccessException e)
+            {   e.printStackTrace();
+            }
+        }
+        return false;
     }
 }

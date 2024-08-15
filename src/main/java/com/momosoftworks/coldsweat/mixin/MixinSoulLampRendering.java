@@ -4,6 +4,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.client.event.HandleSoulLampAnim;
 import com.momosoftworks.coldsweat.client.event.RenderLampHand;
+import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.entity.EntityHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
@@ -124,7 +125,7 @@ public class MixinSoulLampRendering
                                       // locals
                                       boolean isMainArm, ItemStack leftHand, ItemStack rightHand)
         {
-            if (rightHand.getItem() == ModItems.SOULSPRING_LAMP && isPlayerModelSlim())
+            if (rightHand.getItem() == ModItems.SOULSPRING_LAMP && ClientOnlyHelper.isPlayerModelSlim(self))
             {   ms.translate(-0.5/16f, 0, 0);
                 WAS_RIGHT_HAND_ADJUSTED = true;
             }
@@ -148,34 +149,16 @@ public class MixinSoulLampRendering
             {   ms.translate(0.5/16f, 0, 0);
                 WAS_RIGHT_HAND_ADJUSTED = false;
             }
-            if (leftHand.getItem() == ModItems.SOULSPRING_LAMP && isPlayerModelSlim())
+            if (leftHand.getItem() == ModItems.SOULSPRING_LAMP && ClientOnlyHelper.isPlayerModelSlim(self))
             {   ms.translate(0.5/16f, 0, 0);
             }
-        }
-
-        private static final Field SLIM = ObfuscationReflectionHelper.findField(PlayerModel.class, "field_178735_y");
-        static { SLIM.setAccessible(true); }
-
-        private boolean isPlayerModelSlim()
-        {
-            if (self.getParentModel() instanceof PlayerModel<?>)
-            {
-                PlayerModel<?> playerModel = (PlayerModel<?>) self.getParentModel();
-                try
-                {
-                    return (boolean) SLIM.get(playerModel);
-                }
-                catch (IllegalAccessException e)
-                {   e.printStackTrace();
-                }
-            }
-            return false;
         }
     }
 
     @Mixin(BipedArmorLayer.class)
-    public static class ChestplateArms<T extends LivingEntity, A extends BipedModel<T>>
+    public static class ChestplateArms<T extends LivingEntity, M extends BipedModel<T>, A extends BipedModel<T>>
     {
+        BipedArmorLayer<T, M, A> self = (BipedArmorLayer<T, M, A>) (Object) this;
         @Inject(method = "renderArmorPiece", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/model/BipedModel;copyPropertiesTo(Lnet/minecraft/client/renderer/entity/model/BipedModel;)V", shift = At.Shift.AFTER))
         public void renderChestplateArms(MatrixStack poseStack, IRenderTypeBuffer buffer, T entity, EquipmentSlotType slot, int light, A model, CallbackInfo ci)
         {
@@ -187,6 +170,9 @@ public class MixinSoulLampRendering
                     model.rightArm.xRot = -model.rightArm.yRot - CSMath.toRadians(90);
                     model.rightArm.yRot = 0;
                     model.rightArm.x += 1;
+                    if (!ClientOnlyHelper.isPlayerModelSlim(self))
+                    {   model.rightArm.y -= 1;
+                    }
                 }
                 if (EntityHelper.holdingLamp(entity, HandSide.LEFT))
                 {
@@ -194,6 +180,30 @@ public class MixinSoulLampRendering
                     model.leftArm.xRot = model.leftArm.yRot - CSMath.toRadians(90);
                     model.leftArm.yRot = 0;
                     model.leftArm.x -= 1;
+                    if (!ClientOnlyHelper.isPlayerModelSlim(self))
+                    {   model.leftArm.y -= 1;
+                    }
+                }
+            }
+        }
+    }
+
+    @Mixin(BipedModel.class)
+    public static class ShiftWidePlayerArm
+    {
+        BipedModel self = (BipedModel) (Object) this;
+
+        @Inject(method = "setupAnim(Lnet/minecraft/entity/LivingEntity;FFFFF)V", at = @At("TAIL"))
+        public void shiftWidePlayerArm(LivingEntity entity, float limbSwing, float limbSwingAmount, float age, float headYaw, float headPitch, CallbackInfo ci)
+        {
+            if (self instanceof PlayerModel && !ClientOnlyHelper.isPlayerModelSlim(self))
+            {
+                PlayerModel playerModel = ((PlayerModel<?>) self);
+                if (EntityHelper.holdingLamp(entity, HandSide.RIGHT))
+                {   playerModel.rightArm.y += 1;
+                }
+                if (EntityHelper.holdingLamp(entity, HandSide.LEFT))
+                {   playerModel.leftArm.y += 1;
                 }
             }
         }

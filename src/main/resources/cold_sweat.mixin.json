@@ -19,6 +19,7 @@
     "MixinSoulLampRendering",
     "MixinSoulLampRendering$ChestplateArms",
     "MixinSoulLampRendering$HeldItem",
+    "MixinSoulLampRendering$ShiftWidePlayerArm",
     "MixinXPBar",
     "MixinXPBar$MixinItemLabel"
   ],
