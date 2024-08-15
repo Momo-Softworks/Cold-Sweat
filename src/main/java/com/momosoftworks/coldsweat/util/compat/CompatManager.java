@@ -345,14 +345,22 @@ public class CompatManager
         public static void addThirstDrinks(FMLCommonSetupEvent event)
         {
             if (isThirstLoaded())
-            {   ThirstHelper.addDrink(ModItems.FILLED_WATERSKIN, 6, 12);
+            {
+                ThirstHelper.addDrink(ModItems.FILLED_WATERSKIN, 6, 12);
                 WaterPurity.addContainer(new ContainerWithPurity(ModItems.WATERSKIN.getDefaultInstance(),
                                                                  ModItems.FILLED_WATERSKIN.getDefaultInstance()));
             }
+
             if (isCreateLoaded())
             {
-                ColdSweatDisplayBehaviors.THERMOLITH = AllDisplayBehaviours.register(new ResourceLocation(ColdSweat.MOD_ID, "thermolith"), new ColdSweatDisplayBehaviors.Thermolith());
-                AllDisplayBehaviours.assignBlock(ColdSweatDisplayBehaviors.THERMOLITH, ModBlocks.THERMOLITH);
+                new Object()
+                {
+                    public void registerDisplayBehaviors()
+                    {
+                        ColdSweatDisplayBehaviors.THERMOLITH = AllDisplayBehaviours.register(new ResourceLocation(ColdSweat.MOD_ID, "thermolith"), new ColdSweatDisplayBehaviors.Thermolith());
+                        AllDisplayBehaviours.assignBlock(ColdSweatDisplayBehaviors.THERMOLITH, ModBlocks.THERMOLITH);
+                    }
+                }.registerDisplayBehaviors();
             }
         }
     }
