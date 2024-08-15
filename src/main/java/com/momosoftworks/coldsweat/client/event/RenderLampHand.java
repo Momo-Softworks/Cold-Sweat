@@ -101,37 +101,27 @@ public class RenderLampHand
         if (entity instanceof PlayerEntity && EntityHelper.holdingLamp(entity, side))
         {
             PlayerEntity player = ((PlayerEntity) entity);
-            if (side == HandSide.LEFT)
-            {
-                arm.zRot += (float) (-0.5*Math.PI);
-                arm.yRot = arm.xRot + (float) (0.5*Math.PI);
-                arm.xRot = (float) -Math.PI/2;
-                arm.x += 1;
-                if (player.isCrouching())
-                {   arm.xRot -= 0.4f;
-                }
+            // Turn the player's arm so their "palm" is face-down
+            float sideMultiplier = side == HandSide.RIGHT ? 1 : -1;
+            arm.zRot += (float) (0.5*Math.PI) * sideMultiplier;
+            arm.yRot = -arm.xRot * sideMultiplier - (float) (0.5*Math.PI) * sideMultiplier;
+            arm.xRot = (float) -Math.PI/2;
+            arm.x -= 1 * sideMultiplier;
+            // Fix weird offset when crouching
+            if (player.isCrouching())
+            {   arm.xRot -= 0.4f;
             }
-            else
+            // Better swinging animation
+            if (player.swinging && side == player.getMainArm())
             {
-                arm.zRot += 0.5*Math.PI;
-                arm.yRot = -arm.xRot - 0.5f*(float)Math.PI;
-                arm.xRot = (float) -Math.PI/2;
-                arm.x -= 1;
-                if (player.isCrouching())
-                {   arm.xRot -= 0.4f;
+                float partialTick = Minecraft.getInstance().getFrameTime();
+                float attackAnim = player.getAttackAnim(partialTick);
+                float pitchFactor = 1.5f * CSMath.blend(0.4f, 2f, player.getViewXRot(partialTick), -90, 90);
+                if (attackAnim < 0.125)
+                {   arm.xRot += Math.max(0, Math.sin(attackAnim * Math.PI * 4) / pitchFactor);
                 }
-                // Better swinging animation
-                if (player.swinging && side == player.getMainArm())
-                {
-                    float partialTick = Minecraft.getInstance().getFrameTime();
-                    float attackAnim = player.getAttackAnim(partialTick);
-                    float pitchFactor = 1.5f * CSMath.blend(0.4f, 2f, player.getViewXRot(partialTick), -90, 90);
-                    if (attackAnim < 0.125)
-                    {   arm.xRot += Math.max(0, Math.sin(attackAnim * Math.PI * 4) / pitchFactor);
-                    }
-                    else
-                    {   arm.xRot += CSMath.blend(1, 0, attackAnim, 0.125, 1) / pitchFactor;
-                    }
+                else
+                {   arm.xRot += CSMath.blend(1, 0, attackAnim, 0.125, 1) / pitchFactor;
                 }
             }
         }
