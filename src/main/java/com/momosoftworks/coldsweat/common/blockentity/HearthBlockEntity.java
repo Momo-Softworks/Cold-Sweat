@@ -752,10 +752,14 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         }
         else this.hotFuel.setAmount(amount);
 
-        if (amount == 0 && hasHotFuel)
-        {   hasHotFuel = false;
-            if (level != null)
-            {   level.playSound(null, this.getBlockPos(), this.getFuelDepleteSound(), SoundSource.BLOCKS, 1, (float) Math.random() * 0.2f + 0.9f);
+        if (amount == 0)
+        {
+            if (this.hasHotFuel)
+            {
+                hasHotFuel = false;
+                if (level != null)
+                {   level.playSound(null, this.getBlockPos(), this.getFuelDepleteSound(), SoundSource.BLOCKS, 1, (float) Math.random() * 0.2f + 0.9f);
+                }
             }
         }
         else hasHotFuel = true;
@@ -774,13 +778,19 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         }
         else this.coldFuel.setAmount(amount);
 
-        if (amount <= 0 && hasColdFuel)
-        {   hasColdFuel = false;
-            if (level != null)
-            {   level.playSound(null, this.getBlockPos(), this.getFuelDepleteSound(), SoundSource.BLOCKS, 1, (float) Math.random() * 0.2f + 0.9f);
+        if (amount <= 0)
+        {
+            if (this.hasColdFuel)
+            {
+                hasColdFuel = false;
+                if (level != null)
+                {   level.playSound(null, this.getBlockPos(), this.getFuelDepleteSound(), SoundSource.BLOCKS, 1, (float) Math.random() * 0.2f + 0.9f);
+                }
             }
         }
-        else hasColdFuel = true;
+        else
+        {   hasColdFuel = true;
+        }
 
         if (update) this.updateFuelState();
     }
