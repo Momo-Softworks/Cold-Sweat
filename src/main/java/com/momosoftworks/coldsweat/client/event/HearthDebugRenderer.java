@@ -128,8 +128,13 @@ public class HearthDebugRenderer
             ChunkAccess workingChunk = null;
             float viewDistance = Minecraft.getInstance().options.renderDistance().get() * 2f;
 
+            List<BlockPos> invalidHearths = new ArrayList<>();
             for (Map.Entry<BlockPos, Map<BlockPos, Collection<Direction>>> entry : HEARTH_LOCATIONS.entrySet())
             {
+                if (!(level.getBlockEntity(entry.getKey()) instanceof HearthBlockEntity))
+                {   invalidHearths.add(entry.getKey());
+                    continue;
+                }
                 if (HearthSaveDataHandler.DISABLED_HEARTHS.contains(Pair.of(entry.getKey(), level.dimension().location().toString()))) continue;
 
                 Map<BlockPos, Collection<Direction>> points = entry.getValue();
@@ -182,6 +187,7 @@ public class HearthDebugRenderer
                     }
                 }
             }
+            invalidHearths.forEach(HEARTH_LOCATIONS::remove);
             RenderSystem.disableBlend();
             ps.popPose();
             buffer.endBatch(RenderType.LINES);
