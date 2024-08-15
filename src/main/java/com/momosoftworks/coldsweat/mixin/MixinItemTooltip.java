@@ -26,6 +26,8 @@ import java.util.*;
 @Mixin(ItemStack.class)
 public class MixinItemTooltip
 {
+    ItemStack stack = (ItemStack) (Object) this;
+
     @Inject(method = "getTooltipLines", at = @At(value = "FIELD", target = "Lnet/minecraft/item/ItemStack$TooltipDisplayFlags;MODIFIERS:Lnet/minecraft/item/ItemStack$TooltipDisplayFlags;", shift = At.Shift.AFTER),
             locals = LocalCapture.CAPTURE_FAILHARD)
     private void injectBeforeAttributes(PlayerEntity player, ITooltipFlag advanced, CallbackInfoReturnable<List<ITextComponent>> cir,
@@ -59,35 +61,43 @@ public class MixinItemTooltip
         });
     }
 
-    @Redirect(method = "getTooltipLines", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;getAttributeModifiers(Lnet/minecraft/inventory/EquipmentSlotType;)Lcom/google/common/collect/Multimap;"))
-    private Multimap<Attribute, AttributeModifier> getItemAttributes(ItemStack stack, EquipmentSlotType slot)
+    private static EquipmentSlotType CURRENT_SLOT_QUERY = null;
+
+    @Inject(method = "getTooltipLines", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;getAttributeModifiers(Lnet/minecraft/inventory/EquipmentSlotType;)Lcom/google/common/collect/Multimap;"),
+            locals = LocalCapture.CAPTURE_FAILHARD)
+    private void setCurrentSlot(PlayerEntity pPlayer, ITooltipFlag pIsAdvanced, CallbackInfoReturnable<List<ITextComponent>> cir,
+                                // locals
+                                List<TextComponent> tooltip, IFormattableTextComponent itemName, int i, EquipmentSlotType[] allSlots, int var7, int var8, EquipmentSlotType slot)
     {
-        // We don't care if the item is not equipped in the correct slot
-        if (MobEntity.getEquipmentSlotForItem(stack) != slot)
-        {   return stack.getAttributeModifiers(slot);
-        }
+        CURRENT_SLOT_QUERY = slot;
+    }
 
-        Multimap<Attribute, AttributeModifier> map = MultimapBuilder.linkedHashKeys().arrayListValues().build(stack.getAttributeModifiers(slot));
-
-        Optional.ofNullable(ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem())).ifPresent(insulator ->
+    @ModifyVariable(method = "getTooltipLines", at = @At(value = "STORE", ordinal = 0), ordinal = 0)
+    private Multimap<Attribute, AttributeModifier> modifyAttributeModifiers(Multimap<Attribute, AttributeModifier> original, PlayerEntity player, ITooltipFlag advanced)
+    {
+        Multimap<Attribute, AttributeModifier> modifiers = MultimapBuilder.linkedHashKeys().arrayListValues().build(original);
+        if (player != null && stack.equals(player.getItemBySlot(CURRENT_SLOT_QUERY)))
         {
-            if (insulator.test(Minecraft.getInstance().player, stack))
-            {   map.putAll(insulator.attributes.getMap());
-            }
-        });
-        ItemInsulationManager.getInsulationCap(stack).ifPresent(cap ->
-        {
-            cap.getInsulation().stream().map(Pair::getFirst).forEach(item ->
+            Optional.ofNullable(ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem())).ifPresent(insulator ->
             {
-                Optional.ofNullable(ConfigSettings.INSULATION_ITEMS.get().get(item.getItem())).ifPresent(insulator ->
+                if (insulator.test(player, stack))
+                {   modifiers.putAll(insulator.attributes.getMap());
+                }
+            });
+            ItemInsulationManager.getInsulationCap(stack).ifPresent(cap ->
+            {
+                cap.getInsulation().stream().map(Pair::getFirst).forEach(item ->
                 {
-                    if (insulator.test(Minecraft.getInstance().player, item))
-                    {   map.putAll(insulator.attributes.getMap());
-                    }
+                    Optional.ofNullable(ConfigSettings.INSULATION_ITEMS.get().get(item.getItem())).ifPresent(insulator ->
+                    {
+                        if (insulator.test(player, item))
+                        {   modifiers.putAll(insulator.attributes.getMap());
+                        }
+                    });
                 });
             });
-        });
-        return map;
+        }
+        return modifiers;
     }
 
     private static List<ITextComponent> TOOLTIP = null;
