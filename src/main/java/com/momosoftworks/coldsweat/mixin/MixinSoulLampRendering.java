@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.client.event.HandleSoulLampAnim;
 import com.momosoftworks.coldsweat.client.event.RenderLampHand;
+import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.entity.EntityHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
@@ -18,7 +19,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -26,8 +26,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-
-import java.lang.reflect.Field;
 
 @Mixin(HumanoidModel.class)
 public class MixinSoulLampRendering
@@ -115,7 +113,7 @@ public class MixinSoulLampRendering
                                       // locals
                                       boolean isMainArm, ItemStack leftHand, ItemStack rightHand)
         {
-            if (rightHand.is(ModItems.SOULSPRING_LAMP) && isPlayerModelSlim())
+            if (rightHand.is(ModItems.SOULSPRING_LAMP) && ClientOnlyHelper.isPlayerModelSlim(self))
             {   ms.translate(-0.5/16f, 0, 0);
                 WAS_RIGHT_HAND_ADJUSTED = true;
             }
@@ -134,33 +132,16 @@ public class MixinSoulLampRendering
             {   ms.translate(0.5/16f, 0, 0);
                 WAS_RIGHT_HAND_ADJUSTED = false;
             }
-            if (leftHand.is(ModItems.SOULSPRING_LAMP) && isPlayerModelSlim())
+            if (leftHand.is(ModItems.SOULSPRING_LAMP) && ClientOnlyHelper.isPlayerModelSlim(self))
             {   ms.translate(0.5/16f, 0, 0);
             }
-        }
-
-        private static final Field SLIM = ObfuscationReflectionHelper.findField(PlayerModel.class, "f_103380_");
-        static { SLIM.setAccessible(true); }
-
-        private boolean isPlayerModelSlim()
-        {
-            if (self.getParentModel() instanceof PlayerModel<?> playerModel)
-            {
-                try
-                {
-                    return (boolean) SLIM.get(playerModel);
-                }
-                catch (IllegalAccessException e)
-                {   e.printStackTrace();
-                }
-            }
-            return false;
         }
     }
 
     @Mixin(HumanoidArmorLayer.class)
-    public static class ChestplateArms<T extends LivingEntity, A extends HumanoidModel<T>>
+    public static class ChestplateArms<T extends LivingEntity, M extends HumanoidModel<T>, A extends HumanoidModel<T>>
     {
+        HumanoidArmorLayer<T, M, A> self = (HumanoidArmorLayer<T, M, A>) (Object) this;
         @Inject(method = "renderArmorPiece", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/HumanoidModel;copyPropertiesTo(Lnet/minecraft/client/model/HumanoidModel;)V", shift = At.Shift.AFTER))
         public void renderChestplateArms(PoseStack poseStack, MultiBufferSource buffer, T entity, EquipmentSlot slot, int light, A model, CallbackInfo ci)
         {
@@ -172,6 +153,9 @@ public class MixinSoulLampRendering
                     model.rightArm.xRot = -model.rightArm.yRot - CSMath.toRadians(90);
                     model.rightArm.yRot = 0;
                     model.rightArm.x += 1;
+                    if (!ClientOnlyHelper.isPlayerModelSlim(self))
+                    {   model.rightArm.y -= 1;
+                    }
                 }
                 if (EntityHelper.holdingLamp(entity, HumanoidArm.LEFT))
                 {
@@ -179,6 +163,29 @@ public class MixinSoulLampRendering
                     model.leftArm.xRot = model.leftArm.yRot - CSMath.toRadians(90);
                     model.leftArm.yRot = 0;
                     model.leftArm.x -= 1;
+                    if (!ClientOnlyHelper.isPlayerModelSlim(self))
+                    {   model.leftArm.y -= 1;
+                    }
+                }
+            }
+        }
+    }
+
+    @Mixin(HumanoidModel.class)
+    public static class ShiftWidePlayerArm
+    {
+        HumanoidModel self = (HumanoidModel) (Object) this;
+
+        @Inject(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V", at = @At("TAIL"))
+        public void shiftWidePlayerArm(LivingEntity entity, float limbSwing, float limbSwingAmount, float age, float headYaw, float headPitch, CallbackInfo ci)
+        {
+            if (self instanceof PlayerModel playerModel && !ClientOnlyHelper.isPlayerModelSlim(self))
+            {
+                if (EntityHelper.holdingLamp(entity, HumanoidArm.RIGHT))
+                {   playerModel.rightArm.y += 1;
+                }
+                if (EntityHelper.holdingLamp(entity, HumanoidArm.LEFT))
+                {   playerModel.leftArm.y += 1;
                 }
             }
         }
