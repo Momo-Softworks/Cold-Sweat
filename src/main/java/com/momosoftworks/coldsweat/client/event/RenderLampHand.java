@@ -112,15 +112,15 @@ public class RenderLampHand
             }
 
             // Better swinging animation
-            if (player.swinging && side == player.getMainArm())
+            if (player.swinging && side == EntityHelper.getArmFromHand(player.swingingArm, player))
             {
                 float partialTick = Minecraft.getInstance().getFrameTime();
                 float attackAnim = player.getAttackAnim(partialTick);
                 float playerPitch = player.getViewXRot(partialTick);
                 float pitchFactor = getSwingHorizontalOffset(side, playerPitch);
-                float midSwingPoint = side == HandSide.RIGHT ? 0.125f : 0.0f;
+                float midSwingPoint = side == HandSide.RIGHT ? 0.125f : 0.05f;
 
-                if (attackAnim < 0.001)
+                if (attackAnim < midSwingPoint)
                 {   arm.xRot += CSMath.blend(0, 1, attackAnim, 0, midSwingPoint) / pitchFactor;
                 }
                 else
@@ -128,6 +128,9 @@ public class RenderLampHand
                 }
                 float pitchSwingHeight = playerPitch < 0 ? playerPitch/20 : playerPitch/60;
                 arm.yRot += (Math.pow(attackAnim - 0.5, 2) - 0.25) * pitchSwingHeight * sideMultiplier;
+                if (side == HandSide.LEFT)
+                {   arm.zRot += Math.sin(attackAnim*Math.PI)*0.5f;
+                }
             }
         }
     }
@@ -137,13 +140,13 @@ public class RenderLampHand
         float pitchFactor;
         if (side == HandSide.RIGHT)
         {
-            pitchFactor = playerPitch < 0 ? CSMath.blend(1f, 0.5f, playerPitch, 0, -90)
+            pitchFactor = playerPitch < 0 ? CSMath.blend(1f, 0.6f, playerPitch, 0, -90)
                                           : CSMath.blend(1f, 3f, playerPitch, 0, 90);
         }
         else
         {
-            pitchFactor = playerPitch < 0 ? CSMath.blend(1f, 0.7f, playerPitch, 0, -90)
-                                          : CSMath.blend(0.7f, 4f, playerPitch, 0, 90);
+            pitchFactor = playerPitch < 0 ? CSMath.blend(1f, 0.6f, playerPitch, 0, -90)
+                                          : CSMath.blend(1f, 3f, playerPitch, 0, 90);
         }
         return pitchFactor;
     }

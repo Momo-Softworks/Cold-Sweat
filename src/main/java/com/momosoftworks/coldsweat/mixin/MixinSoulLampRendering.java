@@ -16,6 +16,7 @@ import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.HandSide;
@@ -200,10 +201,20 @@ public class MixinSoulLampRendering
             {
                 PlayerModel playerModel = ((PlayerModel<?>) self);
                 if (EntityHelper.holdingLamp(entity, HandSide.RIGHT))
-                {   playerModel.rightArm.y += 1;
+                {
+                    playerModel.rightArm.y += 1;
+                    if (entity instanceof PlayerEntity && entity.getAttackAnim(Minecraft.getInstance().getFrameTime()) > 0
+                    && EntityHelper.getArmFromHand(entity.swingingArm, ((PlayerEntity) entity)) == HandSide.RIGHT)
+                    {   playerModel.rightArm.x -= 1;
+                    }
                 }
                 if (EntityHelper.holdingLamp(entity, HandSide.LEFT))
-                {   playerModel.leftArm.y += 1;
+                {
+                    playerModel.leftArm.y += 1;
+                    if (entity instanceof PlayerEntity && entity.getAttackAnim(Minecraft.getInstance().getFrameTime()) > 0
+                    && EntityHelper.getArmFromHand(entity.swingingArm, ((PlayerEntity) entity)) == HandSide.LEFT)
+                    {   playerModel.leftArm.x += 1;
+                    }
                 }
             }
         }
