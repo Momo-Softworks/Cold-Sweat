@@ -8,10 +8,12 @@
     "MixinEffectsScreen",
     "MixinGoatRenderer",
     "MixinHeartRender",
-    "MixinHumanoidModel",
     "MixinInventoryOpenClient",
     "MixinItemTooltip",
     "MixinPickEntity",
+    "MixinSoulLampRendering",
+    "MixinSoulLampRendering$ChestplateArms",
+    "MixinSoulLampRendering$HeldItem",
     "MixinXPBar",
     "MixinXPBar$MixinItemLabel",
     "compat.MixinCreateOverlay"
