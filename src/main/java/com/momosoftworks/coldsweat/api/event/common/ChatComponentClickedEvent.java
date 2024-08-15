@@ -8,11 +8,11 @@ import javax.annotation.Nullable;
 
 public class ChatComponentClickedEvent extends Event
 {
-    private Style style;
-    private PlayerEntity player;
+    private final Style style;
+    private final PlayerEntity player;
 
     public ChatComponentClickedEvent(@Nullable Style style, PlayerEntity player)
-    {   this.style = style;
+    {   this.style = style != null ? style : Style.EMPTY;
         this.player = player;
     }
 
