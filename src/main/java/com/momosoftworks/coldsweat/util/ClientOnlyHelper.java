@@ -3,6 +3,9 @@ package com.momosoftworks.coldsweat.util;
 import com.momosoftworks.coldsweat.client.event.HearthDebugRenderer;
 import com.momosoftworks.coldsweat.client.gui.config.pages.ConfigPageOne;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.resources.sounds.EntityBoundSoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket;
@@ -12,7 +15,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 
 /**
@@ -51,5 +56,36 @@ public class ClientOnlyHelper
 
     public static GameType getGameMode()
     {   return Minecraft.getInstance().gameMode.getPlayerMode();
+    }
+
+    private static final Field SLIM = ObfuscationReflectionHelper.findField(PlayerModel.class, "f_103380_");
+    static { SLIM.setAccessible(true); }
+
+    public static boolean isPlayerModelSlim(RenderLayer<?, ?> layer)
+    {
+        if (layer.getParentModel() instanceof PlayerModel<?> playerModel)
+        {
+            try
+            {   return (boolean) SLIM.get(playerModel);
+            }
+            catch (IllegalAccessException e)
+            {   e.printStackTrace();
+            }
+        }
+        return false;
+    }
+
+    public static boolean isPlayerModelSlim(HumanoidModel<?> model)
+    {
+        if (model instanceof PlayerModel<?> playerModel)
+        {
+            try
+            {   return (boolean) SLIM.get(playerModel);
+            }
+            catch (IllegalAccessException e)
+            {   e.printStackTrace();
+            }
+        }
+        return false;
     }
 }
