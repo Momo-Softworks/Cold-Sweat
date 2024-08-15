@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.mixin;
 
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.client.event.HandleSoulLampAnim;
+import com.momosoftworks.coldsweat.client.event.RenderLampHand;
 import com.momosoftworks.coldsweat.util.entity.EntityHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
@@ -55,6 +56,7 @@ public class MixinHumanoidModel
                 }
             }
         }
+        RenderLampHand.transformArm(entity, this.rightArm, HumanoidArm.RIGHT);
     }
 
     @Inject(method = "poseLeftArm",
@@ -83,5 +85,6 @@ public class MixinHumanoidModel
                 }
             }
         }
+        RenderLampHand.transformArm(entity, this.leftArm, HumanoidArm.LEFT);
     }
 }
