@@ -96,7 +96,7 @@ public class ConfigUpdater
     public static String getVersionString(ArtifactVersion version)
     {
         String ver = version.getMajorVersion() + "." + version.getMinorVersion() + "." + version.getIncrementalVersion();
-        if (!version.getQualifier().isEmpty())
+        if (version.getQualifier() != null && !version.getQualifier().isEmpty())
         {   ver += "-" + version.getQualifier();
         }
         return ver;
