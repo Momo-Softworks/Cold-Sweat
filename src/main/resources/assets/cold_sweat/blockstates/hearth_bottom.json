@@ -1,10 +1,56 @@
 {
   "variants":
   {
+    "facing=north,side_powered=false,back_powered=false": {
+      "model": "cold_sweat:block/hearth_bottom"
+    },
+    "facing=south,side_powered=false,back_powered=false": {
+      "model": "cold_sweat:block/hearth_bottom", "y": 180
+    },
+    "facing=east,side_powered=false,back_powered=false": {
+      "model": "cold_sweat:block/hearth_bottom", "y": 90
+    },
+    "facing=west,side_powered=false,back_powered=false": {
+      "model": "cold_sweat:block/hearth_bottom", "y": 270
+    },
 
-    "facing=north": { "model": "cold_sweat:block/hearth_bottom" },
-    "facing=south": { "model": "cold_sweat:block/hearth_bottom", "y": 180 },
-    "facing=east": { "model": "cold_sweat:block/hearth_bottom", "y": 90 },
-    "facing=west": { "model": "cold_sweat:block/hearth_bottom", "y": 270 }
+    "facing=north,side_powered=true,back_powered=false": {
+      "model": "cold_sweat:block/hearth_bottom_side_on"
+    },
+    "facing=south,side_powered=true,back_powered=false": {
+      "model": "cold_sweat:block/hearth_bottom_side_on", "y": 180
+    },
+    "facing=east,side_powered=true,back_powered=false": {
+      "model": "cold_sweat:block/hearth_bottom_side_on", "y": 90
+    },
+    "facing=west,side_powered=true,back_powered=false": {
+      "model": "cold_sweat:block/hearth_bottom_side_on", "y": 270
+    },
+
+    "facing=north,side_powered=false,back_powered=true": {
+      "model": "cold_sweat:block/hearth_bottom_back_on"
+    },
+    "facing=south,side_powered=false,back_powered=true": {
+      "model": "cold_sweat:block/hearth_bottom_back_on", "y": 180
+    },
+    "facing=east,side_powered=false,back_powered=true": {
+      "model": "cold_sweat:block/hearth_bottom_back_on", "y": 90
+    },
+    "facing=west,side_powered=false,back_powered=true": {
+      "model": "cold_sweat:block/hearth_bottom_back_on", "y": 270
+    },
+
+    "facing=north,side_powered=true,back_powered=true": {
+      "model": "cold_sweat:block/hearth_bottom_both_on"
+    },
+    "facing=south,side_powered=true,back_powered=true": {
+      "model": "cold_sweat:block/hearth_bottom_both_on", "y": 180
+    },
+    "facing=east,side_powered=true,back_powered=true": {
+      "model": "cold_sweat:block/hearth_bottom_both_on", "y": 90
+    },
+    "facing=west,side_powered=true,back_powered=true": {
+      "model": "cold_sweat:block/hearth_bottom_both_on", "y": 270
+    }
   }
 }
