@@ -452,7 +452,7 @@ public class TempCommand extends BaseCommand
                         AttributeInstance instance = EntityTempManager.getAttribute(attribute, living);
                         if (instance == null) continue;
                         instance.removeModifiers();
-                        EntityTempManager.getAttribute(attribute, living).setBaseValue(Double.NaN);
+                        instance.setBaseValue(instance.getAttribute().getDefaultValue());
                         cap.clearPersistentAttribute(instance.getAttribute());
                     }
                 });

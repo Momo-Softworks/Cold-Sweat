@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.common.capability.handler;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.api.event.common.LivingEntityLoadAdditionalEvent;
 import com.momosoftworks.coldsweat.api.event.common.TempModifierEvent;
 import com.momosoftworks.coldsweat.api.event.core.GatherDefaultTempModifiersEvent;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
@@ -19,6 +20,7 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.type.InsulatingMount;
 import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.config.type.PredicateItem;
+import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -168,10 +170,7 @@ public class EntityTempManager
             getTemperatureCap(living).ifPresent(cap ->
             {
                 // If entity has never been initialized, add default modifiers
-                List<TempModifier> allModifiers = new ArrayList<>();
-                for (Temperature.Trait trait : VALID_MODIFIER_TRAITS)
-                {   allModifiers.addAll(cap.getModifiers(trait));
-                }
+                List<TempModifier> allModifiers = getAllModifiers(living);
                 if (allModifiers.isEmpty())
                 {
                     for (Temperature.Trait trait : VALID_MODIFIER_TRAITS)
@@ -183,6 +182,27 @@ public class EntityTempManager
                     }
                 }
             });
+        }
+    }
+
+    @SubscribeEvent
+    public static void fixOldAttributeData(LivingEntityLoadAdditionalEvent event)
+    {
+        if (isTemperatureEnabled(event.getEntity().getType())
+        && event.getNBT().getList("Attributes", 10).stream().anyMatch(attribute -> ((CompoundTag) attribute).getString("Name").equals("cold_sweat:world_temperature_offset")))
+        {
+            TaskScheduler.scheduleServer(() ->
+            {
+                for (Temperature.Trait attributeType : VALID_ATTRIBUTE_TYPES)
+                {
+                    CSMath.doIfNotNull(getAttribute(attributeType, event.getEntity()),
+                    attribute ->
+                    {
+                        attribute.removeModifiers();
+                        attribute.setBaseValue(attribute.getAttribute().getDefaultValue());
+                    });
+                }
+            }, 1);
         }
     }
 
@@ -745,5 +765,17 @@ public class EntityTempManager
         return CSMath.containsAny(ForgeRegistries.ATTRIBUTES.getKey(attribute).toString(),
                                   Arrays.stream(EntityTempManager.VALID_ATTRIBUTE_TYPES)
                                         .map(Temperature.Trait::getSerializedName).toArray(String[]::new));
+    }
+
+    public static List<TempModifier> getAllModifiers(LivingEntity entity)
+    {
+        List<TempModifier> allModifiers = new ArrayList<>();
+        getTemperatureCap(entity).ifPresent(cap ->
+        {
+            for (Temperature.Trait trait : VALID_MODIFIER_TRAITS)
+            {   allModifiers.addAll(cap.getModifiers(trait));
+            }
+        });
+        return allModifiers;
     }
 }
