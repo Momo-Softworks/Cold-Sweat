@@ -1,9 +1,8 @@
 {
   "required": true,
-  "compatibilityLevel": "JAVA_8",
   "package": "com.momosoftworks.coldsweat.mixin",
-  "minVersion": "0.8",
-  "plugin": "com.momosoftworks.coldsweat.mixin_plugin.ColdSweatMixinPlugin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap":"cold_sweat.mixin-refmap.json",
   "client": [
     "MixinChatClicked",
     "MixinEffectsScreen",
@@ -40,7 +39,6 @@
     "MixinSoulCampfire",
     "MixinSoulFire",
     "MixinTriggerBounds$MixinFloatBound",
-    "MixinSoulFire",
     "compat.MixinSereneIceMelt",
     "compat.MixinSpoiledIcebox",
     "compat.MixinSpoiledIcebox$ContainerModifier"
