@@ -21,6 +21,7 @@ import com.momosoftworks.coldsweat.core.init.ModAttributes;
 import com.momosoftworks.coldsweat.core.init.ModBlocks;
 import com.momosoftworks.coldsweat.core.init.ModEffects;
 import com.momosoftworks.coldsweat.core.init.ModItems;
+import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
@@ -45,6 +46,7 @@ import net.minecraft.world.item.UseAnim;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
@@ -164,6 +166,15 @@ public class EntityTempManager
             {   Temperature.updateModifiers(entity, cap);
             }
         });
+    }
+
+    @SubscribeEvent
+    public static void clearClientCapCache(ClientTickEvent.Post event)
+    {
+        if (ClientOnlyHelper.getClientLevel() != null
+        && ClientOnlyHelper.getClientLevel().getGameTime() % 5 == 0)
+        {   CLIENT_CAP_CACHE.clear();
+        }
     }
 
     /**
