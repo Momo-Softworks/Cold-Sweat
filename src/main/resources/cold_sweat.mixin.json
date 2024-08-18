@@ -33,6 +33,7 @@
     "MixinIce$NoWaterOnBreak",
     "MixinIce$RequireTool",
     "MixinInventoryOpenServer",
+    "MixinLivingLoad",
     "MixinLlamaInteract",
     "MixinMinecart",
     "MixinSmithingRecipe",
