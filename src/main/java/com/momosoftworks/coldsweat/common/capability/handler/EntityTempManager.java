@@ -43,6 +43,7 @@ import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.UseAction;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.Direction;
 import net.minecraft.util.NonNullList;
@@ -173,10 +174,7 @@ public class EntityTempManager
             getTemperatureCap(living).ifPresent(cap ->
             {
                 // If entity has never been initialized, add default modifiers
-                List<TempModifier> allModifiers = new ArrayList<>();
-                for (Temperature.Trait trait : VALID_MODIFIER_TRAITS)
-                {   allModifiers.addAll(cap.getModifiers(trait));
-                }
+                List<TempModifier> allModifiers = getAllModifiers(living);
                 if (allModifiers.isEmpty())
                 {
                     for (Temperature.Trait trait : VALID_MODIFIER_TRAITS)
@@ -185,6 +183,18 @@ public class EntityTempManager
                         MinecraftForge.EVENT_BUS.post(gatherEvent);
                         cap.getModifiers(trait).addAll(gatherEvent.getModifiers());
                     }
+                }
+                if (!living.getPersistentData().getBoolean("cold_sweat:initialized"))
+                {
+                    for (Temperature.Trait attributeType : VALID_ATTRIBUTE_TYPES)
+                    {
+                        CSMath.doIfNotNull(getAttribute(attributeType, living), attribute ->
+                        {
+                            attribute.removeModifiers();
+                            attribute.setBaseValue(attribute.getAttribute().getDefaultValue());
+                        });
+                    }
+                    living.getPersistentData().putBoolean("cold_sweat:initialized", true);
                 }
             });
         }
@@ -720,5 +730,17 @@ public class EntityTempManager
         return CSMath.containsAny(ForgeRegistries.ATTRIBUTES.getKey(attribute).toString(),
                                   Arrays.stream(EntityTempManager.VALID_ATTRIBUTE_TYPES)
                                         .map(Temperature.Trait::getSerializedName).toArray(String[]::new));
+    }
+
+    public static List<TempModifier> getAllModifiers(LivingEntity entity)
+    {
+        List<TempModifier> allModifiers = new ArrayList<>();
+        getTemperatureCap(entity).ifPresent(cap ->
+        {
+            for (Temperature.Trait trait : VALID_MODIFIER_TRAITS)
+            {   allModifiers.addAll(cap.getModifiers(trait));
+            }
+        });
+        return allModifiers;
     }
 }
