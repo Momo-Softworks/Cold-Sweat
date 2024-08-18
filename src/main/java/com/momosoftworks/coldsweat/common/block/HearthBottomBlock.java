@@ -34,6 +34,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
@@ -46,6 +47,8 @@ import java.util.*;
 public class HearthBottomBlock extends Block implements EntityBlock
 {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final BooleanProperty SIDE_POWERED = BooleanProperty.create("side_powered");
+    public static final BooleanProperty BACK_POWERED = BooleanProperty.create("back_powered");
 
     public static Properties getProperties()
     {
@@ -64,7 +67,9 @@ public class HearthBottomBlock extends Block implements EntityBlock
     public HearthBottomBlock(Properties properties)
     {
         super(properties);
-        this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH));
+        this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH)
+                                                          .setValue(SIDE_POWERED, false)
+                                                          .setValue(BACK_POWERED, false));
     }
 
     @Override
@@ -217,7 +222,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
-    {   builder.add(FACING);
+    {   builder.add(FACING, SIDE_POWERED, BACK_POWERED);
     }
 
     @Override
