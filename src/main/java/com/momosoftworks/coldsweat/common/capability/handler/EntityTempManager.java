@@ -19,6 +19,7 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.type.InsulatingMount;
 import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.config.type.PredicateItem;
+import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModAttributes;
@@ -221,10 +222,11 @@ public class EntityTempManager
     }
 
     @SubscribeEvent
-    public static void clearClientCapCache(TickEvent.LevelTickEvent event)
+    public static void clearClientCapCache(TickEvent.ClientTickEvent event)
     {
         if (event.side == LogicalSide.CLIENT && event.phase == TickEvent.Phase.END
-        && event.level.getGameTime() % 2 == 0)
+        && ClientOnlyHelper.getClientLevel() != null
+        && ClientOnlyHelper.getClientLevel().getGameTime() % 5 == 0)
         {   CLIENT_CAP_CACHE.clear();
         }
     }
