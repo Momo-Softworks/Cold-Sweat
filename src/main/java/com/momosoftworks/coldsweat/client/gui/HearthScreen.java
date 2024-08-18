@@ -37,18 +37,17 @@ public class HearthScreen extends AbstractHearthScreen<HearthContainer>
     public HearthScreen(HearthContainer screenContainer, PlayerInventory inv, ITextComponent titleIn)
     {
         super(screenContainer, inv, titleIn);
-        this.leftPos = 0;
-        this.topPos = 0;
         this.imageWidth = 176;
         this.imageHeight = 166;
     }
 
     @Override
     protected void renderBg(MatrixStack poseStack, float partialTicks, int mouseX, int mouseY)
-    {   RenderSystem.color4f(1f, 1f, 1f, 1f);
+    {
+        RenderSystem.color4f(1f, 1f, 1f, 1f);
         this.minecraft.textureManager.bind(HEARTH_GUI);
-        int x = (this.width - this.getXSize()) / 2;
-        int y = (this.height - this.getYSize()) / 2;
+        int x = this.leftPos;
+        int y = this.topPos;
         this.blit(poseStack, x, y, 0, 0, this.imageWidth, this.imageHeight);
 
         int hotFuel  = (int) (this.menu.getHotFuel()  / 27.7);

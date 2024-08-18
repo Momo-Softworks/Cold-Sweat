@@ -19,10 +19,13 @@ import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.fml.network.NetworkDirection;
+import net.minecraftforge.client.event.GuiScreenEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 import java.util.Arrays;
 
+@Mod.EventBusSubscriber
 public abstract class AbstractHearthScreen<T extends Container> extends DisplayEffectsScreen<T>
 {
     private static final ResourceLocation HEARTH_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/hearth_gui.png");
@@ -36,10 +39,6 @@ public abstract class AbstractHearthScreen<T extends Container> extends DisplayE
 
     public AbstractHearthScreen(T screenContainer, PlayerInventory inv, ITextComponent title)
     {   super(screenContainer, inv, title);
-        this.leftPos = 0;
-        this.topPos = 0;
-        this.imageWidth = 176;
-        this.imageHeight = 166;
     }
 
     @Override
@@ -89,7 +88,8 @@ public abstract class AbstractHearthScreen<T extends Container> extends DisplayE
 
     @Override
     public void render(MatrixStack ps, int mouseX, int mouseY, float partialTicks)
-    {   this.renderBackground(ps);
+    {
+        this.renderBackground(ps);
         super.render(ps, mouseX, mouseY, partialTicks);
         this.renderTooltip(ps, mouseX, mouseY);
     }
@@ -99,6 +99,18 @@ public abstract class AbstractHearthScreen<T extends Container> extends DisplayE
     {   super.onClose();
         if (this.minecraft.player != null && hideParticlesOld != hideParticles)
         {   ColdSweatPacketHandler.INSTANCE.sendToServer(new DisableHearthParticlesMessage(HearthSaveDataHandler.serializeDisabledHearths()));
+        }
+    }
+
+    @SubscribeEvent
+    public static void preventScreenShift(GuiScreenEvent.PotionShiftEvent event)
+    {
+        if (event.getGui() instanceof AbstractHearthScreen)
+        {
+            AbstractHearthScreen<?> screen = (AbstractHearthScreen<?>) event.getGui();
+            if (screen.getBlockEntity().getEffects().isEmpty())
+            {   event.setCanceled(true);
+            }
         }
     }
 }
