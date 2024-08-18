@@ -30,7 +30,7 @@ public class WorldSettingsConfig
 
     public static final ModConfigSpec.ConfigValue<Double> caveInsulation;
 
-    public static final ModConfigSpec.ConfigValue<List<? extends List<Object>>> blockTemps;
+    public static final ModConfigSpec.ConfigValue<List<? extends List<?>>> blockTemps;
     public static final ModConfigSpec.IntValue blockRange;
 
     public static final ModConfigSpec.ConfigValue<Boolean> coldSoulFire;
@@ -640,7 +640,7 @@ public class WorldSettingsConfig
     {   return structureTemps.get();
     }
 
-    public List<? extends List<Object>> getBlockTemps()
+    public List<? extends List<?>> getBlockTemps()
     {   return blockTemps.get();
     }
     public int getBlockRange()
@@ -727,7 +727,7 @@ public class WorldSettingsConfig
         }
     }
 
-    public synchronized void setBlockTemps(List<? extends List<Object>> temps)
+    public synchronized void setBlockTemps(List<? extends List<?>> temps)
     {   synchronized (blockTemps)
         {   blockTemps.set(temps);
         }
