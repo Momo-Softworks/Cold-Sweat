@@ -28,6 +28,7 @@
     "MixinIce$NoWaterOnBreak",
     "MixinIce$RequireTool",
     "MixinInventoryOpenServer",
+    "MixinLivingLoad",
     "MixinMinecart",
     "MixinSmithingRecipe",
     "MixinSoulCampfire",
