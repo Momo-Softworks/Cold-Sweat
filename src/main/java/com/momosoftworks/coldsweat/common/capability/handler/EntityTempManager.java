@@ -187,6 +187,18 @@ public class EntityTempManager
                         cap.getModifiers(trait).addAll(gatherEvent.getModifiers());
                     }
                 }
+                if (!living.getPersistentData().getBoolean("cold_sweat:initialized"))
+                {
+                    for (Temperature.Trait attributeType : VALID_ATTRIBUTE_TYPES)
+                    {
+                        CSMath.doIfNotNull(getAttribute(attributeType, living), attribute ->
+                        {
+                            attribute.removeModifiers();
+                            attribute.setBaseValue(attribute.getAttribute().getDefaultValue());
+                        });
+                    }
+                    living.getPersistentData().putBoolean("cold_sweat:initialized", true);
+                }
             });
         }
     }
