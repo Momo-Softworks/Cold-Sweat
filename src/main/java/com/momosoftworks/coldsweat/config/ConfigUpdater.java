@@ -22,7 +22,7 @@ public class ConfigUpdater
         WorldSettingsConfig worldSettings = WorldSettingsConfig.getInstance();
 
         /*
-         2.3-b06a
+         2.3
          */
         if (isBehind(configVersion, "2.3"))
         {
@@ -91,15 +91,6 @@ public class ConfigUpdater
          2.3-b01a
          */
         if (compareVersions(configVersion, "2.3-b01a") < 0)
-        {
-            // Update chameleon molt insulation ingredient entry
-            addConfigSetting(itemSettings::getInsulationItems, itemSettings::setInsulationItems,
-                             List.of("cold_sweat:chameleon_molt", 2, 0.0085, "adaptive"));
-        }
-        /*
-         2.3-b01a
-         */
-        if (isBehind(configVersion, "2.3-b01a"))
         {
             // Update chameleon molt insulation ingredient entry
             addConfigSetting(itemSettings::getInsulationItems, itemSettings::setInsulationItems,
