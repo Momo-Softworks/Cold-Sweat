@@ -16,9 +16,9 @@ import com.simibubi.create.content.equipment.armor.BacktankUtil;
 import com.simibubi.create.content.equipment.armor.DivingHelmetItem;
 import com.simibubi.create.content.redstone.displayLink.AllDisplayBehaviours;
 import de.teamlapen.werewolves.entities.player.werewolf.WerewolfPlayer;
-import dev.ghen.thirst.api.ThirstHelper;
 import dev.ghen.thirst.content.purity.ContainerWithPurity;
 import dev.ghen.thirst.content.purity.WaterPurity;
+import dev.ghen.thirst.foundation.common.event.RegisterThirstValueEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.ResourceLocation;
@@ -269,6 +269,20 @@ public class CompatManager
                 }
             });
         }
+
+        if (THIRST_LOADED)
+        {
+            MinecraftForge.EVENT_BUS.register(new Object()
+            {
+                @SubscribeEvent
+                public void registerThirstItems(RegisterThirstValueEvent event)
+                {
+                    event.addDrink(ModItems.FILLED_WATERSKIN, 6, 3);
+                    event.addContainer(new ContainerWithPurity(ModItems.WATERSKIN.getDefaultInstance(),
+                                                               ModItems.FILLED_WATERSKIN.getDefaultInstance()));
+                }
+            });
+        }
     }
 
     @SubscribeEvent
@@ -363,15 +377,8 @@ public class CompatManager
     public static class ModEvents
     {
         @SubscribeEvent
-        public static void addThirstDrinks(FMLCommonSetupEvent event)
+        public static void setupModEvents(FMLCommonSetupEvent event)
         {
-            if (isThirstLoaded())
-            {
-                ThirstHelper.addDrink(ModItems.FILLED_WATERSKIN, 6, 12);
-                WaterPurity.addContainer(new ContainerWithPurity(ModItems.WATERSKIN.getDefaultInstance(),
-                                                                 ModItems.FILLED_WATERSKIN.getDefaultInstance()));
-            }
-
             if (isCreateLoaded())
             {
                 new Object()
