@@ -1,7 +1,8 @@
 {
 	"texture_size": [64, 64],
 	"textures": {
-		"2": "cold_sweat:block/hearth_side",
+		"back": "cold_sweat:block/hearth_side_hot_off",
+		"sides": "cold_sweat:block/hearth_side_cold_off",
 		"3": "cold_sweat:block/hearth_top",
 		"4": "cold_sweat:block/hearth_front",
 		"5": "cold_sweat:block/hearth_bottom",
@@ -29,9 +30,9 @@
 			"rotation": {"angle": 0, "axis": "y", "origin": [16, 0, 15]},
 			"faces": {
 				"north": {"uv": [0, 0, 16, 16], "texture": "#4"},
-				"east": {"uv": [0, 0, 16, 16], "texture": "#2"},
-				"south": {"uv": [0, 0, 16, 16], "texture": "#2"},
-				"west": {"uv": [0, 0, 16, 16], "texture": "#2"},
+				"east": {"uv": [0, 0, 16, 16], "texture": "#sides"},
+				"south": {"uv": [0, 0, 16, 16], "texture": "#back"},
+				"west": {"uv": [0, 0, 16, 16], "texture": "#sides"},
 				"up": {"uv": [0, 0, 16, 16], "texture": "#3"},
 				"down": {"uv": [0, 0, 16, 16], "rotation": 180, "texture": "#5"}
 			}
