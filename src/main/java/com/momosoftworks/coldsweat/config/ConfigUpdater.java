@@ -24,9 +24,9 @@ public class ConfigUpdater
         WorldSettingsConfig worldSettings = WorldSettingsConfig.getInstance();
 
         /*
-         2.3-b06a
+         2.3
          */
-        if (compareVersions(configVersion, "2.3-b06a") < 0)
+        if (compareVersions(configVersion, "2.3") < 0)
         {
             // Update magma block temperature
             replaceConfigSetting(worldSettings::getBlockTemps, "minecraft:magma_block", blockTemp -> {
@@ -85,7 +85,18 @@ public class ConfigUpdater
         {
             // Update soul sprout food item
             addConfigSetting(itemSettings::getFoodTemperatures, itemSettings::setFoodTemperatures,
-                    List.of("cold_sweat:soul_sprout", 0.0, "{}", 1200));
+                             List.of("cold_sweat:soul_sprout", 0.0, "{}", 1200));
+            addConfigSetting(worldSettings::getBlockTemps, worldSettings::setBlockTemps,
+                             List.of("minecraft:lava_cauldron", 0.5, 7, true, 1.5));
+        }
+        /*
+         2.3-b01a
+         */
+        if (compareVersions(configVersion, "2.3-b01a") < 0)
+        {
+            // Update chameleon molt insulation ingredient entry
+            addConfigSetting(itemSettings::getInsulationItems, itemSettings::setInsulationItems,
+                             List.of("cold_sweat:chameleon_molt", 2, 0.0085, "adaptive"));
         }
         itemSettings.save();
         worldSettings.save();
