@@ -11,6 +11,7 @@ import com.momosoftworks.coldsweat.util.registries.ModDamageSources;
 import dev.ghen.thirst.api.ThirstHelper;
 import dev.ghen.thirst.content.purity.ContainerWithPurity;
 import dev.ghen.thirst.content.purity.WaterPurity;
+import dev.ghen.thirst.foundation.common.event.RegisterThirstValueEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.ResourceLocation;
@@ -299,6 +300,20 @@ public class CompatManager
                 }
             });
         }
+
+        if (THIRST_LOADED)
+        {
+            NeoForge.EVENT_BUS.register(new Object()
+            {
+                @SubscribeEvent
+                public void registerThirstItems(RegisterThirstValueEvent event)
+                {
+                    event.addDrink(ModItems.FILLED_WATERSKIN.value(), 6, 3);
+                    event.addContainer(new ContainerWithPurity(ModItems.WATERSKIN.value(),
+                                                               ModItems.FILLED_WATERSKIN.value()));
+                }
+            });
+        }
     }
 
     @SubscribeEvent
@@ -403,21 +418,8 @@ public class CompatManager
     public static class ModEvents
     {
         @SubscribeEvent
-        public static void addThirstDrinks(FMLCommonSetupEvent event)
+        public static void setupModEvents(FMLCommonSetupEvent event)
         {
-            // TODO: Find out how this works now
-            if (isThirstLoaded())
-            {
-                new Object()
-                {
-                    public void registerDrinks()
-                    {
-                        ThirstHelper.addDrink(ModItems.FILLED_WATERSKIN.value(), 6, 12);
-                        WaterPurity.addContainer(new ContainerWithPurity(ModItems.WATERSKIN.value(),
-                                                                         ModItems.FILLED_WATERSKIN.value()));
-                    }
-                }.registerDrinks();
-            }
             // TODO: Implement when Create is updated
             /*if (isCreateLoaded())
             {
