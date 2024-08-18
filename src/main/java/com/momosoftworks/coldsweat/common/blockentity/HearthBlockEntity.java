@@ -257,8 +257,8 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         this.checkInputSignal();
 
         // Determine what types of fuel to use
-        this.shouldUseColdFuel = false;
-        this.shouldUseHotFuel = false;
+        boolean wasUsingColdFuel = this.shouldUseColdFuel;
+        boolean wasUsingHotFuel = this.shouldUseHotFuel;
         if (!ConfigSettings.SMART_HEARTH.get())
         {
             this.shouldUseColdFuel = this.isSidePowered;
@@ -320,8 +320,14 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
                 // Give insulation to players
                 if (!isClient && this.ticksExisted % 20 == 0)
                 {
+                    // Reset the usage status for cold/hot fuel
+                    if (ConfigSettings.SMART_HEARTH.get())
+                    {   this.resetFuelStatus();
+                    }
+                    // Provide insulation to players & calculate fuel usage
                     for (int i = 0; i < players.size(); i++)
-                    {   PlayerEntity player = players.get(i);
+                    {
+                        PlayerEntity player = players.get(i);
                         if (player != null && pathLookup.contains(player.blockPosition()))
                         {   this.insulatePlayer(player);
                         }
@@ -340,7 +346,8 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         }
 
         // Update fuel
-        if (this.isFuelChanged())
+        if (this.isFuelChanged()
+        || (wasUsingColdFuel != this.shouldUseColdFuel || wasUsingHotFuel != this.shouldUseHotFuel))
         {   this.updateFuelState();
         }
 
@@ -472,6 +479,12 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
             this.isBackPowered = this.hasSignalFromBack();
             this.isSidePowered = this.hasSignalFromSides();
             // Update signals for client
+            if (wasBackPowered != this.isBackPowered)
+            {   level.setBlock(this.getBlockPos(), this.getBlockState().setValue(HearthBottomBlock.BACK_POWERED, this.isBackPowered), 3);
+            }
+            if (wasSidePowered != this.isSidePowered)
+            {   level.setBlock(this.getBlockPos(), this.getBlockState().setValue(HearthBottomBlock.SIDE_POWERED, this.isSidePowered), 3);
+            }
             this.syncInputSignal(wasBackPowered, wasSidePowered);
         }
     }
@@ -585,6 +598,15 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         }
     }
 
+    protected void resetFuelStatus()
+    {
+        if (this.level == null || !this.level.isClientSide)
+        {
+            this.shouldUseColdFuel = false;
+            this.shouldUseHotFuel = false;
+        }
+    }
+
     void insulatePlayer(PlayerEntity player)
     {
         for (int i = 0; i < effects.size(); i++)
@@ -616,31 +638,11 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         if (!shouldUseColdFuel || !shouldUseHotFuel)
         EntityTempManager.getTemperatureCap(player).ifPresent(cap ->
         {
-            double temp = cap.getTrait(Temperature.Trait.WORLD);
+            double temp = CSMath.getIfNotNull(Temperature.getModifier(cap, Temperature.Trait.WORLD, BlockInsulationTempModifier.class).orElse(null),
+                                              TempModifier::getLastInput,
+                                              cap.getTrait(Temperature.Trait.WORLD));
             double min = cap.getTrait(Temperature.Trait.FREEZING_POINT);
             double max = cap.getTrait(Temperature.Trait.BURNING_POINT);
-
-            // If the player is habitable, check the input temperature reported by their HearthTempModifier (if they have one)
-            if (CSMath.betweenInclusive(temp, min, max))
-            {
-                // Find the player's HearthTempModifier
-                TempModifier modifier = null;
-                for (TempModifier tempModifier : cap.getModifiers(Temperature.Trait.WORLD))
-                {   if (tempModifier instanceof BlockInsulationTempModifier)
-                    {   modifier = tempModifier;
-                        break;
-                    }
-                }
-                // If they have one, refresh it
-                if (modifier != null)
-                {   if (modifier.getExpireTime() - modifier.getTicksExisted() > 20)
-                    {   return;
-                    }
-                    temp = modifier.getLastInput();
-                }
-                // This means the player is not insulated, and they are habitable without it
-                else return;
-            }
 
             // Tell the hearth to use hot fuel
             shouldUseHotFuel |= this.getHotFuel() > 0 && temp < min;
@@ -974,6 +976,8 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         CompoundNBT tag = super.getUpdateTag();
         tag.putInt("HotFuel",  this.getHotFuel());
         tag.putInt("ColdFuel", this.getColdFuel());
+        tag.putBoolean("ShouldUseColdFuel", this.shouldUseColdFuel);
+        tag.putBoolean("ShouldUseHotFuel", this.shouldUseHotFuel);
         tag.putInt("InsulationLevel", insulationLevel);
         this.saveEffects(tag);
 
@@ -984,6 +988,8 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     public void handleUpdateTag(BlockState state, CompoundNBT tag)
     {   this.setHotFuel(tag.getInt("HotFuel"), false);
         this.setColdFuel(tag.getInt("ColdFuel"), false);
+        this.shouldUseColdFuel = tag.getBoolean("ShouldUseColdFuel");
+        this.shouldUseHotFuel = tag.getBoolean("ShouldUseHotFuel");
         this.updateFuelState();
         this.insulationLevel = tag.getInt("InsulationLevel");
         this.loadEffects(tag);

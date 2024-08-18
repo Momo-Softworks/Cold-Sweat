@@ -5,7 +5,6 @@ import com.momosoftworks.coldsweat.core.init.BlockEntityInit;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
-import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
@@ -14,16 +13,14 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.*;
-import net.minecraft.loot.LootContext;
+import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.DirectionProperty;
-import net.minecraft.state.IntegerProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.IBlockReader;
@@ -37,6 +34,8 @@ import java.util.*;
 public class HearthBottomBlock extends Block
 {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final BooleanProperty SIDE_POWERED = BooleanProperty.create("side_powered");
+    public static final BooleanProperty BACK_POWERED = BooleanProperty.create("back_powered");
 
     public static Properties getProperties()
     {
@@ -54,7 +53,9 @@ public class HearthBottomBlock extends Block
     public HearthBottomBlock(Block.Properties properties)
     {
         super(properties);
-        this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH));
+        this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH)
+                                                          .setValue(SIDE_POWERED, false)
+                                                          .setValue(BACK_POWERED, false));
     }
 
     @Override
@@ -205,7 +206,7 @@ public class HearthBottomBlock extends Block
 
     @Override
     protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder)
-    {   builder.add(FACING);
+    {   builder.add(FACING, SIDE_POWERED, BACK_POWERED);
     }
 
     @Override
