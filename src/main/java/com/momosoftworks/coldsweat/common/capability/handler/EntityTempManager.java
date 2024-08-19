@@ -33,6 +33,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
@@ -650,6 +651,10 @@ public class EntityTempManager
 
     public static boolean isTemperatureEnabled(EntityType<?> type)
     {   return TEMPERATURE_ENABLED_ENTITIES.contains(type);
+    }
+
+    public static boolean immuneToTempEffects(LivingEntity entity)
+    {   return entity.level.getDifficulty() == Difficulty.PEACEFUL && ConfigSettings.USE_PEACEFUL_MODE.get();
     }
 
     public static Map<ItemStack, Insulator> getInsulatorsOnEntity(LivingEntity entity)
