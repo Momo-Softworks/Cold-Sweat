@@ -337,7 +337,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         }
 
         // Update fuel
-        if (this.isFuelChanged()
+        if (!this.level.isClientSide && this.isFuelChanged()
         || (wasUsingColdFuel != this.shouldUseColdFuel || wasUsingHotFuel != this.shouldUseHotFuel))
         {   this.updateFuelState();
         }
@@ -554,8 +554,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
     protected boolean isFuelChanged()
     {
-        return Math.abs(this.getColdFuel() - lastColdFuel) >= this.getMaxFuel()/36 || Math.abs(this.getHotFuel() - lastHotFuel) >= this.getMaxFuel()/36
-            || this.ticksExisted % 5 == 0;
+        return Math.abs(this.getColdFuel() - lastColdFuel) >= this.getMaxFuel()/36 || Math.abs(this.getHotFuel() - lastHotFuel) >= this.getMaxFuel()/36;
     }
 
     protected void storeFuel(ItemStack stack, int amount)
@@ -985,7 +984,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         this.setColdFuel(tag.getInt("ColdFuel"), false);
         this.shouldUseColdFuel = tag.getBoolean("ShouldUseColdFuel");
         this.shouldUseHotFuel = tag.getBoolean("ShouldUseHotFuel");
-        this.updateFuelState();
         this.insulationLevel = tag.getInt("InsulationLevel");
         this.loadEffects(tag);
     }
