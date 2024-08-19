@@ -272,7 +272,7 @@ public class Chameleon extends Animal
     {
         if (event.getEntity() instanceof Chameleon chameleon)
         {
-            if (chameleon.getVehicle() == event.getSource().getEntity())
+            if (chameleon.getVehicle() != null && chameleon.getVehicle() == event.getSource().getEntity())
             {   event.setCanceled(true);
             }
         }
