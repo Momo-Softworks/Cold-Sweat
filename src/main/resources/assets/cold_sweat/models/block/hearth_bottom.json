@@ -5,7 +5,7 @@
 		"sides": "cold_sweat:block/hearth_side_cold_off",
 		"3": "cold_sweat:block/hearth_top",
 		"4": "cold_sweat:block/hearth_front",
-		"5": "cold_sweat:block/hearth_bottom",
+		"bottom": "cold_sweat:block/hearth_bottom_off",
 		"hearth_grate": "cold_sweat:block/hearth_grate",
 		"particle": "cold_sweat:block/hearth_front"
 	},
@@ -34,7 +34,7 @@
 				"south": {"uv": [0, 0, 16, 16], "texture": "#back"},
 				"west": {"uv": [0, 0, 16, 16], "texture": "#sides"},
 				"up": {"uv": [0, 0, 16, 16], "texture": "#3"},
-				"down": {"uv": [0, 0, 16, 16], "rotation": 180, "texture": "#5"}
+				"down": {"uv": [0, 0, 16, 16], "rotation": 180, "texture": "#bottom"}
 			}
 		}
 	]
