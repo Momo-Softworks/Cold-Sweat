@@ -111,9 +111,9 @@ public class EntityTempManager
         return cache.computeIfAbsent(entity, e ->
         {
             LazyOptional<ITemperatureCap> cap = e.getCapability(ModCapabilities.ENTITY_TEMPERATURE);
-            cap.addListener((opt) ->
-            {   SERVER_CAP_CACHE.remove(e);
-            });
+            if (cache == SERVER_CAP_CACHE)
+            {   cap.addListener((opt) -> SERVER_CAP_CACHE.remove(e));
+            }
             return cap;
         });
     }
