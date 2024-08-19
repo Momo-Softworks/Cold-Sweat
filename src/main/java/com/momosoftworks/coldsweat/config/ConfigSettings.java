@@ -9,11 +9,14 @@ import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.slot.ScalingFormula;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.spec.*;
+import com.momosoftworks.coldsweat.config.type.CarriedItemTemperature;
 import com.momosoftworks.coldsweat.config.type.InsulatingMount;
 import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.config.type.PredicateItem;
 import com.momosoftworks.coldsweat.data.codec.configuration.DepthTempData;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
+import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
+import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.serialization.*;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
@@ -27,6 +30,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.biome.Biome;
@@ -107,6 +111,8 @@ public class ConfigSettings
     public static final DynamicHolder<Boolean> CHECK_SLEEP_CONDITIONS;
 
     public static final DynamicHolder<Map<Item, PredicateItem>> FOOD_TEMPERATURES;
+
+    public static final DynamicHolder<Map<Item, CarriedItemTemperature>> CARRIED_ITEM_TEMPERATURES;
 
     public static final DynamicHolder<Integer> WATERSKIN_STRENGTH;
 
@@ -492,6 +498,113 @@ public class ConfigSettings
         (saver) -> ConfigHelper.writeItemMap(saver,
                                            list -> ItemSettingsConfig.getInstance().setFoodTemperatures(list),
                                            food -> List.of(food.value(), food.data().nbt().tag().toString())));
+
+        CARRIED_ITEM_TEMPERATURES = addSyncedSetting("carried_item_temps", () ->
+        {
+            List<?> list = ItemSettingsConfig.getInstance().getCarriedTemps();
+            Map<Item, CarriedItemTemperature> map = new FastMap<>();
+
+            for (Object entry : list)
+            {
+                List<?> entryList = (List<?>) entry;
+                // item ID
+                String itemID = (String) entryList.get(0);
+                Either<TagKey<Item>, Item> item = itemID.startsWith("#")
+                                                  ? Either.left(TagKey.create(Registries.ITEM, new ResourceLocation(itemID.substring(1))))
+                                                  : Either.right(ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemID)));
+                //temp
+                double temp = ((Number) entryList.get(1)).doubleValue();
+                // slots
+                List<Either<IntegerBounds, EquipmentSlot>> slots = switch ((String) entryList.get(2))
+                {
+                    case "inventory" -> List.of(Either.left(IntegerBounds.NONE));
+                    case "hotbar"    -> List.of(Either.left(new IntegerBounds(36, 44)));
+                    case "hand" -> List.of(Either.right(EquipmentSlot.MAINHAND), Either.right(EquipmentSlot.OFFHAND));
+                    default -> List.of(Either.left(new IntegerBounds(-1, -1)));
+                };
+                // trait
+                Temperature.Trait trait = Temperature.Trait.fromID((String) entryList.get(3));
+                // nbt
+                NbtRequirement nbtRequirement = entryList.size() > 4
+                                                ? new NbtRequirement(NBTHelper.parseCompoundNbt((String) entryList.get(4)))
+                                                : new NbtRequirement(new CompoundTag());
+                // compile item requirement
+                ItemRequirement itemRequirement = new ItemRequirement(Optional.of(List.of(item)),
+                                                                      Optional.empty(), Optional.empty(),
+                                                                      Optional.empty(), Optional.empty(),
+                                                                      Optional.empty(), Optional.empty(),
+                                                                      nbtRequirement);
+                // final carried temp
+                CarriedItemTemperature carriedTemp = new CarriedItemTemperature(itemRequirement, slots, temp, trait, IntegerBounds.NONE, EntityRequirement.NONE);
+
+                // add carried temp to map
+                if (item.left().isPresent())
+                {   ForgeRegistries.ITEMS.tags().getTag(item.left().get()).stream().forEach(i -> map.put(i, carriedTemp));
+                }
+                else
+                {   map.put(item.right().get(), carriedTemp);
+                }
+            }
+            return map;
+        },
+        (encoder) ->
+        {
+            CompoundTag tag = new CompoundTag();
+            ListTag list = new ListTag();
+            encoder.forEach((item, temp) ->
+            {
+                CompoundTag entry = new CompoundTag();
+                entry.putString("Id", ForgeRegistries.ITEMS.getKey(item).toString());
+                entry.put("Value", temp.serialize());
+                list.add(entry);
+            });
+            tag.put("CarriedItemTemps", list);
+            return tag;
+        },
+        (decoder) ->
+        {
+            List<?> list = decoder.getList("CarriedItemTemps", 10);
+            Map<Item, CarriedItemTemperature> map = new FastMap<>();
+            list.forEach(entry ->
+            {
+                CompoundTag entryTag = (CompoundTag) entry;
+                Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(entryTag.getString("Id")));
+                CarriedItemTemperature temp = CarriedItemTemperature.deserialize(entryTag.getCompound("Value"));
+                map.put(item, temp);
+            });
+            return map;
+        },
+        (saver) ->
+        {
+            List list = new ArrayList<>();
+            saver.forEach((item, temp) ->
+            {
+                List entry = new ArrayList<>();
+                String[] strictType = {""};
+                if (temp.slots().size() == 1) temp.slots().get(0).ifLeft(left ->
+                {
+                    if (left.equals(IntegerBounds.NONE))
+                    {  strictType[0] = "inventory";
+                    }
+                    if (left.min() == 36 && left.max() == 44)
+                    {  strictType[0] = "hotbar";
+                    }
+                });
+                else if (temp.slots().size() == 2
+                && temp.slots().get(0).right().map(right -> right == EquipmentSlot.MAINHAND).orElse(false)
+                && temp.slots().get(1).right().map(right -> right == EquipmentSlot.OFFHAND).orElse(false))
+                {  strictType[0] = "hand";
+                }
+                else return;
+                entry.add(ForgeRegistries.ITEMS.getKey(item).toString());
+                entry.add(temp.temperature());
+                entry.add(strictType[0]);
+                entry.add(temp.trait().getSerializedName());
+                entry.add(temp.item().nbt().tag().toString());
+                list.add(entry);
+            });
+            ItemSettingsConfig.getInstance().setCarriedTemps(list);
+        });
 
         WATERSKIN_STRENGTH = addSetting("waterskin_strength", () -> ItemSettingsConfig.getInstance().getWaterskinStrength());
 

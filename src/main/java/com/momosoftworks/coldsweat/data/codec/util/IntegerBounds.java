@@ -13,6 +13,8 @@ public record IntegerBounds(int min, int max)
             Codec.INT.optionalFieldOf("max", Integer.MAX_VALUE).forGetter(bounds -> bounds.max)
     ).apply(instance, IntegerBounds::new));
 
+    public static IntegerBounds NONE = new IntegerBounds(-Integer.MAX_VALUE, Integer.MAX_VALUE);
+
     public boolean test(int value)
     {   return value >= min && value <= max;
     }
