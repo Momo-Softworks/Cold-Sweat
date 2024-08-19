@@ -44,6 +44,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
 import net.neoforged.bus.api.EventPriority;
@@ -159,7 +160,7 @@ public class EntityTempManager
      * Tick TempModifiers and update temperature for living entities
      */
     @SubscribeEvent
-    public static void onLivingTick(EntityTickEvent.Pre event)
+    public static void tickTemperature(EntityTickEvent.Pre event)
     {
         if (!(event.getEntity() instanceof LivingEntity entity) || !TEMPERATURE_ENABLED_ENTITIES.contains(entity.getType())) return;
 
@@ -185,6 +186,65 @@ public class EntityTempManager
 
             if (entity instanceof Player && entity.tickCount % 60 == 0)
             {   Temperature.updateModifiers(entity, cap);
+            }
+        });
+    }
+
+    @SubscribeEvent
+    public static void tickInventoryTempItems(EntityTickEvent.Pre event)
+    {
+        if (!(event.getEntity() instanceof LivingEntity entity)) return;
+        if (entity.tickCount % 10 != 0 || !isTemperatureEnabled(event.getEntity().getType())) return;
+
+        Map<Temperature.Trait, Double> effectMap = Arrays.stream(VALID_MODIFIER_TRAITS).collect(
+                () -> new EnumMap<>(Temperature.Trait.class),
+                (map, type) -> map.put(type, 0d),
+                EnumMap::putAll);
+
+        // Get temperature of equipped items
+        for (EquipmentSlot slot : EquipmentSlot.values())
+        {
+            ItemStack stack = entity.getItemBySlot(slot);
+            if (!stack.isEmpty())
+            {
+                Item item = stack.getItem();
+                Optional.ofNullable(ConfigSettings.CARRIED_ITEM_TEMPERATURES.get().get(item)).ifPresent(
+                carried ->
+                {
+                    if (carried.testEntity(entity) && carried.testSlot(stack, null, slot))
+                    {   effectMap.put(carried.trait(), effectMap.get(carried.trait()) + carried.temperature() * stack.getCount());
+                    }
+                });
+            }
+        }
+
+        // Get temperature of main inventory items
+        if (entity instanceof Player player)
+        {
+            for (Slot slot : player.inventoryMenu.slots)
+            {
+                ItemStack stack = slot.getItem();
+                if (!stack.isEmpty())
+                {
+                    Item item = stack.getItem();
+                    Optional.ofNullable(ConfigSettings.CARRIED_ITEM_TEMPERATURES.get().get(item)).ifPresent(
+                    carried ->
+                    {
+                        if (carried.testSlot(stack, slot.index, null))
+                        {   effectMap.put(carried.trait(), effectMap.get(carried.trait()) + carried.temperature() * stack.getCount());
+                        }
+                    });
+                }
+            }
+        }
+        effectMap.forEach((trait, temp) ->
+        {
+            Optional<InventoryItemsTempModifier> modifier = Temperature.getModifier(entity, trait, InventoryItemsTempModifier.class);
+            if (modifier.isEmpty())
+            {   Temperature.addModifier(entity, new InventoryItemsTempModifier(temp), trait, Placement.Duplicates.BY_CLASS);
+            }
+            else
+            {   modifier.get().getNBT().putDouble("Effect", temp);
             }
         });
     }
@@ -238,23 +298,37 @@ public class EntityTempManager
     public static void defineDefaultModifiers(GatherDefaultTempModifiersEvent event)
     {
         // Default TempModifiers for players
-        if (event.getEntity() instanceof Player && event.getTrait() == Temperature.Trait.WORLD)
+        if (event.getEntity() instanceof Player)
         {
-            event.addModifier(new BiomeTempModifier(25).tickRate(10), Placement.Duplicates.BY_CLASS, Placement.BEFORE_FIRST);
-            event.addModifier(new UndergroundTempModifier().tickRate(10), Placement.Duplicates.BY_CLASS, Placement.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof BiomeTempModifier));
-            event.addModifier(new BlockTempModifier().tickRate(4), Placement.Duplicates.BY_CLASS, Placement.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof UndergroundTempModifier));
+            if (event.getTrait() == Temperature.Trait.WORLD)
+            {
+                event.addModifier(new BiomeTempModifier(25).tickRate(10), Placement.Duplicates.BY_CLASS, Placement.BEFORE_FIRST);
+                event.addModifier(new UndergroundTempModifier().tickRate(10), Placement.Duplicates.BY_CLASS, Placement.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof BiomeTempModifier));
+                event.addModifier(new BlockTempModifier().tickRate(4), Placement.Duplicates.BY_CLASS, Placement.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof UndergroundTempModifier));
 
-            // Serene Seasons compat
-            if (CompatManager.isSereneSeasonsLoaded())
-            {
-                TempModifierRegistry.getValue(ResourceLocation.parse("sereneseasons:season")).ifPresent(mod -> event.addModifier(mod.tickRate(60), Placement.Duplicates.BY_CLASS, Placement.of(Mode.BEFORE, Order.FIRST,
-                                                                                                                                                 mod2 -> mod2 instanceof UndergroundTempModifier)));
+                // Serene Seasons compat
+                if (CompatManager.isSereneSeasonsLoaded())
+                {
+                    TempModifierRegistry.getValue(ResourceLocation.parse("sereneseasons:season")).ifPresent(mod ->
+                    {
+                        event.addModifier(mod.tickRate(60),
+                                          Placement.Duplicates.BY_CLASS,
+                                          Placement.of(Mode.BEFORE, Order.FIRST, mod2 -> mod2 instanceof UndergroundTempModifier));
+                    });
+                }
+                // Weather2 Compat
+                if (CompatManager.isWeather2Loaded())
+                {
+                    TempModifierRegistry.getValue(ResourceLocation.parse("weather2:storm")).ifPresent(mod ->
+                    {
+                        event.addModifier(mod.tickRate(60),
+                                          Placement.Duplicates.BY_CLASS,
+                                          Placement.of(Mode.BEFORE, Order.FIRST, mod2 -> mod2 instanceof UndergroundTempModifier));
+                    });
+                }
             }
-            // Weather2 Compat
-            if (CompatManager.isWeather2Loaded())
-            {
-                TempModifierRegistry.getValue(ResourceLocation.parse("weather2:storm")).ifPresent(mod -> event.addModifier(mod.tickRate(60), Placement.Duplicates.BY_CLASS, Placement.of(Mode.BEFORE, Order.FIRST,
-                                                                                                                                           mod2 -> mod2 instanceof UndergroundTempModifier)));
+            if (Arrays.stream(VALID_MODIFIER_TRAITS).anyMatch(trait -> trait == event.getTrait()))
+            {   event.addModifier(new InventoryItemsTempModifier(), Placement.Duplicates.BY_CLASS, Placement.AFTER_LAST);
             }
         }
         // Default TempModifiers for other temperature-enabled entities
@@ -330,7 +404,7 @@ public class EntityTempManager
      * Handle modifiers for freezing, burning, and being wet
      */
     @SubscribeEvent
-    public static void onPlayerTick(PlayerTickEvent.Pre event)
+    public static void handleWaterAndFreezing(PlayerTickEvent.Pre event)
     {
         Player player = event.getEntity();
 

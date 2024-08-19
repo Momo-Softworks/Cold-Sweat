@@ -4,6 +4,7 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
@@ -76,6 +77,11 @@ public record ItemComponentsRequirement(PatchedDataComponentMap components)
         {   e.printStackTrace();
         }
         return new ItemComponentsRequirement(parsedComponents);
+    }
+
+    public String write()
+    {
+        return DataComponentMap.CODEC.encodeStart(JsonOps.COMPRESSED, this.components).mapOrElse(el -> el.getAsString(), s -> "");
     }
 
     public CompoundTag serialize()

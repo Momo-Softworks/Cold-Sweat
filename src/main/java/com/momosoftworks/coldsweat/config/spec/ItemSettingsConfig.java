@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.config.spec;
 
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.ListBuilder;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.config.ModConfig;
@@ -26,6 +27,7 @@ public class ItemSettingsConfig
     private static final ModConfigSpec.ConfigValue<List<? extends List<?>>> soulLampItems;
     private static final ModConfigSpec.ConfigValue<List<? extends String>> soulLampDimensions;
     private static final ModConfigSpec.ConfigValue<List<? extends List<?>>> temperatureFoods;
+    private static final ModConfigSpec.ConfigValue<List<? extends List<?>>> carriedTemps;
 
     private static final ModConfigSpec.ConfigValue<List<? extends List<?>>> insulatingItems;
     private static final ModConfigSpec.ConfigValue<List<? extends String>> insulationBlacklist;
@@ -269,6 +271,29 @@ public class ItemSettingsConfig
                 .defineInRange("Waterskin Strength", 50, 0, Integer.MAX_VALUE);
         BUILDER.pop();
 
+        /*
+         Misc
+         */
+        BUILDER.push("Misc");
+
+        carriedTemps = BUILDER
+                .comment("Defines items that affect the player's temperature when in the inventory",
+                         "Format: [[\"item_id\", temperature, strict_type, trait, *nbt], [\"item_id\", temperature, strict_type, trait, *nbt], ...etc]",
+                         "temperature: The temperature change the item will apply to the entity. For core temperature, this is applied every tick",
+                         "strict_type: Either \"inventory\", \"hotbar\", or \"hand\". Defines what slots the item must be in to apply to the entity",
+                         "trait: The temperature trait to apply the effect to. Typical values are \"core\" for body temperature or \"world\" for ambient temperature. More on the mod documentation page.",
+                         "nbt: Optional. The NBT data the item must have to apply to the entity.")
+                .defineListAllowEmpty(List.of("Carried Item Temperatures"), () -> List.of(
+                ),
+                it -> it instanceof List<?> list && CSMath.betweenInclusive(list.size(), 4, 5)
+                        && list.get(0) instanceof String
+                        && list.get(1) instanceof Number
+                        && list.get(2) instanceof String
+                        && list.get(3) instanceof String
+                        && (list.size() < 5 || list.get(4) instanceof String));
+
+        BUILDER.pop();
+
         SPEC = BUILDER.build();
     }
 
@@ -350,6 +375,10 @@ public class ItemSettingsConfig
 
     public List<? extends List<?>> getInsulatingCurios()
     {   return CompatManager.isCuriosLoaded() ? insulatingCurios.get() : List.of();
+    }
+
+    public List<? extends List<?>> getCarriedTemps()
+    {   return carriedTemps.get();
     }
 
     /* Setters */
@@ -437,6 +466,12 @@ public class ItemSettingsConfig
         {   synchronized (insulatingCurios)
             {   insulatingCurios.set(items);
             }
+        }
+    }
+
+    public synchronized void setCarriedTemps(List<? extends List<?>> items)
+    {   synchronized (carriedTemps)
+        {   carriedTemps.set(items);
         }
     }
 }
