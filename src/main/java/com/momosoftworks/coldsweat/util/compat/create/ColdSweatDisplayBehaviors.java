@@ -1,6 +1,5 @@
 package com.momosoftworks.coldsweat.util.compat.create;
 
-import com.google.common.collect.ImmutableList;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.blockentity.ThermolithBlockEntity;
 import com.simibubi.create.content.redstone.displayLink.DisplayBehaviour;
@@ -8,12 +7,11 @@ import com.simibubi.create.content.redstone.displayLink.DisplayLinkContext;
 import com.simibubi.create.content.redstone.displayLink.source.SingleLineDisplaySource;
 import com.simibubi.create.content.redstone.displayLink.target.DisplayTargetStats;
 import com.simibubi.create.foundation.gui.ModularGuiLineBuilder;
-import com.simibubi.create.foundation.utility.Lang;
-import net.minecraft.ChatFormatting;
+import com.simibubi.create.foundation.utility.Components;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
-import java.util.Optional;
+import java.util.List;
 
 public class ColdSweatDisplayBehaviors
 {
@@ -28,8 +26,7 @@ public class ColdSweatDisplayBehaviors
             {
                 double temperature = Temperature.getTemperatureAt(thermolith.getBlockPos(), thermolith.getLevel());
 
-                String unitsString = displayLinkContext.sourceConfig().getString("Units");
-                Temperature.Units units = Optional.ofNullable(Temperature.Units.fromID(unitsString)).orElse(Temperature.Units.MC);
+                Temperature.Units units = Temperature.Units.values()[displayLinkContext.sourceConfig().getInt("Units")];
 
                 double convertedTemp = Temperature.convert(temperature, Temperature.Units.MC, units, true);
 
@@ -50,12 +47,11 @@ public class ColdSweatDisplayBehaviors
             super.initConfigurationWidgets(context, builder, isFirstLine);
             if (!isFirstLine)
             {
-                builder.addTextInput(0, 137, (e, t) -> {
-                    e.setValue("mc");
-                    t.withTooltip(ImmutableList.of(Component.translatable("cold_sweat.config.units.name").append(" (f, c, mc)")
-                                                           .withStyle((s) -> s.withColor(5476833)),
-                                                   Lang.translateDirect("gui.schedule.lmb_edit")
-                                                           .withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC)));
+                builder.addSelectionScrollInput(0, 137, (input, label) -> {
+                    input.forOptions(List.of(Components.literal(Temperature.Units.F.getFormattedName()),
+                                             Components.literal(Temperature.Units.C.getFormattedName()),
+                                             Components.literal(Temperature.Units.MC.getFormattedName())))
+                         .titled(Component.translatable("cold_sweat.config.units.name"));
                 }, "Units");
             }
         }
