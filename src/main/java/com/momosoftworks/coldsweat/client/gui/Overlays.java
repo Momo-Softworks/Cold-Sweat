@@ -58,7 +58,7 @@ public class Overlays
     @SubscribeEvent
     public static void onRenderHUD(RenderGameOverlayEvent.Post event)
     {
-        if (event.getType() == RenderGameOverlayEvent.ElementType.ALL)
+        if (event.getType() == RenderGameOverlayEvent.ElementType.HOTBAR)
         {
             Minecraft mc = Minecraft.getInstance();
             PlayerEntity player = mc.player;
