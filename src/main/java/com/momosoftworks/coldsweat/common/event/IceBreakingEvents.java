@@ -3,10 +3,11 @@ package com.momosoftworks.coldsweat.common.event;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.material.Material;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.IWorld;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -22,12 +23,15 @@ public class IceBreakingEvents
     public static void onIceBreak(BlockEvent.BreakEvent event)
     {
         BlockState state = event.getState();
-        ServerWorld level = (ServerWorld) event.getWorld();
+        IWorld level = event.getWorld();
         ItemStack tool = event.getPlayer().getItemInHand(Hand.MAIN_HAND);
         BlockPos pos = event.getPos();
+        Material belowMaterial = level.getBlockState(pos.below()).getMaterial();
 
-        if (state.is(Blocks.ICE) && !tool.isCorrectToolForDrops(state))
-        {   level.setBlockAndUpdate(pos, Blocks.WATER.defaultBlockState());
+        if (state.is(Blocks.ICE) && !tool.isCorrectToolForDrops(state)
+        && !event.getPlayer().abilities.instabuild
+        && belowMaterial.blocksMotion() || belowMaterial.isLiquid())
+        {   level.setBlock(pos, Blocks.WATER.defaultBlockState(), 3);
         }
     }
 
