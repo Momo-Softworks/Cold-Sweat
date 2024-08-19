@@ -230,27 +230,28 @@ public class AbstractTempCap implements ITemperatureCap
         int coreTempSign = CSMath.sign(newCoreTemp);
         // If needed, blend the player's temperature back to 0
         List<TempModifier> coreModifiers = this.getModifiers(Trait.CORE);
-        if (coreModifiers.isEmpty()
-        || (coreModifiers.get(0).getLastInput() == coreModifiers.get(coreModifiers.size()-1).getLastOutput()))
+        boolean hasCoreModifiers = !coreModifiers.isEmpty() && (coreModifiers.get(0).getLastInput() == coreModifiers.get(coreModifiers.size()-1).getLastOutput());
+        double amount = 0;
+        // Player is fully cold dampened & body is cold
+        if (isFullyColdDampened && coreTempSign < 0)
+        {   amount = ConfigSettings.TEMP_RATE.get() / 10d;
+        }
+        // Player is fully heat dampened & body is hot
+        else if (isFullyHeatDampened && coreTempSign > 0)
+        {   amount = ConfigSettings.TEMP_RATE.get() / -10d;
+        }
+        // Else if the player's core temp is not the same as the world temp
+        else if (coreTempSign != 0 && coreTempSign != worldTempSign)
+        {   amount = (coreTempSign == 1 ? newWorldTemp - maxTemp : newWorldTemp - minTemp) / 3;
+        }
+        // Blend back to 0
+        if (amount != 0)
         {
-            double amount = 0;
-            // Player is fully cold dampened & body is cold
-            if (isFullyColdDampened && coreTempSign < 0)
-            {   amount = ConfigSettings.TEMP_RATE.get() / 10d;
+            double changeBy = CSMath.maxAbs(amount * ConfigSettings.TEMP_RATE.get(), ConfigSettings.TEMP_RATE.get() / 10d * -coreTempSign);
+            if (hasCoreModifiers)
+            {   changeBy /= 2;
             }
-            // Player is fully heat dampened & body is hot
-            else if (isFullyHeatDampened && coreTempSign > 0)
-            {   amount = ConfigSettings.TEMP_RATE.get() / -10d;
-            }
-            // Else if the player's core temp is not the same as the world temp
-            else if (coreTempSign != 0 && coreTempSign != worldTempSign)
-            {   amount = (coreTempSign == 1 ? newWorldTemp - maxTemp : newWorldTemp - minTemp) / 3;
-            }
-            // Blend back to 0
-            if (amount != 0)
-            {   double changeBy = CSMath.maxAbs(amount * ConfigSettings.TEMP_RATE.get(), ConfigSettings.TEMP_RATE.get() / 10d * -coreTempSign);
-                newCoreTemp += CSMath.minAbs(changeBy, -getTrait(Trait.CORE));
-            }
+            newCoreTemp += CSMath.minAbs(changeBy, -getTrait(Trait.CORE));
         }
 
         // Write the new temperature values
