@@ -1,0 +1,8 @@
+{
+    "parent": "cold_sweat:block/hearth_bottom",
+	"textures": {
+		"back": "cold_sweat:block/hearth_side_hot_off",
+		"sides": "cold_sweat:block/hearth_side_cold_on",
+        "bottom": "cold_sweat:block/hearth_bottom_off"
+	}
+}
