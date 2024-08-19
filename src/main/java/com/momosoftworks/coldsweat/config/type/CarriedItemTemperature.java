@@ -69,6 +69,27 @@ public class CarriedItemTemperature implements NbtSerializable
         return false;
     }
 
+    public String getSlotRangeName()
+    {
+        String[] strictType = {""};
+        if (this.slots.size() == 1) this.slots.get(0).ifLeft(left ->
+        {
+            if (left.equals(IntegerBounds.NONE))
+            {  strictType[0] = "inventory";
+            }
+            if (left.min == 36 && left.max == 44)
+            {  strictType[0] = "hotbar";
+            }
+        });
+        else if (this.slots.size() == 2
+        && this.slots.get(0).right().map(right -> right == EquipmentSlotType.MAINHAND).orElse(false)
+        && this.slots.get(1).right().map(right -> right == EquipmentSlotType.OFFHAND).orElse(false))
+        {  strictType[0] = "hand";
+        }
+
+        return strictType[0];
+    }
+
     @Override
     public CompoundNBT serialize()
     {

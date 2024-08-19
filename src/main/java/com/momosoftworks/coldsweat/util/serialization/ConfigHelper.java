@@ -508,8 +508,15 @@ public class ConfigHelper
             Item item = entry.getKey();
             T value = entry.getValue();
             List<Object> itemData = new ArrayList<>();
-            itemData.add(ForgeRegistries.ITEMS.getKey(item).toString());
-            itemData.addAll(valueWriter.apply(value));
+            ResourceLocation itemID = ForgeRegistries.ITEMS.getKey(item);
+            if (itemID == null)
+            {   ColdSweat.LOGGER.error("Error writing item map: item \"{}\" does not exist", item);
+                continue;
+            }
+            itemData.add(itemID.toString());
+            List<?> args = valueWriter.apply(value);
+            if (args == null) continue;
+            itemData.addAll(args);
             list.add(itemData);
         }
         saver.accept(list);
