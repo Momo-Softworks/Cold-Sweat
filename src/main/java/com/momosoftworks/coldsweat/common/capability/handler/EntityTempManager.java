@@ -189,15 +189,6 @@ public class EntityTempManager
         });
     }
 
-    @SubscribeEvent
-    public static void clearClientCapCache(ClientTickEvent.Post event)
-    {
-        if (ClientOnlyHelper.getClientLevel() != null
-        && ClientOnlyHelper.getClientLevel().getGameTime() % 5 == 0)
-        {   CLIENT_CAP_CACHE.clear();
-        }
-    }
-
     /**
      * Transfer the player's capability when traveling from the End
      */
