@@ -1,13 +1,14 @@
 package com.momosoftworks.coldsweat.config;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.config.type.CarriedItemTemperature;
 import com.momosoftworks.coldsweat.config.type.InsulatingMount;
 import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.config.type.PredicateItem;
@@ -17,6 +18,7 @@ import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
+import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.data.tag.ModEffectTags;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
@@ -33,6 +35,7 @@ import net.minecraft.item.Item;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.resources.IResource;
 import net.minecraft.resources.ResourcePackInfo;
+import net.minecraft.tags.ITag;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.JSONUtils;
@@ -47,6 +50,7 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import javax.xml.ws.Holder;
 import java.io.*;
 import java.nio.file.Path;
 import java.util.*;
@@ -111,6 +115,7 @@ public class ConfigRegistryHandler
         Set<InsulatorData> insulators = new HashSet<>(ModRegistries.INSULATOR_DATA.getValues());
         Set<FuelData> fuels = new HashSet<>(ModRegistries.FUEL_DATA.getValues());
         Set<FoodData> foods = new HashSet<>(ModRegistries.FOOD_DATA.getValues());
+        Set<ItemCarryTempData> carryTemps = new HashSet<>(ModRegistries.CARRY_TEMP_DATA.getValues());
 
         Set<BlockTempData> blockTemps = new HashSet<>(ModRegistries.BLOCK_TEMP_DATA.getValues());
         Set<BiomeTempData> biomeTemps = new HashSet<>(ModRegistries.BIOME_TEMP_DATA.getValues());
@@ -127,6 +132,7 @@ public class ConfigRegistryHandler
         insulators.addAll(parseConfigData(ModRegistries.INSULATOR_DATA, InsulatorData.CODEC));
         fuels.addAll(parseConfigData(ModRegistries.FUEL_DATA, FuelData.CODEC));
         foods.addAll(parseConfigData(ModRegistries.FOOD_DATA, FoodData.CODEC));
+        carryTemps.addAll(parseConfigData(ModRegistries.CARRY_TEMP_DATA, ItemCarryTempData.CODEC));
 
         blockTemps.addAll(parseConfigData(ModRegistries.BLOCK_TEMP_DATA, BlockTempData.CODEC));
         biomeTemps.addAll(parseConfigData(ModRegistries.BIOME_TEMP_DATA, BiomeTempData.CODEC));
@@ -149,6 +155,9 @@ public class ConfigRegistryHandler
         // foods
         addFoodConfigs(foods);
         logRegistryLoaded(String.format("Loaded %s foods", foods.size()), foods);
+        // carry temperatures
+        addCarryTempConfigs(carryTemps);
+        logRegistryLoaded(String.format("Loaded %s carried item temperatures", carryTemps.size()), carryTemps);
 
         // block temperatures
         addBlockTempConfigs(blockTemps);
@@ -306,6 +315,30 @@ public class ConfigRegistryHandler
             for (Item item : items)
             {
                 ConfigSettings.FOOD_TEMPERATURES.get().put(item, predicateItem);
+            }
+        });
+    }
+
+    private static void addCarryTempConfigs(Set<ItemCarryTempData> carryTemps)
+    {
+        carryTemps.forEach(carryTempData ->
+        {
+            // Check if the required mods are loaded
+            if (carryTempData.requiredMods.isPresent())
+            {
+                List<String> requiredMods = carryTempData.requiredMods.get();
+                if (requiredMods.stream().anyMatch(mod -> !CompatManager.modLoaded(mod)))
+                {   return;
+                }
+            }
+
+            CarriedItemTemperature carriedItemTemperature = CarriedItemTemperature.createFromData(carryTempData);
+            List<Either<ITag<Item>, Item>> items = CSMath.orElse(carryTempData.data.items.orElse(null),
+                                                                 Arrays.asList(Either.left(carryTempData.data.tag.orElse(null))),
+                                                                 Arrays.asList());
+            for (Item item : RegistryHelper.mapTaggableList(items))
+            {
+                ConfigSettings.CARRIED_ITEM_TEMPERATURES.get().put(item, carriedItemTemperature);
             }
         });
     }
