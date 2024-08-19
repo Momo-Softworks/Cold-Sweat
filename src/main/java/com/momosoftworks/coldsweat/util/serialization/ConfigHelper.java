@@ -493,7 +493,9 @@ public class ConfigHelper
             }
             ResourceLocation itemID = BuiltInRegistries.ITEM.getKey(item);
             itemData.add(itemID.toString());
-            itemData.addAll(valueWriter.apply(value));
+            List<?> args = valueWriter.apply(value);
+            if (args == null) continue;
+            itemData.addAll(args);
             list.add(itemData);
         }
         saver.accept(list);

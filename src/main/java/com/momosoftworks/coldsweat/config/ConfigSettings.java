@@ -588,34 +588,25 @@ public class ConfigSettings
         },
         (saver) ->
         {
-            List list = new ArrayList<>();
-            saver.forEach((item, temp) ->
+            ConfigHelper.writeItemMap(saver,
+            list -> ItemSettingsConfig.getInstance().setCarriedTemps(list),
+            temp ->
             {
-                List entry = new ArrayList<>();
-                String[] strictType = {""};
-                if (temp.slots().size() == 1) temp.slots().get(0).ifLeft(left ->
-                {
-                    if (left.equals(IntegerBounds.NONE))
-                    {  strictType[0] = "inventory";
-                    }
-                    if (left.min() == 36 && left.max() == 44)
-                    {  strictType[0] = "hotbar";
-                    }
-                });
-                else if (temp.slots().size() == 2
-                && temp.slots().get(0).right().map(right -> right == EquipmentSlot.MAINHAND).orElse(false)
-                && temp.slots().get(1).right().map(right -> right == EquipmentSlot.OFFHAND).orElse(false))
-                {  strictType[0] = "hand";
-                }
-                else return;
-                entry.add(BuiltInRegistries.ITEM.getKey(item).toString());
+                List<Object> entry = new ArrayList<>();
+                // Temperature
                 entry.add(temp.temperature());
-                entry.add(strictType[0]);
+                // Slot types
+                String strictType = temp.getSlotRangeName();
+                if (strictType.isEmpty()) return null;
+                entry.add(strictType);
+                // Trait
                 entry.add(temp.trait().getSerializedName());
-                entry.add(temp.item().components().write());
-                list.add(entry);
+                // NBT data
+                if (!temp.item().components().components().isEmpty())
+                {   entry.add(temp.item().components().write());
+                }
+                return entry;
             });
-            ItemSettingsConfig.getInstance().setCarriedTemps(list);
         });
 
         WATERSKIN_STRENGTH = addSetting("waterskin_strength", () -> ItemSettingsConfig.getInstance().getWaterskinStrength());
