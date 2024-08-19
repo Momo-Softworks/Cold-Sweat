@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.common.event;
 
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ModAttributes;
 import com.momosoftworks.coldsweat.core.init.ModEffects;
@@ -24,6 +25,8 @@ public class TempEffectsCommon
     public static void onPlayerMine(PlayerEvent.BreakSpeed event)
     {
         Player player = event.getEntity();
+        if (EntityTempManager.immuneToTempEffects(player)) return;
+
         double miningSpeedReduction = ConfigSettings.COLD_MINING_IMPAIRMENT.get();
 
         if (miningSpeedReduction <= 0
@@ -48,6 +51,7 @@ public class TempEffectsCommon
     public static void onPlayerTick(PlayerTickEvent.Post event)
     {
         Player player = event.getEntity();
+        if (EntityTempManager.immuneToTempEffects(player)) return;
         float temp = (float) Temperature.get(player, Temperature.Trait.BODY);
         if (temp < -50)
         {
@@ -77,6 +81,8 @@ public class TempEffectsCommon
     {
         if (event.getEntity().getLastHurtByMob() instanceof Player player)
         {
+            if (EntityTempManager.immuneToTempEffects(player)) return;
+
             double knockbackReduction = ConfigSettings.COLD_KNOCKBACK_REDUCTION.get();
             if (knockbackReduction <= 0 || player.hasEffect(ModEffects.ICE_RESISTANCE) || player.hasEffect(ModEffects.GRACE)) return;
 
@@ -98,6 +104,8 @@ public class TempEffectsCommon
     {
         if (event.getEntity() instanceof Player player)
         {
+            if (EntityTempManager.immuneToTempEffects(player)) return;
+
             double frozenHeartsPercentage = ConfigSettings.HEARTS_FREEZING_PERCENTAGE.get();
 
             if (frozenHeartsPercentage <= 0
