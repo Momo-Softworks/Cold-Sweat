@@ -68,7 +68,7 @@ public class ConfigSettings
     public static final DynamicHolder<Double> TEMP_DAMAGE;
     public static final DynamicHolder<Boolean> FIRE_RESISTANCE_ENABLED;
     public static final DynamicHolder<Boolean> ICE_RESISTANCE_ENABLED;
-    public static final DynamicHolder<Boolean> DAMAGE_SCALING;
+    public static final DynamicHolder<Boolean> USE_PEACEFUL_MODE;
     public static final DynamicHolder<Boolean> REQUIRE_THERMOMETER;
     public static final DynamicHolder<Integer> GRACE_LENGTH;
     public static final DynamicHolder<Boolean> GRACE_ENABLED;
@@ -201,9 +201,9 @@ public class ConfigSettings
         (decoder) -> decoder.getBoolean("IceResistanceEnabled"),
         (saver) -> MainSettingsConfig.getInstance().setIceResistanceEnabled(saver));
 
-        DAMAGE_SCALING = addSyncedSetting("damage_scaling", () -> MainSettingsConfig.getInstance().doDamageScaling(),
-        (encoder) -> ConfigHelper.serializeNbtBool(encoder, "DamageScaling"),
-        (decoder) -> decoder.getBoolean("DamageScaling"),
+        USE_PEACEFUL_MODE = addSyncedSetting("use_peaceful", () -> MainSettingsConfig.getInstance().doDamageScaling(),
+        (encoder) -> ConfigHelper.serializeNbtBool(encoder, "UsePeaceful"),
+        (decoder) -> decoder.getBoolean("UsePeaceful"),
         (saver) -> MainSettingsConfig.getInstance().setDamageScaling(saver));
 
         REQUIRE_THERMOMETER = addSyncedSetting("require_thermometer", () -> MainSettingsConfig.getInstance().thermometerRequired(),

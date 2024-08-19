@@ -5,6 +5,7 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.client.RenderFogEvent;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.gui.Overlays;
+import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.event.TempEffectsCommon;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -51,7 +52,9 @@ public class TempEffectsClient
     public static void setCamera(EntityViewRenderEvent.CameraSetup event)
     {
         PlayerEntity player = Minecraft.getInstance().player;
-        if (!Minecraft.getInstance().isPaused() && player != null)
+        if (player == null || EntityTempManager.immuneToTempEffects(player)) return;
+
+        if (!Minecraft.getInstance().isPaused())
         {
             // Get the FPS of the game
             float frameTime = Minecraft.getInstance().getDeltaFrameTime();
@@ -110,7 +113,8 @@ public class TempEffectsClient
         if (event.phase == net.minecraftforge.event.TickEvent.Phase.END)
         {
             PlayerEntity player = Minecraft.getInstance().player;
-            if (player != null && player.tickCount % 5 == 0)
+            if (player == null || EntityTempManager.immuneToTempEffects(player)) return;
+            if (player.tickCount % 5 == 0)
             {
                 COLD_IMMUNITY = 0;
                 HOT_IMMUNITY = 0;
@@ -132,9 +136,11 @@ public class TempEffectsClient
         if (!(event instanceof RenderFogEvent || event instanceof EntityViewRenderEvent.FogColors)) return;
 
         PlayerEntity player = Minecraft.getInstance().player;
+        if (player == null || EntityTempManager.immuneToTempEffects(player)) return;
+
         double fogDistance = Math.max(0.01, ConfigSettings.HEATSTROKE_FOG_DISTANCE.get());
         if (fogDistance >= 64) return;
-        if (fogDistance < Double.POSITIVE_INFINITY && player != null && BLEND_TEMP >= 50 && HOT_IMMUNITY < 4)
+        if (fogDistance < Double.POSITIVE_INFINITY&& BLEND_TEMP >= 50 && HOT_IMMUNITY < 4)
         {
             float tempWithResistance = CSMath.blend(BLEND_TEMP, 50, HOT_IMMUNITY, 0, 4);
             if (event instanceof RenderFogEvent)
@@ -162,7 +168,9 @@ public class TempEffectsClient
     public static void vignette(RenderGameOverlayEvent.Pre event)
     {
         PlayerEntity player = Minecraft.getInstance().player;
-        if (player != null && event.getType() == RenderGameOverlayEvent.ElementType.ALL
+        if (player == null || EntityTempManager.immuneToTempEffects(player)) return;
+
+        if (event.getType() == RenderGameOverlayEvent.ElementType.ALL
         && ((BLEND_TEMP > 0 && HOT_IMMUNITY < 4) || (BLEND_TEMP < 0 && COLD_IMMUNITY < 4)))
         {
             float resistance = CSMath.blend(1, 0, BLEND_TEMP > 0 ? HOT_IMMUNITY : COLD_IMMUNITY, 0, 4);
@@ -220,7 +228,8 @@ public class TempEffectsClient
             try
             {
                 float playerTemp = (float) Overlays.BODY_TEMP;
-                if (ConfigSettings.DISTORTION_EFFECTS.get() && playerTemp >= 50 && HOT_IMMUNITY < 4)
+                if (ConfigSettings.DISTORTION_EFFECTS.get() && playerTemp >= 50 && HOT_IMMUNITY < 4
+                && mc.player != null && !EntityTempManager.immuneToTempEffects(mc.player))
                 {
                     float blur = CSMath.blend(0f, 7f, playerTemp, 50, 100) / (HOT_IMMUNITY + 1);
                     if (blur > 0 && (mc.gameRenderer.currentEffect() == null || !mc.gameRenderer.currentEffect().getName().equals("minecraft:shaders/post/blobs2.json")))

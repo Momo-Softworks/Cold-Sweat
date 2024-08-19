@@ -119,10 +119,10 @@ public class ConfigPageOne extends AbstractConfigPage
                 button -> ConfigSettings.REQUIRE_THERMOMETER.set(!ConfigSettings.REQUIRE_THERMOMETER.get()),
                 true, true, false, new TranslationTextComponent("cold_sweat.config.require_thermometer.desc"));
 
-        this.addButton("damage_scaling", Side.RIGHT,
-                () -> new TranslationTextComponent("cold_sweat.config.damage_scaling.name").append(": ").append(ConfigSettings.DAMAGE_SCALING.get() ? ON : OFF),
-                button -> ConfigSettings.DAMAGE_SCALING.set(!ConfigSettings.DAMAGE_SCALING.get()),
-                true, true, false, new TranslationTextComponent("cold_sweat.config.damage_scaling.desc"));
+        this.addButton("use_peaceful", Side.RIGHT,
+                () -> new TranslationTextComponent("cold_sweat.config.use_peaceful.name").append(": ").append(ConfigSettings.USE_PEACEFUL_MODE.get() ? ON : OFF),
+                button -> ConfigSettings.USE_PEACEFUL_MODE.set(!ConfigSettings.USE_PEACEFUL_MODE.get()),
+                true, true, false, new TranslationTextComponent("cold_sweat.config.use_peaceful.desc"));
     }
 
     @Override

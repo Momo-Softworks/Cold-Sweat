@@ -51,6 +51,7 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.world.Difficulty;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -639,6 +640,10 @@ public class EntityTempManager
 
     public static boolean isTemperatureEnabled(EntityType<?> type)
     {   return TEMPERATURE_ENABLED_ENTITIES.contains(type);
+    }
+
+    public static boolean immuneToTempEffects(LivingEntity entity)
+    {   return entity.level.getDifficulty() == Difficulty.PEACEFUL && ConfigSettings.USE_PEACEFUL_MODE.get();
     }
 
     public static Map<ItemStack, Insulator> getInsulatorsOnEntity(LivingEntity entity)

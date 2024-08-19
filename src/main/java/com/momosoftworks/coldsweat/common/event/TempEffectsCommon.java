@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.common.event;
 
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -24,6 +25,7 @@ public class TempEffectsCommon
     public static void onPlayerMine(PlayerEvent.BreakSpeed event)
     {
         PlayerEntity player = event.getPlayer();
+        if (EntityTempManager.immuneToTempEffects(player)) return;
         double miningSpeedReduction = ConfigSettings.COLD_MINING_IMPAIRMENT.get();
 
         if (miningSpeedReduction <= 0
@@ -48,6 +50,7 @@ public class TempEffectsCommon
     public static void onPlayerTick(TickEvent.PlayerTickEvent event)
     {
         PlayerEntity player = event.player;
+        if (EntityTempManager.immuneToTempEffects(player)) return;
         if (event.phase == TickEvent.Phase.END)
         {
             float temp = (float) Temperature.get(player, Temperature.Trait.BODY);
@@ -81,6 +84,8 @@ public class TempEffectsCommon
         if (event.getEntityLiving().getLastHurtByMob() instanceof PlayerEntity)
         {
             PlayerEntity player = (PlayerEntity) event.getEntityLiving().getLastHurtByMob();
+            if (EntityTempManager.immuneToTempEffects(player)) return;
+
             double knockbackReduction = ConfigSettings.COLD_KNOCKBACK_REDUCTION.get();
             if (knockbackReduction <= 0 || player.hasEffect(ModEffects.ICE_RESISTANCE) || player.hasEffect(ModEffects.GRACE)) return;
 
@@ -103,6 +108,8 @@ public class TempEffectsCommon
         if (event.getEntityLiving() instanceof PlayerEntity)
         {
             PlayerEntity player = (PlayerEntity) event.getEntityLiving();
+            if (EntityTempManager.immuneToTempEffects(player)) return;
+
             double frozenHeartsPercentage = ConfigSettings.HEARTS_FREEZING_PERCENTAGE.get();
 
             if (frozenHeartsPercentage <= 0
