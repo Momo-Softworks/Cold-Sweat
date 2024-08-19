@@ -224,7 +224,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements ITickableTil
 
     @Override
     protected boolean hasSignalFromSides()
-    {   return Arrays.stream(Direction.values()).anyMatch(dir -> dir.getAxis() != Direction.Axis.Y && this.level.hasSignal(this.getBlockPos().relative(dir), dir));
+    {   return Arrays.stream(Direction.values()).anyMatch(dir -> dir != Direction.UP && this.level.hasSignal(this.getBlockPos().relative(dir), dir));
     }
 
     @Override

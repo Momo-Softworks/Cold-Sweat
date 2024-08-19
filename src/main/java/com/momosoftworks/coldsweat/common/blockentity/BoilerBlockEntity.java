@@ -174,7 +174,7 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
     {
         return Arrays.stream(Direction.values()).anyMatch(direction ->
         {
-            return direction.getAxis() != Direction.Axis.Y && direction != this.getBlockState().getValue(BoilerBlock.FACING)
+            return direction != Direction.UP && direction != this.getBlockState().getValue(BoilerBlock.FACING)
                 && this.level.hasSignal(this.worldPosition.relative(direction), direction);
         });
     }
