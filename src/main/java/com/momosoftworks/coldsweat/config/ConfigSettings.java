@@ -87,6 +87,7 @@ public class ConfigSettings
     public static final DynamicHolder<Map<StructureFeature<?>, Pair<Double, Temperature.Units>>> STRUCTURE_OFFSETS;
     public static final DynamicHolder<Double> CAVE_INSULATION;
     public static final DynamicHolder<List<DepthTempData>> DEPTH_REGIONS;
+    public static final DynamicHolder<Boolean> CHECK_SLEEP_CONDITIONS;
     public static final DynamicHolder<Double[]> SUMMER_TEMPS;
     public static final DynamicHolder<Double[]> AUTUMN_TEMPS;
     public static final DynamicHolder<Double[]> WINTER_TEMPS;
@@ -107,8 +108,6 @@ public class ConfigSettings
     public static final DynamicHolder<Map<Item, Insulator>> INSULATING_CURIOS;
     public static final DynamicHolder<ScalingFormula> INSULATION_SLOTS;
     public static final DynamicHolder<List<Item>> INSULATION_BLACKLIST;
-
-    public static final DynamicHolder<Boolean> CHECK_SLEEP_CONDITIONS;
 
     public static final DynamicHolder<Map<Item, PredicateItem>> FOOD_TEMPERATURES;
 
