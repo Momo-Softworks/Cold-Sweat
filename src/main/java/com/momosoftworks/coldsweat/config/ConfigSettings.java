@@ -498,8 +498,15 @@ public class ConfigSettings
         (encoder) -> ConfigHelper.serializeItemMap(encoder, "FoodTemperatures", food -> food.serialize()),
         (decoder) -> ConfigHelper.deserializeItemMap(decoder, "FoodTemperatures", nbt -> PredicateItem.deserialize(nbt)),
         (saver) -> ConfigHelper.writeItemMap(saver,
-                                           list -> ItemSettingsConfig.getInstance().setFoodTemperatures(list),
-                                           food -> List.of(food.value(), food.data().components().write())));
+                                             list -> ItemSettingsConfig.getInstance().setFoodTemperatures(list),
+                                             food ->
+                                             {
+                                                 List<Object> foodData = new ArrayList<>(List.of(food.value(), food.data().components().write()));
+                                                 if (food.extraData().contains("duration"))
+                                                 {   foodData.add(food.extraData().getInt("duration"));
+                                                 }
+                                                 return foodData;
+                                             }));
 
         CARRIED_ITEM_TEMPERATURES = addSyncedSetting("carried_item_temps", () ->
         {
