@@ -232,7 +232,9 @@ public class AbstractTempCap implements ITemperatureCap
         // Get the sign of the player's core temperature (-1, 0, or 1)
         int coreTempSign = CSMath.sign(newCoreTemp);
         // If needed, blend the player's temperature back to 0
-        if (this.getModifiers(Trait.CORE).isEmpty())
+        List<TempModifier> coreModifiers = this.getModifiers(Trait.CORE);
+        if (coreModifiers.isEmpty()
+        || (coreModifiers.get(0).getLastInput() == coreModifiers.get(coreModifiers.size()-1).getLastOutput()))
         {
             double amount = 0;
             // Player is fully cold dampened & body is cold
