@@ -513,7 +513,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     protected boolean hasSignalFromBack()
     {
         Direction facing = this.getBlockState().getValue(HearthBottomBlock.FACING);
-        return this.level.hasSignal(this.getBlockPos().relative(facing.getOpposite()), facing.getOpposite());
+        return this.level.hasSignal(this.getBlockPos().relative(facing.getOpposite()), facing.getOpposite())
+            || this.level.hasSignal(this.getBlockPos().relative(Direction.DOWN), Direction.DOWN);
     }
 
     protected void syncInputSignal(boolean wasBackPowered, boolean wasSidePowered)
