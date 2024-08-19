@@ -44,7 +44,7 @@
     "cold_sweat:heat_resistance": [
       {
         "name": "cs:netherite_diving_set_bonus",
-        "amount": 0.25,
+        "amount": 0.1,
         "operation": "addition"
       }
     ],
