@@ -319,16 +319,14 @@ public class AbstractTempCap implements ITemperatureCap
         if (!hasGrace && entity.tickCount % 40 == 0)
         {
             if (bodyTemp >= 100 && !(hasFireResist && ConfigSettings.FIRE_RESISTANCE_ENABLED.get()))
-            {   DamageSource hot = ModDamageSources.HOT;
-                DamageSource hotScaling = ModDamageSources.HOT.setScalesWithDifficulty();
-
-                entity.hurt(ConfigSettings.DAMAGE_SCALING.get() ? hotScaling : hot, (float) CSMath.blend(ConfigSettings.TEMP_DAMAGE.get(), 0, heatResistance, 0, 1));
+            {
+                DamageSource hot = ModDamageSources.HOT;
+                entity.hurt(hot, (float) CSMath.blend(ConfigSettings.TEMP_DAMAGE.get(), 0, heatResistance, 0, 1));
             }
             else if (bodyTemp <= -100 && !(hasIceResist && ConfigSettings.ICE_RESISTANCE_ENABLED.get()))
-            {   DamageSource cold = ModDamageSources.COLD;
-                DamageSource coldScaling = ModDamageSources.COLD.setScalesWithDifficulty();
-
-                entity.hurt(ConfigSettings.DAMAGE_SCALING.get() ? coldScaling : cold, (float) CSMath.blend(ConfigSettings.TEMP_DAMAGE.get(), 0, coldResistance, 0, 1));
+            {
+                DamageSource cold = ModDamageSources.COLD;
+                entity.hurt(cold, (float) CSMath.blend(ConfigSettings.TEMP_DAMAGE.get(), 0, coldResistance, 0, 1));
             }
         }
     }
