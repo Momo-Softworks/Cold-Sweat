@@ -324,16 +324,14 @@ public class AbstractTempCap implements ITemperatureCap
         if (!hasGrace && entity.tickCount % 40 == 0)
         {
             if (bodyTemp >= 100 && !(hasFireResist && ConfigSettings.FIRE_RESISTANCE_ENABLED.get()))
-            {   DamageSource hot = new DamageSource(damageTypes.getHolderOrThrow(ModDamageSources.HOT));
-                DamageSource hotScaling = new DamageSource(damageTypes.getHolderOrThrow(ModDamageSources.HOT_SCALING));
-
-                entity.hurt(ConfigSettings.DAMAGE_SCALING.get() ? hotScaling : hot, (float) CSMath.blend(ConfigSettings.TEMP_DAMAGE.get(), 0, heatResistance, 0, 1));
+            {
+                DamageSource hot = new DamageSource(damageTypes.getHolderOrThrow(ModDamageSources.HOT));
+                entity.hurt(hot, (float) CSMath.blend(ConfigSettings.TEMP_DAMAGE.get(), 0, heatResistance, 0, 1));
             }
             else if (bodyTemp <= -100 && !(hasIceResist && ConfigSettings.ICE_RESISTANCE_ENABLED.get()))
-            {   DamageSource cold = new DamageSource(damageTypes.getHolderOrThrow(ModDamageSources.COLD));
-                DamageSource coldScaling = new DamageSource(damageTypes.getHolderOrThrow(ModDamageSources.COLD_SCALING));
-
-                 entity.hurt(ConfigSettings.DAMAGE_SCALING.get() ? coldScaling : cold, (float) CSMath.blend(ConfigSettings.TEMP_DAMAGE.get(), 0, coldResistance, 0, 1));
+            {
+                DamageSource cold = new DamageSource(damageTypes.getHolderOrThrow(ModDamageSources.COLD));
+                entity.hurt(cold, (float) CSMath.blend(ConfigSettings.TEMP_DAMAGE.get(), 0, coldResistance, 0, 1));
             }
         }
     }
