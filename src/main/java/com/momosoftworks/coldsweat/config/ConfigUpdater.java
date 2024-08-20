@@ -4,15 +4,12 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.config.spec.ItemSettingsConfig;
 import com.momosoftworks.coldsweat.config.spec.MainSettingsConfig;
 import com.momosoftworks.coldsweat.config.spec.WorldSettingsConfig;
-import net.minecraft.world.item.Items;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 public class ConfigUpdater
 {
@@ -23,6 +20,15 @@ public class ConfigUpdater
         ItemSettingsConfig itemSettings = ItemSettingsConfig.getInstance();
         WorldSettingsConfig worldSettings = WorldSettingsConfig.getInstance();
 
+        /*
+         2.3.1
+         */
+        if (isBehind(configVersion, "2.3.1"))
+        {
+            removeConfigSetting(worldSettings::getBlockTemps, "minecraft:ice", worldSettings::setBlockTemps);
+            removeConfigSetting(worldSettings::getBlockTemps, "minecraft:packed_ice", worldSettings::setBlockTemps);
+            removeConfigSetting(worldSettings::getBlockTemps, "minecraft:blue_ice", worldSettings::setBlockTemps);
+        }
         /*
          2.3
          */
