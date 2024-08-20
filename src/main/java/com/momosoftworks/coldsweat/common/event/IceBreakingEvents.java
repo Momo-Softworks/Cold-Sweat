@@ -7,6 +7,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Material;
 import net.minecraftforge.common.Tags;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.level.BlockEvent;
@@ -26,11 +27,11 @@ public class IceBreakingEvents
         LevelAccessor level = event.getLevel();
         ItemStack tool = event.getPlayer().getItemInHand(InteractionHand.MAIN_HAND);
         BlockPos pos = event.getPos();
-        BlockState belowState = level.getBlockState(pos.below());
+        Material belowState = level.getBlockState(pos.below()).getMaterial();
 
         if (state.is(Blocks.ICE) && !tool.isCorrectToolForDrops(state)
         && !event.getPlayer().getAbilities().instabuild
-        && belowState.blocksMotion() || belowState.liquid())
+        && belowState.blocksMotion() || belowState.isLiquid())
         {   level.setBlock(pos, Blocks.WATER.defaultBlockState(), 3);
         }
     }
