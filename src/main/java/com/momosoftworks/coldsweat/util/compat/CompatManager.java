@@ -5,6 +5,7 @@ import com.mojang.datafixers.util.Either;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
+import com.momosoftworks.coldsweat.core.init.BlockInit;
 import com.momosoftworks.coldsweat.util.compat.create.ColdSweatDisplayBehaviors;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
@@ -14,6 +15,8 @@ import com.simibubi.create.content.equipment.armor.BacktankItem;
 import com.simibubi.create.content.equipment.armor.BacktankUtil;
 import com.simibubi.create.content.equipment.armor.DivingHelmetItem;
 import com.simibubi.create.content.redstone.displayLink.AllDisplayBehaviours;
+import com.simibubi.create.foundation.ponder.PonderRegistry;
+import com.simibubi.create.infrastructure.ponder.AllPonderTags;
 import de.teamlapen.werewolves.entities.player.werewolf.WerewolfPlayer;
 import dev.ghen.thirst.api.ThirstHelper;
 import dev.ghen.thirst.content.purity.ContainerWithPurity;
@@ -69,7 +72,7 @@ public class CompatManager
     private static final boolean WYTHERS_LOADED = modLoaded("wwoo");
     private static final boolean TOOLTIPS_LOADED = modLoaded("legendarytooltips");
     private static final boolean PRIMAL_WINTER_LOADED = modLoaded("primalwinter");
-    private static final boolean THIRST_LOADED = modLoaded("thirst");
+    private static final boolean THIRST_LOADED = modLoaded("thirst", 1,3,8);
     private static final boolean ICEBERG_LOADED = modLoaded("iceberg");
     private static final boolean SPOILED_LOADED = modLoaded("spoiled");
     private static final boolean SUPPLEMENTARIES_LOADED = modLoaded("supplementaries");
@@ -359,6 +362,7 @@ public class CompatManager
                     {
                         ColdSweatDisplayBehaviors.THERMOLITH = AllDisplayBehaviours.register(new ResourceLocation(ColdSweat.MOD_ID, "thermolith"), new ColdSweatDisplayBehaviors.Thermolith());
                         AllDisplayBehaviours.assignBlock(ColdSweatDisplayBehaviors.THERMOLITH, ModBlocks.THERMOLITH);
+                        PonderRegistry.TAGS.forTag(AllPonderTags.DISPLAY_SOURCES).add(BlockInit.THERMOLITH.get());
                     }
                 }.registerDisplayBehaviors();
             }
