@@ -110,6 +110,7 @@ public class ConfigSettings
     public static final DynamicHolder<Map<Item, Insulator>> INSULATING_ARMORS;
     public static final DynamicHolder<Map<Item, Insulator>> INSULATING_CURIOS;
     public static final DynamicHolder<ScalingFormula> INSULATION_SLOTS;
+    public static final DynamicHolder<Double> INSULATION_STRENGTH;
     public static final DynamicHolder<List<Item>> INSULATION_BLACKLIST;
 
     public static final DynamicHolder<Map<Item, PredicateItem>> FOOD_TEMPERATURES;
@@ -467,6 +468,8 @@ public class ConfigSettings
             list.addAll(saver.getValues());
             ItemSettingsConfig.getInstance().setArmorInsulationSlots(list);
         });
+
+        INSULATION_STRENGTH = addSetting("insulation_strength", () -> ItemSettingsConfig.getInstance().getInsulationStrength());
 
         INSULATION_BLACKLIST = addSetting("insulation_blacklist", () -> ItemSettingsConfig.getInstance().getInsulationBlacklist()
                                                                         .stream()
