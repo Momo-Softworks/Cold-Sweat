@@ -30,6 +30,7 @@
     "MixinMinecart",
     "MixinSoulCampfire",
     "MixinSoulFire",
+    "MixinTridentRiptide",
     "compat.MixinSereneIceMelt",
     "compat.MixinSpoiledIcebox",
     "compat.MixinSpoiledIcebox$ContainerModifier"
