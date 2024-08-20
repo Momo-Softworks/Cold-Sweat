@@ -2346,6 +2346,7 @@ Fixes:
 - Fixed ice melting into water when broken in creative mode or no block was beneath it
 - Fixed the chameleon being immune to neutral damage (not directly from an entity) when not riding a player
 - (1.16) Fixed UI icons rendering over the chat panel
+- (1.16) Fixed the UI for the hearth, icebox, and boiler being offset when the player has potion effects
 - Fixed inconsistency in the freezing screen shake effect at different framerates
 
 Technical Changes:
