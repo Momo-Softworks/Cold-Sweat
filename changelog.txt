@@ -2286,7 +2286,7 @@ Fixes:
 
 
 ------------------------------------------------------------------------------------------------------------------------
-2.3-b06a
+2.3
 * Added config option for armor insulation slots to dynamically scale based on protection value:
       - There are 4 modes: Static (no scaling), Linear, Exponential, and Logarithmic
       - A maximum number of slots can be set to prevent excessive scaling
@@ -2322,3 +2322,32 @@ Technical Changes:
 * Added an automatic config updater, which will change existing config settings when updating to new versions
      - This prevents outdated config settings causing new features to not work as intended
      - This system will be used very sparingly, and only triggers once
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.3.1
+* The hearth now has visible redstone inputs on the sides and back, to make it more clear how it is powered
+- Hearth-like blocks can now be powered from the bottom
+      - For the Hearth, this is an additional input for heating
+- Updated Thirst Was Taken compat to support 1.3.8+
+      - TWT versions below 1.3.8 will now have compat disabled
+- Ice how has a minimum temperature, reducing the likelihood of extremely cold (negative) temperatures when standing close to it
+
+Fixes:
+* (1.16) Fixed mixins not loading, causing a lot of strange behavior
+* Fixed the player's attributes being set to incorrect values when updating form 2.2
+* Fixed the insulation value for chameleon molt being removed when updating from 2.2
+* Fixed the player's temperature & world temperature sometimes appearing to not change after respawning
+- Fixed missing subtitles for the icebox's opening and closing sounds
+- Fixed ice melting into water when broken in creative mode or no block was beneath it
+- Fixed the chameleon being immune to neutral damage (not directly from an entity) when not riding a player
+- (1.16) Fixed UI icons rendering over the chat panel
+- Fixed inconsistency in the freezing screen shake effect at different framerates
+
+Technical Changes:
+* Added config setting to nullify all negative temperature effects when the game is set to Peaceful mode
+      - This setting replaces the "Damage Scaling" setting, as it didn't work well anyway
+* Added new JSON config setting allowing items carried in the player's inventory to apply temperature effects
+      - A simplified version of this has also been added to item_settings.toml for quick access
+* Added config to change the general strength of insulation items
+      - This setting applies to all armor and insulators, changing their effectiveness by a given multiplier
