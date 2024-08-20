@@ -73,7 +73,7 @@ public class TempEffectsClient
                     float shiverIntensity = CSMath.blend(((float) Math.sin(tickTime / 10) + 1) * 0.03f + 0.01f,
                                                 0f, BLEND_TEMP, -100, -50);
                     // Multiply the effect for lower framerates
-                    shiverIntensity *= Minecraft.getInstance().getDeltaFrameTime() * 10;
+                    shiverIntensity *= Minecraft.getInstance().getTimer().getRealtimeDeltaTicks() * 10;
                     float shiverRotation = (float) (Math.sin(tickTime * 2.5) * shiverIntensity) / (1 + COLD_IMMUNITY);
                     // Rotate camera
                     player.setYRot(player.getYRot() + shiverRotation);

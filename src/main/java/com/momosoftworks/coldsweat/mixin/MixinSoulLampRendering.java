@@ -186,7 +186,7 @@ public class MixinSoulLampRendering
                 if (EntityHelper.holdingLamp(entity, HumanoidArm.RIGHT))
                 {
                     playerModel.rightArm.y += 1;
-                    if (entity instanceof Player player && player.getAttackAnim(Minecraft.getInstance().getFrameTime()) > 0
+                    if (entity instanceof Player player && player.getAttackAnim(Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true)) > 0
                     && EntityHelper.getArmFromHand(player.swingingArm, player) == HumanoidArm.RIGHT)
                     {   playerModel.rightArm.x -= 1;
                     }
@@ -194,7 +194,7 @@ public class MixinSoulLampRendering
                 if (EntityHelper.holdingLamp(entity, HumanoidArm.LEFT))
                 {
                     playerModel.leftArm.y += 1;
-                    if (entity instanceof Player player && player.getAttackAnim(Minecraft.getInstance().getFrameTime()) > 0
+                    if (entity instanceof Player player && player.getAttackAnim(Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true)) > 0
                     && EntityHelper.getArmFromHand(player.swingingArm, player) == HumanoidArm.LEFT)
                     {   playerModel.leftArm.x += 1;
                     }
