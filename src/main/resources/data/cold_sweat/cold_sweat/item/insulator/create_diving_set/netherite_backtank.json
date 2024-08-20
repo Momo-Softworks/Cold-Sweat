@@ -44,7 +44,7 @@
     "cold_sweat:heat_resistance": [
       {
         "name": "cold_sweat:diving_suit_bonus",
-        "amount": 0.125,
+        "amount": 0.25,
         "operation": "add_value"
       }
     ],
