@@ -2334,6 +2334,8 @@ Technical Changes:
 - Updated Thirst Was Taken compat to support 1.3.8+
       - TWT versions below 1.3.8 will now have compat disabled
 - Ice how has a minimum temperature, reducing the likelihood of extremely cold (negative) temperatures when standing close to it
+- The trident's riptide ability can now be used when the player is wet
+      - Using this removes the player's "wetness"
 
 Fixes:
 * (1.16) Fixed mixins not loading, causing a lot of strange behavior
