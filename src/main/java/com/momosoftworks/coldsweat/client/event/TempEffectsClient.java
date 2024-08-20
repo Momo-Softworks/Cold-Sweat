@@ -15,6 +15,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.PostChain;
 import net.minecraft.client.renderer.PostPass;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
@@ -68,11 +69,16 @@ public class TempEffectsClient
                 // Camera "shivers" when temp is < -50
                 if (BLEND_TEMP <= -50 && COLD_IMMUNITY < 4)
                 {
-                    float factor = CSMath.blend(0.05f, 0f, BLEND_TEMP, -100, -50);
                     double tickTime = player.tickCount + event.getPartialTick();
-                    float shiverAmount = (float) (Math.sin((tickTime) * 3) * factor * (10 * frameTime)) / (1 + COLD_IMMUNITY);
-                    player.setYRot(player.getYRot() + shiverAmount);
+                    float shiverIntensity = CSMath.blend(((float) Math.sin(tickTime / 10) + 1) * 0.03f + 0.01f,
+                                                0f, BLEND_TEMP, -100, -50);
+                    // Multiply the effect for lower framerates
+                    shiverIntensity *= Minecraft.getInstance().getDeltaFrameTime() * 10;
+                    float shiverRotation = (float) (Math.sin(tickTime * 2.5) * shiverIntensity) / (1 + COLD_IMMUNITY);
+                    // Rotate camera
+                    player.setYRot(player.getYRot() + shiverRotation);
                 }
+                // Sway camera for heatstroke
                 else if (BLEND_TEMP >= 50 && HOT_IMMUNITY < 4)
                 {
                     float immunityModifier = CSMath.blend(BLEND_TEMP, 50, HOT_IMMUNITY, 0, 4);
