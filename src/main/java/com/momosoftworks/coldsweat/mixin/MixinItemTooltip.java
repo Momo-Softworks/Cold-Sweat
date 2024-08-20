@@ -42,7 +42,7 @@ public abstract class MixinItemTooltip
     @Inject(method = "getTooltipLines", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;addToTooltip(Lnet/minecraft/core/component/DataComponentType;Lnet/minecraft/world/item/Item$TooltipContext;Ljava/util/function/Consumer;Lnet/minecraft/world/item/TooltipFlag;)V",
                                                  ordinal = 6, shift = At.Shift.AFTER),
             locals = LocalCapture.CAPTURE_FAILHARD)
-    private void injectBeforeAttributes(Item.TooltipContext pTooltipContext, Player pPlayer, TooltipFlag pTooltipFlag, CallbackInfoReturnable<List<Component>> cir,
+    private void injectBeforeAttributes(Item.TooltipContext pTooltipContext, Player player, TooltipFlag pTooltipFlag, CallbackInfoReturnable<List<Component>> cir,
                                         //locals
                                         List<Component> tooltip, MutableComponent mutablecomponent, Consumer consumer)
     {
@@ -75,13 +75,13 @@ public abstract class MixinItemTooltip
 
     @Inject(method = "addAttributeTooltips", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;forEachModifier(Lnet/minecraft/world/entity/EquipmentSlotGroup;Ljava/util/function/BiConsumer;)V", shift = At.Shift.AFTER),
             locals = LocalCapture.CAPTURE_FAILHARD)
-    private void getItemAttributes(Consumer<Component> pTooltipAdder, Player pPlayer, CallbackInfo ci,
+    private void getItemAttributes(Consumer<Component> pTooltipAdder, Player player, CallbackInfo ci,
                                    // locals
                                    ItemAttributeModifiers itemattributemodifiers, EquipmentSlotGroup[] allSlots, int var5, int var6, EquipmentSlotGroup slot, MutableBoolean isFirstLine)
     {
         // We don't care if the item is not equipped in the correct slot
-        if (EquipmentSlotGroup.bySlot(Minecraft.getInstance().player.getEquipmentSlotForItem(stack)) != slot
-        || Arrays.stream(EquipmentSlot.values()).noneMatch(eq -> slot.test(eq) && stack.equals(pPlayer.getItemBySlot(eq))))
+        if (player == null || EquipmentSlotGroup.bySlot(Minecraft.getInstance().player.getEquipmentSlotForItem(stack)) != slot
+        || Arrays.stream(EquipmentSlot.values()).noneMatch(eq -> slot.test(eq) && stack.equals(player.getItemBySlot(eq))))
         {   return;
         }
 
@@ -90,7 +90,7 @@ public abstract class MixinItemTooltip
             if (insulator.test(Minecraft.getInstance().player, stack))
             {
                 for (Map.Entry<Attribute, AttributeModifier> entry : insulator.attributes().getMap().entries())
-                {   addModifierTooltip(pTooltipAdder, pPlayer, Holder.direct(entry.getKey()), entry.getValue());
+                {   addModifierTooltip(pTooltipAdder, player, Holder.direct(entry.getKey()), entry.getValue());
                 }
             }
         });
@@ -101,7 +101,7 @@ public abstract class MixinItemTooltip
                 Optional.ofNullable(ConfigSettings.INSULATION_ITEMS.get().get(item.getItem())).ifPresent(insulator ->
                 {
                     for (Map.Entry<Attribute, AttributeModifier> entry : insulator.attributes().getMap().entries())
-                    {   addModifierTooltip(pTooltipAdder, pPlayer, Holder.direct(entry.getKey()), entry.getValue());
+                    {   addModifierTooltip(pTooltipAdder, player, Holder.direct(entry.getKey()), entry.getValue());
                     }
                 });
             });
