@@ -101,6 +101,11 @@ repositories {
             includeGroup "curse.maven"
         }
     }
+    maven {
+        // location of the maven for Registrate and Flywheel
+        name = 'tterrag maven'
+        url = 'https://maven.tterrag.com'
+    }
     mavenCentral()
 }
 
@@ -112,6 +117,7 @@ dependencies {
     compileOnly fg.deobf("curse.maven:sereneapi-291874:4037228")
     compileOnly fg.deobf("curse.maven:werewolves-417851:4318648")
     compileOnly fg.deobf("curse.maven:vampirism-233029:4470449")
+    compileOnly("com.tterrag.registrate:Registrate:MC1.19.3-1.1.10")
   //compileOnly fg.deobf("curse.maven:armorunderwear-310383:4383256") // no 1.19.2 version
   //compileOnly fg.deobf("curse.maven:carrots-311327:4382778") // no 1.19.2 version
 
