@@ -145,6 +145,7 @@ public class TempModifierInit
         event.register(new IceboxBlockTemp());
         event.register(new BoilerBlockTemp());
         event.register(new NetherPortalBlockTemp());
+        event.register(new IceBlockTemp());
         ColdSweat.LOGGER.debug("Registered BlockTemps in {}ms", System.currentTimeMillis() - startMS);
     }
 

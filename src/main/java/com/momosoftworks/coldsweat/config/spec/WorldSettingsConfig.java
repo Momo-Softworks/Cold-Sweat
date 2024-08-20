@@ -222,7 +222,7 @@ public class WorldSettingsConfig
         blockTemps = BUILDER
                 .comment("Allows for adding simple BlockTemps without the use of Java mods",
                          "Format (All temperatures are in Minecraft units):",
-                         "[[\"block-ids\", <temperature>, <range (max 7)>, <*true/false: falloff>, <*max effect>, <*predicates>], [etc...], [etc...]]",
+                         "[[\"block-ids\", <temperature>, <range>, <*true/false: falloff>, <*max effect>, <*predicates>], [etc...], [etc...]]",
                          "(* = optional) (1 \u00B0MC = 42 \u00B0F/ 23.33 \u00B0C)",
                          "",
                          "Arguments:",
@@ -237,10 +237,7 @@ public class WorldSettingsConfig
                                             Arrays.asList("minecraft:soul_fire",     -0.476, 7, true, 0.8),
                                             Arrays.asList("minecraft:fire",           0.476, 7, true, 0.8),
                                             Arrays.asList("minecraft:magma_block",      0.25, 3, true, 1),
-                                            Arrays.asList("minecraft:soul_campfire", -0.476, 7, true, 0.6, "lit=true"),
-                                            Arrays.asList("minecraft:ice",            -0.15, 4, true, 0.5),
-                                            Arrays.asList("minecraft:packed_ice",     -0.25, 4, true, 1.0),
-                                            Arrays.asList("minecraft:blue_ice",       -0.35, 4, true, 1.0)
+                                            Arrays.asList("minecraft:soul_campfire", -0.476, 7, true, 0.6, "lit=true")
                                     ).addIf(CompatManager.isCavesAndCliffsLoaded(),
                                             () -> Arrays.asList("cavesandcliffs:lava_cauldron",    0.5, 7, true, 1.5))
                                     .build(),
@@ -252,6 +249,7 @@ public class WorldSettingsConfig
                                 }
                                 return false;
                             });
+
         blockRange = BUILDER
                 .comment("The maximum range of blocks' area of effect",
                          "Note: This will not change anything unless blocks are configured to utilize the expanded range",
