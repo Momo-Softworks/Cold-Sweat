@@ -32,6 +32,7 @@ public class ItemSettingsConfig
     private static final ForgeConfigSpec.ConfigValue<List<? extends String>> insulationBlacklist;
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> insulatingArmor;
     private static final ForgeConfigSpec.ConfigValue<List<?>> insulationSlots;
+    private static final ForgeConfigSpec.DoubleValue insulationStrength;
 
     private static final ForgeConfigSpec.IntValue waterskinStrength;
 
@@ -238,6 +239,10 @@ public class ItemSettingsConfig
                 .defineList("Insulation Slots", List.of("static", 4, 6, 5, 4),
                         it -> it instanceof Number || it instanceof String);
 
+        insulationStrength = BUILDER
+                .comment("Defines the effectiveness of insulating items in protecting against temperature")
+                .defineInRange("Insulation Strength", 1.0, 0, Double.MAX_VALUE);
+
         insulationBlacklist = BUILDER
                 .comment("Defines wearable items that cannot be insulated",
                         "Format: [\"item_id\", \"item_id\", ...etc]")
@@ -344,6 +349,10 @@ public class ItemSettingsConfig
     {   return insulationSlots.get();
     }
 
+    public double getInsulationStrength()
+    {   return insulationStrength.get();
+    }
+
     public List<? extends String> getInsulationBlacklist()
     {   return insulationBlacklist.get();
     }
@@ -415,6 +424,12 @@ public class ItemSettingsConfig
     public synchronized void setArmorInsulationSlots(List<?> slots)
     {   synchronized (insulationSlots)
         {   insulationSlots.set(slots);
+        }
+    }
+
+    public synchronized void setInsulationStrength(double effectiveness)
+    {   synchronized (insulationStrength)
+        {   insulationStrength.set(effectiveness);
         }
     }
 
