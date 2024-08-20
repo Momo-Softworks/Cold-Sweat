@@ -38,6 +38,7 @@
     "MixinSmithingRecipe",
     "MixinSoulCampfire",
     "MixinSoulFire",
+    "MixinTridentRiptide",
     "MixinTriggerBounds$MixinFloatBound",
     "compat.MixinSereneIceMelt",
     "compat.MixinSpoiledIcebox",
