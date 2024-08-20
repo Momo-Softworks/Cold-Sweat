@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.mixin;
 
 import com.momosoftworks.coldsweat.api.temperature.modifier.WaterTempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -29,8 +30,11 @@ public class MixinTridentRiptide
     @Inject(method = "releaseUsing", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;startAutoSpinAttack(I)V"))
     private void removeWetnessOnUse(ItemStack stack, World level, LivingEntity entity, int timeLeft, CallbackInfo ci)
     {
-        if (!entity.isInWaterOrBubble())
-        {   Temperature.removeModifiers(entity, Temperature.Trait.WORLD, mod -> mod instanceof WaterTempModifier);
-        }
+        TaskScheduler.scheduleServer(() ->
+        {
+            if (!entity.isInWaterOrBubble())
+            {   Temperature.removeModifiers(entity, Temperature.Trait.WORLD, mod -> mod instanceof WaterTempModifier);
+            }
+        }, 5);
     }
 }
