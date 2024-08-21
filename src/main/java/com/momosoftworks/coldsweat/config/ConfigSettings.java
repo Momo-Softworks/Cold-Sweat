@@ -164,6 +164,7 @@ public class ConfigSettings
     public static final DynamicHolder<Boolean> HIGH_CONTRAST;
 
     public static final DynamicHolder<Boolean> SHOW_CREATIVE_WARNING;
+    public static final DynamicHolder<Boolean> HIDE_TOOLTIPS;
 
 
     // Makes the settings instantiation collapsible & easier to read
@@ -818,6 +819,8 @@ public class ConfigSettings
         HIGH_CONTRAST = addClientSetting("high_contrast", () -> ClientSettingsConfig.getInstance().isHighContrast());
 
         SHOW_CREATIVE_WARNING = addClientSetting("show_creative_warning", () -> ClientSettingsConfig.getInstance().showCreativeWarning());
+
+        HIDE_TOOLTIPS = addClientSetting("show_creative_warning", () -> ClientSettingsConfig.getInstance().hideTooltips());
 
         boolean ssLoaded = CompatManager.isSereneSeasonsLoaded();
         SUMMER_TEMPS = addSetting("summer_temps", ssLoaded ? () -> WorldSettingsConfig.getInstance().getSummerTemps() : () -> new Double[3]);
