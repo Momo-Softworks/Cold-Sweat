@@ -43,6 +43,8 @@ public class ClientSettingsConfig
 
     private static final ForgeConfigSpec.BooleanValue enableCreativeWarning;
 
+    private static final ForgeConfigSpec.BooleanValue hideTooltips;
+
 
     static 
     {
@@ -117,6 +119,9 @@ public class ClientSettingsConfig
             hearthDebug = BUILDER
                     .comment("Displays areas that the Hearth is affecting when the F3 debug menu is open")
                     .define("Hearth Debug", true);
+            hideTooltips = BUILDER
+                    .comment("Hides insulation tooltips for items, armor, and curios unless SHIFT is held")
+                    .define("Hide Tooltips", false);
         BUILDER.pop();
 
         SPEC = BUILDER.build();
@@ -214,6 +219,10 @@ public class ClientSettingsConfig
     {   return moveBodyIconWhenAdvanced.get();
     }
 
+    public boolean hideTooltips()
+    {   return hideTooltips.get();
+    }
+
     /*
      * Safe set methods for config values
      */
@@ -292,6 +301,10 @@ public class ClientSettingsConfig
 
     public void setTempSmoothing(double smoothing)
     {   tempSmoothing.set(smoothing);
+    }
+
+    public void setHideTooltips(boolean hide)
+    {   hideTooltips.set(hide);
     }
 
     public synchronized void writeAndSave()

@@ -164,6 +164,7 @@ public class TooltipHandler
         ItemStack stack = event.getItemStack();
         Item item = stack.getItem();
         var elements = event.getTooltipElements();
+        boolean hideTooltips = ConfigSettings.HIDE_TOOLTIPS.get() && !Screen.hasShiftDown();
         if (stack.isEmpty()) return;
 
         // Get the index at which the tooltip should be inserted
@@ -212,14 +213,14 @@ public class TooltipHandler
             }
         }
         // If the item is an insulation ingredient, add the tooltip
-        else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(item)) != null && !itemInsul.insulation().isEmpty())
+        else if (!hideTooltips && (itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(item)) != null && !itemInsul.insulation().isEmpty())
         {
             if (itemInsul.test(player, stack))
             {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(itemInsul.insulation().split(), Insulation.Slot.ITEM, stack)));
             }
         }
         // If the item is an insulating curio, add the tooltip
-        else if (CompatManager.isCuriosLoaded() && (itemInsul = ConfigSettings.INSULATING_CURIOS.get().get(item)) != null && !itemInsul.insulation().isEmpty())
+        else if (!hideTooltips && CompatManager.isCuriosLoaded() && (itemInsul = ConfigSettings.INSULATING_CURIOS.get().get(item)) != null && !itemInsul.insulation().isEmpty())
         {
             if (itemInsul.test(player, stack))
             {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(itemInsul.insulation().split(), Insulation.Slot.CURIO, stack)));
@@ -227,7 +228,7 @@ public class TooltipHandler
         }
         // If the item is insulated armor
         Insulator armorInsulator = ConfigSettings.INSULATING_ARMORS.get().get(item);
-        if (stack.getItem() instanceof Equipable && (!Objects.equals(armorInsulator, itemInsul) || armorInsulator == null))
+        if (!hideTooltips && stack.getItem() instanceof Equipable && (!Objects.equals(armorInsulator, itemInsul) || armorInsulator == null))
         {
             List<Insulation> insulation = new ArrayList<>();
 
