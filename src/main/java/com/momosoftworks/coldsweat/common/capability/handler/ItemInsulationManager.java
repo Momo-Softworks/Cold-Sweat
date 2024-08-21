@@ -48,7 +48,8 @@ public class ItemInsulationManager
 
     public static int getInsulationSlots(ItemStack item)
     {
-        return ConfigSettings.INSULATION_SLOTS.get().getSlots(((ArmorItem) item.getItem()).getEquipmentSlot(), item);
+        if (!isInsulatable(item)) return 0;
+        return ConfigSettings.INSULATION_SLOTS.get().getSlots(((Equipable) item.getItem()).getEquipmentSlot(), item);
     }
 
     public static boolean isInsulatable(ItemStack stack)
