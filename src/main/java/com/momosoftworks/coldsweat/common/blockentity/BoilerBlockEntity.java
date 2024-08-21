@@ -1,12 +1,7 @@
 package com.momosoftworks.coldsweat.common.blockentity;
 
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.api.temperature.modifier.BlockInsulationTempModifier;
-import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
-import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.block.BoilerBlock;
-import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
-import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
 import com.momosoftworks.coldsweat.common.container.BoilerContainer;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
@@ -25,9 +20,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.WorldlyContainer;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -38,7 +31,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider, WorldlyContainer
 {
@@ -121,8 +113,8 @@ public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider
                 for (int i = 1; i < 10; i++)
                 {
                     ItemStack stack = getItem(i);
-                    if (stack.is(ModItemTags.BOILER_PURIFIABLE)
-                    && CompatManager.isThirstLoaded() && CompatManager.getWaterPurity(stack) < 3)
+                    if (CompatManager.isThirstLoaded() && CompatManager.hasWaterPurity(stack)
+                    && CompatManager.getWaterPurity(stack) < 3)
                     {
                         CompatManager.setWaterPurity(stack, CompatManager.getWaterPurity(stack) + 1);
                         hasItemStacks = true;
@@ -266,7 +258,7 @@ public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider
     {
         if (slot == 0)
             return this.getItemFuel(stack) != 0;
-        else return stack.is(ModItemTags.BOILER_VALID) || (CompatManager.isThirstLoaded() && stack.is(ModItemTags.BOILER_PURIFIABLE));
+        else return stack.is(ModItemTags.BOILER_VALID) || (CompatManager.isThirstLoaded() && CompatManager.hasWaterPurity(stack));
     }
 
     @Override
