@@ -218,6 +218,14 @@ public class CompatManager
         return false;
     }
 
+    public static boolean hasWaterPurity(ItemStack stack)
+    {
+        if (THIRST_LOADED)
+        {   return WaterPurity.hasPurity(stack);
+        }
+        return false;
+    }
+
     public static int getWaterPurity(ItemStack stack)
     {
         if (THIRST_LOADED)
