@@ -223,6 +223,14 @@ public class CompatManager
         return SEASONS_LOADED && SeasonHooks.coldEnoughToSnowSeasonal(level, level.getBiome(pos), pos);
     }
 
+    public static boolean hasWaterPurity(ItemStack stack)
+    {
+        if (THIRST_LOADED)
+        {   return WaterPurity.hasPurity(stack);
+        }
+        return false;
+    }
+
     public static int getWaterPurity(ItemStack stack)
     {
         if (THIRST_LOADED)
