@@ -246,6 +246,7 @@ public class TooltipHandler
 
         AtomicReference<Tooltip> tooltip = new AtomicReference<>();
         PlayerEntity player = Minecraft.getInstance().player;
+        boolean hideTooltips = ConfigSettings.HIDE_TOOLTIPS.get() && !Screen.hasShiftDown();
 
         Insulator itemInsul = null;
 
@@ -253,14 +254,14 @@ public class TooltipHandler
         {   tooltip.set(new ClientSoulspringTooltip(stack.getOrCreateTag().getDouble("Fuel")));
         }
         // If the item is an insulation ingredient, add the tooltip
-        else if ((itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(item)) != null && !itemInsul.insulation.isEmpty())
+        else if (!hideTooltips && (itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(item)) != null && !itemInsul.insulation.isEmpty())
         {
             if (itemInsul.test(player, stack))
             {   tooltip.set(new ClientInsulationTooltip(itemInsul.insulation.split(), Insulation.Slot.ITEM, stack));
             }
         }
         // If the item is an insulating curio, add the tooltip
-        else if (CompatManager.isCuriosLoaded() && (itemInsul = ConfigSettings.INSULATING_CURIOS.get().get(item)) != null && !itemInsul.insulation.isEmpty())
+        else if (!hideTooltips && CompatManager.isCuriosLoaded() && (itemInsul = ConfigSettings.INSULATING_CURIOS.get().get(item)) != null && !itemInsul.insulation.isEmpty())
         {
             if (itemInsul.test(player, stack))
             {   tooltip.set(new ClientInsulationTooltip(itemInsul.insulation.split(), Insulation.Slot.CURIO, stack));
@@ -269,7 +270,7 @@ public class TooltipHandler
 
         // If the item is insulated armor
         Insulator armorInsulator = ConfigSettings.INSULATING_ARMORS.get().get(item);
-        if (stack.getItem() instanceof IArmorVanishable && (!Objects.equals(armorInsulator, itemInsul) || armorInsulator == null))
+        if (!hideTooltips && stack.getItem() instanceof IArmorVanishable && (!Objects.equals(armorInsulator, itemInsul) || armorInsulator == null))
         {
             List<Insulation> insulation = new ArrayList<>();
 
