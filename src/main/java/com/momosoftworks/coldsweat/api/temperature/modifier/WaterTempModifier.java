@@ -20,6 +20,18 @@ public class WaterTempModifier extends TempModifier
     {   this.getNBT().putDouble("Strength", strength);
     }
 
+    public double getWetness()
+    {   return this.getNBT().getDouble("Strength");
+    }
+
+    public double getMaxStrength(LivingEntity entity)
+    {
+        double worldTemp = Temperature.get(entity, Temperature.Trait.WORLD);
+        double maxTemp = ConfigSettings.MAX_TEMP.get();
+        double minTemp = ConfigSettings.MIN_TEMP.get();
+        return CSMath.clamp(Math.abs(CSMath.average(maxTemp, minTemp) - worldTemp) / 2, 0.23d, 0.5d);
+    }
+
     @Override
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
