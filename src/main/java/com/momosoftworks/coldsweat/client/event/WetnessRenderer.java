@@ -6,17 +6,25 @@ import com.momosoftworks.coldsweat.api.temperature.modifier.WaterTempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGuiEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import oshi.util.tuples.Triplet;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class WetnessRenderer
@@ -26,6 +34,15 @@ public class WetnessRenderer
     private static final List<Droplet> WATER_DROPS = new ArrayList<>();
     private static final List<Triplet<Vector2i, Float, Integer>> TRAILS = new ArrayList<>();
     private static boolean WAS_SUBMERGED = false;
+
+    @SubscribeEvent
+    public static void updateSkyBrightness(TickEvent.ClientTickEvent event)
+    {
+        Level level = Minecraft.getInstance().level;
+        if (level != null)
+        {   level.updateSkyBrightness();
+        }
+    }
 
     @SubscribeEvent
     public static void onRenderOverlay(RenderGuiEvent.Pre event)
@@ -40,8 +57,11 @@ public class WetnessRenderer
         Player player = mc.player;
         if (player == null) return;
 
+        BlockPos playerPos = player.blockPosition();
         float playerYVelocity = (float) (player.position().y - player.yOld);
         boolean isSubmerged = player.canSwimInFluidType(player.getEyeInFluidType());
+        int light = player.level().getMaxLocalRawBrightness(playerPos.above());
+        float brightness = CSMath.blend(0, 1, light, 0, 15);
 
         // Clear water drops when the player submerges
         if (isSubmerged && !paused)
@@ -57,13 +77,15 @@ public class WetnessRenderer
         }
 
         // Get the player's wetness level
-        double wetness = Temperature.getModifier(mc.player, Temperature.Trait.WORLD, WaterTempModifier.class).map(mod -> mod.getNBT().getDouble("Strength")).orElse(0d);
+        double wetness = Temperature.getModifier(mc.player, Temperature.Trait.WORLD, WaterTempModifier.class).map(mod ->
+                         {  return CSMath.blend(0, 1, mod.getWetness(), 0, mod.getMaxStrength(player));
+                         }).orElse(0d);
 
         // Spawn a bunch of droplets when the player exits the water
         boolean justExitedWater = WAS_SUBMERGED && !isSubmerged;
         if (justExitedWater)
         {
-            for (int i = 0; i < 20; i++)
+            for (int i = 0; i < 15; i++)
             {
                 Droplet newDrop = createDrop(screenWidth, screenHeight);
                 newDrop.yMotion = getRandomVelocity(frametime) / 2 + 0.3f;
@@ -83,7 +105,7 @@ public class WetnessRenderer
         WAS_SUBMERGED = isSubmerged;
 
         // Spawn droplets randomly when the player is wet
-        if (!paused && !isSubmerged && wetness > 0.01f && ((float) Math.random() * 1 * frametime) < 0.01f * wetness * frametime)
+        if (!paused && !isSubmerged && wetness > 0.01f && ((float) Math.random() * 1 * frametime) < 0.0015f * wetness * frametime)
         {
             WATER_DROPS.add(createDrop(screenWidth, screenHeight));
         }
@@ -100,7 +122,7 @@ public class WetnessRenderer
             if (alpha > 0)
             {
                 // Render the water drop
-                RenderSystem.setShaderColor(1, 1, 1, alpha);
+                RenderSystem.setShaderColor(brightness, brightness, brightness, alpha);
                 event.getGuiGraphics().blit(WATER_DROP, (int) CSMath.roundNearest(pos.x, 3f/uiScale), (int)pos.y, size, size, 0, 0, 8, 8, 8, 8);
 
                 // Update the drop's position and alpha
@@ -118,7 +140,10 @@ public class WetnessRenderer
 
                     // Movement due to player motion
                     float dropFallFromPlayerVel = Math.max(-4f * frametime, playerYVelocity * frametime * 20);
+                    dropFallFromPlayerVel = (float) CSMath.shrink(dropFallFromPlayerVel, 0.3f) * 2;
+                    if (dropFallFromPlayerVel < 0) drop.yMotion /= 2;
                     float dropMoveFromPlayerLook = -(player.yHeadRot - player.yHeadRotO) / 20;
+                    dropMoveFromPlayerLook = (float) CSMath.shrink(dropMoveFromPlayerLook, 0.5f);
                     drop.xVelocity = (float) CSMath.maxAbs(dropMoveFromPlayerLook * (Math.random() * 0.2), drop.xVelocity);
                     drop.xVelocity /= 1 + 0.6f * frametime;
 
@@ -173,7 +198,7 @@ public class WetnessRenderer
 
             if (alpha > 0)
             {
-                RenderSystem.setShaderColor(1, 1, 1, alpha);
+                RenderSystem.setShaderColor(brightness, brightness, brightness, alpha);
                 event.getGuiGraphics().blit(WATER_DROP_TRAIL, (int) CSMath.roundNearest(pos.x, 3f/uiScale * 4), pos.y, size, 1, 0, 0, 8, 1, 8, 1);
                 if (!paused)
                 {   TRAILS.set(i, new Triplet<>(new Vector2i(pos.x, pos.y), alpha - 0.045f * frametime, size));
@@ -184,16 +209,33 @@ public class WetnessRenderer
                 i--;
             }
         }
+        RenderSystem.setShaderColor(1, 1, 1, 1);
+    }
+
+    public static boolean isDarkEnoughToSpawn(Level pLevel, BlockPos pPos, RandomSource pRandom) {
+        if (pLevel.getBrightness(LightLayer.SKY, pPos) > pRandom.nextInt(32)) {
+            return false;
+        } else {
+            DimensionType dimensiontype = pLevel.dimensionType();
+            int i = dimensiontype.monsterSpawnBlockLightLimit();
+            if (i < 15 && pLevel.getBrightness(LightLayer.BLOCK, pPos) > i) {
+                return false;
+            } else {
+                int j = pLevel.isThundering() ? pLevel.getMaxLocalRawBrightness(pPos, 10) : pLevel.getMaxLocalRawBrightness(pPos);
+                int sample = dimensiontype.monsterSpawnLightTest().sample(pRandom);
+                return j <= sample;
+            }
+        }
     }
 
     private static float getRandomVelocity(float frametime)
     {
-        return (float) Math.min(0.7f * frametime * 20, (Math.pow(Math.random() * 3 + 0.1f, 4) * frametime) / 4f);
+        return (float) Math.min(0.7f * frametime * 20, (Math.pow(Math.random() * 5 + 0.1f, 3) * frametime) / 4f);
     }
 
     private static Droplet createDrop(int screenWidth, int screenHeight)
     {
-        int size = new Random().nextInt(24, 32);
+        int size = new Random().nextInt(32, 40);
         return new Droplet(new Vector2f((int) (Math.random() * screenWidth), -size), 1f, size);
     }
 
