@@ -23,18 +23,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(Biome.class)
 public abstract class MixinFreezingWater
 {
-    private final ThreadLocal<IWorldReader> level = new ThreadLocal<>();
-    private final ThreadLocal<Boolean> isCheckingFreezing = ThreadLocal.withInitial(() -> false);
+    private static final ThreadLocal<IWorldReader> LEVEL = new ThreadLocal<>();
+    private static final ThreadLocal<Boolean> IS_CHECKING_FREEZING = ThreadLocal.withInitial(() -> false);
     Biome self = (Biome) (Object) this;
-
-    private static IWorldReader LEVEL = null;
 
     @Inject(method = "shouldFreeze(Lnet/minecraft/world/IWorldReader;Lnet/minecraft/util/math/BlockPos;Z)Z",
             at = @At(value = "HEAD"), cancellable = true)
     private void shouldFreezeBlock(IWorldReader levelReader, BlockPos pos, boolean mustBeAtEdge, CallbackInfoReturnable<Boolean> cir)
     {
-        this.level.set(levelReader);
-        this.isCheckingFreezing.set(true);
+        LEVEL.set(levelReader);
+        IS_CHECKING_FREEZING.set(true);
 
         if (!ConfigSettings.COLD_SOUL_FIRE.get())
         {   return;
@@ -66,9 +64,9 @@ public abstract class MixinFreezingWater
     @Inject(method = "getTemperature", at = @At("HEAD"), cancellable = true)
     private void getTemperature(BlockPos pos, CallbackInfoReturnable<Float> cir)
     {
-        if (this.isCheckingFreezing.get() && this.level.get() instanceof World)
+        if (this.IS_CHECKING_FREEZING.get() && this.LEVEL.get() instanceof World)
         {
-            World world = ((World) level.get());
+            World world = ((World) LEVEL.get());
             double biomeTemp = WorldHelper.getBiomeTemperatureAt(world, self, pos);
             if (CompatManager.isSereneSeasonsLoaded())
             {
@@ -77,6 +75,6 @@ public abstract class MixinFreezingWater
             }
             cir.setReturnValue((float) biomeTemp);
         }
-        this.isCheckingFreezing.set(false);
+        this.IS_CHECKING_FREEZING.set(false);
     }
 }
