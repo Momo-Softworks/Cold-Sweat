@@ -101,7 +101,7 @@ public class WetnessRenderer
             {
                 // Render the water drop
                 RenderSystem.setShaderColor(1, 1, 1, alpha);
-                event.getGuiGraphics().blit(WATER_DROP, (int)pos.x, (int)pos.y, size, size, 0, 0, 8, 8, 8, 8);
+                event.getGuiGraphics().blit(WATER_DROP, (int) CSMath.roundNearest(pos.x, 3f/uiScale), (int)pos.y, size, size, 0, 0, 8, 8, 8, 8);
 
                 // Update the drop's position and alpha
                 if (!paused)
@@ -117,7 +117,7 @@ public class WetnessRenderer
                     else drop.yMotionUpdateCooldown -= frametime;
 
                     // Movement due to player motion
-                    float dropFallFromPlayerVel = Math.max(-drop.yMotion * 1.5f, playerYVelocity * frametime * 20);
+                    float dropFallFromPlayerVel = Math.max(-4f * frametime, playerYVelocity * frametime * 20);
                     float dropMoveFromPlayerLook = -(player.yHeadRot - player.yHeadRotO) / 20;
                     drop.xVelocity = (float) CSMath.maxAbs(dropMoveFromPlayerLook * (Math.random() * 0.2), drop.xVelocity);
                     drop.xVelocity /= 1 + 0.6f * frametime;
@@ -174,7 +174,7 @@ public class WetnessRenderer
             if (alpha > 0)
             {
                 RenderSystem.setShaderColor(1, 1, 1, alpha);
-                event.getGuiGraphics().blit(WATER_DROP_TRAIL, pos.x, pos.y, size, 1, 0, 0, 8, 1, 8, 1);
+                event.getGuiGraphics().blit(WATER_DROP_TRAIL, (int) CSMath.roundNearest(pos.x, 3f/uiScale * 4), pos.y, size, 1, 0, 0, 8, 1, 8, 1);
                 if (!paused)
                 {   TRAILS.set(i, new Triplet<>(new Vector2i(pos.x, pos.y), alpha - 0.045f * frametime, size));
                 }
@@ -194,7 +194,7 @@ public class WetnessRenderer
     private static Droplet createDrop(int screenWidth, int screenHeight)
     {
         int size = new Random().nextInt(24, 32);
-        return new Droplet(new Vector2f((int) (Math.random() * screenWidth), -size), 0.7f, size);
+        return new Droplet(new Vector2f((int) (Math.random() * screenWidth), -size), 1f, size);
     }
 
     protected static class Droplet
