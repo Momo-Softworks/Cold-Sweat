@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.client.event;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.temperature.modifier.WaterTempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
@@ -9,19 +9,20 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.Vec2f;
 import com.momosoftworks.coldsweat.util.math.Vec2i;
+import com.momosoftworks.coldsweat.util.serialization.Triplet;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import oshi.util.tuples.Triplet;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +40,7 @@ public class WetnessRenderer
     @SubscribeEvent
     public static void updateSkyBrightness(TickEvent.ClientTickEvent event)
     {
-        Level level = Minecraft.getInstance().level;
+        World level = Minecraft.getInstance().level;
         if (level != null)
         {   level.updateSkyBrightness();
         }
@@ -50,7 +51,7 @@ public class WetnessRenderer
     {
         if (event.getType() != RenderGameOverlayEvent.ElementType.ALL) return;
         Minecraft mc = Minecraft.getInstance();
-        PoseStack ps = event.getMatrixStack();
+        MatrixStack ps = event.getMatrixStack();
 
         float frametime = mc.getDeltaFrameTime();
         int screenWidth = mc.getWindow().getGuiScaledWidth();
@@ -58,7 +59,7 @@ public class WetnessRenderer
         boolean paused = mc.isPaused();
         int uiScale = mc.options.guiScale;
 
-        Player player = mc.player;
+        PlayerEntity player = mc.player;
         if (player == null) return;
 
         BlockPos playerPos = player.blockPosition();
@@ -129,9 +130,9 @@ public class WetnessRenderer
             if (alpha > 0)
             {
                 // Render the water drop
-                RenderSystem.setShaderColor(brightness, brightness, brightness, alpha);
-                RenderSystem.setShaderTexture(0, WATER_DROP);
-                Screen.blit(ps, (int) CSMath.roundNearest(pos.x, 3f/uiScale), (int)pos.y, size, size, 0, 0, 8, 8, 8, 8);
+                RenderSystem.color4f(brightness, brightness, brightness, alpha);
+                mc.textureManager.bind(WATER_DROP);
+                AbstractGui.blit(ps, (int) CSMath.roundNearest(pos.x, 3f/uiScale), (int)pos.y, size, size, 0, 0, 8, 8, 8, 8);
 
                 // Update the drop's position and alpha
                 if (!paused)
@@ -200,14 +201,14 @@ public class WetnessRenderer
         for (int i = 0; i < TRAILS.size(); i++)
         {
             Triplet<Vec2i, Float, Integer> trail = TRAILS.get(i);
-            Vec2i pos = trail.getA();
-            float alpha = trail.getB();
-            int size = trail.getC();
+            Vec2i pos = trail.getFirst();
+            float alpha = trail.getSecond();
+            int size = trail.getThird();
 
             if (alpha > 0)
             {
-                RenderSystem.setShaderColor(brightness, brightness, brightness, alpha);
-                RenderSystem.setShaderTexture(0, WATER_DROP_TRAIL);
+                RenderSystem.color4f(brightness, brightness, brightness, alpha);
+                mc.textureManager.bind(WATER_DROP_TRAIL);
                 Screen.blit(ps, (int) CSMath.roundNearest(pos.x, 3f/uiScale * 4), pos.y, size, 1, 0, 0, 8, 1, 8, 1);
                 if (!paused)
                 {   TRAILS.set(i, new Triplet<>(new Vec2i(pos.x, pos.y), alpha - 0.045f * frametime, size));
@@ -218,7 +219,7 @@ public class WetnessRenderer
                 i--;
             }
         }
-        RenderSystem.setShaderColor(1, 1, 1, 1);
+        RenderSystem.color4f(1, 1, 1, 1);
     }
 
     private static float getRandomVelocity(float frametime)
@@ -228,7 +229,7 @@ public class WetnessRenderer
 
     private static Droplet createDrop(int screenWidth, int screenHeight)
     {
-        int size = new Random().nextInt(32, 40);
+        int size = new Random().nextInt(8) + 32;
         return new Droplet(new Vec2f((int) (Math.random() * screenWidth), -size), 1f, size);
     }
 
