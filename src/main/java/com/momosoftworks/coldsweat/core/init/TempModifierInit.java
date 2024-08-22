@@ -21,7 +21,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -32,7 +32,7 @@ import java.util.function.Predicate;
 public class TempModifierInit
 {
     @SubscribeEvent
-    public static void onServerStart(ServerStartingEvent event)
+    public static void onServerStart(ServerAboutToStartEvent event)
     {   buildRegistries();
     }
 
