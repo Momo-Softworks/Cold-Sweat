@@ -1,8 +1,11 @@
 package com.momosoftworks.coldsweat.config;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Either;
+
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
@@ -57,7 +60,7 @@ import java.util.stream.Collectors;
  */
 public class ConfigSettings
 {
-    public static final Map<String, DynamicHolder<?>> CONFIG_SETTINGS = new ConcurrentHashMap<>();
+    public static final BiMap<String, DynamicHolder<?>> CONFIG_SETTINGS = HashBiMap.create();
 
     public static Difficulty DEFAULT_DIFFICULTY = Difficulty.NORMAL;
 
@@ -829,66 +832,81 @@ public class ConfigSettings
         SPRING_TEMPS = addSetting("spring_temps", ssLoaded ? () -> WorldSettingsConfig.getInstance().getSpringTemps() : () -> new Double[3]);
     }
 
+    public static String getKey(DynamicHolder<?> setting)
+    {   return CONFIG_SETTINGS.inverse().get(setting);
+    }
+
     public enum Difficulty
     {
-        SUPER_EASY(Map.of(
-            "min_temp", () -> Temperature.convert(40, Temperature.Units.F, Temperature.Units.MC, true),
-            "max_temp", () -> Temperature.convert(120, Temperature.Units.F, Temperature.Units.MC, true),
-            "temp_rate", () -> 0.5,
-            "require_thermometer", () -> false,
-            "fire_resistance_enabled", () -> true,
-            "ice_resistance_enabled", () -> true,
-            "damage_scaling", () -> false
+        SUPER_EASY(() -> Map.of(
+            getKey(MIN_TEMP), () -> Temperature.convert(40, Temperature.Units.F, Temperature.Units.MC, true),
+            getKey(MAX_TEMP), () -> Temperature.convert(120, Temperature.Units.F, Temperature.Units.MC, true),
+            getKey(TEMP_RATE), () -> 0.5,
+            getKey(REQUIRE_THERMOMETER), () -> false,
+            getKey(FIRE_RESISTANCE_ENABLED), () -> true,
+            getKey(ICE_RESISTANCE_ENABLED), () -> true
         )),
 
-        EASY(Map.of(
-            "min_temp", () -> Temperature.convert(45, Temperature.Units.F, Temperature.Units.MC, true),
-            "max_temp", () -> Temperature.convert(110, Temperature.Units.F, Temperature.Units.MC, true),
-            "temp_rate", () -> 0.75,
-            "require_thermometer", () -> false,
-            "fire_resistance_enabled", () -> true,
-            "ice_resistance_enabled", () -> true,
-            "damage_scaling", () -> false
+        EASY(() -> Map.of(
+            getKey(MIN_TEMP), () -> Temperature.convert(45, Temperature.Units.F, Temperature.Units.MC, true),
+            getKey(MAX_TEMP), () -> Temperature.convert(110, Temperature.Units.F, Temperature.Units.MC, true),
+            getKey(TEMP_RATE), () -> 0.75,
+            getKey(REQUIRE_THERMOMETER), () -> false,
+            getKey(FIRE_RESISTANCE_ENABLED), () -> true,
+            getKey(ICE_RESISTANCE_ENABLED), () -> true
         )),
 
-        NORMAL(Map.of(
-            "min_temp", () -> Temperature.convert(50, Temperature.Units.F, Temperature.Units.MC, true),
-            "max_temp", () -> Temperature.convert(100, Temperature.Units.F, Temperature.Units.MC, true),
-            "temp_rate", () -> 1.0,
-            "require_thermometer", () -> true,
-            "fire_resistance_enabled", () -> true,
-            "ice_resistance_enabled", () -> true,
-            "damage_scaling", () -> true
+        NORMAL(() -> Map.of(
+            getKey(MIN_TEMP), () -> Temperature.convert(50, Temperature.Units.F, Temperature.Units.MC, true),
+            getKey(MAX_TEMP), () -> Temperature.convert(100, Temperature.Units.F, Temperature.Units.MC, true),
+            getKey(TEMP_RATE), () -> 1.0,
+            getKey(REQUIRE_THERMOMETER), () -> true,
+            getKey(FIRE_RESISTANCE_ENABLED), () -> true,
+            getKey(ICE_RESISTANCE_ENABLED), () -> true
         )),
 
-        HARD(Map.of(
-            "min_temp", () -> Temperature.convert(60, Temperature.Units.F, Temperature.Units.MC, true),
-            "max_temp", () -> Temperature.convert(90, Temperature.Units.F, Temperature.Units.MC, true),
-            "temp_rate", () -> 1.5,
-            "require_thermometer", () -> true,
-            "fire_resistance_enabled", () -> false,
-            "ice_resistance_enabled", () -> false,
-            "damage_scaling", () -> true
+        HARD(() -> Map.of(
+            getKey(MIN_TEMP), () -> Temperature.convert(55, Temperature.Units.F, Temperature.Units.MC, true),
+            getKey(MAX_TEMP), () -> Temperature.convert(90, Temperature.Units.F, Temperature.Units.MC, true),
+            getKey(TEMP_RATE), () -> 1.25,
+            getKey(REQUIRE_THERMOMETER), () -> true,
+            getKey(FIRE_RESISTANCE_ENABLED), () -> false,
+            getKey(ICE_RESISTANCE_ENABLED), () -> false
         )),
 
-        CUSTOM(Map.of());
+        CUSTOM(() -> Map.of());
 
-        private final Map<String, Supplier<?>> settings;
+        private final Supplier<Map<String, Supplier<?>>> settingsSupplier;
+        private Map<String, Supplier<?>> settings;
 
-        Difficulty(Map<String, Supplier<?>> settings)
-        {   this.settings = settings;
+        Difficulty(Supplier<Map<String, Supplier<?>>> settings)
+        {   this.settingsSupplier = settings;
+        }
+
+        private void ensureSettingsGenerated()
+        {   if (settings == null) settings = settingsSupplier.get();
         }
 
         public <T> T getSetting(String id)
-        {   return (T) settings.get(id).get();
+        {
+            this.ensureSettingsGenerated();
+            return (T) settings.get(id).get();
         }
 
         public <T> T getOrDefault(String id, T defaultValue)
-        {   return (T) settings.getOrDefault(id, () -> defaultValue).get();
+        {
+            this.ensureSettingsGenerated();
+            return (T) settings.getOrDefault(id, () -> defaultValue).get();
         }
 
         public void load()
-        {   settings.forEach((id, loader) -> CONFIG_SETTINGS.get(id).set(loader.get()));
+        {
+            this.ensureSettingsGenerated();
+            settings.forEach((id, loader) -> CONFIG_SETTINGS.computeIfPresent(id, (s, holder) ->
+            {
+                holder.set(loader.get());
+                return holder;
+            }));
         }
     }
 
