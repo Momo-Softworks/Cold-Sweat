@@ -492,13 +492,17 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         {
             this.isBackPowered = this.hasSignalFromBack();
             this.isSidePowered = this.hasSignalFromSides();
+            // Update block state (if this is a hearth)
+            if (this.getBlockState().is(ModBlocks.HEARTH_BOTTOM))
+            {
+                if (wasBackPowered != this.isBackPowered)
+                {   level.setBlock(this.getBlockPos(), this.getBlockState().setValue(HearthBottomBlock.BACK_POWERED, this.isBackPowered), 3);
+                }
+                if (wasSidePowered != this.isSidePowered)
+                {   level.setBlock(this.getBlockPos(), this.getBlockState().setValue(HearthBottomBlock.SIDE_POWERED, this.isSidePowered), 3);
+                }
+            }
             // Update signals for client
-            if (wasBackPowered != this.isBackPowered)
-            {   level.setBlock(this.getBlockPos(), this.getBlockState().setValue(HearthBottomBlock.BACK_POWERED, this.isBackPowered), 3);
-            }
-            if (wasSidePowered != this.isSidePowered)
-            {   level.setBlock(this.getBlockPos(), this.getBlockState().setValue(HearthBottomBlock.SIDE_POWERED, this.isSidePowered), 3);
-            }
             this.syncInputSignal(wasBackPowered, wasSidePowered);
         }
     }
