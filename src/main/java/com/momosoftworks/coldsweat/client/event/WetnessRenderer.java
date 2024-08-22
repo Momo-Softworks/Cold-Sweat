@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.temperature.modifier.WaterTempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -60,8 +61,11 @@ public class WetnessRenderer
         BlockPos playerPos = player.blockPosition();
         float playerYVelocity = (float) (player.position().y - player.yOld);
         boolean isSubmerged = player.canSwimInFluidType(player.getEyeInFluidType());
+
         int light = player.level().getMaxLocalRawBrightness(playerPos.above());
         float brightness = CSMath.blend(0, 1, light, 0, 15);
+
+        float tempMult = (float) CSMath.blend(0.3, 6, Temperature.get(player, Temperature.Trait.WORLD), ConfigSettings.MIN_TEMP.get(), ConfigSettings.MAX_TEMP.get() * 2);
 
         // Clear water drops when the player submerges
         if (isSubmerged && !paused)
@@ -129,7 +133,7 @@ public class WetnessRenderer
                 if (!paused)
                 {
                     // Fade out
-                    drop.alpha -= 0.001f * frametime;
+                    drop.alpha -= 0.003f * frametime * tempMult;
                     // Recalculate the y velocity every so often
                     if (drop.yMotionUpdateCooldown <= 0)
                     {
