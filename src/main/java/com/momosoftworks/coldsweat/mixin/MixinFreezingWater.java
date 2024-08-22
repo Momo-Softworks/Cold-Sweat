@@ -23,16 +23,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(Biome.class)
 public class MixinFreezingWater
 {
-    private static final ThreadLocal<LevelReader> LEVEL = new ThreadLocal<>();
-    private static final ThreadLocal<Boolean> IS_CHECKING_FREEZING = ThreadLocal.withInitial(() -> false);
+    private static LevelReader LEVEL = null;
+    private static Boolean IS_CHECKING_FREEZING = false;
     Biome self = (Biome) (Object) this;
 
     @Inject(method = "shouldFreeze(Lnet/minecraft/world/level/LevelReader;Lnet/minecraft/core/BlockPos;Z)Z",
             at = @At(value = "HEAD"), cancellable = true)
     private void shouldFreezeBlock(LevelReader levelReader, BlockPos pos, boolean mustBeAtEdge, CallbackInfoReturnable<Boolean> cir)
     {
-        LEVEL.set(levelReader);
-        IS_CHECKING_FREEZING.set(true);
+        LEVEL = levelReader;
+        IS_CHECKING_FREEZING = true;
 
         if (!ConfigSettings.COLD_SOUL_FIRE.get())
         {   return;
@@ -64,7 +64,7 @@ public class MixinFreezingWater
     @Inject(method = "getTemperature", at = @At("HEAD"), cancellable = true)
     private void getTemperature(BlockPos pos, CallbackInfoReturnable<Float> cir)
     {
-        if (this.IS_CHECKING_FREEZING.get() && this.LEVEL.get() instanceof Level level)
+        if (IS_CHECKING_FREEZING && LEVEL instanceof Level level)
         {
             double biomeTemp = WorldHelper.getBiomeTemperatureAt(level, self, pos);
             if (CompatManager.isSereneSeasonsLoaded())
@@ -74,6 +74,6 @@ public class MixinFreezingWater
             }
             cir.setReturnValue((float) biomeTemp);
         }
-        this.IS_CHECKING_FREEZING.set(false);
+        IS_CHECKING_FREEZING = false;
     }
 }
