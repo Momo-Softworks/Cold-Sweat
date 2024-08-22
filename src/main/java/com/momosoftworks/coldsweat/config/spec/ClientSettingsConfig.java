@@ -44,7 +44,7 @@ public class ClientSettingsConfig
 
     private static final ModConfigSpec.BooleanValue enableCreativeWarning;
 
-    private static final ForgeConfigSpec.BooleanValue hideTooltips;
+    private static final ModConfigSpec.BooleanValue hideTooltips;
 
 
     static 
