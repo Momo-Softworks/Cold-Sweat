@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.temperature.modifier.WaterTempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -13,11 +14,11 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.RenderGuiEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RenderGuiEvent;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import oshi.util.tuples.Triplet;
@@ -26,17 +27,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-@Mod.EventBusSubscriber(Dist.CLIENT)
+@EventBusSubscriber(Dist.CLIENT)
 public class WetnessRenderer
 {
-    private static final ResourceLocation WATER_DROP = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/overlay/droplet.png");
-    private static final ResourceLocation WATER_DROP_TRAIL = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/overlay/droplet_trail.png");
+    private static final ResourceLocation WATER_DROP = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/droplet.png");
+    private static final ResourceLocation WATER_DROP_TRAIL = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/droplet_trail.png");
     private static final List<Droplet> WATER_DROPS = new ArrayList<>();
     private static final List<Triplet<Vector2i, Float, Integer>> TRAILS = new ArrayList<>();
     private static boolean WAS_SUBMERGED = false;
 
     @SubscribeEvent
-    public static void updateSkyBrightness(TickEvent.ClientTickEvent event)
+    public static void updateSkyBrightness(ClientTickEvent.Pre event)
     {
         Level level = Minecraft.getInstance().level;
         if (level != null)
@@ -48,7 +49,7 @@ public class WetnessRenderer
     public static void onRenderOverlay(RenderGuiEvent.Pre event)
     {
         Minecraft mc = Minecraft.getInstance();
-        float frametime = mc.getDeltaFrameTime();
+        float frametime = mc.getTimer().getRealtimeDeltaTicks();
         int screenWidth = mc.getWindow().getGuiScaledWidth();
         int screenHeight = mc.getWindow().getGuiScaledHeight();
         boolean paused = mc.isPaused();
@@ -60,8 +61,11 @@ public class WetnessRenderer
         BlockPos playerPos = player.blockPosition();
         float playerYVelocity = (float) (player.position().y - player.yOld);
         boolean isSubmerged = player.canSwimInFluidType(player.getEyeInFluidType());
+
         int light = player.level().getMaxLocalRawBrightness(playerPos.above());
         float brightness = CSMath.blend(0, 1, light, 0, 15);
+
+        float tempMult = (float) CSMath.blend(0.3, 6, Temperature.get(player, Temperature.Trait.WORLD), ConfigSettings.MIN_TEMP.get(), ConfigSettings.MAX_TEMP.get() * 2);
 
         // Clear water drops when the player submerges
         if (isSubmerged && !paused)
@@ -129,7 +133,7 @@ public class WetnessRenderer
                 if (!paused)
                 {
                     // Fade out
-                    drop.alpha -= 0.001f * frametime;
+                    drop.alpha -= 0.003f * frametime * tempMult;
                     // Recalculate the y velocity every so often
                     if (drop.yMotionUpdateCooldown <= 0)
                     {
