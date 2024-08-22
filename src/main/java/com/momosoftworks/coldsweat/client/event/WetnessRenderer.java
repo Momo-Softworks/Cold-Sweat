@@ -216,22 +216,6 @@ public class WetnessRenderer
         RenderSystem.setShaderColor(1, 1, 1, 1);
     }
 
-    public static boolean isDarkEnoughToSpawn(Level pLevel, BlockPos pPos, RandomSource pRandom) {
-        if (pLevel.getBrightness(LightLayer.SKY, pPos) > pRandom.nextInt(32)) {
-            return false;
-        } else {
-            DimensionType dimensiontype = pLevel.dimensionType();
-            int i = dimensiontype.monsterSpawnBlockLightLimit();
-            if (i < 15 && pLevel.getBrightness(LightLayer.BLOCK, pPos) > i) {
-                return false;
-            } else {
-                int j = pLevel.isThundering() ? pLevel.getMaxLocalRawBrightness(pPos, 10) : pLevel.getMaxLocalRawBrightness(pPos);
-                int sample = dimensiontype.monsterSpawnLightTest().sample(pRandom);
-                return j <= sample;
-            }
-        }
-    }
-
     private static float getRandomVelocity(float frametime)
     {
         return (float) Math.min(0.7f * frametime * 20, (Math.pow(Math.random() * 5 + 0.1f, 3) * frametime) / 4f);
