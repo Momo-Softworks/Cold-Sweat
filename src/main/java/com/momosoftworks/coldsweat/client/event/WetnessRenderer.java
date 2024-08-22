@@ -1,12 +1,16 @@
 package com.momosoftworks.coldsweat.client.event;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.temperature.modifier.WaterTempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.math.Vec2f;
+import com.momosoftworks.coldsweat.util.math.Vec2i;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
@@ -19,8 +23,6 @@ import net.minecraftforge.client.event.RenderGuiEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import org.joml.Vector2f;
-import org.joml.Vector2i;
 import oshi.util.tuples.Triplet;
 
 import java.util.ArrayList;
@@ -33,7 +35,7 @@ public class WetnessRenderer
     private static final ResourceLocation WATER_DROP = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/overlay/droplet.png");
     private static final ResourceLocation WATER_DROP_TRAIL = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/overlay/droplet_trail.png");
     private static final List<Droplet> WATER_DROPS = new ArrayList<>();
-    private static final List<Triplet<Vector2i, Float, Integer>> TRAILS = new ArrayList<>();
+    private static final List<Triplet<Vec2i, Float, Integer>> TRAILS = new ArrayList<>();
     private static boolean WAS_SUBMERGED = false;
 
     @SubscribeEvent
@@ -49,6 +51,8 @@ public class WetnessRenderer
     public static void onRenderOverlay(RenderGuiEvent.Pre event)
     {
         Minecraft mc = Minecraft.getInstance();
+        PoseStack ps = event.getPoseStack();
+
         float frametime = mc.getDeltaFrameTime();
         int screenWidth = mc.getWindow().getGuiScaledWidth();
         int screenHeight = mc.getWindow().getGuiScaledHeight();
@@ -62,7 +66,7 @@ public class WetnessRenderer
         float playerYVelocity = (float) (player.position().y - player.yOld);
         boolean isSubmerged = player.canSwimInFluidType(player.getEyeInFluidType());
 
-        int light = player.level().getMaxLocalRawBrightness(playerPos.above());
+        int light = player.level.getMaxLocalRawBrightness(playerPos.above());
         float brightness = CSMath.blend(0, 1, light, 0, 15);
 
         float tempMult = (float) CSMath.blend(0.3, 6, Temperature.get(player, Temperature.Trait.WORLD), ConfigSettings.MIN_TEMP.get(), ConfigSettings.MAX_TEMP.get() * 2);
@@ -76,7 +80,7 @@ public class WetnessRenderer
                 drop.alpha -= 0.6f * frametime;
                 float xMoveDir = drop.position.x < screenWidth / 2f ? -1 : 1;
                 float yMoveDir = drop.position.y < screenHeight / 2f ? -1 : 1;
-                drop.position.add(new Vector2f(xMoveDir, yMoveDir).mul(200 * -playerYVelocity * frametime));
+                drop.position.add(new Vec2f(xMoveDir, yMoveDir).mul(200 * -playerYVelocity * frametime));
             }
         }
 
@@ -100,7 +104,7 @@ public class WetnessRenderer
                 int y = (int)newDrop.position.y;
                 for (int j = 1; j < streakLength; j++)
                 {
-                    TRAILS.add(new Triplet<>(new Vector2i(x, y - j),
+                    TRAILS.add(new Triplet<>(new Vec2i(x, y - j),
                                              CSMath.blend(newDrop.alpha * 0.8f, 0, j, 1, streakLength),
                                              newDrop.size / 2));
                 }
@@ -119,7 +123,7 @@ public class WetnessRenderer
         for (int i = 0; i < WATER_DROPS.size(); i++)
         {
             Droplet drop = WATER_DROPS.get(i);
-            Vector2f pos = drop.position;
+            Vec2f pos = drop.position;
             float alpha = drop.alpha;
             int size = drop.size / uiScale * 3;
 
@@ -127,7 +131,8 @@ public class WetnessRenderer
             {
                 // Render the water drop
                 RenderSystem.setShaderColor(brightness, brightness, brightness, alpha);
-                event.getGuiGraphics().blit(WATER_DROP, (int) CSMath.roundNearest(pos.x, 3f/uiScale), (int)pos.y, size, size, 0, 0, 8, 8, 8, 8);
+                RenderSystem.setShaderTexture(0, WATER_DROP);
+                Screen.blit(ps, (int) CSMath.roundNearest(pos.x, 3f/uiScale), (int)pos.y, size, size, 0, 0, 8, 8, 8, 8);
 
                 // Update the drop's position and alpha
                 if (!paused)
@@ -162,13 +167,13 @@ public class WetnessRenderer
                     int oldY = (int)pos.y;
                     // Move the drop
                     if (!isSubmerged)
-                    {   drop.position.add(new Vector2f(drop.xMotion * drop.yMotion * 20 + drop.xVelocity, drop.yMotion + dropFallFromPlayerVel).div(uiScale).mul(3));
+                    {   drop.position.add(new Vec2f(drop.xMotion * drop.yMotion * 20 + drop.xVelocity, drop.yMotion + dropFallFromPlayerVel).div(uiScale).mul(3));
                     }
 
                     // Add a trail behind the drop
                     for (int j = 0; j < Math.max(0, (int) (pos.y - oldY)); j++)
                     {
-                        TRAILS.add(new Triplet<>(new Vector2i((int)pos.x, oldY + j), alpha, size));
+                        TRAILS.add(new Triplet<>(new Vec2i((int)pos.x, oldY + j), alpha, size));
                     }
                 }
 
@@ -195,17 +200,18 @@ public class WetnessRenderer
         // Render water drop trails
         for (int i = 0; i < TRAILS.size(); i++)
         {
-            Triplet<Vector2i, Float, Integer> trail = TRAILS.get(i);
-            Vector2i pos = trail.getA();
+            Triplet<Vec2i, Float, Integer> trail = TRAILS.get(i);
+            Vec2i pos = trail.getA();
             float alpha = trail.getB();
             int size = trail.getC();
 
             if (alpha > 0)
             {
                 RenderSystem.setShaderColor(brightness, brightness, brightness, alpha);
-                event.getGuiGraphics().blit(WATER_DROP_TRAIL, (int) CSMath.roundNearest(pos.x, 3f/uiScale * 4), pos.y, size, 1, 0, 0, 8, 1, 8, 1);
+                RenderSystem.setShaderTexture(0, WATER_DROP_TRAIL);
+                Screen.blit(ps, (int) CSMath.roundNearest(pos.x, 3f/uiScale * 4), pos.y, size, 1, 0, 0, 8, 1, 8, 1);
                 if (!paused)
-                {   TRAILS.set(i, new Triplet<>(new Vector2i(pos.x, pos.y), alpha - 0.045f * frametime, size));
+                {   TRAILS.set(i, new Triplet<>(new Vec2i(pos.x, pos.y), alpha - 0.045f * frametime, size));
                 }
             }
             else
@@ -240,12 +246,12 @@ public class WetnessRenderer
     private static Droplet createDrop(int screenWidth, int screenHeight)
     {
         int size = new Random().nextInt(32, 40);
-        return new Droplet(new Vector2f((int) (Math.random() * screenWidth), -size), 1f, size);
+        return new Droplet(new Vec2f((int) (Math.random() * screenWidth), -size), 1f, size);
     }
 
     protected static class Droplet
     {
-        public Vector2f position;
+        public Vec2f position;
         public float alpha;
         public int size;
         public float yMotion = (float) Math.random() * 0.05f + 0.05f;
@@ -254,7 +260,7 @@ public class WetnessRenderer
         public float yMotionUpdateCooldown = (float) Math.random() * 16f + 8f;
         public float XMotionUpdateCooldown = 16;
 
-        public Droplet(Vector2f position, float alpha, int size)
+        public Droplet(Vec2f position, float alpha, int size)
         {
             this.position = position;
             this.alpha = alpha;
