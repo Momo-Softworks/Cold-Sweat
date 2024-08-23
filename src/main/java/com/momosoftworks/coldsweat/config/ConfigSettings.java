@@ -160,11 +160,12 @@ public class ConfigSettings
     public static final DynamicHolder<Vec2i> CONFIG_BUTTON_POS;
 
     public static final DynamicHolder<Boolean> DISTORTION_EFFECTS;
-
     public static final DynamicHolder<Boolean> HIGH_CONTRAST;
 
     public static final DynamicHolder<Boolean> SHOW_CREATIVE_WARNING;
     public static final DynamicHolder<Boolean> HIDE_TOOLTIPS;
+
+    public static final DynamicHolder<Boolean> SHOW_WATER_EFFECT;
 
 
     // Makes the settings instantiation collapsible & easier to read
@@ -818,6 +819,8 @@ public class ConfigSettings
         SHOW_CREATIVE_WARNING = addClientSetting("show_creative_warning", () -> ClientSettingsConfig.getInstance().isCreativeWarningEnabled());
 
         HIDE_TOOLTIPS = addClientSetting("hide_tooltips", () -> ClientSettingsConfig.getInstance().hideTooltips());
+
+        SHOW_WATER_EFFECT = addClientSetting("show_water_effect", () -> ClientSettingsConfig.getInstance().isWaterEffectEnabled());
 
         boolean ssLoaded = CompatManager.isSereneSeasonsLoaded();
         SUMMER_TEMPS = addSetting("summer_temps", ssLoaded ? () -> WorldSettingsConfig.getInstance().getSummerTemps() : () -> new Double[3]);
