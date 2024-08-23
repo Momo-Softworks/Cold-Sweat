@@ -46,6 +46,8 @@ public class ClientSettingsConfig
 
     private static final ModConfigSpec.BooleanValue hideTooltips;
 
+    private static final ForgeConfigSpec.BooleanValue showWaterEffect;
+
 
     static 
     {
@@ -63,6 +65,9 @@ public class ClientSettingsConfig
                     .comment("The amount of smoothing applied to gauges in the UI",
                              "A value of 1 has no smoothing")
                     .defineInRange("Temperature Smoothing", 10, 1.0, Integer.MAX_VALUE);
+            showWaterEffect = BUILDER
+                    .comment("Displays a dripping water effect on-screen when the player is wet")
+                    .define("Show Water Effect", true);
         BUILDER.pop();
 
         BUILDER.push("UI Options");
@@ -224,6 +229,10 @@ public class ClientSettingsConfig
     {   return hideTooltips.get();
     }
 
+    public boolean isWaterEffectEnabled()
+    {   return showWaterEffect.get();
+    }
+
     /*
      * Safe set methods for config values
      */
@@ -306,6 +315,10 @@ public class ClientSettingsConfig
 
     public void setHideTooltips(boolean hide)
     {   hideTooltips.set(hide);
+    }
+
+    public void setWaterEffectEnabled(boolean enabled)
+    {   showWaterEffect.set(enabled);
     }
 
     public synchronized void writeAndSave()

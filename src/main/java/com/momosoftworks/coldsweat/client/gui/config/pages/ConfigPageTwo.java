@@ -63,14 +63,10 @@ public class ConfigPageTwo extends AbstractConfigPage
                 button -> ConfigSettings.HIGH_CONTRAST.set(!ConfigSettings.HIGH_CONTRAST.get()),
                 false, false, true, Component.translatable("cold_sweat.config.high_contrast.desc"));
 
-        // Config Button Repositioning Screen
-        this.addButton("button_position", Side.LEFT, () -> Component.translatable("cold_sweat.config.config_button_pos.name"),
-                       button ->
-                       {
-                           DrawConfigButton.EDIT_MODE = true;
-                           this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options));
-                       },
-                       false, false, true, Component.translatable("cold_sweat.config.config_button_pos.desc"));
+        // Show Water Effect
+        this.addButton("show_water_effect", Side.LEFT, () -> Component.translatable("cold_sweat.config.show_water_effect.name").append(": ").append(ConfigSettings.SHOW_WATER_EFFECT.get() ? ON : OFF),
+                button -> ConfigSettings.SHOW_WATER_EFFECT.set(!ConfigSettings.SHOW_WATER_EFFECT.get()),
+                false, false, true, Component.translatable("cold_sweat.config.show_water_effect.desc"));
 
         // Direction Buttons: Steve Head
         this.addDirectionPanel("icon_directions", Side.RIGHT, Component.translatable("cold_sweat.config.temp_icon_location.name"),
@@ -128,6 +124,15 @@ public class ConfigPageTwo extends AbstractConfigPage
         this.addButton("move_body_icon", Side.RIGHT, () -> Component.translatable("cold_sweat.config.move_body_icon.name").append(": ").append(ConfigSettings.MOVE_BODY_ICON_WHEN_ADVANCED.get() ? ON : OFF),
                 button -> ConfigSettings.MOVE_BODY_ICON_WHEN_ADVANCED.set(!ConfigSettings.MOVE_BODY_ICON_WHEN_ADVANCED.get()),
                 false, false, true, Component.translatable("cold_sweat.config.move_body_icon.desc"));
+
+        // Config Button Repositioning Screen
+        this.addButton("button_position", Side.RIGHT, () -> Component.translatable("cold_sweat.config.config_button_pos.name"),
+                       button ->
+                       {
+                           DrawConfigButton.EDIT_MODE = true;
+                           this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options));
+                       },
+                       false, false, true, Component.translatable("cold_sweat.config.config_button_pos.desc"));
     }
 
     @Override

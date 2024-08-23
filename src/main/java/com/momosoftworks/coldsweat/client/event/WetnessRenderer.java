@@ -48,6 +48,8 @@ public class WetnessRenderer
     @SubscribeEvent
     public static void onRenderOverlay(RenderGuiEvent.Pre event)
     {
+        if (!ConfigSettings.SHOW_WATER_EFFECT.get()) return;
+
         Minecraft mc = Minecraft.getInstance();
         float frametime = mc.getTimer().getRealtimeDeltaTicks();
         int screenWidth = mc.getWindow().getGuiScaledWidth();
