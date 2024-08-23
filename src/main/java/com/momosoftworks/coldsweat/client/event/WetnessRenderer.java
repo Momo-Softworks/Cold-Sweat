@@ -50,6 +50,8 @@ public class WetnessRenderer
     @SubscribeEvent
     public static void onRenderOverlay(RenderGuiEvent.Pre event)
     {
+        if (!ConfigSettings.SHOW_WATER_EFFECT.get()) return;
+
         Minecraft mc = Minecraft.getInstance();
         PoseStack ps = event.getPoseStack();
 
