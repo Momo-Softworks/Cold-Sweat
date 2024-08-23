@@ -113,8 +113,6 @@
   "cold_sweat.config.difficulty.description.rate.decrease":    "Body temperature change rate is reduced by %d",
   "cold_sweat.config.difficulty.description.rate.increase":    "Body temperature change rate is increased by %d",
   "cold_sweat.config.difficulty.description.rate.normal":      "Body temperature change rate is normal",
-  "cold_sweat.config.difficulty.description.scaling_on":       "Damage %ddoes%d scale with Minecraft difficulty",
-  "cold_sweat.config.difficulty.description.scaling_off":      "Damage %ddoes not%d scale with Minecraft difficulty",
   "cold_sweat.config.difficulty.description.world_temp_on":    "World temperature %dis%d visible without a thermometer",
   "cold_sweat.config.difficulty.description.world_temp_off":   "World temperature %dis not%d visible without a thermometer",
 
