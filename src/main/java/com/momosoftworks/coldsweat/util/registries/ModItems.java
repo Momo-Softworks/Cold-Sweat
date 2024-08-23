@@ -21,6 +21,7 @@ public class ModItems
     public static final Item THERMOLITH = ItemInit.THERMOLITH.get();
     public static final Item SOUL_SPROUT = ItemInit.SOUL_SPROUT.get();
     public static final Item CHAMELEON_SPAWN_EGG = ItemInit.CHAMELEON_SPAWN_EGG.get();
+    public static final Item GOAT_SPAWN_EGG = ItemInit.GOAT_SPAWN_EGG.get();
     public static final Item HOGLIN_HEADPIECE = ItemInit.HOGLIN_HEADPIECE.get();
     public static final Item HOGLIN_TUNIC = ItemInit.HOGLIN_TUNIC.get();
     public static final Item HOGLIN_TROUSERS = ItemInit.HOGLIN_TROUSERS.get();

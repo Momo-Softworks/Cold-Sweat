@@ -67,4 +67,6 @@ public class ItemInit
     // Spawn Eggs
     public static final RegistryObject<ForgeSpawnEggItem> CHAMELEON_SPAWN_EGG = ITEMS.register("chameleon_spawn_egg", () ->
             new ForgeSpawnEggItem(EntityInit.CHAMELEON, 0x82C841, 0x1C9170, new Item.Properties().tab(ItemGroup.TAB_MISC)));
+    public static final RegistryObject<ForgeSpawnEggItem> GOAT_SPAWN_EGG = ITEMS.register("goat_spawn_egg", () ->
+            new ForgeSpawnEggItem(EntityInit.GOAT, 10851452, 5589310, new Item.Properties().tab(ItemGroup.TAB_MISC)));
 }

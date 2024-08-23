@@ -18,6 +18,7 @@
   "item.cold_sweat.insulated_minecart":  "Minecart with Insulation",
   "item.cold_sweat.chameleon_molt":      "Chameleon Molt",
   "item.cold_sweat.chameleon_spawn_egg": "Chameleon Spawn Egg",
+  "item.cold_sweat.goat_spawn_egg":      "Goat Spawn Egg",
   "item.cold_sweat.soul_sprout":         "Soul Sprout",
   "item.cold_sweat.hoglin_headpiece":    "Hoglin Headpiece",
   "item.cold_sweat.hoglin_tunic":        "Hoglin Tunic",
@@ -35,6 +36,7 @@
 
 
   "entity.cold_sweat.chameleon": "Chameleon",
+  "entity.cold_sweat.goat": "Goat",
 
 
   "tooltip.cold_sweat.config.must_be_in_game": "Must be in-game to edit configs",
@@ -77,6 +79,16 @@
   "entity.chameleon.tongue.in":    "Chameleon licks",
   "entity.chameleon.tongue.out":   "Chameleon licks",
   "entity.chameleon.shed":         "Chameleon sheds",
+  "entity.goat.ambient": "Goat bleats",
+  "entity.goat.death": "Goat dies",
+  "entity.goat.eat": "Goat eats",
+  "entity.goat.hurt": "Goat hurts",
+  "entity.goat.long_jump": "Goat leaps",
+  "entity.goat.milk": "Goat gets milked",
+  "entity.goat.prepare_ram": "Goat stomps",
+  "entity.goat.ram_impact": "Goat rams",
+  "entity.goat.screaming.ambient": "Goat bellows",
+  "entity.goat.step": "Goat steps",
   "item.soulspring_lamp.on":       "Soulspring Lamp ignites",
   "item.soulspring_lamp.off":      "Soulspring Lamp extinguishes",
   "block.hearth.fuel_deplete":     "Hearth sputters",
