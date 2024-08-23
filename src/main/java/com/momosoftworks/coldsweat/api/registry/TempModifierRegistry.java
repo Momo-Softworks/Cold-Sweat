@@ -3,19 +3,19 @@ package com.momosoftworks.coldsweat.api.registry;
 import com.google.common.collect.ImmutableMap;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.util.exceptions.RegistryFailureException;
+import com.momosoftworks.coldsweat.util.math.FastMap;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
 public class TempModifierRegistry
 {
-    static Map<ResourceLocation, Supplier<TempModifier>> TEMP_MODIFIERS = new HashMap<>();
+    static Map<ResourceLocation, TempModifierHolder> TEMP_MODIFIERS = new FastMap<>();
 
-    public static ImmutableMap<ResourceLocation, Supplier<TempModifier>> getEntries()
+    public static ImmutableMap<ResourceLocation, TempModifierHolder> getEntries()
     {   return ImmutableMap.copyOf(TEMP_MODIFIERS);
     }
 
@@ -26,7 +26,7 @@ public class TempModifierRegistry
             throw new RegistryFailureException(id, "TempModifier", String.format("Found duplicate TempModifier entries: %s (%s) %s (%s)", supplier.get().getClass().getName(), id,
                                                              TEMP_MODIFIERS.get(id).getClass().getName(), id), null);
         }
-        TEMP_MODIFIERS.put(id, supplier);
+        TEMP_MODIFIERS.put(id, new TempModifierHolder(supplier));
     }
 
     /**
@@ -43,24 +43,38 @@ public class TempModifierRegistry
      */
     public static Optional<TempModifier> getValue(ResourceLocation id)
     {
-        Supplier<TempModifier> mod = TEMP_MODIFIERS.get(id);
-        if (mod != null)
-        {   return Optional.of(mod.get());
-        }
-        else
-        {   return Optional.empty();
-        }
+        return Optional.ofNullable(TEMP_MODIFIERS.get(id).get());
     }
 
     @Nullable
     public static ResourceLocation getKey(TempModifier modifier)
     {
-        for (Map.Entry<ResourceLocation, Supplier<TempModifier>> entry : TEMP_MODIFIERS.entrySet())
+        for (Map.Entry<ResourceLocation, TempModifierHolder> entry : TEMP_MODIFIERS.entrySet())
         {
-            if (entry.getValue().get().getClass() == modifier.getClass())
+            if (entry.getValue().equals(modifier))
             {   return entry.getKey();
             }
         }
         return null;
+    }
+
+    public static class TempModifierHolder
+    {
+        private final Supplier<TempModifier> supplier;
+
+        public TempModifierHolder(Supplier<TempModifier> supplier)
+        {   this.supplier = supplier;
+        }
+
+        public TempModifier get()
+        {   return supplier.get();
+        }
+
+        @Override
+        public boolean equals(Object obj)
+        {
+            return this.get().getClass() == obj.getClass()
+            || obj instanceof TempModifierHolder && this.get().getClass() == ((TempModifierHolder) obj).get().getClass();
+        }
     }
 }
