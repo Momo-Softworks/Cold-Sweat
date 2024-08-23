@@ -49,4 +49,39 @@ public class SoundInit
             () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "entity.chameleon.tongue.out")));
     public static final RegistryObject<SoundEvent> CHAMELEON_SHED_SOUND_REGISTRY = SOUNDS.register("entity.chameleon.shed",
             () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "entity.chameleon.shed")));
+
+    public static final RegistryObject<SoundEvent> ENTITY_GOAT_AMBIENT = SOUNDS.register("entity.goat.ambient",
+            () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "entity.goat.ambient")));
+    public static final RegistryObject<SoundEvent> ENTITY_GOAT_DEATH = SOUNDS.register("entity.goat.death",
+            () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "entity.goat.death")));
+    public static final RegistryObject<SoundEvent> ENTITY_GOAT_EAT = SOUNDS.register("entity.goat.eat",
+            () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "entity.goat.eat")));
+    public static final RegistryObject<SoundEvent> ENTITY_GOAT_HURT = SOUNDS.register("entity.goat.hurt",
+            () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "entity.goat.hurt")));
+    public static final RegistryObject<SoundEvent> ENTITY_GOAT_LONG_JUMP = SOUNDS.register("entity.goat.long_jump",
+            () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "entity.goat.long_jump")));
+    public static final RegistryObject<SoundEvent> ENTITY_GOAT_MILK = SOUNDS.register("entity.goat.milk",
+            () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "entity.goat.milk")));
+    public static final RegistryObject<SoundEvent> ENTITY_GOAT_PREPARE_RAM = SOUNDS.register("entity.goat.prepare_ram",
+            () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "entity.goat.prepare_ram")));
+    public static final RegistryObject<SoundEvent> ENTITY_GOAT_RAM_IMPACT = SOUNDS.register("entity.goat.ram_impact",
+            () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "entity.goat.ram_impact")));
+    public static final RegistryObject<SoundEvent> ENTITY_GOAT_SCREAMING_AMBIENT = SOUNDS.register("entity.goat.screaming.ambient",
+            () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "entity.goat.screaming.ambient")));
+    public static final RegistryObject<SoundEvent> ENTITY_GOAT_SCREAMING_DEATH = SOUNDS.register("entity.goat.screaming.death",
+            () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "entity.goat.screaming.death")));
+    public static final RegistryObject<SoundEvent> ENTITY_GOAT_SCREAMING_EAT = SOUNDS.register("entity.goat.screaming.eat",
+            () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "entity.goat.screaming.eat")));
+    public static final RegistryObject<SoundEvent> ENTITY_GOAT_SCREAMING_HURT = SOUNDS.register("entity.goat.screaming.hurt",
+            () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "entity.goat.screaming.hurt")));
+    public static final RegistryObject<SoundEvent> ENTITY_GOAT_SCREAMING_LONG_JUMP = SOUNDS.register("entity.goat.screaming.long_jump",
+            () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "entity.goat.screaming.long_jump")));
+    public static final RegistryObject<SoundEvent> ENTITY_GOAT_SCREAMING_MILK = SOUNDS.register("entity.goat.screaming.milk",
+            () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "entity.goat.screaming.milk")));
+    public static final RegistryObject<SoundEvent> ENTITY_GOAT_SCREAMING_PREPARE_RAM = SOUNDS.register("entity.goat.screaming.prepare_ram",
+            () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "entity.goat.screaming.prepare_ram")));
+    public static final RegistryObject<SoundEvent> ENTITY_GOAT_SCREAMING_RAM_IMPACT = SOUNDS.register("entity.goat.screaming.ram_impact",
+            () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "entity.goat.screaming.ram_impact")));
+    public static final RegistryObject<SoundEvent> ENTITY_GOAT_STEP = SOUNDS.register("entity.goat.step",
+            () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "entity.goat.step")));
 }

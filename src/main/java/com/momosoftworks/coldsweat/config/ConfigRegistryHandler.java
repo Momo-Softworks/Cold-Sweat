@@ -18,7 +18,6 @@ import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
-import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.data.tag.ModEffectTags;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
@@ -26,7 +25,6 @@ import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import com.momosoftworks.coldsweat.util.serialization.Triplet;
-import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.EntityType;
@@ -34,9 +32,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.resources.IResource;
-import net.minecraft.resources.ResourcePackInfo;
 import net.minecraft.tags.ITag;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
@@ -48,9 +44,7 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.registries.ForgeRegistries;
 
-import javax.xml.ws.Holder;
 import java.io.*;
 import java.nio.file.Path;
 import java.util.*;
@@ -88,7 +82,7 @@ public class ConfigRegistryHandler
          Fetch JSON registries
         */
         // Create config entries from JSON files
-        for (ModRegistries.CodecRegistry<?> registry : ModRegistries.getAllRegistries())
+        for (ModRegistries.CodecRegistry<?> registry : ModRegistries.getRegistries())
         {
             registry.flush();
             try

@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat;
 
 import com.momosoftworks.coldsweat.client.renderer.entity.ChameleonEntityRenderer;
+import com.momosoftworks.coldsweat.client.renderer.entity.GoatEntityRenderer;
 import com.momosoftworks.coldsweat.common.capability.*;
 import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
@@ -17,8 +18,6 @@ import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTrigge
 import com.momosoftworks.coldsweat.core.init.*;
 import com.momosoftworks.coldsweat.core.itemgroup.InsulationItemsGroup;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
-import com.momosoftworks.coldsweat.data.ModRegistries;
-import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModEntities;
@@ -26,10 +25,8 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.command.arguments.ArgumentTypes;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityManager;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
@@ -38,7 +35,6 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.RegistryBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import top.theillusivec4.curios.api.CuriosApi;
@@ -75,6 +71,9 @@ public class ColdSweat
         SoundInit.SOUNDS.register(bus);
         FeatureInit.FEATURES.register(bus);
         AttributeInit.ATTRIBUTES.register(bus);
+        ActivityInit.ACTIVITIES.register(bus);
+        SensorTypeInit.SENSORS.register(bus);
+        MemoryInit.MEMORIES.register(bus);
 
         // Setup configs
         WorldSettingsConfig.setup();
@@ -111,7 +110,7 @@ public class ColdSweat
         /* Entity temperature */
         CapabilityManager.INSTANCE.register(ITemperatureCap.class, new DummyCapStorage<>(), EntityTempCap::new);
 
-        /* Llama fur */
+        /* Goat fur */
         CapabilityManager.INSTANCE.register(IShearableCap.class, new DummyCapStorage<>(), ShearableFurCap::new);
 
         /* Armor insulation */
@@ -122,6 +121,7 @@ public class ColdSweat
     {
         RenderTypeLookup.setRenderLayer(ModBlocks.SOUL_STALK, RenderType.cutoutMipped());
         RenderingRegistry.registerEntityRenderingHandler(ModEntities.CHAMELEON, ChameleonEntityRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntities.GOAT, GoatEntityRenderer::new);
     }
 
     public void updateConfigs(FMLCommonSetupEvent event)

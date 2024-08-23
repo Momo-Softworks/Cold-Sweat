@@ -215,5 +215,388 @@
           "stream": true
       }
     ]
+  },
+  "entity.goat.ambient": {
+    "sounds": [
+      {
+        "name": "cold_sweat:entity/goat/idle1",
+        "volume": 0.82
+      },
+      {
+        "name": "cold_sweat:entity/goat/idle2",
+        "volume": 0.82
+      },
+      {
+        "name": "cold_sweat:entity/goat/idle3",
+        "volume": 0.84
+      },
+      {
+        "name": "cold_sweat:entity/goat/idle4",
+        "volume": 0.84
+      },
+      {
+        "name": "cold_sweat:entity/goat/idle5",
+        "volume": 0.84
+      },
+      {
+        "name": "cold_sweat:entity/goat/idle6",
+        "volume": 0.84
+      },
+      {
+        "name": "cold_sweat:entity/goat/idle7",
+        "volume": 0.83
+      },
+      {
+        "name": "cold_sweat:entity/goat/idle8",
+        "volume": 0.84
+      }
+    ],
+    "subtitle": "subtitles.entity.goat.ambient"
+  },
+  "entity.goat.death": {
+    "sounds": [
+      {
+        "name": "cold_sweat:entity/goat/death1",
+        "volume": 0.65
+      },
+      {
+        "name": "cold_sweat:entity/goat/death2",
+        "volume": 0.65
+      },
+      {
+        "name": "cold_sweat:entity/goat/death3",
+        "volume": 0.65
+      },
+      {
+        "name": "cold_sweat:entity/goat/death4",
+        "volume": 0.65
+      },
+      {
+        "name": "cold_sweat:entity/goat/death5",
+        "volume": 0.65
+      }
+    ],
+    "subtitle": "subtitles.entity.goat.death"
+  },
+  "entity.goat.eat": {
+    "sounds": [
+      "cold_sweat:entity/goat/eat1",
+      "cold_sweat:entity/goat/eat2",
+      "cold_sweat:entity/goat/eat3"
+    ],
+    "subtitle": "subtitles.entity.goat.eat"
+  },
+  "entity.goat.hurt": {
+    "sounds": [
+      {
+        "name": "cold_sweat:entity/goat/hurt1",
+        "volume": 0.65
+      },
+      {
+        "name": "cold_sweat:entity/goat/hurt2",
+        "volume": 0.65
+      },
+      {
+        "name": "cold_sweat:entity/goat/hurt3",
+        "volume": 0.65
+      },
+      {
+        "name": "cold_sweat:entity/goat/hurt4",
+        "volume": 0.65
+      }
+    ],
+    "subtitle": "subtitles.entity.goat.hurt"
+  },
+  "entity.goat.long_jump": {
+    "sounds": [
+      {
+        "name": "cold_sweat:entity/goat/jump1",
+        "volume": 0.8,
+        "pitch": 1
+      },
+      {
+        "name": "cold_sweat:entity/goat/jump2",
+        "volume": 0.8,
+        "pitch": 1
+      },
+      {
+        "name": "cold_sweat:entity/goat/jump1",
+        "volume": 0.8,
+        "pitch": 0.8
+      },
+      {
+        "name": "cold_sweat:entity/goat/jump2",
+        "volume": 0.8,
+        "pitch": 0.8
+      }
+    ],
+    "subtitle": "subtitles.entity.goat.long_jump"
+  },
+  "entity.goat.milk": {
+    "sounds": [
+      "mob/mooshroom/milk1",
+      "mob/mooshroom/milk2",
+      "mob/mooshroom/milk3"
+    ],
+    "subtitle": "subtitles.entity.goat.milk"
+  },
+  "entity.goat.prepare_ram": {
+    "sounds": [
+      {
+        "name": "cold_sweat:entity/goat/pre_ram1",
+        "volume": 0.8
+      },
+      {
+        "name": "cold_sweat:entity/goat/pre_ram2",
+        "volume": 0.8
+      },
+      {
+        "name": "cold_sweat:entity/goat/pre_ram3",
+        "volume": 0.8
+      },
+      {
+        "name": "cold_sweat:entity/goat/pre_ram4",
+        "volume": 0.8
+      }
+    ],
+    "subtitle": "subtitles.entity.goat.prepare_ram"
+  },
+  "entity.goat.ram_impact": {
+    "sounds": [
+      {
+        "name": "cold_sweat:entity/goat/impact1",
+        "volume": 0.8
+      },
+      {
+        "name": "cold_sweat:entity/goat/impact2",
+        "volume": 0.8
+      },
+      {
+        "name": "cold_sweat:entity/goat/impact2",
+        "volume": 0.8
+      }
+    ],
+    "subtitle": "subtitles.entity.goat.ram_impact"
+  },
+  "entity.goat.screaming.ambient": {
+    "sounds": [
+      {
+        "name": "cold_sweat:entity/goat/idle1",
+        "volume": 0.82
+      },
+      {
+        "name": "cold_sweat:entity/goat/idle2",
+        "volume": 0.82
+      },
+      {
+        "name": "cold_sweat:entity/goat/idle3",
+        "volume": 0.84
+      },
+      {
+        "name": "cold_sweat:entity/goat/idle4",
+        "volume": 0.84
+      },
+      {
+        "name": "cold_sweat:entity/goat/idle5",
+        "volume": 0.84
+      },
+      {
+        "name": "cold_sweat:entity/goat/idle6",
+        "volume": 0.84
+      },
+      {
+        "name": "cold_sweat:entity/goat/idle7",
+        "volume": 0.83
+      },
+      {
+        "name": "cold_sweat:entity/goat/idle8",
+        "volume": 0.84
+      },
+      {
+        "name": "cold_sweat:entity/goat/scream1",
+        "volume": 0.9
+      },
+      {
+        "name": "cold_sweat:entity/goat/scream2",
+        "volume": 0.9
+      },
+      {
+        "name": "cold_sweat:entity/goat/scream3",
+        "volume": 0.9
+      },
+      {
+        "name": "cold_sweat:entity/goat/scream4",
+        "volume": 0.9
+      },
+      {
+        "name": "cold_sweat:entity/goat/scream5",
+        "volume": 0.9
+      },
+      {
+        "name": "cold_sweat:entity/goat/scream6",
+        "volume": 0.9
+      },
+      {
+        "name": "cold_sweat:entity/goat/scream7",
+        "volume": 0.9
+      },
+      {
+        "name": "cold_sweat:entity/goat/scream8",
+        "volume": 0.9
+      },
+      {
+        "name": "cold_sweat:entity/goat/scream9",
+        "volume": 0.9
+      }
+    ],
+    "subtitle": "subtitles.entity.goat.screaming.ambient"
+  },
+  "entity.goat.screaming.death": {
+    "sounds": [
+      {
+        "name": "cold_sweat:entity/goat/screaming_death1",
+        "volume": 0.65
+      },
+      {
+        "name": "cold_sweat:entity/goat/screaming_death2",
+        "volume": 0.65
+      },
+      {
+        "name": "cold_sweat:entity/goat/screaming_death3",
+        "volume": 0.65
+      }
+    ],
+    "subtitle": "subtitles.entity.goat.death"
+  },
+  "entity.goat.screaming.eat": {
+    "sounds": [
+      "cold_sweat:entity/goat/eat1",
+      "cold_sweat:entity/goat/eat2",
+      "cold_sweat:entity/goat/eat3"
+    ],
+    "subtitle": "subtitles.entity.goat.eat"
+  },
+  "entity.goat.screaming.hurt": {
+    "sounds": [
+      {
+        "name": "cold_sweat:entity/goat/screaming_hurt1",
+        "volume": 0.65
+      },
+      {
+        "name": "cold_sweat:entity/goat/screaming_hurt2",
+        "volume": 0.65
+      },
+      {
+        "name": "cold_sweat:entity/goat/screaming_hurt3",
+        "volume": 0.65
+      }
+    ],
+    "subtitle": "subtitles.entity.goat.hurt"
+  },
+  "entity.goat.screaming.long_jump": {
+    "sounds": [
+      {
+        "name": "cold_sweat:entity/goat/jump1",
+        "volum": 0.8,
+        "pitch": 1
+      },
+      {
+        "name": "cold_sweat:entity/goat/jump2",
+        "volum": 0.8,
+        "pitch": 1
+      },
+      {
+        "name": "cold_sweat:entity/goat/jump1",
+        "volum": 0.8,
+        "pitch": 0.8
+      },
+      {
+        "name": "cold_sweat:entity/goat/jump2",
+        "volum": 0.8,
+        "pitch": 0.8
+      }
+    ],
+    "subtitle": "subtitles.entity.goat.long_jump"
+  },
+  "entity.goat.screaming.milk": {
+    "sounds": [
+      "cold_sweat:entity/goat/screaming_milk1",
+      "cold_sweat:entity/goat/screaming_milk2",
+      "cold_sweat:entity/goat/screaming_milk3",
+      "cold_sweat:entity/goat/screaming_milk4",
+      "cold_sweat:entity/goat/screaming_milk5"
+    ],
+    "subtitle": "subtitles.entity.goat.milk"
+  },
+  "entity.goat.screaming.prepare_ram": {
+    "sounds": [
+      {
+        "name": "cold_sweat:entity/goat/screaming_pre_ram1",
+        "volume": 0.8
+      },
+      {
+        "name": "cold_sweat:entity/goat/screaming_pre_ram2",
+        "volume": 0.8
+      },
+      {
+        "name": "cold_sweat:entity/goat/screaming_pre_ram3",
+        "volume": 0.8
+      },
+      {
+        "name": "cold_sweat:entity/goat/screaming_pre_ram4",
+        "volume": 0.8
+      },
+      {
+        "name": "cold_sweat:entity/goat/screaming_pre_ram5",
+        "volume": 0.8
+      }
+    ],
+    "subtitle": "subtitles.entity.goat.prepare_ram"
+  },
+  "entity.goat.screaming.ram_impact": {
+    "sounds": [
+      {
+        "name": "cold_sweat:entity/goat/impact1",
+        "volume": 0.8
+      },
+      {
+        "name": "cold_sweat:entity/goat/impact2",
+        "volume": 0.8
+      },
+      {
+        "name": "cold_sweat:entity/goat/impact2",
+        "volume": 0.8
+      }
+    ],
+    "subtitle": "subtitles.entity.goat.ram_impact"
+  },
+  "entity.goat.step": {
+    "sounds": [
+      {
+        "name": "cold_sweat:entity/goat/step1",
+        "volume": 1
+      },
+      {
+        "name": "cold_sweat:entity/goat/step2",
+        "volume": 1
+      },
+      {
+        "name": "cold_sweat:entity/goat/step3",
+        "volume": 1
+      },
+      {
+        "name": "cold_sweat:entity/goat/step4",
+        "volume": 1
+      },
+      {
+        "name": "cold_sweat:entity/goat/step5",
+        "volume": 1
+      },
+      {
+        "name": "cold_sweat:entity/goat/step6",
+        "volume": 1
+      }
+    ],
+    "subtitle": "subtitles.block.generic.footsteps"
   }
 }

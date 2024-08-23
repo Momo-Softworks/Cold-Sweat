@@ -19,10 +19,10 @@ public class EntitySettingsConfig
     private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> insulatedEntities;
-    private static final ForgeConfigSpec.ConfigValue<List<?>> llamaFurGrowth;
+    private static final ForgeConfigSpec.ConfigValue<List<?>> goatFurGrowth;
     private static final ForgeConfigSpec.ConfigValue<List<?>> chameleonShedTimings;
     private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> chameleonBiomes;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> llamaBiomes;
+    private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> goatBiomes;
     private static final EntitySettingsConfig INSTANCE = new EntitySettingsConfig();
 
     static
@@ -46,10 +46,10 @@ public class EntitySettingsConfig
                     return false;
                 });
 
-        llamaFurGrowth = BUILDER
-                .comment("Defines how often a llama will try to grow its fur, the growth cooldown after shearing, and the chance of it succeeding",
+        goatFurGrowth = BUILDER
+                .comment("Defines how often a goat will try to grow its fur, the growth cooldown after shearing, and the chance of it succeeding",
                         "Format: [ticks, cooldown, chance]")
-                .defineList("Llama Fur Growth Timings", Arrays.asList(
+                .defineList("Goat Fur Growth Timings", Arrays.asList(
                         1200, 2400, 0.20
                 ),
                 it -> it instanceof Number);
@@ -112,10 +112,10 @@ public class EntitySettingsConfig
                             return false;
                         });
 
-        llamaBiomes = BUILDER
-                .comment("Defines additional biomes that llamas can spawn in",
+        goatBiomes = BUILDER
+                .comment("Defines additional biomes that goats can spawn in",
                          "Format: [[\"biome_id\", weight], [\"biome_id\", weight], etc...]")
-                .defineList("Llama Spawn Biomes", ListBuilder.begin(
+                .defineList("Goat Spawn Biomes", ListBuilder.begin(
                                 Arrays.asList("minecraft:mountains", 10),
                                 Arrays.asList("minecraft:mountains_edge", 5),
                                 Arrays.asList("minecraft:wooded_mountains", 12),
@@ -174,8 +174,8 @@ public class EntitySettingsConfig
     {   return insulatedEntities.get();
     }
 
-    public List<?> getLlamaFurStats()
-    {   return llamaFurGrowth.get();
+    public List<?> getGoatFurStats()
+    {   return goatFurGrowth.get();
     }
 
     public List<?> getChameleonShedStats()
@@ -186,15 +186,15 @@ public class EntitySettingsConfig
     {   return chameleonBiomes.get();
     }
 
-    public List<? extends List<?>> getLlamaSpawnBiomes()
-    {   return llamaBiomes.get();
+    public List<? extends List<?>> getGoatSpawnBiomes()
+    {   return goatBiomes.get();
     }
 
     /* Setters */
 
-    public void setLlamaFurStats(List<? extends Number> list)
-    {   synchronized (llamaFurGrowth)
-        {   llamaFurGrowth.set(list);
+    public void setGoatFurStats(List<? extends Number> list)
+    {   synchronized (goatFurGrowth)
+        {   goatFurGrowth.set(list);
         }
     }
 

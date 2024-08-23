@@ -32,13 +32,11 @@ import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import com.momosoftworks.coldsweat.util.serialization.Triplet;
-import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
-import net.minecraft.item.Items;
 import net.minecraft.nbt.*;
 import net.minecraft.potion.Effect;
 import net.minecraft.tags.ITag;
@@ -52,10 +50,8 @@ import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.ForgeRegistries;
-import org.apache.maven.artifact.versioning.ArtifactVersion;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.*;
 import java.util.stream.Collectors;
 
@@ -627,7 +623,7 @@ public class ConfigSettings
                                                                                     .collect(ArrayList::new, List::add, List::addAll)));
 
         FUR_TIMINGS = addSyncedSetting("fur_timings", () ->
-        {   List<?> entry = EntitySettingsConfig.getInstance().getLlamaFurStats();
+        {   List<?> entry = EntitySettingsConfig.getInstance().getGoatFurStats();
             return new Triplet<>(((Number) entry.get(0)).intValue(), ((Number) entry.get(1)).intValue(), ((Number) entry.get(2)).doubleValue());
         },
         encoder ->
@@ -648,7 +644,7 @@ public class ConfigSettings
             list.add(saver.getFirst());
             list.add(saver.getSecond());
             list.add(saver.getThird());
-            EntitySettingsConfig.getInstance().setLlamaFurStats(list);
+            EntitySettingsConfig.getInstance().setGoatFurStats(list);
         });
 
         SHED_TIMINGS = addSyncedSetting("shed_timings", () ->
@@ -698,7 +694,7 @@ public class ConfigSettings
 
             // Parse goat and chameleon biomes
             configReader.accept(EntitySettingsConfig.getInstance().getChameleonSpawnBiomes());
-            configReader.accept(EntitySettingsConfig.getInstance().getLlamaSpawnBiomes());
+            configReader.accept(EntitySettingsConfig.getInstance().getGoatSpawnBiomes());
 
             return map;
         });

@@ -14,6 +14,7 @@ import java.util.*;
 public class ModRegistries
 {
     private static final SimpleReloadableResourceManager RESOURCE_MANAGER = new SimpleReloadableResourceManager(ResourcePackType.SERVER_DATA);
+    private static final Collection<CodecRegistry<?>> ALL_REGISTRIES = new HashSet<>();
 
     public static SimpleReloadableResourceManager getResourceManager()
     {   return RESOURCE_MANAGER;
@@ -24,34 +25,31 @@ public class ModRegistries
     }
 
     // Item Registries
-    public static CodecRegistry<InsulatorData> INSULATOR_DATA = new ModRegistries.CodecRegistry<>(new ResourceLocation(ColdSweat.MOD_ID, "item/insulator"), InsulatorData.CODEC);
-    public static CodecRegistry<FuelData> FUEL_DATA = new ModRegistries.CodecRegistry<>(new ResourceLocation(ColdSweat.MOD_ID, "item/fuel"), FuelData.CODEC);
-    public static CodecRegistry<FoodData> FOOD_DATA = new ModRegistries.CodecRegistry<>(new ResourceLocation(ColdSweat.MOD_ID, "item/food"), FoodData.CODEC);
-    public static CodecRegistry<ItemCarryTempData> CARRY_TEMP_DATA = new ModRegistries.CodecRegistry<>(new ResourceLocation(ColdSweat.MOD_ID, "item/carried_temp"), ItemCarryTempData.CODEC);
+    public static CodecRegistry<InsulatorData> INSULATOR_DATA = createRegistry(new ResourceLocation(ColdSweat.MOD_ID, "item/insulator"), InsulatorData.CODEC);
+    public static CodecRegistry<FuelData> FUEL_DATA = createRegistry(new ResourceLocation(ColdSweat.MOD_ID, "item/fuel"), FuelData.CODEC);
+    public static CodecRegistry<FoodData> FOOD_DATA = createRegistry(new ResourceLocation(ColdSweat.MOD_ID, "item/food"), FoodData.CODEC);
+    public static CodecRegistry<ItemCarryTempData> CARRY_TEMP_DATA = createRegistry(new ResourceLocation(ColdSweat.MOD_ID, "item/carried_temp"), ItemCarryTempData.CODEC);
 
     // World Registries
-    public static CodecRegistry<BlockTempData> BLOCK_TEMP_DATA = new ModRegistries.CodecRegistry<>(new ResourceLocation(ColdSweat.MOD_ID, "block/block_temp"), BlockTempData.CODEC);
-    public static CodecRegistry<BiomeTempData> BIOME_TEMP_DATA = new ModRegistries.CodecRegistry<>(new ResourceLocation(ColdSweat.MOD_ID, "world/biome_temp"), BiomeTempData.CODEC);
-    public static CodecRegistry<DimensionTempData> DIMENSION_TEMP_DATA = new ModRegistries.CodecRegistry<>(new ResourceLocation(ColdSweat.MOD_ID, "world/dimension_temp"), DimensionTempData.CODEC);
-    public static CodecRegistry<StructureTempData> STRUCTURE_TEMP_DATA = new ModRegistries.CodecRegistry<>(new ResourceLocation(ColdSweat.MOD_ID, "world/structure_temp"), StructureTempData.CODEC);
-    public static CodecRegistry<DepthTempData> DEPTH_TEMP_DATA = new ModRegistries.CodecRegistry<>(new ResourceLocation(ColdSweat.MOD_ID, "world/depth_temp"), DepthTempData.CODEC);
+    public static CodecRegistry<BlockTempData> BLOCK_TEMP_DATA = createRegistry(new ResourceLocation(ColdSweat.MOD_ID, "block/block_temp"), BlockTempData.CODEC);
+    public static CodecRegistry<BiomeTempData> BIOME_TEMP_DATA = createRegistry(new ResourceLocation(ColdSweat.MOD_ID, "world/biome_temp"), BiomeTempData.CODEC);
+    public static CodecRegistry<DimensionTempData> DIMENSION_TEMP_DATA = createRegistry(new ResourceLocation(ColdSweat.MOD_ID, "world/dimension_temp"), DimensionTempData.CODEC);
+    public static CodecRegistry<StructureTempData> STRUCTURE_TEMP_DATA = createRegistry(new ResourceLocation(ColdSweat.MOD_ID, "world/structure_temp"), StructureTempData.CODEC);
+    public static CodecRegistry<DepthTempData> DEPTH_TEMP_DATA = createRegistry(new ResourceLocation(ColdSweat.MOD_ID, "world/depth_temp"), DepthTempData.CODEC);
 
     // Entity Registries
-    public static CodecRegistry<MountData> MOUNT_DATA = new ModRegistries.CodecRegistry<>(new ResourceLocation(ColdSweat.MOD_ID, "entity/mount"), MountData.CODEC);
-    public static CodecRegistry<SpawnBiomeData> ENTITY_SPAWN_BIOME_DATA = new ModRegistries.CodecRegistry<>(new ResourceLocation(ColdSweat.MOD_ID, "entity/spawn_biome"), SpawnBiomeData.CODEC);
+    public static CodecRegistry<MountData> MOUNT_DATA = createRegistry(new ResourceLocation(ColdSweat.MOD_ID, "entity/mount"), MountData.CODEC);
+    public static CodecRegistry<SpawnBiomeData> ENTITY_SPAWN_BIOME_DATA = createRegistry(new ResourceLocation(ColdSweat.MOD_ID, "entity/spawn_biome"), SpawnBiomeData.CODEC);
 
-    public static List<CodecRegistry<?>> getAllRegistries()
+    private static <T> CodecRegistry<T> createRegistry(ResourceLocation registryName, Codec<T> codec)
     {
-        return Arrays.asList(INSULATOR_DATA,
-                             FUEL_DATA,
-                             FOOD_DATA,
-                             BLOCK_TEMP_DATA,
-                             BIOME_TEMP_DATA,
-                             DIMENSION_TEMP_DATA,
-                             STRUCTURE_TEMP_DATA,
-                             DEPTH_TEMP_DATA,
-                             MOUNT_DATA,
-                             ENTITY_SPAWN_BIOME_DATA);
+        CodecRegistry<T> registry = new CodecRegistry<>(registryName, codec);
+        ALL_REGISTRIES.add(registry);
+        return registry;
+    }
+
+    public static Collection<CodecRegistry<?>> getRegistries()
+    {   return new HashSet<>(ALL_REGISTRIES);
     }
     
     public static class CodecRegistry<V>

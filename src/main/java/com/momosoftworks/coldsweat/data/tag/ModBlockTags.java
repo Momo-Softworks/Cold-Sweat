@@ -16,6 +16,8 @@ public class ModBlockTags
 
     public static final ITag.INamedTag<Block> IGNORE_SLEEP_CHECK = createTag("ignore_sleep_check");
 
+    public static final ITag.INamedTag<Block> GOATS_SPAWNABLE_ON = createTag("goats_spawnable_on");
+
     private static ITag.INamedTag<Block> createTag(String name)
     {   return BlockTags.bind(new ResourceLocation(ColdSweat.MOD_ID, name).toString());
     }

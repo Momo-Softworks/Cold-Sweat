@@ -17,10 +17,10 @@ import javax.annotation.Nullable;
 
 public class ChameleonEntityRenderer<T extends ChameleonEntity> extends MobRenderer<ChameleonEntity, ChameleonModel<ChameleonEntity>>
 {
-    public static final ResourceLocation CHAMELEON_SHED  = new ResourceLocation(ColdSweat.MOD_ID, "textures/entities/chameleon_shed.png");
-    public static final ResourceLocation CHAMELEON_GREEN = new ResourceLocation(ColdSweat.MOD_ID, "textures/entities/chameleon_green.png");
-    public static final ResourceLocation CHAMELEON_RED   = new ResourceLocation(ColdSweat.MOD_ID, "textures/entities/chameleon_red.png");
-    public static final ResourceLocation CHAMELEON_BLUE  = new ResourceLocation(ColdSweat.MOD_ID, "textures/entities/chameleon_blue.png");
+    public static final ResourceLocation CHAMELEON_SHED  = new ResourceLocation(ColdSweat.MOD_ID, "textures/entity/chameleon/chameleon_shed.png");
+    public static final ResourceLocation CHAMELEON_GREEN = new ResourceLocation(ColdSweat.MOD_ID, "textures/entity/chameleon/chameleon_green.png");
+    public static final ResourceLocation CHAMELEON_RED   = new ResourceLocation(ColdSweat.MOD_ID, "textures/entity/chameleon/chameleon_red.png");
+    public static final ResourceLocation CHAMELEON_BLUE  = new ResourceLocation(ColdSweat.MOD_ID, "textures/entity/chameleon/chameleon_blue.png");
 
     public ChameleonEntityRenderer(EntityRendererManager context)
     {
