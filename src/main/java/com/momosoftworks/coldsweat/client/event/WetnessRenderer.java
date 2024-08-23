@@ -49,7 +49,8 @@ public class WetnessRenderer
     @SubscribeEvent
     public static void onRenderOverlay(RenderGameOverlayEvent.Pre event)
     {
-        if (event.getType() != RenderGameOverlayEvent.ElementType.ALL) return;
+        if (event.getType() != RenderGameOverlayEvent.ElementType.ALL || !ConfigSettings.SHOW_WATER_EFFECT.get()) return;
+
         Minecraft mc = Minecraft.getInstance();
         MatrixStack ps = event.getMatrixStack();
 
