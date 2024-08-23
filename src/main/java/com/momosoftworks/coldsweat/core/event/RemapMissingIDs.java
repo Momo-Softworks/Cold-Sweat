@@ -20,11 +20,12 @@ public class RemapMissingIDs
         {
             for (MissingMappingsEvent.Mapping<Item> mapping : event.getAllMappings(ForgeRegistries.Keys.ITEMS))
             {
-                if (mapping.getKey().equals(new ResourceLocation(ColdSweat.MOD_ID, "hellspring_lamp")))
-                {   mapping.remap(ModItems.SOULSPRING_LAMP);
-                }
-                else if (mapping.getKey().getNamespace().equals(ColdSweat.MOD_ID) && mapping.getKey().toString().contains("goat_fur"))
-                {   mapping.remap(ForgeRegistries.ITEMS.getValue(new ResourceLocation(ColdSweat.MOD_ID, mapping.getKey().getPath().replace("goat_fur", "fur"))));
+                ResourceLocation key = mapping.getKey();
+                String namespace = key.getNamespace();
+                String path = key.getPath();
+                // Remap fur to goat_fur
+                if (namespace.equals(ColdSweat.MOD_ID) && path.contains("fur"))
+                {   mapping.remap(ForgeRegistries.ITEMS.getValue(new ResourceLocation(ColdSweat.MOD_ID, path.replace("fur", "goat_fur"))));
                 }
             }
         }

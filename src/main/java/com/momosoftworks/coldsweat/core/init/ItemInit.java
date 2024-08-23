@@ -4,7 +4,6 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.block.*;
 import com.momosoftworks.coldsweat.common.item.*;
 import com.momosoftworks.coldsweat.util.registries.ModArmorMaterials;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.*;
 import net.minecraftforge.common.ForgeSpawnEggItem;
@@ -23,7 +22,7 @@ public class ItemInit
     public static final RegistryObject<Item> THERMOMETER = ITEMS.register("thermometer", () ->
             new ThermometerItem(new Item.Properties().rarity(Rarity.UNCOMMON).stacksTo(1)));
     public static final RegistryObject<Item> SOULSPRING_LAMP = ITEMS.register("soulspring_lamp", SoulspringLampItem::new);
-    public static final RegistryObject<Item> FUR = ITEMS.register("fur", () ->
+    public static final RegistryObject<Item> GOAT_FUR = ITEMS.register("goat_fur", () ->
             new Item(new Item.Properties()));
     public static final RegistryObject<Item> HOGLIN_HIDE = ITEMS.register("hoglin_hide", () ->
             new Item(new Item.Properties()));
@@ -45,14 +44,14 @@ public class ItemInit
     public static final RegistryObject<Item> HOGLIN_HOOVES = ITEMS.register("hoglin_hooves", () ->
             new HoglinArmorItem(ModArmorMaterials.HOGLIN, ArmorItem.Type.BOOTS, new Item.Properties()));
 
-    public static final RegistryObject<Item> FUR_CAP = ITEMS.register("fur_cap", () ->
-            new GoatArmorItem(ModArmorMaterials.FUR, ArmorItem.Type.HELMET, new Item.Properties()));
-    public static final RegistryObject<Item> FUR_PARKA = ITEMS.register("fur_parka", () ->
-            new GoatArmorItem(ModArmorMaterials.FUR, ArmorItem.Type.CHESTPLATE, new Item.Properties()));
-    public static final RegistryObject<Item> FUR_PANTS = ITEMS.register("fur_pants", () ->
-            new GoatArmorItem(ModArmorMaterials.FUR, ArmorItem.Type.LEGGINGS, new Item.Properties()));
-    public static final RegistryObject<Item> FUR_BOOTS = ITEMS.register("fur_boots", () ->
-            new GoatArmorItem(ModArmorMaterials.FUR, ArmorItem.Type.BOOTS, new Item.Properties()));
+    public static final RegistryObject<Item> GOAT_FUR_CAP = ITEMS.register("goat_fur_cap", () ->
+            new GoatArmorItem(ModArmorMaterials.GOAT_FUR, ArmorItem.Type.HELMET, new Item.Properties()));
+    public static final RegistryObject<Item> GOAT_FUR_PARKA = ITEMS.register("goat_fur_parka", () ->
+            new GoatArmorItem(ModArmorMaterials.GOAT_FUR, ArmorItem.Type.CHESTPLATE, new Item.Properties()));
+    public static final RegistryObject<Item> GOAT_FUR_PANTS = ITEMS.register("goat_fur_pants", () ->
+            new GoatArmorItem(ModArmorMaterials.GOAT_FUR, ArmorItem.Type.LEGGINGS, new Item.Properties()));
+    public static final RegistryObject<Item> GOAT_FUR_BOOTS = ITEMS.register("goat_fur_boots", () ->
+            new GoatArmorItem(ModArmorMaterials.GOAT_FUR, ArmorItem.Type.BOOTS, new Item.Properties()));
 
     // Block Items
     public static final RegistryObject<BlockItem> BOILER = ITEMS.register("boiler", () -> new BlockItem(BlockInit.BOILER.get(), BoilerBlock.getItemProperties()));

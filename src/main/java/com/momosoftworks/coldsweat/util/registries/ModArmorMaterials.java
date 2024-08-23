@@ -14,8 +14,8 @@ public enum ModArmorMaterials implements ArmorMaterial
 {
     HOGLIN("hoglin", 14, new int[]{2, 5, 6, 3}, 25, SoundEvents.ARMOR_EQUIP_LEATHER,
            1.5F, 0.0F, () -> Ingredient.of(ModItems.HOGLIN_HIDE)),
-    FUR("fur", 10, new int[]{1, 4, 5, 2}, 15, SoundEvents.ARMOR_EQUIP_LEATHER,
-        0F, 0.0F, () -> Ingredient.of(ModItems.FUR));
+    GOAT_FUR("goat_fur", 10, new int[]{1, 4, 5, 2}, 15, SoundEvents.ARMOR_EQUIP_LEATHER,
+             0F, 0.0F, () -> Ingredient.of(ModItems.FUR));
 
     private static final int[] HEALTH_PER_SLOT = new int[]{13, 15, 16, 11};
     private final String name;
