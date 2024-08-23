@@ -29,7 +29,7 @@ public class IceBreakingEvents
 
         if (state.is(Blocks.ICE) && !tool.isCorrectToolForDrops(state)
         && !event.getPlayer().getAbilities().instabuild
-        && belowState.blocksMotion() || belowState.liquid())
+        && (belowState.blocksMotion() || belowState.liquid()))
         {   level.setBlock(pos, Blocks.WATER.defaultBlockState(), 3);
         }
     }
