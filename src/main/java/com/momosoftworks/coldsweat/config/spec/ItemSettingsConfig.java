@@ -164,17 +164,17 @@ public class ItemSettingsConfig
                                 List.of("minecraft:leather",            1,  1),
                                 List.of("cold_sweat:chameleon_molt",    2, 0.0085, "adaptive"),
                                 List.of("cold_sweat:hoglin_hide",       0,  2),
-                                List.of("cold_sweat:fur",               2,  0),
+                                List.of("cold_sweat:goat_fur",          2,  0),
                                 List.of("#minecraft:wool",              1.5, 0),
                                 List.of("minecraft:rabbit_hide",        0,  1.5),
                                 List.of("cold_sweat:hoglin_headpiece",  0,  8),
                                 List.of("cold_sweat:hoglin_tunic",      0,  12),
                                 List.of("cold_sweat:hoglin_trousers",   0,  10),
                                 List.of("cold_sweat:hoglin_hooves",     0,  8),
-                                List.of("cold_sweat:fur_cap",           8,  0),
-                                List.of("cold_sweat:fur_parka",         12, 0),
-                                List.of("cold_sweat:fur_pants",         10, 0),
-                                List.of("cold_sweat:fur_boots",         8,  0))
+                                List.of("cold_sweat:goat_fur_cap",      8,  0),
+                                List.of("cold_sweat:goat_fur_parka",    12, 0),
+                                List.of("cold_sweat:goat_fur_pants",    10, 0),
+                                List.of("cold_sweat:goat_fur_boots",    8,  0))
                             .addIf(CompatManager.isEnvironmentalLoaded(),
                                 () -> List.of("environmental:yak_hair", 1.5, -1)
                         ).build(),
@@ -197,10 +197,10 @@ public class ItemSettingsConfig
                                 List.of("cold_sweat:hoglin_tunic",       0,  12),
                                 List.of("cold_sweat:hoglin_trousers",    0,  10),
                                 List.of("cold_sweat:hoglin_hooves",      0,  8),
-                                List.of("cold_sweat:fur_cap",       8,  0),
-                                List.of("cold_sweat:fur_parka",     12, 0),
-                                List.of("cold_sweat:fur_pants",     10, 0),
-                                List.of("cold_sweat:fur_boots",     8,  0))
+                                List.of("cold_sweat:goat_fur_cap",       8,  0),
+                                List.of("cold_sweat:goat_fur_parka",     12, 0),
+                                List.of("cold_sweat:goat_fur_pants",     10, 0),
+                                List.of("cold_sweat:goat_fur_boots",     8,  0))
                             .addIf(CompatManager.isEnvironmentalLoaded(),
                                 () -> List.of("environmental:yak_pants", 7.5, -5)
                         ).build(),

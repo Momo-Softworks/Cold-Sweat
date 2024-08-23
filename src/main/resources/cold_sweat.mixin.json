@@ -27,6 +27,7 @@
     "MixinIce$RequireTool",
     "MixinInventoryOpenServer",
     "MixinLivingLoad",
+    "MixinLoadItemStack",
     "MixinMinecart",
     "MixinSoulCampfire",
     "MixinSoulFire",

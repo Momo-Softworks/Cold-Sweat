@@ -56,6 +56,6 @@ public class GoatArmorItem extends ArmorItem
     @Override
     public boolean canWalkOnPowderedSnow(ItemStack stack, LivingEntity wearer)
     {
-        return stack.is(ModItems.FUR_BOOTS);
+        return stack.is(ModItems.GOAT_FUR_BOOTS);
     }
 }

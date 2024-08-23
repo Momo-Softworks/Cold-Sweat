@@ -33,7 +33,7 @@ public class ModCreativeTabs
                             stack = CompatManager.setWaterPurity(stack, 3);
                             return stack;
                         }),
-                        ModItems.FUR.value().getDefaultInstance(),
+                        ModItems.GOAT_FUR.value().getDefaultInstance(),
                         ModItems.HOGLIN_HIDE.value().getDefaultInstance(),
                         ModItems.CHAMELEON_MOLT.value().getDefaultInstance(),
                         ModItems.MINECART_INSULATION.value().getDefaultInstance(),
@@ -56,10 +56,10 @@ public class ModCreativeTabs
                         ModItems.HOGLIN_TUNIC.value().getDefaultInstance(),
                         ModItems.HOGLIN_TROUSERS.value().getDefaultInstance(),
                         ModItems.HOGLIN_HOOVES.value().getDefaultInstance(),
-                        ModItems.FUR_CAP.value().getDefaultInstance(),
-                        ModItems.FUR_PARKA.value().getDefaultInstance(),
-                        ModItems.FUR_PANTS.value().getDefaultInstance(),
-                        ModItems.FUR_BOOTS.value().getDefaultInstance(),
+                        ModItems.GOAT_FUR_CAP.value().getDefaultInstance(),
+                        ModItems.GOAT_FUR_PARKA.value().getDefaultInstance(),
+                        ModItems.GOAT_FUR_PANTS.value().getDefaultInstance(),
+                        ModItems.GOAT_FUR_BOOTS.value().getDefaultInstance(),
                         ModItems.CHAMELEON_SPAWN_EGG.value().getDefaultInstance()
                 ));
             })

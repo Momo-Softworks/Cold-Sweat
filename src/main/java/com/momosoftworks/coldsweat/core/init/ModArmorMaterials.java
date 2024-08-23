@@ -19,7 +19,7 @@ public class ModArmorMaterials
     public static final DeferredRegister<ArmorMaterial> ARMOR_MATERIALS = DeferredRegister.create(Registries.ARMOR_MATERIAL, ColdSweat.MOD_ID);
 
     public static final DeferredHolder<ArmorMaterial, ArmorMaterial> HOGLIN = ARMOR_MATERIALS.register("hoglin", () -> new ArmorMaterial(
-            Util.make(new EnumMap<ArmorItem.Type, Integer>(ArmorItem.Type.class), map -> {
+            Util.make(new EnumMap<>(ArmorItem.Type.class), map -> {
                 map.put(ArmorItem.Type.HELMET, 2);
                 map.put(ArmorItem.Type.CHESTPLATE, 5);
                 map.put(ArmorItem.Type.LEGGINGS, 6);
@@ -28,13 +28,13 @@ public class ModArmorMaterials
             List.of(new ArmorMaterial.Layer(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hoglin"))),
             1.5F, 0.0F));
 
-    public static final DeferredHolder<ArmorMaterial, ArmorMaterial> FUR = ARMOR_MATERIALS.register("fur", () -> new ArmorMaterial(
-            Util.make(new EnumMap<ArmorItem.Type, Integer>(ArmorItem.Type.class), map -> {
+    public static final DeferredHolder<ArmorMaterial, ArmorMaterial> GOAT_FUR = ARMOR_MATERIALS.register("goat_fur", () -> new ArmorMaterial(
+            Util.make(new EnumMap<>(ArmorItem.Type.class), map -> {
                 map.put(ArmorItem.Type.HELMET, 1);
                 map.put(ArmorItem.Type.CHESTPLATE, 4);
                 map.put(ArmorItem.Type.LEGGINGS, 5);
                 map.put(ArmorItem.Type.BOOTS, 2);
-            }), 15, SoundEvents.ARMOR_EQUIP_LEATHER, () -> Ingredient.of(ModItems.FUR),
-            List.of(new ArmorMaterial.Layer(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "fur"))),
+            }), 15, SoundEvents.ARMOR_EQUIP_LEATHER, () -> Ingredient.of(ModItems.GOAT_FUR),
+            List.of(new ArmorMaterial.Layer(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "goat_fur"))),
             0.0F, 0.0F));
 }
