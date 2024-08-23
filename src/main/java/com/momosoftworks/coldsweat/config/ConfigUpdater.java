@@ -21,6 +21,44 @@ public class ConfigUpdater
         WorldSettingsConfig worldSettings = WorldSettingsConfig.getInstance();
 
         /*
+         2.3.2
+         */
+        if (isBehind(configVersion, "2.3.2"))
+        {
+            // Goat fur insulation value
+            replaceConfigSetting(itemSettings::getInsulationItems, "cold_sweat:fur", insulator ->
+            {   insulator.set(0, "cold_sweat:goat_fur");
+            }, itemSettings::setInsulationItems);
+
+            // Goat fur armor insulation values
+            replaceConfigSetting(itemSettings::getInsulationItems, "cold_sweat:fur_cap", insulator ->
+            {   insulator.set(0, "cold_sweat:goat_fur_cap");
+            }, itemSettings::setInsulationItems);
+            replaceConfigSetting(itemSettings::getInsulationItems, "cold_sweat:fur_parka", insulator ->
+            {   insulator.set(0, "cold_sweat:goat_fur_parka");
+            }, itemSettings::setInsulationItems);
+            replaceConfigSetting(itemSettings::getInsulationItems, "cold_sweat:fur_pants", insulator ->
+            {   insulator.set(0, "cold_sweat:goat_fur_pants");
+            }, itemSettings::setInsulationItems);
+            replaceConfigSetting(itemSettings::getInsulationItems, "cold_sweat:fur_boots", insulator ->
+            {   insulator.set(0, "cold_sweat:goat_fur_boots");
+            }, itemSettings::setInsulationItems);
+
+            // Goat fur armor worn insulation value
+            replaceConfigSetting(itemSettings::getInsulatingArmorItems, "cold_sweat:fur_cap", insulator ->
+            {   insulator.set(0, "cold_sweat:goat_fur_cap");
+            }, itemSettings::setInsulatingArmorItems);
+            replaceConfigSetting(itemSettings::getInsulatingArmorItems, "cold_sweat:fur_parka", insulator ->
+            {   insulator.set(0, "cold_sweat:goat_fur_parka");
+            }, itemSettings::setInsulatingArmorItems);
+            replaceConfigSetting(itemSettings::getInsulatingArmorItems, "cold_sweat:fur_pants", insulator ->
+            {   insulator.set(0, "cold_sweat:goat_fur_pants");
+            }, itemSettings::setInsulatingArmorItems);
+            replaceConfigSetting(itemSettings::getInsulatingArmorItems, "cold_sweat:fur_boots", insulator ->
+            {   insulator.set(0, "cold_sweat:goat_fur_boots");
+            }, itemSettings::setInsulatingArmorItems);
+        }
+        /*
          2.3.1
          */
         if (isBehind(configVersion, "2.3.1"))

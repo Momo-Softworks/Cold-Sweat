@@ -6,7 +6,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "cold_sweat:fur",
+          "name": "cold_sweat:goat_fur",
           "functions": [
             {
               "function": "minecraft:set_count",
