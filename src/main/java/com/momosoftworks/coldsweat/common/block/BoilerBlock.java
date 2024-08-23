@@ -35,6 +35,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.network.NetworkHooks;
 
+import javax.annotation.Nullable;
 import java.util.Random;
 import java.util.function.ToIntFunction;
 
@@ -185,9 +186,10 @@ public class BoilerBlock extends Block
     }
 
     @Override
-    public boolean canConnectRedstone(BlockState state, IBlockReader level, BlockPos pos, Direction direction)
+    public boolean canConnectRedstone(BlockState state, IBlockReader level, BlockPos pos, @Nullable Direction direction)
     {
-        return direction.getAxis() != Direction.Axis.Y
+        return direction != null
+            && direction.getAxis() != Direction.Axis.Y
             && direction != state.getValue(FACING).getOpposite()
             && level.getBlockState(pos.above()).is(ModBlocks.SMOKESTACK);
     }

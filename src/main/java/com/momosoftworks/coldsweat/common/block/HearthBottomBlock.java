@@ -219,9 +219,10 @@ public class HearthBottomBlock extends Block
     }
 
     @Override
-    public boolean canConnectRedstone(BlockState state, IBlockReader level, BlockPos pos, Direction direction)
+    public boolean canConnectRedstone(BlockState state, IBlockReader level, BlockPos pos, @Nullable Direction direction)
     {
-        return direction.getAxis() != Direction.Axis.Y
+        return direction != null
+            && direction.getAxis() != Direction.Axis.Y
             && direction != state.getValue(FACING).getOpposite();
     }
 

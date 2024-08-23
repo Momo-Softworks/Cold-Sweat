@@ -204,10 +204,11 @@ public class IceboxBlock extends Block
     }
 
     @Override
-    public boolean canConnectRedstone(BlockState state, IBlockReader level, BlockPos pos, Direction direction)
+    public boolean canConnectRedstone(BlockState state, IBlockReader level, BlockPos pos, @Nullable Direction direction)
     {
-        return direction.getAxis() != Direction.Axis.Y
-                && level.getBlockState(pos.above()).is(ModBlocks.SMOKESTACK);
+        return direction != null
+            && direction.getAxis() != Direction.Axis.Y
+            && level.getBlockState(pos.above()).is(ModBlocks.SMOKESTACK);
     }
 
     @Override
