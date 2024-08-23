@@ -28,7 +28,7 @@ import net.minecraft.world.entity.animal.goat.Goat;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraftforge.common.Tags;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
@@ -111,7 +111,7 @@ public class ShearableFurManager
         Player player = event.getEntity();
         ItemStack stack = event.getItemStack();
 
-        if (entity instanceof Goat goat && !goat.isBaby() && !goat.level.isClientSide && stack.getItem() == Items.SHEARS)
+        if (entity instanceof Goat goat && !goat.isBaby() && !goat.level.isClientSide && stack.is(Tags.Items.SHEARS))
         {
             getFurCap(goat).ifPresent(cap ->
             {
