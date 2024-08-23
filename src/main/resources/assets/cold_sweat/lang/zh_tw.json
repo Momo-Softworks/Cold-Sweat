@@ -113,8 +113,6 @@
   "cold_sweat.config.difficulty.description.rate.decrease":    "體溫變化速率降低了 %d",
   "cold_sweat.config.difficulty.description.rate.increase":    "體溫變化速率提高了 %d",
   "cold_sweat.config.difficulty.description.rate.normal":      "體溫變化速率正常",
-  "cold_sweat.config.difficulty.description.scaling_on":       "傷害 %d會%d 根據 Minecraft 難易度調整",
-  "cold_sweat.config.difficulty.description.scaling_off":      "傷害 %d不會%d 根據 Minecraft 難易度調整",
   "cold_sweat.config.difficulty.description.world_temp_on":    "世界溫度 %d會%d 在沒有溫度計的情況下顯示",
   "cold_sweat.config.difficulty.description.world_temp_off":   "世界溫度 %d不會%d 在沒有溫度計的情況下顯示",
 

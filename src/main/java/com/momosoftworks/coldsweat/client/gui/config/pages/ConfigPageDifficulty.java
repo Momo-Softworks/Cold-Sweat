@@ -67,7 +67,6 @@ public class ConfigPageDifficulty extends Screen
                 Component.translatable("cold_sweat.config.difficulty.description.max_temp", getTemperatureString(difficulty.getSetting("max_temp"), RED)),
                 getRateComponent(difficulty),
                 Component.translatable("cold_sweat.config.difficulty.description.world_temp_" + (difficulty.getSetting("require_thermometer") ? "off" : "on"), BOLD + U_LINE, CLEAR),
-                Component.translatable("cold_sweat.config.difficulty.description.scaling_" + (difficulty.getSetting("damage_scaling") ? "on" : "off"), BOLD + U_LINE, CLEAR),
                 Component.translatable("cold_sweat.config.difficulty.description.potions_" + (difficulty.getSetting("ice_resistance_enabled") ? "on" : "off"), BOLD + U_LINE, CLEAR));
     }
 
