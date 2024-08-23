@@ -37,6 +37,7 @@ import net.minecraft.world.item.Items;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
@@ -65,7 +66,7 @@ public class ShearableFurManager
         Player player = event.getEntity();
         ItemStack stack = event.getItemStack();
 
-        if (entity instanceof Goat goat && !goat.isBaby() && !goat.level().isClientSide && stack.getItem() == Items.SHEARS)
+        if (entity instanceof Goat goat && !goat.isBaby() && !goat.level().isClientSide && stack.is(Tags.Items.TOOLS_SHEAR))
         {
             IShearableCap cap = getFurCap(goat);
             if (cap.isSheared())
