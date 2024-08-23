@@ -16,7 +16,6 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 
 @Mod.EventBusSubscriber
 public class AddEntitySpawns
@@ -41,9 +40,13 @@ public class AddEntitySpawns
         });
     }
 
-    @SubscribeEvent
-    public static void registerSpawnPlacements(FMLServerAboutToStartEvent event)
+    @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
+    public static class RegisterSpawnPlacements
     {
-        EntitySpawnPlacementRegistry.register(ModEntities.GOAT, EntitySpawnPlacementRegistry.PlacementType.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, GoatEntity::canSpawn);
+        @SubscribeEvent
+        public static void registerSpawnPlacements(FMLCommonSetupEvent event)
+        {
+            EntitySpawnPlacementRegistry.register(ModEntities.GOAT, EntitySpawnPlacementRegistry.PlacementType.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, GoatEntity::canSpawn);
+        }
     }
 }

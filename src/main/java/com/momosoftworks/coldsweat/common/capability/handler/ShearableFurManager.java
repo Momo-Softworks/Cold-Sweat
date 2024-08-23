@@ -15,13 +15,13 @@ import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.horse.AbstractChestedHorseEntity;
-import net.minecraft.entity.passive.horse.LlamaEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.*;
+import net.minecraftforge.common.Tags;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
@@ -144,6 +144,7 @@ public class ShearableFurManager
     public static void shearEntity(Entity entity, PlayerEntity player, Hand hand)
     {
         ItemStack stack = player.getItemInHand(hand);
+        if (Tags.Items.SHEARS.contains(stack.getItem()))
         getFurCap(entity).ifPresent(cap ->
         {
             if (!cap.isSheared())

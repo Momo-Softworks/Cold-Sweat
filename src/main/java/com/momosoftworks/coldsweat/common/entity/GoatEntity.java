@@ -3,13 +3,14 @@ package com.momosoftworks.coldsweat.common.entity;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Dynamic;
 import com.momosoftworks.coldsweat.common.entity.task.GoatTasks;
+import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.init.EntityInit;
 import com.momosoftworks.coldsweat.core.init.MemoryInit;
 import com.momosoftworks.coldsweat.core.init.SensorTypeInit;
 import com.momosoftworks.coldsweat.core.init.SoundInit;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
+import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
@@ -194,6 +195,28 @@ public class GoatEntity extends AnimalEntity
         }
     }
 
+    @Override
+    public void onAddedToWorld()
+    {
+        // Convert this entity to a Goat from Caves & Cliffs if loaded
+        if (CompatManager.isCavesAndCliffsLoaded())
+        {
+            AnimalEntity convertedGoat = CompatManager.createGoatFrom(this);
+            if (convertedGoat != null)
+            {
+                TaskScheduler.scheduleServer(() ->
+                {
+                    this.remove();
+                    if (this.level instanceof ServerWorld)
+                    {   ((ServerWorld) this.level).despawn(this);
+                    }
+                    this.level.addFreshEntity(convertedGoat);
+                }, 0);
+            }
+        }
+        super.onAddedToWorld();
+    }
+
     public ILivingEntityData finalizeSpawn(IServerWorld worldIn, DifficultyInstance difficultyIn, SpawnReason reason, @Nullable ILivingEntityData spawnDataIn, @Nullable CompoundNBT dataTag)
     {
         GoatTasks.resetLongJumpCooldown(this);
@@ -271,7 +294,7 @@ public class GoatEntity extends AnimalEntity
     }
 
     protected PathNavigator createNavigation(World worldIn)
-    {   return new GoatEntity.GoatPathNavigator(this, worldIn);
+    {   return new GoatPathNavigator(this, worldIn);
     }
 
     public static boolean canSpawn(EntityType<? extends AnimalEntity> entityType, IWorld worldIn, SpawnReason reason, BlockPos pos, Random rand)
@@ -303,7 +326,7 @@ public class GoatEntity extends AnimalEntity
 
         protected PathFinder createPathFinder(int range)
         {
-            this.nodeEvaluator = new GoatEntity.GoatPathNodeProcessor();
+            this.nodeEvaluator = new GoatPathNodeProcessor();
             return new PathFinder(this.nodeEvaluator, range);
         }
     }

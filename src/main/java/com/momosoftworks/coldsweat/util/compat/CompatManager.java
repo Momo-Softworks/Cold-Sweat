@@ -1,18 +1,16 @@
 package com.momosoftworks.coldsweat.util.compat;
 
 import com.blackgear.cavesandcliffs.common.entity.GoatEntity;
-import com.momosoftworks.coldsweat.api.temperature.modifier.compat.CuriosTempModifier;
-import com.momosoftworks.coldsweat.api.util.Placement;
-import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.blackgear.cavesandcliffs.core.registries.entity.CCBEntityTypes;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
-import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.config.type.Insulator;
+import com.momosoftworks.coldsweat.common.capability.handler.ShearableFurManager;
 import de.teamlapen.werewolves.entities.player.werewolf.WerewolfPlayer;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModDamageSources;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -20,7 +18,6 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
@@ -30,7 +27,6 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.jwaresoftware.mcmods.lib.Armory;
-import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.CuriosCapability;
 import top.theillusivec4.curios.api.event.CurioChangeEvent;
 import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
@@ -211,6 +207,61 @@ public class CompatManager
 
     public static boolean isGoat(Entity entity)
     {   return isCavesAndCliffsLoaded() && entity instanceof GoatEntity;
+    }
+
+    public static AnimalEntity createGoatFrom(com.momosoftworks.coldsweat.common.entity.GoatEntity goat)
+    {
+        if (isCavesAndCliffsLoaded())
+        {
+            return new Object()
+            {
+                public AnimalEntity create()
+                {
+                    GoatEntity entity = new GoatEntity(CCBEntityTypes.GOAT.get(), goat.level);
+                    entity.copyPosition(goat);
+                    entity.yHeadRot = goat.yHeadRot;
+                    entity.yBodyRot = goat.yBodyRot;
+                    entity.setHealth(goat.getHealth());
+                    entity.setBaby(goat.isBaby());
+                    entity.setAge(goat.getAge());
+                    if (goat.hasCustomName())
+                    {   entity.setCustomName(goat.getCustomName());
+                        entity.setCustomNameVisible(goat.isCustomNameVisible());
+                    }
+                    entity.setDeltaMovement(goat.getDeltaMovement());
+                    entity.setAbsorptionAmount(goat.getAbsorptionAmount());
+                    entity.setAirSupply(goat.getAirSupply());
+                    entity.setRemainingFireTicks(goat.getRemainingFireTicks());
+                    entity.setNoGravity(goat.isNoGravity());
+                    entity.setInvulnerable(goat.isInvulnerable());
+                    entity.setSilent(goat.isSilent());
+                    entity.setInvisible(goat.isInvisible());
+                    entity.setNoAi(goat.isNoAi());
+                    entity.setLeftHanded(goat.isLeftHanded());
+                    if (goat.isPersistenceRequired())
+                    {   entity.setPersistenceRequired();
+                    }
+                    entity.setGlowing(goat.isGlowing());
+                    entity.setInLoveTime(goat.getInLoveTime());
+                    entity.setLastHurtByMob(goat.getLastHurtByMob());
+                    entity.setLastHurtMob(goat.getLastHurtMob());
+                    if (goat.isLeashed())
+                    {   entity.setLeashedTo(goat.getLeashHolder(), true);
+                    }
+                    entity.getPersistentData().merge(goat.getPersistentData());
+                    entity.setScreaming(goat.isScreaming());
+                    entity.getAttributes().load(goat.getAttributes().save());
+                    ShearableFurManager.getFurCap(entity).ifPresent(cap ->
+                    {
+                        ShearableFurManager.getFurCap(goat).ifPresent(goatCap ->
+                        {   cap.deserializeNBT(goatCap.serializeNBT());
+                        });
+                    });
+                    return entity;
+                }
+            }.create();
+        }
+        return null;
     }
 
     /* Compat Events */
