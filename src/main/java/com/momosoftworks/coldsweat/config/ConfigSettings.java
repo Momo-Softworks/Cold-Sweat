@@ -47,7 +47,6 @@ import net.minecraftforge.registries.ForgeRegistries;
 import oshi.util.tuples.Triplet;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.*;
 import java.util.stream.Collectors;
 
@@ -206,10 +205,10 @@ public class ConfigSettings
         (decoder) -> decoder.getBoolean("IceResistanceEnabled"),
         (saver) -> MainSettingsConfig.getInstance().setIceResistanceEnabled(saver));
 
-        USE_PEACEFUL_MODE = addSyncedSetting("use_peaceful", () -> MainSettingsConfig.getInstance().doDamageScaling(),
+        USE_PEACEFUL_MODE = addSyncedSetting("use_peaceful", () -> MainSettingsConfig.getInstance().nullifyInPeaceful(),
         (encoder) -> ConfigHelper.serializeNbtBool(encoder, "UsePeaceful"),
         (decoder) -> decoder.getBoolean("UsePeaceful"),
-        (saver) -> MainSettingsConfig.getInstance().setDamageScaling(saver));
+        (saver) -> MainSettingsConfig.getInstance().setNullifyInPeaceful(saver));
 
         REQUIRE_THERMOMETER = addSyncedSetting("require_thermometer", () -> MainSettingsConfig.getInstance().thermometerRequired(),
         (encoder) -> ConfigHelper.serializeNbtBool(encoder, "RequireThermometer"),

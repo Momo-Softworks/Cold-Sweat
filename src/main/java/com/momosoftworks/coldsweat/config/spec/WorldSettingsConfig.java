@@ -20,32 +20,32 @@ public class WorldSettingsConfig
     private static final ForgeConfigSpec SPEC;
     public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
-    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> biomeOffsets;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> biomeTemps;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> dimensionOffsets;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> dimensionTemps;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> structureOffsets;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> structureTemps;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> BIOME_TEMP_OFFSETS;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> BIOME_TEMP_OVERRIDES;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> DIMENSION_TEMP_OFFSETS;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> DIMENSION_TEMP_OVERRIDES;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> STRUCTURE_TEMP_OFFSETS;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> STRUCTURE_TEMP_OVERRIDES;
 
-    public static final ForgeConfigSpec.ConfigValue<Double> caveInsulation;
+    public static final ForgeConfigSpec.ConfigValue<Double> CAVE_INSULATION_STRENGTH;
 
-    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> blockTemps;
-    public static final ForgeConfigSpec.IntValue blockRange;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> BLOCK_TEMPERATURES;
+    public static final ForgeConfigSpec.IntValue MAX_BLOCK_TEMP_RANGE;
 
-    public static final ForgeConfigSpec.ConfigValue<Boolean> coldSoulFire;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> IS_SOUL_FIRE_COLD;
 
-    public static ForgeConfigSpec.ConfigValue<List<? extends Number>> summerTemps;
-    public static ForgeConfigSpec.ConfigValue<List<? extends Number>> autumnTemps;
-    public static ForgeConfigSpec.ConfigValue<List<? extends Number>> winterTemps;
-    public static ForgeConfigSpec.ConfigValue<List<? extends Number>> springTemps;
+    public static ForgeConfigSpec.ConfigValue<List<? extends Number>> SUMMER_TEMPERATURES;
+    public static ForgeConfigSpec.ConfigValue<List<? extends Number>> AUTUMN_TEMPERATURES;
+    public static ForgeConfigSpec.ConfigValue<List<? extends Number>> WINTER_TEMPERATURES;
+    public static ForgeConfigSpec.ConfigValue<List<? extends Number>> SPRING_TEMPERATURES;
 
-    public static final ForgeConfigSpec.ConfigValue<Boolean> smartHearth;
-    public static final ForgeConfigSpec.ConfigValue<Double> hearthEffect;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> hearthSpreadWhitelist;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> hearthSpreadBlacklist;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> ENABLE_SMART_HEARTH;
+    public static final ForgeConfigSpec.ConfigValue<Double> HEARTH_INSULATION_STRENGTH;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> HEARTH_SPREAD_WHITELIST;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> HEARTH_SPREAD_BLACKLIST;
 
-    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> sleepingOverrideBlocks;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> checkSleep;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> SLEEPING_OVERRIDE_BLOCKS;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> SHOULD_CHECK_SLEEP;
 
     public static final WorldSettingsConfig INSTANCE = new WorldSettingsConfig();
 
@@ -58,7 +58,7 @@ public class WorldSettingsConfig
                         "Common dimension IDs: minecraft:overworld, minecraft:the_nether, minecraft:the_end")
                .push("Dimensions");
 
-        dimensionOffsets = BUILDER
+        DIMENSION_TEMP_OFFSETS = BUILDER
                 .comment("Applies an offset to the world's temperature across an entire dimension")
             .defineList("Dimension Temperature Offsets", List.of(
                     List.of("minecraft:the_nether", 1.0),
@@ -68,7 +68,7 @@ public class WorldSettingsConfig
                     && list.get(1) instanceof Number
                     && (list.size() < 3 || list.get(2) instanceof String));
 
-        dimensionTemps = BUILDER
+        DIMENSION_TEMP_OVERRIDES = BUILDER
             .comment("Overrides existing dimension temperatures & offsets",
                      "Also overrides temperatures of all biomes in the dimension")
             .defineList("Dimension Temperatures", List.of(
@@ -89,7 +89,7 @@ public class WorldSettingsConfig
                        "units: Optional. The units of the temperature (\"C\" or \"F\". Defaults to MC units)")
                .push("Biomes");
 
-        biomeOffsets = BUILDER
+        BIOME_TEMP_OFFSETS = BUILDER
             .comment("Applies an offset to the temperature of a biome")
             .defineList("Biome Temperature Offsets", List.of(),
                 it ->
@@ -105,7 +105,7 @@ public class WorldSettingsConfig
                 });
 
 
-        biomeTemps = BUILDER
+        BIOME_TEMP_OVERRIDES = BUILDER
             .comment("Defines the temperature of a biome, overriding existing biome temperatures & offsets.")
             .defineList("Biome Temperatures", ListBuilder.begin(
                             List.of("minecraft:soul_sand_valley", 53, 53, "F"),
@@ -444,7 +444,7 @@ public class WorldSettingsConfig
 
         BUILDER.push("Blocks");
 
-        blockTemps = BUILDER
+        BLOCK_TEMPERATURES = BUILDER
                 .comment("Allows for adding simple BlockTemps without the use of Java mods",
                          "Format (All temperatures are in Minecraft units):",
                          "[[\"block-ids\", <temperature>, <range>, <*true/false: falloff>, <*max effect>, <*predicates>], [etc...], [etc...]]",
@@ -467,7 +467,7 @@ public class WorldSettingsConfig
                                     ),
                             it -> it instanceof List<?> list && list.size() >= 3 && list.get(0) instanceof String && list.get(1) instanceof Number && list.get(2) instanceof Number);
 
-        blockRange = BUILDER
+        MAX_BLOCK_TEMP_RANGE = BUILDER
                 .comment("The maximum range of blocks' area of effect",
                          "Note: This will not change anything unless blocks are configured to utilize the expanded range",
                           "This value is capped at 16 for performance reasons")
@@ -478,12 +478,12 @@ public class WorldSettingsConfig
 
         BUILDER.push("Misc");
 
-        caveInsulation = BUILDER
+        CAVE_INSULATION_STRENGTH = BUILDER
                 .comment("The amount of temperature normalization from being deep underground",
                          "0.0 = no insulation, 1.0 = full insulation")
                 .defineInRange("Cave Insulation Strength", 1.0, 0.0, 1.0);
 
-        structureTemps = BUILDER
+        STRUCTURE_TEMP_OVERRIDES = BUILDER
                 .comment("Overrides the world temperature when the player is within this structure",
                          "Format: [[\"structure_1\", temperature1, *units], [\"structure_2\", temperature2, *units]... etc]",
                          "(* = optional)")
@@ -494,7 +494,7 @@ public class WorldSettingsConfig
                         && list.get(1) instanceof Number
                         && (list.size() < 3 || list.get(2) instanceof String));
 
-        structureOffsets = BUILDER
+        STRUCTURE_TEMP_OFFSETS = BUILDER
                 .comment("Offsets the world temperature when the player is within this structure",
                          "Format: [[\"structure_1\", offset1, *units], [\"structure_2\", offset2, *units]... etc]",
                          "(* = optional)")
@@ -505,7 +505,7 @@ public class WorldSettingsConfig
                         && list.get(1) instanceof Number
                         && (list.size() < 3 || list.get(2) instanceof String));
 
-        sleepingOverrideBlocks = BUILDER
+        SLEEPING_OVERRIDE_BLOCKS = BUILDER
                 .comment("List of blocks that will allow the player to sleep on them, regardless of the \"Prevent Sleep When in Danger\" setting",
                          "Use this list if the player is not getting the temperature effect from sleeping on particular blocks")
                 .defineList("Sleep Check Override Blocks", ListBuilder.<String>begin()
@@ -514,11 +514,11 @@ public class WorldSettingsConfig
                         .build(),
                 it -> it instanceof String);
 
-        checkSleep = BUILDER
+        SHOULD_CHECK_SLEEP = BUILDER
                 .comment("When set to true, players cannot sleep if they are cold or hot enough to die")
                 .define("Check Sleeping Conditions", true);
 
-        coldSoulFire = BUILDER
+        IS_SOUL_FIRE_COLD = BUILDER
                 .comment("Converts damage dealt by Soul Fire to cold damage (default: true)",
                          "Does not affect the block's temperature")
                 .define("Cold Soul Fire", true);
@@ -528,16 +528,16 @@ public class WorldSettingsConfig
 
         BUILDER.push("Hearth");
 
-        smartHearth = BUILDER
+        ENABLE_SMART_HEARTH = BUILDER
                 .comment("Allows the hearth to automatically turn on/off based on nearby players' temperature",
                          "If false, the hearth turns on/off by redstone signal")
                 .define("Automatic Hearth", false);
 
-        hearthEffect = BUILDER
+        HEARTH_INSULATION_STRENGTH = BUILDER
                 .comment("How effective the hearth is at normalizing temperature")
                 .defineInRange("Hearth Strength", 0.75, 0, 1.0);
 
-        hearthSpreadWhitelist = BUILDER
+        HEARTH_SPREAD_WHITELIST = BUILDER
                 .comment("List of additional blocks that the hearth can spread through",
                          "Use this list if the hearth isn't spreading through particular blocks that it should")
                 .defineListAllowEmpty(List.of("Hearth Spread Whitelist"), () -> ListBuilder.begin(
@@ -548,7 +548,7 @@ public class WorldSettingsConfig
                                           .build(),
                                       o -> o instanceof String);
 
-        hearthSpreadBlacklist = BUILDER
+        HEARTH_SPREAD_BLACKLIST = BUILDER
                 .comment("List of additional blocks that the hearth cannot spread through",
                          "Use this list if the hearth is spreading through particular blocks that it shouldn't")
                 .defineList("Hearth Spread Blacklist", List.of(
@@ -565,22 +565,22 @@ public class WorldSettingsConfig
                             "Applied as an offset to the world's temperature")
                    .push("Season Temperatures");
 
-            summerTemps = BUILDER
+            SUMMER_TEMPERATURES = BUILDER
                     .defineList("Summer", Arrays.asList(
                             0.4, 0.6, 0.4
                     ), it -> it instanceof Number);
 
-            autumnTemps = BUILDER
+            AUTUMN_TEMPERATURES = BUILDER
                     .defineList("Autumn", Arrays.asList(
                             0.2, 0, -0.2
                     ), it -> it instanceof Number);
 
-            winterTemps = BUILDER
+            WINTER_TEMPERATURES = BUILDER
                     .defineList("Winter", Arrays.asList(
                             -0.4, -0.6, -0.4
                     ), it -> it instanceof Number);
 
-            springTemps = BUILDER
+            SPRING_TEMPERATURES = BUILDER
                     .defineList("Spring", Arrays.asList(
                             -0.2, 0, 0.2
                     ), it -> it instanceof Number);
@@ -616,140 +616,140 @@ public class WorldSettingsConfig
     /* Getters */
 
     public List<? extends List<?>> getBiomeTempOffsets()
-    {   return biomeOffsets.get();
+    {   return BIOME_TEMP_OFFSETS.get();
     }
     public List<? extends List<?>> getBiomeTemperatures()
-    {   return biomeTemps.get();
+    {   return BIOME_TEMP_OVERRIDES.get();
     }
 
     public List<? extends List<?>> getDimensionTempOffsets()
-    {   return dimensionOffsets.get();
+    {   return DIMENSION_TEMP_OFFSETS.get();
     }
     public List<? extends List<?>> getDimensionTemperatures()
-    {   return dimensionTemps.get();
+    {   return DIMENSION_TEMP_OVERRIDES.get();
     }
 
     public List<? extends List<?>> getStructureTempOffsets()
-    {   return structureOffsets.get();
+    {   return STRUCTURE_TEMP_OFFSETS.get();
     }
     public List<? extends List<?>> getStructureTemperatures()
-    {   return structureTemps.get();
+    {   return STRUCTURE_TEMP_OVERRIDES.get();
     }
 
     public List<? extends List<?>> getBlockTemps()
-    {   return blockTemps.get();
+    {   return BLOCK_TEMPERATURES.get();
     }
     public int getBlockRange()
-    {   return blockRange.get();
+    {   return MAX_BLOCK_TEMP_RANGE.get();
     }
 
     public double getCaveInsulation()
-    {   return caveInsulation.get();
+    {   return CAVE_INSULATION_STRENGTH.get();
     }
 
     public double getHearthStrength()
-    {   return hearthEffect.get();
+    {   return HEARTH_INSULATION_STRENGTH.get();
     }
     public boolean isSmartHearth()
-    {   return smartHearth.get();
+    {   return ENABLE_SMART_HEARTH.get();
     }
     public List<String> getHearthSpreadWhitelist()
-    {   return (List<String>) hearthSpreadWhitelist.get();
+    {   return (List<String>) HEARTH_SPREAD_WHITELIST.get();
     }
     public List<String> getHearthSpreadBlacklist()
-    {   return (List<String>) hearthSpreadBlacklist.get();
+    {   return (List<String>) HEARTH_SPREAD_BLACKLIST.get();
     }
 
     public Double[] getSummerTemps()
-    {   return summerTemps.get().stream().map(Number::doubleValue).toArray(Double[]::new);
+    {   return SUMMER_TEMPERATURES.get().stream().map(Number::doubleValue).toArray(Double[]::new);
     }
     public Double[] getAutumnTemps()
-    {   return autumnTemps.get().stream().map(Number::doubleValue).toArray(Double[]::new);
+    {   return AUTUMN_TEMPERATURES.get().stream().map(Number::doubleValue).toArray(Double[]::new);
     }
     public Double[] getWinterTemps()
-    {   return winterTemps.get().stream().map(Number::doubleValue).toArray(Double[]::new);
+    {   return WINTER_TEMPERATURES.get().stream().map(Number::doubleValue).toArray(Double[]::new);
     }
     public Double[] getSpringTemps()
-    {   return springTemps.get().stream().map(Number::doubleValue).toArray(Double[]::new);
+    {   return SPRING_TEMPERATURES.get().stream().map(Number::doubleValue).toArray(Double[]::new);
     }
 
     public boolean isSoulFireCold()
-    {   return coldSoulFire.get();
+    {   return IS_SOUL_FIRE_COLD.get();
     }
 
     public boolean isSleepChecked()
-    {   return checkSleep.get();
+    {   return SHOULD_CHECK_SLEEP.get();
     }
 
     public synchronized List<? extends String> getSleepOverrideBlocks()
-    {   return sleepingOverrideBlocks.get();
+    {   return SLEEPING_OVERRIDE_BLOCKS.get();
     }
 
     /* Setters */
 
     public synchronized void setBiomeTemperatures(List<? extends List<?>> temps)
-    {   synchronized (biomeTemps)
-        {   biomeTemps.set(temps);
+    {   synchronized (BIOME_TEMP_OVERRIDES)
+        {   BIOME_TEMP_OVERRIDES.set(temps);
         }
     }
 
     public synchronized void setBiomeTempOffsets(List<? extends List<?>> offsets)
-    {   synchronized (biomeOffsets)
-        {   biomeOffsets.set(offsets);
+    {   synchronized (BIOME_TEMP_OFFSETS)
+        {   BIOME_TEMP_OFFSETS.set(offsets);
         }
     }
 
     public synchronized void setDimensionTemperatures(List<? extends List<?>> temps)
-    {   synchronized (dimensionTemps)
-        {   dimensionTemps.set(temps);
+    {   synchronized (DIMENSION_TEMP_OVERRIDES)
+        {   DIMENSION_TEMP_OVERRIDES.set(temps);
         }
     }
 
     public synchronized void setDimensionTempOffsets(List<? extends List<?>> offsets)
-    {   synchronized (dimensionOffsets)
-        {   dimensionOffsets.set(offsets);
+    {   synchronized (DIMENSION_TEMP_OFFSETS)
+        {   DIMENSION_TEMP_OFFSETS.set(offsets);
         }
     }
 
     public synchronized void setStructureTemperatures(List<? extends List<?>> temps)
-    {   synchronized (structureTemps)
-        {   structureTemps.set(temps);
+    {   synchronized (STRUCTURE_TEMP_OVERRIDES)
+        {   STRUCTURE_TEMP_OVERRIDES.set(temps);
         }
     }
 
     public synchronized void setStructureTempOffsets(List<? extends List<?>> offsets)
-    {   synchronized (structureOffsets)
-        {   structureOffsets.set(offsets);
+    {   synchronized (STRUCTURE_TEMP_OFFSETS)
+        {   STRUCTURE_TEMP_OFFSETS.set(offsets);
         }
     }
 
     public synchronized void setBlockTemps(List<? extends List<?>> temps)
-    {   synchronized (blockTemps)
-        {   blockTemps.set(temps);
+    {   synchronized (BLOCK_TEMPERATURES)
+        {   BLOCK_TEMPERATURES.set(temps);
         }
     }
 
     public synchronized void setBlockRange(int range)
-    {   synchronized (blockRange)
-        {   blockRange.set(range);
+    {   synchronized (MAX_BLOCK_TEMP_RANGE)
+        {   MAX_BLOCK_TEMP_RANGE.set(range);
         }
     }
 
     public synchronized void setCaveInsulation(double insulation)
-    {   synchronized (caveInsulation)
-        {   caveInsulation.set(insulation);
+    {   synchronized (CAVE_INSULATION_STRENGTH)
+        {   CAVE_INSULATION_STRENGTH.set(insulation);
         }
     }
 
     public synchronized void setHearthSpreadWhitelist(List<ResourceLocation> whitelist)
-    {   synchronized (hearthSpreadWhitelist)
-        {   hearthSpreadWhitelist.set(whitelist.stream().map(ResourceLocation::toString).collect(Collectors.toList()));
+    {   synchronized (HEARTH_SPREAD_WHITELIST)
+        {   HEARTH_SPREAD_WHITELIST.set(whitelist.stream().map(ResourceLocation::toString).collect(Collectors.toList()));
         }
     }
 
     public synchronized void setHearthSpreadBlacklist(List<ResourceLocation> blacklist)
-    {   synchronized (hearthSpreadBlacklist)
-        {   hearthSpreadBlacklist.set(blacklist.stream().map(ResourceLocation::toString).collect(Collectors.toList()));
+    {   synchronized (HEARTH_SPREAD_BLACKLIST)
+        {   HEARTH_SPREAD_BLACKLIST.set(blacklist.stream().map(ResourceLocation::toString).collect(Collectors.toList()));
         }
     }
 }
