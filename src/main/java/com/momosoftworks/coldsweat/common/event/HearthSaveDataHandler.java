@@ -10,6 +10,7 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.network.PacketDistributor;
@@ -60,6 +61,16 @@ public class HearthSaveDataHandler
             CompoundTag disabledHearths = new CompoundTag();
             disabledHearths.put("DisabledHearths", player.getPersistentData().getList("DisabledHearths", 10));
             ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new DisableHearthParticlesMessage(disabledHearths));
+        }
+    }
+
+    @SubscribeEvent
+    public static void transferDisabledHearths(PlayerEvent.Clone event)
+    {
+        if (!event.getEntity().level().isClientSide())
+        {
+            ListTag disabledHearths = event.getOriginal().getPersistentData().getList("DisabledHearths", 10);
+            event.getEntity().getPersistentData().put("DisabledHearths", disabledHearths);
         }
     }
 }
