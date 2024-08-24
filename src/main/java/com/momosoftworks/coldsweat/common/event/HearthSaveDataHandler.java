@@ -71,4 +71,14 @@ public class HearthSaveDataHandler
             ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new DisableHearthParticlesMessage(disabledHearths));
         }
     }
+
+    @SubscribeEvent
+    public static void transferDisabledHearths(PlayerEvent.Clone event)
+    {
+        if (!event.getEntity().level.isClientSide())
+        {
+            ListTag disabledHearths = event.getOriginal().getPersistentData().getList("DisabledHearths", 10);
+            event.getEntity().getPersistentData().put("DisabledHearths", disabledHearths);
+        }
+    }
 }
