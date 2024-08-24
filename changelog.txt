@@ -2356,3 +2356,41 @@ Technical Changes:
       - A simplified version of this has also been added to item_settings.toml for quick access
 * Added config to change the general strength of insulation items
       - This setting applies to all armor and insulators, changing their effectiveness by a given multiplier
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.3.2
+!! (1.16) The config setting for llama spawn biomes will be deleted and replaced with goat spawn biomes. Please back up before launching!
+
+- Added screen effect for when the player is wet
+      - This can be disabled in the configs
+- Added config option to hide insulation tooltips unless shift is held
+* (1.16) Backported goats from 1.18
+      - Replicate the appearance and behavior of Vanilla goats
+      - If Caves and Cliffs Backport is installed, all Cold Sweat goats will be replaced with that mod's goats
+            - This is to keep things simpler by only having one kind of goat
+            - As much data as possible will be preserved when replacing (name, age, health, etc)
+      - They are now the intended way of obtaining goat fur
+      ! If this introduces bugs, I swear I'm gonna revert this stuff
+* (1.16) Llamas no longer yield goat fur
+- Renamed all fur-related items to "goat fur"
+      - Existing items and configs will be automatically updated to reflect this change
+* Added screen effect for when the player is wet
+      - Can be disabled via an option in the config menu or in client.toml
+
+Fixes:
+* Fixed crash when putting a smokestack on the icebox or boiler
+* Fixed crash when saving configs in the config screen
+- Fixed crash when placing redstone near a hearth, boiler, or icebox in some cases
+- (1.16 - 1.19) Fixed the icebox still not having subtitles for opening and closing
+- (1.21) Fixed crash when equipping a non-armor item (like the elytra)
+- Fixed hearth-like blocks providing chilling/warming when powered but not fueled
+- Fixed the Create netherite diving gear having incorrect heat and cold protection values
+- Fixed mixin conflict with MemoryLeakFix
+
+Translation Changes:
+- Added Traditional Chinese (zh_tw) translation, courtesy of yichifauzi on GitHub
+
+Technical Changes:
+- Any drinkable item can now be put in the boiler if Thirst Was Taken is installed, removing the need for the "boiler_purifiable" tag
+- The config for carried item temperatures now has an optional "max_effect" field that limits how much that type of item can affect the player
