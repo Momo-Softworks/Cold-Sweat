@@ -22,6 +22,7 @@ import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DataPackRegistryEvent;
 import org.apache.logging.log4j.LogManager;
@@ -95,9 +96,6 @@ public class ColdSweat
             CriteriaTriggers.register(ModAdvancementTriggers.BLOCK_AFFECTS_TEMP);
             CriteriaTriggers.register(ModAdvancementTriggers.ARMOR_INSULATED);
         });
-
-        // Load configs to memory
-        //ConfigSettings.load(null);
     }
 
     public void spawnPlacements(SpawnPlacementRegisterEvent event)
@@ -113,7 +111,7 @@ public class ColdSweat
         event.register(ShearableFurCap.class);
     }
 
-    public void updateConfigs(FMLCommonSetupEvent event)
+    public void updateConfigs(FMLLoadCompleteEvent event)
     {   ConfigUpdater.updateConfigs();
     }
 }
