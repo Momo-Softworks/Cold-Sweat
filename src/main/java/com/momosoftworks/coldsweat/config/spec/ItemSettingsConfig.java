@@ -283,19 +283,21 @@ public class ItemSettingsConfig
 
         CARRIED_ITEM_TEMPERATURE = BUILDER
                 .comment("Defines items that affect the player's temperature when in the inventory",
-                         "Format: [[\"item_id\", temperature, strict_type, trait, *nbt], [\"item_id\", temperature, strict_type, trait, *nbt], ...etc]",
+                         "Format: [[\"item_id\", temperature, strict_type, trait, *nbt, *max_effect], [\"item_id\", temperature, strict_type, trait, *nbt, *max_effect], ...etc]",
                          "temperature: The temperature change the item will apply to the entity. For core temperature, this is applied every tick",
                          "strict_type: Either \"inventory\", \"hotbar\", or \"hand\". Defines what slots the item must be in to apply to the entity",
                          "trait: The temperature trait to apply the effect to. Typical values are \"core\" for body temperature or \"world\" for ambient temperature. More on the mod documentation page.",
-                         "nbt: Optional. The NBT data the item must have to apply to the entity.")
+                         "nbt: Optional. The NBT data the item must have to apply to the entity.",
+                         "max_effect: Optional. The maximum temperature effect the item can apply to the entity.")
                 .defineListAllowEmpty(List.of("Carried Item Temperatures"), () -> List.of(
                 ),
-                it -> it instanceof List<?> list && CSMath.betweenInclusive(list.size(), 4, 5)
+                it -> it instanceof List<?> list && CSMath.betweenInclusive(list.size(), 4, 6)
                         && list.get(0) instanceof String
                         && list.get(1) instanceof Number
                         && list.get(2) instanceof String
                         && list.get(3) instanceof String
-                        && (list.size() < 5 || list.get(4) instanceof String));
+                        && (list.size() < 5 || list.get(4) instanceof String)
+                        && (list.size() < 6 || list.get(5) instanceof Number));
 
         BUILDER.pop();
 
