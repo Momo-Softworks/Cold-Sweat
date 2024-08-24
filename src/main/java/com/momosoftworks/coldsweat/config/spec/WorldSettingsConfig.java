@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class WorldSettingsConfig
 {
     private static final ForgeConfigSpec SPEC;
-    public static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
+    private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> BIOME_TEMP_OFFSETS;
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> BIOME_TEMP_OVERRIDES;

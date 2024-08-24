@@ -15,7 +15,7 @@ public class MainSettingsConfig
 {
     private static final ForgeConfigSpec SPEC;
     private static final MainSettingsConfig INSTANCE = new MainSettingsConfig();
-    private  static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
+    private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
     public static final ForgeConfigSpec.ConfigValue<Integer> DIFFICULTY;
     public static final ForgeConfigSpec.ConfigValue<String> VERSION;
