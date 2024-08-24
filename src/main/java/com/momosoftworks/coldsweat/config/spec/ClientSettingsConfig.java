@@ -314,6 +314,10 @@ public class ClientSettingsConfig
     {   TEMPERATURE_SMOOTHING.set(smoothing);
     }
 
+    public void setMoveBodyIconWhenAdvanced(boolean enabled)
+    {   MOVE_BODY_TEMP_ICON_ADVANCED.set(enabled);
+    }
+
     public void setHideTooltips(boolean hide)
     {   HIDE_INSULATION_TOOLTIPS.set(hide);
     }
@@ -343,6 +347,8 @@ public class ClientSettingsConfig
         this.setHighContrast(ConfigSettings.HIGH_CONTRAST.get());
         this.setConfigButtonPos(Arrays.asList(ConfigSettings.CONFIG_BUTTON_POS.get().x(),
                                               ConfigSettings.CONFIG_BUTTON_POS.get().y()));
+        this.setMoveBodyIconWhenAdvanced(ConfigSettings.MOVE_BODY_ICON_WHEN_ADVANCED.get());
+        this.setWaterEffectEnabled(ConfigSettings.SHOW_WATER_EFFECT.get());
         this.save();
     }
 
