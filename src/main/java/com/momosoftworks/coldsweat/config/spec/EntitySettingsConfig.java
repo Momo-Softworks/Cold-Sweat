@@ -15,14 +15,15 @@ import java.util.List;
 
 public class EntitySettingsConfig
 {
-    public static final ForgeConfigSpec SPEC;
+    private static final ForgeConfigSpec SPEC;
     private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
-    private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> insulatedEntities;
-    private static final ForgeConfigSpec.ConfigValue<List<?>> goatFurGrowth;
-    private static final ForgeConfigSpec.ConfigValue<List<?>> chameleonShedTimings;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> chameleonBiomes;
-    private static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> goatBiomes;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> INSULATED_ENTITIES;
+    public static final ForgeConfigSpec.ConfigValue<List<?>> GOAT_FUR_GROWTH_STATS;
+    public static final ForgeConfigSpec.ConfigValue<List<?>> CHAMELEON_SHED_STATS;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> CHAMELEON_SPAWN_BIOMES;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> GOAT_SPAWN_BIOMES;
+
     private static final EntitySettingsConfig INSTANCE = new EntitySettingsConfig();
 
     static
@@ -31,7 +32,7 @@ public class EntitySettingsConfig
          Insulated Entities
          */
         BUILDER.push("Entity Settings");
-        insulatedEntities = BUILDER
+        INSULATED_ENTITIES = BUILDER
                 .comment("List of entities that will insulate the player when riding them",
                          "A value of 0 provides no insulation; 1 provides full insulation",
                          "Format: [[\"entity_id\", coldResistance, hotResistance], [\"entity_id\", coldResistance, hotResistance], etc...]")
@@ -46,7 +47,7 @@ public class EntitySettingsConfig
                     return false;
                 });
 
-        goatFurGrowth = BUILDER
+        GOAT_FUR_GROWTH_STATS = BUILDER
                 .comment("Defines how often a goat will try to grow its fur, the growth cooldown after shearing, and the chance of it succeeding",
                         "Format: [ticks, cooldown, chance]")
                 .defineList("Goat Fur Growth Timings", Arrays.asList(
@@ -54,7 +55,7 @@ public class EntitySettingsConfig
                 ),
                 it -> it instanceof Number);
 
-        chameleonShedTimings = BUILDER
+        CHAMELEON_SHED_STATS = BUILDER
                 .comment("Defines how often a chameleon will try to shed its skin, the cooldown after shedding, and the chance of it succeeding",
                         "Format: [ticks, cooldown, chance]")
                 .defineList("Chameleon Shedding Timings", Arrays.asList(
@@ -65,7 +66,7 @@ public class EntitySettingsConfig
         BUILDER.pop();
 
         BUILDER.push("Mob Spawning");
-        chameleonBiomes = BUILDER
+        CHAMELEON_SPAWN_BIOMES = BUILDER
                 .comment("Defines the biomes that Chameleons can spawn in",
                          "Format: [[\"biome_id\", weight], [\"biome_id\", weight], etc...]")
                 .defineList("Chameleon Spawn Biomes", ListBuilder.begin(
@@ -112,7 +113,7 @@ public class EntitySettingsConfig
                             return false;
                         });
 
-        goatBiomes = BUILDER
+        GOAT_SPAWN_BIOMES = BUILDER
                 .comment("Defines additional biomes that goats can spawn in",
                          "Format: [[\"biome_id\", weight], [\"biome_id\", weight], etc...]")
                 .defineList("Goat Spawn Biomes", ListBuilder.begin(
@@ -171,36 +172,32 @@ public class EntitySettingsConfig
     /* Getters */
 
     public List<? extends List<?>> getInsulatedEntities()
-    {   return insulatedEntities.get();
+    {   return INSULATED_ENTITIES.get();
     }
 
     public List<?> getGoatFurStats()
-    {   return goatFurGrowth.get();
+    {   return GOAT_FUR_GROWTH_STATS.get();
     }
 
     public List<?> getChameleonShedStats()
-    {   return chameleonShedTimings.get();
+    {   return CHAMELEON_SHED_STATS.get();
     }
 
     public List<? extends List<?>> getChameleonSpawnBiomes()
-    {   return chameleonBiomes.get();
+    {   return CHAMELEON_SPAWN_BIOMES.get();
     }
 
     public List<? extends List<?>> getGoatSpawnBiomes()
-    {   return goatBiomes.get();
+    {   return GOAT_SPAWN_BIOMES.get();
     }
 
     /* Setters */
 
     public void setGoatFurStats(List<? extends Number> list)
-    {   synchronized (goatFurGrowth)
-        {   goatFurGrowth.set(list);
-        }
+    {   GOAT_FUR_GROWTH_STATS.set(list);
     }
 
     public void setChameleonShedStats(List<? extends Number> list)
-    {   synchronized (chameleonShedTimings)
-        {   chameleonShedTimings.set(list);
-        }
+    {   CHAMELEON_SHED_STATS.set(list);
     }
 }

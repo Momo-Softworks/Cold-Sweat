@@ -34,6 +34,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -124,7 +125,7 @@ public class ColdSweat
         RenderingRegistry.registerEntityRenderingHandler(ModEntities.GOAT, GoatEntityRenderer::new);
     }
 
-    public void updateConfigs(FMLCommonSetupEvent event)
+    public void updateConfigs(FMLLoadCompleteEvent event)
     {   ConfigUpdater.updateConfigs();
     }
 
