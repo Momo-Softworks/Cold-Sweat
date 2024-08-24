@@ -11,6 +11,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.HashSet;
@@ -59,6 +60,16 @@ public class HearthSaveDataHandler
             CompoundTag disabledHearths = new CompoundTag();
             disabledHearths.put("DisabledHearths", player.getPersistentData().getList("DisabledHearths", 10));
             PacketDistributor.sendToPlayer(player, new DisableHearthParticlesMessage(disabledHearths));
+        }
+    }
+
+    @SubscribeEvent
+    public static void transferDisabledHearths(PlayerEvent.Clone event)
+    {
+        if (!event.getEntity().level().isClientSide())
+        {
+            ListTag disabledHearths = event.getOriginal().getPersistentData().getList("DisabledHearths", 10);
+            event.getEntity().getPersistentData().put("DisabledHearths", disabledHearths);
         }
     }
 }
