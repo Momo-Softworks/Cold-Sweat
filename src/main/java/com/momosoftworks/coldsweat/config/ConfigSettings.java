@@ -544,6 +544,8 @@ public class ConfigSettings
                 ItemComponentsRequirement nbtRequirement = entryList.size() > 4
                                                            ? ItemComponentsRequirement.parse((String) entryList.get(4))
                                                            : new ItemComponentsRequirement();
+                // max effect
+                double maxEffect = entryList.size() > 5 ? ((Number) entryList.get(5)).doubleValue() : Double.MAX_VALUE;
                 // compile item requirement
                 ItemRequirement itemRequirement = new ItemRequirement(Optional.of(List.of(item)),
                                                                       Optional.empty(), Optional.empty(),
@@ -551,7 +553,7 @@ public class ConfigSettings
                                                                       Optional.empty(), Optional.empty(),
                                                                       nbtRequirement);
                 // final carried temp
-                CarriedItemTemperature carriedTemp = new CarriedItemTemperature(itemRequirement, slots, temp, trait, IntegerBounds.NONE, EntityRequirement.NONE);
+                CarriedItemTemperature carriedTemp = new CarriedItemTemperature(itemRequirement, slots, temp, trait, maxEffect, EntityRequirement.NONE);
 
                 // add carried temp to map
                 if (item.left().isPresent())

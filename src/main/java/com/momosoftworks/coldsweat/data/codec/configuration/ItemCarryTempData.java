@@ -14,7 +14,7 @@ import java.util.Optional;
 
 public record ItemCarryTempData(ItemRequirement data, List<Either<IntegerBounds, EquipmentSlot>> slots, double temp,
                                 Optional<Temperature.Trait> trait,
-                                Optional<IntegerBounds> bounds,
+                                Optional<Double> maxEffect,
                                 Optional<EntityRequirement> entityRequirement,
                                 Optional<List<String>> requiredMods)
 {
@@ -24,7 +24,7 @@ public record ItemCarryTempData(ItemRequirement data, List<Either<IntegerBounds,
                  .listOf().fieldOf("slots").forGetter(ItemCarryTempData::slots),
             Codec.DOUBLE.fieldOf("temperature").forGetter(ItemCarryTempData::temp),
             Temperature.Trait.CODEC.optionalFieldOf("trait").forGetter(ItemCarryTempData::trait),
-            IntegerBounds.CODEC.optionalFieldOf("bounds").forGetter(ItemCarryTempData::bounds),
+            Codec.DOUBLE.optionalFieldOf("bounds").forGetter(ItemCarryTempData::maxEffect),
             EntityRequirement.getCodec().optionalFieldOf("entity").forGetter(ItemCarryTempData::entityRequirement),
             Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(ItemCarryTempData::requiredMods)
     ).apply(instance, ItemCarryTempData::new));

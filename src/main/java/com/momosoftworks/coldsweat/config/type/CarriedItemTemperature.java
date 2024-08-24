@@ -18,14 +18,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public record CarriedItemTemperature(ItemRequirement item, List<Either<IntegerBounds, EquipmentSlot>> slots, double temperature,
-                                     Temperature.Trait trait, IntegerBounds bounds, EntityRequirement entityRequirement) implements NbtSerializable
+                                     Temperature.Trait trait, double maxEffect, EntityRequirement entityRequirement) implements NbtSerializable
 {
 
     public static CarriedItemTemperature createFromData(ItemCarryTempData data)
     {
         return new CarriedItemTemperature(data.data(), data.slots(), data.temp(),
                                           data.trait().orElse(Temperature.Trait.CORE),
-                                          data.bounds().orElse(IntegerBounds.NONE),
+                                          data.maxEffect().orElse(Double.MAX_VALUE),
                                           data.entityRequirement().orElse(EntityRequirement.NONE));
     }
 
@@ -94,7 +94,7 @@ public record CarriedItemTemperature(ItemRequirement item, List<Either<IntegerBo
         tag.put("slots", slotsTag);
         tag.putDouble("temperature", temperature);
         tag.putString("trait", trait.getSerializedName());
-        tag.put("bounds", bounds.serialize());
+        tag.putDouble("maxEffect", maxEffect);
         tag.put("entity", entityRequirement.serialize());
         return tag;
     }
@@ -116,8 +116,8 @@ public record CarriedItemTemperature(ItemRequirement item, List<Either<IntegerBo
         }
         double temperature = tag.getDouble("temperature");
         Temperature.Trait trait = Temperature.Trait.fromID(tag.getString("trait"));
-        IntegerBounds bounds = IntegerBounds.deserialize(tag.getCompound("bounds"));
+        double maxEffect = tag.getDouble("maxEffect");
         EntityRequirement entityRequirement = EntityRequirement.deserialize(tag.getCompound("entity"));
-        return new CarriedItemTemperature(item, slots, temperature, trait, bounds, entityRequirement);
+        return new CarriedItemTemperature(item, slots, temperature, trait, maxEffect, entityRequirement);
     }
 }
