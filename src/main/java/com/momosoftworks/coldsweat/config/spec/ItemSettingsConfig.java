@@ -17,29 +17,29 @@ import java.util.List;
 public class ItemSettingsConfig
 {
     private static final ModConfigSpec SPEC;
-    public static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
+    private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
-    private static final ModConfigSpec.ConfigValue<List<? extends List<?>>> boilerItems;
-    private static final ModConfigSpec.ConfigValue<List<? extends List<?>>> iceboxItems;
-    private static final ModConfigSpec.ConfigValue<List<? extends List<?>>> hearthItems;
-    private static final ModConfigSpec.ConfigValue<List<? extends String>> blacklistedPotions;
-    private static final ModConfigSpec.BooleanValue allowPotionsInHearth;
-    private static final ModConfigSpec.ConfigValue<List<? extends List<?>>> soulLampItems;
-    private static final ModConfigSpec.ConfigValue<List<? extends String>> soulLampDimensions;
-    private static final ModConfigSpec.ConfigValue<List<? extends List<?>>> temperatureFoods;
-    private static final ModConfigSpec.ConfigValue<List<? extends List<?>>> carriedTemps;
+    public static final ModConfigSpec.ConfigValue<List<? extends List<?>>> BOILER_FUELS;
+    public static final ModConfigSpec.ConfigValue<List<? extends List<?>>> ICEBOX_FUELS;
+    public static final ModConfigSpec.ConfigValue<List<? extends List<?>>> HEARTH_FUELS;
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> HEARTH_POTION_BLACKLIST;
+    public static final ModConfigSpec.BooleanValue ALLOW_POTIONS_IN_HEARTH;
+    public static final ModConfigSpec.ConfigValue<List<? extends List<?>>> SOULSPRING_LAMP_FUELS;
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> SOULSPRING_LAMP_DIMENSIONS;
+    public static final ModConfigSpec.ConfigValue<List<? extends List<?>>> FOOD_TEMPERATURES;
+    public static final ModConfigSpec.ConfigValue<List<? extends List<?>>> CARRIED_ITEM_TEMPERATURE;
 
-    private static final ModConfigSpec.ConfigValue<List<? extends List<?>>> insulatingItems;
-    private static final ModConfigSpec.ConfigValue<List<? extends String>> insulationBlacklist;
-    private static final ModConfigSpec.ConfigValue<List<? extends List<?>>> insulatingArmor;
-    private static final ModConfigSpec.ConfigValue<List<?>> insulationSlots;
-    private static final ModConfigSpec.DoubleValue insulationStrength;
+    public static final ModConfigSpec.ConfigValue<List<? extends List<?>>> INSULATION_ITEMS;
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> INSULATION_BLACKLIST;
+    public static final ModConfigSpec.ConfigValue<List<? extends List<?>>> INSULATING_ARMOR;
+    public static final ModConfigSpec.ConfigValue<List<?>> INSULATION_SLOTS;
+    public static final ModConfigSpec.DoubleValue INSULATION_STRENGTH;
 
-    private static final ModConfigSpec.IntValue waterskinStrength;
+    public static final ModConfigSpec.IntValue WATERSKIN_STRENGTH;
 
-    private static ModConfigSpec.ConfigValue<List<? extends List<?>>> insulatingCurios;
+    public static final ModConfigSpec.ConfigValue<List<? extends List<?>>> INSULATING_CURIOS;
 
-    static final ItemSettingsConfig INSTANCE = new ItemSettingsConfig();
+    private static final ItemSettingsConfig INSTANCE = new ItemSettingsConfig();
 
     static
     {
@@ -49,7 +49,7 @@ public class ItemSettingsConfig
         BUILDER.push("Fuel Items")
                 .comment("Defines items that can be used as fuel",
                          "Format: [[\"item-id-1\", amount-1], [\"item-id-2\", amount-2], ...etc]");
-        boilerItems = BUILDER
+        BOILER_FUELS = BUILDER
                 .defineListAllowEmpty(List.of("Boiler"), () -> ListBuilder.begin(
                                 List.of("#minecraft:planks",         10),
                                 List.of("minecraft:coal",            37),
@@ -61,7 +61,7 @@ public class ItemSettingsConfig
                         ).build(),
                         it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number);
 
-        iceboxItems = BUILDER
+        ICEBOX_FUELS = BUILDER
                 .defineListAllowEmpty(List.of("Icebox"), () -> ListBuilder.begin(
                                 List.of("minecraft:snowball",           10),
                                 List.of("minecraft:clay_ball",          37),
@@ -74,7 +74,7 @@ public class ItemSettingsConfig
                         ).build(),
                         it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number);
 
-        hearthItems = BUILDER
+        HEARTH_FUELS = BUILDER
                 .comment("Negative values indicate cold fuel")
                 .defineListAllowEmpty(List.of("Hearth"), () -> ListBuilder.begin(
                                 // Hot
@@ -96,7 +96,7 @@ public class ItemSettingsConfig
                                 List.of("minecraft:packed_ice",         -1000)
                         ).build(),
                         it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number);
-        blacklistedPotions = BUILDER
+        HEARTH_POTION_BLACKLIST = BUILDER
                 .comment("Potions containing any of these effects will not be allowed in the hearth",
                          "Format: [\"effect_id\", \"effect_id\", ...etc]")
                 .defineListAllowEmpty(List.of("Blacklisted Hearth Potions"), () -> ListBuilder.begin(
@@ -108,7 +108,7 @@ public class ItemSettingsConfig
                                 "minecraft:slowness"
                         ).build(),
                         it -> it instanceof String);
-        allowPotionsInHearth = BUILDER
+        ALLOW_POTIONS_IN_HEARTH = BUILDER
                 .comment("If true, potions can be used as fuel in the hearth",
                          "This gives all players in range the potion effect")
                 .define("Allow Potions in Hearth", true);
@@ -118,7 +118,7 @@ public class ItemSettingsConfig
           Soulspring Lamp Items
          */
         BUILDER.push("Soulspring Lamp");
-        soulLampItems = BUILDER
+        SOULSPRING_LAMP_FUELS = BUILDER
                 .comment("Defines items that the Soulspring Lamp can use as fuel",
                         "Format: [[\"item-id-1\", amount-1], [\"item-id-2\", amount-2], ...etc]")
                 .defineListAllowEmpty(List.of("Fuel Items"), () -> ListBuilder.<List<?>>begin(
@@ -126,7 +126,7 @@ public class ItemSettingsConfig
                         ).build(),
                         it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number);
 
-        soulLampDimensions = BUILDER
+        SOULSPRING_LAMP_DIMENSIONS = BUILDER
                 .comment("Defines the dimensions that the Soulspring Lamp can be used in",
                         "Format: [\"dimension-id-1\", \"dimension-id-2\", ...etc]")
                 .defineListAllowEmpty(List.of("Valid Dimensions"), () -> ListBuilder.begin(
@@ -139,7 +139,7 @@ public class ItemSettingsConfig
          Insulation
          */
         BUILDER.push("Insulation");
-        insulatingItems = BUILDER
+        INSULATION_ITEMS = BUILDER
                 .comment("Defines the items that can be used for insulating armor in the Sewing Table",
                          "Format: [[\"item_id\", cold, hot, \"static\", *nbt], [\"item_id\", amount, adapt-speed, \"adaptive\", *nbt], ...etc]",
                          "\"item_id\": The item's ID (i.e. \"minecraft:iron_ingot\"). Accepts tags with \"#\" (i.e. \"#minecraft:wool\").",
@@ -185,7 +185,7 @@ public class ItemSettingsConfig
                                 && (list.size() < 4 || list.get(3) instanceof String)
                                 && (list.size() < 5 || list.get(4) instanceof String));
 
-        insulatingArmor = BUILDER
+        INSULATING_ARMOR = BUILDER
                 .comment("Defines the items that provide insulation when worn",
                         "See Insulation Ingredients for formatting")
                 .defineListAllowEmpty(List.of("Insulating Armor"), () -> ListBuilder.begin(
@@ -213,7 +213,7 @@ public class ItemSettingsConfig
 
         if (CompatManager.isCuriosLoaded())
         {
-            insulatingCurios = BUILDER
+            INSULATING_CURIOS = BUILDER
                     .comment("Defines the items that provide insulation when worn in a curio slot",
                              "See Insulation Ingredients for formatting")
                     .defineListAllowEmpty(List.of("Insulating Curios"), () -> List.of(
@@ -226,8 +226,9 @@ public class ItemSettingsConfig
                                 && (list.size() < 4 || list.get(3) instanceof String)
                                 && (list.size() < 5 || list.get(4) instanceof String));
         }
+        else INSULATING_CURIOS = null;
 
-        insulationSlots = BUILDER
+        INSULATION_SLOTS = BUILDER
                 .comment("Defines how many insulation slots armor pieces have",
                          "There are 4 modes for this setting:",
                          "Static: Each armor slot (head, body, legs, feet) has a fixed number of insulation slots",
@@ -240,11 +241,11 @@ public class ItemSettingsConfig
                 .defineList("Insulation Slots", List.of("static", 4, 6, 5, 4),
                         it -> it instanceof Number || it instanceof String);
 
-        insulationStrength = BUILDER
+        INSULATION_STRENGTH = BUILDER
                 .comment("Defines the effectiveness of insulating items in protecting against temperature")
                 .defineInRange("Insulation Strength", 1.0, 0, Double.MAX_VALUE);
 
-        insulationBlacklist = BUILDER
+        INSULATION_BLACKLIST = BUILDER
                 .comment("Defines wearable items that cannot be insulated",
                         "Format: [\"item_id\", \"item_id\", ...etc]")
                 .defineListAllowEmpty(List.of("Insulation Blacklist"), () -> List.of(
@@ -257,7 +258,7 @@ public class ItemSettingsConfig
          Consumables
          */
         BUILDER.push("Consumables");
-        temperatureFoods = BUILDER
+        FOOD_TEMPERATURES = BUILDER
                 .comment("Defines items that affect the player's temperature when consumed",
                         "Format: [[\"item_id\", amount, *nbt, *duration], [\"item_id\", amount, *nbt, *duration], ...etc]",
                         "Negative values are cold foods, positive values are hot foods",
@@ -271,7 +272,7 @@ public class ItemSettingsConfig
                         && list.get(1) instanceof Number
                         && (list.size() < 3 || list.get(2) instanceof String)
                         && (list.size() < 4 || list.get(3) instanceof Number));
-        waterskinStrength = BUILDER
+        WATERSKIN_STRENGTH = BUILDER
                 .comment("Defines how much a waterskin will change the player's body temperature by when used")
                 .defineInRange("Waterskin Strength", 50, 0, Integer.MAX_VALUE);
         BUILDER.pop();
@@ -281,7 +282,7 @@ public class ItemSettingsConfig
          */
         BUILDER.push("Misc");
 
-        carriedTemps = BUILDER
+        CARRIED_ITEM_TEMPERATURE = BUILDER
                 .comment("Defines items that affect the player's temperature when in the inventory",
                          "Format: [[\"item_id\", temperature, strict_type, trait, *nbt], [\"item_id\", temperature, strict_type, trait, *nbt], ...etc]",
                          "temperature: The temperature change the item will apply to the entity. For core temperature, this is applied every tick",
@@ -327,166 +328,166 @@ public class ItemSettingsConfig
     /* Getters */
 
     public List<? extends List<?>> getBoilerFuelItems()
-    {   return boilerItems.get();
+    {   return BOILER_FUELS.get();
     }
 
     public List<? extends List<?>> getIceboxFuelItems()
-    {   return iceboxItems.get();
+    {   return ICEBOX_FUELS.get();
     }
 
     public List<? extends List<?>> getHearthFuelItems()
-    {   return hearthItems.get();
+    {   return HEARTH_FUELS.get();
     }
 
     public List<? extends List<?>> getInsulationItems()
-    {   return insulatingItems.get();
+    {   return INSULATION_ITEMS.get();
     }
 
     public List<? extends List<?>> getInsulatingArmorItems()
-    {   return insulatingArmor.get();
+    {   return INSULATING_ARMOR.get();
     }
 
     public List<?> getArmorInsulationSlots()
-    {   return insulationSlots.get();
+    {   return INSULATION_SLOTS.get();
     }
 
     public double getInsulationStrength()
-    {   return insulationStrength.get();
+    {   return INSULATION_STRENGTH.get();
     }
 
     public List<? extends String> getInsulationBlacklist()
-    {   return insulationBlacklist.get();
+    {   return INSULATION_BLACKLIST.get();
     }
 
     public List<? extends List<?>> getSoulLampFuelItems()
-    {   return soulLampItems.get();
+    {   return SOULSPRING_LAMP_FUELS.get();
     }
 
     public List<? extends List<?>> getFoodTemperatures()
-    {   return temperatureFoods.get();
+    {   return FOOD_TEMPERATURES.get();
     }
 
     public List<? extends String> getValidSoulLampDimensions()
-    {   return soulLampDimensions.get();
+    {   return SOULSPRING_LAMP_DIMENSIONS.get();
     }
 
     public int getWaterskinStrength()
-    {   return waterskinStrength.get();
+    {   return WATERSKIN_STRENGTH.get();
     }
 
     public boolean arePotionsEnabled()
-    {   return allowPotionsInHearth.get();
+    {   return ALLOW_POTIONS_IN_HEARTH.get();
     }
 
     public List<String> getPotionBlacklist()
-    {   return (List<String>) blacklistedPotions.get();
+    {   return (List<String>) HEARTH_POTION_BLACKLIST.get();
     }
 
     public List<? extends List<?>> getInsulatingCurios()
-    {   return CompatManager.isCuriosLoaded() ? insulatingCurios.get() : List.of();
+    {   return CompatManager.isCuriosLoaded() ? INSULATING_CURIOS.get() : List.of();
     }
 
     public List<? extends List<?>> getCarriedTemps()
-    {   return carriedTemps.get();
+    {   return CARRIED_ITEM_TEMPERATURE.get();
     }
 
     /* Setters */
 
     public synchronized void setBoilerFuelItems(List<? extends List<?>> itemMap)
-    {   synchronized (boilerItems)
-        {   boilerItems.set(itemMap);
+    {   synchronized (BOILER_FUELS)
+        {   BOILER_FUELS.set(itemMap);
         }
     }
 
     public synchronized void setIceboxFuelItems(List<? extends List<?>> itemMap)
-    {   synchronized (iceboxItems)
-        {   iceboxItems.set(itemMap);
+    {   synchronized (ICEBOX_FUELS)
+        {   ICEBOX_FUELS.set(itemMap);
         }
     }
 
     public synchronized void setHearthFuelItems(List<? extends List<?>> itemMap)
-    {   synchronized (hearthItems)
-        {   hearthItems.set(itemMap);
+    {   synchronized (HEARTH_FUELS)
+        {   HEARTH_FUELS.set(itemMap);
         }
     }
 
     public synchronized void setInsulationItems(List<? extends List<?>> items)
-    {   synchronized (insulatingItems)
-        {   insulatingItems.set(items);
+    {   synchronized (INSULATION_ITEMS)
+        {   INSULATION_ITEMS.set(items);
         }
     }
 
     public synchronized void setInsulatingArmorItems(List<? extends List<?>> itemMap)
-    {   synchronized (insulatingArmor)
-        {   insulatingArmor.set(itemMap);
+    {   synchronized (INSULATING_ARMOR)
+        {   INSULATING_ARMOR.set(itemMap);
         }
     }
 
     public synchronized void setArmorInsulationSlots(List<?> slots)
-    {   synchronized (insulationSlots)
-        {   insulationSlots.set(slots);
+    {   synchronized (INSULATION_SLOTS)
+        {   INSULATION_SLOTS.set(slots);
         }
     }
 
     public synchronized void setInsulationStrength(double effectiveness)
-    {   synchronized (insulationStrength)
-        {   insulationStrength.set(effectiveness);
+    {   synchronized (INSULATION_STRENGTH)
+        {   INSULATION_STRENGTH.set(effectiveness);
         }
     }
 
     public synchronized void setSoulLampFuelItems(List<? extends List<?>> items)
-    {   synchronized (soulLampItems)
-        {   soulLampItems.set(items);
+    {   synchronized (SOULSPRING_LAMP_FUELS)
+        {   SOULSPRING_LAMP_FUELS.set(items);
         }
     }
 
     public synchronized void setFoodTemperatures(List<? extends List<?>> itemMap)
-    {   synchronized (temperatureFoods)
-        {   temperatureFoods.set(itemMap);
+    {   synchronized (FOOD_TEMPERATURES)
+        {   FOOD_TEMPERATURES.set(itemMap);
         }
     }
 
     public synchronized void setValidSoulLampDimensions(List<? extends String> items)
-    {   synchronized (soulLampDimensions)
-        {   soulLampDimensions.set(items);
+    {   synchronized (SOULSPRING_LAMP_DIMENSIONS)
+        {   SOULSPRING_LAMP_DIMENSIONS.set(items);
         }
     }
 
     public synchronized void setWaterskinStrength(int strength)
-    {   synchronized (waterskinStrength)
-        {   waterskinStrength.set(strength);
+    {   synchronized (WATERSKIN_STRENGTH)
+        {   WATERSKIN_STRENGTH.set(strength);
         }
     }
 
     public synchronized void setPotionsEnabled(Boolean saver)
-    {   synchronized (allowPotionsInHearth)
-        {   allowPotionsInHearth.set(saver);
+    {   synchronized (ALLOW_POTIONS_IN_HEARTH)
+        {   ALLOW_POTIONS_IN_HEARTH.set(saver);
         }
     }
 
     public synchronized void setPotionBlacklist(List<String> saver)
-    {   synchronized (blacklistedPotions)
-        {   blacklistedPotions.set(saver);
+    {   synchronized (HEARTH_POTION_BLACKLIST)
+        {   HEARTH_POTION_BLACKLIST.set(saver);
         }
     }
 
     public synchronized void setInsulationBlacklist(List<String> blacklist)
-    {   synchronized (insulationBlacklist)
-        {   insulationBlacklist.set(blacklist);
+    {   synchronized (INSULATION_BLACKLIST)
+        {   INSULATION_BLACKLIST.set(blacklist);
         }
     }
 
     public synchronized void setInsulatingCurios(List<? extends List<?>> items)
     {   if (CompatManager.isCuriosLoaded())
-        {   synchronized (insulatingCurios)
-            {   insulatingCurios.set(items);
+        {   synchronized (INSULATING_CURIOS)
+            {   INSULATING_CURIOS.set(items);
             }
         }
     }
 
     public synchronized void setCarriedTemps(List<? extends List<?>> items)
-    {   synchronized (carriedTemps)
-        {   carriedTemps.set(items);
+    {   synchronized (CARRIED_ITEM_TEMPERATURE)
+        {   CARRIED_ITEM_TEMPERATURE.set(items);
         }
     }
 }

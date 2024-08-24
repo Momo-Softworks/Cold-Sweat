@@ -3,8 +3,6 @@ package com.momosoftworks.coldsweat.config.spec;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.ModList;
-import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.ModConfigSpec;
@@ -17,30 +15,30 @@ public class MainSettingsConfig
 {
     private static final ModConfigSpec SPEC;
     private static final MainSettingsConfig INSTANCE = new MainSettingsConfig();
-    public  static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
+    private static final ModConfigSpec.Builder BUILDER = new ModConfigSpec.Builder();
 
-    public static final ModConfigSpec.ConfigValue<Integer> difficulty;
-    public static final ModConfigSpec.ConfigValue<String> version;
+    public static final ModConfigSpec.ConfigValue<Integer> DIFFICULTY;
+    public static final ModConfigSpec.ConfigValue<String> VERSION;
 
-    public static final ModConfigSpec.ConfigValue<Double> maxHabitable;
-    public static final ModConfigSpec.ConfigValue<Double> minHabitable;
-    public static final ModConfigSpec.ConfigValue<Double> rateMultiplier;
-    public static final ModConfigSpec.ConfigValue<Double> tempDamage;
+    public static final ModConfigSpec.ConfigValue<Double> MAX_HABITABLE_TEMPERATURE;
+    public static final ModConfigSpec.ConfigValue<Double> MIN_HABITABLE_TEMPERATURE;
+    public static final ModConfigSpec.ConfigValue<Double> TEMP_RATE_MULTIPLIER;
+    public static final ModConfigSpec.ConfigValue<Double> TEMP_DAMAGE;
 
-    public static final ModConfigSpec.ConfigValue<Boolean> fireResistanceEffect;
-    public static final ModConfigSpec.ConfigValue<Boolean> iceResistanceEffect;
+    public static final ModConfigSpec.ConfigValue<Boolean> FIRE_RESISTANCE_BLOCKS_OVERHEATING;
+    public static final ModConfigSpec.ConfigValue<Boolean> ICE_RESISTANCE_BLOCKS_FREEZING;
 
-    public static final ModConfigSpec.ConfigValue<Boolean> damageScaling;
-    public static final ModConfigSpec.ConfigValue<Boolean> requireThermometer;
+    public static final ModConfigSpec.ConfigValue<Boolean> NULLIFY_IN_PEACEFUL;
+    public static final ModConfigSpec.ConfigValue<Boolean> REQUIRE_THERMOMETER;
 
-    public static final ModConfigSpec.ConfigValue<Integer> gracePeriodLength;
-    public static final ModConfigSpec.ConfigValue<Boolean> gracePeriodEnabled;
+    public static final ModConfigSpec.ConfigValue<Integer> GRACE_PERIOD_LENGTH;
+    public static final ModConfigSpec.ConfigValue<Boolean> ENABLE_GRACE_PERIOD;
 
-    public static final ModConfigSpec.ConfigValue<Double> heatstrokeFog;
-    public static final ModConfigSpec.ConfigValue<Double> freezingHearts;
-    public static final ModConfigSpec.ConfigValue<Double> coldKnockback;
-    public static final ModConfigSpec.ConfigValue<Double> coldMining;
-    public static final ModConfigSpec.ConfigValue<Double> coldMovement;
+    public static final ModConfigSpec.ConfigValue<Double> HEATSTROKE_FOG;
+    public static final ModConfigSpec.ConfigValue<Double> FREEZING_HEARTS;
+    public static final ModConfigSpec.ConfigValue<Double> COLD_KNOCKBACK;
+    public static final ModConfigSpec.ConfigValue<Double> COLD_MINING;
+    public static final ModConfigSpec.ConfigValue<Double> COLD_MOVEMENT;
 
     static 
     {
@@ -49,10 +47,10 @@ public class MainSettingsConfig
         BUILDER.comment("DO NOT EDIT THE SETTINGS IN THIS SECTION")
                .push("Builtin");
 
-        difficulty = BUILDER
+        DIFFICULTY = BUILDER
                 .defineInRange("Difficulty", defaultDiff.ordinal(), 0, ConfigSettings.Difficulty.values().length - 1);
 
-        version = BUILDER
+        VERSION = BUILDER
                 .define("Version", "");
 
         BUILDER.pop();
@@ -62,25 +60,25 @@ public class MainSettingsConfig
          */
         BUILDER.push("Difficulty");
 
-        minHabitable = BUILDER
+        MIN_HABITABLE_TEMPERATURE = BUILDER
                 .comment("Defines the minimum habitable temperature")
                 .defineInRange("Minimum Habitable Temperature", defaultDiff.getOrDefault("min_temp", Temperature.convert(50, Temperature.Units.F, Temperature.Units.MC, true)),
                                Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 
-        maxHabitable = BUILDER
+        MAX_HABITABLE_TEMPERATURE = BUILDER
                 .comment("Defines the maximum habitable temperature")
                 .defineInRange("Maximum Habitable Temperature", defaultDiff.getOrDefault("max_temp", Temperature.convert(100, Temperature.Units.F, Temperature.Units.MC, true)),
                                Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 
-        rateMultiplier = BUILDER
+        TEMP_RATE_MULTIPLIER = BUILDER
                 .comment("Rate at which the player's body temperature changes (default: 1.0 (100%))")
                 .defineInRange("Rate Multiplier", defaultDiff.getOrDefault("temp_rate", 1d), 0d, Double.POSITIVE_INFINITY);
 
-        tempDamage = BUILDER
+        TEMP_DAMAGE = BUILDER
                 .comment("Damage dealt to the player when they are too hot or too cold")
                 .defineInRange("Temperature Damage", defaultDiff.getOrDefault("temp_damage", 2d), 0d, Double.POSITIVE_INFINITY);
 
-        damageScaling = BUILDER
+        NULLIFY_IN_PEACEFUL = BUILDER
                 .comment("Sets whether damage scales with difficulty")
                 .define("Damage Scaling", defaultDiff.getOrDefault("damage_scaling", true));
 
@@ -92,15 +90,15 @@ public class MainSettingsConfig
          */
         BUILDER.push("Items");
 
-        fireResistanceEffect = BUILDER
+        FIRE_RESISTANCE_BLOCKS_OVERHEATING = BUILDER
                 .comment("Allow fire resistance to block overheating damage")
                 .define("Fire Resistance Immunity", defaultDiff.getOrDefault("fire_resistance_enabled", true));
 
-        iceResistanceEffect = BUILDER
+        ICE_RESISTANCE_BLOCKS_FREEZING = BUILDER
                 .comment("Allow ice resistance to block freezing damage")
                 .define("Ice Resistance Immunity", defaultDiff.getOrDefault("ice_resistance_enabled", true));
 
-        requireThermometer = BUILDER
+        REQUIRE_THERMOMETER = BUILDER
             .comment("Thermometer item is required to see detailed world temperature")
             .define("Require Thermometer", defaultDiff.getOrDefault("require_thermometer", true));
 
@@ -113,7 +111,7 @@ public class MainSettingsConfig
         BUILDER.push("Temperature Effects");
             BUILDER.push("Hot");
 
-            heatstrokeFog = BUILDER
+            HEATSTROKE_FOG = BUILDER
                 .comment("When set to true, the player's view distance will decrease when they are too hot")
                 .defineInRange("Heatstroke Fog", defaultDiff.getOrDefault("heatstroke_fog", 6.0), 0, Double.POSITIVE_INFINITY);
 
@@ -121,22 +119,22 @@ public class MainSettingsConfig
 
             BUILDER.push("Cold");
 
-            freezingHearts = BUILDER
+            FREEZING_HEARTS = BUILDER
                 .comment("When set to true, this percentage of the player's hearts will freeze over when they are too cold, preventing regeneration",
                          "Represented as a percentage")
                 .defineInRange("Freezing Hearts Percentage", defaultDiff.getOrDefault("freezing_hearts", 0.5), 0, 1);
 
-            coldKnockback = BUILDER
+            COLD_KNOCKBACK = BUILDER
                 .comment("When set to true, the player's attack knockback will be reduced by this amount when they are too cold",
                          "Represented as a percentage")
                 .defineInRange("Chilled Knockback Reduction", defaultDiff.getOrDefault("knockback_impairment", 0.5), 0, 1);
 
-            coldMovement = BUILDER
+            COLD_MOVEMENT = BUILDER
                 .comment("When set to true, the player's movement speed will be reduced by this amount when they are too cold",
                          "Represented as a percentage")
                 .defineInRange("Chilled Movement Slowdown", defaultDiff.getOrDefault("cold_slowness", 0.5), 0, 1);
 
-            coldMining = BUILDER
+            COLD_MINING = BUILDER
                 .comment("When set to true, the player's mining speed will be reduced by this amount when they are too cold",
                          "Represented as a percentage")
                 .defineInRange("Chilled Mining Speed Reduction", defaultDiff.getOrDefault("cold_break_speed", 0.5), 0, 1);
@@ -147,11 +145,11 @@ public class MainSettingsConfig
 
         BUILDER.push("Grace Period");
 
-                gracePeriodLength = BUILDER
+                GRACE_PERIOD_LENGTH = BUILDER
                 .comment("The number of ticks after the player spawns during which they are immune to temperature effects")
                 .defineInRange("Grace Period Length", defaultDiff.getOrDefault("grace_length", 6000), 0, Integer.MAX_VALUE);
 
-                gracePeriodEnabled = BUILDER
+                ENABLE_GRACE_PERIOD = BUILDER
                 .comment("Enables the grace period")
                 .define("Grace Period Enabled", defaultDiff.getOrDefault("grace_enabled", true));
 
@@ -181,169 +179,169 @@ public class MainSettingsConfig
     /* Getters */
 
     public String getVersion()
-    {   return version.get();
+    {   return VERSION.get();
     }
     public int getDifficulty()
-    {   return difficulty.get();
+    {   return DIFFICULTY.get();
     }
 
     public boolean isFireResistanceEnabled()
-    {   return fireResistanceEffect.get();
+    {   return FIRE_RESISTANCE_BLOCKS_OVERHEATING.get();
     }
     public boolean isIceResistanceEnabled()
-    {   return iceResistanceEffect.get();
+    {   return ICE_RESISTANCE_BLOCKS_FREEZING.get();
     }
 
     public boolean thermometerRequired()
-    {   return requireThermometer.get();
+    {   return REQUIRE_THERMOMETER.get();
     }
 
-    public boolean doDamageScaling()
-    {   return damageScaling.get();
+    public boolean nullifyInPeaceful()
+    {   return NULLIFY_IN_PEACEFUL.get();
     }
 
     public double getTempDamage()
-    {   return tempDamage.get();
+    {   return TEMP_DAMAGE.get();
     }
 
     public double getMinTempHabitable()
-    {   return minHabitable.get();
+    {   return MIN_HABITABLE_TEMPERATURE.get();
     }
     public double getMaxTempHabitable()
-    {   return maxHabitable.get();
+    {   return MAX_HABITABLE_TEMPERATURE.get();
     }
 
     public double getRateMultiplier()
-    {   return rateMultiplier.get();
+    {   return TEMP_RATE_MULTIPLIER.get();
     }
 
     public int getGracePeriodLength()
-    {   return gracePeriodLength.get();
+    {   return GRACE_PERIOD_LENGTH.get();
     }
 
     public boolean isGracePeriodEnabled()
-    {   return gracePeriodEnabled.get();
+    {   return ENABLE_GRACE_PERIOD.get();
     }
 
     public double getHeatstrokeFogDistance()
-    {   return heatstrokeFog.get();
+    {   return HEATSTROKE_FOG.get();
     }
 
     public double getHeartsFreezingPercentage()
-    {   return freezingHearts.get();
+    {   return FREEZING_HEARTS.get();
     }
     public double getColdKnockbackReduction()
-    {   return coldKnockback.get();
+    {   return COLD_KNOCKBACK.get();
     }
     public double getColdMiningImpairment()
-    {   return coldMining.get();
+    {   return COLD_MINING.get();
     }
     public double getColdMovementSlowdown()
-    {   return coldMovement.get();
+    {   return COLD_MOVEMENT.get();
     }
 
     /* Setters */
 
     public synchronized void setVersion(String version)
-    {   synchronized (MainSettingsConfig.version)
-        {   MainSettingsConfig.version.set(version);
+    {   synchronized (MainSettingsConfig.VERSION)
+        {   MainSettingsConfig.VERSION.set(version);
         }
     }
 
     public synchronized void setDifficulty(int value)
-    {   synchronized (difficulty)
-        {   difficulty.set(value);
+    {   synchronized (DIFFICULTY)
+        {   DIFFICULTY.set(value);
         }
     }
 
     public synchronized void setMaxHabitable(double temp)
-    {   synchronized (maxHabitable)
-        {   maxHabitable.set(temp);
+    {   synchronized (MAX_HABITABLE_TEMPERATURE)
+        {   MAX_HABITABLE_TEMPERATURE.set(temp);
         }
     }
 
     public synchronized void setMinHabitable(double temp)
-    {   synchronized (minHabitable)
-        {   minHabitable.set(temp);
+    {   synchronized (MIN_HABITABLE_TEMPERATURE)
+        {   MIN_HABITABLE_TEMPERATURE.set(temp);
         }
     }
 
     public synchronized void setRateMultiplier(double rate)
-    {   synchronized (rateMultiplier)
-        {   rateMultiplier.set(rate);
+    {   synchronized (TEMP_RATE_MULTIPLIER)
+        {   TEMP_RATE_MULTIPLIER.set(rate);
         }
     }
 
     public synchronized void setFireResistanceEnabled(boolean isEffective)
-    {   synchronized (fireResistanceEffect)
-        {   fireResistanceEffect.set(isEffective);
+    {   synchronized (FIRE_RESISTANCE_BLOCKS_OVERHEATING)
+        {   FIRE_RESISTANCE_BLOCKS_OVERHEATING.set(isEffective);
         }
     }
 
     public synchronized void setIceResistanceEnabled(boolean isEffective)
-    {   synchronized (iceResistanceEffect)
-        {   iceResistanceEffect.set(isEffective);
+    {   synchronized (ICE_RESISTANCE_BLOCKS_FREEZING)
+        {   ICE_RESISTANCE_BLOCKS_FREEZING.set(isEffective);
         }
     }
 
     public synchronized void setRequireThermometer(boolean required)
-    {   synchronized (requireThermometer)
-        {   requireThermometer.set(required);
+    {   synchronized (REQUIRE_THERMOMETER)
+        {   REQUIRE_THERMOMETER.set(required);
         }
     }
 
-    public synchronized void setDamageScaling(boolean enabled)
-    {   synchronized (damageScaling)
-        {   damageScaling.set(enabled);
+    public synchronized void setNullifyInPeaceful(boolean enabled)
+    {   synchronized (NULLIFY_IN_PEACEFUL)
+        {   NULLIFY_IN_PEACEFUL.set(enabled);
         }
     }
 
     public synchronized void setTempDamage(double damage)
-    {   synchronized (tempDamage)
-        {   tempDamage.set(damage);
+    {   synchronized (TEMP_DAMAGE)
+        {   TEMP_DAMAGE.set(damage);
         }
     }
 
     public synchronized void setGracePeriodLength(int ticks)
-    {   synchronized (gracePeriodLength)
-        {   gracePeriodLength.set(ticks);
+    {   synchronized (GRACE_PERIOD_LENGTH)
+        {   GRACE_PERIOD_LENGTH.set(ticks);
         }
     }
 
     public synchronized void setGracePeriodEnabled(boolean enabled)
-    {   synchronized (gracePeriodEnabled)
-        {   gracePeriodEnabled.set(enabled);
+    {   synchronized (ENABLE_GRACE_PERIOD)
+        {   ENABLE_GRACE_PERIOD.set(enabled);
         }
     }
 
 
     public synchronized void setHeatstrokeFogDistance(double distance)
-    {   synchronized (heatstrokeFog)
-        {   heatstrokeFog.set(distance);
+    {   synchronized (HEATSTROKE_FOG)
+        {   HEATSTROKE_FOG.set(distance);
         }
     }
 
     public synchronized void setHeartsFreezingPercentage(double percent)
-    {   synchronized (freezingHearts)
-        {   freezingHearts.set(percent);
+    {   synchronized (FREEZING_HEARTS)
+        {   FREEZING_HEARTS.set(percent);
         }
     }
 
     public synchronized void setColdKnockbackReduction(double amount)
-    {   synchronized (coldKnockback)
-        {   coldKnockback.set(amount);
+    {   synchronized (COLD_KNOCKBACK)
+        {   COLD_KNOCKBACK.set(amount);
         }
     }
 
     public synchronized void setColdMiningImpairment(double amount)
-    {   synchronized (coldMining)
-        {   coldMining.set(amount);
+    {   synchronized (COLD_MINING)
+        {   COLD_MINING.set(amount);
         }
     }
 
     public synchronized void setColdMovementSlowdown(double amount)
-    {   synchronized (coldMovement)
-        {   coldMovement.set(amount);
+    {   synchronized (COLD_MOVEMENT)
+        {   COLD_MOVEMENT.set(amount);
         }
     }
 
