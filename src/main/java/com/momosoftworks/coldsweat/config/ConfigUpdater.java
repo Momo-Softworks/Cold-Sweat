@@ -4,12 +4,12 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.config.spec.ItemSettingsConfig;
 import com.momosoftworks.coldsweat.config.spec.MainSettingsConfig;
 import com.momosoftworks.coldsweat.config.spec.WorldSettingsConfig;
+import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModList;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public class ConfigUpdater
 {
@@ -26,46 +26,46 @@ public class ConfigUpdater
         if (isBehind(configVersion, "2.3.2"))
         {
             // Goat fur insulation value
-            replaceConfigSetting(itemSettings::getInsulationItems, "cold_sweat:fur", insulator ->
+            replaceConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "cold_sweat:fur", insulator ->
             {   insulator.set(0, "cold_sweat:goat_fur");
-            }, itemSettings::setInsulationItems);
+            });
 
             // Goat fur armor insulation values
-            replaceConfigSetting(itemSettings::getInsulationItems, "cold_sweat:fur_cap", insulator ->
+            replaceConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "cold_sweat:fur_cap", insulator ->
             {   insulator.set(0, "cold_sweat:goat_fur_cap");
-            }, itemSettings::setInsulationItems);
-            replaceConfigSetting(itemSettings::getInsulationItems, "cold_sweat:fur_parka", insulator ->
+            });
+            replaceConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "cold_sweat:fur_parka", insulator ->
             {   insulator.set(0, "cold_sweat:goat_fur_parka");
-            }, itemSettings::setInsulationItems);
-            replaceConfigSetting(itemSettings::getInsulationItems, "cold_sweat:fur_pants", insulator ->
+            });
+            replaceConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "cold_sweat:fur_pants", insulator ->
             {   insulator.set(0, "cold_sweat:goat_fur_pants");
-            }, itemSettings::setInsulationItems);
-            replaceConfigSetting(itemSettings::getInsulationItems, "cold_sweat:fur_boots", insulator ->
+            });
+            replaceConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "cold_sweat:fur_boots", insulator ->
             {   insulator.set(0, "cold_sweat:goat_fur_boots");
-            }, itemSettings::setInsulationItems);
+            });
 
             // Goat fur armor worn insulation value
-            replaceConfigSetting(itemSettings::getInsulatingArmorItems, "cold_sweat:fur_cap", insulator ->
+            replaceConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, "cold_sweat:fur_cap", insulator ->
             {   insulator.set(0, "cold_sweat:goat_fur_cap");
-            }, itemSettings::setInsulatingArmorItems);
-            replaceConfigSetting(itemSettings::getInsulatingArmorItems, "cold_sweat:fur_parka", insulator ->
+            });
+            replaceConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, "cold_sweat:fur_parka", insulator ->
             {   insulator.set(0, "cold_sweat:goat_fur_parka");
-            }, itemSettings::setInsulatingArmorItems);
-            replaceConfigSetting(itemSettings::getInsulatingArmorItems, "cold_sweat:fur_pants", insulator ->
+            });
+            replaceConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, "cold_sweat:fur_pants", insulator ->
             {   insulator.set(0, "cold_sweat:goat_fur_pants");
-            }, itemSettings::setInsulatingArmorItems);
-            replaceConfigSetting(itemSettings::getInsulatingArmorItems, "cold_sweat:fur_boots", insulator ->
+            });
+            replaceConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, "cold_sweat:fur_boots", insulator ->
             {   insulator.set(0, "cold_sweat:goat_fur_boots");
-            }, itemSettings::setInsulatingArmorItems);
+            });
         }
         /*
          2.3.1
          */
         if (isBehind(configVersion, "2.3.1"))
         {
-            removeConfigSetting(worldSettings::getBlockTemps, "minecraft:ice", worldSettings::setBlockTemps);
-            removeConfigSetting(worldSettings::getBlockTemps, "minecraft:packed_ice", worldSettings::setBlockTemps);
-            removeConfigSetting(worldSettings::getBlockTemps, "minecraft:blue_ice", worldSettings::setBlockTemps);
+            removeConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, "minecraft:ice");
+            removeConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, "minecraft:packed_ice");
+            removeConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, "minecraft:blue_ice");
         }
         /*
          2.3
@@ -73,42 +73,42 @@ public class ConfigUpdater
         if (isBehind(configVersion, "2.3"))
         {
             // Update magma block temperature
-            replaceConfigSetting(worldSettings::getBlockTemps, "minecraft:magma_block", blockTemp -> {
+            replaceConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, "minecraft:magma_block", blockTemp -> {
                 blockTemp.set(1, 0.25);
                 blockTemp.set(4, 1.0);
-            }, worldSettings::setBlockTemps);
+            });
 
             // Update ice fuel value
-            replaceConfigSetting(itemSettings::getIceboxFuelItems, "minecraft:ice", iceFuel -> {
+            replaceConfigSetting(ItemSettingsConfig.ICEBOX_FUELS, "minecraft:ice", iceFuel -> {
                 iceFuel.set(1, 250);
-            }, itemSettings::setIceboxFuelItems);
-            replaceConfigSetting(itemSettings::getHearthFuelItems, "minecraft:ice", iceFuel -> {
+            });
+            replaceConfigSetting(ItemSettingsConfig.HEARTH_FUELS, "minecraft:ice", iceFuel -> {
                 iceFuel.set(1, -250);
-            }, itemSettings::setHearthFuelItems);
+            });
 
             // Update snow fuel value
-            replaceConfigSetting(itemSettings::getIceboxFuelItems, "minecraft:snow_block", snowFuel -> {
+            replaceConfigSetting(ItemSettingsConfig.ICEBOX_FUELS, "minecraft:snow_block", snowFuel -> {
                 snowFuel.set(1, 100);
-            }, itemSettings::setIceboxFuelItems);
-            replaceConfigSetting(itemSettings::getHearthFuelItems, "minecraft:snow_block", snowFuel -> {
+            });
+            replaceConfigSetting(ItemSettingsConfig.HEARTH_FUELS, "minecraft:snow_block", snowFuel -> {
                 snowFuel.set(1, -100);
-            }, itemSettings::setHearthFuelItems);
+            });
 
             // Update powder snow fuel value
-            replaceConfigSetting(itemSettings::getIceboxFuelItems, "minecraft:powder_snow_bucket", powderSnowFuel -> {
+            replaceConfigSetting(ItemSettingsConfig.ICEBOX_FUELS, "minecraft:powder_snow_bucket", powderSnowFuel -> {
                 powderSnowFuel.set(1, 100);
-            }, itemSettings::setIceboxFuelItems);
-            replaceConfigSetting(itemSettings::getHearthFuelItems, "minecraft:powder_snow_bucket", powderSnowFuel -> {
+            });
+            replaceConfigSetting(ItemSettingsConfig.HEARTH_FUELS, "minecraft:powder_snow_bucket", powderSnowFuel -> {
                 powderSnowFuel.set(1, -100);
-            }, itemSettings::setHearthFuelItems);
+            });
 
             // Update snowball fuel value
-            replaceConfigSetting(itemSettings::getIceboxFuelItems, "minecraft:snowball", snowballFuel -> {
+            replaceConfigSetting(ItemSettingsConfig.ICEBOX_FUELS, "minecraft:snowball", snowballFuel -> {
                 snowballFuel.set(1, 10);
-            }, itemSettings::setIceboxFuelItems);
-            replaceConfigSetting(itemSettings::getHearthFuelItems, "minecraft:snowball", snowballFuel -> {
+            });
+            replaceConfigSetting(ItemSettingsConfig.HEARTH_FUELS, "minecraft:snowball", snowballFuel -> {
                 snowballFuel.set(1, -10);
-            }, itemSettings::setHearthFuelItems);
+            });
         }
 
         /*
@@ -117,9 +117,9 @@ public class ConfigUpdater
         if (isBehind(configVersion, "2.3-b05b"))
         {
             // Remove water as fuel item for hearth
-            removeConfigSetting(itemSettings::getHearthFuelItems, "minecraft:water_bucket", itemSettings::setHearthFuelItems);
+            removeConfigSetting(ItemSettingsConfig.HEARTH_FUELS, "minecraft:water_bucket");
             // Remove water as fuel item for icebox
-            removeConfigSetting(itemSettings::getIceboxFuelItems, "minecraft:water_bucket", itemSettings::setIceboxFuelItems);
+            removeConfigSetting(ItemSettingsConfig.ICEBOX_FUELS, "minecraft:water_bucket");
         }
 
         /*
@@ -128,9 +128,9 @@ public class ConfigUpdater
         if (isBehind(configVersion, "2.3-b04a"))
         {
             // Update soul sprout food item
-            addConfigSetting(itemSettings::getFoodTemperatures, itemSettings::setFoodTemperatures,
+            addConfigSetting(ItemSettingsConfig.FOOD_TEMPERATURES,
                              List.of("cold_sweat:soul_sprout", 0.0, "{}", 1200));
-            addConfigSetting(worldSettings::getBlockTemps, worldSettings::setBlockTemps,
+            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES,
                              List.of("minecraft:lava_cauldron", 0.5, 7, true, 1.5));
         }
         /*
@@ -139,7 +139,7 @@ public class ConfigUpdater
         if (compareVersions(configVersion, "2.3-b01a") < 0)
         {
             // Update chameleon molt insulation ingredient entry
-            addConfigSetting(itemSettings::getInsulationItems, itemSettings::setInsulationItems,
+            addConfigSetting(ItemSettingsConfig.INSULATION_ITEMS,
                              List.of("cold_sweat:chameleon_molt", 2, 0.0085, "adaptive"));
         }
         /*
@@ -148,13 +148,14 @@ public class ConfigUpdater
         if (isBehind(configVersion, "2.3-b01a"))
         {
             // Update chameleon molt insulation ingredient entry
-            addConfigSetting(itemSettings::getInsulationItems, itemSettings::setInsulationItems,
+            addConfigSetting(ItemSettingsConfig.INSULATION_ITEMS,
                              List.of("cold_sweat:chameleon_molt", 2, 0.0085, "adaptive"));
         }
-        itemSettings.save();
-        worldSettings.save();
         // Update config version
         MainSettingsConfig.getInstance().setVersion(ModList.get().getModFileById(ColdSweat.MOD_ID).versionString());
+
+        itemSettings.save();
+        worldSettings.save();
     }
 
     private static boolean isBehind(String version, String comparedTo)
@@ -252,10 +253,10 @@ public class ConfigUpdater
         return Integer.compare(parts1.length, parts2.length);
     }
 
-    public static void replaceConfigSetting(Supplier<List<? extends List<?>>> getter, String key,
-                                            Consumer<List<Object>> modifier, Consumer<List<? extends List<Object>>> setter)
+    public static void replaceConfigSetting(ForgeConfigSpec.ConfigValue<List<? extends List<?>>> config, String key,
+                                            Consumer<List<Object>> modifier)
     {
-        List<List<Object>> setting = (List<List<Object>>) new ArrayList<>(getter.get());
+        List<List<?>> setting = new ArrayList<>(config.get());
         for (int i = 0; i < setting.size(); i++)
         {
             List<Object> element = new ArrayList<>(setting.get(i));
@@ -263,27 +264,27 @@ public class ConfigUpdater
             {
                 modifier.accept(element);
                 setting.set(i, element);
-                setter.accept(setting);
+                config.set(setting);
                 break;
             }
         }
     }
 
-    public static void addConfigSetting(Supplier<List<? extends List<?>>> getter, Consumer<List<? extends List<? extends Object>>> setter,
-                                        List<? extends Object> newSetting)
+    public static void addConfigSetting(ForgeConfigSpec.ConfigValue<List<? extends List<?>>> config, List<?> newSetting)
     {
-        List<List<? extends Object>> setting = new ArrayList<>(getter.get());
+        List<List<? extends Object>> setting = new ArrayList<>(config.get());
         if (setting.stream().noneMatch(entry -> !entry.isEmpty() && entry.get(0).equals(newSetting.get(0))))
         {
+            config.clearCache();
             setting.add(newSetting);
-            setter.accept(setting);
+            config.set(setting);
         }
     }
 
-    public static void removeConfigSetting(Supplier<List<? extends List<? extends Object>>> getter, String key, Consumer<List<? extends List<? extends Object>>> setter)
+    public static void removeConfigSetting(ForgeConfigSpec.ConfigValue<List<? extends List<? extends Object>>> config, String key)
     {
-        List<? extends List<? extends Object>> setting = new ArrayList<>(getter.get());
+        List<? extends List<? extends Object>> setting = new ArrayList<>(config.get());
         setting.removeIf(entry -> !entry.isEmpty() && entry.get(0).equals(key));
-        setter.accept(setting);
+        config.set(setting);
     }
 }

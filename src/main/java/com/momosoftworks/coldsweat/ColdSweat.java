@@ -28,6 +28,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.NewRegistryEvent;
 import net.minecraftforge.registries.RegistryBuilder;
@@ -128,7 +129,7 @@ public class ColdSweat
         event.register(ShearableFurCap.class);
     }
 
-    public void updateConfigs(FMLCommonSetupEvent event)
+    public void updateConfigs(FMLLoadCompleteEvent event)
     {   ConfigUpdater.updateConfigs();
     }
 
