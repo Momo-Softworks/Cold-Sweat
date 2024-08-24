@@ -647,7 +647,7 @@ public class WorldSettingsConfig
     {   return CAVE_INSULATION_STRENGTH.get();
     }
 
-    public double getHearthEffect()
+    public double getHearthStrength()
     {   return HEARTH_INSULATION_STRENGTH.get();
     }
     public boolean isSmartHearth()

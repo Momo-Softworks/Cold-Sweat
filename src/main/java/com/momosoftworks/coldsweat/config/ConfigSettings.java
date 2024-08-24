@@ -780,7 +780,7 @@ public class ConfigSettings
         },
         saver -> WorldSettingsConfig.getInstance().setHearthSpreadBlacklist(saver.stream().map(ForgeRegistries.BLOCKS::getKey).toList()));
 
-        HEARTH_STRENGTH = addSetting("hearth_effect", () -> WorldSettingsConfig.getInstance().getHearthEffect());
+        HEARTH_STRENGTH = addSetting("hearth_effect", () -> WorldSettingsConfig.getInstance().getHearthStrength());
 
         SMART_HEARTH = addSetting("smart_hearth", () -> WorldSettingsConfig.getInstance().isSmartHearth());
 
