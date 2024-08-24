@@ -17,6 +17,7 @@ import com.momosoftworks.coldsweat.common.capability.temperature.EntityTempCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.config.type.CarriedItemTemperature;
 import com.momosoftworks.coldsweat.config.type.InsulatingMount;
 import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.config.type.PredicateItem;
@@ -24,6 +25,7 @@ import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.registries.ModAttributes;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
@@ -250,10 +252,11 @@ public class EntityTempManager
         LivingEntity entity = event.getEntityLiving();
         if (entity.tickCount % 10 != 0 || !isTemperatureEnabled(event.getEntity().getType())) return;
 
-        Map<Temperature.Trait, Double> effectMap = Arrays.stream(VALID_MODIFIER_TRAITS).collect(
+        Map<Temperature.Trait, Double> effectsPerTrait = Arrays.stream(VALID_MODIFIER_TRAITS).collect(
                 () -> new EnumMap<>(Temperature.Trait.class),
-                (map, type) -> map.put(type, 0d),
+                (map, type) -> map.put(type, 0.0),
                 EnumMap::putAll);
+        Map<CarriedItemTemperature, Double> effectsPerCarriedTemp = new FastMap<>();
 
         // Get temperature of equipped items
         for (EquipmentSlot slot : EquipmentSlot.values())
@@ -264,10 +267,7 @@ public class EntityTempManager
                 Item item = stack.getItem();
                 Optional.ofNullable(ConfigSettings.CARRIED_ITEM_TEMPERATURES.get().get(item)).ifPresent(
                 carried ->
-                {
-                    if (carried.testEntity(entity) && carried.testSlot(stack, null, slot))
-                    {   effectMap.put(carried.trait(), effectMap.get(carried.trait()) + carried.temperature() * stack.getCount());
-                    }
+                {   checkAndAddCarriedTemp(entity, stack, null, slot, carried, effectsPerCarriedTemp);
                 });
             }
         }
@@ -283,15 +283,21 @@ public class EntityTempManager
                     Item item = stack.getItem();
                     Optional.ofNullable(ConfigSettings.CARRIED_ITEM_TEMPERATURES.get().get(item)).ifPresent(
                     carried ->
-                    {
-                        if (carried.testSlot(stack, slot.index, null))
-                        {   effectMap.put(carried.trait(), effectMap.get(carried.trait()) + carried.temperature() * stack.getCount());
-                        }
+                    {   checkAndAddCarriedTemp(entity, stack, slot.index, null, carried, effectsPerCarriedTemp);
                     });
                 }
             }
         }
-        effectMap.forEach((trait, temp) ->
+
+        for (Map.Entry<CarriedItemTemperature, Double> entry : effectsPerCarriedTemp.entrySet())
+        {
+            Temperature.Trait trait = entry.getKey().trait();
+            double temp = entry.getValue();
+
+            effectsPerTrait.put(trait, effectsPerTrait.get(trait) + temp);
+        }
+
+        effectsPerTrait.forEach((trait, temp) ->
         {
             Optional<InventoryItemsTempModifier> modifier = Temperature.getModifier(entity, trait, InventoryItemsTempModifier.class);
             if (modifier.isEmpty())
@@ -301,6 +307,19 @@ public class EntityTempManager
             {   modifier.get().getNBT().putDouble("Effect", temp);
             }
         });
+    }
+
+    private static void checkAndAddCarriedTemp(LivingEntity entity, ItemStack stack, Integer slot, EquipmentSlot equipmentSlot,
+                                               CarriedItemTemperature carried, Map<CarriedItemTemperature, Double> effectsPerCarriedTemp)
+    {
+        if (carried.testEntity(entity) && carried.testSlot(stack, slot, equipmentSlot))
+        {
+            double temp = carried.temperature() * stack.getCount();
+            double currentEffect = effectsPerCarriedTemp.getOrDefault(carried, 0.0);
+            double newEffect = Math.min(carried.maxEffect(), Math.abs(currentEffect + temp)) * CSMath.sign(currentEffect + temp);
+
+            effectsPerCarriedTemp.put(carried, newEffect);
+        }
     }
 
     @SubscribeEvent
