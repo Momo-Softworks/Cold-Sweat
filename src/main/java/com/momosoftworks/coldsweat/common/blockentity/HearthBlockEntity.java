@@ -261,8 +261,11 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         boolean wasUsingHotFuel = this.shouldUseHotFuel;
         if (!ConfigSettings.SMART_HEARTH.get())
         {
-            this.shouldUseColdFuel = this.isSidePowered;
-            this.shouldUseHotFuel = this.isBackPowered;
+            this.shouldUseColdFuel = this.isSidePowered && this.getColdFuel() > 0;
+            this.shouldUseHotFuel = this.isBackPowered && this.getHotFuel() > 0;
+        }
+        if (!this.shouldUseColdFuel && !this.shouldUseHotFuel)
+        {   this.resetPaths();
         }
 
         // Clear paths every 5 minutes to account for calculation errors
@@ -282,7 +285,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
             {   insulationLevel++;
             }
 
-            if (this.isPlayerNearby && (isSidePowered || isBackPowered || ConfigSettings.SMART_HEARTH.get()))
+            if (this.shouldUseColdFuel || this.shouldUseHotFuel || (ConfigSettings.SMART_HEARTH.get() && this.isPlayerNearby))
             {
                 // Determine whether particles are enabled
                 if (this.ticksExisted % 20 == 0)
