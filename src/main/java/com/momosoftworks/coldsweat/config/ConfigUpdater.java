@@ -139,15 +139,6 @@ public class ConfigUpdater
         /*
          2.3-b01a
          */
-        if (compareVersions(configVersion, "2.3-b01a") < 0)
-        {
-            // Update chameleon molt insulation ingredient entry
-            addConfigSetting(ItemSettingsConfig.INSULATION_ITEMS,
-                             Arrays.asList("cold_sweat:chameleon_molt", 2, 0.0085, "adaptive"));
-        }
-        /*
-         2.3-b01a
-         */
         if (isBehind(configVersion, "2.3-b01a"))
         {
             // Update chameleon molt insulation ingredient entry
