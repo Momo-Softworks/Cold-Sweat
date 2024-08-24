@@ -27,7 +27,7 @@ public record ItemCarryTempData(ItemRequirement data, List<Either<IntegerBounds,
                  .listOf().fieldOf("slots").forGetter(ItemCarryTempData::slots),
             Codec.DOUBLE.fieldOf("temperature").forGetter(ItemCarryTempData::temp),
             Temperature.Trait.CODEC.optionalFieldOf("trait").forGetter(ItemCarryTempData::trait),
-            Codec.DOUBLE.optionalFieldOf("bounds").forGetter(ItemCarryTempData::maxEffect),
+            Codec.DOUBLE.optionalFieldOf("max_effect").forGetter(ItemCarryTempData::maxEffect),
             EntityRequirement.getCodec().optionalFieldOf("entity").forGetter(ItemCarryTempData::entityRequirement),
             Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(ItemCarryTempData::requiredMods)
     ).apply(instance, ItemCarryTempData::new));
