@@ -2311,12 +2311,14 @@ Fixes:
 - The icebox now has a unique texture for when a smokestack is placed on top
 - Right-clicking the thermometer now displays the world temperature if Supplementaries in installed
 - The thermolith now provides direct power, allowing it to send the signal through blocks
-- Updated the hearth's item texture to be consistent with its block form
+- Updated the hearth's item texture and recipe to be consistent with its block form
 - Ice and snow now have slightly lower fuel values in the icebox and hearth
 
 Fixes:
 - Fixed attribute modifiers failing to parse in non-English locales, causing world loading to fail
 - Fixed steam particles not rendering
+- Fixed crash when clicking unformatted text in chat
+- Fixed the hearth's AOE still showing after the block is removed by unconventional means
 
 Technical Changes:
 * Added an automatic config updater, which will change existing config settings when updating to new versions
@@ -2332,6 +2334,8 @@ Technical Changes:
 - Updated Thirst Was Taken compat to support 1.3.8+
       - TWT versions below 1.3.8 will now have compat disabled
 - Ice how has a minimum temperature, reducing the likelihood of extremely cold (negative) temperatures when standing close to it
+- The trident's riptide ability can now be used when the player is wet
+      - Using this removes the player's "wetness"
 
 Fixes:
 * (1.16) Fixed mixins not loading, causing a lot of strange behavior
@@ -2342,6 +2346,7 @@ Fixes:
 - Fixed ice melting into water when broken in creative mode or no block was beneath it
 - Fixed the chameleon being immune to neutral damage (not directly from an entity) when not riding a player
 - (1.16) Fixed UI icons rendering over the chat panel
+- (1.16) Fixed the UI for the hearth, icebox, and boiler being offset when the player has potion effects
 - Fixed inconsistency in the freezing screen shake effect at different framerates
 
 Technical Changes:
@@ -2351,3 +2356,54 @@ Technical Changes:
       - A simplified version of this has also been added to item_settings.toml for quick access
 * Added config to change the general strength of insulation items
       - This setting applies to all armor and insulators, changing their effectiveness by a given multiplier
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.3.2
+!! (1.16) The config setting for llama spawn biomes will be deleted and replaced with goat spawn biomes. Please back up before launching!
+
+- Added config option to hide insulation tooltips unless shift is held
+* (1.16) Backported goats from 1.18
+      - Replicate the appearance and behavior of Vanilla goats
+      - If Caves and Cliffs Backport is installed, all Cold Sweat goats will be replaced with that mod's goats
+            - This is to keep things simpler by only having one kind of goat
+            - As much data as possible will be preserved when replacing (name, age, health, etc)
+      - They are now the intended way of obtaining goat fur
+      ! If this introduces bugs, I swear I'm gonna revert this stuff
+* (1.16) Llamas no longer yield goat fur
+- Renamed all fur-related items to "goat fur"
+      - Existing items and configs will be automatically updated to reflect this change
+* Added screen effect for when the player is wet
+      - Can be disabled via an option in the config menu or in client.toml
+
+Fixes:
+* Fixed crash when putting a smokestack on the icebox or boiler
+* Fixed crash when saving configs in the config screen
+- Fixed crash when placing redstone near a hearth, boiler, or icebox in some cases
+- (1.16 - 1.19) Fixed the icebox still not having subtitles for opening and closing
+- (1.21) Fixed crash when equipping a non-armor item (like the elytra)
+- Fixed hearth-like blocks providing chilling/warming when powered but not fueled
+- Fixed the Create netherite diving gear having incorrect heat and cold protection values
+- Fixed mixin conflict with MemoryLeakFix
+
+Translation Changes:
+- Added Traditional Chinese (zh_tw) translation, courtesy of yichifauzi on GitHub
+
+Technical Changes:
+- Any drinkable item can now be put in the boiler if Thirst Was Taken is installed, removing the need for the "boiler_purifiable" tag
+- The config for carried item temperatures now has an optional "max_effect" field that limits how much that type of item can affect the player
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.3.3
+- Updated the hearth's item texture slightly to match its new block texture
+
+Fixes:
+* Fixed crash when the player is wet and GUI scaling is set to "Auto"
+- Fixed the hearth still accepting water if the config settings had not been updated from a previous version
+- Fixed erratic walking behavior for chameleons, especially when bumping into other mobs
+- Fixed the chameleon's walking animation clipping into the ground slightly
+- Fixed items thrown to a chameleon having different NBT when picked up, making them unstackable
+- Fixed chameleons accepting infinite breeding items in some cases
+- Fixed baby chameleons attempting to go into breeding mode when fed breeding items
+- Fixed the water dripping effect persisting on-screen after the player has completely dried off
