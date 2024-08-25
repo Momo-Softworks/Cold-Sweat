@@ -328,20 +328,6 @@ public class Chameleon extends Animal
     }
 
     @Override
-    public float tickHeadTurn(float p_21260_, float p_21261_)
-    {
-        if (this.isWalking())
-        {   this.yBodyRot = (float) -Math.toDegrees(Math.atan2(getDeltaMovement().x, getDeltaMovement().z));
-            this.rotateHeadIfNecessary();
-            this.rotateBodyIfNecessary();
-        }
-        if (Math.abs(yHeadRot - yBodyRot) > 45)
-        {   rotateBodyIfNecessary();
-        }
-        return p_21261_;
-    }
-
-    @Override
     public int getHeadRotSpeed()
     {   return 20;
     }
@@ -543,16 +529,6 @@ public class Chameleon extends Animal
 
     public static boolean canSpawn(EntityType<Chameleon> type, LevelAccessor level, MobSpawnType spawnType, BlockPos pos, RandomSource random)
     {   return true;
-    }
-
-    private void rotateBodyIfNecessary()
-    {
-        this.yBodyRot = Mth.rotateIfNecessary(this.yBodyRot, this.yHeadRot, (float)this.getMaxHeadYRot());
-    }
-
-    private void rotateHeadIfNecessary()
-    {
-        this.yHeadRot = Mth.rotateIfNecessary(this.yHeadRot, this.yBodyRot, (float)this.getMaxHeadYRot());
     }
 
     @Override
