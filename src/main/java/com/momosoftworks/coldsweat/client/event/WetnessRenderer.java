@@ -56,6 +56,9 @@ public class WetnessRenderer
         int screenHeight = mc.getWindow().getGuiScaledHeight();
         boolean paused = mc.isPaused();
         int uiScale = mc.options.guiScale().get();
+        if (uiScale == 0)
+        {   uiScale = mc.getWindow().calculateScale(0, mc.isEnforceUnicode());
+        }
 
         Player player = mc.player;
         if (player == null) return;
