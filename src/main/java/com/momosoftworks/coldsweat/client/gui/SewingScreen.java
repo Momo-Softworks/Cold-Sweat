@@ -19,8 +19,6 @@ public class SewingScreen extends AbstractContainerScreen<SewingContainer>
     public SewingScreen(SewingContainer screenContainer, Inventory inv, Component titleIn)
     {
         super(screenContainer, inv, titleIn);
-        this.leftPos = 0;
-        this.topPos = 0;
         this.imageWidth = 176;
         this.imageHeight = 201;
     }
@@ -43,9 +41,7 @@ public class SewingScreen extends AbstractContainerScreen<SewingContainer>
     protected void renderBg(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY)
     {
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-        int x = (this.width - this.getXSize()) / 2;
-        int y = (this.height - this.getYSize()) / 2;
-        graphics.blit(SEWING_GUI, x, y, 0, 0, this.getXSize(), this.getYSize());
+        graphics.blit(SEWING_GUI, this.leftPos, this.topPos, 0, 0, this.getXSize(), this.getYSize());
 
         if (!menu.getSlot(0).hasItem())
         {   graphics.blit(SEWING_GUI, this.getGuiLeft() + 43, this.getGuiTop() + 26, 176, 0, 16, 16);

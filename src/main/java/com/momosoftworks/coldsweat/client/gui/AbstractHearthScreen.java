@@ -41,10 +41,6 @@ public abstract class AbstractHearthScreen<T extends AbstractContainerMenu> exte
 
     public AbstractHearthScreen(T screenContainer, Inventory inv, Component title)
     {   super(screenContainer, inv, title);
-        this.leftPos = 0;
-        this.topPos = 0;
-        this.imageWidth = 176;
-        this.imageHeight = 166;
     }
 
     @Override

@@ -22,8 +22,6 @@ public class IceboxScreen extends AbstractHearthScreen<IceboxContainer>
     public IceboxScreen(IceboxContainer screenContainer, Inventory inv, Component titleIn)
     {
         super(screenContainer, inv, titleIn);
-        this.leftPos = 0;
-        this.topPos = 0;
         this.imageWidth = 176;
         this.imageHeight = 172;
         this.inventoryLabelY = this.imageHeight - 94;
@@ -50,9 +48,7 @@ public class IceboxScreen extends AbstractHearthScreen<IceboxContainer>
     protected void renderBg(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY)
     {
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-        int x = (this.width - this.imageWidth) / 2;
-        int y = (this.height - this.imageHeight) / 2;
-        graphics.blit(ICEBOX_GUI, x, y, 0, 0, this.imageWidth, this.imageHeight);
+        graphics.blit(ICEBOX_GUI, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
 
         // Draw fuel gauge
         graphics.blit(ICEBOX_GUI, leftPos + 109, topPos + 63, 176, 0, (int) (menu.te.getFuel() / 31.25), 16, 256, 256);
