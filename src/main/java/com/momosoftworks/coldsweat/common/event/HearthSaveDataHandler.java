@@ -78,7 +78,7 @@ public class HearthSaveDataHandler
     {
         if (!event.getEntity().level.isClientSide())
         {
-            ListTag disabledHearths = event.getOriginal().getPersistentData().getList("DisabledHearths", 10);
+            ListNBT disabledHearths = event.getOriginal().getPersistentData().getList("DisabledHearths", 10);
             event.getEntity().getPersistentData().put("DisabledHearths", disabledHearths);
         }
     }
