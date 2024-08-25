@@ -262,7 +262,7 @@ public class ItemSettingsConfig
                         "Format: [[\"item_id\", amount, *nbt, *duration], [\"item_id\", amount, *nbt, *duration], ...etc]",
                         "Negative values are cold foods, positive values are hot foods",
                         "nbt: Optional. If set, the item will only affect the player's temperature if it has the specified NBT tag.",
-                        "duration: Optional. If set, the player's temperature will remain increased/decreased for this amount of time.")
+                        "duration: Optional. If set, the player's temperature will remain increased/decreased for this amount of time (in ticks).")
                 .defineListAllowEmpty(List.of("Temperature-Affecting Foods"), () -> Arrays.asList(
                         List.of("cold_sweat:soul_sprout", -20, "{}", 1200)
                 ),
