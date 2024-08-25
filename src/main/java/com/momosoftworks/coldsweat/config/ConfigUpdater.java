@@ -70,7 +70,7 @@ public class ConfigUpdater
         /*
          2.3
          */
-        if (isBehind(configVersion, "2.3"))
+        if (isBehind(configVersion, "2.3.3"))
         {
             // Update magma block temperature
             replaceConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, "minecraft:magma_block", blockTemp -> {
