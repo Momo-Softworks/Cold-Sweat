@@ -332,23 +332,6 @@ public class ChameleonEntity extends AnimalEntity
     }
 
     @Override
-    public float tickHeadTurn(float p_21260_, float p_21261_)
-    {
-        if (this.isWalking())
-        {
-            if (this.onGround)
-            {   this.yBodyRot = (float) -Math.toDegrees(Math.atan2(getDeltaMovement().x, getDeltaMovement().z));
-            }
-            this.rotateHeadIfNecessary();
-            this.rotateBodyIfNecessary();
-        }
-        if (Math.abs(yHeadRot - yBodyRot) > 45)
-        {   rotateHeadIfNecessary();
-        }
-        return p_21261_;
-    }
-
-    @Override
     public int getHeadRotSpeed()
     {   return 20;
     }
@@ -557,16 +540,6 @@ public class ChameleonEntity extends AnimalEntity
                ? ((PlayerEntity) this.getVehicle()).getItemBySlot(EquipmentSlotType.HEAD).getItem() == ModItems.HOGLIN_HEADPIECE
                     ? 0.65 : 0.5
                : 0;
-    }
-
-    private void rotateBodyIfNecessary()
-    {
-        this.yBodyRot = MathHelper.rotateIfNecessary(this.yBodyRot, this.yHeadRot, (float)this.getMaxHeadYRot());
-    }
-
-    private void rotateHeadIfNecessary()
-    {
-        this.yHeadRot = MathHelper.rotateIfNecessary(this.yHeadRot, this.yBodyRot, (float)this.getMaxHeadYRot());
     }
 
     @Override
