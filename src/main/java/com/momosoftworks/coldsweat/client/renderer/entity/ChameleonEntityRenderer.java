@@ -16,10 +16,10 @@ import net.minecraft.world.entity.player.Player;
 
 public class ChameleonEntityRenderer<T extends Chameleon> extends MobRenderer<Chameleon, ChameleonModel<Chameleon>>
 {
-    public static final ResourceLocation CHAMELEON_SHED  = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/entities/chameleon_shed.png");
-    public static final ResourceLocation CHAMELEON_GREEN = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/entities/chameleon_green.png");
-    public static final ResourceLocation CHAMELEON_RED   = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/entities/chameleon_red.png");
-    public static final ResourceLocation CHAMELEON_BLUE  = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/entities/chameleon_blue.png");
+    public static final ResourceLocation CHAMELEON_SHED  = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/entity/chameleon/chameleon_shed.png");
+    public static final ResourceLocation CHAMELEON_GREEN = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/entity/chameleon/chameleon_green.png");
+    public static final ResourceLocation CHAMELEON_RED   = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/entity/chameleon/chameleon_red.png");
+    public static final ResourceLocation CHAMELEON_BLUE  = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/entity/chameleon/chameleon_blue.png");
 
     public ChameleonEntityRenderer(EntityRendererProvider.Context context)
     {
