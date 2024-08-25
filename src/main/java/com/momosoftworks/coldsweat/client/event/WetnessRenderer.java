@@ -133,6 +133,7 @@ public class WetnessRenderer
                 // Render the water drop
                 RenderSystem.color4f(brightness, brightness, brightness, alpha);
                 mc.textureManager.bind(WATER_DROP);
+
                 AbstractGui.blit(ps, (int) CSMath.roundNearest(pos.x, 3f/uiScale), (int)pos.y, size, size, 0, 0, 8, 8, 8, 8);
 
                 // Update the drop's position and alpha

@@ -22,8 +22,6 @@ public class BoilerScreen extends AbstractHearthScreen<BoilerContainer>
     public BoilerScreen(BoilerContainer screenContainer, PlayerInventory inv, ITextComponent titleIn)
     {
         super(screenContainer, inv, titleIn);
-        this.leftPos = 0;
-        this.topPos = 0;
         this.imageWidth = 176;
         this.imageHeight = 172;
         this.inventoryLabelY = this.imageHeight - 94;
@@ -45,9 +43,7 @@ public class BoilerScreen extends AbstractHearthScreen<BoilerContainer>
     {
         RenderSystem.color4f(1f, 1f, 1f, 1f);
         Minecraft.getInstance().textureManager.bind(BOILER_GUI);
-        int x = (this.width - this.imageWidth) / 2;
-        int y = (this.height - this.imageHeight) / 2;
-        this.blit(matrixStack, x, y, 0, 0, this.imageWidth, this.imageHeight);
+        this.blit(matrixStack, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
 
         // Draw fuel gauge
         blit(matrixStack, leftPos + 109, topPos + 63, 176, 0, (int) (this.menu.getFuel() / 31.25), 16, 256, 256);

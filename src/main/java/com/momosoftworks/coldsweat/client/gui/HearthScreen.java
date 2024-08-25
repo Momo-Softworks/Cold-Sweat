@@ -36,19 +36,16 @@ public class HearthScreen extends AbstractHearthScreen<HearthContainer>
 
     public HearthScreen(HearthContainer screenContainer, PlayerInventory inv, ITextComponent titleIn)
     {
-        super(screenContainer, inv, titleIn);
+        super(screenContainer, inv, new TranslatableComponent("container." + ColdSweat.MOD_ID + ".hearth"));
         this.imageWidth = 176;
         this.imageHeight = 166;
     }
 
     @Override
     protected void renderBg(MatrixStack poseStack, float partialTicks, int mouseX, int mouseY)
-    {
-        RenderSystem.color4f(1f, 1f, 1f, 1f);
+    {   RenderSystem.color4f(1f, 1f, 1f, 1f);
         this.minecraft.textureManager.bind(HEARTH_GUI);
-        int x = this.leftPos;
-        int y = this.topPos;
-        this.blit(poseStack, x, y, 0, 0, this.imageWidth, this.imageHeight);
+        this.blit(poseStack, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
 
         int hotFuel  = (int) (this.menu.getHotFuel()  / 27.7);
         int coldFuel = (int) (this.menu.getColdFuel() / 27.7);

@@ -20,8 +20,6 @@ public class SewingScreen extends ContainerScreen<SewingContainer>
     public SewingScreen(SewingContainer screenContainer, PlayerInventory inv, ITextComponent title)
     {
         super(screenContainer, inv, NAME);
-        this.leftPos = 0;
-        this.topPos = 0;
         this.imageWidth = 176;
         this.imageHeight = 201;
     }
@@ -47,9 +45,7 @@ public class SewingScreen extends ContainerScreen<SewingContainer>
     {
         RenderSystem.color4f(1f, 1f, 1f, 1f);
         this.minecraft.textureManager.bind(SEWING_GUI);
-        int x = (this.width - this.getXSize()) / 2;
-        int y = (this.height - this.getYSize()) / 2;
-        this.blit(matrixStack, x, y, 0, 0, this.getXSize(), this.getYSize());
+        this.blit(matrixStack, this.leftPos, this.topPos, 0, 0, this.getXSize(), this.getYSize());
 
         if (!menu.getSlot(0).hasItem())
         {   this.blit(matrixStack, this.getGuiLeft() + 43, this.getGuiTop() + 26, 176, 0, 16, 16);
