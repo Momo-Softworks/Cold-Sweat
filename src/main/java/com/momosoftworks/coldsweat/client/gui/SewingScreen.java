@@ -20,8 +20,6 @@ public class SewingScreen extends AbstractContainerScreen<SewingContainer>
     public SewingScreen(SewingContainer screenContainer, Inventory inv, Component titleIn)
     {
         super(screenContainer, inv, new TranslatableComponent("container." + ColdSweat.MOD_ID + ".sewing_table"));
-        this.leftPos = 0;
-        this.topPos = 0;
         this.imageWidth = 176;
         this.imageHeight = 201;
     }
@@ -47,9 +45,7 @@ public class SewingScreen extends AbstractContainerScreen<SewingContainer>
     {
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
         RenderSystem.setShaderTexture(0, SEWING_GUI);
-        int x = (this.width - this.getXSize()) / 2;
-        int y = (this.height - this.getYSize()) / 2;
-        this.blit(poseStack, x, y, 0, 0, this.getXSize(), this.getYSize());
+        this.blit(poseStack, this.leftPos, this.topPos, 0, 0, this.getXSize(), this.getYSize());
 
         if (!menu.getSlot(0).hasItem())
         {

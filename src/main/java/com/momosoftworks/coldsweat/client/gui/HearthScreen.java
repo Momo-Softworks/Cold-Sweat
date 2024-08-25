@@ -22,8 +22,6 @@ public class HearthScreen extends AbstractHearthScreen<HearthContainer>
     public HearthScreen(HearthContainer screenContainer, Inventory inv, Component titleIn)
     {
         super(screenContainer, inv, new TranslatableComponent("container." + ColdSweat.MOD_ID + ".hearth"));
-        this.leftPos = 0;
-        this.topPos = 0;
         this.imageWidth = 176;
         this.imageHeight = 166;
     }
@@ -32,9 +30,7 @@ public class HearthScreen extends AbstractHearthScreen<HearthContainer>
     protected void renderBg(PoseStack poseStack, float partialTicks, int mouseX, int mouseY)
     {   RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
         RenderSystem.setShaderTexture(0, HEARTH_GUI);
-        int x = (this.width - this.getXSize()) / 2;
-        int y = (this.height - this.getYSize()) / 2;
-        this.blit(poseStack, x, y, 0, 0, this.imageWidth, this.imageHeight);
+        this.blit(poseStack, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
 
         int hotFuel  = (int) (this.menu.getHotFuel()  / 27.7);
         int coldFuel = (int) (this.menu.getColdFuel() / 27.7);
