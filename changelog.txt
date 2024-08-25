@@ -2362,8 +2362,6 @@ Technical Changes:
 2.3.2
 !! (1.16) The config setting for llama spawn biomes will be deleted and replaced with goat spawn biomes. Please back up before launching!
 
-- Added screen effect for when the player is wet
-      - This can be disabled in the configs
 - Added config option to hide insulation tooltips unless shift is held
 * (1.16) Backported goats from 1.18
       - Replicate the appearance and behavior of Vanilla goats
@@ -2394,3 +2392,18 @@ Translation Changes:
 Technical Changes:
 - Any drinkable item can now be put in the boiler if Thirst Was Taken is installed, removing the need for the "boiler_purifiable" tag
 - The config for carried item temperatures now has an optional "max_effect" field that limits how much that type of item can affect the player
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.3.3
+- Updated the hearth's item texture slightly to match its new block texture
+
+Fixes:
+* Fixed crash when the player is wet and GUI scaling is set to "Auto"
+- Fixed the hearth still accepting water if the config settings had not been updated from a previous version
+- Fixed erratic walking behavior for chameleons, especially when bumping into other mobs
+- Fixed the chameleon's walking animation clipping into the ground slightly
+- Fixed items thrown to a chameleon having different NBT when picked up, making them unstackable
+- Fixed chameleons accepting infinite breeding items in some cases
+- Fixed baby chameleons attempting to go into breeding mode when fed breeding items
+- Fixed the water dripping effect persisting on-screen after the player has completely dried off
