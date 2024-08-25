@@ -135,7 +135,12 @@ public class WetnessRenderer
                 if (!paused)
                 {
                     // Fade out
-                    drop.alpha -= 0.003f * frametime * tempMult;
+                    if (wetness <= 0)
+                    {   drop.alpha -= 0.08f * frametime;
+                    }
+                    else
+                    {   drop.alpha -= 0.003f * frametime * tempMult;
+                    }
                     // Recalculate the y velocity every so often
                     if (drop.yMotionUpdateCooldown <= 0)
                     {
@@ -145,9 +150,6 @@ public class WetnessRenderer
                     else drop.yMotionUpdateCooldown -= frametime;
 
                     // Movement due to player motion
-                    float dropFallFromPlayerVel = Math.max(-4f * frametime, playerYVelocity * frametime * 20);
-                    dropFallFromPlayerVel = (float) CSMath.shrink(dropFallFromPlayerVel, 0.3f) * 2;
-                    if (dropFallFromPlayerVel < 0) drop.yMotion /= 2;
                     float dropMoveFromPlayerLook = -(player.yHeadRot - player.yHeadRotO) / 20;
                     dropMoveFromPlayerLook = (float) CSMath.shrink(dropMoveFromPlayerLook, 0.5f);
                     drop.xVelocity = (float) CSMath.maxAbs(dropMoveFromPlayerLook * (Math.random() * 0.2), drop.xVelocity);
@@ -164,7 +166,7 @@ public class WetnessRenderer
                     int oldY = (int)pos.y;
                     // Move the drop
                     if (!isSubmerged)
-                    {   drop.position.add(new Vector2f(drop.xMotion * drop.yMotion * 20 + drop.xVelocity, drop.yMotion + dropFallFromPlayerVel).div(uiScale).mul(3));
+                    {   drop.position.add(new Vector2f(drop.xMotion * drop.yMotion * 20 + drop.xVelocity, drop.yMotion).div(uiScale).mul(3));
                     }
 
                     // Add a trail behind the drop
