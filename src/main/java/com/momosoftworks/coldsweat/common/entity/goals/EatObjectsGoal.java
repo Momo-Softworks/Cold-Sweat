@@ -55,9 +55,8 @@ public class EatObjectsGoal extends Goal
             {
                 ItemStack item = itemEntity.getItem();
                 Optional<Edible> edible = ChameleonEdibles.getEdible(item);
-                String recipient = NBTHelper.getTagOrEmpty(item).getString("Recipient");
                 if (edible.isPresent()
-                && (recipient.isEmpty() || recipient.equals(this.entity.getUUID().toString())))
+                && (!itemEntity.getPersistentData().contains("Recipient") || itemEntity.getPersistentData().getUUID("Recipient").equals(this.entity.getUUID())))
                 {
                     if (this.entity.getCooldown(edible.get()) <= 0 && edible.get().shouldEat(this.entity, itemEntity)
                     || isBreedingItem(itemEntity.getItem()))
@@ -139,7 +138,9 @@ public class EatObjectsGoal extends Goal
                                 {   ItemStack stack = item.getItem().copy();
                                     stack.shrink(1);
                                     if (!stack.isEmpty())
-                                    {   WorldHelper.entityDropItem(this.entity, stack).setThrower(thrower);
+                                    {   ItemEntity remainingStack = WorldHelper.entityDropItem(this.entity, stack);
+                                        remainingStack.setThrower(thrower);
+                                        remainingStack.getPersistentData().putUUID("Recipient", this.entity.getUUID());
                                     }
                                 }
                             }
