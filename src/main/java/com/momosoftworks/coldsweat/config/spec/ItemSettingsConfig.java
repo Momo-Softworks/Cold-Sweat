@@ -76,7 +76,6 @@ public class ItemSettingsConfig
                                 Arrays.asList("minecraft:ice",                250),
                                 Arrays.asList("minecraft:clay",               333),
                                 Arrays.asList("minecraft:powder_snow_bucket", 100),
-                                //List.of("minecraft:water_bucket",       1000),
                                 Arrays.asList("minecraft:packed_ice",         1000)
                         ).build(),
                         it ->
@@ -100,13 +99,12 @@ public class ItemSettingsConfig
                                 Arrays.asList("minecraft:magma_block",     333),
                                 Arrays.asList("minecraft:lava_bucket",     1000),
                                 // Cold
-                                Arrays.asList("minecraft:snowball",           -37),
+                                Arrays.asList("minecraft:snowball",           -10),
                                 Arrays.asList("minecraft:clay_ball",          -37),
-                                Arrays.asList("minecraft:snow_block",         -333),
-                                Arrays.asList("minecraft:ice",                -333),
+                                Arrays.asList("minecraft:snow_block",         -100),
+                                Arrays.asList("minecraft:ice",                -250),
                                 Arrays.asList("minecraft:clay",               -333),
-                                Arrays.asList("minecraft:powder_snow_bucket", -333),
-                                Arrays.asList("minecraft:water_bucket",       -1000),
+                                Arrays.asList("minecraft:powder_snow_bucket", -100),
                                 Arrays.asList("minecraft:packed_ice",         -1000)
                         ).build(),
                         it ->
@@ -315,7 +313,7 @@ public class ItemSettingsConfig
                         "Format: [[\"item_id\", amount, *nbt, *duration], [\"item_id\", amount, *nbt, *duration], ...etc]",
                         "Negative values are cold foods, positive values are hot foods",
                         "nbt: Optional. If set, the item will only affect the player's temperature if it has the specified NBT tag.",
-                        "duration: Optional. If set, the player's temperature will remain increased/decreased for this amount of time.")
+                        "duration: Optional. If set, the player's temperature will remain increased/decreased for this amount of time (in ticks).")
                 .defineListAllowEmpty(Arrays.asList("Temperature-Affecting Foods"), () -> Arrays.asList(
                         Arrays.asList("cold_sweat:soul_sprout", -20, "{}", 1200)
                 ),

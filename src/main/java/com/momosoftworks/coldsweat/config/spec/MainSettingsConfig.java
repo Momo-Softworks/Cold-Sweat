@@ -63,21 +63,21 @@ public class MainSettingsConfig
 
         MIN_HABITABLE_TEMPERATURE = BUILDER
                 .comment("Defines the minimum habitable temperature")
-                .defineInRange("Minimum Habitable Temperature", defaultDiff.getOrDefault("min_temp", Temperature.convert(50, Temperature.Units.F, Temperature.Units.MC, true)),
+                .defineInRange("Minimum Habitable Temperature", defaultDiff.getOrDefault(ConfigSettings.MIN_TEMP, Temperature.convert(50, Temperature.Units.F, Temperature.Units.MC, true)),
                                Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 
         MAX_HABITABLE_TEMPERATURE = BUILDER
                 .comment("Defines the maximum habitable temperature")
-                .defineInRange("Maximum Habitable Temperature", defaultDiff.getOrDefault("max_temp", Temperature.convert(100, Temperature.Units.F, Temperature.Units.MC, true)),
+                .defineInRange("Maximum Habitable Temperature", defaultDiff.getOrDefault(ConfigSettings.MAX_TEMP, Temperature.convert(100, Temperature.Units.F, Temperature.Units.MC, true)),
                                Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 
         TEMP_RATE_MULTIPLIER = BUILDER
                 .comment("Rate at which the player's body temperature changes (default: 1.0 (100%))")
-                .defineInRange("Rate Multiplier", defaultDiff.getOrDefault("temp_rate", 1d), 0d, Double.POSITIVE_INFINITY);
+                .defineInRange("Rate Multiplier", defaultDiff.getOrDefault(ConfigSettings.TEMP_RATE, 1d), 0d, Double.POSITIVE_INFINITY);
 
         TEMP_DAMAGE = BUILDER
                 .comment("Damage dealt to the player when they are too hot or too cold")
-                .defineInRange("Temperature Damage", defaultDiff.getOrDefault("temp_damage", 2d), 0d, Double.POSITIVE_INFINITY);
+                .defineInRange("Temperature Damage", defaultDiff.getOrDefault(ConfigSettings.TEMP_DAMAGE, 2d), 0d, Double.POSITIVE_INFINITY);
 
         NULLIFY_IN_PEACEFUL = BUILDER
                 .comment("Sets whether damage scales with difficulty")
@@ -93,15 +93,15 @@ public class MainSettingsConfig
 
         FIRE_RESISTANCE_BLOCKS_OVERHEATING = BUILDER
                 .comment("Allow fire resistance to block overheating damage")
-                .define("Fire Resistance Immunity", defaultDiff.getOrDefault("fire_resistance_enabled", true));
+                .define("Fire Resistance Immunity", defaultDiff.getOrDefault(ConfigSettings.FIRE_RESISTANCE_ENABLED, true));
 
         ICE_RESISTANCE_BLOCKS_FREEZING = BUILDER
                 .comment("Allow ice resistance to block freezing damage")
-                .define("Ice Resistance Immunity", defaultDiff.getOrDefault("ice_resistance_enabled", true));
+                .define("Ice Resistance Immunity", defaultDiff.getOrDefault(ConfigSettings.ICE_RESISTANCE_ENABLED, true));
 
         REQUIRE_THERMOMETER = BUILDER
             .comment("Thermometer item is required to see detailed world temperature")
-            .define("Require Thermometer", defaultDiff.getOrDefault("require_thermometer", true));
+            .define("Require Thermometer", defaultDiff.getOrDefault(ConfigSettings.REQUIRE_THERMOMETER, true));
 
         BUILDER.pop();
 
@@ -113,8 +113,9 @@ public class MainSettingsConfig
             BUILDER.push("Hot");
 
             HEATSTROKE_FOG = BUILDER
-                .comment("When set to true, the player's view distance will decrease when they are too hot")
-                .defineInRange("Heatstroke Fog", defaultDiff.getOrDefault("heatstroke_fog", 6.0), 0, Double.POSITIVE_INFINITY);
+                .comment("Defines the distance at which the player's vision is obscured by heatstroke fog",
+                         "Set to a value above 64 to disable the effect")
+                .defineInRange("Heatstroke Fog", defaultDiff.getOrDefault(ConfigSettings.HEATSTROKE_FOG_DISTANCE, 6.0), 0, Double.POSITIVE_INFINITY);
 
             BUILDER.pop();
 
@@ -123,22 +124,22 @@ public class MainSettingsConfig
             FREEZING_HEARTS = BUILDER
                 .comment("When set to true, this percentage of the player's hearts will freeze over when they are too cold, preventing regeneration",
                          "Represented as a percentage")
-                .defineInRange("Freezing Hearts Percentage", defaultDiff.getOrDefault("freezing_hearts", 0.5), 0, 1);
+                .defineInRange("Freezing Hearts Percentage", defaultDiff.getOrDefault(ConfigSettings.HEARTS_FREEZING_PERCENTAGE, 0.5), 0, 1);
 
             COLD_KNOCKBACK = BUILDER
                 .comment("When set to true, the player's attack knockback will be reduced by this amount when they are too cold",
                          "Represented as a percentage")
-                .defineInRange("Chilled Knockback Reduction", defaultDiff.getOrDefault("knockback_impairment", 0.5), 0, 1);
+                .defineInRange("Chilled Knockback Reduction", defaultDiff.getOrDefault(ConfigSettings.COLD_KNOCKBACK_REDUCTION, 0.5), 0, 1);
 
             COLD_MOVEMENT = BUILDER
                 .comment("When set to true, the player's movement speed will be reduced by this amount when they are too cold",
                          "Represented as a percentage")
-                .defineInRange("Chilled Movement Slowdown", defaultDiff.getOrDefault("cold_slowness", 0.5), 0, 1);
+                .defineInRange("Chilled Movement Slowdown", defaultDiff.getOrDefault(ConfigSettings.COLD_MOVEMENT_SLOWDOWN, 0.5), 0, 1);
 
             COLD_MINING = BUILDER
                 .comment("When set to true, the player's mining speed will be reduced by this amount when they are too cold",
                          "Represented as a percentage")
-                .defineInRange("Chilled Mining Speed Reduction", defaultDiff.getOrDefault("cold_break_speed", 0.5), 0, 1);
+                .defineInRange("Chilled Mining Speed Reduction", defaultDiff.getOrDefault(ConfigSettings.COLD_MINING_IMPAIRMENT, 0.5), 0, 1);
 
             BUILDER.pop();
         BUILDER.pop();
@@ -147,12 +148,12 @@ public class MainSettingsConfig
         BUILDER.push("Grace Period");
 
                 GRACE_PERIOD_LENGTH = BUILDER
-                .comment("The number of ticks after the player spawns during which they are immune to temperature effects")
-                .defineInRange("Grace Period Length", defaultDiff.getOrDefault("grace_length", 6000), 0, Integer.MAX_VALUE);
+                .comment("The amount of time (in ticks) after the player spawns during which they are immune to temperature effects")
+                .defineInRange("Grace Period Length", defaultDiff.getOrDefault(ConfigSettings.GRACE_LENGTH, 6000), 0, Integer.MAX_VALUE);
 
                 ENABLE_GRACE_PERIOD = BUILDER
                 .comment("Enables the grace period")
-                .define("Grace Period Enabled", defaultDiff.getOrDefault("grace_enabled", true));
+                .define("Grace Period Enabled", defaultDiff.getOrDefault(ConfigSettings.GRACE_ENABLED, true));
 
         BUILDER.pop();
 
