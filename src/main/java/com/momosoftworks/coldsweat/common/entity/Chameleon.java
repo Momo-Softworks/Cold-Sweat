@@ -20,7 +20,6 @@ import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.Util;
 import net.minecraft.advancements.Advancement;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -342,20 +341,6 @@ public class Chameleon extends Animal
     }
 
     @Override
-    public float tickHeadTurn(float p_21260_, float p_21261_)
-    {
-        if (this.isWalking())
-        {   this.yBodyRot = (float) -Math.toDegrees(Math.atan2(getDeltaMovement().x, getDeltaMovement().z));
-            this.rotateHeadIfNecessary();
-            this.rotateBodyIfNecessary();
-        }
-        if (Math.abs(yHeadRot - yBodyRot) > 45)
-        {   rotateBodyIfNecessary();
-        }
-        return p_21261_;
-    }
-
-    @Override
     public int getHeadRotSpeed()
     {   return 20;
     }
@@ -562,16 +547,6 @@ public class Chameleon extends Animal
                ? player.getItemBySlot(EquipmentSlot.HEAD).is(ModItems.HOGLIN_HEADPIECE)
                     ? 0.65 : 0.5
                : 0;
-    }
-
-    private void rotateBodyIfNecessary()
-    {
-        this.yBodyRot = Mth.rotateIfNecessary(this.yBodyRot, this.yHeadRot, (float)this.getMaxHeadYRot());
-    }
-
-    private void rotateHeadIfNecessary()
-    {
-        this.yHeadRot = Mth.rotateIfNecessary(this.yHeadRot, this.yBodyRot, (float)this.getMaxHeadYRot());
     }
 
     @Override
