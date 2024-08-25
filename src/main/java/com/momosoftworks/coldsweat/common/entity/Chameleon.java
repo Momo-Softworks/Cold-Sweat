@@ -197,9 +197,10 @@ public class Chameleon extends Animal
                 if (!player.level.isClientSide)
                 {
                     ItemStack dropStack = stack.copy();
-                    dropStack.setCount(1);
-                    dropStack.getOrCreateTag().put("Recipient", StringTag.valueOf(this.getUUID().toString()));
-                    player.drop(dropStack, true);
+                    ItemEntity dropped = player.drop(dropStack, true);
+                    if (dropped != null)
+                    {   dropped.getPersistentData().putUUID("Recipient", this.getUUID());
+                    }
                     player.stopUsingItem();
                     this.usePlayerItem(player, hand, stack);
                 }
@@ -230,7 +231,8 @@ public class Chameleon extends Animal
 
     @Override
     public boolean canFallInLove()
-    {   return super.canFallInLove() && !this.getPersistentData().getBoolean("HasBred");
+    {   return super.canFallInLove() && !this.isBaby() && !this.isInLove()
+            && !this.getPersistentData().getBoolean("HasBred");
     }
 
     @Override
@@ -293,10 +295,11 @@ public class Chameleon extends Animal
     }
 
     @Override
-    public void spawnChildFromBreeding(ServerLevel pLevel, Animal pMate)
+    public void spawnChildFromBreeding(ServerLevel level, Animal mate)
     {
-        super.spawnChildFromBreeding(pLevel, pMate);
+        super.spawnChildFromBreeding(level, mate);
         this.getPersistentData().putBoolean("HasBred", true);
+        mate.getPersistentData().putBoolean("HasBred", true);
     }
 
     @Nullable

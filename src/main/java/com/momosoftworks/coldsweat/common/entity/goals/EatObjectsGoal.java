@@ -60,7 +60,7 @@ public class EatObjectsGoal extends Goal
                 ItemStack item = itemEntity.getItem();
                 Optional<Edible> edible = ChameleonEdibles.getEdible(item);
                 if (edible.isPresent()
-                && (!NBTHelper.getTagOrEmpty(item).contains("Recipient") || NBTHelper.getTagOrEmpty(item).getString("Recipient").equals(this.entity.getUUID().toString())))
+                && (!itemEntity.getPersistentData().contains("Recipient") || itemEntity.getPersistentData().getUUID("Recipient").equals(this.entity.getUUID())))
                 {
                     if (this.entity.getCooldown(edible.get()) <= 0 && edible.get().shouldEat(this.entity, itemEntity)
                     || isBreedingItem(itemEntity.getItem()))
@@ -135,12 +135,18 @@ public class EatObjectsGoal extends Goal
                         if (this.target instanceof ItemEntity item)
                         {   this.entity.onItemPickup(item);
 
-                            UUID thrower = item.getThrower();
-                            if (item.getItem().getCount() > 0)
-                            {   ItemStack stack = item.getItem().copy();
-                                stack.shrink(1);
-                                if (!stack.isEmpty())
-                                    WorldHelper.entityDropItem(this.entity, stack).setThrower(thrower);
+                            Entity thrower = item.getThrowingEntity();
+                            if (thrower != null)
+                            {
+                                if (item.getItem().getCount() > 0)
+                                {   ItemStack stack = item.getItem().copy();
+                                    stack.shrink(1);
+                                    if (!stack.isEmpty())
+                                    {   ItemEntity remainingStack = WorldHelper.entityDropItem(this.entity, stack);
+                                        remainingStack.setThrower(thrower.getUUID());
+                                        remainingStack.getPersistentData().putUUID("Recipient", this.entity.getUUID());
+                                    }
+                                }
                             }
                         }
 
