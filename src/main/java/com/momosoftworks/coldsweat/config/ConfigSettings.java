@@ -897,6 +897,12 @@ public class ConfigSettings
             return (T) settings.getOrDefault(id, () -> defaultValue).get();
         }
 
+        public <T> T getOrDefault(DynamicHolder<?> config, T defaultValue)
+        {
+            this.ensureSettingsGenerated();
+            return (T) settings.getOrDefault(getKey(config), () -> defaultValue).get();
+        }
+
         public void load()
         {
             this.ensureSettingsGenerated();
