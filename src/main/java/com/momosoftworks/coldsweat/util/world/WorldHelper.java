@@ -294,7 +294,9 @@ public abstract class WorldHelper
     {   var biome = DynamicHolder.create(() -> level.getBiomeManager().getBiome(pos).value());
 
         return (level.isRaining() && biome.get().getPrecipitation() == Biome.Precipitation.RAIN || CompatManager.isRainstormAt(level, pos))
-            && biome.get().warmEnoughToRain(pos) && canSeeSky(level, pos.above(), level.getMaxBuildHeight());
+            && canSeeSky(level, pos.above(), level.getMaxBuildHeight())
+            && biome.get().warmEnoughToRain(pos)
+            && !CompatManager.isColdEnoughToSnow(level, pos);
     }
 
     /**

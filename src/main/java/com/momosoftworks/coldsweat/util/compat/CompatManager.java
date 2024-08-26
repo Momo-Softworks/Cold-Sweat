@@ -45,6 +45,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.jwaresoftware.mcmods.lib.api.combat.Armory;
+import sereneseasons.season.SeasonHooks;
 import top.theillusivec4.curios.api.CuriosCapability;
 import top.theillusivec4.curios.api.event.CurioChangeEvent;
 import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
@@ -216,6 +217,11 @@ public class CompatManager
             }
         }
         return false;
+    }
+
+    public static boolean isColdEnoughToSnow(Level level, BlockPos pos)
+    {
+        return SEASONS_LOADED && SeasonHooks.coldEnoughToSnowHook(level.getBiome(pos).value(), pos, level);
     }
 
     public static boolean hasWaterPurity(ItemStack stack)
