@@ -27,6 +27,7 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.jwaresoftware.mcmods.lib.Armory;
+import sereneseasons.season.SeasonHooks;
 import top.theillusivec4.curios.api.CuriosCapability;
 import top.theillusivec4.curios.api.event.CurioChangeEvent;
 import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
@@ -203,6 +204,11 @@ public class CompatManager
             }
         }*/
         return false;
+    }
+
+    public static boolean isColdEnoughToSnow(World level, BlockPos pos)
+    {
+        return SEASONS_LOADED && SeasonHooks.getBiomeTemperature(level, level.getBiome(pos), pos) < 0.15f;
     }
 
     public static boolean isGoat(Entity entity)

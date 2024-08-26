@@ -282,7 +282,9 @@ public abstract class WorldHelper
     {   DynamicHolder<Biome> biome = DynamicHolder.create(() -> level.getBiomeManager().getBiome(pos));
 
         return (level.isRaining() && biome.get().getPrecipitation() == Biome.RainType.RAIN || CompatManager.isRainstormAt(level, pos))
-            && biome.get().getTemperature(pos) >= 0.15F && canSeeSky(level, pos.above(), level.getMaxBuildHeight());
+            && canSeeSky(level, pos.above(), level.getMaxBuildHeight())
+            && biome.get().getTemperature(pos) >= 0.15f
+            && !CompatManager.isColdEnoughToSnow(level, pos);
     }
 
     /**
