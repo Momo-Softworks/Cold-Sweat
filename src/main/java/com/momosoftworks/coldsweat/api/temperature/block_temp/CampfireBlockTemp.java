@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.api.temperature.block_temp;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import net.minecraft.core.BlockPos;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -15,7 +16,7 @@ public class CampfireBlockTemp extends BlockTemp
 {
     public CampfireBlockTemp()
     {
-        super(ForgeRegistries.BLOCKS.getValues().stream().filter(block -> block instanceof CampfireBlock && block != Blocks.SOUL_CAMPFIRE).toArray(Block[]::new));
+        super(ForgeRegistries.BLOCKS.tags().getTag(BlockTags.CAMPFIRES).stream().filter(block -> block instanceof CampfireBlock && block != Blocks.SOUL_CAMPFIRE).toArray(Block[]::new));
     }
 
     @Override
