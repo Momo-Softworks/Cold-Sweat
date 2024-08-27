@@ -237,7 +237,7 @@ public class WorldSettingsConfig
                                             Arrays.asList("minecraft:soul_fire",     -0.476, 7, true, 0.8),
                                             Arrays.asList("minecraft:fire",           0.476, 7, true, 0.8),
                                             Arrays.asList("minecraft:magma_block",      0.25, 3, true, 1),
-                                            Arrays.asList("minecraft:soul_campfire", -0.476, 7, true, 0.6, "lit=true")
+                                            Arrays.asList("minecraft:soul_campfire", -0.476, 7, true, 0.8, "lit=true")
                                     ).addIf(CompatManager.isCavesAndCliffsLoaded(),
                                             () -> Arrays.asList("cavesandcliffs:lava_cauldron",    0.5, 7, true, 1.5))
                                     .build(),
