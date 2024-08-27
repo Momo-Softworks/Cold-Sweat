@@ -1,18 +1,29 @@
 package com.momosoftworks.coldsweat.api.temperature.block_temp;
 
-import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.serialization.ObjectBuilder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.registries.ForgeRegistries;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class IceBlockTemp extends BlockTemp
 {
     public IceBlockTemp()
-    {   super(Blocks.ICE, Blocks.PACKED_ICE, Blocks.BLUE_ICE);
+    {
+        super(ObjectBuilder.build(() ->
+        {
+            List<Block> blocks = new ArrayList<>(List.of(Blocks.ICE, Blocks.PACKED_ICE, Blocks.BLUE_ICE));
+            blocks.addAll(ForgeRegistries.BLOCKS.tags().getTag(BlockTags.ICE).stream().toList());
+            return blocks.stream().distinct().toArray(Block[]::new);
+        }));
     }
 
     @Override
@@ -21,7 +32,9 @@ public class IceBlockTemp extends BlockTemp
         Block block = state.getBlock();
         double temperature = block == Blocks.ICE ? -0.15
                            : block == Blocks.PACKED_ICE ? -0.25
-                           : block == Blocks.BLUE_ICE ? -0.35 : 0;
+                           : block == Blocks.BLUE_ICE ? -0.35
+                           : state.is(BlockTags.ICE) ? -0.15
+                           : 0;
         double range = 4;
         return CSMath.blend(0, temperature, distance, range, 0);
     }
