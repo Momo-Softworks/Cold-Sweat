@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.util.compat;
 import com.anthonyhilyard.iceberg.util.Tooltips;
 import com.mojang.datafixers.util.Either;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.api.temperature.modifier.compat.SereneSeasonsTempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.core.init.BlockInit;
@@ -46,6 +47,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import sereneseasons.api.season.SeasonChangedEvent;
 import sereneseasons.season.SeasonHooks;
 import top.theillusivec4.curios.api.CuriosCapability;
 import top.theillusivec4.curios.api.event.CurioChangeEvent;
@@ -292,6 +294,21 @@ public class CompatManager
                     event.addDrink(ModItems.FILLED_WATERSKIN, 6, 3);
                     event.addContainer(new ContainerWithPurity(ModItems.WATERSKIN.getDefaultInstance(),
                                                                ModItems.FILLED_WATERSKIN.getDefaultInstance()));
+                }
+            });
+        }
+
+        if (SEASONS_LOADED)
+        {
+            MinecraftForge.EVENT_BUS.register(new Object()
+            {
+                @SubscribeEvent
+                public void onSeasonChange(SeasonChangedEvent.Standard event)
+                {
+                    for (Player player : event.getLevel().players())
+                    {
+                        Temperature.getModifier(player, Temperature.Trait.WORLD, SereneSeasonsTempModifier.class).ifPresent(mod -> mod.update(mod.getLastInput(), player, Temperature.Trait.WORLD));
+                    }
                 }
             });
         }
