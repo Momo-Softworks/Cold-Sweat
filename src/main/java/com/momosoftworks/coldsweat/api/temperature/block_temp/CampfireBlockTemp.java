@@ -7,15 +7,15 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.CampfireBlock;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.registries.ForgeRegistries;
 
 public class CampfireBlockTemp extends BlockTemp
 {
     public CampfireBlockTemp()
     {
-        super(ForgeRegistries.BLOCKS.getValues().stream().filter(block -> block instanceof CampfireBlock && block != Blocks.SOUL_CAMPFIRE).toArray(Block[]::new));
+        super(BlockTags.CAMPFIRES.getValues().stream().filter(block -> block instanceof CampfireBlock && block != Blocks.SOUL_CAMPFIRE).toArray(Block[]::new));
     }
 
     @Override
