@@ -3,18 +3,18 @@ package com.momosoftworks.coldsweat.util.compat;
 import com.anthonyhilyard.iceberg.util.Tooltips;
 import com.mojang.datafixers.util.Either;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.api.temperature.modifier.compat.SereneSeasonsTempModifier;
+import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.core.init.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModDamageSources;
-import dev.ghen.thirst.api.ThirstHelper;
 import dev.ghen.thirst.content.purity.ContainerWithPurity;
 import dev.ghen.thirst.content.purity.WaterPurity;
 import dev.ghen.thirst.foundation.common.event.RegisterThirstValueEvent;
+import glitchcore.event.EventManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -33,6 +33,7 @@ import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
+import sereneseasons.api.season.SeasonChangedEvent;
 import sereneseasons.season.SeasonHooks;
 import top.theillusivec4.curios.api.CuriosCapability;
 import top.theillusivec4.curios.api.event.CurioChangeEvent;
@@ -321,6 +322,25 @@ public class CompatManager
                                                                ModItems.FILLED_WATERSKIN.value()));
                 }
             });
+        }
+
+        if (SEASONS_LOADED)
+        {
+            // Register event to GlitchCore's stupid redundant proprietary event bus
+            new Object()
+            {
+                public void registerListener()
+                {
+                    EventManager.<SeasonChangedEvent.Standard>addListener(event ->
+                    {
+                        for (Player player : event.getLevel().players())
+                        {
+                            Temperature.getModifier(player, Temperature.Trait.WORLD, SereneSeasonsTempModifier.class)
+                                       .ifPresent(mod -> mod.update(mod.getLastInput(), player, Temperature.Trait.WORLD));
+                        }
+                    });
+                }
+            }.registerListener();
         }
     }
 

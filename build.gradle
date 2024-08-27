@@ -103,9 +103,10 @@ configurations {
 dependencies {
     implementation "net.neoforged:neoforge:${neo_version}"
 
-    compileOnly "curse.maven:serene-seasons-291874:5429913-deobf"
     compileOnly "maven.modrinth:thirst-was-taken:1.21.0-2.0.0"
 
+    implementation "curse.maven:serene-seasons-291874:5613014"
+    implementation "curse.maven:glitchcore-955399:5645390"
     implementation "curse.maven:spoiled-364918:5490658"
     implementation "curse.maven:curios-continuation-1037991:5476603"
     implementation "curse.maven:iceberg-520110:5590963"
