@@ -76,7 +76,7 @@ public class SoulspringLampItem extends Item
                 && temp > max && getFuel(stack) > 0)
                 {
                     // Drain fuel
-                    if (!(living instanceof PlayerEntity && !((PlayerEntity) living).isCreative() || living.isSpectator()))
+                    if (!(living instanceof PlayerEntity && ((PlayerEntity) living).isCreative() || living.isSpectator()))
                     {   addFuel(stack, -0.005 * CSMath.clamp(temp - max, 1, 3));
                     }
 
