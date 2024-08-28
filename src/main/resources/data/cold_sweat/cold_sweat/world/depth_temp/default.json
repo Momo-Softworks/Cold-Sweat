@@ -9,7 +9,7 @@
       },
       "bottom": {
         "anchor": "ground_level",
-        "depth": -4,
+        "depth": 0,
         "temperature": "passthrough,1"
       }
     },
@@ -17,7 +17,7 @@
       "type": "linear",
       "top": {
         "anchor": "ground_level",
-        "depth": -5,
+        "depth": -1,
         "temperature": "passthrough,1"
       },
       "bottom": {
