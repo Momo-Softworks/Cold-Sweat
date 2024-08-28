@@ -3,7 +3,10 @@ package com.momosoftworks.coldsweat.api.temperature.block_temp;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import net.minecraft.core.BlockPos;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -11,13 +14,12 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
-import java.util.stream.StreamSupport;
-
 public class CampfireBlockTemp extends BlockTemp
 {
     public CampfireBlockTemp()
     {
-        super(StreamSupport.stream(BuiltInRegistries.BLOCK.spliterator(), true).filter(block -> block instanceof CampfireBlock && block != Blocks.SOUL_CAMPFIRE).toArray(Block[]::new));
+        super(BuiltInRegistries.BLOCK.getTag(BlockTags.CAMPFIRES).stream().flatMap(HolderSet::stream).map(Holder::value)
+                                     .filter(block -> block instanceof CampfireBlock && block != Blocks.SOUL_CAMPFIRE).toArray(Block[]::new));
     }
 
     @Override
