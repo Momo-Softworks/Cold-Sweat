@@ -12,8 +12,6 @@ import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.function.Supplier;
 
@@ -53,7 +51,7 @@ public class ClientSoulspringTooltip implements ClientTooltipComponent
 
             int i = 0;
             for (Item item : ConfigSettings.SOULSPRING_LAMP_FUEL.get().keySet())
-            {   graphics.renderItem(new ItemStack(Holder.direct(item), 1, ConfigSettings.SOULSPRING_LAMP_FUEL.get().get(item).data().components().components().asPatch()),
+            {   graphics.renderItem(new ItemStack(Holder.direct(item), 1, ConfigSettings.SOULSPRING_LAMP_FUEL.get().get(item).data().components().getAsPatch()),
                                     x + ((i * 16) % 96), y + 12 + CSMath.floor(i / 6d) * 16);
                 i++;
             }

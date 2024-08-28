@@ -97,6 +97,6 @@ public class ModCreativeTabs
         list.sort(Comparator.comparing(item -> item.getKey() instanceof ArmorItem armor
                                                ? armor.getMaterial().getRegisteredName() + (3 - armor.getEquipmentSlot().getIndex())
                                                : ""));
-        return list.stream().map(data -> new ItemStack(Holder.direct(data.getKey()), 1, data.getValue().data().components().components().asPatch())).toList();
+        return list.stream().map(data -> new ItemStack(Holder.direct(data.getKey()), 1, data.getValue().data().components().getAsPatch())).toList();
     }
 }

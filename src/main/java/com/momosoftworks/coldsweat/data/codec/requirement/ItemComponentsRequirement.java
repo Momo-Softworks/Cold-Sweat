@@ -3,35 +3,28 @@ package com.momosoftworks.coldsweat.data.codec.requirement;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import io.netty.buffer.Unpooled;
 import net.minecraft.commands.arguments.item.ItemParser;
-import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.*;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.*;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.commands.GiveCommand;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.connection.ConnectionType;
 
 import javax.annotation.Nullable;
 
-public record ItemComponentsRequirement(PatchedDataComponentMap components)
+public record ItemComponentsRequirement(DataComponentMap components)
 {
     public static final Codec<ItemComponentsRequirement> CODEC = CompoundTag.CODEC.xmap(ItemComponentsRequirement::deserialize, ItemComponentsRequirement::serialize);
 
     public ItemComponentsRequirement()
-    {   this(new PatchedDataComponentMap(DataComponentMap.builder().build()));
+    {   this(DataComponentMap.builder().build());
     }
 
     public boolean test(ItemStack pStack)
@@ -48,6 +41,10 @@ public record ItemComponentsRequirement(PatchedDataComponentMap components)
                                                                                                  other -> other.equals(this.components().get(component)),
                                                                                                  false));
         }
+    }
+
+    public DataComponentPatch getAsPatch()
+    {   return new PatchedDataComponentMap(this.components()).asPatch();
     }
 
     public static ItemComponentsRequirement parse(String data)
@@ -81,7 +78,7 @@ public record ItemComponentsRequirement(PatchedDataComponentMap components)
 
     public String write()
     {
-        return DataComponentMap.CODEC.encodeStart(JsonOps.COMPRESSED, this.components).mapOrElse(el -> el.getAsString(), s -> "");
+        return DataComponentMap.CODEC.encodeStart(JsonOps.INSTANCE, this.components).getOrThrow().toString();
     }
 
     public CompoundTag serialize()
