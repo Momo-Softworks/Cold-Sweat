@@ -119,7 +119,7 @@ public record DepthTempData(List<TempRegion> temperatures)
             either ->
             {
                 if (either.left().isPresent())
-                {   return DataResult.success(new TempContainer(either.left().get(), ContainerType.NONE, 1));
+                {   return DataResult.success(new TempContainer(either.left().get(), ContainerType.NORMAL, 1));
                 }
                 else
                 {
@@ -138,7 +138,7 @@ public record DepthTempData(List<TempRegion> temperatures)
             },
             value ->
             {
-                String strength = value.type == ContainerType.NONE ? "" : "," + value.strength;
+                String strength = value.type == ContainerType.NORMAL ? "" : "," + value.strength;
                 if (value.type == ContainerType.PASSTHROUGH)
                 {   return DataResult.success(Either.right("passthrough" + strength));
                 }
@@ -173,7 +173,7 @@ public record DepthTempData(List<TempRegion> temperatures)
         {
             return switch (this.temperature.type)
             {
-                case NONE -> this.temperature.temperature;
+                case NORMAL -> this.temperature.temperature;
                 case PASSTHROUGH -> temperature;
                 case MIDPOINT -> (ConfigSettings.MIN_TEMP.get() + ConfigSettings.MAX_TEMP.get()) / 2;
             };
@@ -181,7 +181,7 @@ public record DepthTempData(List<TempRegion> temperatures)
 
         public enum ContainerType implements StringRepresentable
         {
-            NONE("none"),
+            NORMAL("normal"),
             PASSTHROUGH("passthrough"),
             MIDPOINT("midpoint");
 
