@@ -140,7 +140,7 @@ public class DepthTempData implements IForgeRegistryEntry<DepthTempData>
             either ->
             {
                 if (either.left().isPresent())
-                {   return DataResult.success(new TempContainer(either.left().get(), ContainerType.NONE, 1));
+                {   return DataResult.success(new TempContainer(either.left().get(), ContainerType.NORMAL, 1));
                 }
                 else
                 {
@@ -159,7 +159,7 @@ public class DepthTempData implements IForgeRegistryEntry<DepthTempData>
             },
             value ->
             {
-                String strength = value.type == ContainerType.NONE ? "" : "," + value.strength;
+                String strength = value.type == ContainerType.NORMAL ? "" : "," + value.strength;
                 if (value.type == ContainerType.PASSTHROUGH)
                 {   return DataResult.success(Either.right("passthrough" + strength));
                 }
@@ -210,7 +210,7 @@ public class DepthTempData implements IForgeRegistryEntry<DepthTempData>
         {
             switch (this.temperature.type)
             {
-                case NONE : return this.temperature.temperature;
+                case NORMAL : return this.temperature.temperature;
                 case PASSTHROUGH : return temperature;
                 case MIDPOINT : return  (ConfigSettings.MIN_TEMP.get() + ConfigSettings.MAX_TEMP.get()) / 2;
             }
@@ -219,7 +219,7 @@ public class DepthTempData implements IForgeRegistryEntry<DepthTempData>
 
         public enum ContainerType implements StringRepresentable
         {
-            NONE("none"),
+            NORMAL("normal"),
             PASSTHROUGH("passthrough"),
             MIDPOINT("midpoint");
 
