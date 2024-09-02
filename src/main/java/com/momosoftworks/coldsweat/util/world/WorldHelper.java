@@ -15,8 +15,6 @@ import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
-import com.momosoftworks.coldsweat.util.serialization.ObjectBuilder;
-import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import com.momosoftworks.coldsweat.util.serialization.Triplet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.block.Block;
@@ -27,8 +25,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.PickaxeItem;
-import net.minecraft.item.TieredItem;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
@@ -597,16 +593,5 @@ public abstract class WorldHelper
         {   temp = seasonModifier.get().update(temp, null, Temperature.Trait.WORLD);
         }
         return temp;
-    }
-
-    public static boolean isEffectivelyPickaxe(ItemStack stack)
-    {
-        if (stack.getItem() instanceof PickaxeItem)
-        {   return true;
-        }
-
-        // Check if the item can mine stone efficiently
-        BlockState stoneState = Blocks.STONE.defaultBlockState();
-        return stack.isCorrectToolForDrops(stoneState);
     }
 }

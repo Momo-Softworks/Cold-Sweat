@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.common.event;
 
+import com.momosoftworks.coldsweat.util.item.ItemHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -45,7 +46,7 @@ public class IceBreakingEvents
         ItemStack tool = event.getPlayer().getItemInHand(Hand.MAIN_HAND);
 
         if ((state.is(Blocks.ICE) || state.is(Blocks.PACKED_ICE) || state.is(Blocks.BLUE_ICE))
-        && WorldHelper.isEffectivelyPickaxe(tool))
+        && ItemHelper.isEffectivelyPickaxe(tool))
         {   event.setNewSpeed(event.getNewSpeed() / 2);
         }
     }
