@@ -7,12 +7,12 @@ import com.momosoftworks.coldsweat.common.capability.shearing.ShearableFurCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.EntityTempCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
 import com.momosoftworks.coldsweat.common.entity.Chameleon;
-import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.ConfigUpdater;
 import com.momosoftworks.coldsweat.config.spec.*;
 import com.momosoftworks.coldsweat.core.init.*;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
+import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.SpawnPlacementTypes;
@@ -70,6 +70,9 @@ public class ColdSweat
         MainSettingsConfig.setup(modContainer);
         ClientSettingsConfig.setup(modContainer);
         EntitySettingsConfig.setup(modContainer);
+
+        // Setup compat
+        CompatManager.registerEventHandlers();
 
         // Setup JSON data-driven handlers
         bus.addListener((DataPackRegistryEvent.NewRegistry event) ->
