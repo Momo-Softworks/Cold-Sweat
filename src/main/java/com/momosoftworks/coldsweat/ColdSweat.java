@@ -76,6 +76,9 @@ public class ColdSweat
         ClientSettingsConfig.setup();
         EntitySettingsConfig.setup();
 
+        // Setup compat
+        CompatManager.registerEventHandlers();
+
         // Setup JSON data-driven handlers
         bus.addListener((NewRegistryEvent event) ->
         {
