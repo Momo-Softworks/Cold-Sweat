@@ -15,11 +15,11 @@ public class ColdSweatMixinPlugin implements IMixinConfigPlugin
 {
     private static final String COMPAT_MIXIN_PACKAGE = "com.momosoftworks.coldsweat.mixin.compat";
     private static final Map<String, Supplier<Boolean>> CONDITIONS = ImmutableMap.of(
-            "MixinCreateOverlay", CompatManager::isCreateLoaded,
-            "MixinCreateConnect", CompatManager::isCreateLoaded,
-            "MixinSpoiledIcebox", CompatManager::isSpoiledLoaded,
-            "MixinSereneIceMelt", CompatManager::isSereneSeasonsLoaded,
-            "MixinGoatRenderer",  CompatManager::isCavesAndCliffsLoaded
+            "MixinCreateOverlay", () -> CompatManager.isCreateLoaded(),
+            "MixinCreateConnect", () -> CompatManager.isCreateLoaded(),
+            "MixinSpoiledIcebox", () -> CompatManager.isSpoiledLoaded(),
+            "MixinSereneIceMelt", () -> CompatManager.isSereneSeasonsLoaded(),
+            "MixinGoatRenderer",  () -> CompatManager.isCavesAndCliffsLoaded()
     );
 
     @Override
