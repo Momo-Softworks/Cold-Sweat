@@ -32,19 +32,21 @@ public class TempModifierRegisterEvent extends Event
      * A way of indirectly registering TempModifiers by class name.<br>
      * Useful for adding compat for other mods, where loading the TempModifier's class directly would cause an error.<br>
      * The class must have a no-arg constructor for this to work.
+     * @param id The ID of the TempModifier. Should use your mod ID as the namespace
+     * @param classPath The path to the TempModifier class, e.g. "com.examplemod.TempModifier"
      */
-    public void registerByClassName(ResourceLocation id, String className)
+    public void registerByClassName(ResourceLocation id, String classPath)
     {
         try
         {
-            Constructor<?> clazz = Class.forName(className).getConstructor();
+            Constructor<?> clazz = Class.forName(classPath).getConstructor();
             this.register(id, () ->
             {
                 try
                 {   return (TempModifier) clazz.newInstance();
                 }
                 catch (Exception e)
-                {   throw new RegistryFailureException(id, "TempModifier", "Failed to instantiate class " + className, e);
+                {   throw new RegistryFailureException(id, "TempModifier", "Failed to instantiate class " + classPath, e);
                 }
             });
         }
