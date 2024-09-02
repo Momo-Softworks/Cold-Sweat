@@ -460,10 +460,8 @@ public class WorldSettingsConfig
                          "Multiple predicates can be used by separating them with commas (i.e: \"lit=true,waterlogged=false\")")
                 .defineList("Block Temperatures", Arrays.asList
                                     (
-                                            Arrays.asList("minecraft:soul_fire",     -0.476, 7, true, 0.8),
                                             Arrays.asList("minecraft:fire",           0.476, 7, true, 0.8),
                                             Arrays.asList("minecraft:magma_block",      0.25, 3, true, 1),
-                                            Arrays.asList("minecraft:soul_campfire", -0.476, 7, true, 0.8, "lit=true"),
                                             Arrays.asList("minecraft:lava_cauldron",    0.5, 7, true, 1.5)
                                     ),
                             it -> it instanceof List<?> list && list.size() >= 3 && list.get(0) instanceof String && list.get(1) instanceof Number && list.get(2) instanceof Number);
