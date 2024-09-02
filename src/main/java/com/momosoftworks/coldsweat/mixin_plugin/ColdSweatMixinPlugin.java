@@ -18,8 +18,7 @@ public class ColdSweatMixinPlugin implements IMixinConfigPlugin
             "MixinCreateOverlay", CompatManager::isCreateLoaded,
             "MixinCreateConnect", CompatManager::isCreateLoaded,
             "MixinSpoiledIcebox", CompatManager::isSpoiledLoaded,
-            "MixinSereneIceMelt", CompatManager::isSereneSeasonsLoaded,
-            "MixinGoatRenderer",  CompatManager::isCavesAndCliffsLoaded
+            "MixinSereneIceMelt", CompatManager::isSereneSeasonsLoaded
     );
 
     @Override
