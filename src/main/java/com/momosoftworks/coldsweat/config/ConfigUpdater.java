@@ -24,6 +24,14 @@ public class ConfigUpdater
         WorldSettingsConfig worldSettings = WorldSettingsConfig.getInstance();
 
         /*
+         2.3.4
+         */
+        if (isBehind(configVersion, "2.3.4"))
+        {
+            removeConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, "minecraft:soul_fire");
+            removeConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, "minecraft:soul_campfire");
+        }
+        /*
          2.3.2
          */
         if (isBehind(configVersion, "2.3.2"))
