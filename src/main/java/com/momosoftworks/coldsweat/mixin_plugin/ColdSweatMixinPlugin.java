@@ -2,7 +2,6 @@ package com.momosoftworks.coldsweat.mixin_plugin;
 
 import com.google.common.collect.ImmutableMap;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
-import net.minecraftforge.fml.loading.LoadingModList;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -14,12 +13,13 @@ import java.util.function.Supplier;
 
 public class ColdSweatMixinPlugin implements IMixinConfigPlugin
 {
-    private static final String compatMixinPackage = "com.momosoftworks.coldsweat.mixin.compat";
+    private static final String COMPAT_MIXIN_PACKAGE = "com.momosoftworks.coldsweat.mixin.compat";
     private static final Map<String, Supplier<Boolean>> CONDITIONS = ImmutableMap.of(
-            compatMixinPackage + "MixinCreateOverlay", () -> CompatManager.isCreateLoaded(),
-            compatMixinPackage + "MixinCreateConnect", () -> CompatManager.isCreateLoaded(),
-            compatMixinPackage + "MixinSpoiledIcebox", () -> CompatManager.isSpoiledLoaded(),
-            compatMixinPackage + "MixinSereneIceMelt", () -> CompatManager.isSereneSeasonsLoaded()
+            "MixinCreateOverlay", CompatManager::isCreateLoaded,
+            "MixinCreateConnect", CompatManager::isCreateLoaded,
+            "MixinSpoiledIcebox", CompatManager::isSpoiledLoaded,
+            "MixinSereneIceMelt", CompatManager::isSereneSeasonsLoaded,
+            "MixinGoatRenderer",  CompatManager::isCavesAndCliffsLoaded
     );
 
     @Override
@@ -37,7 +37,7 @@ public class ColdSweatMixinPlugin implements IMixinConfigPlugin
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName)
     {
-        return CONDITIONS.getOrDefault(mixinClassName, () -> true).get();
+        return CONDITIONS.getOrDefault(COMPAT_MIXIN_PACKAGE + mixinClassName, () -> true).get();
     }
 
     @Override
