@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.util.serialization.ObjectBuilder;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.CampfireBlock;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.util.math.BlockPos;
@@ -53,7 +54,8 @@ public abstract class MixinFreezingWater
                     if (!(mutable.getX() == pos.getX() || mutable.getZ() == pos.getZ()))
                     {   continue;
                     }
-                    if (levelReader.getBlockState(mutable).is(Blocks.SOUL_FIRE))
+                    BlockState state = levelReader.getBlockState(mutable);
+                    if (ConfigSettings.COLD_SOUL_FIRE.get() && (state.is(Blocks.SOUL_FIRE) || state.is(Blocks.SOUL_CAMPFIRE) && state.getValue(CampfireBlock.LIT)))
                     {   cir.setReturnValue(true);
                     }
                 }
