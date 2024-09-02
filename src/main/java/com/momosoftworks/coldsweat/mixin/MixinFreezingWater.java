@@ -51,9 +51,6 @@ public abstract class MixinFreezingWater
                 for (int z = -1; z <= 1; z++)
                 {
                     mutable.set(pos).move(x, y, z);
-                    if (!(mutable.getX() == pos.getX() || mutable.getZ() == pos.getZ()))
-                    {   continue;
-                    }
                     BlockState state = levelReader.getBlockState(mutable);
                     if (ConfigSettings.COLD_SOUL_FIRE.get() && (state.is(Blocks.SOUL_FIRE) || state.is(Blocks.SOUL_CAMPFIRE) && state.getValue(CampfireBlock.LIT)))
                     {   cir.setReturnValue(true);
