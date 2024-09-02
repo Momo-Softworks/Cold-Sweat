@@ -1,8 +1,8 @@
 package com.momosoftworks.coldsweat.core.init;
 
-import com.blackgear.cavesandcliffs.common.entity.GoatTasks;
-import com.blackgear.cavesandcliffs.common.entity.ai.sensor.TemptationsSensor;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.common.entity.sensor.TemptationsSensor;
+import com.momosoftworks.coldsweat.common.entity.task.GoatTasks;
 import net.minecraft.entity.ai.brain.sensor.SensorType;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
