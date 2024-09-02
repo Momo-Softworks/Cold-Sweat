@@ -82,6 +82,9 @@ public class ColdSweat
         MainSettingsConfig.setup();
         ClientSettingsConfig.setup();
         EntitySettingsConfig.setup();
+
+        // Setup compat
+        CompatManager.registerEventHandlers();
     }
 
     public void commonSetup(final FMLCommonSetupEvent event)
