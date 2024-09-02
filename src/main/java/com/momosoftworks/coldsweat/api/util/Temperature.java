@@ -263,18 +263,19 @@ public class Temperature
         // Iterate through the list (backwards if "forward" is false)
         for (int i = start; isForward ? i < modifiers.size() : i >= 0; i += isForward ? 1 : -1)
         {
-            TempModifier mod = modifiers.get(i);
+            TempModifier modifierAt = modifiers.get(i);
             // If the predicate is true, inject the modifier at this position (or after it if "after" is true)
-            if (predicate.test(mod))
+            if (predicate.test(modifierAt))
             {
                 if (isReplacing)
-                {   modifiers.set(i, modifier);
+                {   changed = !modifierAt.equals(modifier);
+                    modifiers.set(i, modifier);
                 }
                 else
                 {   modifiers.add(i + (placement.mode()  == Placement.Mode.AFTER ? 1 : 0), modifier);
+                    changed = true;
                 }
                 hits++;
-                changed = true;
                 // If duplicates are not allowed, break the loop
                 if (duplicatePolicy != Placement.Duplicates.ALLOW || hits >= maxCount)
                 {   return true;
