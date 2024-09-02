@@ -12,8 +12,6 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.DebugScreenOverlay;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -21,11 +19,9 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -33,7 +29,6 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
@@ -195,40 +190,27 @@ public class HearthDebugRenderer
         }
     }
 
-    @SubscribeEvent
-    public static void onClientTick(ClientTickEvent.Post event)
+    public static void updatePaths(HearthBlockEntity hearth)
     {
-        ClientLevel level = Minecraft.getInstance().level;
-        if (level != null
-        && level.getGameTime() % 20 == 0 && Minecraft.getInstance().getDebugOverlay().showDebugScreen()
-        && ConfigSettings.HEARTH_DEBUG.get())
+        if (!hearth.isSpreading()) return;
+        BlockPos pos = hearth.getBlockPos();
+        Set<BlockPos> paths = hearth.getPaths().stream().map(path -> path.pos).collect(Collectors.toSet());
+
+        Map<BlockPos, Collection<Direction>> pathMap = HEARTH_LOCATIONS.computeIfAbsent(pos, k -> Maps.newHashMap());
+        if (pathMap.size() != paths.size())
         {
-            for (Pair<BlockPos, ResourceLocation> entry : HearthSaveDataHandler.HEARTH_POSITIONS)
+            HEARTH_LOCATIONS.put(pos, paths.stream().map(path ->
             {
-                if (!level.dimension().location().equals(entry.getSecond())) continue;
-
-                BlockPos pos = entry.getFirst();
-                BlockEntity blockEntity = level.getBlockEntity(pos);
-                if (blockEntity instanceof HearthBlockEntity hearth)
+                ArrayList<Direction> dirs = new ArrayList<>();
+                for (Direction dir : Direction.values())
                 {
-                    Set<BlockPos> lookup = hearth.getPathLookup();
-
-                    Map<BlockPos, Collection<Direction>> pathMap = HEARTH_LOCATIONS.computeIfAbsent(pos, k -> Maps.newHashMap());
-                    if (pathMap.size() != lookup.size())
-                    {
-                        HEARTH_LOCATIONS.put(pos, lookup.stream().map(bp ->
-                        {
-                            ArrayList<Direction> dirs = new ArrayList<>();
-                            for (Direction dir : Direction.values())
-                            {
-                                if (lookup.contains(bp.relative(dir)))
-                                    dirs.add(dir);
-                            }
-                            return Map.entry(bp, dirs);
-                        }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> b, Maps::newHashMap)));
+                    BlockPos dirPos = path.relative(dir);
+                    if (paths.contains(dirPos))
+                    {   dirs.add(dir);
                     }
                 }
-            }
+                return Map.entry(path, dirs);
+            }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
         }
     }
 }
