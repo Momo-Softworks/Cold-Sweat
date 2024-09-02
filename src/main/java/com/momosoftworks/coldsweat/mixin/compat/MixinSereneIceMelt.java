@@ -26,7 +26,7 @@ public class MixinSereneIceMelt
                                              ServerWorld level, ChunkPos chunkpos, int i, int j, int meltRand, BlockPos topAirPos)
     {
         BlockPos groundPos = topAirPos.below();
-        if (WorldHelper.getBiomeTemperatureAt(level, level.getBiome(groundPos), groundPos) < 0.15F)
+        if (WorldHelper.getWorldTemperatureAt(level, groundPos) < 0.15F)
         {
             ci.cancel();
         }

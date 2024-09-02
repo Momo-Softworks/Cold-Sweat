@@ -1,10 +1,6 @@
 package com.momosoftworks.coldsweat.mixin;
 
-import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
-import com.momosoftworks.coldsweat.api.temperature.modifier.compat.SereneSeasonsTempModifier;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.util.compat.CompatManager;
-import com.momosoftworks.coldsweat.util.serialization.ObjectBuilder;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -26,7 +22,6 @@ public abstract class MixinFreezingWater
 {
     private static IWorldReader LEVEL = null;
     private static Boolean IS_CHECKING_FREEZING = false;
-    Biome self = (Biome) (Object) this;
 
     @Inject(method = "shouldFreeze(Lnet/minecraft/world/IWorldReader;Lnet/minecraft/util/math/BlockPos;Z)Z",
             at = @At(value = "HEAD"), cancellable = true)
@@ -65,13 +60,7 @@ public abstract class MixinFreezingWater
     {
         if (IS_CHECKING_FREEZING && LEVEL instanceof World)
         {
-            World world = ((World) LEVEL);
-            double biomeTemp = WorldHelper.getBiomeTemperatureAt(world, self, pos);
-            if (CompatManager.isSereneSeasonsLoaded())
-            {
-                TempModifier modifier = ObjectBuilder.build(SereneSeasonsTempModifier::new);
-                biomeTemp = modifier.apply(biomeTemp);
-            }
+            double biomeTemp = WorldHelper.getWorldTemperatureAt((World) LEVEL, pos);
             cir.setReturnValue((float) biomeTemp);
         }
         IS_CHECKING_FREEZING = false;
