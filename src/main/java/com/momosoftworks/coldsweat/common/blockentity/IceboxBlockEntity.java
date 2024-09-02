@@ -223,10 +223,10 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
     }
 
     @Override
-    protected void tickPaths(int pathCount, int firstIndex, int lastIndex)
+    protected void tickPaths(int firstIndex, int lastIndex)
     {
         if (this.hasSmokestack)
-        {   super.tickPaths(pathCount, firstIndex, lastIndex);
+        {   super.tickPaths(firstIndex, lastIndex);
         }
     }
 

@@ -92,6 +92,6 @@ public class SpreadPath
     public boolean equals(Object o)
     {
         return o instanceof SpreadPath
-        && this.pos == ((SpreadPath) o).pos;
+        && this.pos.equals(((SpreadPath) o).pos);
     }
 }
