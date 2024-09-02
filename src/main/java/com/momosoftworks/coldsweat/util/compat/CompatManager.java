@@ -32,7 +32,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
-import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import sereneseasons.api.season.SeasonChangedEvent;
 import sereneseasons.season.SeasonHooks;
 import top.theillusivec4.curios.api.CuriosCapability;
@@ -52,7 +52,7 @@ public class CompatManager
     private static final boolean SPIRIT_LOADED = modLoaded("spirit");
     private static final boolean ARMOR_UNDERWEAR_LOADED = modLoaded("armorunder");
     private static final boolean BYG_LOADED = modLoaded("byg");
-    private static final boolean CREATE_LOADED = modLoaded("create", 0, 5, 1);
+    private static final boolean CREATE_LOADED = modLoaded("create", "0.5.1");
     private static final boolean ATMOSPHERIC_LOADED = modLoaded("atmospheric");
     private static final boolean ENVIRONMENTAL_LOADED = modLoaded("environmental");
     private static final boolean TERRALITH_LOADED = modLoaded("terralith");
@@ -60,27 +60,24 @@ public class CompatManager
     private static final boolean WYTHERS_LOADED = modLoaded("wwoo");
     private static final boolean TOOLTIPS_LOADED = modLoaded("legendarytooltips");
     private static final boolean PRIMAL_WINTER_LOADED = modLoaded("primalwinter");
-    private static final boolean THIRST_LOADED = modLoaded("thirst");
+    private static final boolean THIRST_LOADED = modLoaded("thirst", "1.21.0-2.0.0");
     private static final boolean ICEBERG_LOADED = modLoaded("iceberg");
     private static final boolean SPOILED_LOADED = modLoaded("spoiled");
     private static final boolean SUPPLEMENTARIES_LOADED = modLoaded("supplementaries");
 
-    public static boolean modLoaded(String modID, int minMajorVer, int minMinorVer, int minPatchVer)
+    public static boolean modLoaded(String modID, String version)
     {
         ModContainer mod = ModList.get().getModContainerById(modID).orElse(null);
-        if (mod == null) return false;
-
-        if (minMajorVer > 0 || minMinorVer > 0 || minPatchVer > 0)
+        if (mod == null)
+        {   return false;
+        }
+        if (!version.isEmpty())
         {
-            ArtifactVersion version = mod.getModInfo().getVersion();
-            if (version.getMajorVersion() >= minMajorVer
-            &&  version.getMinorVersion() >= minMinorVer
-            &&  version.getIncrementalVersion() >= minPatchVer)
+            if (mod.getModInfo().getVersion().compareTo(new DefaultArtifactVersion(version)) >= 0)
             {   return true;
             }
             else
-            {   ColdSweat.LOGGER.error("Cold Sweat requires {} {} or higher for compat to be enabled!", modID.substring(0, 1).toUpperCase() + modID.substring(1),
-                                                                                                                minMajorVer + "." + minMinorVer + "." + minPatchVer);
+            {   ColdSweat.LOGGER.error("Cold Sweat requires {} {} or higher for compat to be enabled!", modID, version);
                 return false;
             }
         }
@@ -88,7 +85,7 @@ public class CompatManager
     }
 
     public static boolean modLoaded(String modID)
-    {   return modLoaded(modID, 0, 0, 0);
+    {   return modLoaded(modID, "");
     }
 
     public static boolean isBiomesOPlentyLoaded()
