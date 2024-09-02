@@ -208,9 +208,9 @@ public class WetnessRenderer
         for (int i = 0; i < TRAILS.size(); i++)
         {
             Triplet<Vec2i, Float, Integer> trail = TRAILS.get(i);
-            Vec2i pos = trail.getFirst();
-            float alpha = trail.getSecond();
-            int size = trail.getThird();
+            Vec2i pos = trail.getA();
+            float alpha = trail.getB();
+            int size = trail.getC();
 
             if (alpha > 0)
             {

@@ -9,13 +9,11 @@ import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
 import com.momosoftworks.coldsweat.api.util.Temperature;
-import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
-import com.momosoftworks.coldsweat.data.codec.util.ResourceKey;
 import com.momosoftworks.coldsweat.util.exceptions.ArgumentCountException;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.block.Block;
@@ -34,8 +32,6 @@ import net.minecraft.world.DimensionType;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.ForgeRegistryEntry;
-import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
 import java.util.*;
@@ -356,9 +352,9 @@ public class ConfigHelper
             {   ColdSweat.LOGGER.error("Error serializing biome temperatures: biome \"{}\" does not exist", entry.getKey());
                 continue;
             }
-            biomeTag.putDouble("Min", entry.getValue().getFirst());
-            biomeTag.putDouble("Max", entry.getValue().getSecond());
-            biomeTag.putString("Units", entry.getValue().getThird().toString());
+            biomeTag.putDouble("Min", entry.getValue().getA());
+            biomeTag.putDouble("Max", entry.getValue().getB());
+            biomeTag.putString("Units", entry.getValue().getC().toString());
             mapTag.put(biomeId.toString(), biomeTag);
         }
         tag.put(key, mapTag);

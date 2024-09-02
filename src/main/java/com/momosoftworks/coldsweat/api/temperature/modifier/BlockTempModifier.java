@@ -132,7 +132,7 @@ public class BlockTempModifier extends TempModifier
         if (entity instanceof ServerPlayerEntity && shouldTickAdvancements)
         {
             for (Triplet<BlockPos, BlockTemp, Double> trigger : triggers)
-            {   ModAdvancementTriggers.BLOCK_AFFECTS_TEMP.trigger(((ServerPlayerEntity) entity), trigger.getFirst(), trigger.getThird(), blockTempEffects.get(trigger.getSecond()));
+            {   ModAdvancementTriggers.BLOCK_AFFECTS_TEMP.trigger(((ServerPlayerEntity) entity), trigger.getA(), trigger.getC(), blockTempEffects.get(trigger.getB()));
             }
         }
 

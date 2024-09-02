@@ -266,9 +266,9 @@ public class ConfigSettings
                                                                 ResourceLocation biome = RegistryHelper.getBiomeId(entry.getKey(), registryAccess);
                                                                 if (biome == null) return null;
 
-                                                                Temperature.Units units = entry.getValue().getThird();
-                                                                double min = Temperature.convert(entry.getValue().getFirst(), Temperature.Units.MC, units, true);
-                                                                double max = Temperature.convert(entry.getValue().getSecond(), Temperature.Units.MC, units, true);
+                                                                Temperature.Units units = entry.getValue().getC();
+                                                                double min = Temperature.convert(entry.getValue().getA(), Temperature.Units.MC, units, true);
+                                                                double max = Temperature.convert(entry.getValue().getB(), Temperature.Units.MC, units, true);
 
                                                                 return Arrays.asList(biome.toString(), min, max, units.toString());
                                                             })
@@ -284,9 +284,9 @@ public class ConfigSettings
                                                                 ResourceLocation biome = RegistryHelper.getBiomeId(entry.getKey(), registryAccess);
                                                                 if (biome == null) return null;
 
-                                                                Temperature.Units units = entry.getValue().getThird();
-                                                                double min = Temperature.convert(entry.getValue().getFirst(), Temperature.Units.MC, units, false);
-                                                                double max = Temperature.convert(entry.getValue().getSecond(), Temperature.Units.MC, units, false);
+                                                                Temperature.Units units = entry.getValue().getC();
+                                                                double min = Temperature.convert(entry.getValue().getA(), Temperature.Units.MC, units, false);
+                                                                double max = Temperature.convert(entry.getValue().getB(), Temperature.Units.MC, units, false);
 
                                                                 return Arrays.asList(biome.toString(), min, max, units.toString());
                                                             })
@@ -631,9 +631,9 @@ public class ConfigSettings
         },
         encoder ->
         {   CompoundNBT tag = new CompoundNBT();
-            tag.put("Interval", IntNBT.valueOf(encoder.getFirst()));
-            tag.put("Cooldown", IntNBT.valueOf(encoder.getSecond()));
-            tag.put("Chance", DoubleNBT.valueOf(encoder.getThird()));
+            tag.put("Interval", IntNBT.valueOf(encoder.getA()));
+            tag.put("Cooldown", IntNBT.valueOf(encoder.getB()));
+            tag.put("Chance", DoubleNBT.valueOf(encoder.getC()));
             return tag;
         },
         (decoder) ->
@@ -644,9 +644,9 @@ public class ConfigSettings
         },
         (saver) ->
         {   List<Number> list = new ArrayList<>();
-            list.add(saver.getFirst());
-            list.add(saver.getSecond());
-            list.add(saver.getThird());
+            list.add(saver.getA());
+            list.add(saver.getB());
+            list.add(saver.getC());
             EntitySettingsConfig.getInstance().setGoatFurStats(list);
         });
 
@@ -656,9 +656,9 @@ public class ConfigSettings
         },
         encoder ->
         {   CompoundNBT tag = new CompoundNBT();
-            tag.put("Interval", IntNBT.valueOf(encoder.getFirst()));
-            tag.put("Cooldown", IntNBT.valueOf(encoder.getSecond()));
-            tag.put("Chance", DoubleNBT.valueOf(encoder.getThird()));
+            tag.put("Interval", IntNBT.valueOf(encoder.getA()));
+            tag.put("Cooldown", IntNBT.valueOf(encoder.getB()));
+            tag.put("Chance", DoubleNBT.valueOf(encoder.getC()));
             return tag;
         },
         (decoder) ->
@@ -669,9 +669,9 @@ public class ConfigSettings
         },
         (saver) ->
         {   List<Number> list = new ArrayList<>();
-            list.add(saver.getFirst());
-            list.add(saver.getSecond());
-            list.add(saver.getThird());
+            list.add(saver.getA());
+            list.add(saver.getB());
+            list.add(saver.getC());
             EntitySettingsConfig.getInstance().setChameleonShedStats(list);
         });
 

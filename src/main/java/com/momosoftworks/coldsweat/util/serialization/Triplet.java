@@ -16,15 +16,15 @@ public class Triplet<A, B, C>
     {   return new Triplet<>(first, second, third);
     }
 
-    public A getFirst()
+    public A getA()
     {   return first;
     }
 
-    public B getSecond()
+    public B getB()
     {   return second;
     }
 
-    public C getThird()
+    public C getC()
     {   return third;
     }
 }

@@ -39,7 +39,6 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.GameRules;
@@ -361,9 +360,9 @@ public class ChameleonEntity extends AnimalEntity
         if (!this.level.isClientSide)
         {
             boolean shedding = this.isShedding();
-            int shedCheckIncrement = ConfigSettings.SHED_TIMINGS.get().getFirst();
-            int shedCooldown = ConfigSettings.SHED_TIMINGS.get().getSecond();
-            double shedChance = ConfigSettings.SHED_TIMINGS.get().getThird();
+            int shedCheckIncrement = ConfigSettings.SHED_TIMINGS.get().getA();
+            int shedCooldown = ConfigSettings.SHED_TIMINGS.get().getB();
+            double shedChance = ConfigSettings.SHED_TIMINGS.get().getC();
             if (this.tickCount % shedCheckIncrement == 0 && !shedding
             && this.random.nextDouble() < shedChance && this.getAgeSecs() * 20 - this.getLastShed() > shedCooldown)
             {
