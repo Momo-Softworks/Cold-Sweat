@@ -1,6 +1,8 @@
 package com.momosoftworks.coldsweat.util.world;
 
 import com.mojang.datafixers.util.Pair;
+import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
+import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ModBlocks;
@@ -18,6 +20,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.SectionPos;
 import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -53,10 +56,7 @@ import oshi.util.tuples.Triplet;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
@@ -284,7 +284,8 @@ public abstract class WorldHelper
      * @param rayTracer function to run on each found block
      * @param maxHits the maximum number of blocks to act upon before the ray expires
      */
-    public static void forBlocksInRay(Vec3 from, Vec3 to, Level level, ChunkAccess chunk, Map<BlockPos, BlockState> stateCache, BiConsumer<BlockState, BlockPos> rayTracer, int maxHits)
+    public static void forBlocksInRay(Vec3 from, Vec3 to, Level level, ChunkAccess chunk, Map<BlockPos, BlockState> stateCache,
+                                      BiConsumer<BlockState, BlockPos> rayTracer, int maxHits)
     {
         // Don't bother if the ray has no length
         if (!from.equals(to))
@@ -356,7 +357,8 @@ public abstract class WorldHelper
         return null;
     }
 
-    public static void spawnParticle(Level level, ParticleOptions particle, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed)
+    public static void spawnParticle(Level level, ParticleOptions particle, double x, double y, double z,
+                                     double xSpeed, double ySpeed, double zSpeed)
     {
         if (!level.isClientSide)
         {
@@ -369,7 +371,8 @@ public abstract class WorldHelper
         }
     }
 
-    public static void spawnParticleBatch(Level level, ParticleOptions particle, double x, double y, double z, double xSpread, double ySpread, double zSpread, double count, double speed)
+    public static void spawnParticleBatch(Level level, ParticleOptions particle, double x, double y, double z,
+                                          double xSpread, double ySpread, double zSpread, double count, double speed)
     {
         Random rand = new Random();
 
@@ -420,10 +423,19 @@ public abstract class WorldHelper
         return item;
     }
 
+    /**
+     * Drops an item with random velocity from the entity's position
+     * @return The dropped item entity
+     */
     public static ItemEntity entityDropItem(Entity entity, ItemStack stack)
     {   return entityDropItem(entity, stack, 6000);
     }
 
+    /**
+     * Drops an item with random velocity from the entity's position
+     * @param lifeTime The despawn time of the item, in ticks
+     * @return The dropped item entity
+     */
     public static ItemEntity entityDropItem(Entity entity, ItemStack stack, int lifeTime)
     {
         Random rand = new Random();
@@ -442,6 +454,21 @@ public abstract class WorldHelper
         return item;
     }
 
+    /**
+     * @return The closest Vec3, contained in the entity's bounding box, to the given pos.
+     */
+    public static Vec3 getClosestPointOnEntity(LivingEntity entity, Vec3 pos)
+    {
+        double playerRadius = entity.getBbWidth() / 2;
+        return new Vec3(CSMath.clamp(pos.x, entity.getX() - playerRadius, entity.getX() + playerRadius),
+                        CSMath.clamp(pos.y, entity.getY(), entity.getY() + entity.getBbHeight()),
+                        CSMath.clamp(pos.z, entity.getZ() - playerRadius, entity.getZ() + playerRadius));
+    }
+
+    /**
+     * Merges the entity's server-side persistent data into the client-side persistent data
+     * @param destination The player to send the data to. If null, sends to all tracking entities
+     */
     public static void syncEntityForgeData(Entity entity, ServerPlayer destination)
     {
         if (destination != null)
@@ -452,6 +479,9 @@ public abstract class WorldHelper
         }
     }
 
+    /**
+     * Manually sends a block entity's update tag to tracking clients
+     */
     public static void syncBlockEntityData(BlockEntity be)
     {
         if (be.getLevel() == null || be.getLevel().isClientSide) return;
@@ -459,20 +489,35 @@ public abstract class WorldHelper
     }
 
     /**
-     * Allows the server world to be accessed from any thread
+     * Allows the server world to be accessed if you only have a generic "Level" object<br>
+     * ONLY USE ON THE SERVER THREAD
+     * @return The server world
      */
     public static ServerLevel getServerLevel(Level level)
     {   return ServerLifecycleHooks.getCurrentServer().getLevel(level.dimension());
     }
 
+    /**
+     * Gets the server instance<br>
+     * ONLY USE ON THE SERVER THREAD
+     * @return The server instance
+     */
     public static MinecraftServer getServer()
     {   return ServerLifecycleHooks.getCurrentServer();
     }
 
+    /**
+     * Gets the min and max temperature of the biome.
+     * @return A pair of the min and max temperature of the biome
+     */
     public static Pair<Double, Double> getBiomeTemperatureRange(Level level, Biome biome)
     {   return getBiomeTemperatureRange(level.registryAccess(), biome);
     }
 
+    /**
+     * Gets the min and max temperature of the biome.
+     * @return A pair of the min and max temperature of the biome
+     */
     public static Pair<Double, Double> getBiomeTemperatureRange(RegistryAccess registryAccess, Biome biome)
     {
         double variance = 1 / Math.max(1, 2 + biome.getModifiedClimateSettings().downfall() * 2);
@@ -480,27 +525,39 @@ public abstract class WorldHelper
 
         // Get the biome's temperature, either overridden by config or calculated
         // Start with biome override
-        Triplet<Double, Double, Temperature.Units> configTemp = ConfigSettings.BIOME_TEMPS.get(registryAccess)
-                                                                .getOrDefault(biome, new Triplet<>(baseTemp - variance, baseTemp + variance, Temperature.Units.MC));
-        Triplet<Double, Double, Temperature.Units> configOffset = ConfigSettings.BIOME_OFFSETS.get(registryAccess)
-                                                                  .getOrDefault(biome, new Triplet<>(0d, 0d, Temperature.Units.MC));
-        return CSMath.addPairs(Pair.of(configTemp.getA(), configTemp.getB()), Pair.of(configOffset.getA(), configOffset.getB()));
+        Triplet<Double, Double, Temperature.Units> configOverride = ConfigSettings.BIOME_TEMPS.get(registryAccess)
+                                                                    .getOrDefault(biome, null);
+        // If override temp is defined, return that
+        if (configOverride != null)
+        {
+            double min = configOverride.getA();
+            double max = configOverride.getB();
+            return Pair.of(min, max);
+        }
+        // If no override, calculate the biome's temperature
+        else
+        {
+            Triplet<Double, Double, Temperature.Units> biomeTemp = new Triplet<>(baseTemp - variance, baseTemp + variance, Temperature.Units.MC);
+            Triplet<Double, Double, Temperature.Units> configOffset = ConfigSettings.BIOME_OFFSETS.get(registryAccess)
+                                                                      .getOrDefault(biome, new Triplet<>(0d, 0d, Temperature.Units.MC));
+            return CSMath.addPairs(Pair.of(biomeTemp.getA(), biomeTemp.getB()), Pair.of(configOffset.getA(), configOffset.getB()));
+        }
     }
 
-    public static Vec3 getClosestPointOnEntity(LivingEntity entity, Vec3 pos)
-    {
-        double playerRadius = entity.getBbWidth() / 2;
-        return new Vec3(CSMath.clamp(pos.x, entity.getX() - playerRadius, entity.getX() + playerRadius),
-                        CSMath.clamp(pos.y, entity.getY(), entity.getY() + entity.getBbHeight()),
-                        CSMath.clamp(pos.z, entity.getZ() - playerRadius, entity.getZ() + playerRadius));
-    }
-
+    /**
+     * Gets the temperature of the biome at the specified position, including biome temperature and time of day.
+     * @return The temperature of the biome at the specified position
+     */
     public static double getBiomeTemperature(Level level, Biome biome)
     {
         Pair<Double, Double> temps = getBiomeTemperatureRange(level, biome);
         return CSMath.blend(temps.getFirst(), temps.getSecond(), Math.sin(level.getDayTime() / (12000 / Math.PI)), -1, 1);
     }
 
+    /**
+     * Gets the temperature of the biome at the specified position; including biome temperature, time of day, and the altitude of the given BlockPos.
+     * @return The temperature of the biome at the specified position
+     */
     public static double getBiomeTemperatureAt(Level level, Biome biome, BlockPos pos)
     {
         Pair<Double, Double> temps = getBiomeTemperatureRange(level, biome);
@@ -509,5 +566,23 @@ public abstract class WorldHelper
         double mid = (min + max) / 2;
         return CSMath.blend(min, max, Math.sin(level.getDayTime() / (12000 / Math.PI)), -1, 1)
              + CSMath.blend(0, Math.min(-0.6, (min - mid) * 2), pos.getY(), level.getSeaLevel(), level.getMaxBuildHeight());
+    }
+
+    /**
+     * Gets the temperature of the world at the specified position, including non-biome temperature sources.<br>
+     * Does not include block temperature!
+     * @return The temperature at the specified position
+     */
+    public static double getWorldTemperatureAt(Level level, BlockPos pos)
+    {
+        Biome biome = level.getBiome(pos).value();
+        // Get biome temperature
+        double temp = getBiomeTemperatureAt(level, biome, pos);
+        // Get season temperature (if available)
+        Optional<TempModifier> seasonModifier = TempModifierRegistry.getValue(ResourceLocation.fromNamespaceAndPath("sereneseasons", "season"));
+        if (seasonModifier.isPresent())
+        {   temp = seasonModifier.get().update(temp, null, Temperature.Trait.WORLD);
+        }
+        return temp;
     }
 }
