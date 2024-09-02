@@ -116,7 +116,6 @@ public class BlockTempModifier extends TempModifier
                                 // Store this block type's total effect on the player
                                 // Dampen the effect with each block between the player and the block
                                 double blockTempTotal = blockTempEffects.getOrDefault(blockTemp, 0d) + tempToAdd / (blocks[0] + 1);
-                                if (blockTempTotal < blockTemp.minEffect() || blockTempTotal > blockTemp.maxEffect()) continue;
                                 blockTempEffects.put(blockTemp, CSMath.clamp(blockTempTotal, blockTemp.minEffect(), blockTemp.maxEffect()));
                                 // Used to trigger advancements
                                 if (shouldTickAdvancements)
