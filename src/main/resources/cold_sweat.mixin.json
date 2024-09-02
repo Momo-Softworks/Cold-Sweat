@@ -40,6 +40,7 @@
     "MixinSoulFire",
     "MixinTridentRiptide",
     "MixinTriggerBounds$MixinFloatBound",
+    "compat.MixinCreateConnect",
     "compat.MixinSereneIceMelt",
     "compat.MixinSpoiledIcebox",
     "compat.MixinSpoiledIcebox$ContainerModifier"
