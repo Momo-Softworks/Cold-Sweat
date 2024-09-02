@@ -162,10 +162,10 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
     }
 
     @Override
-    protected void tickPaths(int pathCount, int firstIndex, int lastIndex)
+    protected void tickPaths(int firstIndex, int lastIndex)
     {
         if (this.hasSmokestack)
-        {   super.tickPaths(pathCount, firstIndex, lastIndex);
+        {   super.tickPaths(firstIndex, lastIndex);
         }
     }
 

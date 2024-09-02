@@ -9,6 +9,7 @@ import com.momosoftworks.coldsweat.api.event.common.BlockStateChangedEvent;
 import com.momosoftworks.coldsweat.api.temperature.modifier.BlockInsulationTempModifier;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.client.event.HearthDebugRenderer;
 import com.momosoftworks.coldsweat.common.block.HearthBottomBlock;
 import com.momosoftworks.coldsweat.common.block.SmokestackBlock;
 import com.momosoftworks.coldsweat.common.container.HearthContainer;
@@ -156,12 +157,16 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     @SubscribeEvent
     public void onBlockUpdate(BlockStateChangedEvent event)
     {
+        if (this.isRebuildQueued) return;
+
         BlockPos pos = event.getPosition();
         World level = event.getWorld();
+
         if (level == this.level
-        && CSMath.withinCubeDistance(pos, this.getBlockPos(), this.getMaxRange())
+        && this.pathLookup.contains(pos)
         && !event.getOldState().getCollisionShape(level, pos).equals(event.getNewState().getCollisionShape(level, pos)))
-        {   this.sendBlockUpdate();
+        {
+            this.sendBlockUpdate();
         }
     }
 
@@ -318,7 +323,10 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
                 int firstIndex = Math.max(0, lastIndex - partSize);
 
                 // Spread to new blocks
-                this.tickPaths(pathCount, firstIndex, lastIndex);
+                this.tickPaths(firstIndex, lastIndex);
+                if (isClient && paths.size() != pathCount)
+                {   HearthDebugRenderer.updatePaths(this);
+                }
 
                 // Give insulation to players
                 if (!isClient && this.ticksExisted % 20 == 0)
@@ -331,7 +339,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
                     for (int i = 0; i < players.size(); i++)
                     {
                         PlayerEntity player = players.get(i);
-                        if (player != null && pathLookup.contains(player.blockPosition()))
+                        if (player != null && paths.contains(new SpreadPath(player.blockPosition())))
                         {   this.insulatePlayer(player);
                         }
                     }
@@ -360,8 +368,9 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         }
     }
 
-    protected void tickPaths(int pathCount, int firstIndex, int lastIndex)
+    protected void tickPaths(int firstIndex, int lastIndex)
     {
+        int pathCount = paths.size();
         for (int i = firstIndex; i < Math.min(paths.size(), lastIndex); i++)
         {   // This operation is really fast because it's an ArrayList
             SpreadPath spreadPath = paths.get(i);
@@ -1067,6 +1076,14 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
 
     public Set<BlockPos> getPathLookup()
     {   return this.pathLookup;
+    }
+
+    public List<SpreadPath> getPaths()
+    {   return this.paths;
+    }
+
+    public boolean isSpreading()
+    {   return this.spreading;
     }
 
     public boolean isSidePowered()

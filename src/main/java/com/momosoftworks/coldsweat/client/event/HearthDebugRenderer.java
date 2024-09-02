@@ -17,9 +17,7 @@ import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.culling.ClippingHelper;
-import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -36,6 +34,7 @@ import net.minecraftforge.fml.common.Mod;
 
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
@@ -185,43 +184,27 @@ public class HearthDebugRenderer
         }
     }
 
-    @SubscribeEvent
-    public static void onClientTick(TickEvent.ClientTickEvent event)
+    public static void updatePaths(HearthBlockEntity hearth)
     {
-        ClientWorld level = Minecraft.getInstance().level;
-        if (event.phase == TickEvent.Phase.END && level != null
-        && level.getGameTime() % 20 == 0 && Minecraft.getInstance().options.renderDebug
-        && ConfigSettings.HEARTH_DEBUG.get())
+        if (!hearth.isSpreading()) return;
+        BlockPos pos = hearth.getBlockPos();
+        Set<BlockPos> paths = hearth.getPaths().stream().map(path -> path.pos).collect(Collectors.toSet());
+
+        Map<BlockPos, Collection<Direction>> pathMap = HEARTH_LOCATIONS.computeIfAbsent(pos, k -> Maps.newHashMap());
+        if (pathMap.size() != paths.size())
         {
-            for (Pair<BlockPos, ResourceLocation> entry : HearthSaveDataHandler.HEARTH_POSITIONS)
+            HEARTH_LOCATIONS.put(pos, paths.stream().map(path ->
             {
-                if (!level.dimension().location().equals(entry.getSecond())) continue;
-
-                BlockPos pos = entry.getFirst();
-                TileEntity blockEntity = level.getBlockEntity(pos);
-                if (blockEntity instanceof HearthBlockEntity)
+                ArrayList<Direction> dirs = new ArrayList<>();
+                for (Direction dir : Direction.values())
                 {
-                    HearthBlockEntity hearth = (HearthBlockEntity) blockEntity;
-                    Set<BlockPos> lookup = hearth.getPathLookup();
-
-                    Map<BlockPos, Collection<Direction>> pathMap = HEARTH_LOCATIONS.computeIfAbsent(pos, k -> Maps.newHashMap());
-                    if (pathMap.size() != lookup.size())
-                    {
-                        Map<BlockPos, Collection<Direction>> dirMap = Maps.newHashMap();
-                        for (BlockPos bp : lookup)
-                        {
-                            ArrayList<Direction> dirs = new ArrayList<>();
-                            for (Direction dir : Direction.values())
-                            {
-                                if (lookup.contains(bp.relative(dir)))
-                                    dirs.add(dir);
-                            }
-                            dirMap.put(bp, dirs);
-                        }
-                        HEARTH_LOCATIONS.put(pos, dirMap);
+                    BlockPos dirPos = path.relative(dir);
+                    if (paths.contains(dirPos))
+                    {   dirs.add(dir);
                     }
                 }
-            }
+                return new AbstractMap.SimpleEntry<>(path, dirs);
+            }).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
         }
     }
 }
