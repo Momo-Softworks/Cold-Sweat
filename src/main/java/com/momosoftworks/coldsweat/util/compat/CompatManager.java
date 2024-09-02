@@ -267,7 +267,7 @@ public class CompatManager
 
     /* Compat Events */
 
-    static
+    public static void registerEventHandlers()
     {
         if (CURIOS_LOADED)
         {

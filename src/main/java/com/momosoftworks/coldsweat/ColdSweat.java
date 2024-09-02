@@ -12,6 +12,7 @@ import com.momosoftworks.coldsweat.core.init.*;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
+import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.registries.ModEntities;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.world.entity.SpawnPlacements;
@@ -67,6 +68,9 @@ public class ColdSweat
         MainSettingsConfig.setup();
         ClientSettingsConfig.setup();
         EntitySettingsConfig.setup();
+
+        // Setup compat
+        CompatManager.registerEventHandlers();
 
         // Setup JSON data-driven handlers
         bus.addListener((DataPackRegistryEvent.NewRegistry event) ->
