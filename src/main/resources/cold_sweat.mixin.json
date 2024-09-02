@@ -32,6 +32,7 @@
     "MixinSoulCampfire",
     "MixinSoulFire",
     "MixinTridentRiptide",
+    "compat.MixinCreateConnect",
     "compat.MixinSereneIceMelt",
     "compat.MixinSpoiledIcebox",
     "compat.MixinSpoiledIcebox$ContainerModifier"
