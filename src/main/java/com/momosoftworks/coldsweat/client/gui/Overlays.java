@@ -48,8 +48,8 @@ public class Overlays
     public static double WORLD_TEMP = 0;
     static boolean ADVANCED_WORLD_TEMP = false;
     static double PREV_WORLD_TEMP = 0;
-    static double MAX_TEMP = 0;
-    static double MIN_TEMP = 0;
+    static double PLAYER_MAX_TEMP = 0;
+    static double PLAYER_MIN_TEMP = 0;
 
     // Stuff for body temperature
     public static double BODY_TEMP = 0;
@@ -71,7 +71,7 @@ public class Overlays
             double temp = Temperature.convert(WORLD_TEMP, ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
 
             // Get the temperature severity
-            int severity = getWorldSeverity(temp, MIN_TEMP, MAX_TEMP);
+            int severity = getGaugeSeverity(temp, PLAYER_MIN_TEMP, PLAYER_MAX_TEMP);
 
             // Set text color
             int color = switch (severity)
@@ -101,7 +101,7 @@ public class Overlays
             RenderSystem.disableBlend();
 
             // Sets the text bobbing offset (or none if disabled)
-            int bob = ConfigSettings.ICON_BOBBING.get() && !CSMath.betweenInclusive(temp, MIN_TEMP, MAX_TEMP) && player.tickCount % 2 == 0 ? 1 : 0;
+            int bob = ConfigSettings.ICON_BOBBING.get() && !CSMath.betweenInclusive(temp, PLAYER_MIN_TEMP, PLAYER_MAX_TEMP) && player.tickCount % 2 == 0 ? 1 : 0;
 
             // Render text
             int blendedTemp = (int) CSMath.blend(PREV_WORLD_TEMP, WORLD_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
@@ -211,7 +211,7 @@ public class Overlays
             // Get player world temperature
             double temp = Temperature.convert(WORLD_TEMP, ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
             // Get the temperature severity
-            int severity = getWorldSeverity(temp, MIN_TEMP, MAX_TEMP);
+            int severity = getGaugeSeverity(temp, PLAYER_MIN_TEMP, PLAYER_MAX_TEMP);
             int renderOffset = CSMath.clamp(severity, -1, 1) * 2;
 
             poseStack.pushPose();
@@ -277,10 +277,9 @@ public class Overlays
                     PREV_WORLD_TEMP = WORLD_TEMP;
                     WORLD_TEMP += Math.abs(diff) <= 1 ? diff : CSMath.maxAbs(diff / ConfigSettings.TEMP_SMOOTHING.get(), 0.25 * CSMath.sign(diff));
 
-                    // Update max/min offset
-                    MAX_TEMP = cap.getTrait(Temperature.Trait.BURNING_POINT);
-                    MIN_TEMP = cap.getTrait(Temperature.Trait.FREEZING_POINT);
-
+                    // Update max/min temps
+                    PLAYER_MAX_TEMP = cap.getTrait(Temperature.Trait.BURNING_POINT);
+                    PLAYER_MIN_TEMP = cap.getTrait(Temperature.Trait.FREEZING_POINT);
 
                     /* Body Temp */
 
@@ -300,8 +299,39 @@ public class Overlays
         }
     }
 
-    public static int getWorldSeverity(double temp, double min, double max)
-    {   return (int) CSMath.blend(-4, 4, temp, min, max);
+    /**
+     * Gets the given temperature's severity, relative to the player's min and max temperatures.
+     * @param playerMin The player's minimum temperature
+     * @param playerMax The player's maximum temperature
+     * @return A number between -1 and 1, representing the severity of the temperature
+     */
+    public static double getWorldSeverity(double temp, double playerMin, double playerMax)
+    {
+        if (temp < playerMin) return -1;
+        if (temp > playerMax) return 1;
+
+        double normalMin = ConfigSettings.Difficulty.NORMAL.getSetting(ConfigSettings.MIN_TEMP);
+        double normalMax = ConfigSettings.Difficulty.NORMAL.getSetting(ConfigSettings.MAX_TEMP);
+
+        double mid = calculateMidpoint(playerMin, playerMax, normalMin, normalMax);
+
+        return (temp < mid)
+               ? CSMath.blend(-1, 0, temp, playerMin, mid)
+               : CSMath.blend(0, 1, temp, mid, playerMax);
+    }
+
+    private static double calculateMidpoint(double playerMin, double playerMax, double normalMin, double normalMax)
+    {
+        boolean bothBelowNormal = playerMin < normalMin && playerMax < normalMax;
+        boolean bothAboveNormal = playerMin > normalMin && playerMax > normalMax;
+
+        return (bothBelowNormal || bothAboveNormal)
+               ? (playerMin + playerMax) / 2
+               : (normalMin + normalMax) / 2;
+    }
+
+    public static int getGaugeSeverity(double temp, double playerMin, double playerMax)
+    {   return (int) (getWorldSeverity(temp, playerMin, playerMax) * 4);
     }
 
     static double getBodySeverity(int temp)
