@@ -32,6 +32,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.*;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.effect.MobEffect;
@@ -64,7 +65,7 @@ public class ConfigSettings
     public static Difficulty DEFAULT_DIFFICULTY = Difficulty.NORMAL;
 
     // Settings visible in the config screen
-    public static final DynamicHolder<Integer> DIFFICULTY;
+    public static final DynamicHolder<Difficulty> DIFFICULTY;
     public static final DynamicHolder<Double> MAX_TEMP;
     public static final DynamicHolder<Double> MIN_TEMP;
     public static final DynamicHolder<Double> TEMP_RATE;
@@ -173,10 +174,10 @@ public class ConfigSettings
     // Makes the settings instantiation collapsible & easier to read
     static
     {
-        DIFFICULTY = addSyncedSetting("difficulty", () -> MainSettingsConfig.getInstance().getDifficulty(),
-        (encoder) -> ConfigHelper.serializeNbtInt(encoder, "Difficulty"),
-        (decoder) -> decoder.getInt("Difficulty"),
-        (saver) -> MainSettingsConfig.getInstance().setDifficulty(saver));
+        DIFFICULTY = addSyncedSetting("difficulty", () -> Difficulty.byId(MainSettingsConfig.getInstance().getDifficulty()),
+        (encoder) -> ConfigHelper.serializeNbtInt(encoder.getId(), "Difficulty"),
+        (decoder) -> Difficulty.byId(decoder.getInt("Difficulty")),
+        (saver) -> MainSettingsConfig.getInstance().setDifficulty(saver.getId()));
 
         MAX_TEMP = addSyncedSetting("max_temp", () -> MainSettingsConfig.getInstance().getMaxTempHabitable(),
         (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "MaxTemp"),
@@ -897,6 +898,12 @@ public class ConfigSettings
             return (T) settings.get(id).get();
         }
 
+        public <T> T getSetting(DynamicHolder<T> config)
+        {
+            this.ensureSettingsGenerated();
+            return (T) settings.get(getKey(config)).get();
+        }
+
         public <T> T getOrDefault(String id, T defaultValue)
         {
             this.ensureSettingsGenerated();
@@ -917,6 +924,25 @@ public class ConfigSettings
                 holder.set(loader.get());
                 return holder;
             }));
+        }
+
+        public int getId()
+        {   return this.ordinal();
+        }
+
+        public static Difficulty byId(int id)
+        {   return values()[id];
+        }
+
+        public static Component getFormattedName(Difficulty difficulty)
+        {
+            return switch (difficulty)
+            {   case SUPER_EASY  -> Component.translatable("cold_sweat.config.difficulty.super_easy.name");
+                case EASY  -> Component.translatable("cold_sweat.config.difficulty.easy.name");
+                case NORMAL  -> Component.translatable("cold_sweat.config.difficulty.normal.name");
+                case HARD  -> Component.translatable("cold_sweat.config.difficulty.hard.name");
+                default -> Component.translatable("cold_sweat.config.difficulty.custom.name");
+            };
         }
     }
 

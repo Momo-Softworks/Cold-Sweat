@@ -95,7 +95,7 @@ public class ConfigPageOne extends AbstractConfigPage
 
         // Difficulty button
         this.addButton("difficulty", Side.RIGHT, () -> Component.translatable("cold_sweat.config.difficulty.name").append(
-                        " (" + ConfigPageDifficulty.getDifficultyName(ConfigSettings.DIFFICULTY.get()).getString() + ")..."),
+                        " (" + ConfigSettings.Difficulty.getFormattedName(ConfigSettings.DIFFICULTY.get()).getString() + ")..."),
                 button -> MINECRAFT.setScreen(new ConfigPageDifficulty(this)),
                 true, false, false, Component.translatable("cold_sweat.config.difficulty.desc"));
 
