@@ -24,6 +24,7 @@ import com.momosoftworks.coldsweat.config.type.PredicateItem;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
+import com.momosoftworks.coldsweat.util.entity.DummyPlayer;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.registries.ModAttributes;
@@ -466,7 +467,9 @@ public class EntityTempManager
     @SubscribeEvent
     public static void calcModifierImmunity(TempModifierEvent.Calculate.Modify event)
     {
+        if (event.getEntity() instanceof DummyPlayer) return;
         if (!Arrays.stream(VALID_ATTRIBUTE_TYPES).toList().contains(event.getTrait())) return;
+
         TempModifier mod = event.getModifier();
         ResourceLocation modifierKey = TempModifierRegistry.getKey(mod);
         LivingEntity entity = event.getEntity();
