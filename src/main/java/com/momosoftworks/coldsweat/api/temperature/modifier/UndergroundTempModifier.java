@@ -5,6 +5,7 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.DepthTempData;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.BlockPos;
@@ -13,6 +14,7 @@ import net.minecraft.world.World;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 public class UndergroundTempModifier extends TempModifier
@@ -43,26 +45,37 @@ public class UndergroundTempModifier extends TempModifier
 
         int skylight = entity.level.getBrightness(LightType.SKY, entity.blockPosition());
 
+        Map<BlockPos, Pair<DepthTempData, Double>> depthRegions = new FastMap<>();
+
+        for (Pair<BlockPos, Double> pair : depthTable)
+        {
+            BlockPos pos = pair.getFirst().offset(0, skylight - 4, 0);
+            double distance = pair.getSecond();
+            DepthTempData tempData = null;
+            for (DepthTempData data : ConfigSettings.DEPTH_REGIONS.get())
+            {
+                if (data.withinBounds(level, pos))
+                {
+                    tempData = data;
+                    break;
+                }
+            }
+            if (tempData != null)
+            {   depthRegions.put(pos, Pair.of(tempData, distance));
+            }
+        }
+
         return temp ->
         {
             List<Pair<Double, Double>> depthTemps = new ArrayList<>();
 
-            for (Pair<BlockPos, Double> pair : depthTable)
+            for (Map.Entry<BlockPos, Pair<DepthTempData, Double>> entry : depthRegions.entrySet())
             {
-                BlockPos.Mutable pos = pair.getFirst().mutable();
-                double distance = pair.getSecond();
+                BlockPos pos = entry.getKey();
+                DepthTempData depthData = entry.getValue().getFirst();
+                double distance = entry.getValue().getSecond();
 
-                // Fudge the height of the position to be influenced by skylight
-                pos.move(0, skylight - 4, 0);
-                // Get the depth region for this position
-                Double depthTemp = null;
-                for (DepthTempData tempData : ConfigSettings.DEPTH_REGIONS.get())
-                {
-                    if ((depthTemp = tempData.getTemperature(temp, pos, level)) != null)
-                    {   break;
-                    }
-                }
-                if (depthTemp == null) continue;
+                double depthTemp = depthData.getTemperature(temp, pos, level);
                 double weight = 1 / (distance + 1);
                 // Add the weighted temperature to the list
                 depthTemps.add(new Pair<>(depthTemp, weight));
