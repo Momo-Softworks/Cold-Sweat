@@ -2,7 +2,6 @@ package com.momosoftworks.coldsweat.api.util;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
-import com.momosoftworks.coldsweat.api.event.core.GatherDefaultTempModifiersEvent;
 import com.momosoftworks.coldsweat.api.event.common.TempModifierEvent;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
@@ -13,6 +12,7 @@ import com.momosoftworks.coldsweat.core.network.message.SyncTemperatureMessage;
 import com.momosoftworks.coldsweat.util.entity.DummyPlayer;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.InterruptableStreamer;
+import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringRepresentable;
@@ -114,22 +114,9 @@ public class Temperature
     {   return apply(temp, entity, trait, modifiers.toArray(new TempModifier[0]));
     }
 
-    static Map<ResourceLocation, DummyPlayer> DUMMIES = new HashMap<>();
-
     public static double getTemperatureAt(BlockPos pos, Level level)
     {
-        ResourceLocation dimension = level.dimension().location();
-        // There is one "dummy" entity per world, which TempModifiers are applied to
-        DummyPlayer dummy = DUMMIES.get(dimension);
-        // If the dummy for this dimension is invalid, make a new one
-        if (dummy == null || dummy.level() != level)
-        {
-            DUMMIES.put(dimension, dummy = new DummyPlayer(level));
-            // Use default player modifiers to determine the temperature
-            GatherDefaultTempModifiersEvent event = new GatherDefaultTempModifiersEvent(dummy, Trait.WORLD);
-            NeoForge.EVENT_BUS.post(event);
-            addModifiers(dummy, event.getModifiers(), Trait.WORLD, Placement.Duplicates.BY_CLASS);
-        }
+        DummyPlayer dummy = WorldHelper.getDummyPlayer(level);
         // Move the dummy to the position being tested
         dummy.setPos(CSMath.getCenterPos(pos));
         return apply(0, dummy, Trait.WORLD, getModifiers(dummy, Trait.WORLD));
