@@ -49,8 +49,8 @@ public class RegisterItemOverrides
                 Entity entity = (livingEntity != null ? livingEntity : stack.getEntityRepresentation());
                 if (entity != null)
                 {
-                    double minTemp = ConfigSettings.MIN_TEMP.get();
-                    double maxTemp = ConfigSettings.MAX_TEMP.get();
+                    double minTemp = livingEntity != null ? Temperature.get(livingEntity, Temperature.Trait.FREEZING_POINT) : ConfigSettings.MIN_TEMP.get();
+                    double maxTemp = livingEntity != null ? Temperature.get(livingEntity, Temperature.Trait.BURNING_POINT)  : ConfigSettings.MAX_TEMP.get();
 
                     double worldTemp;
                     if (!entity.getPersistentData().contains("WorldTempTimestamp")
@@ -70,7 +70,7 @@ public class RegisterItemOverrides
                         if (Minecraft.getInstance().getEntityRenderDispatcher().crosshairPickEntity == frame)
                         {
                             boolean celsius = ConfigSettings.CELSIUS.get();
-                            ChatFormatting tempColor = switch (Overlays.getWorldSeverity(worldTemp, minTemp, maxTemp))
+                            ChatFormatting tempColor = switch (Overlays.getGaugeSeverity(worldTemp, minTemp, maxTemp))
                             {
                                 case 0 -> ChatFormatting.WHITE;
                                 case 2,3 -> ChatFormatting.GOLD;
@@ -85,7 +85,7 @@ public class RegisterItemOverrides
                         }
                     }
 
-                    double worldTempAdjusted = CSMath.blend(-1.01d, 1d, worldTemp, minTemp, maxTemp);
+                    double worldTempAdjusted = Overlays.getWorldSeverity(worldTemp, minTemp, maxTemp) * 1.01;
                     return (float) worldTempAdjusted;
                 }
                 return 0;
