@@ -1,21 +1,21 @@
 package com.momosoftworks.coldsweat.api.registry;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.util.exceptions.RegistryFailureException;
-import com.momosoftworks.coldsweat.util.math.FastMap;
+import com.momosoftworks.coldsweat.util.math.FastBiMap;
 import net.minecraft.resources.ResourceLocation;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
 public class TempModifierRegistry
 {
-    static Map<ResourceLocation, TempModifierHolder> TEMP_MODIFIERS = new FastMap<>();
+    static FastBiMap<ResourceLocation, TempModifierHolder> TEMP_MODIFIERS = new FastBiMap<>();
 
-    public static ImmutableMap<ResourceLocation, TempModifierHolder> getEntries()
-    {   return ImmutableMap.copyOf(TEMP_MODIFIERS);
+    public static BiMap<ResourceLocation, TempModifierHolder> getEntries()
+    {   return ImmutableBiMap.copyOf(TEMP_MODIFIERS);
     }
 
     public static void register(ResourceLocation id, Supplier<TempModifier> supplier)
@@ -47,32 +47,38 @@ public class TempModifierRegistry
 
     public static ResourceLocation getKey(TempModifier modifier)
     {
-        for (Map.Entry<ResourceLocation, TempModifierHolder> entry : TEMP_MODIFIERS.entrySet())
-        {
-            if (entry.getValue().equals(modifier))
-            {   return entry.getKey();
-            }
-        }
-        return null;
+        return TEMP_MODIFIERS.getKey(new TempModifierHolder(() -> modifier));
     }
 
     public static class TempModifierHolder
     {
         private final Supplier<TempModifier> supplier;
+        private final Class<? extends TempModifier> clazz;
 
         public TempModifierHolder(Supplier<TempModifier> supplier)
         {   this.supplier = supplier;
+            this.clazz = supplier.get().getClass();
         }
 
         public TempModifier get()
         {   return supplier.get();
         }
 
+        public Class<? extends TempModifier> getModifierClass()
+        {   return clazz;
+        }
+
         @Override
         public boolean equals(Object obj)
         {
-            return this.get().getClass() == obj.getClass()
-            || obj instanceof TempModifierHolder && this.get().getClass() == ((TempModifierHolder) obj).get().getClass();
+            return obj instanceof TempModifier mod
+                   ? mod.getClass().equals(clazz)
+                   : obj instanceof TempModifierHolder holder && holder.getModifierClass().equals(clazz);
+        }
+
+        @Override
+        public String toString()
+        {   return clazz.getName();
         }
     }
 }
