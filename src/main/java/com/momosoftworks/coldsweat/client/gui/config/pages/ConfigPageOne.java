@@ -98,7 +98,7 @@ public class ConfigPageOne extends AbstractConfigPage
 
         // Difficulty button
         this.addButton("difficulty", Side.RIGHT, () -> new TranslatableComponent("cold_sweat.config.difficulty.name").append(
-                        " (" + ConfigPageDifficulty.getDifficultyName(ConfigSettings.DIFFICULTY.get()).getString() + ")..."),
+                        " (" + ConfigSettings.Difficulty.getFormattedName(ConfigSettings.DIFFICULTY.get()).getString() + ")..."),
                 button -> mc.setScreen(new ConfigPageDifficulty(this)),
                 true, false, false, new TranslatableComponent("cold_sweat.config.difficulty.desc"));
 
