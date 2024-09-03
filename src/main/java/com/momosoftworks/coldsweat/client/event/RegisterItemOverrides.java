@@ -6,7 +6,6 @@ import com.momosoftworks.coldsweat.client.gui.Overlays;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ItemInit;
-import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -46,8 +45,8 @@ public class RegisterItemOverrides
                 Entity entity = (livingEntity != null ? livingEntity : stack.getEntityRepresentation());
                 if (entity != null)
                 {
-                    double minTemp = ConfigSettings.MIN_TEMP.get();
-                    double maxTemp = ConfigSettings.MAX_TEMP.get();
+                    double minTemp = livingEntity != null ? Temperature.get(livingEntity, Temperature.Trait.FREEZING_POINT) : ConfigSettings.MIN_TEMP.get();
+                    double maxTemp = livingEntity != null ? Temperature.get(livingEntity, Temperature.Trait.BURNING_POINT)  : ConfigSettings.MAX_TEMP.get();
 
                     double worldTemp;
                     if (!entity.getPersistentData().contains("WorldTempTimestamp")
@@ -69,7 +68,7 @@ public class RegisterItemOverrides
                         {
                             boolean celsius = ConfigSettings.CELSIUS.get();
                             TextFormatting tempColor;
-                            switch (Overlays.getWorldSeverity(worldTemp, minTemp, maxTemp))
+                            switch (Overlays.getGaugeSeverity(worldTemp, minTemp, maxTemp))
                             {
                                 case 0 : tempColor = TextFormatting.WHITE; break;
                                 case 2 : case 3 : tempColor = TextFormatting.GOLD; break;
@@ -84,7 +83,7 @@ public class RegisterItemOverrides
                         }
                     }
 
-                    double worldTempAdjusted = CSMath.blend(-1.01d, 1d, worldTemp, minTemp, maxTemp);
+                    double worldTempAdjusted = Overlays.getWorldSeverity(worldTemp, minTemp, maxTemp) * 1.01;
                     return (float) worldTempAdjusted;
                 }
                 return 0;
