@@ -225,6 +225,28 @@ public class FastMap<K, V> implements Map<K, V>, Cloneable, Serializable
     }
 
     /**
+     * Gets the value associated with the key that is equal to the given object, according to {@code equals()}.
+     */
+    public V getEqual( Object key )
+    {
+        if (key == null)
+        {   throw new NullPointerException("Key cannot be null");
+        }
+
+        for (EntryImpl<K, V> entry : _entries)
+        {
+            while (entry != null)
+            {
+                if (key.equals(entry._key))
+                {   return entry._value;
+                }
+                entry = entry._next;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Returns the entry with the specified key.
      *
      * @param key the key whose associated entry is to be returned.
@@ -255,7 +277,7 @@ public class FastMap<K, V> implements Map<K, V>, Cloneable, Serializable
      *         specified key.
      * @throws NullPointerException if the key is <code>null</code>.
      */
-    public Object put( Object key, Object value )
+    public V put( Object key, Object value )
     {
         EntryImpl entry = _entries[keyHash( key ) & _mask];
         while ( entry != null )
@@ -264,7 +286,7 @@ public class FastMap<K, V> implements Map<K, V>, Cloneable, Serializable
             {
                 Object prevValue = entry._value;
                 entry._value = value;
-                return prevValue;
+                return (V) prevValue;
             }
             entry = entry._next;
         }
