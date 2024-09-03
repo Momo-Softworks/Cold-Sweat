@@ -1,10 +1,13 @@
 package com.momosoftworks.coldsweat.util.world;
 
 import com.mojang.datafixers.util.Pair;
+import com.momosoftworks.coldsweat.api.event.core.GatherDefaultTempModifiersEvent;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
+import com.momosoftworks.coldsweat.api.util.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.util.entity.DummyPlayer;
 import com.momosoftworks.coldsweat.util.serialization.DynamicHolder;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.BlockDataUpdateMessage;
@@ -48,6 +51,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.server.ServerLifecycleHooks;
@@ -61,6 +65,8 @@ import java.util.function.Predicate;
 
 public abstract class WorldHelper
 {
+    static Map<ResourceLocation, DummyPlayer> DUMMIES = new HashMap<>();
+
     /**
      * Iterates through every block until it reaches minecraft:air, then returns the Y value<br>
      * Ignores minecraft:cave_air<br>
@@ -580,10 +586,32 @@ public abstract class WorldHelper
         // Get biome temperature
         double temp = getBiomeTemperatureAt(level, biome, pos);
         // Get season temperature (if available)
-        Optional<TempModifier> seasonModifier = TempModifierRegistry.getValue(new ResourceLocation("sereneseasons", "season"));
-        if (seasonModifier.isPresent())
-        {   temp = seasonModifier.get().update(temp, null, Temperature.Trait.WORLD);
+        if (CompatManager.isSereneSeasonsLoaded())
+        {
+            DummyPlayer dummy = getDummyPlayer(level);
+            Optional<TempModifier> seasonModifier = TempModifierRegistry.getValue(new ResourceLocation("sereneseasons", "season"));
+            if (seasonModifier.isPresent())
+            {   temp = Temperature.apply(temp, dummy, Temperature.Trait.WORLD, seasonModifier.get());
+            }
         }
+
         return temp;
+    }
+
+    public static DummyPlayer getDummyPlayer(Level level)
+    {
+        ResourceLocation dimension = level.dimension().location();
+        // There is one "dummy" entity per world, which TempModifiers are applied to
+        DummyPlayer dummy = DUMMIES.get(dimension);
+        // If the dummy for this dimension is invalid, make a new one
+        if (dummy == null || dummy.level() != level)
+        {
+            WorldHelper.DUMMIES.put(dimension, dummy = new DummyPlayer(level));
+            // Use default player modifiers to determine the temperature
+            GatherDefaultTempModifiersEvent event = new GatherDefaultTempModifiersEvent(dummy, Temperature.Trait.WORLD);
+            MinecraftForge.EVENT_BUS.post(event);
+            Temperature.addModifiers(dummy, event.getModifiers(), Temperature.Trait.WORLD, Placement.Duplicates.BY_CLASS);
+        }
+        return dummy;
     }
 }
