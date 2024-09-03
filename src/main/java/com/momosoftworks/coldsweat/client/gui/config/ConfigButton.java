@@ -1,12 +1,10 @@
 package com.momosoftworks.coldsweat.client.gui.config;
 
-import com.momosoftworks.coldsweat.client.gui.config.pages.ConfigPageDifficulty;
 import com.momosoftworks.coldsweat.client.gui.config.pages.ConfigPageOne;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
@@ -33,7 +31,7 @@ public class ConfigButton extends Button
                 ConfigPageOne page = (ConfigPageOne) Minecraft.getInstance().screen;
                 ((Button) page.getWidgetBatch("difficulty").get(0)).setMessage(
                         new StringTextComponent(new TranslationTextComponent("cold_sweat.config.difficulty.name").getString() +
-                                " (" + ConfigPageDifficulty.getDifficultyName(ConfigSettings.DIFFICULTY.get()).getString() + ")..."));
+                                " (" + ConfigSettings.Difficulty.getFormattedName(ConfigSettings.DIFFICULTY.get()).getString() + ")..."));
             }
         }
 

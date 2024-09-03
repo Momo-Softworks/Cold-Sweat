@@ -48,13 +48,13 @@ public class ConfigPageDifficulty extends Screen
         this.parentScreen = parentScreen;
     }
 
-    public static List<TextComponent> getListFor(int difficulty)
+    public static List<TextComponent> getListFor(ConfigSettings.Difficulty difficulty)
     {
-       switch (difficulty)
-        {   case 0  : return SUPER_EASY_DESCRIPTION;
-            case 1  : return EASY_DESCRIPTION;
-            case 2  : return NORMAL_DESCRIPTION;
-            case 3  : return HARD_DESCRIPTION;
+        switch (difficulty)
+        {   case SUPER_EASY : return SUPER_EASY_DESCRIPTION;
+            case EASY   : return EASY_DESCRIPTION;
+            case NORMAL : return NORMAL_DESCRIPTION;
+            case HARD   : return HARD_DESCRIPTION;
             default : return CUSTOM_DESCRIPTION;
         }
     }
@@ -89,25 +89,14 @@ public class ConfigPageDifficulty extends Screen
                          : new TranslationTextComponent(key, YEL + (Math.abs(1 - rate) * 100) + "%" + CLEAR);
     }
 
-    public static int getDifficultyColor(int difficulty)
+    public static int getDifficultyColor(ConfigSettings.Difficulty difficulty)
     {
         switch (difficulty)
-        {   case 0  : return 16777215;
-            case 1  : return 16768882;
-            case 2  : return 16755024;
-            case 3  : return 16731202;
+        {   case SUPER_EASY : return 16777215;
+            case EASY   : return 16768882;
+            case NORMAL : return 16755024;
+            case HARD   : return 16731202;
             default : return 10631158;
-        }
-    }
-
-    public static IFormattableTextComponent getDifficultyName(int difficulty)
-    {
-        switch (difficulty)
-        {   case 0  : return new TranslationTextComponent("cold_sweat.config.difficulty.super_easy.name");
-            case 1  : return new TranslationTextComponent("cold_sweat.config.difficulty.easy.name");
-            case 2  : return new TranslationTextComponent("cold_sweat.config.difficulty.normal.name");
-            case 3  : return new TranslationTextComponent("cold_sweat.config.difficulty.hard.name");
-            default : return new TranslationTextComponent("cold_sweat.config.difficulty.custom.name");
         }
     }
 
@@ -115,7 +104,6 @@ public class ConfigPageDifficulty extends Screen
     {
         return -1;
     }
-
 
     @Override
     protected void init()
@@ -139,7 +127,7 @@ public class ConfigPageDifficulty extends Screen
         {   this.renderDirtBackground(0);
         }
 
-        int difficulty = ConfigSettings.DIFFICULTY.get();
+        ConfigSettings.Difficulty difficulty = ConfigSettings.DIFFICULTY.get();
 
         // Get a list of TextComponents to render
         List<IFormattableTextComponent> descLines = new ArrayList<>();
@@ -179,11 +167,11 @@ public class ConfigPageDifficulty extends Screen
                 isMouseOverSlider(mouseX, mouseY) ? 134 : 128, 152, 6);
 
         // Draw Slider Head
-        this.blit(matrixStack, this.width / 2 - 78 + (difficulty * 37), this.height / 2 - 58,
+        this.blit(matrixStack, this.width / 2 - 78 + (difficulty.getId() * 37), this.height / 2 - 58,
                 isMouseOverSlider(mouseX, mouseY) ? 0 : 6, 128, 6, 16);
 
         // Draw Difficulty Title
-        IFormattableTextComponent difficultyName = getDifficultyName(difficulty);
+        IFormattableTextComponent difficultyName = getFormattedName(difficulty);
         this.font.drawShadow(matrixStack, difficultyName, this.width / 2.0f - (font.width(difficultyName) / 2f),
                              this.height / 2.0f - 84, getDifficultyColor(difficulty));
 
@@ -195,16 +183,7 @@ public class ConfigPageDifficulty extends Screen
     public void onClose()
     {
         super.onClose();
-        switch (ConfigSettings.DIFFICULTY.get())
-        {   // Super Easy
-            case 0 : SUPER_EASY.load(); break;
-            // Easy
-            case 1 : EASY.load(); break;
-            // Normal
-            case 2 : NORMAL.load(); break;
-            // Hard
-            case 3 : HARD.load(); break;
-        }
+        ConfigSettings.DIFFICULTY.get().load();
         ConfigScreen.saveConfig();
         ConfigScreen.MC.setScreen(parentScreen);
     }
@@ -222,7 +201,7 @@ public class ConfigPageDifficulty extends Screen
         double y = ConfigScreen.MOUSE_Y;
         if (ConfigScreen.IS_MOUSE_DOWN && isMouseOverSlider(x, y))
         {
-            int newDifficulty = (int) Math.round(CSMath.blend(0, 4, x, this.width / 2.0 - 76, this.width / 2.0 + 76));
+            ConfigSettings.Difficulty newDifficulty = ConfigSettings.Difficulty.byId((int) Math.round(CSMath.blend(0, 4, x, this.width / 2.0 - 76, this.width / 2.0 + 76)));
 
             if (newDifficulty != ConfigSettings.DIFFICULTY.get())
             {   ConfigScreen.MC.getSoundManager().play(SimpleSound.forUI(new SoundEvent(new ResourceLocation("minecraft:block.note_block.hat")), 1.8f, 0.5f));
