@@ -88,6 +88,13 @@ public class ListBuilder<T>
         return this;
     }
 
+    public ListBuilder<T> fill(int count, Supplier<T> supplier)
+    {   for (int i = 0; i < count; i++)
+        {   this.elements.add(supplier.get());
+        }
+        return this;
+    }
+
     public ArrayList<T> build()
     {   return elements;
     }

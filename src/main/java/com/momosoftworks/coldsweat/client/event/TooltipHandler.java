@@ -4,6 +4,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.client.gui.tooltip.ClientInsulationAttributeTooltip;
 import com.momosoftworks.coldsweat.client.gui.tooltip.ClientInsulationTooltip;
 import com.momosoftworks.coldsweat.client.gui.tooltip.ClientSoulspringTooltip;
 import com.momosoftworks.coldsweat.client.gui.tooltip.Tooltip;
@@ -18,6 +19,7 @@ import com.momosoftworks.coldsweat.util.exceptions.RegistryFailureException;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModAttributes;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
+import com.momosoftworks.coldsweat.util.serialization.ListBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.screen.Screen;
@@ -97,13 +99,13 @@ public class TooltipHandler
                 {   value += modifier.getAmount();
                 }
                 if (value != 0)
-                {   tooltip.add(getFormattedAttributeModifier(attribute, value, operation));
+                {   tooltip.add(getFormattedAttributeModifier(attribute, value, operation, false));
                 }
             }
         });
     }
 
-    public static IFormattableTextComponent getFormattedAttributeModifier(Attribute attribute, double amount, AttributeModifier.Operation operation)
+    public static IFormattableTextComponent getFormattedAttributeModifier(Attribute attribute, double amount, AttributeModifier.Operation operation, boolean forTooltip)
     {
         if (attribute == null) return new StringTextComponent("");
         double value = amount;
@@ -141,9 +143,12 @@ public class TooltipHandler
         else
         {   percent = "";
         }
+        List<String> params = new ArrayList<>(Arrays.asList(sign + CSMath.formatDoubleOrInt(CSMath.round(value, 2)) + percent));
+        if (forTooltip)
+        {   params.add("show_icon");
+        }
         return new TranslationTextComponent(String.format("attribute.cold_sweat.modifier.%s.%s", operationString, attributeName),
-                                         sign + CSMath.formatDoubleOrInt(CSMath.round(value, 2))
-                                                 + percent)
+                                         params.toArray())
                 .withStyle(color);
     }
 
@@ -152,23 +157,30 @@ public class TooltipHandler
     {   TOOLTIP_BACKGROUND_COLOR = event.getBackground();
     }
 
-    private static final List<Tooltip> TOOLTIP_INSERTIONS = new ArrayList<>();
+    private static final List<Object> TOOLTIP_INSERTIONS = new ArrayList<>();
 
     private static void addTooltip(int index, Tooltip tooltip, List<ITextComponent> elements)
     {
-        TOOLTIP_INSERTIONS.add(tooltip);
+        TOOLTIP_INSERTIONS.add(index, tooltip);
         elements.add(index, getTooltipCode(tooltip.getClass()));
     }
 
-    @SubscribeEvent
+    private static void setTooltip(int index, Tooltip tooltip)
+    {
+        TOOLTIP_INSERTIONS.set(index, tooltip);
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void addSimpleTooltips(ItemTooltipEvent event)
     {
-        TOOLTIP_INSERTIONS.clear();
         ItemStack stack = event.getItemStack();
         Item item = stack.getItem();
         List<ITextComponent> elements = event.getToolTip();
         boolean hideTooltips = ConfigSettings.HIDE_TOOLTIPS.get() && !Screen.hasShiftDown();
         if (stack.isEmpty()) return;
+
+        TOOLTIP_INSERTIONS.clear();
+        TOOLTIP_INSERTIONS.addAll(ListBuilder.begin().fill(elements.size(), Object::new).build());
 
         // Get the index at which the tooltip should be inserted
         int tooltipStartIndex = getTooltipTitleIndex(elements, stack);
@@ -288,6 +300,23 @@ public class TooltipHandler
             {   addTooltip(tooltipStartIndex, new ClientInsulationTooltip(insulation, Insulation.Slot.ARMOR, stack), elements);
             }
         }
+
+        /*
+         Custom tooltips for attributes from insulation
+         */
+        for (int i = 0; i < elements.size(); i++)
+        {
+            ITextComponent element = elements.get(i);
+            if (element instanceof TranslationTextComponent)
+            {
+                TranslationTextComponent component = ((TranslationTextComponent) element);
+                if (Arrays.asList(component.getArgs()).contains("show_icon"))
+                {
+                    elements.remove(i);
+                    addTooltip(i, new ClientInsulationAttributeTooltip(component, Minecraft.getInstance().font), elements);
+                }
+            }
+        }
     }
 
     @SubscribeEvent
@@ -298,24 +327,24 @@ public class TooltipHandler
         // Find the empty line that this tooltip should fill
         int y = event.getY() - 10;
         List<? extends ITextProperties> tooltipLines = event.getLines();
-        for (ITextProperties tooltipLine : tooltipLines)
+        for (int i = 0; i < Math.min(tooltipLines.size(), TOOLTIP_INSERTIONS.size()); i++)
         {
+            y += 10;
+            ITextProperties tooltipLine = tooltipLines.get(i);
             String line = tooltipLine.getString();
             if (line.isEmpty()) continue;
-            if (TOOLTIP_INSERTIONS.isEmpty()) return;
 
-            Tooltip nextTooltip = TOOLTIP_INSERTIONS.get(0);
+            Object nextInsertion = TOOLTIP_INSERTIONS.get(i);
+            if (!(nextInsertion instanceof Tooltip)) continue;
+            Tooltip nextTooltip = (Tooltip) nextInsertion;
             String tooltipID = TOOLTIPS.get(nextTooltip.getClass());
 
             if (!line.equals(tooltipID))
             {   continue;
             }
-            y += 10;
 
             nextTooltip.renderImage(Minecraft.getInstance().font, event.getX(), y, event.getMatrixStack(), Minecraft.getInstance().getItemRenderer(), 0);
             nextTooltip.renderText(Minecraft.getInstance().font, event.getX(), y, event.getMatrixStack(), Minecraft.getInstance().getItemRenderer(), 0);
-
-            TOOLTIP_INSERTIONS.remove(0);
         }
     }
 
@@ -416,5 +445,6 @@ public class TooltipHandler
     {
         registerTooltip(ClientInsulationTooltip.class);
         registerTooltip(ClientSoulspringTooltip.class);
+        registerTooltip(ClientInsulationAttributeTooltip.class);
     }
 }

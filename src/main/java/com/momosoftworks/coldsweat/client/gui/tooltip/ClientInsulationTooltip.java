@@ -77,7 +77,7 @@ public class ClientInsulationTooltip extends Tooltip
     @Override
     public void renderImage(FontRenderer font, int x, int y, MatrixStack poseStack, ItemRenderer itemRenderer, int depth)
     {
-        y += 12;
+        y += 2;
         Minecraft.getInstance().textureManager.bind(TOOLTIP_LOCATION.get());
 
         List<Insulation> posInsulation = new ArrayList<>();

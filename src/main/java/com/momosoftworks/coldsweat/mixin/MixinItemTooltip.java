@@ -145,7 +145,7 @@ public class MixinItemTooltip
             if (TOOLTIP != null && ENTRY != null && MODIFIER != null
             && EntityTempManager.isTemperatureAttribute(ENTRY.getKey()))
             {
-                IFormattableTextComponent newline = TooltipHandler.getFormattedAttributeModifier(ENTRY.getKey(), MODIFIER.getAmount(), MODIFIER.getOperation());
+                IFormattableTextComponent newline = TooltipHandler.getFormattedAttributeModifier(ENTRY.getKey(), MODIFIER.getAmount(), MODIFIER.getOperation(), true);
                 for (ITextComponent sibling : siblings)
                 {   newline = newline.append(sibling);
                 }

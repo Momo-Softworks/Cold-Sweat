@@ -129,6 +129,8 @@ dependencies {
     implementation fg.deobf("curse.maven:create-328085:3536025")
     implementation fg.deobf("curse.maven:flywheel-486392:3535459")
     implementation fg.deobf("curse.maven:spoiled-364918:3776531")
+    implementation fg.deobf("curse.maven:ob-aquamirae-536254:4420334")
+    implementation fg.deobf("curse.maven:obscure-api-638417:4420298")
 
     compileOnly fg.deobf("curse.maven:better-weather-400714:3420517")
     compileOnly fg.deobf("curse.maven:vampirism-233029:4640398")
