@@ -23,13 +23,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class TempModifierTypeArgument implements ArgumentType<Temperature.Trait>
+public class TempModifierTraitArgument implements ArgumentType<Temperature.Trait>
 {
     private static final Dynamic2CommandExceptionType INVALID_ENUM = new Dynamic2CommandExceptionType(
             (found, constants) -> new TranslatableComponent("commands.forge.arguments.enum.invalid", constants, found));
 
-    public static TempModifierTypeArgument modifier()
-    {   return new TempModifierTypeArgument();
+    public static TempModifierTraitArgument modifier()
+    {   return new TempModifierTraitArgument();
     }
 
     public static Temperature.Trait getModifier(CommandContext<CommandSourceStack> context, String argument)
@@ -60,21 +60,21 @@ public class TempModifierTypeArgument implements ArgumentType<Temperature.Trait>
         return Stream.of(EntityTempManager.VALID_MODIFIER_TRAITS).map(StringRepresentable::getSerializedName).collect(Collectors.toList());
     }
 
-    public static class Serializer implements ArgumentSerializer<TempModifierTypeArgument>
+    public static class Serializer implements ArgumentSerializer<TempModifierTraitArgument>
     {
         @Override
-        public void serializeToNetwork(TempModifierTypeArgument argument, FriendlyByteBuf buffer)
+        public void serializeToNetwork(TempModifierTraitArgument argument, FriendlyByteBuf buffer)
         {
         }
 
         @SuppressWarnings({"unchecked"})
         @Override
-        public TempModifierTypeArgument deserializeFromNetwork(FriendlyByteBuf buffer)
-        {   return new TempModifierTypeArgument();
+        public TempModifierTraitArgument deserializeFromNetwork(FriendlyByteBuf buffer)
+        {   return new TempModifierTraitArgument();
         }
 
         @Override
-        public void serializeToJson(TempModifierTypeArgument argument, JsonObject json)
+        public void serializeToJson(TempModifierTraitArgument argument, JsonObject json)
         {
         }
     }

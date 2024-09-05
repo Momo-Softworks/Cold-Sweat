@@ -15,22 +15,24 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.synchronization.ArgumentSerializer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.StringRepresentable;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class AbilityOrTempTypeArgument implements ArgumentType<Temperature.Trait>
+public class TemperatureTraitArgument implements ArgumentType<Temperature.Trait>
 {
     private static final Dynamic2CommandExceptionType INVALID_ENUM = new Dynamic2CommandExceptionType(
             (found, constants) -> new TranslatableComponent("commands.forge.arguments.enum.invalid", constants, found));
 
-    public static AbilityOrTempTypeArgument attribute()
-    {   return new AbilityOrTempTypeArgument();
+    public static TemperatureTraitArgument type()
+    {   return new TemperatureTraitArgument();
     }
 
-    public static Temperature.Trait getAttribute(CommandContext<CommandSourceStack> context, String argument)
+    public static Temperature.Trait getTemperature(CommandContext<CommandSourceStack> context, String argument)
     {   return context.getArgument(argument, Temperature.Trait.class);
     }
 
@@ -49,30 +51,30 @@ public class AbilityOrTempTypeArgument implements ArgumentType<Temperature.Trait
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(final CommandContext<S> context, final SuggestionsBuilder builder)
     {
-        return SharedSuggestionProvider.suggest(this.getExamples(), builder);
+        return SharedSuggestionProvider.suggest(Stream.of(EntityTempManager.VALID_TEMPERATURE_TRAITS).map(StringRepresentable::getSerializedName), builder);
     }
 
     @Override
     public Collection<String> getExamples()
     {
-        return Stream.of(EntityTempManager.VALID_ATTRIBUTE_TYPES).map(Temperature.Trait::getSerializedName).toList();
+        return Stream.of(EntityTempManager.VALID_TEMPERATURE_TRAITS).map(StringRepresentable::getSerializedName).collect(Collectors.toList());
     }
 
-    public static class Serializer implements ArgumentSerializer<AbilityOrTempTypeArgument>
+    public static class Serializer implements ArgumentSerializer<TemperatureTraitArgument>
     {
         @Override
-        public void serializeToNetwork(AbilityOrTempTypeArgument argument, FriendlyByteBuf buffer)
+        public void serializeToNetwork(TemperatureTraitArgument argument, FriendlyByteBuf buffer)
         {
         }
 
         @SuppressWarnings({"unchecked"})
         @Override
-        public AbilityOrTempTypeArgument deserializeFromNetwork(FriendlyByteBuf buffer)
-        {   return new AbilityOrTempTypeArgument();
+        public TemperatureTraitArgument deserializeFromNetwork(FriendlyByteBuf buffer)
+        {   return new TemperatureTraitArgument();
         }
 
         @Override
-        public void serializeToJson(AbilityOrTempTypeArgument argument, JsonObject json)
+        public void serializeToJson(TemperatureTraitArgument argument, JsonObject json)
         {
         }
     }
