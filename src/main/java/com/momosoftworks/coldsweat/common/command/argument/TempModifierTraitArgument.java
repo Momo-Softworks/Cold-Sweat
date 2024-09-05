@@ -14,16 +14,16 @@ import net.minecraft.util.StringRepresentable;
 
 import java.util.Locale;
 
-public class TempModifierTypeArgument extends StringRepresentableArgument<Temperature.Trait>
+public class TempModifierTraitArgument extends StringRepresentableArgument<Temperature.Trait>
 {
     private static final Codec<Temperature.Trait> MODIFIERS_CODEC = StringRepresentable.fromEnum(() -> EntityTempManager.VALID_MODIFIER_TRAITS);
 
-    private TempModifierTypeArgument()
+    private TempModifierTraitArgument()
     {   super(MODIFIERS_CODEC, () -> EntityTempManager.VALID_MODIFIER_TRAITS);
     }
 
-    public static TempModifierTypeArgument modifier()
-    {   return new TempModifierTypeArgument();
+    public static TempModifierTraitArgument modifier()
+    {   return new TempModifierTraitArgument();
     }
 
     public static Temperature.Trait getModifier(CommandContext<CommandSourceStack> context, String argument)
@@ -34,7 +34,7 @@ public class TempModifierTypeArgument extends StringRepresentableArgument<Temper
     {   return Id.toLowerCase(Locale.ROOT);
     }
 
-    public static class Info implements ArgumentTypeInfo<TempModifierTypeArgument, Info.Template>
+    public static class Info implements ArgumentTypeInfo<TempModifierTraitArgument, Info.Template>
     {
         @Override
         public void serializeToNetwork(Template template, FriendlyByteBuf buffer)
@@ -52,19 +52,19 @@ public class TempModifierTypeArgument extends StringRepresentableArgument<Temper
         }
 
         @Override
-        public Template unpack(TempModifierTypeArgument argument)
+        public Template unpack(TempModifierTraitArgument argument)
         {   return new Template();
         }
 
-        public final class Template implements ArgumentTypeInfo.Template<TempModifierTypeArgument>
+        public final class Template implements ArgumentTypeInfo.Template<TempModifierTraitArgument>
         {
             @Override
-            public TempModifierTypeArgument instantiate(CommandBuildContext pContext)
-            {   return new TempModifierTypeArgument();
+            public TempModifierTraitArgument instantiate(CommandBuildContext pContext)
+            {   return new TempModifierTraitArgument();
             }
 
             @Override
-            public ArgumentTypeInfo<TempModifierTypeArgument, ?> type()
+            public ArgumentTypeInfo<TempModifierTraitArgument, ?> type()
             {   return Info.this;
             }
         }

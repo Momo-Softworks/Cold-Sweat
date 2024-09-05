@@ -9,8 +9,8 @@ import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
 import com.momosoftworks.coldsweat.common.command.BaseCommand;
-import com.momosoftworks.coldsweat.common.command.argument.AbilityOrTempTypeArgument;
-import com.momosoftworks.coldsweat.common.command.argument.TempModifierTypeArgument;
+import com.momosoftworks.coldsweat.common.command.argument.TempAttributeTraitArgument;
+import com.momosoftworks.coldsweat.common.command.argument.TempModifierTraitArgument;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -82,9 +82,9 @@ public class TempCommand extends BaseCommand
                 /* Get TempModifiers from entity */
                 .then(Commands.literal("debug")
                         .then(Commands.argument("entity", EntityArgument.entity())
-                                  .then(Commands.argument("type", TempModifierTypeArgument.modifier())
+                                  .then(Commands.argument("type", TempModifierTraitArgument.modifier())
                                           .executes(source -> executeDebugModifiers(
-                                                  source.getSource(), EntityArgument.getEntity(source, "entity"), TempModifierTypeArgument.getModifier(source, "type"))
+                                                  source.getSource(), EntityArgument.getEntity(source, "entity"), TempModifierTraitArgument.getModifier(source, "type"))
                                           )
                                   )
                         )
@@ -95,10 +95,10 @@ public class TempCommand extends BaseCommand
                                 /* Clear all attributes */
                                 .then(Commands.literal("clear")
                                               /* Modify attribute of this type */
-                                              .then(Commands.argument("type", AbilityOrTempTypeArgument.attribute())
+                                              .then(Commands.argument("type", TempAttributeTraitArgument.attribute())
                                                             .executes(source -> executeClearModifier(
                                                                     source.getSource(), EntityArgument.getEntities(source, "entities"),
-                                                                    AbilityOrTempTypeArgument.getAttribute(source, "type"))
+                                                                    TempAttributeTraitArgument.getAttribute(source, "type"))
                                                             )
                                               )
                                               .executes(source -> executeClearAllModifiers(
@@ -107,12 +107,12 @@ public class TempCommand extends BaseCommand
                                 )
                                 /* Add to base value */
                                 .then(Commands.literal("add")
-                                              .then(Commands.argument("type", AbilityOrTempTypeArgument.attribute())
+                                              .then(Commands.argument("type", TempAttributeTraitArgument.attribute())
                                                             .then(Commands.argument("amount", DoubleArgumentType.doubleArg())
                                                                           .then(Commands.argument("permanent", BoolArgumentType.bool())
                                                                                         .executes(source -> executeModifyEntityTemp(
                                                                                                 source.getSource(), EntityArgument.getEntities(source, "entities"),
-                                                                                                AbilityOrTempTypeArgument.getAttribute(source, "type"),
+                                                                                                TempAttributeTraitArgument.getAttribute(source, "type"),
                                                                                                 DoubleArgumentType.getDouble(source, "amount"),
                                                                                                 AttributeModifier.Operation.ADD_VALUE, BoolArgumentType.getBool(source, "permanent"))
                                                                                         )
@@ -120,7 +120,7 @@ public class TempCommand extends BaseCommand
                                                                           /* Default to non-permanent if not specified */
                                                                           .executes(source -> executeModifyEntityTemp(
                                                                                   source.getSource(), EntityArgument.getEntities(source, "entities"),
-                                                                                  AbilityOrTempTypeArgument.getAttribute(source, "type"),
+                                                                                  TempAttributeTraitArgument.getAttribute(source, "type"),
                                                                                   DoubleArgumentType.getDouble(source, "amount"),
                                                                                   AttributeModifier.Operation.ADD_VALUE, false)
                                                                           )
@@ -129,19 +129,19 @@ public class TempCommand extends BaseCommand
                                 )
                                 /* Multiply base */
                                 .then(Commands.literal("multiply_base")
-                                              .then(Commands.argument("type", AbilityOrTempTypeArgument.attribute())
+                                              .then(Commands.argument("type", TempAttributeTraitArgument.attribute())
                                                             .then(Commands.argument("amount", DoubleArgumentType.doubleArg())
                                                                           .then(Commands.argument("permanent", BoolArgumentType.bool())
                                                                                         .executes(source -> executeModifyEntityTemp(
                                                                                                 source.getSource(), EntityArgument.getEntities(source, "entities"),
-                                                                                                AbilityOrTempTypeArgument.getAttribute(source, "type"),
+                                                                                                TempAttributeTraitArgument.getAttribute(source, "type"),
                                                                                                 DoubleArgumentType.getDouble(source, "amount"),
                                                                                                 AttributeModifier.Operation.ADD_MULTIPLIED_BASE, BoolArgumentType.getBool(source, "permanent"))
                                                                                         )
                                                                           )
                                                                           .executes(source -> executeModifyEntityTemp(
                                                                                   source.getSource(), EntityArgument.getEntities(source, "entities"),
-                                                                                  AbilityOrTempTypeArgument.getAttribute(source, "type"),
+                                                                                  TempAttributeTraitArgument.getAttribute(source, "type"),
                                                                                   DoubleArgumentType.getDouble(source, "amount"),
                                                                                   AttributeModifier.Operation.ADD_MULTIPLIED_BASE, false)
                                                                           )
@@ -150,19 +150,19 @@ public class TempCommand extends BaseCommand
                                 )
                                 /* Multiply base */
                                 .then(Commands.literal("multiply_total")
-                                              .then(Commands.argument("type", AbilityOrTempTypeArgument.attribute())
+                                              .then(Commands.argument("type", TempAttributeTraitArgument.attribute())
                                                             .then(Commands.argument("amount", DoubleArgumentType.doubleArg())
                                                                           .then(Commands.argument("permanent", BoolArgumentType.bool())
                                                                                         .executes(source -> executeModifyEntityTemp(
                                                                                                 source.getSource(), EntityArgument.getEntities(source, "entities"),
-                                                                                                AbilityOrTempTypeArgument.getAttribute(source, "type"),
+                                                                                                TempAttributeTraitArgument.getAttribute(source, "type"),
                                                                                                 DoubleArgumentType.getDouble(source, "amount"),
                                                                                                 AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, BoolArgumentType.getBool(source, "permanent"))
                                                                                         )
                                                                           )
                                                                           .executes(source -> executeModifyEntityTemp(
                                                                                   source.getSource(), EntityArgument.getEntities(source, "entities"),
-                                                                                  AbilityOrTempTypeArgument.getAttribute(source, "type"),
+                                                                                  TempAttributeTraitArgument.getAttribute(source, "type"),
                                                                                   DoubleArgumentType.getDouble(source, "amount"),
                                                                                   AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL, false)
                                                                           )
@@ -170,19 +170,19 @@ public class TempCommand extends BaseCommand
                                               )
                                 )
                                 .then(Commands.literal("set")
-                                              .then(Commands.argument("type", AbilityOrTempTypeArgument.attribute())
+                                              .then(Commands.argument("type", TempAttributeTraitArgument.attribute())
                                                               .then(Commands.argument("amount", DoubleArgumentType.doubleArg())
                                                                           .then(Commands.argument("permanent", BoolArgumentType.bool())
                                                                                           .executes(source -> executeModifyEntityTemp(
                                                                                                   source.getSource(), EntityArgument.getEntities(source, "entities"),
-                                                                                                  AbilityOrTempTypeArgument.getAttribute(source, "type"),
+                                                                                                  TempAttributeTraitArgument.getAttribute(source, "type"),
                                                                                                   DoubleArgumentType.getDouble(source, "amount"),
                                                                                                   null, BoolArgumentType.getBool(source, "permanent"))
                                                                                           )
                                                                           )
                                                                           .executes(source -> executeModifyEntityTemp(
                                                                                   source.getSource(), EntityArgument.getEntities(source, "entities"),
-                                                                                  AbilityOrTempTypeArgument.getAttribute(source, "type"),
+                                                                                  TempAttributeTraitArgument.getAttribute(source, "type"),
                                                                                   DoubleArgumentType.getDouble(source, "amount"),
                                                                                   null, false)
                                                                           )
@@ -456,7 +456,7 @@ public class TempCommand extends BaseCommand
             {
                 EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
                 {
-                    for (Temperature.Trait attribute : EntityTempManager.VALID_ATTRIBUTE_TYPES)
+                    for (Temperature.Trait attribute : EntityTempManager.VALID_ATTRIBUTE_TRAITS)
                     {
                         AttributeInstance instance = EntityTempManager.getAttribute(attribute, living);
                         if (instance == null) continue;
