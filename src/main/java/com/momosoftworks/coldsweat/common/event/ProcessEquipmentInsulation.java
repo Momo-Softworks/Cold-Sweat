@@ -36,6 +36,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -63,15 +64,18 @@ public class ProcessEquipmentInsulation
                 {
                     // Add the armor's intrinsic insulation value (defined in configs)
                     // Mutually exclusive with Sewing Table insulation
-                    Insulator armorInsulator = ConfigSettings.INSULATING_ARMORS.get().get(armorStack.getItem());
-                    if (armorInsulator != null)
+                    Collection<Insulator> armorInsulators = ConfigSettings.INSULATING_ARMORS.get().get(armorStack.getItem());
+                    if (!armorInsulators.isEmpty())
                     {
-                        // Check if the player meets the predicate for the insulation
-                        if (!armorInsulator.predicate().test(serverPlayer) || !armorInsulator.data().test(armorStack, true))
-                        {   continue;
+                        for (Insulator armorInsulator : armorInsulators)
+                        {
+                            // Check if the player meets the predicate for the insulation
+                            if (!armorInsulator.test(player, armorStack))
+                            {   continue;
+                            }
+                            cold += armorInsulator.insulation().getCold();
+                            heat += armorInsulator.insulation().getHeat();
                         }
-                        cold += armorInsulator.insulation().getCold();
-                        heat += armorInsulator.insulation().getHeat();
                     }
                     else
                     {   // Add the armor's insulation value from the Sewing Table
@@ -80,13 +84,7 @@ public class ProcessEquipmentInsulation
                         {   continue;
                         }
                         ArmorInsulation cap = icap.get();
-                        List<Insulation> insulation = cap.getInsulation()
-                                                      .stream()
-                                                      .filter(pair -> CSMath.getIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(pair.getFirst().getItem()),
-                                                                                          insulator -> insulator.test(serverPlayer, pair.getFirst()),
-                                                                                          false))
-                                                      .map(pair -> pair.getSecond())
-                                                      .flatMap(List::stream).toList();
+                        List<Insulation> insulation = ItemInsulationManager.getAllEffectiveInsulation(armorStack, player);
 
                         // Get the armor's insulation values
                         for (Insulation value : insulation)
@@ -143,13 +141,14 @@ public class ProcessEquipmentInsulation
 
             /* Get insulation from curios */
 
-            for (ItemStack stack : CompatManager.getCurios(player))
+            for (ItemStack curio : CompatManager.getCurios(player))
             {
-                Insulator insulator = ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem());
-                if (insulator != null && insulator.test(player, stack))
+                for (Insulator insulator : ConfigSettings.INSULATING_CURIOS.get().get(curio.getItem()))
                 {
-                    cold += insulator.insulation().getCold();
-                    heat += insulator.insulation().getHeat();
+                    if (insulator.test(player, curio))
+                    {   cold += insulator.insulation().getCold();
+                        heat += insulator.insulation().getHeat();
+                    }
                 }
             }
 

@@ -72,9 +72,9 @@ public class ModCreativeTabs
             {
                 List<ItemStack> allInsulators = new ArrayList<>();
                 Stream.of(
-                        sort(ConfigSettings.INSULATION_ITEMS.get().entrySet()),
-                        sort(ConfigSettings.INSULATING_ARMORS.get().entrySet()),
-                        sort(ConfigSettings.INSULATING_CURIOS.get().entrySet())
+                        sort(ConfigSettings.INSULATION_ITEMS.get().entries()),
+                        sort(ConfigSettings.INSULATING_ARMORS.get().entries()),
+                        sort(ConfigSettings.INSULATING_CURIOS.get().entries())
                 ).flatMap(Collection::stream).forEach(stack ->
                 {
                     if (allInsulators.stream().noneMatch(s -> s.getItem() == stack.getItem()))
@@ -87,7 +87,7 @@ public class ModCreativeTabs
             .title(Component.translatable("itemGroup.cs_insulation_items"))
             .build());
 
-    private static List<ItemStack> sort(Set<Map.Entry<Item, Insulator>> items)
+    private static List<ItemStack> sort(Collection<Map.Entry<Item, Insulator>> items)
     {   List<Map.Entry<Item, Insulator>> list = new ArrayList<>(items);
         // Sort by name first
         list.sort(Comparator.comparing(item -> item.getKey().getDefaultInstance().getDisplayName().getString()));

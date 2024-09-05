@@ -5,6 +5,8 @@ import com.momosoftworks.coldsweat.client.event.TooltipHandler;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.config.type.Insulator;
+import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
@@ -47,30 +49,36 @@ public abstract class MixinItemTooltip
                                         List<Component> tooltip, MutableComponent mutablecomponent, Consumer consumer)
     {
         ItemStack stack = (ItemStack) (Object) this;
-        Optional.ofNullable(ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem())).ifPresent(insulator ->
+
+        // Add insulation attributes to tooltip
+        AttributeModifierMap insulatorAttributes = new AttributeModifierMap();
+        for (Insulator insulator : ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()))
         {
-            if (insulator.test(Minecraft.getInstance().player, stack))
-            {
-                if (!insulator.attributes().getMap().isEmpty())
-                {
-                    tooltip.add(CommonComponents.EMPTY);
-                    tooltip.add(Component.translatable("item.modifiers.insulation").withStyle(ChatFormatting.GRAY));
-                    TooltipHandler.addModifierTooltipLines(tooltip, insulator.attributes());
-                }
+            if (insulator.test(player, stack))
+            {   insulatorAttributes.putAll(insulator.attributes());
             }
-        });
-        Optional.ofNullable(ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem())).ifPresent(insulator ->
+        }
+        if (!insulatorAttributes.isEmpty())
         {
-            if (insulator.test(Minecraft.getInstance().player, stack))
-            {
-                if (!insulator.attributes().getMap().isEmpty())
-                {
-                    tooltip.add(CommonComponents.EMPTY);
-                    tooltip.add(Component.translatable("item.modifiers.curio").withStyle(ChatFormatting.GRAY));
-                    TooltipHandler.addModifierTooltipLines(tooltip, insulator.attributes());
-                }
+            tooltip.add(CommonComponents.EMPTY);
+            tooltip.add(Component.translatable("item.modifiers.insulation").withStyle(ChatFormatting.GRAY));
+            TooltipHandler.addModifierTooltipLines(tooltip, insulatorAttributes);
+        }
+
+        // Add curio attributes to tooltip
+        AttributeModifierMap curioAttributes = new AttributeModifierMap();
+        for (Insulator insulator : ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem()))
+        {
+            if (insulator.test(player, stack))
+            {   curioAttributes.putAll(insulator.attributes());
             }
-        });
+        }
+        if (!curioAttributes.isEmpty())
+        {
+            tooltip.add(CommonComponents.EMPTY);
+            tooltip.add(Component.translatable("item.modifiers.curio").withStyle(ChatFormatting.GRAY));
+            TooltipHandler.addModifierTooltipLines(tooltip, curioAttributes);
+        }
     }
 
     @Inject(method = "addAttributeTooltips", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;forEachModifier(Lnet/minecraft/world/entity/EquipmentSlotGroup;Ljava/util/function/BiConsumer;)V", shift = At.Shift.AFTER),
@@ -85,25 +93,28 @@ public abstract class MixinItemTooltip
         {   return;
         }
 
-        Optional.ofNullable(ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem())).ifPresent(insulator ->
+        for (Insulator insulator : ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem()))
         {
-            if (insulator.test(Minecraft.getInstance().player, stack))
+            if (insulator.test(player, stack))
             {
                 for (Map.Entry<Attribute, AttributeModifier> entry : insulator.attributes().getMap().entries())
-                {   addModifierTooltip(pTooltipAdder, player, Holder.direct(entry.getKey()), entry.getValue());
+                {   pTooltipAdder.accept(TooltipHandler.getFormattedAttributeModifier(Holder.direct(entry.getKey()), entry.getValue().amount(), entry.getValue().operation()));
                 }
             }
-        });
+        }
         ItemInsulationManager.getInsulationCap(stack).ifPresent(cap ->
         {
             cap.getInsulation().stream().map(Pair::getFirst).forEach(item ->
             {
-                Optional.ofNullable(ConfigSettings.INSULATION_ITEMS.get().get(item.getItem())).ifPresent(insulator ->
+                for (Insulator insulator : ConfigSettings.INSULATION_ITEMS.get().get(item.getItem()))
                 {
-                    for (Map.Entry<Attribute, AttributeModifier> entry : insulator.attributes().getMap().entries())
-                    {   addModifierTooltip(pTooltipAdder, player, Holder.direct(entry.getKey()), entry.getValue());
+                    if (insulator.test(player, item))
+                    {
+                        for (Map.Entry<Attribute, AttributeModifier> entry : insulator.attributes().getMap().entries())
+                        {   pTooltipAdder.accept(TooltipHandler.getFormattedAttributeModifier(Holder.direct(entry.getKey()), entry.getValue().amount(), entry.getValue().operation()));
+                        }
                     }
-                });
+                }
             });
         });
     }

@@ -87,10 +87,8 @@ public record ArmorInsulation(List<Pair<ItemStack, List<Insulation>>> insulation
     public ArmorInsulation addInsulationItem(ItemStack stack)
     {
         var insulation = new ArrayList<>(this.insulation());
-        ConfigSettings.INSULATION_ITEMS.get().computeIfPresent(stack.getItem(), (item, insulator) ->
-        {
-            insulation.add(Pair.of(stack, insulator.insulation().split()));
-            return insulator;
+        ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()).forEach(insulator ->
+        {   insulation.add(Pair.of(stack, insulator.insulation().split()));
         });
         return new ArmorInsulation(insulation);
     }
@@ -112,13 +110,16 @@ public record ArmorInsulation(List<Pair<ItemStack, List<Insulation>>> insulation
     {
         AtomicInteger positiveInsul = new AtomicInteger();
 
-        Insulator insulator = ConfigSettings.INSULATION_ITEMS.get().get(insulationItem.getItem());
-        if (insulator == null)
+        List<Insulation> insulation = ConfigSettings.INSULATION_ITEMS.get().get(insulationItem.getItem())
+                                      .stream().filter(insulator -> insulator.test(null, insulationItem))
+                                      .map(insulator -> insulator.insulation().split())
+                                      .flatMap(List::stream).toList();
+        if (insulation.isEmpty())
         {   return false;
         }
 
         List<Pair<ItemStack, List<Insulation>>> insulList = new ArrayList<>(this.insulation);
-        insulList.add(Pair.of(insulationItem, insulator.insulation().split()));
+        insulList.add(Pair.of(insulationItem, insulation));
 
         // Get the total positive/negative insulation of the armor
         insulList.stream().map(Pair::getSecond).flatMap(Collection::stream).forEach(insul ->

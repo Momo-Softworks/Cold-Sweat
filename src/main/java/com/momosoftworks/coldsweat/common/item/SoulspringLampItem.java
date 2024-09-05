@@ -10,6 +10,7 @@ import com.momosoftworks.coldsweat.config.type.PredicateItem;
 import com.momosoftworks.coldsweat.core.init.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.core.init.ModItemComponents;
 import com.momosoftworks.coldsweat.core.init.ModSounds;
+import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
@@ -52,7 +53,7 @@ public class SoulspringLampItem extends Item
     @Override
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected)
     {
-        if (entity instanceof LivingEntity living && !level.isClientSide && living.tickCount % 5 == 0)
+        if (entity instanceof LivingEntity living && living.tickCount % 5 == 0)
         {
             boolean shouldBeOn = false;
             try
@@ -88,7 +89,7 @@ public class SoulspringLampItem extends Item
                         double z = bb2.minZ + (bb2.maxZ - bb2.minZ) * Math.random();
                         double xSpeed = (Math.random() - 0.5) * 0.02;
                         double zSpeed = (Math.random() - 0.5) * 0.02;
-                        WorldHelper.spawnParticle(level, ParticleTypes.SOUL_FIRE_FLAME, x, y, z, xSpeed, 0, zSpeed);
+                        level.addParticle(ParticleTypes.SOUL_FIRE_FLAME, x, y, z, xSpeed, 0, zSpeed);
                     }
 
                     for (LivingEntity ent : level.getEntitiesOfClass(LivingEntity.class, bb))
@@ -110,22 +111,25 @@ public class SoulspringLampItem extends Item
             }
             finally
             {
-                CustomData itemTag = NBTHelper.getOrCreateTag(stack);
-                // If the conditions are not met, turn off the lamp
-                if (itemTag.copyTag().getInt("stateChangeTimer") <= 0
-                && CSMath.orElse(stack.get(ModItemComponents.SOULSPRING_LAMP_LIT), false) != shouldBeOn)
+                if (!level.isClientSide())
                 {
-                    stack.set(DataComponents.CUSTOM_DATA, itemTag.update(tag -> tag.putInt("stateChangeTimer", 2)));
-                    stack.set(ModItemComponents.SOULSPRING_LAMP_LIT, shouldBeOn);
+                    CustomData itemTag = NBTHelper.getOrCreateTag(stack);
+                    // If the conditions are not met, turn off the lamp
+                    if (itemTag.copyTag().getInt("stateChangeTimer") <= 0
+                    && CSMath.orElse(stack.get(ModItemComponents.SOULSPRING_LAMP_LIT), false) != shouldBeOn)
+                    {
+                        stack.set(DataComponents.CUSTOM_DATA, itemTag.update(tag -> tag.putInt("stateChangeTimer", 2)));
+                        stack.set(ModItemComponents.SOULSPRING_LAMP_LIT, shouldBeOn);
 
-                    if (getFuel(stack) < 0.5)
-                        setFuel(stack, 0);
+                        if (getFuel(stack) < 0.5)
+                            setFuel(stack, 0);
 
-                    WorldHelper.playEntitySound(shouldBeOn ? ModSounds.SOUL_LAMP_ON.value() : ModSounds.SOUL_LAMP_OFF.value(), living, living.getSoundSource(), 1.5f, (float) Math.random() / 5f + 0.9f);
-                }
-                else
-                {   // Decrement the state change timer
-                    NBTHelper.incrementTag(stack, "stateChangeTimer", -1, tag -> tag > 0);
+                        WorldHelper.playEntitySound(shouldBeOn ? ModSounds.SOUL_LAMP_ON.value() : ModSounds.SOUL_LAMP_OFF.value(), living, living.getSoundSource(), 1.5f, (float) Math.random() / 5f + 0.9f);
+                    }
+                    else
+                    {   // Decrement the state change timer
+                        NBTHelper.incrementTag(stack, "stateChangeTimer", -1, tag -> tag > 0);
+                    }
                 }
             }
         }
@@ -153,9 +157,11 @@ public class SoulspringLampItem extends Item
     }
 
     public static double getFuelForStack(ItemStack item)
-    {   return CSMath.getIfNotNull(ConfigSettings.SOULSPRING_LAMP_FUEL.get().get(item.getItem()),
-                                   fuel -> fuel.test(item) ? fuel.value() : 0,
-                                   0).intValue();
+    {   return ConfigSettings.SOULSPRING_LAMP_FUEL.get().get(item.getItem())
+               .stream()
+               .filter(it -> it.test(item))
+               .findFirst()
+               .map(PredicateItem::value).orElse(0d).intValue();
     }
 
     // Restore fuel if player hits an enemy
@@ -215,7 +221,7 @@ public class SoulspringLampItem extends Item
     @Override
     public boolean overrideOtherStackedOnMe(ItemStack thisStack, ItemStack fuelStack, Slot slot, ClickAction action, Player player, SlotAccess slotAccess)
     {
-        PredicateItem fuel = ConfigSettings.SOULSPRING_LAMP_FUEL.get().get(fuelStack.getItem());
+        PredicateItem fuel = ConfigHelper.findFirstItemMatching(ConfigSettings.SOULSPRING_LAMP_FUEL, fuelStack).orElse(null);
         if (fuel != null && fuel.test(fuelStack) && getFuel(thisStack) < 64)
         {
             double currentFuel = getFuel(thisStack);

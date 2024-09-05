@@ -174,20 +174,24 @@ public class TooltipHandler
         // Get the index of the end of the tooltip, before the debug info (if enabled)
         int tooltipEndIndex = getTooltipEndIndex(elements, stack);
 
-        Insulator itemInsul = null;
         Player player = Minecraft.getInstance().player;
 
-        // If the item is a Soulspring Lamp
+        /*
+         Tooltips for soulspring lamp
+         */
         if (stack.getItem() instanceof SoulspringLampItem)
         {   if (!Screen.hasShiftDown())
             {   elements.add(tooltipStartIndex, Either.left(EXPAND_TOOLTIP));
             }
             elements.add(tooltipStartIndex, Either.right(new SoulspringTooltip(stack.getOrDefault(ModItemComponents.SOULSPRING_LAMP_FUEL, 0d))));
         }
-        // If the item is edible
-        else if (stack.getUseAnimation() == UseAnim.DRINK || stack.getUseAnimation() == UseAnim.EAT)
+
+        /*
+         Tooltip for food temperature
+         */
+        if (stack.getUseAnimation() == UseAnim.DRINK || stack.getUseAnimation() == UseAnim.EAT)
         {
-            PredicateItem temp = ConfigSettings.FOOD_TEMPERATURES.get().get(stack.getItem());
+            PredicateItem temp = ConfigSettings.FOOD_TEMPERATURES.get().get(stack.getItem()).stream().filter(predicate -> predicate.test(player, stack)).findFirst().orElse(null);
             if (temp != null && temp.test(player, stack))
             {
                 MutableComponent consumeEffects = temp.value() > 0
@@ -214,48 +218,63 @@ public class TooltipHandler
                 }
             }
         }
-        // If the item is an insulation ingredient, add the tooltip
-        else if (!hideTooltips && (itemInsul = ConfigSettings.INSULATION_ITEMS.get().get(item)) != null && !itemInsul.insulation().isEmpty())
+
+        /*
+         Tooltips for insulation
+         */
+        if (!hideTooltips && !stack.isEmpty())
         {
-            if (itemInsul.test(player, stack))
-            {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(itemInsul.insulation().split(), Insulation.Slot.ITEM, stack)));
+            List<Insulator> validInsulations = new ArrayList<>();
+
+            // Insulation ingredient
+            {
+                List<Insulation> insulation = new ArrayList<>();
+                for (Insulator insulator : ConfigSettings.INSULATION_ITEMS.get().get(item))
+                {
+                    if (!insulator.insulation().isEmpty() && insulator.test(player, stack))
+                    {   insulation.addAll(insulator.insulation().split());
+                        validInsulations.add(insulator);
+                    }
+                }
+                if (!insulation.isEmpty())
+                {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(insulation, Insulation.Slot.ITEM, stack)));
+                }
             }
-        }
-        // If the item is an insulating curio, add the tooltip
-        else if (!hideTooltips && CompatManager.isCuriosLoaded() && (itemInsul = ConfigSettings.INSULATING_CURIOS.get().get(item)) != null && !itemInsul.insulation().isEmpty())
-        {
-            if (itemInsul.test(player, stack))
-            {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(itemInsul.insulation().split(), Insulation.Slot.CURIO, stack)));
+
+            // Insulating curio
+            if (CompatManager.isCuriosLoaded())
+            {
+                List<Insulation> insulation = new ArrayList<>();
+                for (Insulator insulator : ConfigSettings.INSULATING_CURIOS.get().get(item))
+                {
+                    if (!insulator.insulation().isEmpty() && insulator.test(player, stack))
+                    {   insulation.addAll(insulator.insulation().split());
+                        validInsulations.add(insulator);
+                    }
+                }
+                if (!insulation.isEmpty())
+                {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(insulation, Insulation.Slot.CURIO, stack)));
+                }
             }
-        }
-        // If the item is insulated armor
-        Insulator armorInsulator = ConfigSettings.INSULATING_ARMORS.get().get(item);
-        if (!hideTooltips && stack.getItem() instanceof Equipable && (!Objects.equals(armorInsulator, itemInsul) || armorInsulator == null))
-        {
+
             List<Insulation> insulation = new ArrayList<>();
+
+            // Insulating armor
+            if (ItemInsulationManager.isInsulatable(stack))
+            {
+                for (Insulator insulator : ConfigSettings.INSULATING_ARMORS.get().get(item))
+                {
+                    if (!validInsulations.contains(insulator) && insulator.test(player, stack))
+                    {   insulation.addAll(insulator.insulation().split());
+                    }
+                }
+            }
 
             ItemInsulationManager.getInsulationCap(stack).ifPresent(cap ->
             {
                 // Create the list of insulation pairs from NBT
-                insulation.addAll(cap.getInsulation().stream()
-                                  // Filter out insulation that doesn't match the predicate
-                                  .filter(pair ->
-                                  {
-                                      ItemStack stack1 = pair.getFirst();
-                                      return CSMath.getIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(stack1.getItem()),
-                                                                 insulator -> insulator.test(player, stack),
-                                                                 true);
-                                  })
-                                  .map(Pair::getSecond).flatMap(List::stream).toList());
+                insulation.addAll(ItemInsulationManager.getAllEffectiveInsulation(stack, player));
             });
-
-            // If the armor has intrinsic insulation due to configs, add it to the list
-            if (armorInsulator != null)
-            {
-                if (armorInsulator.test(player, stack))
-                {   insulation.addAll(armorInsulator.insulation().split());
-                }
-            }
 
             if (!insulation.isEmpty())
             {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(insulation, Insulation.Slot.ARMOR, stack)));
@@ -275,10 +294,12 @@ public class TooltipHandler
                 double fuel = screen.getSlotUnderMouse().getItem().getOrDefault(ModItemComponents.SOULSPRING_LAMP_FUEL, 0d);
                 ItemStack carriedStack = screen.getMenu().getCarried();
 
-                PredicateItem itemFuel;
+                PredicateItem itemFuel = ConfigSettings.SOULSPRING_LAMP_FUEL.get().get(carriedStack.getItem())
+                                         .stream()
+                                         .filter(predicate -> predicate.test(Minecraft.getInstance().player, carriedStack))
+                                         .findFirst().orElse(null);
                 if (!carriedStack.isEmpty()
-                && (itemFuel = ConfigSettings.SOULSPRING_LAMP_FUEL.get().get(carriedStack.getItem())) != null
-                && itemFuel.test(carriedStack))
+                && itemFuel != null)
                 {
                     double fuelValue = screen.getMenu().getCarried().getCount() * itemFuel.value();
                     int slotX = screen.getSlotUnderMouse().x + screen.getGuiLeft();

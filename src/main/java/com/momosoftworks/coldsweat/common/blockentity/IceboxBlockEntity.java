@@ -6,12 +6,14 @@ import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
 import com.momosoftworks.coldsweat.common.container.IceboxContainer;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.config.type.PredicateItem;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.init.*;
 import com.momosoftworks.coldsweat.core.network.message.BlockDataUpdateMessage;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
@@ -223,9 +225,8 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
 
     @Override
     public int getItemFuel(ItemStack item)
-    {   return CSMath.getIfNotNull(ConfigSettings.ICEBOX_FUEL.get().get(item.getItem()),
-                                   fuel -> fuel.test(item) ? fuel.value() : 0,
-                                   0).intValue();
+    {   return ConfigHelper.findFirstItemMatching(ConfigSettings.ICEBOX_FUEL, item)
+               .map(PredicateItem::value).orElse(0d).intValue();
     }
 
     @Override
