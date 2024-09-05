@@ -19,15 +19,15 @@ import com.momosoftworks.coldsweat.config.type.PredicateItem;
 import com.momosoftworks.coldsweat.core.init.ModEntities;
 import com.momosoftworks.coldsweat.data.codec.configuration.DepthTempData;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemComponentsRequirement;
-import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
+import com.momosoftworks.coldsweat.data.codec.configuration.EntityTempData;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.math.FastMap;
+import com.momosoftworks.coldsweat.util.math.FastMultiMap;
 import com.momosoftworks.coldsweat.util.serialization.*;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.configuration.SpawnBiomeData;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
-import net.minecraft.core.HolderSet;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -137,6 +137,7 @@ public class ConfigSettings
     public static final DynamicHolder<Triplet<Integer, Integer, Double>> SHED_TIMINGS;
     public static final DynamicHolder<Multimap<Biome, SpawnBiomeData>> ENTITY_SPAWN_BIOMES;
     public static final DynamicHolder<Map<EntityType<?>, InsulatingMount>> INSULATED_ENTITIES;
+    public static final DynamicHolder<Multimap<EntityType<?>, EntityTempData>> ENTITY_TEMPERATURES;
 
     // Client Settings
     /* NULL ON THE SERVER */
@@ -737,6 +738,31 @@ public class ConfigSettings
             ColdSweat.LOGGER.warn("Duplicate entity entry for \"{}\" found in config. Using the first entry.", BuiltInRegistries.ENTITY_TYPE.getKey(a.entityType()).toString());
             return a;
         })));
+
+        ENTITY_TEMPERATURES = addSetting("entity_temperatures", () ->
+        {
+            List<?> list = EntitySettingsConfig.ENTITY_TEMPERATURES.get();
+            Multimap<EntityType<?>, EntityTempData> map = new FastMultiMap<>();
+            for (Object entry : list)
+            {
+                List<?> entryList = (List<?>) entry;
+                String entityID = (String) entryList.get(0);
+                double temp = ((Number) entryList.get(1)).doubleValue();
+                double range = ((Number) entryList.get(2)).doubleValue();
+                Temperature.Units units = entryList.size() > 3
+                                          ? Temperature.Units.fromID((String) entryList.get(3))
+                                          : Temperature.Units.MC;
+
+                for (EntityType<?> entityType : ConfigHelper.getEntityTypes(entityID))
+                {
+                    EntityRequirement requirement = new EntityRequirement(Optional.of(entityType), Optional.empty(), Optional.empty(), Optional.empty(),
+                                                                          Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
+                                                                          Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
+                    map.put(entityType, new EntityTempData(requirement, temp, range, units, Optional.empty(), Optional.empty()));
+                }
+            }
+            return map;
+        });
 
         BLOCK_RANGE = addSyncedSetting("block_range", () -> WorldSettingsConfig.getInstance().getBlockRange(),
         (encoder) -> ConfigHelper.serializeNbtInt(encoder, "BlockRange"),
