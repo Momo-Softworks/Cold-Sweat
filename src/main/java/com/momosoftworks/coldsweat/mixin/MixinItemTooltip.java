@@ -10,6 +10,7 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -145,10 +146,11 @@ public class MixinItemTooltip
             if (TOOLTIP != null && ENTRY != null && MODIFIER != null
             && EntityTempManager.isTemperatureAttribute(ENTRY.getKey()))
             {
-                MutableComponent newline = TooltipHandler.getFormattedAttributeModifier(ENTRY.getKey(), MODIFIER.getAmount(), MODIFIER.getOperation());
+                MutableComponent newline = TooltipHandler.getFormattedAttributeModifier(ENTRY.getKey(), MODIFIER.getAmount(), MODIFIER.getOperation(), true);
                 for (Component sibling : siblings)
                 {   newline = newline.append(sibling);
                 }
+                Minecraft.getInstance().player.displayClientMessage(Component.literal(newline.toString()), true);
                 return (E) newline;
             }
         }
