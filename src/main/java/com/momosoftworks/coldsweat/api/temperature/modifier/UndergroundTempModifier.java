@@ -19,6 +19,14 @@ import java.util.function.Function;
 
 public class UndergroundTempModifier extends TempModifier
 {
+    public UndergroundTempModifier()
+    {   this(49);
+    }
+
+    public UndergroundTempModifier(int samples)
+    {   this.getNBT().putInt("Samples", samples);
+    }
+
     @Override
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
@@ -32,7 +40,7 @@ public class UndergroundTempModifier extends TempModifier
         List<Pair<BlockPos, Double>> depthTable = new ArrayList<>();
 
         // Collect a list of depths taken at regular intervals around the entity, and their distances from the player
-        for (BlockPos pos : WorldHelper.getPositionGrid(entity.blockPosition(), 49, 10))
+        for (BlockPos pos : WorldHelper.getPositionGrid(entity.blockPosition(), this.getNBT().getInt("Samples"), 10))
         {
             if (!level.isInWorldBounds(pos))
             {   continue;
