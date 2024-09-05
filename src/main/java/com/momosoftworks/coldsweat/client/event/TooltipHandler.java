@@ -3,10 +3,10 @@ package com.momosoftworks.coldsweat.client.event;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Either;
-import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.gui.tooltip.ClientSoulspringTooltip;
+import com.momosoftworks.coldsweat.client.gui.tooltip.InsulationAttributeTooltip;
 import com.momosoftworks.coldsweat.client.gui.tooltip.InsulationTooltip;
 import com.momosoftworks.coldsweat.client.gui.tooltip.SoulspringTooltip;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
@@ -45,9 +45,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class TooltipHandler
@@ -102,13 +100,13 @@ public class TooltipHandler
                 {   value += modifier.getAmount();
                 }
                 if (value != 0)
-                {   tooltip.add(getFormattedAttributeModifier(attribute, value, operation));
+                {   tooltip.add(getFormattedAttributeModifier(attribute, value, operation, false));
                 }
             }
         });
     }
 
-    public static MutableComponent getFormattedAttributeModifier(Attribute attribute, double amount, AttributeModifier.Operation operation)
+    public static MutableComponent getFormattedAttributeModifier(Attribute attribute, double amount, AttributeModifier.Operation operation, boolean forTooltip)
     {
         if (attribute == null) return new TextComponent("");
         double value = amount;
@@ -146,10 +144,12 @@ public class TooltipHandler
         else
         {   percent = "";
         }
+        List<String> params = new ArrayList<>(List.of(sign + CSMath.formatDoubleOrInt(CSMath.round(value, 2)) + percent));
+        if (forTooltip)
+        {   params.add("show_icon");
+        }
         return new TranslatableComponent(String.format("attribute.cold_sweat.modifier.%s.%s", operationString, attributeName),
-                                                       sign + CSMath.formatDoubleOrInt(CSMath.round(value, 2))
-                                                       + percent)
-                        .withStyle(color);
+                                                       params.toArray()).withStyle(color);
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -272,6 +272,21 @@ public class TooltipHandler
 
             if (!insulation.isEmpty())
             {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(insulation, Insulation.Slot.ARMOR, stack)));
+            }
+        }
+
+        /*
+         Custom tooltips for attributes from insulation
+         */
+        for (int i = 0; i < elements.size(); i++)
+        {
+            Either<FormattedText, TooltipComponent> element = elements.get(i);
+            if (element.left().isPresent() && element.left().get() instanceof TranslatableComponent component)
+            {
+                if (Arrays.asList(component.getArgs()).contains("show_icon"))
+                {
+                    elements.set(i, Either.right(new InsulationAttributeTooltip(component, Minecraft.getInstance().font)));
+                }
             }
         }
     }
