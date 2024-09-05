@@ -22,14 +22,14 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class AbilityOrTempTypeArgument implements ArgumentType<Temperature.Trait>
+public class TempAttributeTraitArgument implements ArgumentType<Temperature.Trait>
 {
     //TODO - Fix this class when the better attributes system is implemented
     private static final Dynamic2CommandExceptionType INVALID_ENUM = new Dynamic2CommandExceptionType(
             (found, constants) -> new TranslationTextComponent("commands.forge.arguments.enum.invalid", constants, found));
 
-    public static AbilityOrTempTypeArgument attribute()
-    {   return new AbilityOrTempTypeArgument();
+    public static TempAttributeTraitArgument attribute()
+    {   return new TempAttributeTraitArgument();
     }
 
     public static Temperature.Trait getAttribute(CommandContext<CommandSource> context, String argument)
@@ -60,21 +60,21 @@ public class AbilityOrTempTypeArgument implements ArgumentType<Temperature.Trait
         return Stream.of(EntityTempManager.VALID_ATTRIBUTE_TYPES).map(Temperature.Trait::getSerializedName).collect(Collectors.toList());
     }
 
-    public static class Serializer implements IArgumentSerializer<AbilityOrTempTypeArgument>
+    public static class Serializer implements IArgumentSerializer<TempAttributeTraitArgument>
     {
         @Override
-        public void serializeToNetwork(AbilityOrTempTypeArgument argument, PacketBuffer buffer)
+        public void serializeToNetwork(TempAttributeTraitArgument argument, PacketBuffer buffer)
         {
         }
 
         @SuppressWarnings({"unchecked"})
         @Override
-        public AbilityOrTempTypeArgument deserializeFromNetwork(PacketBuffer buffer)
-        {   return new AbilityOrTempTypeArgument();
+        public TempAttributeTraitArgument deserializeFromNetwork(PacketBuffer buffer)
+        {   return new TempAttributeTraitArgument();
         }
 
         @Override
-        public void serializeToJson(AbilityOrTempTypeArgument argument, JsonObject json)
+        public void serializeToJson(TempAttributeTraitArgument argument, JsonObject json)
         {
         }
     }

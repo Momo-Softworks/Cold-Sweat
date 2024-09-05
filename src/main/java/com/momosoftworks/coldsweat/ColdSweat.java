@@ -9,9 +9,9 @@ import com.momosoftworks.coldsweat.common.capability.shearing.IShearableCap;
 import com.momosoftworks.coldsweat.common.capability.shearing.ShearableFurCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.EntityTempCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
-import com.momosoftworks.coldsweat.common.command.argument.AbilityOrTempTypeArgument;
-import com.momosoftworks.coldsweat.common.command.argument.TempModifierTypeArgument;
-import com.momosoftworks.coldsweat.common.command.argument.TemperatureTypeArgument;
+import com.momosoftworks.coldsweat.common.command.argument.TempAttributeTraitArgument;
+import com.momosoftworks.coldsweat.common.command.argument.TempModifierTraitArgument;
+import com.momosoftworks.coldsweat.common.command.argument.TemperatureTraitArgument;
 import com.momosoftworks.coldsweat.config.*;
 import com.momosoftworks.coldsweat.config.spec.*;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
@@ -103,9 +103,9 @@ public class ColdSweat
             InsulationItemsGroup.INSULATION_ITEMS.register();
 
             // Register custom command arguments
-            ArgumentTypes.register("temperature", TemperatureTypeArgument.class, new TemperatureTypeArgument.Serializer());
-            ArgumentTypes.register("temp_attribute", AbilityOrTempTypeArgument.class, new AbilityOrTempTypeArgument.Serializer());
-            ArgumentTypes.register("temp_modifier", TempModifierTypeArgument.class, new TempModifierTypeArgument.Serializer());
+            ArgumentTypes.register("temperature", TemperatureTraitArgument.class, new TemperatureTraitArgument.Serializer());
+            ArgumentTypes.register("temp_attribute", TempAttributeTraitArgument.class, new TempAttributeTraitArgument.Serializer());
+            ArgumentTypes.register("temp_modifier", TempModifierTraitArgument.class, new TempModifierTraitArgument.Serializer());
         });
     }
 

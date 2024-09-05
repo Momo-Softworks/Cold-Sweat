@@ -23,13 +23,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class TemperatureTypeArgument implements ArgumentType<Temperature.Trait>
+public class TemperatureTraitArgument implements ArgumentType<Temperature.Trait>
 {
     private static final Dynamic2CommandExceptionType INVALID_ENUM = new Dynamic2CommandExceptionType(
             (found, constants) -> new TranslationTextComponent("commands.forge.arguments.enum.invalid", constants, found));
 
-    public static TemperatureTypeArgument type()
-    {   return new TemperatureTypeArgument();
+    public static TemperatureTraitArgument type()
+    {   return new TemperatureTraitArgument();
     }
 
     public static Temperature.Trait getTemperature(CommandContext<CommandSource> context, String argument)
@@ -60,21 +60,21 @@ public class TemperatureTypeArgument implements ArgumentType<Temperature.Trait>
         return Stream.of(EntityTempManager.VALID_TEMPERATURE_TRAITS).map(StringRepresentable::getSerializedName).collect(Collectors.toList());
     }
 
-    public static class Serializer implements IArgumentSerializer<TemperatureTypeArgument>
+    public static class Serializer implements IArgumentSerializer<TemperatureTraitArgument>
     {
         @Override
-        public void serializeToNetwork(TemperatureTypeArgument argument, PacketBuffer buffer)
+        public void serializeToNetwork(TemperatureTraitArgument argument, PacketBuffer buffer)
         {
         }
 
         @SuppressWarnings({"unchecked"})
         @Override
-        public TemperatureTypeArgument deserializeFromNetwork(PacketBuffer buffer)
-        {   return new TemperatureTypeArgument();
+        public TemperatureTraitArgument deserializeFromNetwork(PacketBuffer buffer)
+        {   return new TemperatureTraitArgument();
         }
 
         @Override
-        public void serializeToJson(TemperatureTypeArgument argument, JsonObject json)
+        public void serializeToJson(TemperatureTraitArgument argument, JsonObject json)
         {
         }
     }
