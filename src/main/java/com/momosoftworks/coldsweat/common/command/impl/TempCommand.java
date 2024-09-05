@@ -255,7 +255,7 @@ public class TempCommand extends BaseCommand
         }
 
         LivingEntity living = (LivingEntity) entity;
-        AttributeInstance attribute = Arrays.asList(EntityTempManager.VALID_ATTRIBUTE_TYPES).contains(trait)
+        AttributeInstance attribute = trait.isForAttributes()
                                       ? EntityTempManager.getAttribute(trait, living)
                                       : null;
         Temperature.Units preferredUnits = EntityTempManager.getTemperatureCap(entity).map(ITemperatureCap::getPreferredUnits).orElse(Temperature.Units.F);
