@@ -93,6 +93,7 @@ public class ColdSweat
             event.create(new RegistryBuilder<SpawnBiomeData>().setType(SpawnBiomeData.class).setName(ModRegistries.ENTITY_SPAWN_BIOME_DATA.location()).dataPackRegistry(SpawnBiomeData.CODEC));
             event.create(new RegistryBuilder<DepthTempData>().setType(DepthTempData.class).setName(ModRegistries.DEPTH_TEMP_DATA.location()).dataPackRegistry(DepthTempData.CODEC));
             event.create(new RegistryBuilder<ItemCarryTempData>().setType(ItemCarryTempData.class).setName(ModRegistries.CARRY_TEMP_DATA.location()).dataPackRegistry(ItemCarryTempData.CODEC));
+            event.create(new RegistryBuilder<EntityTempData>().setName(ModRegistries.ENTITY_TEMP_DATA.location()).dataPackRegistry(EntityTempData.CODEC));
         });
     }
 
