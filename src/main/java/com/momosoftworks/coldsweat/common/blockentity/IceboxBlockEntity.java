@@ -5,6 +5,7 @@ import com.momosoftworks.coldsweat.common.block.IceboxBlock;
 import com.momosoftworks.coldsweat.common.container.IceboxContainer;
 import com.momosoftworks.coldsweat.common.item.FilledWaterskinItem;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.config.type.PredicateItem;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.init.BlockEntityInit;
 import com.momosoftworks.coldsweat.core.init.ParticleTypesInit;
@@ -17,6 +18,7 @@ import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.render.ChestLidController;
 import com.momosoftworks.coldsweat.util.render.ContainerOpenersCounter;
+import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -236,9 +238,8 @@ public class IceboxBlockEntity extends HearthBlockEntity implements ITickableTil
 
     @Override
     public int getItemFuel(ItemStack item)
-    {   return CSMath.getIfNotNull(ConfigSettings.ICEBOX_FUEL.get().get(item.getItem()),
-                                   fuel -> fuel.test(item) ? fuel.value : 0,
-                                   0).intValue();
+    {   return ConfigHelper.findFirstItemMatching(ConfigSettings.ICEBOX_FUEL, item)
+               .map(it -> it.value).orElse(0d).intValue();
     }
 
     @Override

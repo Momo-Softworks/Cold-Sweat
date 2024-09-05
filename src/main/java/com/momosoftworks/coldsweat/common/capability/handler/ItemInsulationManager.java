@@ -9,10 +9,11 @@ import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCa
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.TypedField;
 import com.momosoftworks.coldsweat.config.type.Insulator;
-import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.enchantment.IArmorVanishable;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -182,16 +183,29 @@ public class ItemInsulationManager
             getInsulationCap(stack).ifPresent(cap ->
             {
                 for (Pair<ItemStack, List<Insulation>> pair : cap.getInsulation())
-                {
-                    CSMath.doIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(pair.getFirst().getItem()), insulators::add);
+                {   insulators.addAll(ConfigSettings.INSULATION_ITEMS.get().get(pair.getFirst().getItem()));
                 }
             });
         }
 
-        CSMath.doIfNotNull(ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem()), insulators::add);
-        CSMath.doIfNotNull(ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem()), insulators::add);
+        insulators.addAll(ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem()));
+        if (CompatManager.isCuriosLoaded())
+        {   insulators.addAll(ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem()));
+        }
 
         return insulators;
+    }
+
+    public static List<Insulation> getAllEffectiveInsulation(ItemStack armor, LivingEntity entity)
+    {
+        return ItemInsulationManager.getInsulationCap(armor)
+               .map(IInsulatableCap::getInsulation).orElse(new ArrayList<>())
+               .stream()
+               // Map to list of ItemStacks
+               .map(Pair::getFirst)
+               // Map to list of insulators and filter ones that don't meet their conditions
+               .flatMap(itemStack -> ConfigSettings.INSULATION_ITEMS.get().get(itemStack.getItem()).stream().filter(insulator -> insulator.test(entity, itemStack)))
+               .map(ins -> ins.insulation).collect(Collectors.toList());
     }
 
     public static List<AttributeModifier> getInsulationAttributeModifiers(ItemStack stack, Attribute attribute, @Nullable AttributeModifier.Operation operation, @Nullable Entity owner)

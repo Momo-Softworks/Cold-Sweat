@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.util.serialization;
 
+import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
@@ -10,6 +11,7 @@ import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.type.Insulator;
+import com.momosoftworks.coldsweat.config.type.PredicateItem;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
@@ -17,10 +19,13 @@ import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
 import com.momosoftworks.coldsweat.util.exceptions.ArgumentCountException;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.block.Block;
+import com.momosoftworks.coldsweat.util.math.FastMultiMap;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.state.Property;
 import net.minecraft.tags.*;
 import net.minecraft.util.RegistryKey;
@@ -456,10 +461,18 @@ public class ConfigHelper
     }
 
     public static <T> CompoundNBT serializeItemMap(Map<Item, T> map, String key, Function<T, CompoundNBT> serializer)
+    {   return serializeItemMapLike(Either.left(map), key, serializer);
+    }
+
+    public static <T> CompoundNBT serializeItemMultimap(Multimap<Item, T> map, String key, Function<T, CompoundNBT> serializer)
+    {   return serializeItemMapLike(Either.right(map), key, serializer);
+    }
+
+    public static <T> CompoundNBT serializeItemMapLike(Either<Map<Item, T>, Multimap<Item, T>> map, String key, Function<T, CompoundNBT> serializer)
     {
         CompoundNBT tag = new CompoundNBT();
         CompoundNBT mapTag = new CompoundNBT();
-        for (Map.Entry<Item, T> entry : map.entrySet())
+        for (Map.Entry<Item, T> entry : map.map(Map::entrySet, Multimap::entries))
         {
             ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(entry.getKey());
             if (itemId == null) continue;
@@ -471,35 +484,69 @@ public class ConfigHelper
     }
 
     public static <T> Map<Item, T> deserializeItemMap(CompoundNBT tag, String key, Function<CompoundNBT, T> deserializer)
+    {   return deserializeItemMapLike(tag, key, deserializer).getFirst();
+    }
+
+    public static <T> Multimap<Item, T> deserializeItemMultimap(CompoundNBT tag, String key, Function<CompoundNBT, T> deserializer)
+    {   return deserializeItemMapLike(tag, key, deserializer).getSecond();
+    }
+
+    private static <T> Pair<Map<Item, T>, Multimap<Item, T>> deserializeItemMapLike(CompoundNBT tag, String key, Function<CompoundNBT, T> deserializer)
     {
         Map<Item, T> map = new HashMap<>();
+        Multimap<Item, T> multimap = new FastMultiMap<>();
         CompoundNBT mapTag = tag.getCompound(key);
         for (String itemID : mapTag.getAllKeys())
         {
             Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemID));
-            map.put(item, deserializer.apply(mapTag.getCompound(itemID)));
+            T value = deserializer.apply(mapTag.getCompound(itemID));
+            if (value != null)
+            {   map.put(item, value);
+                multimap.put(item, value);
+            }
         }
-        return map;
+        return Pair.of(map, multimap);
     }
 
     public static <T> Map<Item, T> readItemMap(List<? extends List<?>> source, BiFunction<Item, List<?>, T> valueParser)
+    {   return readItemMapLike(source, valueParser).getFirst();
+    }
+
+    public static <T> Multimap<Item, T> readItemMultimap(List<? extends List<?>> source, BiFunction<Item, List<?>, T> valueParser)
+    {   return readItemMapLike(source, valueParser).getSecond();
+    }
+
+    private static <T> Pair<Map<Item, T>, Multimap<Item, T>> readItemMapLike(List<? extends List<?>> source, BiFunction<Item, List<?>, T> valueParser)
     {
         Map<Item, T> map = new HashMap<>();
+        Multimap<Item, T> multimap = new FastMultiMap<>();
         for (List<?> entry : source)
         {
             String itemId = (String) entry.get(0);
             for (Item item : getItems(itemId))
             {
-                map.put(item, valueParser.apply(item, entry.subList(1, entry.size())));
+                T value = valueParser.apply(item, entry.subList(1, entry.size()));
+                if (value != null)
+                {   map.put(item, value);
+                    multimap.put(item, value);
+                }
             }
         }
-        return map;
+        return Pair.of(map, multimap);
     }
 
     public static <T> void writeItemMap(Map<Item, T> map, Consumer<List<? extends List<?>>> saver, Function<T, List<?>> valueWriter)
+    {   writeItemMapLike(Either.left(map), saver, valueWriter);
+    }
+
+    public static <T> void writeItemMultimap(Multimap<Item, T> map, Consumer<List<? extends List<?>>> saver, Function<T, List<?>> valueWriter)
+    {   writeItemMapLike(Either.right(map), saver, valueWriter);
+    }
+
+    private static <T> void writeItemMapLike(Either<Map<Item, T>, Multimap<Item, T>> map, Consumer<List<? extends List<?>>> saver, Function<T, List<?>> valueWriter)
     {
         List<List<?>> list = new ArrayList<>();
-        for (Map.Entry<Item, T> entry : map.entrySet())
+        for (Map.Entry<Item, T> entry : map.map(Map::entrySet, Multimap::entries))
         {
             Item item = entry.getKey();
             T value = entry.getValue();
@@ -518,15 +565,16 @@ public class ConfigHelper
         saver.accept(list);
     }
 
-    public static CompoundNBT serializeItemInsulations(Map<Item, Insulator> map, String key)
+    public static CompoundNBT serializeItemInsulations(Multimap<Item, Insulator> map, String key)
     {
         CompoundNBT tag = new CompoundNBT();
-        CompoundNBT mapTag = new CompoundNBT();
-        for (Map.Entry<Item, Insulator> entry : map.entrySet())
+        ListNBT mapTag = new ListNBT();
+        for (Map.Entry<Item, Insulator> entry : map.entries())
         {
             Item item = entry.getKey();
             Insulator insulator = entry.getValue();
             ResourceLocation itemID = ForgeRegistries.ITEMS.getKey(item);
+
             if (itemID == null)
             {   ColdSweat.LOGGER.error("Error serializing item insulations: item \"{}\" does not exist", item);
                 continue;
@@ -535,30 +583,38 @@ public class ConfigHelper
             {   ColdSweat.LOGGER.error("Error serializing item insulations: insulation value for item \"{}\" is null", item);
                 continue;
             }
-            mapTag.put(itemID.toString(), insulator.serialize());
+
+            CompoundNBT insulatorTag = new CompoundNBT();
+            insulatorTag.put("Insulator", insulator.serialize());
+            insulatorTag.putString("Item", itemID.toString());
+
+            mapTag.add(insulatorTag);
         }
         tag.put(key, mapTag);
 
         return tag;
     }
 
-    public static Map<Item, Insulator> deserializeItemInsulations(CompoundNBT tag, String key)
+    public static Multimap<Item, Insulator> deserializeItemInsulations(CompoundNBT tag, String key)
     {
-        Map<Item, Insulator> map = new HashMap<>();
-        CompoundNBT mapTag = tag.getCompound(key);
-        for (String itemID : mapTag.getAllKeys())
+        Multimap<Item, Insulator> map = new FastMultiMap<>();
+        ListNBT mapTag = tag.getList(key, 10);
+        for (int i = 0; i < mapTag.size(); i++)
         {
-            CompoundNBT insulatorTag = mapTag.getCompound(itemID);
-            Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemID));
-            Insulator insulator = Insulator.deserialize(insulatorTag);
-            map.put(item, insulator);
+            CompoundNBT insulatorTag = mapTag.getCompound(i);
+            Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(insulatorTag.getString("Item")));
+            Insulator insulator = Insulator.deserialize(insulatorTag.getCompound("Insulator"));
+
+            if (item != null && insulator != null)
+            {   map.put(item, insulator);
+            }
         }
         return map;
     }
 
-    public static Map<Item, Insulator> readItemInsulations(List<? extends List<?>> items, Insulation.Slot slot)
+    public static Multimap<Item, Insulator> readItemInsulations(List<? extends List<?>> items, Insulation.Slot slot)
     {
-        return readItemMap(items, (item, args) ->
+        return readItemMultimap(items, (item, args) ->
         {
             if (args.size() < 2)
             {   ColdSweat.LOGGER.error(new ArgumentCountException(args.size(), 2, String.format("Error parsing insulation config for item %s", item)).getMessage());
@@ -581,9 +637,9 @@ public class ConfigHelper
         });
     }
 
-    public static void writeItemInsulations(Map<Item, Insulator> items, Consumer<List<? extends List<?>>> saver)
+    public static void writeItemInsulations(Multimap<Item, Insulator> items, Consumer<List<? extends List<?>>> saver)
     {
-        writeItemMap(items, saver, insulator ->
+        writeItemMultimap(items, saver, insulator ->
         {
             if (insulator == null)
             {   ColdSweat.LOGGER.error("Error writing item insulations: insulator value is null");
@@ -621,5 +677,16 @@ public class ConfigHelper
                                                       },
                                                       key -> "#" + vanillaTags.getId(key)),
                             forgeRegistry);
+    }
+
+    public static Optional<PredicateItem> findFirstItemMatching(DynamicHolder<Multimap<Item, PredicateItem>> predicates, ItemStack stack)
+    {
+        for (PredicateItem predicate : predicates.get().get(stack.getItem()))
+        {
+            if (predicate.test(stack))
+            {   return Optional.of(predicate);
+            }
+        }
+        return Optional.empty();
     }
 }

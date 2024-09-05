@@ -48,21 +48,31 @@ public class ClientSoulspringTooltip extends Tooltip
     public void renderImage(FontRenderer font, int x, int y, MatrixStack poseStack, ItemRenderer itemRenderer, int depth)
     {
         y += 11;
+        poseStack.pushPose();
         Minecraft.getInstance().textureManager.bind(TOOLTIP_LOCATION.get());
         AbstractGui.blit(poseStack, x, y, 401, 0, 0, 30, 8, 34, 30);
         AbstractGui.blit(poseStack, x, y, 401, 0, 16, (int) (fuel / 2.1333), 8, 34, 30);
         if (Screen.hasShiftDown())
         {
             AbstractGui.blit(poseStack, x + 34, y, 401, 0, 24, 16, 10, 34, 30);
+            float oldBlitOffset = itemRenderer.blitOffset;
+            itemRenderer.blitOffset = 300;
 
             int i = 0;
-            Minecraft.getInstance().getItemRenderer().blitOffset += 401;
-            for (Map.Entry<Item, PredicateItem> item : ConfigSettings.SOULSPRING_LAMP_FUEL.get().entrySet())
+            for (Item item : ConfigSettings.SOULSPRING_LAMP_FUEL.get().keySet())
             {
-                itemRenderer.renderGuiItem(new ItemStack(item.getKey(), 1, item.getValue().data.nbt.tag),
-                                           x + ((i * 16) % 96), y + 12 + CSMath.floor(i / 6d) * 16);
-                i++;
+                for (PredicateItem it : ConfigSettings.SOULSPRING_LAMP_FUEL.get().get(item))
+                {
+                    ItemStack stack = new ItemStack(item, 1);
+                    stack.setTag(it.data.nbt.tag);
+                    itemRenderer.renderGuiItem(stack,
+                                               x + ((i * 16) % 96),
+                                               y + 12 + CSMath.floor(i / 6d) * 16);
+                    i++;
+                }
             }
+            itemRenderer.blitOffset = oldBlitOffset;
         }
+        poseStack.popPose();
     }
 }

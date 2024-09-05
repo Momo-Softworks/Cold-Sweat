@@ -17,12 +17,12 @@ import java.util.Map;
 
 public class Insulator implements NbtSerializable
 {
-    public Insulation insulation;
-    public Insulation.Slot slot;
-    public ItemRequirement data;
-    public EntityRequirement predicate;
-    public AttributeModifierMap attributes;
-    public Map<ResourceLocation, Double> immuneTempModifiers;
+    public final Insulation insulation;
+    public final Insulation.Slot slot;
+    public final ItemRequirement data;
+    public final EntityRequirement predicate;
+    public final AttributeModifierMap attributes;
+    public final Map<ResourceLocation, Double> immuneTempModifiers;
 
     public Insulator(Insulation insulation, Insulation.Slot slot, ItemRequirement data,
                      EntityRequirement predicate, AttributeModifierMap attributes,

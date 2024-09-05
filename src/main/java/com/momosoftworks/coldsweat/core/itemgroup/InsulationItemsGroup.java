@@ -35,9 +35,9 @@ public class InsulationItemsGroup extends ItemGroup
     {
         // Spoof the item categories to allow items to be added to the tab
         List<List<ItemStack>> itemCategories = Arrays.asList(
-                sort(ConfigSettings.INSULATION_ITEMS.get().entrySet()),
-                sort(ConfigSettings.INSULATING_ARMORS.get().entrySet()),
-                sort(ConfigSettings.INSULATING_CURIOS.get().entrySet())
+                sort(ConfigSettings.INSULATION_ITEMS.get().entries()),
+                sort(ConfigSettings.INSULATING_ARMORS.get().entries()),
+                sort(ConfigSettings.INSULATING_CURIOS.get().entries())
         );
 
         for (List<ItemStack> category : itemCategories)
@@ -56,7 +56,7 @@ public class InsulationItemsGroup extends ItemGroup
         }
     }
 
-    private static List<ItemStack> sort(Set<Map.Entry<Item, Insulator>> items)
+    private static List<ItemStack> sort(Collection<Map.Entry<Item, Insulator>> items)
     {   List<Map.Entry<Item, Insulator>> list = new ArrayList<>(items);
         // Sort by name first
         list.sort(Comparator.comparing(item -> item.getKey().getDefaultInstance().getDisplayName().getString()));
