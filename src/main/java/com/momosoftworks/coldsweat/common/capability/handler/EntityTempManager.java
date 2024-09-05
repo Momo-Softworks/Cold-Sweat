@@ -79,28 +79,9 @@ import java.util.stream.Stream;
 @Mod.EventBusSubscriber
 public class EntityTempManager
 {
-    public static final Temperature.Trait[] VALID_TEMPERATURE_TRAITS = { Temperature.Trait.CORE, Temperature.Trait.BASE, Temperature.Trait.WORLD,
-                                                                         Temperature.Trait.HEAT_RESISTANCE, Temperature.Trait.COLD_RESISTANCE,
-                                                                         Temperature.Trait.HEAT_DAMPENING, Temperature.Trait.COLD_DAMPENING,
-                                                                         Temperature.Trait.FREEZING_POINT, Temperature.Trait.BURNING_POINT };
-
-    public static final Temperature.Trait[] VALID_MODIFIER_TRAITS = { Temperature.Trait.CORE, Temperature.Trait.BASE,
-                                                                      Temperature.Trait.RATE, Temperature.Trait.WORLD,
-                                                                      Temperature.Trait.HEAT_RESISTANCE, Temperature.Trait.COLD_RESISTANCE,
-                                                                      Temperature.Trait.HEAT_DAMPENING, Temperature.Trait.COLD_DAMPENING,
-                                                                      Temperature.Trait.FREEZING_POINT, Temperature.Trait.BURNING_POINT };
-
-    public static final Temperature.Trait[] VALID_ATTRIBUTE_TYPES = new Temperature.Trait[]
-    {
-        Temperature.Trait.WORLD,
-        Temperature.Trait.BASE,
-        Temperature.Trait.HEAT_RESISTANCE,
-        Temperature.Trait.COLD_RESISTANCE,
-        Temperature.Trait.HEAT_DAMPENING,
-        Temperature.Trait.COLD_DAMPENING,
-        Temperature.Trait.FREEZING_POINT,
-        Temperature.Trait.BURNING_POINT
-    };
+    public static final Temperature.Trait[] VALID_TEMPERATURE_TRAITS = Arrays.stream(Temperature.Trait.values()).filter(Temperature.Trait::isForTemperature).toArray(Temperature.Trait[]::new);
+    public static final Temperature.Trait[] VALID_MODIFIER_TRAITS = Arrays.stream(Temperature.Trait.values()).filter(Temperature.Trait::isForModifiers).toArray(Temperature.Trait[]::new);
+    public static final Temperature.Trait[] VALID_ATTRIBUTE_TRAITS = Arrays.stream(Temperature.Trait.values()).filter(Temperature.Trait::isForAttributes).toArray(Temperature.Trait[]::new);
 
     public static final Set<EntityType<? extends LivingEntity>> TEMPERATURE_ENABLED_ENTITIES = new HashSet<>(List.of(EntityType.PLAYER));
 
@@ -198,7 +179,7 @@ public class EntityTempManager
         {
             TaskScheduler.scheduleServer(() ->
             {
-                for (Temperature.Trait attributeType : VALID_ATTRIBUTE_TYPES)
+                for (Temperature.Trait attributeType : VALID_ATTRIBUTE_TRAITS)
                 {
                     CSMath.doIfNotNull(getAttribute(attributeType, event.getEntity()),
                     attribute ->
@@ -392,7 +373,7 @@ public class EntityTempManager
             {
                 event.addModifier(new BiomeTempModifier(25).tickRate(10), Placement.Duplicates.BY_CLASS, Placement.BEFORE_FIRST);
                 event.addModifier(new UndergroundTempModifier().tickRate(10), Placement.Duplicates.BY_CLASS, Placement.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof BiomeTempModifier));
-                event.addModifier(new BlockTempModifier().tickRate(4), Placement.Duplicates.BY_CLASS, Placement.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof UndergroundTempModifier));
+                event.addModifier(new BlockTempModifier().tickRate(4), Placement.Duplicates.BY_CLASS, Placement.AFTER_LAST);
 
                 // Serene Seasons compat
                 if (CompatManager.isSereneSeasonsLoaded())
@@ -415,7 +396,7 @@ public class EntityTempManager
                     });
                 }
             }
-            if (Arrays.stream(VALID_MODIFIER_TRAITS).anyMatch(trait -> trait == event.getTrait()))
+            if (event.getTrait().isForModifiers())
             {   event.addModifier(new InventoryItemsTempModifier(), Placement.Duplicates.BY_CLASS, Placement.AFTER_LAST);
             }
         }
@@ -423,8 +404,8 @@ public class EntityTempManager
         else if (event.getTrait() == Temperature.Trait.WORLD && TEMPERATURE_ENABLED_ENTITIES.contains(event.getEntity().getType()))
         {   // Basic modifiers
             event.addModifier(new BiomeTempModifier(16).tickRate(40), Placement.Duplicates.BY_CLASS, Placement.BEFORE_FIRST);
-            event.addModifier(new BlockTempModifier(4).tickRate(20), Placement.Duplicates.BY_CLASS, Placement.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof UndergroundTempModifier));
             event.addModifier(new UndergroundTempModifier(16).tickRate(40), Placement.Duplicates.BY_CLASS, Placement.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof BiomeTempModifier));
+            event.addModifier(new BlockTempModifier(4).tickRate(20), Placement.Duplicates.BY_CLASS, Placement.AFTER_LAST);
 
             // Serene Seasons compat
             if (CompatManager.isSereneSeasonsLoaded())
@@ -467,7 +448,7 @@ public class EntityTempManager
     public static void calcModifierImmunity(TempModifierEvent.Calculate.Modify event)
     {
         if (event.getEntity() instanceof DummyPlayer) return;
-        if (!Arrays.stream(VALID_ATTRIBUTE_TYPES).toList().contains(event.getTrait())) return;
+        if (!event.getTrait().isForAttributes()) return;
 
         TempModifier mod = event.getModifier();
         ResourceLocation modifierKey = TempModifierRegistry.getKey(mod);
@@ -864,7 +845,7 @@ public class EntityTempManager
     public static boolean isTemperatureAttribute(Attribute attribute)
     {
         return CSMath.containsAny(ForgeRegistries.ATTRIBUTES.getKey(attribute).toString(),
-                                  Arrays.stream(EntityTempManager.VALID_ATTRIBUTE_TYPES)
+                                  Arrays.stream(EntityTempManager.VALID_ATTRIBUTE_TRAITS)
                                         .map(Temperature.Trait::getSerializedName).toArray(String[]::new));
     }
 
