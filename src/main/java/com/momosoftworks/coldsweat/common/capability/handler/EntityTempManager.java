@@ -53,10 +53,8 @@ import net.minecraft.world.item.UseAnim;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
-import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEquipmentChangeEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
@@ -99,21 +97,18 @@ public class EntityTempManager
     public static void initModifiersOnEntity(EntityJoinLevelEvent event)
     {
         if (event.getEntity() instanceof LivingEntity living && !living.level().isClientSide()
-        && TEMPERATURE_ENABLED_ENTITIES.contains(living.getType()))
+        && isTemperatureEnabled(living.getType()))
         {
             getTemperatureCap(living).ifPresent(cap ->
             {
-                // If entity has never been initialized, add default modifiers
-                List<TempModifier> allModifiers = getAllModifiers(living);
-                if (allModifiers.isEmpty())
+                // Add default modifiers every time the entity joins the world
+                for (Temperature.Trait trait : VALID_MODIFIER_TRAITS)
                 {
-                    for (Temperature.Trait trait : VALID_MODIFIER_TRAITS)
-                    {
-                        GatherDefaultTempModifiersEvent gatherEvent = new GatherDefaultTempModifiersEvent(living, trait);
-                        NeoForge.EVENT_BUS.post(gatherEvent);
+                    GatherDefaultTempModifiersEvent gatherEvent = new GatherDefaultTempModifiersEvent(living, trait);
+                    NeoForge.EVENT_BUS.post(gatherEvent);
 
-                        cap.getModifiers(trait).addAll(gatherEvent.getModifiers());
-                    }
+                    cap.getModifiers(trait).clear();
+                    cap.getModifiers(trait).addAll(gatherEvent.getModifiers());
                 }
             });
         }
