@@ -9,6 +9,10 @@ import net.minecraftforge.eventbus.api.Event;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Determines the default {@link TempModifier}s that will be applied to an entity upon spawning.<br>
+ * This event is fired EVERY TIME the entity joins the world, so make sure to properly check for duplicates.
+ */
 public class GatherDefaultTempModifiersEvent extends Event
 {
     private final List<TempModifier> modifiers;

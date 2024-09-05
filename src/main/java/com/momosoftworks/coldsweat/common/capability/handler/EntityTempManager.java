@@ -157,21 +157,18 @@ public class EntityTempManager
     public static void initModifiersOnEntity(EntityJoinWorldEvent event)
     {
         if (event.getEntity() instanceof LivingEntity && !event.getEntity().level.isClientSide()
-        && TEMPERATURE_ENABLED_ENTITIES.contains(event.getEntity().getType()))
+        && isTemperatureEnabled(event.getEntity().getType()))
         {
             LivingEntity living = ((LivingEntity) event.getEntity());
             getTemperatureCap(living).ifPresent(cap ->
             {
-                // If entity has never been initialized, add default modifiers
-                List<TempModifier> allModifiers = getAllModifiers(living);
-                if (allModifiers.isEmpty())
-                {
+                // Add default modifiers every time the entity joins the world
                     for (Temperature.Trait trait : VALID_MODIFIER_TRAITS)
                     {
                         GatherDefaultTempModifiersEvent gatherEvent = new GatherDefaultTempModifiersEvent(living, trait);
                         MinecraftForge.EVENT_BUS.post(gatherEvent);
-                        cap.getModifiers(trait).addAll(gatherEvent.getModifiers());
-                    }
+    cap.getModifiers(trait).clear();
+                    cap.getModifiers(trait).addAll(gatherEvent.getModifiers());
                 }
                 if (!living.getPersistentData().getBoolean("cold_sweat:initialized"))
                 {

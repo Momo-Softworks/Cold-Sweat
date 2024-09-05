@@ -93,7 +93,7 @@ public class AbstractTempCap implements ITemperatureCap
     {
         double oldTemp = this.getTrait(trait);
         this.setTrait(trait, value);
-        if (oldTemp != value && entity instanceof ServerPlayerEntity)
+        if (entity.tickCount > 5 && oldTemp != value && entity instanceof ServerPlayerEntity)
         {   ModAdvancementTriggers.TEMPERATURE_CHANGED.trigger(((ServerPlayerEntity) entity), this.getTraits());
         }
     }
