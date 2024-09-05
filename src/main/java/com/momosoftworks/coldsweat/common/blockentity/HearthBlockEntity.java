@@ -13,6 +13,7 @@ import com.momosoftworks.coldsweat.common.container.HearthContainer;
 import com.momosoftworks.coldsweat.common.event.HearthSaveDataHandler;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.config.type.PredicateItem;
 import com.momosoftworks.coldsweat.core.init.BlockEntityInit;
 import com.momosoftworks.coldsweat.core.init.ParticleTypesInit;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
@@ -25,6 +26,7 @@ import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
+import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.world.SpreadPath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import com.simibubi.create.content.fluids.pipes.EncasedPipeBlock;
@@ -767,9 +769,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     }
 
     public int getItemFuel(ItemStack item)
-    {   return CSMath.getIfNotNull(ConfigSettings.HEARTH_FUEL.get().get(item.getItem()),
-                                   fuel -> fuel.test(item) ? fuel.value() : 0,
-                                   0).intValue();
+    {   return ConfigHelper.findFirstItemMatching(ConfigSettings.HEARTH_FUEL, item)
+               .map(PredicateItem::value).orElse(0d).intValue();
     }
 
     public int getHotFuel()
