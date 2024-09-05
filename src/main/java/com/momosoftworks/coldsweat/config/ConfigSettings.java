@@ -109,25 +109,25 @@ public class ConfigSettings
     public static final DynamicHolder<List<Block>> SLEEP_CHECK_IGNORE_BLOCKS;
 
     // Item settings
-    public static final DynamicHolder<Map<Item, Insulator>> INSULATION_ITEMS;
-    public static final DynamicHolder<Map<Item, Insulator>> INSULATING_ARMORS;
-    public static final DynamicHolder<Map<Item, Insulator>> INSULATING_CURIOS;
+    public static final DynamicHolder<Multimap<Item, Insulator>> INSULATION_ITEMS;
+    public static final DynamicHolder<Multimap<Item, Insulator>> INSULATING_ARMORS;
+    public static final DynamicHolder<Multimap<Item, Insulator>> INSULATING_CURIOS;
     public static final DynamicHolder<ScalingFormula> INSULATION_SLOTS;
     public static final DynamicHolder<Double> INSULATION_STRENGTH;
     public static final DynamicHolder<List<Item>> INSULATION_BLACKLIST;
 
-    public static final DynamicHolder<Map<Item, PredicateItem>> FOOD_TEMPERATURES;
+    public static final DynamicHolder<Multimap<Item, PredicateItem>> FOOD_TEMPERATURES;
 
-    public static final DynamicHolder<Map<Item, CarriedItemTemperature>> CARRIED_ITEM_TEMPERATURES;
+    public static final DynamicHolder<Multimap<Item, CarriedItemTemperature>> CARRIED_ITEM_TEMPERATURES;
 
     public static final DynamicHolder<Integer> WATERSKIN_STRENGTH;
 
     public static final DynamicHolder<List<DimensionType>> LAMP_DIMENSIONS;
 
-    public static final DynamicHolder<Map<Item, PredicateItem>> BOILER_FUEL;
-    public static final DynamicHolder<Map<Item, PredicateItem>> ICEBOX_FUEL;
-    public static final DynamicHolder<Map<Item, PredicateItem>> HEARTH_FUEL;
-    public static final DynamicHolder<Map<Item, PredicateItem>> SOULSPRING_LAMP_FUEL;
+    public static final DynamicHolder<Multimap<Item, PredicateItem>> BOILER_FUEL;
+    public static final DynamicHolder<Multimap<Item, PredicateItem>> ICEBOX_FUEL;
+    public static final DynamicHolder<Multimap<Item, PredicateItem>> HEARTH_FUEL;
+    public static final DynamicHolder<Multimap<Item, PredicateItem>> SOULSPRING_LAMP_FUEL;
 
     public static final DynamicHolder<Boolean> HEARTH_POTIONS_ENABLED;
     public static final DynamicHolder<List<MobEffect>> HEARTH_POTION_BLACKLIST;
@@ -136,7 +136,7 @@ public class ConfigSettings
     public static final DynamicHolder<Triplet<Integer, Integer, Double>> FUR_TIMINGS;
     public static final DynamicHolder<Triplet<Integer, Integer, Double>> SHED_TIMINGS;
     public static final DynamicHolder<Multimap<Biome, SpawnBiomeData>> ENTITY_SPAWN_BIOMES;
-    public static final DynamicHolder<Map<EntityType<?>, InsulatingMount>> INSULATED_ENTITIES;
+    public static final DynamicHolder<Multimap<EntityType<?>, InsulatingMount>> INSULATED_ENTITIES;
     public static final DynamicHolder<Multimap<EntityType<?>, EntityTempData>> ENTITY_TEMPERATURES;
 
     // Client Settings
@@ -380,16 +380,16 @@ public class ConfigSettings
                                                                nbtRequirement),
                                      EntityRequirement.NONE);
         };
-        BOILER_FUEL = addSetting("boiler_fuel_items", () -> ConfigHelper.readItemMap(ItemSettingsConfig.getInstance().getBoilerFuelItems(), fuelMapper));
-        ICEBOX_FUEL = addSetting("icebox_fuel_items", () -> ConfigHelper.readItemMap(ItemSettingsConfig.getInstance().getIceboxFuelItems(), fuelMapper));
-        HEARTH_FUEL = addSetting("hearth_fuel_items", () -> ConfigHelper.readItemMap(ItemSettingsConfig.getInstance().getHearthFuelItems(), fuelMapper));
+        BOILER_FUEL = addSetting("boiler_fuel_items", () -> ConfigHelper.readItemMultimap(ItemSettingsConfig.getInstance().getBoilerFuelItems(), fuelMapper));
+        ICEBOX_FUEL = addSetting("icebox_fuel_items", () -> ConfigHelper.readItemMultimap(ItemSettingsConfig.getInstance().getIceboxFuelItems(), fuelMapper));
+        HEARTH_FUEL = addSetting("hearth_fuel_items", () -> ConfigHelper.readItemMultimap(ItemSettingsConfig.getInstance().getHearthFuelItems(), fuelMapper));
 
-        SOULSPRING_LAMP_FUEL = addSyncedSetting("lamp_fuel_items", () -> ConfigHelper.readItemMap(ItemSettingsConfig.getInstance().getSoulLampFuelItems(), fuelMapper),
-        (encoder) -> ConfigHelper.serializeItemMap(encoder, "LampFuelItems", fuel -> fuel.serialize()),
-        (decoder) -> ConfigHelper.deserializeItemMap(decoder, "LampFuelItems", nbt -> PredicateItem.deserialize(nbt)),
-        (saver) -> ConfigHelper.writeItemMap(saver,
-                                           list -> ItemSettingsConfig.getInstance().setSoulLampFuelItems(list),
-                                           fuel -> List.of(fuel.value(), fuel.data().nbt().tag().toString())));
+        SOULSPRING_LAMP_FUEL = addSyncedSetting("lamp_fuel_items", () -> ConfigHelper.readItemMultimap(ItemSettingsConfig.getInstance().getSoulLampFuelItems(), fuelMapper),
+        (encoder) -> ConfigHelper.serializeItemMultimap(encoder, "LampFuelItems", fuel -> fuel.serialize()),
+        (decoder) -> ConfigHelper.deserializeItemMultimap(decoder, "LampFuelItems", nbt -> PredicateItem.deserialize(nbt)),
+        (saver) -> ConfigHelper.writeItemMultimap(saver,
+                                             list -> ItemSettingsConfig.getInstance().setSoulLampFuelItems(list),
+                                             fuel -> List.of(fuel.value(), fuel.data().nbt().tag().toString())));
 
         HEARTH_POTIONS_ENABLED = addSetting("hearth_potions_enabled", () -> ItemSettingsConfig.getInstance().arePotionsEnabled());
         HEARTH_POTION_BLACKLIST = addSetting("hearth_potion_blacklist", () -> ItemSettingsConfig.getInstance().getPotionBlacklist()
@@ -408,7 +408,7 @@ public class ConfigSettings
         (saver) -> ConfigHelper.writeItemInsulations(saver, list -> ItemSettingsConfig.getInstance().setInsulatingArmorItems(list)));
 
         INSULATING_CURIOS = addSyncedSetting("insulating_curios", () ->
-        {   if (!CompatManager.isCuriosLoaded()) return new HashMap<>();
+        {   if (!CompatManager.isCuriosLoaded()) return new FastMultiMap<>();
             return ConfigHelper.readItemInsulations(ItemSettingsConfig.getInstance().getInsulatingCurios(), Insulation.Slot.CURIO);
         },
         (encoder) -> ConfigHelper.serializeItemInsulations(encoder, "InsulatingCurios"),
@@ -486,7 +486,7 @@ public class ConfigSettings
 
         SLEEP_CHECK_IGNORE_BLOCKS = addSetting("sleep_check_override_blocks", () -> ConfigHelper.getBlocks(WorldSettingsConfig.getInstance().getSleepOverrideBlocks().toArray(new String[0])));
 
-        FOOD_TEMPERATURES = addSyncedSetting("food_temperatures", () -> ConfigHelper.readItemMap(ItemSettingsConfig.getInstance().getFoodTemperatures(), (item, args) ->
+        FOOD_TEMPERATURES = addSyncedSetting("food_temperatures", () -> ConfigHelper.readItemMultimap(ItemSettingsConfig.getInstance().getFoodTemperatures(), (item, args) ->
         {
             double value = ((Number) args.get(0)).doubleValue();
             NbtRequirement nbtRequirement = args.size() > 1
@@ -504,9 +504,9 @@ public class ConfigSettings
             }
             return new PredicateItem(value, itemRequirement, EntityRequirement.NONE, tag);
         }),
-        (encoder) -> ConfigHelper.serializeItemMap(encoder, "FoodTemperatures", food -> food.serialize()),
-        (decoder) -> ConfigHelper.deserializeItemMap(decoder, "FoodTemperatures", nbt -> PredicateItem.deserialize(nbt)),
-        (saver) -> ConfigHelper.writeItemMap(saver,
+        (encoder) -> ConfigHelper.serializeItemMultimap(encoder, "FoodTemperatures", PredicateItem::serialize),
+        (decoder) -> ConfigHelper.deserializeItemMultimap(decoder, "FoodTemperatures", PredicateItem::deserialize),
+        (saver) -> ConfigHelper.writeItemMultimap(saver,
                                              list -> ItemSettingsConfig.getInstance().setFoodTemperatures(list),
                                              food ->
                                              {
@@ -520,7 +520,7 @@ public class ConfigSettings
         CARRIED_ITEM_TEMPERATURES = addSyncedSetting("carried_item_temps", () ->
         {
             List<?> list = ItemSettingsConfig.getInstance().getCarriedTemps();
-            Map<Item, CarriedItemTemperature> map = new FastMap<>();
+            Multimap<Item, CarriedItemTemperature> map = new FastMultiMap<>();
 
             for (Object entry : list)
             {
@@ -567,36 +567,11 @@ public class ConfigSettings
             }
             return map;
         },
-        (encoder) ->
-        {
-            CompoundTag tag = new CompoundTag();
-            ListTag list = new ListTag();
-            encoder.forEach((item, temp) ->
-            {
-                CompoundTag entry = new CompoundTag();
-                entry.putString("Id", ForgeRegistries.ITEMS.getKey(item).toString());
-                entry.put("Value", temp.serialize());
-                list.add(entry);
-            });
-            tag.put("CarriedItemTemps", list);
-            return tag;
-        },
-        (decoder) ->
-        {
-            List<?> list = decoder.getList("CarriedItemTemps", 10);
-            Map<Item, CarriedItemTemperature> map = new FastMap<>();
-            list.forEach(entry ->
-            {
-                CompoundTag entryTag = (CompoundTag) entry;
-                Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(entryTag.getString("Id")));
-                CarriedItemTemperature temp = CarriedItemTemperature.deserialize(entryTag.getCompound("Value"));
-                map.put(item, temp);
-            });
-            return map;
-        },
+        (encoder) -> ConfigHelper.serializeItemMultimap(encoder, "CarriedItemTemps", CarriedItemTemperature::serialize),
+        (decoder) -> ConfigHelper.deserializeItemMultimap(decoder, "CarriedItemTemps", CarriedItemTemperature::deserialize),
         (saver) ->
         {
-            ConfigHelper.writeItemMap(saver,
+            ConfigHelper.writeItemMultimap(saver,
             list -> ItemSettingsConfig.getInstance().setCarriedTemps(list),
             temp ->
             {
@@ -731,10 +706,7 @@ public class ConfigSettings
         .flatMap(List::stream)
         .distinct()
         .filter(entry -> entry.getKey() != null)
-        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (a, b) -> {
-            ColdSweat.LOGGER.warn("Duplicate entity entry for \"{}\" found in config. Using the first entry.", ForgeRegistries.ENTITIES.getKey(a.entityType()).toString());
-            return a;
-        })));
+        .collect(() -> new FastMultiMap<>(), (map, entry) -> map.put(entry.getKey(), entry.getValue()), FastMultiMap::putAll));
 
         ENTITY_TEMPERATURES = addSetting("entity_temperatures", () ->
         {
