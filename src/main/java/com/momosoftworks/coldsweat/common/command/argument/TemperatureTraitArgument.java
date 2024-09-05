@@ -14,16 +14,16 @@ import net.minecraft.util.StringRepresentable;
 
 import java.util.Locale;
 
-public class TemperatureTypeArgument extends StringRepresentableArgument<Temperature.Trait>
+public class TemperatureTraitArgument extends StringRepresentableArgument<Temperature.Trait>
 {
     private static final Codec<Temperature.Trait> TEMPERATURES_CODEC = StringRepresentable.fromEnum(() -> EntityTempManager.VALID_TEMPERATURE_TRAITS);
 
-    private TemperatureTypeArgument()
+    private TemperatureTraitArgument()
     {   super(TEMPERATURES_CODEC, () -> EntityTempManager.VALID_TEMPERATURE_TRAITS);
     }
 
-    public static TemperatureTypeArgument temperature()
-    {   return new TemperatureTypeArgument();
+    public static TemperatureTraitArgument temperature()
+    {   return new TemperatureTraitArgument();
     }
 
     public static Temperature.Trait getTemperature(CommandContext<CommandSourceStack> context, String argument)
@@ -34,7 +34,7 @@ public class TemperatureTypeArgument extends StringRepresentableArgument<Tempera
     {   return Id.toLowerCase(Locale.ROOT);
     }
 
-    public static class Info implements ArgumentTypeInfo<TemperatureTypeArgument, Info.Template>
+    public static class Info implements ArgumentTypeInfo<TemperatureTraitArgument, Info.Template>
     {
         @Override
         public void serializeToNetwork(Template template, FriendlyByteBuf buffer)
@@ -52,19 +52,19 @@ public class TemperatureTypeArgument extends StringRepresentableArgument<Tempera
         }
 
         @Override
-        public Template unpack(TemperatureTypeArgument argument)
+        public Template unpack(TemperatureTraitArgument argument)
         {   return new Template();
         }
 
-        public final class Template implements ArgumentTypeInfo.Template<TemperatureTypeArgument>
+        public final class Template implements ArgumentTypeInfo.Template<TemperatureTraitArgument>
         {
             @Override
-            public TemperatureTypeArgument instantiate(CommandBuildContext pContext)
-            {   return new TemperatureTypeArgument();
+            public TemperatureTraitArgument instantiate(CommandBuildContext pContext)
+            {   return new TemperatureTraitArgument();
             }
 
             @Override
-            public ArgumentTypeInfo<TemperatureTypeArgument, ?> type()
+            public ArgumentTypeInfo<TemperatureTraitArgument, ?> type()
             {   return Info.this;
             }
         }
