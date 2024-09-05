@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.client.gui.config;
 
+import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.ChatFormatting;
@@ -62,7 +63,7 @@ public abstract class AbstractConfigPage extends Screen
 
     private final Screen parentScreen;
 
-    public Map<String, List<GuiEventListener>> widgetBatches = new HashMap<>();
+    public Map<String, Pair<List<GuiEventListener>, Boolean>> widgetBatches = new HashMap<>();
     public Map<String, List<Component>> tooltips = new HashMap<>();
 
     protected int rightSideLength = 0;
@@ -111,7 +112,7 @@ public abstract class AbstractConfigPage extends Screen
         int labelY = this.height / 4 + (side == Side.LEFT ? leftSideLength : rightSideLength);
         ConfigLabel label = new ConfigLabel(id, text, labelX, labelY, color);
 
-        this.addWidgetBatch(id, List.of(label));
+        this.addWidgetBatch(id, List.of(label), true);
 
         if (side == Side.LEFT)
         {   this.leftSideLength += font.lineHeight + 4;
@@ -176,7 +177,7 @@ public abstract class AbstractConfigPage extends Screen
         // Assign the tooltip
         this.setTooltip(id, tooltipList);
 
-        this.addWidgetBatch(id, List.of(button));
+        this.addWidgetBatch(id, List.of(button), shouldBeActive);
 
         // Mark this space as used
         if (side == Side.LEFT)
@@ -269,7 +270,7 @@ public abstract class AbstractConfigPage extends Screen
         this.setTooltip(id, tooltipList);
 
         // Add the widget
-        this.addWidgetBatch(id, List.of(textBox, configLabel));
+        this.addWidgetBatch(id, List.of(textBox, configLabel), shouldBeActive);
 
         // Mark this space as used
         if (side == Side.LEFT)
@@ -392,7 +393,7 @@ public abstract class AbstractConfigPage extends Screen
         // Assign the tooltip
         this.setTooltip(id, tooltipList);
 
-        this.addWidgetBatch(id, widgetBatch);
+        this.addWidgetBatch(id, widgetBatch, shouldBeActive);
 
         // Add height to the list
         if (side == Side.LEFT)
@@ -446,7 +447,7 @@ public abstract class AbstractConfigPage extends Screen
         this.setTooltip(id, tooltipList);
 
         // Add the widget
-        this.addWidgetBatch(id, List.of(sliderButton));
+        this.addWidgetBatch(id, List.of(sliderButton), shouldBeActive);
 
         // Mark this space as used
         if (side == Side.LEFT)
@@ -523,10 +524,11 @@ public abstract class AbstractConfigPage extends Screen
         }
         if (MOUSE_STILL_TIMER < TOOLTIP_DELAY) return;
 
-        for (Map.Entry<String, List<GuiEventListener>> entry : widgetBatches.entrySet())
+        for (Map.Entry<String, Pair<List<GuiEventListener>, Boolean>> entry : widgetBatches.entrySet())
         {
             String id = entry.getKey();
-            List<GuiEventListener> widgets = entry.getValue();
+            List<GuiEventListener> widgets = entry.getValue().getFirst();
+            boolean enabled = entry.getValue().getSecond();
             int minX = 0, minY = 0, maxX = 0, maxY = 0;
             for (GuiEventListener listener : widgets)
             {
@@ -546,7 +548,9 @@ public abstract class AbstractConfigPage extends Screen
             // if the mouse is hovering over any of the widgets in the batch, show the corresponding tooltip
             if (CSMath.betweenInclusive(mouseX, minX, maxX) && CSMath.betweenInclusive(mouseY, minY, maxY))
             {
-                List<Component> tooltipList = this.tooltips.get(id);
+                List<Component> tooltipList = enabled
+                                              ? this.tooltips.get(id)
+                                              : List.of(Component.translatable("cold_sweat.config.require_op").withStyle(ChatFormatting.RED));
                 if (tooltipList != null && !tooltipList.isEmpty())
                 {
                     graphics.renderTooltip(font, tooltipList, Optional.empty(), mouseX, mouseY);
@@ -562,19 +566,19 @@ public abstract class AbstractConfigPage extends Screen
         RIGHT
     }
 
-    protected void addWidgetBatch(String id, List<GuiEventListener> elements)
+    protected void addWidgetBatch(String id, List<GuiEventListener> elements, boolean enabled)
     {
         for (GuiEventListener element : elements)
         {
             if (element instanceof Renderable widget)
                 this.addRenderableWidget((GuiEventListener & Renderable & NarratableEntry) widget);
         }
-        this.widgetBatches.put(id, elements);
+        this.widgetBatches.put(id, Pair.of(elements, enabled));
     }
 
     public List<GuiEventListener> getWidgetBatch(String id)
     {
-        return this.widgetBatches.get(id);
+        return this.widgetBatches.get(id).getFirst();
     }
 
     protected void setTooltip(String id, List<Component> tooltip)
