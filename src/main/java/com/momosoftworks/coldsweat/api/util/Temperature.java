@@ -419,25 +419,44 @@ public class Temperature
      */
     public enum Trait implements StringRepresentable
     {
-        WORLD("world"),
-        CORE("core"),
-        BASE("base"),
-        BODY("body"),
-        RATE("rate"),
+        WORLD("world", true, true, true),
+        CORE("core", true, true, false),
+        BASE("base", true, true, true),
+        BODY("body", false, false, false),
+        RATE("rate", false, true, false),
 
-        FREEZING_POINT("freezing_point"),
-        BURNING_POINT("burning_point"),
-        COLD_RESISTANCE("cold_resistance"),
-        HEAT_RESISTANCE("heat_resistance"),
-        COLD_DAMPENING("cold_dampening"),
-        HEAT_DAMPENING("heat_dampening");
+        FREEZING_POINT("freezing_point", true, true, true),
+        BURNING_POINT("burning_point", true, true, true),
+        COLD_RESISTANCE("cold_resistance", true, true, true),
+        HEAT_RESISTANCE("heat_resistance", true, true, true),
+        COLD_DAMPENING("cold_dampening", true, true, true),
+        HEAT_DAMPENING("heat_dampening", true, true, true);
 
         public static final Codec<Trait> CODEC = StringRepresentable.fromEnum(Trait::values);
 
         private final String id;
+        private final boolean forTemperature;
+        private final boolean forModifiers;
+        private final boolean forAttributes;
 
-        Trait(String id)
-        {   this.id = id;
+        Trait(String id, boolean forTemperature, boolean forModifiers, boolean forAttributes)
+        {
+            this.id = id;
+            this.forTemperature = forTemperature;
+            this.forModifiers = forModifiers;
+            this.forAttributes = forAttributes;
+        }
+
+        public boolean isForTemperature()
+        {   return forTemperature;
+        }
+
+        public boolean isForModifiers()
+        {   return forModifiers;
+        }
+
+        public boolean isForAttributes()
+        {   return forAttributes;
         }
 
         public static Trait fromID(String id)
