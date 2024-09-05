@@ -86,6 +86,7 @@ public class ColdSweat
             event.dataPackRegistry(ModRegistries.ENTITY_SPAWN_BIOME_DATA, SpawnBiomeData.CODEC);
             event.dataPackRegistry(ModRegistries.DEPTH_TEMP_DATA, DepthTempData.CODEC);
             event.dataPackRegistry(ModRegistries.CARRY_TEMP_DATA, ItemCarryTempData.CODEC);
+            event.dataPackRegistry(ModRegistries.ENTITY_TEMP_DATA, EntityTempData.CODEC);
         });
     }
 

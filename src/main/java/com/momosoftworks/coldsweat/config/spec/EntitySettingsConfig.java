@@ -23,6 +23,7 @@ public class EntitySettingsConfig
     public static final ForgeConfigSpec.ConfigValue<List<?>> CHAMELEON_SHED_STATS;
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> CHAMELEON_SPAWN_BIOMES;
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> GOAT_SPAWN_BIOMES;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> ENTITY_TEMPERATURES;
 
     private static final EntitySettingsConfig INSTANCE = new EntitySettingsConfig();
 
@@ -31,20 +32,35 @@ public class EntitySettingsConfig
         /*
          Insulated Entities
          */
-        BUILDER.push("Entity Settings");
+        BUILDER.push("Entity Temperature");
         INSULATED_ENTITIES = BUILDER
                 .comment("List of entities that will insulate the player when riding them",
                          "A value of 0 provides no insulation; 1 provides full insulation",
                          "Format: [[\"entity_id\", coldResistance, hotResistance], [\"entity_id\", coldResistance, hotResistance], etc...]")
                 .defineListAllowEmpty(List.of("Insulated Mounts"), () -> Arrays.asList(),
-                it ->
-                {
-                    if (it instanceof List<?>)
-                    {   List<?> list = ((List<?>) it);
-                        return list.size() == 3 && list.get(0) instanceof String && list.get(1) instanceof Number && list.get(2) instanceof Number;
-                    }
-                    return false;
-                });
+                it -> it instanceof List<?> list
+                      && list.size() == 3
+                      && list.get(0) instanceof String
+                      && list.get(1) instanceof Number
+                      && list.get(2) instanceof Number);
+
+        ENTITY_TEMPERATURES = BUILDER
+                .comment("Defines temperature-emitting properties for entities",
+                         "Format: [[\"entity_id\", temperature, range, *units], [\"entity_id\", temperature, range, *units], etc...]",
+                         "temperature: The temperature emitted by the entity",
+                         "range: The range of the effect, in blocks",
+                         "units: (Optional) The units of the temperature value (MC, F, or C). Defaults to MC")
+                .defineListAllowEmpty(List.of("Entity Temperatures"), () -> Arrays.asList(),
+                it -> it instanceof List<?> list
+                      && list.size() >= 3
+                      && list.get(0) instanceof String
+                      && list.get(1) instanceof Number
+                      && list.get(2) instanceof Number
+                      && (list.size() < 4 || list.get(3) instanceof String));
+
+        BUILDER.pop();
+
+        BUILDER.push("Fur Growth & Shedding");
 
         GOAT_FUR_GROWTH_STATS = BUILDER
                 .comment("Defines how often a goat will try to grow its fur, the growth cooldown after shearing, and the chance of it succeeding",
