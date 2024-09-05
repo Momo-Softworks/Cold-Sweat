@@ -5,6 +5,8 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.ColdSweat;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.tags.ITag;
 import net.minecraft.entity.monster.MonsterEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
@@ -22,6 +24,7 @@ import java.util.Optional;
 public class EntityRequirement
 {
     public final Optional<EntityType<?>> type;
+    public final Optional<ITag<EntityType<?>>> tag;
     public final Optional<LocationRequirement> location;
     public final Optional<LocationRequirement> steppingOn;
     public final Optional<EffectsRequirement> effects;
@@ -33,12 +36,14 @@ public class EntityRequirement
     public final Optional<EntityRequirement> passenger;
     public final Optional<EntityRequirement> target;
 
-    public EntityRequirement(Optional<EntityType<?>> type, Optional<LocationRequirement> location, Optional<LocationRequirement> steppingOn,
+    public EntityRequirement(Optional<EntityType<?>> type, Optional<ITag<EntityType<?>>> tag,
+                                Optional<LocationRequirement> location, Optional<LocationRequirement> steppingOn,
                              Optional<EffectsRequirement> effects, Optional<NbtRequirement> nbt, Optional<EntityFlagsRequirement> flags,
                              Optional<EquipmentRequirement> equipment, Optional<PlayerDataRequirement> playerData,
                              Optional<EntityRequirement> vehicle, Optional<EntityRequirement> passenger, Optional<EntityRequirement> target)
     {
         this.type = type;
+        this.tag = tag;
         this.location = location;
         this.steppingOn = steppingOn;
         this.effects = effects;
@@ -53,17 +58,18 @@ public class EntityRequirement
     public static EntityRequirement NONE = new EntityRequirement(Optional.empty(), Optional.empty(), Optional.empty(),
                                                                 Optional.empty(), Optional.empty(), Optional.empty(),
                                                                 Optional.empty(), Optional.empty(), Optional.empty(),
-                                                                Optional.empty(), Optional.empty());
+                                                                Optional.empty(), Optional.empty(), Optional.empty());
 
     public static Codec<EntityRequirement> SIMPLE_CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Registry.ENTITY_TYPE.optionalFieldOf("type").forGetter(requirement -> requirement.type),
+            ITag.codec(EntityTypeTags::getAllTags).optionalFieldOf("tag").forGetter(requirement -> requirement.tag),
             LocationRequirement.CODEC.optionalFieldOf("location").forGetter(requirement -> requirement.location),
             LocationRequirement.CODEC.optionalFieldOf("stepping_on").forGetter(requirement -> requirement.steppingOn),
             EffectsRequirement.CODEC.optionalFieldOf("effects").forGetter(requirement -> requirement.effects),
             NbtRequirement.CODEC.optionalFieldOf("nbt").forGetter(requirement -> requirement.nbt),
             EntityFlagsRequirement.CODEC.optionalFieldOf("flags").forGetter(requirement -> requirement.flags),
             EquipmentRequirement.CODEC.optionalFieldOf("equipment").forGetter(requirement -> requirement.equipment)
-    ).apply(instance, (type, location, standingOn, effects, nbt, flags, equipment) -> new EntityRequirement(type, location, standingOn, effects, nbt, flags, equipment,
+    ).apply(instance, (type, tag, location, standingOn, effects, nbt, flags, equipment) -> new EntityRequirement(type, tag, location, standingOn, effects, nbt, flags, equipment,
                                                                                                             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty())));
 
     private static final List<Codec<EntityRequirement>> REQUIREMENT_CODEC_STACK = new ArrayList<>(Arrays.asList(SIMPLE_CODEC));
@@ -82,7 +88,8 @@ public class EntityRequirement
     {
         Codec<EntityRequirement> latestCodec = REQUIREMENT_CODEC_STACK.get(REQUIREMENT_CODEC_STACK.size() - 1);
         Codec<EntityRequirement> codec = RecordCodecBuilder.create(instance -> instance.group(
-                Registry.ENTITY_TYPE.optionalFieldOf("type").forGetter(requirement -> requirement.type),
+                net.minecraft.util.registry.Registry.ENTITY_TYPE.optionalFieldOf("type").forGetter(requirement -> requirement.type),
+                ITag.codec(EntityTypeTags::getAllTags).optionalFieldOf("tag").forGetter(requirement -> requirement.tag),
                 LocationRequirement.CODEC.optionalFieldOf("location").forGetter(requirement -> requirement.location),
                 LocationRequirement.CODEC.optionalFieldOf("stepping_on").forGetter(requirement -> requirement.steppingOn),
                 EffectsRequirement.CODEC.optionalFieldOf("effects").forGetter(requirement -> requirement.effects),
@@ -107,6 +114,9 @@ public class EntityRequirement
         {   return true;
         }
         if (type.isPresent() && !type.get().equals(entity.getType()))
+        {   return false;
+        }
+        if (tag.isPresent() && !entity.getType().is(tag.get()))
         {   return false;
         }
         if (location.isPresent() && !location.get().test(entity.level, entity.position()))
@@ -152,19 +162,20 @@ public class EntityRequirement
     public CompoundNBT serialize()
     {
         try
-        {   CompoundNBT tag = new CompoundNBT();
-            type.ifPresent(type -> tag.putString("type", ForgeRegistries.ENTITIES.getKey(type).toString()));
-            location.ifPresent(location -> tag.put("location", location.serialize()));
-            steppingOn.ifPresent(standingOn -> tag.put("standing_on", standingOn.serialize()));
-            effects.ifPresent(effects -> tag.put("effects", effects.serialize()));
-            nbt.ifPresent(nbt -> tag.put("nbt", nbt.serialize()));
-            flags.ifPresent(flags -> tag.put("flags", flags.serialize()));
-            equipment.ifPresent(equipment -> tag.put("equipment", equipment.serialize()));
-            playerData.ifPresent(playerData -> tag.put("player_data", playerData.serialize()));
-            vehicle.ifPresent(vehicle -> tag.put("vehicle", vehicle.serialize()));
-            passenger.ifPresent(passenger -> tag.put("passenger", passenger.serialize()));
-            target.ifPresent(target -> tag.put("target", target.serialize()));
-            return tag;
+        {   CompoundNBT compound = new CompoundNBT();
+            type.ifPresent(type -> compound.putString("type", ForgeRegistries.ENTITIES.getKey(type).toString()));
+            tag.ifPresent(tag -> compound.putString("tag", EntityTypeTags.getAllTags().getId(tag).toString()));
+            location.ifPresent(location -> compound.put("location", location.serialize()));
+            steppingOn.ifPresent(standingOn -> compound.put("standing_on", standingOn.serialize()));
+            effects.ifPresent(effects -> compound.put("effects", effects.serialize()));
+            nbt.ifPresent(nbt -> compound.put("nbt", nbt.serialize()));
+            flags.ifPresent(flags -> compound.put("flags", flags.serialize()));
+            equipment.ifPresent(equipment -> compound.put("equipment", equipment.serialize()));
+            playerData.ifPresent(playerData -> compound.put("player_data", playerData.serialize()));
+            vehicle.ifPresent(vehicle -> compound.put("vehicle", vehicle.serialize()));
+            passenger.ifPresent(passenger -> compound.put("passenger", passenger.serialize()));
+            target.ifPresent(target -> compound.put("target", target.serialize()));
+            return compound;
         }
         catch (Exception e)
         {
@@ -174,22 +185,23 @@ public class EntityRequirement
         }
     }
 
-    public static EntityRequirement deserialize(CompoundNBT tag)
+    public static EntityRequirement deserialize(CompoundNBT compound)
     {
         try
-        {   Optional<EntityType<?>> type = tag.contains("type") ? Optional.of(ForgeRegistries.ENTITIES.getValue(new ResourceLocation(tag.getString("type")))) : Optional.empty();
-            Optional<LocationRequirement> location = tag.contains("location") ? Optional.of(LocationRequirement.deserialize(tag.getCompound("location"))) : Optional.empty();
-            Optional<LocationRequirement> standingOn = tag.contains("standing_on") ? Optional.of(LocationRequirement.deserialize(tag.getCompound("standing_on"))) : Optional.empty();
-            Optional<EffectsRequirement> effects = tag.contains("effects") ? Optional.of(EffectsRequirement.deserialize(tag.getCompound("effects"))) : Optional.empty();
-            Optional<NbtRequirement> nbt = tag.contains("nbt") ? Optional.of(NbtRequirement.deserialize(tag.getCompound("nbt"))) : Optional.empty();
-            Optional<EntityFlagsRequirement> flags = tag.contains("flags") ? Optional.of(EntityFlagsRequirement.deserialize(tag.getCompound("flags"))) : Optional.empty();
-            Optional<EquipmentRequirement> equipment = tag.contains("equipment") ? Optional.of(EquipmentRequirement.deserialize(tag.getCompound("equipment"))) : Optional.empty();
-            Optional<PlayerDataRequirement> playerData = tag.contains("player_data") ? Optional.of(PlayerDataRequirement.deserialize(tag.getCompound("player_data"))) : Optional.empty();
-            Optional<EntityRequirement> vehicle = tag.contains("vehicle") ? Optional.of(EntityRequirement.deserialize(tag.getCompound("vehicle"))) : Optional.empty();
-            Optional<EntityRequirement> passenger = tag.contains("passenger") ? Optional.of(EntityRequirement.deserialize(tag.getCompound("passenger"))) : Optional.empty();
-            Optional<EntityRequirement> target = tag.contains("target") ? Optional.of(EntityRequirement.deserialize(tag.getCompound("target"))) : Optional.empty();
+        {   Optional<EntityType<?>> type = compound.contains("type") ? Optional.of(ForgeRegistries.ENTITIES.getValue(new ResourceLocation(compound.getString("type")))) : Optional.empty();
+            Optional<ITag<EntityType<?>>> tag = compound.contains("tag") ? Optional.of(EntityTypeTags.getAllTags().getTag(new ResourceLocation(compound.getString("tag")))) : Optional.empty();
+            Optional<LocationRequirement> location = compound.contains("location") ? Optional.of(LocationRequirement.deserialize(compound.getCompound("location"))) : Optional.empty();
+            Optional<LocationRequirement> standingOn = compound.contains("standing_on") ? Optional.of(LocationRequirement.deserialize(compound.getCompound("standing_on"))) : Optional.empty();
+            Optional<EffectsRequirement> effects = compound.contains("effects") ? Optional.of(EffectsRequirement.deserialize(compound.getCompound("effects"))) : Optional.empty();
+            Optional<NbtRequirement> nbt = compound.contains("nbt") ? Optional.of(NbtRequirement.deserialize(compound.getCompound("nbt"))) : Optional.empty();
+            Optional<EntityFlagsRequirement> flags = compound.contains("flags") ? Optional.of(EntityFlagsRequirement.deserialize(compound.getCompound("flags"))) : Optional.empty();
+            Optional<EquipmentRequirement> equipment = compound.contains("equipment") ? Optional.of(EquipmentRequirement.deserialize(compound.getCompound("equipment"))) : Optional.empty();
+            Optional<PlayerDataRequirement> playerData = compound.contains("player_data") ? Optional.of(PlayerDataRequirement.deserialize(compound.getCompound("player_data"))) : Optional.empty();
+            Optional<EntityRequirement> vehicle = compound.contains("vehicle") ? Optional.of(EntityRequirement.deserialize(compound.getCompound("vehicle"))) : Optional.empty();
+            Optional<EntityRequirement> passenger = compound.contains("passenger") ? Optional.of(EntityRequirement.deserialize(compound.getCompound("passenger"))) : Optional.empty();
+            Optional<EntityRequirement> target = compound.contains("target") ? Optional.of(EntityRequirement.deserialize(compound.getCompound("target"))) : Optional.empty();
 
-            return new EntityRequirement(type, location, standingOn, effects, nbt, flags, equipment, playerData, vehicle, passenger, target);
+            return new EntityRequirement(type, tag, location, standingOn, effects, nbt, flags, equipment, playerData, vehicle, passenger, target);
         }
         catch (Exception e)
         {

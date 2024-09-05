@@ -119,6 +119,7 @@ public class ConfigRegistryHandler
 
         Set<MountData> mounts = new HashSet<>(ModRegistries.MOUNT_DATA.getValues());
         Set<SpawnBiomeData> spawnBiomes = new HashSet<>(ModRegistries.ENTITY_SPAWN_BIOME_DATA.getValues());
+        Set<EntityTempData> entityTemps = new HashSet<>(ModRegistries.ENTITY_TEMP_DATA.getValues());
 
         /*
          Parse user-defined JSON data from the configs folder
@@ -136,6 +137,7 @@ public class ConfigRegistryHandler
 
         mounts.addAll(parseConfigData(ModRegistries.MOUNT_DATA, MountData.CODEC));
         spawnBiomes.addAll(parseConfigData(ModRegistries.ENTITY_SPAWN_BIOME_DATA, SpawnBiomeData.CODEC));
+        entityTemps.addAll(parseConfigData(ModRegistries.ENTITY_TEMP_DATA, EntityTempData.CODEC));
 
         /*
          Add JSON data to the config settings
@@ -175,6 +177,9 @@ public class ConfigRegistryHandler
         // spawn biomes
         addSpawnBiomeConfigs(spawnBiomes, registries);
         logRegistryLoaded(String.format("Loaded %s entity spawn biomes", spawnBiomes.size()), spawnBiomes);
+        // entity temperatures
+        addEntityTempConfigs(entityTemps);
+        logRegistryLoaded(String.format("Loaded %s entity temperatures", entityTemps.size()), entityTemps);
     }
 
     private static void logRegistryLoaded(String message, Set<?> registry)
@@ -520,6 +525,29 @@ public class ConfigRegistryHandler
             }
             for (Biome biome : spawnBiomeData.biomes)
             {   ConfigSettings.ENTITY_SPAWN_BIOMES.get(registryAccess).put(biome, spawnBiomeData);
+            }
+        });
+    }
+
+    private static void addEntityTempConfigs(Set<EntityTempData> entityTemps)
+    {
+        entityTemps.forEach(entityTempData ->
+        {
+            // Check if the required mods are loaded
+            if (entityTempData.requiredMods.isPresent())
+            {
+                List<String> requiredMods = entityTempData.requiredMods.get();
+                if (requiredMods.stream().anyMatch(mod -> !CompatManager.modLoaded(mod)))
+                {   return;
+                }
+            }
+            // Gather entity types and tags
+            List<Either<ITag<EntityType<?>>, EntityType<?>>> types = new ArrayList<>();
+            entityTempData.entity.type.ifPresent(type -> types.add(Either.right(type)));
+            entityTempData.entity.tag.ifPresent(tag -> types.add(Either.left(tag)));
+
+            for (EntityType<?> entity : RegistryHelper.mapTaggableList(types))
+            {   ConfigSettings.ENTITY_TEMPERATURES.get().put(entity, entityTempData);
             }
         });
     }

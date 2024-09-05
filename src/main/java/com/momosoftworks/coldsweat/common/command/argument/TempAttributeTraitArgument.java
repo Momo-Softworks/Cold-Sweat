@@ -57,7 +57,7 @@ public class TempAttributeTraitArgument implements ArgumentType<Temperature.Trai
     @Override
     public Collection<String> getExamples()
     {
-        return Stream.of(EntityTempManager.VALID_ATTRIBUTE_TYPES).map(Temperature.Trait::getSerializedName).collect(Collectors.toList());
+        return Stream.of(EntityTempManager.VALID_ATTRIBUTE_TRAITS).map(Temperature.Trait::getSerializedName).collect(Collectors.toList());
     }
 
     public static class Serializer implements IArgumentSerializer<TempAttributeTraitArgument>

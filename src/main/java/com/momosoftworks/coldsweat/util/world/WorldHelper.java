@@ -344,6 +344,13 @@ public abstract class WorldHelper
         }
     }
 
+    /**
+     * Overload for {@link #forBlocksInRay(Vector3d, Vector3d, World, IChunk, Map, BiConsumer, int)} with less bloated params
+     */
+    public static void forBlocksInRay(Vector3d from, Vector3d to, World level, BiConsumer<BlockState, BlockPos> rayTracer, int maxHits)
+    {   forBlocksInRay(from, to, level, getChunk(level, new BlockPos(from)), new HashMap<>(), rayTracer, maxHits);
+    }
+
     public static Entity raycastEntity(Vector3d from, Vector3d to, World level, Predicate<Entity> filter)
     {
         // Don't bother if the ray has no length

@@ -40,6 +40,7 @@ public class ModRegistries
     // Entity Registries
     public static CodecRegistry<MountData> MOUNT_DATA = createRegistry(new ResourceLocation(ColdSweat.MOD_ID, "entity/mount"), MountData.CODEC);
     public static CodecRegistry<SpawnBiomeData> ENTITY_SPAWN_BIOME_DATA = createRegistry(new ResourceLocation(ColdSweat.MOD_ID, "entity/spawn_biome"), SpawnBiomeData.CODEC);
+    public static final CodecRegistry<EntityTempData> ENTITY_TEMP_DATA = createRegistry(new ResourceLocation(ColdSweat.MOD_ID, "entity/entity_temp"), EntityTempData.CODEC);
 
     private static <T> CodecRegistry<T> createRegistry(ResourceLocation registryName, Codec<T> codec)
     {

@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.util.entity;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.serialization.ObjectBuilder;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -10,6 +11,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.GameType;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.LogicalSidedProvider;
@@ -33,6 +35,10 @@ public class EntityHelper
 
     public static boolean holdingLamp(LivingEntity player, HandSide arm)
     {   return getItemInHand(player, arm).getItem() == ModItems.SOULSPRING_LAMP;
+    }
+
+    public static Vector3d getCenterOf(Entity entity)
+    {   return entity.position().add(0, entity.getBbHeight() / 2, 0);
     }
 
     public static HandSide getHandSide(Hand hand, PlayerEntity player)
