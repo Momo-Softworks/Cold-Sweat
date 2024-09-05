@@ -31,6 +31,7 @@ import com.momosoftworks.coldsweat.util.registries.ModAttributes;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
+import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -242,7 +243,7 @@ public class EntityTempManager
             if (!stack.isEmpty())
             {
                 Item item = stack.getItem();
-                Optional.ofNullable(ConfigSettings.CARRIED_ITEM_TEMPERATURES.get().get(item)).ifPresent(
+                ConfigSettings.CARRIED_ITEM_TEMPERATURES.get().get(item).forEach(
                 carried ->
                 {   checkAndAddCarriedTemp(entity, stack, null, slot, carried, effectsPerCarriedTemp);
                 });
@@ -258,7 +259,7 @@ public class EntityTempManager
                 if (!stack.isEmpty())
                 {
                     Item item = stack.getItem();
-                    Optional.ofNullable(ConfigSettings.CARRIED_ITEM_TEMPERATURES.get().get(item)).ifPresent(
+                    ConfigSettings.CARRIED_ITEM_TEMPERATURES.get().get(item).forEach(
                     carried ->
                     {   checkAndAddCarriedTemp(entity, stack, slot.index, null, carried, effectsPerCarriedTemp);
                     });
@@ -677,7 +678,8 @@ public class EntityTempManager
                 // If insulated entity (defined in config)
                 else
                 {
-                    InsulatingMount entityInsul = ConfigSettings.INSULATED_ENTITIES.get().get(mount.getType());
+                    InsulatingMount entityInsul = ConfigSettings.INSULATED_ENTITIES.get().get(mount.getType())
+                                                  .stream().filter(mnt -> mnt.test(mount)).findFirst().orElse(null);
                     if (entityInsul != null && entityInsul.test(mount))
                     {   Temperature.addOrReplaceModifier(player, new MountTempModifier(entityInsul.coldInsulation(), entityInsul.heatInsulation()).tickRate(5).expires(5), Temperature.Trait.RATE, Placement.Duplicates.BY_CLASS);
                     }
@@ -697,7 +699,7 @@ public class EntityTempManager
         && !event.getEntity().level().isClientSide)
         {
             // If food item defined in config
-            PredicateItem foodData = ConfigSettings.FOOD_TEMPERATURES.get().get(event.getItem().getItem());
+            PredicateItem foodData = ConfigHelper.findFirstItemMatching(ConfigSettings.FOOD_TEMPERATURES, event.getItem()).orElse(null);
             if (foodData != null && foodData.test(event.getItem()))
             {
                 double effect = foodData.value();
@@ -741,18 +743,18 @@ public class EntityTempManager
             ItemStack stack = entity.getItemBySlot(slot);
             if (!stack.isEmpty())
             {
-                Optional.ofNullable(ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem())).ifPresent(insul -> insulators.put(stack, insul));
+                ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem()).forEach(insul -> insulators.put(stack, insul));
                 ItemInsulationManager.getInsulationCap(stack).ifPresent(cap ->
                 {
                     cap.getInsulation().stream().map(Pair::getFirst).forEach(item ->
                     {
-                        Optional.ofNullable(ConfigSettings.INSULATION_ITEMS.get().get(item.getItem())).ifPresent(insul -> insulators.put(item, insul));
+                        ConfigSettings.INSULATION_ITEMS.get().get(item.getItem()).forEach(insul -> insulators.put(item, insul));
                     });
                 });
             }
         }
         for (ItemStack curio : CompatManager.getCurios(entity))
-        {   Optional.ofNullable(ConfigSettings.INSULATING_CURIOS.get().get(curio.getItem())).ifPresent(insul -> insulators.put(curio, insul));
+        {   ConfigSettings.INSULATING_CURIOS.get().get(curio.getItem()).forEach(insul -> insulators.put(curio, insul));
         }
         return insulators;
     }

@@ -126,10 +126,9 @@ public class SewingContainer extends AbstractContainerMenu
         {
             @Override
             public boolean mayPlace(ItemStack stack)
-            {   return stack.getItem() instanceof Equipable && !ConfigSettings.INSULATION_BLACKLIST.get().contains(stack.getItem())
-                    && CSMath.getIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()),
-                                           ins -> ins.insulation(),
-                                           new StaticInsulation(0, 0)).isEmpty() ;
+            {
+                return stack.getItem() instanceof Equipable && !ConfigSettings.INSULATION_BLACKLIST.get().contains(stack.getItem())
+                    && ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()).isEmpty();
             }
             @Override
             public void onTake(Player player, ItemStack stack)
@@ -148,9 +147,8 @@ public class SewingContainer extends AbstractContainerMenu
         {
             @Override
             public boolean mayPlace(ItemStack stack)
-            {   return !CSMath.getIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()),
-                                            ins -> ins.insulation(),
-                                            new StaticInsulation(0, 0)).isEmpty()
+            {
+                return !ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()).isEmpty()
                     || stack.getItem() instanceof ShearsItem;
             }
             @Override

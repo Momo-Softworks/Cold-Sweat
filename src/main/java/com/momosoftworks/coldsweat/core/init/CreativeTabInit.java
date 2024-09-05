@@ -71,14 +71,14 @@ public class CreativeTabInit
             .icon(() -> ModItems.CHAMELEON_MOLT.getDefaultInstance())
             .displayItems((params, list) ->
             {
-                list.acceptAll(sort(ConfigSettings.INSULATION_ITEMS.get().entrySet()));
-                list.acceptAll(sort(ConfigSettings.INSULATING_ARMORS.get().entrySet()));
-                list.acceptAll(sort(ConfigSettings.INSULATING_CURIOS.get().entrySet()));
+                list.acceptAll(sort(ConfigSettings.INSULATION_ITEMS.get().entries()));
+                list.acceptAll(sort(ConfigSettings.INSULATING_ARMORS.get().entries()));
+                list.acceptAll(sort(ConfigSettings.INSULATING_CURIOS.get().entries()));
             })
             .title(Component.translatable("itemGroup.cs_insulation_items"))
             .build());
 
-    private static List<ItemStack> sort(Set<Map.Entry<Item, Insulator>> items)
+    private static List<ItemStack> sort(Collection<Map.Entry<Item, Insulator>> items)
     {   List<Map.Entry<Item, Insulator>> list = new ArrayList<>(items);
         // Sort by name first
         list.sort(Comparator.comparing(item -> item.getKey().getDefaultInstance().getDisplayName().getString()));

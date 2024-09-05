@@ -36,7 +36,7 @@ import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 @Mod.EventBusSubscriber
@@ -63,27 +63,23 @@ public class ArmorInsulation
                 {
                     // Add the armor's intrinsic insulation value (defined in configs)
                     // Mutually exclusive with Sewing Table insulation
-                    Insulator armorInsulator = ConfigSettings.INSULATING_ARMORS.get().get(armorStack.getItem());
-                    if (armorInsulator != null)
+                    Collection<Insulator> armorInsulators = ConfigSettings.INSULATING_ARMORS.get().get(armorStack.getItem());
+                    if (!armorInsulators.isEmpty())
                     {
-                        // Check if the player meets the predicate for the insulation
-                        if (!armorInsulator.predicate().test(serverPlayer) || !armorInsulator.data().test(armorStack, true))
-                        {   continue;
+                        for (Insulator armorInsulator : armorInsulators)
+                        {
+                            // Check if the player meets the predicate for the insulation
+                            if (!armorInsulator.test(player, armorStack))
+                            {   continue;
+                            }
+                            cold += armorInsulator.insulation().getCold();
+                            heat += armorInsulator.insulation().getHeat();
                         }
-                        cold += armorInsulator.insulation().getCold();
-                        heat += armorInsulator.insulation().getHeat();
                     }
                     else
                     {   // Add the armor's insulation value from the Sewing Table
                         LazyOptional<IInsulatableCap> iCap = ItemInsulationManager.getInsulationCap(armorStack);
-                        List<Insulation> insulation = ItemInsulationManager.getInsulationCap(armorStack)
-                                                      .map(IInsulatableCap::getInsulation).orElse(new ArrayList<>())
-                                                      .stream()
-                                                      .filter(pair -> CSMath.getIfNotNull(ConfigSettings.INSULATION_ITEMS.get().get(pair.getFirst().getItem()),
-                                                                                          insulator -> insulator.test(serverPlayer, pair.getFirst()),
-                                                                                          false))
-                                                      .map(pair -> pair.getSecond())
-                                                      .flatMap(List::stream).toList();
+                        List<Insulation> insulation = ItemInsulationManager.getAllEffectiveInsulation(armorStack, player);
 
                         // Get the armor's insulation values
                         for (Insulation value : insulation)
@@ -142,13 +138,14 @@ public class ArmorInsulation
 
             /* Get insulation from curios */
 
-            for (ItemStack stack : CompatManager.getCurios(player))
+            for (ItemStack curio : CompatManager.getCurios(player))
             {
-                Insulator insulator = ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem());
-                if (insulator != null && insulator.test(player, stack))
+                for (Insulator insulator : ConfigSettings.INSULATING_CURIOS.get().get(curio.getItem()))
                 {
-                    cold += insulator.insulation().getCold();
-                    heat += insulator.insulation().getHeat();
+                    if (insulator.test(player, curio))
+                    {   cold += insulator.insulation().getCold();
+                        heat += insulator.insulation().getHeat();
+                    }
                 }
             }
 

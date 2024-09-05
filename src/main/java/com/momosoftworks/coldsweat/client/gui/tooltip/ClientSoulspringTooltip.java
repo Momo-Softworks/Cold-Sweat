@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.client.gui.tooltip;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.config.type.PredicateItem;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -53,9 +54,13 @@ public class ClientSoulspringTooltip implements ClientTooltipComponent
 
             int i = 0;
             for (Item item : ConfigSettings.SOULSPRING_LAMP_FUEL.get().keySet())
-            {   graphics.renderItem(new ItemStack(item, 1, ConfigSettings.SOULSPRING_LAMP_FUEL.get().get(item).data().nbt().tag()),
-                                    x + ((i * 16) % 96), y + 12 + CSMath.floor(i / 6d) * 16);
-                i++;
+            {
+                for (PredicateItem it : ConfigSettings.SOULSPRING_LAMP_FUEL.get().get(item))
+                {
+                    graphics.renderItem(new ItemStack(item, 1, it.data().nbt().tag()),
+                                        x + ((i * 16) % 96), y + 12 + CSMath.floor(i / 6d) * 16);
+                    i++;
+                }
             }
         }
     }
