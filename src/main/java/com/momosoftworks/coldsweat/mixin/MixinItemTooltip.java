@@ -98,7 +98,7 @@ public abstract class MixinItemTooltip
             if (insulator.test(player, stack))
             {
                 for (Map.Entry<Attribute, AttributeModifier> entry : insulator.attributes().getMap().entries())
-                {   pTooltipAdder.accept(TooltipHandler.getFormattedAttributeModifier(Holder.direct(entry.getKey()), entry.getValue().amount(), entry.getValue().operation()));
+                {   pTooltipAdder.accept(TooltipHandler.getFormattedAttributeModifier(Holder.direct(entry.getKey()), entry.getValue().amount(), entry.getValue().operation(), true));
                 }
             }
         }
@@ -111,7 +111,7 @@ public abstract class MixinItemTooltip
                     if (insulator.test(player, item))
                     {
                         for (Map.Entry<Attribute, AttributeModifier> entry : insulator.attributes().getMap().entries())
-                        {   pTooltipAdder.accept(TooltipHandler.getFormattedAttributeModifier(Holder.direct(entry.getKey()), entry.getValue().amount(), entry.getValue().operation()));
+                        {   pTooltipAdder.accept(TooltipHandler.getFormattedAttributeModifier(Holder.direct(entry.getKey()), entry.getValue().amount(), entry.getValue().operation(), true));
                         }
                     }
                 }
@@ -126,7 +126,7 @@ public abstract class MixinItemTooltip
     {
         if (EntityTempManager.isTemperatureAttribute(attribute.value()))
         {
-            MutableComponent newline = TooltipHandler.getFormattedAttributeModifier(attribute, modifier.amount(), modifier.operation());
+            MutableComponent newline = TooltipHandler.getFormattedAttributeModifier(attribute, modifier.amount(), modifier.operation(), false);
             tooltip.accept(newline);
             ci.cancel();
         }
