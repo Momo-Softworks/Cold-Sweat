@@ -150,7 +150,6 @@ public class MixinItemTooltip
                 for (Component sibling : siblings)
                 {   newline = newline.append(sibling);
                 }
-                Minecraft.getInstance().player.displayClientMessage(Component.literal(newline.toString()), true);
                 return (E) newline;
             }
         }
