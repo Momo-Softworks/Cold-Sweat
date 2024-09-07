@@ -770,6 +770,20 @@ public class ConfigHelper
                                                       }));
     }
 
+    public static <T> Codec<Either<TagKey<T>, T>> tagOrVanillaRegistryCodec(ResourceKey<Registry<T>> vanillaRegistry, Codec<Holder<T>> codec)
+    {
+        return Codec.either(Codec.STRING.comapFlatMap(str ->
+                                                      {
+                                                          if (!str.startsWith("#"))
+                                                          {   return DataResult.error(() -> "Not a tag key: " + str);
+                                                          }
+                                                          ResourceLocation itemLocation = ResourceLocation.parse(str.replace("#", ""));
+                                                          return DataResult.success(TagKey.create(vanillaRegistry, itemLocation));
+                                                      },
+                                                      key -> "#" + key.location()),
+                            codec.xmap(Holder::value, Holder::direct));
+    }
+
     public static <T> Codec<Either<TagKey<T>, ResourceKey<T>>> tagOrResourceKeyCodec(ResourceKey<Registry<T>> vanillaRegistry)
     {
         return Codec.either(Codec.STRING.comapFlatMap(str ->
