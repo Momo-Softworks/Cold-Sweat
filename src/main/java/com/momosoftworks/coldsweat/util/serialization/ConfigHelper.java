@@ -664,7 +664,7 @@ public class ConfigHelper
         });
     }
 
-    public static <T extends IForgeRegistryEntry<T>> Codec<Either<ITag<T>, T>> tagOrRegistryObjectCodec(RegistryKey<Registry<T>> vanillaRegistry, Registry<T> forgeRegistry)
+    public static <T extends IForgeRegistryEntry<T>> Codec<Either<ITag<T>, T>> tagOrBuiltinCodec(RegistryKey<Registry<T>> vanillaRegistry, Registry<T> forgeRegistry)
     {
         ITagCollection<T> vanillaTags = ConfigHelper.getTagsForRegistry(vanillaRegistry);
         return Codec.either(Codec.STRING.comapFlatMap(str ->

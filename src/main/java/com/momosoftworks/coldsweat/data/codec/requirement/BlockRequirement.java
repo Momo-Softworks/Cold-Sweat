@@ -42,7 +42,7 @@ public class BlockRequirement
         this.nbt = nbt;
     }
     public static final Codec<BlockRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ConfigHelper.tagOrRegistryObjectCodec(Registry.BLOCK_REGISTRY, Registry.BLOCK).listOf().optionalFieldOf("blocks").forGetter(predicate -> predicate.blocks),
+            ConfigHelper.tagOrBuiltinCodec(Registry.BLOCK_REGISTRY, Registry.BLOCK).listOf().optionalFieldOf("blocks").forGetter(predicate -> predicate.blocks),
             ITag.codec(BlockTags::getAllTags).optionalFieldOf("tag").forGetter(predicate -> predicate.tag),
             StateRequirement.CODEC.optionalFieldOf("state").forGetter(predicate -> predicate.state),
             NbtRequirement.CODEC.optionalFieldOf("nbt").forGetter(predicate -> predicate.nbt)
