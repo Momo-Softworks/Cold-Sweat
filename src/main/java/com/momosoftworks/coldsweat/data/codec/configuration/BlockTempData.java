@@ -18,7 +18,7 @@ public record BlockTempData(List<Either<TagKey<Block>, Block>> blocks, double te
                             BlockPredicate condition, Optional<CompoundTag> nbt, Optional<List<String>> requiredMods)
 {
     public static final Codec<BlockTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ConfigHelper.tagOrRegistryObjectCodec(Registry.BLOCK_REGISTRY, ForgeRegistries.BLOCKS).listOf().fieldOf("blocks").forGetter(BlockTempData::blocks),
+            ConfigHelper.tagOrForgeRegistryCodec(Registry.BLOCK_REGISTRY, ForgeRegistries.BLOCKS).listOf().fieldOf("blocks").forGetter(BlockTempData::blocks),
             Codec.DOUBLE.fieldOf("temperature").forGetter(BlockTempData::temperature),
             Codec.DOUBLE.optionalFieldOf("max_effect", Double.MAX_VALUE).forGetter(BlockTempData::maxEffect),
             Codec.DOUBLE.optionalFieldOf("range", Double.MAX_VALUE).forGetter(BlockTempData::range),

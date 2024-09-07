@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.core.Registry;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -15,7 +16,7 @@ public record DimensionTempData(List<Either<TagKey<DimensionType>, DimensionType
                                 Temperature.Units units, boolean isOffset, Optional<List<String>> requiredMods)
 {
     public static final Codec<DimensionTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.either(TagKey.codec(Registry.DIMENSION_TYPE_REGISTRY), DimensionType.DIRECT_CODEC).listOf().fieldOf("dimensions").forGetter(DimensionTempData::dimensions),
+            ConfigHelper.tagOrVanillaRegistryCodec(Registry.DIMENSION_TYPE_REGISTRY, DimensionType.CODEC).listOf().fieldOf("dimensions").forGetter(DimensionTempData::dimensions),
             Codec.DOUBLE.fieldOf("temperature").forGetter(DimensionTempData::temperature),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(DimensionTempData::units),
             Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(DimensionTempData::isOffset),
