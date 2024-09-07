@@ -13,7 +13,6 @@ import java.util.function.Consumer;
 
 public class ConfigUpdater
 {
-
     public static void updateConfigs()
     {
         String version = ModList.get().getModFileById(ColdSweat.MOD_ID).versionString();
@@ -167,8 +166,9 @@ public class ConfigUpdater
         }
 
         // Update config version
-        MainSettingsConfig.getInstance().setVersion(ModList.get().getModFileById(ColdSweat.MOD_ID).versionString());
+        MainSettingsConfig.getInstance().setVersion(version);
 
+        MainSettingsConfig.getInstance().save();
         itemSettings.save();
         worldSettings.save();
     }
@@ -277,9 +277,15 @@ public class ConfigUpdater
             List<Object> element = new ArrayList<>(setting.get(i));
             if (!element.isEmpty() && element.get(0).equals(key))
             {
-                modifier.accept(element);
-                setting.set(i, element);
-                config.set(setting);
+                try
+                {
+                    modifier.accept(element);
+                    setting.set(i, element);
+                    config.set(setting);
+                }
+                catch (Exception e)
+                {   ColdSweat.LOGGER.error("Failed to update config setting {} for key '{}'", config.getPath(), key, e);
+                }
                 break;
             }
         }
