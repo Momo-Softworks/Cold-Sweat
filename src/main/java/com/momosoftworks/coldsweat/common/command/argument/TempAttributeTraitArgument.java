@@ -24,7 +24,6 @@ import java.util.stream.Stream;
 
 public class TempAttributeTraitArgument implements ArgumentType<Temperature.Trait>
 {
-    //TODO - Fix this class when the better attributes system is implemented
     private static final Dynamic2CommandExceptionType INVALID_ENUM = new Dynamic2CommandExceptionType(
             (found, constants) -> new TranslationTextComponent("commands.forge.arguments.enum.invalid", constants, found));
 
