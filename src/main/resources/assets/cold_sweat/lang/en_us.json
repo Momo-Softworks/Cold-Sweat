@@ -185,6 +185,8 @@
   "cold_sweat.config.units.desc":                   "Displays temperature in Celsius or Fahrenheit.",
   "cold_sweat.config.world_temp_location.desc":     "The position of the world temperature gauge on the screen.",
 
+  "cold_sweat.config.require_op":                   "Requires operator permissions.",
+
 
   "cold_sweat.message.sleep.body.hot":     "You may not rest now; You are overheating.",
   "cold_sweat.message.sleep.body.cold":    "You may not rest now; You are freezing.",
