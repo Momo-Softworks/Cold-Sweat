@@ -30,12 +30,13 @@ public record DepthTempData(List<TempRegion> temperatures, List<Either<TagKey<Di
     public boolean withinBounds(Level level, BlockPos pos)
     {
         Holder<DimensionType> dim = level.dimensionTypeRegistration();
-        for (Either<TagKey<DimensionType>, DimensionType> dimension : dimensions)
+        int i;
+        for (i = 0; i < this.dimensions.size(); i++)
         {
-            if (!dimension.map(dim::is, type -> dim.value().equals(type)))
-            {   return false;
-            }
+            Either<TagKey<DimensionType>, DimensionType> dimension = this.dimensions.get(i);
+            if (dimension.map(dim::is, type -> type.equals(dim.value()))) break;
         }
+        if (i == this.dimensions.size() - 1) return false;
         for (TempRegion region : temperatures)
         {
             if (region.withinBounds(level, pos))
