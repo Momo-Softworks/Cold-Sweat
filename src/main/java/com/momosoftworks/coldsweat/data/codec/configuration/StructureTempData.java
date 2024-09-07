@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -18,7 +19,7 @@ public record StructureTempData(List<Either<TagKey<ConfiguredStructureFeature<?,
                                 Temperature.Units units, boolean isOffset, Optional<List<String>> requiredMods) implements IForgeRegistryEntry<StructureTempData>
 {
     public static final Codec<StructureTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.either(TagKey.codec(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY), ConfiguredStructureFeature.DIRECT_CODEC).listOf().fieldOf("structures").forGetter(StructureTempData::structures),
+            ConfigHelper.tagOrVanillaRegistryCodec(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, ConfiguredStructureFeature.CODEC).listOf().fieldOf("structures").forGetter(StructureTempData::structures),
             Codec.DOUBLE.fieldOf("temperature").forGetter(StructureTempData::temperature),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(StructureTempData::units),
             Codec.BOOL.optionalFieldOf("offset", false).forGetter(StructureTempData::isOffset),

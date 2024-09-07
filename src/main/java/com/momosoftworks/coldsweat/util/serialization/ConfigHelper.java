@@ -649,7 +649,7 @@ public class ConfigHelper
         });
     }
 
-    public static <T extends IForgeRegistryEntry<T>> Codec<Either<TagKey<T>, T>> tagOrRegistryObjectCodec(ResourceKey<Registry<T>> vanillaRegistry, IForgeRegistry<T> forgeRegistry)
+    public static <T extends IForgeRegistryEntry<T>> Codec<Either<TagKey<T>, T>> tagOrForgeRegistryCodec(ResourceKey<Registry<T>> vanillaRegistry, IForgeRegistry<T> forgeRegistry)
     {
         return Codec.either(Codec.STRING.comapFlatMap(str ->
                                                       {
@@ -661,6 +661,20 @@ public class ConfigHelper
                                                       },
                                                       key -> "#" + key.location()),
                             forgeRegistry.getCodec());
+    }
+
+    public static <T> Codec<Either<TagKey<T>, T>> tagOrVanillaRegistryCodec(ResourceKey<Registry<T>> vanillaRegistry, Codec<Holder<T>> codec)
+    {
+        return Codec.either(Codec.STRING.comapFlatMap(str ->
+                                                      {
+                                                          if (!str.startsWith("#"))
+                                                          {   return DataResult.error("Not a tag key: " + str);
+                                                          }
+                                                          ResourceLocation itemLocation = new ResourceLocation(str.replace("#", ""));
+                                                          return DataResult.success(TagKey.create(vanillaRegistry, itemLocation));
+                                                      },
+                                                      key -> "#" + key.location()),
+                            codec.xmap(Holder::value, Holder::direct));
     }
 
     public static <T> Codec<Either<TagKey<T>, ResourceKey<T>>> tagOrResourceKeyCodec(ResourceKey<Registry<T>> vanillaRegistry)

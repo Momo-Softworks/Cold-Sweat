@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public record EffectsRequirement(Map<MobEffect, Instance> effects)
 {
     public static final Codec<EffectsRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.unboundedMap(ConfigHelper.tagOrRegistryObjectCodec(Registry.MOB_EFFECT_REGISTRY, ForgeRegistries.MOB_EFFECTS), Instance.CODEC)
+            Codec.unboundedMap(ConfigHelper.tagOrForgeRegistryCodec(Registry.MOB_EFFECT_REGISTRY, ForgeRegistries.MOB_EFFECTS), Instance.CODEC)
             .xmap(map ->
                   {
                         Map<MobEffect, Instance> effects = new HashMap<>();

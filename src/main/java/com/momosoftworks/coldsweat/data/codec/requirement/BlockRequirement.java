@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 public record BlockRequirement(Optional<List<Either<TagKey<Block>, Block>>> blocks, Optional<TagKey<Block>> tag, Optional<StateRequirement> state, Optional<NbtRequirement> nbt)
 {
     public static final Codec<BlockRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ConfigHelper.tagOrRegistryObjectCodec(Registry.BLOCK_REGISTRY, ForgeRegistries.BLOCKS).listOf().optionalFieldOf("blocks").forGetter(predicate -> predicate.blocks),
+            ConfigHelper.tagOrForgeRegistryCodec(Registry.BLOCK_REGISTRY, ForgeRegistries.BLOCKS).listOf().optionalFieldOf("blocks").forGetter(predicate -> predicate.blocks),
             TagKey.codec(Registry.BLOCK_REGISTRY).optionalFieldOf("tag").forGetter(predicate -> predicate.tag),
             StateRequirement.CODEC.optionalFieldOf("state").forGetter(predicate -> predicate.state),
             NbtRequirement.CODEC.optionalFieldOf("nbt").forGetter(predicate -> predicate.nbt)
