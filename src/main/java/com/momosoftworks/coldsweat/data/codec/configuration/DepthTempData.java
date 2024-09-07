@@ -11,6 +11,7 @@ import com.momosoftworks.coldsweat.util.serialization.StringRepresentable;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
@@ -20,17 +21,28 @@ import java.util.List;
 public class DepthTempData implements IForgeRegistryEntry<DepthTempData>
 {
     public static final Codec<DepthTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            TempRegion.CODEC.listOf().fieldOf("regions").forGetter(data -> data.temperatures)
+            TempRegion.CODEC.listOf().fieldOf("regions").forGetter(data -> data.temperatures),
+            DimensionType.DIRECT_CODEC.listOf().fieldOf("dimensions").forGetter(data -> data.dimensions)
     ).apply(instance, DepthTempData::new));
 
     public final List<TempRegion> temperatures;
+    public final List<DimensionType> dimensions;
 
-    public DepthTempData(List<TempRegion> temperatures)
+    public DepthTempData(List<TempRegion> temperatures, List<DimensionType> dimensions)
     {   this.temperatures = temperatures;
+        this.dimensions = dimensions;
     }
 
     public boolean withinBounds(World level, BlockPos pos)
     {
+        DimensionType dim = level.dimensionType();
+        int i;
+        for (i = 0; i < this.dimensions.size(); i++)
+        {
+            DimensionType dimension = this.dimensions.get(i);
+            if (dimension.equals(dim)) break;
+        }
+        if (i == this.dimensions.size() - 1) return false;
         for (TempRegion region : temperatures)
         {
             if (region.withinBounds(level, pos))
