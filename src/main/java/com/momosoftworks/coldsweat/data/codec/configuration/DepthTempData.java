@@ -7,22 +7,35 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.dimension.DimensionType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public record DepthTempData(List<TempRegion> temperatures)
+public record DepthTempData(List<TempRegion> temperatures, List<Either<TagKey<DimensionType>, DimensionType>> dimensions)
 {
     public static final Codec<DepthTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            TempRegion.CODEC.listOf().fieldOf("regions").forGetter(DepthTempData::temperatures)
+            TempRegion.CODEC.listOf().fieldOf("regions").forGetter(DepthTempData::temperatures),
+            ConfigHelper.tagOrVanillaRegistryCodec(Registries.DIMENSION_TYPE, DimensionType.CODEC).listOf().fieldOf("dimensions").forGetter(DepthTempData::dimensions)
     ).apply(instance, DepthTempData::new));
 
     public boolean withinBounds(Level level, BlockPos pos)
     {
+        Holder<DimensionType> dim = level.dimensionTypeRegistration();
+        for (Either<TagKey<DimensionType>, DimensionType> dimension : dimensions)
+        {
+            if (!dimension.map(dim::is, type -> dim.value().equals(type)))
+            {   return false;
+            }
+        }
         for (TempRegion region : temperatures)
         {
             if (region.withinBounds(level, pos))
