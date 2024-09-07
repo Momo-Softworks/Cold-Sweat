@@ -1,4 +1,8 @@
 {
+  "dimensions":
+  [
+    "#minecraft:overworld_like"
+  ],
   "regions": [
     {
       "type": "constant",
