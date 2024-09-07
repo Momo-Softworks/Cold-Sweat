@@ -15,7 +15,6 @@ import java.util.function.Consumer;
 
 public class ConfigUpdater
 {
-
     public static void updateConfigs()
     {
         String version = getVersionString(ModList.get().getModContainerById(ColdSweat.MOD_ID).get().getModInfo().getVersion());
@@ -168,6 +167,10 @@ public class ConfigUpdater
             addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, Arrays.asList("#minecraft:campfires", 0.476, 7, 0.9, "lit=true", " ", 8));
         }
 
+        // Update config version
+        MainSettingsConfig.getInstance().setVersion(version);
+
+        MainSettingsConfig.getInstance().save();
         itemSettings.save();
         worldSettings.save();
     }
@@ -288,9 +291,15 @@ public class ConfigUpdater
             List<Object> element = new ArrayList<>(setting.get(i));
             if (!element.isEmpty() && element.get(0).equals(key))
             {
-                modifier.accept(element);
-                setting.set(i, element);
-                config.set(setting);
+                try
+                {
+                    modifier.accept(element);
+                    setting.set(i, element);
+                    config.set(setting);
+                }
+                catch (Exception e)
+                {   ColdSweat.LOGGER.error("Failed to update config setting {} for key '{}'", config.getPath(), key, e);
+                }
                 break;
             }
         }
