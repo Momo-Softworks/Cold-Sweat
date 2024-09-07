@@ -21,8 +21,7 @@ public class SereneSeasonsTempModifier extends TempModifier
     @Override
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
-        if (entity.level().dimensionType().natural()
-        || ServerConfig.whitelistedDimensions.get().contains(entity.level().dimension().location().toString()))
+        if (ServerConfig.whitelistedDimensions.get().contains(entity.level().dimension().location().toString()))
         {
             ISeasonState season = SeasonHelper.getSeasonState(entity.level());
             double startValue;
