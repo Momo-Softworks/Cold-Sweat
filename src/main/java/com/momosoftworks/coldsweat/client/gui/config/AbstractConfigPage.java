@@ -537,7 +537,7 @@ public abstract class AbstractConfigPage extends Screen
             {
                 List<Component> tooltipList = enabled
                                               ? this.tooltips.get(id)
-                                              : List.of(Component.translatable("cold_sweat.config.require_op").withStyle(ChatFormatting.RED));
+                                              : List.of(new TranslatableComponent("cold_sweat.config.require_op").withStyle(ChatFormatting.RED));
                 if (tooltipList != null && !tooltipList.isEmpty())
                 {   this.renderComponentTooltip(poseStack, tooltipList, mouseX, mouseY);
                 }
