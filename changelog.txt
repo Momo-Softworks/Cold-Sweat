@@ -2407,3 +2407,50 @@ Fixes:
 - Fixed chameleons accepting infinite breeding items in some cases
 - Fixed baby chameleons attempting to go into breeding mode when fed breeding items
 - Fixed the water dripping effect persisting on-screen after the player has completely dried off
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.3.4
+- Create fluid pipes now connect to the top of the hearth
+- Entities can now be configured to affect ambient temperature
+      - This config is in entity-settings.toml or as JSON under entity/entity_temp/
+- Added a tooltip explaining that game-altering settings in the config menu are disabled for non-OP players
+- Added a tooltip to insulated armor items that shows which attributes come from insulation
+
+Fixes:
+* (1.16) Fixed crash when Caves and Cliffs is not installed
+* (1.16 - 1.18) Fixed the player getting wet when it is snowing and serene seasons is installed
+* Fixed the soulspring lamp not consuming fuel
+- Fixed Thirst Was Taken support not activating when the mod is installed
+- Fixed Serene Seasons's seasonal temperatures applying to non-whitelisted dimensions in some cases
+- Fixed block, dimension, structure, and biome tags not working properly in JSON configs
+- Fixed temperature-affecting blocks behaving strangely when their max temperature is reached
+- Fixed the world temperature gauge representing temperate temperatures inaccurately when the player has extreme min or max temperature traits
+- Fixed water not accurately using the current season to determine freezing behavior
+- Fixed soul fire and soul campfire not respecting the "Cold Soul Fire" config setting
+- Fixed hearth-like blocks giving insulating effects to players 1 block outside its area-of-effect
+
+Technical Changes:
+* Items, blocks, entities, etc. can now have multiple config setting applied to them
+      - This, for example, allows multiple settings with different conditions and effects to be applied
+      - If multiple valid settings are found, they will either stack or override each other depending on the object
+      - This is most useful in JSON configs
+- Depth temperature JSON configs now support a "dimensions" field, which limits the effect to the specified dimensions/tags
+* Added many new dynamic dimension tags (1.18+):
+      * These tags are dynamically filled, meaning they should work for all modded dimensions regardless of support
+      - #forge:bed_works: If beds are usable in the dimension
+      - #forge:has_ceiling: If the dimension has a ceiling (i.e. the Nether)
+      - #forge:has_raids: If pillager raids can occur in the dimension
+      - #forge:has_sky: Inverse of #forge:has_ceiling. If dimension has an open sky
+      - #forge:has_skylight: If the dimension has ambient light
+      - #forge:natural: If the dimension is considered "natural"
+      - #forge:overworld_like: If the dimension is similar to the Overworld (has_sky, has_skylight, and natural)
+      - #forge:piglin_safe: If piglins will not zombify in the dimension
+      - #forge:respawn_anchor_works: If respawn anchors are usable in the dimension
+      - #forge:ultrawarm: If the dimension is extremely hot (i.e. the Nether)
+      - #forge:unnatural: Inverse of #forge:natural
+- Optimized the hearth's spreading algorithm
+- Optimized the performance of non-player temperature-affected entities
+- Any block tagged as #minecraft:ice will now cool the nearby area like Vanilla ice blocks
+- Any block tagged as #minecraft:campfires will now heat the nearby area like Vanilla campfires (except for the soul campfire)
+- TempModifiers are no longer synced to the client if a modifier is replaced with an identical one
