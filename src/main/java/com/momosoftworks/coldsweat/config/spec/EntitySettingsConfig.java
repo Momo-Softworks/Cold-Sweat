@@ -84,7 +84,7 @@ public class EntitySettingsConfig
         CHAMELEON_SPAWN_BIOMES = BUILDER
                 .comment("Defines the biomes that Chameleons can spawn in",
                          "Format: [[\"biome_id\", weight], [\"biome_id\", weight], etc...]")
-                .defineList("Chameleon Spawn Biomes", ListBuilder.begin(
+                .defineListAllowEmpty(List.of("Chameleon Spawn Biomes"), () -> ListBuilder.begin(
                                 List.of("minecraft:bamboo_jungle", 80),
                                 List.of("minecraft:jungle", 80),
                                 List.of("minecraft:sparse_jungle", 35),
@@ -132,7 +132,7 @@ public class EntitySettingsConfig
                 .comment("Defines additional biomes that goats can spawn in",
                          "Format: [[\"biome_id\", weight], [\"biome_id\", weight], etc...]",
                          "Not affected by the \"Increase Goat Spawns\" option")
-                .defineList("Goat Spawn Biomes", ListBuilder.begin(
+                .defineListAllowEmpty(List.of("Goat Spawn Biomes"), () -> ListBuilder.begin(
                                 List.of("minecraft:frozen_peaks", 8),
                                 List.of("minecraft:jagged_peaks", 8),
                                 List.of("minecraft:snowy_slopes", 8),
