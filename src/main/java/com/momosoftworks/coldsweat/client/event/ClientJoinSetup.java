@@ -23,7 +23,7 @@ public class ClientJoinSetup
         ColdSweatPacketHandler.INSTANCE.sendToServer(new ClientConfigAskMessage());
         ColdSweatPacketHandler.INSTANCE.sendToServer(new SyncPreferredUnitsMessage(ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F));
         // Rebuild TempModifier registries
-        TempModifierInit.buildRegistries();
+        TempModifierInit.buildModifierRegistries();
         MinecraftForge.EVENT_BUS.post(new EdiblesRegisterEvent());
     }
 }
