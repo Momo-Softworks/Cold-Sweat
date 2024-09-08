@@ -33,6 +33,13 @@ public class ConfigUpdater
         {
             removeConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, "minecraft:soul_fire");
             removeConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, "minecraft:soul_campfire");
+            // Add block temperatures converted from Java
+            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, List.of("cold_sweat:boiler", 0.27, 7, 0.88, "lit=true", "{}", 4));
+            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, List.of("cold_sweat:icebox", -0.27, 7, 0.88, "frosted=true", "{}", 0));
+            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, List.of("minecraft:ice", -0.15, 4, 0.6, "", "{}", -0.7));
+            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, List.of("minecraft:packed_ice", -0.25, 4, 1.0, "", "{}", -0.7));
+            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, List.of("minecraft:blue_ice", -0.35, 4, 1.4, "", "{}", -0.7));
+            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, List.of("#minecraft:ice", -0.15, 4, 0.6, "", "{}", -0.7));
         }
         /*
          2.3.2
