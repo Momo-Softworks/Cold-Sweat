@@ -113,6 +113,7 @@ public class ConfigSettings
     public static final DynamicHolder<Double> HEARTH_STRENGTH;
     public static final DynamicHolder<Boolean> SMART_HEARTH;
     public static final DynamicHolder<List<Block>> SLEEP_CHECK_IGNORE_BLOCKS;
+    public static final DynamicHolder<Boolean> USE_CUSTOM_FREEZE_BEHAVIOR;
 
     // Item settings
     public static final DynamicHolder<Multimap<Item, Insulator>> INSULATION_ITEMS;
@@ -491,6 +492,8 @@ public class ConfigSettings
         CHECK_SLEEP_CONDITIONS = addSetting("check_sleep_conditions", () -> WorldSettingsConfig.getInstance().isSleepChecked());
 
         SLEEP_CHECK_IGNORE_BLOCKS = addSetting("sleep_check_override_blocks", () -> ConfigHelper.getBlocks(WorldSettingsConfig.getInstance().getSleepOverrideBlocks().toArray(new String[0])));
+
+        USE_CUSTOM_FREEZE_BEHAVIOR = addSetting("custom_freeze_check", WorldSettingsConfig.USE_CUSTOM_FREEZE_BEHAVIOR::get);
 
         FOOD_TEMPERATURES = addSyncedSetting("food_temperatures", () -> ConfigHelper.readItemMultimap(ItemSettingsConfig.getInstance().getFoodTemperatures(), (item, args) ->
         {

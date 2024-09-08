@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.mixin.compat;
 
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -25,6 +26,8 @@ public class MixinSereneIceMelt
                                              //locals
                                              ServerWorld level, ChunkPos chunkpos, int i, int j, int meltRand, BlockPos topAirPos)
     {
+        if (!ConfigSettings.USE_CUSTOM_FREEZE_BEHAVIOR.get()) return;
+
         BlockPos groundPos = topAirPos.below();
         if (WorldHelper.getWorldTemperatureAt(level, groundPos) < 0.15F)
         {
