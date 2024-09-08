@@ -8,10 +8,10 @@ import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,13 +47,7 @@ public record ItemData(ItemRequirement data, Double value, Optional<EntityRequir
         Optional<EntityRequirement> entityRequirement = Optional.ofNullable(nbt.contains("entity_requirement")
                                                                             ? EntityRequirement.deserialize(nbt.getCompound("entity_requirement"))
                                                                             : null);
-        Optional<List<String>> requiredMods = Optional.of(nbt.getList("required_mods", 8)).map(mods ->
-        {   List<String> mods1 = new ArrayList<>();
-            for (int i = 0; i < mods.size(); i++)
-            {   mods1.add(mods.getString(i));
-            }
-            return mods1;
-        });
+        Optional<List<String>> requiredMods = Optional.of(nbt.getList("required_mods", 8).stream().map(Tag::getAsString).toList());
         return new ItemData(items, value, entityRequirement, requiredMods);
     }
 
