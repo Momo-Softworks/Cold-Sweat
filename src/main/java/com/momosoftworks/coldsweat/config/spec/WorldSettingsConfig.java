@@ -60,7 +60,7 @@ public class WorldSettingsConfig
 
         DIMENSION_TEMP_OFFSETS = BUILDER
                 .comment("Applies an offset to the world's temperature across an entire dimension")
-            .defineList("Dimension Temperature Offsets", List.of(
+            .defineListAllowEmpty(List.of("Dimension Temperature Offsets"), () -> List.of(
                     List.of("minecraft:the_nether", 0.7),
                     List.of("minecraft:the_end", -0.1)
             ), it -> it instanceof List<?> list
@@ -71,7 +71,7 @@ public class WorldSettingsConfig
         DIMENSION_TEMP_OVERRIDES = BUILDER
             .comment("Overrides existing dimension temperatures & offsets",
                      "Also overrides temperatures of all biomes in the dimension")
-            .defineList("Dimension Temperatures", List.of(
+            .defineListAllowEmpty(List.of("Dimension Temperatures"), () -> List.of(
                     // No default values
             ), it -> it instanceof List<?> list
                     && list.get(0) instanceof String
@@ -91,23 +91,18 @@ public class WorldSettingsConfig
 
         BIOME_TEMP_OFFSETS = BUILDER
             .comment("Applies an offset to the temperature of a biome")
-            .defineList("Biome Temperature Offsets", List.of(),
-                it ->
-                {
-                    if (it instanceof List<?> list)
-                    {
-                        if (list.size() == 2)
-                        {   ColdSweat.LOGGER.warn("Falling back to legacy code for config setting {} in \"Biome Temperature Offsets\". Please update to the new standard!", list.get(0));
-                        }
-                        return list.get(0) instanceof String && list.get(1) instanceof Number && (list.size() < 3 || list.get(2) instanceof Number) && (list.size() < 4 || list.get(3) instanceof String);
-                    }
-                    return false;
-                });
+            .defineListAllowEmpty(List.of("Biome Temperature Offsets"), () -> List.of(),
+                it -> it instanceof List<?> list
+                      && list.get(0) instanceof String
+                      && list.get(1) instanceof Number
+                      && (list.size() < 3 || list.get(2) instanceof Number)
+                      && (list.size() < 4 || list.get(3) instanceof String)
+                );
 
 
         BIOME_TEMP_OVERRIDES = BUILDER
             .comment("Defines the temperature of a biome, overriding existing biome temperatures & offsets.")
-            .defineList("Biome Temperatures", ListBuilder.begin(
+            .defineListAllowEmpty(List.of("Biome Temperatures"), () -> ListBuilder.begin(
                             List.of("minecraft:soul_sand_valley", 53, 53, "F"),
                             List.of("minecraft:old_growth_birch_forest", 58, 72, "F"),
                             List.of("minecraft:river", 60, 70, "F"),
@@ -427,17 +422,12 @@ public class WorldSettingsConfig
                             () -> List.of("wythers:wooded_desert", 22, 25, "C"),
                             () -> List.of("wythers:wooded_savanna", 22, 26, "C")
                     ).build(),
-                it ->
-                {
-                    if (it instanceof List<?> list)
-                    {
-                        if (list.size() == 2)
-                        {   ColdSweat.LOGGER.warn("Falling back to legacy code for config setting {} in \"Biome Temperatures\". Please update to the new standard!", list.get(0));
-                        }
-                        return list.get(0) instanceof String && list.get(1) instanceof Number && (list.size() < 3 || list.get(2) instanceof Number) && (list.size() < 4 || list.get(3) instanceof String);
-                    }
-                    return false;
-                });
+                it -> it instanceof List<?> list
+                      && list.get(0) instanceof String
+                      && list.get(1) instanceof Number
+                      && list.get(2) instanceof Number
+                      && (list.size() < 4 || list.get(3) instanceof String)
+                );
 
         BUILDER.pop();
 
@@ -501,7 +491,7 @@ public class WorldSettingsConfig
                 .comment("Overrides the world temperature when the player is within this structure",
                          "Format: [[\"structure_1\", temperature1, *units], [\"structure_2\", temperature2, *units]... etc]",
                          "(* = optional)")
-                .defineList("Structure Temperatures", List.of(
+                .defineListAllowEmpty(List.of("Structure Temperatures"), () -> List.of(
                         List.of("minecraft:igloo", 65, "F")
                 ), it -> it instanceof List<?> list
                         && list.get(0) instanceof String
@@ -512,7 +502,7 @@ public class WorldSettingsConfig
                 .comment("Offsets the world temperature when the player is within this structure",
                          "Format: [[\"structure_1\", offset1, *units], [\"structure_2\", offset2, *units]... etc]",
                          "(* = optional)")
-                .defineList("Structure Temperature Offsets", List.of(
+                .defineListAllowEmpty(List.of("Structure Temperature Offsets"), () -> List.of(
                         // empty
                 ), it -> it instanceof List<?> list
                         && list.get(0) instanceof String
@@ -522,7 +512,7 @@ public class WorldSettingsConfig
         SLEEPING_OVERRIDE_BLOCKS = BUILDER
                 .comment("List of blocks that will allow the player to sleep on them, regardless of the \"Prevent Sleep When in Danger\" setting",
                          "Use this list if the player is not getting the temperature effect from sleeping on particular blocks")
-                .defineList("Sleep Check Override Blocks", ListBuilder.<String>begin()
+                .defineListAllowEmpty(List.of("Sleep Check Override Blocks"), () -> ListBuilder.<String>begin()
                         .addIf(CompatManager.modLoaded("comforts"),
                                 () -> "#comforts:sleeping_bags")
                         .build(),
@@ -565,7 +555,7 @@ public class WorldSettingsConfig
         HEARTH_SPREAD_BLACKLIST = BUILDER
                 .comment("List of additional blocks that the hearth cannot spread through",
                          "Use this list if the hearth is spreading through particular blocks that it shouldn't")
-                .defineList("Hearth Spread Blacklist", List.of(
+                .defineListAllowEmpty(List.of("Hearth Spread Blacklist"), () -> List.of(
                             ),
                             o -> o instanceof String);
 
