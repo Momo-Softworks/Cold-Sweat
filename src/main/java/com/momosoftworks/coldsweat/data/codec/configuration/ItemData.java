@@ -6,12 +6,13 @@ import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class ItemData implements NbtSerializable
 {
@@ -56,13 +57,7 @@ public class ItemData implements NbtSerializable
         Optional<EntityRequirement> entityRequirement = Optional.ofNullable(nbt.contains("entity_requirement")
                                                                             ? EntityRequirement.deserialize(nbt.getCompound("entity_requirement"))
                                                                             : null);
-        Optional<List<String>> requiredMods = Optional.of(nbt.getList("required_mods", 8)).map(mods ->
-        {   List<String> mods1 = new ArrayList<>();
-            for (int i = 0; i < mods.size(); i++)
-            {   mods1.add(mods.getString(i));
-            }
-            return mods1;
-        });
+        Optional<List<String>> requiredMods = Optional.of(nbt.getList("required_mods", 8).stream().map(INBT::getAsString).collect(Collectors.toList()));
         return new ItemData(items, value, entityRequirement, requiredMods);
     }
 
