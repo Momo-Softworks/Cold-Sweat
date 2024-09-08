@@ -220,6 +220,8 @@ public class TempEffectsClient
     static Uniform BLUR_RADIUS = null;
     static Field POST_PASSES = null;
     static boolean BLUR_APPLIED = false;
+    static PostChain OLD_EFFECT = null;
+    static final String BLOBS_EFFECT = "minecraft:shaders/post/blobs2.json";
 
     static
     {
@@ -235,6 +237,7 @@ public class TempEffectsClient
         if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_WEATHER)
         {
             Minecraft mc = Minecraft.getInstance();
+            PostChain effect = mc.gameRenderer.currentEffect();
             try
             {
                 float playerTemp = (float) Overlays.BODY_TEMP;
@@ -242,12 +245,15 @@ public class TempEffectsClient
                 && mc.player != null && !EntityTempManager.immuneToTempEffects(mc.player))
                 {
                     float blur = CSMath.blend(0f, 7f, playerTemp, 50, 100) / (HOT_IMMUNITY + 1);
-                    if (blur > 0 && (mc.gameRenderer.currentEffect() == null || !mc.gameRenderer.currentEffect().getName().equals("minecraft:shaders/post/blobs2.json")))
-                    {   BLUR_APPLIED = false;
+                    if (effect != OLD_EFFECT && (effect == null || !effect.getName().equals(BLOBS_EFFECT)))
+                    {   OLD_EFFECT = mc.gameRenderer.currentEffect();
+                        BLUR_APPLIED = false;
                     }
                     if (!BLUR_APPLIED)
-                    {   mc.gameRenderer.loadEffect(new ResourceLocation("shaders/post/blobs2.json"));
-                        BLUR_RADIUS = ((List<PostPass>) POST_PASSES.get(mc.gameRenderer.currentEffect())).get(0).getEffect().getUniform("Radius");
+                    {
+                        mc.gameRenderer.loadEffect(new ResourceLocation(BLOBS_EFFECT));
+                        effect = mc.gameRenderer.currentEffect();
+                        BLUR_RADIUS = ((List<PostPass>) POST_PASSES.get(effect)).get(0).getEffect().getUniform("Radius");
                         BLUR_APPLIED = true;
                     }
                     if (BLUR_RADIUS != null)
@@ -255,8 +261,12 @@ public class TempEffectsClient
                     }
                 }
                 else if (BLUR_APPLIED)
-                {   BLUR_RADIUS.set(0f);
+                {
+                    BLUR_RADIUS.set(0f);
                     BLUR_APPLIED = false;
+                    if (OLD_EFFECT != null)
+                    {   mc.gameRenderer.loadEffect(new ResourceLocation(OLD_EFFECT.getName()));
+                    }
                 }
             } catch (Exception ignored) {}
         }
