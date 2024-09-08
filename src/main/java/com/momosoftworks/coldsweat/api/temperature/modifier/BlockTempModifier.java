@@ -111,6 +111,7 @@ public class BlockTempModifier extends TempModifier
 
                             for (BlockTemp blockTemp : blockTemps)
                             {
+                                if (!blockTemp.isValid(level, blockpos, state)) continue;
                                 double tempToAdd = blockTemp.getTemperature(level, entity, state, blockpos, distance);
 
                                 // Store this block type's total effect on the player
@@ -121,6 +122,7 @@ public class BlockTempModifier extends TempModifier
                                 if (shouldTickAdvancements)
                                 {   triggers.add(new Triplet<>(blockpos, blockTemp, distance));
                                 }
+                                break;
                             }
                         }
                     }

@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -31,16 +32,15 @@ import java.util.function.Predicate;
 @Mod.EventBusSubscriber
 public class TempModifierInit
 {
-    @SubscribeEvent
-    public static void onServerStart(ServerAboutToStartEvent event)
-    {   buildRegistries();
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void fireRegisterModifiers(ServerAboutToStartEvent event)
+    {   buildModifierRegistries();
     }
 
     // Trigger registry events
-    public static void buildRegistries()
+    public static void buildModifierRegistries()
     {
         TempModifierRegistry.flush();
-        BlockTempRegistry.flush();
 
         try { MinecraftForge.EVENT_BUS.post(new TempModifierRegisterEvent()); }
         catch (Exception e)
@@ -48,7 +48,11 @@ public class TempModifierInit
             ColdSweat.LOGGER.error("Registering TempModifiers failed!");
             throw e;
         }
+    }
 
+    public static void buildBlockRegistries()
+    {
+        BlockTempRegistry.flush();
         try { MinecraftForge.EVENT_BUS.post(new BlockTempRegisterEvent()); }
         catch (Exception e)
         {
@@ -57,14 +61,15 @@ public class TempModifierInit
         }
     }
 
-    // Register BlockTemps
-    @SubscribeEvent
-    public static void registerBlockTemps(BlockTempRegisterEvent event)
+    public static void buildBlockConfigs()
     {
-        long startMS = System.currentTimeMillis();
         // Auto-generate BlockTemps from config
         for (List<?> effectBuilder : WorldSettingsConfig.getInstance().getBlockTemps())
         {
+            if (effectBuilder.size() < 3)
+            {   ColdSweat.LOGGER.error("Malformed configuration for block temperature: {}", effectBuilder);
+                break;
+            }
             try
             {
                 // Get IDs associated with this config entry
@@ -73,58 +78,56 @@ public class TempModifierInit
                 // Parse block IDs into blocks
                 Block[] effectBlocks = Arrays.stream(blockIDs).map(ConfigHelper::getBlocks).flatMap(List::stream).toArray(Block[]::new);
 
+                // Temp of block
+                final double blockTemp = ((Number) effectBuilder.get(1)).doubleValue();
+                // Range of effect
+                final double blockRange = ((Number) effectBuilder.get(2)).doubleValue();
+
+                // Get min/max effect
+                final double maxChange = effectBuilder.size() > 3 && effectBuilder.get(3) instanceof Number
+                                         ? ((Number) effectBuilder.get(3)).doubleValue()
+                                         : Double.MAX_VALUE;
+
                 // Get block predicate
-                Map<String, Predicate<BlockState>> blockPredicates = effectBuilder.size() >= 6 && effectBuilder.get(5) instanceof String
-                                                                     ? ConfigHelper.getBlockStatePredicates(effectBlocks[0], (String) effectBuilder.get(5))
+                Map<String, Predicate<BlockState>> blockPredicates = effectBuilder.size() > 4 && effectBuilder.get(4) instanceof String str && !str.isEmpty()
+                                                                     ? ConfigHelper.getBlockStatePredicates(effectBlocks[0], str)
                                                                      : new HashMap<>();
 
-                event.register(new BlockTempConfig(blockPredicates, effectBlocks)
+                Optional<CompoundTag> tag = effectBuilder.size() > 5 && effectBuilder.get(5) instanceof String str && !str.isEmpty()
+                                            ? Optional.of(NBTHelper.parseCompoundNbt(str))
+                                            : Optional.empty();
+
+                double tempLimit = effectBuilder.size() > 6
+                                   ? ((Number) effectBuilder.get(6)).doubleValue()
+                                   : Double.MAX_VALUE;
+
+                double maxEffect = blockTemp > 0 ?  maxChange :  Double.MAX_VALUE;
+                double minEffect = blockTemp < 0 ? -maxChange : -Double.MAX_VALUE;
+
+                double maxTemperature = blockTemp > 0 ? tempLimit : Double.MAX_VALUE;
+                double minTemperature = blockTemp < 0 ? tempLimit : -Double.MAX_VALUE;
+
+                BlockTempRegistry.register(new BlockTempConfig(blockPredicates, effectBlocks)
                 {
-                    // Temp of block
-                    final double blockTemp = ((Number) effectBuilder.get(1)).doubleValue();
-                    // Range of effect
-                    final double blockRange = ((Number) effectBuilder.get(2)).doubleValue();
-
-                    // Weakens over distance?
-                    final boolean weaken = effectBuilder.size() > 3 && effectBuilder.get(3) instanceof Boolean
-                                          ? (Boolean) effectBuilder.get(3)
-                                          : true;
-
-                    // Get min/max effect
-                    final double maxChange = effectBuilder.size() > 4 && effectBuilder.get(4) instanceof Number
-                                             ? ((Number) effectBuilder.get(4)).doubleValue()
-                                             : Double.MAX_VALUE;
-
-                    final Optional<CompoundTag> tag = effectBuilder.size() > 6 && effectBuilder.get(6) instanceof String
-                                                      ? Optional.of(NBTHelper.parseCompoundNbt((String) effectBuilder.get(5)))
-                                                      : Optional.empty();
-
-                    final double maxEffect = blockTemp > 0 ?  maxChange :  Double.MAX_VALUE;
-                    final double minEffect = blockTemp < 0 ? -maxChange : -Double.MAX_VALUE;
-
                     @Override
                     public double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
                     {
                         // Check the list of predicates first
-                        if (blockPredicates.isEmpty() || this.testPredicates(state))
+                        if (tag.isPresent())
                         {
-                            if (tag.isPresent())
+                            BlockEntity blockEntity = level.getBlockEntity(pos);
+                            if (blockEntity != null)
                             {
-                                BlockEntity blockEntity = level.getBlockEntity(pos);
-                                if (blockEntity != null)
+                                CompoundTag blockTag = blockEntity.saveWithFullMetadata();
+                                for (String key : tag.get().getAllKeys())
                                 {
-                                    CompoundTag blockTag = blockEntity.saveWithFullMetadata();
-                                    for (String key : tag.get().getAllKeys())
-                                    {
-                                        if (!tag.get().get(key).equals(blockTag.get(key)))
-                                        {   return 0;
-                                        }
+                                    if (!tag.get().get(key).equals(blockTag.get(key)))
+                                    {   return 0;
                                     }
                                 }
                             }
-                            return weaken ? CSMath.blend(blockTemp, 0, distance, 0.5, blockRange) : blockTemp;
                         }
-                        return  0;
+                        return CSMath.blend(blockTemp, 0, distance, 0.5, blockRange);
                     }
 
                     @Override
@@ -136,6 +139,16 @@ public class TempModifierInit
                     public double minEffect()
                     {   return minEffect;
                     }
+
+                    @Override
+                    public double minTemperature()
+                    {   return minTemperature;
+                    }
+
+                    @Override
+                    public double maxTemperature()
+                    {   return maxTemperature;
+                    }
                 });
             }
             catch (Exception e)
@@ -143,20 +156,24 @@ public class TempModifierInit
                 break;
             }
         }
+    }
+
+    // Register BlockTemps
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void registerBlockTemps(BlockTempRegisterEvent event)
+    {
+        long startMS = System.currentTimeMillis();
 
         event.register(new LavaBlockTemp());
         event.register(new FurnaceBlockTemp());
         event.register(new CampfireBlockTemp());
-        event.register(new IceboxBlockTemp());
-        event.register(new BoilerBlockTemp());
         event.register(new NetherPortalBlockTemp());
-        event.register(new IceBlockTemp());
         event.register(new SoulFireBlockTemp());
         ColdSweat.LOGGER.debug("Registered BlockTemps in {}ms", System.currentTimeMillis() - startMS);
     }
 
     // Register TempModifiers
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void registerTempModifiers(TempModifierRegisterEvent event)
     {
         long startMS = System.currentTimeMillis();
