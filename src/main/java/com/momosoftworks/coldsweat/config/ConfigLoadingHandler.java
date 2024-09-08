@@ -548,7 +548,19 @@ public class ConfigLoadingHandler
 
     private static void addDepthTempConfigs(Set<Holder<DepthTempData>> depthTemps)
     {
-        ConfigSettings.DEPTH_REGIONS.get().addAll(depthTemps.stream().map(Holder::get).toList());
+        for (Holder<DepthTempData> holder : depthTemps)
+        {
+            DepthTempData depthTemp = holder.value();
+            // Check if the required mods are loaded
+            if (depthTemp.requiredMods().isPresent())
+            {
+                List<String> requiredMods = depthTemp.requiredMods().get();
+                if (requiredMods.stream().anyMatch(mod -> !CompatManager.modLoaded(mod)))
+                {   return;
+                }
+            }
+            ConfigSettings.DEPTH_REGIONS.get().add(depthTemp);
+        }
     }
 
     private static void addMountConfigs(Set<Holder<MountData>> mounts)
