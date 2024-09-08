@@ -11,7 +11,7 @@ import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.Level;
@@ -26,7 +26,7 @@ public record DepthTempData(List<TempRegion> temperatures, List<Either<TagKey<Di
 {
     public static final Codec<DepthTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             TempRegion.CODEC.listOf().fieldOf("regions").forGetter(DepthTempData::temperatures),
-            ConfigHelper.tagOrVanillaRegistryCodec(Registry.DIMENSION_TYPE_REGISTRY, DimensionType.CODEC).listOf().fieldOf("dimensions").forGetter(DepthTempData::dimensions),
+            ConfigHelper.tagOrVanillaRegistryCodec(Registries.DIMENSION_TYPE, DimensionType.CODEC).listOf().fieldOf("dimensions").forGetter(DepthTempData::dimensions),
             Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(DepthTempData::requiredMods)
     ).apply(instance, DepthTempData::new));
 
