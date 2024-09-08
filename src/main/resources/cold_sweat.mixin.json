@@ -19,7 +19,6 @@
     "MixinXPBar$MixinItemLabel"
   ],
   "mixins": [
-    "MixinBeforeServerStart",
     "MixinBlockUpdate",
     "MixinCampfire",
     "MixinFreezingWater",

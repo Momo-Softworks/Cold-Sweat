@@ -21,7 +21,6 @@ import com.momosoftworks.coldsweat.data.codec.configuration.DepthTempData;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemComponentsRequirement;
 import com.momosoftworks.coldsweat.data.codec.configuration.EntityTempData;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
-import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.math.FastMultiMap;
 import com.momosoftworks.coldsweat.util.serialization.*;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
@@ -1006,9 +1005,7 @@ public class ConfigSettings
     public static void load(RegistryAccess registryAccess)
     {
         if (registryAccess != null)
-        {
-            CONFIG_SETTINGS.values().forEach(dynamicHolder -> dynamicHolder.load(registryAccess));
-            ConfigRegistryHandler.collectConfigRegistries(registryAccess);
+        {   CONFIG_SETTINGS.values().forEach(dynamicHolder -> dynamicHolder.load(registryAccess));
         }
         else
         {

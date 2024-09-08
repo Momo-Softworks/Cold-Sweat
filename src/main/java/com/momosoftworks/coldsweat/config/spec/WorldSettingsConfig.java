@@ -448,23 +448,39 @@ public class WorldSettingsConfig
         BLOCK_TEMPERATURES = BUILDER
                 .comment("Allows for adding simple BlockTemps without the use of Java mods",
                          "Format (All temperatures are in Minecraft units):",
-                         "[[\"block-ids\", <temperature>, <range>, <*true/false: falloff>, <*max effect>, <*predicates>], [etc...], [etc...]]",
+                         "[[\"block-ids\", <temperature>, <range>, <*max effect>, <*predicates>, <*nbt>, <*temperature-limit>], [etc...], [etc...]]",
                          "(* = optional) (1 \u00B0MC = 42 \u00B0F/ 23.33 \u00B0C)",
                          "",
                          "Arguments:",
-                         "block-ids: multiple IDs can be used by separating them with commas (i.e: \"minecraft:torch,minecraft:wall_torch\")",
-                         "temperature: the temperature of the block, in Minecraft units",
-                         "falloff: the block is less effective as distance increases",
-                         "max effect: the maximum temperature change this block can cause to a player (even with multiple blocks)",
-                         "predicates: the state that the block has to be in for the temperature to be applied (lit=true for a campfire, for example).",
-                         "Multiple predicates can be used by separating them with commas (i.e: \"lit=true,waterlogged=false\")")
-                .defineList("Block Temperatures", Arrays.asList
-                                    (
-                                            Arrays.asList("minecraft:fire",           0.476, 7, true, 0.8),
-                                            Arrays.asList("minecraft:magma_block",      0.25, 3, true, 1),
-                                            Arrays.asList("minecraft:lava_cauldron",    0.5, 7, true, 1.5)
-                                    ),
-                            it -> it instanceof List<?> list && list.size() >= 3 && list.get(0) instanceof String && list.get(1) instanceof Number && list.get(2) instanceof Number);
+                         "block-ids: Multiple IDs can be used by separating them with commas (i.e: \"minecraft:torch,minecraft:wall_torch\")",
+                         "temperature: The temperature of the block, in Minecraft units",
+                         "*falloff: The block is less effective as distance increases",
+                         "*max effect: The maximum temperature change this block can cause to a player (even with multiple blocks)",
+                         "*predicates: The state that the block has to be in for the temperature to be applied (i.e. lit=true).",
+                         "- (Multiple predicates can be used by separating them with commas [i.e. \"lit=true,waterlogged=false\"])",
+                         "*nbt: The NBT data that the block must have for the temperature to be applied.",
+                         "*temperature-limit: The maximum world temperature at which this block temp will be effective.",
+                         "- (Represents the minimum temp if the block temp is negative)")
+                .defineListAllowEmpty(List.of("Block Temperatures"), () -> List.of(
+                                            List.of("cold_sweat:boiler",         0.27, 7, 0.88, "lit=true", "{}", 4),
+                                            List.of("cold_sweat:icebox",        -0.27, 7, 0.88, "frosted=true", "{}", 0),
+                                            List.of("minecraft:fire",           0.476, 7, 0.8),
+                                            List.of("minecraft:magma_block",     0.25, 3, 1.0),
+                                            List.of("minecraft:lava_cauldron",    0.5, 7, 1.5),
+                                            List.of("minecraft:ice",            -0.15, 4, 0.6, "", "{}", -0.7),
+                                            List.of("minecraft:packed_ice",     -0.25, 4, 1.0, "", "{}", -0.7),
+                                            List.of("minecraft:blue_ice",       -0.35, 4, 1.4, "", "{}", -0.7),
+                                            List.of("#minecraft:ice",           -0.15, 4, 0.6, "", "{}", -0.7)
+                                      ),
+                            it -> it instanceof List<?> list
+                                    && list.size() >= 3
+                                    && list.get(0) instanceof String
+                                    && list.get(1) instanceof Number
+                                    && list.get(2) instanceof Number
+                                    && (list.size() < 4 || list.get(3) instanceof Number)
+                                    && (list.size() < 5 || list.get(4) instanceof String)
+                                    && (list.size() < 6 || list.get(5) instanceof String)
+                                    && (list.size() < 7 || list.get(6) instanceof Number));
 
         MAX_BLOCK_TEMP_RANGE = BUILDER
                 .comment("The maximum range of blocks' area of effect",

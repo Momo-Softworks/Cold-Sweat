@@ -22,6 +22,10 @@ public abstract class BlockTemp
      */
     public abstract double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance);
 
+    public boolean isValid(Level level, BlockPos pos, BlockState state)
+    {   return true;
+    }
+
     public BlockTemp(Block... blocks)
     {   validBlocks = new HashSet<>(Set.of(blocks));
     }

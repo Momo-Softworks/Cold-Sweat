@@ -23,7 +23,7 @@ public class ClientJoinSetup
         PacketDistributor.sendToServer(new ClientConfigAskMessage());
         PacketDistributor.sendToServer(new SyncPreferredUnitsMessage(ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F));
         // Rebuild TempModifier registries
-        TempModifierInit.buildRegistries();
+        TempModifierInit.buildModifierRegistries();
         NeoForge.EVENT_BUS.post(new EdiblesRegisterEvent());
     }
 }
