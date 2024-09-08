@@ -270,7 +270,9 @@ public class TempCommand extends BaseCommand
             source.sendSuccess(() ->
                                Component.literal(ForgeRegistries.ATTRIBUTES.getKey(attribute.getAttribute()).toString()).withStyle(ChatFormatting.GOLD)
                        .append(Component.literal(" → ").withStyle(ChatFormatting.WHITE))
-                       .append(Component.literal(attribute.getValue()+"").withStyle(ChatFormatting.AQUA)), false);
+                       .append(Component.literal(attribute.getValue()+"")
+                                        .withStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)
+                                        .withHoverEvent(getConvertedUnitHover(trait, attribute.getValue(), preferredUnits)))), false);
             lastValue = attribute.getBaseValue();
         }
         else for (TempModifier modifier : Temperature.getModifiers(living, trait))
