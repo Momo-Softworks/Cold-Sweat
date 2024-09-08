@@ -27,6 +27,8 @@ public class MixinFreezingWater
             at = @At(value = "HEAD"), cancellable = true)
     private void shouldFreezeBlock(LevelReader levelReader, BlockPos pos, boolean mustBeAtEdge, CallbackInfoReturnable<Boolean> cir)
     {
+        if (!ConfigSettings.USE_CUSTOM_FREEZE_BEHAVIOR.get()) return;
+
         LEVEL = levelReader;
         IS_CHECKING_FREEZING = true;
 
@@ -58,6 +60,8 @@ public class MixinFreezingWater
     @Inject(method = "getTemperature", at = @At("HEAD"), cancellable = true)
     private void getTemperature(BlockPos pos, CallbackInfoReturnable<Float> cir)
     {
+        if (!ConfigSettings.USE_CUSTOM_FREEZE_BEHAVIOR.get()) return;
+
         if (IS_CHECKING_FREEZING && LEVEL instanceof Level level)
         {
             double biomeTemp = WorldHelper.getWorldTemperatureAt(level, pos);
