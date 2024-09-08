@@ -418,6 +418,8 @@ public class ConfigLoadingHandler
                 final BlockPredicate condition = blockTempData.condition();
                 final CompoundTag tag = blockTempData.nbt().orElse(null);
                 final double range = blockTempData.range();
+                final double minTemp = blockTempData.minTemp();
+                final double maxTemp = blockTempData.maxTemp();
 
                 @Override
                 public double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
@@ -455,6 +457,16 @@ public class ConfigLoadingHandler
                 @Override
                 public double minEffect()
                 {   return temperature < 0 ? -maxEffect : super.minEffect();
+                }
+
+                @Override
+                public double minTemperature()
+                {   return minTemp;
+                }
+
+                @Override
+                public double maxTemperature()
+                {   return maxTemp;
                 }
             };
 

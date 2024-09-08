@@ -14,16 +14,19 @@ import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import java.util.List;
 import java.util.Optional;
 
-public record BlockTempData(List<Either<TagKey<Block>, Block>> blocks, double temperature, double range, double maxEffect, boolean fade,
+public record BlockTempData(List<Either<TagKey<Block>, Block>> blocks, double temperature, double range,
+                            double maxEffect, boolean fade, double maxTemp, double minTemp,
                             BlockPredicate condition, Optional<CompoundTag> nbt, Optional<List<String>> requiredMods)
 {
     public static final Codec<BlockTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ConfigHelper.tagOrBuiltinCodec(Registries.BLOCK, BuiltInRegistries.BLOCK).listOf().fieldOf("blocks").forGetter(BlockTempData::blocks),
             Codec.DOUBLE.fieldOf("temperature").forGetter(BlockTempData::temperature),
-            Codec.DOUBLE.optionalFieldOf("max_effect", Double.MAX_VALUE).forGetter(BlockTempData::maxEffect),
             Codec.DOUBLE.optionalFieldOf("range", Double.MAX_VALUE).forGetter(BlockTempData::range),
+            Codec.DOUBLE.optionalFieldOf("max_effect", Double.MAX_VALUE).forGetter(BlockTempData::maxEffect),
             Codec.BOOL.optionalFieldOf("fade", true).forGetter(BlockTempData::fade),
-            BlockPredicate.CODEC.optionalFieldOf("condition", BlockPredicate.alwaysTrue()).forGetter(BlockTempData::condition),
+            Codec.DOUBLE.optionalFieldOf("max_temp", Double.MAX_VALUE).forGetter(BlockTempData::maxTemp),
+            Codec.DOUBLE.optionalFieldOf("min_temp", -Double.MAX_VALUE).forGetter(BlockTempData::minTemp),
+            net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate.CODEC.optionalFieldOf("condition", net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate.alwaysTrue()).forGetter(BlockTempData::condition),
             CompoundTag.CODEC.optionalFieldOf("nbt").forGetter(BlockTempData::nbt),
             Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(BlockTempData::requiredMods)
     ).apply(instance, BlockTempData::new));
