@@ -10,7 +10,6 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -19,7 +18,7 @@ public class ConfigUpdater
 
     public static void updateConfigs()
     {
-        String version = ModList.get().getModFileById(ColdSweat.MOD_ID).versionString();
+        String version = getVersionString(ModList.get().getModContainerById(ColdSweat.MOD_ID).get().getModInfo().getVersion());
         if (version.equals("0.0NONE")) return;
 
         String configVersion = MainSettingsConfig.getInstance().getVersion();
@@ -27,71 +26,42 @@ public class ConfigUpdater
         WorldSettingsConfig worldSettings = WorldSettingsConfig.getInstance();
 
         /*
-         2.3.4
+         2.3-b01a
          */
-        if (isBehind(configVersion, "2.3.4"))
+        if (isBehind(configVersion, "2.3-b01a"))
         {
-            removeConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, "minecraft:soul_fire");
-            removeConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, "minecraft:soul_campfire");
-            // Add block temperatures converted from Java
-            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, List.of("cold_sweat:boiler", 0.27, 7, 0.88, "lit=true", "{}", 4));
-            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, List.of("cold_sweat:icebox", -0.27, 7, 0.88, "frosted=true", "{}", 0));
-            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, List.of("minecraft:ice", -0.15, 4, 0.6, "", "{}", -0.7));
-            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, List.of("minecraft:packed_ice", -0.25, 4, 1.0, "", "{}", -0.7));
-            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, List.of("minecraft:blue_ice", -0.35, 4, 1.4, "", "{}", -0.7));
-            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, List.of("#minecraft:ice", -0.15, 4, 0.6, "", "{}", -0.7));
+            // Update chameleon molt insulation ingredient entry
+            addConfigSetting(ItemSettingsConfig.INSULATION_ITEMS,
+                             Arrays.asList("cold_sweat:chameleon_molt", 2, 0.0085, "adaptive"));
         }
-        /*
-         2.3.2
-         */
-        if (isBehind(configVersion, "2.3.2"))
-        {
-            // Goat fur insulation value
-            replaceConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "cold_sweat:fur", insulator ->
-            {   insulator.set(0, "cold_sweat:goat_fur");
-            });
 
-            // Goat fur armor insulation values
-            replaceConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "cold_sweat:fur_cap", insulator ->
-            {   insulator.set(0, "cold_sweat:goat_fur_cap");
-            });
-            replaceConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "cold_sweat:fur_parka", insulator ->
-            {   insulator.set(0, "cold_sweat:goat_fur_parka");
-            });
-            replaceConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "cold_sweat:fur_pants", insulator ->
-            {   insulator.set(0, "cold_sweat:goat_fur_pants");
-            });
-            replaceConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "cold_sweat:fur_boots", insulator ->
-            {   insulator.set(0, "cold_sweat:goat_fur_boots");
-            });
-
-            // Goat fur armor worn insulation value
-            replaceConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, "cold_sweat:fur_cap", insulator ->
-            {   insulator.set(0, "cold_sweat:goat_fur_cap");
-            });
-            replaceConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, "cold_sweat:fur_parka", insulator ->
-            {   insulator.set(0, "cold_sweat:goat_fur_parka");
-            });
-            replaceConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, "cold_sweat:fur_pants", insulator ->
-            {   insulator.set(0, "cold_sweat:goat_fur_pants");
-            });
-            replaceConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, "cold_sweat:fur_boots", insulator ->
-            {   insulator.set(0, "cold_sweat:goat_fur_boots");
-            });
-        }
         /*
-         2.3.1
+         2.3-b04a
          */
-        if (isBehind(configVersion, "2.3.1"))
+        if (isBehind(configVersion, "2.3-b04a"))
         {
-            removeConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, "minecraft:ice");
-            removeConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, "minecraft:packed_ice");
-            removeConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, "minecraft:blue_ice");
+            // Update soul sprout food item
+            addConfigSetting(ItemSettingsConfig.FOOD_TEMPERATURES,
+                             Arrays.asList("cold_sweat:soul_sprout", 0.0, "{}", 1200));
+            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES,
+                             Arrays.asList("minecraft:lava_cauldron", 0.5, 7, true, 1.5));
         }
+
+        /*
+         2.3-b05b
+         */
+        if (isBehind(configVersion, "2.3-b05b"))
+        {
+            // Remove water as fuel item for hearth
+            removeConfigSetting(ItemSettingsConfig.HEARTH_FUELS, "minecraft:water_bucket");
+            // Remove water as fuel item for icebox
+            removeConfigSetting(ItemSettingsConfig.ICEBOX_FUELS, "minecraft:water_bucket");
+        }
+
         /*
          2.3
          */
-        if (isBehind(configVersion, "2.3.3"))
+        if (isBehind(configVersion, "2.3"))
         {
             // Update magma block temperature
             replaceConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, "minecraft:magma_block", blockTemp -> {
@@ -133,38 +103,69 @@ public class ConfigUpdater
         }
 
         /*
-         2.3-b05b
+         2.3.1
          */
-        if (isBehind(configVersion, "2.3-b05b"))
+        if (isBehind(configVersion, "2.3.1"))
         {
-            // Remove water as fuel item for hearth
-            removeConfigSetting(ItemSettingsConfig.HEARTH_FUELS, "minecraft:water_bucket");
-            // Remove water as fuel item for icebox
-            removeConfigSetting(ItemSettingsConfig.ICEBOX_FUELS, "minecraft:water_bucket");
+            removeConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, "minecraft:ice");
+            removeConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, "minecraft:packed_ice");
+            removeConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, "minecraft:blue_ice");
         }
 
         /*
-         2.3-b04a
+         2.3.2
          */
-        if (isBehind(configVersion, "2.3-b04a"))
+        if (isBehind(configVersion, "2.3.2"))
         {
-            // Update soul sprout food item
-            addConfigSetting(ItemSettingsConfig.FOOD_TEMPERATURES,
-                             Arrays.asList("cold_sweat:soul_sprout", 0.0, "{}", 1200));
-            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES,
-                             Arrays.asList("minecraft:lava_cauldron", 0.5, 7, true, 1.5));
+            // Goat fur insulation value
+            replaceConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "cold_sweat:fur", insulator ->
+            {   insulator.set(0, "cold_sweat:goat_fur");
+            });
+
+            // Goat fur armor insulation values
+            replaceConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "cold_sweat:fur_cap", insulator ->
+            {   insulator.set(0, "cold_sweat:goat_fur_cap");
+            });
+            replaceConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "cold_sweat:fur_parka", insulator ->
+            {   insulator.set(0, "cold_sweat:goat_fur_parka");
+            });
+            replaceConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "cold_sweat:fur_pants", insulator ->
+            {   insulator.set(0, "cold_sweat:goat_fur_pants");
+            });
+            replaceConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "cold_sweat:fur_boots", insulator ->
+            {   insulator.set(0, "cold_sweat:goat_fur_boots");
+            });
+
+            // Goat fur armor worn insulation value
+            replaceConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, "cold_sweat:fur_cap", insulator ->
+            {   insulator.set(0, "cold_sweat:goat_fur_cap");
+            });
+            replaceConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, "cold_sweat:fur_parka", insulator ->
+            {   insulator.set(0, "cold_sweat:goat_fur_parka");
+            });
+            replaceConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, "cold_sweat:fur_pants", insulator ->
+            {   insulator.set(0, "cold_sweat:goat_fur_pants");
+            });
+            replaceConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, "cold_sweat:fur_boots", insulator ->
+            {   insulator.set(0, "cold_sweat:goat_fur_boots");
+            });
         }
+
         /*
-         2.3-b01a
+         2.3.4
          */
-        if (isBehind(configVersion, "2.3-b01a"))
+        if (isBehind(configVersion, "2.3.4"))
         {
-            // Update chameleon molt insulation ingredient entry
-            addConfigSetting(ItemSettingsConfig.INSULATION_ITEMS,
-                             Arrays.asList("cold_sweat:chameleon_molt", 2, 0.0085, "adaptive"));
+            removeConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, "minecraft:soul_fire");
+            removeConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, "minecraft:soul_campfire");
+            // Add block temperatures converted from Java
+            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, Arrays.asList("cold_sweat:boiler", 0.27, 7, 0.88, "lit=true", "{}", 4));
+            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, Arrays.asList("cold_sweat:icebox", -0.27, 7, 0.88, "frosted=true", "{}", 0));
+            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, Arrays.asList("minecraft:ice", -0.15, 4, 0.6, "", "{}", -0.7));
+            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, Arrays.asList("minecraft:packed_ice", -0.25, 4, 1.0, "", "{}", -0.7));
+            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, Arrays.asList("minecraft:blue_ice", -0.35, 4, 1.4, "", "{}", -0.7));
+            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, Arrays.asList("#minecraft:ice", -0.15, 4, 0.6, "", "{}", -0.7));
         }
-        // Update config version
-        MainSettingsConfig.getInstance().setVersion(getVersionString(ModList.get().getModContainerById(ColdSweat.MOD_ID).get().getModInfo().getVersion()));
 
         itemSettings.save();
         worldSettings.save();
