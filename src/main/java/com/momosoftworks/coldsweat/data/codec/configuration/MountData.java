@@ -13,7 +13,9 @@ import net.minecraftforge.registries.ForgeRegistries;
 import java.util.List;
 import java.util.Optional;
 
-public record MountData(List<Either<TagKey<EntityType<?>>, EntityType<?>>> entities, double coldInsulation, double heatInsulation, EntityRequirement requirement, Optional<List<String>> requiredMods)
+public record MountData(List<Either<TagKey<EntityType<?>>, EntityType<?>>> entities, double coldInsulation,
+                        double heatInsulation, EntityRequirement requirement,
+                        Optional<List<String>> requiredMods)
 {
     public static Codec<MountData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ConfigHelper.tagOrForgeRegistryCodec(Registries.ENTITY_TYPE, ForgeRegistries.ENTITY_TYPES).listOf().fieldOf("entities").forGetter(MountData::entities),
