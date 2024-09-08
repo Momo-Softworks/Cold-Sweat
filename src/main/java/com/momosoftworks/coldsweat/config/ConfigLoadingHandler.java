@@ -12,6 +12,7 @@ import com.momosoftworks.coldsweat.config.type.CarriedItemTemperature;
 import com.momosoftworks.coldsweat.config.type.InsulatingMount;
 import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.config.type.PredicateItem;
+import com.momosoftworks.coldsweat.core.init.TempModifierInit;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
@@ -43,6 +44,10 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.io.*;
@@ -50,15 +55,29 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ConfigRegistryHandler
+@Mod.EventBusSubscriber
+public class ConfigLoadingHandler
 {
-    public static void collectConfigRegistries(DynamicRegistries registries)
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void loadConfigs(FMLServerAboutToStartEvent event)
     {
-        if (registries == null)
-        {   ColdSweat.LOGGER.error("Failed to load registries from null RegistryAccess");
-            return;
-        }
+        DynamicRegistries registries = event.getServer().registryAccess();
+        // User JSON configs (config folder)
+        collectUserRegistries(registries);
+        // Java-based block temps
+        TempModifierInit.buildBlockRegistries();
+        // JSON configs (data resources)
+        collectRegistries(registries);
+        // User configs (TOML)
+        ConfigSettings.load(registries);
+        TempModifierInit.buildBlockConfigs();
+    }
 
+    /**
+     * Loads JSON-based configs from data resources
+     */
+    public static void collectRegistries(DynamicRegistries registries)
+    {
         /*
          Add blocks from tags to configs
          */
@@ -75,8 +94,8 @@ public class ConfigRegistryHandler
                                                            {   ColdSweat.LOGGER.info("Adding item {} to insulation blacklist", holder);
                                                            }).collect(Collectors.toSet()));
         ConfigSettings.HEARTH_POTION_BLACKLIST.get().addAll(ModEffectTags.HEARTH_BLACKLISTED.getValues().stream().peek(holder ->
-                                                           {   ColdSweat.LOGGER.info("Adding effect {} to hearth potion blacklist", holder);
-                                                           }).collect(Collectors.toSet()));
+                                                                                  {   ColdSweat.LOGGER.info("Adding effect {} to hearth potion blacklist", holder);
+                                                                                  }).collect(Collectors.toSet()));
 
         /*
          Fetch JSON registries
@@ -121,24 +140,48 @@ public class ConfigRegistryHandler
         Set<SpawnBiomeData> spawnBiomes = new HashSet<>(ModRegistries.ENTITY_SPAWN_BIOME_DATA.getValues());
         Set<EntityTempData> entityTemps = new HashSet<>(ModRegistries.ENTITY_TEMP_DATA.getValues());
 
+        logAndAddRegistries(registries, insulators, fuels, foods, carryTemps, blockTemps, biomeTemps,
+                            dimensionTemps, structureTemps, depthTemps, mounts, spawnBiomes, entityTemps);
+    }
+
+    /**
+     * Loads JSON-based configs from the configs folder
+     */
+    public static void collectUserRegistries(DynamicRegistries registries)
+    {
+        if (registries == null)
+        {   ColdSweat.LOGGER.error("Failed to load registries from null RegistryAccess");
+            return;
+        }
+
         /*
          Parse user-defined JSON data from the configs folder
         */
-        insulators.addAll(parseConfigData(ModRegistries.INSULATOR_DATA, InsulatorData.CODEC));
-        fuels.addAll(parseConfigData(ModRegistries.FUEL_DATA, FuelData.CODEC));
-        foods.addAll(parseConfigData(ModRegistries.FOOD_DATA, FoodData.CODEC));
-        carryTemps.addAll(parseConfigData(ModRegistries.CARRY_TEMP_DATA, ItemCarryTempData.CODEC));
+        Set<InsulatorData> insulators = new HashSet<>(parseConfigData(ModRegistries.INSULATOR_DATA, InsulatorData.CODEC));
+        Set<FuelData> fuels = new HashSet<>(parseConfigData(ModRegistries.FUEL_DATA, FuelData.CODEC));
+        Set<FoodData> foods = new HashSet<>(parseConfigData(ModRegistries.FOOD_DATA, FoodData.CODEC));
+        Set<ItemCarryTempData> carryTemps = new HashSet<>(parseConfigData(ModRegistries.CARRY_TEMP_DATA, ItemCarryTempData.CODEC));
 
-        blockTemps.addAll(parseConfigData(ModRegistries.BLOCK_TEMP_DATA, BlockTempData.CODEC));
-        biomeTemps.addAll(parseConfigData(ModRegistries.BIOME_TEMP_DATA, BiomeTempData.CODEC));
-        dimensionTemps.addAll(parseConfigData(ModRegistries.DIMENSION_TEMP_DATA, DimensionTempData.CODEC));
-        structureTemps.addAll(parseConfigData(ModRegistries.STRUCTURE_TEMP_DATA, StructureTempData.CODEC));
-        depthTemps.addAll(parseConfigData(ModRegistries.DEPTH_TEMP_DATA, DepthTempData.CODEC));
+        Set<BlockTempData> blockTemps = new HashSet<>(parseConfigData(ModRegistries.BLOCK_TEMP_DATA, BlockTempData.CODEC));
+        Set<BiomeTempData> biomeTemps = new HashSet<>(parseConfigData(ModRegistries.BIOME_TEMP_DATA, BiomeTempData.CODEC));
+        Set<DimensionTempData> dimensionTemps = new HashSet<>(parseConfigData(ModRegistries.DIMENSION_TEMP_DATA, DimensionTempData.CODEC));
+        Set<StructureTempData> structureTemps = new HashSet<>(parseConfigData(ModRegistries.STRUCTURE_TEMP_DATA, StructureTempData.CODEC));
+        Set<DepthTempData> depthTemps = new HashSet<>(parseConfigData(ModRegistries.DEPTH_TEMP_DATA, DepthTempData.CODEC));
 
-        mounts.addAll(parseConfigData(ModRegistries.MOUNT_DATA, MountData.CODEC));
-        spawnBiomes.addAll(parseConfigData(ModRegistries.ENTITY_SPAWN_BIOME_DATA, SpawnBiomeData.CODEC));
-        entityTemps.addAll(parseConfigData(ModRegistries.ENTITY_TEMP_DATA, EntityTempData.CODEC));
+        Set<MountData> mounts = new HashSet<>(parseConfigData(ModRegistries.MOUNT_DATA, MountData.CODEC));
+        Set<SpawnBiomeData> spawnBiomes = new HashSet<>(parseConfigData(ModRegistries.ENTITY_SPAWN_BIOME_DATA, SpawnBiomeData.CODEC));
+        Set<EntityTempData> entityTemps = new HashSet<>(parseConfigData(ModRegistries.ENTITY_TEMP_DATA, EntityTempData.CODEC));
 
+        logAndAddRegistries(registries, insulators, fuels, foods, carryTemps, blockTemps, biomeTemps,
+                            dimensionTemps, structureTemps, depthTemps, mounts, spawnBiomes, entityTemps);
+    }
+
+    private static void logAndAddRegistries(DynamicRegistries registries, Set<InsulatorData> insulators, Set<FuelData> fuels,
+                                            Set<FoodData> foods, Set<ItemCarryTempData> carryTemps, Set<BlockTempData> blockTemps,
+                                            Set<BiomeTempData> biomeTemps, Set<DimensionTempData> dimensionTemps,
+                                            Set<StructureTempData> structureTemps, Set<DepthTempData> depthTemps,
+                                            Set<MountData> mounts, Set<SpawnBiomeData> spawnBiomes, Set<EntityTempData> entityTemps)
+    {
         /*
          Add JSON data to the config settings
          */

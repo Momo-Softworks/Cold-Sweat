@@ -24,7 +24,6 @@
   ],
   "mixins": [
     "ItemSwapMixin",
-    "MixinBeforeServerStart",
     "MixinBlockUpdate",
     "MixinCampfire",
     "MixinEntityRiding",

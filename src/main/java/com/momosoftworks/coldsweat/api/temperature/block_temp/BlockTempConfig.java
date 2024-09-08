@@ -2,6 +2,8 @@ package com.momosoftworks.coldsweat.api.temperature.block_temp;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 import java.util.Collection;
 import java.util.Map;
@@ -16,8 +18,11 @@ public abstract class BlockTempConfig extends BlockTemp
         this.predicates = predicates;
     }
 
-    public boolean testPredicates(BlockState state)
+    @Override
+    public boolean isValid(World level, BlockPos pos, BlockState state)
     {
+        if (this.predicates.isEmpty()) return true;
+
         for (Predicate<BlockState> predicate : predicates.values())
         {   if (!predicate.test(state)) return false;
         }
