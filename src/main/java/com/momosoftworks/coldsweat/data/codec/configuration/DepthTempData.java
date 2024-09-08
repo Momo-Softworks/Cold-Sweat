@@ -21,12 +21,15 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 
-public record DepthTempData(List<TempRegion> temperatures, List<Either<TagKey<DimensionType>, DimensionType>> dimensions) implements IForgeRegistryEntry<DepthTempData>
+public record DepthTempData(List<TempRegion> temperatures, List<Either<TagKey<DimensionType>, DimensionType>> dimensions,
+                            Optional<List<String>> requiredMods) implements IForgeRegistryEntry<DepthTempData>
 {
     public static final Codec<DepthTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             TempRegion.CODEC.listOf().fieldOf("regions").forGetter(DepthTempData::temperatures),
-            ConfigHelper.tagOrVanillaRegistryCodec(Registry.DIMENSION_TYPE_REGISTRY, DimensionType.CODEC).listOf().fieldOf("dimensions").forGetter(DepthTempData::dimensions)
+            ConfigHelper.tagOrVanillaRegistryCodec(Registry.DIMENSION_TYPE_REGISTRY, DimensionType.CODEC).listOf().fieldOf("dimensions").forGetter(DepthTempData::dimensions),
+            Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(DepthTempData::requiredMods)
     ).apply(instance, DepthTempData::new));
 
     public boolean withinBounds(Level level, BlockPos pos)
