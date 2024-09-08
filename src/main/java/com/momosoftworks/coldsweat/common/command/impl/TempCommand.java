@@ -276,10 +276,11 @@ public class TempCommand extends BaseCommand
             double lastInput = modifier.getLastInput();
             double lastOutput = modifier.getLastOutput();
 
-            source.sendSuccess(new TextComponent(CSMath.truncate(modifier.getLastInput(), 2)+"")
+            source.sendSuccess(new TextComponent("")
+                       .append(new TextComponent(CSMath.truncate(modifier.getLastInput(), 2)+"")
                                         .withStyle(Style.EMPTY.withColor(ChatFormatting.WHITE)
-                                        .withHoverEvent(getConvertedUnitHover(trait, lastInput, preferredUnits)))
-                       .append(new TextComponent(" → ").withStyle(ChatFormatting.WHITE))
+                                        .withHoverEvent(getConvertedUnitHover(trait, lastInput, preferredUnits))))
+                       .append(new TextComponent(" → ").withStyle(Style.EMPTY.withColor(ChatFormatting.WHITE).withHoverEvent(null)))
                        .append(new TextComponent(modifier.toString()).withStyle(ChatFormatting.GRAY))
                        .append(new TextComponent(" → ").withStyle(ChatFormatting.WHITE))
                        .append(new TextComponent(CSMath.truncate(modifier.getLastOutput(), 2)+"")
