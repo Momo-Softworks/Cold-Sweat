@@ -1,6 +1,5 @@
 package com.momosoftworks.coldsweat.config.spec;
 
-import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.serialization.ListBuilder;
 import net.minecraft.resources.ResourceLocation;
@@ -47,6 +46,8 @@ public class WorldSettingsConfig
 
     public static final ModConfigSpec.ConfigValue<List<? extends String>> SLEEPING_OVERRIDE_BLOCKS;
     public static final ModConfigSpec.ConfigValue<Boolean> SHOULD_CHECK_SLEEP;
+
+    public static final ForgeConfigSpec.ConfigValue<Boolean> USE_CUSTOM_FREEZE_BEHAVIOR;
 
     public static final WorldSettingsConfig INSTANCE = new WorldSettingsConfig();
 
@@ -477,6 +478,10 @@ public class WorldSettingsConfig
                          "Note: This will not change anything unless blocks are configured to utilize the expanded range",
                           "This value is capped at 16 for performance reasons")
                 .defineInRange("Block Range", 7, 1, 16);
+
+        USE_CUSTOM_FREEZE_BEHAVIOR = BUILDER
+                .comment("When set to true, uses Cold Sweat's temperature system to determine water freezing behavior")
+                .define("Custom Freezing Check", true);
 
         BUILDER.pop();
 
