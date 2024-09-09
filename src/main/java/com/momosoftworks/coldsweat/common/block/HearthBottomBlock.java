@@ -186,11 +186,18 @@ public class HearthBottomBlock extends Block implements EntityBlock
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving)
+    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, BlockPos fromPos, boolean isMoving)
     {
-        super.neighborChanged(state, level, pos, block, fromPos, isMoving);
+        super.neighborChanged(state, level, pos, neighborBlock, fromPos, isMoving);
         if (level.getBlockState(pos.above()).getBlock() != ModBlocks.HEARTH_TOP)
         {   this.destroy(level, pos, state);
+        }
+        else
+        {   // Check for redstone power to this block
+            HearthBlockEntity hearth = (HearthBlockEntity) level.getBlockEntity(pos);
+            if (hearth != null)
+            {   hearth.checkInputSignal();
+            }
         }
     }
 

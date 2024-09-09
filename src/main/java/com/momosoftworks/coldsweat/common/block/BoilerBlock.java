@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.common.block;
 
 import com.momosoftworks.coldsweat.common.blockentity.BoilerBlockEntity;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
+import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import com.momosoftworks.coldsweat.util.registries.ModBlockEntities;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
@@ -126,6 +127,17 @@ public class BoilerBlock extends Block implements EntityBlock
         {   boiler.checkForSmokestack();
         }
         return super.updateShape(state, direction, neighborState, level, pos, neighborPos);
+    }
+
+    @Override
+    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, BlockPos fromPos, boolean isMoving)
+    {
+        super.neighborChanged(state, level, pos, neighborBlock, fromPos, isMoving);
+        // Check for redstone power to this block
+        HearthBlockEntity hearth = (HearthBlockEntity) level.getBlockEntity(pos);
+        if (hearth != null)
+        {   hearth.checkInputSignal();
+        }
     }
 
     @SuppressWarnings("deprecation")
