@@ -57,10 +57,9 @@ public class DrawConfigButton
                                      button ->
                                      {
                                          ConfigScreen.CURRENT_PAGE = 0;
-                                         if (!Minecraft.getInstance().isLocalServer() && Minecraft.getInstance().player != null)
+                                         if (Minecraft.getInstance().player != null)
                                          {   PacketDistributor.sendToServer(new ClientConfigAskMessage(Minecraft.getInstance().player.getUUID()));
                                          }
-                                         else ClientOnlyHelper.openConfigScreen();
                                      });
             if (Minecraft.getInstance().level == null)
             {

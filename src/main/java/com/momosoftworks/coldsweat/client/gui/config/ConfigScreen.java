@@ -61,16 +61,8 @@ public class ConfigScreen
         RegistryAccess registryAccess = RegistryHelper.getRegistryAccess();
         if (Minecraft.getInstance().player != null)
         {
-            if (!MC.isLocalServer())
-            {   PacketDistributor.sendToServer(new SyncConfigSettingsMessage(registryAccess));
-            }
-            else
-            {   ConfigSettings.saveValues(registryAccess);
-            }
+            PacketDistributor.sendToServer(new SyncConfigSettingsMessage(registryAccess));
             PacketDistributor.sendToServer(new SyncPreferredUnitsMessage(ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F));
-        }
-        else
-        {   ConfigSettings.saveValues(registryAccess);
         }
         ClientSettingsConfig.getInstance().writeAndSave();
     }

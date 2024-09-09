@@ -2,7 +2,9 @@ package com.momosoftworks.coldsweat.core.network.message;
 
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.config.spec.ItemSettingsConfig;
 import com.momosoftworks.coldsweat.config.spec.MainSettingsConfig;
+import com.momosoftworks.coldsweat.config.spec.WorldSettingsConfig;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.core.RegistryAccess;
@@ -68,18 +70,22 @@ public class SyncConfigSettingsMessage implements CustomPacketPayload
         context.enqueueWork(() ->
         {
             RegistryAccess registryAccess = RegistryHelper.getRegistryAccess();
-            message.configValues.forEach((name, values) -> ConfigSettings.decode(name, values, registryAccess));
 
             if (context.flow().isServerbound())
             {
                 if (context.player().hasPermissions(2))
-                {   ConfigSettings.saveValues(registryAccess);
+                {
+                    message.configValues.forEach((name, values) -> ConfigSettings.decode(name, values, registryAccess));
+                    ConfigSettings.saveValues(registryAccess);
                     MainSettingsConfig.getInstance().save();
+                    WorldSettingsConfig.getInstance().save();
+                    ItemSettingsConfig.getInstance().save();
                 }
                 PacketDistributor.sendToAllPlayers(new SyncConfigSettingsMessage(EMPTY_UUID, registryAccess));
             }
             else
             {
+                message.configValues.forEach((name, values) -> ConfigSettings.decode(name, values, registryAccess));
                 if (message.menuOpener.equals(ClientOnlyHelper.getClientPlayer().getUUID()))
                 {   ClientOnlyHelper.openConfigScreen();
                 }
