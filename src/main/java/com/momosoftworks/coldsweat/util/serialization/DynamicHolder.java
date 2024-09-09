@@ -15,19 +15,22 @@ import java.util.function.*;
 public class DynamicHolder<T>
 {
     private T value;
-    private final Getter<T> valueCreator;
+    private Supplier<T> valueCreator;
+    private Loader<T> loader;
+    private Saver<T> saver;
     private Writer<T> encoder;
     private Reader<T> decoder;
-    private Saver<T> saver;
     private boolean synced = false;
     private boolean requireRegistries = false;
 
-    protected DynamicHolder(Supplier<T> valueCreator)
-    {   this.valueCreator = (registryAccess) -> valueCreator.get();
+    protected DynamicHolder(Supplier<T> valueCreator, Consumer<DynamicHolder<T>> loader)
+    {   this.valueCreator = valueCreator;
+        this.loader = (holder, registryAccess) -> loader.accept(holder);
     }
 
-    protected DynamicHolder(Getter<T> valueCreator)
+    protected DynamicHolder(Supplier<T> valueCreator, Loader<T> loader)
     {   this.valueCreator = valueCreator;
+        this.loader = loader;
     }
 
     /**
@@ -36,15 +39,19 @@ public class DynamicHolder<T>
      * @return A value holder.
      * @param <T> The type of the value.
      */
-    public static <T> DynamicHolder<T> createWithRegistries(Getter<T> valueCreator)
+    public static <T> DynamicHolder<T> createWithRegistries(Supplier<T> valueCreator, Loader<T> loader)
     {
-        DynamicHolder<T> loader = new DynamicHolder<>(valueCreator);
-        loader.requireRegistries = true;
-        return loader;
+        DynamicHolder<T> holder = new DynamicHolder<>(valueCreator, loader);
+        holder.value = valueCreator.get();
+        holder.requireRegistries = true;
+        return holder;
     }
 
-    public static <T> DynamicHolder<T> create(Supplier<T> valueCreator)
-    {   return new DynamicHolder<>(valueCreator);
+    public static <T> DynamicHolder<T> create(Supplier<T> valueCreator, Consumer<DynamicHolder<T>> loader)
+    {
+        DynamicHolder<T> holder = new DynamicHolder<>(valueCreator, loader);
+        holder.value = valueCreator.get();
+        return holder;
     }
 
     /**
@@ -56,25 +63,27 @@ public class DynamicHolder<T>
      * @return A synced value holder.
      * @param <T> The type of the value.
      */
-    public static <T> DynamicHolder<T> createSyncedWithRegistries(Getter<T> valueCreator, Writer<T> encoder, Reader<T> decoder, Saver<T> saver)
+    public static <T> DynamicHolder<T> createSyncedWithRegistries(Supplier<T> valueCreator, Loader<T> loader, Writer<T> encoder, Reader<T> decoder, Saver<T> saver)
     {
-        DynamicHolder<T> loader = new DynamicHolder<>(valueCreator);
-        loader.encoder = encoder;
-        loader.decoder = decoder;
-        loader.saver = saver;
-        loader.synced = true;
-        loader.requireRegistries = true;
-        return loader;
+        DynamicHolder<T> holder = new DynamicHolder<>(valueCreator, loader);
+        holder.value = valueCreator.get();
+        holder.encoder = encoder;
+        holder.decoder = decoder;
+        holder.saver = saver;
+        holder.synced = true;
+        holder.requireRegistries = true;
+        return holder;
     }
 
-    public static <T> DynamicHolder<T> createSynced(Supplier<T> valueCreator, Function<T, CompoundTag> encoder, Function<CompoundTag, T> decoder, Consumer<T> saver)
+    public static <T> DynamicHolder<T> createSynced(Supplier<T> valueCreator, Consumer<DynamicHolder<T>> loader, Function<T, CompoundTag> encoder, Function<CompoundTag, T> decoder, Consumer<T> saver)
     {
-        DynamicHolder<T> loader = new DynamicHolder<>(valueCreator);
-        loader.encoder = (val, registryAccess) -> encoder.apply(val);
-        loader.decoder = (tag, registryAccess) -> decoder.apply(tag);
-        loader.saver = (val, registryAccess) -> saver.accept(val);
-        loader.synced = true;
-        return loader;
+        DynamicHolder<T> holder = new DynamicHolder<>(valueCreator, loader);
+        holder.value = valueCreator.get();
+        holder.encoder = (val, registryAccess) -> encoder.apply(val);
+        holder.decoder = (tag, registryAccess) -> decoder.apply(tag);
+        holder.saver = (val, registryAccess) -> saver.accept(val);
+        holder.synced = true;
+        return holder;
     }
 
     public T get()
@@ -83,7 +92,7 @@ public class DynamicHolder<T>
         {   throw new RuntimeException("RegistryAccess is required for this DynamicHolder, yet none was provided.");
         }
         if (this.value == null)
-        {   this.load();
+        {   this.load(true);
         }
         return value;
     }
@@ -91,25 +100,35 @@ public class DynamicHolder<T>
     public T get(RegistryAccess registryAccess)
     {
         if (this.value == null)
-        {   this.load(registryAccess);
+        {   this.load(registryAccess, true);
         }
         return value;
     }
 
-    public void set(Object value)
+    public void set(T value)
     {
-        if (!this.value.getClass().isInstance(value))
-        {   throw new ClassCastException(String.format("Cannot cast value of type %s to DynamicHolder of type %s", value.getClass(), this.value.getClass()));
-        }
+        this.value = value;
+    }
+
+    public void setUnsafe(Object value)
+    {
         this.value = (T) value;
     }
 
-    public void load()
-    {   this.value = valueCreator.get(null);
+    public void load(boolean replace)
+    {
+        if (replace)
+        {   this.value = this.valueCreator.get();
+        }
+        this.loader.load(this, null);
     }
 
-    public void load(RegistryAccess registryAccess)
-    {   this.value = valueCreator.get(registryAccess);
+    public void load(RegistryAccess registryAccess, boolean replace)
+    {
+        if (replace)
+        {   this.value = this.valueCreator.get();
+        }
+        this.loader.load(this, registryAccess);
     }
 
     public CompoundTag encode(RegistryAccess registryAccess)
@@ -160,9 +179,9 @@ public class DynamicHolder<T>
     }
 
     @FunctionalInterface
-    public interface Getter<T>
+    public interface Loader<T>
     {
-        T get(RegistryAccess registryAccess);
+        void load(DynamicHolder<T> holder, RegistryAccess registryAccess);
     }
 
     @FunctionalInterface

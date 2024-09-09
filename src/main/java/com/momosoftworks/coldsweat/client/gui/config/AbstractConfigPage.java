@@ -203,7 +203,7 @@ public abstract class AbstractConfigPage extends Screen
                 CSMath.tryCatch(() ->
                 {
                     if (setsCustomDifficulty)
-                        ConfigSettings.DIFFICULTY.set(4);
+                        ConfigSettings.DIFFICULTY.set(ConfigSettings.Difficulty.CUSTOM);
                     onEdited.accept(Double.parseDouble(this.getValue()));
                 });
             }
@@ -214,7 +214,7 @@ public abstract class AbstractConfigPage extends Screen
                 CSMath.tryCatch(() ->
                 {
                     if (setsCustomDifficulty)
-                        ConfigSettings.DIFFICULTY.set(4);
+                        ConfigSettings.DIFFICULTY.set(ConfigSettings.Difficulty.CUSTOM);
                     onEdited.accept(Double.parseDouble(this.getValue()));
                 });
             }
@@ -225,7 +225,7 @@ public abstract class AbstractConfigPage extends Screen
                 CSMath.tryCatch(() ->
                 {
                     if (setsCustomDifficulty)
-                        ConfigSettings.DIFFICULTY.set(4);
+                        ConfigSettings.DIFFICULTY.set(ConfigSettings.Difficulty.CUSTOM);
                     onEdited.accept(Double.parseDouble(this.getValue()));
                 });
             }
@@ -297,7 +297,7 @@ public abstract class AbstractConfigPage extends Screen
         {
             leftRightPressed.accept(-1);
             if (setsCustomDifficulty)
-            {   ConfigSettings.DIFFICULTY.set(4);
+            {   ConfigSettings.DIFFICULTY.set(ConfigSettings.Difficulty.CUSTOM);
             }
         });
         leftButton.active = shouldBeActive;
@@ -308,7 +308,7 @@ public abstract class AbstractConfigPage extends Screen
         {
             upDownPressed.accept(-1);
             if (setsCustomDifficulty)
-            {   ConfigSettings.DIFFICULTY.set(4);
+            {   ConfigSettings.DIFFICULTY.set(ConfigSettings.Difficulty.CUSTOM);
             }
         });
         upButton.active = shouldBeActive;
@@ -319,7 +319,7 @@ public abstract class AbstractConfigPage extends Screen
         {
             upDownPressed.accept(1);
             if (setsCustomDifficulty)
-            {   ConfigSettings.DIFFICULTY.set(4);
+            {   ConfigSettings.DIFFICULTY.set(ConfigSettings.Difficulty.CUSTOM);
             }
         });
         downButton.active = shouldBeActive;
@@ -330,7 +330,7 @@ public abstract class AbstractConfigPage extends Screen
         {
             leftRightPressed.accept(1);
             if (setsCustomDifficulty)
-            {   ConfigSettings.DIFFICULTY.set(4);
+            {   ConfigSettings.DIFFICULTY.set(ConfigSettings.Difficulty.CUSTOM);
             }
         });
         rightButton.active = shouldBeActive;
@@ -341,7 +341,7 @@ public abstract class AbstractConfigPage extends Screen
         {
             reset.run();
             if (setsCustomDifficulty)
-            {   ConfigSettings.DIFFICULTY.set(4);
+            {   ConfigSettings.DIFFICULTY.set(ConfigSettings.Difficulty.CUSTOM);
             }
         });
         resetButton.active = shouldBeActive;
@@ -353,7 +353,7 @@ public abstract class AbstractConfigPage extends Screen
             ImageButton hideButton = new ImageButton(this.width / 2 + xOffset + 52 + labelOffset, this.height / 4 + 2 + yOffset, 20, 10, 68, 10, 20, TEXTURE, button ->
             {
                 if (setsCustomDifficulty)
-                {   ConfigSettings.DIFFICULTY.set(4);
+                {   ConfigSettings.DIFFICULTY.set(ConfigSettings.Difficulty.CUSTOM);
                 }
                 setImageX((ImageButton) button, hide.get());
             });
