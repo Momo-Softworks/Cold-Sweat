@@ -664,6 +664,9 @@ public abstract class WorldHelper
             // Use default player modifiers to determine the temperature
             GatherDefaultTempModifiersEvent event = new GatherDefaultTempModifiersEvent(dummy, Temperature.Trait.WORLD);
             MinecraftForge.EVENT_BUS.post(event);
+            for (TempModifier modifier : event.getModifiers())
+            {   modifier.tickRate(1);
+            }
             Temperature.addModifiers(dummy, event.getModifiers(), Temperature.Trait.WORLD, Placement.Duplicates.BY_CLASS);
         }
         return dummy;
