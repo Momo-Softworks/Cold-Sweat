@@ -31,9 +31,4 @@ public class NetherPortalBlockTemp extends BlockTemp
     public double minEffect()
     {   return -1;
     }
-
-    @Override
-    public double minTemperature()
-    {   return 1;
-    }
 }
