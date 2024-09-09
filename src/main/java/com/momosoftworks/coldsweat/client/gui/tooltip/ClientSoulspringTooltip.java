@@ -47,7 +47,7 @@ public class ClientSoulspringTooltip extends Tooltip
     @Override
     public void renderImage(FontRenderer font, int x, int y, MatrixStack poseStack, ItemRenderer itemRenderer, int depth)
     {
-        y += 11;
+        y += 1;
         poseStack.pushPose();
         Minecraft.getInstance().textureManager.bind(TOOLTIP_LOCATION.get());
         AbstractGui.blit(poseStack, x, y, 401, 0, 0, 30, 8, 34, 30);
