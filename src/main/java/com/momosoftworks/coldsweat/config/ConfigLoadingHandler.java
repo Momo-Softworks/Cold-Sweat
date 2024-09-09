@@ -74,7 +74,7 @@ public class ConfigLoadingHandler
         // JSON configs (data resources)
         collectRegistries(registries);
         // User configs (TOML)
-        ConfigSettings.load(registries);
+        ConfigSettings.load(registries, false);
         TempModifierInit.buildBlockConfigs();
     }
 

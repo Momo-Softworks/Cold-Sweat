@@ -21,6 +21,7 @@ import com.momosoftworks.coldsweat.data.codec.configuration.EntityTempData;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.math.FastMultiMap;
+import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.serialization.*;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
@@ -174,89 +175,89 @@ public class ConfigSettings
     // Makes the settings instantiation collapsible & easier to read
     static
     {
-        DIFFICULTY = addSyncedSetting("difficulty", () -> Difficulty.byId(MainSettingsConfig.getInstance().getDifficulty()),
+        DIFFICULTY = addSyncedSetting("difficulty", Difficulty.NORMAL, holder -> holder.set(Difficulty.byId(MainSettingsConfig.getInstance().getDifficulty())),
         (encoder) -> ConfigHelper.serializeNbtInt(encoder.getId(), "Difficulty"),
         (decoder) -> Difficulty.byId(decoder.getInt("Difficulty")),
         (saver) -> MainSettingsConfig.getInstance().setDifficulty(saver.getId()));
 
-        MAX_TEMP = addSyncedSetting("max_temp", () -> MainSettingsConfig.getInstance().getMaxTempHabitable(),
+        MAX_TEMP = addSyncedSetting("max_temp", 1.7, holder -> holder.set(MainSettingsConfig.getInstance().getMaxTempHabitable()),
         (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "MaxTemp"),
         (decoder) -> decoder.getDouble("MaxTemp"),
         (saver) -> MainSettingsConfig.getInstance().setMaxHabitable(saver));
 
-        MIN_TEMP = addSyncedSetting("min_temp", () -> MainSettingsConfig.getInstance().getMinTempHabitable(),
+        MIN_TEMP = addSyncedSetting("min_temp", 0.5, holder -> holder.set(MainSettingsConfig.getInstance().getMinTempHabitable()),
         (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "MinTemp"),
         (decoder) -> decoder.getDouble("MinTemp"),
         (saver) -> MainSettingsConfig.getInstance().setMinHabitable(saver));
 
-        TEMP_RATE = addSyncedSetting("temp_rate", () -> MainSettingsConfig.getInstance().getRateMultiplier(),
+        TEMP_RATE = addSyncedSetting("temp_rate", 1d, holder -> holder.set(MainSettingsConfig.getInstance().getRateMultiplier()),
         (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "TempRate"),
         (decoder) -> decoder.getDouble("TempRate"),
         (saver) -> MainSettingsConfig.getInstance().setRateMultiplier(saver));
 
-        TEMP_DAMAGE = addSyncedSetting("temp_damage", () -> MainSettingsConfig.getInstance().getTempDamage(),
+        TEMP_DAMAGE = addSyncedSetting("temp_damage", 2d, holder -> holder.set(MainSettingsConfig.getInstance().getTempDamage()),
         (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "TempDamage"),
         (decoder) -> decoder.getDouble("TempDamage"),
         (saver) -> MainSettingsConfig.getInstance().setTempDamage(saver));
 
-        FIRE_RESISTANCE_ENABLED = addSyncedSetting("fire_resistance_enabled", () -> MainSettingsConfig.getInstance().isFireResistanceEnabled(),
+        FIRE_RESISTANCE_ENABLED = addSyncedSetting("fire_resistance_enabled", true, holder -> holder.set(MainSettingsConfig.getInstance().isFireResistanceEnabled()),
         (encoder) -> ConfigHelper.serializeNbtBool(encoder, "FireResistanceEnabled"),
         (decoder) -> decoder.getBoolean("FireResistanceEnabled"),
         (saver) -> MainSettingsConfig.getInstance().setFireResistanceEnabled(saver));
 
-        ICE_RESISTANCE_ENABLED = addSyncedSetting("ice_resistance_enabled", () -> MainSettingsConfig.getInstance().isIceResistanceEnabled(),
+        ICE_RESISTANCE_ENABLED = addSyncedSetting("ice_resistance_enabled", true, holder -> holder.set(MainSettingsConfig.getInstance().isIceResistanceEnabled()),
         (encoder) -> ConfigHelper.serializeNbtBool(encoder, "IceResistanceEnabled"),
         (decoder) -> decoder.getBoolean("IceResistanceEnabled"),
         (saver) -> MainSettingsConfig.getInstance().setIceResistanceEnabled(saver));
 
-        USE_PEACEFUL_MODE = addSyncedSetting("use_peaceful", () -> MainSettingsConfig.getInstance().nullifyInPeaceful(),
+        USE_PEACEFUL_MODE = addSyncedSetting("use_peaceful", true, holder -> holder.set(MainSettingsConfig.getInstance().nullifyInPeaceful()),
         (encoder) -> ConfigHelper.serializeNbtBool(encoder, "UsePeaceful"),
         (decoder) -> decoder.getBoolean("UsePeaceful"),
         (saver) -> MainSettingsConfig.getInstance().setNullifyInPeaceful(saver));
 
-        REQUIRE_THERMOMETER = addSyncedSetting("require_thermometer", () -> MainSettingsConfig.getInstance().thermometerRequired(),
+        REQUIRE_THERMOMETER = addSyncedSetting("require_thermometer", true, holder -> holder.set(MainSettingsConfig.getInstance().thermometerRequired()),
         (encoder) -> ConfigHelper.serializeNbtBool(encoder, "RequireThermometer"),
         (decoder) -> decoder.getBoolean("RequireThermometer"),
         (saver) -> MainSettingsConfig.getInstance().setRequireThermometer(saver));
 
-        GRACE_LENGTH = addSyncedSetting("grace_length", () -> MainSettingsConfig.getInstance().getGracePeriodLength(),
+        GRACE_LENGTH = addSyncedSetting("grace_length", 6000, holder -> holder.set(MainSettingsConfig.getInstance().getGracePeriodLength()),
         (encoder) -> ConfigHelper.serializeNbtInt(encoder, "GraceLength"),
         (decoder) -> decoder.getInt("GraceLength"),
         (saver) -> MainSettingsConfig.getInstance().setGracePeriodLength(saver));
 
-        GRACE_ENABLED = addSyncedSetting("grace_enabled", () -> MainSettingsConfig.getInstance().isGracePeriodEnabled(),
+        GRACE_ENABLED = addSyncedSetting("grace_enabled", true, holder -> holder.set(MainSettingsConfig.getInstance().isGracePeriodEnabled()),
         (encoder) -> ConfigHelper.serializeNbtBool(encoder, "GraceEnabled"),
         (decoder) -> decoder.getBoolean("GraceEnabled"),
         (saver) -> MainSettingsConfig.getInstance().setGracePeriodEnabled(saver));
 
 
-        HEARTS_FREEZING_PERCENTAGE = addSyncedSetting("hearts_freezing_percentage", () -> MainSettingsConfig.getInstance().getHeartsFreezingPercentage(),
+        HEARTS_FREEZING_PERCENTAGE = addSyncedSetting("hearts_freezing_percentage", 0.5, holder -> holder.set(MainSettingsConfig.getInstance().getHeartsFreezingPercentage()),
         (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "HeartsFreezingPercentage"),
         (decoder) -> decoder.getDouble("HeartsFreezingPercentage"),
         (saver) -> MainSettingsConfig.getInstance().setHeartsFreezingPercentage(saver));
 
-        COLD_MINING_IMPAIRMENT = addSyncedSetting("cold_mining_slowdown", () -> MainSettingsConfig.getInstance().getColdMiningImpairment(),
+        COLD_MINING_IMPAIRMENT = addSyncedSetting("cold_mining_slowdown", 0.5, holder -> holder.set(MainSettingsConfig.getInstance().getColdMiningImpairment()),
         (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "ColdMiningImpairment"),
         (decoder) -> decoder.getDouble("ColdMiningImpairment"),
         (saver) -> MainSettingsConfig.getInstance().setColdMiningImpairment(saver));
 
-        COLD_MOVEMENT_SLOWDOWN = addSyncedSetting("cold_movement_slowdown", () -> MainSettingsConfig.getInstance().getColdMovementSlowdown(),
+        COLD_MOVEMENT_SLOWDOWN = addSyncedSetting("cold_movement_slowdown", 0.5, holder -> holder.set(MainSettingsConfig.getInstance().getColdMovementSlowdown()),
         (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "ColdMovementSlowdown"),
         (decoder) -> decoder.getDouble("ColdMovementSlowdown"),
         (saver) -> MainSettingsConfig.getInstance().setColdMovementSlowdown(saver));
 
-        COLD_KNOCKBACK_REDUCTION = addSyncedSetting("cold_knockback_reduction", () -> MainSettingsConfig.getInstance().getColdKnockbackReduction(),
+        COLD_KNOCKBACK_REDUCTION = addSyncedSetting("cold_knockback_reduction", 0.5, holder -> holder.set(MainSettingsConfig.getInstance().getColdKnockbackReduction()),
         (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "ColdKnockbackReduction"),
         (decoder) -> decoder.getDouble("ColdKnockbackReduction"),
         (saver) -> MainSettingsConfig.getInstance().setColdKnockbackReduction(saver));
 
-        HEATSTROKE_FOG_DISTANCE = addSyncedSetting("heatstroke_fog_distance", () -> MainSettingsConfig.getInstance().getHeatstrokeFogDistance(),
+        HEATSTROKE_FOG_DISTANCE = addSyncedSetting("heatstroke_fog_distance", 6d, holder -> holder.set(MainSettingsConfig.getInstance().getHeatstrokeFogDistance()),
         (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "HeatstrokeFogDistance"),
         (decoder) -> decoder.getDouble("HeatstrokeFogDistance"),
         (saver) -> MainSettingsConfig.getInstance().setHeatstrokeFogDistance(saver));
 
 
-        BIOME_TEMPS = addSyncedSettingWithRegistries("biome_temps", (registryAccess) -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().getBiomeTemperatures(), true, registryAccess),
+        BIOME_TEMPS = addSyncedSettingWithRegistries("biome_temps", new FastMap<>(), (holder, registryAccess) -> holder.get(registryAccess).putAll(ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().getBiomeTemperatures(), true, registryAccess)),
         (encoder, registryAccess) -> ConfigHelper.serializeBiomeTemps(encoder, "BiomeTemps", registryAccess),
         (decoder, registryAccess) -> ConfigHelper.deserializeBiomeTemps(decoder, "BiomeTemps", registryAccess),
         (saver, registryAccess) -> WorldSettingsConfig.getInstance().setBiomeTemperatures(saver.entrySet().stream()
@@ -274,7 +275,7 @@ public class ConfigSettings
                                                             .filter(Objects::nonNull)
                                                             .collect(Collectors.toList())));
 
-        BIOME_OFFSETS = addSyncedSettingWithRegistries("biome_offsets", (registryAccess) -> ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().getBiomeTempOffsets(), false, registryAccess),
+        BIOME_OFFSETS = addSyncedSettingWithRegistries("biome_offsets", new FastMap<>(), (holder, registryAccess) -> holder.get(registryAccess).putAll(ConfigHelper.getBiomesWithValues(WorldSettingsConfig.getInstance().getBiomeTempOffsets(), false, registryAccess)),
         (encoder, registryAccess) -> ConfigHelper.serializeBiomeTemps(encoder, "BiomeOffsets", registryAccess),
         (decoder, registryAccess) -> ConfigHelper.deserializeBiomeTemps(decoder, "BiomeOffsets", registryAccess),
         (saver, registryAccess) -> WorldSettingsConfig.getInstance().setBiomeTempOffsets(saver.entrySet().stream()
@@ -292,7 +293,7 @@ public class ConfigSettings
                                                             .filter(Objects::nonNull)
                                                             .collect(Collectors.toList())));
 
-        DIMENSION_TEMPS = addSyncedSettingWithRegistries("dimension_temps", (registryAccess) -> ConfigHelper.getDimensionsWithValues(WorldSettingsConfig.getInstance().getDimensionTemperatures(), true, registryAccess),
+        DIMENSION_TEMPS = addSyncedSettingWithRegistries("dimension_temps", new FastMap<>(), (holder, registryAccess) -> holder.get(registryAccess).putAll(ConfigHelper.getDimensionsWithValues(WorldSettingsConfig.getInstance().getDimensionTemperatures(), true, registryAccess)),
         (encoder, registryAccess) -> ConfigHelper.serializeDimensionTemps(encoder, "DimensionTemps", registryAccess),
         (decoder, registryAccess) -> ConfigHelper.deserializeDimensionTemps(decoder, "DimensionTemps", registryAccess),
         (saver, registryAccess) -> WorldSettingsConfig.getInstance().setDimensionTemperatures(saver.entrySet().stream()
@@ -309,7 +310,7 @@ public class ConfigSettings
                                                      .filter(Objects::nonNull)
                                                      .collect(Collectors.toList())));
 
-        DIMENSION_OFFSETS = addSyncedSettingWithRegistries("dimension_offsets", (registryAccess) -> ConfigHelper.getDimensionsWithValues(WorldSettingsConfig.getInstance().getDimensionTempOffsets(), false, registryAccess),
+        DIMENSION_OFFSETS = addSyncedSettingWithRegistries("dimension_offsets", new FastMap<>(), (holder, registryAccess) -> holder.get(registryAccess).putAll(ConfigHelper.getDimensionsWithValues(WorldSettingsConfig.getInstance().getDimensionTempOffsets(), false, registryAccess)),
         (encoder, registryAccess) -> ConfigHelper.serializeDimensionTemps(encoder, "DimensionOffsets", registryAccess),
         (decoder, registryAccess) -> ConfigHelper.deserializeDimensionTemps(decoder, "DimensionOffsets", registryAccess),
         (saver, registryAccess) -> WorldSettingsConfig.getInstance().setDimensionTempOffsets(saver.entrySet().stream()
@@ -326,7 +327,7 @@ public class ConfigSettings
                                                      .filter(Objects::nonNull)
                                                      .collect(Collectors.toList())));
 
-        STRUCTURE_TEMPS = addSyncedSettingWithRegistries("structure_temperatures", (registryAccess) -> ConfigHelper.getStructuresWithValues(WorldSettingsConfig.getInstance().getStructureTemperatures(), true, registryAccess),
+        STRUCTURE_TEMPS = addSyncedSettingWithRegistries("structure_temperatures", new FastMap<>(), (holder, registryAccess) -> holder.get(registryAccess).putAll(ConfigHelper.getStructuresWithValues(WorldSettingsConfig.getInstance().getStructureTemperatures(), true, registryAccess)),
         (encoder, registryAccess) -> ConfigHelper.serializeStructureTemps(encoder, "StructureTemperatures", registryAccess),
         (decoder, registryAccess) -> ConfigHelper.deserializeStructureTemps(decoder, "StructureTemperatures", registryAccess),
         (saver, registryAccess) -> WorldSettingsConfig.getInstance().setStructureTemperatures(saver.entrySet().stream()
@@ -343,7 +344,7 @@ public class ConfigSettings
                                                      .filter(Objects::nonNull)
                                                      .collect(Collectors.toList())));
 
-        STRUCTURE_OFFSETS = addSyncedSettingWithRegistries("structure_offsets", (registryAccess) -> ConfigHelper.getStructuresWithValues(WorldSettingsConfig.getInstance().getStructureTempOffsets(), false, registryAccess),
+        STRUCTURE_OFFSETS = addSyncedSettingWithRegistries("structure_offsets", new FastMap<>(), (holder, registryAccess) -> holder.get(registryAccess).putAll(ConfigHelper.getStructuresWithValues(WorldSettingsConfig.getInstance().getStructureTempOffsets(), false, registryAccess)),
         (encoder, registryAccess) -> ConfigHelper.serializeStructureTemps(encoder, "StructureOffsets", registryAccess),
         (decoder, registryAccess) -> ConfigHelper.deserializeStructureTemps(decoder, "StructureOffsets", registryAccess),
         (saver, registryAccess) -> WorldSettingsConfig.getInstance().setStructureTempOffsets(saver.entrySet().stream()
@@ -360,9 +361,9 @@ public class ConfigSettings
                                                      .filter(Objects::nonNull)
                                                      .collect(Collectors.toList())));
 
-        CAVE_INSULATION = addSetting("cave_insulation", () -> WorldSettingsConfig.getInstance().getCaveInsulation());
+        CAVE_INSULATION = addSetting("cave_insulation", 1d, holder -> holder.set(WorldSettingsConfig.getInstance().getCaveInsulation()));
 
-        DEPTH_REGIONS = addSetting("depth_regions", () -> new ArrayList<>());
+        DEPTH_REGIONS = addSetting("depth_regions", new ArrayList<>(), holder -> {});
 
         BiFunction<Item, List<?>, PredicateItem> fuelMapper = (item, args) ->
         {
@@ -379,36 +380,39 @@ public class ConfigSettings
                                                                nbtRequirement),
                                      EntityRequirement.NONE);
         };
-        BOILER_FUEL = addSetting("boiler_fuel_items", () -> ConfigHelper.readItemMultimap(ItemSettingsConfig.getInstance().getBoilerFuelItems(), fuelMapper));
-        ICEBOX_FUEL = addSetting("icebox_fuel_items", () -> ConfigHelper.readItemMultimap(ItemSettingsConfig.getInstance().getIceboxFuelItems(), fuelMapper));
-        HEARTH_FUEL = addSetting("hearth_fuel_items", () -> ConfigHelper.readItemMultimap(ItemSettingsConfig.getInstance().getHearthFuelItems(), fuelMapper));
+        BOILER_FUEL = addSetting("boiler_fuel_items", new FastMultiMap<>(), holder -> holder.get().putAll(ConfigHelper.readItemMultimap(ItemSettingsConfig.getInstance().getBoilerFuelItems(), fuelMapper)));
+        ICEBOX_FUEL = addSetting("icebox_fuel_items", new FastMultiMap<>(), holder -> holder.get().putAll(ConfigHelper.readItemMultimap(ItemSettingsConfig.getInstance().getIceboxFuelItems(), fuelMapper)));
+        HEARTH_FUEL = addSetting("hearth_fuel_items", new FastMultiMap<>(), holder -> holder.get().putAll(ConfigHelper.readItemMultimap(ItemSettingsConfig.getInstance().getHearthFuelItems(), fuelMapper)));
 
-        SOULSPRING_LAMP_FUEL = addSyncedSetting("lamp_fuel_items", () -> ConfigHelper.readItemMultimap(ItemSettingsConfig.getInstance().getSoulLampFuelItems(), fuelMapper),
+        SOULSPRING_LAMP_FUEL = addSyncedSetting("lamp_fuel_items", new FastMultiMap<>(), holder -> holder.get().putAll(ConfigHelper.readItemMultimap(ItemSettingsConfig.getInstance().getSoulLampFuelItems(), fuelMapper)),
         (encoder) -> ConfigHelper.serializeItemMultimap(encoder, "LampFuelItems", fuel -> fuel.serialize()),
         (decoder) -> ConfigHelper.deserializeItemMultimap(decoder, "LampFuelItems", nbt -> PredicateItem.deserialize(nbt)),
         (saver) -> ConfigHelper.writeItemMultimap(saver,
                                              list -> ItemSettingsConfig.getInstance().setSoulLampFuelItems(list),
                                              fuel -> List.of(fuel.value(), fuel.data().nbt().tag().toString())));
 
-        HEARTH_POTIONS_ENABLED = addSetting("hearth_potions_enabled", () -> ItemSettingsConfig.getInstance().arePotionsEnabled());
-        HEARTH_POTION_BLACKLIST = addSetting("hearth_potion_blacklist", () -> ItemSettingsConfig.getInstance().getPotionBlacklist()
-                                                                          .stream()
-                                                                          .map(entry -> ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation(entry)))
-                                                                          .collect(ArrayList::new, List::add, List::addAll));
+        HEARTH_POTIONS_ENABLED = addSetting("hearth_potions_enabled", true, holder -> holder.set(ItemSettingsConfig.getInstance().arePotionsEnabled()));
+        HEARTH_POTION_BLACKLIST = addSetting("hearth_potion_blacklist", new ArrayList<>(),
+                                             holder -> holder.get().addAll(ItemSettingsConfig.getInstance().getPotionBlacklist()
+                                                       .stream()
+                                                       .map(entry -> ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation(entry)))
+                                                       .collect(ArrayList::new, List::add, List::addAll)));
 
-        INSULATION_ITEMS = addSyncedSetting("insulation_items", () -> ConfigHelper.readItemInsulations(ItemSettingsConfig.getInstance().getInsulationItems(), Insulation.Slot.ITEM),
+        INSULATION_ITEMS = addSyncedSetting("insulation_items", new FastMultiMap<>(), holder -> holder.get().putAll(ConfigHelper.readItemInsulations(ItemSettingsConfig.getInstance().getInsulationItems(), Insulation.Slot.ITEM)),
         (encoder) -> ConfigHelper.serializeItemInsulations(encoder, "InsulationItems"),
         (decoder) -> ConfigHelper.deserializeItemInsulations(decoder, "InsulationItems"),
         (saver) -> ConfigHelper.writeItemInsulations(saver, list -> ItemSettingsConfig.getInstance().setInsulationItems(list)));
 
-        INSULATING_ARMORS = addSyncedSetting("insulating_armors", () -> ConfigHelper.readItemInsulations(ItemSettingsConfig.getInstance().getInsulatingArmorItems(), Insulation.Slot.ARMOR),
+        INSULATING_ARMORS = addSyncedSetting("insulating_armors", new FastMultiMap<>(), holder -> holder.get().putAll(ConfigHelper.readItemInsulations(ItemSettingsConfig.getInstance().getInsulatingArmorItems(), Insulation.Slot.ARMOR)),
         (encoder) -> ConfigHelper.serializeItemInsulations(encoder, "InsulatingArmors"),
         (decoder) -> ConfigHelper.deserializeItemInsulations(decoder, "InsulatingArmors"),
         (saver) -> ConfigHelper.writeItemInsulations(saver, list -> ItemSettingsConfig.getInstance().setInsulatingArmorItems(list)));
 
-        INSULATING_CURIOS = addSyncedSetting("insulating_curios", () ->
-        {   if (!CompatManager.isCuriosLoaded()) return new FastMultiMap<>();
-            return ConfigHelper.readItemInsulations(ItemSettingsConfig.getInstance().getInsulatingCurios(), Insulation.Slot.CURIO);
+        INSULATING_CURIOS = addSyncedSetting("insulating_curios", new FastMultiMap<>(), holder ->
+        {
+            if (CompatManager.isCuriosLoaded())
+            {   holder.get().putAll(ConfigHelper.readItemInsulations(ItemSettingsConfig.getInstance().getInsulatingCurios(), Insulation.Slot.CURIO));
+            }
         },
         (encoder) -> ConfigHelper.serializeItemInsulations(encoder, "InsulatingCurios"),
         (decoder) -> ConfigHelper.deserializeItemInsulations(decoder, "InsulatingCurios"),
@@ -418,7 +422,7 @@ public class ConfigSettings
             }
         });
 
-        INSULATION_SLOTS = addSyncedSetting("insulation_slots", () ->
+        INSULATION_SLOTS = addSyncedSetting("insulation_slots", new ScalingFormula.Static(0, 0, 0, 0), holder ->
         {
             List<?> list = ItemSettingsConfig.getInstance().getArmorInsulationSlots();
             // Handle legacy insulation notation
@@ -430,14 +434,14 @@ public class ConfigSettings
             ScalingFormula.Type scalingType = ScalingFormula.Type.byName(mode);
             List<? extends Number> values = list.subList(1, list.size()).stream().map(o -> (Number) o).toList();
 
-            return scalingType == ScalingFormula.Type.STATIC
-                                  ? new ScalingFormula.Static(values.get(0).intValue(),
-                                                              values.get(1).intValue(),
-                                                              values.get(2).intValue(),
-                                                              values.get(3).intValue())
-                                  : new ScalingFormula.Dynamic(scalingType,
-                                                               values.get(0).doubleValue(),
-                                                               values.size() > 2 ? values.get(2).doubleValue() : Double.MAX_VALUE);
+            holder.set(scalingType == ScalingFormula.Type.STATIC
+                                      ? new ScalingFormula.Static(values.get(0).intValue(),
+                                                                  values.get(1).intValue(),
+                                                                  values.get(2).intValue(),
+                                                                  values.get(3).intValue())
+                                      : new ScalingFormula.Dynamic(scalingType,
+                                                                   values.get(0).doubleValue(),
+                                                                   values.size() > 2 ? values.get(2).doubleValue() : Double.MAX_VALUE));
         },
         (encoder) ->
         {
@@ -474,20 +478,21 @@ public class ConfigSettings
             ItemSettingsConfig.getInstance().setArmorInsulationSlots(list);
         });
 
-        INSULATION_STRENGTH = addSetting("insulation_strength", () -> ItemSettingsConfig.getInstance().getInsulationStrength());
+        INSULATION_STRENGTH = addSetting("insulation_strength", 1d, holder -> holder.set(ItemSettingsConfig.getInstance().getInsulationStrength()));
 
-        INSULATION_BLACKLIST = addSetting("insulation_blacklist", () -> ItemSettingsConfig.getInstance().getInsulationBlacklist()
-                                                                        .stream()
-                                                                        .map(entry -> ForgeRegistries.ITEMS.getValue(new ResourceLocation(entry)))
-                                                                        .collect(ArrayList::new, List::add, List::addAll));
+        INSULATION_BLACKLIST = addSetting("insulation_blacklist", new ArrayList<>(),
+                                          holder -> holder.get().addAll(ItemSettingsConfig.getInstance().getInsulationBlacklist()
+                                                    .stream()
+                                                    .map(entry -> ForgeRegistries.ITEMS.getValue(new ResourceLocation(entry)))
+                                                    .collect(ArrayList::new, List::add, List::addAll)));
 
-        CHECK_SLEEP_CONDITIONS = addSetting("check_sleep_conditions", () -> WorldSettingsConfig.getInstance().isSleepChecked());
+        CHECK_SLEEP_CONDITIONS = addSetting("check_sleep_conditions", true, holder -> holder.set(WorldSettingsConfig.getInstance().isSleepChecked()));
 
-        SLEEP_CHECK_IGNORE_BLOCKS = addSetting("sleep_check_override_blocks", () -> ConfigHelper.getBlocks(WorldSettingsConfig.getInstance().getSleepOverrideBlocks().toArray(new String[0])));
+        SLEEP_CHECK_IGNORE_BLOCKS = addSetting("sleep_check_override_blocks", new ArrayList<>(), holder -> holder.get().addAll(ConfigHelper.getBlocks(WorldSettingsConfig.getInstance().getSleepOverrideBlocks().toArray(new String[0]))));
 
-        USE_CUSTOM_FREEZE_BEHAVIOR = addSetting("custom_freeze_check", WorldSettingsConfig.USE_CUSTOM_FREEZE_BEHAVIOR);
+        USE_CUSTOM_FREEZE_BEHAVIOR = addSetting("custom_freeze_check", true, holder -> holder.set(WorldSettingsConfig.USE_CUSTOM_FREEZE_BEHAVIOR.get()));
 
-        FOOD_TEMPERATURES = addSyncedSetting("food_temperatures", () -> ConfigHelper.readItemMultimap(ItemSettingsConfig.getInstance().getFoodTemperatures(), (item, args) ->
+        FOOD_TEMPERATURES = addSyncedSetting("food_temperatures", new FastMultiMap<>(), holder -> holder.get().putAll(ConfigHelper.readItemMultimap(ItemSettingsConfig.getInstance().getFoodTemperatures(), (item, args) ->
         {
             double value = ((Number) args.get(0)).doubleValue();
             NbtRequirement nbtRequirement = args.size() > 1
@@ -504,7 +509,7 @@ public class ConfigSettings
             {   tag.putInt("duration", duration);
             }
             return new PredicateItem(value, itemRequirement, EntityRequirement.NONE, tag);
-        }),
+        })),
         (encoder) -> ConfigHelper.serializeItemMultimap(encoder, "FoodTemperatures", PredicateItem::serialize),
         (decoder) -> ConfigHelper.deserializeItemMultimap(decoder, "FoodTemperatures", PredicateItem::deserialize),
         (saver) -> ConfigHelper.writeItemMultimap(saver,
@@ -518,7 +523,7 @@ public class ConfigSettings
                                                  return foodData;
                                              }));
 
-        CARRIED_ITEM_TEMPERATURES = addSyncedSetting("carried_item_temps", () ->
+        CARRIED_ITEM_TEMPERATURES = addSyncedSetting("carried_item_temps", new FastMultiMap<>(), holder ->
         {
             List<?> list = ItemSettingsConfig.getInstance().getCarriedTemps();
             Multimap<Item, CarriedItemTemperature> map = new FastMultiMap<>();
@@ -566,7 +571,7 @@ public class ConfigSettings
                 {   map.put(item.right().get(), carriedTemp);
                 }
             }
-            return map;
+            holder.get().putAll(map);
         },
         (encoder) -> ConfigHelper.serializeItemMultimap(encoder, "CarriedItemTemps", CarriedItemTemperature::serialize),
         (decoder) -> ConfigHelper.deserializeItemMultimap(decoder, "CarriedItemTemps", CarriedItemTemperature::deserialize),
@@ -593,16 +598,17 @@ public class ConfigSettings
             });
         });
 
-        WATERSKIN_STRENGTH = addSetting("waterskin_strength", () -> ItemSettingsConfig.getInstance().getWaterskinStrength());
+        WATERSKIN_STRENGTH = addSetting("waterskin_strength", 50, holder -> holder.set(ItemSettingsConfig.getInstance().getWaterskinStrength()));
 
-        LAMP_DIMENSIONS = addSettingWithRegistries("valid_lamp_dimensions", (registryAccess) -> new ArrayList<>(ItemSettingsConfig.getInstance().getValidSoulLampDimensions()
-                                                                                    .stream()
-                                                                                    .map(entry -> registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get(new ResourceLocation(entry)))
-                                                                                    .collect(ArrayList::new, List::add, List::addAll)));
+        LAMP_DIMENSIONS = addSettingWithRegistries("valid_lamp_dimensions", new ArrayList<>(),
+                                                   (holder, registryAccess) -> holder.get(registryAccess).addAll(new ArrayList<>(ItemSettingsConfig.getInstance().getValidSoulLampDimensions()
+                                                                           .stream()
+                                                                           .map(entry -> registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get(new ResourceLocation(entry)))
+                                                                           .collect(ArrayList::new, List::add, List::addAll))));
 
-        FUR_TIMINGS = addSyncedSetting("fur_timings", () ->
+        FUR_TIMINGS = addSyncedSetting("fur_timings", new Triplet<>(0, 0, 0d), holder ->
         {   List<?> entry = EntitySettingsConfig.getInstance().getGoatFurStats();
-            return new Triplet<>(((Number) entry.get(0)).intValue(), ((Number) entry.get(1)).intValue(), ((Number) entry.get(2)).doubleValue());
+            holder.set(new Triplet<>(((Number) entry.get(0)).intValue(), ((Number) entry.get(1)).intValue(), ((Number) entry.get(2)).doubleValue()));
         },
         (encoder) ->
         {   CompoundTag tag = new CompoundTag();
@@ -625,9 +631,10 @@ public class ConfigSettings
             EntitySettingsConfig.getInstance().setGoatFurStats(list);
         });
 
-        SHED_TIMINGS = addSyncedSetting("shed_timings", () ->
-        {   List<?> entry = EntitySettingsConfig.getInstance().getChameleonShedStats();
-            return new Triplet<>(((Number) entry.get(0)).intValue(), ((Number) entry.get(1)).intValue(), ((Number) entry.get(2)).doubleValue());
+        SHED_TIMINGS = addSyncedSetting("shed_timings", new Triplet<>(0, 0, 0d), holder ->
+        {
+            List<?> entry = EntitySettingsConfig.getInstance().getChameleonShedStats();
+            holder.set(new Triplet<>(((Number) entry.get(0)).intValue(), ((Number) entry.get(1)).intValue(), ((Number) entry.get(2)).doubleValue()));
         },
         (encoder) ->
         {   CompoundTag tag = new CompoundTag();
@@ -650,7 +657,7 @@ public class ConfigSettings
             EntitySettingsConfig.getInstance().setChameleonShedStats(list);
         });
 
-        ENTITY_SPAWN_BIOMES = addSettingWithRegistries("entity_spawn_biomes", (registryAccess) ->
+        ENTITY_SPAWN_BIOMES = addSettingWithRegistries("entity_spawn_biomes", new FastMultiMap<>(), (holder, registryAccess) ->
         {
             Multimap<Biome, SpawnBiomeData> map = HashMultimap.create();
             // Function to read biomes from configs and put them in the config settings
@@ -685,10 +692,10 @@ public class ConfigSettings
             configReader.accept(EntitySettingsConfig.getInstance().getChameleonSpawnBiomes(), ModEntities.CHAMELEON);
             configReader.accept(EntitySettingsConfig.getInstance().getGoatSpawnBiomes(), EntityType.GOAT);
 
-            return map;
+            holder.get(registryAccess).putAll(map);
         });
 
-        INSULATED_ENTITIES = addSetting("insulated_entities", () ->
+        INSULATED_ENTITIES = addSetting("insulated_entities", new FastMultiMap<>(), holder -> holder.get().putAll(
         EntitySettingsConfig.getInstance().getInsulatedEntities().stream().map(entry ->
         {
             List<Map.Entry<EntityType<?>, InsulatingMount>> entries = new ArrayList<>();
@@ -707,9 +714,9 @@ public class ConfigSettings
         .flatMap(List::stream)
         .distinct()
         .filter(entry -> entry.getKey() != null)
-        .collect(() -> new FastMultiMap<>(), (map, entry) -> map.put(entry.getKey(), entry.getValue()), FastMultiMap::putAll));
+        .collect(FastMultiMap::new, (map, entry) -> map.put(entry.getKey(), entry.getValue()), FastMultiMap::putAll)));
 
-        ENTITY_TEMPERATURES = addSetting("entity_temperatures", () ->
+        ENTITY_TEMPERATURES = addSetting("entity_temperatures", new FastMultiMap<>(), holder ->
         {
             List<?> list = EntitySettingsConfig.ENTITY_TEMPERATURES.get();
             Multimap<EntityType<?>, EntityTempData> map = new FastMultiMap<>();
@@ -731,17 +738,17 @@ public class ConfigSettings
                     map.put(entityType, new EntityTempData(requirement, temp, range, units, Optional.empty(), Optional.empty()));
                 }
             }
-            return map;
+            holder.get().putAll(map);
         });
 
-        BLOCK_RANGE = addSyncedSetting("block_range", () -> WorldSettingsConfig.getInstance().getBlockRange(),
+        BLOCK_RANGE = addSyncedSetting("block_range", 7, holder -> holder.set(WorldSettingsConfig.getInstance().getBlockRange()),
         (encoder) -> ConfigHelper.serializeNbtInt(encoder, "BlockRange"),
         (decoder) -> decoder.getInt("BlockRange"),
         (saver) -> WorldSettingsConfig.getInstance().setBlockRange(saver));
 
-        COLD_SOUL_FIRE = addSetting("cold_soul_fire", () -> WorldSettingsConfig.getInstance().isSoulFireCold());
+        COLD_SOUL_FIRE = addSetting("cold_soul_fire", true, holder -> holder.set(WorldSettingsConfig.getInstance().isSoulFireCold()));
 
-        HEARTH_SPREAD_WHITELIST = addSyncedSetting("hearth_spread_whitelist", () -> ConfigHelper.getBlocks(WorldSettingsConfig.getInstance().getHearthSpreadWhitelist().toArray(new String[0])),
+        HEARTH_SPREAD_WHITELIST = addSyncedSetting("hearth_spread_whitelist", new ArrayList<>(), holder -> holder.get().addAll(ConfigHelper.getBlocks(WorldSettingsConfig.getInstance().getHearthSpreadWhitelist().toArray(new String[0]))),
         (encoder) ->
         {
             CompoundTag tag = new CompoundTag();
@@ -762,7 +769,7 @@ public class ConfigSettings
         },
         saver -> WorldSettingsConfig.getInstance().setHearthSpreadWhitelist(saver.stream().map(ForgeRegistries.BLOCKS::getKey).toList()));
 
-        HEARTH_SPREAD_BLACKLIST = addSyncedSetting("hearth_spread_blacklist", () -> ConfigHelper.getBlocks(WorldSettingsConfig.getInstance().getHearthSpreadBlacklist().toArray(new String[0])),
+        HEARTH_SPREAD_BLACKLIST = addSyncedSetting("hearth_spread_blacklist", new ArrayList<>(), holder -> holder.get().addAll(ConfigHelper.getBlocks(WorldSettingsConfig.getInstance().getHearthSpreadBlacklist().toArray(new String[0]))),
         (encoder) ->
         {
             CompoundTag tag = new CompoundTag();
@@ -783,58 +790,62 @@ public class ConfigSettings
         },
         saver -> WorldSettingsConfig.getInstance().setHearthSpreadBlacklist(saver.stream().map(ForgeRegistries.BLOCKS::getKey).toList()));
 
-        HEARTH_STRENGTH = addSetting("hearth_effect", () -> WorldSettingsConfig.getInstance().getHearthStrength());
+        HEARTH_STRENGTH = addSetting("hearth_effect", 0.75, holder -> holder.set(WorldSettingsConfig.getInstance().getHearthStrength()));
 
-        SMART_HEARTH = addSetting("smart_hearth", () -> WorldSettingsConfig.getInstance().isSmartHearth());
+        SMART_HEARTH = addSetting("smart_hearth", false, holder -> holder.set(WorldSettingsConfig.getInstance().isSmartHearth()));
 
-        CELSIUS = addClientSetting("celsius", () -> ClientSettingsConfig.getInstance().isCelsius());
+        CELSIUS = addClientSetting("celsius", false, holder -> holder.set(ClientSettingsConfig.getInstance().isCelsius()));
 
-        TEMP_OFFSET = addClientSetting("temp_offset", () -> ClientSettingsConfig.getInstance().getTempOffset());
+        TEMP_OFFSET = addClientSetting("temp_offset", 0, holder -> holder.set(ClientSettingsConfig.getInstance().getTempOffset()));
 
-        TEMP_SMOOTHING = addClientSetting("temp_smoothing", () -> ClientSettingsConfig.getInstance().getTempSmoothing());
+        TEMP_SMOOTHING = addClientSetting("temp_smoothing", 10d, holder -> holder.set(ClientSettingsConfig.getInstance().getTempSmoothing()));
 
-        BODY_ICON_POS = addClientSetting("body_icon_pos", () -> new Vec2i(ClientSettingsConfig.getInstance().getBodyIconX(),
-                                                                  ClientSettingsConfig.getInstance().getBodyIconY()));
-        BODY_ICON_ENABLED = addClientSetting("body_icon_enabled", () -> ClientSettingsConfig.getInstance().isBodyIconEnabled());
+        BODY_ICON_POS = addClientSetting("body_icon_pos", new Vec2i(0, 0), holder -> holder.set(new Vec2i(ClientSettingsConfig.getInstance().getBodyIconX(),
+                                                                  ClientSettingsConfig.getInstance().getBodyIconY())));
+        BODY_ICON_ENABLED = addClientSetting("body_icon_enabled", true, holder -> holder.set(ClientSettingsConfig.getInstance().isBodyIconEnabled()));
 
-        MOVE_BODY_ICON_WHEN_ADVANCED = addClientSetting("move_body_icon_for_advanced", () -> ClientSettingsConfig.getInstance().moveBodyIconWhenAdvanced());
+        MOVE_BODY_ICON_WHEN_ADVANCED = addClientSetting("move_body_icon_for_advanced", true, holder -> holder.set(ClientSettingsConfig.getInstance().moveBodyIconWhenAdvanced()));
 
-        BODY_READOUT_POS = addClientSetting("body_readout_pos", () -> new Vec2i(ClientSettingsConfig.getInstance().getBodyReadoutX(),
-                                                                                   ClientSettingsConfig.getInstance().getBodyReadoutY()));
-        BODY_READOUT_ENABLED = addClientSetting("body_readout_enabled", () -> ClientSettingsConfig.getInstance().isBodyReadoutEnabled());
+        BODY_READOUT_POS = addClientSetting("body_readout_pos", new Vec2i(0, 0), holder -> holder.set(new Vec2i(ClientSettingsConfig.getInstance().getBodyReadoutX(),
+                                                                                ClientSettingsConfig.getInstance().getBodyReadoutY())));
+        BODY_READOUT_ENABLED = addClientSetting("body_readout_enabled", true, holder -> holder.set(ClientSettingsConfig.getInstance().isBodyReadoutEnabled()));
 
-        WORLD_GAUGE_POS = addClientSetting("world_gauge_pos", () -> new Vec2i(ClientSettingsConfig.getInstance().getWorldGaugeX(),
-                                                                    ClientSettingsConfig.getInstance().getWorldGaugeY()));
-        WORLD_GAUGE_ENABLED = addClientSetting("world_gauge_enabled", () -> ClientSettingsConfig.getInstance().isWorldGaugeEnabled());
+        WORLD_GAUGE_POS = addClientSetting("world_gauge_pos", new Vec2i(0, 0), holder -> holder.set(new Vec2i(ClientSettingsConfig.getInstance().getWorldGaugeX(),
+                                                                    ClientSettingsConfig.getInstance().getWorldGaugeY())));
+        WORLD_GAUGE_ENABLED = addClientSetting("world_gauge_enabled", true, holder -> holder.set(ClientSettingsConfig.getInstance().isWorldGaugeEnabled()));
 
-        CUSTOM_HOTBAR_LAYOUT = addClientSetting("custom_hotbar_layout", () -> ClientSettingsConfig.getInstance().isCustomHotbarLayout());
-        ICON_BOBBING = addClientSetting("icon_bobbing", () -> ClientSettingsConfig.getInstance().isIconBobbing());
+        CUSTOM_HOTBAR_LAYOUT = addClientSetting("custom_hotbar_layout", true, holder -> holder.set(ClientSettingsConfig.getInstance().isCustomHotbarLayout()));
+        ICON_BOBBING = addClientSetting("icon_bobbing", true, holder -> holder.set(ClientSettingsConfig.getInstance().isIconBobbing()));
 
-        HEARTH_DEBUG = addClientSetting("hearth_debug", () -> ClientSettingsConfig.getInstance().isHearthDebug());
+        HEARTH_DEBUG = addClientSetting("hearth_debug", true, holder -> holder.set(ClientSettingsConfig.getInstance().isHearthDebug()));
 
-        SHOW_CONFIG_BUTTON = addClientSetting("show_config_button", () -> ClientSettingsConfig.getInstance().showConfigButton());
-        CONFIG_BUTTON_POS = addClientSetting("config_button_pos", () -> new Vec2i(ClientSettingsConfig.getInstance().getConfigButtonPos().get(0),
-                                                                          ClientSettingsConfig.getInstance().getConfigButtonPos().get(1)));
+        SHOW_CONFIG_BUTTON = addClientSetting("show_config_button", true, holder -> holder.set(ClientSettingsConfig.getInstance().showConfigButton()));
+        CONFIG_BUTTON_POS = addClientSetting("config_button_pos", new Vec2i(0, 0), holder -> holder.set(new Vec2i(ClientSettingsConfig.getInstance().getConfigButtonPos().get(0),
+                                                                          ClientSettingsConfig.getInstance().getConfigButtonPos().get(1))));
 
-        DISTORTION_EFFECTS = addClientSetting("distortion_effects", () -> ClientSettingsConfig.getInstance().areDistortionsEnabled());
+        DISTORTION_EFFECTS = addClientSetting("distortion_effects", true, holder -> holder.set(ClientSettingsConfig.getInstance().areDistortionsEnabled()));
 
-        HIGH_CONTRAST = addClientSetting("high_contrast", () -> ClientSettingsConfig.getInstance().isHighContrast());
+        HIGH_CONTRAST = addClientSetting("high_contrast", false, holder -> holder.set(ClientSettingsConfig.getInstance().isHighContrast()));
 
-        SHOW_CREATIVE_WARNING = addClientSetting("show_creative_warning", () -> ClientSettingsConfig.getInstance().showCreativeWarning());
+        SHOW_CREATIVE_WARNING = addClientSetting("show_creative_warning", true, holder -> holder.set(ClientSettingsConfig.getInstance().showCreativeWarning()));
 
-        HIDE_TOOLTIPS = addClientSetting("hide_tooltips", () -> ClientSettingsConfig.getInstance().hideTooltips());
+        HIDE_TOOLTIPS = addClientSetting("hide_tooltips", false, holder -> holder.set(ClientSettingsConfig.getInstance().hideTooltips()));
 
-        SHOW_WATER_EFFECT = addClientSetting("show_water_effect", () -> ClientSettingsConfig.getInstance().isWaterEffectEnabled());
+        SHOW_WATER_EFFECT = addClientSetting("show_water_effect", true, holder -> holder.set(ClientSettingsConfig.getInstance().isWaterEffectEnabled()));
 
         boolean ssLoaded = CompatManager.isSereneSeasonsLoaded();
-        SUMMER_TEMPS = addSetting("summer_temps", ssLoaded ? () -> WorldSettingsConfig.getInstance().getSummerTemps() : () -> new Double[3]);
-        AUTUMN_TEMPS = addSetting("autumn_temps", ssLoaded ? () -> WorldSettingsConfig.getInstance().getAutumnTemps() : () -> new Double[3]);
-        WINTER_TEMPS = addSetting("winter_temps", ssLoaded ? () -> WorldSettingsConfig.getInstance().getWinterTemps() : () -> new Double[3]);
-        SPRING_TEMPS = addSetting("spring_temps", ssLoaded ? () -> WorldSettingsConfig.getInstance().getSpringTemps() : () -> new Double[3]);
+        SUMMER_TEMPS = addSetting("summer_temps", new Double[]{}, holder -> holder.set(ssLoaded ? WorldSettingsConfig.getInstance().getSummerTemps() : new Double[3]));
+        AUTUMN_TEMPS = addSetting("autumn_temps", new Double[]{}, holder -> holder.set(ssLoaded ? WorldSettingsConfig.getInstance().getAutumnTemps() : new Double[3]));
+        WINTER_TEMPS = addSetting("winter_temps", new Double[]{}, holder -> holder.set(ssLoaded ? WorldSettingsConfig.getInstance().getWinterTemps() : new Double[3]));
+        SPRING_TEMPS = addSetting("spring_temps", new Double[]{}, holder -> holder.set(ssLoaded ? WorldSettingsConfig.getInstance().getSpringTemps() : new Double[3]));
     }
 
     public static String getKey(DynamicHolder<?> setting)
     {   return CONFIG_SETTINGS.inverse().get(setting);
+    }
+
+    public static DynamicHolder<?> getSetting(String key)
+    {   return CONFIG_SETTINGS.get(key);
     }
 
     public enum Difficulty
@@ -906,7 +917,7 @@ public class ConfigSettings
             return (T) settings.getOrDefault(id, () -> defaultValue).get();
         }
 
-        public <T> T getOrDefault(DynamicHolder<?> config, T defaultValue)
+        public <T> T getOrDefault(DynamicHolder<T> config, T defaultValue)
         {
             this.ensureSettingsGenerated();
             return (T) settings.getOrDefault(getKey(config), () -> defaultValue).get();
@@ -915,11 +926,7 @@ public class ConfigSettings
         public void load()
         {
             this.ensureSettingsGenerated();
-            settings.forEach((id, loader) -> CONFIG_SETTINGS.computeIfPresent(id, (s, holder) ->
-            {
-                holder.set(loader.get());
-                return holder;
-            }));
+            settings.forEach((id, loader) -> ConfigSettings.getSetting(id).setUnsafe(loader.get()));
         }
 
         public int getId()
@@ -942,35 +949,35 @@ public class ConfigSettings
         }
     }
 
-    public static <T> DynamicHolder<T> addSetting(String id, Supplier<T> supplier)
-    {   DynamicHolder<T> loader = DynamicHolder.create(supplier);
-        CONFIG_SETTINGS.put(id, loader);
-        return loader;
+    public static <T> DynamicHolder<T> addSetting(String id, T defaultVal, Consumer<DynamicHolder<T>> loader)
+    {   DynamicHolder<T> holder = DynamicHolder.create(() -> defaultVal, loader);
+        CONFIG_SETTINGS.put(id, holder);
+        return holder;
     }
 
-    public static <T> DynamicHolder<T> addSettingWithRegistries(String id, DynamicHolder.Getter<T> supplier)
-    {   DynamicHolder<T> loader = DynamicHolder.createWithRegistries(supplier);
-        CONFIG_SETTINGS.put(id, loader);
-        return loader;
+    public static <T> DynamicHolder<T> addSettingWithRegistries(String id, T defaultVal, DynamicHolder.Loader<T> loader)
+    {   DynamicHolder<T> holder = DynamicHolder.createWithRegistries(() -> defaultVal, loader);
+        CONFIG_SETTINGS.put(id, holder);
+        return holder;
     }
 
-    public static <T> DynamicHolder<T> addSyncedSetting(String id, Supplier<T> supplier, Function<T, CompoundTag> writer, Function<CompoundTag, T> reader, Consumer<T> saver)
-    {   DynamicHolder<T> loader = DynamicHolder.createSynced(supplier, writer, reader, saver);
-        CONFIG_SETTINGS.put(id, loader);
-        return loader;
+    public static <T> DynamicHolder<T> addSyncedSetting(String id, T defaultVal, Consumer<DynamicHolder<T>> loader, Function<T, CompoundTag> writer, Function<CompoundTag, T> reader, Consumer<T> saver)
+    {   DynamicHolder<T> holder = DynamicHolder.createSynced(() -> defaultVal, loader, writer, reader, saver);
+        CONFIG_SETTINGS.put(id, holder);
+        return holder;
     }
 
-    public static <T> DynamicHolder<T> addSyncedSettingWithRegistries(String id, DynamicHolder.Getter<T> supplier, DynamicHolder.Writer<T> writer, DynamicHolder.Reader<T> reader, DynamicHolder.Saver<T> saver)
-    {   DynamicHolder<T> loader = DynamicHolder.createSyncedWithRegistries(supplier, writer, reader, saver);
-        CONFIG_SETTINGS.put(id, loader);
-        return loader;
+    public static <T> DynamicHolder<T> addSyncedSettingWithRegistries(String id, T defaultVal, DynamicHolder.Loader<T> loader, DynamicHolder.Writer<T> writer, DynamicHolder.Reader<T> reader, DynamicHolder.Saver<T> saver)
+    {   DynamicHolder<T> holder = DynamicHolder.createSyncedWithRegistries(() -> defaultVal, loader, writer, reader, saver);
+        CONFIG_SETTINGS.put(id, holder);
+        return holder;
     }
 
-    public static <T> DynamicHolder<T> addClientSetting(String id, Supplier<T> supplier)
+    public static <T> DynamicHolder<T> addClientSetting(String id, T defaultVal, Consumer<DynamicHolder<T>> loader)
     {
         return FMLEnvironment.dist == Dist.CLIENT
-             ? addSetting(id, supplier)
-             : DynamicHolder.create(() -> null);
+             ? addSetting(id, defaultVal, loader)
+             : DynamicHolder.create(() -> null, (value) -> {});
     }
 
     public static Map<String, CompoundTag> encode(RegistryAccess registryAccess)
@@ -1001,10 +1008,10 @@ public class ConfigSettings
         });
     }
 
-    public static void load(RegistryAccess registryAccess)
+    public static void load(RegistryAccess registryAccess, boolean replace)
     {
         if (registryAccess != null)
-        {   CONFIG_SETTINGS.values().forEach(dynamicHolder -> dynamicHolder.load(registryAccess));
+        {   CONFIG_SETTINGS.values().forEach(dynamicHolder -> dynamicHolder.load(registryAccess, replace));
         }
         else
         {
@@ -1012,7 +1019,7 @@ public class ConfigSettings
             CONFIG_SETTINGS.values().forEach(dynamicHolder ->
             {
                 if (!dynamicHolder.requiresRegistries())
-                {   dynamicHolder.load();
+                {   dynamicHolder.load(replace);
                 }
             });
         }

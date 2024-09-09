@@ -9,6 +9,13 @@ import java.util.*;
 
 public class FastMultiMap<K, V> implements Multimap<K, V>
 {
+    public FastMultiMap()
+    {}
+
+    public FastMultiMap(Multimap<K, V> multimap)
+    {   putAll(multimap);
+    }
+
     private final FastMap<K, Set<V>> internal = new FastMap<>();
     private int totalSize = 0;
 
@@ -265,5 +272,10 @@ public class FastMultiMap<K, V> implements Multimap<K, V>
             map.put(entry.getKey(), entry.getValue());
         }
         return map;
+    }
+
+    @Override
+    public String toString()
+    {   return internal.toString();
     }
 }
