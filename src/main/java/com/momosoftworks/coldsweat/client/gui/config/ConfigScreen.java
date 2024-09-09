@@ -59,16 +59,8 @@ public class ConfigScreen
         DynamicRegistries registryAccess = RegistryHelper.getDynamicRegistries();
         if (Minecraft.getInstance().player != null)
         {
-            if (!MC.isLocalServer())
-            {   ColdSweatPacketHandler.INSTANCE.sendToServer(new SyncConfigSettingsMessage(registryAccess));
-            }
-            else
-            {   ConfigSettings.saveValues(registryAccess);
-            }
+            ColdSweatPacketHandler.INSTANCE.sendToServer(new SyncConfigSettingsMessage(registryAccess));
             ColdSweatPacketHandler.INSTANCE.sendToServer(new SyncPreferredUnitsMessage(ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F));
-        }
-        else
-        {   ConfigSettings.saveValues(registryAccess);
         }
         ClientSettingsConfig.getInstance().writeAndSave();
     }
