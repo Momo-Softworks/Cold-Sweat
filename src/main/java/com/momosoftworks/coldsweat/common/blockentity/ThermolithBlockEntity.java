@@ -23,7 +23,7 @@ public class ThermolithBlockEntity extends TileEntity implements ITickableTileEn
     @Override
     public void tick()
     {
-        if (level.getGameTime() % 10 == 0 && !level.isClientSide)
+        if (level.getGameTime() % 20 == 0 && !level.isClientSide)
         {
             BlockPos pos = this.getBlockPos();
             BlockState state = this.getBlockState();
@@ -36,7 +36,7 @@ public class ThermolithBlockEntity extends TileEntity implements ITickableTileEn
             {
                 signal = newSignal;
                 level.updateNeighborsAt(pos, state.getBlock());
-                level.updateNeighborsAt(pos.relative(facing), state.getBlock());
+                level.updateNeighborsAt(pos.relative(facing), this.level.getBlockState(pos.relative(facing)).getBlock());
             }
 
             // Handle turning on/off
