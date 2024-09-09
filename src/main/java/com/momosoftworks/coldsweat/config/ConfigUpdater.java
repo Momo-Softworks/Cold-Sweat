@@ -163,6 +163,7 @@ public class ConfigUpdater
             addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, List.of("minecraft:packed_ice", -0.25, 4, 1.0, "", "{}", -0.7));
             addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, List.of("minecraft:blue_ice", -0.35, 4, 1.4, "", "{}", -0.7));
             addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, List.of("#minecraft:ice", -0.15, 4, 0.6, "", "{}", -0.7));
+            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, List.of("#minecraft:campfires", 0.476, 7, 0.9, "lit=true", " ", 8));
         }
 
         // Update config version
