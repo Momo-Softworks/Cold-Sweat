@@ -19,7 +19,7 @@ public class ConfigUpdater
     public static void updateConfigs()
     {
         String version = getVersionString(ModList.get().getModContainerById(ColdSweat.MOD_ID).get().getModInfo().getVersion());
-        if (version.equals("0.0NONE")) return;
+        if (version.equals("0.0-NONE")) return;
 
         String configVersion = MainSettingsConfig.getInstance().getVersion();
         ItemSettingsConfig itemSettings = ItemSettingsConfig.getInstance();
