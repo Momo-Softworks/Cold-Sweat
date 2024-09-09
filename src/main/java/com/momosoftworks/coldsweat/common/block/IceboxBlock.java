@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.common.block;
 
+import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import com.momosoftworks.coldsweat.common.blockentity.IceboxBlockEntity;
 import com.momosoftworks.coldsweat.core.init.ModBlockEntities;
 import com.momosoftworks.coldsweat.core.init.ModBlocks;
@@ -20,10 +21,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.SignalGetter;
+import net.minecraft.world.level.*;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -156,6 +154,17 @@ public class IceboxBlock extends Block implements EntityBlock
             }
         }
         return super.updateShape(state, direction, neighborState, level, pos, neighborPos);
+    }
+
+    @Override
+    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, BlockPos fromPos, boolean isMoving)
+    {
+        super.neighborChanged(state, level, pos, neighborBlock, fromPos, isMoving);
+        // Check for redstone power to this block
+        HearthBlockEntity hearth = (HearthBlockEntity) level.getBlockEntity(pos);
+        if (hearth != null)
+        {   hearth.checkInputSignal();
+        }
     }
 
     @SuppressWarnings("deprecation")

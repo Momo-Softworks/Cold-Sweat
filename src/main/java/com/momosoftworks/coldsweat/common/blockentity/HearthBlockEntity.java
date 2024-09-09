@@ -251,8 +251,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
         // Tick down the time for each effect
         this.tickPotionEffects();
-        // Check for redstone power to this block
-        this.checkInputSignal();
 
         // Determine what types of fuel to use
         boolean wasUsingColdFuel = this.shouldUseColdFuel;
@@ -262,7 +260,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
             this.shouldUseColdFuel = this.isSidePowered && this.getColdFuel() > 0;
             this.shouldUseHotFuel = this.isBackPowered && this.getHotFuel() > 0;
         }
-        if (!this.shouldUseColdFuel && !this.shouldUseHotFuel)
+        if (!this.shouldUseColdFuel && !this.shouldUseHotFuel && !this.paths.isEmpty())
         {   this.resetPaths();
         }
 
@@ -295,7 +293,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
                 if (paths.isEmpty())
                 {   this.addPath(new SpreadPath(pos.above(2)).setOrigin(pos.above(2)));
-                    pathLookup.add(pos.above());
+                    pathLookup.add(pos.above(2));
                 }
 
                 // Mark as not spreading if all paths are frozen
@@ -316,7 +314,10 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                 int firstIndex = Math.max(0, lastIndex - partSize);
 
                 // Spread to new blocks
-                this.tickPaths(firstIndex, lastIndex);
+                // Only tick paths every 20 ticks or if there is only one or less paths (prevents hearths that can't spread causing undue lag)
+                if (this.paths.size() > 1 || this.ticksExisted % 20 == 0)
+                {   this.tickPaths(firstIndex, lastIndex);
+                }
                 if (isClient && paths.size() != pathCount)
                 {   HearthDebugRenderer.updatePaths(this);
                 }
@@ -365,7 +366,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     {
         int pathCount = paths.size();
         for (int i = firstIndex; i < Math.min(paths.size(), lastIndex); i++)
-        {   // This operation is really fast because it's an ArrayList
+        {
+            // This operation is really fast because it's an ArrayList
             SpreadPath spreadPath = paths.get(i);
             BlockPos pathPos = spreadPath.pos;
             if (spreadPath.origin == null)
