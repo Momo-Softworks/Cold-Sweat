@@ -22,7 +22,7 @@ public class ConfigButton extends Button
     {
         if (setsCustomDifficulty())
         {
-            ConfigSettings.DIFFICULTY.set(4);
+            ConfigSettings.DIFFICULTY.set(ConfigSettings.Difficulty.CUSTOM);
 
             if (Minecraft.getInstance().screen instanceof ConfigPageOne page)
             {
