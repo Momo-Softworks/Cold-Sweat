@@ -64,7 +64,7 @@ public class FastMultiMap<K, V> implements Multimap<K, V>
     @Override
     public boolean put(K key, V value)
     {
-        Set<V> values = internal.computeIfAbsent(key, k -> new HashSet<>());
+        Set<V> values = internal.computeIfAbsent(key, k -> new LinkedHashSet<>());
         if (values.add(value))
         {
             totalSize++;
