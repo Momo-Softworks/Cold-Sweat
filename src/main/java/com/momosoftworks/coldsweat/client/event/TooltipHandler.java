@@ -165,9 +165,10 @@ public class TooltipHandler
         elements.add(index, getTooltipCode(tooltip.getClass()));
     }
 
-    private static void setTooltip(int index, Tooltip tooltip)
+    private static void setTooltip(int index, Tooltip tooltip, List<ITextComponent> elements)
     {
         TOOLTIP_INSERTIONS.set(index, tooltip);
+        elements.set(index, getTooltipCode(tooltip.getClass()));
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -312,8 +313,7 @@ public class TooltipHandler
                 TranslationTextComponent component = ((TranslationTextComponent) element);
                 if (Arrays.asList(component.getArgs()).contains("show_icon"))
                 {
-                    elements.remove(i);
-                    addTooltip(i, new ClientInsulationAttributeTooltip(component, Minecraft.getInstance().font), elements);
+                    setTooltip(i, new ClientInsulationAttributeTooltip(component, Minecraft.getInstance().font), elements);
                 }
             }
         }
