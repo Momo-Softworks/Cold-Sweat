@@ -165,6 +165,7 @@ public class ConfigUpdater
             addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, Arrays.asList("minecraft:packed_ice", -0.25, 4, 1.0, "", "{}", -0.7));
             addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, Arrays.asList("minecraft:blue_ice", -0.35, 4, 1.4, "", "{}", -0.7));
             addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, Arrays.asList("#minecraft:ice", -0.15, 4, 0.6, "", "{}", -0.7));
+            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, Arrays.asList("#minecraft:campfires", 0.476, 7, 0.9, "lit=true", " ", 8));
         }
 
         itemSettings.save();
