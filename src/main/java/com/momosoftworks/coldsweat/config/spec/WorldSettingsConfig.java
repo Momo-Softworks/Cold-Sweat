@@ -47,7 +47,7 @@ public class WorldSettingsConfig
     public static final ModConfigSpec.ConfigValue<List<? extends String>> SLEEPING_OVERRIDE_BLOCKS;
     public static final ModConfigSpec.ConfigValue<Boolean> SHOULD_CHECK_SLEEP;
 
-    public static final ForgeConfigSpec.ConfigValue<Boolean> USE_CUSTOM_FREEZE_BEHAVIOR;
+    public static final ModConfigSpec.ConfigValue<Boolean> USE_CUSTOM_FREEZE_BEHAVIOR;
 
     public static final WorldSettingsConfig INSTANCE = new WorldSettingsConfig();
 
