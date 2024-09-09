@@ -1,6 +1,8 @@
 package com.momosoftworks.coldsweat.core.network.message;
 
+import com.momosoftworks.coldsweat.config.spec.ItemSettingsConfig;
 import com.momosoftworks.coldsweat.config.spec.MainSettingsConfig;
+import com.momosoftworks.coldsweat.config.spec.WorldSettingsConfig;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -66,19 +68,23 @@ public class SyncConfigSettingsMessage
         context.enqueueWork(() ->
         {
             RegistryAccess registryAccess = RegistryHelper.getRegistryAccess();
-            message.configValues.forEach((name, values) -> ConfigSettings.decode(name, values, registryAccess));
 
             if (context.getDirection().getReceptionSide().isServer())
             {
                 if (context.getSender() != null && context.getSender().hasPermissions(2))
-                {   ConfigSettings.saveValues(registryAccess);
+                {
+                    message.configValues.forEach((name, values) -> ConfigSettings.decode(name, values, registryAccess));
+                    ConfigSettings.saveValues(registryAccess);
                     MainSettingsConfig.getInstance().save();
+                    WorldSettingsConfig.getInstance().save();
+                    ItemSettingsConfig.getInstance().save();
                 }
 
                 ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new SyncConfigSettingsMessage(EMPTY_UUID, registryAccess));
             }
             else if (context.getDirection().getReceptionSide().isClient())
             {
+                message.configValues.forEach((name, values) -> ConfigSettings.decode(name, values, registryAccess));
                 if (message.menuOpener.equals(ClientOnlyHelper.getClientPlayer().getUUID()))
                 {   ClientOnlyHelper.openConfigScreen();
                 }
