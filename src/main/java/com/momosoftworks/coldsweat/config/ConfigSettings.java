@@ -834,10 +834,10 @@ public class ConfigSettings
         SHOW_WATER_EFFECT = addClientSetting("show_water_effect", true, holder -> holder.set(ClientSettingsConfig.getInstance().isWaterEffectEnabled()));
 
         boolean ssLoaded = CompatManager.isSereneSeasonsLoaded();
-        SUMMER_TEMPS = addSetting("summer_temps", new Double[]{}, holder -> holder.set(ssLoaded ? WorldSettingsConfig.getInstance().getSummerTemps() : new Double[3]));
-        AUTUMN_TEMPS = addSetting("autumn_temps", new Double[]{}, holder -> holder.set(ssLoaded ? WorldSettingsConfig.getInstance().getAutumnTemps() : new Double[3]));
-        WINTER_TEMPS = addSetting("winter_temps", new Double[]{}, holder -> holder.set(ssLoaded ? WorldSettingsConfig.getInstance().getWinterTemps() : new Double[3]));
-        SPRING_TEMPS = addSetting("spring_temps", new Double[]{}, holder -> holder.set(ssLoaded ? WorldSettingsConfig.getInstance().getSpringTemps() : new Double[3]));
+        SUMMER_TEMPS = addSetting("summer_temps", new Double[]{0d, 0d, 0d}, holder -> holder.set(ssLoaded ? WorldSettingsConfig.getInstance().getSummerTemps() : new Double[3]));
+        AUTUMN_TEMPS = addSetting("autumn_temps", new Double[]{0d, 0d, 0d}, holder -> holder.set(ssLoaded ? WorldSettingsConfig.getInstance().getAutumnTemps() : new Double[3]));
+        WINTER_TEMPS = addSetting("winter_temps", new Double[]{0d, 0d, 0d}, holder -> holder.set(ssLoaded ? WorldSettingsConfig.getInstance().getWinterTemps() : new Double[3]));
+        SPRING_TEMPS = addSetting("spring_temps", new Double[]{0d, 0d, 0d}, holder -> holder.set(ssLoaded ? WorldSettingsConfig.getInstance().getSpringTemps() : new Double[3]));
     }
 
     public static String getKey(DynamicHolder<?> setting)
