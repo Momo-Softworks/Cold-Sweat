@@ -42,7 +42,7 @@ public class TempModifierRegistry
      */
     public static Optional<TempModifier> getValue(ResourceLocation id)
     {
-        return Optional.ofNullable(TEMP_MODIFIERS.get(id).get());
+        return Optional.ofNullable(TEMP_MODIFIERS.get(id)).map(TempModifierHolder::get);
     }
 
     public static ResourceLocation getKey(TempModifier modifier)
