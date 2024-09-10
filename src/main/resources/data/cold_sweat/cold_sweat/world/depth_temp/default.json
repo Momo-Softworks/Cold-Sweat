@@ -1,7 +1,7 @@
 {
   "dimensions":
   [
-    "#minecraft:overworld_like"
+    "#c:overworld_like"
   ],
   "regions": [
     {
