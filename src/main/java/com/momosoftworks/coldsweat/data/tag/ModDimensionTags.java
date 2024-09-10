@@ -46,7 +46,7 @@ public class ModDimensionTags
     {   return TagKey.create(Registries.DIMENSION_TYPE, new ResourceLocation("forge", name));
     }
 
-    private static final Field CONTENTS = ObfuscationReflectionHelper.findField(HolderSet.Named.class, "contents");
+    private static final Field CONTENTS = ObfuscationReflectionHelper.findField(HolderSet.Named.class, "f_205830_");
     static { CONTENTS.setAccessible(true); }
 
     /**
