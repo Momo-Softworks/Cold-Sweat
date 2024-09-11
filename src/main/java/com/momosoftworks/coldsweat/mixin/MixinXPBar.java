@@ -53,6 +53,16 @@ public class MixinXPBar
     {
         private static boolean MOVED_UP = false;
 
+        @Inject(method = "renderSelectedItemName(Lnet/minecraft/client/gui/GuiGraphics;I)V",
+                at = @At(value = "HEAD"), remap = false)
+        public void renderItemNamePre(GuiGraphics graphics, int height, CallbackInfo ci)
+        {
+            if (!MOVED_UP && ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get())
+            {   graphics.pose().translate(0, -4, 0);
+                MOVED_UP = true;
+            }
+        }
+
         @Surrogate
         @Inject(method = "renderSelectedItemName*",
                 at = @At(value = "HEAD"))
@@ -64,20 +74,9 @@ public class MixinXPBar
             }
         }
 
-        @Inject(method = "renderSelectedItemName*",
-                at = @At(value = "HEAD"))
-        public void renderItemNamePre(GuiGraphics graphics, int height, CallbackInfo ci)
-        {
-            if (!MOVED_UP && ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get())
-            {   graphics.pose().translate(0, -4, 0);
-                MOVED_UP = true;
-            }
-        }
-
-        @Surrogate
-        @Inject(method = "renderSelectedItemName*",
-                at = @At("TAIL"))
-        public void renderItemNamePost(GuiGraphics graphics, CallbackInfo ci)
+        @Inject(method = "renderSelectedItemName(Lnet/minecraft/client/gui/GuiGraphics;I)V",
+                at = @At("TAIL"), remap = false)
+        public void renderItemNamePost(GuiGraphics graphics, int height, CallbackInfo ci)
         {
             if (MOVED_UP && ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get())
             {   graphics.pose().translate(0, 4, 0);
@@ -85,9 +84,10 @@ public class MixinXPBar
             }
         }
 
+        @Surrogate
         @Inject(method = "renderSelectedItemName*",
                 at = @At("TAIL"))
-        public void renderItemNamePost(GuiGraphics graphics, int height, CallbackInfo ci)
+        public void renderItemNamePost(GuiGraphics graphics, CallbackInfo ci)
         {
             if (MOVED_UP && ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get())
             {   graphics.pose().translate(0, 4, 0);
