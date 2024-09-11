@@ -16,7 +16,7 @@
       "tag": "minecraft:soul_fire_base_blocks"
     },
     "I": {
-      "tag": "forge:ingots/iron"
+      "tag": "c:ingots/iron"
     }
   },
   "result": {
