@@ -17,6 +17,7 @@ import com.momosoftworks.coldsweat.config.type.PredicateItem;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.exceptions.RegistryFailureException;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.registries.ModAttributes;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.serialization.ListBuilder;
@@ -209,32 +210,48 @@ public class TooltipHandler
          */
         if (stack.getUseAnimation() == UseAction.DRINK || stack.getUseAnimation() == UseAction.EAT)
         {
-            PredicateItem temp = ConfigSettings.FOOD_TEMPERATURES.get().get(stack.getItem()).stream().filter(predicate -> predicate.test(player, stack)).findFirst().orElse(null);
-            if (temp != null && temp.test(player, stack))
+            // Check if Diet has their own tooltip already
+            int dietTooltipSectionIndex = CSMath.getIndexOf(elements, line -> line.getString().equalsIgnoreCase(new TranslationTextComponent("tooltip.diet.eaten").getString()));
+            int index = dietTooltipSectionIndex != -1
+                        ? dietTooltipSectionIndex + 1
+                        : tooltipEndIndex;
+
+            Map<Integer, Double> foodTemps = new FastMap<>();
+            for (PredicateItem predicateItem : ConfigSettings.FOOD_TEMPERATURES.get().get(item))
             {
-                IFormattableTextComponent consumeEffects =
-                                                  temp.value > 0
-                                                  ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp.value)).withStyle(HOT) :
-                                                  temp.value == 0
-                                                  ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp.value)) :
-                                                  new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", CSMath.formatDoubleOrInt(temp.value)).withStyle(COLD);
-                // Add a duration to the tooltip if it exists
-                if (temp.extraData.contains("duration", 3))
-                {   consumeEffects.append(" (" + StringUtils.formatTickDuration(temp.extraData.getInt("duration")) + ")");
-                }
-                // Check if Diet has their own tooltip already
-                int dietTooltipSectionIndex = CSMath.getIndexOf(elements, line -> line.getString().equalsIgnoreCase(new TranslationTextComponent("tooltip.diet.eaten").getString()));
-                int index = dietTooltipSectionIndex != -1
-                            ? dietTooltipSectionIndex + 1
-                            : tooltipEndIndex;
-                // If the section already exists, add it under that section
-                elements.add(index, consumeEffects);
-                // Don't add our own section title if one already exists
-                if (dietTooltipSectionIndex == -1)
+                if (predicateItem.test(player, stack))
                 {
-                    elements.add(tooltipEndIndex, new TranslationTextComponent("tooltip.cold_sweat.consumed").withStyle(TextFormatting.GRAY));
-                    elements.add(tooltipEndIndex, new StringTextComponent(""));
+                    double temp = predicateItem.value;
+                    int duration = predicateItem.extraData.contains("duration")
+                                   ? predicateItem.extraData.getInt("duration")
+                                   : 0;
+                    foodTemps.merge(duration, temp, Double::sum);
                 }
+            }
+
+            for (Map.Entry<Integer, Double> entry : foodTemps.entrySet())
+            {
+                double temp = entry.getValue();
+                int duration = entry.getKey();
+
+                IFormattableTextComponent consumeEffects = temp > 0
+                                                  ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp)).withStyle(HOT) :
+                                                  temp == 0
+                                                  ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp)) :
+                                                  new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", CSMath.formatDoubleOrInt(temp)).withStyle(COLD);
+                // Add a duration to the tooltip if it exists
+                if (duration > 0)
+                {   consumeEffects.append(" (" + StringUtils.formatTickDuration(duration) + ")");
+                }
+                // Add the effect to the tooltip
+                elements.add(index, consumeEffects);
+            }
+
+            // Don't add our own section title if one already exists
+            if (dietTooltipSectionIndex == -1)
+            {
+                elements.add(tooltipEndIndex, new TranslationTextComponent("tooltip.cold_sweat.consumed").withStyle(TextFormatting.GRAY));
+                elements.add(tooltipEndIndex, new StringTextComponent(""));
             }
         }
 

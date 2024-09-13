@@ -461,18 +461,10 @@ public class ConfigHelper
     }
 
     public static <T> CompoundNBT serializeItemMap(Map<Item, T> map, String key, Function<T, CompoundNBT> serializer)
-    {   return serializeItemMapLike(Either.left(map), key, serializer);
-    }
-
-    public static <T> CompoundNBT serializeItemMultimap(Multimap<Item, T> map, String key, Function<T, CompoundNBT> serializer)
-    {   return serializeItemMapLike(Either.right(map), key, serializer);
-    }
-
-    public static <T> CompoundNBT serializeItemMapLike(Either<Map<Item, T>, Multimap<Item, T>> map, String key, Function<T, CompoundNBT> serializer)
     {
         CompoundNBT tag = new CompoundNBT();
         CompoundNBT mapTag = new CompoundNBT();
-        for (Map.Entry<Item, T> entry : map.map(Map::entrySet, Multimap::entries))
+        for (Map.Entry<Item, T> entry : map.entrySet())
         {
             ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(entry.getKey());
             if (itemId == null) continue;
@@ -483,18 +475,31 @@ public class ConfigHelper
         return tag;
     }
 
+    public static <T> CompoundNBT serializeItemMultimap(Multimap<Item, T> map, String key, Function<T, CompoundNBT> serializer)
+    {
+        CompoundNBT tag = new CompoundNBT();
+        ListNBT mapTag = new ListNBT();
+        for (Map.Entry<Item, T> entry : map.entries())
+        {
+            CompoundNBT entryTag = new CompoundNBT();
+            ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(entry.getKey());
+            if (itemId == null)
+            {
+                ColdSweat.LOGGER.error("Error serializing item map: item \"{}\" does not exist", entry.getKey());
+                continue;
+            }
+            entryTag.putString("Item", itemId.toString());
+            entryTag.put("Value", serializer.apply(entry.getValue()));
+            mapTag.add(entryTag);
+        }
+        tag.put(key, mapTag);
+
+        return tag;
+    }
+
     public static <T> Map<Item, T> deserializeItemMap(CompoundNBT tag, String key, Function<CompoundNBT, T> deserializer)
-    {   return deserializeItemMapLike(tag, key, deserializer).getFirst();
-    }
-
-    public static <T> Multimap<Item, T> deserializeItemMultimap(CompoundNBT tag, String key, Function<CompoundNBT, T> deserializer)
-    {   return deserializeItemMapLike(tag, key, deserializer).getSecond();
-    }
-
-    private static <T> Pair<Map<Item, T>, Multimap<Item, T>> deserializeItemMapLike(CompoundNBT tag, String key, Function<CompoundNBT, T> deserializer)
     {
         Map<Item, T> map = new HashMap<>();
-        Multimap<Item, T> multimap = new FastMultiMap<>();
         CompoundNBT mapTag = tag.getCompound(key);
         for (String itemID : mapTag.getAllKeys())
         {
@@ -502,10 +507,25 @@ public class ConfigHelper
             T value = deserializer.apply(mapTag.getCompound(itemID));
             if (value != null)
             {   map.put(item, value);
-                multimap.put(item, value);
             }
         }
-        return Pair.of(map, multimap);
+        return map;
+    }
+
+    public static <T> Multimap<Item, T> deserializeItemMultimap(CompoundNBT tag, String key, Function<CompoundNBT, T> deserializer)
+    {
+        Multimap<Item, T> map = new FastMultiMap<>();
+        ListNBT mapTag = tag.getList(key, 10);
+        for (int i = 0; i < mapTag.size(); i++)
+        {
+            CompoundNBT entryTag = mapTag.getCompound(i);
+            Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(entryTag.getString("Item")));
+            T value = deserializer.apply(entryTag.getCompound("Value"));
+            if (value != null)
+            {   map.put(item, value);
+            }
+        }
+        return map;
     }
 
     public static <T> Map<Item, T> readItemMap(List<? extends List<?>> source, BiFunction<Item, List<?>, T> valueParser)
