@@ -17,6 +17,7 @@ import com.momosoftworks.coldsweat.config.type.PredicateItem;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.registries.ModAttributes;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.ChatFormatting;
@@ -24,7 +25,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
@@ -46,8 +46,10 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.antlr.v4.runtime.misc.MultiMap;
 
 import java.util.*;
+import java.util.stream.Collector;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class TooltipHandler
@@ -188,31 +190,48 @@ public class TooltipHandler
          */
         if (stack.getUseAnimation() == UseAnim.DRINK || stack.getUseAnimation() == UseAnim.EAT)
         {
-            PredicateItem temp = ConfigSettings.FOOD_TEMPERATURES.get().get(stack.getItem()).stream().filter(predicate -> predicate.test(player, stack)).findFirst().orElse(null);
-            if (temp != null && temp.test(player, stack))
+            // Check if Diet has their own tooltip already
+            int dietTooltipSectionIndex = CSMath.getIndexOf(elements, line -> line.left().map(text -> text.getString().equalsIgnoreCase(Component.translatable("tooltip.diet.eaten").getString())).orElse(false));
+            int index = dietTooltipSectionIndex != -1
+                        ? dietTooltipSectionIndex + 1
+                        : tooltipEndIndex;
+
+            Map<Integer, Double> foodTemps = new FastMap<>();
+            for (PredicateItem predicateItem : ConfigSettings.FOOD_TEMPERATURES.get().get(item))
             {
-                MutableComponent consumeEffects = temp.value() > 0
-                                                  ? Component.translatable("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp.value())).withStyle(HOT) :
-                                                  temp.value() == 0
-                                                  ? Component.translatable("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp.value())) :
-                                                  Component.translatable("tooltip.cold_sweat.temperature_effect", CSMath.formatDoubleOrInt(temp.value())).withStyle(COLD);
-                // Add a duration to the tooltip if it exists
-                if (temp.extraData().contains("duration", Tag.TAG_INT))
-                {   consumeEffects.append(" (" + StringUtil.formatTickDuration(temp.extraData().getInt("duration")) + ")");
-                }
-                // Check if Diet has their own tooltip already
-                int dietTooltipSectionIndex = CSMath.getIndexOf(elements, line -> line.left().map(text -> text.getString().equalsIgnoreCase(Component.translatable("tooltip.diet.eaten").getString())).orElse(false));
-                int index = dietTooltipSectionIndex != -1
-                            ? dietTooltipSectionIndex + 1
-                            : tooltipEndIndex;
-                // If the section already exists, add it under that section
-                elements.add(index, Either.left(consumeEffects));
-                // Don't add our own section title if one already exists
-                if (dietTooltipSectionIndex == -1)
+                if (predicateItem.test(player, stack))
                 {
-                    elements.add(tooltipEndIndex, Either.left(Component.translatable("tooltip.cold_sweat.consumed").withStyle(ChatFormatting.GRAY)));
-                    elements.add(tooltipEndIndex, Either.left(Component.empty()));
+                    double temp = predicateItem.value();
+                    int duration = predicateItem.extraData().contains("duration")
+                                   ? predicateItem.extraData().getInt("duration")
+                                   : 0;
+                    foodTemps.merge(duration, temp, Double::sum);
                 }
+            }
+
+            for (Map.Entry<Integer, Double> entry : foodTemps.entrySet())
+            {
+                double temp = entry.getValue();
+                int duration = entry.getKey();
+
+                MutableComponent consumeEffects = temp > 0
+                                                  ? Component.translatable("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp)).withStyle(HOT) :
+                                                  temp == 0
+                                                  ? Component.translatable("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp)) :
+                                                  Component.translatable("tooltip.cold_sweat.temperature_effect", CSMath.formatDoubleOrInt(temp)).withStyle(COLD);
+                // Add a duration to the tooltip if it exists
+                if (duration > 0)
+                {   consumeEffects.append(" (" + StringUtil.formatTickDuration(duration) + ")");
+                }
+                // Add the effect to the tooltip
+                elements.add(index, Either.left(consumeEffects));
+            }
+
+            // Don't add our own section title if one already exists
+            if (dietTooltipSectionIndex == -1)
+            {
+                elements.add(tooltipEndIndex, Either.left(Component.translatable("tooltip.cold_sweat.consumed").withStyle(ChatFormatting.GRAY)));
+                elements.add(tooltipEndIndex, Either.left(Component.empty()));
             }
         }
 
