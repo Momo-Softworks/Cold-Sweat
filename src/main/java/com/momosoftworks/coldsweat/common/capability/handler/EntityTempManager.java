@@ -701,24 +701,26 @@ public class EntityTempManager
         && !event.getEntity().level.isClientSide)
         {
             // If food item defined in config
-            PredicateItem foodData = ConfigHelper.findFirstItemMatching(ConfigSettings.FOOD_TEMPERATURES, event.getItem()).orElse(null);
-            if (foodData != null && foodData.test(event.getItem()))
+            for (PredicateItem foodData : ConfigSettings.FOOD_TEMPERATURES.get().get(event.getItem().getItem()))
             {
-                double effect = foodData.value();
-                if (foodData.extraData().contains("duration", Tag.TAG_INT))
+                if (foodData != null && foodData.test(event.getItem()))
                 {
-                    int duration = foodData.extraData().getInt("duration");
-                    // Special case for soul sprouts
-                    FoodTempModifier foodModifier = event.getItem().getItem() == ModItems.SOUL_SPROUT
-                                                    ? new SoulSproutTempModifier(effect)
-                                                    : new FoodTempModifier(effect);
-                    // Store the duration of the TempModifier
-                    foodModifier.getNBT().put("extraData", foodData.extraData());
-                    // Add the TempModifier
-                    Temperature.addModifier(player, foodModifier.expires(duration), Temperature.Trait.BASE, Placement.Duplicates.BY_CLASS);
-                }
-                else
-                {   Temperature.addModifier(player, new FoodTempModifier(effect).expires(0), Temperature.Trait.CORE, Placement.Duplicates.EXACT);
+                    double effect = foodData.value();
+                    if (foodData.extraData().contains("duration", Tag.TAG_INT))
+                    {
+                        int duration = foodData.extraData().getInt("duration");
+                        // Special case for soul sprouts
+                        FoodTempModifier foodModifier = event.getItem().getItem() == ModItems.SOUL_SPROUT
+                                                        ? new SoulSproutTempModifier(effect)
+                                                        : new FoodTempModifier(effect);
+                        // Store the duration of the TempModifier
+                        foodModifier.getNBT().put("extraData", foodData.extraData());
+                        // Add the TempModifier
+                        Temperature.addModifier(player, foodModifier.expires(duration), Temperature.Trait.BASE, Placement.Duplicates.BY_CLASS);
+                    }
+                    else
+                    {   Temperature.addModifier(player, new FoodTempModifier(effect).expires(0), Temperature.Trait.CORE, Placement.Duplicates.EXACT);
+                    }
                 }
             }
         }
