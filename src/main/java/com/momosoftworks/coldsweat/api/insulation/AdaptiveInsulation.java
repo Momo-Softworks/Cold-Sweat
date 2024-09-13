@@ -63,8 +63,8 @@ public class AdaptiveInsulation extends Insulation
     public List<Insulation> split()
     {
         List<Insulation> insulation = new ArrayList<>();
-        for (int i = 0; i < CSMath.ceil(Math.abs(this.insulation)) / 2; i++)
-        {   double insul = CSMath.minAbs(CSMath.shrink(this.insulation, i * 2), 2);
+        for (int i = 0; i < CSMath.ceil(Math.abs(this.insulation) / 2); i++)
+        {   double insul = CSMath.minAbs(CSMath.shrink(this.insulation, i * 2), 2 * CSMath.sign(this.insulation));
             insulation.add(new AdaptiveInsulation(insul, factor, speed));
         }
         return insulation;

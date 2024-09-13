@@ -58,7 +58,7 @@ public abstract class Insulation implements NbtSerializable
             if (pair instanceof AdaptiveInsulation)
             {
                 AdaptiveInsulation insul = ((AdaptiveInsulation) pair);
-                return Math.abs(insul.getInsulation()) >= 2 ? 7 : 6;
+                return Math.abs(insul.getInsulation()) >= 2 ? 6 : 7;
             }
             else if (pair instanceof StaticInsulation)
             {

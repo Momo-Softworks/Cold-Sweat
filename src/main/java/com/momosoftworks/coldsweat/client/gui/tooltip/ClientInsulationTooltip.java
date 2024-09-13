@@ -129,15 +129,13 @@ public class ClientInsulationTooltip extends Tooltip
 
         // Positive insulation bar
         if (!posInsulation.isEmpty())
-        {   renderBar(poseStack, x, y, posInsulation, slot, !negInsulation.isEmpty(), false, stack);
-            poseStack.translate(posInsulation.size() * 6 + 12, 0, 0);
-            width += posInsulation.size() * 6 + 12;
+        {   width += renderBar(poseStack, x + width, y, posInsulation, slot, !negInsulation.isEmpty(), false, stack);
         }
 
         // Negative insulation bar
         if (!negInsulation.isEmpty())
-        {   renderBar(poseStack, x + width, y, negInsulation, slot, true, true, stack);
-            width += negInsulation.size() * 6 + 12;
+        {   width += 4;
+            width += renderBar(poseStack, x + width, y, negInsulation, slot, true, true, stack);
         }
         poseStack.popPose();
     }
@@ -185,16 +183,17 @@ public class ClientInsulationTooltip extends Tooltip
         return 12 + font.width(text);
     }
 
-    static void renderBar(MatrixStack poseStack, int x, int y, List<Insulation> insulations, Insulation.Slot slot, boolean showSign, boolean isNegative, ItemStack stack)
+    static int renderBar(MatrixStack poseStack, int x, int y, List<Insulation> insulations, Insulation.Slot slot, boolean showSign, boolean isNegative, ItemStack stack)
     {
         Minecraft.getInstance().textureManager.bind(TOOLTIP_LOCATION.get());
         FontRenderer font = Minecraft.getInstance().font;
         List<Insulation> sortedInsulation = Insulation.sort(insulations);
         boolean overflow = sortedInsulation.size() >= 10;
-        int insulSlotCount = Math.max(slot == Insulation.Slot.ARMOR
-                                  ? ConfigSettings.INSULATION_SLOTS.get().getSlots(MobEntity.getEquipmentSlotForItem(stack), stack)
-                                  : 0,
-                                  insulations.size());
+        int defaultArmorSlots = ConfigSettings.INSULATION_SLOTS.get().getSlots(MobEntity.getEquipmentSlotForItem(stack), stack);
+        int insulSlotCount = Math.max(slot == Insulation.Slot.ARMOR ? defaultArmorSlots : 0,
+                                      insulations.size());
+
+        int finalWidth = 0;
 
         // background
         for (int i = 0; i < insulSlotCount && !overflow; i++)
@@ -236,18 +235,22 @@ public class ClientInsulationTooltip extends Tooltip
             // Render cold insulation
             if (cold > 0)
             {   int xOffs = renderOverloadCell(poseStack, font, x, y, cold, textColor, Insulation.Type.COLD);
+                finalWidth += xOffs;
                 poseStack.translate(xOffs, 0, 0);
             }
             if (hot > 0)
             {   int xOffs = renderOverloadCell(poseStack, font, x, y, hot, textColor, Insulation.Type.HEAT);
+                finalWidth += xOffs;
                 poseStack.translate(xOffs, 0, 0);
             }
             if (neutral > 0)
             {   int xOffs = renderOverloadCell(poseStack, font, x, y, neutral, textColor, Insulation.Type.NEUTRAL);
+                finalWidth += xOffs;
                 poseStack.translate(xOffs, 0, 0);
             }
             if (adaptive > 0)
             {   int xOffs = renderOverloadCell(poseStack, font, x, y, adaptive, textColor, Insulation.Type.ADAPTIVE);
+                finalWidth += xOffs;
                 poseStack.translate(xOffs, 0, 0);
             }
             poseStack.popPose();
@@ -260,11 +263,12 @@ public class ClientInsulationTooltip extends Tooltip
                 AdaptiveInsulation adaptive = (AdaptiveInsulation) insulation;
                 double value = adaptive.getInsulation();
 
-                for (int i = 0; i < CSMath.ceil(Math.abs(value)) / 2; i++)
+                for (int i = 0; i < CSMath.ceil(Math.abs(value) / 2) ; i++)
                 {
-                    double insul = CSMath.minAbs(CSMath.shrink(value, i * 2), 2);
+                    double insul = CSMath.minAbs(CSMath.shrink(value, i * 2), 2 * CSMath.sign(value));
                     // adaptive cells base color
                     renderCell(poseStack, x + 7, y + 1, insul, 12, true);
+                    finalWidth += 6;
 
                     // adaptive cells overlay
                     double blend = Math.abs(adaptive.getFactor());
@@ -288,34 +292,35 @@ public class ClientInsulationTooltip extends Tooltip
             {
                 StaticInsulation staticInsulation = (StaticInsulation) insulation;
                 double cold = staticInsulation.getCold();
-                double hot = staticInsulation.getHeat();
-                double neutral = cold > 0 == hot > 0
-                                 ? CSMath.minAbs(cold, hot)
+                double heat = staticInsulation.getHeat();
+                double neutral = cold > 0 == heat > 0
+                                 ? CSMath.minAbs(cold, heat)
                                  : 0;
                 cold -= neutral;
-                hot -= neutral;
+                heat -= neutral;
 
                 // Cold insulation
-                for (int i = 0; i < CSMath.ceil(Math.abs(cold)) / 2; i++)
-                {   double coldInsul = CSMath.minAbs(CSMath.shrink(cold, i * 2), 2);
+                for (int i = 0; i < CSMath.ceil(Math.abs(cold) / 2); i++)
+                {   double coldInsul = CSMath.minAbs(CSMath.shrink(cold, i * 2), 2 * CSMath.sign(cold));
                     renderCell(poseStack, x + 7, y + 1, coldInsul, 12, false); // cold cells
                     poseStack.translate(6, 0, 0);
                 }
 
                 // Neutral insulation
                 for (int i = 0; i < CSMath.ceil(Math.abs(neutral)); i++)
-                {   double neutralInsul = CSMath.minAbs(CSMath.shrink(neutral, i), 1) * 2;
+                {   double neutralInsul = CSMath.minAbs(CSMath.shrink(neutral, i), CSMath.sign(neutral)) * 2;
                     renderCell(poseStack, x + 7, y + 1, neutralInsul, 6, false); // neutral cells
                     poseStack.translate(6, 0, 0);
                 }
 
                 // Hot insulation
-                for (int i = 0; i < CSMath.ceil(Math.abs(hot)) / 2; i++)
-                {   double hotInsul = CSMath.minAbs(CSMath.shrink(hot, i * 2), 2);
+                for (int i = 0; i < CSMath.ceil(Math.abs(heat) / 2); i++)
+                {   double hotInsul = CSMath.minAbs(CSMath.shrink(heat, i * 2), 2 * CSMath.sign(heat));
                     renderCell(poseStack, x + 7, y + 1, hotInsul, 18, false); // hot cells
                     poseStack.translate(6, 0, 0);
                 }
             }
+            finalWidth += 6;
         }
         poseStack.popPose();
 
@@ -386,6 +391,9 @@ public class ClientInsulationTooltip extends Tooltip
                 AbstractGui.blit(poseStack, x + 3, y + 2, 401, 19, 0, 5, 5, 24, 32);
             }
         }
+        // Return the width of the tooltip
+        if (!overflow) finalWidth += 2;
+        return finalWidth + 6;
     }
 }
 
