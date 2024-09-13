@@ -29,7 +29,7 @@ public record PredicateItem(Double value, ItemRequirement data, EntityRequiremen
         tag.putDouble("value", value);
         tag.put("data", data.serialize());
         tag.put("requirement", requirement.serialize());
-        if (extraData != null)
+        if (extraData != null && !extraData.isEmpty())
         {   tag.put("extraData", extraData);
         }
         return tag;
