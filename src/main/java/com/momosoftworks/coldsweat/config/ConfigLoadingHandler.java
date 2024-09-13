@@ -61,6 +61,7 @@ public class ConfigLoadingHandler
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void loadConfigs(FMLServerAboutToStartEvent event)
     {
+        ConfigSettings.clear();
         DynamicRegistries registries = event.getServer().registryAccess();
         // User JSON configs (config folder)
         collectUserRegistries(registries);
