@@ -55,6 +55,7 @@ import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
 import weather2.ServerTickHandler;
 import weather2.weathersystem.WeatherManagerServer;
 import weather2.weathersystem.storm.StormObject;
+import weather2.weathersystem.storm.WeatherObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -215,6 +216,28 @@ public class CompatManager
             }
         }
         return false;
+    }
+
+    public static WeatherObject getClosestStorm(Level level, BlockPos pos)
+    {
+        if (WEATHER_LOADED)
+        {
+            WeatherManagerServer weatherManager = ServerTickHandler.getWeatherManagerFor(level.dimension());
+            if (weatherManager == null) return null;
+
+            double distance = Double.MAX_VALUE;
+            WeatherObject closestStorm = null;
+            for (WeatherObject stormObject : weatherManager.getStormObjects())
+            {
+                double newDistance = stormObject.pos.distanceTo(new Vec3(pos.getX(), pos.getY(), pos.getZ()));
+                if (newDistance < distance)
+                {   distance = newDistance;
+                    closestStorm = stormObject;
+                }
+            }
+            return closestStorm;
+        }
+        return null;
     }
 
     public static boolean isColdEnoughToSnow(Level level, BlockPos pos)
