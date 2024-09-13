@@ -69,6 +69,7 @@ public class ConfigLoadingHandler
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void loadConfigs(ServerAboutToStartEvent event)
     {
+        ConfigSettings.clear();
         RegistryAccess registries = event.getServer().registryAccess();
         // User JSON configs (config folder)
         collectUserRegistries(registries);
