@@ -52,20 +52,20 @@ public class StaticInsulation extends Insulation
         heat -= neutral;
 
         // Cold insulation
-        for (int i = 0; i < CSMath.ceil(Math.abs(cold)) / 2; i++)
-        {   double coldInsul = CSMath.minAbs(CSMath.shrink(cold, i * 2), 2);
+        for (int i = 0; i < CSMath.ceil(Math.abs(cold) / 2); i++)
+        {   double coldInsul = CSMath.minAbs(CSMath.shrink(cold, i * 2), 2 * CSMath.sign(cold));
             insulation.add(new StaticInsulation(coldInsul, 0d));
         }
 
         // Neutral insulation
         for (int i = 0; i < CSMath.ceil(Math.abs(neutral)); i++)
-        {   double neutralInsul = CSMath.minAbs(CSMath.shrink(neutral, i), 1);
+        {   double neutralInsul = CSMath.minAbs(CSMath.shrink(neutral, i), 1 * CSMath.sign(neutral));
             insulation.add(new StaticInsulation(neutralInsul, neutralInsul));
         }
 
         // Heat insulation
-        for (int i = 0; i < CSMath.ceil(Math.abs(heat)) / 2; i++)
-        {   double heatInsul = CSMath.minAbs(CSMath.shrink(heat, i * 2), 2);
+        for (int i = 0; i < CSMath.ceil(Math.abs(heat) / 2); i++)
+        {   double heatInsul = CSMath.minAbs(CSMath.shrink(heat, i * 2),  2 * CSMath.sign(heat));
             insulation.add(new StaticInsulation(0d, heatInsul));
         }
         return insulation;

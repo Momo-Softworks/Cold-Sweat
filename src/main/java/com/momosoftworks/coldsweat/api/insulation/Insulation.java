@@ -90,7 +90,7 @@ public abstract class Insulation implements NbtSerializable
         newPairs.sort(Comparator.comparingDouble(pair ->
         {
             if (pair instanceof AdaptiveInsulation insul)
-                return Math.abs(insul.getInsulation()) >= 2 ? 7 : 6;
+                return Math.abs(insul.getInsulation()) >= 2 ? 6 : 7;
             else if (pair instanceof StaticInsulation insul)
             {
                 double absCold = Math.abs(insul.getCold());
