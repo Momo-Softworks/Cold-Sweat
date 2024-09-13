@@ -1028,4 +1028,11 @@ public class ConfigSettings
             });
         }
     }
+
+    public static void clear()
+    {
+        for (DynamicHolder<?> holder : CONFIG_SETTINGS.values())
+        {   holder.reset();
+        }
+    }
 }

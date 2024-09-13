@@ -171,6 +171,10 @@ public class DynamicHolder<T>
         }
     }
 
+    public void reset()
+    {   this.value = this.valueCreator.get();
+    }
+
     public boolean isSynced()
     {   return synced;
     }
