@@ -59,7 +59,7 @@ public class StaticInsulation extends Insulation
 
         // Neutral insulation
         for (int i = 0; i < CSMath.ceil(Math.abs(neutral)); i++)
-        {   double neutralInsul = CSMath.minAbs(CSMath.shrink(neutral, i), 1);
+        {   double neutralInsul = CSMath.minAbs(CSMath.shrink(neutral, i), 1 * CSMath.sign(neutral));
             insulation.add(new StaticInsulation(neutralInsul, neutralInsul));
         }
 
