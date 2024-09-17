@@ -248,8 +248,10 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
     public void tick(Level level, BlockPos pos)
     {
-        // Register the hearth's position to the global map
-        this.registerLocation();
+        // Init the hearth upon first tick
+        if (this.ticksExisted == 0)
+        {   this.init();
+        }
 
         // Easy access to clientside testList::stream
         boolean isClient = level.isClientSide;
@@ -708,6 +710,13 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     {   return CompatManager.isCreateLoaded() && (state.getBlock() instanceof FluidPipeBlock
                                                || state.getBlock() instanceof GlassFluidPipeBlock
                                                || state.getBlock() instanceof EncasedPipeBlock);
+    }
+
+    protected void init()
+    {
+        this.registerLocation();
+        this.checkForSmokestack();
+        this.checkInputSignal();
     }
 
     private void registerLocation()

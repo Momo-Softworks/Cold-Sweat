@@ -55,7 +55,6 @@ public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider
 
     public BoilerBlockEntity(BlockPos pos, BlockState state)
     {   super(ModBlockEntities.BOILER, pos, state);
-        TaskScheduler.schedule(this::checkForSmokestack, 5);
     }
 
     @Override
@@ -79,13 +78,13 @@ public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider
     }
 
     @Override
-    protected Component getDefaultName() {
-        return Component.translatable("container." + ColdSweat.MOD_ID + ".boiler");
+    protected Component getDefaultName()
+    {   return Component.translatable("container." + ColdSweat.MOD_ID + ".boiler");
     }
 
     @Override
-    public Component getDisplayName() {
-        return this.getCustomName() != null ? this.getCustomName() : this.getDefaultName();
+    public Component getDisplayName()
+    {   return this.getCustomName() != null ? this.getCustomName() : this.getDefaultName();
     }
 
     public static <T extends BlockEntity> void tick(Level level, BlockPos pos, BlockState state, T te)
