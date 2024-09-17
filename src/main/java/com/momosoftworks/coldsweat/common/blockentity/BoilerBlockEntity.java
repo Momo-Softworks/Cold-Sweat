@@ -5,12 +5,10 @@ import com.momosoftworks.coldsweat.common.block.BoilerBlock;
 import com.momosoftworks.coldsweat.common.container.BoilerContainer;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.type.PredicateItem;
-import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.init.*;
 import com.momosoftworks.coldsweat.core.network.message.BlockDataUpdateMessage;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
-import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -43,7 +41,6 @@ public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider
 
     public BoilerBlockEntity(BlockPos pos, BlockState state)
     {   super(ModBlockEntities.BOILER.value(), pos, state);
-        TaskScheduler.schedule(this::checkForSmokestack, 5);
     }
 
     @Override
@@ -68,13 +65,13 @@ public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider
     }
 
     @Override
-    protected Component getDefaultName() {
-        return Component.translatable("container." + ColdSweat.MOD_ID + ".boiler");
+    protected Component getDefaultName()
+    {   return Component.translatable("container." + ColdSweat.MOD_ID + ".boiler");
     }
 
     @Override
-    public Component getDisplayName() {
-        return this.getCustomName() != null ? this.getCustomName() : this.getDefaultName();
+    public Component getDisplayName()
+    {   return this.getCustomName() != null ? this.getCustomName() : this.getDefaultName();
     }
 
     public static <T extends BlockEntity> void tick(Level level, BlockPos pos, BlockState state, T te)

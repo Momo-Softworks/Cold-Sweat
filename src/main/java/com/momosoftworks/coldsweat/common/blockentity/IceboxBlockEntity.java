@@ -78,7 +78,6 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
 
     public IceboxBlockEntity(BlockPos pos, BlockState state)
     {   super(ModBlockEntities.ICEBOX.value(), pos, state);
-        TaskScheduler.schedule(this::checkForSmokestack, 5);
     }
 
     @Override
