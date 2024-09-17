@@ -1,24 +1,25 @@
 package com.momosoftworks.coldsweat.client.event;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.*;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.temperature.modifier.WaterTempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
+import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import oshi.util.tuples.Triplet;
@@ -119,8 +120,14 @@ public class WetnessRenderer
             WATER_DROPS.add(createDrop(screenWidth, screenHeight));
         }
 
-        // Handle rendering & movement of water drops
+        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
         RenderSystem.enableBlend();
+        RenderSystem.setShaderTexture(0, WATER_DROP);
+
+        GuiGraphics graphics = event.getGuiGraphics();
+        BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+
+        // Handle rendering & movement of water drops
         for (int i = 0; i < WATER_DROPS.size(); i++)
         {
             Droplet drop = WATER_DROPS.get(i);
@@ -131,8 +138,8 @@ public class WetnessRenderer
             if (alpha > 0)
             {
                 // Render the water drop
-                RenderSystem.setShaderColor(brightness, brightness, brightness, alpha);
-                event.getGuiGraphics().blit(WATER_DROP, (int) CSMath.roundNearest(pos.x, 3f/uiScale), (int)pos.y, size, size, 0, 0, 8, 8, 8, 8);
+                renderQuad(graphics, bufferBuilder, (int) CSMath.roundNearest(pos.x, 3f/uiScale), (int)pos.y, size, size, 0, 0, 1, 1,
+                           brightness, brightness, brightness, alpha);
 
                 // Update the drop's position and alpha
                 if (!paused)
@@ -198,8 +205,14 @@ public class WetnessRenderer
                 i--;
             }
         }
+        MeshData meshData = bufferBuilder.build();
+        if (meshData != null)
+        {   BufferUploader.drawWithShader(meshData);
+        }
 
         // Render water drop trails
+        bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        RenderSystem.setShaderTexture(0, WATER_DROP_TRAIL);
         for (int i = 0; i < TRAILS.size(); i++)
         {
             Triplet<Vector2i, Float, Integer> trail = TRAILS.get(i);
@@ -209,8 +222,8 @@ public class WetnessRenderer
 
             if (alpha > 0)
             {
-                RenderSystem.setShaderColor(brightness, brightness, brightness, alpha);
-                event.getGuiGraphics().blit(WATER_DROP_TRAIL, (int) CSMath.roundNearest(pos.x, 3f/uiScale * 4), pos.y, size, 1, 0, 0, 8, 1, 8, 1);
+                renderQuad(graphics, bufferBuilder, (int) CSMath.roundNearest(pos.x, 3f/uiScale * 4), pos.y, size, 1, 0, 0, 1, 1,
+                           brightness, brightness, brightness, alpha);
                 if (!paused)
                 {   TRAILS.set(i, new Triplet<>(new Vector2i(pos.x, pos.y), alpha - 0.045f * frametime, size));
                 }
@@ -220,7 +233,10 @@ public class WetnessRenderer
                 i--;
             }
         }
-        RenderSystem.setShaderColor(1, 1, 1, 1);
+        meshData = bufferBuilder.build();
+        if (meshData != null)
+        {   BufferUploader.drawWithShader(meshData);
+        }
     }
 
     private static float getRandomVelocity(float frametime)
@@ -232,6 +248,17 @@ public class WetnessRenderer
     {
         int size = new Random().nextInt(32, 40);
         return new Droplet(new Vector2f((int) (Math.random() * screenWidth), -size), 1f, size);
+    }
+
+    private static void renderQuad(GuiGraphics graphics, BufferBuilder bufferBuilder, int x, int y,
+                                   int width, int height, float u, float v, float uWidth, float vHeight,
+                                   float r, float g, float b, float a)
+    {
+        Matrix4f lastPose = graphics.pose().last().pose();
+        bufferBuilder.addVertex(lastPose, x, y, 0).setUv(u, v).setColor(r, g, b, a);
+        bufferBuilder.addVertex(lastPose, x, y + height, 0).setUv(u, v + vHeight).setColor(r, g, b, a);
+        bufferBuilder.addVertex(lastPose, x + width, y + height, 0).setUv(u + uWidth, v + vHeight).setColor(r, g, b, a);
+        bufferBuilder.addVertex(lastPose, x + width, y, 0).setUv(u + uWidth, v).setColor(r, g, b, a);
     }
 
     protected static class Droplet
