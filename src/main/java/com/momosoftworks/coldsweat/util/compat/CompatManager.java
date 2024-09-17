@@ -218,7 +218,7 @@ public class CompatManager
         return false;
     }
 
-    public static WeatherObject getClosestStorm(Level level, BlockPos pos)
+    public static Object getClosestStorm(Level level, BlockPos pos)
     {
         if (WEATHER_LOADED)
         {
