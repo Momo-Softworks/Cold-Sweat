@@ -1,29 +1,19 @@
 package com.momosoftworks.coldsweat.common.blockentity;
 
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.api.temperature.modifier.BlockInsulationTempModifier;
-import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
-import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.block.BoilerBlock;
 import com.momosoftworks.coldsweat.common.container.BoilerContainer;
-import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.item.FilledWaterskinItem;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.config.type.PredicateItem;
-import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.init.BlockEntityInit;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.BlockDataUpdateMessage;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
-import com.momosoftworks.coldsweat.util.compat.CompatManager;
-import com.momosoftworks.coldsweat.util.registries.ModBlockEntities;
-import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.ISidedInventory;
@@ -32,13 +22,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
-import net.minecraft.potion.EffectInstance;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
@@ -51,7 +39,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.Optional;
 
 public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTileEntity, ISidedInventory
 {
@@ -65,7 +52,6 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
 
     public BoilerBlockEntity()
     {   super(BlockEntityInit.BOILER_BLOCK_ENTITY_TYPE.get());
-        TaskScheduler.schedule(this::checkForSmokestack, 5);
     }
 
     @Override
@@ -89,13 +75,13 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
     }
 
     @Override
-    protected ITextComponent getDefaultName() {
-        return new TranslationTextComponent("container." + ColdSweat.MOD_ID + ".boiler");
+    protected ITextComponent getDefaultName()
+    {   return new TranslationTextComponent("container." + ColdSweat.MOD_ID + ".boiler");
     }
 
     @Override
-    public ITextComponent getDisplayName() {
-        return this.getCustomName() != null ? this.getCustomName() : this.getDefaultName();
+    public ITextComponent getDisplayName()
+    {   return this.getCustomName() != null ? this.getCustomName() : this.getDefaultName();
     }
 
     @Override

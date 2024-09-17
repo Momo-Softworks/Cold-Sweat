@@ -1,9 +1,6 @@
 package com.momosoftworks.coldsweat.common.blockentity;
 
 import com.mojang.datafixers.util.Pair;
-import com.simibubi.create.content.contraptions.fluids.pipes.EncasedPipeBlock;
-import com.simibubi.create.content.contraptions.fluids.pipes.FluidPipeBlock;
-import com.simibubi.create.content.contraptions.fluids.pipes.GlassFluidPipeBlock;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.common.BlockStateChangedEvent;
 import com.momosoftworks.coldsweat.api.temperature.modifier.BlockInsulationTempModifier;
@@ -12,11 +9,10 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.event.HearthDebugRenderer;
 import com.momosoftworks.coldsweat.common.block.HearthBottomBlock;
 import com.momosoftworks.coldsweat.common.block.SmokestackBlock;
+import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.container.HearthContainer;
 import com.momosoftworks.coldsweat.common.event.HearthSaveDataHandler;
-import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.config.type.PredicateItem;
 import com.momosoftworks.coldsweat.core.init.BlockEntityInit;
 import com.momosoftworks.coldsweat.core.init.ParticleTypesInit;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
@@ -32,7 +28,13 @@ import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.world.SpreadPath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
-import net.minecraft.block.*;
+import com.simibubi.create.content.contraptions.fluids.pipes.EncasedPipeBlock;
+import com.simibubi.create.content.contraptions.fluids.pipes.FluidPipeBlock;
+import com.simibubi.create.content.contraptions.fluids.pipes.GlassFluidPipeBlock;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.RotatedPillarBlock;
+import net.minecraft.block.WallBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.ParticleStatus;
 import net.minecraft.entity.player.PlayerEntity;
@@ -76,8 +78,8 @@ import net.minecraftforge.fml.network.PacketDistributor;
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber
 public class HearthBlockEntity extends LockableLootTileEntity implements ITickableTileEntity
@@ -234,8 +236,10 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     public void tick()
     {
         BlockPos pos = this.getBlockPos();
-        // Register the hearth's position to the global map
-        this.registerLocation();
+        // Init the hearth upon first tick
+        if (this.ticksExisted == 0)
+        {   this.init();
+        }
 
         // Easy access to clientside testList::stream
         boolean isClient = level.isClientSide;
@@ -697,6 +701,13 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     {   return CompatManager.isCreateLoaded() && (state.getBlock() instanceof FluidPipeBlock
                                                || state.getBlock() instanceof GlassFluidPipeBlock
                                                || state.getBlock() instanceof EncasedPipeBlock);
+    }
+
+    protected void init()
+    {
+        this.registerLocation();
+        this.checkForSmokestack();
+        this.checkInputSignal();
     }
 
     private void registerLocation()
