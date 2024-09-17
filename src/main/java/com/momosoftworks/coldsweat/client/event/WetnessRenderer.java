@@ -11,12 +11,14 @@ import com.momosoftworks.coldsweat.util.math.Vec2f;
 import com.momosoftworks.coldsweat.util.math.Vec2i;
 import com.momosoftworks.coldsweat.util.serialization.Triplet;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -122,8 +124,13 @@ public class WetnessRenderer
             WATER_DROPS.add(createDrop(screenWidth, screenHeight));
         }
 
-        // Handle rendering & movement of water drops
         RenderSystem.enableBlend();
+        Minecraft.getInstance().textureManager.bind(WATER_DROP);
+
+        BufferBuilder bufferBuilder = Tessellator.getInstance().getBuilder();
+        bufferBuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+
+        // Handle rendering & movement of water drops
         for (int i = 0; i < WATER_DROPS.size(); i++)
         {
             Droplet drop = WATER_DROPS.get(i);
@@ -134,10 +141,8 @@ public class WetnessRenderer
             if (alpha > 0)
             {
                 // Render the water drop
-                RenderSystem.color4f(brightness, brightness, brightness, alpha);
-                mc.textureManager.bind(WATER_DROP);
-
-                AbstractGui.blit(ps, (int) CSMath.roundNearest(pos.x, 3f/uiScale), (int)pos.y, size, size, 0, 0, 8, 8, 8, 8);
+                renderQuad(ps, bufferBuilder, (int) CSMath.roundNearest(pos.x, 3f/uiScale), (int)pos.y, size, size, 0, 0, 1, 1,
+                           brightness, brightness, brightness, alpha);
 
                 // Update the drop's position and alpha
                 if (!paused)
@@ -203,8 +208,11 @@ public class WetnessRenderer
                 i--;
             }
         }
+        Tessellator.getInstance().end();
 
         // Render water drop trails
+        bufferBuilder.begin(7, DefaultVertexFormats.POSITION_TEX_COLOR);
+        Minecraft.getInstance().textureManager.bind(WATER_DROP_TRAIL);
         for (int i = 0; i < TRAILS.size(); i++)
         {
             Triplet<Vec2i, Float, Integer> trail = TRAILS.get(i);
@@ -214,9 +222,8 @@ public class WetnessRenderer
 
             if (alpha > 0)
             {
-                RenderSystem.color4f(brightness, brightness, brightness, alpha);
-                mc.textureManager.bind(WATER_DROP_TRAIL);
-                Screen.blit(ps, (int) CSMath.roundNearest(pos.x, 3f/uiScale * 4), pos.y, size, 1, 0, 0, 8, 1, 8, 1);
+                renderQuad(ps, bufferBuilder, (int) CSMath.roundNearest(pos.x, 3f/uiScale * 4), pos.y, size, 1, 0, 0, 1, 1,
+                           brightness, brightness, brightness, alpha);
                 if (!paused)
                 {   TRAILS.set(i, new Triplet<>(new Vec2i(pos.x, pos.y), alpha - 0.045f * frametime, size));
                 }
@@ -226,7 +233,7 @@ public class WetnessRenderer
                 i--;
             }
         }
-        RenderSystem.color4f(1, 1, 1, 1);
+        Tessellator.getInstance().end();
     }
 
     private static float getRandomVelocity(float frametime)
@@ -238,6 +245,17 @@ public class WetnessRenderer
     {
         int size = new Random().nextInt(8) + 32;
         return new Droplet(new Vec2f((int) (Math.random() * screenWidth), -size), 1f, size);
+    }
+
+    private static void renderQuad(MatrixStack poseStack, BufferBuilder bufferBuilder, int x, int y,
+                                   int width, int height, float u, float v, float uWidth, float vHeight,
+                                   float r, float g, float b, float a)
+    {
+        Matrix4f lastPose = poseStack.last().pose();
+        bufferBuilder.vertex(lastPose, x, y, 0).uv(u, v).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(lastPose, x, y + height, 0).uv(u, v + vHeight).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(lastPose, x + width, y + height, 0).uv(u + uWidth, v + vHeight).color(r, g, b, a).endVertex();
+        bufferBuilder.vertex(lastPose, x + width, y, 0).uv(u + uWidth, v).color(r, g, b, a).endVertex();
     }
 
     protected static class Droplet
