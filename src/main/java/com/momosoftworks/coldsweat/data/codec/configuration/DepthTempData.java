@@ -40,13 +40,9 @@ public class DepthTempData implements IForgeRegistryEntry<DepthTempData>
     public boolean withinBounds(World level, BlockPos pos)
     {
         DimensionType dim = level.dimensionType();
-        int i;
-        for (i = 0; i < this.dimensions.size(); i++)
-        {
-            DimensionType dimension = this.dimensions.get(i);
-            if (dimension.equals(dim)) break;
+        if (!CSMath.anyMatch(dimension -> dimension.equals(dim), this.dimensions))
+        {   return false;
         }
-        if (i == this.dimensions.size() - 1) return false;
         for (TempRegion region : temperatures)
         {
             if (region.withinBounds(level, pos))

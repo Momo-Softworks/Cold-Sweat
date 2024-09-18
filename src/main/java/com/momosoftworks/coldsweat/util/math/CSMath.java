@@ -846,10 +846,41 @@ public class CSMath
         return false;
     }
 
+    /**
+     * Returns true if the given string contains any of the provided substrings.
+     */
     public static boolean containsAny(String string, String... values)
     {
         for (String value : values)
         {   if (string.contains(value)) return true;
+        }
+        return false;
+    }
+
+    /**
+     * Optimized anyMatch() method for lists using a basic for loop, because Iterators are slow.
+     */
+    public static <T> boolean anyMatch(Predicate<T> predicate, List<T> list)
+    {
+        for (int i = 0; i < list.size(); i++)
+        {
+            if (predicate.test(list.get(i)))
+            {   return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Generic anyMatch() method for collections using an enhanced for loop.
+     */
+    public static <T> boolean anyMatch(Predicate<T> predicate, Collection<T> collection)
+    {
+        for (T t : collection)
+        {
+            if (predicate.test(t))
+            {   return true;
+            }
         }
         return false;
     }
