@@ -39,7 +39,7 @@ public class MixinSpoiledIcebox
             icebox.setFuel(icebox.getFuel() - 1);
              return 0.0;
         }
-        return 1.0;
+        return o;
     }
 
     @Mixin(SpoiledConfigCache.class)
