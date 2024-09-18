@@ -156,7 +156,7 @@
   "cold_sweat.config.distortion.desc":              "Enables screen distortion, shaking, and swaying effects.",
   "cold_sweat.config.config_button_pos.desc":       "Open the options menu with controls for repositioning the config button.",
   "cold_sweat.config.cold_freezing_hearts.desc":    "Controls how much of the player's hearts freeze over when cold, preventing them from regenerating.",
-  "cold_sweat.config.cold_knockback_reduction.desc":"Reduces the amount of knockback the player receives when their body temperature is cold.",
+  "cold_sweat.config.cold_knockback_reduction.desc":"Reduces the knockback of the player's attacks when their body temperature is cold.",
   "cold_sweat.config.cold_mining_impairment.desc":  "Decreases the player's mining speed when their body temperature is cold.",
   "cold_sweat.config.cold_movement_slowdown.desc":  "Slows the player's movement speed when their body temperature is cold.",
   "cold_sweat.config.custom_hotbar.desc":           "Enables Cold Sweat's custom hotbar layout (disable this if it is clashing with other mods).",
