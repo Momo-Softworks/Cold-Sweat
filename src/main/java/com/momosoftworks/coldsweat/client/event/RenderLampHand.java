@@ -10,6 +10,7 @@ import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.renderer.FirstPersonRenderer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
+import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.entity.LivingEntity;
@@ -24,6 +25,8 @@ import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+
+import java.lang.Math;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class RenderLampHand
@@ -104,7 +107,7 @@ public class RenderLampHand
             // Turn the player's arm so their "palm" is face-down
             float sideMultiplier = side == HandSide.RIGHT ? 1 : -1;
             arm.zRot += (float) (0.5*Math.PI) * sideMultiplier;
-            arm.yRot = -arm.xRot * sideMultiplier - (float) (0.5*Math.PI) * sideMultiplier;
+            arm.yRot = -arm.xRot * sideMultiplier - (float) (0.5*Math.PI) * sideMultiplier * 1.04f;
             arm.xRot = (float) -Math.PI/2;
             arm.x -= 1 * sideMultiplier;
             if (player.isCrouching())
@@ -113,25 +116,40 @@ public class RenderLampHand
 
             // Better swinging animation
             if (player.swinging && side == EntityHelper.getArmFromHand(player.swingingArm, player))
-            {
-                float partialTick = Minecraft.getInstance().getFrameTime();
-                float attackAnim = player.getAttackAnim(partialTick);
-                float playerPitch = player.getViewXRot(partialTick);
-                float pitchFactor = getSwingHorizontalOffset(side, playerPitch);
-                float midSwingPoint = side == HandSide.RIGHT ? 0.125f : 0.05f;
-
-                if (attackAnim < midSwingPoint)
-                {   arm.xRot += CSMath.blend(0, 1, attackAnim, 0, midSwingPoint) / pitchFactor;
-                }
-                else
-                {   arm.xRot += CSMath.blend(1, 0, attackAnim, midSwingPoint, 1) / pitchFactor;
-                }
-                float pitchSwingHeight = playerPitch < 0 ? playerPitch/20 : playerPitch/60;
-                arm.yRot += (Math.pow(attackAnim - 0.5, 2) - 0.25) * pitchSwingHeight * sideMultiplier;
-                if (side == HandSide.LEFT)
-                {   arm.zRot += Math.sin(attackAnim*Math.PI)*0.5f;
-                }
+            {   swingArm(arm, player, side);
             }
+        }
+    }
+
+    private static void swingArm(ModelRenderer arm, LivingEntity player, HandSide side)
+    {
+        float sideMultiplier = side == HandSide.RIGHT ? 1 : -1;
+        float partialTick = Minecraft.getInstance().getFrameTime();
+        float attackAnim = player.getAttackAnim(partialTick);
+        float playerPitch = player.getViewXRot(partialTick);
+        float pitchFactor = getSwingHorizontalOffset(side, playerPitch);
+        float windUpTime = 0.3f;
+        float windUpPoint = 1.5f;
+        float midSwingTime = 0.7f;
+
+        if (attackAnim < windUpTime / 3)
+        {
+            arm.xRot += CSMath.blendLog(0f, windUpPoint, attackAnim, 0, windUpTime / 3) / pitchFactor;
+        }
+        else if (attackAnim < windUpTime)
+        {
+            arm.xRot += CSMath.blendLog(windUpPoint, 1f, attackAnim, windUpTime / 3, windUpTime) / pitchFactor;
+        }
+        else if (attackAnim < midSwingTime)
+        {   arm.xRot += CSMath.blend(1f, 0.2f, attackAnim, windUpTime, midSwingTime) / pitchFactor;
+        }
+        else
+        {   arm.xRot += CSMath.blendExp(0.2f, 0f, attackAnim, midSwingTime, 1) / pitchFactor;
+        }
+        float pitchSwingHeight = playerPitch < 0 ? playerPitch/20 : playerPitch/60;
+        arm.yRot += (Math.pow(attackAnim - 0.5, 2) - 0.25) * pitchSwingHeight * sideMultiplier;
+        if (side == HandSide.LEFT)
+        {   arm.zRot += Math.sin(attackAnim*Math.PI)*0.5f;
         }
     }
 
@@ -140,15 +158,41 @@ public class RenderLampHand
         float pitchFactor;
         if (side == HandSide.RIGHT)
         {
-            pitchFactor = playerPitch < 0 ? CSMath.blend(1f, 0.6f, playerPitch, 0, -90)
-                                          : CSMath.blend(1f, 3f, playerPitch, 0, 90);
+            pitchFactor = playerPitch < 0 ? CSMath.blend(1.8f, 0.6f, playerPitch, 0, -90)
+                                          : CSMath.blend(1.8f, 3f, playerPitch, 0, 90);
         }
         else
         {
-            pitchFactor = playerPitch < 0 ? CSMath.blend(1f, 0.6f, playerPitch, 0, -90)
-                                          : CSMath.blend(1f, 3f, playerPitch, 0, 90);
+            pitchFactor = playerPitch < 0 ? CSMath.blend(3f, 0.5f, playerPitch, 0, -90)
+                                          : CSMath.blend(3f, 3f, playerPitch, 0, 90);
         }
         return pitchFactor;
+    }
+
+    public static void rotateArmorShoulder(BipedModel<?> model, HandSide side, boolean slim)
+    {
+        if (side == HandSide.RIGHT)
+        {
+            float xRot = model.rightArm.xRot;
+            model.rightArm.zRot -= CSMath.toRadians(90);
+            model.rightArm.xRot = -model.rightArm.yRot - CSMath.toRadians(90);
+            model.rightArm.yRot = xRot + CSMath.toRadians(90);
+            model.rightArm.x += 1;
+            if (!slim)
+            {   model.rightArm.y -= 1;
+            }
+        }
+        else if (side == HandSide.LEFT)
+        {
+            float xRot = model.leftArm.xRot;
+            model.leftArm.zRot += CSMath.toRadians(90);
+            model.leftArm.xRot = model.leftArm.yRot - CSMath.toRadians(90);
+            model.leftArm.yRot = -xRot - CSMath.toRadians(90);
+            model.leftArm.x -= 1;
+            if (!slim)
+            {   model.leftArm.y -= 1;
+            }
+        }
     }
 
     private static void renderHand(MatrixStack ms, IRenderTypeBuffer bufferSource, int light, AbstractClientPlayerEntity player, boolean isRightHand,

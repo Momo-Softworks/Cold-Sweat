@@ -20,7 +20,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.HandSide;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -28,8 +27,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-
-import java.lang.reflect.Field;
 
 @Mixin(BipedModel.class)
 public class MixinSoulLampRendering
@@ -160,6 +157,7 @@ public class MixinSoulLampRendering
     public static class ChestplateArms<T extends LivingEntity, M extends BipedModel<T>, A extends BipedModel<T>>
     {
         BipedArmorLayer<T, M, A> self = (BipedArmorLayer<T, M, A>) (Object) this;
+
         @Inject(method = "renderArmorPiece", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/model/BipedModel;copyPropertiesTo(Lnet/minecraft/client/renderer/entity/model/BipedModel;)V", shift = At.Shift.AFTER))
         public void renderChestplateArms(MatrixStack poseStack, IRenderTypeBuffer buffer, T entity, EquipmentSlotType slot, int light, A model, CallbackInfo ci)
         {
@@ -167,23 +165,11 @@ public class MixinSoulLampRendering
             {
                 if (EntityHelper.holdingLamp(entity, HandSide.RIGHT))
                 {
-                    model.rightArm.zRot -= CSMath.toRadians(90);
-                    model.rightArm.xRot = -model.rightArm.yRot - CSMath.toRadians(90);
-                    model.rightArm.yRot = 0;
-                    model.rightArm.x += 1;
-                    if (!ClientOnlyHelper.isPlayerModelSlim(self))
-                    {   model.rightArm.y -= 1;
-                    }
+                    RenderLampHand.rotateArmorShoulder(model, HandSide.RIGHT, ClientOnlyHelper.isPlayerModelSlim(self));
                 }
                 if (EntityHelper.holdingLamp(entity, HandSide.LEFT))
                 {
-                    model.leftArm.zRot += CSMath.toRadians(90);
-                    model.leftArm.xRot = model.leftArm.yRot - CSMath.toRadians(90);
-                    model.leftArm.yRot = 0;
-                    model.leftArm.x -= 1;
-                    if (!ClientOnlyHelper.isPlayerModelSlim(self))
-                    {   model.leftArm.y -= 1;
-                    }
+                    RenderLampHand.rotateArmorShoulder(model, HandSide.LEFT, ClientOnlyHelper.isPlayerModelSlim(self));
                 }
             }
         }
