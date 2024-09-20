@@ -144,6 +144,7 @@ public class MixinSoulLampRendering
     public static class ChestplateArms<T extends LivingEntity, M extends HumanoidModel<T>, A extends HumanoidModel<T>>
     {
         HumanoidArmorLayer<T, M, A> self = (HumanoidArmorLayer<T, M, A>) (Object) this;
+
         @Inject(method = "renderArmorPiece", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/HumanoidModel;copyPropertiesTo(Lnet/minecraft/client/model/HumanoidModel;)V", shift = At.Shift.AFTER))
         public void renderChestplateArms(PoseStack poseStack, MultiBufferSource buffer, T entity, EquipmentSlot slot, int light, A model, CallbackInfo ci)
         {
@@ -151,23 +152,11 @@ public class MixinSoulLampRendering
             {
                 if (EntityHelper.holdingLamp(entity, HumanoidArm.RIGHT))
                 {
-                    model.rightArm.zRot -= CSMath.toRadians(90);
-                    model.rightArm.xRot = -model.rightArm.yRot - CSMath.toRadians(90);
-                    model.rightArm.yRot = 0;
-                    model.rightArm.x += 1;
-                    if (!ClientOnlyHelper.isPlayerModelSlim(self))
-                    {   model.rightArm.y -= 1;
-                    }
+                    RenderLampHand.rotateArmorShoulder(model, HumanoidArm.RIGHT, ClientOnlyHelper.isPlayerModelSlim(self));
                 }
                 if (EntityHelper.holdingLamp(entity, HumanoidArm.LEFT))
                 {
-                    model.leftArm.zRot += CSMath.toRadians(90);
-                    model.leftArm.xRot = model.leftArm.yRot - CSMath.toRadians(90);
-                    model.leftArm.yRot = 0;
-                    model.leftArm.x -= 1;
-                    if (!ClientOnlyHelper.isPlayerModelSlim(self))
-                    {   model.leftArm.y -= 1;
-                    }
+                    RenderLampHand.rotateArmorShoulder(model, HumanoidArm.LEFT, ClientOnlyHelper.isPlayerModelSlim(self));
                 }
             }
         }
