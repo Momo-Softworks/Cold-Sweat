@@ -262,16 +262,48 @@ public class CSMath
 
     public static double blendExp(double blendFrom, double blendTo, double factor, double rangeMin, double rangeMax)
     {
-        if (factor <= rangeMin) return blendFrom;
-        if (factor >= rangeMax) return blendTo;
-        return (blendTo - blendFrom) / (rangeMax - rangeMin) * Math.exp(factor - rangeMin) + blendFrom;
+        // Ensure factor is within the specified range
+        factor = Math.max(rangeMin, Math.min(factor, rangeMax));
+
+        // Normalize the factor to a 0-1 range
+        double normalizedFactor = (factor - rangeMin) / (rangeMax - rangeMin);
+
+        // Apply exponential curve to the normalized factor
+        float expFactor = (float) ((Math.exp(normalizedFactor) - 1) / (Math.E - 1));
+
+        // Perform the blend
+        return blendFrom + (blendTo - blendFrom) * expFactor;
     }
 
     public static float blendExp(float blendFrom, float blendTo, float factor, float rangeMin, float rangeMax)
     {
-        if (factor <= rangeMin) return blendFrom;
-        if (factor >= rangeMax) return blendTo;
-        return (blendTo - blendFrom) / (rangeMax - rangeMin) * (float) Math.exp(factor - rangeMin) + blendFrom;
+        // Ensure factor is within the specified range
+        factor = Math.max(rangeMin, Math.min(factor, rangeMax));
+
+        // Normalize the factor to a 0-1 range
+        float normalizedFactor = (factor - rangeMin) / (rangeMax - rangeMin);
+
+        // Apply exponential curve to the normalized factor
+        float expFactor = (float) ((Math.exp(normalizedFactor) - 1) / (Math.E - 1));
+
+        // Perform the blend
+        return blendFrom + (blendTo - blendFrom) * expFactor;
+    }
+
+    // Eases in and out, like a combination of blendLog and blendExp
+    public static float blendInOut(float blendFrom, float blendTo, float factor, float rangeMin, float rangeMax)
+    {
+        // Ensure factor is within the specified range
+        factor = Math.max(rangeMin, Math.min(factor, rangeMax));
+
+        // Normalize the factor to a 0-1 range
+        float normalizedFactor = (factor - rangeMin) / (rangeMax - rangeMin);
+
+        // Apply ease-in-out curve to the normalized factor
+        float expFactor = (float) (Math.pow(normalizedFactor, 2) / (Math.pow(normalizedFactor, 2) + Math.pow(1 - normalizedFactor, 2)));
+
+        // Perform the blend
+        return blendFrom + (blendTo - blendFrom) * expFactor;
     }
 
     /**
