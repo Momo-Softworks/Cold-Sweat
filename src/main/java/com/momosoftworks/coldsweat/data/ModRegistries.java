@@ -19,7 +19,7 @@ public class ModRegistries
     public static final ResourceKey<Registry<BiomeTempData>> BIOME_TEMP_DATA = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "world/biome_temp"));
     public static final ResourceKey<Registry<DimensionTempData>> DIMENSION_TEMP_DATA = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "world/dimension_temp"));
     public static final ResourceKey<Registry<StructureTempData>> STRUCTURE_TEMP_DATA = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "world/structure_temp"));
-    public static final ResourceKey<Registry<DepthTempData>> DEPTH_TEMP_DATA = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "world/depth_temp"));
+    public static final ResourceKey<Registry<DepthTempData>> DEPTH_TEMP_DATA = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "world/temp_region"));
 
     // Entity Registries
     public static final ResourceKey<Registry<MountData>> MOUNT_DATA = ResourceKey.createRegistryKey(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "entity/mount"));
