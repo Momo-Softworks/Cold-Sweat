@@ -2411,6 +2411,7 @@ Fixes:
       - This config is in entity-settings.toml or as JSON under entity/entity_temp/
 - Added a tooltip explaining that game-altering settings in the config menu are disabled for non-OP players
 - Added a tooltip to insulated armor items that shows which attributes come from insulation
+- Added config setting to disable Cold Sweat's custom water freezing behavior
 
 Fixes:
 * (1.16) Fixed crash when Caves and Cliffs is not installed
@@ -2424,13 +2425,21 @@ Fixes:
 - Fixed water not accurately using the current season to determine freezing behavior
 - Fixed soul fire and soul campfire not respecting the "Cold Soul Fire" config setting
 - Fixed hearth-like blocks giving insulating effects to players 1 block outside its area-of-effect
+- Fixed hover tooltips for temperature units in /temp debug not working properly
 
 Technical Changes:
 * Items, blocks, entities, etc. can now have multiple config setting applied to them
       - This, for example, allows multiple settings with different conditions and effects to be applied
       - If multiple valid settings are found, they will either stack or override each other depending on the object
-      - This is most useful in JSON configs
-- Depth temperature JSON configs now support a "dimensions" field, which limits the effect to the specified dimensions/tags
+* Changed the load order of configs & custom registries to be more consistent and sensible:
+      - User JSON configs (config/coldsweat/data/*)
+      - Java-based configs (BlockTemps only)
+      - Datapack JSON configs (data/<namespace>/cold_sweat/*)
+      - User TOML configs (config/coldsweat/*.toml)
+      - Configs loaded first will take precedence in cases where they do not stack, such as block temps and fuel items
+* Added new fields to depth temperature JSON configs:
+      - "required_mods": A list of mods that must be installed for the config to be loaded
+      - "dimensions": A list of dimensions or tags that the config will apply to
 * Added many new dynamic dimension tags (1.18+):
       * These tags are dynamically filled, meaning they should work for all modded dimensions regardless of support
       - #forge:bed_works: If beds are usable in the dimension
@@ -2444,8 +2453,44 @@ Technical Changes:
       - #forge:respawn_anchor_works: If respawn anchors are usable in the dimension
       - #forge:ultrawarm: If the dimension is extremely hot (i.e. the Nether)
       - #forge:unnatural: Inverse of #forge:natural
+* Added new arguments for TOML-based block temp configs:
+      - nbt: Optional. The block entity's NBT data must match this to apply the temperature (fails the check if the block has no block entity)
+      - max-temp: Optional. The maximum world temperature at which the block temp will be effective. If the block's temperature is negative, this will be the minimum temperature
+- Added max_temp and min_temp fields to block temp JSON configs
+- Block temperatures for ice blocks, boiler, icebox, and campfires have been moved to TOML rather than Java
+      - They will be automatically re-added to world_settings.toml
 - Optimized the hearth's spreading algorithm
 - Optimized the performance of non-player temperature-affected entities
 - Any block tagged as #minecraft:ice will now cool the nearby area like Vanilla ice blocks
 - Any block tagged as #minecraft:campfires will now heat the nearby area like Vanilla campfires (except for the soul campfire)
 - TempModifiers are no longer synced to the client if a modifier is replaced with an identical one
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.3.5
+- Wind, sandstorms, and tornadoes from Weather 2 will now affect the player's temperature
+- Increased the maximum volume of the hearth's effect from 9000 to 12000 blocks
+- Increased the maximum volume of the icebox & boiler's effect from 1500 to 2000 blocks
+
+Fixes:
+* Fixed crash when attempting to update config settings with invalid formatting
+* Fixed config-driven features stacking in effectiveness when entering multiple worlds in the same session
+* Fixed temperature not changing properly when the player travels underground
+- Fixed the insulation tooltip not displaying partial, negative, or large
+- Fixed Spoiled compatibility causing "containerModifier" blocks defined in the Spoiled configs to not work properly
+* Fixed hearth-like blocks forgetting that they are powered upon unloading and reloading the chunk
+* Fixed hearth-like blocks causing chunk-loading deadlocks upon loading in some cases
+- Fixed performance issues while rendering the "wetness" screen effect
+- Fixed the description of "Knockback Chill" stating received knockback is reduced, rather than dealt knockback
+- (1.20) Fixed the selected item's name overlapping the player's body temperature icon when a thermometer is equipped
+- (1.21) Fixed invalid formatting for the hearth's recipe
+
+Technical Changes:
+* Food temperature configs now stack when applied to the same item, rather than only using the first one loaded
+* Temperature region changes:
+      - Moved from /depth_temp/ to /temp_region/
+      - Temperature regions now support y-values outside the world limits
+      - Temperature regions now support "boundless" temp regions by omitting either the "top" or "bottom" bound
+            - These apply infinitely upward or downward (but not both), and have a constant temperature
+* Java-based block temperatures are now loaded last to allow user configs to override them
+      - A registerFirst() method has been added to BlockTempRegisterEvent for BlockTemps that must break this rule and be registered first
