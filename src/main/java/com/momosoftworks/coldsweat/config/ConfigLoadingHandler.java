@@ -69,13 +69,13 @@ public class ConfigLoadingHandler
         DynamicRegistries registries = event.getServer().registryAccess();
         // User JSON configs (config folder)
         collectUserRegistries(registries);
-        // Java-based block temps
-        TempModifierInit.buildBlockRegistries();
         // JSON configs (data resources)
         collectRegistries(registries);
         // User configs (TOML)
         ConfigSettings.load(registries, false);
         TempModifierInit.buildBlockConfigs();
+        // Post-toml Java BlockTemps
+        TempModifierInit.buildBlockRegistries();
     }
 
     /**
