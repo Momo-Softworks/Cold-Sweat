@@ -173,7 +173,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     }
 
     public int getMaxPaths()
-    {   return 9000;
+    {   return 12000;
     }
 
     public int getMaxFuel()
