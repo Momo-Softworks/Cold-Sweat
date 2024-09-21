@@ -16,7 +16,7 @@ import java.util.*;
 public class BlockTempRegistry
 {
     public static final LinkedList<BlockTemp> BLOCK_TEMPS = new LinkedList<>();
-    public static final Multimap<Block, BlockTemp> MAPPED_BLOCKS = new FastMultiMap<>();
+    public static final FastMultiMap<Block, BlockTemp> MAPPED_BLOCKS = new FastMultiMap<>();
     public static final BlockTemp DEFAULT_BLOCK_TEMP = new BlockTemp()
     {
         @Override
@@ -25,11 +25,19 @@ public class BlockTempRegistry
         }
     };
 
-    public static void register(BlockTemp blockTemp)
+    public static synchronized void register(BlockTemp blockTemp)
+    {   register(blockTemp, false);
+    }
+
+    public static synchronized void registerFirst(BlockTemp blockTemp)
+    {   register(blockTemp, true);
+    }
+
+    private static synchronized void register(BlockTemp blockTemp, boolean front)
     {
         blockTemp.getAffectedBlocks().forEach(block ->
         {
-            Collection<BlockTemp> blockTemps = MAPPED_BLOCKS.get(block);
+            LinkedHashSet<BlockTemp> blockTemps = MAPPED_BLOCKS.get(block);
             if (!blockTemps.isEmpty())
             {
                 if (blockTemp instanceof BlockTempConfig cfg)
@@ -46,16 +54,20 @@ public class BlockTempRegistry
                         }
                     }
                 }
-                blockTemps.add(blockTemp);
             }
-            else
-            {   blockTemps.addAll(new ArrayList<>(List.of(blockTemp)));
+            if (front)
+            {
+                List<BlockTemp> blockTempList = new ArrayList<>(blockTemps);
+                blockTempList.add(0, blockTemp);
+                blockTemps.clear();
+                blockTemps.addAll(blockTempList);
             }
+            else blockTemps.add(blockTemp);
         });
         BLOCK_TEMPS.add(blockTemp);
     }
 
-    public static void flush()
+    public static synchronized void flush()
     {
         MAPPED_BLOCKS.clear();
         BLOCK_TEMPS.clear();
