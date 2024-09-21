@@ -25,6 +25,7 @@ import com.momosoftworks.coldsweat.data.tag.ModEffectTags;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -33,6 +34,8 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
@@ -58,10 +61,7 @@ import oshi.util.tuples.Triplet;
 import java.io.File;
 import java.io.FileReader;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber
@@ -71,6 +71,8 @@ public class ConfigLoadingHandler
     public static void loadConfigs(ServerAboutToStartEvent event)
     {
         ConfigSettings.clear();
+        getDefaultConfigs(event.getServer());
+
         RegistryAccess registries = event.getServer().registryAccess();
         // User JSON configs (config folder)
         collectUserRegistries(registries);
@@ -183,7 +185,13 @@ public class ConfigLoadingHandler
                             dimensionTemps, structureTemps, depthTemps, mounts, spawnBiomes, entityTemps);
     }
 
-    private static void logAndAddRegistries(RegistryAccess registries, Set<Holder<InsulatorData>> insulators, Set<Holder<FuelData>> fuels, Set<Holder<FoodData>> foods, Set<Holder<ItemCarryTempData>> carryTemps, Set<Holder<BlockTempData>> blockTemps, Set<Holder<BiomeTempData>> biomeTemps, Set<Holder<DimensionTempData>> dimensionTemps, Set<Holder<StructureTempData>> structureTemps, Set<Holder<DepthTempData>> depthTemps, Set<Holder<MountData>> mounts, Set<Holder<SpawnBiomeData>> spawnBiomes, Set<Holder<EntityTempData>> entityTemps)
+    private static void logAndAddRegistries(RegistryAccess registries, Set<Holder<InsulatorData>> insulators,
+                                            Set<Holder<FuelData>> fuels, Set<Holder<FoodData>> foods,
+                                            Set<Holder<ItemCarryTempData>> carryTemps, Set<Holder<BlockTempData>> blockTemps,
+                                            Set<Holder<BiomeTempData>> biomeTemps, Set<Holder<DimensionTempData>> dimensionTemps,
+                                            Set<Holder<StructureTempData>> structureTemps, Set<Holder<DepthTempData>> depthTemps,
+                                            Set<Holder<MountData>> mounts, Set<Holder<SpawnBiomeData>> spawnBiomes,
+                                            Set<Holder<EntityTempData>> entityTemps)
     {
         /*
          Add JSON data to the config settings
@@ -247,6 +255,11 @@ public class ConfigLoadingHandler
             {   ColdSweat.LOGGER.info("{}", entry);
             }
         }
+    }
+
+    private static void getDefaultConfigs(MinecraftServer server)
+    {
+        DEFAULT_REGION = ConfigHelper.parseResource(server.getResourceManager(), new ResourceLocation(ColdSweat.MOD_ID, "cold_sweat/world/temp_region/default.json"), DepthTempData.CODEC).orElseThrow();
     }
 
     private static void addInsulatorConfigs(Set<Holder<InsulatorData>> insulators)
@@ -559,8 +572,16 @@ public class ConfigLoadingHandler
         });
     }
 
+    private static DepthTempData DEFAULT_REGION = null;
+
     private static void addDepthTempConfigs(Set<Holder<DepthTempData>> depthTemps)
     {
+        // If other depth temps are being registered, remove the default one
+        if (depthTemps.size() > 2 || depthTemps.stream().noneMatch(temp -> temp.value().equals(DEFAULT_REGION)))
+        {   ConfigSettings.DEPTH_REGIONS.get().remove(DEFAULT_REGION);
+            depthTemps.removeIf(holder -> holder.value().equals(DEFAULT_REGION));
+        }
+        // Add the depth temps to the config
         for (Holder<DepthTempData> holder : depthTemps)
         {
             DepthTempData depthTemp = holder.value();
