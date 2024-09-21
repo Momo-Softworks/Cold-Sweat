@@ -18,13 +18,7 @@ public abstract class Insulation implements NbtSerializable
     public static Codec<Insulation> getCodec()
     {
         return Codec.either(StaticInsulation.CODEC, AdaptiveInsulation.CODEC)
-               .xmap(either ->
-               {
-                   if (either.left().isPresent())
-                   {   return either.left().get();
-                   }
-                   return either.right().get();
-               },
+               .xmap(either -> either.map(stat -> stat, adapt -> adapt),
                insul ->
                {
                    if (insul instanceof StaticInsulation)

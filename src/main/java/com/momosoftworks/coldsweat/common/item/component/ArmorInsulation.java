@@ -87,9 +87,14 @@ public record ArmorInsulation(List<Pair<ItemStack, List<Insulation>>> insulation
     public ArmorInsulation addInsulationItem(ItemStack stack)
     {
         var insulation = new ArrayList<>(this.insulation());
-        ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()).forEach(insulator ->
-        {   insulation.add(Pair.of(stack, insulator.insulation().split()));
-        });
+
+        List<Insulation> newInsulation = ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()).stream()
+                                         .map(insulator -> insulator.insulation().split())
+                                         .flatMap(List::stream)
+                                         .toList();
+        if (!newInsulation.isEmpty())
+        {   insulation.add(Pair.of(stack, newInsulation));
+        }
         return new ArmorInsulation(insulation);
     }
 
