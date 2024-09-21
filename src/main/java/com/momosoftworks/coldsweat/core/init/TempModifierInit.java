@@ -68,7 +68,7 @@ public class TempModifierInit
         {
             if (effectBuilder.size() < 3)
             {   ColdSweat.LOGGER.error("Malformed configuration for block temperature: {}", effectBuilder);
-                break;
+                continue;
             }
             try
             {
