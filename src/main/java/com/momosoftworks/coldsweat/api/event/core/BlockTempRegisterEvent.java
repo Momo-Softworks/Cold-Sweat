@@ -24,7 +24,10 @@ public class BlockTempRegisterEvent extends Event
      * @param blockTemp The BlockTemp to add.
      */
     public void register(BlockTemp blockTemp)
-    {
-        BlockTempRegistry.register(blockTemp);
+    {   BlockTempRegistry.register(blockTemp);
+    }
+
+    public void registerFirst(BlockTemp blockTemp)
+    {   BlockTempRegistry.registerFirst(blockTemp);
     }
 }
