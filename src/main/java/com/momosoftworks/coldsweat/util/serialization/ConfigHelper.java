@@ -1,10 +1,12 @@
 package com.momosoftworks.coldsweat.util.serialization;
 
 import com.google.common.collect.Multimap;
+import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
@@ -27,7 +29,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -43,6 +48,10 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.tags.ITag;
 import oshi.util.tuples.Triplet;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -765,5 +774,26 @@ public class ConfigHelper
             }
         }
         return Optional.empty();
+    }
+
+    public static <T> Optional<T> parseResource(ResourceManager resourceManager, ResourceLocation location, Codec<T> codec)
+    {
+        if (resourceManager == null)
+        {
+            return Optional.empty();
+        }
+        try
+        {
+            Resource resource = resourceManager.getResource(location).orElseThrow();
+            try (Reader reader = new InputStreamReader(resource.open(), StandardCharsets.UTF_8))
+            {
+                JsonObject json = GsonHelper.parse(reader);
+                return codec.parse(JsonOps.INSTANCE, json).result();
+            }
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException("Failed to load JSON file: " + location, e);
+        }
     }
 }
