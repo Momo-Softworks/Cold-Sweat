@@ -36,7 +36,7 @@ public class ModRegistries
     public static CodecRegistry<BiomeTempData> BIOME_TEMP_DATA = createRegistry(new ResourceLocation(ColdSweat.MOD_ID, "world/biome_temp"), BiomeTempData.CODEC);
     public static CodecRegistry<DimensionTempData> DIMENSION_TEMP_DATA = createRegistry(new ResourceLocation(ColdSweat.MOD_ID, "world/dimension_temp"), DimensionTempData.CODEC);
     public static CodecRegistry<StructureTempData> STRUCTURE_TEMP_DATA = createRegistry(new ResourceLocation(ColdSweat.MOD_ID, "world/structure_temp"), StructureTempData.CODEC);
-    public static CodecRegistry<DepthTempData> DEPTH_TEMP_DATA = createRegistry(new ResourceLocation(ColdSweat.MOD_ID, "world/depth_temp"), DepthTempData.CODEC);
+    public static CodecRegistry<DepthTempData> DEPTH_TEMP_DATA = createRegistry(new ResourceLocation(ColdSweat.MOD_ID, "world/temp_region"), DepthTempData.CODEC);
 
     // Entity Registries
     public static CodecRegistry<MountData> MOUNT_DATA = createRegistry(new ResourceLocation(ColdSweat.MOD_ID, "entity/mount"), MountData.CODEC);
@@ -53,7 +53,7 @@ public class ModRegistries
     public static Collection<CodecRegistry<?>> getRegistries()
     {   return new HashSet<>(ALL_REGISTRIES);
     }
-    
+
     public static class CodecRegistry<V>
     {
         private final Set<V> registry = new HashSet<>();
@@ -65,11 +65,11 @@ public class ModRegistries
             this.registryName = registryName;
             this.codec = codec;
         }
-        
+
         public Codec<V> getCodec()
         {   return codec;
         }
-        
+
         public void register(Object value)
         {
             try
@@ -79,7 +79,7 @@ public class ModRegistries
             {   ColdSweat.LOGGER.error("Failed to register {} ({}) to {}. Incompatible classes.", value, value.getClass(), this.getRegistryName());
             }
         }
-        
+
         public Collection<V> getValues()
         {   return new HashSet<>(registry);
         }

@@ -892,7 +892,7 @@ public class CSMath
     /**
      * Optimized anyMatch() method for lists using a basic for loop, because Iterators are slow.
      */
-    public static <T> boolean anyMatch(Predicate<T> predicate, List<T> list)
+    public static <T> boolean anyMatch(List<T> list, Predicate<T> predicate)
     {
         for (int i = 0; i < list.size(); i++)
         {
@@ -906,7 +906,7 @@ public class CSMath
     /**
      * Generic anyMatch() method for collections using an enhanced for loop.
      */
-    public static <T> boolean anyMatch(Predicate<T> predicate, Collection<T> collection)
+    public static <T> boolean anyMatch(Collection<T> collection, Predicate<T> predicate)
     {
         for (T t : collection)
         {

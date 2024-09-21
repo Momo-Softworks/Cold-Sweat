@@ -1,10 +1,12 @@
 package com.momosoftworks.coldsweat.util.serialization;
 
 import com.google.common.collect.Multimap;
+import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
@@ -26,8 +28,11 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.resources.IResource;
+import net.minecraft.resources.IResourceManager;
 import net.minecraft.state.Property;
 import net.minecraft.tags.*;
+import net.minecraft.util.JSONUtils;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.DynamicRegistries;
@@ -39,6 +44,10 @@ import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -708,5 +717,26 @@ public class ConfigHelper
             }
         }
         return Optional.empty();
+    }
+
+    public static <T> Optional<T> parseResource(IResourceManager resourceManager, ResourceLocation location, Codec<T> codec)
+    {
+        if (resourceManager == null)
+        {
+            return Optional.empty();
+        }
+        try
+        {
+            IResource resource = resourceManager.getResource(location);
+            try (Reader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))
+            {
+                JsonObject json = JSONUtils.parse(reader);
+                return codec.parse(JsonOps.INSTANCE, json).result();
+            }
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException("Failed to load JSON file: " + location, e);
+        }
     }
 }

@@ -42,9 +42,6 @@ public class UndergroundTempModifier extends TempModifier
         // Collect a list of depths taken at regular intervals around the entity, and their distances from the player
         for (BlockPos pos : WorldHelper.getPositionGrid(entity.blockPosition(), this.getNBT().getInt("Samples"), 10))
         {
-            if (!level.isInWorldBounds(pos))
-            {   continue;
-            }
             depthTable.add(Pair.of(pos, Math.sqrt(pos.distSqr(playerPos))));
         }
         if (depthTable.isEmpty())

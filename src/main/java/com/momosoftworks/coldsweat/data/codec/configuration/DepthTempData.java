@@ -2,7 +2,6 @@ package com.momosoftworks.coldsweat.data.codec.configuration;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -40,7 +39,7 @@ public class DepthTempData implements IForgeRegistryEntry<DepthTempData>
     public boolean withinBounds(World level, BlockPos pos)
     {
         DimensionType dim = level.dimensionType();
-        if (!CSMath.anyMatch(dimension -> dimension.equals(dim), this.dimensions))
+        if (!CSMath.anyMatch(this.dimensions, dimension -> dimension.equals(dim)))
         {   return false;
         }
         for (TempRegion region : temperatures)
@@ -65,15 +64,35 @@ public class DepthTempData implements IForgeRegistryEntry<DepthTempData>
 
     public static class TempRegion
     {
+        public static final TempRegion NONE = new TempRegion(RampType.CONSTANT, VerticalBound.NONE, VerticalBound.NONE);
+
         public static final Codec<TempRegion> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                RampType.CODEC.optionalFieldOf("type", RampType.LINEAR).forGetter(region -> region.rampType),
-                VerticalBound.CODEC.fieldOf("top").forGetter(region -> region.top),
-                VerticalBound.CODEC.fieldOf("bottom").forGetter(region -> region.bottom)
+                RampType.CODEC.optionalFieldOf("type", RampType.CONSTANT).forGetter(region -> region.rampType),
+                VerticalBound.CODEC.optionalFieldOf("top", VerticalBound.NONE).forGetter(region -> region.top),
+                VerticalBound.CODEC.optionalFieldOf("bottom", VerticalBound.NONE).forGetter(region -> region.bottom)
         ).apply(instance, (type, top, bottom) ->
         {
-            if (type == RampType.CONSTANT && !top.temperature.equals(bottom.temperature))
-            {   throw new IllegalArgumentException("Constant temperature ramp type must have a single temperature value; got " + top.temperature + " and " + bottom.temperature);
+            // Checks to ensure the region is valid
+            // Must have at least one bound
+            if (top == VerticalBound.NONE && bottom == VerticalBound.NONE) throw new IllegalArgumentException("Temperature region must have at least one bound");
+            // Boundless upward
+            if (top == VerticalBound.NONE)
+            {   // Boundless region must be constant
+                if (type != RampType.CONSTANT) throw new IllegalArgumentException("\"top\" region undefined. Boundless temperature region must have a constant temperature");
+                top = new VerticalBound(VerticalAnchor.CONSTANT, Integer.MAX_VALUE, bottom.units, bottom.temperature);
             }
+            // Boundless downward
+            if (bottom == VerticalBound.NONE)
+            {   // Boundless region must be constant
+                if (type != RampType.CONSTANT) throw new IllegalArgumentException("\"bottom\" region undefined. Boundless temperature region must have a constant temperature");
+                bottom = new VerticalBound(VerticalAnchor.CONSTANT, Integer.MIN_VALUE, top.units, top.temperature);
+            }
+            // Constant temperature ramp type must have a constant temperature
+            if (type == RampType.CONSTANT && !top.temperature.equals(bottom.temperature))
+            {   throw new IllegalArgumentException("Constant temperature ramp type must have a constant temperature; got " + top.temperature + " and " + bottom.temperature);
+            }
+
+            // Create the region
             return new TempRegion(type, top, bottom);
         }));
 
@@ -123,8 +142,7 @@ public class DepthTempData implements IForgeRegistryEntry<DepthTempData>
 
     public static class VerticalBound
     {
-        public static final TempContainer DEFAULT_PASSTHROUGH = new TempContainer(0, ContainerType.PASSTHROUGH, 1);
-        public static final TempContainer DEFAULT_MIDPOINT = new TempContainer(0, ContainerType.MIDPOINT, 1);
+        public static final VerticalBound NONE = new VerticalBound(VerticalAnchor.CONSTANT, 0, Temperature.Units.MC, TempContainer.NONE);
 
         public static final Codec<VerticalBound> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 VerticalAnchor.CODEC.optionalFieldOf("anchor", VerticalAnchor.CONSTANT).forGetter(bound -> bound.anchor),
@@ -148,38 +166,24 @@ public class DepthTempData implements IForgeRegistryEntry<DepthTempData>
 
         public static class TempContainer
         {
-            public static final Codec<TempContainer> CODEC = Codec.either(Codec.DOUBLE, Codec.STRING).flatXmap(
-            either ->
-            {
-                if (either.left().isPresent())
-                {   return DataResult.success(new TempContainer(either.left().get(), ContainerType.NORMAL, 1));
-                }
-                else
+            public static final TempContainer NONE = new TempContainer(0, ContainerType.STATIC, 1.0);
+
+            public static final Codec<TempContainer> CODEC = Codec.either(
+                RecordCodecBuilder.<TempContainer>create(instance -> instance.group(
+                    Codec.DOUBLE.optionalFieldOf("value", Double.NaN).forGetter(container -> container.temperature),
+                    ContainerType.CODEC.optionalFieldOf("type", ContainerType.STATIC).forGetter(container -> container.type),
+                    Codec.doubleRange(0, 1).optionalFieldOf("strength", 1.0).forGetter(container -> container.strength)
+                ).apply(instance, (temp, type, strength) ->
                 {
-                    String[] value = either.right().get().split(",");
-                    double strength = value.length == 2 ? Double.parseDouble(value[1]) : 1;
-                    if (value[0].equals("passthrough"))
-                    {   return DataResult.success(new TempContainer(0, ContainerType.PASSTHROUGH, strength));
+                    if (type == ContainerType.STATIC && temp.equals(Double.NaN) && strength > 0)
+                    {   throw new IllegalArgumentException("Static temperature container must have a temperature");
                     }
-                    else if (value[0].equals("midpoint"))
-                    {   return DataResult.success(new TempContainer(0, ContainerType.MIDPOINT, strength));
-                    }
-                    else
-                    {   return DataResult.error("Unknown temperature value: " + value);
-                    }
-                }
-            },
-            value ->
-            {
-                String strength = value.type == ContainerType.NORMAL ? "" : "," + value.strength;
-                if (value.type == ContainerType.PASSTHROUGH)
-                {   return DataResult.success(Either.right("passthrough" + strength));
-                }
-                else if (value.type == ContainerType.MIDPOINT)
-                {   return DataResult.success(Either.right("midpoint" + strength));
-                }
-                else return DataResult.success(Either.left(value.temperature));
-            });
+                    return new TempContainer(temp, type, strength);
+                })),
+                Codec.DOUBLE.xmap(d -> new TempContainer(d, ContainerType.STATIC, 1.0), container -> container.temperature)
+            )
+            .xmap(either -> either.map(c -> c, c -> c), container -> container.type == ContainerType.STATIC
+                                                                     ? Either.right(container) : Either.left(container));
 
             public final double temperature;
             public final ContainerType type;
@@ -198,9 +202,9 @@ public class DepthTempData implements IForgeRegistryEntry<DepthTempData>
                 if (obj instanceof TempContainer)
                 {
                     TempContainer container = ((TempContainer) obj);
-                    return container.temperature == temperature
-                        && container.type == type
-                        && container.strength == strength;
+                    return Double.valueOf(container.temperature).equals(temperature)
+                            && container.type == type
+                            && container.strength == strength;
                 }
                 return false;
             }
@@ -211,28 +215,34 @@ public class DepthTempData implements IForgeRegistryEntry<DepthTempData>
             switch (anchor)
             {
                 case CONSTANT : return depth;
-                case WORLD_TOP : return level.getMaxBuildHeight();
-                case WORLD_BOTTOM : return 0;
+                case WORLD_TOP : return level.getMaxBuildHeight() + depth;
+                case WORLD_BOTTOM : return 0 + depth;
                 case GROUND_LEVEL : return WorldHelper.getHeight(checkPos, level) + depth;
             }
-            return depth;
+            return 0;
         }
 
         public double getTemperature(double temperature)
         {
             switch (this.temperature.type)
             {
-                case NORMAL : return this.temperature.temperature;
-                case PASSTHROUGH : return temperature;
-                case MIDPOINT : return  (ConfigSettings.MIN_TEMP.get() + ConfigSettings.MAX_TEMP.get()) / 2;
+                case STATIC :
+                {
+                    if (this.temperature.strength == 0) return temperature;
+                    return CSMath.blend(temperature, this.temperature.temperature, this.temperature.strength, 0, 1);
+                }
+                case MIDPOINT :
+                {
+                    if (this.temperature.strength == 0) return temperature;
+                    return CSMath.blend(temperature, (ConfigSettings.MIN_TEMP.get() + ConfigSettings.MAX_TEMP.get()) / 2, this.temperature.strength, 0, 1);
+                }
             }
-            return this.temperature.temperature;
+            return 0;
         }
 
         public enum ContainerType implements StringRepresentable
         {
-            NORMAL("normal"),
-            PASSTHROUGH("passthrough"),
+            STATIC("static"),
             MIDPOINT("midpoint");
 
             private final String name;

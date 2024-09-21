@@ -24,12 +24,14 @@ import com.momosoftworks.coldsweat.data.tag.ModEffectTags;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import com.momosoftworks.coldsweat.util.serialization.Triplet;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.resources.IResource;
@@ -62,6 +64,8 @@ public class ConfigLoadingHandler
     public static void loadConfigs(FMLServerAboutToStartEvent event)
     {
         ConfigSettings.clear();
+        getDefaultConfigs(event.getServer());
+
         DynamicRegistries registries = event.getServer().registryAccess();
         // User JSON configs (config folder)
         collectUserRegistries(registries);
@@ -177,11 +181,14 @@ public class ConfigLoadingHandler
                             dimensionTemps, structureTemps, depthTemps, mounts, spawnBiomes, entityTemps);
     }
 
-    private static void logAndAddRegistries(DynamicRegistries registries, Set<InsulatorData> insulators, Set<FuelData> fuels,
-                                            Set<FoodData> foods, Set<ItemCarryTempData> carryTemps, Set<BlockTempData> blockTemps,
+    private static void logAndAddRegistries(DynamicRegistries registries, Set<InsulatorData> insulators,
+                                            Set<FuelData> fuels,
+                                            Set<FoodData> foods,
+                                            Set<ItemCarryTempData> carryTemps, Set<BlockTempData> blockTemps,
                                             Set<BiomeTempData> biomeTemps, Set<DimensionTempData> dimensionTemps,
                                             Set<StructureTempData> structureTemps, Set<DepthTempData> depthTemps,
-                                            Set<MountData> mounts, Set<SpawnBiomeData> spawnBiomes, Set<EntityTempData> entityTemps)
+                                            Set<MountData> mounts, Set<SpawnBiomeData> spawnBiomes,
+                                            Set<EntityTempData> entityTemps)
     {
         /*
          Add JSON data to the config settings
@@ -239,6 +246,11 @@ public class ConfigLoadingHandler
         for (Object entry : registry)
         {   ColdSweat.LOGGER.info("{}", entry);
         }
+    }
+
+    private static void getDefaultConfigs(MinecraftServer server)
+    {
+        DEFAULT_REGION = ConfigHelper.parseResource(server.getDataPackRegistries().getResourceManager(), new ResourceLocation(ColdSweat.MOD_ID, "cold_sweat/world/temp_region/default.json"), DepthTempData.CODEC).orElseThrow(RuntimeException::new);
     }
 
     private static void addInsulatorConfigs(Set<InsulatorData> insulators)
@@ -532,8 +544,16 @@ public class ConfigLoadingHandler
         });
     }
 
+    private static DepthTempData DEFAULT_REGION = null;
+
     private static void addDepthTempConfigs(Set<DepthTempData> depthTemps)
     {
+        // If other depth temps are being registered, remove the default one
+        if (depthTemps.size() > 2 || depthTemps.stream().noneMatch(temp -> temp.equals(DEFAULT_REGION)))
+        {   ConfigSettings.DEPTH_REGIONS.get().remove(DEFAULT_REGION);
+            depthTemps.removeIf(depthTemp -> depthTemp.equals(DEFAULT_REGION));
+        }
+        // Add the depth temps to the config
         for (DepthTempData depthTemp : depthTemps)
         {
             // Check if the required mods are loaded
