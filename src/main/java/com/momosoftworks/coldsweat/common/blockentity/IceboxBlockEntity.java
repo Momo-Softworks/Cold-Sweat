@@ -191,7 +191,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements ITickableTil
 
     @Override
     public int getMaxPaths()
-    {   return 1500;
+    {   return 2000;
     }
 
     @Override

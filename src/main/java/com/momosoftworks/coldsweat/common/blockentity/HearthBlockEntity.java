@@ -189,7 +189,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     }
 
     public int getMaxPaths()
-    {   return 9000;
+    {   return 12000;
     }
 
     public int getMaxFuel()
