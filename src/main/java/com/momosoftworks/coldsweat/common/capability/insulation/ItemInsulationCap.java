@@ -52,9 +52,13 @@ public class ItemInsulationCap implements IInsulatableCap
 
     public void addInsulationItem(ItemStack stack)
     {
-        ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()).forEach(insulator ->
-        {   this.insulation.add(Pair.of(stack, insulator.insulation.split()));
-        });
+        List<Insulation> insulation = ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()).stream()
+                                      .map(insulator -> insulator.insulation.split())
+                                      .flatMap(List::stream)
+                                      .collect(Collectors.toList());
+        if (!insulation.isEmpty())
+        {   this.insulation.add(Pair.of(stack, insulation));
+        }
     }
 
     public ItemStack removeInsulationItem(ItemStack stack)
