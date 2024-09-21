@@ -16,7 +16,7 @@ public class FastMultiMap<K, V> implements Multimap<K, V>
     {   putAll(multimap);
     }
 
-    private final FastMap<K, Set<V>> internal = new FastMap<>();
+    private final FastMap<K, LinkedHashSet<V>> internal = new FastMap<>();
     private int totalSize = 0;
 
     @Override
@@ -152,10 +152,10 @@ public class FastMultiMap<K, V> implements Multimap<K, V>
     }
 
     @Override
-    public Set<V> get(K key)
+    public LinkedHashSet<V> get(K key)
     {
-        Set<V> values = internal.get(key);
-        return values != null ? values : new HashSet<>();
+        LinkedHashSet<V> values = internal.get(key);
+        return values != null ? values : new LinkedHashSet<>();
     }
 
     @Override
@@ -168,7 +168,7 @@ public class FastMultiMap<K, V> implements Multimap<K, V>
     public Multiset<K> keys()
     {
         HashMultiset<K> keys = HashMultiset.create();
-        for (Map.Entry<K, Set<V>> entry : internal.entrySet())
+        for (Map.Entry<K, LinkedHashSet<V>> entry : internal.entrySet())
         {
             keys.add(entry.getKey(), entry.getValue().size());
         }
@@ -185,7 +185,7 @@ public class FastMultiMap<K, V> implements Multimap<K, V>
             {
                 return new Iterator<V>()
                 {
-                    private final Iterator<Set<V>> setIterator = internal.values().iterator();
+                    private final Iterator<LinkedHashSet<V>> setIterator = internal.values().iterator();
                     private Iterator<V> currentIterator = Collections.emptyIterator();
 
                     @Override
@@ -228,8 +228,8 @@ public class FastMultiMap<K, V> implements Multimap<K, V>
             {
                 return new Iterator<Map.Entry<K, V>>()
                 {
-                    private final Iterator<Map.Entry<K, Set<V>>> entryIterator = internal.entrySet().iterator();
-                    private Map.Entry<K, Set<V>> currentEntry;
+                    private final Iterator<Map.Entry<K, LinkedHashSet<V>>> entryIterator = internal.entrySet().iterator();
+                    private Map.Entry<K, LinkedHashSet<V>> currentEntry;
                     private Iterator<V> valueIterator = Collections.emptyIterator();
 
                     @Override
@@ -267,7 +267,7 @@ public class FastMultiMap<K, V> implements Multimap<K, V>
     public FastMap<K, Collection<V>> asMap()
     {
         FastMap<K, Collection<V>> map = new FastMap<>(internal.size());
-        for (Map.Entry<K, Set<V>> entry : internal.entrySet())
+        for (Map.Entry<K, LinkedHashSet<V>> entry : internal.entrySet())
         {
             map.put(entry.getKey(), entry.getValue());
         }
