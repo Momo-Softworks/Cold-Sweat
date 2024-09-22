@@ -165,11 +165,11 @@ public class MixinSoulLampRendering
             {
                 if (EntityHelper.holdingLamp(entity, HandSide.RIGHT))
                 {
-                    RenderLampHand.rotateArmorShoulder(model, HandSide.RIGHT, ClientOnlyHelper.isPlayerModelSlim(self));
+                    RenderLampHand.rotateArmorShoulder(entity, model, HandSide.RIGHT, ClientOnlyHelper.isPlayerModelSlim(self));
                 }
                 if (EntityHelper.holdingLamp(entity, HandSide.LEFT))
                 {
-                    RenderLampHand.rotateArmorShoulder(model, HandSide.LEFT, ClientOnlyHelper.isPlayerModelSlim(self));
+                    RenderLampHand.rotateArmorShoulder(entity, model, HandSide.LEFT, ClientOnlyHelper.isPlayerModelSlim(self));
                 }
             }
         }

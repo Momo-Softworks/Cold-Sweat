@@ -169,8 +169,11 @@ public class RenderLampHand
         return pitchFactor;
     }
 
-    public static void rotateArmorShoulder(BipedModel<?> model, HandSide side, boolean slim)
+    public static void rotateArmorShoulder(LivingEntity entity, BipedModel<?> model, HandSide side, boolean slim)
     {
+        float partialTick = Minecraft.getInstance().getFrameTime();
+        float playerPitch = entity.getViewXRot(partialTick);
+        float attackAnim = entity.getAttackAnim(partialTick);
         if (side == HandSide.RIGHT)
         {
             float xRot = model.rightArm.xRot;
@@ -181,6 +184,10 @@ public class RenderLampHand
             if (!slim)
             {   model.rightArm.y -= 1;
             }
+            float pitchSwingHeight = playerPitch < 0 ? playerPitch/20 : playerPitch/60;
+            float pitchRot = (float) (Math.pow(attackAnim - 0.5, 2) - 0.25) * pitchSwingHeight;
+            model.rightArm.zRot += pitchRot * 0.4f;
+            model.rightArm.yRot += pitchRot * 0.2f;
         }
         else if (side == HandSide.LEFT)
         {
@@ -192,6 +199,8 @@ public class RenderLampHand
             if (!slim)
             {   model.leftArm.y -= 1;
             }
+            float pitchSwingHeight = playerPitch < 0 ? playerPitch/20 : playerPitch/60;
+            model.rightArm.yRot += (Math.pow(attackAnim - 0.5, 2) - 0.25) * pitchSwingHeight * -1;
         }
     }
 
