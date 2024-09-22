@@ -40,7 +40,7 @@ public class MixinSpoiledIcebox
             icebox.setFuel(icebox.getFuel() - 1);
             return 0.0;
         }
-        return o;
+        return instance.get(o);
     }
 
     @Mixin(SpoiledConfigCache.class)
