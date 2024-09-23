@@ -65,7 +65,8 @@ public class ModDimensionTags
         fillTag(HAS_RAIDS, DimensionType::hasRaids, registryAccess);
         fillTag(OVERWORLD_LIKE, dimensionType -> !dimensionType.hasCeiling()
                                               && dimensionType.natural()
-                                              && dimensionType.hasSkyLight(), registryAccess);
+                                              && dimensionType.hasSkyLight()
+                                              && !dimensionType.ultraWarm(), registryAccess);
     }
 
     private static void fillTag(TagKey<DimensionType> tag, Predicate<DimensionType> predicate, RegistryAccess registryAccess)
