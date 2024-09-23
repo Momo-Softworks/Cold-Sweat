@@ -3,8 +3,9 @@ package com.momosoftworks.coldsweat.data;
 import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
+import net.minecraft.resources.FallbackResourceManager;
+import net.minecraft.resources.IResourceManager;
 import net.minecraft.resources.ResourcePackType;
-import net.minecraft.resources.SimpleReloadableResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.packs.ModFileResourcePack;
@@ -13,10 +14,10 @@ import java.util.*;
 
 public class ModRegistries
 {
-    private static final SimpleReloadableResourceManager RESOURCE_MANAGER = new SimpleReloadableResourceManager(ResourcePackType.SERVER_DATA);
+    private static final FallbackResourceManager RESOURCE_MANAGER = new FallbackResourceManager(ResourcePackType.SERVER_DATA, ColdSweat.MOD_ID);
     private static final Collection<CodecRegistry<?>> ALL_REGISTRIES = new HashSet<>();
 
-    public static SimpleReloadableResourceManager getResourceManager()
+    public static IResourceManager getResourceManager()
     {   return RESOURCE_MANAGER;
     }
 
@@ -42,7 +43,7 @@ public class ModRegistries
     public static CodecRegistry<SpawnBiomeData> ENTITY_SPAWN_BIOME_DATA = createRegistry(new ResourceLocation(ColdSweat.MOD_ID, "entity/spawn_biome"), SpawnBiomeData.CODEC);
     public static final CodecRegistry<EntityTempData> ENTITY_TEMP_DATA = createRegistry(new ResourceLocation(ColdSweat.MOD_ID, "entity/entity_temp"), EntityTempData.CODEC);
 
-    private static <T> CodecRegistry<T> createRegistry(ResourceLocation registryName, Codec<T> codec)
+    public static <T> CodecRegistry<T> createRegistry(ResourceLocation registryName, Codec<T> codec)
     {
         CodecRegistry<T> registry = new CodecRegistry<>(registryName, codec);
         ALL_REGISTRIES.add(registry);
