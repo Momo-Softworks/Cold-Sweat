@@ -20,7 +20,7 @@ public class FurnaceBlockTemp extends BlockTemp
     @Override
     public double getTemperature(World world, LivingEntity entity, BlockState state, BlockPos pos, double distance)
     {
-        if (state.getValue(AbstractFurnaceBlock.LIT))
+        if (state.hasProperty(AbstractFurnaceBlock.LIT) && state.getValue(AbstractFurnaceBlock.LIT))
         {   return CSMath.blend(Temperature.convert(15, Temperature.Units.F, Temperature.Units.MC, false), 0, distance, 0.5, 7);
         }
         return 0;
