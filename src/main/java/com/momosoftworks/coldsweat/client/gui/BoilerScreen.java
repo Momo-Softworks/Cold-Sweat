@@ -2,13 +2,18 @@ package com.momosoftworks.coldsweat.client.gui;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
-import net.minecraft.client.Minecraft;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import com.momosoftworks.coldsweat.common.container.BoilerContainer;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.util.math.CSMath;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
+
+import java.util.Arrays;
 
 public class BoilerScreen extends AbstractHearthScreen<BoilerContainer>
 {
@@ -46,6 +51,17 @@ public class BoilerScreen extends AbstractHearthScreen<BoilerContainer>
         this.blit(matrixStack, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
 
         // Draw fuel gauge
-        blit(matrixStack, leftPos + 109, topPos + 63, 176, 0, (int) (this.menu.getFuel() / 31.25), 16, 256, 256);
+        blit(matrixStack, leftPos + 109, topPos + 63, 176, 0, (int) (this.menu.getFuel() / 31.25), 14, 256, 256);
+
+        if (!ConfigSettings.SMART_HEARTH.get() && this.menu.te.hasSmokeStack())
+        {
+            boolean powered = this.menu.te.isBackPowered();
+
+            blit(matrixStack, leftPos + 117, topPos + 78, 176, powered ? 14 : 22, 14, 8, 256, 256);
+
+            if (CSMath.betweenInclusive(mouseX, leftPos + 117, leftPos + 131) && CSMath.betweenInclusive(mouseY, topPos + 78, topPos + 86))
+            {   this.renderComponentTooltip(matrixStack, Arrays.asList(new TranslationTextComponent(powered ? "gui.cold_sweat.hearth.powered" : "gui.cold_sweat.hearth.unpowered")), mouseX, mouseY);
+            }
+        }
     }
 }

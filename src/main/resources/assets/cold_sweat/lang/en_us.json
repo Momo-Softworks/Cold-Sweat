@@ -61,6 +61,9 @@
   "container.cold_sweat.sewing_table":  "Sewing Table",
   "container.cold_sweat.hearth":        "Hearth",
 
+  "gui.cold_sweat.hearth.powered":   "Powered",
+  "gui.cold_sweat.hearth.unpowered": "Unpowered",
+
 
   "itemGroup.cold_sweat": "Cold Sweat",
   "itemGroup.cs_insulation_items": "Cold Sweat: Insulators",
