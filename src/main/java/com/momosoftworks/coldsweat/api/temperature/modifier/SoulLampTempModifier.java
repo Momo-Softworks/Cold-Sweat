@@ -11,12 +11,12 @@ public class SoulLampTempModifier extends TempModifier
     @Override
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
-        double almostMax = ConfigSettings.MAX_TEMP.get() * 0.99;
+        double almostMax = Temperature.get(entity, Temperature.Trait.BURNING_POINT) * 0.99;
         return temp ->
         {
             if (temp < almostMax) return temp;
 
-            return Math.max(temp * 0.4, almostMax);
+            return Math.max(temp * (1 - ConfigSettings.SOULSPRING_LAMP_STRENGTH.get()), almostMax);
         };
     }
 }
