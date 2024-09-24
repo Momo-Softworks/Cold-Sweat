@@ -2473,6 +2473,7 @@ Technical Changes:
 
 ------------------------------------------------------------------------------------------------------------------------
 2.3.5
+* Added an indicator to the screens for hearth-like blocks that shows if the block is powered
 - Wind, sandstorms, and tornadoes from Weather 2 will now affect the player's temperature
 - Increased the maximum volume of the hearth's effect from 9000 to 12000 blocks
 - Increased the maximum volume of the icebox & boiler's effect from 1500 to 2000 blocks
@@ -2488,7 +2489,8 @@ Fixes:
 - Fixed performance issues while rendering the "wetness" screen effect
 - Fixed the description of "Knockback Chill" stating received knockback is reduced, rather than dealt knockback
 - (1.20) Fixed the selected item's name overlapping the player's body temperature icon when a thermometer is equipped
-- (1.21) Fixed invalid formatting for the hearth's recipe
+- (1.21) Fixed invalid formatting for the hearth's recipe causing it to be uncraftable
+- (1.21) Fixed dynamic dimension_type tags not populating
 
 Technical Changes:
 * Food temperature configs now stack when applied to the same item, rather than only using the first one loaded
