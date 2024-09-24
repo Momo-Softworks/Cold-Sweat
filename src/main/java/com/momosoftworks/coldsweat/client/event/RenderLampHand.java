@@ -169,7 +169,7 @@ public class RenderLampHand
 
     public static void rotateArmorShoulder(LivingEntity entity, HumanoidModel<?> model, HumanoidArm side, boolean slim)
     {
-        float partialTick = Minecraft.getInstance().getFrameTime();
+        float partialTick = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true);
         float playerPitch = entity.getViewXRot(partialTick);
         float attackAnim = entity.getAttackAnim(partialTick);
         if (side == HumanoidArm.RIGHT)
