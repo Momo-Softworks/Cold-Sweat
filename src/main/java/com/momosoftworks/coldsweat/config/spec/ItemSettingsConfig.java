@@ -36,6 +36,7 @@ public class ItemSettingsConfig
     public static final ForgeConfigSpec.DoubleValue INSULATION_STRENGTH;
 
     public static final ForgeConfigSpec.IntValue WATERSKIN_STRENGTH;
+    public static final ForgeConfigSpec.DoubleValue SOULSPRING_LAMP_STRENGTH;
 
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> INSULATING_CURIOS;
 
@@ -308,6 +309,7 @@ public class ItemSettingsConfig
          Consumables
          */
         BUILDER.push("Consumables");
+
         FOOD_TEMPERATURES = BUILDER
                 .comment("Defines items that affect the player's temperature when consumed",
                         "Format: [[\"item_id\", amount, *nbt, *duration], [\"item_id\", amount, *nbt, *duration], ...etc]",
@@ -333,6 +335,12 @@ public class ItemSettingsConfig
         WATERSKIN_STRENGTH = BUILDER
                 .comment("Defines how much a waterskin will change the player's body temperature by when used")
                 .defineInRange("Waterskin Strength", 50, 0, Integer.MAX_VALUE);
+
+        SOULSPRING_LAMP_STRENGTH = BUILDER
+                .comment("Determines the strength of the Soulspring Lamp's effect before it is overwhelmed",
+                         "A value of 1 means it will never be overwhelmed")
+                .defineInRange("Soulspring Lamp Strength", 0.6, 0, 1);
+
         BUILDER.pop();
 
         /*
