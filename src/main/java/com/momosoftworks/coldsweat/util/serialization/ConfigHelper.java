@@ -784,8 +784,8 @@ public class ConfigHelper
         }
         try
         {
-            Resource resource = resourceManager.getResource(location).orElseThrow();
-            try (Reader reader = new InputStreamReader(resource.open(), StandardCharsets.UTF_8))
+            Resource resource = resourceManager.getResource(location);
+            try (Reader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))
             {
                 JsonObject json = GsonHelper.parse(reader);
                 return codec.parse(JsonOps.INSTANCE, json).result();
