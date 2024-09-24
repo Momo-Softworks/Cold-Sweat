@@ -3,6 +3,8 @@ package com.momosoftworks.coldsweat.data.codec.configuration;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.DimensionType;
 
 import java.util.List;
@@ -27,7 +29,7 @@ public class DimensionTempData
     }
 
     public static final Codec<DimensionTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            DimensionType.DIRECT_CODEC.listOf().fieldOf("dimension").forGetter(data -> data.dimensions),
+            ConfigHelper.dynamicCodec(Registry.DIMENSION_TYPE_REGISTRY).listOf().fieldOf("dimension").forGetter(data -> data.dimensions),
             Codec.DOUBLE.fieldOf("temperature").forGetter(data -> data.temperature),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(data -> data.units),
             Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(data -> data.isOffset),

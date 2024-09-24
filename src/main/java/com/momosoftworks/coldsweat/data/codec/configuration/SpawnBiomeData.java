@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.data.codec.configuration;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
 import net.minecraft.tags.EntityTypeTags;
@@ -33,7 +34,7 @@ public class SpawnBiomeData
     }
 
     public static final Codec<SpawnBiomeData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Biome.DIRECT_CODEC.listOf().fieldOf("biomes").forGetter(data -> data.biomes),
+            ConfigHelper.dynamicCodec(Registry.BIOME_REGISTRY).listOf().fieldOf("biomes").forGetter(data -> data.biomes),
             EntityClassification.CODEC.fieldOf("category").forGetter(data -> data.category),
             Codec.INT.fieldOf("weight").forGetter(data -> data.weight),
             Codec.either(ITag.codec(EntityTypeTags::getAllTags), Registry.ENTITY_TYPE).listOf().fieldOf("entities").forGetter(data -> data.entities),

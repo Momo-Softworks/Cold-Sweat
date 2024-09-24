@@ -1,0 +1,89 @@
+{
+  "dimensions":
+  [
+    "minecraft:overworld"
+  ],
+  "regions": [
+    {
+      "bottom": {
+        "anchor": "world_top",
+        "depth": 1,
+        "temperature": {
+          "strength": 0
+        }
+      }
+    },
+    {
+      "type": "constant",
+      "top": {
+        "anchor": "world_top",
+        "depth": 0,
+        "temperature": {
+          "strength": 0
+        }
+      },
+      "bottom": {
+        "anchor": "ground_level",
+        "depth": 0,
+        "temperature": {
+          "strength": 0
+        }
+      }
+    },
+    {
+      "type": "linear",
+      "top": {
+        "anchor": "ground_level",
+        "depth": -1,
+        "temperature": {
+          "strength": 0
+        }
+      },
+      "bottom": {
+        "anchor": "ground_level",
+        "depth": -20,
+        "temperature": 75,
+        "units": "f"
+      }
+    },
+    {
+      "type": "logarithmic",
+      "top": {
+        "anchor": "ground_level",
+        "depth": -21,
+        "temperature": 75,
+        "units": "f"
+      },
+      "bottom": {
+        "anchor": "world_bottom",
+        "depth": -3,
+        "temperature": 110,
+        "units": "f"
+      }
+    },
+    {
+      "type": "linear",
+      "top": {
+        "anchor": "world_bottom",
+        "depth": -4,
+        "temperature": 110,
+        "units": "f"
+      },
+      "bottom": {
+        "anchor": "world_bottom",
+        "depth": -68,
+        "temperature": -273.15,
+        "units": "c"
+      }
+    },
+    {
+      "type": "constant",
+      "top": {
+        "anchor": "world_bottom",
+        "depth": -69,
+        "temperature": -273.15,
+        "units": "c"
+      }
+    }
+  ]
+}

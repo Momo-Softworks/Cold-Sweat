@@ -20,6 +20,7 @@ import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
 import com.momosoftworks.coldsweat.util.exceptions.ArgumentCountException;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.Block;
 import com.momosoftworks.coldsweat.util.math.FastMultiMap;
 import net.minecraft.block.BlockState;
@@ -708,6 +709,14 @@ public class ConfigHelper
                             forgeRegistry);
     }
 
+    public static <T> Codec<T> dynamicCodec(RegistryKey<Registry<T>> vanillaRegistry)
+    {
+        DynamicRegistries registryAccess = WorldHelper.getServer().registryAccess();
+        Registry<T> registry = registryAccess.registry(vanillaRegistry).get();
+        return Codec.STRING.xmap(str -> registry.get(new ResourceLocation(str)),
+                                 item -> registry.getKey(item).toString());
+    }
+
     public static Optional<PredicateItem> findFirstItemMatching(DynamicHolder<Multimap<Item, PredicateItem>> predicates, ItemStack stack)
     {
         for (PredicateItem predicate : predicates.get().get(stack.getItem()))
@@ -731,7 +740,8 @@ public class ConfigHelper
             try (Reader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))
             {
                 JsonObject json = JSONUtils.parse(reader);
-                return codec.parse(JsonOps.INSTANCE, json).result();
+                DataResult<T> result = codec.parse(JsonOps.INSTANCE, json);
+                return result.result();
             }
         }
         catch (IOException e)

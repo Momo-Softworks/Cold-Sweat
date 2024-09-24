@@ -6,10 +6,12 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.StringRepresentable;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraftforge.registries.IForgeRegistryEntry;
@@ -17,12 +19,13 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public class DepthTempData implements IForgeRegistryEntry<DepthTempData>
 {
     public static final Codec<DepthTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             TempRegion.CODEC.listOf().fieldOf("regions").forGetter(data -> data.temperatures),
-            DimensionType.DIRECT_CODEC.listOf().fieldOf("dimensions").forGetter(data -> data.dimensions),
+            ConfigHelper.dynamicCodec(Registry.DIMENSION_TYPE_REGISTRY).listOf().fieldOf("dimensions").forGetter(data -> data.dimensions),
             Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(data -> data.requiredMods)
     ).apply(instance, DepthTempData::new));
 

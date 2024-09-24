@@ -250,7 +250,7 @@ public class ConfigLoadingHandler
 
     private static void getDefaultConfigs(MinecraftServer server)
     {
-        DEFAULT_REGION = ConfigHelper.parseResource(server.getDataPackRegistries().getResourceManager(), new ResourceLocation(ColdSweat.MOD_ID, "cold_sweat/world/temp_region/default.json"), DepthTempData.CODEC).orElseThrow(RuntimeException::new);
+        DEFAULT_REGION = ConfigHelper.parseResource(server.getDataPackRegistries().getResourceManager(), new ResourceLocation(ColdSweat.MOD_ID, "config/world/temp_region/default.json"), DepthTempData.CODEC).orElseThrow(RuntimeException::new);
     }
 
     private static void addInsulatorConfigs(Set<InsulatorData> insulators)
