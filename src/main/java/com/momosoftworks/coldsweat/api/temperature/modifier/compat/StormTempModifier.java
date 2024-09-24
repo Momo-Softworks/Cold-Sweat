@@ -4,8 +4,6 @@ import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
 import weather2.ServerTickHandler;
 import weather2.weathersystem.WeatherManagerServer;
@@ -30,7 +28,7 @@ public class StormTempModifier extends TempModifier
             WeatherManagerServer weatherManager = ServerTickHandler.getWeatherManagerFor(entity.level.dimension());
             float windSpeed = weatherManager.getWindManager().getWindSpeed();
 
-            WeatherObject weather = CompatManager.getClosestStorm(entity.level, entity.blockPosition());
+            WeatherObject weather = (WeatherObject) CompatManager.getClosestStorm(entity.level, entity.blockPosition());
             double stormTemp;
             // If there is a blizzard/sandstorm, apply the temperature and wind speed modifiers
             if (weather instanceof WeatherObjectParticleStorm storm)
