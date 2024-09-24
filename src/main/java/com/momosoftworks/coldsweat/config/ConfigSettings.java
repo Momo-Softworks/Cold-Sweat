@@ -122,6 +122,7 @@ public class ConfigSettings
     public static final DynamicHolder<Multimap<Item, CarriedItemTemperature>> CARRIED_ITEM_TEMPERATURES;
 
     public static final DynamicHolder<Integer> WATERSKIN_STRENGTH;
+    public static final DynamicHolder<Double> SOULSPRING_LAMP_STRENGTH;
 
     public static final DynamicHolder<List<DimensionType>> LAMP_DIMENSIONS;
 
@@ -603,6 +604,8 @@ public class ConfigSettings
         });
 
         WATERSKIN_STRENGTH = addSetting("waterskin_strength", () -> 50, holder -> holder.set(ItemSettingsConfig.getInstance().getWaterskinStrength()));
+
+        SOULSPRING_LAMP_STRENGTH = addSetting("soulspring_lamp_strength", () -> 0.6d, holder -> holder.set(ItemSettingsConfig.SOULSPRING_LAMP_STRENGTH.get()));
 
         LAMP_DIMENSIONS = addSettingWithRegistries("valid_lamp_dimensions", ArrayList::new,
                                                    (holder, registryAccess) -> holder.get(registryAccess).addAll(new ArrayList<>(ItemSettingsConfig.getInstance().getValidSoulLampDimensions()
