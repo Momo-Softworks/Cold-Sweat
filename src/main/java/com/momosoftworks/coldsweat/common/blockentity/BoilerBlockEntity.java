@@ -101,7 +101,7 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
             boolean hasItemStacks = false;
 
             // Warm up waterskins
-            if (ticksExisted % (int) (20 / ConfigSettings.TEMP_RATE.get()) == 0)
+            if (ticksExisted % (int) (20 / Math.max(1, ConfigSettings.TEMP_RATE.get())) == 0)
             {
                 for (int i = 1; i < 10; i++)
                 {
