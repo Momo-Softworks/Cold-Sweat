@@ -70,8 +70,7 @@ public class WorldSettingsConfig
                     && (list.size() < 3 || list.get(2) instanceof String));
 
         DIMENSION_TEMP_OVERRIDES = BUILDER
-            .comment("Overrides existing dimension temperatures & offsets",
-                     "Also overrides temperatures of all biomes in the dimension")
+            .comment("Defines the temperature of a dimension, overriding all other biome and dimension temperatures/settings")
             .defineListAllowEmpty(List.of("Dimension Temperatures"), () -> List.of(
                     // No default values
             ), it -> it instanceof List<?> list
@@ -102,7 +101,7 @@ public class WorldSettingsConfig
 
 
         BIOME_TEMP_OVERRIDES = BUILDER
-            .comment("Defines the temperature of a biome, overriding existing biome temperatures & offsets.")
+            .comment("Defines the temperature of a biome, overriding the biome's default temperature")
             .defineListAllowEmpty(List.of("Biome Temperatures"), () -> ListBuilder.begin(
                             List.of("minecraft:soul_sand_valley", 53, 53, "F"),
                             List.of("minecraft:old_growth_birch_forest", 58, 72, "F"),
