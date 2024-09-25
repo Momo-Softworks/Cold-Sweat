@@ -545,25 +545,12 @@ public abstract class WorldHelper
         double variance = 1 / Math.max(1, 2 + biome.getDownfall() * 2);
         double baseTemp = biome.getBaseTemperature();
 
-        // Get the biome's temperature, either overridden by config or calculated
-        // Start with biome override
-        Triplet<Double, Double, Temperature.Units> configOverride = ConfigSettings.BIOME_TEMPS.get(registryAccess)
-                                                                    .getOrDefault(biome, null);
-        // If override temp is defined, return that
-        if (configOverride != null)
-        {
-            double min = configOverride.getA();
-            double max = configOverride.getB();
-            return Pair.of(min, max);
-        }
-        // If no override, calculate the biome's temperature
-        else
-        {
-            Triplet<Double, Double, Temperature.Units> biomeTemp = new Triplet<>(baseTemp - variance, baseTemp + variance, Temperature.Units.MC);
-            Triplet<Double, Double, Temperature.Units> configOffset = ConfigSettings.BIOME_OFFSETS.get(registryAccess)
-                                                                      .getOrDefault(biome, new Triplet<>(0d, 0d, Temperature.Units.MC));
-            return CSMath.addPairs(Pair.of(biomeTemp.getA(), biomeTemp.getB()), Pair.of(configOffset.getA(), configOffset.getB()));
-        }
+        Triplet<Double, Double, Temperature.Units> biomeTemp = CSMath.orElse(ConfigSettings.BIOME_TEMPS.get(registryAccess).getOrDefault(biome, null),
+                                                                             new Triplet<>(baseTemp - variance, baseTemp + variance, Temperature.Units.MC));
+        Triplet<Double, Double, Temperature.Units> configOffset = ConfigSettings.BIOME_OFFSETS.get(registryAccess)
+                                                                  .getOrDefault(biome, new Triplet<>(0d, 0d, Temperature.Units.MC));
+        return CSMath.addPairs(Pair.of(biomeTemp.getA(), biomeTemp.getB()),
+                               Pair.of(configOffset.getA(), configOffset.getB()));
     }
 
     /**

@@ -74,8 +74,7 @@ public class WorldSettingsConfig
             });
 
         DIMENSION_TEMP_OVERRIDES = BUILDER
-            .comment("Overrides existing dimension temperatures & offsets",
-                     "Also overrides temperatures of all biomes in the dimension")
+            .comment("Defines the temperature of a dimension, overriding all other biome and dimension temperatures/settings")
             .defineListAllowEmpty(Arrays.asList("Dimension Temperatures"), () -> Arrays.asList(
                     // No default values
             ), it ->
@@ -113,7 +112,7 @@ public class WorldSettingsConfig
 
 
         BIOME_TEMP_OVERRIDES = BUILDER
-            .comment("Defines the temperature of a biome, overriding existing biome temperatures & offsets.")
+            .comment("Defines the temperature of a biome, overriding the biome's default temperature")
             .defineListAllowEmpty(Arrays.asList("Biome Temperatures"), () -> ListBuilder.begin(
                             Arrays.asList("minecraft:soul_sand_valley", 53, 53, "F"),
                             Arrays.asList("minecraft:tall_birch_forest", 58, 72, "F"),
