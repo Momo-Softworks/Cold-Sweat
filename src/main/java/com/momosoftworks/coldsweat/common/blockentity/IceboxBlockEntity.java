@@ -175,7 +175,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
                 level.setBlock(pos, state.setValue(IceboxBlock.FROSTED, true), 3);
 
             // Cool down waterskins
-            if (ticksExisted % (int) (20 / ConfigSettings.TEMP_RATE.get()) == 0)
+            if (ticksExisted % (int) (20 / Math.max(1, ConfigSettings.TEMP_RATE.get())) == 0)
             {
                 boolean hasItemStacks = false;
                 for (int i = 1; i < 10; i++)

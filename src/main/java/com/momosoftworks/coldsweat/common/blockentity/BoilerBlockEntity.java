@@ -108,7 +108,7 @@ public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider
             boolean hasItemStacks = false;
 
             // Warm up waterskins
-            if (ticksExisted % (int) (20 / ConfigSettings.TEMP_RATE.get()) == 0)
+            if (ticksExisted % (int) (20 / Math.max(1, ConfigSettings.TEMP_RATE.get())) == 0)
             {
                 for (int i = 1; i < 10; i++)
                 {
@@ -122,7 +122,7 @@ public class BoilerBlockEntity extends HearthBlockEntity implements MenuProvider
                     }
                 }
             }
-            if (ticksExisted % (200 / ConfigSettings.TEMP_RATE.get()) == 0)
+            if (ticksExisted % (200 / Math.max(1, ConfigSettings.TEMP_RATE.get())) == 0)
             {
                 for (int i = 1; i < 10; i++)
                 {
