@@ -59,7 +59,7 @@ public class SoulspringLampItem extends Item
                 if (!(isSelected || living.getOffhandItem() == stack))
                 {   return;
                 }
-                double max = ConfigSettings.MAX_TEMP.get();
+                double max = Temperature.get(living, Temperature.Trait.BURNING_POINT);
 
                 double temp = Temperature.getModifier(living, Temperature.Trait.WORLD, SoulLampTempModifier.class)
                               .map(TempModifier::getLastInput).orElseGet(() -> Temperature.get(living, Temperature.Trait.WORLD));
