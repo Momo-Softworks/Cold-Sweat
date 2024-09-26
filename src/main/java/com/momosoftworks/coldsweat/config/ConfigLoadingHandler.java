@@ -5,6 +5,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.api.event.core.ServerConfigsLoadedEvent;
 import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
 import com.momosoftworks.coldsweat.api.util.Temperature;
@@ -49,7 +50,6 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.io.*;
@@ -61,7 +61,7 @@ import java.util.stream.Collectors;
 public class ConfigLoadingHandler
 {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void loadConfigs(FMLServerAboutToStartEvent event)
+    public static void loadConfigs(ServerConfigsLoadedEvent event)
     {
         ConfigSettings.clear();
         getDefaultConfigs(event.getServer());
