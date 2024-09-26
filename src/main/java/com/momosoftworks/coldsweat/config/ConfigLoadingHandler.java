@@ -5,6 +5,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.api.event.core.ServerConfigsLoadedEvent;
 import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
 import com.momosoftworks.coldsweat.api.util.Temperature;
@@ -68,7 +69,7 @@ import java.util.stream.Collectors;
 public class ConfigLoadingHandler
 {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void loadConfigs(ServerAboutToStartEvent event)
+    public static void loadConfigs(ServerConfigsLoadedEvent event)
     {
         ConfigSettings.clear();
         getDefaultConfigs(event.getServer());

@@ -28,6 +28,7 @@
     "MixinLivingLoad",
     "MixinLoadItemStack",
     "MixinMinecart",
+    "MixinPreServerLoad",
     "MixinSoulCampfire",
     "MixinSoulFire",
     "MixinTridentRiptide",
