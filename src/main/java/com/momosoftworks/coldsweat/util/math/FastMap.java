@@ -233,8 +233,9 @@ public class FastMap<K, V> implements Map<K, V>, Cloneable, Serializable
         {   throw new NullPointerException("Key cannot be null");
         }
 
-        for (EntryImpl<K, V> entry : _entries)
+        for (int i = 0; i < _entries.length; i++)
         {
+            EntryImpl<K, V> entry = _entries[i];
             while (entry != null)
             {
                 if (key.equals(entry._key))
@@ -258,8 +259,7 @@ public class FastMap<K, V> implements Map<K, V>, Cloneable, Serializable
         while ( entry != null )
         {
             if ( key.equals( entry._key ) )
-            {
-                return entry;
+            {   return entry;
             }
             entry = entry._next;
         }
