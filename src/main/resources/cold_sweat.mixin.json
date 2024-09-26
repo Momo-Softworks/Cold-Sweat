@@ -28,6 +28,7 @@
     "MixinInventoryOpenServer",
     "MixinLivingLoad",
     "MixinMinecart",
+    "MixinPreServerLoad",
     "MixinSmithingRecipe",
     "MixinSoulCampfire",
     "MixinSoulFire",
