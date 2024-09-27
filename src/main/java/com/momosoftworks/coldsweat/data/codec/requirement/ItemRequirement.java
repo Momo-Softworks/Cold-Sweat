@@ -40,6 +40,10 @@ public record ItemRequirement(Optional<List<Either<TagKey<Item>, Item>>> items, 
             ItemComponentsRequirement.CODEC.optionalFieldOf("components", new ItemComponentsRequirement()).forGetter(predicate -> predicate.components)
     ).apply(instance, ItemRequirement::new));
 
+    public static final ItemRequirement NONE = new ItemRequirement(Optional.empty(), Optional.empty(), Optional.empty(),
+                                                                   Optional.empty(), Optional.empty(), Optional.empty(),
+                                                                   Optional.empty(), new NbtRequirement());
+
     public boolean test(ItemStack stack, boolean ignoreCount)
     {
         if (stack.isEmpty() && items.isPresent() && !items.get().isEmpty())
@@ -122,6 +126,8 @@ public record ItemRequirement(Optional<List<Either<TagKey<Item>, Item>>> items, 
 
     public static ItemRequirement deserialize(CompoundTag nbt)
     {
+        if (nbt.isEmpty()) return NONE;
+
         Optional<List<Either<TagKey<Item>, Item>>> items = Optional.of(nbt.getList("items", 8)
                                                            .stream()
                                                            .map(tg ->

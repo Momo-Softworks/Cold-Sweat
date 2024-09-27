@@ -28,11 +28,14 @@ public record Insulator(Insulation insulation, Insulation.Slot slot, ItemRequire
         tag.put("insulation", insulation.serialize());
         tag.put("slot", Insulation.Slot.CODEC.encodeStart(NbtOps.INSTANCE, slot).result().get());
         tag.put("data", data.serialize());
-        tag.put("predicate", predicate.serialize());
-        tag.put("attributes", attributes.serialize());
-        CompoundTag immuneTempModifiersTag = new CompoundTag();
-        immuneTempModifiers.forEach((key, value) -> immuneTempModifiersTag.putDouble(key.toString(), value));
-        tag.put("immune_temp_modifiers", immuneTempModifiersTag);
+        if (!predicate.equals(EntityRequirement.NONE)) tag.put("predicate", predicate.serialize());
+        if (!attributes.isEmpty()) tag.put("attributes", attributes.serialize());
+        if (!immuneTempModifiers.isEmpty())
+        {
+            CompoundTag immuneTempModifiersTag = new CompoundTag();
+            immuneTempModifiers.forEach((key, value) -> immuneTempModifiersTag.putDouble(key.toString(), value));
+            tag.put("immune_temp_modifiers", immuneTempModifiersTag);
+        }
 
         return tag;
     }

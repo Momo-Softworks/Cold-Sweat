@@ -85,6 +85,8 @@ public class AttributeModifierMap implements NbtSerializable
 
     public static AttributeModifierMap deserialize(CompoundTag tag)
     {
+        if (tag.isEmpty()) return new AttributeModifierMap();
+
         Multimap<Attribute, AttributeModifier> map = HashMultimap.create();
         tag.getAllKeys().forEach(key ->
         {   Attribute attribute = BuiltInRegistries.ATTRIBUTE.get(ResourceLocation.parse(key));

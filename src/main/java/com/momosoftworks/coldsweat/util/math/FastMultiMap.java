@@ -16,6 +16,13 @@ public class FastMultiMap<K, V> implements Multimap<K, V>
     {   putAll(multimap);
     }
 
+    public FastMultiMap(Collection<Map.Entry<K, V>> entries)
+    {
+        for (Map.Entry<K, V> entry : entries)
+        {   put(entry.getKey(), entry.getValue());
+        }
+    }
+
     private final FastMap<K, LinkedHashSet<V>> internal = new FastMap<>();
     private int totalSize = 0;
 
