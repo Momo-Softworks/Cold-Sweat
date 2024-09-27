@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.common.capability.handler;
 
+import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
@@ -9,6 +10,7 @@ import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCa
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
+import com.momosoftworks.coldsweat.util.math.FastMultiMap;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -35,10 +37,7 @@ import net.minecraftforge.fml.common.Mod;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.*;
 
 @Mod.EventBusSubscriber
 public class ItemInsulationManager
@@ -122,6 +121,7 @@ public class ItemInsulationManager
             getInsulationCap(containerStack).ifPresent(cap ->
             {
                 // Serialize insulation for syncing to client
+                containerStack.getOrCreateTag().remove("Insulation");
                 containerStack.getOrCreateTag().merge(cap.serializeNBT());
             });
         }
@@ -163,7 +163,7 @@ public class ItemInsulationManager
         {
             getInsulationCap(stack).ifPresent(cap ->
             {
-                for (Pair<ItemStack, List<Insulation>> pair : cap.getInsulation())
+                for (Pair<ItemStack, Multimap<Insulator, Insulation>> pair : cap.getInsulation())
                 {   insulators.addAll(ConfigSettings.INSULATION_ITEMS.get().get(pair.getFirst().getItem()));
                 }
             });
@@ -182,11 +182,9 @@ public class ItemInsulationManager
         return ItemInsulationManager.getInsulationCap(armor)
                .map(IInsulatableCap::getInsulation).orElse(new ArrayList<>())
                .stream()
-               // Map to list of ItemStacks
-               .map(Pair::getFirst)
-               // Map to list of insulators and filter ones that don't meet their conditions
-               .flatMap(itemStack -> ConfigSettings.INSULATION_ITEMS.get().get(itemStack.getItem()).stream().filter(insulator -> insulator.test(entity, itemStack)))
-               .map(Insulator::insulation).toList();
+               .map(pair -> pair.mapSecond(map -> new FastMultiMap<>(map.entries().stream().filter(entry -> entry.getKey().test(entity, armor)).toList())))
+               .map(pair -> pair.getSecond().values())
+               .flatMap(Collection::stream).toList();
     }
 
     public static List<AttributeModifier> getInsulationAttributeModifiers(ItemStack stack, Attribute attribute, @Nullable AttributeModifier.Operation operation, @Nullable Entity owner)

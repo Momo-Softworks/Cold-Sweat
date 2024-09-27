@@ -733,8 +733,8 @@ public class CSMath
     @SafeVarargs
     @Nullable
     public static <T> T orElse(T... values)
-    {   for (T value : values)
-        {   if (value != null) return value;
+    {   for (int i = 0; i < values.length; i++)
+        {   if (values[i] != null)return values[i];
         }
         return null;
     }
