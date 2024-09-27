@@ -2,7 +2,7 @@ package com.momosoftworks.coldsweat.core.init;
 
 import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.common.item.component.ArmorInsulation;
+import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -17,8 +17,8 @@ public class ModItemComponents
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Boolean>> SOULSPRING_LAMP_LIT = DATA_COMPONENTS.register("lit",
                                                () -> DataComponentType.<Boolean>builder().persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL).build());
 
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<ArmorInsulation>> ARMOR_INSULATION = DATA_COMPONENTS.register("armor_insulation",
-                                               () -> DataComponentType.<ArmorInsulation>builder().persistent(ArmorInsulation.CODEC).networkSynchronized(ArmorInsulation.STREAM_CODEC).build());
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<ItemInsulationCap>> ARMOR_INSULATION = DATA_COMPONENTS.register("armor_insulation",
+                                                                                                                                               () -> DataComponentType.<ItemInsulationCap>builder().persistent(ItemInsulationCap.CODEC).networkSynchronized(ItemInsulationCap.STREAM_CODEC).build());
 
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Double>> WATER_TEMPERATURE = DATA_COMPONENTS.register("temperature",
                                                () -> DataComponentType.<Double>builder().persistent(Codec.DOUBLE).networkSynchronized(ByteBufCodecs.DOUBLE).build());

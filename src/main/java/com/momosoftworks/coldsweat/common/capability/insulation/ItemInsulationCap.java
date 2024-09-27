@@ -1,4 +1,4 @@
-package com.momosoftworks.coldsweat.common.item.component;
+package com.momosoftworks.coldsweat.common.capability.insulation;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
@@ -8,7 +8,6 @@ import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -20,7 +19,7 @@ import net.minecraft.world.item.ItemStack;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public record ArmorInsulation(List<Pair<ItemStack, List<Insulation>>> insulation)
+public record ItemInsulationCap(List<Pair<ItemStack, List<Insulation>>> insulation)
 {
     public static final Codec<List<Insulation>> INSULATION_CODEC = CompoundTag.CODEC.xmap(
     tag ->
@@ -42,14 +41,14 @@ public record ArmorInsulation(List<Pair<ItemStack, List<Insulation>>> insulation
         return tag;
     });
 
-    public static final Codec<ArmorInsulation> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+    public static final Codec<ItemInsulationCap> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.pair(ItemStack.CODEC, INSULATION_CODEC).listOf().fieldOf("Insulation").forGetter(armorInsulation -> armorInsulation.insulation)
-    ).apply(instance, ArmorInsulation::new));
+    ).apply(instance, ItemInsulationCap::new));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, ArmorInsulation> STREAM_CODEC = StreamCodec.of((buf, insul) -> insul.serialize(buf),
-                                                                                                            (buf) -> ArmorInsulation.deserialize(buf));
+    public static final StreamCodec<RegistryFriendlyByteBuf, ItemInsulationCap> STREAM_CODEC = StreamCodec.of((buf, insul) -> insul.serialize(buf),
+                                                                                                              (buf) -> ItemInsulationCap.deserialize(buf));
 
-    public ArmorInsulation()
+    public ItemInsulationCap()
     {   this(new ArrayList<>());
     }
 
@@ -57,7 +56,7 @@ public record ArmorInsulation(List<Pair<ItemStack, List<Insulation>>> insulation
     {   return ImmutableList.copyOf(this.insulation());
     }
 
-    public ArmorInsulation calcAdaptiveInsulation(double worldTemp, double minTemp, double maxTemp)
+    public ItemInsulationCap calcAdaptiveInsulation(double worldTemp, double minTemp, double maxTemp)
     {
         var insulation = new ArrayList<>(this.insulation());
         for (Pair<ItemStack, List<Insulation>> entry : insulation)
@@ -81,10 +80,10 @@ public record ArmorInsulation(List<Pair<ItemStack, List<Insulation>>> insulation
                 }
             }
         }
-        return new ArmorInsulation(insulation);
+        return new ItemInsulationCap(insulation);
     }
 
-    public ArmorInsulation addInsulationItem(ItemStack stack)
+    public ItemInsulationCap addInsulationItem(ItemStack stack)
     {
         var insulation = new ArrayList<>(this.insulation());
 
@@ -95,16 +94,16 @@ public record ArmorInsulation(List<Pair<ItemStack, List<Insulation>>> insulation
         if (!newInsulation.isEmpty())
         {   insulation.add(Pair.of(stack, newInsulation));
         }
-        return new ArmorInsulation(insulation);
+        return new ItemInsulationCap(insulation);
     }
 
-    public ArmorInsulation removeInsulationItem(ItemStack stack)
+    public ItemInsulationCap removeInsulationItem(ItemStack stack)
     {
         var insulation = new ArrayList<>(this.insulation());
         Optional<Pair<ItemStack, List<Insulation>>> toRemove = insulation.stream().filter(entry -> entry.getFirst().equals(stack)).findFirst();
         toRemove.ifPresent(insulation::remove);
 
-        return new ArmorInsulation(insulation);
+        return new ItemInsulationCap(insulation);
     }
 
     public ItemStack getInsulationItem(int index)
@@ -151,7 +150,7 @@ public record ArmorInsulation(List<Pair<ItemStack, List<Insulation>>> insulation
         }
     }
 
-    public static ArmorInsulation deserialize(RegistryFriendlyByteBuf buffer)
+    public static ItemInsulationCap deserialize(RegistryFriendlyByteBuf buffer)
     {
         int size = buffer.readInt();
         List<Pair<ItemStack, List<Insulation>>> insulation = new ArrayList<>();
@@ -161,6 +160,6 @@ public record ArmorInsulation(List<Pair<ItemStack, List<Insulation>>> insulation
             List<Insulation> insulList = buffer.readList(buf -> Insulation.getNetworkCodec().decode(buf));
             insulation.add(Pair.of(stack, insulList));
         }
-        return new ArmorInsulation(insulation);
+        return new ItemInsulationCap(insulation);
     }
 }

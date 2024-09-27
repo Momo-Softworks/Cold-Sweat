@@ -1,9 +1,7 @@
 package com.momosoftworks.coldsweat.common.container;
 
-import com.mojang.datafixers.util.Pair;
-import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
-import com.momosoftworks.coldsweat.common.item.component.ArmorInsulation;
+import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.init.ModMenus;
@@ -36,9 +34,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
-import java.util.Collection;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class SewingContainer extends AbstractContainerMenu
 {
@@ -320,9 +316,9 @@ public class SewingContainer extends AbstractContainerMenu
 
     private boolean insulateArmorItem(ItemStack armorItem, ItemStack insulatorItem)
     {
-        Optional<ArmorInsulation> insulCap = ItemInsulationManager.getInsulationCap(armorItem);
+        Optional<ItemInsulationCap> insulCap = ItemInsulationManager.getInsulationCap(armorItem);
         if (insulCap.isEmpty()) return false;
-        ArmorInsulation cap = insulCap.get();
+        ItemInsulationCap cap = insulCap.get();
 
         ItemStack insulator = insulatorItem.copy();
         insulator.setCount(1);

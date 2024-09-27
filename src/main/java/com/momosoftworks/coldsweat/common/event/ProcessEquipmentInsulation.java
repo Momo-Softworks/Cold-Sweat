@@ -9,7 +9,7 @@ import com.momosoftworks.coldsweat.api.temperature.modifier.ArmorInsulationTempM
 import com.momosoftworks.coldsweat.api.util.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
-import com.momosoftworks.coldsweat.common.item.component.ArmorInsulation;
+import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.core.init.ModItems;
@@ -79,11 +79,11 @@ public class ProcessEquipmentInsulation
                     }
                     else
                     {   // Add the armor's insulation value from the Sewing Table
-                        Optional<ArmorInsulation> icap = ItemInsulationManager.getInsulationCap(armorStack);
+                        Optional<ItemInsulationCap> icap = ItemInsulationManager.getInsulationCap(armorStack);
                         if (icap.isEmpty())
                         {   continue;
                         }
-                        ArmorInsulation cap = icap.get();
+                        ItemInsulationCap cap = icap.get();
                         List<Insulation> insulation = ItemInsulationManager.getAllEffectiveInsulation(armorStack, player);
 
                         // Get the armor's insulation values

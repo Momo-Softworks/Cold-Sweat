@@ -2,20 +2,18 @@ package com.momosoftworks.coldsweat.common.capability.handler;
 
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
-import com.momosoftworks.coldsweat.common.item.component.ArmorInsulation;
+import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.core.init.ModItemComponents;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.item.ItemStackHelper;
-import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.core.Holder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
@@ -35,10 +33,10 @@ public class ItemInsulationManager
      * Gets the insulation component from the item, or creates one if needed.<br>
      * This will always return {@code null} for non-armor items!
      */
-    public static Optional<ArmorInsulation> getInsulationCap(ItemStack stack)
+    public static Optional<ItemInsulationCap> getInsulationCap(ItemStack stack)
     {
         if (isInsulatable(stack) && !stack.has(ModItemComponents.ARMOR_INSULATION))
-        {   stack.set(ModItemComponents.ARMOR_INSULATION, new ArmorInsulation());
+        {   stack.set(ModItemComponents.ARMOR_INSULATION, new ItemInsulationCap());
         }
         return Optional.ofNullable(stack.get(ModItemComponents.ARMOR_INSULATION));
     }
@@ -84,7 +82,7 @@ public class ItemInsulationManager
     public static List<Insulation> getAllEffectiveInsulation(ItemStack armor, LivingEntity entity)
     {
         return ItemInsulationManager.getInsulationCap(armor)
-               .map(ArmorInsulation::getInsulation).orElse(new ArrayList<>())
+               .map(ItemInsulationCap::getInsulation).orElse(new ArrayList<>())
                .stream()
                // Map to list of ItemStacks
                .map(Pair::getFirst)
