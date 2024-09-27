@@ -46,11 +46,14 @@ public class Insulator implements NbtSerializable
         tag.put("insulation", insulation.serialize());
         tag.put("slot", Insulation.Slot.CODEC.encodeStart(NBTDynamicOps.INSTANCE, slot).result().get());
         tag.put("data", data.serialize());
-        tag.put("predicate", predicate.serialize());
-        tag.put("attributes", attributes.serialize());
-        CompoundNBT immuneTempModifiersTag = new CompoundNBT();
-        immuneTempModifiers.forEach((key, value) -> immuneTempModifiersTag.putDouble(key.toString(), value));
-        tag.put("immune_temp_modifiers", immuneTempModifiersTag);
+        if (!predicate.equals(EntityRequirement.NONE)) tag.put("predicate", predicate.serialize());
+        if (!attributes.isEmpty()) tag.put("attributes", attributes.serialize());
+        if (!immuneTempModifiers.isEmpty())
+        {
+            CompoundNBT immuneTempModifiersTag = new CompoundNBT();
+            immuneTempModifiers.forEach((key, value) -> immuneTempModifiersTag.putDouble(key.toString(), value));
+            tag.put("immune_temp_modifiers", immuneTempModifiersTag);
+        }
 
         return tag;
     }

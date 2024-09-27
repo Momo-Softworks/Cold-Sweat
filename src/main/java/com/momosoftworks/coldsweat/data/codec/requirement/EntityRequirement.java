@@ -187,6 +187,7 @@ public class EntityRequirement
 
     public static EntityRequirement deserialize(CompoundNBT compound)
     {
+        if (compound.isEmpty()) return NONE;
         try
         {   Optional<EntityType<?>> type = compound.contains("type") ? Optional.of(ForgeRegistries.ENTITIES.getValue(new ResourceLocation(compound.getString("type")))) : Optional.empty();
             Optional<ITag<EntityType<?>>> tag = compound.contains("tag") ? Optional.of(EntityTypeTags.getAllTags().getTag(new ResourceLocation(compound.getString("tag")))) : Optional.empty();

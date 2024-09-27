@@ -6,6 +6,7 @@ import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
 import com.momosoftworks.coldsweat.util.serialization.StringRepresentable;
 import net.minecraft.nbt.CompoundNBT;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -109,13 +110,15 @@ public abstract class Insulation implements NbtSerializable
         {   return name;
         }
 
+        @Nullable
         public static Slot byName(String name)
-        {   for (Slot type : values())
+        {
+            for (Slot type : values())
             {   if (type.name.equals(name))
                 {   return type;
                 }
             }
-            throw new IllegalArgumentException("Unknown insulation slot: " + name);
+            return null;
         }
     }
 

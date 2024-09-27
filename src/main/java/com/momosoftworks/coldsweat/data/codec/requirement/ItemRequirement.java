@@ -63,6 +63,10 @@ public class ItemRequirement
             NbtRequirement.CODEC.optionalFieldOf("nbt", new NbtRequirement(new CompoundNBT())).forGetter(predicate -> predicate.nbt)
     ).apply(instance, ItemRequirement::new));
 
+    public static final ItemRequirement NONE = new ItemRequirement(Optional.empty(), Optional.empty(), Optional.empty(),
+                                                                   Optional.empty(), Optional.empty(), Optional.empty(),
+                                                                   Optional.empty(), new NbtRequirement());
+
     public boolean test(ItemStack stack, boolean ignoreCount)
     {
         if (stack.isEmpty() && items.isPresent() && !items.get().isEmpty())
@@ -139,6 +143,8 @@ public class ItemRequirement
 
     public static ItemRequirement deserialize(CompoundNBT nbt)
     {
+        if (nbt.isEmpty()) return NONE;
+
         Optional<List<Either<ITag<Item>, Item>>> items = Optional.of(nbt.getList("items", 8)
                                                            .stream()
                                                            .map(tg ->

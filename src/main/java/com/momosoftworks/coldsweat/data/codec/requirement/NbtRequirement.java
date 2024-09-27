@@ -22,6 +22,10 @@ public class NbtRequirement
     
     public static final Codec<NbtRequirement> CODEC = CompoundNBT.CODEC.xmap(NbtRequirement::deserialize, NbtRequirement::serialize);
 
+    public NbtRequirement()
+    {   this(new CompoundNBT());
+    }
+
     public boolean test(ItemStack pStack)
     {   return this.tag.isEmpty() || this.test(pStack.getTag());
     }
