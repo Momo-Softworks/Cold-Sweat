@@ -154,6 +154,7 @@ public record EntityRequirement(Optional<EntityType<?>> type, Optional<TagKey<En
 
     public static EntityRequirement deserialize(CompoundTag compound)
     {
+        if (compound.isEmpty()) return NONE;
         try
         {   Optional<EntityType<?>> type = compound.contains("type") ? Optional.of(ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(compound.getString("type")))) : Optional.empty();
             Optional<TagKey<EntityType<?>>> tag = compound.contains("tag") ? Optional.of(TagKey.create(Registries.ENTITY_TYPE, new ResourceLocation(compound.getString("tag")))) : Optional.empty();

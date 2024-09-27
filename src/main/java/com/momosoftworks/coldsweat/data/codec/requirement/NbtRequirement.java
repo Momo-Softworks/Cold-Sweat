@@ -16,6 +16,10 @@ public record NbtRequirement(CompoundTag tag)
 {
     public static final Codec<NbtRequirement> CODEC = CompoundTag.CODEC.xmap(NbtRequirement::deserialize, NbtRequirement::serialize);
 
+    public NbtRequirement()
+    {   this(new CompoundTag());
+    }
+
     public boolean test(ItemStack pStack)
     {   return this.tag().isEmpty() || this.test(pStack.getTag());
     }

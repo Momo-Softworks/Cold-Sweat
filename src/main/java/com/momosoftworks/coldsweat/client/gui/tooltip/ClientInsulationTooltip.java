@@ -11,6 +11,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -239,6 +240,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
                         case 1 -> 18;
                         default -> 12;
                     };
+                    Minecraft.getInstance().player.displayClientMessage(Component.literal(adaptive.getFactor()+""), true);
                     RenderSystem.enableBlend();
                     RenderSystem.setShaderColor(1, 1, 1, (float) blend);
                     renderCell(graphics, x + 7, y + 1, insul, overlayU, true);

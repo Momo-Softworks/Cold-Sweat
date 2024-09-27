@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.common.capability.insulation;
 
+import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
@@ -7,8 +8,10 @@ import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManag
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.math.FastMultiMap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,19 +20,19 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ItemInsulationCap implements IInsulatableCap
 {
-    private final List<Pair<ItemStack, List<Insulation>>> insulation = new ArrayList<>();
+    private final List<Pair<ItemStack, Multimap<Insulator, Insulation>>> insulation = new ArrayList<>();
 
     @Override
-    public List<Pair<ItemStack, List<Insulation>>> getInsulation()
+    public List<Pair<ItemStack, Multimap<Insulator, Insulation>>> getInsulation()
     {   return this.insulation;
     }
 
     public void calcAdaptiveInsulation(double worldTemp, double minTemp, double maxTemp)
     {
-        for (Pair<ItemStack, List<Insulation>> entry : insulation)
+        for (Pair<ItemStack, Multimap<Insulator, Insulation>> entry : insulation)
         {
-            List<Insulation> list = entry.getSecond();
-            for (Insulation pair : list)
+            Collection<Insulation> entryInsul = entry.getSecond().values();
+            for (Insulation pair : entryInsul)
             {
                 if (pair instanceof AdaptiveInsulation insul)
                 {
@@ -51,10 +54,9 @@ public class ItemInsulationCap implements IInsulatableCap
 
     public void addInsulationItem(ItemStack stack)
     {
-        List<Insulation> insulation = ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()).stream()
-                                      .map(insulator -> insulator.insulation().split())
-                                      .flatMap(List::stream)
-                                      .toList();
+        Multimap<Insulator, Insulation> insulation = ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()).stream()
+                                                     .map(insulator -> Map.entry(insulator, insulator.insulation().split()))
+                                                     .collect(FastMultiMap::new, (map, o) -> map.putAll(o.getKey(), o.getValue()), FastMultiMap::putAll);
         if (!insulation.isEmpty())
         {   this.insulation.add(Pair.of(stack, insulation));
         }
@@ -62,7 +64,7 @@ public class ItemInsulationCap implements IInsulatableCap
 
     public ItemStack removeInsulationItem(ItemStack stack)
     {
-        Optional<Pair<ItemStack, List<Insulation>>> toRemove = this.insulation.stream().filter(entry -> entry.getFirst().equals(stack)).findFirst();
+        Optional<Pair<ItemStack, Multimap<Insulator, Insulation>>> toRemove = this.insulation.stream().filter(entry -> entry.getFirst().equals(stack)).findFirst();
         toRemove.ifPresent(this.insulation::remove);
         return stack;
     }
@@ -75,19 +77,19 @@ public class ItemInsulationCap implements IInsulatableCap
     {
         AtomicInteger positiveInsul = new AtomicInteger();
 
-        List<Insulation> insulation = ConfigSettings.INSULATION_ITEMS.get().get(insulationItem.getItem())
-                                      .stream().filter(insulator -> insulator.test(null, insulationItem))
-                                      .map(insulator -> insulator.insulation().split())
-                                      .flatMap(List::stream).toList();
+        Multimap<Insulator, Insulation> insulation = ConfigSettings.INSULATION_ITEMS.get().get(insulationItem.getItem())
+                                                     .stream().filter(insulator -> insulator.test(null, insulationItem))
+                                                     .map(insulator -> Map.entry(insulator, insulator.insulation().split()))
+                                                     .collect(FastMultiMap::new, (map, o) -> map.putAll(o.getKey(), o.getValue()), FastMultiMap::putAll);
         if (insulation.isEmpty())
         {   return false;
         }
 
-        List<Pair<ItemStack, List<Insulation>>> insulList = new ArrayList<>(this.insulation);
+        List<Pair<ItemStack, Multimap<Insulator, Insulation>>> insulList = new ArrayList<>(this.insulation);
         insulList.add(Pair.of(insulationItem, insulation));
 
         // Get the total positive/negative insulation of the armor
-        insulList.stream().map(Pair::getSecond).flatMap(Collection::stream).forEach(insul ->
+        insulList.stream().map(Pair::getSecond).flatMap(map -> map.values().stream()).forEach(insul ->
         {
             if (insul.getHeat() >= 0 || insul.getCold() >= 0)
             {   positiveInsul.getAndIncrement();
@@ -104,14 +106,22 @@ public class ItemInsulationCap implements IInsulatableCap
         // Iterate over insulation items
         for (int i = 0; i < insulation.size(); i++)
         {
-            Pair<ItemStack, List<Insulation>> entry = insulation.get(i);
+            Pair<ItemStack, Multimap<Insulator, Insulation>> entry = insulation.get(i);
+
             CompoundTag entryNBT = new CompoundTag();
-            List<Insulation> pairList = entry.getSecond();
+            Multimap<Insulator, Insulation> pairList = entry.getSecond();
             // Store ItemStack data
             entryNBT.put("Item", entry.getFirst().save(new CompoundTag()));
             // Store insulation data
-            ListTag pairListNBT = serializeInsulation(pairList);
-            entryNBT.put("Values", pairListNBT);
+            ListTag entryInsulList = new ListTag();
+            for (Map.Entry<Insulator, Collection<Insulation>> insulMapping : pairList.asMap().entrySet())
+            {
+                CompoundTag mappingNBT = new CompoundTag();
+                mappingNBT.put("Insulator", insulMapping.getKey().serialize());
+                mappingNBT.put("Insulation", serializeInsulation(insulMapping.getValue()));
+                entryInsulList.add(mappingNBT);
+            }
+            entryNBT.put("Values", entryInsulList);
             // Add the item to the list
             insulNBT.add(entryNBT);
         }
@@ -123,12 +133,12 @@ public class ItemInsulationCap implements IInsulatableCap
     }
 
     @NotNull
-    private static ListTag serializeInsulation(List<Insulation> pairList)
+    private static ListTag serializeInsulation(Collection<Insulation> pairList)
     {
         ListTag insulList = new ListTag();
         // Store insulation values for the item
-        for (int i = 0; i < pairList.size(); i++)
-        {   insulList.add(pairList.get(i).serialize());
+        for (Insulation insulation : pairList)
+        {   insulList.add(insulation.serialize());
         }
         return insulList;
     }
@@ -139,19 +149,36 @@ public class ItemInsulationCap implements IInsulatableCap
         this.insulation.clear();
 
         // Load the insulation items
-        ListTag insulList = tag.getList("Insulation", 10);
+        ListTag insulNBT = tag.getList("Insulation", 10);
 
-        // Iterate over insulation items
-        for (int i = 0; i < insulList.size(); i++)
+        for (int i = 0; i < insulNBT.size(); i++)
         {
-            CompoundTag entryNBT = insulList.getCompound(i);
+            CompoundTag entryNBT = insulNBT.getCompound(i);
+
             ItemStack stack = ItemStack.of(entryNBT.getCompound("Item"));
-            List<Insulation> pairList = entryNBT.getList("Values", 10).stream().map(tg -> Insulation.deserialize(((CompoundTag) tg)))
-                                                                      .filter(Objects::nonNull)
-                                                                      .map(Insulation::split)
-                                                                      .flatMap(Collection::stream)
-                                                                      .toList();
-            this.insulation.add(Pair.of(stack, new ArrayList<>(pairList)));
+            Multimap<Insulator, Insulation> insulMap = new FastMultiMap<>();
+            ListTag pairListNBT = entryNBT.getList("Values", 10);
+            // Handle legacy insulation
+            if (!pairListNBT.isEmpty() && !pairListNBT.getCompound(0).contains("Insulator"))
+            {
+                for (Insulator insulator : ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()))
+                {   insulMap.putAll(insulator, insulator.insulation().split());
+                }
+            }
+            // Handle normal insulation
+            else for (int j = 0; j < pairListNBT.size(); j++)
+            {
+                // Legacy insulation handling
+                CompoundTag mappingNBT = pairListNBT.getCompound(j);
+                Insulator insulator = Insulator.deserialize(mappingNBT.getCompound("Insulator"));
+                ListTag insulListNBT = mappingNBT.getList("Insulation", 10);
+                List<Insulation> insulList = new ArrayList<>();
+                for (int k = 0; k < insulListNBT.size(); k++)
+                {   insulList.add(AdaptiveInsulation.deserialize(insulListNBT.getCompound(k)));
+                }
+                insulMap.putAll(insulator, insulList);
+            }
+            this.insulation.add(Pair.of(stack, insulMap));
         }
     }
 
