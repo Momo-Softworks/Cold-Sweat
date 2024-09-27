@@ -50,6 +50,7 @@ public class HearthDebugRenderer
             PlayerEntity player = Minecraft.getInstance().player;
             if (player == null) return;
 
+
             MatrixStack ms = event.getMatrixStack();
             Vector3d camPos = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
             World world = player.level;
@@ -150,8 +151,8 @@ public class HearthDebugRenderer
                             workingChunk = WorldHelper.getChunk(world, pos);
                         if (workingChunk == null) continue;
 
-                        if (workingChunk.getBlockState(pos).getShape(world, pos).equals(VoxelShapes.block()))
-                        {   WorldRenderer.renderLineBox(ms, vertexes, x, y, z, x + 1, y + 1, z + 1, r, g, b, renderAlpha);
+                        if (!WorldHelper.canSeeSky(world, pos, 1))
+                        {   WorldRenderer.renderVoxelShape(ms, vertexes, world.getBlockState(pos).getShape(world, pos), x, y, z, r, g, b, renderAlpha);
                             continue;
                         }
 
@@ -196,8 +197,9 @@ public class HearthDebugRenderer
             HEARTH_LOCATIONS.put(pos, paths.stream().map(path ->
             {
                 ArrayList<Direction> dirs = new ArrayList<>();
-                for (Direction dir : Direction.values())
+                for (int i = 0; i < Direction.values().length; i++)
                 {
+                    Direction dir = Direction.values()[i];
                     BlockPos dirPos = path.relative(dir);
                     if (paths.contains(dirPos))
                     {   dirs.add(dir);

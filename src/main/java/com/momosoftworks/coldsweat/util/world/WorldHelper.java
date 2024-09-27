@@ -38,6 +38,7 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.SectionPos;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.registry.Registry;
@@ -151,7 +152,7 @@ public abstract class WorldHelper
         {
             BlockState state = chunk.getBlockState(pos2);
             VoxelShape shape = state.getShape(level, pos, ISelectionContext.empty());
-            if (Block.isShapeFullBlock(shape)) return false;
+            if (shape.equals(VoxelShapes.block())) return false;
 
             if (isFullSide(CSMath.flattenShape(Direction.Axis.Y, shape), Direction.UP))
             {   return false;
@@ -172,7 +173,7 @@ public abstract class WorldHelper
         if (ConfigSettings.HEARTH_SPREAD_BLACKLIST.get().contains(block)) return true;
 
         VoxelShape shape = state.getShape(world, pos, ISelectionContext.empty());
-        if (Block.isShapeFullBlock(shape)) return true;
+        if (shape.equals(VoxelShapes.block())) return true;
 
                // Should it have spread here in the first place?
         return isFullSide(shape.getFaceShape(fromDir.getOpposite()), fromDir)

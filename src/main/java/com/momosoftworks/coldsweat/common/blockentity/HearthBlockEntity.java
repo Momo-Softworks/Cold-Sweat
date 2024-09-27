@@ -59,10 +59,12 @@ import net.minecraft.tileentity.LockableLootTileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
@@ -124,7 +126,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     List<PlayerEntity> players = new ArrayList<>();
     int rebuildCooldown = 0;
     boolean forceRebuild = false;
-    boolean isRebuildQueued = false;
+    List<BlockPos> queuedUpdates = new ArrayList<>();
     public int ticksExisted = 0;
 
     boolean registeredLocation = false;
@@ -161,8 +163,6 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     @SubscribeEvent
     public void onBlockUpdate(BlockStateChangedEvent event)
     {
-        if (this.isRebuildQueued) return;
-
         BlockPos pos = event.getPosition();
         World level = event.getWorld();
 
@@ -170,7 +170,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         && this.pathLookup.contains(pos)
         && !event.getOldState().getCollisionShape(level, pos).equals(event.getNewState().getCollisionShape(level, pos)))
         {
-            this.sendBlockUpdate();
+            this.sendBlockUpdate(pos);
         }
     }
 
@@ -274,7 +274,8 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
             this.shouldUseHotFuel = this.isBackPowered && this.getHotFuel() > 0;
         }
         if (!this.shouldUseColdFuel && !this.shouldUseHotFuel && !this.paths.isEmpty())
-        {   this.resetPaths();
+        {   this.forceUpdate();
+            this.resetPaths();
         }
 
         // Clear paths every 5 minutes to account for calculation errors
@@ -283,7 +284,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         }
 
         // Reset if a nearby block has been updated
-        if (forceRebuild || (rebuildCooldown <= 0 && isRebuildQueued))
+        if (forceRebuild || (rebuildCooldown <= 0 && !this.queuedUpdates.isEmpty()))
         {   this.resetPaths();
         }
 
@@ -327,11 +328,11 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
                 int firstIndex = Math.max(0, lastIndex - partSize);
 
                 // Spread to new blocks
-                // Only tick paths every 20 ticks or if there is only one or less paths (prevents hearths that can't spread causing undue lag)
+                // Only tick paths every 20 ticks or if there is only one or fewer paths (prevents hearths that can't spread causing undue lag)
                 if (this.paths.size() > 1 || this.ticksExisted % 20 == 0)
                 {   this.tickPaths(firstIndex, lastIndex);
                 }
-                if (isClient && paths.size() != pathCount)
+                if (isClient && spreading && paths.size() != pathCount)
                 {   HearthDebugRenderer.updatePaths(this);
                 }
 
@@ -374,6 +375,8 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         {   this.tickParticles();
         }
     }
+
+    IChunk workingChunk = null;
 
     protected void tickPaths(int firstIndex, int lastIndex)
     {
@@ -419,7 +422,10 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
                     /*
                      Spreading algorithm
                      */
-                    BlockState state = level.getBlockState(pathPos);
+                    if (workingChunk == null || !workingChunk.getPos().equals(new ChunkPos(pathPos)))
+                    {   workingChunk = WorldHelper.getChunk(level, pathPos);
+                    }
+                    BlockState state = workingChunk != null ? workingChunk.getBlockState(pathPos) : level.getBlockState(pathPos);
 
                     // Build a map of what positions can see the sky
                     Pair<Integer, Integer> flatPos = Pair.of(spX, spZ);
@@ -447,13 +453,13 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
 
                             // Avoid duplicate paths (ArrayList isn't duplicate-safe like Sets/Maps)
                             // .add() functions to both add the path and check if it's already in the list
-                            if (pathLookup.add(tryPos))
+                            if (!pathLookup.contains(tryPos))
                             {
                                 SpreadPath newPath = new SpreadPath(tryPos, direction).setOrigin(spreadPath.origin);
 
                                 // If the BlockState is a pipe, check if the new path is following the direction of the pipe
                                 if (!WorldHelper.isSpreadBlocked(level, state, pathPos, direction, spreadPath.direction)
-                                && this.isValidPipeAt(tryPos, state, newPath, direction))
+                                && this.isValidPipeAt(tryPos, state, newPath, direction) && pathLookup.add(tryPos))
                                 {   // Add the new path to the list
                                     paths.add(newPath);
                                 }
@@ -751,19 +757,29 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         this.rebuildCooldown = 100;
 
         // Clear paths & lookup
-        paths.clear();
-        pathLookup.clear();
-        seeSkyMap.clear();
+        this.paths.clear();
+        this.pathLookup.clear();
+        if (this.forceRebuild)
+        {   seeSkyMap.clear();
+        }
+        else for (int i = 0; i < this.queuedUpdates.size(); i++)
+        {
+            BlockPos pos = this.queuedUpdates.get(i);
+            seeSkyMap.remove(Pair.of(pos.getX(), pos.getZ()));
+        }
 
         // Un-freeze paths so areas can be re-checked
-        frozenPaths = 0;
-        spreading = true;
+        this.frozenPaths = 0;
+        this.spreading = true;
 
         // Tell client to reset paths too
         this.sendResetPacket();
+        if (this.level.isClientSide)
+        {   HearthDebugRenderer.updatePaths(this);
+        }
 
-        forceRebuild = false;
-        this.isRebuildQueued = false;
+        this.forceRebuild = false;
+        this.queuedUpdates.clear();
     }
 
     public List<EffectInstance> getEffects()
@@ -878,7 +894,9 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         }
         // A smokestack has been removed
         else if (!this.hasSmokestack && hadSmokestack)
-        {   this.resetPaths();
+        {
+            this.forceUpdate();
+            this.resetPaths();
             this.unregisterLocation();
             if (this.level.isClientSide)
             {   ClientOnlyHelper.removeHearthPosition(this.getBlockPos());
@@ -1070,13 +1088,13 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         }
     }
 
-    public void sendBlockUpdate()
-    {   isRebuildQueued = true;
+    public void sendBlockUpdate(BlockPos pos)
+    {   this.queuedUpdates.add(pos);
     }
 
     public void forceUpdate()
     {   this.forceRebuild = true;
-        this.sendBlockUpdate();
+        this.sendBlockUpdate(this.getBlockPos());
     }
 
     @Override
