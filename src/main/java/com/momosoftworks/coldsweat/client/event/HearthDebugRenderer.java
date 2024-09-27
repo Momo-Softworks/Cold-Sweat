@@ -25,12 +25,10 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.phys.shapes.Shapes;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
-import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -53,6 +51,7 @@ public class HearthDebugRenderer
         {
             Player player = Minecraft.getInstance().player;
             if (player == null) return;
+
 
             Frustum frustum = event.getFrustum();
             PoseStack ps = event.getPoseStack();
@@ -156,8 +155,8 @@ public class HearthDebugRenderer
                             workingChunk = WorldHelper.getChunk(level, pos);
                         if (workingChunk == null) continue;
 
-                        if (workingChunk.getBlockState(pos).getShape(level, pos).equals(Shapes.block()))
-                        {   LevelRenderer.renderLineBox(ps, vertexes, x, y, z, x + 1, y + 1, z + 1, r, g, b, renderAlpha);
+                        if (!WorldHelper.canSeeSky(level, pos, 1))
+                        {   LevelRenderer.renderVoxelShape(ps, vertexes, level.getBlockState(pos).getShape(level, pos), x, y, z, r, g, b, renderAlpha, false);
                             continue;
                         }
 
@@ -202,8 +201,9 @@ public class HearthDebugRenderer
             HEARTH_LOCATIONS.put(pos, paths.stream().map(path ->
             {
                 ArrayList<Direction> dirs = new ArrayList<>();
-                for (Direction dir : Direction.values())
+                for (int i = 0; i < Direction.values().length; i++)
                 {
+                    Direction dir = Direction.values()[i];
                     BlockPos dirPos = path.relative(dir);
                     if (paths.contains(dirPos))
                     {   dirs.add(dir);

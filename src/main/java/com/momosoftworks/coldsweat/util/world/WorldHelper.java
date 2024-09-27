@@ -51,6 +51,7 @@ import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
 import net.neoforged.neoforge.common.NeoForge;
@@ -149,7 +150,7 @@ public abstract class WorldHelper
         {
             BlockState state = chunk.getBlockState(pos2);
             VoxelShape shape = state.getShape(level, pos, CollisionContext.empty());
-            if (Block.isShapeFullBlock(shape)) return false;
+            if (shape.equals(Shapes.block())) return false;
 
             if (isFullSide(CSMath.flattenShape(Direction.Axis.Y, shape), Direction.UP))
             {   return false;
@@ -170,7 +171,7 @@ public abstract class WorldHelper
         if (ConfigSettings.HEARTH_SPREAD_BLACKLIST.get().contains(block)) return true;
 
         VoxelShape shape = state.getShape(level, pos, CollisionContext.empty());
-        if (Block.isShapeFullBlock(shape)) return true;
+        if (shape.equals(Shapes.block())) return true;
 
                // Should it have spread here in the first place?
         return isFullSide(shape.getFaceShape(fromDir.getOpposite()), fromDir)
