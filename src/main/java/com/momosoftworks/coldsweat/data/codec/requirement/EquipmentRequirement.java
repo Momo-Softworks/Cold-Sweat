@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.data.codec.requirement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -35,27 +36,11 @@ public record EquipmentRequirement(Optional<ItemRequirement> head, Optional<Item
     }
 
     public CompoundTag serialize()
-    {
-        CompoundTag tag = new CompoundTag();
-        head.ifPresent(requirement  -> tag.put("head", requirement.serialize()));
-        chest.ifPresent(requirement -> tag.put("chest", requirement.serialize()));
-        legs.ifPresent(requirement  -> tag.put("legs", requirement.serialize()));
-        feet.ifPresent(requirement  -> tag.put("feet", requirement.serialize()));
-        mainHand.ifPresent(requirement -> tag.put("main_hand", requirement.serialize()));
-        offHand.ifPresent(requirement  -> tag.put("off_hand", requirement.serialize()));
-        return tag;
+    {   return (CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElse(new CompoundTag());
     }
 
     public static EquipmentRequirement deserialize(CompoundTag tag)
-    {
-        return new EquipmentRequirement(
-            tag.contains("head") ? Optional.of(ItemRequirement.deserialize(tag.getCompound("head"))) : Optional.empty(),
-            tag.contains("chest") ? Optional.of(ItemRequirement.deserialize(tag.getCompound("chest"))) : Optional.empty(),
-            tag.contains("legs") ? Optional.of(ItemRequirement.deserialize(tag.getCompound("legs"))) : Optional.empty(),
-            tag.contains("feet") ? Optional.of(ItemRequirement.deserialize(tag.getCompound("feet"))) : Optional.empty(),
-            tag.contains("main_hand") ? Optional.of(ItemRequirement.deserialize(tag.getCompound("main_hand"))) : Optional.empty(),
-            tag.contains("off_hand") ? Optional.of(ItemRequirement.deserialize(tag.getCompound("off_hand"))) : Optional.empty()
-        );
+    {   return CODEC.decode(NbtOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize EquipmentRequirement")).getFirst();
     }
 
     @Override

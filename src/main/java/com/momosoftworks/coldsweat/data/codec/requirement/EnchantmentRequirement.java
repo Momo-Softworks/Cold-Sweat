@@ -9,6 +9,8 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
@@ -21,6 +23,16 @@ public record EnchantmentRequirement(Either<TagKey<Enchantment>, Holder<Enchantm
             ConfigHelper.tagOrHolderCodec(Registries.ENCHANTMENT).fieldOf("enchantment").forGetter(requirement -> requirement.enchantment),
             IntegerBounds.CODEC.optionalFieldOf("levels").forGetter(requirement -> requirement.level)
     ).apply(instance, EnchantmentRequirement::new));
+
+    public static StreamCodec<RegistryFriendlyByteBuf, EnchantmentRequirement> STREAM_CODEC = StreamCodec.of(
+            (buf, requirement) ->
+            {
+                buf.writeUtf(ConfigHelper.serializeTagOrRegistryObject(Registries.ENCHANTMENT, requirement.enchantment));
+                buf.writeOptional(requirement.level, IntegerBounds.STREAM_CODEC);
+            },
+            (buf) -> new EnchantmentRequirement(ConfigHelper.deserializeTagOrRegistryObject(buf.readUtf(), Registries.ENCHANTMENT),
+                                                buf.readOptional(IntegerBounds.STREAM_CODEC))
+    );
 
     public boolean test(Holder<Enchantment> enchantment, int level)
     {

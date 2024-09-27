@@ -9,6 +9,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.effect.MobEffect;
@@ -102,21 +103,11 @@ public record EffectsRequirement(Map<Holder<MobEffect>, Instance> effects)
     }
 
     public CompoundTag serialize()
-    {
-        CompoundTag tag = new CompoundTag();
-        for (Map.Entry<Holder<MobEffect>, Instance> entry : effects.entrySet())
-        {
-            tag.put(entry.getKey().unwrapKey().get().location().toString(), entry.getValue().serialize());
-        }
-        return tag;
+    {   return (CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElse(new CompoundTag());
     }
 
     public static EffectsRequirement deserialize(CompoundTag tag)
-    {
-        Map<Holder<MobEffect>, Instance> effects = tag.getAllKeys().stream().collect(
-                Collectors.toMap(key -> Holder.direct(BuiltInRegistries.MOB_EFFECT.get(ResourceLocation.parse(key))),
-                                                  key -> Instance.deserialize(tag.getCompound(key))));
-        return new EffectsRequirement(effects);
+    {   return CODEC.decode(NbtOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize EffectsRequirement")).getFirst();
     }
 
     @Override

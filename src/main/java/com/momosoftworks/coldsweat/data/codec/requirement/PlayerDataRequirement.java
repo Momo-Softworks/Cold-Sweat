@@ -10,6 +10,7 @@ import net.minecraft.advancements.CriterionProgress;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stat;
@@ -107,81 +108,11 @@ public record PlayerDataRequirement(Optional<GameType> gameType, Optional<Map<St
     }
 
     public CompoundTag serialize()
-    {
-        CompoundTag tag = new CompoundTag();
-        gameType.ifPresent(gameType -> tag.putString("gameType", gameType.getName()));
-        stats.ifPresent(stats ->
-        {
-            ListTag statsTag = new ListTag();
-            for (Map.Entry<StatRequirement, IntegerBounds> entry : stats.entrySet())
-            {
-                CompoundTag statTag = new CompoundTag();
-                statTag.put("stat", entry.getKey().serialize());
-                statTag.put("value", entry.getValue().serialize());
-                statsTag.add(statTag);
-            }
-            tag.put("stats", statsTag);
-        });
-        recipes.ifPresent(recipes ->
-        {
-            CompoundTag recipesTag = new CompoundTag();
-            for (Map.Entry<ResourceLocation, Boolean> entry : recipes.entrySet())
-            {   recipesTag.putBoolean(entry.getKey().toString(), entry.getValue());
-            }
-            tag.put("recipes", recipesTag);
-        });
-        advancements.ifPresent(advancements ->
-        {
-            CompoundTag advancementsTag = new CompoundTag();
-            for (Map.Entry<ResourceLocation, Either<AdvancementCompletionRequirement, AdvancementCriteriaRequirement>> entry : advancements.entrySet())
-            {
-                CompoundTag advancementTag = new CompoundTag();
-                entry.getValue().ifLeft(complete -> advancementTag.putBoolean("complete", complete.complete));
-                entry.getValue().ifRight(criteria -> {
-                    CompoundTag criteriaTag = new CompoundTag();
-                    for (Map.Entry<String, Boolean> criteriaEntry : criteria.criteria.entrySet())
-                    {
-                        criteriaTag.putBoolean(criteriaEntry.getKey(), criteriaEntry.getValue());
-                    }
-                    advancementTag.put("criteria", criteriaTag);
-                });
-                advancementsTag.put(entry.getKey().toString(), advancementTag);
-            }
-            tag.put("advancements", advancementsTag);
-        });
-        lookingAt.ifPresent(lookingAt -> tag.put("lookingAt", lookingAt.serialize()));
-
-        return tag;
+    {   return (CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElse(new CompoundTag());
     }
 
     public static PlayerDataRequirement deserialize(CompoundTag tag)
-    {
-        Optional<GameType> gameType = tag.contains("gameType") ? Optional.of(GameType.byName(tag.getString("gameType"))) : Optional.empty();
-        Optional<Map<StatRequirement, IntegerBounds>> stats = tag.contains("stats") ? Optional.of(tag.getList("stats", 10)
-                .stream()
-                .map(tg -> (CompoundTag) tg)
-                .collect(Collectors.<CompoundTag, StatRequirement, IntegerBounds>toMap(tg -> StatRequirement.deserialize(tg.getCompound("stat")),
-                                          tg -> IntegerBounds.deserialize(tg.getCompound("value"))))
-        ) : Optional.empty();
-
-        Optional<Map<ResourceLocation, Boolean>> recipes = tag.contains("recipes") ? Optional.of(tag.getCompound("recipes").getAllKeys().stream()
-                .collect(Collectors.toMap(key -> ResourceLocation.parse(key), key -> tag.getCompound("recipes").getBoolean(key)))) : Optional.empty();
-
-        Optional<Map<ResourceLocation, Either<AdvancementCompletionRequirement, AdvancementCriteriaRequirement>>> advancements = tag.contains("advancements") ? Optional.of(tag.getCompound("advancements").getAllKeys().stream()
-                .collect(Collectors.toMap(key -> ResourceLocation.parse(key), key -> {
-                    CompoundTag advancementTag = tag.getCompound("advancements").getCompound(key);
-                    if (advancementTag.contains("complete"))
-                    {   return Either.left(new AdvancementCompletionRequirement(advancementTag.getBoolean("complete")));
-                    }
-                    else
-                    {   return Either.right(new AdvancementCriteriaRequirement(advancementTag.getCompound("criteria").getAllKeys().stream()
-                            .collect(Collectors.toMap(criteriaKey -> criteriaKey, criteriaKey -> advancementTag.getCompound("criteria").getBoolean(criteriaKey)))));
-                    }
-                }))) : Optional.empty();
-
-        Optional<EntityRequirement> lookingAt = tag.contains("lookingAt") ? Optional.of(EntityRequirement.deserialize(tag.getCompound("lookingAt"))) : Optional.empty();
-
-        return new PlayerDataRequirement(gameType, stats, recipes, advancements, lookingAt);
+    {   return CODEC.decode(NbtOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize PlayerDataRequirement")).getFirst();
     }
 
     @Override

@@ -16,6 +16,13 @@ public class FastMultiMap<K, V> implements Multimap<K, V>
     {   putAll(multimap);
     }
 
+    public FastMultiMap(Map<K, ? extends Collection<V>> map)
+    {
+        for (Map.Entry<K, ? extends Collection<V>> entry : map.entrySet())
+        {   putAll(entry.getKey(), entry.getValue());
+        }
+    }
+
     public FastMultiMap(Collection<Map.Entry<K, V>> entries)
     {
         for (Map.Entry<K, V> entry : entries)

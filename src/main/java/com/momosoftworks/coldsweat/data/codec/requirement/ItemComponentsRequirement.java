@@ -13,6 +13,7 @@ import net.minecraft.core.component.*;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.*;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.connection.ConnectionType;
@@ -22,6 +23,11 @@ import javax.annotation.Nullable;
 public record ItemComponentsRequirement(DataComponentMap components)
 {
     public static final Codec<ItemComponentsRequirement> CODEC = CompoundTag.CODEC.xmap(ItemComponentsRequirement::deserialize, ItemComponentsRequirement::serialize);
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, ItemComponentsRequirement> STREAM_CODEC = StreamCodec.of(
+            (buf, requirement) -> buf.writeNbt(requirement.serialize()),
+            (buf) -> ItemComponentsRequirement.deserialize(buf.readNbt())
+    );
 
     public ItemComponentsRequirement()
     {   this(DataComponentMap.builder().build());

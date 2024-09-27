@@ -3,6 +3,9 @@ package com.momosoftworks.coldsweat.data.codec.util;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 
 import java.util.Objects;
 
@@ -13,6 +16,15 @@ public record IntegerBounds(int min, int max)
             Codec.INT.optionalFieldOf("max", Integer.MAX_VALUE).forGetter(bounds -> bounds.max)
     ).apply(instance, IntegerBounds::new));
 
+    public static final StreamCodec<FriendlyByteBuf, IntegerBounds> STREAM_CODEC = StreamCodec.of(
+            (buf, bounds) ->
+            {
+                buf.writeInt(bounds.min());
+                buf.writeInt(bounds.max());
+            },
+            (buf) -> new IntegerBounds(buf.readInt(), buf.readInt())
+    );
+
     public static IntegerBounds NONE = new IntegerBounds(-Integer.MAX_VALUE, Integer.MAX_VALUE);
 
     public boolean test(int value)
@@ -20,15 +32,11 @@ public record IntegerBounds(int min, int max)
     }
 
     public CompoundTag serialize()
-    {
-        CompoundTag tag = new CompoundTag();
-        tag.putInt("min", min);
-        tag.putInt("max", max);
-        return tag;
+    {   return ((CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElseGet(CompoundTag::new));
     }
 
     public static IntegerBounds deserialize(CompoundTag tag)
-    {   return new IntegerBounds(tag.getInt("min"), tag.getInt("max"));
+    {   return CODEC.decode(NbtOps.INSTANCE, tag).result().orElseThrow().getFirst();
     }
 
     @Override

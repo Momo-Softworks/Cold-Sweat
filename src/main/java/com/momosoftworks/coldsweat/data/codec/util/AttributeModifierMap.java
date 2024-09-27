@@ -3,11 +3,13 @@ package com.momosoftworks.coldsweat.data.codec.util;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.mojang.serialization.Codec;
+import com.momosoftworks.coldsweat.util.math.FastMultiMap;
 import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 
@@ -22,6 +24,30 @@ public class AttributeModifierMap implements NbtSerializable
                             .collect(HashMap::new,
                                      (mp, ent) -> mp.put(ent.getKey(), new ArrayList<>(ent.getValue())),
                                      HashMap::putAll));
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, AttributeModifierMap> STREAM_CODEC = StreamCodec.of(
+            (buf, map) ->
+            {
+                buf.writeVarInt(map.getMap().size());
+                for (Attribute attribute : map.getMap().keySet())
+                {
+                    buf.writeResourceLocation(BuiltInRegistries.ATTRIBUTE.getKey(attribute));
+                    buf.writeCollection(map.get(attribute), AttributeCodecs.MODIFIER_STREAM_CODEC);
+                }
+            },
+            (buf) ->
+            {
+                Multimap<Attribute, AttributeModifier> map = new FastMultiMap<>();
+                int size = buf.readVarInt();
+                for (int i = 0; i < size; i++)
+                {
+                    Attribute attribute = BuiltInRegistries.ATTRIBUTE.get(buf.readResourceLocation());
+                    List<AttributeModifier> list = buf.readCollection(ArrayList::new, AttributeCodecs.MODIFIER_STREAM_CODEC);
+                    map.putAll(attribute, list);
+                }
+                return new AttributeModifierMap(map);
+            }
+    );
 
     private final Multimap<Attribute, AttributeModifier> map = HashMultimap.create();
 
@@ -73,27 +99,12 @@ public class AttributeModifierMap implements NbtSerializable
     @Override
     public CompoundTag serialize()
     {
-        CompoundTag tag = new CompoundTag();
-        map.asMap().forEach((attribute, modifier) ->
-        {   String key = BuiltInRegistries.ATTRIBUTE.getKey(attribute).toString();
-            ListTag list = new ListTag();
-            modifier.forEach(mod -> list.add(mod.save()));
-            tag.put(key, list);
-        });
-        return tag;
+        return ((CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElse(new CompoundTag()));
     }
 
     public static AttributeModifierMap deserialize(CompoundTag tag)
     {
-        if (tag.isEmpty()) return new AttributeModifierMap();
-
-        Multimap<Attribute, AttributeModifier> map = HashMultimap.create();
-        tag.getAllKeys().forEach(key ->
-        {   Attribute attribute = BuiltInRegistries.ATTRIBUTE.get(ResourceLocation.parse(key));
-            ListTag list = tag.getList(key, 10);
-            list.forEach(mod -> map.put(attribute, AttributeModifier.load(((CompoundTag) mod))));
-        });
-        return new AttributeModifierMap(map);
+        return CODEC.decode(NbtOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize AttributeModifierMap")).getFirst();
     }
 
     @Override

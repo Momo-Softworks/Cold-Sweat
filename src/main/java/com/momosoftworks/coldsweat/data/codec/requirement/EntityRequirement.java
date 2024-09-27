@@ -6,6 +6,7 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
@@ -127,56 +128,13 @@ public record EntityRequirement(Optional<EntityType<?>> type, Optional<TagKey<En
     }
 
     public CompoundTag serialize()
-    {
-        try
-        {   CompoundTag compound = new CompoundTag();
-            type.ifPresent(type -> compound.putString("type", BuiltInRegistries.ENTITY_TYPE.getKey(type).toString()));
-            tag.ifPresent(tag -> compound.putString("tag", tag.location().toString()));
-            location.ifPresent(location -> compound.put("location", location.serialize()));
-            steppingOn.ifPresent(standingOn -> compound.put("standing_on", standingOn.serialize()));
-            effects.ifPresent(effects -> compound.put("effects", effects.serialize()));
-            nbt.ifPresent(nbt -> compound.put("nbt", nbt.serialize()));
-            flags.ifPresent(flags -> compound.put("flags", flags.serialize()));
-            equipment.ifPresent(equipment -> compound.put("equipment", equipment.serialize()));
-            playerData.ifPresent(playerData -> compound.put("player_data", playerData.serialize()));
-            vehicle.ifPresent(vehicle -> compound.put("vehicle", vehicle.serialize()));
-            passenger.ifPresent(passenger -> compound.put("passenger", passenger.serialize()));
-            target.ifPresent(target -> compound.put("target", target.serialize()));
-            return compound;
-        }
-        catch (Exception e)
-        {
-            ColdSweat.LOGGER.error("Error serializing entity requirement: {}", e.getMessage());
-            e.printStackTrace();
-            return new CompoundTag();
-        }
+    {   return (CompoundTag) getCodec().encodeStart(NbtOps.INSTANCE, this).result().orElse(new CompoundTag());
     }
 
     public static EntityRequirement deserialize(CompoundTag compound)
     {
         if (compound.isEmpty()) return NONE;
-        try
-        {   Optional<EntityType<?>> type = compound.contains("type") ? Optional.of(BuiltInRegistries.ENTITY_TYPE.get(ResourceLocation.parse(compound.getString("type")))) : Optional.empty();
-            Optional<TagKey<EntityType<?>>> tag = compound.contains("tag") ? Optional.of(TagKey.create(Registries.ENTITY_TYPE, ResourceLocation.parse(compound.getString("tag")))) : Optional.empty();
-            Optional<LocationRequirement> location = compound.contains("location") ? Optional.of(LocationRequirement.deserialize(compound.getCompound("location"))) : Optional.empty();
-            Optional<LocationRequirement> standingOn = compound.contains("standing_on") ? Optional.of(LocationRequirement.deserialize(compound.getCompound("standing_on"))) : Optional.empty();
-            Optional<EffectsRequirement> effects = compound.contains("effects") ? Optional.of(EffectsRequirement.deserialize(compound.getCompound("effects"))) : Optional.empty();
-            Optional<NbtRequirement> nbt = compound.contains("nbt") ? Optional.of(NbtRequirement.deserialize(compound.getCompound("nbt"))) : Optional.empty();
-            Optional<EntityFlagsRequirement> flags = compound.contains("flags") ? Optional.of(EntityFlagsRequirement.deserialize(compound.getCompound("flags"))) : Optional.empty();
-            Optional<EquipmentRequirement> equipment = compound.contains("equipment") ? Optional.of(EquipmentRequirement.deserialize(compound.getCompound("equipment"))) : Optional.empty();
-            Optional<PlayerDataRequirement> playerData = compound.contains("player_data") ? Optional.of(PlayerDataRequirement.deserialize(compound.getCompound("player_data"))) : Optional.empty();
-            Optional<EntityRequirement> vehicle = compound.contains("vehicle") ? Optional.of(EntityRequirement.deserialize(compound.getCompound("vehicle"))) : Optional.empty();
-            Optional<EntityRequirement> passenger = compound.contains("passenger") ? Optional.of(EntityRequirement.deserialize(compound.getCompound("passenger"))) : Optional.empty();
-            Optional<EntityRequirement> target = compound.contains("target") ? Optional.of(EntityRequirement.deserialize(compound.getCompound("target"))) : Optional.empty();
-
-            return new EntityRequirement(type, tag, location, standingOn, effects, nbt, flags, equipment, playerData, vehicle, passenger, target);
-        }
-        catch (Exception e)
-        {
-            ColdSweat.LOGGER.error("Error deserializing entity requirement: {}", e.getMessage());
-            e.printStackTrace();
-            return NONE;
-        }
+        return getCodec().decode(NbtOps.INSTANCE, compound).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize EntityRequirement")).getFirst();
     }
 
     @Override

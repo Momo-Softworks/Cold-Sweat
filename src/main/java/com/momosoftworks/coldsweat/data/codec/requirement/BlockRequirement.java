@@ -11,6 +11,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -65,47 +66,11 @@ public record BlockRequirement(Optional<List<Either<TagKey<Block>, Block>>> bloc
     }
 
     public CompoundTag serialize()
-    {
-        CompoundTag compound = new CompoundTag();
-
-        blocks.ifPresent(blocks ->
-        {
-            compound.put("blocks", NBTHelper.listTagOf(blocks.stream().map(either ->
-                                   {
-                                       return StringTag.valueOf(either.map(
-                                              tag ->
-                                              {    return "#" + tag.location();
-                                              },
-                                              block ->
-                                              {    return BuiltInRegistries.BLOCK.getKey(block).toString();
-                                              }));
-                                   })
-                                   .collect(Collectors.toList())));
-        });
-        tag.ifPresent(tag -> compound.putString("tag", tag.location().toString()));
-        state.ifPresent(state -> compound.put("state", state.serialize()));
-        nbt.ifPresent(nbt -> compound.put("nbt", nbt.serialize()));
-
-        return compound;
+    {   return (CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElseGet(CompoundTag::new);
     }
 
     public static BlockRequirement deserialize(CompoundTag tag)
-    {
-        Optional<List<Either<TagKey<Block>, Block>>> blocks = tag.contains("blocks") ? Optional.of(tag.getList("blocks", 8).stream().map(tg ->
-        {
-            String string = tg.getAsString();
-            if (string.startsWith("#"))
-            {   return Either.<TagKey<Block>, Block>left(TagKey.create(Registries.BLOCK, ResourceLocation.parse(string.substring(1))));
-            }
-            else
-            {   return Either.<TagKey<Block>, Block>right(BuiltInRegistries.BLOCK.get(ResourceLocation.parse(string)));
-            }
-        }).collect(Collectors.toList())) : Optional.empty();
-        Optional<TagKey<Block>> tagKey = tag.contains("tag") ? Optional.of(TagKey.create(Registries.BLOCK, ResourceLocation.parse(tag.getString("tag")))) : Optional.empty();
-        Optional<StateRequirement> state = tag.contains("state") ? Optional.of(StateRequirement.deserialize(tag.getCompound("state"))) : Optional.empty();
-        Optional<NbtRequirement> nbt = tag.contains("nbt") ? Optional.of(NbtRequirement.deserialize(tag.getCompound("nbt"))) : Optional.empty();
-
-        return new BlockRequirement(blocks, tagKey, state, nbt);
+    {   return CODEC.decode(NbtOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize BlockRequirement")).getFirst();
     }
 
     @Override
@@ -139,27 +104,11 @@ public record BlockRequirement(Optional<List<Either<TagKey<Block>, Block>>> bloc
         ).apply(instance, StateRequirement::new));
 
         public CompoundTag serialize()
-        {   CompoundTag compound = new CompoundTag();
-            ListTag list = new ListTag();
-            this.properties.forEach(property -> list.add(property.map(
-                    StateProperty::serialize,
-                    RangedProperty::serialize)));
-            compound.put("properties", list);
-            return compound;
+        {   return (CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElseGet(CompoundTag::new);
         }
 
         public static StateRequirement deserialize(CompoundTag tag)
-        {
-            List<Either<StateProperty, RangedProperty>> properties = NBTHelper.listTagOf(tag.getList("properties", 10)).stream().map(tg -> {
-                CompoundTag compound = (CompoundTag) tg;
-                if (compound.contains("value"))
-                {   return Either.<StateProperty, RangedProperty>left(StateProperty.deserialize(compound));
-                }
-                else
-                {   return Either.<StateProperty, RangedProperty>right(RangedProperty.deserialize(compound));
-                }
-            }).toList();
-            return new StateRequirement(properties);
+        {   return CODEC.decode(NbtOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize StateRequirement")).getFirst();
         }
 
         public boolean matches(BlockState pState)
@@ -207,14 +156,11 @@ public record BlockRequirement(Optional<List<Either<TagKey<Block>, Block>>> bloc
         ).apply(instance, StateProperty::new));
 
         public CompoundTag serialize()
-        {   CompoundTag compound = new CompoundTag();
-            compound.putString("name", this.name);
-            compound.putString("value", this.value);
-            return compound;
+        {   return (CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElseGet(CompoundTag::new);
         }
 
         public static StateProperty deserialize(CompoundTag tag)
-        {   return new StateProperty(tag.getString("name"), tag.getString("value"));
+        {   return CODEC.decode(NbtOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize StateProperty")).getFirst();
         }
 
         public <S extends StateHolder<?, S>> boolean match(StateDefinition<?, S> pProperties, S pPropertyToMatch)
@@ -256,15 +202,11 @@ public record BlockRequirement(Optional<List<Either<TagKey<Block>, Block>>> bloc
         ).apply(instance, RangedProperty::new));
 
         public CompoundTag serialize()
-        {   CompoundTag compound = new CompoundTag();
-            compound.putString("name", this.name);
-            compound.putString("min", this.min);
-            compound.putString("max", this.max);
-            return compound;
+        {   return (CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElseGet(CompoundTag::new);
         }
 
         public static RangedProperty deserialize(CompoundTag tag)
-        {   return new RangedProperty(tag.getString("name"), tag.getString("min"), tag.getString("max"));
+        {   return CODEC.decode(NbtOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize RangedProperty")).getFirst();
         }
 
         public <S extends StateHolder<?, S>> boolean match(StateDefinition<?, S> pProperties, S pTargetProperty)

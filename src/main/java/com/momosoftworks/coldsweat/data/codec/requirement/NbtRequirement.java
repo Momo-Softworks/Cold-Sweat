@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.nbt.*;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
 
@@ -15,10 +16,6 @@ public record NbtRequirement(CompoundTag tag)
 
     public NbtRequirement()
     {   this(new CompoundTag());
-    }
-
-    public boolean test(ItemStack pStack)
-    {   return this.tag().isEmpty() || this.test(pStack.getTag());
     }
 
     public boolean test(Entity pEntity)

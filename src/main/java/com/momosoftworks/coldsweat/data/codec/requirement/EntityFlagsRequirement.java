@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.data.codec.requirement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.world.entity.AgeableMob;
 import net.minecraft.world.entity.Entity;
 
@@ -32,29 +33,11 @@ public record EntityFlagsRequirement(Optional<Boolean> onFire, Optional<Boolean>
     }
 
     public CompoundTag serialize()
-    {
-        CompoundTag tag = new CompoundTag();
-        onFire.ifPresent(value -> tag.putBoolean("is_on_fire", value));
-        sneaking.ifPresent(value -> tag.putBoolean("is_sneaking", value));
-        sprinting.ifPresent(value -> tag.putBoolean("is_sprinting", value));
-        swimming.ifPresent(value -> tag.putBoolean("is_swimming", value));
-        invisible.ifPresent(value -> tag.putBoolean("is_invisible", value));
-        glowing.ifPresent(value -> tag.putBoolean("is_glowing", value));
-        baby.ifPresent(value -> tag.putBoolean("is_baby", value));
-        return tag;
+    {   return (CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElse(new CompoundTag());
     }
 
     public static EntityFlagsRequirement deserialize(CompoundTag tag)
-    {
-        return new EntityFlagsRequirement(
-            tag.contains("is_on_fire") ? Optional.of(tag.getBoolean("is_on_fire")) : Optional.empty(),
-            tag.contains("is_sneaking") ? Optional.of(tag.getBoolean("is_sneaking")) : Optional.empty(),
-            tag.contains("is_sprinting") ? Optional.of(tag.getBoolean("is_sprinting")) : Optional.empty(),
-            tag.contains("is_swimming") ? Optional.of(tag.getBoolean("is_swimming")) : Optional.empty(),
-            tag.contains("is_invisible") ? Optional.of(tag.getBoolean("is_invisible")) : Optional.empty(),
-            tag.contains("is_glowing") ? Optional.of(tag.getBoolean("is_glowing")) : Optional.empty(),
-            tag.contains("is_baby") ? Optional.of(tag.getBoolean("is_baby")) : Optional.empty()
-        );
+    {   return CODEC.decode(NbtOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize EntityFlagsRequirement")).getFirst();
     }
 
     @Override

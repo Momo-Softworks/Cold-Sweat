@@ -8,6 +8,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.StringRepresentable;
+import org.checkerframework.checker.units.qual.C;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -16,22 +17,28 @@ import java.util.List;
 
 public abstract class Insulation implements NbtSerializable
 {
+    private static Codec<Insulation> CODEC = null;
+    private static StreamCodec<FriendlyByteBuf, Insulation> STREAM_CODEC = null;
     public static Codec<Insulation> getCodec()
     {
-        return Codec.either(StaticInsulation.CODEC, AdaptiveInsulation.CODEC)
-               .xmap(either -> either.map(stat -> stat, adapt -> adapt),
-               insul ->
-               {
-                   if (insul instanceof StaticInsulation)
-                   {   return Either.left(((StaticInsulation) insul));
-                   }
-                   return Either.right(((AdaptiveInsulation) insul));
-               });
+        if (CODEC == null)
+        CODEC = Codec.either(StaticInsulation.CODEC, AdaptiveInsulation.CODEC).xmap(
+        either -> either.map(stat -> stat, adapt -> adapt),
+        insul ->
+        {
+            if (insul instanceof StaticInsulation)
+            {   return Either.left(((StaticInsulation) insul));
+            }
+            return Either.right(((AdaptiveInsulation) insul));
+        });
+        return CODEC;
     }
 
     public static StreamCodec<FriendlyByteBuf, Insulation> getNetworkCodec()
     {
-        return StreamCodec.of((buf, insul) ->
+        if (STREAM_CODEC == null)
+        return  StreamCodec.of(
+        (buf, insul) ->
         {
             if (insul instanceof StaticInsulation st)
             {
@@ -46,6 +53,7 @@ public abstract class Insulation implements NbtSerializable
                 buf.writeDouble(ad.getFactor());
                 buf.writeDouble(ad.getSpeed());
             }
+            else buf.writeUtf("none");
         },
         (buf) ->
         {
@@ -58,6 +66,7 @@ public abstract class Insulation implements NbtSerializable
             }
             return null;
         });
+        return STREAM_CODEC;
     }
 
     /**
