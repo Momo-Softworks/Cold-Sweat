@@ -19,6 +19,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ItemInsulationCap implements IInsulatableCap
 {
     private final List<Pair<ItemStack, Multimap<Insulator, Insulation>>> insulation = new ArrayList<>();
+    private boolean changed = false;
+    private CompoundTag oldSerialized = null;
 
     @Override
     public List<Pair<ItemStack, Multimap<Insulator, Insulation>>> getInsulation()
@@ -48,6 +50,7 @@ public class ItemInsulationCap implements IInsulatableCap
                 }
             }
         }
+        this.changed = true;
     }
 
     public void addInsulationItem(ItemStack stack)
@@ -57,13 +60,18 @@ public class ItemInsulationCap implements IInsulatableCap
                                                      .collect(FastMultiMap::new, (map, o) -> map.putAll(o.getKey(), o.getValue()), FastMultiMap::putAll);
         if (!insulation.isEmpty())
         {   this.insulation.add(Pair.of(stack, insulation));
+            this.changed = true;
         }
     }
 
     public ItemStack removeInsulationItem(ItemStack stack)
     {
         Optional<Pair<ItemStack, Multimap<Insulator, Insulation>>> toRemove = this.insulation.stream().filter(entry -> entry.getFirst().equals(stack)).findFirst();
-        toRemove.ifPresent(this.insulation::remove);
+        toRemove.ifPresent(pair ->
+        {
+            this.insulation.remove(pair);
+            this.changed = true;
+        });
         return stack;
     }
 
@@ -99,6 +107,9 @@ public class ItemInsulationCap implements IInsulatableCap
     @Override
     public CompoundTag serializeNBT()
     {
+        if (!this.changed && this.oldSerialized != null)
+        {   return this.oldSerialized;
+        }
         // Save the insulation items
         ListTag insulNBT = new ListTag();
         // Iterate over insulation items
@@ -127,6 +138,8 @@ public class ItemInsulationCap implements IInsulatableCap
         CompoundTag tag = new CompoundTag();
         tag.put("Insulation", insulNBT);
 
+        this.oldSerialized = tag;
+        this.changed = false;
         return tag;
     }
 
@@ -176,6 +189,10 @@ public class ItemInsulationCap implements IInsulatableCap
                 insulMap.putAll(insulator, insulList);
             }
             this.insulation.add(Pair.of(stack, insulMap));
+        }
+
+        if (!tag.equals(this.oldSerialized))
+        {   this.changed = true;
         }
     }
 
