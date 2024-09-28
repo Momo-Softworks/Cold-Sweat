@@ -2,16 +2,16 @@ package com.momosoftworks.coldsweat.data.codec.requirement;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.data.codec.requirement.sub_type.EntitySubRequirement;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.scores.Team;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,13 +21,15 @@ import java.util.Optional;
 public record EntityRequirement(Optional<EntityType<?>> type, Optional<TagKey<EntityType<?>>> tag,
                                 Optional<LocationRequirement> location, Optional<LocationRequirement> steppingOn,
                                 Optional<EffectsRequirement> effects, Optional<NbtRequirement> nbt, Optional<EntityFlagsRequirement> flags,
-                                Optional<EquipmentRequirement> equipment, Optional<PlayerDataRequirement> playerData,
+                                Optional<EquipmentRequirement> equipment, Optional<EntitySubRequirement> typeSpecificData,
+                                Optional<String> team,
                                 Optional<EntityRequirement> vehicle, Optional<EntityRequirement> passenger, Optional<EntityRequirement> target)
 {
     public static EntityRequirement NONE = new EntityRequirement(Optional.empty(), Optional.empty(), Optional.empty(),
                                                                  Optional.empty(), Optional.empty(), Optional.empty(),
                                                                  Optional.empty(), Optional.empty(), Optional.empty(),
-                                                                 Optional.empty(), Optional.empty(), Optional.empty());
+                                                                 Optional.empty(), Optional.empty(), Optional.empty(),
+                                                                 Optional.empty());
 
     public static Codec<EntityRequirement> SIMPLE_CODEC = RecordCodecBuilder.create(instance -> instance.group(
             BuiltInRegistries.ENTITY_TYPE.byNameCodec().optionalFieldOf("type").forGetter(requirement -> requirement.type),
@@ -37,9 +39,10 @@ public record EntityRequirement(Optional<EntityType<?>> type, Optional<TagKey<En
             EffectsRequirement.CODEC.optionalFieldOf("effects").forGetter(requirement -> requirement.effects),
             NbtRequirement.CODEC.optionalFieldOf("nbt").forGetter(requirement -> requirement.nbt),
             EntityFlagsRequirement.CODEC.optionalFieldOf("flags").forGetter(requirement -> requirement.flags),
-            EquipmentRequirement.CODEC.optionalFieldOf("equipment").forGetter(requirement -> requirement.equipment)
-    ).apply(instance, (type, tag, location, standingOn, effects, nbt, flags, equipment) -> new EntityRequirement(type, tag, location, standingOn, effects, nbt, flags, equipment,
-                                                                                                            Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty())));
+            EquipmentRequirement.CODEC.optionalFieldOf("equipment").forGetter(requirement -> requirement.equipment),
+            Codec.STRING.optionalFieldOf("team").forGetter(requirement -> requirement.team)
+    ).apply(instance, (type, tag, location, standingOn, effects, nbt, flags, equipment, team) -> new EntityRequirement(type, tag, location, standingOn, effects, nbt, flags, equipment,
+                                                                                                            Optional.empty(), team, Optional.empty(), Optional.empty(), Optional.empty())));
 
     private static final List<Codec<EntityRequirement>> REQUIREMENT_CODEC_STACK = new ArrayList<>(List.of(SIMPLE_CODEC));
     // Allow for up to 16 layers of inner codecs
@@ -65,10 +68,11 @@ public record EntityRequirement(Optional<EntityType<?>> type, Optional<TagKey<En
                 NbtRequirement.CODEC.optionalFieldOf("nbt").forGetter(requirement -> requirement.nbt),
                 EntityFlagsRequirement.CODEC.optionalFieldOf("flags").forGetter(requirement -> requirement.flags),
                 EquipmentRequirement.CODEC.optionalFieldOf("equipment").forGetter(requirement -> requirement.equipment),
-                PlayerDataRequirement.getCodec(latestCodec).optionalFieldOf("player_data").forGetter(requirement -> requirement.playerData),
+                EntitySubRequirement.CODEC.optionalFieldOf("type_specific").forGetter(requirement -> requirement.typeSpecificData),
+                Codec.STRING.optionalFieldOf("team").forGetter(requirement -> requirement.team),
                 latestCodec.optionalFieldOf("vehicle").forGetter(requirement -> requirement.vehicle),
                 latestCodec.optionalFieldOf("passenger").forGetter(requirement -> requirement.passenger),
-                latestCodec.optionalFieldOf("target").forGetter(requirement -> requirement.target)
+                latestCodec.optionalFieldOf("targeted_entity").forGetter(requirement -> requirement.target)
         ).apply(instance, EntityRequirement::new));
 
         REQUIREMENT_CODEC_STACK.add(codec);
@@ -106,7 +110,7 @@ public record EntityRequirement(Optional<EntityType<?>> type, Optional<TagKey<En
         if (equipment.isPresent() && !equipment.get().test(entity))
         {   return false;
         }
-        if (playerData.isPresent() && !playerData.get().test(entity))
+        if (typeSpecificData.isPresent() && !typeSpecificData.get().test(entity, entity.level(), entity.position()))
         {   return false;
         }
         if (vehicle.isPresent() && !vehicle.get().test(entity.getVehicle()))
@@ -117,10 +121,14 @@ public record EntityRequirement(Optional<EntityType<?>> type, Optional<TagKey<En
         }
         if (target.isPresent())
         {
-            if (!(entity instanceof Monster monster))
+            if (!(entity instanceof Monster monster) || !target.get().test(monster.getTarget()))
             {   return false;
             }
-            if (!target.get().test(monster.getTarget()))
+        }
+        if (team.isPresent())
+        {
+            Team team = entity.getTeam();
+            if (team == null || !team.getName().equals(this.team.get()))
             {   return false;
             }
         }
@@ -156,7 +164,7 @@ public record EntityRequirement(Optional<EntityType<?>> type, Optional<TagKey<En
             && nbt.equals(that.nbt)
             && flags.equals(that.flags)
             && equipment.equals(that.equipment)
-            && playerData.equals(that.playerData)
+            && typeSpecificData.equals(that.typeSpecificData)
             && vehicle.equals(that.vehicle)
             && passenger.equals(that.passenger)
             && target.equals(that.target);
@@ -174,7 +182,7 @@ public record EntityRequirement(Optional<EntityType<?>> type, Optional<TagKey<En
         nbt.ifPresent(nbt -> builder.append("nbt=").append(nbt).append(", "));
         flags.ifPresent(flags -> builder.append("flags=").append(flags).append(", "));
         equipment.ifPresent(equipment -> builder.append("equipment=").append(equipment).append(", "));
-        playerData.ifPresent(playerData -> builder.append("player_data=").append(playerData).append(", "));
+        typeSpecificData.ifPresent(playerData -> builder.append("player_data=").append(playerData).append(", "));
         vehicle.ifPresent(vehicle -> builder.append("vehicle=").append(vehicle).append(", "));
         passenger.ifPresent(passenger -> builder.append("passenger=").append(passenger).append(", "));
         target.ifPresent(target -> builder.append("target=").append(target).append(", "));

@@ -40,23 +40,6 @@ public class EntityHelper
     {   return entity.position().add(0, entity.getBbHeight() / 2, 0);
     }
 
-    public static GameType getGameModeForPlayer(Player player)
-    {
-        return player instanceof ServerPlayer serverPlayer
-               ? ObjectBuilder.build((() ->
-                 {
-                     Field gameMode = ObfuscationReflectionHelper.findField(ServerPlayer.class, "gameMode");
-                     gameMode.setAccessible(true);
-                     try
-                     {   return ((ServerPlayerGameMode) gameMode.get(serverPlayer)).getGameModeForPlayer();
-                     }
-                     catch (IllegalAccessException e)
-                     {   throw new RuntimeException(e);
-                     }
-                 }))
-               : ClientOnlyHelper.getGameMode();
-    }
-
     public static ServerPlayer getServerPlayer(Player player)
     {   return ((MinecraftServer) LogicalSidedProvider.WORKQUEUE.get(LogicalSide.SERVER)).getPlayerList().getPlayer(player.getUUID());
     }

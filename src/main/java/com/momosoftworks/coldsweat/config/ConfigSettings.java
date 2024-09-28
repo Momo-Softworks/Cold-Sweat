@@ -741,8 +741,8 @@ public class ConfigSettings
                 {
                     EntityRequirement requirement = new EntityRequirement(Optional.of(entityType), Optional.empty(), Optional.empty(), Optional.empty(),
                                                                           Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-                                                                          Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
-                    map.put(entityType, new EntityTempData(requirement, temp, range, units, Optional.empty(), Optional.empty()));
+                                                                          Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
+                    map.put(entityType, new EntityTempData(requirement, temp, range, units, Optional.empty()));
                 }
             }
             holder.get().putAll(map);
