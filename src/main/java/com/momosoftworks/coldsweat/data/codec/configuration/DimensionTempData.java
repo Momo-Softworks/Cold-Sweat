@@ -29,7 +29,7 @@ public class DimensionTempData
     }
 
     public static final Codec<DimensionTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ConfigHelper.dynamicCodec(Registry.DIMENSION_TYPE_REGISTRY).listOf().fieldOf("dimension").forGetter(data -> data.dimensions),
+            ConfigHelper.dynamicCodec(Registry.DIMENSION_TYPE_REGISTRY).listOf().fieldOf("dimensions").forGetter(data -> data.dimensions),
             Codec.DOUBLE.fieldOf("temperature").forGetter(data -> data.temperature),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(data -> data.units),
             Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(data -> data.isOffset),
