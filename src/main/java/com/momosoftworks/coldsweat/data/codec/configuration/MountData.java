@@ -23,7 +23,7 @@ public record MountData(List<Either<TagKey<EntityType<?>>, EntityType<?>>> entit
             ConfigHelper.tagOrForgeRegistryCodec(Registry.ENTITY_TYPE_REGISTRY, ForgeRegistries.ENTITIES).listOf().fieldOf("entities").forGetter(MountData::entities),
             Codec.DOUBLE.fieldOf("cold_insulation").forGetter(MountData::coldInsulation),
             Codec.DOUBLE.fieldOf("heat_insulation").forGetter(MountData::heatInsulation),
-            EntityRequirement.getCodec().fieldOf("requirement").forGetter(MountData::requirement),
+            EntityRequirement.getCodec().fieldOf("entity").forGetter(MountData::requirement),
             Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(MountData::requiredMods)
     ).apply(instance, MountData::new));
 
