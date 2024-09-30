@@ -21,7 +21,7 @@ public class ItemInsulationCap implements IInsulatableCap
 {
     private final List<Pair<ItemStack, Multimap<Insulator, Insulation>>> insulation = new ArrayList<>();
     private boolean changed = false;
-    private CompoundTag oldSerialized = null;
+    private CompoundNBT oldSerialized = null;
 
     @Override
     public List<Pair<ItemStack, Multimap<Insulator, Insulation>>> getInsulation()
