@@ -20,7 +20,7 @@ public record FoodData(ItemRequirement data, Double value, Optional<Integer> dur
             ItemRequirement.CODEC.fieldOf("data").forGetter(FoodData::data),
             Codec.DOUBLE.fieldOf("value").forGetter(FoodData::value),
             Codec.INT.optionalFieldOf("duration").forGetter(FoodData::duration),
-            EntityRequirement.getCodec().optionalFieldOf("entity_requirement").forGetter(FoodData::entityRequirement),
+            EntityRequirement.getCodec().optionalFieldOf("entity").forGetter(FoodData::entityRequirement),
             Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(FoodData::requiredMods)
     ).apply(instance, FoodData::new));
 
