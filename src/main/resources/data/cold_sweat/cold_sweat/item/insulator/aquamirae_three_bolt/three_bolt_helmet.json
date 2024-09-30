@@ -12,7 +12,7 @@
     "heat": 0,
     "cold": 0
   },
-  "predicate": {
+  "entity": {
     "equipment": {
       "feet": {
         "items": [
