@@ -157,7 +157,7 @@ public class HearthDebugRenderer
                         if (workingChunk == null) continue;
 
                         if (!WorldHelper.canSeeSky(level, pos, 1))
-                        {   LevelRenderer.renderVoxelShape(ps, vertexes, level.getBlockState(pos).getShape(level, pos), x, y, z, r, g, b, renderAlpha, false);
+                        {   LevelRenderer.renderVoxelShape(ps, vertexes, level.getBlockState(pos).getShape(level, pos), x, y, z, r, g, b, renderAlpha);
                             continue;
                         }
 
