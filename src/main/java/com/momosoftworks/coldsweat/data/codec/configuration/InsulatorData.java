@@ -27,7 +27,7 @@ public record InsulatorData(Insulation.Slot slot,
             Insulation.Slot.CODEC.fieldOf("type").forGetter(InsulatorData::slot),
             Insulation.getCodec().fieldOf("insulation").forGetter(InsulatorData::insulation),
             ItemRequirement.CODEC.fieldOf("data").forGetter(InsulatorData::data),
-            EntityRequirement.getCodec().optionalFieldOf("predicate", EntityRequirement.NONE).forGetter(InsulatorData::predicate),
+            EntityRequirement.getCodec().optionalFieldOf("entity", EntityRequirement.NONE).forGetter(InsulatorData::predicate),
             AttributeModifierMap.CODEC.optionalFieldOf("attributes").forGetter(InsulatorData::attributes),
             Codec.unboundedMap(ResourceLocation.CODEC, Codec.DOUBLE).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(InsulatorData::immuneTempModifiers),
             Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(InsulatorData::requiredMods)
