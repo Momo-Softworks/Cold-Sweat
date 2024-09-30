@@ -19,7 +19,7 @@ public record ItemData(ItemRequirement data, Double value, Optional<EntityRequir
     public static final Codec<ItemData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ItemRequirement.CODEC.fieldOf("data").forGetter(ItemData::data),
             Codec.DOUBLE.fieldOf("value").forGetter(ItemData::value),
-            EntityRequirement.getCodec().optionalFieldOf("entity_requirement").forGetter(ItemData::entityRequirement),
+            EntityRequirement.getCodec().optionalFieldOf("entity").forGetter(ItemData::entityRequirement),
             Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(ItemData::requiredMods)
     ).apply(instance, ItemData::new));
 
