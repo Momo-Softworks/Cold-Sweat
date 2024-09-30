@@ -186,7 +186,7 @@ public class ItemInsulationCap implements IInsulatableCap
                 ListTag insulListNBT = mappingNBT.getList("Insulation", 10);
                 List<Insulation> insulList = new ArrayList<>();
                 for (int k = 0; k < insulListNBT.size(); k++)
-                {   insulList.add(AdaptiveInsulation.deserialize(insulListNBT.getCompound(k)));
+                {   insulList.add(Insulation.deserialize(insulListNBT.getCompound(k)));
                 }
                 insulMap.putAll(insulator, insulList);
             }
