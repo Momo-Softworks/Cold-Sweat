@@ -32,7 +32,7 @@ public class MountData
             ConfigHelper.tagOrBuiltinCodec(Registry.ENTITY_TYPE_REGISTRY, Registry.ENTITY_TYPE).listOf().fieldOf("entities").forGetter(data -> data.entities),
             Codec.DOUBLE.fieldOf("cold_insulation").forGetter(data -> data.coldInsulation),
             Codec.DOUBLE.fieldOf("heat_insulation").forGetter(data -> data.heatInsulation),
-            EntityRequirement.getCodec().fieldOf("requirement").forGetter(data -> data.requirement),
+            EntityRequirement.getCodec().fieldOf("entity").forGetter(data -> data.requirement),
             Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(data -> data.requiredMods)
     ).apply(instance, MountData::new));
 

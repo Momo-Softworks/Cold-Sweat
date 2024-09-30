@@ -50,7 +50,7 @@ public class InsulatorData implements NbtSerializable
             Insulation.Slot.CODEC.fieldOf("type").forGetter(data -> data.slot),
             Insulation.getCodec().fieldOf("insulation").forGetter(data -> data.insulation),
             ItemRequirement.CODEC.fieldOf("data").forGetter(data -> data.data),
-            EntityRequirement.getCodec().optionalFieldOf("predicate", EntityRequirement.NONE).forGetter(data -> data.predicate),
+            EntityRequirement.getCodec().optionalFieldOf("entity", EntityRequirement.NONE).forGetter(data -> data.predicate),
             AttributeModifierMap.CODEC.optionalFieldOf("attributes").forGetter(data -> data.attributes),
             Codec.unboundedMap(ResourceLocation.CODEC, Codec.DOUBLE).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(data -> data.immuneTempModifiers),
             Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(data -> data.requiredMods)

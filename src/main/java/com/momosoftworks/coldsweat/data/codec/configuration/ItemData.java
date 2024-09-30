@@ -31,7 +31,7 @@ public class ItemData implements NbtSerializable
     public static final Codec<ItemData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ItemRequirement.CODEC.fieldOf("data").forGetter(data -> data.data),
             Codec.DOUBLE.fieldOf("value").forGetter(data -> data.value),
-            EntityRequirement.getCodec().optionalFieldOf("entity_requirement").forGetter(data -> data.entityRequirement),
+            EntityRequirement.getCodec().optionalFieldOf("entity").forGetter(data -> data.entityRequirement),
             Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(data -> data.requiredMods)
     ).apply(instance, ItemData::new));
 
