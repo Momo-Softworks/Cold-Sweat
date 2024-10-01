@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.api.temperature.block_temp;
 
 
+import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
@@ -13,7 +14,7 @@ import java.util.Set;
 
 public abstract class BlockTemp
 {
-    private final HashSet<Block> validBlocks;
+    private final Set<Block> validBlocks;
 
     /**
      * @param state is the {@link BlockState} of the block
@@ -29,7 +30,7 @@ public abstract class BlockTemp
     }
 
     public BlockTemp(Block... blocks)
-    {   validBlocks = new HashSet<>(Arrays.asList(blocks));
+    {   validBlocks = ImmutableSet.<Block>builder().add(blocks).build();
     }
 
     public boolean hasBlock(Block block)

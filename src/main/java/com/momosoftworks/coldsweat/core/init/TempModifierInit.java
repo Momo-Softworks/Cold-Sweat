@@ -52,7 +52,6 @@ public class TempModifierInit
 
     public static void buildBlockRegistries()
     {
-        BlockTempRegistry.flush();
         try { MinecraftForge.EVENT_BUS.post(new BlockTempRegisterEvent()); }
         catch (Exception e)
         {

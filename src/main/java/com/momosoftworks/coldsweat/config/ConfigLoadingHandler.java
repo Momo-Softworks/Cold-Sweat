@@ -64,6 +64,7 @@ public class ConfigLoadingHandler
     public static void loadConfigs(ServerConfigsLoadedEvent event)
     {
         ConfigSettings.clear();
+        BlockTempRegistry.flush();
         getDefaultConfigs(event.getServer());
 
         DynamicRegistries registries = event.getServer().registryAccess();
