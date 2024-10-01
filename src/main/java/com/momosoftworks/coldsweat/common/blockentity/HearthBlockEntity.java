@@ -347,7 +347,9 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
                     for (int i = 0; i < players.size(); i++)
                     {
                         PlayerEntity player = players.get(i);
-                        if (player != null && paths.contains(new SpreadPath(player.blockPosition())))
+                        if (player == null) continue;
+                        BlockPos.Mutable playerPos = player.blockPosition().mutable();
+                        if (Arrays.stream(DIRECTIONS).filter(dir -> pathLookup.contains(playerPos.set(player.blockPosition()).move(dir))).count() >= 3)
                         {   this.insulatePlayer(player);
                         }
                     }
