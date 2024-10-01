@@ -66,6 +66,7 @@ import java.util.stream.Collectors;
 public class ConfigSettings
 {
     public static final BiMap<String, DynamicHolder<?>> CONFIG_SETTINGS = HashBiMap.create();
+    public static final BiMap<String, DynamicHolder<?>> CLIENT_SETTINGS = HashBiMap.create();
 
     public static Difficulty DEFAULT_DIFFICULTY = Difficulty.NORMAL;
 
@@ -974,9 +975,13 @@ public class ConfigSettings
 
     public static <T> DynamicHolder<T> addClientSetting(String id, Supplier<T> defaultVal, Consumer<DynamicHolder<T>> loader)
     {
-        return FMLEnvironment.dist == Dist.CLIENT
-             ? addSetting(id, defaultVal, loader)
-             : DynamicHolder.create(() -> null, (value) -> {});
+        if (FMLEnvironment.dist == Dist.CLIENT)
+        {
+            DynamicHolder<T> holder = DynamicHolder.create(defaultVal, loader);
+            CLIENT_SETTINGS.put(id, holder);
+            return holder;
+        }
+        else return DynamicHolder.create(() -> null, (value) -> {});
     }
 
     public static Map<String, CompoundNBT> encode(DynamicRegistries registryAccess)
