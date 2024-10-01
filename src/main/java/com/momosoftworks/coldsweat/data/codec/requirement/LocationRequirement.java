@@ -52,12 +52,14 @@ public record LocationRequirement(Optional<Integer> x, Optional<Integer> y, Opti
         this.z.ifPresent(z -> pos.move(0, 0, z));
 
         if (this.dimension.isPresent()
-        && !level.dimension().equals(this.dimension.get()))
+        && !this.dimension.get().map(tag -> level.dimensionTypeRegistration().is(tag.location()),
+                                     key -> level.dimension().equals(key)))
         {   return false;
         }
 
         if (this.biome.isPresent()
-        && !level.getBiome(pos).unwrapKey().get().equals(this.biome.get()))
+        && !this.biome.get().map(tag -> level.getBiomeManager().getNoiseBiomeAtPosition(pos).is(tag),
+                                 key -> level.getBiomeManager().getNoiseBiomeAtPosition(pos).is(key)))
         {   return false;
         }
 
