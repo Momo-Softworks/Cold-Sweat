@@ -56,7 +56,6 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.loading.FMLPaths;
-import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
 import oshi.util.tuples.Triplet;
 
 import java.io.File;
@@ -72,6 +71,7 @@ public class ConfigLoadingHandler
     public static void loadConfigs(ServerConfigsLoadedEvent event)
     {
         ConfigSettings.clear();
+        BlockTempRegistry.flush();
         getDefaultConfigs(event.getServer());
 
         RegistryAccess registries = event.getServer().registryAccess();
