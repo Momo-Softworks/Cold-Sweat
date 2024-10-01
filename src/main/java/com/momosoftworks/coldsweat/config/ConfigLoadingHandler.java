@@ -88,6 +88,15 @@ public class ConfigLoadingHandler
         TempModifierInit.buildBlockRegistries();
     }
 
+    @Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
+    public static final class ClientConfigs
+    {
+        @SubscribeEvent
+        public static void loadClientConfigs(FMLLoadCompleteEvent event)
+        {   ConfigSettings.CLIENT_SETTINGS.forEach((id, holder) -> holder.load(true));
+        }
+    }
+
     /**
      * Loads JSON-based configs from data resources
      */
