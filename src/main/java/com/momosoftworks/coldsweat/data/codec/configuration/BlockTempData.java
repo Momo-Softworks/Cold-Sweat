@@ -26,13 +26,14 @@ public class BlockTempData
     public final double range;
     public final double maxEffect;
     public final boolean fade;
+    public final double minTemp;
+    public final double maxTemp;
     public final List<BlockState> conditions;
     public final Optional<CompoundNBT> tag;
     public final Optional<List<String>> requiredMods;
 
-    private ResourceLocation registryName = new ResourceLocation(ColdSweat.MOD_ID, UUID.randomUUID().toString());
-
-    public BlockTempData(List<Either<ITag<Block>, Block>> blocks, double temperature, double range, double maxEffect, boolean fade,
+    public BlockTempData(List<Either<ITag<Block>, Block>> blocks, double temperature, double range,
+                            double maxEffect, boolean fade, double maxTemp, double minTemp,
                          List<BlockState> conditions, Optional<CompoundNBT> tag, Optional<List<String>> requiredMods)
     {
         this.blocks = blocks;
@@ -40,17 +41,20 @@ public class BlockTempData
         this.range = range;
         this.maxEffect = maxEffect;
         this.fade = fade;
+        this.minTemp = minTemp;
+        this.maxTemp = maxTemp;
         this.conditions = conditions;
         this.tag = tag;
         this.requiredMods = requiredMods;
     }
-
     public static final Codec<BlockTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ConfigHelper.tagOrBuiltinCodec(Registry.BLOCK_REGISTRY, Registry.BLOCK).listOf().fieldOf("blocks").forGetter(data -> data.blocks),
             Codec.DOUBLE.fieldOf("temperature").forGetter(data -> data.temperature),
             Codec.DOUBLE.optionalFieldOf("max_effect", Double.MAX_VALUE).forGetter(data -> data.maxEffect),
             Codec.DOUBLE.optionalFieldOf("range", Double.MAX_VALUE).forGetter(data -> data.range),
             Codec.BOOL.optionalFieldOf("fade", true).forGetter(data -> data.fade),
+            Codec.DOUBLE.optionalFieldOf("max_temp", Double.MAX_VALUE).forGetter(data -> data.maxTemp),
+            Codec.DOUBLE.optionalFieldOf("min_temp", -Double.MAX_VALUE).forGetter(data -> data.minTemp),
             BlockState.CODEC.listOf().optionalFieldOf("conditions", Arrays.asList()).forGetter(data -> data.conditions),
             CompoundNBT.CODEC.optionalFieldOf("nbt").forGetter(data -> data.tag),
             Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(data -> data.requiredMods)
