@@ -50,7 +50,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
-import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -74,6 +73,7 @@ public class ConfigLoadingHandler
     public static void loadConfigs(ServerConfigsLoadedEvent event)
     {
         ConfigSettings.clear();
+        BlockTempRegistry.flush();
         getDefaultConfigs(event.getServer());
 
         RegistryAccess registries = event.getServer().registryAccess();
