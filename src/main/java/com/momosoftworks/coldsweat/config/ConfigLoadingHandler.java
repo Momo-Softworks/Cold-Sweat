@@ -428,6 +428,8 @@ public class ConfigLoadingHandler
             {
                 final double temperature = blockTempData.temperature();
                 final double maxEffect = blockTempData.maxEffect();
+                final double minTemp = blockTempData.minTemp();
+                final double maxTemp = blockTempData.maxTemp();
                 final boolean fade = blockTempData.fade();
                 final BlockPredicate condition = blockTempData.condition();
                 final CompoundTag tag = blockTempData.nbt().orElse(null);
@@ -469,6 +471,16 @@ public class ConfigLoadingHandler
                 @Override
                 public double minEffect()
                 {   return temperature < 0 ? -maxEffect : super.minEffect();
+                }
+
+                @Override
+                public double minTemperature()
+                {   return minTemp;
+                }
+
+                @Override
+                public double maxTemperature()
+                {   return maxTemp;
                 }
             };
 
