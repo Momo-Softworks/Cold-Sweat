@@ -75,7 +75,7 @@ public class LocationRequirement
         }
 
         if (this.biome.isPresent()
-        && !level.getBiome(pos).equals(this.biome.get()))
+        && !this.biome.get().location().equals(level.getBiome(pos).getRegistryName()))
         {   return false;
         }
 
