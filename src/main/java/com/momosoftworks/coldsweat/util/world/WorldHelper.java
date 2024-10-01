@@ -612,4 +612,15 @@ public abstract class WorldHelper
         }
         return dummy;
     }
+
+    public static boolean allAdjacentBlocksMatch(BlockPos pos, Predicate<BlockPos> predicate)
+    {
+        BlockPos.MutableBlockPos pos2 = pos.mutable();
+        for (int i = 0; i < Direction.values().length; i++)
+        {
+            BlockPos offset = pos2.set(pos).move(Direction.values()[i]);
+            if (!predicate.test(offset)) return false;
+        }
+        return true;
+    }
 }
