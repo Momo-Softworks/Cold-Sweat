@@ -26,7 +26,7 @@ public record BlockTempData(List<Either<TagKey<Block>, Block>> blocks, double te
             Codec.BOOL.optionalFieldOf("fade", true).forGetter(BlockTempData::fade),
             Codec.DOUBLE.optionalFieldOf("max_temp", Double.MAX_VALUE).forGetter(BlockTempData::maxTemp),
             Codec.DOUBLE.optionalFieldOf("min_temp", -Double.MAX_VALUE).forGetter(BlockTempData::minTemp),
-            net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate.CODEC.optionalFieldOf("condition", net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate.alwaysTrue()).forGetter(BlockTempData::condition),
+            BlockPredicate.CODEC.optionalFieldOf("condition", BlockPredicate.alwaysTrue()).forGetter(BlockTempData::condition),
             CompoundTag.CODEC.optionalFieldOf("nbt").forGetter(BlockTempData::nbt),
             Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(BlockTempData::requiredMods)
     ).apply(instance, BlockTempData::new));
