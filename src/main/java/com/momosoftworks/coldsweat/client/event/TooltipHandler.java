@@ -248,7 +248,7 @@ public class TooltipHandler
             }
 
             // Don't add our own section title if one already exists
-            if (dietTooltipSectionIndex == -1)
+            if (!foodTemps.isEmpty() && dietTooltipSectionIndex == -1)
             {
                 elements.add(tooltipEndIndex, new TranslationTextComponent("tooltip.cold_sweat.consumed").withStyle(TextFormatting.GRAY));
                 elements.add(tooltipEndIndex, new StringTextComponent(""));
