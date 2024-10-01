@@ -19,7 +19,7 @@ import sereneseasons.handler.season.RandomUpdateHandler;
 public class MixinSereneIceMelt
 {
     @Inject(method = "meltInChunk",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/core/BlockPos;below()Lnet/minecraft/core/BlockPos;"),
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/IceBlock;melt(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;)V"),
             locals = LocalCapture.CAPTURE_FAILHARD,
             cancellable = true)
     private void getBiomeTemperatureOverride(ChunkMap chunkManager, LevelChunk chunkIn, Season.SubSeason subSeason, CallbackInfo ci,
