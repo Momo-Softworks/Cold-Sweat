@@ -359,7 +359,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                     for (int i = 0; i < players.size(); i++)
                     {
                         Player player = players.get(i);
-                        if (player != null && paths.contains(new SpreadPath(player.blockPosition())))
+                        if (player == null) continue;
+                        if (WorldHelper.allAdjacentBlocksMatch(BlockPos.containing(player.getEyePosition()), bpos -> pathLookup.contains(bpos)))
                         {   this.insulatePlayer(player);
                         }
                     }

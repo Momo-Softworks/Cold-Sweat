@@ -2478,6 +2478,7 @@ Fixes:
 * Fixed crash when attempting to update config settings with invalid formatting
 * Fixed crash when a boiler/icebox containing waterskins attempts to tick when the temperature rate is set to 0
 * Fixed config-driven features stacking in effectiveness when entering multiple worlds in the same session
+* Fixed hearth-like blocks' effects applying inconsistently depending on the player's position
 * Fixed temperature not changing properly when the player travels underground
 * Fixed config settings loading too late during world load, causing custom entity spawns (including chameleons) to not load
 * Fixed adaptive insulation not adapting to the ambient temperature
@@ -2486,14 +2487,21 @@ Fixes:
 * Fixed hearth-like blocks forgetting that they are powered upon unloading and reloading the chunk
 * Fixed hearth-like blocks causing chunk-loading deadlocks upon loading in some cases
 - Fixed hearth-like blocks not affecting areas next to solid blocks properly in some cases
+- Fixed the tooltip for food temperature always showing, even if the item has no temperature properties
 - Fixed performance issues while rendering the "wetness" screen effect
 - Fixed the description of "Knockback Chill" stating received knockback is reduced, rather than dealt knockback
+- Fixed JSON configs containing entity requirements not properly checking dimension or biome when specified
 - (1.20) Fixed the held item name text overlapping the player's body temperature icon when a thermometer is equipped
 - (1.21) Fixed invalid formatting for the hearth's recipe causing it to be uncraftable
 - (1.21) Fixed dynamic dimension_type tags not populating
+- (1.16) Fixed "dimensions" field erroneously being named "dimension" in dimension temp JSON configs
 
 Technical Changes:
 * Food temperature configs now stack when applied to the same item, rather than only using the first one loaded
+* Renamed some field names for JSON configs to be more consistent:
+      - All entity requirement fields are named "entity"
+      - All item requirement fields are named "data"
+      - Affected configs: food, insulator, mount
 * Biome temperatures and offsets now stack, rather than override, when applied to the same biome
       - Dimension temperatures/offsets still override each other, meaning dimension temps still override everything
 * Temperature region changes:
