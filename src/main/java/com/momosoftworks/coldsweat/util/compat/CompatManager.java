@@ -49,6 +49,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import sereneseasons.api.season.SeasonChangedEvent;
 import sereneseasons.season.SeasonHooks;
+import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.CuriosCapability;
 import top.theillusivec4.curios.api.event.CurioChangeEvent;
 import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
@@ -166,7 +167,7 @@ public class CompatManager
     }
 
     public static boolean hasCurio(Player player, Item curio)
-    {   return CURIOS_LOADED && player.getCapability(CuriosCapability.INVENTORY).map(cap -> cap.findFirstCurio(curio)).map(Optional::isPresent).orElse(false);
+    {   return CURIOS_LOADED && CuriosApi.getCuriosInventory(player).resolve().map(cap -> cap.findFirstCurio(curio)).map(Optional::isPresent).orElse(false);
     }
 
     public static List<ItemStack> getCurios(LivingEntity entity)
