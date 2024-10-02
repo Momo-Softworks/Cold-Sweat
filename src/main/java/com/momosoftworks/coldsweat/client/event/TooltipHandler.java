@@ -309,7 +309,7 @@ public class TooltipHandler
             if (element.left().isPresent() && element.left().get() instanceof Component component)
             {
                 if (component.getContents() instanceof TranslatableContents translatableContents
-                && Arrays.asList(translatableContents.getArgs()).contains("show_icon"))
+                && translatableContents.getArgs() != null && Arrays.asList(translatableContents.getArgs()).contains("show_icon"))
                 {
                     elements.set(i, Either.right(new InsulationAttributeTooltip(component, Minecraft.getInstance().font)));
                 }
