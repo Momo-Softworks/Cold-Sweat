@@ -16,6 +16,7 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
@@ -72,6 +73,7 @@ public class WetnessRenderer
         boolean isSubmerged = player.isEyeInFluid(FluidTags.WATER);
 
         int light = player.level.getMaxLocalRawBrightness(playerPos.above());
+        if (player.hasEffect(MobEffects.NIGHT_VISION)) light = 15;
         float brightness = CSMath.blend(0, 1, light, 0, 15);
 
         float tempMult = (float) CSMath.blend(0.3, 6, Temperature.get(player, Temperature.Trait.WORLD), ConfigSettings.MIN_TEMP.get(), ConfigSettings.MAX_TEMP.get() * 2);
