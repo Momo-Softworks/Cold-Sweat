@@ -587,7 +587,7 @@ public abstract class WorldHelper
      */
     public static double getWorldTemperatureAt(World level, BlockPos pos)
     {
-        Biome biome = level.getBiomeManager().getNoiseBiomeAtPosition(pos);
+        Biome biome = level.getBiome(pos); // Can't use getNoiseBiomeAtPosition because it's client-only for some reason
         // Get biome temperature
         double temp = getBiomeTemperatureAt(level, biome, pos);
         // Get season temperature (if available)
