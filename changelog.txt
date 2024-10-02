@@ -2495,6 +2495,8 @@ Fixes:
 - (1.21) Fixed invalid formatting for the hearth's recipe causing it to be uncraftable
 - (1.21) Fixed dynamic dimension_type tags not populating
 - (1.16) Fixed "dimensions" field erroneously being named "dimension" in dimension temp JSON configs
+- (1.16 - 1.19) Fixed JSON block temp configs not having min_temp or max_temp fields
+- (1.18 - 1.19) Fixed the tooltip lines for attribute modifiers added by armor insulation rendering behind the tooltip
 
 Technical Changes:
 * Food temperature configs now stack when applied to the same item, rather than only using the first one loaded
