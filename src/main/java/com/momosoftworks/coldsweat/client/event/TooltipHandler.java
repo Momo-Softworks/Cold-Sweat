@@ -328,7 +328,7 @@ public class TooltipHandler
             if (element instanceof TranslationTextComponent)
             {
                 TranslationTextComponent component = ((TranslationTextComponent) element);
-                if (Arrays.asList(component.getArgs()).contains("show_icon"))
+                if (component.getArgs() != null && Arrays.asList(component.getArgs()).contains("show_icon"))
                 {
                     setTooltip(i, new ClientInsulationAttributeTooltip(component, Minecraft.getInstance().font), elements);
                 }
