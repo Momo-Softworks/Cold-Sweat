@@ -302,7 +302,7 @@ public class TooltipHandler
             Either<FormattedText, TooltipComponent> element = elements.get(i);
             if (element.left().isPresent() && element.left().get() instanceof TranslatableComponent component)
             {
-                if (Arrays.asList(component.getArgs()).contains("show_icon"))
+                if (component.getArgs() != null && Arrays.asList(component.getArgs()).contains("show_icon"))
                 {
                     elements.set(i, Either.right(new InsulationAttributeTooltip(component, Minecraft.getInstance().font)));
                 }
