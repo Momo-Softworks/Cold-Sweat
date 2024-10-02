@@ -360,7 +360,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
                     {
                         Player player = players.get(i);
                         if (player == null) continue;
-                        if (WorldHelper.allAdjacentBlocksMatch(BlockPos.containing(player.getEyePosition()), bpos -> pathLookup.contains(bpos)))
+                        if (WorldHelper.allAdjacentBlocksMatch(new BlockPos(player.getEyePosition()), bpos -> pathLookup.contains(bpos)))
                         {   this.insulatePlayer(player);
                         }
                     }
