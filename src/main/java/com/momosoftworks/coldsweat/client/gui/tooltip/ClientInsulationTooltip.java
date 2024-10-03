@@ -240,7 +240,6 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
                         case 1 -> 18;
                         default -> 12;
                     };
-                    Minecraft.getInstance().player.displayClientMessage(Component.literal(adaptive.getFactor()+""), true);
                     RenderSystem.enableBlend();
                     RenderSystem.setShaderColor(1, 1, 1, (float) blend);
                     renderCell(graphics, x + 7, y + 1, insul, overlayU, true);
