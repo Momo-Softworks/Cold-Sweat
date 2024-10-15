@@ -1,8 +1,6 @@
 package com.momosoftworks.coldsweat.client.particle;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.*;
-import net.minecraft.client.settings.ParticleStatus;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.particles.BasicParticleType;
 import net.minecraftforge.api.distmarker.Dist;
@@ -59,11 +57,8 @@ public class HearthParticle extends SpriteTexturedParticle
         }
 
         @Override
-        public Particle createParticle(BasicParticleType typeIn, ClientWorld worldIn, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-            if (Minecraft.getInstance().options.particles != ParticleStatus.MINIMAL)
-                return new HearthParticle(worldIn, x, y, z, xSpeed, ySpeed, zSpeed, this.sprite);
-            else
-                return null;
+        public Particle createParticle(BasicParticleType typeIn, ClientWorld worldIn, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed)
+        {   return new HearthParticle(worldIn, x, y, z, xSpeed, ySpeed, zSpeed, this.sprite);
         }
     }
 }

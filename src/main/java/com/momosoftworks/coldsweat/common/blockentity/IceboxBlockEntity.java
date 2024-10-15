@@ -17,8 +17,10 @@ import com.momosoftworks.coldsweat.util.render.ChestLidController;
 import com.momosoftworks.coldsweat.util.render.ContainerOpenersCounter;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
+import net.minecraft.client.Minecraft;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.settings.ParticleStatus;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -321,6 +323,11 @@ public class IceboxBlockEntity extends HearthBlockEntity implements ITickableTil
     @Override
     public void spawnAirParticle(int x, int y, int z, Random rand)
     {
+        ParticleStatus status = Minecraft.getInstance().options.particles;
+        if (status != ParticleStatus.ALL)
+        {   return;
+        }
+
         BlockPos pos = new BlockPos(x, y, z);
         boolean onGround = !this.level.getBlockState(pos.below()).isAir();
         if (rand.nextFloat() > (spreading ? 0.016f : 0.032f))

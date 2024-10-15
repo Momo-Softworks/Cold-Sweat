@@ -7,8 +7,10 @@ import com.momosoftworks.coldsweat.core.init.ParticleTypesInit;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
+import net.minecraft.client.Minecraft;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.settings.ParticleStatus;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.InventoryHelper;
@@ -16,7 +18,6 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootContext;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.StateContainer;
@@ -25,7 +26,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.RayTraceContext;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
@@ -203,7 +203,8 @@ public class IceboxBlock extends Block
     @Override
     public void animateTick(BlockState state, World level, BlockPos pos, Random rand)
     {
-        if (!state.getValue(FROSTED)) return;
+        ParticleStatus status = Minecraft.getInstance().options.particles;
+        if (!state.getValue(FROSTED) || status == ParticleStatus.MINIMAL) return;
 
         double d0 = pos.getX() + 0.5;
         double d1 = pos.getY();

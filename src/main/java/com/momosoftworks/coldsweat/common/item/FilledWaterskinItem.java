@@ -15,10 +15,12 @@ import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.CauldronBlock;
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.settings.ParticleStatus;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -70,7 +72,9 @@ public class FilledWaterskinItem extends Item
                                  SoundCategory.PLAYERS, 1, (float) ((Math.random() / 5) + 0.9), false);
 
             // Spawn particles
+            ParticleStatus status = Minecraft.getInstance().options.particles;
             Random rand = new Random();
+            if (status != ParticleStatus.MINIMAL)
             for (int i = 0; i < 6; i++)
             {
                 TaskScheduler.scheduleServer(() ->
@@ -183,6 +187,8 @@ public class FilledWaterskinItem extends Item
 
         // spawn falling water particles
         Random rand = new Random();
+        ParticleStatus status = Minecraft.getInstance().options.particles;
+        if (status != ParticleStatus.MINIMAL)
         for (int i = 0; i < 6; i++)
         {
             TaskScheduler.scheduleClient(() ->

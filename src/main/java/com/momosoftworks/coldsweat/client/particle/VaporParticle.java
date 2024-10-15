@@ -171,12 +171,7 @@ public class VaporParticle extends SpriteTexturedParticle
 
         @Override
         public Particle createParticle(BasicParticleType type, ClientWorld level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed)
-        {
-            ParticleStatus status = Minecraft.getInstance().options.particles;
-            if (status != ParticleStatus.MINIMAL && status != ParticleStatus.DECREASED)
-                return new VaporParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, sprite, VaporType.GROUND_MIST);
-            else
-                return null;
+        {   return new VaporParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, sprite, VaporType.GROUND_MIST);
         }
     }
 
@@ -191,11 +186,7 @@ public class VaporParticle extends SpriteTexturedParticle
 
         @Override
         public Particle createParticle(BasicParticleType type, ClientWorld level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed)
-        {
-            if (Minecraft.getInstance().options.particles != ParticleStatus.MINIMAL)
-                return new VaporParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, this.sprite, VaporType.MIST);
-            else
-                return null;
+        {   return new VaporParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, this.sprite, VaporType.MIST);
         }
     }
 }

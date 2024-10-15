@@ -17,7 +17,9 @@ import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
+import net.minecraft.client.Minecraft;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.settings.ParticleStatus;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.CreatureAttribute;
 import net.minecraft.entity.Entity;
@@ -94,7 +96,10 @@ public class SoulspringLampItem extends Item
                         double z = bb2.minZ + (bb2.maxZ - bb2.minZ) * Math.random();
                         double xSpeed = (Math.random() - 0.5) * 0.02;
                         double zSpeed = (Math.random() - 0.5) * 0.02;
-                        level.addParticle(ParticleTypes.SOUL_FIRE_FLAME, x, y, z, xSpeed, 0, zSpeed);
+                        ParticleStatus status = Minecraft.getInstance().options.particles;
+                        if (status == ParticleStatus.ALL)
+                        {   level.addParticle(ParticleTypes.SOUL_FIRE_FLAME, x, y, z, xSpeed, 0, zSpeed);
+                        }
                     }
 
                     for (LivingEntity ent : level.getEntitiesOfClass(LivingEntity.class, bb))

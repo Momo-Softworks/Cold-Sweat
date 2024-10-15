@@ -4,6 +4,8 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.settings.ParticleStatus;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.particles.ParticleTypes;
 
@@ -54,7 +56,8 @@ public class WaterTempModifier extends TempModifier
 
         return temp ->
         {
-            if (!entity.isInWater())
+            ParticleStatus status = Minecraft.getInstance().options.particles;
+            if (!entity.isInWater() && status != ParticleStatus.MINIMAL)
             {
                 if (Math.random() < strength * 2)
                 {   double randX = entity.getBbWidth() * (Math.random() - 0.5);

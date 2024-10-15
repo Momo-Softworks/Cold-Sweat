@@ -6,10 +6,12 @@ import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
+import net.minecraft.client.Minecraft;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.settings.ParticleStatus;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.InventoryHelper;
@@ -17,7 +19,6 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootContext;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.DirectionProperty;
@@ -169,7 +170,8 @@ public class BoilerBlock extends Block
     @OnlyIn(Dist.CLIENT)
     public void animateTick(BlockState stateIn, World world, BlockPos pos, Random rand)
     {
-        if (stateIn.getValue(LIT))
+        ParticleStatus status = Minecraft.getInstance().options.particles;
+        if (stateIn.getValue(LIT) && status != ParticleStatus.MINIMAL)
         {
             double d0 = pos.getX() + 0.5D;
             double d1 = pos.getY();

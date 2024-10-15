@@ -4,15 +4,15 @@ import com.momosoftworks.coldsweat.common.blockentity.ThermolithBlockEntity;
 import com.momosoftworks.coldsweat.core.init.BlockEntityInit;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import net.minecraft.client.Minecraft;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.settings.ParticleStatus;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.loot.LootContext;
 import net.minecraft.particles.RedstoneParticleData;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.DirectionProperty;
@@ -142,7 +142,8 @@ public class ThermolithBlock extends Block implements ITileEntityProvider
     @Override
     public void animateTick(BlockState state, World world, BlockPos pos, Random random)
     {
-        if (state.getValue(POWERED))
+        ParticleStatus status = Minecraft.getInstance().options.particles;
+        if (state.getValue(POWERED) && status != ParticleStatus.MINIMAL)
         {
             Direction direction = state.getValue(ThermolithBlock.FACING);
             boolean xAxis = direction.getAxis() == Direction.Axis.X;
