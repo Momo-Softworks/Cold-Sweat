@@ -16,6 +16,8 @@ import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.ParticleStatus;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -75,7 +77,9 @@ public class FilledWaterskinItem extends Item
                     SoundSource.PLAYERS, 1, (float) ((Math.random() / 5) + 0.9), false);
 
             // Spawn particles
+            ParticleStatus status = Minecraft.getInstance().options.particles().get();
             Random rand = new Random();
+            if (status != ParticleStatus.MINIMAL)
             for (int i = 0; i < 6; i++)
             {
                 TaskScheduler.scheduleServer(() ->
@@ -186,6 +190,8 @@ public class FilledWaterskinItem extends Item
 
         // spawn falling water particles
         Random rand = new Random();
+        ParticleStatus status = Minecraft.getInstance().options.particles().get();
+        if (status != ParticleStatus.MINIMAL)
         for (int i = 0; i < 6; i++)
         {
             TaskScheduler.scheduleClient(() ->
