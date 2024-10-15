@@ -5,6 +5,8 @@ import com.momosoftworks.coldsweat.common.blockentity.ThermolithBlockEntity;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlockEntities;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.ParticleStatus;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -142,7 +144,8 @@ public class ThermolithBlock extends Block implements EntityBlock
     @Override
     public void animateTick(BlockState state, Level level, BlockPos pos, Random random)
     {
-        if (state.getValue(POWERED))
+        ParticleStatus status = Minecraft.getInstance().options.particles;
+        if (state.getValue(POWERED) && status != ParticleStatus.MINIMAL)
         {
             Direction direction = state.getValue(ThermolithBlock.FACING);
             boolean xAxis = direction.getAxis() == Direction.Axis.X;

@@ -7,6 +7,8 @@ import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.util.registries.ModBlockEntities;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.ParticleStatus;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
@@ -204,7 +206,8 @@ public class IceboxBlock extends Block implements EntityBlock
     @Override
     public void animateTick(BlockState state, Level level, BlockPos pos, Random rand)
     {
-        if (!state.getValue(FROSTED)) return;
+        ParticleStatus status = Minecraft.getInstance().options.particles;
+        if (!state.getValue(FROSTED) || status == ParticleStatus.MINIMAL) return;
 
         double d0 = pos.getX() + 0.5;
         double d1 = pos.getY();

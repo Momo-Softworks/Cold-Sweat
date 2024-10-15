@@ -17,6 +17,8 @@ import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.ParticleStatus;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
@@ -331,6 +333,11 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
     @Override
     public void spawnAirParticle(int x, int y, int z, Random rand)
     {
+        ParticleStatus status = Minecraft.getInstance().options.particles;
+        if (status != ParticleStatus.ALL)
+        {   return;
+        }
+
         BlockPos pos = new BlockPos(x, y, z);
         boolean onGround = !this.level.getBlockState(pos.below()).isAir();
         if (rand.nextFloat() > (spreading ? 0.016f : 0.032f))

@@ -6,6 +6,8 @@ import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import com.momosoftworks.coldsweat.util.registries.ModBlockEntities;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.ParticleStatus;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -174,7 +176,8 @@ public class BoilerBlock extends Block implements EntityBlock
     @OnlyIn(Dist.CLIENT)
     public void animateTick(BlockState stateIn, Level level, BlockPos pos, Random rand)
     {
-        if (stateIn.getValue(LIT))
+        ParticleStatus status = Minecraft.getInstance().options.particles;
+        if (stateIn.getValue(LIT) && status != ParticleStatus.MINIMAL)
         {
             double d0 = pos.getX() + 0.5D;
             double d1 = pos.getY();
