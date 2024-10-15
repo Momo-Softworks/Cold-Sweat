@@ -2,18 +2,16 @@ package com.momosoftworks.coldsweat.common.blockentity;
 
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.block.IceboxBlock;
-import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
-import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
 import com.momosoftworks.coldsweat.common.container.IceboxContainer;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.type.PredicateItem;
-import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.init.*;
 import com.momosoftworks.coldsweat.core.network.message.BlockDataUpdateMessage;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
-import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.ParticleStatus;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
@@ -311,6 +309,11 @@ public class IceboxBlockEntity extends HearthBlockEntity implements MenuProvider
     @Override
     public void spawnAirParticle(int x, int y, int z, Random rand)
     {
+        ParticleStatus status = Minecraft.getInstance().options.particles().get();
+        if (status != ParticleStatus.ALL)
+        {   return;
+        }
+
         BlockPos pos = new BlockPos(x, y, z);
         boolean onGround = !this.level.getBlockState(pos.below()).isAir();
         if (rand.nextFloat() > (spreading ? 0.016f : 0.032f))

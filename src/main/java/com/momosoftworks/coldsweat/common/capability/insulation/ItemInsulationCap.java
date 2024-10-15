@@ -24,20 +24,37 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public record ItemInsulationCap(List<Pair<ItemStack, Multimap<Insulator, Insulation>>> insulation)
 {
+    public static final Codec<Pair<Insulator, List<Insulation>>> INSULATION_PAIR_CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Insulator.CODEC.fieldOf("insulator").forGetter(Pair::getFirst),
+            Codec.list(Insulation.getCodec()).fieldOf("insulation").forGetter(Pair::getSecond)
+    ).apply(instance, Pair::new));
+
+    public static final Codec<Multimap<Insulator, Insulation>> INSULATOR_INSULATION_MULTIMAP_CODEC = Codec.unboundedMap(Codec.STRING, INSULATION_PAIR_CODEC).
+    xmap(
+        map ->
+        {
+            Multimap<Insulator, Insulation> multimap = new FastMultiMap<>();
+            map.forEach((key, pair) -> multimap.putAll(pair.getFirst(), pair.getSecond()));
+            return multimap;
+        },
+        multimap ->
+        {
+            Map<String, Pair<Insulator, List<Insulation>>> map = new HashMap<>();
+            int i = 0;
+            for (Map.Entry<Insulator, Collection<Insulation>> entry : multimap.asMap().entrySet())
+            {   map.put(String.valueOf(i++), Pair.of(entry.getKey(), new ArrayList<>(entry.getValue())));
+            }
+            return map;
+        }
+    );
+
+    public static final Codec<Pair<ItemStack, Multimap<Insulator, Insulation>>> ITEM_INSULATION_PAIR_CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            ItemStack.CODEC.fieldOf("item").forGetter(Pair::getFirst),
+            INSULATOR_INSULATION_MULTIMAP_CODEC.fieldOf("insulation").forGetter(Pair::getSecond)
+    ).apply(instance, Pair::new));
+
     public static final Codec<ItemInsulationCap> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.pair(ItemStack.CODEC, Codec.unboundedMap(Insulator.CODEC, Insulation.getCodec().listOf())).listOf().xmap(
-                    list -> list.stream().map(pair ->
-                            {
-                                Multimap<Insulator, Insulation> map = new FastMultiMap<>(pair.getSecond());
-                                return Pair.of(pair.getFirst(), map);
-                            }).toList(),
-                    multiList -> multiList.stream().map(pair ->
-                                 {
-                                     Map<Insulator, List<Insulation>> map = new FastMap<>();
-                                     pair.getSecond().asMap().forEach((key, value) -> map.put(key, new ArrayList<>(value)));
-                                     return Pair.of(pair.getFirst(), map);
-                                 }).toList()
-            ).fieldOf("insulation").forGetter(ItemInsulationCap::insulation)
+            ITEM_INSULATION_PAIR_CODEC.listOf().fieldOf("insulation").forGetter(ItemInsulationCap::insulation)
     ).apply(instance, ItemInsulationCap::new));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, ItemInsulationCap> STREAM_CODEC = StreamCodec.of((buf, insul) -> insul.serialize(buf),

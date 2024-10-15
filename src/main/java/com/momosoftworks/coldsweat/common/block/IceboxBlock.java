@@ -6,15 +6,15 @@ import com.momosoftworks.coldsweat.core.init.ModBlockEntities;
 import com.momosoftworks.coldsweat.core.init.ModBlocks;
 import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.core.init.ModParticleTypes;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.ParticleStatus;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -202,7 +202,8 @@ public class IceboxBlock extends Block implements EntityBlock
     @Override
     public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource rand)
     {
-        if (!state.getValue(FROSTED)) return;
+        ParticleStatus status = Minecraft.getInstance().options.particles().get();
+        if (!state.getValue(FROSTED) || status == ParticleStatus.MINIMAL) return;
 
         double d0 = pos.getX() + 0.5;
         double d1 = pos.getY();

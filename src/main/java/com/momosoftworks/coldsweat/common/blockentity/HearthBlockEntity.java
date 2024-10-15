@@ -899,6 +899,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
 
     protected void tickParticles()
     {
+        ParticleStatus status = Minecraft.getInstance().options.particles().get();
+        if (status == ParticleStatus.MINIMAL) return;
+
         // Calculate the height of the smokestack (can be extended with walls)
         if (this.ticksExisted % 20 == 0)
         {   this.smokestackHeight = 2;

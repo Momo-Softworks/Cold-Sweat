@@ -22,22 +22,16 @@ public abstract class Insulation implements NbtSerializable
     public static Codec<Insulation> getCodec()
     {
         if (CODEC == null)
-        CODEC = Codec.either(StaticInsulation.CODEC, AdaptiveInsulation.CODEC).xmap(
-        either -> either.map(stat -> stat, adapt -> adapt),
-        insul ->
-        {
-            if (insul instanceof StaticInsulation)
-            {   return Either.left(((StaticInsulation) insul));
-            }
-            return Either.right(((AdaptiveInsulation) insul));
-        });
+            CODEC = Codec.either(StaticInsulation.CODEC, AdaptiveInsulation.CODEC).xmap(
+                    either -> either.map(stat -> stat, adapt -> adapt),
+                    insul -> insul instanceof StaticInsulation ? Either.left((StaticInsulation) insul) : Either.right((AdaptiveInsulation) insul));
         return CODEC;
     }
 
     public static StreamCodec<FriendlyByteBuf, Insulation> getNetworkCodec()
     {
         if (STREAM_CODEC == null)
-        return  StreamCodec.of(
+        STREAM_CODEC = StreamCodec.of(
         (buf, insul) ->
         {
             if (insul instanceof StaticInsulation st)
