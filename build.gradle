@@ -114,7 +114,6 @@ dependencies {
     minecraft 'net.neoforged:forge:1.20.1-47.1.79'
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
-    compileOnly fg.deobf("curse.maven:sereneapi-291874:4761605")
     compileOnly fg.deobf("curse.maven:werewolves-become-a-beast-417851:4710810")
     compileOnly fg.deobf("curse.maven:vampirism-233029:4783000")
     compileOnly fg.deobf("curse.maven:weather-storms-tornadoes-237746:4931290")
@@ -127,7 +126,8 @@ dependencies {
     implementation fg.deobf("curse.maven:create-328085:4762216")
     implementation fg.deobf("curse.maven:curios-309927:5367944-sources-5367945")
     implementation fg.deobf("curse.maven:thirst-was-taken-679270:5568703")
-    implementation fg.deobf("curse.maven:serene-seasons-291874:4761603")
+    implementation fg.deobf("curse.maven:glitchcore-955399:5787839")
+    implementation fg.deobf("curse.maven:serene-seasons-291874:5790653")
     implementation fg.deobf("curse.maven:spoiled-364918:4803042")
 
     runtimeOnly fg.deobf("curse.maven:spark-361579:4738952")

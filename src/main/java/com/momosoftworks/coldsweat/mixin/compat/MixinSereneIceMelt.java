@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import sereneseasons.handler.season.RandomUpdateHandler;
+import sereneseasons.season.RandomUpdateHandler;
 
 @Mixin(RandomUpdateHandler.class)
 public class MixinSereneIceMelt

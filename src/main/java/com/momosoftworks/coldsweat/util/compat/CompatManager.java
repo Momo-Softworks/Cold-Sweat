@@ -23,6 +23,7 @@ import de.teamlapen.werewolves.entities.player.werewolf.WerewolfPlayer;
 import dev.ghen.thirst.content.purity.ContainerWithPurity;
 import dev.ghen.thirst.content.purity.WaterPurity;
 import dev.ghen.thirst.foundation.common.event.RegisterThirstValueEvent;
+import glitchcore.event.EventManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.resources.ResourceLocation;
@@ -66,7 +67,7 @@ import java.util.Optional;
 public class CompatManager
 {
     private static final boolean BOP_LOADED = modLoaded("biomesoplenty");
-    private static final boolean SEASONS_LOADED = modLoaded("sereneseasons");
+    private static final boolean SEASONS_LOADED = modLoaded("sereneseasons", "9.1.0");
     private static final boolean CURIOS_LOADED = modLoaded("curios");
     private static final boolean WEREWOLVES_LOADED = modLoaded("werewolves");
     private static final boolean SPIRIT_LOADED = modLoaded("spirit");
@@ -321,17 +322,21 @@ public class CompatManager
 
         if (SEASONS_LOADED)
         {
-            MinecraftForge.EVENT_BUS.register(new Object()
+            // Register event to GlitchCore's stupid redundant proprietary event bus
+            new Object()
             {
-                @SubscribeEvent
-                public void onSeasonChange(SeasonChangedEvent.Standard event)
+                public void registerListener()
                 {
-                    for (Player player : event.getLevel().players())
+                    EventManager.<SeasonChangedEvent.Standard>addListener(event ->
                     {
-                        Temperature.getModifier(player, Temperature.Trait.WORLD, SereneSeasonsTempModifier.class).ifPresent(mod -> mod.update(mod.getLastInput(), player, Temperature.Trait.WORLD));
-                    }
+                        for (Player player : event.getLevel().players())
+                        {
+                            Temperature.getModifier(player, Temperature.Trait.WORLD, SereneSeasonsTempModifier.class)
+                                       .ifPresent(mod -> mod.update(mod.getLastInput(), player, Temperature.Trait.WORLD));
+                        }
+                    });
                 }
-            });
+            }.registerListener();
         }
     }
 
