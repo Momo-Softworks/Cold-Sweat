@@ -55,9 +55,6 @@ public class ConfigPageOne extends AbstractConfigPage
             Player player = Minecraft.getInstance().player;
 
             ConfigSettings.CELSIUS.set(!ConfigSettings.CELSIUS.get());
-            // Update the world temp. gauge when the button is pressed
-            if (player != null)
-                Overlays.WORLD_TEMP = Temperature.convert(EntityTempManager.getTemperatureCap(player).map(cap -> cap.getTrait(Temperature.Trait.WORLD)).orElse(0d), Temperature.Units.MC, properUnits[0], true);
 
             properUnits[0] = ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F;
 
@@ -67,6 +64,10 @@ public class ConfigPageOne extends AbstractConfigPage
 
             ((EditBox) this.getWidgetBatch("min_temp").get(0)).setValue(String.valueOf(ConfigScreen.TWO_PLACES.format(
                     Temperature.convert(ConfigSettings.MIN_TEMP.get(), Temperature.Units.MC, properUnits[0], true))));
+
+            // Update the world temp. gauge when the button is pressed
+            if (player != null)
+                Overlays.setWorldTempInstant(Temperature.convert(Overlays.WORLD_TEMP, properUnits[0] == Temperature.Units.C ? Temperature.Units.F : Temperature.Units.C, properUnits[0], true));
         }, false, false, true, Component.translatable("cold_sweat.config.units.desc"));
 
         // Max Temperature
