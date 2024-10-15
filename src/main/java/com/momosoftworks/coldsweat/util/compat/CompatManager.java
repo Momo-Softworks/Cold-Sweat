@@ -47,6 +47,7 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import sereneseasons.api.season.SeasonChangedEvent;
 import sereneseasons.season.SeasonHooks;
@@ -67,7 +68,7 @@ import java.util.Optional;
 public class CompatManager
 {
     private static final boolean BOP_LOADED = modLoaded("biomesoplenty");
-    private static final boolean SEASONS_LOADED = modLoaded("sereneseasons", "9.1.0");
+    private static final boolean SEASONS_LOADED = modLoaded("sereneseasons", "9.1.0.0", "9.3.0.26");
     private static final boolean CURIOS_LOADED = modLoaded("curios");
     private static final boolean WEREWOLVES_LOADED = modLoaded("werewolves");
     private static final boolean SPIRIT_LOADED = modLoaded("spirit");
@@ -86,15 +87,17 @@ public class CompatManager
     private static final boolean SPOILED_LOADED = modLoaded("spoiled");
     private static final boolean SUPPLEMENTARIES_LOADED = modLoaded("supplementaries");
 
-    public static boolean modLoaded(String modID, String version)
+    public static boolean modLoaded(String modID, String minVersion, String maxVersion)
     {
         ModContainer mod = ModList.get().getModContainerById(modID).orElse(null);
         if (mod == null)
         {   return false;
         }
-        if (!version.isEmpty())
+
+        ArtifactVersion version = mod.getModInfo().getVersion();
+        if (!minVersion.isEmpty())
         {
-            if (mod.getModInfo().getVersion().compareTo(new DefaultArtifactVersion(version)) >= 0)
+            if (version.compareTo(new DefaultArtifactVersion(minVersion)) >= 0)
             {   return true;
             }
             else
@@ -102,7 +105,21 @@ public class CompatManager
                 return false;
             }
         }
+        if (!maxVersion.isEmpty())
+        {
+            if (version.compareTo(new DefaultArtifactVersion(maxVersion)) <= 0)
+            {   return true;
+            }
+            else
+            {   ColdSweat.LOGGER.error("Cold Sweat requires {} {} or lower for compat to be enabled!", modID, version);
+                return false;
+            }
+        }
         else return true;
+    }
+
+    public static boolean modLoaded(String modID, String minVersion)
+    {   return modLoaded(modID, minVersion, "");
     }
 
     public static boolean modLoaded(String modID)
