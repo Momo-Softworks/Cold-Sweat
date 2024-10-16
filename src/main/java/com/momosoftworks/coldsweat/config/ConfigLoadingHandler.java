@@ -71,13 +71,20 @@ public class ConfigLoadingHandler
 
         DynamicRegistries registries = event.getServer().registryAccess();
         // User JSON configs (config folder)
+        ColdSweat.LOGGER.info("Loading registries from configs...");
         collectUserRegistries(registries);
+
         // JSON configs (data resources)
+        ColdSweat.LOGGER.info("Loading registries from data resources...");
         collectRegistries(registries);
+
         // User configs (TOML)
+        ColdSweat.LOGGER.info("Loading TOML configs...");
         ConfigSettings.load(registries, false);
         TempModifierInit.buildBlockConfigs();
+
         // Post-toml Java BlockTemps
+        ColdSweat.LOGGER.info("Loading BlockTemps...");
         TempModifierInit.buildBlockRegistries();
     }
 
