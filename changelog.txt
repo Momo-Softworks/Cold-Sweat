@@ -2473,6 +2473,8 @@ Technical Changes:
 
 ------------------------------------------------------------------------------------------------------------------------
 2.3.5
+!! (1.21 only) Due to a change in how armor insulation is saved/loaded, insulation data will be lost upon upgrading from a previous version.<br>It is recommended that you temporarily remove all insulation on your armor before upgrading!
+
 * Added an indicator to the screens of hearth-like blocks that shows if the block is being powered
 - Wind, sandstorms, and tornadoes from Weather 2 will now affect the player's temperature
 - Increased the maximum volume of the hearth's effect from 9000 to 12000 blocks
@@ -2516,3 +2518,24 @@ Technical Changes:
             - These apply infinitely upward or downward (but not both), and have a constant temperature
 * Java-based block temperatures are now loaded last to allow user configs to override them
       - A registerFirst() method has been added to BlockTempRegisterEvent for BlockTemps that must break this rule and be registered first
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.3.6
+- Particles spawned by Cold Sweat are now dependent on the player's particle setting (All/Decreased/Minimal)
+
+Fixes:
+* (1.21) Fixed crash when saving insulated armor items
+* (1.20) Fixed crash when Serene Seasons 9.1 or newer is installed
+      - Serene Seasons support now requires version 9.1 or newer to be enabled
+* (1.20 - 1.21) Fixed debug message when a tooltip containing adaptive insulation is displayed
+- Fixed the world temperature indicator briefly displaying incorrectly when changing preferred units
+- Fixed spectators getting wet in water
+- Fixed being underwater counting as "underground" when calculating world temperature
+
+Translation Updates:
+* Added Japanese translation (Mohuzato on GitHub)
+
+Technical Changes:
+- (1.20) Dropped NeoForge support in favor of normal Forge, which is receiving more updates
+- Removed the "Cave Insulation Strength" config setting, as it is no longer used
