@@ -106,7 +106,8 @@ public class ConfigSettings
     public static final DynamicHolder<Double> HEARTH_STRENGTH;
     public static final DynamicHolder<Boolean> SMART_HEARTH;
     public static final DynamicHolder<List<Block>> SLEEP_CHECK_IGNORE_BLOCKS;
-    public static final DynamicHolder<Boolean> USE_CUSTOM_FREEZE_BEHAVIOR;
+    public static final DynamicHolder<Boolean> USE_CUSTOM_WATER_FREEZE_BEHAVIOR;
+    public static final DynamicHolder<Boolean> USE_CUSTOM_ICE_DROPS;
 
     // Item settings
     public static final DynamicHolder<Multimap<Item, Insulator>> INSULATION_ITEMS;
@@ -489,7 +490,9 @@ public class ConfigSettings
 
         SLEEP_CHECK_IGNORE_BLOCKS = addSetting("sleep_check_override_blocks", ArrayList::new, holder -> holder.get().addAll(ConfigHelper.getBlocks(WorldSettingsConfig.getInstance().getSleepOverrideBlocks().toArray(new String[0]))));
 
-        USE_CUSTOM_FREEZE_BEHAVIOR = addSetting("custom_freeze_check", () -> true, holder -> holder.set(WorldSettingsConfig.USE_CUSTOM_FREEZE_BEHAVIOR.get()));
+        USE_CUSTOM_WATER_FREEZE_BEHAVIOR = addSetting("custom_freeze_check", () -> true, holder -> holder.set(WorldSettingsConfig.CUSTOM_WATER_FREEZE_BEHAVIOR.get()));
+
+        USE_CUSTOM_ICE_DROPS = addSetting("custom_ice_drops", () -> true, holder -> holder.set(WorldSettingsConfig.CUSTOM_ICE_DROPS.get()));
 
         FOOD_TEMPERATURES = addSyncedSetting("food_temperatures", FastMultiMap::new, holder -> holder.get().putAll(ConfigHelper.readItemMultimap(ItemSettingsConfig.getInstance().getFoodTemperatures(), (item, args) ->
         {
