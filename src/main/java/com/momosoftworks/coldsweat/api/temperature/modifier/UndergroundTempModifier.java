@@ -87,10 +87,7 @@ public class UndergroundTempModifier extends TempModifier
             }
             if (depthTemps.isEmpty()) return temp;
             // Calculate the weighted average of the depth temperatures
-            double weightedDepthTemp = CSMath.weightedAverage(depthTemps);
-
-            // Weigh the depth temperature against the number of underground biomes with temperature
-            return CSMath.blend(temp, weightedDepthTemp, ConfigSettings.CAVE_INSULATION.get(), 0, 1);
+            return CSMath.weightedAverage(depthTemps);
         };
     }
 }
