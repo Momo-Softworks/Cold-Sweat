@@ -138,21 +138,30 @@ public abstract class WorldHelper
      * @return True if the specified position can see the sky (if no full y-axis block faces are within the detection range)
      */
     public static boolean canSeeSky(IWorld level, BlockPos pos, int maxDistance)
-    {   BlockPos.Mutable pos2 = pos.mutable();
+    {
+        BlockPos.Mutable pos2 = pos.mutable();
         int iterations = Math.min(maxDistance, level.getMaxBuildHeight() - pos.getY());
         IChunk chunk = getChunk(level, pos);
         if (chunk == null) return true;
 
         for (int i = 0; i < iterations; i++)
         {
-            BlockState state = chunk.getBlockState(pos2);
-            VoxelShape shape = state.getShape(level, pos, ISelectionContext.empty());
-            if (shape.equals(VoxelShapes.block())) return false;
+            try
+            {
+                BlockState state = chunk.getBlockState(pos2);
+                if (state.isAir() || state.getMaterial().isLiquid())
+                {   continue;
+                }
+                VoxelShape shape = state.getShape(level, pos, ISelectionContext.empty());
+                if (shape.equals(VoxelShapes.block())) return false;
 
-            if (isFullSide(CSMath.flattenShape(Direction.Axis.Y, shape), Direction.UP))
-            {   return false;
+                if (isFullSide(CSMath.flattenShape(Direction.Axis.Y, shape), Direction.UP))
+                {   return false;
+                }
             }
-            pos2.move(0, 1, 0);
+            finally
+            {   pos2.move(0, 1, 0);
+            }
         }
         return true;
     }
