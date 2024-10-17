@@ -24,14 +24,15 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.neoforged.bus.api.ICancellableEvent;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.fml.loading.moddiscovery.ModFileInfo;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import sereneseasons.api.season.SeasonChangedEvent;
 import sereneseasons.season.SeasonHooks;
@@ -65,15 +66,17 @@ public class CompatManager
     private static final boolean SPOILED_LOADED = modLoaded("spoiled");
     private static final boolean SUPPLEMENTARIES_LOADED = modLoaded("supplementaries");
 
-    public static boolean modLoaded(String modID, String version)
+    public static boolean modLoaded(String modID, String minVersion, String maxVersion)
     {
-        ModContainer mod = ModList.get().getModContainerById(modID).orElse(null);
+        ModFileInfo mod = FMLLoader.getLoadingModList().getModFileById(modID);
         if (mod == null)
         {   return false;
         }
-        if (!version.isEmpty())
+
+        ArtifactVersion version = mod.getFile().getJarVersion();
+        if (!minVersion.isEmpty())
         {
-            if (mod.getModInfo().getVersion().compareTo(new DefaultArtifactVersion(version)) >= 0)
+            if (version.compareTo(new DefaultArtifactVersion(minVersion)) >= 0)
             {   return true;
             }
             else
@@ -81,7 +84,21 @@ public class CompatManager
                 return false;
             }
         }
+        if (!maxVersion.isEmpty())
+        {
+            if (version.compareTo(new DefaultArtifactVersion(maxVersion)) <= 0)
+            {   return true;
+            }
+            else
+            {   ColdSweat.LOGGER.error("Cold Sweat requires {} {} or lower for compat to be enabled!", modID, version);
+                return false;
+            }
+        }
         else return true;
+    }
+
+    public static boolean modLoaded(String modID, String minVersion)
+    {   return modLoaded(modID, minVersion, "");
     }
 
     public static boolean modLoaded(String modID)

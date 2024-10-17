@@ -31,7 +31,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -237,7 +236,7 @@ public class Chameleon extends Animal
 
     private void shedItems()
     {
-        for (ItemStack stack : ModLootTables.getDropsLootTable(this, null, ModLootTables.CHAMELEON_SHEDDING))
+        for (ItemStack stack : ModLootTables.getEntityDropsLootTable(this, null, ModLootTables.CHAMELEON_SHEDDING))
         {   WorldHelper.entityDropItem(this, stack, 40000);
         }
         WorldHelper.playEntitySound(ModSounds.CHAMELEON_SHED.value(), this, this.getSoundSource(), 1, this.getVoicePitch());

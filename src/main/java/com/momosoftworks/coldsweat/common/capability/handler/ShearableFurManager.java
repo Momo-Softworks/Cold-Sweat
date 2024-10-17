@@ -1,22 +1,14 @@
 package com.momosoftworks.coldsweat.common.capability.handler;
 
-import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.capability.ModCapabilities;
 import com.momosoftworks.coldsweat.common.capability.shearing.IShearableCap;
-import com.momosoftworks.coldsweat.common.capability.shearing.ShearableFurCap;
-import com.momosoftworks.coldsweat.common.capability.temperature.EntityTempCap;
-import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
-import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
-import com.momosoftworks.coldsweat.core.network.ModPacketHandlers;
 import com.momosoftworks.coldsweat.core.network.message.SyncShearableDataMessage;
 import com.momosoftworks.coldsweat.data.loot.ModLootTables;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -25,7 +17,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.behavior.BehaviorUtils;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -33,10 +24,8 @@ import net.minecraft.world.entity.animal.goat.Goat;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
@@ -81,7 +70,7 @@ public class ShearableFurManager
             goat.level().playSound(null, goat, SoundEvents.SHEEP_SHEAR, SoundSource.NEUTRAL, 1.0F, 1.0F);
 
             // Spawn item(s)
-            for (ItemStack item : ModLootTables.getDropsLootTable(goat, player, ModLootTables.GOAT_SHEARING))
+            for (ItemStack item : ModLootTables.getEntityDropsLootTable(goat, player, ModLootTables.GOAT_SHEARING))
             {   WorldHelper.entityDropItem(goat, item);
             }
 
