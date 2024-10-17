@@ -68,13 +68,8 @@ public abstract class WorldHelper
 {
     static Map<ResourceLocation, DummyPlayer> DUMMIES = new HashMap<>();
 
-    /**
-     * Iterates through every block until it reaches minecraft:air, then returns the Y value<br>
-     * Ignores minecraft:cave_air<br>
-     * This is different from {@code level.getHeight()} because it attempts to ignore floating blocks
-     */
     public static int getHeight(BlockPos pos, Level level)
-    {   // If Minecraft's height calculation is good enough, use that
+    {
         int seaLevel = level.getSeaLevel();
         // If chunk isn't loaded, return sea level
         if (!level.isLoaded(pos)) return seaLevel;
@@ -82,7 +77,7 @@ public abstract class WorldHelper
         ChunkAccess chunk = getChunk(level, pos);
         if (chunk == null) return seaLevel;
 
-        return chunk.getHeight(Heightmap.Types.MOTION_BLOCKING, pos.getX() & 15, pos.getZ() & 15);
+        return chunk.getHeight(Heightmap.Types.OCEAN_FLOOR, pos.getX() & 15, pos.getZ() & 15);
     }
 
     /**
@@ -156,7 +151,6 @@ public abstract class WorldHelper
             }
             pos2.move(0, 1, 0);
         }
-
         return true;
     }
 
