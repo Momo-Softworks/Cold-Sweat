@@ -1,8 +1,12 @@
 package com.momosoftworks.coldsweat.common.event;
 
+import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.data.loot.ModLootTables;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
@@ -21,16 +25,18 @@ public class IceBreakingEvents
     @SubscribeEvent
     public static void onIceBreak(BlockEvent.BreakEvent event)
     {
+        if (!ConfigSettings.USE_CUSTOM_ICE_DROPS.get()) return;
+
         BlockState state = event.getState();
         LevelAccessor level = event.getLevel();
-        ItemStack tool = event.getPlayer().getItemInHand(InteractionHand.MAIN_HAND);
         BlockPos pos = event.getPos();
         BlockState belowState = level.getBlockState(pos.below());
 
-        if (state.is(Blocks.ICE) && !tool.isCorrectToolForDrops(state)
+        if (state.is(Blocks.ICE) && !event.getPlayer().getMainHandItem().isCorrectToolForDrops(state)
         && !event.getPlayer().getAbilities().instabuild
         && (belowState.blocksMotion() || belowState.liquid()))
-        {   level.setBlock(pos, Blocks.WATER.defaultBlockState(), 3);
+        {
+            level.setBlock(pos, Blocks.WATER.defaultBlockState(), 3);
         }
     }
 
@@ -40,12 +46,56 @@ public class IceBreakingEvents
     @SubscribeEvent
     public static void onIceMining(PlayerEvent.BreakSpeed event)
     {
-        BlockState state = event.getState();
-        ItemStack tool = event.getEntity().getItemInHand(InteractionHand.MAIN_HAND);
+        if (!ConfigSettings.USE_CUSTOM_ICE_DROPS.get()) return;
 
-        if ((state.is(Blocks.ICE) || state.is(Blocks.PACKED_ICE) || state.is(Blocks.BLUE_ICE))
-        && tool.is(ItemTags.PICKAXES))
-        {   event.setNewSpeed(event.getNewSpeed() / 2);
+        BlockState state = event.getState();
+        Player player = event.getEntity();
+        ItemStack tool = player.getItemInHand(InteractionHand.MAIN_HAND);
+        float speed = event.getNewSpeed();
+
+        if (isModifiableIceBlock(state) && tool.is(ItemTags.PICKAXES)
+        && !player.getMainHandItem().isCorrectToolForDrops(state))
+        {
+            event.setNewSpeed(speed / 2);
         }
+        if (state.is(Blocks.PACKED_ICE))
+        {   event.setNewSpeed(speed / 4);
+        }
+    }
+
+    @SubscribeEvent
+    public static void iceHarvestCheck(PlayerEvent.HarvestCheck event)
+    {
+        if (!ConfigSettings.USE_CUSTOM_ICE_DROPS.get()) return;
+
+        BlockState state = event.getTargetBlock();
+        Player player = event.getEntity();
+        ItemStack tool = player.getItemInHand(InteractionHand.MAIN_HAND);
+
+        if (isModifiableIceBlock(state) && tool.is(ItemTags.PICKAXES)
+        && player.getMainHandItem().isCorrectToolForDrops(state))
+        {   event.setCanHarvest(true);
+        }
+    }
+
+    public static boolean isModifiableIceBlock(BlockState state)
+    {
+        return state.is(Blocks.ICE)
+            || state.is(Blocks.PACKED_ICE)
+            || state.is(Blocks.BLUE_ICE);
+    }
+
+    public static ResourceLocation getLootTableForIce(BlockState state)
+    {
+        if (state.is(Blocks.ICE))
+        {   return ModLootTables.CUSTOM_ICE_DROP;
+        }
+        if (state.is(Blocks.PACKED_ICE))
+        {   return ModLootTables.CUSTOM_PACKED_ICE_DROP;
+        }
+        if (state.is(Blocks.BLUE_ICE))
+        {   return ModLootTables.CUSTOM_BLUE_ICE_DROP;
+        }
+        return null;
     }
 }
