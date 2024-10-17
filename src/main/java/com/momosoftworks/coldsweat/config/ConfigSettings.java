@@ -97,7 +97,6 @@ public class ConfigSettings
     public static final DynamicHolder<Map<DimensionType, Pair<Double, Temperature.Units>>> DIMENSION_OFFSETS;
     public static final DynamicHolder<Map<Structure<?>, Pair<Double, Temperature.Units>>> STRUCTURE_TEMPS;
     public static final DynamicHolder<Map<Structure<?>, Pair<Double, Temperature.Units>>> STRUCTURE_OFFSETS;
-    public static final DynamicHolder<Double> CAVE_INSULATION;
     public static final DynamicHolder<List<DepthTempData>> DEPTH_REGIONS;
     public static final DynamicHolder<Boolean> CHECK_SLEEP_CONDITIONS;
     public static final DynamicHolder<Double[]> SUMMER_TEMPS;
@@ -368,8 +367,6 @@ public class ConfigSettings
                                                      })
                                                      .filter(Objects::nonNull)
                                                      .collect(Collectors.toList())));
-
-        CAVE_INSULATION = addSetting("cave_insulation", () -> 1d, holder -> holder.set(WorldSettingsConfig.getInstance().getCaveInsulation()));
 
         DEPTH_REGIONS = addSetting("depth_regions", ArrayList::new, holder -> {});
 
