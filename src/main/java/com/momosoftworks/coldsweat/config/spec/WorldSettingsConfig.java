@@ -44,7 +44,8 @@ public class WorldSettingsConfig
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> SLEEPING_OVERRIDE_BLOCKS;
     public static final ForgeConfigSpec.ConfigValue<Boolean> SHOULD_CHECK_SLEEP;
 
-    public static final ForgeConfigSpec.ConfigValue<Boolean> USE_CUSTOM_FREEZE_BEHAVIOR;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> CUSTOM_WATER_FREEZE_BEHAVIOR;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> CUSTOM_ICE_DROPS;
 
     public static final WorldSettingsConfig INSTANCE = new WorldSettingsConfig();
 
@@ -476,9 +477,13 @@ public class WorldSettingsConfig
                           "This value is capped at 16 for performance reasons")
                 .defineInRange("Block Range", 7, 1, 16);
 
-        USE_CUSTOM_FREEZE_BEHAVIOR = BUILDER
+        CUSTOM_WATER_FREEZE_BEHAVIOR = BUILDER
                 .comment("When set to true, uses Cold Sweat's temperature system to determine water freezing behavior")
-                .define("Custom Freezing Check", true);
+                .define("Custom Freezing Behavior", true);
+
+        CUSTOM_ICE_DROPS = BUILDER
+                .comment("When set to true, modifies ice blocks to be harvestable with a pickaxe")
+                .define("Custom Ice Drops", true);
 
         BUILDER.pop();
 

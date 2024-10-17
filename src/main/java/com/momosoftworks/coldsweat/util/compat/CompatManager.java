@@ -42,11 +42,11 @@ import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.loading.FMLLoader;
+import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import sereneseasons.api.season.SeasonChangedEvent;
@@ -89,12 +89,12 @@ public class CompatManager
 
     public static boolean modLoaded(String modID, String minVersion, String maxVersion)
     {
-        ModContainer mod = ModList.get().getModContainerById(modID).orElse(null);
+        ModFileInfo mod = FMLLoader.getLoadingModList().getModFileById(modID);
         if (mod == null)
         {   return false;
         }
 
-        ArtifactVersion version = mod.getModInfo().getVersion();
+        ArtifactVersion version = mod.getFile().getJarVersion();
         if (!minVersion.isEmpty())
         {
             if (version.compareTo(new DefaultArtifactVersion(minVersion)) >= 0)
