@@ -22,9 +22,10 @@ import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.loading.FMLLoader;
+import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.jwaresoftware.mcmods.lib.Armory;
 import sereneseasons.season.SeasonHooks;
@@ -61,15 +62,17 @@ public class CompatManager
     private static final boolean SPOILED_LOADED = modLoaded("spoiled");
     private static final boolean SUPPLEMENTARIES_LOADED = modLoaded("supplementaries");
 
-    public static boolean modLoaded(String modID, String version)
+    public static boolean modLoaded(String modID, String minVersion, String maxVersion)
     {
-        ModContainer mod = ModList.get().getModContainerById(modID).orElse(null);
+        ModFileInfo mod = FMLLoader.getLoadingModList().getModFileById(modID);
         if (mod == null)
         {   return false;
         }
-        if (!version.isEmpty())
+
+        ArtifactVersion version = mod.getMods().get(0).getVersion();
+        if (!minVersion.isEmpty())
         {
-            if (mod.getModInfo().getVersion().compareTo(new DefaultArtifactVersion(version)) >= 0)
+            if (version.compareTo(new DefaultArtifactVersion(minVersion)) >= 0)
             {   return true;
             }
             else
@@ -77,7 +80,21 @@ public class CompatManager
                 return false;
             }
         }
+        if (!maxVersion.isEmpty())
+        {
+            if (version.compareTo(new DefaultArtifactVersion(maxVersion)) <= 0)
+            {   return true;
+            }
+            else
+            {   ColdSweat.LOGGER.error("Cold Sweat requires {} {} or lower for compat to be enabled!", modID, version);
+                return false;
+            }
+        }
         else return true;
+    }
+
+    public static boolean modLoaded(String modID, String minVersion)
+    {   return modLoaded(modID, minVersion, "");
     }
 
     public static boolean modLoaded(String modID)

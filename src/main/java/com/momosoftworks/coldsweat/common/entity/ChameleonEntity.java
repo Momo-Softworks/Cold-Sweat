@@ -236,7 +236,7 @@ public class ChameleonEntity extends AnimalEntity
 
     private void shedItems()
     {
-        for (ItemStack stack : ModLootTables.getDropsLootTable(this, null, ModLootTables.CHAMELEON_SHEDDING))
+        for (ItemStack stack : ModLootTables.getEntityDropsLootTable(this, null, ModLootTables.CHAMELEON_SHEDDING))
         {   WorldHelper.entityDropItem(this, stack, 40000);
         }
         WorldHelper.playEntitySound(ModSounds.CHAMELEON_SHED, this, this.getSoundSource(), 1, this.getVoicePitch());

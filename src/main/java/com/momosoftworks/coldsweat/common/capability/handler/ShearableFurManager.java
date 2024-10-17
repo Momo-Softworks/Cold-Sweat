@@ -155,7 +155,7 @@ public class ShearableFurManager
                 entity.level.playSound(null, entity, SoundEvents.SHEEP_SHEAR, SoundCategory.NEUTRAL, 1.0F, 1.0F);
                 // Spawn item
                 // Spawn item(s)
-                for (ItemStack item : ModLootTables.getDropsLootTable(entity, player, ModLootTables.GOAT_SHEARING))
+                for (ItemStack item : ModLootTables.getEntityDropsLootTable(entity, player, ModLootTables.GOAT_SHEARING))
                 {   WorldHelper.entityDropItem(entity, item);
                 }
                 // Set sheared
