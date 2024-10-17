@@ -27,8 +27,6 @@ public class WorldSettingsConfig
     public static final ModConfigSpec.ConfigValue<List<? extends List<?>>> STRUCTURE_TEMP_OFFSETS;
     public static final ModConfigSpec.ConfigValue<List<? extends List<?>>> STRUCTURE_TEMP_OVERRIDES;
 
-    public static final ModConfigSpec.ConfigValue<Double> CAVE_INSULATION_STRENGTH;
-
     public static final ModConfigSpec.ConfigValue<List<? extends List<?>>> BLOCK_TEMPERATURES;
     public static final ModConfigSpec.IntValue MAX_BLOCK_TEMP_RANGE;
 
@@ -488,11 +486,6 @@ public class WorldSettingsConfig
 
         BUILDER.push("Misc");
 
-        CAVE_INSULATION_STRENGTH = BUILDER
-                .comment("The amount of temperature normalization from being deep underground",
-                         "0.0 = no insulation, 1.0 = full insulation")
-                .defineInRange("Cave Insulation Strength", 1.0, 0.0, 1.0);
-
         STRUCTURE_TEMP_OVERRIDES = BUILDER
                 .comment("Overrides the world temperature when the player is within this structure",
                          "Format: [[\"structure_1\", temperature1, *units], [\"structure_2\", temperature2, *units]... etc]",
@@ -653,10 +646,6 @@ public class WorldSettingsConfig
     {   return MAX_BLOCK_TEMP_RANGE.get();
     }
 
-    public double getCaveInsulation()
-    {   return CAVE_INSULATION_STRENGTH.get();
-    }
-
     public double getHearthEffect()
     {   return HEARTH_INSULATION_STRENGTH.get();
     }
@@ -742,12 +731,6 @@ public class WorldSettingsConfig
     public synchronized void setBlockRange(int range)
     {   synchronized (MAX_BLOCK_TEMP_RANGE)
         {   MAX_BLOCK_TEMP_RANGE.set(range);
-        }
-    }
-
-    public synchronized void setCaveInsulation(double insulation)
-    {   synchronized (CAVE_INSULATION_STRENGTH)
-        {   CAVE_INSULATION_STRENGTH.set(insulation);
         }
     }
 
