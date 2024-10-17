@@ -1,14 +1,18 @@
 package com.momosoftworks.coldsweat.common.event;
 
+import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.data.loot.ModLootTables;
 import com.momosoftworks.coldsweat.util.item.ItemHelper;
-import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.block.material.Material;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IWorld;
+import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -23,13 +27,14 @@ public class IceBreakingEvents
     @SubscribeEvent
     public static void onIceBreak(BlockEvent.BreakEvent event)
     {
+        if (!ConfigSettings.USE_CUSTOM_ICE_DROPS.get()) return;
+
         BlockState state = event.getState();
         IWorld level = event.getWorld();
-        ItemStack tool = event.getPlayer().getItemInHand(Hand.MAIN_HAND);
         BlockPos pos = event.getPos();
         Material belowMaterial = level.getBlockState(pos.below()).getMaterial();
 
-        if (state.is(Blocks.ICE) && !tool.isCorrectToolForDrops(state)
+        if (state.is(Blocks.ICE) && !ForgeHooks.canHarvestBlock(state, event.getPlayer(), level, pos)
         && !event.getPlayer().abilities.instabuild
         && (belowMaterial.blocksMotion() || belowMaterial.isLiquid()))
         {   level.setBlock(pos, Blocks.WATER.defaultBlockState(), 3);
@@ -42,12 +47,56 @@ public class IceBreakingEvents
     @SubscribeEvent
     public static void onIceMining(PlayerEvent.BreakSpeed event)
     {
-        BlockState state = event.getState();
-        ItemStack tool = event.getPlayer().getItemInHand(Hand.MAIN_HAND);
+        if (!ConfigSettings.USE_CUSTOM_ICE_DROPS.get()) return;
 
-        if ((state.is(Blocks.ICE) || state.is(Blocks.PACKED_ICE) || state.is(Blocks.BLUE_ICE))
-        && ItemHelper.isEffectivelyPickaxe(tool))
-        {   event.setNewSpeed(event.getNewSpeed() / 2);
+        BlockState state = event.getState();
+        PlayerEntity player = event.getPlayer();
+        ItemStack tool = player.getItemInHand(Hand.MAIN_HAND);
+        float speed = event.getNewSpeed();
+
+        if (isModifiableIceBlock(state) && ItemHelper.isEffectivelyPickaxe(tool)
+        && !ForgeHooks.canHarvestBlock(state, event.getPlayer(), player.level, event.getPos()))
+        {
+            event.setNewSpeed(speed / 2);
         }
+        if (state.is(Blocks.PACKED_ICE))
+        {   event.setNewSpeed(speed / 4);
+        }
+    }
+
+    @SubscribeEvent
+    public static void iceHarvestCheck(PlayerEvent.HarvestCheck event)
+    {
+        if (!ConfigSettings.USE_CUSTOM_ICE_DROPS.get()) return;
+
+        BlockState state = event.getTargetBlock();
+        PlayerEntity player = event.getPlayer();
+        ItemStack tool = player.getItemInHand(Hand.MAIN_HAND);
+
+        if (isModifiableIceBlock(state) && ItemHelper.isEffectivelyPickaxe(tool)
+        && ForgeHooks.canHarvestBlock(state, event.getPlayer(), player.level, null)) // says nonnull but the pos doesn't do anything
+        {   event.setCanHarvest(true);
+        }
+    }
+
+    public static boolean isModifiableIceBlock(BlockState state)
+    {
+        return state.is(Blocks.ICE)
+            || state.is(Blocks.PACKED_ICE)
+            || state.is(Blocks.BLUE_ICE);
+    }
+
+    public static ResourceLocation getLootTableForIce(BlockState state)
+    {
+        if (state.is(Blocks.ICE))
+        {   return ModLootTables.CUSTOM_ICE_DROP;
+        }
+        if (state.is(Blocks.PACKED_ICE))
+        {   return ModLootTables.CUSTOM_PACKED_ICE_DROP;
+        }
+        if (state.is(Blocks.BLUE_ICE))
+        {   return ModLootTables.CUSTOM_BLUE_ICE_DROP;
+        }
+        return null;
     }
 }

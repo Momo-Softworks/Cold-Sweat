@@ -1,20 +1,24 @@
 package com.momosoftworks.coldsweat.mixin;
 
+import com.momosoftworks.coldsweat.common.event.IceBreakingEvents;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.data.loot.ModLootTables;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.block.*;
-import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.loot.LootContext;
+import net.minecraft.loot.LootParameters;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static net.minecraft.entity.EntityType.POLAR_BEAR;
+import java.util.List;
 
 public class MixinIce
 {
@@ -26,84 +30,30 @@ public class MixinIce
                 cancellable = true)
         private void noWater(World pLevel, PlayerEntity pPlayer, BlockPos pPos, BlockState pState, TileEntity pTe, ItemStack pStack, CallbackInfo ci)
         {
-            ci.cancel();
+            if (ConfigSettings.USE_CUSTOM_ICE_DROPS.get())
+            {   ci.cancel();
+            }
         }
     }
 
-    @Mixin(Blocks.class)
-    public static class RequireTool
+    @Mixin(AbstractBlock.class)
+    public static class AddDrops
     {
-        @Redirect(
-                method = "<clinit>",
-                at = @At(
-                        value = "NEW",
-                        target = "(Lnet/minecraft/block/AbstractBlock$Properties;)Lnet/minecraft/block/IceBlock;",
-                        ordinal = 0
-                ),
-                slice = @Slice(
-                        from = @At(value = "CONSTANT", args = "stringValue=ice")
-                )
-        )
-        private static IceBlock redirectIceBlockConstructor(Block.Properties properties)
+        @Inject(method = "getDrops", at = @At("HEAD"), cancellable = true)
+        private void addDrops(BlockState state, LootContext.Builder params, CallbackInfoReturnable<List<ItemStack>> cir)
         {
-            return new IceBlock(
-                    Block.Properties.of(Material.ICE)
-                            .friction(0.98F)
-                            .randomTicks()
-                            .strength(0.2F)
-                            .sound(SoundType.GLASS)
-                            .noOcclusion()
-                            .isValidSpawn((state, level, pos, entity) -> entity == POLAR_BEAR)
-                            .isRedstoneConductor((a,b,c) -> false)
-                            // Custom properties
-                            .requiresCorrectToolForDrops()
-            );
-        }
-
-        @Redirect(
-                method = "<clinit>",
-                at = @At(
-                        value = "NEW",
-                        target = "(Lnet/minecraft/block/AbstractBlock$Properties;)Lnet/minecraft/block/Block;",
-                        ordinal = 0
-                ),
-                slice = @Slice(
-                        from = @At(value = "CONSTANT", args = "stringValue=packed_ice")
-                )
-        )
-        private static Block redirectPackedIceBlockConstructor(Block.Properties properties)
-        {
-            return new Block(
-                    Block.Properties.of(Material.ICE_SOLID)
-                            .friction(0.98F)
-                            .strength(0.5F)
-                            .sound(SoundType.GLASS)
-                            // Custom properties
-                            .requiresCorrectToolForDrops()
-            );
-        }
-
-        @Redirect(
-                method = "<clinit>",
-                at = @At(
-                        value = "NEW",
-                        target = "(Lnet/minecraft/block/AbstractBlock$Properties;)Lnet/minecraft/block/BreakableBlock;",
-                        ordinal = 0
-                ),
-                slice = @Slice(
-                        from = @At(value = "CONSTANT", args = "stringValue=blue_ice")
-                )
-        )
-        private static BreakableBlock redirectBlueIceBlockConstructor(Block.Properties properties)
-        {
-            return new BreakableBlock(
-                    Block.Properties.of(Material.ICE_SOLID)
-                            .strength(0.8F)
-                            .friction(0.989F)
-                            .sound(SoundType.GLASS)
-                            // Custom properties
-                            .requiresCorrectToolForDrops()
-            );
+            ItemStack stack = params.getParameter(LootParameters.TOOL);
+            if (ConfigSettings.USE_CUSTOM_ICE_DROPS.get() && IceBreakingEvents.isModifiableIceBlock(state)
+            && stack.isCorrectToolForDrops(state))
+            {
+                cir.setReturnValue(ModLootTables.getBlockDropsLootTable(params.getLevel(),
+                                                                        new BlockPos(params.getParameter(LootParameters.ORIGIN)),
+                                                                        state,
+                                                                        CSMath.getIfNotNull(params.getOptionalParameter(LootParameters.THIS_ENTITY),
+                                                                                            entity -> entity instanceof PlayerEntity ? (PlayerEntity) entity : null,
+                                                                                            null),
+                                                                        IceBreakingEvents.getLootTableForIce(state)));
+            }
         }
     }
 }
