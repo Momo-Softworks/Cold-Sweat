@@ -488,8 +488,8 @@ public class EntityTempManager
         {
             if (player.tickCount % 5 == 0)
             {
-                if (!player.isSpectator() && WorldHelper.isInWater(player) || player.tickCount % 40 == 0
-                && WorldHelper.isRainingAt(player.level, player.blockPosition()))
+                if (!player.isSpectator() && (WorldHelper.isInWater(player) || player.tickCount % 40 == 0
+                && WorldHelper.isRainingAt(player.level, player.blockPosition())))
                 {   Temperature.addModifier(player, new WaterTempModifier(0.01f).tickRate(5), Temperature.Trait.WORLD, Placement.Duplicates.BY_CLASS);
                 }
 
