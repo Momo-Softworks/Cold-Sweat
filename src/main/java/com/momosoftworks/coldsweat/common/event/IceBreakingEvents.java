@@ -51,16 +51,21 @@ public class IceBreakingEvents
 
         BlockState state = event.getState();
         Player player = event.getPlayer();
-        ItemStack tool = player.getItemInHand(InteractionHand.MAIN_HAND);
+        ItemStack tool = player.getMainHandItem();
         float speed = event.getNewSpeed();
 
-        if (isModifiableIceBlock(state) && ItemHelper.isEffectivelyPickaxe(tool)
+        if (isModifiableIceBlock(state)
         && !ForgeHooks.isCorrectToolForDrops(state, player))
         {
-            event.setNewSpeed(speed / 2);
+            // Increase speed for pickaxes (even if the tier isn't high enough)
+            if (ItemHelper.isEffectivelyPickaxe(tool))
+            {   event.setNewSpeed(speed * 2);
+            }
+            // Non-pickaxes need a huge speed boost
+            else event.setNewSpeed(speed * 5);
         }
         if (state.is(Blocks.PACKED_ICE))
-        {   event.setNewSpeed(speed / 4);
+        {   event.setNewSpeed(event.getNewSpeed() / 6);
         }
     }
 
@@ -73,9 +78,8 @@ public class IceBreakingEvents
         Player player = event.getPlayer();
         ItemStack tool = player.getItemInHand(InteractionHand.MAIN_HAND);
 
-        if (isModifiableIceBlock(state) && ItemHelper.isEffectivelyPickaxe(tool)
-        && ForgeHooks.isCorrectToolForDrops(state, player))
-        {   event.setCanHarvest(true);
+        if (isModifiableIceBlock(state))
+        {   event.setCanHarvest(ItemHelper.isEffectivelyPickaxe(tool) && event.getPlayer().getMainHandItem().isCorrectToolForDrops(state));
         }
     }
 
