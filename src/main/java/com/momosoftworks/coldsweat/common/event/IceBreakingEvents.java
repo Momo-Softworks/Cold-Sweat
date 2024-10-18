@@ -6,6 +6,8 @@ import com.momosoftworks.coldsweat.util.item.ItemHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemTier;
+import net.minecraft.item.TieredItem;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.block.material.Material;
 import net.minecraft.item.ItemStack;
@@ -79,7 +81,7 @@ public class IceBreakingEvents
         ItemStack tool = player.getItemInHand(Hand.MAIN_HAND);
 
         if (isModifiableIceBlock(state))
-        {   event.setCanHarvest(ItemHelper.isEffectivelyPickaxe(tool) && tool.isCorrectToolForDrops(state));
+        {   event.setCanHarvest(ItemHelper.isEffectivelyPickaxe(tool) && isCorrectToolForDrops(tool, state));
         }
     }
 
@@ -88,6 +90,22 @@ public class IceBreakingEvents
         return state.is(Blocks.ICE)
             || state.is(Blocks.PACKED_ICE)
             || state.is(Blocks.BLUE_ICE);
+    }
+
+    public static boolean isCorrectToolForDrops(ItemStack stack, BlockState state)
+    {
+        if (!isModifiableIceBlock(state)) return false;
+        if (!stack.isCorrectToolForDrops(state) || !(stack.getItem() instanceof TieredItem)) return false;
+
+        TieredItem tool = (TieredItem) stack.getItem();
+
+        if (state.getBlock() == Blocks.ICE)
+        {   return tool.getTier().getLevel() >= ItemTier.STONE.getLevel();
+        }
+        if (state.getBlock() == Blocks.PACKED_ICE || state.getBlock() == Blocks.BLUE_ICE)
+        {   return tool.getTier().getLevel() >= ItemTier.IRON.getLevel();
+        }
+        return false;
     }
 
     public static ResourceLocation getLootTableForIce(BlockState state)
