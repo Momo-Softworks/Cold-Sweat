@@ -146,7 +146,7 @@ public abstract class WorldHelper
             try
             {
                 BlockState state = chunk.getBlockState(pos2);
-                if (state.isAir() || state.liquid())
+                if (state.isAir() || state.getMaterial().isLiquid())
                 {   continue;
                 }
                 VoxelShape shape = state.getShape(level, pos, CollisionContext.empty());
