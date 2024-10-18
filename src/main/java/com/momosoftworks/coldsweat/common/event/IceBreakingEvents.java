@@ -66,7 +66,7 @@ public class IceBreakingEvents
             else event.setNewSpeed(speed * 5);
         }
         if (state.is(Blocks.PACKED_ICE))
-        {   event.setNewSpeed(event.getNewSpeed() / 6);
+        {   event.setNewSpeed(event.getNewSpeed() / 3);
         }
     }
 
