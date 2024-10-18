@@ -18,7 +18,6 @@ import com.momosoftworks.coldsweat.core.init.BlockEntityInit;
 import com.momosoftworks.coldsweat.core.init.ParticleTypesInit;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.HearthResetMessage;
-import com.momosoftworks.coldsweat.core.network.message.UpdateHearthSignalsMessage;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -549,10 +548,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
     protected void syncInputSignal(boolean wasBackPowered, boolean wasSidePowered)
     {
         // Update signals for client
-        if (!this.level.isClientSide() && (wasBackPowered != this.isBackPowered || wasSidePowered != this.isSidePowered))
+        if (this.level instanceof ServerLevel serverLevel && (wasBackPowered != this.isBackPowered || wasSidePowered != this.isSidePowered))
         {
-            ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.TRACKING_CHUNK.with(() -> this.level.getChunkSource().getChunkNow(this.getBlockPos().getX() >>4, this.getBlockPos().getZ() >>4)),
-                                                 new UpdateHearthSignalsMessage(isSidePowered, isBackPowered, this.getBlockPos()));
+            serverLevel.getChunkSource().blockChanged(this.getBlockPos());
         }
     }
 
@@ -1038,6 +1036,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         tag.putBoolean("ShouldUseColdFuel", this.shouldUseColdFuel);
         tag.putBoolean("ShouldUseHotFuel", this.shouldUseHotFuel);
         tag.putInt("InsulationLevel", insulationLevel);
+        tag.putBoolean("IsSidePowered", this.isSidePowered);
+        tag.putBoolean("IsBackPowered", this.isBackPowered);
         this.saveEffects(tag);
 
         return tag;
@@ -1050,6 +1050,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity
         this.shouldUseColdFuel = tag.getBoolean("ShouldUseColdFuel");
         this.shouldUseHotFuel = tag.getBoolean("ShouldUseHotFuel");
         this.insulationLevel = tag.getInt("InsulationLevel");
+        this.isSidePowered = tag.getBoolean("IsSidePowered");
+        this.isBackPowered = tag.getBoolean("IsBackPowered");
         this.loadEffects(tag);
     }
 
