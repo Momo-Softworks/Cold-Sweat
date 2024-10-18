@@ -152,7 +152,10 @@ public class HearthDebugRenderer
                         if (workingChunk == null) continue;
 
                         if (!WorldHelper.canSeeSky(world, pos, 1))
-                        {   WorldRenderer.renderVoxelShape(ms, vertexes, world.getBlockState(pos).getShape(world, pos), x, y, z, r, g, b, renderAlpha);
+                        {
+                            for (AxisAlignedBB aabb : world.getBlockState(pos).getShape(world, pos).toAabbs())
+                            {   WorldRenderer.renderLineBox(ms, vertexes, aabb.minX + x, aabb.minY + y, aabb.minZ + z, aabb.maxX + x, aabb.maxY + y, aabb.maxZ + z, r, g, b, renderAlpha);
+                            }
                             continue;
                         }
 
