@@ -16,6 +16,7 @@ import com.momosoftworks.coldsweat.config.type.PredicateItem;
 import com.momosoftworks.coldsweat.core.init.TempModifierInit;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
+import com.momosoftworks.coldsweat.data.codec.requirement.BlockRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
@@ -450,7 +451,7 @@ public class ConfigLoadingHandler
                 final double minTemp = blockTempData.minTemp();
                 final double maxTemp = blockTempData.maxTemp();
                 final boolean fade = blockTempData.fade();
-                final BlockPredicate condition = blockTempData.condition();
+                final List<BlockRequirement> conditions = blockTempData.conditions();
                 final CompoundTag tag = blockTempData.nbt().orElse(null);
                 final double range = blockTempData.range();
 
@@ -459,8 +460,11 @@ public class ConfigLoadingHandler
                 {
                     if (level instanceof ServerLevel serverLevel)
                     {
-                        if (!condition.test(serverLevel, pos))
-                        {   return 0;
+                        for (int i = 0; i < conditions.size(); i++)
+                        {
+                            if (!conditions.get(i).test(serverLevel, pos))
+                            {   return 0;
+                            }
                         }
                     }
                     if (tag != null)
