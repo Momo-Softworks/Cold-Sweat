@@ -16,6 +16,7 @@ import com.momosoftworks.coldsweat.config.type.PredicateItem;
 import com.momosoftworks.coldsweat.core.init.TempModifierInit;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
+import com.momosoftworks.coldsweat.data.codec.requirement.BlockRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
@@ -449,7 +450,7 @@ public class ConfigLoadingHandler
                 final double temperature = blockTempData.temperature();
                 final double maxEffect = blockTempData.maxEffect();
                 final boolean fade = blockTempData.fade();
-                final BlockPredicate condition = blockTempData.condition();
+                final BlockRequirement condition = blockTempData.condition();
                 final CompoundTag tag = blockTempData.nbt().orElse(null);
                 final double range = blockTempData.range();
                 final double minTemp = blockTempData.minTemp();
