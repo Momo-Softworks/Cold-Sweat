@@ -16,6 +16,7 @@ import com.momosoftworks.coldsweat.config.type.PredicateItem;
 import com.momosoftworks.coldsweat.core.init.TempModifierInit;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
+import com.momosoftworks.coldsweat.data.codec.requirement.BlockRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
@@ -437,8 +438,8 @@ public class ConfigLoadingHandler
                 final double minTemp = blockTempData.minTemp;
                 final double maxTemp = blockTempData.maxTemp;
                 final boolean fade = blockTempData.fade;
-                final List<BlockState> conditions = blockTempData.conditions;
-                final CompoundNBT tag = blockTempData.tag.orElse(null);
+                final List<BlockRequirement> conditions = blockTempData.conditions;
+                final CompoundNBT tag = blockTempData.nbt.orElse(null);
                 final double range = blockTempData.range;
 
                 @Override
@@ -446,8 +447,12 @@ public class ConfigLoadingHandler
                 {
                     if (level instanceof ServerWorld)
                     {
-                        if (conditions.stream().noneMatch(condition -> condition.equals(state)))
-                        {   return 0;
+                        ServerWorld serverLevel = (ServerWorld) level;
+                        for (int i = 0; i < conditions.size(); i++)
+                        {
+                            if (!conditions.get(i).test(serverLevel, pos))
+                            {   return 0;
+                            }
                         }
                     }
                     if (tag != null)

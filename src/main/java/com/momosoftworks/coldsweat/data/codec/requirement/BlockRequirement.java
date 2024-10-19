@@ -41,6 +41,9 @@ public class BlockRequirement
         this.state = state;
         this.nbt = nbt;
     }
+
+    public static final BlockRequirement NONE = new BlockRequirement(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
+
     public static final Codec<BlockRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ConfigHelper.tagOrBuiltinCodec(Registry.BLOCK_REGISTRY, Registry.BLOCK).listOf().optionalFieldOf("blocks").forGetter(predicate -> predicate.blocks),
             ITag.codec(BlockTags::getAllTags).optionalFieldOf("tag").forGetter(predicate -> predicate.tag),
