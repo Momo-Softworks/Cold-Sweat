@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.api.temperature.modifier;
 
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -20,9 +21,14 @@ public class MountTempModifier extends TempModifier
     @Override
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
+        double insulationStrength = ConfigSettings.INSULATION_STRENGTH.get();
+
         return temp ->
-        {   String toChange = temp > 0 ? "HeatInsulation" : "ColdInsulation";
-            return CSMath.blend(temp, 0, this.getNBT().getDouble(toChange), 0, 1);
+        {
+            double insulation = temp > 0
+                                ? this.getNBT().getDouble("HeatInsulation")
+                                : this.getNBT().getDouble("ColdInsulation");
+            return CSMath.blend(temp, 0, insulation * insulationStrength, 0, 1);
         };
     }
 }
