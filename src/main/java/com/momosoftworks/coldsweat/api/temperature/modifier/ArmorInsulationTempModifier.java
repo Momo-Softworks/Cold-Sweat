@@ -27,10 +27,11 @@ public class ArmorInsulationTempModifier extends TempModifier
         double insulationStrength = ConfigSettings.INSULATION_STRENGTH.get();
 
         return temp ->
-        {   double insulation = temp > 0 ? hot : cold;
-            return temp * (insulation >= 0
-                           ? Math.pow(0.1, insulation / 40) / insulationStrength
-                           : -(insulation / 20) * insulationStrength + 1);
+        {   double insulation = (temp > 0 ? hot : cold) * insulationStrength;
+            if (insulation >= 0)
+            {   return temp * Math.pow(0.1, insulation / 40);
+            }
+            else return temp * (-insulation / 20 + 1);
         };
     }
 }
