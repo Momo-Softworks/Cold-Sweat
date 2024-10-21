@@ -2526,19 +2526,51 @@ Technical Changes:
 ------------------------------------------------------------------------------------------------------------------------
 2.3.6
 - Particles spawned by Cold Sweat are now dependent on the player's particle setting (All/Decreased/Minimal)
+- Cold Sweat's custom ice breaking mechanics can now be disabled with the "Custom Ice Drops" setting in world_settings.toml
+- Added config setting to disable Cold Sweat's TempModifiers (or those from other mods)
+      - TempModifiers control how temperature affects the player, so this will hopefully provide some more granular control over that
+- Removed the "Cave Insulation Strength" config setting, as it is no longer used
+- Reduced the underground temperature near y -64 so the player no longer overheats
 
 Fixes:
 * (1.21) Fixed crash when saving insulated armor items
 * (1.20) Fixed crash when Serene Seasons 9.1 or newer is installed
       - Serene Seasons support now requires version 9.1 or newer to be enabled
-* (1.20 - 1.21) Fixed debug message when a tooltip containing adaptive insulation is displayed
+* Fixed crash when "Insulation Strength" is set to 0
+- Fixed insulation from mounts ignoring the "Insulation Strength" setting
 - Fixed the world temperature indicator briefly displaying incorrectly when changing preferred units
 - Fixed spectators getting wet in water
 - Fixed being underwater counting as "underground" when calculating world temperature
+- Fixed the "condition" field of JSON BlockTemp config files not supporting checking block states
+- (1.20 - 1.21) Fixed debug message showing when a tooltip containing adaptive insulation is displayed
+- (1.16) Fixed the hearth debug visualizer rendering red outlines around solid blocks
 
 Translation Updates:
 * Added Japanese translation (Mohuzato on GitHub)
 
 Technical Changes:
-- (1.20) Dropped NeoForge support in favor of normal Forge, which is receiving more updates
-- Removed the "Cave Insulation Strength" config setting, as it is no longer used
+* (1.20) Dropped NeoForge support in favor of normal Forge, which is receiving more updates
+* The TempModifierEvent.Calculate.Override/Modify events have been renamed to Pre/Post
+      - These events are functionally similar, but Pre has some changes:
+            - The event now has getFunction() and setFunction() methods for setting the resulting function before it is calculated
+            - The event must be cancelled for the function to be overwritten
+* Changed the packages of some events:
+     - TempModifierEvent: api.event.common.temperature
+     - EnableTemperatureEvent: api.event.core.init
+     - GatherDefaultTempModifiersEvent: api.event.core.init
+     - BlockTempInitEvent: api.event.core.registry
+     - TempModifierRegisterEvent: api.event.core.registry
+     - EdiblesRegisterEvent: api.event.core.registry
+     - BlockStateChangedEvent: api.event.core.vanilla
+     - ChatComponentClickedEvent: api.event.core.vanilla
+     - EntityPickEvent: api.event.core.vanilla
+     - LivingEntityLoadAdditionalEvent: api.event.core.vanilla
+     - ServerConfigsLoadedEvent: api.event.core.vanilla
+* Added InsulateItemEvent:
+     - Fired when an armor item is being insulated
+     - The insulator item can be modified before being applied to the armor
+     - The event can also be cancelled to prevent the insulation from being applied
+* Added TickInsulationEvent:
+     - Fired when the player's equipment insulation is processed
+     - Allows for granular control over the insulation being provided by sources like armor, insulators, curios, and protection
+     - The event can be cancelled to prevent the insulation from applying to the player
