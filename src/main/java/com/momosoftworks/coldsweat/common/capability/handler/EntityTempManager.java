@@ -456,9 +456,11 @@ public class EntityTempManager
 
         if (ConfigSettings.DISABLED_MODIFIERS.get().contains(modifierKey))
         {
-            event.setFunction(temp -> temp);
             if (modifier instanceof BiomeTempModifier)
-            {   event.setTemperature((Temperature.get(entity, Temperature.Trait.FREEZING_POINT) + Temperature.get(entity, Temperature.Trait.BURNING_POINT)) / 2);
+            {   event.setFunction(temp -> temp + ((Temperature.get(entity, Temperature.Trait.FREEZING_POINT) + Temperature.get(entity, Temperature.Trait.BURNING_POINT)) / 2));
+            }
+            else
+            {   event.setFunction(temp -> temp);
             }
             event.setCanceled(true);
         }
@@ -488,7 +490,7 @@ public class EntityTempManager
             ItemStack stack = entry.getKey();
 
             Double immunity = insulator.immuneTempModifiers().get(modifierKey);
-            if (immunity != null && insulator.test(event.getEntity(), stack))
+            if (immunity != null && insulator.test(entity, stack))
             {
                 event.setFunction(temp -> CSMath.blend(event.getFunction().apply(temp), lastInput, immunity, 0, 1));
             }
