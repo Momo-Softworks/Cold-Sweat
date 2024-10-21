@@ -28,7 +28,7 @@ public record BlockTempData(List<Either<TagKey<Block>, Block>> blocks, double te
             Codec.BOOL.optionalFieldOf("fade", true).forGetter(BlockTempData::fade),
             Codec.DOUBLE.optionalFieldOf("max_temp", Double.MAX_VALUE).forGetter(BlockTempData::maxTemp),
             Codec.DOUBLE.optionalFieldOf("min_temp", -Double.MAX_VALUE).forGetter(BlockTempData::minTemp),
-            BlockRequirement.CODEC.listOf().optionalFieldOf("condition", List.of()).forGetter(BlockTempData::conditions),
+            BlockRequirement.CODEC.listOf().optionalFieldOf("conditions", List.of()).forGetter(BlockTempData::conditions),
             CompoundTag.CODEC.optionalFieldOf("nbt").forGetter(BlockTempData::nbt),
             Codec.STRING.listOf().optionalFieldOf("required_mods").forGetter(BlockTempData::requiredMods)
     ).apply(instance, BlockTempData::new));
