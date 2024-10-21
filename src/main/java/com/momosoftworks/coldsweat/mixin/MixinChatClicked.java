@@ -1,6 +1,6 @@
 package com.momosoftworks.coldsweat.mixin;
 
-import com.momosoftworks.coldsweat.api.event.common.ChatComponentClickedEvent;
+import com.momosoftworks.coldsweat.api.event.vanilla.ChatComponentClickedEvent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Style;
 import net.minecraftforge.common.MinecraftForge;

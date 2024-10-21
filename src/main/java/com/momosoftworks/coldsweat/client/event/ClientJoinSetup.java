@@ -1,6 +1,6 @@
 package com.momosoftworks.coldsweat.client.event;
 
-import com.momosoftworks.coldsweat.api.event.core.EdiblesRegisterEvent;
+import com.momosoftworks.coldsweat.api.event.core.registry.EdiblesRegisterEvent;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.TempModifierInit;

@@ -1,8 +1,8 @@
 package com.momosoftworks.coldsweat.core.init;
 
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.api.event.core.BlockTempRegisterEvent;
-import com.momosoftworks.coldsweat.api.event.core.TempModifierRegisterEvent;
+import com.momosoftworks.coldsweat.api.event.core.registry.BlockTempRegisterEvent;
+import com.momosoftworks.coldsweat.api.event.core.registry.TempModifierRegisterEvent;
 import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.*;

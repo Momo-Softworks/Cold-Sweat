@@ -1,6 +1,6 @@
 package com.momosoftworks.coldsweat.mixin;
 
-import com.momosoftworks.coldsweat.api.event.common.EntityPickEvent;
+import com.momosoftworks.coldsweat.api.event.vanilla.EntityPickEvent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.HitResult;

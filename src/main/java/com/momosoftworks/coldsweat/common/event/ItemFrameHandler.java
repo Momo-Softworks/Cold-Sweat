@@ -1,6 +1,6 @@
 package com.momosoftworks.coldsweat.common.event;
 
-import com.momosoftworks.coldsweat.api.event.common.EntityPickEvent;
+import com.momosoftworks.coldsweat.api.event.vanilla.EntityPickEvent;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.network.chat.Component;
