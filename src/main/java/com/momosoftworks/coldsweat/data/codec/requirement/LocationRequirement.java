@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.data.codec.requirement;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
@@ -9,6 +10,7 @@ import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.Level;
@@ -90,44 +92,11 @@ public record LocationRequirement(Optional<Integer> x, Optional<Integer> y, Opti
     }
 
     public CompoundTag serialize()
-    {
-        CompoundTag tag = new CompoundTag();
-        x.ifPresent(value -> tag.putInt("x", value));
-        y.ifPresent(value -> tag.putInt("y", value));
-        z.ifPresent(value -> tag.putInt("z", value));
-        biome.ifPresent(value ->
-        {   tag.putString("biome", ConfigHelper.serializeTagOrResourceKey(value));
-        });
-        structure.ifPresent(value ->
-        {   tag.putString("structure", ConfigHelper.serializeTagOrResourceKey(value));
-        });
-        dimension.ifPresent(value ->
-        {   tag.putString("dimension", ConfigHelper.serializeTagOrResourceKey(value));
-        });
-        light.ifPresent(bounds -> tag.put("light", bounds.serialize()));
-        block.ifPresent(predicate -> tag.put("block", predicate.serialize()));
-        fluid.ifPresent(predicate -> tag.put("fluid", predicate.serialize()));
-        return tag;
+    {   return (CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElseGet(CompoundTag::new);
     }
 
     public static LocationRequirement deserialize(CompoundTag tag)
-    {
-        Optional<Integer> x = tag.contains("x") ? Optional.of(tag.getInt("x")) : Optional.empty();
-        Optional<Integer> y = tag.contains("y") ? Optional.of(tag.getInt("y")) : Optional.empty();
-        Optional<Integer> z = tag.contains("z") ? Optional.of(tag.getInt("z")) : Optional.empty();
-        Optional<Either<TagKey<Biome>, ResourceKey<Biome>>> biome = tag.contains("biome")
-                                                                    ? Optional.of(ConfigHelper.deserializeTagOrResourceKey(Registries.BIOME, tag.getString("biome")))
-                                                                    : Optional.empty();
-        Optional<Either<TagKey<Structure>, ResourceKey<Structure>>> structure = tag.contains("structure")
-                                                                                ? Optional.of(ConfigHelper.deserializeTagOrResourceKey(Registries.STRUCTURE, tag.getString("structure")))
-                                                                                : Optional.empty();
-        Optional<Either<TagKey<Level>, ResourceKey<Level>>> dimension = tag.contains("dimension")
-                                                                        ? Optional.of(ConfigHelper.deserializeTagOrResourceKey(Registries.DIMENSION, tag.getString("dimension")))
-                                                                        : Optional.empty();
-        Optional<IntegerBounds> light = tag.contains("light") ? Optional.of(IntegerBounds.deserialize(tag.getCompound("light"))) : Optional.empty();
-        Optional<BlockRequirement> block = tag.contains("block") ? Optional.of(BlockRequirement.deserialize(tag.getCompound("block"))) : Optional.empty();
-        Optional<FluidRequirement> fluid = tag.contains("fluid") ? Optional.of(FluidRequirement.deserialize(tag.getCompound("fluid"))) : Optional.empty();
-        return new LocationRequirement(x, y, z, biome, structure, dimension, light, block, fluid);
+    {   return CODEC.decode(NbtOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize BlockRequirement")).getFirst();
     }
 
     @Override
@@ -155,20 +124,6 @@ public record LocationRequirement(Optional<Integer> x, Optional<Integer> y, Opti
 
     @Override
     public String toString()
-    {
-        StringBuilder builder = new StringBuilder();
-        builder.append("LocationRequirement{");
-        x.ifPresent(value -> builder.append("x=").append(value).append(", "));
-        y.ifPresent(value -> builder.append("y=").append(value).append(", "));
-        z.ifPresent(value -> builder.append("z=").append(value).append(", "));
-        biome.ifPresent(value -> builder.append("biome=").append(value).append(", "));
-        structure.ifPresent(value -> builder.append("structure=").append(value).append(", "));
-        dimension.ifPresent(value -> builder.append("dimension=").append(value).append(", "));
-        light.ifPresent(value -> builder.append("light=").append(value).append(", "));
-        block.ifPresent(value -> builder.append("block=").append(value).append(", "));
-        fluid.ifPresent(value -> builder.append("fluid=").append(value).append(", "));
-        builder.append("}");
-
-        return builder.toString();
+    {   return CODEC.encodeStart(JsonOps.INSTANCE, this).result().map(Object::toString).orElse("serialize_failed");
     }
 }

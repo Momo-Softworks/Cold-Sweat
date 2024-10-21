@@ -2,11 +2,13 @@ package com.momosoftworks.coldsweat.data.codec.requirement;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.effect.MobEffect;
@@ -101,21 +103,11 @@ public record EffectsRequirement(Map<MobEffect, Instance> effects)
     }
 
     public CompoundTag serialize()
-    {
-        CompoundTag tag = new CompoundTag();
-        for (Map.Entry<MobEffect, Instance> entry : effects.entrySet())
-        {
-            tag.put(ForgeRegistries.MOB_EFFECTS.getKey(entry.getKey()).toString(), entry.getValue().serialize());
-        }
-        return tag;
+    {   return (CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElseGet(CompoundTag::new);
     }
 
     public static EffectsRequirement deserialize(CompoundTag tag)
-    {
-        Map<MobEffect, Instance> effects = tag.getAllKeys().stream().collect(
-                Collectors.toMap(key -> ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation(key)),
-                                                  key -> Instance.deserialize(tag.getCompound(key))));
-        return new EffectsRequirement(effects);
+    {   return CODEC.decode(NbtOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize EffectsRequirement")).getFirst();
     }
 
     @Override
@@ -143,22 +135,11 @@ public record EffectsRequirement(Map<MobEffect, Instance> effects)
         ).apply(instance, Instance::new));
 
         public CompoundTag serialize()
-        {
-            CompoundTag tag = new CompoundTag();
-            tag.put("amplifier", amplifier.serialize());
-            tag.put("duration", duration.serialize());
-            ambient.ifPresent(value -> tag.putBoolean("ambient", value));
-            visible.ifPresent(value -> tag.putBoolean("visible", value));
-            return tag;
+        {   return (CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElseGet(CompoundTag::new);
         }
 
         public static Instance deserialize(CompoundTag tag)
-        {
-            IntegerBounds amplifier = IntegerBounds.deserialize(tag.getCompound("amplifier"));
-            IntegerBounds duration = IntegerBounds.deserialize(tag.getCompound("duration"));
-            Optional<Boolean> ambient = tag.contains("ambient") ? Optional.of(tag.getBoolean("ambient")) : Optional.empty();
-            Optional<Boolean> visible = tag.contains("visible") ? Optional.of(tag.getBoolean("visible")) : Optional.empty();
-            return new Instance(amplifier, duration, ambient, visible);
+        {   return CODEC.decode(NbtOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize BlockRequirement")).getFirst();
         }
 
         @Override
@@ -187,21 +168,12 @@ public record EffectsRequirement(Map<MobEffect, Instance> effects)
 
         @Override
         public String toString()
-        {
-            StringBuilder builder = new StringBuilder();
-            builder.append("Instance{amplifier=").append(amplifier);
-            builder.append(", duration=").append(duration);
-            ambient.ifPresent(value -> builder.append(", ambient=").append(value));
-            visible.ifPresent(value -> builder.append(", visible=").append(value));
-            builder.append('}');
-
-            return builder.toString();
+        {   return CODEC.encodeStart(JsonOps.INSTANCE, this).result().map(Object::toString).orElse("serialize_failed");
         }
     }
 
     @Override
     public String toString()
-    {
-        return "Effects{" + effects + '}';
+    {   return CODEC.encodeStart(JsonOps.INSTANCE, this).result().map(Object::toString).orElse("serialize_failed");
     }
 }
