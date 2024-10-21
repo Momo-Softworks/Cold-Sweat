@@ -1,6 +1,8 @@
 package com.momosoftworks.coldsweat.data.tag;
 
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.api.event.vanilla.ServerConfigsLoadedEvent;
+import com.momosoftworks.coldsweat.util.serialization.ListBuilder;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
@@ -12,9 +14,9 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
-import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Predicate;
@@ -46,10 +48,12 @@ public class ModDimensionTags
 
     private static final Field CONTENTS = ObfuscationReflectionHelper.findField(HolderSet.Named.class, "contents");
     private static final Method BIND = ObfuscationReflectionHelper.findMethod(HolderSet.Named.class, "bind", List.class);
+    private static final Method BIND_TAGS = ObfuscationReflectionHelper.findMethod(Holder.Reference.class, "bindTags", Collection.class);
     static
     {
         CONTENTS.setAccessible(true);
         BIND.setAccessible(true);
+        BIND_TAGS.setAccessible(true);
     }
 
     /**
@@ -84,7 +88,14 @@ public class ModDimensionTags
             dimensionRegistry.holders().forEach(dimensionType ->
             {
                 if (predicate.test(dimensionType.value()))
-                {   entries.add(dimensionType);
+                {
+                    entries.add(dimensionType);
+                    try
+                    {   BIND_TAGS.invoke(dimensionType, ListBuilder.begin(dimensionType.tags().toList()).add(tag).build());
+                    }
+                    catch (Exception e)
+                    {   throw new RuntimeException(e);
+                    }
                 }
             });
             BIND.invoke(holderSet, new ArrayList<>(entries));
@@ -95,7 +106,7 @@ public class ModDimensionTags
     }
 
     @SubscribeEvent
-    public static void onServerStart(ServerAboutToStartEvent event)
+    public static void onServerStart(ServerConfigsLoadedEvent event)
     {
         // Initialize custom vanilla tags for dimension types
         ModDimensionTags.initDynamicTags(event.getServer().registryAccess());
