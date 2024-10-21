@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.data.codec.requirement;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.entity.EntityHelper;
@@ -9,6 +10,7 @@ import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.CriterionProgress;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stat;
@@ -107,81 +109,11 @@ public record PlayerDataRequirement(Optional<GameType> gameType, Optional<Map<St
     }
 
     public CompoundTag serialize()
-    {
-        CompoundTag tag = new CompoundTag();
-        gameType.ifPresent(gameType -> tag.putString("gameType", gameType.getName()));
-        stats.ifPresent(stats ->
-        {
-            ListTag statsTag = new ListTag();
-            for (Map.Entry<StatRequirement, IntegerBounds> entry : stats.entrySet())
-            {
-                CompoundTag statTag = new CompoundTag();
-                statTag.put("stat", entry.getKey().serialize());
-                statTag.put("value", entry.getValue().serialize());
-                statsTag.add(statTag);
-            }
-            tag.put("stats", statsTag);
-        });
-        recipes.ifPresent(recipes ->
-        {
-            CompoundTag recipesTag = new CompoundTag();
-            for (Map.Entry<ResourceLocation, Boolean> entry : recipes.entrySet())
-            {   recipesTag.putBoolean(entry.getKey().toString(), entry.getValue());
-            }
-            tag.put("recipes", recipesTag);
-        });
-        advancements.ifPresent(advancements ->
-        {
-            CompoundTag advancementsTag = new CompoundTag();
-            for (Map.Entry<ResourceLocation, Either<AdvancementCompletionRequirement, AdvancementCriteriaRequirement>> entry : advancements.entrySet())
-            {
-                CompoundTag advancementTag = new CompoundTag();
-                entry.getValue().ifLeft(complete -> advancementTag.putBoolean("complete", complete.complete));
-                entry.getValue().ifRight(criteria -> {
-                    CompoundTag criteriaTag = new CompoundTag();
-                    for (Map.Entry<String, Boolean> criteriaEntry : criteria.criteria.entrySet())
-                    {
-                        criteriaTag.putBoolean(criteriaEntry.getKey(), criteriaEntry.getValue());
-                    }
-                    advancementTag.put("criteria", criteriaTag);
-                });
-                advancementsTag.put(entry.getKey().toString(), advancementTag);
-            }
-            tag.put("advancements", advancementsTag);
-        });
-        lookingAt.ifPresent(lookingAt -> tag.put("lookingAt", lookingAt.serialize()));
-
-        return tag;
+    {   return (CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElseGet(CompoundTag::new);
     }
 
     public static PlayerDataRequirement deserialize(CompoundTag tag)
-    {
-        Optional<GameType> gameType = tag.contains("gameType") ? Optional.of(GameType.byName(tag.getString("gameType"))) : Optional.empty();
-        Optional<Map<StatRequirement, IntegerBounds>> stats = tag.contains("stats") ? Optional.of(tag.getList("stats", 10)
-                .stream()
-                .map(tg -> (CompoundTag) tg)
-                .collect(Collectors.<CompoundTag, StatRequirement, IntegerBounds>toMap(tg -> StatRequirement.deserialize(tg.getCompound("stat")),
-                                          tg -> IntegerBounds.deserialize(tg.getCompound("value"))))
-        ) : Optional.empty();
-
-        Optional<Map<ResourceLocation, Boolean>> recipes = tag.contains("recipes") ? Optional.of(tag.getCompound("recipes").getAllKeys().stream()
-                .collect(java.util.stream.Collectors.toMap(key -> new ResourceLocation(key), key -> tag.getCompound("recipes").getBoolean(key)))) : Optional.empty();
-
-        Optional<Map<ResourceLocation, Either<AdvancementCompletionRequirement, AdvancementCriteriaRequirement>>> advancements = tag.contains("advancements") ? Optional.of(tag.getCompound("advancements").getAllKeys().stream()
-                .collect(java.util.stream.Collectors.toMap(key -> new ResourceLocation(key), key -> {
-                    CompoundTag advancementTag = tag.getCompound("advancements").getCompound(key);
-                    if (advancementTag.contains("complete"))
-                    {   return Either.left(new AdvancementCompletionRequirement(advancementTag.getBoolean("complete")));
-                    }
-                    else
-                    {   return Either.right(new AdvancementCriteriaRequirement(advancementTag.getCompound("criteria").getAllKeys().stream()
-                            .collect(Collectors.toMap(criteriaKey -> criteriaKey, criteriaKey -> advancementTag.getCompound("criteria").getBoolean(criteriaKey)))));
-                    }
-                }))) : Optional.empty();
-
-        Optional<EntityRequirement> lookingAt = tag.contains("lookingAt") ? Optional.of(EntityRequirement.deserialize(tag.getCompound("lookingAt"))) : Optional.empty();
-
-        return new PlayerDataRequirement(gameType, stats, recipes, advancements, lookingAt);
+    {   return CODEC.decode(NbtOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize BlockRequirement")).getFirst();
     }
 
     @Override
@@ -211,13 +143,8 @@ public record PlayerDataRequirement(Optional<GameType> gameType, Optional<Map<St
         return lookingAt.equals(that.lookingAt);
     }
 
-    public static class StatRequirement
+    public record StatRequirement(StatType<?> type, ResourceLocation statId, Stat<?> stat, IntegerBounds value)
     {
-        private final StatType<?> type;
-        private ResourceLocation statId;
-        private final Stat<?> stat;
-        private final IntegerBounds value;
-
         public static final Codec<StatRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 ForgeRegistries.STAT_TYPES.getCodec().fieldOf("type").forGetter(stat -> stat.type),
                 ResourceLocation.CODEC.fieldOf("stat").forGetter(stat -> stat.statId),
@@ -225,13 +152,7 @@ public record PlayerDataRequirement(Optional<GameType> gameType, Optional<Map<St
         ).apply(instance, StatRequirement::new));
 
         public StatRequirement(StatType<?> type, ResourceLocation statId, IntegerBounds value)
-        {   this(type, (Stat<?>) type.getRegistry().get(statId), value);
-        }
-
-        public StatRequirement(StatType<?> type, Stat<?> stat, IntegerBounds value)
-        {   this.type = type;
-            this.stat = stat;
-            this.value = value;
+        {   this(type, statId, (Stat<?>) type.getRegistry().get(statId), value);
         }
 
         public StatType<?> type()
@@ -245,30 +166,15 @@ public record PlayerDataRequirement(Optional<GameType> gameType, Optional<Map<St
         }
 
         public boolean test(Stat<?> stat, int value)
-        {   return this.stat.equals(stat) && this.value.test(value);
+        {   return statId.equals(ForgeRegistries.STAT_TYPES.getKey(stat.getType())) && this.value.test(value);
         }
 
         public CompoundTag serialize()
-        {   CompoundTag tag = new CompoundTag();
-            tag.putString("type", ForgeRegistries.STAT_TYPES.getKey(type).toString());
-            tag.putString("stat", serializeStat(stat));
-            tag.put("value", this.value.serialize());
-            return tag;
+        {   return (CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElseGet(CompoundTag::new);
         }
 
         public static StatRequirement deserialize(CompoundTag tag)
-        {   StatType<?> type = ForgeRegistries.STAT_TYPES.getValue(new ResourceLocation(tag.getString("type")));
-            Stat<?> stat = deserializeStat(type, tag);
-            IntegerBounds value = IntegerBounds.deserialize(tag.getCompound("value"));
-            return new StatRequirement(type, stat, value);
-        }
-
-        private static <T> String serializeStat(Stat<T> stat)
-        {   return stat.getType().getRegistry().getKey(stat.getValue()).toString();
-        }
-
-        private static <T> Stat<T> deserializeStat(StatType<T> type, CompoundTag tag)
-        {   return type.get(type.getRegistry().get(new ResourceLocation(tag.getString("stat"))));
+        {   return CODEC.decode(NbtOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize BlockRequirement")).getFirst();
         }
 
         @Override
@@ -297,13 +203,7 @@ public record PlayerDataRequirement(Optional<GameType> gameType, Optional<Map<St
 
         @Override
         public String toString()
-        {
-            return "Stat{" +
-                    "type=" + type +
-                    ", statId=" + statId +
-                    ", stat=" + stat +
-                    ", value=" + value +
-                    '}';
+        {   return CODEC.encodeStart(JsonOps.INSTANCE, this).result().map(Object::toString).orElse("serialize_failed");
         }
     }
 
@@ -316,13 +216,11 @@ public record PlayerDataRequirement(Optional<GameType> gameType, Optional<Map<St
         }
 
         public CompoundTag serialize()
-        {   CompoundTag tag = new CompoundTag();
-            tag.putBoolean("completion", complete);
-            return tag;
+        {   return (CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElseGet(CompoundTag::new);
         }
 
         public static AdvancementCompletionRequirement deserialize(CompoundTag tag)
-        {   return new AdvancementCompletionRequirement(tag.getBoolean("completion"));
+        {   return CODEC.decode(NbtOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize BlockRequirement")).getFirst();
         }
 
         @Override
@@ -343,10 +241,7 @@ public record PlayerDataRequirement(Optional<GameType> gameType, Optional<Map<St
 
         @Override
         public String toString()
-        {
-            return "Completion{" +
-                    "complete=" + complete +
-                    '}';
+        {   return CODEC.encodeStart(JsonOps.INSTANCE, this).result().map(Object::toString).orElse("serialize_failed");
         }
     }
     public record AdvancementCriteriaRequirement(Map<String, Boolean> criteria)
@@ -366,15 +261,11 @@ public record PlayerDataRequirement(Optional<GameType> gameType, Optional<Map<St
         }
 
         public CompoundTag serialize()
-        {   CompoundTag tag = new CompoundTag();
-            for (Map.Entry<String, Boolean> entry : this.criteria.entrySet())
-            {   tag.putBoolean(entry.getKey(), entry.getValue());
-            }
-            return tag;
+        {   return (CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElseGet(CompoundTag::new);
         }
 
         public static AdvancementCriteriaRequirement deserialize(CompoundTag tag)
-        {   return new AdvancementCriteriaRequirement(tag.getAllKeys().stream().collect(java.util.stream.Collectors.toMap(key -> key, key -> tag.getBoolean(key))));
+        {   return CODEC.decode(NbtOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize BlockRequirement")).getFirst();
         }
 
         @Override
@@ -394,22 +285,12 @@ public record PlayerDataRequirement(Optional<GameType> gameType, Optional<Map<St
 
         @Override
         public String toString()
-        {
-            return "Criteria{" +
-                    "criteria=" + criteria +
-                    '}';
+        {   return CODEC.encodeStart(JsonOps.INSTANCE, this).result().map(Object::toString).orElse("serialize_failed");
         }
     }
 
     @Override
     public String toString()
-    {
-        return "PlayerData{" +
-                "gameType=" + gameType +
-                ", stats=" + stats +
-                ", recipes=" + recipes +
-                ", advancements=" + advancements +
-                ", lookingAt=" + lookingAt +
-                '}';
+    {   return CODEC.encodeStart(JsonOps.INSTANCE, this).result().map(Object::toString).orElse("serialize_failed");
     }
 }

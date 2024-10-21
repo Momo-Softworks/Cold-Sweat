@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -105,66 +106,11 @@ public record ItemRequirement(Optional<List<Either<TagKey<Item>, Item>>> items, 
     }
 
     public CompoundTag serialize()
-    {
-        CompoundTag nbt = new CompoundTag();
-        items.ifPresent(itemList -> nbt.put("items", NBTHelper.listTagOf(itemList.stream().map(either -> StringTag.valueOf(either.map(tag -> "#" + tag.location(),
-                                                                                                                       item -> ForgeRegistries.ITEMS.getKey(item).toString())))
-                                                                     .collect(Collectors.toList()))));
-        count.ifPresent(count -> nbt.put("count", count.serialize()));
-        durability.ifPresent(durability -> nbt.put("durability", durability.serialize()));
-        enchantments.ifPresent(enchantments -> nbt.put("enchantments", NBTHelper.listTagOf(enchantments.stream().map(EnchantmentRequirement::serialize).collect(Collectors.toList()))));
-        storedEnchantments.ifPresent(enchantments -> nbt.put("stored_enchantments", NBTHelper.listTagOf(enchantments.stream().map(EnchantmentRequirement::serialize).collect(Collectors.toList()))));
-        potion.ifPresent(potion -> nbt.putString("potion", ForgeRegistries.POTIONS.getKey(potion).toString()));
-        if (!this.nbt.tag().isEmpty()) nbt.put("nbt", this.nbt.serialize());
-        return nbt;
+    {   return (CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElseGet(CompoundTag::new);
     }
 
-    public static ItemRequirement deserialize(CompoundTag nbt)
-    {
-        if (nbt.isEmpty()) return NONE;
-
-        Optional<List<Either<TagKey<Item>, Item>>> items = Optional.of(nbt.getList("items", 8)
-                                                           .stream()
-                                                           .map(tg ->
-                                                           {
-                                                                 String string = tg.getAsString();
-                                                                 ResourceLocation location = new ResourceLocation(string.replace("#", ""));
-                                                                 if (!string.contains("#"))
-                                                                 {   return Either.<TagKey<Item>, Item>right(ForgeRegistries.ITEMS.getValue(location));
-                                                                 }
-
-                                                                 return Either.<TagKey<Item>, Item>left(TagKey.create(Registry.ITEM_REGISTRY, location));
-                                                           })
-                                                           .toList());
-
-        Optional<TagKey<Item>> tag = nbt.contains("tag") ? Optional.of(TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(nbt.getString("tag"))))
-                                                         : Optional.empty();
-
-        Optional<IntegerBounds> count = nbt.contains("count") ? Optional.of(IntegerBounds.deserialize(nbt.getCompound("count")))
-                                                              : java.util.Optional.empty();
-
-        Optional<IntegerBounds> durability = nbt.contains("durability") ? Optional.of(IntegerBounds.deserialize(nbt.getCompound("durability")))
-                                                                        : java.util.Optional.empty();
-
-        Optional<List<EnchantmentRequirement>> enchantments = nbt.contains("enchantments") ? Optional.of(nbt.getList("enchantments", 10)
-                                                                                                         .stream()
-                                                                                                         .map(tg -> EnchantmentRequirement.deserialize(((CompoundTag) tg)))
-                                                                                                         .toList())
-                                                                                           : java.util.Optional.empty();
-
-        Optional<List<EnchantmentRequirement>> storedEnchantments = nbt.contains("stored_enchantments") ? Optional.of(nbt.getList("stored_enchantments", 10)
-                                                                                                                      .stream()
-                                                                                                                      .map(tg -> EnchantmentRequirement.deserialize(((CompoundTag) tg)))
-                                                                                                                      .toList())
-                                                                                                        : java.util.Optional.empty();
-
-        Optional<Potion> potion = nbt.contains("potion") ? java.util.Optional.ofNullable(ForgeRegistries.POTIONS.getValue(new ResourceLocation(nbt.getString("potion"))))
-                                                         : java.util.Optional.empty();
-
-        NbtRequirement nbtReq = nbt.contains("nbt") ? NbtRequirement.deserialize(nbt.getCompound("nbt"))
-                                                      : new NbtRequirement(new CompoundTag());
-
-        return new ItemRequirement(items, tag, count, durability, enchantments, storedEnchantments, potion, nbtReq);
+    public static ItemRequirement deserialize(CompoundTag tag)
+    {   return CODEC.decode(NbtOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize ItemRequirement")).getFirst();
     }
 
     @Override

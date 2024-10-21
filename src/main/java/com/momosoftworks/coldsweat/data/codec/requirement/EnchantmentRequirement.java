@@ -2,11 +2,13 @@ package com.momosoftworks.coldsweat.data.codec.requirement;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -41,18 +43,11 @@ public record EnchantmentRequirement(Either<TagKey<Enchantment>, Enchantment> en
     }
 
     public CompoundTag serialize()
-    {
-        CompoundTag tag = new CompoundTag();
-        tag.putString("enchantment", ConfigHelper.serializeTagOrRegistryObject(ForgeRegistries.ENCHANTMENTS, enchantment));
-        level.ifPresent(bounds -> tag.put("level", bounds.serialize()));
-        return tag;
+    {   return (CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElseGet(CompoundTag::new);
     }
 
     public static EnchantmentRequirement deserialize(CompoundTag tag)
-    {
-        Either<TagKey<Enchantment>, Enchantment> enchantment = ConfigHelper.deserializeTagOrRegistryObject(tag.getString("enchantment"), Registry.ENCHANTMENT_REGISTRY, ForgeRegistries.ENCHANTMENTS);
-        IntegerBounds level = tag.contains("level") ? IntegerBounds.deserialize(tag.getCompound("level")) : null;
-        return new EnchantmentRequirement(enchantment, Optional.ofNullable(level));
+    {   return CODEC.decode(NbtOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize EnchantmentRequirement")).getFirst();
     }
 
     @Override
@@ -75,11 +70,6 @@ public record EnchantmentRequirement(Either<TagKey<Enchantment>, Enchantment> en
 
     @Override
     public String toString()
-    {
-        StringBuilder builder = new StringBuilder();
-        builder.append(ConfigHelper.serializeTagOrRegistryObject(ForgeRegistries.ENCHANTMENTS, enchantment));
-        level.ifPresent(bounds -> builder.append(bounds));
-
-        return builder.toString();
+    {   return CODEC.encodeStart(JsonOps.INSTANCE, this).result().map(Object::toString).orElse("serialize_failed");
     }
 }
