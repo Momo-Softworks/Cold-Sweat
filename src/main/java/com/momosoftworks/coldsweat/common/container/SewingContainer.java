@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.common.container;
 
+import com.momosoftworks.coldsweat.api.event.common.insulation.InsulateItemEvent;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -31,6 +32,7 @@ import net.minecraft.world.item.ShearsItem;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
@@ -316,6 +318,11 @@ public class SewingContainer extends AbstractContainerMenu
 
     private boolean insulateArmorItem(ItemStack armorItem, ItemStack insulatorItem)
     {
+        InsulateItemEvent insulateEvent = new InsulateItemEvent(armorItem, insulatorItem, this.playerInventory.player);
+        NeoForge.EVENT_BUS.post(insulateEvent);
+        if (insulateEvent.isCanceled()) return false;
+        insulatorItem = insulateEvent.getInsulator();
+
         Optional<ItemInsulationCap> insulCap = ItemInsulationManager.getInsulationCap(armorItem);
         if (insulCap.isEmpty()) return false;
         ItemInsulationCap cap = insulCap.get();

@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.common.event;
 import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.api.event.common.insulation.InsulationTickEvent;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
@@ -16,6 +17,7 @@ import com.momosoftworks.coldsweat.config.type.Insulator;
 import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.resources.ResourceLocation;
@@ -34,12 +36,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
 
 @EventBusSubscriber
 public class ProcessEquipmentInsulation
@@ -52,8 +56,7 @@ public class ProcessEquipmentInsulation
         && player.tickCount % 20 == 0 && !player.level().isClientSide)
         {
             int fullyInsulatedSlots = 0;
-            double cold = 0;
-            double heat = 0;
+            Map<String, Double> armorInsulation = new FastMap<>();
 
             double worldTemp = Temperature.get(player, Temperature.Trait.WORLD);
             double minTemp = Temperature.get(player, Temperature.Trait.FREEZING_POINT);
@@ -74,8 +77,8 @@ public class ProcessEquipmentInsulation
                             if (!armorInsulator.test(player, armorStack))
                             {   continue;
                             }
-                            cold += armorInsulator.insulation().getCold();
-                            heat += armorInsulator.insulation().getHeat();
+                            mapAdd(armorInsulation, "cold_armor", armorInsulator.insulation().getCold());
+                            mapAdd(armorInsulation, "heat_armor", armorInsulator.insulation().getHeat());
                         }
                     }
                     else
@@ -91,17 +94,19 @@ public class ProcessEquipmentInsulation
                         for (Insulation value : insulation)
                         {
                             if (value instanceof StaticInsulation insul)
-                            {   cold += insul.getCold();
-                                heat += insul.getHeat();
+                            {
+                                mapAdd(armorInsulation, "cold_insulators", insul.getCold());
+                                mapAdd(armorInsulation, "heat_insulators", insul.getHeat());
                             }
                             else if (value instanceof AdaptiveInsulation insul)
-                            {   cold += CSMath.blend(insul.getInsulation() * 0.75, 0, insul.getFactor(), -1, 1);
-                                heat += CSMath.blend(0, insul.getInsulation() * 0.75, insul.getFactor(), -1, 1);
+                            {
+                                mapAdd(armorInsulation, "cold_insulators", CSMath.blend(insul.getInsulation() * 0.75, 0, insul.getFactor(), -1, 1));
+                                mapAdd(armorInsulation, "heat_insulators", CSMath.blend(0, insul.getInsulation() * 0.75, insul.getFactor(), -1, 1));
                             }
                         }
 
                         // Used for tracking "fully_insulated" advancement
-                        if ((cold + heat) / 2 >= ItemInsulationManager.getInsulationSlots(armorStack))
+                        if ((armorInsulation.get("cold_insulators") + armorInsulation.get("heat_insulators")) / 2 >= ItemInsulationManager.getInsulationSlots(armorStack))
                         {   fullyInsulatedSlots++;
                         }
 
@@ -134,9 +139,8 @@ public class ProcessEquipmentInsulation
                                          .stream().filter(entry -> entry.attribute() == Attributes.ARMOR && entry.slot() == EquipmentSlotGroup.ARMOR)
                                          .map(entry -> entry.modifier().amount())
                                          .mapToDouble(Double::doubleValue).sum();
-                    cold += Math.min(armorAmount, 20);
-                    heat += Math.min(armorAmount, 20);
-
+                    mapAdd(armorInsulation, "cold_protection", Math.min(armorAmount, 20));
+                    mapAdd(armorInsulation, "heat_protection", Math.min(armorAmount, 20));
                 }
             }
 
@@ -147,13 +151,22 @@ public class ProcessEquipmentInsulation
                 for (Insulator insulator : ConfigSettings.INSULATING_CURIOS.get().get(curio.getItem()))
                 {
                     if (insulator.test(player, curio))
-                    {   cold += insulator.insulation().getCold();
-                        heat += insulator.insulation().getHeat();
+                    {
+                        mapAdd(armorInsulation, "cold_curios", insulator.insulation().getCold());
+                        mapAdd(armorInsulation, "heat_curios", insulator.insulation().getHeat());
                     }
                 }
             }
 
-            Temperature.addOrReplaceModifier(player, new ArmorInsulationTempModifier(cold, heat).tickRate(20).expires(20), Temperature.Trait.RATE, Placement.Duplicates.BY_CLASS);
+            InsulationTickEvent insulationEvent = new InsulationTickEvent(player, armorInsulation);
+            NeoForge.EVENT_BUS.post(insulationEvent);
+            if (!insulationEvent.isCanceled())
+            {
+                double cold = insulationEvent.getProperty("cold");
+                double heat = insulationEvent.getProperty("heat");
+
+                Temperature.addOrReplaceModifier(player, new ArmorInsulationTempModifier(cold, heat).tickRate(20).expires(20), Temperature.Trait.RATE, Placement.Duplicates.BY_CLASS);
+            }
 
             // Award advancement for full insulation
             if (fullyInsulatedSlots >= 4)
@@ -167,6 +180,11 @@ public class ProcessEquipmentInsulation
                 }
             }
         }
+    }
+
+    private static void mapAdd(Map<String, Double> map, String key, double value)
+    {
+        map.put(key, map.getOrDefault(key, 0d) + value);
     }
 
     /**
