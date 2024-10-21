@@ -13,13 +13,6 @@ public abstract class BlockTemp
 {
     private final Set<Block> validBlocks;
 
-    /**
-     * @param state is the {@link BlockState} of the block
-     * @param pos is the position of the block
-     * @param distance is the distance between the player and the block
-     * @return the temperature of the block. This is ADDED to the world temperature.
-     * Temperature is on the Minecraft scale, in which 0 is a snow biome and 2 is a desert (see {@link LavaBlockTemp} for an example)
-     */
     public abstract double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance);
 
     public boolean isValid(Level level, BlockPos pos, BlockState state)
