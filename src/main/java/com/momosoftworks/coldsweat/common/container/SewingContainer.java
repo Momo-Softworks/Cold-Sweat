@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.common.container;
 
 import com.mojang.datafixers.util.Pair;
+import com.momosoftworks.coldsweat.api.event.common.insulation.InsulateItemEvent;
 import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
 import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
@@ -34,6 +35,7 @@ import net.minecraft.world.item.ShearsItem;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -322,6 +324,11 @@ public class SewingContainer extends AbstractContainerMenu
 
     private boolean insulateArmorItem(ItemStack armorItem, ItemStack insulatorItem)
     {
+        InsulateItemEvent insulateEvent = new InsulateItemEvent(armorItem, insulatorItem, this.playerInventory.player);
+        MinecraftForge.EVENT_BUS.post(insulateEvent);
+        if (insulateEvent.isCanceled()) return false;
+        insulatorItem = insulateEvent.getInsulator();
+
         IInsulatableCap insulCap = ItemInsulationManager.getInsulationCap(armorItem).orElseThrow(() -> new IllegalStateException("Item does not have insulation capability"));
         ItemStack insulator = insulatorItem.copy();
         insulator.setCount(1);
