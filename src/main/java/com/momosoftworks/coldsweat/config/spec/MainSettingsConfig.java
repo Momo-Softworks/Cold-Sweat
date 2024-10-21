@@ -186,7 +186,7 @@ public class MainSettingsConfig
                          " armorunder:lining - Disables the temperature effects of armor linings from Armor Underwear",
                          " weather2:storm - Disables the temperature effects of storms & weather from Weather 2",
                          " curios:curios - Disables the temperature effects of equipped curios")
-                .defineListAllowEmpty("Disabled Temperature Modifiers", List.of(), o -> o instanceof String);
+                .defineListAllowEmpty(List.of("Disabled Temperature Modifiers"), () -> List.of(), o -> o instanceof String);
 
         BUILDER.pop();
 
