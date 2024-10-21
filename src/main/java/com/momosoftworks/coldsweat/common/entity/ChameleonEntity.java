@@ -187,6 +187,7 @@ public class ChameleonEntity extends AnimalEntity
                 if (!player.level.isClientSide)
                 {
                     ItemStack dropStack = stack.copy();
+                    dropStack.setCount(1);
                     ItemEntity dropped = player.drop(dropStack, true);
                     if (dropped != null)
                     {   dropped.getPersistentData().putUUID("Recipient", this.getUUID());
