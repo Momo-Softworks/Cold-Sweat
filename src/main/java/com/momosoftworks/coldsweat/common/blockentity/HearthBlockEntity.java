@@ -2,7 +2,7 @@ package com.momosoftworks.coldsweat.common.blockentity;
 
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.api.event.common.BlockStateChangedEvent;
+import com.momosoftworks.coldsweat.api.event.vanilla.BlockStateChangedEvent;
 import com.momosoftworks.coldsweat.api.temperature.modifier.BlockInsulationTempModifier;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;

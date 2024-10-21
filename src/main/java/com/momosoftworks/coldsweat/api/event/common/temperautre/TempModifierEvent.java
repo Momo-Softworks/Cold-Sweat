@@ -1,4 +1,4 @@
-package com.momosoftworks.coldsweat.api.event.common;
+package com.momosoftworks.coldsweat.api.event.common.temperautre;
 
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import net.minecraft.world.entity.LivingEntity;

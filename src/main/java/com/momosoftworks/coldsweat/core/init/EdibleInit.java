@@ -1,6 +1,6 @@
 package com.momosoftworks.coldsweat.core.init;
 
-import com.momosoftworks.coldsweat.api.event.core.EdiblesRegisterEvent;
+import com.momosoftworks.coldsweat.api.event.core.registry.EdiblesRegisterEvent;
 import com.momosoftworks.coldsweat.common.entity.data.edible.*;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerStartingEvent;
