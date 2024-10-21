@@ -1,6 +1,8 @@
 package com.momosoftworks.coldsweat.data.tag;
 
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.api.event.vanilla.ServerConfigsLoadedEvent;
+import com.momosoftworks.coldsweat.util.serialization.ListBuilder;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
@@ -9,7 +11,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
@@ -84,14 +85,16 @@ public class ModDimensionTags
         dimensionRegistry.holders().forEach(dimensionType ->
         {
             if (predicate.test(dimensionType.value()))
-            {   entries.add(dimensionType);
+            {
+                entries.add(dimensionType);
+                dimensionType.bindTags(ListBuilder.begin(dimensionType.tags().toList()).add(tag).build());
             }
         });
         holderSet.bind(new ArrayList<>(entries));
     }
 
     @SubscribeEvent
-    public static void onServerStart(ServerAboutToStartEvent event)
+    public static void onServerStart(ServerConfigsLoadedEvent event)
     {
         // Initialize custom vanilla tags for dimension types
         ModDimensionTags.initDynamicTags(event.getServer().registryAccess());
