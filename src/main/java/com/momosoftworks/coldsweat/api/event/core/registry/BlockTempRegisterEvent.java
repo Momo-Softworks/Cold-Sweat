@@ -1,4 +1,4 @@
-package com.momosoftworks.coldsweat.api.event.core;
+package com.momosoftworks.coldsweat.api.event.core.registry;
 
 import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;

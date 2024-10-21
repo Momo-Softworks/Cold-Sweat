@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.util.world;
 
 import com.mojang.datafixers.util.Pair;
-import com.momosoftworks.coldsweat.api.event.core.GatherDefaultTempModifiersEvent;
+import com.momosoftworks.coldsweat.api.event.core.init.GatherDefaultTempModifiersEvent;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Placement;

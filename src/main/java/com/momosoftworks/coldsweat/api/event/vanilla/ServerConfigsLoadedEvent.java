@@ -1,4 +1,4 @@
-package com.momosoftworks.coldsweat.api.event.core;
+package com.momosoftworks.coldsweat.api.event.vanilla;
 
 import net.minecraft.server.MinecraftServer;
 import net.neoforged.bus.api.Event;

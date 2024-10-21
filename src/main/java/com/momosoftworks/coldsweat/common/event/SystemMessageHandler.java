@@ -1,6 +1,6 @@
 package com.momosoftworks.coldsweat.common.event;
 
-import com.momosoftworks.coldsweat.api.event.common.ChatComponentClickedEvent;
+import com.momosoftworks.coldsweat.api.event.vanilla.ChatComponentClickedEvent;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;

@@ -1,6 +1,6 @@
 package com.momosoftworks.coldsweat.core.event;
 
-import com.momosoftworks.coldsweat.api.event.core.EnableTemperatureEvent;
+import com.momosoftworks.coldsweat.api.event.core.init.EnableTemperatureEvent;
 import com.momosoftworks.coldsweat.core.init.ModAttributes;
 import com.momosoftworks.coldsweat.core.init.ModEntities;
 import net.minecraft.world.entity.EntityType;

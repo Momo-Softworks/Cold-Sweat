@@ -1,4 +1,4 @@
-package com.momosoftworks.coldsweat.api.event.core;
+package com.momosoftworks.coldsweat.api.event.core.registry;
 
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;

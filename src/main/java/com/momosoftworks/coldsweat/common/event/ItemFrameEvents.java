@@ -1,6 +1,6 @@
 package com.momosoftworks.coldsweat.common.event;
 
-import com.momosoftworks.coldsweat.api.event.common.EntityPickEvent;
+import com.momosoftworks.coldsweat.api.event.vanilla.EntityPickEvent;
 import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;

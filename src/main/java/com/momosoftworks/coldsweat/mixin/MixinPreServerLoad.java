@@ -1,6 +1,6 @@
 package com.momosoftworks.coldsweat.mixin;
 
-import com.momosoftworks.coldsweat.api.event.core.ServerConfigsLoadedEvent;
+import com.momosoftworks.coldsweat.api.event.vanilla.ServerConfigsLoadedEvent;
 import net.minecraft.server.MinecraftServer;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;

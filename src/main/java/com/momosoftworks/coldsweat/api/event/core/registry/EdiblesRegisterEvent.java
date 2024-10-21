@@ -1,4 +1,4 @@
-package com.momosoftworks.coldsweat.api.event.core;
+package com.momosoftworks.coldsweat.api.event.core.registry;
 
 import com.momosoftworks.coldsweat.common.entity.data.edible.ChameleonEdibles;
 import com.momosoftworks.coldsweat.common.entity.data.edible.Edible;

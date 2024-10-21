@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.api.temperature.modifier;
 
-import com.momosoftworks.coldsweat.api.event.common.TempModifierEvent;
-import com.momosoftworks.coldsweat.api.event.core.TempModifierRegisterEvent;
+import com.momosoftworks.coldsweat.api.event.common.temperautre.TempModifierEvent;
+import com.momosoftworks.coldsweat.api.event.core.registry.TempModifierRegisterEvent;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.core.init.TempModifierInit;
