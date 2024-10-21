@@ -4,16 +4,12 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
-import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -26,17 +22,24 @@ import net.minecraft.world.level.material.FluidState;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-public record BlockRequirement(Optional<List<Either<TagKey<Block>, Block>>> blocks, Optional<TagKey<Block>> tag, Optional<StateRequirement> state, Optional<NbtRequirement> nbt)
+public record BlockRequirement(Optional<List<Either<TagKey<Block>, Block>>> blocks, Optional<StateRequirement> state,
+                               Optional<NbtRequirement> nbt, Optional<Direction> sturdyFace,
+                               Optional<Boolean> withinWorldBounds, Optional<Boolean> replaceable,
+                               boolean negate)
 {
-    public static final BlockRequirement NONE = new BlockRequirement(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
+    public static final BlockRequirement NONE = new BlockRequirement(Optional.empty(), Optional.empty(), Optional.empty(),
+                                                                     Optional.empty(), Optional.empty(), Optional.empty(),
+                                                                     false);
 
     public static final Codec<BlockRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ConfigHelper.tagOrBuiltinCodec(Registries.BLOCK, BuiltInRegistries.BLOCK).listOf().optionalFieldOf("blocks").forGetter(predicate -> predicate.blocks),
-            TagKey.codec(Registries.BLOCK).optionalFieldOf("tag").forGetter(predicate -> predicate.tag),
             StateRequirement.CODEC.optionalFieldOf("state").forGetter(predicate -> predicate.state),
-            NbtRequirement.CODEC.optionalFieldOf("nbt").forGetter(predicate -> predicate.nbt)
+            NbtRequirement.CODEC.optionalFieldOf("nbt").forGetter(predicate -> predicate.nbt),
+            Direction.CODEC.optionalFieldOf("has_sturdy_face").forGetter(predicate -> predicate.sturdyFace),
+            Codec.BOOL.optionalFieldOf("within_world_bounds").forGetter(predicate -> predicate.withinWorldBounds),
+            Codec.BOOL.optionalFieldOf("replaceable").forGetter(predicate -> predicate.replaceable),
+            Codec.BOOL.optionalFieldOf("negate", false).forGetter(predicate -> predicate.negate)
     ).apply(instance, BlockRequirement::new));
 
     public boolean test(Level level, BlockPos pos)
@@ -47,22 +50,28 @@ public record BlockRequirement(Optional<List<Either<TagKey<Block>, Block>>> bloc
         else
         {
             BlockState blockstate = level.getBlockState(pos);
-            if (this.tag.isPresent() && !blockstate.is(this.tag.get()))
-            {   return false;
-            }
-            else if (this.blocks.isPresent() && !this.blocks.get().contains(Holder.direct(blockstate.getBlock())))
-            {   return false;
+            if (this.blocks.isPresent() && this.blocks.get().stream().noneMatch(either -> either.map(blockstate::is, blockstate::is)))
+            {   return false ^ this.negate;
             }
             else if (this.state.isPresent() && !this.state.get().matches(blockstate))
-            {   return false;
+            {   return false ^ this.negate;
+            }
+            else if (this.nbt.isPresent())
+            {
+                BlockEntity blockentity = level.getBlockEntity(pos);
+                return (blockentity != null && this.nbt.get().test(blockentity.saveWithFullMetadata(level.registryAccess()))) ^ this.negate;
+            }
+            else if (this.sturdyFace.isPresent())
+            {   return blockstate.isFaceSturdy(level, pos, this.sturdyFace.get()) ^ this.negate;
+            }
+            else if (this.withinWorldBounds.isPresent())
+            {   return level.getWorldBorder().isWithinBounds(pos) ^ this.negate;
+            }
+            else if (this.replaceable.isPresent())
+            {   return blockstate.isAir() || blockstate.canBeReplaced() ^ this.negate;
             }
             else
-            {   if (this.nbt.isPresent())
-                {   BlockEntity blockentity = level.getBlockEntity(pos);
-                    return blockentity != null && this.nbt.get().test(blockentity.saveWithFullMetadata(level.registryAccess()));
-                }
-
-                return true;
+            {   return true ^ this.negate;
             }
         }
     }
@@ -90,13 +99,22 @@ public record BlockRequirement(Optional<List<Either<TagKey<Block>, Block>>> bloc
         if (!blocks.equals(that.blocks))
         {   return false;
         }
-        if (!tag.equals(that.tag))
-        {   return false;
-        }
         if (!state.equals(that.state))
         {   return false;
         }
-        return nbt.equals(that.nbt);
+        if (!nbt.equals(that.nbt))
+        {   return false;
+        }
+        if (!sturdyFace.equals(that.sturdyFace))
+        {   return false;
+        }
+        if (!withinWorldBounds.equals(that.withinWorldBounds))
+        {   return false;
+        }
+        if (!replaceable.equals(that.replaceable))
+        {   return false;
+        }
+        return negate == that.negate;
     }
 
     public record StateRequirement(List<Either<StateProperty, RangedProperty>> properties)
@@ -258,17 +276,20 @@ public record BlockRequirement(Optional<List<Either<TagKey<Block>, Block>>> bloc
         }
     }
 
-    /*@Override
+    @Override
     public String toString()
     {
         StringBuilder builder = new StringBuilder();
         builder.append("BlockRequirement{");
         blocks.ifPresent(blocks -> builder.append("blocks=").append(blocks));
-        tag.ifPresent(tag -> builder.append("tag=").append(tag));
         state.ifPresent(state -> builder.append("state=").append(state));
         nbt.ifPresent(nbt -> builder.append("nbt=").append(nbt));
+        sturdyFace.ifPresent(face -> builder.append("has_sturdy_face=").append(face));
+        withinWorldBounds.ifPresent(bounds -> builder.append("within_world_bounds=").append(bounds));
+        replaceable.ifPresent(replaceable -> builder.append("replaceable=").append(replaceable));
+        builder.append("negate=").append(negate);
         builder.append("}");
 
         return builder.toString();
-    }*/
+    }
 }
