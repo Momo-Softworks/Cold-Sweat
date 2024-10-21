@@ -8,6 +8,8 @@ import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.fluid.FluidState;
+import net.minecraft.item.DirectionalPlaceContext;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
@@ -17,6 +19,7 @@ import net.minecraft.state.StateHolder;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ITag;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
@@ -30,25 +33,39 @@ import java.util.stream.Collectors;
 public class BlockRequirement
 {
     public final Optional<List<Either<ITag<Block>, Block>>> blocks;
-    public final Optional<ITag<Block>> tag;
     public final Optional<StateRequirement> state;
     public final Optional<NbtRequirement> nbt;
+    public final Optional<Direction> sturdyFace;
+    public final Optional<Boolean> withinWorldBounds;
+    public final Optional<Boolean> replaceable;
+    public final boolean negate;
 
-    public BlockRequirement(Optional<List<Either<ITag<Block>, Block>>> blocks, Optional<ITag<Block>> tag, Optional<StateRequirement> state, Optional<NbtRequirement> nbt)
+    public BlockRequirement(Optional<List<Either<ITag<Block>, Block>>> blocks, Optional<StateRequirement> state,
+                            Optional<NbtRequirement> nbt, Optional<Direction> sturdyFace,
+                            Optional<Boolean> withinWorldBounds, Optional<Boolean> replaceable,
+                            boolean negate)
     {
         this.blocks = blocks;
-        this.tag = tag;
         this.state = state;
         this.nbt = nbt;
+        this.sturdyFace = sturdyFace;
+        this.withinWorldBounds = withinWorldBounds;
+        this.replaceable = replaceable;
+        this.negate = negate;
     }
 
-    public static final BlockRequirement NONE = new BlockRequirement(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
+    public static final BlockRequirement NONE = new BlockRequirement(Optional.empty(), Optional.empty(), Optional.empty(),
+                                                                     Optional.empty(), Optional.empty(), Optional.empty(),
+                                                                     false);
 
     public static final Codec<BlockRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ConfigHelper.tagOrBuiltinCodec(Registry.BLOCK_REGISTRY, Registry.BLOCK).listOf().optionalFieldOf("blocks").forGetter(predicate -> predicate.blocks),
-            ITag.codec(BlockTags::getAllTags).optionalFieldOf("tag").forGetter(predicate -> predicate.tag),
             StateRequirement.CODEC.optionalFieldOf("state").forGetter(predicate -> predicate.state),
-            NbtRequirement.CODEC.optionalFieldOf("nbt").forGetter(predicate -> predicate.nbt)
+            NbtRequirement.CODEC.optionalFieldOf("nbt").forGetter(predicate -> predicate.nbt),
+            Codec.STRING.xmap(Direction::byName, Direction::getName).optionalFieldOf("has_sturdy_face").forGetter(predicate -> predicate.sturdyFace),
+            Codec.BOOL.optionalFieldOf("within_world_bounds").forGetter(predicate -> predicate.withinWorldBounds),
+            Codec.BOOL.optionalFieldOf("replaceable").forGetter(predicate -> predicate.replaceable),
+            Codec.BOOL.optionalFieldOf("negate", false).forGetter(predicate -> predicate.negate)
     ).apply(instance, BlockRequirement::new));
 
     public boolean test(World pLevel, BlockPos pPos)
@@ -59,22 +76,28 @@ public class BlockRequirement
         else
         {
             BlockState blockstate = pLevel.getBlockState(pPos);
-            if (this.tag.isPresent() && !blockstate.is(this.tag.get()))
-            {   return false;
-            }
-            else if (this.blocks.isPresent() && !this.blocks.get().contains(blockstate.getBlock()))
-            {   return false;
+            if (this.blocks.isPresent() && this.blocks.get().stream().noneMatch(either -> either.map(blockstate::is, blockstate::is)))
+            {   return false ^ this.negate;
             }
             else if (this.state.isPresent() && !this.state.get().matches(blockstate))
-            {   return false;
+            {   return false ^ this.negate;
+            }
+            else if (this.nbt.isPresent())
+            {
+                TileEntity blockentity = pLevel.getBlockEntity(pPos);
+                return (blockentity != null && this.nbt.get().test(blockentity.save(new CompoundNBT()))) ^ this.negate;
+            }
+            else if (this.sturdyFace.isPresent())
+            {   return blockstate.isFaceSturdy(pLevel, pPos, this.sturdyFace.get()) ^ this.negate;
+            }
+            else if (this.withinWorldBounds.isPresent())
+            {   return pLevel.getWorldBorder().isWithinBounds(pPos) ^ this.negate;
+            }
+            else if (this.replaceable.isPresent())
+            {   return blockstate.isAir() || blockstate.canBeReplaced(new DirectionalPlaceContext(pLevel, pPos, Direction.DOWN, ItemStack.EMPTY, Direction.UP)) ^ this.negate;
             }
             else
-            {   if (this.nbt.isPresent())
-                {   TileEntity blockentity = pLevel.getBlockEntity(pPos);
-                    return blockentity != null && this.nbt.get().test(blockentity.save(new CompoundNBT()));
-                }
-
-                return true;
+            {   return true ^ this.negate;
             }
         }
     }
@@ -96,9 +119,12 @@ public class BlockRequirement
                                    })
                                    .collect(Collectors.toList())));
         });
-        tag.ifPresent(tag -> compound.putString("tag", BlockTags.getAllTags().getId(tag).toString()));
         state.ifPresent(state -> compound.put("state", state.serialize()));
         nbt.ifPresent(nbt -> compound.put("nbt", nbt.serialize()));
+        sturdyFace.ifPresent(face -> compound.putString("has_sturdy_face", face.getName()));
+        withinWorldBounds.ifPresent(bounds -> compound.putBoolean("within_world_bounds", bounds));
+        replaceable.ifPresent(replaceable -> compound.putBoolean("replaceable", replaceable));
+        compound.putBoolean("negate", negate);
 
         return compound;
     }
@@ -115,11 +141,14 @@ public class BlockRequirement
             {   return Either.<ITag<Block>, Block>right(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(string)));
             }
         }).collect(Collectors.toList())) : Optional.empty();
-        Optional<ITag<Block>> tagKey = tag.contains("tag") ? Optional.of(BlockTags.getAllTags().getTag(new ResourceLocation(tag.getString("tag")))) : Optional.empty();
         Optional<StateRequirement> state = tag.contains("state") ? Optional.of(StateRequirement.deserialize(tag.getCompound("state"))) : Optional.empty();
         Optional<NbtRequirement> nbt = tag.contains("nbt") ? Optional.of(NbtRequirement.deserialize(tag.getCompound("nbt"))) : Optional.empty();
+        Optional<Direction> sturdyFace = tag.contains("has_sturdy_face") ? Optional.of(Direction.byName(tag.getString("has_sturdy_face"))) : Optional.empty();
+        Optional<Boolean> withinWorldBounds = tag.contains("within_world_bounds") ? Optional.of(tag.getBoolean("within_world_bounds")) : Optional.empty();
+        Optional<Boolean> replaceable = tag.contains("replaceable") ? Optional.of(tag.getBoolean("replaceable")) : Optional.empty();
+        boolean negate = tag.getBoolean("negate");
 
-        return new BlockRequirement(blocks, tagKey, state, nbt);
+        return new BlockRequirement(blocks, state, nbt, sturdyFace, withinWorldBounds, replaceable, negate);
     }
 
     @Override
@@ -137,13 +166,22 @@ public class BlockRequirement
         if (!blocks.equals(that.blocks))
         {   return false;
         }
-        if (!tag.equals(that.tag))
-        {   return false;
-        }
         if (!state.equals(that.state))
         {   return false;
         }
-        return nbt.equals(that.nbt);
+        if (!nbt.equals(that.nbt))
+        {   return false;
+        }
+        if (!sturdyFace.equals(that.sturdyFace))
+        {   return false;
+        }
+        if (!withinWorldBounds.equals(that.withinWorldBounds))
+        {   return false;
+        }
+        if (!replaceable.equals(that.replaceable))
+        {   return false;
+        }
+        return negate == that.negate;
     }
 
     public static class StateRequirement
@@ -358,9 +396,12 @@ public class BlockRequirement
         StringBuilder builder = new StringBuilder();
         builder.append("BlockRequirement{");
         blocks.ifPresent(blocks -> builder.append("blocks=").append(blocks));
-        tag.ifPresent(tag -> builder.append("tag=").append(tag));
         state.ifPresent(state -> builder.append("state=").append(state));
         nbt.ifPresent(nbt -> builder.append("nbt=").append(nbt));
+        sturdyFace.ifPresent(face -> builder.append("has_sturdy_face=").append(face));
+        withinWorldBounds.ifPresent(bounds -> builder.append("within_world_bounds=").append(bounds));
+        replaceable.ifPresent(replaceable -> builder.append("replaceable=").append(replaceable));
+        builder.append("negate=").append(negate);
         builder.append("}");
 
         return builder.toString();
