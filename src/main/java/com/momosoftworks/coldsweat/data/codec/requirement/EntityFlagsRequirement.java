@@ -1,10 +1,12 @@
 package com.momosoftworks.coldsweat.data.codec.requirement;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.NBTDynamicOps;
 
 import java.util.Optional;
 
@@ -52,29 +54,11 @@ public class EntityFlagsRequirement
     }
 
     public CompoundNBT serialize()
-    {
-        CompoundNBT tag = new CompoundNBT();
-        onFire.ifPresent(value -> tag.putBoolean("is_on_fire", value));
-        sneaking.ifPresent(value -> tag.putBoolean("is_sneaking", value));
-        sprinting.ifPresent(value -> tag.putBoolean("is_sprinting", value));
-        swimming.ifPresent(value -> tag.putBoolean("is_swimming", value));
-        invisible.ifPresent(value -> tag.putBoolean("is_invisible", value));
-        glowing.ifPresent(value -> tag.putBoolean("is_glowing", value));
-        baby.ifPresent(value -> tag.putBoolean("is_baby", value));
-        return tag;
+    {   return (CompoundNBT) CODEC.encodeStart(NBTDynamicOps.INSTANCE, this).result().orElseGet(CompoundNBT::new);
     }
 
     public static EntityFlagsRequirement deserialize(CompoundNBT tag)
-    {
-        return new EntityFlagsRequirement(
-            tag.contains("is_on_fire") ? Optional.of(tag.getBoolean("is_on_fire")) : Optional.empty(),
-            tag.contains("is_sneaking") ? Optional.of(tag.getBoolean("is_sneaking")) : Optional.empty(),
-            tag.contains("is_sprinting") ? Optional.of(tag.getBoolean("is_sprinting")) : Optional.empty(),
-            tag.contains("is_swimming") ? Optional.of(tag.getBoolean("is_swimming")) : Optional.empty(),
-            tag.contains("is_invisible") ? Optional.of(tag.getBoolean("is_invisible")) : Optional.empty(),
-            tag.contains("is_glowing") ? Optional.of(tag.getBoolean("is_glowing")) : Optional.empty(),
-            tag.contains("is_baby") ? Optional.of(tag.getBoolean("is_baby")) : Optional.empty()
-        );
+    {   return CODEC.decode(NBTDynamicOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize EntityFlagsRequirement")).getFirst();
     }
 
     @Override
@@ -100,16 +84,6 @@ public class EntityFlagsRequirement
 
     @Override
     public String toString()
-    {
-        StringBuilder builder = new StringBuilder();
-        onFire.ifPresent(value -> builder.append("is_on_fire=").append(value));
-        sneaking.ifPresent(value -> builder.append(", is_sneaking=").append(value));
-        sprinting.ifPresent(value -> builder.append(", is_sprinting=").append(value));
-        swimming.ifPresent(value -> builder.append(", is_swimming=").append(value));
-        invisible.ifPresent(value -> builder.append(", is_invisible=").append(value));
-        glowing.ifPresent(value -> builder.append(", is_glowing=").append(value));
-        baby.ifPresent(value -> builder.append(", is_baby=").append(value));
-
-        return builder.toString();
+    {   return CODEC.encodeStart(JsonOps.INSTANCE, this).result().map(Object::toString).orElse("serialize_failed");
     }
 }

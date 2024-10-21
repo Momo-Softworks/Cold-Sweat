@@ -1,14 +1,14 @@
 package com.momosoftworks.coldsweat.data.codec.requirement;
 
-import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.data.codec.util.ResourceKey;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.NBTDynamicOps;
 import net.minecraft.util.RegistryKey;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.registry.Registry;
@@ -103,32 +103,11 @@ public class LocationRequirement
     }
 
     public CompoundNBT serialize()
-    {
-        CompoundNBT tag = new CompoundNBT();
-        x.ifPresent(value -> tag.putInt("x", value));
-        y.ifPresent(value -> tag.putInt("y", value));
-        z.ifPresent(value -> tag.putInt("z", value));
-        biome.ifPresent(value -> tag.putString("biome", value.getRegistryName().toString()));
-        structure.ifPresent(value -> tag.putString("structure", value.location().toString()));
-        dimension.ifPresent(value -> tag.putString("dimension", value.location().toString()));
-        light.ifPresent(bounds -> tag.put("light", bounds.serialize()));
-        block.ifPresent(predicate -> tag.put("block", predicate.serialize()));
-        fluid.ifPresent(predicate -> tag.put("fluid", predicate.serialize()));
-        return tag;
+    {   return (CompoundNBT) CODEC.encodeStart(NBTDynamicOps.INSTANCE, this).result().orElseGet(CompoundNBT::new);
     }
 
     public static LocationRequirement deserialize(CompoundNBT tag)
-    {
-        Optional<Integer> x = tag.contains("x") ? Optional.of(tag.getInt("x")) : Optional.empty();
-        Optional<Integer> y = tag.contains("y") ? Optional.of(tag.getInt("y")) : Optional.empty();
-        Optional<Integer> z = tag.contains("z") ? Optional.of(tag.getInt("z")) : Optional.empty();
-        Optional<RegistryKey<Biome>> biome = tag.contains("biome") ? Optional.of(RegistryKey.create(Registry.BIOME_REGISTRY, new ResourceLocation(tag.getString("biome"))) ) : Optional.empty();
-        Optional<RegistryKey<Structure<?>>> structure = tag.contains("structure") ? Optional.of(RegistryKey.create(Registry.STRUCTURE_FEATURE_REGISTRY, new ResourceLocation(tag.getString("structure"))) ) : Optional.empty();
-        Optional<RegistryKey<World>> dimension = tag.contains("dimension") ? Optional.of(RegistryKey.create(Registry.DIMENSION_REGISTRY, new ResourceLocation(tag.getString("dimension"))) ) : Optional.empty();
-        Optional<IntegerBounds> light = tag.contains("light") ? Optional.of(IntegerBounds.deserialize(tag.getCompound("light"))) : Optional.empty();
-        Optional<BlockRequirement> block = tag.contains("block") ? Optional.of(BlockRequirement.deserialize(tag.getCompound("block"))) : Optional.empty();
-        Optional<FluidRequirement> fluid = tag.contains("fluid") ? Optional.of(FluidRequirement.deserialize(tag.getCompound("fluid"))) : Optional.empty();
-        return new LocationRequirement(x, y, z, biome, structure, dimension, light, block, fluid);
+    {   return CODEC.decode(NBTDynamicOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize LocationRequirement")).getFirst();
     }
 
     @Override
@@ -156,20 +135,6 @@ public class LocationRequirement
 
     @Override
     public String toString()
-    {
-        StringBuilder builder = new StringBuilder();
-        builder.append("LocationRequirement{");
-        x.ifPresent(value -> builder.append("x=").append(value).append(", "));
-        y.ifPresent(value -> builder.append("y=").append(value).append(", "));
-        z.ifPresent(value -> builder.append("z=").append(value).append(", "));
-        biome.ifPresent(value -> builder.append("biome=").append(value).append(", "));
-        structure.ifPresent(value -> builder.append("structure=").append(value).append(", "));
-        dimension.ifPresent(value -> builder.append("dimension=").append(value).append(", "));
-        light.ifPresent(value -> builder.append("light=").append(value).append(", "));
-        block.ifPresent(value -> builder.append("block=").append(value).append(", "));
-        fluid.ifPresent(value -> builder.append("fluid=").append(value).append(", "));
-        builder.append("}");
-
-        return builder.toString();
+    {   return CODEC.encodeStart(JsonOps.INSTANCE, this).result().map(Object::toString).orElse("serialize_failed");
     }
 }

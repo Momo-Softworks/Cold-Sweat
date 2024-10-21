@@ -2,22 +2,18 @@ package com.momosoftworks.coldsweat.data.codec.requirement;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tags.BlockTags;
+import net.minecraft.nbt.NBTDynamicOps;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ITag;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class FluidRequirement
 {
@@ -66,22 +62,11 @@ public class FluidRequirement
     }
 
     public CompoundNBT serialize()
-    {
-        CompoundNBT lTag = new CompoundNBT();
-        this.fluids.ifPresent(fluids -> lTag.put("fluids", NBTHelper.listTagOf(fluids.stream().map(ForgeRegistries.FLUIDS::getKey).map(Object::toString).collect(Collectors.toList()))));
-        this.tag.ifPresent(tag -> lTag.putString("tag", FluidTags.getAllTags().getId(tag).toString()));
-        this.state.ifPresent(state -> lTag.put("state", state.serialize()));
-        this.nbt.ifPresent(nbt -> lTag.put("nbt", nbt.serialize()));
-        return lTag;
+    {   return (CompoundNBT) CODEC.encodeStart(NBTDynamicOps.INSTANCE, this).result().orElseGet(CompoundNBT::new);
     }
 
-    public static FluidRequirement deserialize(CompoundNBT pTag)
-    {
-        Optional<List<Fluid>> lFluids = pTag.contains("fluids") ? Optional.of(pTag.getList("fluids", 8).stream().map(tag -> ForgeRegistries.FLUIDS.getValue(new ResourceLocation(tag.getAsString()))).collect(Collectors.toList())) : Optional.empty();
-        Optional<ITag<Fluid>> lTag = pTag.contains("tag") ? Optional.of(FluidTags.getAllTags().getTag(new ResourceLocation(pTag.getString("tag")))) : Optional.empty();
-        Optional<BlockRequirement.StateRequirement> lState = pTag.contains("state") ? Optional.of(BlockRequirement.StateRequirement.deserialize(pTag.getCompound("state"))) : Optional.empty();
-        Optional<NbtRequirement> lNbt = pTag.contains("nbt") ? Optional.of(NbtRequirement.deserialize(pTag.getCompound("nbt"))) : Optional.empty();
-        return new FluidRequirement(lFluids, lTag, lState, lNbt);
+    public static FluidRequirement deserialize(CompoundNBT tag)
+    {   return CODEC.decode(NBTDynamicOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize FluidRequirement")).getFirst();
     }
 
     @Override

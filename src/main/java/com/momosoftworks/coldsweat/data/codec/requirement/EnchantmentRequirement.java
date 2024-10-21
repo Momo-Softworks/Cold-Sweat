@@ -1,13 +1,13 @@
 package com.momosoftworks.coldsweat.data.codec.requirement;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.NBTDynamicOps;
 import net.minecraft.util.registry.Registry;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Map;
 import java.util.Optional;
@@ -44,18 +44,11 @@ public class EnchantmentRequirement
     }
 
     public CompoundNBT serialize()
-    {
-        CompoundNBT tag = new CompoundNBT();
-        tag.putString("enchantment", ForgeRegistries.ENCHANTMENTS.getKey(enchantment).toString());
-        level.ifPresent(bounds -> tag.put("level", bounds.serialize()));
-        return tag;
+    {   return (CompoundNBT) CODEC.encodeStart(NBTDynamicOps.INSTANCE, this).result().orElseGet(CompoundNBT::new);
     }
 
     public static EnchantmentRequirement deserialize(CompoundNBT tag)
-    {
-        Enchantment enchantment = ForgeRegistries.ENCHANTMENTS.getValue(new ResourceLocation(tag.getString("enchantment")));
-        IntegerBounds level = tag.contains("level") ? IntegerBounds.deserialize(tag.getCompound("level")) : null;
-        return new EnchantmentRequirement(enchantment, Optional.ofNullable(level));
+    {   return CODEC.decode(NBTDynamicOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize EnchantmentRequirement")).getFirst();
     }
 
     @Override
@@ -78,11 +71,6 @@ public class EnchantmentRequirement
 
     @Override
     public String toString()
-    {
-        StringBuilder builder = new StringBuilder();
-        builder.append(ForgeRegistries.ENCHANTMENTS.getKey(enchantment).toString());
-        level.ifPresent(bounds -> builder.append(bounds.toString()));
-
-        return builder.toString();
+    {   return CODEC.encodeStart(JsonOps.INSTANCE, this).result().map(Object::toString).orElse("serialize_failed");
     }
 }

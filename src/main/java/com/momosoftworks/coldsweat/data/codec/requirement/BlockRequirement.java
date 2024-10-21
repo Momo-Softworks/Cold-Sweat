@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.data.codec.requirement;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
@@ -12,6 +13,7 @@ import net.minecraft.item.DirectionalPlaceContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.NBTDynamicOps;
 import net.minecraft.nbt.StringNBT;
 import net.minecraft.state.Property;
 import net.minecraft.state.StateContainer;
@@ -28,7 +30,6 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class BlockRequirement
 {
@@ -103,52 +104,11 @@ public class BlockRequirement
     }
 
     public CompoundNBT serialize()
-    {   CompoundNBT compound = new CompoundNBT();
-
-        blocks.ifPresent(blocks ->
-        {
-            compound.put("blocks", NBTHelper.listTagOf(blocks.stream().map(either ->
-                                   {
-                                       return StringNBT.valueOf(either.map(
-                                              tag ->
-                                              {    return "#" + BlockTags.getAllTags().getId(tag);
-                                              },
-                                              block ->
-                                              {    return ForgeRegistries.BLOCKS.getKey(block).toString();
-                                              }));
-                                   })
-                                   .collect(Collectors.toList())));
-        });
-        state.ifPresent(state -> compound.put("state", state.serialize()));
-        nbt.ifPresent(nbt -> compound.put("nbt", nbt.serialize()));
-        sturdyFace.ifPresent(face -> compound.putString("has_sturdy_face", face.getName()));
-        withinWorldBounds.ifPresent(bounds -> compound.putBoolean("within_world_bounds", bounds));
-        replaceable.ifPresent(replaceable -> compound.putBoolean("replaceable", replaceable));
-        compound.putBoolean("negate", negate);
-
-        return compound;
+    {   return (CompoundNBT) CODEC.encodeStart(NBTDynamicOps.INSTANCE, this).result().orElseGet(CompoundNBT::new);
     }
 
     public static BlockRequirement deserialize(CompoundNBT tag)
-    {
-        Optional<List<Either<ITag<Block>, Block>>> blocks = tag.contains("blocks") ? Optional.of(tag.getList("blocks", 8).stream().map(tg ->
-        {
-            String string = tg.getAsString();
-            if (string.startsWith("#"))
-            {   return Either.<ITag<Block>, Block>left(BlockTags.getAllTags().getTag(new ResourceLocation(string.substring(1))));
-            }
-            else
-            {   return Either.<ITag<Block>, Block>right(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(string)));
-            }
-        }).collect(Collectors.toList())) : Optional.empty();
-        Optional<StateRequirement> state = tag.contains("state") ? Optional.of(StateRequirement.deserialize(tag.getCompound("state"))) : Optional.empty();
-        Optional<NbtRequirement> nbt = tag.contains("nbt") ? Optional.of(NbtRequirement.deserialize(tag.getCompound("nbt"))) : Optional.empty();
-        Optional<Direction> sturdyFace = tag.contains("has_sturdy_face") ? Optional.of(Direction.byName(tag.getString("has_sturdy_face"))) : Optional.empty();
-        Optional<Boolean> withinWorldBounds = tag.contains("within_world_bounds") ? Optional.of(tag.getBoolean("within_world_bounds")) : Optional.empty();
-        Optional<Boolean> replaceable = tag.contains("replaceable") ? Optional.of(tag.getBoolean("replaceable")) : Optional.empty();
-        boolean negate = tag.getBoolean("negate");
-
-        return new BlockRequirement(blocks, state, nbt, sturdyFace, withinWorldBounds, replaceable, negate);
+    {   return CODEC.decode(NBTDynamicOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize BlockRequirement")).getFirst();
     }
 
     @Override
@@ -197,27 +157,11 @@ public class BlockRequirement
         ).apply(instance, StateRequirement::new));
 
         public CompoundNBT serialize()
-        {   CompoundNBT compound = new CompoundNBT();
-            ListNBT list = new ListNBT();
-            this.properties.forEach(property -> list.add(property.map(
-                    StateProperty::serialize,
-                    RangedProperty::serialize)));
-            compound.put("properties", list);
-            return compound;
+        {   return (CompoundNBT) CODEC.encodeStart(NBTDynamicOps.INSTANCE, this).result().orElseGet(CompoundNBT::new);
         }
 
         public static StateRequirement deserialize(CompoundNBT tag)
-        {
-            List<Either<StateProperty, RangedProperty>> properties = NBTHelper.listTagOf(tag.getList("properties", 10)).stream().map(tg -> {
-                CompoundNBT compound = (CompoundNBT) tg;
-                if (compound.contains("value"))
-                {   return Either.<StateProperty, RangedProperty>left(StateProperty.deserialize(compound));
-                }
-                else
-                {   return Either.<StateProperty, RangedProperty>right(RangedProperty.deserialize(compound));
-                }
-            }).collect(Collectors.toList());
-            return new StateRequirement(properties);
+        {   return CODEC.decode(NBTDynamicOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize BlockRequirement")).getFirst();
         }
 
         public boolean matches(BlockState pState)
@@ -273,14 +217,11 @@ public class BlockRequirement
         ).apply(instance, StateProperty::new));
 
         public CompoundNBT serialize()
-        {   CompoundNBT compound = new CompoundNBT();
-            compound.putString("name", this.name);
-            compound.putString("value", this.value);
-            return compound;
+        {   return (CompoundNBT) CODEC.encodeStart(NBTDynamicOps.INSTANCE, this).result().orElseGet(CompoundNBT::new);
         }
 
         public static StateProperty deserialize(CompoundNBT tag)
-        {   return new StateProperty(tag.getString("name"), tag.getString("value"));
+        {   return CODEC.decode(NBTDynamicOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize BlockRequirement")).getFirst();
         }
 
         public <S extends StateHolder<?, S>> boolean match(StateContainer<?, S> pProperties, S pPropertyToMatch)
@@ -332,15 +273,11 @@ public class BlockRequirement
         ).apply(instance, RangedProperty::new));
 
         public CompoundNBT serialize()
-        {   CompoundNBT compound = new CompoundNBT();
-            compound.putString("name", this.name);
-            compound.putString("min", this.min);
-            compound.putString("max", this.max);
-            return compound;
+        {   return (CompoundNBT) CODEC.encodeStart(NBTDynamicOps.INSTANCE, this).result().orElseGet(CompoundNBT::new);
         }
 
         public static RangedProperty deserialize(CompoundNBT tag)
-        {   return new RangedProperty(tag.getString("name"), tag.getString("min"), tag.getString("max"));
+        {   return CODEC.decode(NBTDynamicOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize BlockRequirement")).getFirst();
         }
 
         public <S extends StateHolder<?, S>> boolean match(StateContainer<?, S> pProperties, S pTargetProperty)
@@ -392,18 +329,6 @@ public class BlockRequirement
 
     @Override
     public String toString()
-    {
-        StringBuilder builder = new StringBuilder();
-        builder.append("BlockRequirement{");
-        blocks.ifPresent(blocks -> builder.append("blocks=").append(blocks));
-        state.ifPresent(state -> builder.append("state=").append(state));
-        nbt.ifPresent(nbt -> builder.append("nbt=").append(nbt));
-        sturdyFace.ifPresent(face -> builder.append("has_sturdy_face=").append(face));
-        withinWorldBounds.ifPresent(bounds -> builder.append("within_world_bounds=").append(bounds));
-        replaceable.ifPresent(replaceable -> builder.append("replaceable=").append(replaceable));
-        builder.append("negate=").append(negate);
-        builder.append("}");
-
-        return builder.toString();
+    {   return CODEC.encodeStart(JsonOps.INSTANCE, this).result().map(Object::toString).orElse("serialize_failed");
     }
 }

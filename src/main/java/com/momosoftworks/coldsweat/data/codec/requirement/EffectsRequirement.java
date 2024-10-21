@@ -1,25 +1,20 @@
 package com.momosoftworks.coldsweat.data.codec.requirement;
 
-import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
-import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.NBTDynamicOps;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
-import net.minecraft.tags.ITag;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class EffectsRequirement
 {
@@ -85,21 +80,11 @@ public class EffectsRequirement
     }
 
     public CompoundNBT serialize()
-    {
-        CompoundNBT tag = new CompoundNBT();
-        for (Map.Entry<Effect, Instance> entry : effects.entrySet())
-        {
-            tag.put(ForgeRegistries.POTIONS.getKey(entry.getKey()).toString(), entry.getValue().serialize());
-        }
-        return tag;
+    {   return (CompoundNBT) CODEC.encodeStart(NBTDynamicOps.INSTANCE, this).result().orElseGet(CompoundNBT::new);
     }
 
     public static EffectsRequirement deserialize(CompoundNBT tag)
-    {
-        Map<Effect, Instance> effects = tag.getAllKeys().stream().collect(
-                Collectors.toMap(key -> ForgeRegistries.POTIONS.getValue(new ResourceLocation(key)),
-                                                  key -> Instance.deserialize(tag.getCompound(key))));
-        return new EffectsRequirement(effects);
+    {   return CODEC.decode(NBTDynamicOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize EffectsRequirement")).getFirst();
     }
 
     @Override
@@ -140,22 +125,11 @@ public class EffectsRequirement
         ).apply(instance, Instance::new));
 
         public CompoundNBT serialize()
-        {
-            CompoundNBT tag = new CompoundNBT();
-            tag.put("amplifier", amplifier.serialize());
-            tag.put("duration", duration.serialize());
-            ambient.ifPresent(value -> tag.putBoolean("ambient", value));
-            visible.ifPresent(value -> tag.putBoolean("visible", value));
-            return tag;
+        {   return (CompoundNBT) CODEC.encodeStart(NBTDynamicOps.INSTANCE, this).result().orElseGet(CompoundNBT::new);
         }
 
         public static Instance deserialize(CompoundNBT tag)
-        {
-            IntegerBounds amplifier = IntegerBounds.deserialize(tag.getCompound("amplifier"));
-            IntegerBounds duration = IntegerBounds.deserialize(tag.getCompound("duration"));
-            Optional<Boolean> ambient = tag.contains("ambient") ? Optional.of(tag.getBoolean("ambient")) : Optional.empty();
-            Optional<Boolean> visible = tag.contains("visible") ? Optional.of(tag.getBoolean("visible")) : Optional.empty();
-            return new Instance(amplifier, duration, ambient, visible);
+        {   return CODEC.decode(NBTDynamicOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize BlockRequirement")).getFirst();
         }
 
         @Override
@@ -184,21 +158,12 @@ public class EffectsRequirement
 
         @Override
         public String toString()
-        {
-            StringBuilder builder = new StringBuilder();
-            builder.append("Instance{amplifier=").append(amplifier);
-            builder.append(", duration=").append(duration);
-            ambient.ifPresent(value -> builder.append(", ambient=").append(value));
-            visible.ifPresent(value -> builder.append(", visible=").append(value));
-            builder.append('}');
-
-            return builder.toString();
+        {   return CODEC.encodeStart(JsonOps.INSTANCE, this).result().map(Object::toString).orElse("serialize_failed");
         }
     }
 
     @Override
     public String toString()
-    {
-        return "Effects{" + effects + '}';
+    {   return CODEC.encodeStart(JsonOps.INSTANCE, this).result().map(Object::toString).orElse("serialize_failed");
     }
 }
