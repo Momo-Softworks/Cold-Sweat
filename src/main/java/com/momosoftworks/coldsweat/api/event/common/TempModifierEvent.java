@@ -1,6 +1,5 @@
 package com.momosoftworks.coldsweat.api.event.common;
 
-import com.mojang.datafixers.types.Func;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.common.MinecraftForge;
@@ -123,37 +122,50 @@ public class TempModifierEvent extends Event
         }
 
         /**
-         * Fired at the beginning of {@code calculate()}, before the {@code getValue()} method is called. <br>
+         * Fired at the beginning of {@link  TempModifier#update(double, LivingEntity, Temperature.Trait)} before the TempModifier calculates its function. <br>
          * <br>
          * {@link #entity} - The player the TempModifier is attached to. <br>
          * {@link #modifier} - The TempModifier running the method. <br>
          * {@link #temperature} - The Temperature being passed into the {@code getValue()} method. <br>
+         * {@link #newFunction} - The function that will be used by the TempModifier to calculate temperature. <br><strong>The event must be canceled for this to be used.</strong> <br>
          * <br>
          * This event is {@link Cancelable}. <br>
-         * Cancelling this event results in the modifier not being processed, remaining unchanged. <br>
+         * Cancelling this event results in the modifier not calculating its function and using the one provided by the event instead.
          */
         @Cancelable
-        public static class Override extends Calculate
+        public static class Pre extends Calculate
         {
-            public Override(TempModifier modifier, LivingEntity entity, double temperature, Temperature.Trait trait)
+            private Function<Double, Double> newFunction = temp -> temp;
+
+            public Function<Double, Double> getFunction()
+            {   return newFunction;
+            }
+
+            public void setFunction(Function<Double, Double> newFunction)
+            {   this.newFunction = newFunction;
+            }
+
+            public Pre(TempModifier modifier, LivingEntity entity, double temperature, Temperature.Trait trait)
             {   super(modifier, entity, temperature, trait);
             }
         }
 
         /**
-         * Fired by {@code calculate()} after the {@code getResult()} method is run, but before the value is returned <br>
+         * Fired by {@link TempModifier#update(double, LivingEntity, Temperature.Trait)} after the new function is created.<br>
+         * This allows for the function to be modified before it is stored.<br>
          * <br>
          * {@link #entity} is the player the TempModifier is attached to. <br>
          * {@link #modifier} is the TempModifier running the method. <br>
          * {@link #temperature} is the Temperature after the {@code getValue())} method has been called. <br>
+         * {@link #newFunction} is the function that will be used by the TempModifier to calculate temperature. <br>
          * <br>
          * This event is NOT {@link Cancelable}. <br>
          */
-        public static class Modify extends Calculate
+        public static class Post extends Calculate
         {
             private Function<Double, Double> newFunction;
 
-            public Modify(TempModifier modifier, LivingEntity entity, double temp, Function<Double, Double> newFunction, Temperature.Trait trait)
+            public Post(TempModifier modifier, LivingEntity entity, double temp, Function<Double, Double> newFunction, Temperature.Trait trait)
             {   super(modifier, entity, temp, trait);
                 this.newFunction = newFunction;
             }
@@ -164,13 +176,6 @@ public class TempModifierEvent extends Event
 
             public void setFunction(Function<Double, Double> newFunction)
             {   this.newFunction = newFunction;
-            }
-        }
-
-        public static class Process extends Calculate
-        {
-            public Process(TempModifier modifier, LivingEntity entity, double temperature, Temperature.Trait trait)
-            {   super(modifier, entity, temperature, trait);
             }
         }
     }
