@@ -56,8 +56,8 @@
       },
       "bottom": {
         "anchor": "world_bottom",
-        "depth": -3,
-        "temperature": 110,
+        "depth": 1,
+        "temperature": 90,
         "units": "f"
       }
     },
@@ -65,8 +65,8 @@
       "type": "linear",
       "top": {
         "anchor": "world_bottom",
-        "depth": -4,
-        "temperature": 110,
+        "depth": 0,
+        "temperature": 90,
         "units": "f"
       },
       "bottom": {
