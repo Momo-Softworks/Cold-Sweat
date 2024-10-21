@@ -55,7 +55,7 @@ public record FluidRequirement(Optional<List<Either<TagKey<Fluid>, Fluid>>> flui
     }
 
     public CompoundTag serialize()
-    {   return (CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElse(new CompoundTag());
+    {   return (CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElseGet(CompoundTag::new);
     }
 
     public static FluidRequirement deserialize(CompoundTag tag)

@@ -11,6 +11,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -141,14 +142,11 @@ public record ItemRequirement(Optional<List<Either<TagKey<Item>, Item>>> items, 
     }
 
     public CompoundTag serialize()
-    {
-        return (CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElse(new CompoundTag());
+    {   return (CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElseGet(CompoundTag::new);
     }
 
-    public static ItemRequirement deserialize(CompoundTag nbt)
-    {
-        if (nbt.isEmpty()) return NONE;
-        return CODEC.decode(NbtOps.INSTANCE, nbt).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize ItemRequirement")).getFirst();
+    public static ItemRequirement deserialize(CompoundTag tag)
+    {   return CODEC.decode(NbtOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize ItemRequirement")).getFirst();
     }
 
     @Override

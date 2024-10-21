@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.data.codec.requirement.sub_type;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
@@ -11,6 +12,7 @@ import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.CriterionProgress;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -28,7 +30,6 @@ import net.minecraft.world.phys.Vec3;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public record PlayerDataRequirement(IntegerBounds level, Optional<GameType> gameType, Optional<Map<StatRequirement, IntegerBounds>> stats,
                                     Optional<Map<ResourceLocation, Boolean>> recipes,
@@ -110,11 +111,11 @@ public record PlayerDataRequirement(IntegerBounds level, Optional<GameType> game
     }
 
     public CompoundTag serialize()
-    {   return (CompoundTag) getCodec().codec().encodeStart(NbtOps.INSTANCE, this).result().orElse(new CompoundTag());
+    {   return (CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElseGet(CompoundTag::new);
     }
 
-    public static PlayerDataRequirement deserialize(CompoundTag tag)
-    {   return getCodec().codec().decode(NbtOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize PlayerDataRequirement")).getFirst();
+    public static EntitySubRequirement deserialize(CompoundTag tag)
+    {   return CODEC.decode(NbtOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize BlockRequirement")).getFirst();
     }
 
     @Override
@@ -144,13 +145,8 @@ public record PlayerDataRequirement(IntegerBounds level, Optional<GameType> game
         return lookingAt.equals(that.lookingAt);
     }
 
-    public static class StatRequirement
+    public record StatRequirement(StatType<?> type, ResourceLocation statId, Stat<?> stat, IntegerBounds value)
     {
-        private final StatType<?> type;
-        private ResourceLocation statId;
-        private final Stat<?> stat;
-        private final IntegerBounds value;
-
         public static final Codec<StatRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 BuiltInRegistries.STAT_TYPE.byNameCodec().fieldOf("type").forGetter(stat -> stat.type),
                 ResourceLocation.CODEC.fieldOf("stat").forGetter(stat -> stat.statId),
@@ -158,13 +154,7 @@ public record PlayerDataRequirement(IntegerBounds level, Optional<GameType> game
         ).apply(instance, StatRequirement::new));
 
         public StatRequirement(StatType<?> type, ResourceLocation statId, IntegerBounds value)
-        {   this(type, (Stat<?>) type.getRegistry().get(statId), value);
-        }
-
-        public StatRequirement(StatType<?> type, Stat<?> stat, IntegerBounds value)
-        {   this.type = type;
-            this.stat = stat;
-            this.value = value;
+        {   this(type, statId, (Stat<?>) type.getRegistry().get(statId), value);
         }
 
         public StatType<?> type()
@@ -178,30 +168,15 @@ public record PlayerDataRequirement(IntegerBounds level, Optional<GameType> game
         }
 
         public boolean test(Stat<?> stat, int value)
-        {   return this.stat.equals(stat) && this.value.test(value);
+        {   return statId.equals(BuiltInRegistries.STAT_TYPE.getKey(stat.getType())) && this.value.test(value);
         }
 
         public CompoundTag serialize()
-        {   CompoundTag tag = new CompoundTag();
-            tag.putString("type", BuiltInRegistries.STAT_TYPE.getKey(type).toString());
-            tag.putString("stat", serializeStat(stat));
-            tag.put("value", this.value.serialize());
-            return tag;
+        {   return (CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElseGet(CompoundTag::new);
         }
 
         public static StatRequirement deserialize(CompoundTag tag)
-        {   StatType<?> type = BuiltInRegistries.STAT_TYPE.get(ResourceLocation.parse(tag.getString("type")));
-            Stat<?> stat = deserializeStat(type, tag);
-            IntegerBounds value = IntegerBounds.deserialize(tag.getCompound("value"));
-            return new StatRequirement(type, stat, value);
-        }
-
-        private static <T> String serializeStat(Stat<T> stat)
-        {   return stat.getType().getRegistry().getKey(stat.getValue()).toString();
-        }
-
-        private static <T> Stat<T> deserializeStat(StatType<T> type, CompoundTag tag)
-        {   return type.get(type.getRegistry().get(ResourceLocation.parse(tag.getString("stat"))));
+        {   return CODEC.decode(NbtOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize BlockRequirement")).getFirst();
         }
 
         @Override
@@ -230,13 +205,7 @@ public record PlayerDataRequirement(IntegerBounds level, Optional<GameType> game
 
         @Override
         public String toString()
-        {
-            return "Stat{" +
-                    "type=" + type +
-                    ", statId=" + statId +
-                    ", stat=" + stat +
-                    ", value=" + value +
-                    '}';
+        {   return CODEC.encodeStart(JsonOps.INSTANCE, this).result().map(Object::toString).orElse("serialize_failed");
         }
     }
 
@@ -249,13 +218,11 @@ public record PlayerDataRequirement(IntegerBounds level, Optional<GameType> game
         }
 
         public CompoundTag serialize()
-        {   CompoundTag tag = new CompoundTag();
-            tag.putBoolean("completion", complete);
-            return tag;
+        {   return (CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElseGet(CompoundTag::new);
         }
 
         public static AdvancementCompletionRequirement deserialize(CompoundTag tag)
-        {   return new AdvancementCompletionRequirement(tag.getBoolean("completion"));
+        {   return CODEC.decode(NbtOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize BlockRequirement")).getFirst();
         }
 
         @Override
@@ -276,10 +243,7 @@ public record PlayerDataRequirement(IntegerBounds level, Optional<GameType> game
 
         @Override
         public String toString()
-        {
-            return "Completion{" +
-                    "complete=" + complete +
-                    '}';
+        {   return CODEC.encodeStart(JsonOps.INSTANCE, this).result().map(Object::toString).orElse("serialize_failed");
         }
     }
     public record AdvancementCriteriaRequirement(Map<String, Boolean> criteria)
@@ -299,15 +263,11 @@ public record PlayerDataRequirement(IntegerBounds level, Optional<GameType> game
         }
 
         public CompoundTag serialize()
-        {   CompoundTag tag = new CompoundTag();
-            for (Map.Entry<String, Boolean> entry : this.criteria.entrySet())
-            {   tag.putBoolean(entry.getKey(), entry.getValue());
-            }
-            return tag;
+        {   return (CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElseGet(CompoundTag::new);
         }
 
         public static AdvancementCriteriaRequirement deserialize(CompoundTag tag)
-        {   return new AdvancementCriteriaRequirement(tag.getAllKeys().stream().collect(Collectors.toMap(key -> key, key -> tag.getBoolean(key))));
+        {   return CODEC.decode(NbtOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize BlockRequirement")).getFirst();
         }
 
         @Override
@@ -327,22 +287,12 @@ public record PlayerDataRequirement(IntegerBounds level, Optional<GameType> game
 
         @Override
         public String toString()
-        {
-            return "Criteria{" +
-                    "criteria=" + criteria +
-                    '}';
+        {   return CODEC.encodeStart(JsonOps.INSTANCE, this).result().map(Object::toString).orElse("serialize_failed");
         }
     }
 
     @Override
     public String toString()
-    {
-        return "PlayerData{" +
-                "gameType=" + gameType +
-                ", stats=" + stats +
-                ", recipes=" + recipes +
-                ", advancements=" + advancements +
-                ", lookingAt=" + lookingAt +
-                '}';
+    {   return CODEC.encodeStart(JsonOps.INSTANCE, this).result().map(Object::toString).orElse("serialize_failed");
     }
 }

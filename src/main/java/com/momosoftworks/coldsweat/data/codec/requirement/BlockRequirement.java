@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.data.codec.requirement;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.core.BlockPos;
@@ -128,7 +129,7 @@ public record BlockRequirement(Optional<List<Either<TagKey<Block>, Block>>> bloc
         }
 
         public static StateRequirement deserialize(CompoundTag tag)
-        {   return CODEC.decode(NbtOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize StateRequirement")).getFirst();
+        {   return CODEC.decode(NbtOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize BlockRequirement")).getFirst();
         }
 
         public boolean matches(BlockState pState)
@@ -278,18 +279,6 @@ public record BlockRequirement(Optional<List<Either<TagKey<Block>, Block>>> bloc
 
     @Override
     public String toString()
-    {
-        StringBuilder builder = new StringBuilder();
-        builder.append("BlockRequirement{");
-        blocks.ifPresent(blocks -> builder.append("blocks=").append(blocks));
-        state.ifPresent(state -> builder.append("state=").append(state));
-        nbt.ifPresent(nbt -> builder.append("nbt=").append(nbt));
-        sturdyFace.ifPresent(face -> builder.append("has_sturdy_face=").append(face));
-        withinWorldBounds.ifPresent(bounds -> builder.append("within_world_bounds=").append(bounds));
-        replaceable.ifPresent(replaceable -> builder.append("replaceable=").append(replaceable));
-        builder.append("negate=").append(negate);
-        builder.append("}");
-
-        return builder.toString();
+    {   return CODEC.encodeStart(JsonOps.INSTANCE, this).result().map(Object::toString).orElse("serialize_failed");
     }
 }

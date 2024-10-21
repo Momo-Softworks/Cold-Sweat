@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.data.codec.requirement;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
@@ -91,11 +92,11 @@ public record LocationRequirement(Optional<Integer> x, Optional<Integer> y, Opti
     }
 
     public CompoundTag serialize()
-    {   return (CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElse(new CompoundTag());
+    {   return (CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElseGet(CompoundTag::new);
     }
 
     public static LocationRequirement deserialize(CompoundTag tag)
-    {   return CODEC.decode(NbtOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize LocationRequirement")).getFirst();
+    {   return CODEC.decode(NbtOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize BlockRequirement")).getFirst();
     }
 
     @Override
@@ -123,20 +124,6 @@ public record LocationRequirement(Optional<Integer> x, Optional<Integer> y, Opti
 
     @Override
     public String toString()
-    {
-        StringBuilder builder = new StringBuilder();
-        builder.append("LocationRequirement{");
-        x.ifPresent(value -> builder.append("x=").append(value).append(", "));
-        y.ifPresent(value -> builder.append("y=").append(value).append(", "));
-        z.ifPresent(value -> builder.append("z=").append(value).append(", "));
-        biome.ifPresent(value -> builder.append("biome=").append(value).append(", "));
-        structure.ifPresent(value -> builder.append("structure=").append(value).append(", "));
-        dimension.ifPresent(value -> builder.append("dimension=").append(value).append(", "));
-        light.ifPresent(value -> builder.append("light=").append(value).append(", "));
-        block.ifPresent(value -> builder.append("block=").append(value).append(", "));
-        fluid.ifPresent(value -> builder.append("fluid=").append(value).append(", "));
-        builder.append("}");
-
-        return builder.toString();
+    {   return CODEC.encodeStart(JsonOps.INSTANCE, this).result().map(Object::toString).orElse("serialize_failed");
     }
 }

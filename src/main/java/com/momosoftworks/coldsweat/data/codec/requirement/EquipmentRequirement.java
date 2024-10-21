@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.data.codec.requirement;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
@@ -36,7 +37,7 @@ public record EquipmentRequirement(Optional<ItemRequirement> head, Optional<Item
     }
 
     public CompoundTag serialize()
-    {   return (CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElse(new CompoundTag());
+    {   return (CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElseGet(CompoundTag::new);
     }
 
     public static EquipmentRequirement deserialize(CompoundTag tag)
@@ -60,15 +61,6 @@ public record EquipmentRequirement(Optional<ItemRequirement> head, Optional<Item
 
     /*@Override
     public String toString()
-    {
-        StringBuilder builder = new StringBuilder();
-        head.ifPresent(requirement  -> builder.append("Head: ").append(requirement.toString()));
-        chest.ifPresent(requirement -> builder.append("Chest: ").append(requirement.toString()));
-        legs.ifPresent(requirement  -> builder.append("Legs: ").append(requirement.toString()));
-        feet.ifPresent(requirement  -> builder.append("Feet: ").append(requirement.toString()));
-        mainHand.ifPresent(requirement -> builder.append("Main Hand: ").append(requirement.toString()));
-        offHand.ifPresent(requirement  -> builder.append("Off Hand: ").append(requirement.toString()));
-
-        return builder.toString();
+    {   return CODEC.encodeStart(JsonOps.INSTANCE, this).result().map(Object::toString).orElse("serialize_failed");
     }*/
 }

@@ -1,11 +1,13 @@
 package com.momosoftworks.coldsweat.data.codec.requirement;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.requirement.sub_type.EntitySubRequirement;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
@@ -136,13 +138,11 @@ public record EntityRequirement(Optional<EntityType<?>> type, Optional<TagKey<En
     }
 
     public CompoundTag serialize()
-    {   return (CompoundTag) getCodec().encodeStart(NbtOps.INSTANCE, this).result().orElse(new CompoundTag());
+    {   return (CompoundTag) getCodec().encodeStart(NbtOps.INSTANCE, this).result().orElseGet(CompoundTag::new);
     }
 
-    public static EntityRequirement deserialize(CompoundTag compound)
-    {
-        if (compound.isEmpty()) return NONE;
-        return getCodec().decode(NbtOps.INSTANCE, compound).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize EntityRequirement")).getFirst();
+    public static EntityRequirement deserialize(CompoundTag tag)
+    {   return getCodec().decode(NbtOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize EntityRequirement")).getFirst();
     }
 
     @Override
@@ -172,22 +172,6 @@ public record EntityRequirement(Optional<EntityType<?>> type, Optional<TagKey<En
 
     @Override
     public String toString()
-    {
-        StringBuilder builder = new StringBuilder();
-        builder.append("EntityRequirement{");
-        type.ifPresent(type -> builder.append("type=").append(type).append(", "));
-        location.ifPresent(location -> builder.append("location=").append(location).append(", "));
-        steppingOn.ifPresent(standingOn -> builder.append("standing_on=").append(standingOn).append(", "));
-        effects.ifPresent(effects -> builder.append("effects=").append(effects).append(", "));
-        nbt.ifPresent(nbt -> builder.append("nbt=").append(nbt).append(", "));
-        flags.ifPresent(flags -> builder.append("flags=").append(flags).append(", "));
-        equipment.ifPresent(equipment -> builder.append("equipment=").append(equipment).append(", "));
-        typeSpecificData.ifPresent(playerData -> builder.append("player_data=").append(playerData).append(", "));
-        vehicle.ifPresent(vehicle -> builder.append("vehicle=").append(vehicle).append(", "));
-        passenger.ifPresent(passenger -> builder.append("passenger=").append(passenger).append(", "));
-        target.ifPresent(target -> builder.append("target=").append(target).append(", "));
-        builder.append('}');
-
-        return builder.toString();
+    {   return getCodec().encodeStart(JsonOps.INSTANCE, this).result().map(Object::toString).orElse("serialize_failed");
     }
 }

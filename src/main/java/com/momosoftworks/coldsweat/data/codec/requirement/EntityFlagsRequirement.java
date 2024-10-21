@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.data.codec.requirement;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
@@ -33,7 +34,7 @@ public record EntityFlagsRequirement(Optional<Boolean> onFire, Optional<Boolean>
     }
 
     public CompoundTag serialize()
-    {   return (CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElse(new CompoundTag());
+    {   return (CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElseGet(CompoundTag::new);
     }
 
     public static EntityFlagsRequirement deserialize(CompoundTag tag)
@@ -63,16 +64,6 @@ public record EntityFlagsRequirement(Optional<Boolean> onFire, Optional<Boolean>
 
     /*@Override
     public String toString()
-    {
-        StringBuilder builder = new StringBuilder();
-        onFire.ifPresent(value -> builder.append("is_on_fire=").append(value));
-        sneaking.ifPresent(value -> builder.append(", is_sneaking=").append(value));
-        sprinting.ifPresent(value -> builder.append(", is_sprinting=").append(value));
-        swimming.ifPresent(value -> builder.append(", is_swimming=").append(value));
-        invisible.ifPresent(value -> builder.append(", is_invisible=").append(value));
-        glowing.ifPresent(value -> builder.append(", is_glowing=").append(value));
-        baby.ifPresent(value -> builder.append(", is_baby=").append(value));
-
-        return builder.toString();
+    {   return CODEC.encodeStart(JsonOps.INSTANCE, this).result().map(Object::toString).orElse("serialize_failed");
     }*/
 }
