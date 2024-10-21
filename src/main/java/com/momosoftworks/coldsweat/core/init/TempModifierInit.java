@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.*;
 import com.momosoftworks.coldsweat.api.temperature.modifier.*;
 import com.momosoftworks.coldsweat.config.spec.WorldSettingsConfig;
+import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -92,9 +93,9 @@ public class TempModifierInit
                                                                      ? ConfigHelper.getBlockStatePredicates(effectBlocks[0], ((String) effectBuilder.get(4)))
                                                                      : new HashMap<>();
 
-                Optional<CompoundNBT> tag = effectBuilder.size() > 5 && effectBuilder.get(5) instanceof String && !((String) effectBuilder.get(5)).isEmpty()
-                                            ? Optional.of(NBTHelper.parseCompoundNbt(((String) effectBuilder.get(5))))
-                                            : Optional.empty();
+                NbtRequirement tag = effectBuilder.size() > 5 && effectBuilder.get(5) instanceof String && !((String) effectBuilder.get(5)).isEmpty()
+                                            ? new NbtRequirement(NBTHelper.parseCompoundNbt(((String) effectBuilder.get(5))))
+                                            : new NbtRequirement();
 
                 double tempLimit = effectBuilder.size() > 6
                                    ? ((Number) effectBuilder.get(6)).doubleValue()
@@ -112,18 +113,12 @@ public class TempModifierInit
                     public double getTemperature(World level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
                     {
                         // Check the list of predicates first
-                        if (tag.isPresent())
+                        TileEntity blockEntity = level.getBlockEntity(pos);
+                        if (blockEntity != null)
                         {
-                            TileEntity blockEntity = level.getBlockEntity(pos);
-                            if (blockEntity != null)
-                            {
-                                CompoundNBT blockTag = blockEntity.save(new CompoundNBT());
-                                for (String key : tag.get().getAllKeys())
-                                {
-                                    if (!tag.get().get(key).equals(blockTag.get(key)))
-                                    {   return 0;
-                                    }
-                                }
+                            CompoundNBT blockTag = blockEntity.save(new CompoundNBT());
+                            if (!tag.test(blockTag))
+                            {   return 0;
                             }
                         }
                         return CSMath.blend(blockTemp, 0, distance, 0.5, blockRange);
