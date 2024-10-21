@@ -24,12 +24,10 @@ import com.momosoftworks.coldsweat.core.init.ModBlocks;
 import com.momosoftworks.coldsweat.core.init.ModEffects;
 import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
-import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.entity.DummyPlayer;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.FastMap;
-import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -68,7 +66,6 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 @EventBusSubscriber
@@ -358,33 +355,63 @@ public class EntityTempManager
     {
         // Add listener for granting the sewing table recipe when the player gets an insulation item
         if (event.getEntity() instanceof Player player)
+        {
             player.containerMenu.addSlotListener(new ContainerListener()
             {
                 public void slotChanged(AbstractContainerMenu menu, int slotIndex, ItemStack stack)
-                {   Slot slot = menu.getSlot(slotIndex);
+                {
+                    Slot slot = menu.getSlot(slotIndex);
                     if (!(slot instanceof ResultSlot))
                     {
                         if (slot.container == player.getInventory()
                         && (ConfigSettings.INSULATION_ITEMS.get().containsKey(stack.getItem())))
-                        {   player.awardRecipesByKey(List.of(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "sewing_table")));
+                        {
+                            player.awardRecipesByKey(List.of(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "sewing_table")));
                         }
                     }
                 }
                 public void dataChanged(AbstractContainerMenu menu, int slot, int value) {}
             });
+        }
     }
 
     @SubscribeEvent
-    public static void calcModifierImmunity(TempModifierEvent.Calculate.Modify event)
+    public static void cancelImmuneModifiers(TempModifierEvent.Calculate.Pre event)
+    {
+        TempModifier modifier = event.getModifier();
+        LivingEntity entity = event.getEntity();
+
+        ResourceLocation modifierKey = TempModifierRegistry.getKey(modifier);
+
+        if (ConfigSettings.DISABLED_MODIFIERS.get().contains(modifierKey))
+        {
+            event.setFunction(temp -> temp);
+            if (modifier instanceof BiomeTempModifier)
+            {   event.setTemperature((Temperature.get(entity, Temperature.Trait.FREEZING_POINT) + Temperature.get(entity, Temperature.Trait.BURNING_POINT)) / 2);
+            }
+            event.setCanceled(true);
+        }
+    }
+
+    /**
+     * Check the player's immunity level to temperature modifiers when they tick
+     */
+    @SubscribeEvent
+    public static void checkModifierImmunity(TempModifierEvent.Calculate.Post event)
     {
         if (event.getEntity() instanceof DummyPlayer) return;
         if (!event.getTrait().isForAttributes()) return;
 
-        TempModifier mod = event.getModifier();
-        ResourceLocation modifierKey = TempModifierRegistry.getKey(mod);
+        TempModifier modifier = event.getModifier();
+        ResourceLocation modifierKey = TempModifierRegistry.getKey(modifier);
         LivingEntity entity = event.getEntity();
 
-        for (Map.Entry<ItemStack, Insulator> entry : getInsulatorsOnEntity(event.getEntity()).entrySet())
+        double lastInput = modifier instanceof BiomeTempModifier
+                           ? (Temperature.get(entity, Temperature.Trait.FREEZING_POINT) + Temperature.get(entity, Temperature.Trait.BURNING_POINT)) / 2
+                           : modifier.getLastInput();
+
+        // Calculate modifier immunity from equipped insulators
+        for (Map.Entry<ItemStack, Insulator> entry : getInsulatorsOnEntity(entity).entrySet())
         {
             Insulator insulator = entry.getValue();
             ItemStack stack = entry.getKey();
@@ -392,11 +419,8 @@ public class EntityTempManager
             Double immunity = insulator.immuneTempModifiers().get(modifierKey);
             if (immunity != null && insulator.test(event.getEntity(), stack))
             {
-                Function<Double, Double> func = event.getFunction();
-                double lastInput = mod instanceof BiomeTempModifier
-                                   ? (Temperature.get(entity, Temperature.Trait.FREEZING_POINT) + Temperature.get(entity, Temperature.Trait.BURNING_POINT)) / 2
-                                   : mod.getLastInput();
-                event.setFunction(temp -> CSMath.blend(func.apply(temp), lastInput, immunity, 0, 1));
+
+                event.setFunction(temp -> CSMath.blend(event.getFunction().apply(temp), lastInput, immunity, 0, 1));
             }
         }
     }

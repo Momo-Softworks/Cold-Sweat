@@ -115,7 +115,6 @@ public class ConfigSettings
     public static final DynamicHolder<Multimap<Item, Insulator>> INSULATING_ARMORS;
     public static final DynamicHolder<Multimap<Item, Insulator>> INSULATING_CURIOS;
     public static final DynamicHolder<ScalingFormula> INSULATION_SLOTS;
-    public static final DynamicHolder<Double> INSULATION_STRENGTH;
     public static final DynamicHolder<List<Item>> INSULATION_BLACKLIST;
 
     public static final DynamicHolder<Multimap<Item, PredicateItem>> FOOD_TEMPERATURES;
@@ -141,6 +140,10 @@ public class ConfigSettings
     public static final DynamicHolder<Multimap<Biome, SpawnBiomeData>> ENTITY_SPAWN_BIOMES;
     public static final DynamicHolder<Multimap<EntityType<?>, InsulatingMount>> INSULATED_ENTITIES;
     public static final DynamicHolder<Multimap<EntityType<?>, EntityTempData>> ENTITY_TEMPERATURES;
+
+    // Misc Settings
+    public static final DynamicHolder<Double> INSULATION_STRENGTH;
+    public static final DynamicHolder<List<ResourceLocation>> DISABLED_MODIFIERS;
 
     // Client Settings
     /* NULL ON THE SERVER */
@@ -479,8 +482,6 @@ public class ConfigSettings
             ItemSettingsConfig.getInstance().setArmorInsulationSlots(list);
         });
 
-        INSULATION_STRENGTH = addSetting("insulation_strength", () -> 1d, holder -> holder.set(ItemSettingsConfig.getInstance().getInsulationStrength()));
-
         INSULATION_BLACKLIST = addSetting("insulation_blacklist", ArrayList::new,
                                           holder -> holder.get().addAll(ItemSettingsConfig.getInstance().getInsulationBlacklist()
                                                     .stream()
@@ -801,6 +802,12 @@ public class ConfigSettings
         HEARTH_STRENGTH = addSetting("hearth_effect", () -> 0.75, holder -> holder.set(WorldSettingsConfig.getInstance().getHearthEffect()));
 
         SMART_HEARTH = addSetting("smart_hearth", () -> false, holder -> holder.set(WorldSettingsConfig.getInstance().isSmartHearth()));
+
+        INSULATION_STRENGTH = addSetting("insulation_strength", () -> 1d, holder -> holder.set(ItemSettingsConfig.getInstance().getInsulationStrength()));
+
+        DISABLED_MODIFIERS = addSetting("disabled_modifiers", ArrayList::new, holder -> holder.get().addAll(MainSettingsConfig.DISABLED_TEMP_MODIFIERS.get().stream().map(ResourceLocation::parse).toList()));
+
+        // Client
 
         CELSIUS = addClientSetting("celsius", () -> false, holder -> holder.set(ClientSettingsConfig.getInstance().isCelsius()));
 
