@@ -31,7 +31,6 @@ import com.momosoftworks.coldsweat.util.registries.ModAttributes;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
-import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -442,7 +441,8 @@ public class EntityTempManager
                     {
                         if (slot.container == player.inventory
                         && (ConfigSettings.INSULATION_ITEMS.get().containsKey(stack.getItem())))
-                        {   player.awardRecipesByKey(new ResourceLocation[]{new ResourceLocation(ColdSweat.MOD_ID, "sewing_table")});
+                        {
+                            player.awardRecipesByKey(new ResourceLocation[]{new ResourceLocation(ColdSweat.MOD_ID, "sewing_table")});
                         }
                     }
                 }
@@ -455,33 +455,52 @@ public class EntityTempManager
     }
 
     @SubscribeEvent
-    public static void calcModifierImmunity(TempModifierEvent.Calculate.Modify event)
+    public static void cancelImmuneModifiers(TempModifierEvent.Calculate.Pre event)
+    {
+        TempModifier modifier = event.getModifier();
+        LivingEntity entity = event.getEntity();
+
+        ResourceLocation modifierKey = TempModifierRegistry.getKey(modifier);
+
+        if (ConfigSettings.DISABLED_MODIFIERS.get().contains(modifierKey))
+        {
+            event.setFunction(temp -> temp);
+            if (modifier instanceof BiomeTempModifier)
+            {   event.setTemperature((Temperature.get(entity, Temperature.Trait.FREEZING_POINT) + Temperature.get(entity, Temperature.Trait.BURNING_POINT)) / 2);
+            }
+            event.setCanceled(true);
+        }
+    }
+
+    /**
+     * Check the player's immunity level to temperature modifiers when they tick
+     */
+    @SubscribeEvent
+    public static void checkModifierImmunity(TempModifierEvent.Calculate.Post event)
     {
         if (event.getEntity() instanceof DummyPlayer) return;
         if (!event.getTrait().isForAttributes()) return;
 
-        TempModifier mod = event.getModifier();
-        ResourceLocation modifierKey = TempModifierRegistry.getKey(mod);
+        TempModifier modifier = event.getModifier();
+        ResourceLocation modifierKey = TempModifierRegistry.getKey(modifier);
         LivingEntity entity = event.getEntity();
 
-        getTemperatureCap(event.getEntity()).ifPresent(cap ->
-        {
-            for (Map.Entry<ItemStack, Insulator> entry : getInsulatorsOnEntity(event.getEntity()).entrySet())
-            {
-                Insulator insulator = entry.getValue();
-                ItemStack stack = entry.getKey();
+        double lastInput = modifier instanceof BiomeTempModifier
+                           ? (Temperature.get(entity, Temperature.Trait.FREEZING_POINT) + Temperature.get(entity, Temperature.Trait.BURNING_POINT)) / 2
+                           : modifier.getLastInput();
 
-                Double immunity = insulator.immuneTempModifiers.get(modifierKey);
-                if (immunity != null && insulator.test(event.getEntity(), stack))
-                {
-                    Function<Double, Double> func = event.getFunction();
-                    double lastInput = mod instanceof BiomeTempModifier
-                                       ? (Temperature.get(entity, Temperature.Trait.FREEZING_POINT) + Temperature.get(entity, Temperature.Trait.BURNING_POINT)) / 2
-                                       : mod.getLastInput();
-                    event.setFunction(temp -> CSMath.blend(func.apply(temp), lastInput, immunity, 0, 1));
-                }
+        // Calculate modifier immunity from equipped insulators
+        for (Map.Entry<ItemStack, Insulator> entry : getInsulatorsOnEntity(entity).entrySet())
+        {
+            Insulator insulator = entry.getValue();
+            ItemStack stack = entry.getKey();
+
+            Double immunity = insulator.immuneTempModifiers.get(modifierKey);
+            if (immunity != null && insulator.test(event.getEntity(), stack))
+            {
+                event.setFunction(temp -> CSMath.blend(event.getFunction().apply(temp), lastInput, immunity, 0, 1));
             }
-        });
+        }
     }
 
     /**
