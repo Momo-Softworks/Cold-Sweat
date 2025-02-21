@@ -10,6 +10,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
 
@@ -48,7 +49,7 @@ public class BlockTempRegistry
                         {   if (cfg2.comparePredicates(cfg))
                             {
                                 ColdSweat.LOGGER.error("Skipping duplicate BlockTemp for \"{}\" as it already has one with the same predicates: \n{}",
-                                                       block.getName().getString(), cfg2.getPredicates());
+                                                       ForgeRegistries.BLOCKS.getKey(block).toString(), cfg2.getPredicates());
                                 return;
                             }
                         }
