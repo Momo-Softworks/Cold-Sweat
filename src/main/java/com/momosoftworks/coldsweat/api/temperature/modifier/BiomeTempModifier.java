@@ -33,10 +33,8 @@ public class BiomeTempModifier extends TempModifier
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
         int samples = this.getNBT().getInt("Samples");
-        try
-        {
-            World level = entity.level;
             double worldTemp = 0;
+            World level = entity.level;
             BlockPos entPos = entity.blockPosition();
 
             // If a dimension temperature override is defined, return
@@ -95,10 +93,6 @@ public class BiomeTempModifier extends TempModifier
 
             double finalWorldTemp = worldTemp;
             return temp -> temp + finalWorldTemp;
-        }
-        catch (Exception e)
-        {   return temp -> temp;
-        }
     }
 
     public static Pair<Double, Double> getStructureTemp(World level, BlockPos pos)
