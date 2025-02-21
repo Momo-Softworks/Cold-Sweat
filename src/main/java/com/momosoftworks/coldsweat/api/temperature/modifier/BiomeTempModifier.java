@@ -15,6 +15,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.feature.StructureFeature;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 public class BiomeTempModifier extends TempModifier
@@ -102,11 +103,11 @@ public class BiomeTempModifier extends TempModifier
 
     public static Pair<Double, Double> getStructureTemp(World level, BlockPos pos)
     {
-        StructureFeature<?, ?> structure = WorldHelper.getStructureAt(level, pos);
-        if (structure == null) return Pair.of(null, 0d);
+        Optional<StructureFeature<?, ?>> structure = WorldHelper.getStructureAt(level, pos);
+        if (!structure.isPresent()) return Pair.of(null, 0d);
 
-        Double strucTemp = CSMath.getIfNotNull(ConfigSettings.STRUCTURE_TEMPS.get(level.registryAccess()).get(structure), StructureTempData::getTemperature, null);
-        Double strucOffset = CSMath.getIfNotNull(ConfigSettings.STRUCTURE_OFFSETS.get(level.registryAccess()).get(structure), StructureTempData::getTemperature, 0d);
+        Double strucTemp = CSMath.getIfNotNull(ConfigSettings.STRUCTURE_TEMPS.get(level.registryAccess()).get(structure.get()), StructureTempData::getTemperature, null);
+        Double strucOffset = CSMath.getIfNotNull(ConfigSettings.STRUCTURE_OFFSETS.get(level.registryAccess()).get(structure.get()), StructureTempData::getTemperature, 0d);
 
         return Pair.of(strucTemp, strucOffset);
     }

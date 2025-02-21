@@ -231,12 +231,13 @@ public abstract class WorldHelper
     }
 
     @Nullable
-    public static StructureFeature<?, ?> getStructureAt(World level, BlockPos pos)
+    public static Optional<StructureFeature<?, ?>> getStructureAt(World level, BlockPos pos)
     {
-        if (!(level instanceof ServerWorld)) return null;
+        if (!(level instanceof ServerWorld)) return Optional.empty();
 
         ServerWorld serverLevel = ((ServerWorld) level);
         StructureManager structureManager = serverLevel.structureFeatureManager();
+        Registry<Structure<?>> structureRegistry = serverLevel.registryAccess().registryOrThrow(Registry.STRUCTURE_FEATURE_REGISTRY);
 
         // Iterate over all structures at the position (ignores Y level)
         for (Map.Entry<Structure<?>, LongSet> entry : level.getChunk(pos).getAllReferences().entrySet())
@@ -256,17 +257,17 @@ public abstract class WorldHelper
                     // If the structure has a piece at the position, get the temperature
                     if (structurestart.getPieces().stream().anyMatch(piece -> piece.getBoundingBox().isInside(pos)))
                     {
-                        // If the structure has a piece at the position, get the temperature
-                        if (structurestart.getPieces().stream().anyMatch(piece -> piece.getBoundingBox().isInside(pos)))
-                        {
-                            return serverLevel.registryAccess().registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY).get(Registry.STRUCTURE_FEATURE.getKey(structure));
+                        ResourceLocation structureId = structureRegistry.getKey(structure);
+                        if (structureId == null)
+                        {   return Optional.empty();
                         }
+                        return Optional.ofNullable(serverLevel.registryAccess().registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY).get(Registry.STRUCTURE_FEATURE.getKey(structure)));
                     }
                 }
             }
         }
 
-        return null;
+        return Optional.empty();
     }
 
     /**
