@@ -225,12 +225,12 @@ public abstract class WorldHelper
         return sections[CSMath.clamp(chunk.getSectionIndex(y), 0, sections.length - 1)];
     }
 
-    @Nullable
-    public static Holder<ConfiguredStructureFeature<?,?>> getStructureAt(Level level, BlockPos pos)
+    public static Optional<Holder<ConfiguredStructureFeature<?,?>>> getStructureAt(Level level, BlockPos pos)
     {
-        if (!(level instanceof ServerLevel serverLevel)) return null;
+        if (!(level instanceof ServerLevel serverLevel)) return Optional.empty();
 
         StructureFeatureManager structureManager = serverLevel.structureFeatureManager();
+        Registry<ConfiguredStructureFeature<?, ?>> structureRegistry = serverLevel.registryAccess().registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY);
 
         // Iterate over all structures at the position (ignores Y level)
         for (Map.Entry<ConfiguredStructureFeature<?, ?>, LongSet> entry : structureManager.getAllStructuresAt(pos).entrySet())
@@ -247,11 +247,19 @@ public abstract class WorldHelper
 
                 if (structurestart != null && structurestart.isValid() && structureManager.structureHasPieceAt(pos, structurestart))
                 {
-                        return serverLevel.registryAccess().registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY).createIntrusiveHolder(structure);
+                    // If the structure has a piece at the position, get the structure's holder
+                    if (structureManager.structureHasPieceAt(pos, structurestart))
+                    {
+                        ResourceLocation structureId = structureRegistry.getKey(structure);
+                        if (structureId == null)
+                        {   return Optional.empty();
+                        }
+                        return structureRegistry.getHolder(ResourceKey.create(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, structureId));
+                    }
                 }
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     public static StructureStart getStructureWithPieceAt(StructureFeatureManager structureManager, BlockPos pos, TagKey<ConfiguredStructureFeature<?,?>> structureTag)
