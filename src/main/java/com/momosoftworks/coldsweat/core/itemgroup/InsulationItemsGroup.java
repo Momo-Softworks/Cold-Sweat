@@ -5,10 +5,7 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.entity.MobEntity;
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
@@ -62,6 +59,7 @@ public class InsulationItemsGroup extends ItemGroup
     private static List<ItemStack> sort(Collection<Map.Entry<Item, InsulatorData>> items)
     {
         List<Map.Entry<Item, InsulatorData>> list = new ArrayList<>(items);
+        list.removeIf(entry -> entry.getKey() == null || entry.getKey() == Items.AIR);
 
         // Sort by tags the items are in
         list.sort(Comparator.comparing(entry -> entry.getKey().getTags().stream().map(ResourceLocation::toString).reduce("", (a, b) -> a + b)));
