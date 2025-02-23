@@ -25,7 +25,7 @@ public interface EntitySubRequirement
             new ResourceLocation("slime"), () -> SlimeRequirement.CODEC
     ));
 
-    Codec<EntitySubRequirement> CODEC = ResourceLocation.CODEC.dispatch(
+    Codec<EntitySubRequirement> CODEC = (Codec<EntitySubRequirement>) (Object) ResourceLocation.CODEC.dispatch(
             "type",
             requirement -> {
                 Supplier<MapCodec<? extends EntitySubRequirement>> matchingSupplier = REQUIREMENT_MAP.values().stream()

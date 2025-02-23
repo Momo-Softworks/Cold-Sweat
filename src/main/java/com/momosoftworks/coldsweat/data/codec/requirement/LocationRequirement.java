@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.data.codec.requirement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.momosoftworks.coldsweat.data.codec.util.BlockInWorld;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
@@ -16,6 +17,7 @@ import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.gen.feature.structure.StructureStart;
 
 import java.util.Optional;
+import java.util.function.Predicate;
 
 public class LocationRequirement
 {
@@ -28,10 +30,12 @@ public class LocationRequirement
     private final Optional<IntegerBounds> light;
     private final Optional<BlockRequirement> block;
     private final Optional<FluidRequirement> fluid;
+    private final Optional<Predicate<BlockInWorld>> predicate;
 
     public LocationRequirement(Optional<Integer> x, Optional<Integer> y, Optional<Integer> z, Optional<RegistryKey<Biome>> biome,
                                Optional<RegistryKey<Structure<?>>> structure, Optional<RegistryKey<World>> dimension,
-                               Optional<IntegerBounds> light, Optional<BlockRequirement> block, Optional<FluidRequirement> fluid)
+                               Optional<IntegerBounds> light, Optional<BlockRequirement> block, Optional<FluidRequirement> fluid,
+                               Optional<Predicate<BlockInWorld>> predicate)
     {
         this.x = x;
         this.y = y;
@@ -42,6 +46,7 @@ public class LocationRequirement
         this.light = light;
         this.block = block;
         this.fluid = fluid;
+        this.predicate = predicate;
     }
 
     public static final Codec<LocationRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -55,6 +60,27 @@ public class LocationRequirement
             BlockRequirement.CODEC.optionalFieldOf("block").forGetter(location -> location.block),
             FluidRequirement.CODEC.optionalFieldOf("fluid").forGetter(location -> location.fluid)
     ).apply(instance, LocationRequirement::new));
+
+    public LocationRequirement(Optional<Integer> x, Optional<Integer> y, Optional<Integer> z,
+                               Optional<RegistryKey<Biome>> biome,
+                               Optional<RegistryKey<Structure<?>>> structure,
+                               Optional<RegistryKey<World>> dimension,
+                               Optional<IntegerBounds> light, Optional<BlockRequirement> block,
+                               Optional<FluidRequirement> fluid)
+    {
+        this(x, y, z, biome, structure, dimension, light, block, fluid, Optional.empty());
+    }
+
+    public LocationRequirement(Predicate<BlockInWorld> predicate)
+    {
+        this(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
+             Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(predicate));
+    }
+
+    public static final LocationRequirement NONE = new LocationRequirement(Optional.empty(), Optional.empty(), Optional.empty(),
+                                                                           Optional.empty(), Optional.empty(), Optional.empty(),
+                                                                           Optional.empty(), Optional.empty(), Optional.empty(),
+                                                                           Optional.empty());
 
     public Optional<Integer> x()
     {   return x;
@@ -90,6 +116,10 @@ public class LocationRequirement
 
     public boolean test(World level, BlockPos origin)
     {
+        if (this.predicate.isPresent())
+        {   return this.predicate.get().test(new BlockInWorld(level, origin, true));
+        }
+
         BlockPos.Mutable pos = origin.mutable();
         this.x.ifPresent(x -> pos.move(x, 0, 0));
         this.y.ifPresent(y -> pos.move(0, y, 0));

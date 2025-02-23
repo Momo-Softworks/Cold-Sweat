@@ -5,6 +5,7 @@ import com.momosoftworks.coldsweat.common.entity.ChameleonEntity;
 import com.momosoftworks.coldsweat.common.entity.GoatEntity;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.SpawnBiomeData;
+import com.momosoftworks.coldsweat.data.codec.util.FunctionalSpawnerData;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModEntities;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
@@ -54,15 +55,22 @@ public class AddEntitySpawns
             // Add spawns
             CSMath.doIfNotNull(ConfigSettings.ENTITY_SPAWN_BIOMES.get(registryAccess).get(biome), spawns ->
             {
-                for (SpawnBiomeData spawnBiomeData : spawns)
+                for (SpawnBiomeData spawn : spawns)
                 {
-                    RegistryHelper.mapTaggableList(spawnBiomeData.entities())
+                    RegistryHelper.mapTaggableList(spawn.entities())
                     .forEach(entityType ->
                     {
-                        List<MobSpawnInfo.Spawners> spawners = new ArrayList<>(biome.getMobSettings().getMobs(spawnBiomeData.category()));
-                        spawners.removeIf(spawnerData -> spawnerData.type == entityType);
-                        spawners.add(new MobSpawnInfo.Spawners(entityType, spawnBiomeData.weight(), 1, 3));
-                        spawnerMap.put(spawnBiomeData.category(), spawners);
+                        List<MobSpawnInfo.Spawners> spawners = new ArrayList<>(biome.getMobSettings().getMobs(spawn.category()));
+
+                        FunctionalSpawnerData spawnerData = new FunctionalSpawnerData(entityType, spawn.weight(), spawn.count().min(), spawn.count().max(),
+                                                                                      (level, structureManager, chunkGenerator, category, data, pos) ->
+                                                                                      {
+                                                                                          return spawn.location().test(level, pos)
+                                                                                              && spawn.blockBelow().test(level, pos.below());
+                                                                                      });
+                        spawners.removeIf(oldData -> oldData.type == entityType);
+                        spawners.add(spawnerData);
+                        spawnerMap.put(spawn.category(), spawners);
                     });
                 }
             });

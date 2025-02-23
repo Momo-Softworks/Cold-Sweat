@@ -35,6 +35,7 @@
     "MixinLivingLoad",
     "MixinMenuChanged",
     "MixinMinecart",
+    "MixinMobSpawning",
     "MixinPreServerLoad",
     "MixinShearsDispenseBehavior",
     "MixinSmithingRecipe",

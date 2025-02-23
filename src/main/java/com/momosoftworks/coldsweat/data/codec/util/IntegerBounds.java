@@ -9,6 +9,8 @@ import java.util.Objects;
 
 public class IntegerBounds
 {
+    public static IntegerBounds NONE = new IntegerBounds(-Integer.MAX_VALUE, Integer.MAX_VALUE);
+
     public int min;
     public int max;
 
@@ -26,7 +28,12 @@ public class IntegerBounds
             bounds -> bounds.max == bounds.min ? Either.right(bounds.min) : Either.left(bounds)
     );
 
-    public static IntegerBounds NONE = new IntegerBounds(-Integer.MAX_VALUE, Integer.MAX_VALUE);
+    public int min()
+    {   return min;
+    }
+    public int max()
+    {   return max;
+    }
 
     public boolean test(int value)
     {   return value >= min && value <= max;
