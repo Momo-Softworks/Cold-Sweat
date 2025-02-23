@@ -7,10 +7,7 @@ import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.*;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.jetbrains.annotations.NotNull;
@@ -62,6 +59,7 @@ public class InsulationItemsGroup extends CreativeModeTab
     private static List<ItemStack> sort(Collection<Map.Entry<Item, InsulatorData>> items)
     {
         List<Map.Entry<Item, InsulatorData>> list = new ArrayList<>(items);
+        list.removeIf(entry -> entry.getKey() == null || entry.getKey() == Items.AIR);
 
         // Sort by tags the items are in
         list.sort(Comparator.comparing(entry -> ForgeRegistries.ITEMS.tags().getReverseTag(entry.getKey()).orElse(null).getTagKeys().sequential().map(tag -> tag.location().toString()).reduce("", (a, b) -> a + b)));
