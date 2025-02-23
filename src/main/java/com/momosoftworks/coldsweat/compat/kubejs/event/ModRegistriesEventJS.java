@@ -14,8 +14,8 @@ import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.util.serialization.DynamicHolder;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
-import com.momosoftworks.coldsweat.util.serialization.Triplet;
 import dev.latvian.kubejs.event.StartupEventJS;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
@@ -23,7 +23,6 @@ import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.feature.StructureFeature;
-import net.minecraft.world.gen.feature.structure.Structure;
 
 import javax.xml.ws.Holder;
 import java.util.function.Consumer;
@@ -301,6 +300,63 @@ public class ModRegistriesEventJS extends StartupEventJS
 
     public void addStructureOffset(String structureId, double temperature)
     {   addStructureOffset(structureId, temperature, "mc");
+    }
+
+    /*
+     Entity Temperature
+     */
+
+    public void addEntityTemperature(Consumer<EntityTempBuilderJS> builder)
+    {
+        EntityTempBuilderJS entityTempJS = new EntityTempBuilderJS();
+        builder.accept(entityTempJS);
+        EntityTempData entityTempData = entityTempJS.build();
+        if (!entityTempData.areRequiredModsLoaded()) return;
+
+        if (entityTempJS.entities.isEmpty())
+        {   entityTempJS.entities.add(null);
+        }
+        for (EntityType<?> item : entityTempJS.entities)
+        {   ConfigSettings.ENTITY_TEMPERATURES.get().put(item, entityTempData);
+        }
+    }
+
+    /*
+     Insulating Mounts
+     */
+
+    public void addInsulatingMount(Consumer<InsulatingMountBuilderJS> builder)
+    {
+        InsulatingMountBuilderJS insulatingMountJS = new InsulatingMountBuilderJS();
+        builder.accept(insulatingMountJS);
+        MountData mountData = insulatingMountJS.build();
+        if (!mountData.areRequiredModsLoaded()) return;
+
+        if (insulatingMountJS.entities.isEmpty())
+        {   insulatingMountJS.entities.add(null);
+        }
+        for (EntityType<?> item : insulatingMountJS.entities)
+        {   ConfigSettings.INSULATED_MOUNTS.get().put(item, mountData);
+        }
+    }
+
+    /*
+     Spawn Biomes
+     */
+
+    public void addSpawnBiomes(Consumer<SpawnBiomeBuilderJS> builder)
+    {
+        SpawnBiomeBuilderJS spawnBiomeJS = new SpawnBiomeBuilderJS();
+        builder.accept(spawnBiomeJS);
+        SpawnBiomeData spawnBiomeData = spawnBiomeJS.build();
+        if (!spawnBiomeData.areRequiredModsLoaded()) return;
+
+        if (spawnBiomeJS.biomes.isEmpty())
+        {   spawnBiomeJS.biomes.add(null);
+        }
+        for (Holder<Biome> biome : spawnBiomeJS.biomes)
+        {   ConfigSettings.ENTITY_SPAWN_BIOMES.get().put(biome, spawnBiomeData);
+        }
     }
 
     /*
