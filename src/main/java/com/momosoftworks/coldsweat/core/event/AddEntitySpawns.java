@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.momosoftworks.coldsweat.common.entity.Chameleon;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.SpawnBiomeData;
+import com.momosoftworks.coldsweat.data.codec.util.FunctionalSpawnerData;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModEntities;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
@@ -57,15 +58,22 @@ public class AddEntitySpawns
             // Add spawns
             CSMath.doIfNotNull(ConfigSettings.ENTITY_SPAWN_BIOMES.get(registryAccess).get(biome), spawns ->
             {
-                for (SpawnBiomeData spawnBiomeData : spawns)
+                for (SpawnBiomeData spawn : spawns)
                 {
-                    RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITIES, spawnBiomeData.entities())
+                    RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITIES, spawn.entities())
                     .forEach(entityType ->
                     {
-                        List<MobSpawnSettings.SpawnerData> spawners = new ArrayList<>(biome.value().getMobSettings().getMobs(spawnBiomeData.category()).unwrap());
-                        spawners.removeIf(spawnerData -> spawnerData.type == entityType);
-                        spawners.add(new MobSpawnSettings.SpawnerData(entityType, spawnBiomeData.weight(), 1, 3));
-                        spawnerMap.put(spawnBiomeData.category(), WeightedRandomList.create(spawners));
+                        List<MobSpawnSettings.SpawnerData> spawners = new ArrayList<>(biome.value().getMobSettings().getMobs(spawn.category()).unwrap());
+
+                        FunctionalSpawnerData spawnerData = new FunctionalSpawnerData(entityType, spawn.weight(), spawn.count().min(), spawn.count().max(),
+                                                                                      (level, structureManager, chunkGenerator, category, data, pos) ->
+                                                                                      {
+                                                                                          return spawn.location().test(level, pos)
+                                                                                              && spawn.blockBelow().test(level, pos.below());
+                                                                                      });
+                        spawners.removeIf(oldData -> oldData.type == entityType);
+                        spawners.add(spawnerData);
+                        spawnerMap.put(spawn.category(), WeightedRandomList.create(spawners));
                     });
                 }
             });
