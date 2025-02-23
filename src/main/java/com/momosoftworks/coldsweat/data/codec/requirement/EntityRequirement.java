@@ -55,6 +55,15 @@ public record EntityRequirement(Optional<List<Either<TagKey<EntityType<?>>, Enti
              Optional.ofNullable(predicate));
     }
 
+    public EntityRequirement(Predicate<Entity> predicate)
+    {
+        this(Optional.empty(), Optional.empty(), Optional.empty(),
+            Optional.empty(), Optional.empty(), Optional.empty(),
+            Optional.empty(), Optional.empty(), Optional.empty(),
+            Optional.empty(), Optional.empty(), Optional.empty(),
+            Optional.empty(), Optional.ofNullable(predicate));
+    }
+
     public static final EntityRequirement NONE = new EntityRequirement(Optional.empty(), Optional.empty(), Optional.empty(),
                                                                        Optional.empty(), Optional.empty(), Optional.empty(),
                                                                        Optional.empty(), Optional.empty(), Optional.empty(),
