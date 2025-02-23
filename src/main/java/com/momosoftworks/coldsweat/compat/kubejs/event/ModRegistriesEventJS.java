@@ -354,7 +354,7 @@ public class ModRegistriesEventJS extends StartupEventJS
         if (spawnBiomeJS.biomes.isEmpty())
         {   spawnBiomeJS.biomes.add(null);
         }
-        for (Holder<Biome> biome : spawnBiomeJS.biomes)
+        for (Biome biome : spawnBiomeJS.biomes)
         {   ConfigSettings.ENTITY_SPAWN_BIOMES.get().put(biome, spawnBiomeData);
         }
     }
