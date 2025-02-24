@@ -80,9 +80,9 @@ public record EntityRequirement(Optional<List<Either<TagKey<EntityType<?>>, Enti
             EntitySubRequirement.CODEC.optionalFieldOf("type_data").forGetter(requirement -> requirement.typeSpecificData),
             Codec.STRING.optionalFieldOf("team").forGetter(requirement -> requirement.team),
             Codec.unboundedMap(Temperature.Trait.CODEC, DoubleBounds.CODEC).optionalFieldOf("temperature").forGetter(requirement -> requirement.temperature)
-    ).apply(instance, (type, location, standingOn, effects, nbt, flags, equipment, typeData, team, temperature) -> new EntityRequirement(type, location, standingOn, effects, nbt, flags, equipment, typeData, team,
-                                                                                                                  Optional.empty(), Optional.empty(), Optional.empty(),
-                                                                                                                  temperature)));
+    ).apply(instance, (type, location, standingOn, effects, nbt, flags, equipment, typeData, team, temperature) ->
+            new EntityRequirement(type, location, standingOn, effects, nbt, flags, equipment, typeData, team,
+                                  Optional.empty(), Optional.empty(), Optional.empty(), temperature)));
 
     private static final List<Codec<EntityRequirement>> REQUIREMENT_CODEC_STACK = new ArrayList<>(List.of(SIMPLE_CODEC));
     // Allow for up to 16 layers of inner codecs

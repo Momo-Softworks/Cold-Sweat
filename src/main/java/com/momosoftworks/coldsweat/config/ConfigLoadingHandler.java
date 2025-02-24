@@ -373,9 +373,6 @@ public class ConfigLoadingHandler
             insulator.data().items().ifPresent(itemList ->
             {   items.addAll(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, itemList));
             });
-            insulator.data().tag().ifPresent(tag ->
-            {   items.addAll(BuiltInRegistries.ITEM.getTag(tag).get().stream().map(Holder::value).toList());
-            });
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -411,9 +408,6 @@ public class ConfigLoadingHandler
             fuelData.data().items().ifPresent(itemList ->
             {   items.addAll(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, itemList));
             });
-            fuelData.data().tag().ifPresent(tag ->
-            {   items.addAll(BuiltInRegistries.ITEM.getTag(tag).get().stream().map(Holder::value).toList());
-            });
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -445,9 +439,6 @@ public class ConfigLoadingHandler
             foodData.data().items().ifPresent(itemList ->
             {   items.addAll(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, itemList));
             });
-            foodData.data().tag().ifPresent(tag ->
-            {   items.addAll(BuiltInRegistries.ITEM.getTag(tag).get().stream().map(Holder::value).toList());
-            });
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -472,9 +463,6 @@ public class ConfigLoadingHandler
             carryTempData.data().items().ifPresent(itemList ->
             {   items.addAll(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, itemList));
             });
-            carryTempData.data().tag().ifPresent(tag ->
-            {   items.addAll(BuiltInRegistries.ITEM.getTag(tag).stream().flatMap(HolderSet.Named::stream).map(Holder::value).toList());
-            });
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -498,9 +486,6 @@ public class ConfigLoadingHandler
             List<Item> items = new ArrayList<>();
             dryingItemData.data().items().ifPresent(itemList ->
             {   items.addAll(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, itemList));
-            });
-            dryingItemData.data().tag().ifPresent(tag ->
-            {   items.addAll(BuiltInRegistries.ITEM.getTag(tag).get().stream().map(Holder::value).toList());
             });
             if (items.isEmpty())
             {   items.add(null);

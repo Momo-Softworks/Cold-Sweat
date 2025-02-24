@@ -43,7 +43,7 @@ public record PlayerDataRequirement(IntegerBounds level, Optional<GameType> game
     {
         return RecordCodecBuilder.mapCodec(instance -> instance.group(
                 IntegerBounds.CODEC.optionalFieldOf("level", IntegerBounds.NONE).forGetter(requirement -> requirement.level),
-                GameType.CODEC.optionalFieldOf("gamemode").forGetter(requirement -> requirement.gameType),
+                GameType.CODEC.optionalFieldOf("game_mode").forGetter(requirement -> requirement.gameType),
                 Codec.unboundedMap(StatRequirement.CODEC, IntegerBounds.CODEC).optionalFieldOf("stats").forGetter(requirement -> requirement.stats),
                 Codec.unboundedMap(ResourceLocation.CODEC, Codec.BOOL).optionalFieldOf("recipes").forGetter(requirement -> requirement.recipes),
                 Codec.unboundedMap(ResourceLocation.CODEC, Codec.either(AdvancementCompletionRequirement.CODEC, AdvancementCriteriaRequirement.CODEC)).optionalFieldOf("advancements").forGetter(requirement -> requirement.advancements),
