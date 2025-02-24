@@ -230,14 +230,12 @@ public abstract class WorldHelper
         return sections[CSMath.clamp(y >> 4, 0, sections.length - 1)];
     }
 
-    @Nullable
     public static Optional<StructureFeature<?, ?>> getStructureAt(World level, BlockPos pos)
     {
         if (!(level instanceof ServerWorld)) return Optional.empty();
 
         ServerWorld serverLevel = ((ServerWorld) level);
         StructureManager structureManager = serverLevel.structureFeatureManager();
-        Registry<Structure<?>> structureRegistry = serverLevel.registryAccess().registryOrThrow(Registry.STRUCTURE_FEATURE_REGISTRY);
 
         // Iterate over all structures at the position (ignores Y level)
         for (Map.Entry<Structure<?>, LongSet> entry : level.getChunk(pos).getAllReferences().entrySet())
@@ -257,7 +255,7 @@ public abstract class WorldHelper
                     // If the structure has a piece at the position, get the temperature
                     if (structurestart.getPieces().stream().anyMatch(piece -> piece.getBoundingBox().isInside(pos)))
                     {
-                        ResourceLocation structureId = structureRegistry.getKey(structure);
+                        ResourceLocation structureId = structure.delegate.name();
                         if (structureId == null)
                         {   return Optional.empty();
                         }
