@@ -30,20 +30,20 @@ public class BlockRequirement
     private final Optional<List<Either<ITag<Block>, Block>>> blocks;
     private final Optional<StateRequirement> state;
     private final Optional<NbtRequirement> nbt;
-    private final Optional<Direction> sturdyFace;
+    private final Optional<List<Direction>> sturdyFaces;
     private final Optional<Boolean> withinWorldBounds;
     private final Optional<Boolean> replaceable;
     private final boolean negate;
 
     public BlockRequirement(Optional<List<Either<ITag<Block>, Block>>> blocks, Optional<StateRequirement> state,
-                            Optional<NbtRequirement> nbt, Optional<Direction> sturdyFace,
+                            Optional<NbtRequirement> nbt, Optional<List<Direction>> sturdyFaces,
                             Optional<Boolean> withinWorldBounds, Optional<Boolean> replaceable,
                             boolean negate)
     {
         this.blocks = blocks;
         this.state = state;
         this.nbt = nbt;
-        this.sturdyFace = sturdyFace;
+        this.sturdyFaces = sturdyFaces;
         this.withinWorldBounds = withinWorldBounds;
         this.replaceable = replaceable;
         this.negate = negate;
@@ -57,7 +57,7 @@ public class BlockRequirement
             ConfigHelper.tagOrBuiltinCodec(Registry.BLOCK_REGISTRY, Registry.BLOCK).listOf().optionalFieldOf("blocks").forGetter(predicate -> predicate.blocks),
             StateRequirement.CODEC.optionalFieldOf("state").forGetter(predicate -> predicate.state),
             NbtRequirement.CODEC.optionalFieldOf("nbt").forGetter(predicate -> predicate.nbt),
-            Codec.STRING.xmap(Direction::byName, Direction::getName).optionalFieldOf("has_sturdy_face").forGetter(predicate -> predicate.sturdyFace),
+            Codec.STRING.xmap(Direction::byName, Direction::getName).listOf().optionalFieldOf("sturdy_faces").forGetter(predicate -> predicate.sturdyFaces),
             Codec.BOOL.optionalFieldOf("within_world_bounds").forGetter(predicate -> predicate.withinWorldBounds),
             Codec.BOOL.optionalFieldOf("replaceable").forGetter(predicate -> predicate.replaceable),
             Codec.BOOL.optionalFieldOf("negate", false).forGetter(predicate -> predicate.negate)
@@ -72,8 +72,8 @@ public class BlockRequirement
     public Optional<NbtRequirement> nbt()
     {   return nbt;
     }
-    public Optional<Direction> sturdyFace()
-    {   return sturdyFace;
+    public Optional<List<Direction>> sturdyFaces()
+    {   return sturdyFaces;
     }
     public Optional<Boolean> withinWorldBounds()
     {   return withinWorldBounds;
@@ -87,35 +87,35 @@ public class BlockRequirement
 
     public boolean test(World level, BlockPos pos, BlockState state)
     {
-        if (!level.isLoaded(pos))
-        {   return false;
+        if (!level.isLoaded(pos)) return false;
+
+        if (this.blocks.isPresent() && this.blocks.get().stream().noneMatch(either -> either.map(state::is, state::is)))
+        {   return false ^ this.negate;
         }
-        else
+        if (this.state.isPresent() && !this.state.get().test(state))
+        {   return false ^ this.negate;
+        }
+        if (this.nbt.isPresent())
         {
-            if (this.blocks.isPresent() && this.blocks.get().stream().noneMatch(either -> either.map(state::is, state::is)))
-            {   return false ^ this.negate;
-            }
-            else if (this.state.isPresent() && !this.state.get().test(state))
-            {   return false ^ this.negate;
-            }
-            else if (this.nbt.isPresent())
+            TileEntity blockentity = level.getBlockEntity(pos);
+            return (blockentity != null && this.nbt.get().test(blockentity.save(new CompoundNBT()))) ^ this.negate;
+        }
+        if (this.sturdyFaces.isPresent())
+        {
+            for (Direction face : this.sturdyFaces.get())
             {
-                TileEntity blockentity = level.getBlockEntity(pos);
-                return (blockentity != null && this.nbt.get().test(blockentity.save(new CompoundNBT()))) ^ this.negate;
-            }
-            else if (this.sturdyFace.isPresent())
-            {   return state.isFaceSturdy(level, pos, this.sturdyFace.get()) ^ this.negate;
-            }
-            else if (this.withinWorldBounds.isPresent())
-            {   return level.getWorldBorder().isWithinBounds(pos) ^ this.negate;
-            }
-            else if (this.replaceable.isPresent())
-            {   return state.isAir() || state.canBeReplaced(new DirectionalPlaceContext(level, pos, Direction.DOWN, ItemStack.EMPTY, Direction.UP)) ^ this.negate;
-            }
-            else
-            {   return true ^ this.negate;
+                if (!state.isFaceSturdy(level, pos, face))
+                {   return false ^ this.negate;
+                }
             }
         }
+        if (this.withinWorldBounds.isPresent())
+        {   return level.getWorldBorder().isWithinBounds(pos) ^ this.negate;
+        }
+        if (this.replaceable.isPresent())
+        {   return state.isAir() || state.canBeReplaced(new DirectionalPlaceContext(level, pos, Direction.DOWN, ItemStack.EMPTY, Direction.UP)) ^ this.negate;
+        }
+        return true ^ this.negate;
     }
 
     public boolean test(World level, BlockPos pos)
@@ -142,7 +142,7 @@ public class BlockRequirement
             && blocks.equals(that.blocks)
             && state.equals(that.state)
             && nbt.equals(that.nbt)
-            && sturdyFace.equals(that.sturdyFace)
+            && sturdyFaces.equals(that.sturdyFaces)
             && withinWorldBounds.equals(that.withinWorldBounds)
             && replaceable.equals(that.replaceable);
     }

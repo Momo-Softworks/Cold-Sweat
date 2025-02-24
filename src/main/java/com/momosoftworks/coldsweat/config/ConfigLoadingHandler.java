@@ -350,9 +350,6 @@ public class ConfigLoadingHandler
             insulator.data().items().ifPresent(itemList ->
             {   items.addAll(RegistryHelper.mapTaggableList(itemList));
             });
-            insulator.data().tag().ifPresent(tag ->
-            {   items.addAll(tag.getValues());
-            });
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -388,9 +385,6 @@ public class ConfigLoadingHandler
             fuelData.data().items().ifPresent(itemList ->
             {   items.addAll(RegistryHelper.mapTaggableList(itemList));
             });
-            fuelData.data().tag().ifPresent(tag ->
-            {   items.addAll(tag.getValues());
-            });
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -421,9 +415,6 @@ public class ConfigLoadingHandler
             foodData.data().items().ifPresent(itemList ->
             {   items.addAll(RegistryHelper.mapTaggableList(itemList));
             });
-            foodData.data().tag().ifPresent(tag ->
-            {   items.addAll(tag.getValues());
-            });
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -447,9 +438,6 @@ public class ConfigLoadingHandler
             carryTempData.data().items().ifPresent(itemList ->
             {   items.addAll(RegistryHelper.mapTaggableList(itemList));
             });
-            carryTempData.data().tag().ifPresent(tag ->
-            {   items.addAll(tag.getValues());
-            });
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -472,9 +460,6 @@ public class ConfigLoadingHandler
             List<Item> items = new ArrayList<>();
             dryingItemData.data().items().ifPresent(itemList ->
             {   items.addAll(RegistryHelper.mapTaggableList(itemList));
-            });
-            dryingItemData.data().tag().ifPresent(tag ->
-            {   items.addAll(tag.getValues().stream().collect(Collectors.toList()));
             });
             if (items.isEmpty())
             {   items.add(null);
