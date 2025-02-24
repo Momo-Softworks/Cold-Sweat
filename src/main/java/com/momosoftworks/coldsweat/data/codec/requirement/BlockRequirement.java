@@ -26,7 +26,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import java.util.*;
 
 public record BlockRequirement(Optional<List<Either<TagKey<Block>, Block>>> blocks, Optional<StateRequirement> state,
-                               Optional<NbtRequirement> nbt, Optional<Direction> sturdyFace,
+                               Optional<NbtRequirement> nbt, Optional<List<Direction>> sturdyFaces,
                                Optional<Boolean> withinWorldBounds, Optional<Boolean> replaceable,
                                boolean negate)
 {
@@ -38,7 +38,7 @@ public record BlockRequirement(Optional<List<Either<TagKey<Block>, Block>>> bloc
             ConfigHelper.tagOrBuiltinCodec(Registry.BLOCK_REGISTRY, ForgeRegistries.BLOCKS).listOf().optionalFieldOf("blocks").forGetter(predicate -> predicate.blocks),
             StateRequirement.CODEC.optionalFieldOf("state").forGetter(predicate -> predicate.state),
             NbtRequirement.CODEC.optionalFieldOf("nbt").forGetter(predicate -> predicate.nbt),
-            Direction.CODEC.optionalFieldOf("has_sturdy_face").forGetter(predicate -> predicate.sturdyFace),
+            Direction.CODEC.listOf().optionalFieldOf("sturdy_faces").forGetter(predicate -> predicate.sturdyFaces),
             Codec.BOOL.optionalFieldOf("within_world_bounds").forGetter(predicate -> predicate.withinWorldBounds),
             Codec.BOOL.optionalFieldOf("replaceable").forGetter(predicate -> predicate.replaceable),
             Codec.BOOL.optionalFieldOf("negate", false).forGetter(predicate -> predicate.negate)
@@ -46,35 +46,35 @@ public record BlockRequirement(Optional<List<Either<TagKey<Block>, Block>>> bloc
 
     public boolean test(Level level, BlockPos pos, BlockState state)
     {
-        if (!level.isLoaded(pos))
-        {   return false;
+        if (!level.isLoaded(pos)) return false;
+
+        if (this.blocks.isPresent() && this.blocks.get().stream().noneMatch(either -> either.map(state::is, state::is)))
+        {   return false ^ this.negate;
         }
-        else
+        if (this.state.isPresent() && !this.state.get().test(state))
+        {   return false ^ this.negate;
+        }
+        if (this.nbt.isPresent())
         {
-            if (this.blocks.isPresent() && this.blocks.get().stream().noneMatch(either -> either.map(state::is, state::is)))
-            {   return false ^ this.negate;
-            }
-            else if (this.state.isPresent() && !this.state.get().test(state))
-            {   return false ^ this.negate;
-            }
-            else if (this.nbt.isPresent())
+            BlockEntity blockentity = level.getBlockEntity(pos);
+            return (blockentity != null && this.nbt.get().test(blockentity.saveWithFullMetadata())) ^ this.negate;
+        }
+        if (this.sturdyFaces.isPresent())
+        {
+            for (Direction face : this.sturdyFaces.get())
             {
-                BlockEntity blockentity = level.getBlockEntity(pos);
-                return (blockentity != null && this.nbt.get().test(blockentity.saveWithFullMetadata())) ^ this.negate;
-            }
-            else if (this.sturdyFace.isPresent())
-            {   return state.isFaceSturdy(level, pos, this.sturdyFace.get()) ^ this.negate;
-            }
-            else if (this.withinWorldBounds.isPresent())
-            {   return level.getWorldBorder().isWithinBounds(pos) ^ this.negate;
-            }
-            else if (this.replaceable.isPresent())
-            {   return state.isAir() || state.canBeReplaced(new DirectionalPlaceContext(level, pos, Direction.DOWN, ItemStack.EMPTY, Direction.UP)) ^ this.negate;
-            }
-            else
-            {   return true ^ this.negate;
+                if (!state.isFaceSturdy(level, pos, face))
+                {   return false ^ this.negate;
+                }
             }
         }
+        if (this.withinWorldBounds.isPresent())
+        {   return level.getWorldBorder().isWithinBounds(pos) ^ this.negate;
+        }
+        if (this.replaceable.isPresent())
+        {   return state.isAir() || state.canBeReplaced(new DirectionalPlaceContext(level, pos, Direction.DOWN, ItemStack.EMPTY, Direction.UP)) ^ this.negate;
+        }
+        return true ^ this.negate;
     }
 
     public boolean test(Level level, BlockPos pos)
@@ -101,7 +101,7 @@ public record BlockRequirement(Optional<List<Either<TagKey<Block>, Block>>> bloc
             && blocks.equals(that.blocks)
             && state.equals(that.state)
             && nbt.equals(that.nbt)
-            && sturdyFace.equals(that.sturdyFace)
+            && sturdyFaces.equals(that.sturdyFaces)
             && withinWorldBounds.equals(that.withinWorldBounds)
             && replaceable.equals(that.replaceable);
     }
