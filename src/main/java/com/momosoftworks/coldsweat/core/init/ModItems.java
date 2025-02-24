@@ -32,13 +32,10 @@ public class ModItems
     // Armor Items
     public static final DeferredItem<Item> HOGLIN_HEADPIECE = ITEMS.register("hoglin_headpiece", () ->
             new HoglinArmorItem(ModArmorMaterials.HOGLIN, ArmorItem.Type.HELMET, new Item.Properties()));
-
     public static final DeferredItem<Item> HOGLIN_TUNIC = ITEMS.register("hoglin_tunic", () ->
             new HoglinArmorItem(ModArmorMaterials.HOGLIN, ArmorItem.Type.CHESTPLATE, new Item.Properties()));
-
     public static final DeferredItem<Item> HOGLIN_TROUSERS = ITEMS.register("hoglin_trousers", () ->
             new HoglinArmorItem(ModArmorMaterials.HOGLIN, ArmorItem.Type.LEGGINGS, new Item.Properties()));
-
     public static final DeferredItem<Item> HOGLIN_HOOVES = ITEMS.register("hoglin_hooves", () ->
             new HoglinArmorItem(ModArmorMaterials.HOGLIN, ArmorItem.Type.BOOTS, new Item.Properties()));
 
@@ -50,6 +47,15 @@ public class ModItems
             new GoatArmorItem(ModArmorMaterials.GOAT_FUR, ArmorItem.Type.LEGGINGS, new Item.Properties()));
     public static final DeferredItem<Item> GOAT_FUR_BOOTS = ITEMS.register("goat_fur_boots", () ->
             new GoatArmorItem(ModArmorMaterials.GOAT_FUR, ArmorItem.Type.BOOTS, new Item.Properties()));
+
+    public static final DeferredItem<Item> CHAMELEON_HELMET = ITEMS.register("chameleon_scale_helmet", () ->
+            new ChameleonArmorItem(ModArmorMaterials.CHAMELEON, ArmorItem.Type.HELMET, new Item.Properties()));
+    public static final DeferredItem<Item> CHAMELEON_CHESTPLATE = ITEMS.register("chameleon_scale_chestplate", () ->
+            new ChameleonArmorItem(ModArmorMaterials.CHAMELEON, ArmorItem.Type.CHESTPLATE, new Item.Properties()));
+    public static final DeferredItem<Item> CHAMELEON_LEGGINGS = ITEMS.register("chameleon_scale_leggings", () ->
+            new ChameleonArmorItem(ModArmorMaterials.CHAMELEON, ArmorItem.Type.LEGGINGS, new Item.Properties()));
+    public static final DeferredItem<Item> CHAMELEON_BOOTS = ITEMS.register("chameleon_scale_boots", () ->
+            new ChameleonArmorItem(ModArmorMaterials.CHAMELEON, ArmorItem.Type.BOOTS, new Item.Properties()));
 
     // Block Items
     public static final DeferredItem<BlockItem> BOILER = ITEMS.register("boiler", () -> new BlockItem(ModBlocks.BOILER.get(), BoilerBlock.getItemProperties()));

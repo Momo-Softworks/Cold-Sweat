@@ -13,6 +13,7 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.core.init.ModItemComponents;
 import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
@@ -40,7 +41,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Map;
@@ -66,23 +67,38 @@ public class ProcessEquipmentInsulation
             {
                 if (armorStack.getItem() instanceof Equipable)
                 {
-                    // Add the armor's intrinsic insulation value (defined in configs)
-                    // Mutually exclusive with Sewing Table insulation
-                    Collection<InsulatorData> armorInsulators = ConfigSettings.INSULATING_ARMORS.get().get(armorStack.getItem());
-                    if (!armorInsulators.isEmpty())
+                    List<InsulatorData> armorInsulators = new ArrayList<>(ConfigSettings.INSULATING_ARMORS.get().get(armorStack.getItem()));
+                    if (!armorInsulators.isEmpty()) // Add the armor's builtin insulation value (mutually exclusive with sewn insulation)
                     {
+                        // Adapt builtin armor insulation
+                        Insulation firstInsulation = armorInsulators.get(0).insulation().copy();
+                        double newFactor = 0;
+                        if (firstInsulation instanceof AdaptiveInsulation adaptive)
+                        {
+                            // Get armor insulation adaptations from NBT
+                            AdaptiveInsulation.setFactorFromArmor(adaptive, armorStack);
+                            newFactor = AdaptiveInsulation.calculateChange(adaptive, worldTemp, minTemp, maxTemp);
+                            armorStack.set(ModItemComponents.ARMOR_ADAPTATION, newFactor);
+                        }
+
                         for (InsulatorData armorInsulator : armorInsulators)
                         {
                             // Check if the player meets the predicate for the insulation
                             if (!armorInsulator.test(player, armorStack))
                             {   continue;
                             }
-                            mapAdd(armorInsulation, "cold_armor", armorInsulator.insulation().getCold());
-                            mapAdd(armorInsulation, "heat_armor", armorInsulator.insulation().getHeat());
+                            Insulation insulation = armorInsulator.insulation().copy();
+                            // Set adaptation to calculated value
+                            if (insulation instanceof AdaptiveInsulation adaptive)
+                            {   adaptive.setFactor(newFactor);
+                            }
+                            // Store cold/hot insulation values
+                            mapAdd(armorInsulation, "cold_armor", insulation.getCold());
+                            mapAdd(armorInsulation, "heat_armor", insulation.getHeat());
                         }
                     }
-                    else
-                    {   // Add the armor's insulation value from the Sewing Table
+                    else // Add the armor's insulation value from the Sewing Table
+                    {
                         Optional<ItemInsulationCap> icap = ItemInsulationManager.getInsulationCap(armorStack);
                         if (icap.isEmpty())
                         {   continue;

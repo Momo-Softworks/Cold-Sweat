@@ -18,7 +18,9 @@ public class ModItemComponents
                                                () -> DataComponentType.<Boolean>builder().persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL).build());
 
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<ItemInsulationCap>> ARMOR_INSULATION = DATA_COMPONENTS.register("armor_insulation",
-                                                                                                                                               () -> DataComponentType.<ItemInsulationCap>builder().persistent(ItemInsulationCap.CODEC).networkSynchronized(ItemInsulationCap.STREAM_CODEC).build());
+                                               () -> DataComponentType.<ItemInsulationCap>builder().persistent(ItemInsulationCap.CODEC).networkSynchronized(ItemInsulationCap.STREAM_CODEC).build());
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<Double>> ARMOR_ADAPTATION = DATA_COMPONENTS.register("armor_adaptation",
+                                               () -> DataComponentType.<Double>builder().persistent(Codec.DOUBLE).networkSynchronized(ByteBufCodecs.DOUBLE).build());
 
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Double>> WATER_TEMPERATURE = DATA_COMPONENTS.register("temperature",
                                                () -> DataComponentType.<Double>builder().persistent(Codec.DOUBLE).networkSynchronized(ByteBufCodecs.DOUBLE).build());

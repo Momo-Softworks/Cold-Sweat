@@ -37,4 +37,14 @@ public class ModArmorMaterials
             }), 15, SoundEvents.ARMOR_EQUIP_LEATHER, () -> Ingredient.of(ModItems.GOAT_FUR),
             List.of(new ArmorMaterial.Layer(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "goat_fur"))),
             0.0F, 0.0F));
+
+    public static final DeferredHolder<ArmorMaterial, ArmorMaterial> CHAMELEON = ARMOR_MATERIALS.register("chameleon", () -> new ArmorMaterial(
+            Util.make(new EnumMap<>(ArmorItem.Type.class), map -> {
+                map.put(ArmorItem.Type.HELMET, 2);
+                map.put(ArmorItem.Type.CHESTPLATE, 6);
+                map.put(ArmorItem.Type.LEGGINGS, 5);
+                map.put(ArmorItem.Type.BOOTS, 2);
+            }), 15, SoundEvents.ARMOR_EQUIP_NETHERITE, () -> Ingredient.of(ModItems.CHAMELEON_MOLT),
+            List.of(new ArmorMaterial.Layer(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "chameleon"))),
+            0.0F, 0.0F));
 }

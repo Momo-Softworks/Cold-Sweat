@@ -60,6 +60,10 @@ public class ModCreativeTabs
                         ModItems.GOAT_FUR_PARKA.value().getDefaultInstance(),
                         ModItems.GOAT_FUR_PANTS.value().getDefaultInstance(),
                         ModItems.GOAT_FUR_BOOTS.value().getDefaultInstance(),
+                        ModItems.CHAMELEON_HELMET.value().getDefaultInstance(),
+                        ModItems.CHAMELEON_CHESTPLATE.value().getDefaultInstance(),
+                        ModItems.CHAMELEON_LEGGINGS.value().getDefaultInstance(),
+                        ModItems.CHAMELEON_BOOTS.value().getDefaultInstance(),
                         ModItems.CHAMELEON_SPAWN_EGG.value().getDefaultInstance()
                 ));
             })
