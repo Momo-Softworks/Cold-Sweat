@@ -58,6 +58,11 @@ public class AdaptiveInsulation extends Insulation
         }
     }
 
+    @Override
+    public double getValue()
+    {   return insulation;
+    }
+
     public double getInsulation()
     {   return insulation;
     }

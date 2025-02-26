@@ -157,28 +157,32 @@ public class ItemSettingsConfig
                          "*\"nbt\": Optional. If set, the item will only provide insulation if it has the specified NBT tag."
                 )
                 .defineListAllowEmpty(List.of("Insulation Ingredients"), () -> ListBuilder.begin(
-                                List.of("minecraft:leather_helmet",     4,  4),
-                                List.of("minecraft:leather_chestplate", 6,  6),
-                                List.of("minecraft:leather_leggings",   5,  5),
-                                List.of("minecraft:leather_boots",      4,  4),
                                 List.of("minecraft:leather",            1,  1),
                                 List.of("cold_sweat:chameleon_molt",    2, 0.0085, "adaptive"),
                                 List.of("cold_sweat:hoglin_hide",       0,  2),
                                 List.of("cold_sweat:goat_fur",          2,  0),
                                 List.of("#minecraft:wool",              1.5, 0),
                                 List.of("minecraft:rabbit_hide",        0,  1.5),
-                                List.of("cold_sweat:hoglin_headpiece",  0,  8),
-                                List.of("cold_sweat:hoglin_tunic",      0,  12),
-                                List.of("cold_sweat:hoglin_trousers",   0,  10),
-                                List.of("cold_sweat:hoglin_hooves",     0,  8),
-                                List.of("cold_sweat:goat_fur_cap",      8,  0),
-                                List.of("cold_sweat:goat_fur_parka",    12, 0),
-                                List.of("cold_sweat:goat_fur_pants",    10, 0),
-                                List.of("cold_sweat:goat_fur_boots",    8,  0),
-                                List.of("cold_sweat:chameleon_scale_helmet", 8, 0.0085, "adaptive"),
-                                List.of("cold_sweat:chameleon_scale_chestplate", 12, 0.0085, "adaptive"),
-                                List.of("cold_sweat:chameleon_scale_leggings", 10, 0.0085, "adaptive"),
-                                List.of("cold_sweat:chameleon_scale_boots", 8, 0.0085, "adaptive"))
+
+                                List.of("minecraft:leather_helmet",     4, 4, "static", "", true),
+                                List.of("minecraft:leather_chestplate", 6, 6, "static", "", true),
+                                List.of("minecraft:leather_leggings",   5, 5, "static", "", true),
+                                List.of("minecraft:leather_boots",      4, 4, "static", "", true),
+
+                                List.of("cold_sweat:hoglin_headpiece",  0,  8, "static", "", true),
+                                List.of("cold_sweat:hoglin_tunic",      0, 12, "static", "", true),
+                                List.of("cold_sweat:hoglin_trousers",   0, 10, "static", "", true),
+                                List.of("cold_sweat:hoglin_hooves",     0,  8, "static", "", true),
+
+                                List.of("cold_sweat:goat_fur_cap",      8,  0, "static", "", true),
+                                List.of("cold_sweat:goat_fur_parka",    12, 0, "static", "", true),
+                                List.of("cold_sweat:goat_fur_pants",    10, 0, "static", "", true),
+                                List.of("cold_sweat:goat_fur_boots",    8,  0, "static", "", true),
+
+                                List.of("cold_sweat:chameleon_scale_helmet", 8, 0.0085, "adaptive", "", true),
+                                List.of("cold_sweat:chameleon_scale_chestplate", 12, 0.0085, "adaptive", "", true),
+                                List.of("cold_sweat:chameleon_scale_leggings", 10, 0.0085, "adaptive", "", true),
+                                List.of("cold_sweat:chameleon_scale_boots", 8, 0.0085, "adaptive", "", true))
                             .addIf(CompatManager.isEnvironmentalLoaded(),
                                 () -> List.of("environmental:yak_hair", 1.5, -1)
                         ).build(),
@@ -187,28 +191,32 @@ public class ItemSettingsConfig
                                 && list.get(1) instanceof Number
                                 && list.get(2) instanceof Number
                                 && (list.size() < 4 || list.get(3) instanceof String)
-                                && (list.size() < 5 || list.get(4) instanceof String));
+                                && (list.size() < 5 || list.get(4) instanceof String)
+                                && (list.size() < 6 || list.get(5) instanceof Boolean));
 
         INSULATING_ARMOR = BUILDER
                 .comment("Defines the items that provide insulation when worn",
                         "See Insulation Ingredients for formatting")
                 .defineListAllowEmpty(List.of("Insulating Armor"), () -> ListBuilder.begin(
-                                List.of("minecraft:leather_helmet",      4,  4),
-                                List.of("minecraft:leather_chestplate",  6,  6),
-                                List.of("minecraft:leather_leggings",    5,  5),
-                                List.of("minecraft:leather_boots",       4,  4),
-                                List.of("cold_sweat:hoglin_headpiece",   0,  8),
-                                List.of("cold_sweat:hoglin_tunic",       0,  12),
-                                List.of("cold_sweat:hoglin_trousers",    0,  10),
-                                List.of("cold_sweat:hoglin_hooves",      0,  8),
-                                List.of("cold_sweat:goat_fur_cap",       8,  0),
-                                List.of("cold_sweat:goat_fur_parka",     12, 0),
-                                List.of("cold_sweat:goat_fur_pants",     10, 0),
-                                List.of("cold_sweat:goat_fur_boots",     8,  0),
-                                List.of("cold_sweat:chameleon_scale_helmet", 8, 0.0085, "adaptive"),
-                                List.of("cold_sweat:chameleon_scale_chestplate", 12, 0.0085, "adaptive"),
-                                List.of("cold_sweat:chameleon_scale_leggings", 10, 0.0085, "adaptive"),
-                                List.of("cold_sweat:chameleon_scale_boots", 8, 0.0085, "adaptive"))
+                                List.of("minecraft:leather_helmet",      4,  4, "static", "", true),
+                                List.of("minecraft:leather_chestplate",  6,  6, "static", "", true),
+                                List.of("minecraft:leather_leggings",    5,  5, "static", "", true),
+                                List.of("minecraft:leather_boots",       4,  4, "static", "", true),
+
+                                List.of("cold_sweat:hoglin_headpiece",   0,  8, "static", "", true),
+                                List.of("cold_sweat:hoglin_tunic",       0,  12, "static", "", true),
+                                List.of("cold_sweat:hoglin_trousers",    0,  10, "static", "", true),
+                                List.of("cold_sweat:hoglin_hooves",      0,  8, "static", "", true),
+
+                                List.of("cold_sweat:goat_fur_cap",       8,  0, "static", "", true),
+                                List.of("cold_sweat:goat_fur_parka",     12, 0, "static", "", true),
+                                List.of("cold_sweat:goat_fur_pants",     10, 0, "static", "", true),
+                                List.of("cold_sweat:goat_fur_boots",     8,  0, "static", "", true),
+
+                                List.of("cold_sweat:chameleon_scale_helmet", 8, 0.0085, "adaptive", "", true),
+                                List.of("cold_sweat:chameleon_scale_chestplate", 12, 0.0085, "adaptive", "", true),
+                                List.of("cold_sweat:chameleon_scale_leggings", 10, 0.0085, "adaptive", "", true),
+                                List.of("cold_sweat:chameleon_scale_boots", 8, 0.0085, "adaptive", "", true))
                             .addIf(CompatManager.isEnvironmentalLoaded(),
                                 () -> List.of("environmental:yak_pants", 7.5, -5)
                         ).build(),

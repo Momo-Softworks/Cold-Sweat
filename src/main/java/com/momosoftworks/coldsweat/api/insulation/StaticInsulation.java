@@ -39,6 +39,11 @@ public class StaticInsulation extends Insulation
     }
 
     @Override
+    public double getValue()
+    {   return this.cold + this.heat;
+    }
+
+    @Override
     public boolean isEmpty()
     {   return cold == 0 && heat == 0;
     }

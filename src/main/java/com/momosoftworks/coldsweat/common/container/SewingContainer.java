@@ -146,7 +146,7 @@ public class SewingContainer extends ItemCombinerMenu
             this.sendAllDataToRemote();
         }
         // If insulation is being added
-        else
+        else if (ItemInsulationManager.isInsulatable(stack))
         {
             if (!quickMoving)
             {
