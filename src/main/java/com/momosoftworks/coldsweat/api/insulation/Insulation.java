@@ -76,6 +76,7 @@ public abstract class Insulation implements NbtSerializable
 
     public abstract double getCold();
     public abstract double getHeat();
+    public abstract double getValue();
 
     public abstract <T extends Insulation> T copy();
 
@@ -93,27 +94,25 @@ public abstract class Insulation implements NbtSerializable
 
     public int getCompareValue()
     {
-        if (this instanceof AdaptiveInsulation insul)
-        {   return Math.abs(insul.getInsulation()) >= 2 ? 6 : 7;
+        if (this.split().size() > 1)
+        {   return 0;
+        }
+        else if (this instanceof AdaptiveInsulation insul)
+        {   return Math.abs(insul.getInsulation()) >= 2 ? 7 : 8;
         }
         else if (this instanceof StaticInsulation insul)
         {
-            double absCold = Math.abs(insul.getCold());
-            double absHot = Math.abs(insul.getHeat());
-            if (absCold >= 2 && absHot >= 2)
-                return 2;
-            else if (absCold >= 2)
-                return 0;
-            else if (absHot >= 2)
-                return 4;
-            else if (absCold >= 1 && absHot >= 1)
-                return 3;
-            else if (absCold >= 1)
-                return 1;
-            else if (absHot >= 1)
-                return 5;
+            double cold = Math.abs(insul.getCold());
+            double hot = Math.abs(insul.getHeat());
+            if (cold > hot)
+            {   return cold >= 2 ? 1 : 2;
+            }
+            else if (cold == hot)
+            {   return cold >= 1 ? 3 : 4;
+            }
             else
-                return 1;
+            {   return hot >= 2 ? 5 : 6;
+            }
         }
         return 0;
     }

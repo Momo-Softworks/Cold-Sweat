@@ -55,7 +55,8 @@ public class ItemInsulationManager
     public static boolean isInsulatable(ItemStack stack)
     {
         return stack.getItem() instanceof Equipable
-            && !ConfigSettings.INSULATION_ITEMS.get().containsKey(stack.getItem());
+            && !ConfigSettings.INSULATION_ITEMS.get().containsKey(stack.getItem())
+            && !ConfigSettings.INSULATING_ARMORS.get().containsKey(stack.getItem());
     }
 
     public static List<InsulatorData> getAllInsulatorsForStack(ItemStack stack)
@@ -67,7 +68,7 @@ public class ItemInsulationManager
         {
             getInsulationCap(stack).ifPresent(cap ->
             {
-                for (Pair<ItemStack, Multimap<InsulatorData, Insulation>> pair : cap.getInsulation())
+                for (Pair<ItemStack, List<InsulatorData>> pair : cap.getInsulation())
                 {   insulators.addAll(ConfigSettings.INSULATION_ITEMS.get().get(pair.getFirst().getItem()));
                 }
             });
@@ -91,9 +92,8 @@ public class ItemInsulationManager
         return ItemInsulationManager.getInsulationCap(armor)
                .map(ItemInsulationCap::getInsulation).orElse(new ArrayList<>())
                .stream()
-               .map(pair -> pair.mapSecond(map -> new FastMultiMap<>(map.entries().stream().filter(entry -> entry.getKey().test(entity, pair.getFirst())).toList())))
-                .map(map -> map.getSecond().keySet())
-               .flatMap(Collection::stream).toList();
+               .map(pair -> pair.mapSecond(insulators -> insulators.stream().filter(entry -> entry.test(entity, pair.getFirst())).toList()))
+               .map(Pair::getSecond).flatMap(Collection::stream).toList();
     }
 
     /**

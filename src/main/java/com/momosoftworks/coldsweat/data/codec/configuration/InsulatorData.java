@@ -41,11 +41,12 @@ public class InsulatorData extends ConfigData implements RequirementHolder
     final EntityRequirement predicate;
     final AttributeModifierMap attributes;
     final Map<ResourceLocation, Double> immuneTempModifiers;
+    final boolean multiSlot;
 
     public InsulatorData(Insulation.Slot slot,
                          Insulation insulation, ItemRequirement data,
                          EntityRequirement predicate, AttributeModifierMap attributes,
-                         Map<ResourceLocation, Double> immuneTempModifiers,
+                         Map<ResourceLocation, Double> immuneTempModifiers, boolean multiSlot,
                          List<String> requiredMods)
     {
         super(requiredMods);
@@ -55,13 +56,14 @@ public class InsulatorData extends ConfigData implements RequirementHolder
         this.predicate = predicate;
         this.attributes = attributes;
         this.immuneTempModifiers = immuneTempModifiers;
+        this.multiSlot = multiSlot;
     }
 
     public InsulatorData(Insulation.Slot slot, Insulation insulation, ItemRequirement data,
                          EntityRequirement predicate, AttributeModifierMap attributes,
-                         Map<ResourceLocation, Double> immuneTempModifiers)
+                         Map<ResourceLocation, Double> immuneTempModifiers, boolean multiSlot)
     {
-        this(slot, insulation, data, predicate, attributes, immuneTempModifiers, ConfigHelper.getModIDs(CSMath.listOrEmpty(data.items()), BuiltInRegistries.ITEM));
+        this(slot, insulation, data, predicate, attributes, immuneTempModifiers, multiSlot, ConfigHelper.getModIDs(CSMath.listOrEmpty(data.items()), BuiltInRegistries.ITEM));
     }
 
     public static final Codec<InsulatorData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -71,6 +73,7 @@ public class InsulatorData extends ConfigData implements RequirementHolder
             EntityRequirement.getCodec().optionalFieldOf("entity", EntityRequirement.NONE).forGetter(InsulatorData::predicate),
             AttributeModifierMap.CODEC.optionalFieldOf("attributes", new AttributeModifierMap()).forGetter(InsulatorData::attributes),
             Codec.unboundedMap(ResourceLocation.CODEC, Codec.DOUBLE).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(InsulatorData::immuneTempModifiers),
+            Codec.BOOL.optionalFieldOf("multi_slot", false).forGetter(InsulatorData::multiSlot),
             Codec.STRING.listOf().optionalFieldOf("required_mods", List.of()).forGetter(InsulatorData::requiredMods)
     ).apply(instance, InsulatorData::new));
 
@@ -83,6 +86,7 @@ public class InsulatorData extends ConfigData implements RequirementHolder
         buf.writeNbt(EntityRequirement.getCodec().encode(insulator.predicate(), NbtOps.INSTANCE, new CompoundTag()).result().orElse(new CompoundTag()));
         AttributeModifierMap.STREAM_CODEC.encode(buf, insulator.attributes());
         buf.writeMap(insulator.immuneTempModifiers(), ResourceLocation.STREAM_CODEC, CommonStreamCodecs.DOUBLE);
+        buf.writeBoolean(insulator.multiSlot());
     },
     (buf) ->
     {
@@ -92,7 +96,8 @@ public class InsulatorData extends ConfigData implements RequirementHolder
         EntityRequirement predicate = EntityRequirement.getCodec().decode(NbtOps.INSTANCE, buf.readNbt()).result().orElse(Pair.of(EntityRequirement.NONE, new CompoundTag())).getFirst();
         AttributeModifierMap attributes = AttributeModifierMap.STREAM_CODEC.decode(buf);
         Map<ResourceLocation, Double> immuneTempModifiers = buf.readMap(ResourceLocation.STREAM_CODEC, CommonStreamCodecs.DOUBLE);
-        return new InsulatorData(slot, insulation, data, predicate, attributes, immuneTempModifiers);
+        boolean multiSlot = buf.readBoolean();
+        return new InsulatorData(slot, insulation, data, predicate, attributes, immuneTempModifiers, multiSlot);
     });
 
     public Insulation.Slot slot()
@@ -112,6 +117,9 @@ public class InsulatorData extends ConfigData implements RequirementHolder
     }
     public Map<ResourceLocation, Double> immuneTempModifiers()
     {   return immuneTempModifiers;
+    }
+    public boolean multiSlot()
+    {   return multiSlot;
     }
 
     @Override
@@ -135,17 +143,22 @@ public class InsulatorData extends ConfigData implements RequirementHolder
         if (items.isEmpty())
         {   return null;
         }
-        boolean adaptive = entry.size() > 3 && entry.get(3).equals("adaptive");
-        ItemComponentsRequirement components = entry.size() > 4 ? ItemComponentsRequirement.parse((String) entry.get(4)) : new ItemComponentsRequirement();
         double insulVal1 = ((Number) entry.get(1)).doubleValue();
         double insulVal2 = ((Number) entry.get(2)).doubleValue();
+        boolean adaptive = entry.size() > 3 && entry.get(3).equals("adaptive");
+        ItemComponentsRequirement components = entry.size() > 4 ? ItemComponentsRequirement.parse((String) entry.get(4)) : new ItemComponentsRequirement();
+        boolean multiSlot = entry.size() > 5 && (Boolean) entry.get(5);
 
         Insulation insulation = adaptive ? new AdaptiveInsulation(insulVal1, insulVal2)
                                          : new StaticInsulation(insulVal1, insulVal2);
 
         ItemRequirement requirement = new ItemRequirement(items, components);
 
-        return new InsulatorData(slot, insulation, requirement, EntityRequirement.NONE, new AttributeModifierMap(), new HashMap<>());
+        return new InsulatorData(slot, insulation, requirement, EntityRequirement.NONE, new AttributeModifierMap(), new HashMap<>(), multiSlot);
+    }
+
+    public InsulatorData copy()
+    {   return new InsulatorData(this.slot, this.insulation.copy(), this.data, this.predicate, this.attributes, new HashMap<>(this.immuneTempModifiers), this.multiSlot);
     }
 
     @Override

@@ -143,9 +143,9 @@ public class SyncItemPredicatesMessage implements CustomPacketPayload
         {
             ItemInsulationManager.getInsulationCap(stack).ifPresent(cap ->
             {
-                for (Pair<ItemStack, Multimap<InsulatorData, Insulation>> pair : cap.getInsulation())
+                for (Pair<ItemStack, List<InsulatorData>> pair : cap.getInsulation())
                 {
-                    for (InsulatorData insulatorData : pair.getSecond().keySet())
+                    for (InsulatorData insulatorData : pair.getSecond())
                     {   this.predicateMap.put(insulatorData.getId(), insulatorData.test(entity, stack));
                     }
                 }
