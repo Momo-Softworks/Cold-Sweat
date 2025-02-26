@@ -131,8 +131,8 @@ public class ProcessEquipmentInsulation
                             cap.calcAdaptiveInsulation(worldTemp, minTemp, maxTemp);
 
                             // Remove insulation items if the player has too many
-                            List<Pair<ItemStack, Multimap<InsulatorData, Insulation>>> totalInsulation = cap.getInsulation();
-                            int filledInsulationSlots = (int) totalInsulation.stream().map(Pair::getSecond).flatMap(map -> map.values().stream()).map(Insulation::split).flatMap(List::stream).count();
+                            List<Pair<ItemStack, Collection<InsulatorData>>> totalInsulation = cap.getInsulation();
+                            int filledInsulationSlots = totalInsulation.size();
                             if (filledInsulationSlots > ItemInsulationManager.getInsulationSlots(armorStack))
                             {   WorldHelper.playEntitySound(SoundEvents.ITEM_FRAME_REMOVE_ITEM, player, SoundSource.PLAYERS, 1.0F, 1.0F);
                             }
