@@ -139,7 +139,7 @@ public class SewingContainer extends AbstractRepairContainer
             this.broadcastChanges();
         }
         // If insulation is being added
-        else
+        else if (ItemInsulationManager.isInsulatable(stack))
         {
             if (!quickMoving)
             {

@@ -387,14 +387,7 @@ public class TooltipHandler
             List<Insulation> unmetArmorInsulation = new ArrayList<>();
             {
                 for (InsulatorData insulator : ConfigSettings.INSULATING_ARMORS.get().get(item))
-                {
-                    if (!insulator.insulation().isEmpty())
-                    {
-                        if (passesRequirement(insulator))
-                        {   armorInsulation.addAll(insulator.insulation().split());
-                        }
-                        else unmetArmorInsulation.addAll(insulator.insulation().split());
-                    }
+                {   validateInsulator(insulator, armorInsulation, unmetArmorInsulation);
                 }
 
                 ItemInsulationManager.getInsulationCap(stack).ifPresent(cap ->
@@ -403,22 +396,13 @@ public class TooltipHandler
                     {   cap.deserializeNBT(stack.getOrCreateTag());
                     }
 
-                    List<Pair<ItemStack, Multimap<InsulatorData, Insulation>>> insulators = cap.getInsulation();
+                    List<Pair<ItemStack, Collection<InsulatorData>>> insulatorPairs = cap.getInsulation();
 
-                    for (int i = 0; i < insulators.size(); i++)
+                    for (int i = 0; i < insulatorPairs.size(); i++)
                     {
-                        Pair<ItemStack, Multimap<InsulatorData, Insulation>> pair = insulators.get(i);
-                        Multimap<InsulatorData, Insulation> insulatorMap = pair.getSecond();
-
-                        for (InsulatorData insulator : insulatorMap.keySet())
-                        {
-                            if (!insulator.insulation().isEmpty())
-                            {
-                                if (passesRequirement(insulator))
-                                {   armorInsulation.addAll(insulator.insulation().split());
-                                }
-                                else unmetArmorInsulation.addAll(insulator.insulation().split());
-                            }
+                        Pair<ItemStack, Collection<InsulatorData>> pair = insulatorPairs.get(i);
+                        for (InsulatorData insulator : pair.getSecond())
+                        {   validateInsulator(insulator, armorInsulation, unmetArmorInsulation);
                         }
                     }
                 });
@@ -436,14 +420,7 @@ public class TooltipHandler
                 List<Insulation> insulation = new ArrayList<>();
                 List<Insulation> unmetInsulation = new ArrayList<>();
                 for (InsulatorData insulator : ConfigSettings.INSULATION_ITEMS.get().get(item))
-                {
-                    if (!insulator.insulation().isEmpty())
-                    {
-                        if (passesRequirement(insulator))
-                        {   insulation.addAll(insulator.insulation().split());
-                        }
-                        else unmetInsulation.addAll(insulator.insulation().split());
-                    }
+                {   validateInsulator(insulator, insulation, unmetInsulation);
                 }
                 if (!insulation.isEmpty() && !insulation.equals(armorInsulation))
                 {   addTooltip(tooltipStartIndex, new ClientInsulationTooltip(insulation, Insulation.Slot.ITEM, stack, false), elements);
@@ -459,14 +436,7 @@ public class TooltipHandler
                 List<Insulation> insulation = new ArrayList<>();
                 List<Insulation> unmetInsulation = new ArrayList<>();
                 for (InsulatorData insulator : ConfigSettings.INSULATING_CURIOS.get().get(item))
-                {
-                    if (!insulator.insulation().isEmpty())
-                    {
-                        if (passesRequirement(insulator))
-                        {   insulation.addAll(insulator.insulation().split());
-                        }
-                        else unmetInsulation.addAll(insulator.insulation().split());
-                    }
+                {   validateInsulator(insulator, insulation, unmetInsulation);
                 }
                 if (!insulation.isEmpty())
                 {   addTooltip(tooltipStartIndex, new ClientInsulationTooltip(insulation, Insulation.Slot.CURIO, stack, false), elements);
@@ -538,6 +508,19 @@ public class TooltipHandler
 
             nextTooltip.renderImage(Minecraft.getInstance().font, event.getX(), y, event.getMatrixStack(), Minecraft.getInstance().getItemRenderer(), 0);
             nextTooltip.renderText(Minecraft.getInstance().font, event.getX(), y, event.getMatrixStack(), Minecraft.getInstance().getItemRenderer(), 0);
+        }
+    }
+
+    private static void validateInsulator(InsulatorData insulator, List<Insulation> insulation, List<Insulation> unmetInsulation)
+    {
+        boolean multiSlot = insulator.multiSlot();
+        if (!insulator.insulation().isEmpty())
+        {
+            List<Insulation> insulList = multiSlot ? insulator.insulation().split() : Arrays.asList(insulator.insulation());
+            if (passesRequirement(insulator))
+            {   insulation.addAll(insulList);
+            }
+            else unmetInsulation.addAll(insulList);
         }
     }
 

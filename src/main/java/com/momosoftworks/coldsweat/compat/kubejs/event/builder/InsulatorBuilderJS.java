@@ -35,6 +35,7 @@ public class InsulatorBuilderJS
     public Predicate<Entity> entityPredicate = null;
     public AttributeModifierMap attributes = new AttributeModifierMap();
     public Map<ResourceLocation, Double> immuneTempModifiers = new HashMap<>();
+    public boolean multiSlot = false;
 
     public InsulatorBuilderJS()
     {}
@@ -97,10 +98,16 @@ public class InsulatorBuilderJS
         return this;
     }
 
+    public InsulatorBuilderJS multiSlot(boolean multiSlot)
+    {
+        this.multiSlot = multiSlot;
+        return this;
+    }
+
     public InsulatorData build()
     {
         InsulatorData data = new InsulatorData(slot, insulation, new ItemRequirement(this.items, this.itemPredicate), new EntityRequirement(entityPredicate),
-                                               attributes, immuneTempModifiers);
+                                               attributes, immuneTempModifiers, multiSlot);
         data.setType(ConfigData.Type.KUBEJS);
         return data;
     }

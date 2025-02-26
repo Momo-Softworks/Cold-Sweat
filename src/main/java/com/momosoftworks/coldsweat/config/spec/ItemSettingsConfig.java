@@ -182,28 +182,32 @@ public class ItemSettingsConfig
                          "*\"nbt\": Optional. If set, the item will only provide insulation if it has the specified NBT tag."
                 )
                 .defineListAllowEmpty(Arrays.asList("Insulation Ingredients"), () -> ListBuilder.begin(
-                                Arrays.asList("minecraft:leather_helmet",     4,  4),
-                                Arrays.asList("minecraft:leather_chestplate", 6,  6),
-                                Arrays.asList("minecraft:leather_leggings",   5,  5),
-                                Arrays.asList("minecraft:leather_boots",      4,  4),
                                 Arrays.asList("minecraft:leather",            1,  1),
-                                Arrays.asList("cold_sweat:chameleon_molt",    2,  0.0085, "adaptive"),
+                                Arrays.asList("cold_sweat:chameleon_molt",    2, 0.0085, "adaptive"),
                                 Arrays.asList("cold_sweat:hoglin_hide",       0,  2),
                                 Arrays.asList("cold_sweat:goat_fur",          2,  0),
                                 Arrays.asList("#minecraft:wool",              1.5, 0),
                                 Arrays.asList("minecraft:rabbit_hide",        0,  1.5),
-                                Arrays.asList("cold_sweat:hoglin_headpiece",  0,  8),
-                                Arrays.asList("cold_sweat:hoglin_tunic",      0,  12),
-                                Arrays.asList("cold_sweat:hoglin_trousers",   0,  10),
-                                Arrays.asList("cold_sweat:hoglin_hooves",     0,  8),
-                                Arrays.asList("cold_sweat:goat_fur_cap",      8,  0),
-                                Arrays.asList("cold_sweat:goat_fur_parka",    12, 0),
-                                Arrays.asList("cold_sweat:goat_fur_pants",    10, 0),
-                                Arrays.asList("cold_sweat:goat_fur_boots",    8,  0),
-                                Arrays.asList("cold_sweat:chameleon_scale_helmet", 8, 0.0085, "adaptive"),
-                                Arrays.asList("cold_sweat:chameleon_scale_chestplate", 12, 0.0085, "adaptive"),
-                                Arrays.asList("cold_sweat:chameleon_scale_leggings", 10, 0.0085, "adaptive"),
-                                Arrays.asList("cold_sweat:chameleon_scale_boots", 8, 0.0085, "adaptive"))
+
+                                Arrays.asList("minecraft:leather_helmet",     4, 4, "static", "", true),
+                                Arrays.asList("minecraft:leather_chestplate", 6, 6, "static", "", true),
+                                Arrays.asList("minecraft:leather_leggings",   5, 5, "static", "", true),
+                                Arrays.asList("minecraft:leather_boots",      4, 4, "static", "", true),
+
+                                Arrays.asList("cold_sweat:hoglin_headpiece",  0,  8, "static", "", true),
+                                Arrays.asList("cold_sweat:hoglin_tunic",      0, 12, "static", "", true),
+                                Arrays.asList("cold_sweat:hoglin_trousers",   0, 10, "static", "", true),
+                                Arrays.asList("cold_sweat:hoglin_hooves",     0,  8, "static", "", true),
+
+                                Arrays.asList("cold_sweat:goat_fur_cap",      8,  0, "static", "", true),
+                                Arrays.asList("cold_sweat:goat_fur_parka",    12, 0, "static", "", true),
+                                Arrays.asList("cold_sweat:goat_fur_pants",    10, 0, "static", "", true),
+                                Arrays.asList("cold_sweat:goat_fur_boots",    8,  0, "static", "", true),
+
+                                Arrays.asList("cold_sweat:chameleon_scale_helmet", 8, 0.0085, "adaptive", "", true),
+                                Arrays.asList("cold_sweat:chameleon_scale_chestplate", 12, 0.0085, "adaptive", "", true),
+                                Arrays.asList("cold_sweat:chameleon_scale_leggings", 10, 0.0085, "adaptive", "", true),
+                                Arrays.asList("cold_sweat:chameleon_scale_boots", 8, 0.0085, "adaptive", "", true))
                             .addIf(CompatManager.isEnvironmentalLoaded(),
                                 () -> Arrays.asList("environmental:yak_hair", 1.5, -1)
                         ).build(),
@@ -217,7 +221,8 @@ public class ItemSettingsConfig
                                     && list.get(1) instanceof Number
                                     && list.get(2) instanceof Number
                                     && (list.size() < 4 || list.get(3) instanceof String)
-                                    && (list.size() < 5 || list.get(4) instanceof String);
+                                    && (list.size() < 5 || list.get(4) instanceof String)
+                                    && (list.size() < 6 || list.get(5) instanceof Boolean);
                             }
                             return false;
                         });
@@ -226,22 +231,25 @@ public class ItemSettingsConfig
                 .comment("Defines the items that provide insulation when worn",
                         "See Insulation Ingredients for formatting")
                 .defineListAllowEmpty(Arrays.asList("Insulating Armor"), () -> ListBuilder.begin(
-                                Arrays.asList("minecraft:leather_helmet",      4,  4),
-                                Arrays.asList("minecraft:leather_chestplate",  6,  6),
-                                Arrays.asList("minecraft:leather_leggings",    5,  5),
-                                Arrays.asList("minecraft:leather_boots",       4,  4),
-                                Arrays.asList("cold_sweat:hoglin_headpiece",   0,  8),
-                                Arrays.asList("cold_sweat:hoglin_tunic",       0,  12),
-                                Arrays.asList("cold_sweat:hoglin_trousers",    0,  10),
-                                Arrays.asList("cold_sweat:hoglin_hooves",      0,  8),
-                                Arrays.asList("cold_sweat:goat_fur_cap",       8,  0),
-                                Arrays.asList("cold_sweat:goat_fur_parka",     12, 0),
-                                Arrays.asList("cold_sweat:goat_fur_pants",     10, 0),
-                                Arrays.asList("cold_sweat:goat_fur_boots",     8,  0),
-                                Arrays.asList("cold_sweat:chameleon_scale_helmet", 8, 0.0085, "adaptive"),
-                                Arrays.asList("cold_sweat:chameleon_scale_chestplate", 12, 0.0085, "adaptive"),
-                                Arrays.asList("cold_sweat:chameleon_scale_leggings", 10, 0.0085, "adaptive"),
-                                Arrays.asList("cold_sweat:chameleon_scale_boots", 8, 0.0085, "adaptive"))
+                                Arrays.asList("minecraft:leather_helmet",      4,  4, "static", "", true),
+                                Arrays.asList("minecraft:leather_chestplate",  6,  6, "static", "", true),
+                                Arrays.asList("minecraft:leather_leggings",    5,  5, "static", "", true),
+                                Arrays.asList("minecraft:leather_boots",       4,  4, "static", "", true),
+
+                                Arrays.asList("cold_sweat:hoglin_headpiece",   0,  8, "static", "", true),
+                                Arrays.asList("cold_sweat:hoglin_tunic",       0,  12, "static", "", true),
+                                Arrays.asList("cold_sweat:hoglin_trousers",    0,  10, "static", "", true),
+                                Arrays.asList("cold_sweat:hoglin_hooves",      0,  8, "static", "", true),
+
+                                Arrays.asList("cold_sweat:goat_fur_cap",       8,  0, "static", "", true),
+                                Arrays.asList("cold_sweat:goat_fur_parka",     12, 0, "static", "", true),
+                                Arrays.asList("cold_sweat:goat_fur_pants",     10, 0, "static", "", true),
+                                Arrays.asList("cold_sweat:goat_fur_boots",     8,  0, "static", "", true),
+
+                                Arrays.asList("cold_sweat:chameleon_scale_helmet", 8, 0.0085, "adaptive", "", true),
+                                Arrays.asList("cold_sweat:chameleon_scale_chestplate", 12, 0.0085, "adaptive", "", true),
+                                Arrays.asList("cold_sweat:chameleon_scale_leggings", 10, 0.0085, "adaptive", "", true),
+                                Arrays.asList("cold_sweat:chameleon_scale_boots", 8, 0.0085, "adaptive", "", true))
                             .addIf(CompatManager.isEnvironmentalLoaded(),
                                 () -> Arrays.asList("environmental:yak_pants", 7.5, -5)
                         ).build(),

@@ -148,9 +148,9 @@ public class SyncItemPredicatesMessage
         {
             ItemInsulationManager.getInsulationCap(stack).ifPresent(cap ->
             {
-                for (Pair<ItemStack, Multimap<InsulatorData, Insulation>> pair : cap.getInsulation())
+                for (Pair<ItemStack, Collection<InsulatorData>> pair : cap.getInsulation())
                 {
-                    for (InsulatorData insulatorData : pair.getSecond().keySet())
+                    for (InsulatorData insulatorData : pair.getSecond())
                     {   this.predicateMap.put(insulatorData.getId(), insulatorData.test(entity, stack));
                     }
                 }
