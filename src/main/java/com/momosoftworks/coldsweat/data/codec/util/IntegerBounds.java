@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.data.codec.util;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.Objects;
@@ -21,12 +22,24 @@ public record IntegerBounds(int min, int max)
 
     public static IntegerBounds NONE = new IntegerBounds(-Integer.MAX_VALUE, Integer.MAX_VALUE);
 
+    public IntegerBounds(Integer[] bounds)
+    {   this(bounds[0], bounds[1]);
+    }
+
     public boolean test(int value)
     {   return value >= min && value <= max;
     }
 
     public boolean contains(IntegerBounds bounds)
     {   return bounds.min >= min && bounds.max <= max;
+    }
+
+    public int getRandom()
+    {   return min + (int) (Math.random() * (max - min + 1));
+    }
+
+    public int clamp(int value)
+    {   return CSMath.clamp(value, min, max);
     }
 
     @Override
