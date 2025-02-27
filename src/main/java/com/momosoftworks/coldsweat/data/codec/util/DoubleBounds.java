@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.data.codec.util;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 
@@ -31,12 +32,24 @@ public record DoubleBounds(double min, double max)
 
     public static DoubleBounds NONE = new DoubleBounds(-Integer.MAX_VALUE, Integer.MAX_VALUE);
 
+    public DoubleBounds(Double[] bounds)
+    {   this(bounds[0], bounds[1]);
+    }
+
     public boolean test(double value)
     {   return value >= min && value <= max;
     }
 
     public boolean contains(DoubleBounds bounds)
     {   return bounds.min >= min && bounds.max <= max;
+    }
+
+    public double getRandom()
+    {   return min + (Math.random() * (max - min));
+    }
+
+    public double clamp(double value)
+    {   return CSMath.clamp(value, min, max);
     }
 
     @Override
