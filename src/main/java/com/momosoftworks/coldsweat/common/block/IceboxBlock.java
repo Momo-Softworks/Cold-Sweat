@@ -112,7 +112,7 @@ public class IceboxBlock extends Block implements EntityBlock
         {
             // If the player is trying to put a smokestack on top, don't do anything
             if (stack.getItem() == ModItems.SMOKESTACK.value() && rayTraceResult.getDirection() == Direction.UP
-            && level.getBlockState(pos.above()).getBlock() instanceof AirBlock)
+            && level.getBlockState(pos.above()).canBeReplaced())
             {   return ItemInteractionResult.FAIL;
             }
             int itemFuel = icebox.getItemFuel(stack);

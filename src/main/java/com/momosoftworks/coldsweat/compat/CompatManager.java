@@ -21,6 +21,7 @@ import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -200,10 +201,15 @@ public class CompatManager
         }
     }
 
-    public static abstract class Werewolves
+    public static abstract class Create
     {
-        public static boolean isWerewolf(Player player)
-        {   return false;//WEREWOLVES_LOADED && WerewolfPlayer.getOpt(player).filter(w -> w.getLevel() > 0).map(w -> w.getForm().isTransformed()).orElse(false);
+        public static boolean isFluidPipe(BlockState state)
+        {
+            /*return CompatManager.isCreateLoaded()
+                && (state.getBlock() instanceof FluidPipeBlock
+                 || state.getBlock() instanceof GlassFluidPipeBlock
+                 || state.getBlock() instanceof EncasedPipeBlock);*/
+            return false;
         }
     }
 

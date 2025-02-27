@@ -95,9 +95,9 @@ public class HearthBottomBlock extends Block implements EntityBlock
 
     @SuppressWarnings("deprecation")
     @Override
-    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
+    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
     {
-        if (worldIn.getBlockEntity(pos) instanceof HearthBlockEntity te)
+        if (level.getBlockEntity(pos) instanceof HearthBlockEntity te)
         {
             // If the held item is a bucket, try to extract fluids
             if (player.getItemInHand(hand).getItem() == Items.BUCKET)
@@ -130,7 +130,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
                             stack.shrink(1);
                             player.addItem(filledBucket.getDefaultInstance());
                             // Play bucket sound
-                            ItemStackHelper.playBucketEmptySound(stack, player, worldIn, pos);
+                            ItemStackHelper.playBucketEmptySound(stack, player, level, pos);
 
                             return ItemInteractionResult.SUCCESS;
                         }
@@ -162,7 +162,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
                     te.addFuel(itemFuel);
 
                     // Play the fuel filling sound
-                    worldIn.playSound(null, pos, itemFuel > 0
+                    level.playSound(null, pos, itemFuel > 0
                                                  ? SoundEvents.BUCKET_EMPTY_LAVA
                                                  : SoundEvents.BUCKET_EMPTY,
                                       SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
@@ -177,7 +177,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
     public void onPlace(BlockState state, Level level, BlockPos pos, BlockState lastState, boolean p_60570_)
     {
         if (level.getBlockState(pos.above()).isAir())
-        {   level.setBlock(pos.above(), ModBlocks.HEARTH_TOP.value().defaultBlockState().setValue(HearthTopBlock.FACING, state.getValue(FACING)), 2);
+        {   level.setBlock(pos.above(), ModBlocks.HEARTH_TOP.value().defaultBlockState(), 2);
         }
     }
 

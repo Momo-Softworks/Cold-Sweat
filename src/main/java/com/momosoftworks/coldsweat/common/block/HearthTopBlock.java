@@ -3,14 +3,11 @@ package com.momosoftworks.coldsweat.common.block;
 import com.momosoftworks.coldsweat.core.init.ModBlocks;
 import com.momosoftworks.coldsweat.core.init.ModItems;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
@@ -33,26 +30,30 @@ public class HearthTopBlock extends SmokestackBlock
 
     public HearthTopBlock(Properties properties)
     {   super(properties);
-        this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH).setValue(UP, false).setValue(DOWN, false));
     }
 
     @SuppressWarnings("deprecation")
     @Override
-    public InteractionResult useWithoutItem(BlockState state, Level worldIn, BlockPos pos, Player player, BlockHitResult rayTraceResult)
+    public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult rayTraceResult)
     {
-        if (!worldIn.isClientSide && worldIn.getBlockState(pos.below()).getBlock() instanceof HearthBottomBlock hearthBottomBlock)
-        {   return hearthBottomBlock.useWithoutItem(worldIn.getBlockState(pos.below()), worldIn, pos.below(), player, rayTraceResult);
+        if (!level.isClientSide && level.getBlockState(pos.below()).getBlock() instanceof HearthBottomBlock hearthBottomBlock
+        && !super.useWithoutItem(state, level, pos, player, rayTraceResult).consumesAction())
+        {   return hearthBottomBlock.useWithoutItem(level.getBlockState(pos.below()), level, pos.below(), player, rayTraceResult);
         }
         return InteractionResult.PASS;
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack pStack, BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer, InteractionHand pHand, BlockHitResult pHitResult)
+    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
     {
-        if (!pLevel.isClientSide && pLevel.getBlockState(pPos.below()).getBlock() instanceof HearthBottomBlock hearthBottomBlock)
-        {   return hearthBottomBlock.useItemOn(pStack, pLevel.getBlockState(pPos.below()), pLevel, pPos.below(), pPlayer, pHand, pHitResult);
+        if (stack.is(ModItems.SMOKESTACK) && level.getBlockState(pos.relative(rayTraceResult.getDirection())).canBeReplaced())
+        {   return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
         }
-        return ItemInteractionResult.FAIL;
+        if (level.getBlockState(pos.below()).getBlock() instanceof HearthBottomBlock hearthBottomBlock
+        && !super.useItemOn(stack, state, level, pos, player, hand, rayTraceResult).consumesAction())
+        {   return hearthBottomBlock.useItemOn(stack, level.getBlockState(pos.below()), level, pos.below(), player, hand, rayTraceResult);
+        }
+        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 
     @SuppressWarnings("deprecation")

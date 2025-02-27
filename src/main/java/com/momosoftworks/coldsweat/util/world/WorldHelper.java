@@ -169,15 +169,12 @@ public abstract class WorldHelper
     {
         Block block = state.getBlock();
 
-        if (block instanceof SmokestackBlock && toDir.getAxis() == Direction.Axis.Y)
-        {   return true;
-        }
         if (state.isAir() || ConfigSettings.THERMAL_SOURCE_SPREAD_WHITELIST.get().contains(block))
         {   return false;
         }
         if (ConfigSettings.THERMAL_SOURCE_SPREAD_BLACKLIST.get().contains(block)) return true;
 
-        VoxelShape shape = state.getShape(level, pos, CollisionContext.empty());
+        VoxelShape shape = state.getCollisionShape(level, pos, CollisionContext.empty());
         if (shape.equals(Shapes.block())) return true;
 
                // Should it have spread here in the first place?
