@@ -52,14 +52,15 @@ public abstract class Insulation implements NbtSerializable
     public static List<Insulation> sort(List<Insulation> pairs)
     {
         List<Insulation> newPairs = new ArrayList<>(pairs);
-        newPairs.sort(Comparator.comparingDouble(Insulation::getCompareValue));
+        newPairs.sort(Comparator.comparingInt(Insulation::getCompareValue));
         return newPairs;
     }
 
     public int getCompareValue()
     {
-        if (this.split().size() > 1)
-        {   return 0;
+        List<Insulation> subset = this.split();
+        if (subset.size() > 1)
+        {   return sort(subset).get(0).getCompareValue() - 10;
         }
         else if (this instanceof AdaptiveInsulation)
         {   return Math.abs(((AdaptiveInsulation) this).getInsulation()) >= 2 ? 7 : 8;
