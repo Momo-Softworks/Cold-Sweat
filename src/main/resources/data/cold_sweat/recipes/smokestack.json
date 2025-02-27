@@ -4,17 +4,13 @@
   [
     "C C",
     "C C",
-    "CRC"
+    "C C"
   ],
   "key":
   {
     "C":
     {
       "tag": "forge:cobblestone/normal"
-    },
-    "R":
-    {
-      "tag": "forge:dusts/redstone"
     }
   },
   "result":

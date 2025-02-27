@@ -19,12 +19,17 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -156,8 +161,17 @@ public class HearthDebugRenderer
                             workingChunk = WorldHelper.getChunk(level, pos);
                         if (workingChunk == null) continue;
 
-                        if (!WorldHelper.canSeeSky(level, pos, 1))
-                        {   LevelRenderer.renderVoxelShape(ps, vertexes, level.getBlockState(pos).getShape(level, pos), x, y, z, r, g, b, renderAlpha, false);
+                        BlockState state = workingChunk.getBlockState(pos);
+                        VoxelShape blockShape = state.getShape(level, pos);
+                        // if this isn't the player's hovered position
+                        if (!blockShape.isEmpty() && !state.getCollisionShape(level, pos).isEmpty())
+                        {
+                            blockShape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> {
+                                LevelRenderer.renderLineBox(ps,vertexes,
+                                                            minX + x - 0.001, minY + y - 0.001, minZ + z - 0.001,
+                                                            maxX + x + 0.001, maxY + y + 0.001, maxZ + z + 0.001,
+                                                            r, g, b, renderAlpha);
+                            });
                             continue;
                         }
 

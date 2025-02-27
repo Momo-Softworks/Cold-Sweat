@@ -84,9 +84,9 @@ public class HearthBottomBlock extends Block implements EntityBlock
 
     @SuppressWarnings("deprecation")
     @Override
-    public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
     {
-        if (worldIn.getBlockEntity(pos) instanceof HearthBlockEntity te)
+        if (level.getBlockEntity(pos) instanceof HearthBlockEntity te)
         {
             ItemStack stack = player.getItemInHand(hand);
 
@@ -121,14 +121,14 @@ public class HearthBottomBlock extends Block implements EntityBlock
                             stack.shrink(1);
                             player.addItem(filledBucket.getDefaultInstance());
                             // Play bucket sound
-                            worldIn.playSound(null, pos, filledBucket.getFluid().getPickupSound().get(), SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
+                            level.playSound(null, pos, filledBucket.getFluid().getPickupSound().get(), SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
 
                             return InteractionResult.SUCCESS;
                         }
                     }
                 }
                 // Open the GUI
-                if (!worldIn.isClientSide)
+                if (!level.isClientSide)
                     NetworkHooks.openScreen((ServerPlayer) player, te, pos);
             }
             else
@@ -155,13 +155,13 @@ public class HearthBottomBlock extends Block implements EntityBlock
                     te.addFuel(itemFuel);
 
                     // Play the fuel filling sound
-                    worldIn.playSound(null, pos, itemFuel > 0
+                    level.playSound(null, pos, itemFuel > 0
                                                  ? SoundEvents.BUCKET_EMPTY_LAVA
                                                  : SoundEvents.BUCKET_EMPTY,
                                       SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
                 }
                 // Open the GUI
-                else if (!worldIn.isClientSide)
+                else if (!level.isClientSide)
                 {   NetworkHooks.openScreen((ServerPlayer) player, te, pos);
                 }
             }
@@ -173,7 +173,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
     public void onPlace(BlockState state, Level level, BlockPos pos, BlockState lastState, boolean p_60570_)
     {
         if (level.getBlockState(pos.above()).isAir())
-        {   level.setBlock(pos.above(), ModBlocks.HEARTH_TOP.defaultBlockState().setValue(HearthTopBlock.FACING, state.getValue(FACING)), 2);
+        {   level.setBlock(pos.above(), ModBlocks.HEARTH_TOP.defaultBlockState(), 2);
         }
     }
 

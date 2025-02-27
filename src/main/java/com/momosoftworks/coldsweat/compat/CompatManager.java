@@ -17,10 +17,12 @@ import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import com.simibubi.create.content.equipment.armor.BacktankItem;
 import com.simibubi.create.content.equipment.armor.BacktankUtil;
 import com.simibubi.create.content.equipment.armor.DivingHelmetItem;
+import com.simibubi.create.content.fluids.pipes.EncasedPipeBlock;
+import com.simibubi.create.content.fluids.pipes.FluidPipeBlock;
+import com.simibubi.create.content.fluids.pipes.GlassFluidPipeBlock;
 import com.simibubi.create.content.redstone.displayLink.AllDisplayBehaviours;
 import com.simibubi.create.foundation.ponder.PonderRegistry;
 import com.simibubi.create.infrastructure.ponder.AllPonderTags;
-import de.teamlapen.werewolves.entities.player.werewolf.WerewolfPlayer;
 import dev.ghen.thirst.content.purity.ContainerWithPurity;
 import dev.ghen.thirst.content.purity.WaterPurity;
 import dev.ghen.thirst.foundation.common.event.RegisterThirstValueEvent;
@@ -35,6 +37,7 @@ import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
@@ -228,10 +231,14 @@ public class CompatManager
         }
     }
 
-    public static abstract class Werewolves
+    public static abstract class Create
     {
-        public static boolean isWerewolf(Player player)
-        {   return WEREWOLVES_LOADED && WerewolfPlayer.getOpt(player).filter(w -> w.getLevel() > 0).map(w -> w.getForm().isTransformed()).orElse(false);
+        public static boolean isFluidPipe(BlockState state)
+        {
+            return CompatManager.isCreateLoaded()
+                && (state.getBlock() instanceof FluidPipeBlock
+                 || state.getBlock() instanceof GlassFluidPipeBlock
+                 || state.getBlock() instanceof EncasedPipeBlock);
         }
     }
 

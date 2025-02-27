@@ -1,81 +1,115 @@
 {
-  "variants":
-  {
-    "facing=north,up=false,down=false":
-    {
+  "variants": {
+    "facing=up,end=false,base=false": {
       "model": "cold_sweat:block/smokestack"
     },
-    "facing=east,up=false,down=false":
-    {
+    "facing=down,end=false,base=false": {
       "model": "cold_sweat:block/smokestack",
+      "x": 180
+    },
+    "facing=north,end=false,base=false": {
+      "model": "cold_sweat:block/smokestack",
+      "x": 90
+    },
+    "facing=east,end=false,base=false": {
+      "model": "cold_sweat:block/smokestack",
+      "x": 90,
       "y": 90
     },
-    "facing=south,up=false,down=false":
-    {
+    "facing=south,end=false,base=false": {
       "model": "cold_sweat:block/smokestack",
+      "x": 90,
       "y": 180
     },
-    "facing=west,up=false,down=false":
-    {
+    "facing=west,end=false,base=false": {
       "model": "cold_sweat:block/smokestack",
+      "x": 90,
       "y": 270
     },
-    "facing=north,up=true,down=false":
-    {
-      "model": "cold_sweat:block/smokestack_connected_up"
+
+    "facing=up,end=true,base=false": {
+      "model": "cold_sweat:block/smokestack_connected_end"
     },
-    "facing=east,up=true,down=false":
-    {
-      "model": "cold_sweat:block/smokestack_connected_up",
+    "facing=down,end=true,base=false": {
+      "model": "cold_sweat:block/smokestack_connected_end",
+      "x": 180
+    },
+    "facing=north,end=true,base=false": {
+      "model": "cold_sweat:block/smokestack_connected_end",
+      "x": 90
+    },
+    "facing=east,end=true,base=false": {
+      "model": "cold_sweat:block/smokestack_connected_end",
+      "x": 90,
       "y": 90
     },
-    "facing=south,up=true,down=false":
-    {
-      "model": "cold_sweat:block/smokestack_connected_up",
+    "facing=south,end=true,base=false": {
+      "model": "cold_sweat:block/smokestack_connected_end",
+      "x": 90,
       "y": 180
     },
-    "facing=west,up=true,down=false":
-    {
-      "model": "cold_sweat:block/smokestack_connected_up",
+    "facing=west,end=true,base=false": {
+      "model": "cold_sweat:block/smokestack_connected_end",
+      "x": 90,
       "y": 270
     },
-    "facing=north,up=false,down=true":
-    {
-      "model": "cold_sweat:block/smokestack_connected_down"
+
+    "facing=up,end=false,base=true": {
+      "model": "cold_sweat:block/smokestack_connected_base"
     },
-    "facing=east,up=false,down=true":
-    {
-      "model": "cold_sweat:block/smokestack_connected_down",
+    "facing=down,end=false,base=true": {
+      "model": "cold_sweat:block/smokestack_connected_base",
+      "x": 180
+    },
+    "facing=north,end=false,base=true": {
+      "model": "cold_sweat:block/smokestack_connected_base",
+      "x": 90
+    },
+    "facing=east,end=false,base=true": {
+      "model": "cold_sweat:block/smokestack_connected_base",
+      "x": 90,
       "y": 90
     },
-    "facing=south,up=false,down=true":
-    {
-      "model": "cold_sweat:block/smokestack_connected_down",
+    "facing=south,end=false,base=true": {
+      "model": "cold_sweat:block/smokestack_connected_base",
+      "x": 90,
       "y": 180
     },
-    "facing=west,up=false,down=true":
-    {
-      "model": "cold_sweat:block/smokestack_connected_down",
+    "facing=west,end=false,base=true": {
+      "model": "cold_sweat:block/smokestack_connected_base",
+      "x": 90,
       "y": 270
     },
-    "facing=north,up=true,down=true":
-    {
+
+    "facing=up,end=true,base=true": {
       "model": "cold_sweat:block/smokestack_connected"
     },
-    "facing=east,up=true,down=true":
-    {
+    "facing=down,end=true,base=true": {
       "model": "cold_sweat:block/smokestack_connected",
+      "x": 180
+    },
+    "facing=north,end=true,base=true": {
+      "model": "cold_sweat:block/smokestack_connected",
+      "x": 90
+    },
+    "facing=east,end=true,base=true": {
+      "model": "cold_sweat:block/smokestack_connected",
+      "x": 90,
       "y": 90
     },
-    "facing=south,up=true,down=true":
-    {
+    "facing=south,end=true,base=true": {
       "model": "cold_sweat:block/smokestack_connected",
+      "x": 90,
       "y": 180
     },
-    "facing=west,up=true,down=true":
-    {
+    "facing=west,end=true,base=true": {
       "model": "cold_sweat:block/smokestack_connected",
+      "x": 90,
       "y": 270
+    },
+
+    "facing=junction,end=false,base=false": {
+      "model": "cold_sweat:block/smokestack_junction"
     }
   }
 }
