@@ -14,6 +14,7 @@ import com.momosoftworks.coldsweat.config.spec.*;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
+import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.math.RegistryMultiMap;
@@ -207,6 +208,7 @@ public class ConfigSettings
     public static final DynamicHolder<Boolean> EXPAND_TOOLTIPS;
 
     public static final DynamicHolder<WaterEffectSetting> WATER_EFFECT_SETTING;
+    public static final DynamicHolder<IntegerBounds> WATER_DROPLET_SCALE;
 
 
     // Makes the settings instantiation collapsible & easier to read
@@ -934,6 +936,7 @@ public class ConfigSettings
         EXPAND_TOOLTIPS = addClientSetting("expand_tooltips", () -> true, holder -> holder.set(ClientSettingsConfig.EXPAND_TOOLTIPS.get()));
 
         WATER_EFFECT_SETTING = addClientSetting("show_water_effect", () -> WaterEffectSetting.ALL, holder -> holder.set(WaterEffectSetting.values()[ClientSettingsConfig.WATER_EFFECT_SETTING.get()]));
+        WATER_DROPLET_SCALE = addClientSetting("water_droplet_scale", () -> new IntegerBounds(40, 48), holder -> holder.set(new IntegerBounds(ClientSettingsConfig.WATER_DROPLET_SCALE.get().toArray(Integer[]::new))));
 
         boolean seasonsModLoaded = !CompatManager.getSeasonsMods().isEmpty();
         SUMMER_TEMPS = addSetting("summer_temps", SeasonalTempData::new, holder -> holder.set(seasonsModLoaded ? SeasonalTempData.fromToml(WorldSettingsConfig.getSummerTemps()) : new SeasonalTempData()));

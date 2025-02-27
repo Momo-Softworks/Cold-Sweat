@@ -4,8 +4,10 @@ import com.momosoftworks.coldsweat.client.event.DrawConfigButton;
 import com.momosoftworks.coldsweat.client.gui.config.AbstractConfigPage;
 import com.momosoftworks.coldsweat.client.gui.config.ConfigScreen;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import net.minecraft.ChatFormatting;
 import com.momosoftworks.coldsweat.util.math.Vec2i;
+import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
+import com.momosoftworks.coldsweat.util.math.CSMath;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.OptionsScreen;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.*;
@@ -70,6 +72,14 @@ public class ConfigPageTwo extends AbstractConfigPage
         this.addButton("show_water_effect", Side.LEFT, () -> getEnumButtonText(new TranslatableComponent("cold_sweat.config.show_water_effect.name"), ConfigSettings.WATER_EFFECT_SETTING.get()),
                 button -> ConfigSettings.WATER_EFFECT_SETTING.set(getNextCycle(ConfigSettings.WATER_EFFECT_SETTING.get())),
                 false, false, true, new TranslatableComponent("cold_sweat.config.show_water_effect.desc"));
+
+        // Water Droplet Scale
+        this.addSliderButton("water_droplet_scale", Side.LEFT,
+                             () -> getSliderText(new TranslatableComponent("cold_sweat.config.water_droplet_scale.name"), ConfigSettings.WATER_DROPLET_SCALE.get().min(), 5, 100, -1),
+                             5, 100,
+                             (value, button) -> ConfigSettings.WATER_DROPLET_SCALE.set(new IntegerBounds(value.intValue(), (int) (value * 1.2))),
+                             button -> button.setValue(CSMath.blend(0, 1, ConfigSettings.WATER_DROPLET_SCALE.get().min(), 5, 100)),
+                             false, false, new TranslatableComponent("cold_sweat.config.water_droplet_scale.desc"));
 
         // Direction Buttons: Steve Head
         this.addDirectionPanel("icon_directions", Side.RIGHT, new TranslatableComponent("cold_sweat.config.temp_icon_location.name"),

@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.temperature.modifier.WaterTempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.Vec2f;
 import com.momosoftworks.coldsweat.util.math.Vec2i;
@@ -102,7 +103,7 @@ public class WetnessRenderer
         {
             for (int i = 0; i < 15; i++)
             {
-                Droplet newDrop = createDrop(screenWidth, screenHeight);
+                Droplet newDrop = createDrop(screenWidth);
                 newDrop.yMotion = getRandomVelocity(frametime) / 2 + 0.3f;
                 newDrop.position.y = (float) Math.random() * screenHeight;
                 WATER_DROPS.add(newDrop);
@@ -123,7 +124,7 @@ public class WetnessRenderer
         if (!paused && !isSubmerged && wetness > 0.01f && ((float) Math.random() * 0.05) < 0.0015f * wetness * (frametime * 2)
         && WATER_DROPS.size() < 5)
         {
-            WATER_DROPS.add(createDrop(screenWidth, screenHeight));
+            WATER_DROPS.add(createDrop(screenWidth));
         }
 
         RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
@@ -140,6 +141,8 @@ public class WetnessRenderer
             Vec2f pos = drop.position;
             float alpha = drop.alpha;
             int size = drop.size / uiScale * 3;
+
+            drop.size = ConfigSettings.WATER_DROPLET_SCALE.get().clamp(drop.size);
 
             if (alpha > 0)
             {
@@ -224,6 +227,8 @@ public class WetnessRenderer
             float alpha = trail.getB();
             int size = trail.getC();
 
+            size = ConfigSettings.WATER_DROPLET_SCALE.get().clamp(size);
+
             if (alpha > 0)
             {
                 renderQuad(ps, bufferBuilder, (int) CSMath.roundNearest(pos.x, 3f/uiScale * 4), pos.y, size, 1, 0, 0, 1, 1,
@@ -246,9 +251,10 @@ public class WetnessRenderer
         return (float) Math.min(0.7f * frametime * 20, (Math.pow(Math.random() * 5 + 0.1f, 3) * frametime) / 4f);
     }
 
-    private static Droplet createDrop(int screenWidth, int screenHeight)
+    private static Droplet createDrop(int screenWidth)
     {
-        int size = new Random().nextInt(40, 48);
+        IntegerBounds dropSize = ConfigSettings.WATER_DROPLET_SCALE.get();
+        int size = dropSize.getRandom();
         return new Droplet(new Vec2f((int) (Math.random() * screenWidth), -size), 1f, size);
     }
 

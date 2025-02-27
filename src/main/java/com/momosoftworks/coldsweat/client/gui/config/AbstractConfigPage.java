@@ -618,7 +618,7 @@ public abstract class AbstractConfigPage extends Screen
                    .append(new TranslatableComponent(value.getSerializedName()));
     }
 
-    public <T extends Enum<T> & StringRepresentable> T getNextCycle(T current)
+    public <T extends Enum<T>> T getNextCycle(T current)
     {
         T[] values = current.getDeclaringClass().getEnumConstants();
         int index = (current.ordinal() + 1) % values.length;
