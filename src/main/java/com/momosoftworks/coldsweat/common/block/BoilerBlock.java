@@ -88,7 +88,7 @@ public class BoilerBlock extends Block
         ItemStack stack = player.getItemInHand(hand);
         // If the player is trying to put a smokestack on top, don't do anything
         if (stack.getItem() == ModItems.SMOKESTACK && rayTraceResult.getDirection() == Direction.UP
-        && level.getBlockState(pos.above()).isAir())
+        && level.getBlockState(pos.above()).canBeReplaced(new BlockItemUseContext(player, hand, stack, rayTraceResult)))
         {   return ActionResultType.FAIL;
         }
         if (!level.isClientSide)

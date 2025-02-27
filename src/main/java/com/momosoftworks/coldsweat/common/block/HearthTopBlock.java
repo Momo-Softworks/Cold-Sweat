@@ -2,11 +2,13 @@ package com.momosoftworks.coldsweat.common.block;
 
 import com.momosoftworks.coldsweat.core.init.ItemInit;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
+import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
@@ -27,27 +29,22 @@ public class HearthTopBlock extends SmokestackBlock
 
     public HearthTopBlock(Block.Properties properties)
     {   super(properties);
-        this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH).setValue(UP, false).setValue(DOWN, false));
     }
 
     @SuppressWarnings("deprecation")
     @Override
-    public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult)
+    public ActionResultType use(BlockState state, World level, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult)
     {
-        if (!world.isClientSide && world.getBlockState(pos.below()).getBlock() == ModBlocks.HEARTH_BOTTOM)
-        {
-            ModBlocks.HEARTH_BOTTOM.use(world.getBlockState(pos.below()), world, pos.below(), player, hand, rayTraceResult);
+        ItemStack stack = player.getItemInHand(hand);
+        if (stack.getItem() == ModItems.SMOKESTACK && level.getBlockState(pos.relative(rayTraceResult.getDirection())).canBeReplaced(new BlockItemUseContext(player, hand, stack, rayTraceResult)))
+        {   return ActionResultType.FAIL;
+        }
+        BlockState belowState = level.getBlockState(pos.below());
+        if (!level.isClientSide && belowState.getBlock() instanceof HearthBottomBlock
+        && !super.use(state, level, pos, player, hand, rayTraceResult).consumesAction())
+        {   belowState.getBlock().use(belowState, level, pos.below(), player, hand, rayTraceResult);
         }
         return ActionResultType.SUCCESS;
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public void neighborChanged(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving)
-    {   super.neighborChanged(state, world, pos, block, fromPos, isMoving);
-        if (world.getBlockState(pos.below()).getBlock() != ModBlocks.HEARTH_BOTTOM)
-        {   this.destroy(world, pos, state);
-        }
     }
 
     @SuppressWarnings("deprecation")

@@ -375,7 +375,6 @@ public class WorldSettingsConfig
                 .comment("List of additional blocks that thermal sources can spread through",
                          "Use this list if thermal sources aren't spreading through particular blocks that they should")
                 .defineListAllowEmpty(Arrays.asList("Thermal Source Spread Whitelist"), () -> ListBuilder.begin(
-                                              "cold_sweat:hearth_bottom",
                                               "minecraft:iron_bars",
                                               "#minecraft:leaves")
                                           .addIf(CompatManager.isCreateLoaded(),

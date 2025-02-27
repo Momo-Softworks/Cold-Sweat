@@ -12,6 +12,7 @@ import com.momosoftworks.coldsweat.common.event.HearthSaveDataHandler;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
@@ -19,16 +20,14 @@ import net.minecraft.client.renderer.WorldRenderer;
 import net.minecraft.client.renderer.culling.ClippingHelper;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.shapes.VoxelShapes;
+import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.vector.*;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -151,11 +150,17 @@ public class HearthDebugRenderer
                             workingChunk = WorldHelper.getChunk(world, pos);
                         if (workingChunk == null) continue;
 
-                        if (!WorldHelper.canSeeSky(world, pos, 1))
+                        BlockState state = workingChunk.getBlockState(pos);
+                        VoxelShape blockShape = state.getShape(world, pos);
+                        // if this isn't the player's hovered position
+                        if (!blockShape.isEmpty() && !state.getCollisionShape(world, pos).isEmpty())
                         {
-                            for (AxisAlignedBB aabb : world.getBlockState(pos).getShape(world, pos).toAabbs())
-                            {   WorldRenderer.renderLineBox(ms, vertexes, aabb.minX + x, aabb.minY + y, aabb.minZ + z, aabb.maxX + x, aabb.maxY + y, aabb.maxZ + z, r, g, b, renderAlpha);
-                            }
+                            blockShape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> {
+                                WorldRenderer.renderLineBox(ms, vertexes,
+                                                            minX + x - 0.001, minY + y - 0.001, minZ + z - 0.001,
+                                                            maxX + x + 0.001, maxY + y + 0.001, maxZ + z + 0.001,
+                                                            r, g, b, renderAlpha);
+                            });
                             continue;
                         }
 

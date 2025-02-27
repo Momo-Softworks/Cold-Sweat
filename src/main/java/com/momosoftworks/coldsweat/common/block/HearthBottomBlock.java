@@ -30,7 +30,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.Random;
 
 public class HearthBottomBlock extends Block
 {
@@ -163,7 +163,7 @@ public class HearthBottomBlock extends Block
     public void onPlace(BlockState state, World world, BlockPos pos, BlockState lastState, boolean p_60570_)
     {
         if (world.getBlockState(pos.above()).isAir())
-        {   world.setBlock(pos.above(), ModBlocks.HEARTH_TOP.defaultBlockState().setValue(HearthTopBlock.FACING, state.getValue(FACING)), 2);
+        {   world.setBlock(pos.above(), ModBlocks.HEARTH_TOP.defaultBlockState(), 2);
         }
     }
 

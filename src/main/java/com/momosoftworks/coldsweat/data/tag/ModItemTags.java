@@ -18,6 +18,8 @@ public class ModItemTags
     public static final ITag.INamedTag<Item> CHAMELEON_COLD = createTag("chameleon/find_cold_biomes");
     public static final ITag.INamedTag<Item> CHAMELEON_HUMID = createTag("chameleon/find_humid_biomes");
 
+    public static final ITag.INamedTag<Item> ENCASES_SMOKESTACK = createTag("encases_smokestack");
+
     private static ITag.INamedTag<Item> createTag(String name)
     {   return ItemTags.bind(new ResourceLocation(ColdSweat.MOD_ID, name).toString());
     }

@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.event.HearthDebugRenderer;
 import com.momosoftworks.coldsweat.common.block.HearthBottomBlock;
+import com.momosoftworks.coldsweat.common.block.SmokestackBlock;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.container.HearthContainer;
 import com.momosoftworks.coldsweat.common.event.HearthSaveDataHandler;
@@ -18,7 +19,6 @@ import com.momosoftworks.coldsweat.core.init.ParticleTypesInit;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.HearthResetMessage;
 import com.momosoftworks.coldsweat.data.codec.configuration.FuelData;
-import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.data.tag.ModFluidTags;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.entity.DummyPlayer;
@@ -141,8 +141,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     boolean spreading = true;
 
     boolean hasSmokestack = false;
-    int smokestackHeight = 2;
-    boolean topBlocked = false;
+    Map<BlockPos, Direction> pipeEnds = new HashMap<>();
 
     static final Direction[] DIRECTIONS = Direction.values();
 
@@ -304,6 +303,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         // Reset if a nearby block has been updated
         if (forceRebuild || (rebuildCooldown <= 0 && !this.queuedUpdates.isEmpty()))
         {   this.resetPaths();
+            this.pipeEnds.clear();
         }
 
         if (this.getColdFuel() > 0 || this.getHotFuel() > 0)
@@ -313,7 +313,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
             {   insulationLevel++;
             }
 
-            if ((this.shouldUseColdFuel || this.shouldUseHotFuel || (ConfigSettings.SMART_HEARTH.get() && this.isPlayerNearby)) && !topBlocked)
+            if ((this.shouldUseColdFuel || this.shouldUseHotFuel || (ConfigSettings.SMART_HEARTH.get() && this.isPlayerNearby)))
             {
                 // Determine whether particles are enabled
                 if (this.ticksExisted % 20 == 0)
@@ -324,8 +324,8 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
                 }
 
                 if (paths.isEmpty())
-                {   this.addPath(new SpreadPath(pos.above(2)).setOrigin(pos.above(2)));
-                    pathLookup.add(pos.above(2));
+                {   this.addPath(new SpreadPath(pos.above(1)).setOrigin(pos.above(1)));
+                    pathLookup.add(pos.above(1));
                 }
 
                 // Mark as not spreading if all paths are frozen
@@ -394,21 +394,6 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         if (isClient)
         {   this.tickParticles();
         }
-
-        // Calculate the height of the smokestack (can be extended with walls)
-        if (this.ticksExisted % 20 == 0)
-        {
-            this.smokestackHeight = 2;
-            BlockState state = level.getBlockState(this.getBlockPos().above(this.smokestackHeight));
-            while (state.is(ModBlockTags.EXTENDS_SMOKESTACK))
-            {   this.smokestackHeight++;
-                state = level.getBlockState(this.getBlockPos().above(this.smokestackHeight));
-            }
-        }
-
-        // Check if top is blocked off
-        BlockPos topPos = this.getBlockPos().above(this.smokestackHeight);
-        this.topBlocked = WorldHelper.isSpreadBlocked(level, level.getBlockState(topPos), topPos, Direction.UP, Direction.UP);
     }
 
     IChunk workingChunk = null;
@@ -473,7 +458,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
                     {   canSeeSky = seeSkyState.getSecond();
                     }
 
-                    if (!canSeeSky || isPipe(state))
+                    if (!canSeeSky || isTransferPipe(state))
                     {
                         // Try to spread in every direction from the current position
                         for (int d = 0; d < DIRECTIONS.length; d++)
@@ -482,22 +467,16 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
 
                             // Don't try to spread backwards
                             Direction pathDir = spreadPath.direction;
-                            if (direction.getAxis() == pathDir.getAxis() && direction != pathDir) continue;
+                            if (direction == pathDir.getOpposite()) continue;
 
                             BlockPos tryPos = pathPos.relative(direction);
 
-                            // Avoid duplicate paths (ArrayList isn't duplicate-safe like Sets/Maps)
-                            // .add() functions to both add the path and check if it's already in the list
-                            if (!pathLookup.contains(tryPos))
-                            {
-                                SpreadPath newPath = new SpreadPath(tryPos, direction).setOrigin(spreadPath.origin);
+                            SpreadPath newPath = new SpreadPath(tryPos, direction).setOrigin(spreadPath.origin);
 
-                                // If the BlockState is a pipe, check if the new path is following the direction of the pipe
-                                if (!WorldHelper.isSpreadBlocked(level, state, pathPos, direction, spreadPath.direction)
-                                && this.isValidPipeAt(tryPos, state, newPath, direction) && pathLookup.add(tryPos))
-                                {   // Add the new path to the list
-                                    paths.add(newPath);
-                                }
+                            // Check if this position hasn't been tried before, and if it's spread-able
+                            if (pathLookup.add(tryPos) && this.canSpread(level, pathPos, tryPos, state, spreadPath.direction, direction, newPath))
+                            {   // Add the new path to the list
+                                this.addPath(newPath);
                             }
                         }
                     }
@@ -725,30 +704,44 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         return shouldInsulate.get();
     }
 
-    protected boolean isValidPipeAt(BlockPos newPos, BlockState fromState, SpreadPath newPath, Direction direction)
+    protected boolean canSpread(World level, BlockPos fromPos, BlockPos toPos, BlockState fromState, Direction fromDirection, Direction toDirection, SpreadPath newPath)
     {
-        if (!isPipe(fromState)) return true;
-        if (CompatManager.isCreateLoaded())
+        Block fromBlock = fromState.getBlock();
+        if (fromBlock instanceof SmokestackBlock)
         {
-            Block block = fromState.getBlock();
-            if (!(block instanceof FluidPipeBlock || block instanceof GlassFluidPipeBlock || block instanceof EncasedPipeBlock))
-            {   return true;
+            SmokestackBlock.Facing facing = fromState.getValue(SmokestackBlock.FACING);
+            boolean isJunction = facing == SmokestackBlock.Facing.JUNCTION;
+            BlockState toState = level.getBlockState(toPos);
+            boolean isToSmokestack = toState.getBlock() instanceof SmokestackBlock;
+            SmokestackBlock.Facing toFacing = isToSmokestack ? toState.getValue(SmokestackBlock.FACING) : null;
+            // Spreading from a junction
+            if (isJunction)
+            {   return isToSmokestack && (toFacing == SmokestackBlock.Facing.JUNCTION || toFacing.getAxis() == toDirection.getAxis());
             }
-            if ((block instanceof FluidPipeBlock && fromState.getValue(FluidPipeBlock.PROPERTY_BY_DIRECTION.get(direction)))
-            || (block instanceof GlassFluidPipeBlock && fromState.getValue(RotatedPillarBlock.AXIS) == direction.getAxis())
-            || (block instanceof EncasedPipeBlock && fromState.getValue(EncasedPipeBlock.FACING_TO_PROPERTY_MAP.get(direction))))
-            {   newPath.setOrigin(newPos);
+            // Spreading from a directional smokestack
+            else if (facing.getAxis() == toDirection.getAxis())
+            {
+                newPath.setOrigin(toPos);
+                if (!isToSmokestack) this.pipeEnds.put(toPos, toDirection);
                 return true;
             }
             return false;
         }
-        return true;
+        else if (CompatManager.isCreateLoaded())
+        {
+            if ((fromBlock instanceof FluidPipeBlock && fromState.getValue(FluidPipeBlock.PROPERTY_BY_DIRECTION.get(toDirection)))
+            || (fromBlock instanceof GlassFluidPipeBlock && fromState.getValue(RotatedPillarBlock.AXIS) == toDirection.getAxis())
+            || (fromBlock instanceof EncasedPipeBlock && fromState.getValue(EncasedPipeBlock.FACING_TO_PROPERTY_MAP.get(toDirection))))
+            {
+                newPath.setOrigin(toPos);
+                return true;
+            }
+        }
+        return !WorldHelper.isSpreadBlocked(level, fromState, fromPos, toDirection, fromDirection);
     }
 
-    protected boolean isPipe(BlockState state)
-    {   return CompatManager.isCreateLoaded() && (state.getBlock() instanceof FluidPipeBlock
-                                               || state.getBlock() instanceof GlassFluidPipeBlock
-                                               || state.getBlock() instanceof EncasedPipeBlock);
+    protected boolean isTransferPipe(BlockState state)
+    {   return state.getBlock() instanceof SmokestackBlock || CompatManager.Create.isFluidPipe(state);
     }
 
     protected void init()
@@ -953,36 +946,40 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     @OnlyIn(Dist.CLIENT)
     protected void tickParticles()
     {
-        if (topBlocked) return;
         ParticleStatus status = Minecraft.getInstance().options.particles;
         if (status == ParticleStatus.MINIMAL) return;
 
         Random rand = this.level.random;
-        if (this.shouldUseColdFuel)
+        for (Map.Entry<BlockPos, Direction> entry : this.pipeEnds.entrySet())
         {
-            if (rand.nextDouble() < this.getColdFuel() / 3000d)
-            {   double d0 = this.x + 0.5d;
-                double d1 = this.y + this.smokestackHeight;
-                double d2 = this.z + 0.5d;
-                double d3 = (rand.nextDouble() - 0.5) / 4;
-                double d4 = (rand.nextDouble() - 0.5) / 4;
-                double d5 = (rand.nextDouble() - 0.5) / 4;
-                level.addParticle(ParticleTypesInit.STEAM.get(), d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.04D, 0.0D);
+            BlockPos pos = entry.getKey();
+            Direction face = entry.getValue();
+            if (this.shouldUseColdFuel)
+            {
+                if (rand.nextDouble() < this.getColdFuel() / 3000d)
+                {   double d0 = pos.getX() + 0.5 - face.getStepX() * 0.5;
+                    double d1 = pos.getY() + 0.5 - face.getStepY() * 0.5;
+                    double d2 = pos.getZ() + 0.5 - face.getStepZ() * 0.5;
+                    double d3 = (rand.nextDouble() - 0.5) / 4;
+                    double d4 = (rand.nextDouble() - 0.5) / 4;
+                    double d5 = (rand.nextDouble() - 0.5) / 4;
+                    level.addParticle(ParticleTypesInit.STEAM.get(), d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.04D, 0.0D);
+                }
             }
-        }
-        if (this.shouldUseHotFuel)
-        {
-            if (rand.nextDouble() < this.getHotFuel() / 3000d)
-            {   double d0 = this.x + 0.5d;
-                double d1 = this.y + this.smokestackHeight;
-                double d2 = this.z + 0.5d;
-                double d3 = (rand.nextDouble() - 0.5) / 2;
-                double d4 = (rand.nextDouble() - 0.5) / 2;
-                double d5 = (rand.nextDouble() - 0.5) / 2;
-                BasicParticleType particle = rand.nextDouble() < 0.5
-                                              ? ParticleTypes.LARGE_SMOKE
-                                              : ParticleTypes.SMOKE;
-                level.addParticle(particle, d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.0D, 0.0D);
+            if (this.shouldUseHotFuel)
+            {
+                if (rand.nextDouble() < this.getHotFuel() / 3000d)
+                {   double d0 = pos.getX() + 0.5 - face.getStepX() * 0.5;
+                    double d1 = pos.getY() + 0.5 - face.getStepY() * 0.5;
+                    double d2 = pos.getZ() + 0.5 - face.getStepZ() * 0.5;
+                    double d3 = (rand.nextDouble() - 0.5) / 2;
+                    double d4 = (rand.nextDouble() - 0.5) / 2;
+                    double d5 = (rand.nextDouble() - 0.5) / 2;
+                    BasicParticleType particle = rand.nextDouble() < 0.5
+                                                  ? ParticleTypes.LARGE_SMOKE
+                                                  : ParticleTypes.SMOKE;
+                    level.addParticle(particle, d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.0D, 0.0D);
+                }
             }
         }
     }

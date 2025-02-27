@@ -7,9 +7,9 @@ import com.momosoftworks.coldsweat.core.init.ParticleTypesInit;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
-import net.minecraft.client.Minecraft;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.ParticleStatus;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -31,7 +31,6 @@ import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
-import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
 
@@ -111,7 +110,7 @@ public class IceboxBlock extends Block
             ItemStack stack = player.getItemInHand(hand);
             // If the player is trying to put a smokestack on top, don't do anything
             if (stack.getItem() == ModItems.SMOKESTACK && rayTraceResult.getDirection() == Direction.UP
-            && level.getBlockState(pos.above()).getBlock() instanceof AirBlock)
+            && level.getBlockState(pos.above()).canBeReplaced(new BlockItemUseContext(player, hand, stack, rayTraceResult)))
             {   return ActionResultType.FAIL;
             }
             int itemFuel = te.getItemFuel(stack);

@@ -6,6 +6,10 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.core.init.FetchSeasonsModsEvent;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.capability.handler.ShearableFurManager;
+import com.simibubi.create.content.contraptions.fluids.pipes.EncasedPipeBlock;
+import com.simibubi.create.content.contraptions.fluids.pipes.FluidPipeBlock;
+import com.simibubi.create.content.contraptions.fluids.pipes.GlassFluidPipeBlock;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.passive.AnimalEntity;
@@ -190,6 +194,17 @@ public class CompatManager
                              }
                              return list;
                          }).flatMap(List::stream).collect(Collectors.toList())).orElse(new ArrayList<>());
+        }
+    }
+
+    public static abstract class Create
+    {
+        public static boolean isFluidPipe(BlockState state)
+        {
+            return CompatManager.isCreateLoaded()
+                && (state.getBlock() instanceof FluidPipeBlock
+                 || state.getBlock() instanceof GlassFluidPipeBlock
+                 || state.getBlock() instanceof EncasedPipeBlock);
         }
     }
 
