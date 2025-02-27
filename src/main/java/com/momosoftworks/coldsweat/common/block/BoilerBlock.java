@@ -97,7 +97,7 @@ public class BoilerBlock extends Block implements EntityBlock
         ItemStack stack = player.getItemInHand(hand);
         // If the player is trying to put a smokestack on top, don't do anything
         if (stack.getItem() == ModItems.SMOKESTACK && rayTraceResult.getDirection() == Direction.UP
-        && level.getBlockState(pos.above()).isAir())
+        && level.getBlockState(pos.above()).canBeReplaced(new BlockPlaceContext(player, hand, stack, rayTraceResult)))
         {   return InteractionResult.FAIL;
         }
         if (!level.isClientSide)

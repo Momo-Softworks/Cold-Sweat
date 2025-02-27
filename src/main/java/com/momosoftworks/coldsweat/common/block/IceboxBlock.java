@@ -116,7 +116,7 @@ public class IceboxBlock extends Block implements EntityBlock
             ItemStack stack = player.getItemInHand(hand);
             // If the player is trying to put a smokestack on top, don't do anything
             if (stack.getItem() == ModItems.SMOKESTACK && rayTraceResult.getDirection() == Direction.UP
-            && level.getBlockState(pos.above()).getBlock() instanceof AirBlock)
+            && level.getBlockState(pos.above()).canBeReplaced(new BlockPlaceContext(player, hand, stack, rayTraceResult)))
             {   return InteractionResult.FAIL;
             }
             int itemFuel = icebox.getItemFuel(stack);

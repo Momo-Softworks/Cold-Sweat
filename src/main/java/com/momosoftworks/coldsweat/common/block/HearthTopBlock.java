@@ -2,12 +2,14 @@ package com.momosoftworks.coldsweat.common.block;
 
 import com.momosoftworks.coldsweat.core.init.ItemInit;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
+import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -30,15 +32,19 @@ public class HearthTopBlock extends SmokestackBlock
 
     public HearthTopBlock(Block.Properties properties)
     {   super(properties);
-        this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH).setValue(UP, false).setValue(DOWN, false));
     }
 
     @SuppressWarnings("deprecation")
     @Override
-    public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
     {
-        if (!worldIn.isClientSide && worldIn.getBlockState(pos.below()).getBlock() instanceof HearthBottomBlock hearthBottomBlock)
-        {   hearthBottomBlock.use(worldIn.getBlockState(pos.below()), worldIn, pos.below(), player, hand, rayTraceResult);
+        ItemStack stack = player.getItemInHand(hand);
+        if (stack.getItem() == ModItems.SMOKESTACK && level.getBlockState(pos.relative(rayTraceResult.getDirection())).canBeReplaced(new BlockPlaceContext(player, hand, stack, rayTraceResult)))
+        {   return InteractionResult.FAIL;
+        }
+        if (!level.isClientSide && level.getBlockState(pos.below()).getBlock() instanceof HearthBottomBlock hearthBottomBlock
+        && !super.use(state, level, pos, player, hand, rayTraceResult).consumesAction())
+        {   hearthBottomBlock.use(level.getBlockState(pos.below()), level, pos.below(), player, hand, rayTraceResult);
         }
         return InteractionResult.SUCCESS;
     }
