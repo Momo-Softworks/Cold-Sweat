@@ -49,6 +49,7 @@ public class ClientSettingsConfig
     public static final ForgeConfigSpec.BooleanValue EXPAND_TOOLTIPS;
 
     public static final ForgeConfigSpec.IntValue WATER_EFFECT_SETTING;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> WATER_DROPLET_SCALE;
 
     static 
     {
@@ -70,6 +71,9 @@ public class ClientSettingsConfig
                     .comment("Displays a dripping water effect on-screen and/or with particles when the player is wet",
                              "0: Off, 1: Particles, 2: On-Screen, 3: Both")
                     .defineInRange("Show Water Effect", 3, 0, 3);
+            WATER_DROPLET_SCALE = BUILDER
+                    .comment("The scale of the water droplets on-screen, in scaled \"pixels\"")
+                    .defineList("Water Droplet Scale", Arrays.asList(40, 48), it -> it instanceof Integer);
         BUILDER.pop();
 
         BUILDER.push("UI Options");

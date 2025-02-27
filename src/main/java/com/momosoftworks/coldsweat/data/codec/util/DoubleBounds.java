@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.data.codec.util;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 
 import java.util.Objects;
 
@@ -12,9 +13,12 @@ public class DoubleBounds
     private final double max;
 
     public DoubleBounds(double min, double max)
-    {
-        this.min = min;
+    {   this.min = min;
         this.max = max;
+    }
+
+    public DoubleBounds(Double[] bounds)
+    {   this(bounds[0], bounds[1]);
     }
 
     public static final Codec<DoubleBounds> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -42,6 +46,14 @@ public class DoubleBounds
 
     public boolean contains(DoubleBounds bounds)
     {   return bounds.min >= min && bounds.max <= max;
+    }
+
+    public double getRandom()
+    {   return min + (Math.random() * (max - min));
+    }
+
+    public double clamp(double value)
+    {   return CSMath.clamp(value, min, max);
     }
 
     @Override
