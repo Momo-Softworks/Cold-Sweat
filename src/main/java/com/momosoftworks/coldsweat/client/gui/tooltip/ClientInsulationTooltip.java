@@ -189,7 +189,7 @@ public class ClientInsulationTooltip extends Tooltip
         renderCellBackground(poseStack, x, y);
         // Render base cell
         MC.textureManager.bind(TOOLTIP_LOCATION.get());
-        Screen.blit(poseStack, x, y, 0, uvX, uvY, 6, 4, 36, 28);
+        Screen.blit(poseStack, x, y, 0, uvX, uvY, 6, 4, 28, 36);
         // Render color overlay for adaptive insulation
         if (insulation instanceof AdaptiveInsulation && ((AdaptiveInsulation) insulation).getFactor() != 0 && !RECURSIVE)
         {
@@ -209,7 +209,7 @@ public class ClientInsulationTooltip extends Tooltip
     {
         MC.textureManager.bind(TOOLTIP_LOCATION.get());
         // Render background
-        Screen.blit(poseStack, x, y, 0, 0, 0, 6, 4, 36, 28);
+        Screen.blit(poseStack, x, y, 0, 0, 0, 6, 4, 28, 36);
     }
 
     static void renderIcon(MatrixStack poseStack, int x, int y, Insulation.Slot slot, BarType type)
@@ -218,15 +218,15 @@ public class ClientInsulationTooltip extends Tooltip
         // icon
         switch (slot)
         {
-            case ITEM  : Screen.blit(poseStack, x, y, 0, 28, 0,  8, 8, 36, 28); break;
-            case ARMOR : Screen.blit(poseStack, x, y, 0, 28, 8,  8, 8, 36, 28); break;
-            case CURIO : Screen.blit(poseStack, x, y, 0, 28, 16, 8, 8, 36, 28); break;
+            case ITEM  : Screen.blit(poseStack, x, y, 0, 28, 0,  8, 8, 28, 36); break;
+            case ARMOR : Screen.blit(poseStack, x, y, 0, 28, 8,  8, 8, 28, 36); break;
+            case CURIO : Screen.blit(poseStack, x, y, 0, 28, 16, 8, 8, 28, 36); break;
         }
         // positive/negative sign
         switch (type)
         {
-            case POSITIVE : Screen.blit(poseStack, x + 3, y + 3, 0, 18, 0, 5, 5, 36, 28); break;
-            case NEGATIVE : Screen.blit(poseStack, x + 3, y + 3, 0, 23, 0, 5, 5, 36, 28); break;
+            case POSITIVE : Screen.blit(poseStack, x + 3, y + 3, 0, 18, 0, 5, 5, 28, 36); break;
+            case NEGATIVE : Screen.blit(poseStack, x + 3, y + 3, 0, 23, 0, 5, 5, 28, 36); break;
         }
     }
 
@@ -454,7 +454,7 @@ public class ClientInsulationTooltip extends Tooltip
         {
             BorderSegment segment = getBorderSegment(size, i);
             // background
-            Screen.blit(poseStack, x + 7 + i * 6, y + 1, 0, 0, 0, 6, 4, 36, 28);
+            Screen.blit(poseStack, x + 7 + i * 6, y + 1, 0, 0, 0, 6, 4, 28, 36);
             // border
             renderCellBorder(poseStack, x + i * 6, y, segment, BorderType.OVERFLOW);
         }
@@ -468,8 +468,8 @@ public class ClientInsulationTooltip extends Tooltip
         MC.textureManager.bind(TOOLTIP_LOCATION.get());
         switch (type)
         {
-            case DIVIDER : Screen.blit(poseStack, x, y - 1, 0, 10, 0, 1, 6, 36, 28); break;
-            case EMPTY_DIVIDER : Screen.blit(poseStack, x, y - 1, 0, 11, 0, 1, 6, 36, 28); break;
+            case DIVIDER : Screen.blit(poseStack, x, y - 1, 0, 10, 0, 1, 6, 28, 36); break;
+            case EMPTY_DIVIDER : Screen.blit(poseStack, x, y - 1, 0, 11, 0, 1, 6, 28, 36); break;
             default :
             {
                 int vOffset;
@@ -493,13 +493,13 @@ public class ClientInsulationTooltip extends Tooltip
                         }
                         break;
                     case HEAD:
-                        Screen.blit(poseStack, x - 1, y - 1, 0, 0, vOffset, 7, 6, 36, 28);
+                        Screen.blit(poseStack, x - 1, y - 1, 0, 0, vOffset, 7, 6, 28, 36);
                         break;
                     case BODY:
-                        Screen.blit(poseStack, x + 0, y - 1, 0, 2, vOffset, 6, 6, 36, 28);
+                        Screen.blit(poseStack, x + 0, y - 1, 0, 2, vOffset, 6, 6, 28, 36);
                         break;
                     case TAIL:
-                        Screen.blit(poseStack, x + 0, y - 1, 0, 3, vOffset, 7, 6, 36, 28);
+                        Screen.blit(poseStack, x + 0, y - 1, 0, 3, vOffset, 7, 6, 28, 36);
                         break;
                 }
                 break;
