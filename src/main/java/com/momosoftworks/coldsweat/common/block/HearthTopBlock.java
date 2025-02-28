@@ -37,14 +37,13 @@ public class HearthTopBlock extends SmokestackBlock
     {
         ItemStack stack = player.getItemInHand(hand);
         if (stack.getItem() == ModItems.SMOKESTACK && level.getBlockState(pos.relative(rayTraceResult.getDirection())).canBeReplaced(new BlockItemUseContext(player, hand, stack, rayTraceResult)))
-        {   return ActionResultType.FAIL;
+        {   return ActionResultType.PASS;
         }
         BlockState belowState = level.getBlockState(pos.below());
-        if (!level.isClientSide && belowState.getBlock() instanceof HearthBottomBlock
-        && !super.use(state, level, pos, player, hand, rayTraceResult).consumesAction())
-        {   belowState.getBlock().use(belowState, level, pos.below(), player, hand, rayTraceResult);
+        if (belowState.getBlock() instanceof HearthBottomBlock)
+        {   return belowState.getBlock().use(belowState, level, pos.below(), player, hand, rayTraceResult);
         }
-        return ActionResultType.SUCCESS;
+        return ActionResultType.PASS;
     }
 
     @SuppressWarnings("deprecation")

@@ -3,7 +3,6 @@ package com.momosoftworks.coldsweat.common.block;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
-import com.momosoftworks.coldsweat.util.serialization.StringRepresentable;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
@@ -180,7 +179,7 @@ public class SmokestackBlock extends Block
                 if (!player.isCreative())
                 {   stack.shrink(1);
                 }
-                return ActionResultType.SUCCESS;
+                return ActionResultType.CONSUME;
             }
         }
         return super.use(state, level, pos, player, hand, rayTraceResult);
