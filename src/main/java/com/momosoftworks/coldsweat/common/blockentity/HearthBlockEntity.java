@@ -386,7 +386,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                         {   playerBB = playerBB.inflate(0, 0.5, 0);
                         }
                         playerBB = CompatManager.Valkyrien.transformIfShipPos(level, playerBB).inflate(-0.1);
-                        if (BlockPos.betweenClosedStream(playerBB).anyMatch(paths::contains))
+                        if (BlockPos.betweenClosedStream(playerBB).anyMatch(ps -> paths.contains(new SpreadPath(ps))))
                         {   this.insulatePlayer(player);
                         }
                     }
