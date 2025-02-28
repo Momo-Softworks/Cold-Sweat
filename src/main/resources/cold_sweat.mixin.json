@@ -5,6 +5,7 @@
   "refmap": "cold_sweat.mixin-refmap.json",
   "client": [
     "MixinAfterLevelRender",
+    "MixinBlockUpdate$Client",
     "MixinChatClicked",
     "MixinEffectsScreen",
     "MixinGoatRenderer",
@@ -21,7 +22,7 @@
     "compat.MixinCreateOverlay"
   ],
   "mixins": [
-    "MixinBlockUpdate",
+    "MixinBlockUpdate$Server",
     "MixinCampfire",
     "MixinFreezingWater",
     "MixinFreezingWater$IceMelt",
