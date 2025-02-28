@@ -150,7 +150,7 @@ public abstract class WorldHelper
             try
             {
                 BlockState state = chunk.getBlockState(pos2);
-                if (state.isAir() || state.liquid())
+                if (state.isAir() || state.liquid() || ConfigSettings.THERMAL_SOURCE_SPREAD_WHITELIST.get().contains(state.getBlock()))
                 {   continue;
                 }
                 VoxelShape shape = state.getShape(level, pos, CollisionContext.empty());
