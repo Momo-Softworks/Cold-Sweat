@@ -361,7 +361,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                         if (playerBB.maxY - playerBB.minY < 1.5)
                         {   playerBB = playerBB.inflate(0, 0.5, 0);
                         }
-                        if (BlockPos.betweenClosedStream(playerBB).anyMatch(paths::contains))
+                        if (BlockPos.betweenClosedStream(playerBB).anyMatch(ps -> paths.contains(new SpreadPath(ps))))
                         {   this.insulatePlayer(player);
                         }
                     }
