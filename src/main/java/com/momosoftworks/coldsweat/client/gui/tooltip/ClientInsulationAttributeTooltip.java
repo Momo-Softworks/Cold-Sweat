@@ -46,7 +46,7 @@ public class ClientInsulationAttributeTooltip implements ClientTooltipComponent
     public void renderImage(Font font, int x, int y, GuiGraphics graphics)
     {
         // Icon
-        graphics.blit(TOOLTIP_LOCATION.get(), x, y + 1, 0, 24, 8, 8, 8, 32, 24);
+        graphics.blit(TOOLTIP_LOCATION.get(), x, y, 0, 28, 8,  8, 8, 36, 28);
         // Text
         int color = Optional.ofNullable(this.original.getStyle().getColor()).map(TextColor::getValue).orElse(16777215);
         int xOffs = strikethrough ? 12: 10;
