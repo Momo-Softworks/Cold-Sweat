@@ -22,18 +22,21 @@ public class ChameleonArmorItem extends ArmorItem
         if (entityLiving instanceof PlayerEntity)
         {   return (A) ArmorModels.EMPTY_ARMOR_MODEL;
         }
-        else return getRealArmorModel(entityLiving, stack, armorSlot);
+        else return Client.getRealArmorModel(entityLiving, stack, armorSlot);
     }
 
-    public <A extends BipedModel<?>> A getRealArmorModel(LivingEntity entityLiving, ItemStack itemStack, EquipmentSlotType armorSlot)
+    public static final class Client
     {
-        switch (armorSlot)
+        public static <A extends BipedModel<?>> A getRealArmorModel(LivingEntity entityLiving, ItemStack itemStack, EquipmentSlotType armorSlot)
         {
-            case HEAD  : return (A) ArmorModels.CHAMELEON_HELMET_MODEL;
-            case CHEST : return (A) ArmorModels.CHAMELEON_CHESTPLATE_MODEL;
-            case LEGS  : return (A) ArmorModels.CHAMELEON_LEGGINGS_MODEL;
-            case FEET  : return (A) ArmorModels.CHAMELEON_BOOTS_MODEL;
-            default    : return (A) ArmorModels.EMPTY_ARMOR_MODEL;
+            switch (armorSlot)
+            {
+                case HEAD  : return (A) ArmorModels.CHAMELEON_HELMET_MODEL;
+                case CHEST : return (A) ArmorModels.CHAMELEON_CHESTPLATE_MODEL;
+                case LEGS  : return (A) ArmorModels.CHAMELEON_LEGGINGS_MODEL;
+                case FEET  : return (A) ArmorModels.CHAMELEON_BOOTS_MODEL;
+                default    : return (A) ArmorModels.EMPTY_ARMOR_MODEL;
+            }
         }
     }
 }

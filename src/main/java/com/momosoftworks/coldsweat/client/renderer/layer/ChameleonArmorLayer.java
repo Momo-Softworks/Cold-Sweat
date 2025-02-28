@@ -64,7 +64,7 @@ public class ChameleonArmorLayer<T extends LivingEntity, M extends BipedModel<T>
                 RenderSystem.defaultBlendFunc();
                 // Get model data
                 boolean isInnerModel = this.usesInnerModel(slot);
-                BipedModel<T> model = armorItem.getRealArmorModel(livingEntity, itemstack, slot);
+                BipedModel<T> model = ChameleonArmorItem.Client.getRealArmorModel(livingEntity, itemstack, slot);
                 // Set transforms & visibility properties
                 this.getParentModel().copyPropertiesTo(model);
                 this.setPartVisibilities(model, slot);
