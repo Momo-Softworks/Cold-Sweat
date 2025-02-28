@@ -50,7 +50,7 @@ public class ClientInsulationAttributeTooltip implements ClientTooltipComponent
     {
         // Icon
         RenderSystem.setShaderTexture(0, TOOLTIP_LOCATION.get());
-        Screen.blit(ps, x, y + 1, 0, 24, 8, 8, 8, 32, 24);
+        Screen.blit(ps, x, y, 0, 28, 8,  8, 8, 36, 28);
         // Text
         int color = Optional.ofNullable(this.original.getStyle().getColor()).map(TextColor::getValue).orElse(16777215);
         int xOffs = strikethrough ? 12: 10;
