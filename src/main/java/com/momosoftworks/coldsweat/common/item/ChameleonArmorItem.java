@@ -30,21 +30,25 @@ public class ChameleonArmorItem extends ArmorItem
                 if (entityLiving instanceof Player)
                 {   return RegisterModels.EMPTY_ARMOR_MODEL; // Custom logic for player models
                 }
-                else return getRealArmorModel(entityLiving, itemStack, armorSlot);
+                else return Client.getRealArmorModel(entityLiving, itemStack, armorSlot);
             }
         });
     }
 
-    public HumanoidModel<?> getRealArmorModel(LivingEntity entityLiving, ItemStack itemStack, EquipmentSlot armorSlot)
+    public static final class Client
     {
-        RegisterModels.checkForInitModels();
-        return switch (armorSlot)
+        public static HumanoidModel<?> getRealArmorModel(LivingEntity entityLiving, ItemStack itemStack, EquipmentSlot armorSlot)
         {
-            case HEAD -> RegisterModels.CHAMELEON_HELMET_MODEL;
-            case CHEST -> RegisterModels.CHAMELEON_CHESTPLATE_MODEL;
-            case LEGS -> RegisterModels.CHAMELEON_LEGGINGS_MODEL;
-            case FEET -> RegisterModels.CHAMELEON_BOOTS_MODEL;
-            default -> RegisterModels.EMPTY_ARMOR_MODEL;
-        };
+            RegisterModels.checkForInitModels();
+            return switch (armorSlot)
+            {
+                case HEAD -> RegisterModels.CHAMELEON_HELMET_MODEL;
+                case CHEST -> RegisterModels.CHAMELEON_CHESTPLATE_MODEL;
+                case LEGS -> RegisterModels.CHAMELEON_LEGGINGS_MODEL;
+                case FEET -> RegisterModels.CHAMELEON_BOOTS_MODEL;
+                default -> RegisterModels.EMPTY_ARMOR_MODEL;
+            };
+        }
     }
+
 }

@@ -13,7 +13,6 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -58,7 +57,7 @@ public class ChameleonArmorLayer<T extends LivingEntity, M extends HumanoidModel
                 RenderSystem.defaultBlendFunc();
                 // Get model data
                 boolean isInnerModel = this.usesInnerModel(slot);
-                HumanoidModel<T> model = (HumanoidModel<T>) armorItem.getRealArmorModel(livingEntity, itemstack, slot);
+                HumanoidModel<T> model = (HumanoidModel<T>) ChameleonArmorItem.Client.getRealArmorModel(livingEntity, itemstack, slot);
                 // Set transforms & visibility properties
                 this.getParentModel().copyPropertiesTo(model);
                 this.setPartVisibilities(model, slot);
