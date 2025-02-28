@@ -16,8 +16,9 @@ import java.util.stream.Stream;
 
 import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import net.minecraft.util.IStringSerializable;
 
-public interface StringRepresentable
+public interface StringRepresentable extends IStringSerializable
 {
     int PRE_BUILT_MAP_THRESHOLD = 16;
 
