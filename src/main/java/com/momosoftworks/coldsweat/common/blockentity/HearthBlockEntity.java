@@ -380,8 +380,13 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                     {
                         Player player = players.get(i);
                         if (player == null || player instanceof DummyPlayer) continue;
-                        AABB playerBB = CompatManager.Valkyrien.transformIfShipPos(level, player.getBoundingBox()).inflate(-0.1);
-                        if (BlockPos.betweenClosedStream(playerBB).anyMatch(pathLookup::contains))
+                        AABB playerBB = player.getBoundingBox();
+                        // Ensure height is at least 2 blocks tall
+                        if (playerBB.maxY - playerBB.minY < 1.5)
+                        {   playerBB = playerBB.inflate(0, 0.5, 0);
+                        }
+                        playerBB = CompatManager.Valkyrien.transformIfShipPos(level, playerBB).inflate(-0.1);
+                        if (BlockPos.betweenClosedStream(playerBB).anyMatch(paths::contains))
                         {   this.insulatePlayer(player);
                         }
                     }
@@ -724,9 +729,11 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         {
             SmokestackBlock.Facing facing = fromState.getValue(SmokestackBlock.FACING);
             boolean isJunction = facing == SmokestackBlock.Facing.JUNCTION;
+
             BlockState toState = level.getBlockState(toPos);
             boolean isToSmokestack = toState.getBlock() instanceof SmokestackBlock;
             SmokestackBlock.Facing toFacing = isToSmokestack ? toState.getValue(SmokestackBlock.FACING) : null;
+
             // Spreading from a junction
             if (isJunction)
             {   return isToSmokestack && (toFacing == SmokestackBlock.Facing.JUNCTION || toFacing.getAxis() == toDirection.getAxis());
@@ -735,7 +742,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
             else if (facing.getAxis() == toDirection.getAxis())
             {
                 newPath.setOrigin(toPos);
-                if (!isToSmokestack) this.pipeEnds.put(toPos, toDirection);
+                if (!isTransferPipe(toState)) this.pipeEnds.put(fromPos, toDirection);
                 return true;
             }
             return false;
@@ -746,11 +753,13 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
             || (fromBlock instanceof GlassFluidPipeBlock && fromState.getValue(RotatedPillarBlock.AXIS) == toDirection.getAxis())
             || (fromBlock instanceof EncasedPipeBlock && fromState.getValue(EncasedPipeBlock.FACING_TO_PROPERTY_MAP.get(toDirection))))
             {
+                BlockState toState = level.getBlockState(toPos);
+                if (!isTransferPipe(toState)) this.pipeEnds.put(fromPos, toDirection);
                 newPath.setOrigin(toPos);
                 return true;
             }
         }
-        return !WorldHelper.isSpreadBlocked(level, fromState, fromPos, toDirection, fromDirection);
+        return !WorldHelper.isSpreadBlocked(level, fromState, fromPos, fromDirection, toDirection);
     }
 
     protected boolean isTransferPipe(BlockState state)
@@ -970,9 +979,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
             if (this.shouldUseColdFuel)
             {
                 if (rand.nextDouble() < this.getColdFuel() / 3000d)
-                {   double d0 = pos.getX() + 0.5 - face.getStepX() * 0.5;
-                    double d1 = pos.getY() + 0.5 - face.getStepY() * 0.5;
-                    double d2 = pos.getZ() + 0.5 - face.getStepZ() * 0.5;
+                {   double d0 = pos.getX() + 0.5 + face.getStepX() * 0.5;
+                    double d1 = pos.getY() + 0.5 + face.getStepY() * 0.5;
+                    double d2 = pos.getZ() + 0.5 + face.getStepZ() * 0.5;
                     double d3 = (rand.nextDouble() - 0.5) / 4;
                     double d4 = (rand.nextDouble() - 0.5) / 4;
                     double d5 = (rand.nextDouble() - 0.5) / 4;
@@ -982,9 +991,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
             if (this.shouldUseHotFuel)
             {
                 if (rand.nextDouble() < this.getHotFuel() / 3000d)
-                {   double d0 = pos.getX() + 0.5 - face.getStepX() * 0.5;
-                    double d1 = pos.getY() + 0.5 - face.getStepY() * 0.5;
-                    double d2 = pos.getZ() + 0.5 - face.getStepZ() * 0.5;
+                {   double d0 = pos.getX() + 0.5 + face.getStepX() * 0.5;
+                    double d1 = pos.getY() + 0.5 + face.getStepY() * 0.5;
+                    double d2 = pos.getZ() + 0.5 + face.getStepZ() * 0.5;
                     double d3 = (rand.nextDouble() - 0.5) / 2;
                     double d4 = (rand.nextDouble() - 0.5) / 2;
                     double d5 = (rand.nextDouble() - 0.5) / 2;
