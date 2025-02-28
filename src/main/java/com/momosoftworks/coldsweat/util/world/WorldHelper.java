@@ -155,7 +155,7 @@ public abstract class WorldHelper
             try
             {
                 BlockState state = chunk.getBlockState(pos2);
-                if (state.isAir() || state.getMaterial().isLiquid())
+                if (state.isAir() || state.getMaterial().isLiquid() || ConfigSettings.THERMAL_SOURCE_SPREAD_WHITELIST.get().contains(state.getBlock()))
                 {   continue;
                 }
                 VoxelShape shape = state.getShape(level, pos, ISelectionContext.empty());
