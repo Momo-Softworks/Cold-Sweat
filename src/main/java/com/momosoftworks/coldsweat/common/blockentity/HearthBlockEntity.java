@@ -175,7 +175,10 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         && this.pathLookup.contains(pos)
         && !event.getOldState().getCollisionShape(level, pos).equals(event.getNewState().getCollisionShape(level, pos)))
         {
-            this.sendBlockUpdate(pos);
+            if (!level.isClientSide())
+            {   this.sendBlockUpdate(pos);
+            }
+            this.pipeEnds.clear();
         }
     }
 
