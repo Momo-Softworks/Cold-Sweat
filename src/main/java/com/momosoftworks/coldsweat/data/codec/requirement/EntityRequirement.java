@@ -5,18 +5,21 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.data.codec.requirement.sub_type.EntitySubRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.DoubleBounds;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.monster.MonsterEntity;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.tags.ITag;
 import net.minecraft.util.registry.Registry;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class EntityRequirement
@@ -28,7 +31,8 @@ public class EntityRequirement
     public final Optional<NbtRequirement> nbt;
     public final Optional<EntityFlagsRequirement> flags;
     public final Optional<EquipmentRequirement> equipment;
-    public final Optional<PlayerDataRequirement> playerData;
+    Optional<EntitySubRequirement> typeSpecificData;
+    Optional<String> team;
     public final Optional<EntityRequirement> vehicle;
     public final Optional<EntityRequirement> passenger;
     public final Optional<EntityRequirement> target;
@@ -38,9 +42,10 @@ public class EntityRequirement
     public EntityRequirement(Optional<List<Either<ITag<EntityType<?>>, EntityType<?>>>> entities,
                              Optional<LocationRequirement> location, Optional<LocationRequirement> steppingOn,
                              Optional<EffectsRequirement> effects, Optional<NbtRequirement> nbt, Optional<EntityFlagsRequirement> flags,
-                             Optional<EquipmentRequirement> equipment, Optional<PlayerDataRequirement> playerData,
-                             Optional<EntityRequirement> vehicle, Optional<EntityRequirement> passenger, Optional<EntityRequirement> target,
-                             Optional<Map<Temperature.Trait, DoubleBounds>> temperature, Optional<Predicate<Entity>> predicate)
+                             Optional<EquipmentRequirement> equipment, Optional<EntitySubRequirement> typeSpecificData,
+                             Optional<String> team, Optional<EntityRequirement> vehicle, Optional<EntityRequirement> passenger,
+                             Optional<EntityRequirement> target, Optional<Map<Temperature.Trait, DoubleBounds>> temperature,
+                             Optional<Predicate<Entity>> predicate)
     {
         this.entities = entities;
         this.location = location;
@@ -49,7 +54,8 @@ public class EntityRequirement
         this.nbt = nbt;
         this.flags = flags;
         this.equipment = equipment;
-        this.playerData = playerData;
+        this.typeSpecificData = typeSpecificData;
+        this.team = team;
         this.vehicle = vehicle;
         this.passenger = passenger;
         this.target = target;
@@ -59,11 +65,11 @@ public class EntityRequirement
 
     public EntityRequirement(Optional<List<Either<ITag<EntityType<?>>, EntityType<?>>>> type, Optional<LocationRequirement> location,
                              Optional<LocationRequirement> steppingOn, Optional<EffectsRequirement> effects, Optional<NbtRequirement> nbt,
-                             Optional<EntityFlagsRequirement> flags, Optional<EquipmentRequirement> equipment, Optional<PlayerDataRequirement> playerData,
-                             Optional<EntityRequirement> vehicle, Optional<EntityRequirement> passenger, Optional<EntityRequirement> target,
-                             Optional<Map<Temperature.Trait, DoubleBounds>> temperature)
+                             Optional<EntityFlagsRequirement> flags, Optional<EquipmentRequirement> equipment, Optional<EntitySubRequirement> typeSpecificData,
+                             Optional<String> team, Optional<EntityRequirement> vehicle, Optional<EntityRequirement> passenger,
+                             Optional<EntityRequirement> target, Optional<Map<Temperature.Trait, DoubleBounds>> temperature)
     {
-        this(type, location, steppingOn, effects, nbt, flags, equipment, playerData, vehicle, passenger, target, temperature, Optional.empty());
+        this(type, location, steppingOn, effects, nbt, flags, equipment, typeSpecificData, team, vehicle, passenger, target, temperature, Optional.empty());;
     }
 
     public EntityRequirement(List<Either<ITag<EntityType<?>>, EntityType<?>>> entities)
@@ -73,11 +79,13 @@ public class EntityRequirement
              Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
     }
 
-    public EntityRequirement(Predicate<Entity> predicate)
+    public EntityRequirement(Collection<EntityType<?>> entities, Predicate<Entity> predicate)
     {
-        this(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
+        this(Optional.of(entities.stream().map(Either::<ITag<EntityType<?>>, EntityType<?>>right).collect(Collectors.toList())),
+             Optional.empty(), Optional.empty(), Optional.empty(),
+             Optional.empty(), Optional.empty(), Optional.empty(),
+             Optional.empty(), Optional.empty(), Optional.empty(),
+             Optional.empty(), Optional.empty(), Optional.empty(),
              Optional.ofNullable(predicate));
     }
 
@@ -95,10 +103,12 @@ public class EntityRequirement
             NbtRequirement.CODEC.optionalFieldOf("nbt").forGetter(requirement -> requirement.nbt),
             EntityFlagsRequirement.CODEC.optionalFieldOf("flags").forGetter(requirement -> requirement.flags),
             EquipmentRequirement.CODEC.optionalFieldOf("equipment").forGetter(requirement -> requirement.equipment),
+            EntitySubRequirement.CODEC.optionalFieldOf("type_data").forGetter(requirement -> requirement.typeSpecificData),
+            Codec.STRING.optionalFieldOf("team").forGetter(requirement -> requirement.team),
             Codec.unboundedMap(Temperature.Trait.CODEC, DoubleBounds.CODEC).optionalFieldOf("temperature").forGetter(requirement -> requirement.temperature)
-    ).apply(instance, (type, location, standingOn, effects, nbt, flags, equipment, temperature) -> new EntityRequirement(type, location, standingOn, effects, nbt, flags, equipment,
-                                                                                                            Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-                                                                                                            temperature)));
+    ).apply(instance, (type, location, standingOn, effects, nbt, flags, equipment, typeData, team, temperature) ->
+            new EntityRequirement(type, location, standingOn, effects, nbt, flags, equipment, typeData, team,
+                                  Optional.empty(), Optional.empty(), Optional.empty(), temperature)));
 
     private static final List<Codec<EntityRequirement>> REQUIREMENT_CODEC_STACK = new ArrayList<>(Arrays.asList(SIMPLE_CODEC));
     // Allow for up to 16 layers of inner codecs
@@ -123,7 +133,8 @@ public class EntityRequirement
                 NbtRequirement.CODEC.optionalFieldOf("nbt").forGetter(requirement -> requirement.nbt),
                 EntityFlagsRequirement.CODEC.optionalFieldOf("flags").forGetter(requirement -> requirement.flags),
                 EquipmentRequirement.CODEC.optionalFieldOf("equipment").forGetter(requirement -> requirement.equipment),
-                PlayerDataRequirement.getCodec(latestCodec).optionalFieldOf("player_data").forGetter(requirement -> requirement.playerData),
+                EntitySubRequirement.CODEC.optionalFieldOf("type_specific").forGetter(requirement -> requirement.typeSpecificData),
+                Codec.STRING.optionalFieldOf("team").forGetter(requirement -> requirement.team),
                 latestCodec.optionalFieldOf("vehicle").forGetter(requirement -> requirement.vehicle),
                 latestCodec.optionalFieldOf("passenger").forGetter(requirement -> requirement.passenger),
                 latestCodec.optionalFieldOf("target").forGetter(requirement -> requirement.target),
@@ -154,8 +165,11 @@ public class EntityRequirement
     public Optional<EquipmentRequirement> equipment()
     {   return equipment;
     }
-    public Optional<PlayerDataRequirement> playerData()
-    {   return playerData;
+    public Optional<EntitySubRequirement> typeSpecificData()
+    {   return typeSpecificData;
+    }
+    public Optional<String> team()
+    {   return team;
     }
     public Optional<EntityRequirement> vehicle()
     {   return vehicle;
@@ -210,7 +224,7 @@ public class EntityRequirement
         if (equipment.isPresent() && !equipment.get().test(entity))
         {   return false;
         }
-        if (playerData.isPresent() && !playerData.get().test(entity))
+        if (typeSpecificData.isPresent() && !typeSpecificData.get().test(entity, entity.level, entity.position()))
         {   return false;
         }
         if (vehicle.isPresent() && !vehicle.get().test(entity.getVehicle()))
@@ -221,11 +235,14 @@ public class EntityRequirement
         }
         if (target.isPresent())
         {
-            if (!(entity instanceof MonsterEntity))
+            if (!(entity instanceof MonsterEntity) || !target.get().test(((MonsterEntity) entity).getTarget()))
             {   return false;
             }
-            MonsterEntity monster = (MonsterEntity) entity;
-            if (!target.get().test(monster.getTarget()))
+        }
+        if (team.isPresent())
+        {
+            Team team = entity.getTeam();
+            if (team == null || !team.getName().equals(this.team.get()))
             {   return false;
             }
         }
@@ -262,7 +279,7 @@ public class EntityRequirement
             && nbt.equals(that.nbt)
             && flags.equals(that.flags)
             && equipment.equals(that.equipment)
-            && playerData.equals(that.playerData)
+            && typeSpecificData.equals(that.typeSpecificData)
             && vehicle.equals(that.vehicle)
             && passenger.equals(that.passenger)
             && target.equals(that.target)

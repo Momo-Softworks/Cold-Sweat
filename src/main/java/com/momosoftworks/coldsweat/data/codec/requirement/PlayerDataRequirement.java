@@ -3,8 +3,10 @@ package com.momosoftworks.coldsweat.data.codec.requirement;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.impl.RequirementHolder;
+import com.momosoftworks.coldsweat.data.codec.requirement.sub_type.EntitySubRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.entity.EntityHelper;
 import net.minecraft.advancements.AdvancementProgress;
@@ -13,8 +15,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.ProjectileHelper;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.NBTDynamicOps;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.StatType;
 import net.minecraft.util.ResourceLocation;
@@ -24,12 +24,13 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.GameType;
+import net.minecraft.world.World;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Map;
 import java.util.Optional;
 
-public class PlayerDataRequirement implements RequirementHolder
+public class PlayerDataRequirement implements EntitySubRequirement, RequirementHolder
 {
     private final Optional<GameType> gameType;
     private final Optional<Map<StatRequirement, IntegerBounds>> stats;
@@ -48,17 +49,15 @@ public class PlayerDataRequirement implements RequirementHolder
         this.advancements = advancements;
         this.lookingAt = lookingAt;
     }
-    public static final Codec<PlayerDataRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.STRING.xmap(GameType::byName, GameType::getName).optionalFieldOf("game_mode").forGetter(requirement -> requirement.gameType),
-            Codec.unboundedMap(StatRequirement.CODEC, IntegerBounds.CODEC).optionalFieldOf("stats").forGetter(requirement -> requirement.stats),
-            Codec.unboundedMap(ResourceLocation.CODEC, Codec.BOOL).optionalFieldOf("recipes").forGetter(requirement -> requirement.recipes),
-            Codec.unboundedMap(ResourceLocation.CODEC, Codec.either(AdvancementCompletionRequirement.CODEC, AdvancementCriteriaRequirement.CODEC)).optionalFieldOf("advancements").forGetter(requirement -> requirement.advancements),
-            EntityRequirement.getCodec().optionalFieldOf("looking_at").forGetter(requirement -> requirement.lookingAt)
-    ).apply(instance, PlayerDataRequirement::new));
 
-    public static Codec<PlayerDataRequirement> getCodec(Codec<EntityRequirement> lastCodec)
+    @Override
+    public MapCodec<? extends EntitySubRequirement> getCodec()
+    {   return getCodec(EntityRequirement.getCodec());
+    }
+
+    public static MapCodec<PlayerDataRequirement> getCodec(Codec<EntityRequirement> lastCodec)
     {
-        return RecordCodecBuilder.create(instance -> instance.group(
+        return RecordCodecBuilder.mapCodec(instance -> instance.group(
                 Codec.STRING.xmap(GameType::byName, GameType::getName).optionalFieldOf("game_mode").forGetter(requirement -> requirement.gameType),
                 Codec.unboundedMap(StatRequirement.CODEC, IntegerBounds.CODEC).optionalFieldOf("stats").forGetter(requirement -> requirement.stats),
                 Codec.unboundedMap(ResourceLocation.CODEC, Codec.BOOL).optionalFieldOf("recipes").forGetter(requirement -> requirement.recipes),
@@ -138,6 +137,11 @@ public class PlayerDataRequirement implements RequirementHolder
             }
         }
         return true;
+    }
+
+    @Override
+    public boolean test(Entity entity, World level, Vector3d position)
+    {   return test(entity);
     }
 
     @Override
