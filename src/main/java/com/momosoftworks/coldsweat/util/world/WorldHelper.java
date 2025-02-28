@@ -172,7 +172,7 @@ public abstract class WorldHelper
         return true;
     }
 
-    public static boolean isSpreadBlocked(IWorld world, BlockState state, BlockPos pos, Direction toDir, Direction fromDir)
+    public static boolean isSpreadBlocked(IWorld world, BlockState state, BlockPos pos, Direction fromDir, Direction toDir)
     {
         Block block = state.getBlock();
 
