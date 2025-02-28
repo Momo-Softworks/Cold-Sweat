@@ -8,7 +8,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
+import net.minecraftforge.client.IItemRenderProperties;
 
 import java.util.function.Consumer;
 
@@ -19,12 +19,12 @@ public class ChameleonArmorItem extends ArmorItem
     }
 
     @Override
-    public void initializeClient(Consumer<IClientItemExtensions> consumer)
+    public void initializeClient(Consumer<IItemRenderProperties> consumer)
     {
-        consumer.accept(new IClientItemExtensions()
+        consumer.accept(new IItemRenderProperties()
         {
             @Override
-            public HumanoidModel<?> getHumanoidArmorModel(LivingEntity entityLiving, ItemStack itemStack, EquipmentSlot armorSlot, HumanoidModel<?> playerModel)
+            public HumanoidModel<?> getArmorModel(LivingEntity entityLiving, ItemStack itemStack, EquipmentSlot armorSlot, HumanoidModel<?> playerModel)
             {
                 RegisterModels.checkForInitModels();
                 if (entityLiving instanceof Player)

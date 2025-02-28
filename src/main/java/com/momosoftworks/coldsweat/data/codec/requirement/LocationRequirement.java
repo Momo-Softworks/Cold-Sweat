@@ -43,7 +43,7 @@ public record LocationRequirement(Optional<Integer> x, Optional<Integer> y, Opti
 
     public LocationRequirement(Optional<Integer> x, Optional<Integer> y, Optional<Integer> z,
                                Optional<Either<TagKey<Biome>, ResourceKey<Biome>>> biome,
-                               Optional<Either<TagKey<Structure>, ResourceKey<Structure>>> structure,
+                               Optional<Either<TagKey<ConfiguredStructureFeature<?, ?>>, ResourceKey<ConfiguredStructureFeature<?, ?>>>> structure,
                                Optional<Either<TagKey<Level>, ResourceKey<Level>>> dimension,
                                Optional<IntegerBounds> light, Optional<BlockRequirement> block,
                                Optional<FluidRequirement> fluid)
