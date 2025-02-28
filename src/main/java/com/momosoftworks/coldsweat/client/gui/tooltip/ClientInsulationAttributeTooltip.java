@@ -49,7 +49,7 @@ public class ClientInsulationAttributeTooltip extends Tooltip
     {
         // Icon
         Minecraft.getInstance().textureManager.bind(TOOLTIP_LOCATION.get());
-        AbstractGui.blit(ps, x, y + 2, 0, 24, 8, 8, 8, 24, 32);
+        AbstractGui.blit(ps, x, y, 0, 28, 8,  8, 8, 28, 36);
         // Text
         int color = Optional.ofNullable(this.original.getStyle().getColor()).map(Color::getValue).orElse(16777215);
         int xOffs = strikethrough ? 12: 10;
