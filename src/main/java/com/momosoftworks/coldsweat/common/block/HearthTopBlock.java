@@ -4,7 +4,6 @@ import com.momosoftworks.coldsweat.core.init.ItemInit;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -40,13 +39,12 @@ public class HearthTopBlock extends SmokestackBlock
     {
         ItemStack stack = player.getItemInHand(hand);
         if (stack.getItem() == ModItems.SMOKESTACK && level.getBlockState(pos.relative(rayTraceResult.getDirection())).canBeReplaced(new BlockPlaceContext(player, hand, stack, rayTraceResult)))
-        {   return InteractionResult.FAIL;
+        {   return InteractionResult.PASS;
         }
-        if (!level.isClientSide && level.getBlockState(pos.below()).getBlock() instanceof HearthBottomBlock hearthBottomBlock
-        && !super.use(state, level, pos, player, hand, rayTraceResult).consumesAction())
-        {   hearthBottomBlock.use(level.getBlockState(pos.below()), level, pos.below(), player, hand, rayTraceResult);
+        if (level.getBlockState(pos.below()).getBlock() instanceof HearthBottomBlock hearthBottomBlock)
+        {   return hearthBottomBlock.use(level.getBlockState(pos.below()), level, pos.below(), player, hand, rayTraceResult);
         }
-        return InteractionResult.SUCCESS;
+        return InteractionResult.PASS;
     }
 
     @SuppressWarnings("deprecation")

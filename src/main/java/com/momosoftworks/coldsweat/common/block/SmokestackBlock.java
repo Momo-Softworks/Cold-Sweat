@@ -180,7 +180,7 @@ public class SmokestackBlock extends Block
                 if (!player.isCreative())
                 {   stack.shrink(1);
                 }
-                return InteractionResult.SUCCESS;
+                return InteractionResult.CONSUME;
             }
         }
         return super.use(state, level, pos, player, hand, rayTraceResult);
