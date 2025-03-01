@@ -1,22 +1,32 @@
 package com.momosoftworks.coldsweat.compat.create;
 
+import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.blockentity.ThermolithBlockEntity;
+import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
-import com.simibubi.create.content.redstone.displayLink.DisplayBehaviour;
+import com.simibubi.create.api.behaviour.display.DisplaySource;
+import com.simibubi.create.api.registry.CreateRegistries;
 import com.simibubi.create.content.redstone.displayLink.DisplayLinkContext;
 import com.simibubi.create.content.redstone.displayLink.source.SingleLineDisplaySource;
 import com.simibubi.create.content.redstone.displayLink.target.DisplayTargetStats;
 import com.simibubi.create.foundation.gui.ModularGuiLineBuilder;
-import com.simibubi.create.foundation.utility.Components;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.RegistryObject;
 
 import java.util.List;
 
-public class ColdSweatDisplayBehaviors
+public class ColdSweatDisplaySources
 {
-    public static DisplayBehaviour THERMOLITH;
+    public static final DeferredRegister<DisplaySource> DISPLAY_SOURCES = DeferredRegister.create(CreateRegistries.DISPLAY_SOURCE, ColdSweat.MOD_ID);
+    public static final RegistryObject<DisplaySource> THERMOLITH = DISPLAY_SOURCES.register("cold_sweat_thermolith", () ->
+    {
+        DisplaySource source = new Thermolith();
+        DisplaySource.BY_BLOCK.add(ModBlocks.THERMOLITH, source);
+        return source;
+    });
 
     public static class Thermolith extends SingleLineDisplaySource
     {
@@ -49,9 +59,9 @@ public class ColdSweatDisplayBehaviors
             if (!isFirstLine)
             {
                 builder.addSelectionScrollInput(0, 137, (input, label) -> {
-                    input.forOptions(List.of(Components.literal(Temperature.Units.F.getFormattedName()),
-                                             Components.literal(Temperature.Units.C.getFormattedName()),
-                                             Components.literal(Temperature.Units.MC.getFormattedName())))
+                    input.forOptions(List.of(Component.literal(Temperature.Units.F.getFormattedName()),
+                                             Component.literal(Temperature.Units.C.getFormattedName()),
+                                             Component.literal(Temperature.Units.MC.getFormattedName())))
                          .titled(Component.translatable("cold_sweat.config.units.name"));
                 }, "Units");
             }

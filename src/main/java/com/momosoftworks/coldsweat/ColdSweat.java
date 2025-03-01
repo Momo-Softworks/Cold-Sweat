@@ -75,6 +75,7 @@ public class ColdSweat
 
         // Setup compat
         CompatManager.registerEventHandlers();
+        CompatManager.invokeRegistries(bus);
 
         // Setup JSON data-driven handlers
         bus.addListener((DataPackRegistryEvent.NewRegistry event) ->

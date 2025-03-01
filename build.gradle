@@ -136,6 +136,9 @@ repositories {
             includeGroup "dev.latvian.mods"
         }
     }
+    maven {
+        url = "https://maven.createmod.net"
+    }
     mavenCentral()
 }
 
@@ -144,6 +147,7 @@ dependencies {
     minecraft 'net.minecraftforge:forge:1.20.1-47.3.22'
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
+    // Compat mods
     compileOnly fg.deobf("curse.maven:werewolves-become-a-beast-417851:4710810")
     compileOnly fg.deobf("curse.maven:vampirism-233029:4783000")
     compileOnly fg.deobf("curse.maven:weather-storms-tornadoes-237746:4931290")
@@ -153,26 +157,29 @@ dependencies {
     //compileOnly fg.deobf("curse.maven:carrots-311327:4382778") // no 1.19.2 version
     compileOnly("com.tterrag.registrate:Registrate:MC1.20-1.3.3")
 
-    implementation fg.deobf("curse.maven:create-328085:4762216")
+    implementation fg.deobf("curse.maven:create-328085:6247663")
+    compileOnly("net.createmod.ponder:Ponder-Forge-1.20.1:1.0.37")
     implementation fg.deobf("curse.maven:curios-309927:5367944-sources-5367945")
-    implementation fg.deobf("curse.maven:thirst-was-taken-679270:5568703")
+    compileOnly fg.deobf("curse.maven:thirst-was-taken-679270:5568703")
     implementation fg.deobf("curse.maven:glitchcore-955399:5787839")
     implementation fg.deobf("curse.maven:serene-seasons-291874:5790653")
     implementation fg.deobf("curse.maven:spoiled-364918:4803042")
 
+    // Valkyrien Skies (compat)
     compileOnly         ("org.valkyrienskies.core:api:${valk_skies_api_version}")
     compileOnly         ("org.valkyrienskies.core:impl:${valk_skies_api_version}")
     compileOnly         ("org.valkyrienskies.core:api-game:${valk_skies_api_version}")
     compileOnly         ("org.valkyrienskies.core:util:${valk_skies_api_version}")
     compileOnly fg.deobf("org.valkyrienskies:valkyrienskies-120-forge:2.3.0-beta.5+bcda04a482")
     compileOnly fg.deobf("curse.maven:eureka-ships-654384:5321630")
+    implementation 'thedarkcolour:kotlinforforge:4.10.0'
 
+    /// KubeJS (Compat)
     implementation fg.deobf("dev.latvian.mods:kubejs-forge:${kubejs_version}")
     implementation fg.deobf("dev.latvian.mods:rhino-forge:${rhino_version}")
     implementation fg.deobf("dev.architectury:architectury-forge:${architectury_version}")
 
-    implementation 'thedarkcolour:kotlinforforge:4.10.0'
-
+    // Runtime mods
     runtimeOnly fg.deobf("curse.maven:spark-361579:4738952")
     runtimeOnly fg.deobf("curse.maven:biomes-o-plenty-220318:4764804")
     runtimeOnly fg.deobf("curse.maven:terrablender-563928:5378180")
@@ -186,7 +193,6 @@ dependencies {
     runtimeOnly fg.deobf("curse.maven:caelus-308989:4581481")
     runtimeOnly fg.deobf("curse.maven:comforts-276951:5068863")
     runtimeOnly fg.deobf("curse.maven:packet-fixer-689467:5416166")
-
     runtimeOnly fg.deobf("curse.maven:attributefix-280510:4844658")
     runtimeOnly fg.deobf("curse.maven:customskinloader-286924:5497382")
 }

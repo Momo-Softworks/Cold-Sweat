@@ -7,11 +7,10 @@ import com.momosoftworks.coldsweat.api.event.core.init.FetchSeasonsModsEvent;
 import com.momosoftworks.coldsweat.api.temperature.modifier.compat.SereneSeasonsTempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
+import com.momosoftworks.coldsweat.compat.create.ColdSweatDisplaySources;
+import com.momosoftworks.coldsweat.compat.create.ColdSweatPonderPlugin;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.core.init.BlockInit;
-import com.momosoftworks.coldsweat.compat.create.ColdSweatDisplayBehaviors;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import com.simibubi.create.content.equipment.armor.BacktankItem;
@@ -20,16 +19,13 @@ import com.simibubi.create.content.equipment.armor.DivingHelmetItem;
 import com.simibubi.create.content.fluids.pipes.EncasedPipeBlock;
 import com.simibubi.create.content.fluids.pipes.FluidPipeBlock;
 import com.simibubi.create.content.fluids.pipes.GlassFluidPipeBlock;
-import com.simibubi.create.content.redstone.displayLink.AllDisplayBehaviours;
-import com.simibubi.create.foundation.ponder.PonderRegistry;
-import com.simibubi.create.infrastructure.ponder.AllPonderTags;
 import dev.ghen.thirst.content.purity.ContainerWithPurity;
 import dev.ghen.thirst.content.purity.WaterPurity;
 import dev.ghen.thirst.foundation.common.event.RegisterThirstValueEvent;
 import glitchcore.event.EventManager;
+import net.createmod.ponder.foundation.PonderIndex;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.FormattedText;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -42,6 +38,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -79,7 +76,7 @@ public class CompatManager
     private static final boolean SPIRIT_LOADED = modLoaded("spirit");
     private static final boolean BYG_LOADED = modLoaded("byg");
     private static final boolean BWG_LOADED = modLoaded("biomeswevegone");
-    private static final boolean CREATE_LOADED = modLoaded("create", "0.5.1");
+    private static final boolean CREATE_LOADED = modLoaded("create", "6.0.0");
     private static final boolean ATMOSPHERIC_LOADED = modLoaded("atmospheric");
     private static final boolean ENVIRONMENTAL_LOADED = modLoaded("environmental");
     private static final boolean TERRALITH_LOADED = modLoaded("terralith");
@@ -439,6 +436,13 @@ public class CompatManager
         }
     }
 
+    public static void invokeRegistries(IEventBus bus)
+    {
+        if (isCreateLoaded())
+        {   ColdSweatDisplaySources.DISPLAY_SOURCES.register(bus);
+        }
+    }
+
     public static boolean USING_BACKTANK = false;
 
     @SubscribeEvent
@@ -502,33 +506,23 @@ public class CompatManager
     {
         @SubscribeEvent
         public static void setupModEvents(FMLCommonSetupEvent event)
-        {
-            if (isCreateLoaded())
-            {
-                new Object()
-                {
-                    public void registerDisplayBehaviors()
-                    {
-                        ColdSweatDisplayBehaviors.THERMOLITH = AllDisplayBehaviours.register(new ResourceLocation(ColdSweat.MOD_ID, "thermolith"), new ColdSweatDisplayBehaviors.Thermolith());
-                        AllDisplayBehaviours.assignBlock(ColdSweatDisplayBehaviors.THERMOLITH, ModBlocks.THERMOLITH);
-                    }
-                }.registerDisplayBehaviors();
-            }
-        }
+        {}
 
         @SubscribeEvent
         public static void setupModClientEvents(FMLClientSetupEvent event)
         {
-            if (isCreateLoaded())
+            event.enqueueWork(() ->
             {
-                new Object()
+                if (isCreateLoaded())
                 {
-                    public void registerPonderTags()
+                    new Object()
                     {
-                        PonderRegistry.TAGS.forTag(AllPonderTags.DISPLAY_SOURCES).add(BlockInit.THERMOLITH.get());
-                    }
-                }.registerPonderTags();
-            }
+                        public void registerPonderPlugin()
+                        {   PonderIndex.addPlugin(new ColdSweatPonderPlugin());
+                        }
+                    }.registerPonderPlugin();
+                }
+            });
         }
     }
 }
