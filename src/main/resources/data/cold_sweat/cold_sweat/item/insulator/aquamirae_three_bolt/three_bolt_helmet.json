@@ -3,7 +3,7 @@
     "aquamirae"
   ],
   "type": "armor",
-  "data": {
+  "item": {
     "items": [
       "aquamirae:three_bolt_helmet"
     ]
