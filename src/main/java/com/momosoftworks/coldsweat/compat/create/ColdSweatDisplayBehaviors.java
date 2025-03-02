@@ -31,7 +31,8 @@ public class ColdSweatDisplayBehaviors
 
                 double convertedTemp = Temperature.convert(temperature, Temperature.Units.MC, units, true);
 
-                String text = String.format("%.0f%s", convertedTemp, units.getFormattedName());
+                String places = units == Temperature.Units.MC ? "%.2f" : "%.0f";
+                String text = String.format(places+"%s", convertedTemp, units.getFormattedName());
                 return Component.literal(text);
             }
             return Component.empty();
