@@ -2821,3 +2821,64 @@ Technical Changes:
 - Added CreateRegistriesEvent.Pre
       - Fires directly after registries are compiled, and before removals are handled
       - Subscribing to the base event is not recommended, as it will cause the subscriber to fire twice
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.4-b01a
+* New armor set: Chameleon Scale:
+      - Crafted with chameleon molt in typical armor patterns
+      - Visually adapts to the ambient temperature
+      - Each armor piece provides maximum adaptive insulation
+      - Cannot be insulated in the sewing table
+      - Can be used as insulation for other items (similar to leather armor)
+* The smokestack block can now be placed in all directions
+      - This allows for creating "pipes" that transport air from the hearth/boiler/icebox
+      - This is a built-in alternative to using Create's pipes, but those still work as well
+      - A smokestack connected on more than one axis (like in corners) will become a "junction", which takes up a full block
+      - Junctions do not allow air to pass around them- only through them via connected smokestacks
+      - A smokestack can be right-clicked with cobblestone to create a junction, which is useful for venting air through walls
+      - The smoke & steam emitted from the thermal sources will travel through the smokestack line and emit from the end(s)
+* Smokestacks no longer require redstone to craft
+* Tweaked how the insulation system works:
+      - Each insulation slot now represents an item, rather than 2 insulation points
+      - This enables more powerful insulation items to take up only one slot
+      - Added custom tooltip graphic for "compound" insulation items
+      - Added new parameter to insulator configs: "fill_slots"
+            - This will make the insulator take up multiple slots as normal
+* Updated compat for Create to 6.0.0
+* (1.21) Fully Reimplemented Create and Thirst Was Taken support
+- Entities caught on fire will now heat up the nearby area
+      - You can also warm yourself up this way!
+- Eating temperature-affecting foods now properly replaces the pre-existing effect for that item
+      - i.e. eating a soul sprout will now reset the "coldness" timer if its effect is already active, rather than doing nothing
+Fixes:
+- (1.19) Fixed the inside of structures having no temperature
+- Fixed crash while ticking the icebox when Immersive Portals is installed
+- Fixed adaptive insulating armors not adapting to the ambient temperature
+- Fixed attribute modifiers added by insulation not being removed when the armor item is taken off
+
+Technical Changes:
+- TemperatureChangedEvent now fires every time an entity's temperature changes, instead of only when it is changed manually
+* JSON and KubeJS configs with no defined targets (no listed items, entities, etc.) will now apply to everything
+      - This is useful if your config should affect all entities that match given requirements/predicates
+! The "data" field in item JSON configs has been renamed to "item" for consistency with other configs
+- Added optional "affects_self" field to entity temperature JSON configs
+      - This will cause the entity to be affected by its own temperature (defaults to "false")
+- Added optional fields "count", "location", and "block_below" fields to entity spawn biome configs:
+      - "count": The number of entities that can spawn in a group
+      - "location": A location requirement that must be met for the entity to spawn
+      - "block_below": Another location requirement, centered on the block below the entity
+- Added optional "location" field to block temperature JSON
+- Added new field to insulator configs: "fill_slots"
+      - This will make the insulator take up multiple slots as normal (reverts the new "one item per slot" system)
+      - This is "false" by default
+- Added entity temperature, spawn biome, and insulating mount configs support to KubeJS
+- (1.20-) Added new type-specific entity requirements (ported from 1.21):
+      - (1.18+) "variant": Checks the entity's variant (cat color, axolotl color, etc.)
+      - "fishing_hook": Checks if the fishing bobber entity is in open water (this is a Vanilla thing, IDK)
+      - (1.18+) "lightning_bolt": Checks blocks set on fire and entities struck by the lightning
+      - "piglin_neutral_armor": Checks if the entity is wearing armor that pacifies piglins
+      - "player": Checks player-specific data (game mode, stats, advancements, etc.)
+      - "raider": Checks pillager-specific data (part of an active raid, is the raid captain)
+      - "slime": Checks the size of the slime
+      - (1.18+) "snow_boots": Checks if the player is wearing boots that prevent falling through powder snow
