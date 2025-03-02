@@ -3,7 +3,7 @@
     "create"
   ],
   "type": "armor",
-  "data": {
+  "item": {
     "items": [
       "create:netherite_diving_helmet"
     ]
