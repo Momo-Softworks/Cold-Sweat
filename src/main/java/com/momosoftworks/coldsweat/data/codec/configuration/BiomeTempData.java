@@ -54,7 +54,7 @@ public class BiomeTempData extends ConfigData
                     either ->
                     either.map(left -> left, right -> right),
                     Either::right).forGetter(data -> data.max),
-            com.momosoftworks.coldsweat.api.util.Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(data -> data.units),
+            Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(data -> data.units),
             Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(data -> data.isOffset),
             Codec.STRING.listOf().optionalFieldOf("required_mods", Arrays.asList()).forGetter(BiomeTempData::requiredMods)
     ).apply(instance, BiomeTempData::new));

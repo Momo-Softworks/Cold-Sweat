@@ -485,13 +485,13 @@ public class ConfigHelper
 
     public static void writeItemInsulations(Multimap<Item, InsulatorData> items, Consumer<List<? extends List<?>>> saver)
     {
-        writeRegistryMultimap(items, insulator -> getTaggableListStrings(insulator.data().items().orElse(Arrays.asList()), net.minecraft.util.registry.Registry.ITEM_REGISTRY), insulator ->
+        writeRegistryMultimap(items, insulator -> getTaggableListStrings(insulator.item().items().orElse(Arrays.asList()), net.minecraft.util.registry.Registry.ITEM_REGISTRY), insulator ->
         {
             if (insulator == null)
             {   ColdSweat.LOGGER.error("Error writing item insulations: insulator value is null");
                 return new ArrayList<>();
             }
-            if (!insulator.predicate().equals(EntityRequirement.NONE) || !insulator.attributes().getMap().isEmpty())
+            if (!insulator.entity().equals(EntityRequirement.NONE) || !insulator.attributes().getMap().isEmpty())
             {   return new ArrayList<>();
             }
             List<Object> itemData = new ArrayList<>();
@@ -504,7 +504,7 @@ public class ConfigHelper
             itemData.add(insulator.insulation() instanceof StaticInsulation
                          ? "static"
                          : "adaptive");
-            itemData.add(insulator.data().nbt().tag().toString());
+            itemData.add(insulator.item().nbt().tag().toString());
 
             return itemData;
         }, saver);

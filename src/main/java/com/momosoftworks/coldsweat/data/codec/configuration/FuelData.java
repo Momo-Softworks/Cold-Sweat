@@ -24,43 +24,43 @@ import java.util.List;
 
 public class FuelData extends ConfigData implements RequirementHolder
 {
+    final ItemRequirement item;
     final FuelType type;
     final Double fuel;
-    final ItemRequirement data;
 
-    public FuelData(FuelType type, Double fuel, ItemRequirement data, List<String> requiredMods)
+    public FuelData(ItemRequirement item, FuelType type, Double fuel, List<String> requiredMods)
     {
         super(requiredMods);
         this.type = type;
         this.fuel = fuel;
-        this.data = data;
+        this.item = item;
     }
 
-    public FuelData(FuelType type, Double fuel, ItemRequirement data)
+    public FuelData(ItemRequirement item, FuelType type, Double fuel)
     {
-        this(type, fuel, data, ConfigHelper.getModIDs(CSMath.listOrEmpty(data.items()), ForgeRegistries.ITEMS));
+        this(item, type, fuel, ConfigHelper.getModIDs(CSMath.listOrEmpty(item.items()), ForgeRegistries.ITEMS));
     }
 
     public static final Codec<FuelData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            FuelType.CODEC.fieldOf("type").forGetter(data -> data.type),
-            Codec.DOUBLE.fieldOf("fuel").forGetter(data -> data.fuel),
-            ItemRequirement.CODEC.fieldOf("data").forGetter(data -> data.data),
+            ItemRequirement.CODEC.fieldOf("item").forGetter(FuelData::item),
+            FuelType.CODEC.fieldOf("type").forGetter(FuelData::type),
+            Codec.DOUBLE.fieldOf("fuel").forGetter(FuelData::fuel),
             Codec.STRING.listOf().optionalFieldOf("required_mods", Arrays.asList()).forGetter(FuelData::requiredMods)
     ).apply(instance, FuelData::new));
 
+    public ItemRequirement item()
+    {   return item;
+    }
     public FuelType type()
     {   return type;
     }
     public Double fuel()
     {   return fuel;
     }
-    public ItemRequirement data()
-    {   return data;
-    }
 
     @Override
     public boolean test(ItemStack stack)
-    {   return data.test(stack, true);
+    {   return item.test(stack, true);
     }
 
     @Nullable
@@ -79,7 +79,7 @@ public class FuelData extends ConfigData implements RequirementHolder
                                         : new NbtRequirement(new CompoundNBT());
         ItemRequirement itemRequirement = new ItemRequirement(items, nbtRequirement);
 
-        return new FuelData(fuelType, fuel, itemRequirement);
+        return new FuelData(itemRequirement, fuelType, fuel);
     }
 
     @Override
@@ -96,7 +96,7 @@ public class FuelData extends ConfigData implements RequirementHolder
         FuelData that = (FuelData) obj;
         return super.equals(obj)
             && fuel.equals(that.fuel)
-            && data.equals(that.data);
+            && item.equals(that.item);
     }
 
     public enum FuelType implements StringRepresentable

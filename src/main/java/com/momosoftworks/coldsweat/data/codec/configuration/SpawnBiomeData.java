@@ -10,7 +10,6 @@ import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
-import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.tags.ITag;
 import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.registry.Registry;
@@ -26,33 +25,32 @@ import java.util.stream.Collectors;
 public class SpawnBiomeData extends ConfigData
 {
     final List<Biome> biomes;
+    final List<Either<ITag<EntityType<?>>, EntityType<?>>> entities;
     final EntityClassification category;
     final int weight;
-    final List<Either<ITag<EntityType<?>>, EntityType<?>>> entities;
     final IntegerBounds count;
     final LocationRequirement location;
     final LocationRequirement blockBelow;
 
-    public SpawnBiomeData(List<Biome> biomes, EntityClassification category,
-                          int weight, List<Either<ITag<EntityType<?>>, EntityType<?>>> entities,
-                          IntegerBounds count, LocationRequirement location,
+    public SpawnBiomeData(List<Biome> biomes,
+                          List<Either<ITag<EntityType<?>>, EntityType<?>>> entities,
+                          EntityClassification category, int weight, IntegerBounds count, LocationRequirement location,
                           LocationRequirement blockBelow, List<String> requiredMods)
     {
         super(requiredMods);
         this.biomes = biomes;
+        this.entities = entities;
         this.category = category;
         this.weight = weight;
-        this.entities = entities;
         this.count = count;
         this.location = location;
         this.blockBelow = blockBelow;
     }
 
-    public SpawnBiomeData(List<Biome> biomes, EntityClassification category,
-                          int weight, List<Either<ITag<EntityType<?>>, EntityType<?>>> entities,
-                          IntegerBounds count, LocationRequirement location, LocationRequirement blockBelow)
+    public SpawnBiomeData(List<Biome> biomes, List<Either<ITag<EntityType<?>>, EntityType<?>>> entities,
+                          EntityClassification category, int weight, IntegerBounds count, LocationRequirement location, LocationRequirement blockBelow)
     {
-        this(biomes, category, weight, entities, count, location, blockBelow, ConfigHelper.getModIDs(biomes, Registry.BIOME_REGISTRY));
+        this(biomes, entities, category, weight, count, location, blockBelow, ConfigHelper.getModIDs(biomes, Registry.BIOME_REGISTRY));
     }
 
     public SpawnBiomeData(Collection<Biome> biomes, EntityClassification category,
@@ -60,16 +58,16 @@ public class SpawnBiomeData extends ConfigData
                           IntegerBounds count, LocationRequirement location, LocationRequirement blockBelow)
     {
         this(new ArrayList<>(biomes),
-             category, weight,
              entities.stream().map(Either::<ITag<EntityType<?>>, EntityType<?>>right).collect(Collectors.toList()),
+             category, weight,
              count, location, blockBelow);
     }
 
     public static final Codec<SpawnBiomeData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ConfigHelper.dynamicCodec(Registry.BIOME_REGISTRY).listOf().fieldOf("biomes").forGetter(data -> data.biomes),
-            EntityClassification.CODEC.fieldOf("category").forGetter(data -> data.category),
-            Codec.INT.fieldOf("weight").forGetter(data -> data.weight),
-            Codec.either(ITag.codec(EntityTypeTags::getAllTags), Registry.ENTITY_TYPE).listOf().fieldOf("entities").forGetter(data -> data.entities),
+            ConfigHelper.dynamicCodec(Registry.BIOME_REGISTRY).listOf().fieldOf("biomes").forGetter(SpawnBiomeData::biomes),
+            ConfigHelper.tagOrBuiltinCodec(Registry.ENTITY_TYPE_REGISTRY, Registry.ENTITY_TYPE).listOf().fieldOf("entities").forGetter(SpawnBiomeData::entities),
+            EntityClassification.CODEC.fieldOf("category").forGetter(SpawnBiomeData::category),
+            Codec.INT.fieldOf("weight").forGetter(SpawnBiomeData::weight),
             IntegerBounds.CODEC.optionalFieldOf("count", IntegerBounds.NONE).forGetter(SpawnBiomeData::count),
             LocationRequirement.CODEC.optionalFieldOf("location", LocationRequirement.NONE).forGetter(SpawnBiomeData::location),
             LocationRequirement.CODEC.optionalFieldOf("block_below", LocationRequirement.NONE).forGetter(SpawnBiomeData::blockBelow),
@@ -107,8 +105,9 @@ public class SpawnBiomeData extends ConfigData
         }
         List<Biome> biomes = ConfigHelper.parseRegistryItems(Registry.BIOME_REGISTRY, registryAccess, (String) entry.get(0));
         if (biomes.isEmpty()) return null;
-        return new SpawnBiomeData(biomes, EntityClassification.CREATURE, ((Number) entry.get(1)).intValue(),
-                                  Arrays.asList(Either.right(entityType)), new IntegerBounds(1, 1), LocationRequirement.NONE, LocationRequirement.NONE);
+        return new SpawnBiomeData(biomes, Arrays.asList(Either.right(entityType)),
+                                  EntityClassification.CREATURE, ((Number) entry.get(1)).intValue(),
+                                  new IntegerBounds(1, 1), LocationRequirement.NONE, LocationRequirement.NONE);
     }
 
     @Override

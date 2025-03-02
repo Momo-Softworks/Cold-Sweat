@@ -20,6 +20,7 @@ import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.BlockRequirement;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
+import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.RegistryMultiMap;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.block.Block;
@@ -347,7 +348,7 @@ public class ConfigLoadingHandler
 
             // Add listed items as insulators
             List<Item> items = new ArrayList<>();
-            insulator.data().items().ifPresent(itemList ->
+            insulator.item().items().ifPresent(itemList ->
             {   items.addAll(RegistryHelper.mapTaggableList(itemList));
             });
             if (items.isEmpty())
@@ -382,7 +383,7 @@ public class ConfigLoadingHandler
             }
 
             List<Item> items = new ArrayList<>();
-            fuelData.data().items().ifPresent(itemList ->
+            fuelData.item().items().ifPresent(itemList ->
             {   items.addAll(RegistryHelper.mapTaggableList(itemList));
             });
             if (items.isEmpty())
@@ -412,7 +413,7 @@ public class ConfigLoadingHandler
             }
 
             List<Item> items = new ArrayList<>();
-            foodData.data().items().ifPresent(itemList ->
+            foodData.item().items().ifPresent(itemList ->
             {   items.addAll(RegistryHelper.mapTaggableList(itemList));
             });
             if (items.isEmpty())
@@ -435,7 +436,7 @@ public class ConfigLoadingHandler
             }
 
             List<Item> items = new ArrayList<>();
-            carryTempData.data().items().ifPresent(itemList ->
+            carryTempData.item().items().ifPresent(itemList ->
             {   items.addAll(RegistryHelper.mapTaggableList(itemList));
             });
             if (items.isEmpty())
@@ -594,7 +595,7 @@ public class ConfigLoadingHandler
             if (!mountData.areRequiredModsLoaded())
             {   return;
             }
-            List<EntityType<?>> entities = RegistryHelper.mapTaggableList(mountData.entityData().entities().orElse(Arrays.asList()));
+            List<EntityType<?>> entities = RegistryHelper.mapTaggableList(mountData.entity().entities().orElse(Arrays.asList()));
             if (entities.isEmpty())
             {   entities.add(null);
             }

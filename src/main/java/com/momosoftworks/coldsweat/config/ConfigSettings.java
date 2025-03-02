@@ -398,7 +398,7 @@ public class ConfigSettings
 
                 data.setType(ConfigData.Type.TOML);
 
-                putRegistryEntries(dataMap, ForgeRegistries.ITEMS, data.data().items(), data);
+                putRegistryEntries(dataMap, ForgeRegistries.ITEMS, data.item().items(), data);
             }
             ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.FUEL_DATA);
             holder.get().putAll(dataMap);
@@ -432,7 +432,7 @@ public class ConfigSettings
 
                 data.setType(ConfigData.Type.TOML);
 
-                putRegistryEntries(dataMap, ForgeRegistries.ITEMS, data.data().items(), data);
+                putRegistryEntries(dataMap, ForgeRegistries.ITEMS, data.item().items(), data);
             }
             // Handle registry removals
             ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.INSULATOR_DATA);
@@ -543,7 +543,7 @@ public class ConfigSettings
                 FoodData data = FoodData.fromToml(list);
                 if (data == null) continue;
 
-                putRegistryEntries(dataMap, ForgeRegistries.ITEMS, data.data().items(), data);
+                putRegistryEntries(dataMap, ForgeRegistries.ITEMS, data.item().items(), data);
             }
             // Handle registry removals
             ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.FOOD_DATA);
@@ -564,7 +564,7 @@ public class ConfigSettings
                 ItemCarryTempData data = ItemCarryTempData.fromToml(list);
                 if (data == null) continue;
 
-                putRegistryEntries(dataMap, ForgeRegistries.ITEMS, data.data().items(), data);
+                putRegistryEntries(dataMap, ForgeRegistries.ITEMS, data.item().items(), data);
             }
             // Handle registry removals
             ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.CARRY_TEMP_DATA);
@@ -655,7 +655,7 @@ public class ConfigSettings
 
                 data.setType(ConfigData.Type.TOML);
 
-                putRegistryEntries(dataMap, ForgeRegistries.ENTITIES, data.entityData().entities(), data);
+                putRegistryEntries(dataMap, ForgeRegistries.ENTITIES, data.entity().entities(), data);
             }
             // Handle registry removals
             ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.MOUNT_DATA);
