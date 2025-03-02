@@ -18,7 +18,7 @@ public class FilterInsulationItemsTab
     {
         event.addCheck((item, insulator) ->
         {
-            for (Either<TagKey<Item>, Item> either : CSMath.listOrEmpty(insulator.data().items()))
+            for (Either<TagKey<Item>, Item> either : CSMath.listOrEmpty(insulator.item().items()))
             {
                 if (either.left().map(tag -> item.builtInRegistryHolder().is(tag)).orElse(false))
                 {

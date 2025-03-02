@@ -458,7 +458,7 @@ public class TooltipHandler
 
     private static void validateInsulator(InsulatorData insulator, List<Insulation> insulation, List<Insulation> unmetInsulation)
     {
-        boolean multiSlot = insulator.multiSlot();
+        boolean multiSlot = insulator.fillSlots();
         if (!insulator.insulation().isEmpty())
         {
             List<Insulation> insulList = multiSlot ? insulator.insulation().split() : List.of(insulator.insulation());

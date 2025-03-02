@@ -397,7 +397,7 @@ public class ConfigSettings
 
                 data.setType(ConfigData.Type.TOML);
 
-                putRegistryEntries(dataMap, BuiltInRegistries.ITEM, data.data().items(), data);
+                putRegistryEntries(dataMap, BuiltInRegistries.ITEM, data.item().items(), data);
             }
             ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.FUEL_DATA);
             holder.get().putAll(dataMap);
@@ -431,7 +431,7 @@ public class ConfigSettings
 
                 data.setType(ConfigData.Type.TOML);
 
-                putRegistryEntries(dataMap, BuiltInRegistries.ITEM, data.data().items(), data);
+                putRegistryEntries(dataMap, BuiltInRegistries.ITEM, data.item().items(), data);
             }
             // Handle registry removals
             ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.INSULATOR_DATA);
@@ -542,7 +542,7 @@ public class ConfigSettings
                 FoodData data = FoodData.fromToml(list);
                 if (data == null) continue;
 
-                putRegistryEntries(dataMap, BuiltInRegistries.ITEM, data.data().items(), data);
+                putRegistryEntries(dataMap, BuiltInRegistries.ITEM, data.item().items(), data);
             }
             // Handle registry removals
             ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.FOOD_DATA);
@@ -563,7 +563,7 @@ public class ConfigSettings
                 ItemCarryTempData data = ItemCarryTempData.fromToml(list);
                 if (data == null) continue;
 
-                putRegistryEntries(dataMap, BuiltInRegistries.ITEM, data.data().items(), data);
+                putRegistryEntries(dataMap, BuiltInRegistries.ITEM, data.item().items(), data);
             }
             // Handle registry removals
             ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.CARRY_TEMP_DATA);
@@ -661,7 +661,7 @@ public class ConfigSettings
 
                 data.setType(ConfigData.Type.TOML);
 
-                putRegistryEntries(dataMap, BuiltInRegistries.ENTITY_TYPE, data.entityData().entities(), data);
+                putRegistryEntries(dataMap, BuiltInRegistries.ENTITY_TYPE, data.entity().entities(), data);
             }
             // Handle registry removals
             ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.MOUNT_DATA);

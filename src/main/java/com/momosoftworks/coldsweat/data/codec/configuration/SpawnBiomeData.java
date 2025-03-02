@@ -24,33 +24,32 @@ import java.util.List;
 public class SpawnBiomeData extends ConfigData
 {
     final List<Either<TagKey<Biome>, Holder<Biome>>> biomes;
+    final List<Either<TagKey<EntityType<?>>, EntityType<?>>> entities;
     final MobCategory category;
     final int weight;
-    final List<Either<TagKey<EntityType<?>>, EntityType<?>>> entities;
     final IntegerBounds count;
     final LocationRequirement location;
     final LocationRequirement blockBelow;
 
-    public SpawnBiomeData(List<Either<TagKey<Biome>, Holder<Biome>>> biomes, MobCategory category,
-                          int weight, List<Either<TagKey<EntityType<?>>, EntityType<?>>> entities,
-                          IntegerBounds count, LocationRequirement location,
+    public SpawnBiomeData(List<Either<TagKey<Biome>, Holder<Biome>>> biomes,
+                          List<Either<TagKey<EntityType<?>>, EntityType<?>>> entities,
+                          MobCategory category, int weight, IntegerBounds count, LocationRequirement location,
                           LocationRequirement blockBelow, List<String> requiredMods)
     {
         super(requiredMods);
         this.biomes = biomes;
+        this.entities = entities;
         this.category = category;
         this.weight = weight;
-        this.entities = entities;
         this.count = count;
         this.location = location;
         this.blockBelow = blockBelow;
     }
 
-    public SpawnBiomeData(List<Either<TagKey<Biome>, Holder<Biome>>> biomes, MobCategory category,
-                          int weight, List<Either<TagKey<EntityType<?>>, EntityType<?>>> entities,
-                          IntegerBounds count, LocationRequirement location, LocationRequirement blockBelow)
+    public SpawnBiomeData(List<Either<TagKey<Biome>, Holder<Biome>>> biomes, List<Either<TagKey<EntityType<?>>, EntityType<?>>> entities,
+                          MobCategory category, int weight, IntegerBounds count, LocationRequirement location, LocationRequirement blockBelow)
     {
-        this(biomes, category, weight, entities, count, location, blockBelow, ConfigHelper.getModIDs(biomes));
+        this(biomes, entities, category, weight, count, location, blockBelow, ConfigHelper.getModIDs(biomes));
     }
 
     public SpawnBiomeData(Collection<Holder<Biome>> biomes, MobCategory category,
@@ -58,16 +57,16 @@ public class SpawnBiomeData extends ConfigData
                           IntegerBounds count, LocationRequirement location, LocationRequirement blockBelow)
     {
         this(biomes.stream().map(Either::<TagKey<Biome>, Holder<Biome>>right).toList(),
-             category, weight,
              entities.stream().map(Either::<TagKey<EntityType<?>>, EntityType<?>>right).toList(),
+             category, weight,
              count, location, blockBelow);
     }
 
     public static final Codec<SpawnBiomeData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ConfigHelper.tagOrHolderCodec(Registries.BIOME, Biome.CODEC).listOf().fieldOf("biomes").forGetter(SpawnBiomeData::biomes),
+            ConfigHelper.tagOrBuiltinCodec(Registries.ENTITY_TYPE, BuiltInRegistries.ENTITY_TYPE).listOf().fieldOf("entities").forGetter(SpawnBiomeData::entities),
             MobCategory.CODEC.fieldOf("category").forGetter(SpawnBiomeData::category),
             Codec.INT.fieldOf("weight").forGetter(SpawnBiomeData::weight),
-            ConfigHelper.tagOrBuiltinCodec(Registries.ENTITY_TYPE, BuiltInRegistries.ENTITY_TYPE).listOf().fieldOf("entities").forGetter(SpawnBiomeData::entities),
             IntegerBounds.CODEC.optionalFieldOf("count", IntegerBounds.NONE).forGetter(SpawnBiomeData::count),
             LocationRequirement.CODEC.optionalFieldOf("location", LocationRequirement.NONE).forGetter(SpawnBiomeData::location),
             LocationRequirement.CODEC.optionalFieldOf("block_below", LocationRequirement.NONE).forGetter(SpawnBiomeData::blockBelow),
@@ -106,8 +105,9 @@ public class SpawnBiomeData extends ConfigData
         List<Either<TagKey<Biome>, Holder<Biome>>> biomes = ConfigHelper.parseRegistryItems(Registries.BIOME, registryAccess, (String) entry.get(0));
         if (biomes.isEmpty()) return null;
 
-        return new SpawnBiomeData(biomes, MobCategory.CREATURE, ((Number) entry.get(1)).intValue(),
-                                  List.of(Either.right(entityType)), new IntegerBounds(1, 1), LocationRequirement.NONE, LocationRequirement.NONE);
+        return new SpawnBiomeData(biomes, List.of(Either.right(entityType)),
+                                  MobCategory.CREATURE, ((Number) entry.get(1)).intValue(),
+                                  new IntegerBounds(1, 1), LocationRequirement.NONE, LocationRequirement.NONE);
     }
 
     @Override

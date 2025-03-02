@@ -32,7 +32,7 @@ import java.util.Optional;
 
 public class ItemCarryTempData extends ConfigData implements RequirementHolder
 {
-    final ItemRequirement data;
+    final ItemRequirement item;
     final List<Either<IntegerBounds, SlotType>> slots;
     final double temperature;
     final Temperature.Trait trait;
@@ -41,12 +41,12 @@ public class ItemCarryTempData extends ConfigData implements RequirementHolder
     final AttributeModifierMap attributeModifiers;
     final Map<ResourceLocation, Double> immuneTempModifiers;
 
-    public ItemCarryTempData(ItemRequirement data, List<Either<IntegerBounds, SlotType>> slots, double temperature,
+    public ItemCarryTempData(ItemRequirement item, List<Either<IntegerBounds, SlotType>> slots, double temperature,
                              Temperature.Trait trait, Double maxEffect, EntityRequirement entityRequirement, AttributeModifierMap attributeModifiers,
                              Map<ResourceLocation, Double> immuneTempModifiers, List<String> requiredMods)
     {
         super(requiredMods);
-        this.data = data;
+        this.item = item;
         this.slots = slots;
         this.temperature = temperature;
         this.trait = trait;
@@ -56,15 +56,15 @@ public class ItemCarryTempData extends ConfigData implements RequirementHolder
         this.immuneTempModifiers = immuneTempModifiers;
     }
 
-    public ItemCarryTempData(ItemRequirement data, List<Either<IntegerBounds, SlotType>> slots, double temperature,
+    public ItemCarryTempData(ItemRequirement item, List<Either<IntegerBounds, SlotType>> slots, double temperature,
                              Temperature.Trait trait, Double maxEffect, EntityRequirement entityRequirement, AttributeModifierMap attributeModifiers,
                              Map<ResourceLocation, Double> immuneTempModifiers)
     {
-        this(data, slots, temperature, trait, maxEffect, entityRequirement, attributeModifiers, immuneTempModifiers, ConfigHelper.getModIDs(CSMath.listOrEmpty(data.items()), BuiltInRegistries.ITEM));
+        this(item, slots, temperature, trait, maxEffect, entityRequirement, attributeModifiers, immuneTempModifiers, ConfigHelper.getModIDs(CSMath.listOrEmpty(item.items()), BuiltInRegistries.ITEM));
     }
 
     public static final Codec<ItemCarryTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ItemRequirement.CODEC.fieldOf("data").forGetter(ItemCarryTempData::data),
+            ItemRequirement.CODEC.fieldOf("item").forGetter(ItemCarryTempData::item),
             Codec.either(IntegerBounds.CODEC, SlotType.CODEC).listOf().fieldOf("slots").forGetter(ItemCarryTempData::slots),
             Codec.DOUBLE.fieldOf("temperature").forGetter(ItemCarryTempData::temperature),
             Temperature.Trait.CODEC.optionalFieldOf("trait", Temperature.Trait.WORLD).forGetter(ItemCarryTempData::trait),
@@ -75,8 +75,8 @@ public class ItemCarryTempData extends ConfigData implements RequirementHolder
             Codec.STRING.listOf().optionalFieldOf("required_mods", List.of()).forGetter(ItemCarryTempData::requiredMods)
     ).apply(instance, ItemCarryTempData::new));
 
-    public ItemRequirement data()
-    {   return data;
+    public ItemRequirement item()
+    {   return item;
     }
     public List<Either<IntegerBounds, SlotType>> slots()
     {   return slots;
@@ -111,7 +111,7 @@ public class ItemCarryTempData extends ConfigData implements RequirementHolder
 
     public boolean test(Entity entity, ItemStack stack, SlotType slot)
     {
-        if (!test(entity) || !data().test(stack, true)) return false;
+        if (!test(entity) || !item().test(stack, true)) return false;
         for (int i = 0; i < this.slots().size(); i++)
         {
             Optional<SlotType> slotType = this.slots().get(i).right();
@@ -124,7 +124,7 @@ public class ItemCarryTempData extends ConfigData implements RequirementHolder
 
     public boolean test(ItemStack stack, @Nullable Integer slot, @Nullable EquipmentSlot equipmentSlot)
     {
-        if (!data.test(stack, true))
+        if (!item.test(stack, true))
         {   return false;
         }
         if (slot == null && equipmentSlot == null)
@@ -204,7 +204,7 @@ public class ItemCarryTempData extends ConfigData implements RequirementHolder
         ItemCarryTempData that = (ItemCarryTempData) obj;
         return super.equals(obj)
             && temperature == that.temperature
-            && data.equals(that.data)
+            && item.equals(that.item)
             && slots.equals(that.slots)
             && trait.equals(that.trait)
             && maxEffect.equals(that.maxEffect)

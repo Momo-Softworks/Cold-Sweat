@@ -55,7 +55,7 @@ public class ClientSoulspringTooltip implements ClientTooltipComponent
             {
                 for (FuelData fuelData : ConfigSettings.SOULSPRING_LAMP_FUEL.get().get(item))
                 {
-                    graphics.renderItem(new ItemStack(Holder.direct(item), 1, fuelData.data().components().getAsPatch()),
+                    graphics.renderItem(new ItemStack(Holder.direct(item), 1, fuelData.item().components().getAsPatch()),
                                         x + ((i * 16) % 96), y + 12 + CSMath.floor(i / 6d) * 16);
                     i++;
                 }

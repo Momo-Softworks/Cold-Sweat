@@ -111,7 +111,7 @@ public class ModCreativeTabs
         return event.getItems().stream().map(entry ->
         {
             ItemStack stack = new ItemStack(entry.getKey());
-            DataComponentMap components = entry.getValue().data().components().components();
+            DataComponentMap components = entry.getValue().item().components().components();
             stack.applyComponents(components);
             return stack;
         }).toList();
