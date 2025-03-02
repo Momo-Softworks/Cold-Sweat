@@ -12,12 +12,14 @@
   ],
   "ingredient": {
     "item": "cold_sweat:filled_waterskin",
+    "type": "neoforge:components",
     "components": {
       "thirst:purity": 0
     }
   },
   "result": {
-    "item": "cold_sweat:filled_waterskin",
+    "id": "cold_sweat:filled_waterskin",
+    "type": "neoforge:components",
     "components": {
       "thirst:purity": 2
     }
