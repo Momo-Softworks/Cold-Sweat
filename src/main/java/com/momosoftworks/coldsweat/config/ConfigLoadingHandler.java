@@ -22,6 +22,7 @@ import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.data.tag.ModDimensionTags;
 import com.momosoftworks.coldsweat.data.tag.ModEffectTags;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
+import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.RegistryMultiMap;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.core.BlockPos;
@@ -372,7 +373,7 @@ public class ConfigLoadingHandler
 
             // Add listed items as insulators
             List<Item> items = new ArrayList<>();
-            insulator.data().items().ifPresent(itemList ->
+            insulator.item().items().ifPresent(itemList ->
             {   items.addAll(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, itemList));
             });
             if (items.isEmpty())
@@ -407,7 +408,7 @@ public class ConfigLoadingHandler
             }
 
             List<Item> items = new ArrayList<>();
-            fuelData.data().items().ifPresent(itemList ->
+            fuelData.item().items().ifPresent(itemList ->
             {   items.addAll(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, itemList));
             });
             if (items.isEmpty())
@@ -438,7 +439,7 @@ public class ConfigLoadingHandler
             }
 
             List<Item> items = new ArrayList<>();
-            foodData.data().items().ifPresent(itemList ->
+            foodData.item().items().ifPresent(itemList ->
             {   items.addAll(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, itemList));
             });
             if (items.isEmpty())
@@ -462,7 +463,7 @@ public class ConfigLoadingHandler
             }
 
             List<Item> items = new ArrayList<>();
-            carryTempData.data().items().ifPresent(itemList ->
+            carryTempData.item().items().ifPresent(itemList ->
             {   items.addAll(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, itemList));
             });
             if (items.isEmpty())
@@ -627,7 +628,7 @@ public class ConfigLoadingHandler
             if (!mountData.areRequiredModsLoaded())
             {   return;
             }
-            List<EntityType<?>> entities = RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITY_TYPES, mountData.entityData().entities().orElse(List.of()));
+            List<EntityType<?>> entities = RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITY_TYPES, mountData.entity().entities().orElse(List.of()));
             if (entities.isEmpty())
             {   entities.add(null);
             }
