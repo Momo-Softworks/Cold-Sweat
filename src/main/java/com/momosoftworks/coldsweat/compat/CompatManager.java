@@ -7,14 +7,24 @@ import com.momosoftworks.coldsweat.api.event.core.init.FetchSeasonsModsEvent;
 import com.momosoftworks.coldsweat.api.temperature.modifier.compat.SereneSeasonsTempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
+import com.momosoftworks.coldsweat.compat.create.ColdSweatPonderPlugin;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.simibubi.create.AllDataComponents;
+import com.simibubi.create.content.equipment.armor.BacktankItem;
+import com.simibubi.create.content.equipment.armor.BacktankUtil;
+import com.simibubi.create.content.equipment.armor.DivingHelmetItem;
 import dev.ghen.thirst.content.purity.ContainerWithPurity;
 import dev.ghen.thirst.content.purity.WaterPurity;
 import dev.ghen.thirst.foundation.common.event.RegisterThirstValueEvent;
 import glitchcore.event.EventManager;
+import glitchcore.event.TickEvent;
+import net.createmod.ponder.foundation.PonderIndex;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.FormattedText;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
@@ -24,10 +34,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.fml.loading.moddiscovery.ModFileInfo;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import sereneseasons.api.season.SeasonChangedEvent;
@@ -336,7 +348,7 @@ public class CompatManager
         }
     }
 
-    //TODO: Reimplement when mod is updated to this version
+    //TODO: Reimplement when Valkyrien is updated to this version
     public static abstract class Valkyrien
     {
         /*public static Vec3 translateToShipCoords(Vec3 pos, Ship ship)
@@ -437,8 +449,8 @@ public class CompatManager
 
     public static boolean USING_BACKTANK = false;
 
-    //TODO: Reimplement when this mod is updated
-    /*@SubscribeEvent
+    // TODO: Check if this still works
+    @SubscribeEvent
     public static void drainCreateBacktank(PlayerTickEvent.Post event)
     {
         Player player = event.getEntity();
@@ -448,12 +460,12 @@ public class CompatManager
         // Somehow this makes the indicator render. I have no idea
         if (USING_BACKTANK && player.level().isClientSide)
         {
-            player.getPersistentData().putInt("VisualBacktankAir", Math.round(BacktankUtil.getAllWithAir(player).stream()
-                                                                                      .map(BacktankUtil::getAir)
-                                                                                      .reduce(0f, Float::sum)) - 1);
+            player.getPersistentData().putInt("VisualBacktankAir", BacktankUtil.getAllWithAir(player).stream()
+                                                                               .map(BacktankUtil::getAir)
+                                                                               .reduce(0, Integer::sum) - 1);
         }
 
-        if (player.tickCount % 20 != 0 || event.phase == TickEvent.Phase.START)
+        if (player.tickCount % 20 != 0)
         {   return;
         }
 
@@ -463,49 +475,59 @@ public class CompatManager
 
         if (!player.isCreative() && !player.isInLava()
         && backTank.getItem() instanceof BacktankItem
-        && backTank.getItem().isFireResistant()
+        && backTank.has(DataComponents.FIRE_RESISTANT)
         && (ConfigSettings.HEAT_DRAINS_BACKTANK.get() && worldTemp > burningPoint || ConfigSettings.COLD_DRAINS_BACKTANK.get() && worldTemp < freezingPoint))
         {
             // Ensure player is wearing a full set of fire-resistant armor
             ItemStack helmet = player.getItemBySlot(EquipmentSlot.HEAD);
-            if (!helmet.getItem().isFireResistant() || !(helmet.getItem() instanceof DivingHelmetItem)) return;
+            if (!helmet.has(DataComponents.FIRE_RESISTANT) || !(helmet.getItem() instanceof DivingHelmetItem)) return;
             ItemStack boots = player.getItemBySlot(EquipmentSlot.FEET);
-            if (!boots.getItem().isFireResistant()) return;
+            if (!boots.has(DataComponents.FIRE_RESISTANT)) return;
             ItemStack pants = player.getItemBySlot(EquipmentSlot.LEGS);
-            if (!pants.getItem().isFireResistant()) return;
+            if (!pants.has(DataComponents.FIRE_RESISTANT)) return;
 
             if (player.level().isClientSide)
                 USING_BACKTANK = true;
 
-            if (CSMath.getIfNotNull(backTank.getTag(), tag -> tag.getInt("Air"), 0) > 0)
+            if (backTank.getOrDefault(AllDataComponents.BACKTANK_AIR, 0) > 0)
             {   // Drain air
                 BacktankUtil.consumeAir(player, backTank, 1);
                 //Update backtank air status
                 if (player.level().isClientSide)
                 {
-                    player.getPersistentData().putInt("VisualBacktankAir", Math.round(BacktankUtil.getAllWithAir(player).stream()
-                                                                                              .map(BacktankUtil::getAir)
-                                                                                              .reduce(0f, Float::sum)));
+                    player.getPersistentData().putInt("VisualBacktankAir", BacktankUtil.getAllWithAir(player).stream()
+                                                                                             .map(BacktankUtil::getAir)
+                                                                                             .reduce(0, Integer::sum));
                 }
             }
         }
         else if (player.level().isClientSide)
         {   USING_BACKTANK = false;
         }
-    }*/
+    }
 
     @EventBusSubscriber(modid = ColdSweat.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
     public static class ModEvents
     {
         @SubscribeEvent
         public static void setupModEvents(FMLCommonSetupEvent event)
+        {}
+
+        @SubscribeEvent
+        public static void setupModClientEvents(FMLClientSetupEvent event)
         {
-            // TODO: Implement when Create is updated
-            /*if (isCreateLoaded())
+            event.enqueueWork(() ->
             {
-                ColdSweatDisplayBehaviors.THERMOLITH = AllDisplayBehaviours.register(new ResourceLocation(ColdSweat.MOD_ID, "thermolith"), new ColdSweatDisplayBehaviors.Thermolith());
-                AllDisplayBehaviours.assignBlock(ColdSweatDisplayBehaviors.THERMOLITH, ModBlocks.THERMOLITH);
-            }*/
+                if (isCreateLoaded())
+                {
+                    new Object()
+                    {
+                        public void registerPonderPlugin()
+                        {   PonderIndex.addPlugin(new ColdSweatPonderPlugin());
+                        }
+                    }.registerPonderPlugin();
+                }
+            });
         }
     }
 }

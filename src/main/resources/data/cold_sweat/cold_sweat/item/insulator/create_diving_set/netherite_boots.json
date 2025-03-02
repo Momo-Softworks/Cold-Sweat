@@ -41,17 +41,17 @@
     }
   },
   "attributes": {
-    "cold_sweat:heat_dampening": [
+    "generic.attack_damage": [
       {
         "name": "cold_sweat:diving_suit_bonus",
-        "amount": 0.25,
-        "operation": "add_value"
+        "amount": -0.25,
+        "operation": "add_multiplied_base"
       }
     ],
-    "cold_sweat:cold_dampening": [
+    "generic.movement_speed": [
       {
         "name": "cold_sweat:diving_suit_bonus",
-        "amount": 0.25,
+        "amount": -0.02,
         "operation": "add_value"
       }
     ]

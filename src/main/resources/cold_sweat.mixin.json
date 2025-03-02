@@ -28,7 +28,6 @@
     "MixinIce$AddDrops",
     "MixinIce$NoWaterOnBreak",
     "MixinInventoryOpenServer",
-    "MixinItemTooltip$GetModifiers",
     "MixinLivingLoad",
     "MixinLoadItemStack",
     "MixinMenuChanged",
@@ -39,6 +38,8 @@
     "MixinSoulCampfire",
     "MixinSoulFire",
     "MixinTridentRiptide",
+    "compat.MixinCreateConnect",
+    "compat.MixinCreateOverlay",
     "compat.MixinSereneIceMelt",
     "compat.MixinSpoiledIcebox",
     "compat.MixinSpoiledIcebox$ContainerModifier"

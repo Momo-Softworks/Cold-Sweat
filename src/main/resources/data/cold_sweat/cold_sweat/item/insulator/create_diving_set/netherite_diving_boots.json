@@ -41,18 +41,18 @@
     }
   },
   "attributes": {
-    "cold_sweat:heat_dampening": [
+    "generic.step_height": [
       {
         "name": "cold_sweat:diving_suit_bonus",
         "amount": 0.25,
         "operation": "add_value"
       }
     ],
-    "cold_sweat:cold_dampening": [
+    "generic.water_movement_efficiency": [
       {
         "name": "cold_sweat:diving_suit_bonus",
-        "amount": 0.25,
-        "operation": "add_value"
+        "amount": 1.0,
+        "operation": "add_multiplied_total"
       }
     ]
   }

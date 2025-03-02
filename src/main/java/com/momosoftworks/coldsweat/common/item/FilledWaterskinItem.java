@@ -4,6 +4,7 @@ import com.momosoftworks.coldsweat.api.temperature.modifier.WaterskinTempModifie
 import com.momosoftworks.coldsweat.api.util.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.event.TooltipHandler;
+import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.init.ModItemComponents;
@@ -12,6 +13,7 @@ import com.momosoftworks.coldsweat.core.init.ModSounds;
 import com.momosoftworks.coldsweat.core.network.message.ParticleBatchMessage;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
+import dev.ghen.thirst.content.registry.ThirstComponent;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -119,8 +121,6 @@ public class FilledWaterskinItem extends Item
     {
         // Create empty waterskin item
         ItemStack emptyStack = getEmpty(stack);
-        // TODO: Add this back if TWT is for this version
-        //emptyStack.getOrCreateTag().remove("Purity");
 
         // Add the item to the player's inventory
         if (player.getInventory().contains(emptyStack))
@@ -205,6 +205,10 @@ public class FilledWaterskinItem extends Item
             // Preserve NBT (except temperature)
             emptyWaterskin.applyComponents(stack.getComponents());
             emptyWaterskin.remove(ModItemComponents.WATER_TEMPERATURE);
+            // TODO: Check if this works w/o thirst
+            if (CompatManager.isThirstLoaded())
+            {   emptyWaterskin.remove(ThirstComponent.PURITY);
+            }
             return emptyWaterskin;
         }
         return stack;
@@ -271,11 +275,7 @@ public class FilledWaterskinItem extends Item
 
     @Override
     public ItemStack getCraftingRemainingItem(ItemStack itemStack)
-    {
-        ItemStack empty = getEmpty(itemStack);
-        // TODO: Add this back if TWT is for this version
-        //empty.getOrCreateTag().remove("Purity");
-        return empty;
+    {   return getEmpty(itemStack);
     }
 
     public String getDescriptionId()

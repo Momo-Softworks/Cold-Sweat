@@ -171,10 +171,10 @@ public class TooltipHandler
         }
         String percent;
         if (operation != AttributeModifier.Operation.ADD_VALUE
-        || attribute == ModAttributes.HEAT_RESISTANCE.value()
-        || attribute == ModAttributes.COLD_RESISTANCE.value()
-        || attribute == ModAttributes.HEAT_DAMPENING.value()
-        || attribute == ModAttributes.COLD_DAMPENING.value())
+        || attribute.equals(ModAttributes.HEAT_RESISTANCE)
+        || attribute.equals(ModAttributes.COLD_RESISTANCE)
+        || attribute.equals(ModAttributes.HEAT_DAMPENING)
+        || attribute.equals(ModAttributes.COLD_DAMPENING))
         {   percent = "%";
             value *= 100;
         }
@@ -191,7 +191,7 @@ public class TooltipHandler
             component = getFormattedVanillaAttributeModifier(attribute, value, operation);
             TranslatableContents contents = (TranslatableContents) component.getContents();
             params.addAll(0, Arrays.asList(contents.getArgs()));
-            component = setComponentContents(getFormattedVanillaAttributeModifier(attribute, value, operation), new TranslatableContents(contents.getKey(), contents.getFallback(), params.toArray()));
+            component = setComponentContents(component, new TranslatableContents(contents.getKey(), contents.getFallback(), params.toArray()));
         }
         component = component.withStyle(color);
         component = addTooltipFlags(component, forTooltip, strikethrough);
@@ -200,7 +200,7 @@ public class TooltipHandler
 
     public static MutableComponent getFormattedVanillaAttributeModifier(Holder<Attribute> attribute, double amount, AttributeModifier.Operation operation)
     {
-        double adjustedAmount;
+        double adjustedAmount = amount;
         if (operation == AttributeModifier.Operation.ADD_VALUE)
         {
             if (attribute.equals(Attributes.KNOCKBACK_RESISTANCE))
@@ -210,18 +210,15 @@ public class TooltipHandler
             {   adjustedAmount = amount;
             }
         }
-        else
-        {   adjustedAmount = amount * 100.0D;
-        }
 
         if (amount >= 0.0D)
         {
-            return Component.translatable("attribute.modifier.plus." + operation.getSerializedName(), ATTRIBUTE_MODIFIER_FORMAT.format(adjustedAmount),
+            return Component.translatable("attribute.modifier.plus." + operation.id(), ATTRIBUTE_MODIFIER_FORMAT.format(adjustedAmount),
                                           Component.translatable(attribute.value().getDescriptionId())).withStyle(ChatFormatting.BLUE);
         }
         else
         {   adjustedAmount *= -1;
-            return Component.translatable("attribute.modifier.take." + operation.getSerializedName(), ATTRIBUTE_MODIFIER_FORMAT.format(adjustedAmount),
+            return Component.translatable("attribute.modifier.take." + operation.id(), ATTRIBUTE_MODIFIER_FORMAT.format(adjustedAmount),
                                             Component.translatable(attribute.value().getDescriptionId())).withStyle(ChatFormatting.RED);
         }
     }
@@ -244,7 +241,7 @@ public class TooltipHandler
             if (strikethrough)
             {   params.add("strikethrough");
             }
-            MutableComponent newComponent = setComponentContents(component, new TranslatableContents(translatable.getKey(), "_", params.toArray()));
+            MutableComponent newComponent = setComponentContents(component, new TranslatableContents(translatable.getKey(), translatable.getFallback(), params.toArray()));
             if (strikethrough)
             {   newComponent.setStyle(Style.EMPTY.withColor(7561572));
             }

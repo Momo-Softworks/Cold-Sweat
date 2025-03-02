@@ -25,6 +25,9 @@ import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.world.SpreadPath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
+import com.simibubi.create.content.fluids.pipes.EncasedPipeBlock;
+import com.simibubi.create.content.fluids.pipes.FluidPipeBlock;
+import com.simibubi.create.content.fluids.pipes.GlassFluidPipeBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.ParticleStatus;
 import net.minecraft.core.BlockPos;
@@ -729,8 +732,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         }
         else if (CompatManager.isCreateLoaded())
         {
-            // TODO: Reimplement when Create is updated
-            /*if ((fromBlock instanceof FluidPipeBlock && fromState.getValue(PipeBlock.PROPERTY_BY_DIRECTION.get(toDirection)))
+            if ((fromBlock instanceof FluidPipeBlock && fromState.getValue(PipeBlock.PROPERTY_BY_DIRECTION.get(toDirection)))
             || (fromBlock instanceof GlassFluidPipeBlock && fromState.getValue(RotatedPillarBlock.AXIS) == toDirection.getAxis())
             || (fromBlock instanceof EncasedPipeBlock && fromState.getValue(EncasedPipeBlock.FACING_TO_PROPERTY_MAP.get(toDirection))))
             {
@@ -738,7 +740,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                 if (!isTransferPipe(toState)) this.pipeEnds.put(fromPos, toDirection);
                 newPath.setOrigin(toPos);
                 return true;
-            }*/
+            }
         }
         return !WorldHelper.isSpreadBlocked(level, fromState, fromPos, fromDirection, toDirection);
     }
