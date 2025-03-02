@@ -18,17 +18,17 @@ import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.BlockRequirement;
+import com.momosoftworks.coldsweat.data.codec.requirement.LocationRequirement;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
-import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.RegistryMultiMap;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.resources.IResource;
 import net.minecraft.item.Item;
+import net.minecraft.resources.IResource;
 import net.minecraft.tags.ITag;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.RegistryKey;
@@ -40,7 +40,6 @@ import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.feature.StructureFeature;
-import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
@@ -491,10 +490,12 @@ public class ConfigLoadingHandler
             {
                 final double temperature = blockTempData.getTemperature();
                 final List<BlockRequirement> conditions = blockTempData.conditions();
+                final LocationRequirement location = blockTempData.location();
 
                 @Override
                 public double getTemperature(World level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
                 {
+                    if (!location.test(level, pos)) return 0;
                     if (level instanceof ServerWorld)
                     {
                         ServerWorld serverLevel = (ServerWorld) level;
