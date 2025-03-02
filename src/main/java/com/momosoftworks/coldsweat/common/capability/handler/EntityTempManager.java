@@ -604,6 +604,7 @@ public class EntityTempManager
     @SubscribeEvent
     public static void updateInsulationAttributesOnEquipmentChange(LivingEquipmentChangeEvent event)
     {
+        updateInsulationAttributeModifiers(event.getEntityLiving(), event.getFrom(), event.getTo());
         for (ItemStack armor : event.getEntity().getArmorSlots())
         {
             if (!armor.isEmpty())
