@@ -147,8 +147,8 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
         super.tick(level, pos);
 
         // Recheck openers
-        if (!this.remove)
-        {   this.openersCounter.recheckOpeners(this.getLevel(), this.getBlockPos(), this.getBlockState());
+        if (!this.remove && this.level != null && this.level.getServer() != null)
+        {   this.openersCounter.recheckOpeners(this.level, this.getBlockPos(), this.getBlockState());
         }
 
         if (getFuel() > 0)
