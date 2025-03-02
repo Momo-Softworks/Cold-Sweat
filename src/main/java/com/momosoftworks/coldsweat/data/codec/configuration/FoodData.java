@@ -26,40 +26,40 @@ import java.util.List;
 
 public class FoodData extends ConfigData implements RequirementHolder, IForgeRegistryEntry<FoodData>
 {
+    final ItemRequirement item;
     final Double temperature;
-    final ItemRequirement data;
     final int duration;
     final EntityRequirement entityRequirement;
 
-    public FoodData(Double temperature, ItemRequirement data, int duration,
+    public FoodData(ItemRequirement item, Double temperature, int duration,
                     EntityRequirement entityRequirement, List<String> requiredMods)
     {
         super(requiredMods);
         this.temperature = temperature;
-        this.data = data;
+        this.item = item;
         this.duration = duration;
         this.entityRequirement = entityRequirement;
     }
 
-    public FoodData(Double temperature, ItemRequirement data, int duration,
+    public FoodData(ItemRequirement item, Double temperature, int duration,
                     EntityRequirement entityRequirement)
     {
-        this(temperature, data, duration, entityRequirement, ConfigHelper.getModIDs(CSMath.listOrEmpty(data.items()), ForgeRegistries.ITEMS));
+        this(item, temperature, duration, entityRequirement, ConfigHelper.getModIDs(CSMath.listOrEmpty(item.items()), ForgeRegistries.ITEMS));
     }
 
     public static final Codec<FoodData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            ItemRequirement.CODEC.optionalFieldOf("item", ItemRequirement.NONE).forGetter(FoodData::item),
             Codec.DOUBLE.fieldOf("temperature").forGetter(FoodData::temperature),
-            ItemRequirement.CODEC.fieldOf("data").forGetter(FoodData::data),
             Codec.INT.optionalFieldOf("duration", -1).forGetter(FoodData::duration),
             EntityRequirement.getCodec().optionalFieldOf("entity", EntityRequirement.NONE).forGetter(FoodData::entityRequirement),
             Codec.STRING.listOf().optionalFieldOf("required_mods", List.of()).forGetter(FoodData::requiredMods)
     ).apply(instance, FoodData::new));
 
+    public ItemRequirement item()
+    {   return item;
+    }
     public Double temperature()
     {   return temperature;
-    }
-    public ItemRequirement data()
-    {   return data;
     }
     public int duration()
     {   return duration;
@@ -70,7 +70,7 @@ public class FoodData extends ConfigData implements RequirementHolder, IForgeReg
 
     @Override
     public boolean test(ItemStack stack)
-    {   return data.test(stack, true);
+    {   return item.test(stack, true);
     }
 
     @Override
@@ -94,7 +94,7 @@ public class FoodData extends ConfigData implements RequirementHolder, IForgeReg
         int duration = entry.size() > 3 ? ((Number) entry.get(3)).intValue() : -1;
         ItemRequirement itemRequirement = new ItemRequirement(items, nbtRequirement);
 
-        return new FoodData(temperature, itemRequirement, duration, EntityRequirement.NONE);
+        return new FoodData(itemRequirement, temperature, duration, EntityRequirement.NONE);
     }
 
     @Override
@@ -110,7 +110,7 @@ public class FoodData extends ConfigData implements RequirementHolder, IForgeReg
 
         FoodData that = (FoodData) obj;
         return super.equals(obj)
-            && data.equals(that.data)
+            && item.equals(that.item)
             && temperature.equals(that.temperature)
             && duration == that.duration
             && entityRequirement.equals(that.entityRequirement);

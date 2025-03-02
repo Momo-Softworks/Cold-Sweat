@@ -105,7 +105,7 @@ public class InsulatorBuilderJS
 
     public InsulatorData build()
     {
-        InsulatorData data = new InsulatorData(slot, insulation, new ItemRequirement(this.items, this.itemPredicate), new EntityRequirement(entityPredicate),
+        InsulatorData data = new InsulatorData(new ItemRequirement(this.items, this.itemPredicate), slot, insulation, new EntityRequirement(entityPredicate),
                                                attributes, immuneTempModifiers, multiSlot);
         data.setType(ConfigData.Type.KUBEJS);
         return data;

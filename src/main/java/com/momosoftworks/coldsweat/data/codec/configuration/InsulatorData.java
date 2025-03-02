@@ -30,59 +30,58 @@ import java.util.*;
 
 public class InsulatorData extends ConfigData implements RequirementHolder, IForgeRegistryEntry<InsulatorData>
 {
+    final ItemRequirement item;
     final Insulation.Slot slot;
     final Insulation insulation;
-    final ItemRequirement data;
-    final EntityRequirement predicate;
+    final EntityRequirement entity;
     final AttributeModifierMap attributes;
     final Map<ResourceLocation, Double> immuneTempModifiers;
-    final boolean fill;
+    final boolean fillSlots;
 
-    public InsulatorData(Insulation.Slot slot,
-                         Insulation insulation, ItemRequirement data,
-                         EntityRequirement predicate, AttributeModifierMap attributes,
-                         Map<ResourceLocation, Double> immuneTempModifiers, boolean fill,
-                         List<String> requiredMods)
+    public InsulatorData(ItemRequirement item, Insulation.Slot slot,
+                         Insulation insulation, EntityRequirement entity,
+                         AttributeModifierMap attributes, Map<ResourceLocation, Double> immuneTempModifiers,
+                         boolean fillSlots, List<String> requiredMods)
     {
         super(requiredMods);
+        this.item = item;
         this.slot = slot;
         this.insulation = insulation;
-        this.data = data;
-        this.predicate = predicate;
+        this.entity = entity;
         this.attributes = attributes;
         this.immuneTempModifiers = immuneTempModifiers;
-        this.fill = fill;
+        this.fillSlots = fillSlots;
     }
 
-    public InsulatorData(Insulation.Slot slot, Insulation insulation, ItemRequirement data,
-                         EntityRequirement predicate, AttributeModifierMap attributes,
-                         Map<ResourceLocation, Double> immuneTempModifiers, boolean fill)
+    public InsulatorData(ItemRequirement item, Insulation.Slot slot, Insulation insulation,
+                         EntityRequirement entity, AttributeModifierMap attributes,
+                         Map<ResourceLocation, Double> immuneTempModifiers, boolean fillSlots)
     {
-        this(slot, insulation, data, predicate, attributes, immuneTempModifiers, fill, ConfigHelper.getModIDs(CSMath.listOrEmpty(data.items()), ForgeRegistries.ITEMS));
+        this(item, slot, insulation, entity, attributes, immuneTempModifiers, fillSlots, ConfigHelper.getModIDs(CSMath.listOrEmpty(item.items()), ForgeRegistries.ITEMS));
     }
 
     public static final Codec<InsulatorData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            ItemRequirement.CODEC.fieldOf("item").forGetter(InsulatorData::item),
             Insulation.Slot.CODEC.fieldOf("type").forGetter(InsulatorData::slot),
             Insulation.getCodec().fieldOf("insulation").forGetter(InsulatorData::insulation),
-            ItemRequirement.CODEC.fieldOf("data").forGetter(InsulatorData::data),
-            EntityRequirement.getCodec().optionalFieldOf("entity", EntityRequirement.NONE).forGetter(InsulatorData::predicate),
+            EntityRequirement.getCodec().optionalFieldOf("entity", EntityRequirement.NONE).forGetter(InsulatorData::entity),
             AttributeModifierMap.CODEC.optionalFieldOf("attributes", new AttributeModifierMap()).forGetter(InsulatorData::attributes),
             Codec.unboundedMap(ResourceLocation.CODEC, Codec.DOUBLE).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(InsulatorData::immuneTempModifiers),
-            Codec.BOOL.optionalFieldOf("fill", false).forGetter(InsulatorData::multiSlot),
+            Codec.BOOL.optionalFieldOf("fill_slots", false).forGetter(InsulatorData::fillSlots),
             Codec.STRING.listOf().optionalFieldOf("required_mods", List.of()).forGetter(InsulatorData::requiredMods)
     ).apply(instance, InsulatorData::new));
 
+    public ItemRequirement item()
+    {   return item;
+    }
     public Insulation.Slot slot()
     {   return slot;
     }
     public Insulation insulation()
     {   return insulation;
     }
-    public ItemRequirement data()
-    {   return data;
-    }
-    public EntityRequirement predicate()
-    {   return predicate;
+    public EntityRequirement entity()
+    {   return entity;
     }
     public AttributeModifierMap attributes()
     {   return attributes;
@@ -90,18 +89,18 @@ public class InsulatorData extends ConfigData implements RequirementHolder, IFor
     public Map<ResourceLocation, Double> immuneTempModifiers()
     {   return immuneTempModifiers;
     }
-    public boolean multiSlot()
-    {   return fill;
+    public boolean fillSlots()
+    {   return fillSlots;
     }
 
     @Override
     public boolean test(ItemStack stack)
-    {   return data.test(stack, true);
+    {   return item.test(stack, true);
     }
 
     @Override
     public boolean test(Entity entity)
-    {   return entity == null || predicate.test(entity);
+    {   return entity == null || this.entity.test(entity);
     }
 
     @Nullable
@@ -124,13 +123,13 @@ public class InsulatorData extends ConfigData implements RequirementHolder, IFor
         Insulation insulation = adaptive ? new AdaptiveInsulation(insulVal1, insulVal2)
                                          : new StaticInsulation(insulVal1, insulVal2);
 
-        ItemRequirement requirement = new ItemRequirement(items, new NbtRequirement(tag));
+        ItemRequirement itemRequirement = new ItemRequirement(items, new NbtRequirement(tag));
 
-        return new InsulatorData(slot, insulation, requirement, EntityRequirement.NONE, new AttributeModifierMap(), new HashMap<>(), multiSlot);
+        return new InsulatorData(itemRequirement, slot, insulation, EntityRequirement.NONE, new AttributeModifierMap(), new HashMap<>(), multiSlot);
     }
 
     public InsulatorData copy()
-    {   return new InsulatorData(this.slot, this.insulation.copy(), this.data, this.predicate, this.attributes, new HashMap<>(this.immuneTempModifiers), this.fill);
+    {   return new InsulatorData(this.item, this.slot, this.insulation.copy(), this.entity, this.attributes, new HashMap<>(this.immuneTempModifiers), this.fillSlots);
     }
 
     @Override
@@ -148,8 +147,8 @@ public class InsulatorData extends ConfigData implements RequirementHolder, IFor
         return super.equals(obj)
             && slot == that.slot
             && insulation.equals(that.insulation)
-            && data.equals(that.data)
-            && predicate.equals(that.predicate)
+            && item.equals(that.item)
+            && entity.equals(that.entity)
             && attributes.equals(that.attributes)
             && immuneTempModifiers.equals(that.immuneTempModifiers);
     }
