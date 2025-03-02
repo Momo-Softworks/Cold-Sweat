@@ -18,6 +18,7 @@ import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.BlockRequirement;
+import com.momosoftworks.coldsweat.data.codec.requirement.LocationRequirement;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.data.tag.ModDimensionTags;
 import com.momosoftworks.coldsweat.data.tag.ModEffectTags;
@@ -517,10 +518,12 @@ public class ConfigLoadingHandler
             {
                 final double temperature = blockTempData.getTemperature();
                 final List<BlockRequirement> conditions = blockTempData.conditions();
+                final LocationRequirement location = blockTempData.location();
 
                 @Override
                 public double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
                 {
+                    if (!location.test(level, pos)) return 0;
                     if (level instanceof ServerLevel serverLevel)
                     {
                         for (int i = 0; i < conditions.size(); i++)

@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.BlockRequirement;
+import com.momosoftworks.coldsweat.data.codec.requirement.LocationRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -31,11 +32,12 @@ public class BlockTempData extends ConfigData
     final double minTemp;
     final Temperature.Units units;
     final List<BlockRequirement> conditions;
+    final LocationRequirement location;
 
     public BlockTempData(List<Either<TagKey<Block>, Block>> blocks, double temperature, double range,
                          double maxEffect, boolean fade, double maxTemp, double minTemp,
                          Temperature.Units units, List<BlockRequirement> conditions,
-                         List<String> requiredMods)
+                         LocationRequirement location, List<String> requiredMods)
     {
         super(requiredMods);
         this.blocks = blocks;
@@ -47,13 +49,14 @@ public class BlockTempData extends ConfigData
         this.minTemp = minTemp;
         this.units = units;
         this.conditions = conditions;
+        this.location = location;
     }
 
     public BlockTempData(List<Either<TagKey<Block>, Block>> blocks, double temperature, double range,
                          double maxEffect, boolean fade, double maxTemp, double minTemp,
-                         Temperature.Units units, List<BlockRequirement> conditions)
+                         Temperature.Units units, List<BlockRequirement> conditions, LocationRequirement location)
     {
-        this(blocks, temperature, range, maxEffect, fade, maxTemp, minTemp, units, conditions, ConfigHelper.getModIDs(blocks, BuiltInRegistries.BLOCK));
+        this(blocks, temperature, range, maxEffect, fade, maxTemp, minTemp, units, conditions, location, ConfigHelper.getModIDs(blocks, BuiltInRegistries.BLOCK));
     }
 
     /**
@@ -66,7 +69,7 @@ public class BlockTempData extends ConfigData
         this(blockTemp.getAffectedBlocks().stream().map(Either::<TagKey<Block>, Block>right).toList(),
              0, blockTemp.range(), blockTemp.maxEffect(),
              true, blockTemp.maxTemperature(), blockTemp.minTemperature(), Temperature.Units.MC,
-             List.of());
+             List.of(), LocationRequirement.NONE);
     }
 
     public static final Codec<BlockTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -79,6 +82,7 @@ public class BlockTempData extends ConfigData
             Codec.DOUBLE.optionalFieldOf("min_temp", -Double.MAX_VALUE).forGetter(BlockTempData::minTemp),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(BlockTempData::units),
             BlockRequirement.CODEC.listOf().optionalFieldOf("conditions", List.of()).forGetter(BlockTempData::conditions),
+            LocationRequirement.CODEC.optionalFieldOf("location", LocationRequirement.NONE).forGetter(BlockTempData::location),
             Codec.STRING.listOf().optionalFieldOf("required_mods", List.of()).forGetter(BlockTempData::requiredMods)
     ).apply(instance, BlockTempData::new));
 
@@ -108,6 +112,9 @@ public class BlockTempData extends ConfigData
     }
     public List<BlockRequirement> conditions()
     {   return conditions;
+    }
+    public LocationRequirement location()
+    {   return location;
     }
 
     public double getTemperature()
@@ -172,7 +179,7 @@ public class BlockTempData extends ConfigData
                                                                  Optional.empty(), Optional.empty(), Optional.empty(), false);
 
         return new BlockTempData(blocks, blockTemp, blockRange, maxEffect, true, maxTemperature,
-                                 minTemperature, units, List.of(blockRequirement));
+                                 minTemperature, units, List.of(blockRequirement), LocationRequirement.NONE);
     }
 
     @Override
