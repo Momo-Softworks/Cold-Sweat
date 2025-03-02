@@ -102,7 +102,7 @@ public class CreativeTabInit
         return event.getItems().stream().map(entry ->
         {
             ItemStack stack = new ItemStack(entry.getKey());
-            CompoundTag nbt = entry.getValue().data().nbt().tag();
+            CompoundTag nbt = entry.getValue().item().nbt().tag();
             if (!nbt.isEmpty())
             {   stack.getOrCreateTag().merge(nbt);
             }
