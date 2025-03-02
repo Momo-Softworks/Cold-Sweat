@@ -3,7 +3,7 @@
     "create"
   ],
   "type": "armor",
-  "data": {
+  "item": {
     "items": [
       "minecraft:netherite_leggings"
     ]
