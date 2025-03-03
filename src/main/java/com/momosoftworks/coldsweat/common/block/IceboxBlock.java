@@ -157,11 +157,11 @@ public class IceboxBlock extends Block
         if (neighborPos.equals(pos.above()) && te instanceof IceboxBlockEntity)
         {
             IceboxBlockEntity icebox = ((IceboxBlockEntity) te);
-            boolean hasSmokestack = icebox.hasSmokeStack();
-            icebox.checkForSmokestack();
-            if (hasSmokestack != icebox.hasSmokeStack())
+            boolean hadSmokestack = icebox.hasSmokeStack();
+            boolean hasSmokeStack = icebox.checkForSmokestack();
+            if (hadSmokestack != hasSmokeStack)
             {
-                state = state.setValue(SMOKESTACK, icebox.hasSmokeStack());
+                state = state.setValue(SMOKESTACK, hasSmokeStack);
                 level.setBlock(pos, state, 3);
                 level.blockUpdated(pos, this);
             }

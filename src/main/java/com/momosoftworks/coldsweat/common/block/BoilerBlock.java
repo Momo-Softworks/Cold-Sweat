@@ -1,16 +1,16 @@
 package com.momosoftworks.coldsweat.common.block;
 
 import com.momosoftworks.coldsweat.common.blockentity.BoilerBlockEntity;
-import com.momosoftworks.coldsweat.core.init.BlockEntityInit;
 import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
+import com.momosoftworks.coldsweat.core.init.BlockEntityInit;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
-import net.minecraft.client.Minecraft;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.ParticleStatus;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -30,7 +30,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
-import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -131,9 +130,8 @@ public class BoilerBlock extends Block
         if (neighborPos.equals(pos.above()) && be instanceof BoilerBlockEntity)
         {
             BoilerBlockEntity boiler = (BoilerBlockEntity) be;
-            boolean hasSmokestack = boiler.hasSmokeStack();
-            boiler.checkForSmokestack();
-            if (hasSmokestack != boiler.hasSmokeStack())
+            boolean hadSmokestack = boiler.hasSmokeStack();
+            if (hadSmokestack != boiler.checkForSmokestack())
             {   level.blockUpdated(pos, this);
             }
         }
