@@ -107,10 +107,7 @@ public class Chameleon extends Animal
         this.goalSelector.addGoal(1, new PanicGoal(this, 1.6));
         this.goalSelector.addGoal(2, new BreedGoal(this, 1.0D));
         this.goalSelector.addGoal(3, new EatObjectsGoal(this, List.of(EntityType.SILVERFISH)));
-        this.goalSelector.addGoal(4, new TemptGoal(this, 1.25, Ingredient.fromValues(ChameleonEdibles.EDIBLES
-                                                                                     .stream()
-                                                                                     .map(edible -> new Ingredient.TagValue(edible.associatedItems()))
-                                                                                     .filter(ing -> ing.getItems().stream().noneMatch(ItemStack::isEmpty))), false));
+        this.goalSelector.addGoal(4, new TemptGoal(this, 1.25, stack -> ChameleonEdibles.EDIBLES.stream().anyMatch(edible -> stack.is(edible.associatedItems())), false));
         this.goalSelector.addGoal(4, new FollowParentGoal(this, 1.1D));
         this.goalSelector.addGoal(5, new LazyLookGoal(this));
         this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class, 6.0F));
