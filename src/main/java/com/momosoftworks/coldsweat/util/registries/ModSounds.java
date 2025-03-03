@@ -25,4 +25,6 @@ public class ModSounds
     public static SoundEvent ICEBOX_DEPLETE = SoundInit.ICEBOX_DEPLETE_SOUND_REGISTRY.get();
     public static SoundEvent ICEBOX_OPEN = SoundInit.ICEBOX_OPEN_SOUND_REGISTRY.get();
     public static SoundEvent ICEBOX_CLOSE = SoundInit.ICEBOX_CLOSE_SOUND_REGISTRY.get();
+
+    public static SoundEvent ARMOR_EQUIP_CHAMELEON = SoundInit.CHAMELEON_ARMOR_EQUIP_SOUND_REGISTRY.get();
 }

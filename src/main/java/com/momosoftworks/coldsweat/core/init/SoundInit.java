@@ -50,6 +50,9 @@ public class SoundInit
     public static final RegistryObject<SoundEvent> CHAMELEON_SHED_SOUND_REGISTRY = SOUNDS.register("entity.chameleon.shed",
             () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "entity.chameleon.shed")));
 
+    public static final RegistryObject<SoundEvent> CHAMELEON_ARMOR_EQUIP_SOUND_REGISTRY = SOUNDS.register("item.armor.equip_chameleon_scale",
+            () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "item.armor.equip_chameleon_scale")));
+
     public static final RegistryObject<SoundEvent> ENTITY_GOAT_AMBIENT = SOUNDS.register("entity.goat.ambient",
             () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "entity.goat.ambient")));
     public static final RegistryObject<SoundEvent> ENTITY_GOAT_DEATH = SOUNDS.register("entity.goat.death",
