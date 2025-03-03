@@ -232,6 +232,11 @@ public class ItemInsulationManager
         return ImmutableList.copyOf(insulation);
     }
 
+    /**
+     * Gathers a list of modifiers for the given attribute that are on this stack, from its insulation
+     * @param operation Optional. Filters the output to only include modifiers with the given operation.
+     * @param owner Optional. The entity wearing the item. This will be used to check the validity of the insulation before its modifiers are added to the list.
+     */
     public static List<AttributeModifier> getAppliedInsulationAttributes(ItemStack stack, Attribute attribute, @Nullable AttributeModifier.Operation operation, @Nullable Entity owner)
     {
         List<AttributeModifier> modifiers = new ArrayList<>();
@@ -248,6 +253,9 @@ public class ItemInsulationManager
         return modifiers;
     }
 
+    /**
+     * Gets all attribute modifiers for the given attribute that this item has, provided it is in the given slot. This includes modifiers from the item itself and from its insulation.
+     */
     public static List<AttributeModifier> getAttributeModifiersForSlot(ItemStack stack, Attribute attribute, EquipmentSlot slot, @Nullable AttributeModifier.Operation operation, @Nullable Entity owner)
     {
         List<AttributeModifier> modifiers = new ArrayList<>(operation != null
