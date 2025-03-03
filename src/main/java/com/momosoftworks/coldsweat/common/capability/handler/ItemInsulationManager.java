@@ -144,9 +144,14 @@ public class ItemInsulationManager
         event.getContainer().removeSlotListener(INSULATION_LISTENER);
     }
 
+    /**
+     * @return The number of insulation slots on this armor item, or 0 if it does not support insulation
+     */
     public static int getInsulationSlots(ItemStack item)
     {
-        return ConfigSettings.INSULATION_SLOTS.get().getSlots(LivingEntity.getEquipmentSlotForItem(item), item);
+        return isInsulatable(item)
+               ? ConfigSettings.INSULATION_SLOTS.get().getSlots(LivingEntity.getEquipmentSlotForItem(item), item)
+               : 0;
     }
 
     public static boolean isInsulatable(ItemStack stack)
