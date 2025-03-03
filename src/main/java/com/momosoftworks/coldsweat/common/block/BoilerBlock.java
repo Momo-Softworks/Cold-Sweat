@@ -137,9 +137,8 @@ public class BoilerBlock extends Block implements EntityBlock
     {
         if (neighborPos.equals(pos.above()) && level.getBlockEntity(pos) instanceof BoilerBlockEntity boiler)
         {
-            boolean hasSmokestack = boiler.hasSmokeStack();
-            boiler.checkForSmokestack();
-            if (hasSmokestack != boiler.hasSmokeStack())
+            boolean hadSmokestack = boiler.hasSmokeStack();
+            if (hadSmokestack != boiler.checkForSmokestack())
             {   level.blockUpdated(pos, this);
             }
         }
