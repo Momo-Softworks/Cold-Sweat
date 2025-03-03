@@ -1,5 +1,7 @@
 package com.momosoftworks.coldsweat.common.blockentity;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.vanilla.BlockStateChangedEvent;
@@ -103,7 +105,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     // List of SpreadPaths, which determine where the Hearth is affecting and how it spreads through/around blocks
     List<SpreadPath> paths = new ArrayList<>(this.getMaxPaths());
     // Used as a lookup table for detecting duplicate paths (faster than ArrayList#contains())
-    Set<BlockPos> pathLookup = new HashSet<>(this.getMaxPaths());
+    Multimap<BlockPos, Direction> pathLookup = HashMultimap.create(this.getMaxPaths(), 6);
     Map<Pair<Integer, Integer>, Pair<Integer, Boolean>> seeSkyMap = new FastMap<>(this.getMaxPaths());
 
     List<MobEffectInstance> effects = new ArrayList<>();
@@ -180,13 +182,15 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         Level level = event.getLevel();
 
         if (level == this.level
-        && this.pathLookup.contains(pos)
+        && this.pathLookup.containsKey(pos)
         && !event.getOldState().getCollisionShape(level, pos).equals(event.getNewState().getCollisionShape(level, pos)))
         {
             if (!level.isClientSide())
             {   this.sendBlockUpdate(pos);
             }
-            this.pipeEnds.clear();
+            if (isTransferPipe(event.getOldState()) || isTransferPipe(event.getNewState()))
+            {   this.searchForPipeEnds(this.getBlockPos().above(), Direction.UP);
+            }
         }
     }
 
@@ -320,7 +324,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         // Reset if a nearby block has been updated
         if (forceRebuild || (rebuildCooldown <= 0 && !this.queuedUpdates.isEmpty()))
         {   this.resetPaths();
-            this.pipeEnds.clear();
         }
 
         if (this.getColdFuel() > 0 || this.getHotFuel() > 0)
@@ -342,7 +345,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
 
                 if (paths.isEmpty())
                 {   this.addPath(new SpreadPath(pos.above(1)).setOrigin(pos.above(1)));
-                    pathLookup.add(pos.above(1));
+                    pathLookup.put(pos.above(1), Direction.UP);
+                    this.searchForPipeEnds(this.getBlockPos().above(), Direction.UP);
                 }
 
                 // Mark as not spreading if all paths are frozen
@@ -389,7 +393,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                         {   playerBB = playerBB.inflate(0, 0.5, 0);
                         }
                         playerBB = CompatManager.Valkyrien.transformIfShipPos(level, playerBB).inflate(-0.1);
-                        if (BlockPos.betweenClosedStream(playerBB).anyMatch(ps -> paths.contains(new SpreadPath(ps))))
+                        if (BlockPos.betweenClosedStream(playerBB).anyMatch(ps -> paths.contains(new SpreadPath(ps)))
+                        && !WorldHelper.canSeeSky(level, player.blockPosition(), 64))
                         {   this.insulatePlayer(player);
                         }
                     }
@@ -496,7 +501,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                             SpreadPath newPath = new SpreadPath(tryPos, direction).setOrigin(spreadPath.origin);
 
                             // Check if this position hasn't been tried before, and if it's spread-able
-                            if (this.canSpread(level, pathPos, tryPos, state, spreadPath.direction, direction, newPath) && pathLookup.add(tryPos))
+                            if (pathLookup.put(tryPos, direction) && this.canSpread(level, pathPos, tryPos, state, spreadPath.direction, direction, newPath))
                             {   // Add the new path to the list
                                 this.addPath(newPath);
                             }
@@ -504,7 +509,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                     }
                     // Remove this path if it has skylight access
                     else
-                    {   pathLookup.remove(pathPos);
+                    {   pathLookup.removeAll(pathPos);
                         paths.remove(i);
                         i--;
                         continue;
@@ -745,7 +750,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
             else if (facing.getAxis() == toDirection.getAxis())
             {
                 newPath.setOrigin(toPos);
-                if (!isTransferPipe(toState)) this.pipeEnds.put(fromPos, toDirection);
                 return true;
             }
             return false;
@@ -756,8 +760,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
             || (fromBlock instanceof GlassFluidPipeBlock && fromState.getValue(RotatedPillarBlock.AXIS) == toDirection.getAxis())
             || (fromBlock instanceof EncasedPipeBlock && fromState.getValue(EncasedPipeBlock.FACING_TO_PROPERTY_MAP.get(toDirection))))
             {
-                BlockState toState = level.getBlockState(toPos);
-                if (!isTransferPipe(toState)) this.pipeEnds.put(fromPos, toDirection);
                 newPath.setOrigin(toPos);
                 return true;
             }
@@ -767,6 +769,68 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
 
     protected boolean isTransferPipe(BlockState state)
     {   return state.getBlock() instanceof SmokestackBlock || CompatManager.Create.isFluidPipe(state);
+    }
+
+    protected boolean connectsTo(BlockState state, BlockState otherState, Direction direction)
+    {
+        boolean otherIsSamePipe = state.getBlock() instanceof SmokestackBlock == otherState.getBlock() instanceof SmokestackBlock
+                               && CompatManager.Create.isFluidPipe(otherState) == CompatManager.Create.isFluidPipe(state);
+        return pipePointingTo(state, otherState, direction) && otherIsSamePipe;
+    }
+
+    protected boolean pipePointingTo(BlockState state, BlockState otherState, Direction direction)
+    {
+        if (state.getBlock() instanceof SmokestackBlock)
+        {
+            SmokestackBlock.Facing facing = state.getValue(SmokestackBlock.FACING);
+            return facing == SmokestackBlock.Facing.JUNCTION
+                   ? otherState.getBlock() instanceof SmokestackBlock
+                   : facing.getAxis() == direction.getAxis();
+        }
+        else if (CompatManager.isCreateLoaded())
+        {
+            if (state.getBlock() instanceof FluidPipeBlock)
+            {   return state.getValue(PipeBlock.PROPERTY_BY_DIRECTION.get(direction));
+            }
+            else if (state.getBlock() instanceof GlassFluidPipeBlock)
+            {   return state.getValue(RotatedPillarBlock.AXIS) == direction.getAxis();
+            }
+            else if (state.getBlock() instanceof EncasedPipeBlock)
+            {   return state.getValue(EncasedPipeBlock.FACING_TO_PROPERTY_MAP.get(direction));
+            }
+        }
+        return false;
+    }
+
+    protected void searchForPipeEnds(BlockPos startPos, Direction fromDir)
+    {
+        if (this.hasSmokestack && this.level != null)
+        {   this.pipeEnds.clear();
+            searchForPipeEndsRecursive(startPos, level.getBlockState(startPos), fromDir, new HashSet<>());
+        }
+    }
+
+    protected void searchForPipeEndsRecursive(BlockPos pos, BlockState state, Direction fromDir, Set<BlockPos> visited)
+    {
+        visited.add(pos);
+
+        for (int d = 0; d < DIRECTIONS.length; d++)
+        {
+            Direction direction = DIRECTIONS[d];
+            if (direction == fromDir.getOpposite()) continue;
+
+            BlockPos tryPos = pos.relative(direction);
+            if (visited.contains(tryPos) || !CSMath.withinCubeDistance(this.getBlockPos(), tryPos, this.getMaxRange())) continue;
+
+            BlockState otherState = level.getBlockState(tryPos);
+            if (isTransferPipe(otherState) && connectsTo(state, otherState, direction))
+            {   searchForPipeEndsRecursive(tryPos, otherState, direction, visited);
+            }
+            else if (!WorldHelper.isSpreadBlocked(level, otherState, tryPos, fromDir.getOpposite(), direction)
+            && pipePointingTo(state, otherState, direction))
+            {   this.pipeEnds.put(tryPos, direction.getOpposite());
+            }
+        }
     }
 
     protected void init()
@@ -840,6 +904,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
 
         this.forceRebuild = false;
         this.queuedUpdates.clear();
+        this.searchForPipeEnds(this.getBlockPos().above(), Direction.UP);
     }
 
     public List<MobEffectInstance> getEffects()
@@ -1132,24 +1197,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
              : super.getCapability(capability, facing) : super.getCapability(capability, facing);
     }
 
-    public void replacePaths(ArrayList<SpreadPath> newPaths)
-    {
-        this.frozenPaths = 0;
-
-        this.paths.clear();
-        this.paths.addAll(newPaths);
-
-        this.pathLookup.clear();
-        this.pathLookup.addAll(newPaths.stream().map(path -> path.pos).collect(Collectors.toSet()));
-
-        this.spreading = true;
-
-        if (this.level.isClientSide)
-        {   ClientOnlyHelper.addHearthPosition(this.getBlockPos());
-        }
-        this.sendResetPacket();
-    }
-
     public void addPath(SpreadPath path)
     {   paths.add(path);
     }
@@ -1183,7 +1230,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         }
     }
 
-    public Set<BlockPos> getPathLookup()
+    public Multimap<BlockPos, Direction> getPathLookup()
     {   return this.pathLookup;
     }
 
@@ -1209,6 +1256,10 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
 
     public void setBackPowered(boolean isPowered)
     {   this.isBackPowered = isPowered;
+    }
+
+    public Map<BlockPos, Direction> getPipeEnds()
+    {   return this.pipeEnds;
     }
 
     @Override
