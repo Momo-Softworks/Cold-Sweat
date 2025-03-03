@@ -15,5 +15,6 @@ public class ModEntities
 
     //chameleon
     public static final DeferredHolder<EntityType<?>, EntityType<Chameleon>> CHAMELEON = ENTITY_TYPES.register("chameleon",
-                        () -> EntityType.Builder.of(Chameleon::new, MobCategory.CREATURE).sized(0.75f, 0.65f).build(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "chameleon").toString()));
+                        () -> EntityType.Builder.of(Chameleon::new, MobCategory.CREATURE).sized(0.75f, 0.65f).eyeHeight(0.35f)
+                                                .build(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "chameleon").toString()));
 }
