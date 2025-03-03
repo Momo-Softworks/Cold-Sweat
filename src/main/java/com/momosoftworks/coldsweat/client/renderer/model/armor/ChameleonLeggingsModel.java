@@ -26,7 +26,7 @@ public class ChameleonLeggingsModel<T extends LivingEntity> extends HumanoidMode
         PartDefinition right_leg = partdefinition.getChild("right_leg");
         PartDefinition left_leg = partdefinition.getChild("left_leg");
 
-        PartDefinition waist_armor = body.addOrReplaceChild("waist_armor", CubeListBuilder.create().texOffs(16, 112).addBox(-4.0F, -24.0F, -2.0F, 8.0F, 12.0F, 4.0F, new CubeDeformation(scale)), PartPose.offset(0.0F, 23.0F, 0.0F));
+        PartDefinition waist_armor = body.addOrReplaceChild("waist_armor", CubeListBuilder.create().texOffs(16, 112).addBox(-4.0F, -23.25F, -2.0F, 8.0F, 12.0F, 4.0F, new CubeDeformation(scale * 1.2f)), PartPose.offset(0.0F, 23.0F, 0.0F));
 
         PartDefinition right_legging = right_leg.addOrReplaceChild("right_legging", CubeListBuilder.create().texOffs(0, 112).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(scale)), PartPose.offset(0.0F, 0.0F, 0.0F));
 
