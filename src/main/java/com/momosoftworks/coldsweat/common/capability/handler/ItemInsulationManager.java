@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.common.capability.handler;
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.common.capability.ModCapabilities;
 import com.momosoftworks.coldsweat.common.capability.SidedCapabilityCache;
 import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
@@ -39,10 +40,9 @@ import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Mod.EventBusSubscriber
 public class ItemInsulationManager
@@ -174,13 +174,33 @@ public class ItemInsulationManager
                : 0;
     }
 
+    /**
+     * Checks if the item is allowed to receive insulation from sewing.<br>
+     * The item must be equipable and not have any built-in insulation.
+     */
     public static boolean isInsulatable(ItemStack stack)
     {
         return stack.getItem() instanceof IArmorVanishable
-            && !ConfigSettings.INSULATION_ITEMS.get().containsKey(stack.getItem())
-            && !ConfigSettings.INSULATING_ARMORS.get().containsKey(stack.getItem());
+            && getBuiltinInsulation(stack).isEmpty();
     }
 
+    /**
+     * Gives a collection of all insulation that is built-in to the item (not applied via sewing)
+     * @return an IMMUTABLE list of insulation the item has.
+     */
+    public static List<Insulation> getBuiltinInsulation(ItemStack stack)
+    {
+        return Stream.of(ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()),
+                         ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem()),
+                         ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem()))
+               .flatMap(Collection::stream).map(InsulatorData::insulation)
+               .filter(ins -> !ins.isEmpty()).collect(Collectors.toList());
+    }
+
+    /**
+     * Returns a list of {@link InsulatorData} attached to the item, including both built-in and applied insulation.
+     * @return an IMMUTABLE list of insulation the item has.
+     */
     public static List<InsulatorData> getAllInsulatorsForStack(ItemStack stack)
     {
         if (stack.isEmpty()) return new ArrayList<>();
