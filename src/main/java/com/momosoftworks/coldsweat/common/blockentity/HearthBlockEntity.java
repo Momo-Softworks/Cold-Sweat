@@ -948,14 +948,16 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     {
         if (level == null) return false;
 
+        BlockState aboveState = level.getBlockState(this.getBlockPos().above());
         boolean hadSmokestack = this.hasSmokestack;
-        this.hasSmokestack = level.getBlockState(this.getBlockPos().above()).getBlock() == ModBlocks.SMOKESTACK;
+        this.hasSmokestack = aboveState.getBlock() instanceof SmokestackBlock;
         // A smokestack has been added
         if (this.hasSmokestack && !hadSmokestack)
         {   this.registerLocation();
             if (this.level.isClientSide)
             {   ClientOnlyHelper.addHearthPosition(this.getBlockPos());
             }
+            this.getBlockState().updateNeighbourShapes(this.level, this.getBlockPos(), 3);
         }
         // A smokestack has been removed
         else if (!this.hasSmokestack && hadSmokestack)
