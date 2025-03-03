@@ -41,8 +41,7 @@ public class SmokestackBlock extends Block
                 .of(Material.STONE)
                 .sound(SoundType.STONE)
                 .strength(2f, 10f)
-                .requiresCorrectToolForDrops()
-                .dynamicShape();
+                .requiresCorrectToolForDrops();
     }
 
     public static Item.Properties getItemProperties()

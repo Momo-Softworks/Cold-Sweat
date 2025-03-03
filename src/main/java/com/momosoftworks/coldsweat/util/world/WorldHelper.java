@@ -7,7 +7,6 @@ import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
 import com.momosoftworks.coldsweat.api.temperature.modifier.*;
 import com.momosoftworks.coldsweat.api.util.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
-import com.momosoftworks.coldsweat.common.block.SmokestackBlock;
 import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -751,7 +750,7 @@ public abstract class WorldHelper
 
             for (TileEntity be : getBlockEntities(chunk).values())
             {
-                if (be instanceof HearthBlockEntity && ((HearthBlockEntity) be).getPathLookup().contains(pos))
+                if (be instanceof HearthBlockEntity && ((HearthBlockEntity) be).getPathLookup().containsKey(pos))
                 {
                     HearthBlockEntity hearth = (HearthBlockEntity) be;
                     maxCoolingLevel = Math.max(maxCoolingLevel, hearth.getCoolingLevel());
