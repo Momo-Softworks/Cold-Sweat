@@ -246,8 +246,8 @@ public class ChameleonEntity extends AnimalEntity
     }
 
     @Override
-    public float getEyeHeight(Pose pose)
-    {   return this.isBaby() ? 0.25F : 0.35F;
+    protected float getStandingEyeHeight(Pose pPose, EntityDimensions pDimensions)
+    {   return this.isBaby() ? 0.25F : 0.3F;
     }
 
     @SubscribeEvent
@@ -474,6 +474,14 @@ public class ChameleonEntity extends AnimalEntity
                     this.clearTrackingPos();
                 }
             }
+        }
+
+        // Spawn love particles
+        if (this.isInLove() && this.random.nextDouble() < 0.8 && this.tickCount % 8 == 0)
+        {
+            WorldHelper.spawnParticleBatch(this.level, ParticleTypes.HEART, this.getX(), this.getY() + this.getBbHeight() / 2, this.getZ(),
+                                           this.getBbWidth() / 1.5, this.getBbHeight() / 1.5, this.getBbWidth() / 1.5,
+                                           1, 0);
         }
 
         // Tick cooldowns
