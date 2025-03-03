@@ -16,7 +16,7 @@ public enum ModArmorMaterials implements ArmorMaterial
            1.5F, 0.0F, () -> Ingredient.of(ModItems.HOGLIN_HIDE)),
     GOAT_FUR("goat_fur", 10, new int[]{1, 4, 5, 2}, 15, SoundEvents.ARMOR_EQUIP_LEATHER,
              0F, 0.0F, () -> Ingredient.of(ModItems.FUR)),
-    CHAMELEON("chameleon", 12, new int[]{2, 5, 6, 2}, 15, SoundEvents.ARMOR_EQUIP_NETHERITE,
+    CHAMELEON("chameleon", 12, new int[]{2, 5, 6, 2}, 15, ModSounds.ARMOR_EQUIP_CHAMELEON,
                 0F, 0.0F, () -> Ingredient.of(ModItems.CHAMELEON_MOLT));
 
     private static final int[] HEALTH_PER_SLOT = new int[]{13, 15, 16, 11};

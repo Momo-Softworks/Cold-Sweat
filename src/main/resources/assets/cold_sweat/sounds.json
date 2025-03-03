@@ -215,5 +215,24 @@
           "stream": true
       }
     ]
+  },
+  "item.armor.equip_chameleon_scale":
+  {
+    "subtitle": "item.armor.equip_chameleon",
+    "sounds":
+    [
+      {
+        "name": "cold_sweat:item/armor/chameleon_armor_equip_0",
+        "stream": true
+      },
+      {
+          "name": "cold_sweat:item/armor/chameleon_armor_equip_1",
+          "stream": true
+      },
+      {
+        "name": "cold_sweat:item/armor/chameleon_armor_equip_2",
+        "stream": true
+      }
+    ]
   }
 }
