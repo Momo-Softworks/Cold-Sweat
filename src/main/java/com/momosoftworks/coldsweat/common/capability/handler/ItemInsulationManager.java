@@ -46,10 +46,14 @@ public class ItemInsulationManager
     {   event.getEntity().getPersistentData().putBoolean("InventoryOpen", event instanceof PlayerContainerEvent.Open);
     }
 
+    /**
+     * @return The number of insulation slots on this armor item, or 0 if it does not support insulation
+     */
     public static int getInsulationSlots(ItemStack item)
     {
-        if (!isInsulatable(item)) return 0;
-        return ConfigSettings.INSULATION_SLOTS.get().getSlots(((Equipable) item.getItem()).getEquipmentSlot(), item);
+        return isInsulatable(item)
+               ? ConfigSettings.INSULATION_SLOTS.get().getSlots(((Equipable) item.getItem()).getEquipmentSlot(), item)
+               : 0;
     }
 
     public static boolean isInsulatable(ItemStack stack)
