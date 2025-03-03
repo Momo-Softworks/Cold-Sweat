@@ -474,7 +474,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                             SpreadPath newPath = new SpreadPath(tryPos, direction).setOrigin(spreadPath.origin);
 
                             // Check if this position hasn't been tried before, and if it's spread-able
-                            if (pathLookup.add(tryPos) && this.canSpread(level, pathPos, tryPos, state, spreadPath.direction, direction, newPath))
+                            if (this.canSpread(level, pathPos, tryPos, state, spreadPath.direction, direction, newPath) && pathLookup.add(tryPos))
                             {   // Add the new path to the list
                                 this.addPath(newPath);
                             }
