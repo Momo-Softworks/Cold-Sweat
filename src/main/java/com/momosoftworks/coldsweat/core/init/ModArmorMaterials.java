@@ -44,7 +44,7 @@ public class ModArmorMaterials
                 map.put(ArmorItem.Type.CHESTPLATE, 6);
                 map.put(ArmorItem.Type.LEGGINGS, 5);
                 map.put(ArmorItem.Type.BOOTS, 2);
-            }), 15, SoundEvents.ARMOR_EQUIP_NETHERITE, () -> Ingredient.of(ModItems.CHAMELEON_MOLT),
+            }), 15, ModSounds.ARMOR_EQUIP_CHAMELEON, () -> Ingredient.of(ModItems.CHAMELEON_MOLT),
             List.of(new ArmorMaterial.Layer(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "chameleon"))),
             0.0F, 0.0F));
 }
