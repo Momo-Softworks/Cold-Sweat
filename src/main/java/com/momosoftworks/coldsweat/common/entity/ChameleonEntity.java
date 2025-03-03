@@ -246,7 +246,7 @@ public class ChameleonEntity extends AnimalEntity
     }
 
     @Override
-    protected float getStandingEyeHeight(Pose pPose, EntityDimensions pDimensions)
+    protected float getStandingEyeHeight(Pose pPose, EntitySize pDimensions)
     {   return this.isBaby() ? 0.25F : 0.3F;
     }
 
