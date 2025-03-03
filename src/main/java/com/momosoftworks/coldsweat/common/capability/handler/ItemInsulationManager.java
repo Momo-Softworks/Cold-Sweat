@@ -1,10 +1,8 @@
 package com.momosoftworks.coldsweat.common.capability.handler;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.common.capability.ModCapabilities;
 import com.momosoftworks.coldsweat.common.capability.SidedCapabilityCache;
 import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
@@ -12,7 +10,6 @@ import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCa
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.util.TypedField;
-import com.momosoftworks.coldsweat.util.math.FastMultiMap;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.enchantment.IArmorVanishable;
 import net.minecraft.entity.Entity;
@@ -42,7 +39,9 @@ import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber
@@ -165,9 +164,14 @@ public class ItemInsulationManager
         event.getContainer().broadcastChanges();
     }
 
+    /**
+     * @return The number of insulation slots on this armor item, or 0 if it does not support insulation
+     */
     public static int getInsulationSlots(ItemStack item)
     {
-        return ConfigSettings.INSULATION_SLOTS.get().getSlots(MobEntity.getEquipmentSlotForItem(item), item);
+        return isInsulatable(item)
+               ? ConfigSettings.INSULATION_SLOTS.get().getSlots(MobEntity.getEquipmentSlotForItem(item), item)
+               : 0;
     }
 
     public static boolean isInsulatable(ItemStack stack)
