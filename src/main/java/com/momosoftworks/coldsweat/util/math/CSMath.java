@@ -740,6 +740,14 @@ public class CSMath
     {   return list.orElseGet(Collections::emptyList);
     }
 
+    public static <T> void setOrAppend(List<T> list, int index, T entry)
+    {
+        if (index < 0 || index >= list.size())
+        {   list.add(entry);
+        }
+        else list.set(index, entry);
+    }
+
     public static Class<?> getCallerClass(int depth)
     {
         StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
