@@ -19,6 +19,9 @@ public class ConfigUpdater
 {
     public static void updateConfigs()
     {
+        // Do not run if auto-update is disabled
+        if (!MainSettingsConfig.AUTO_UPDATE.get()) return;
+
         String version = ColdSweat.getVersion();
         //if (version.equals("0.0NONE")) return;
 
