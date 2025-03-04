@@ -14,7 +14,6 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
@@ -63,7 +62,10 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
 
 
     public ClientInsulationTooltip(List<Insulation> insulation, Insulation.Slot slot, ItemStack stack, boolean strikethrough)
-    {   this.insulation = insulation;
+    {if (slot != Insulation.Slot.ITEM)
+        {   insulation = Insulation.splitList(insulation);
+        }
+        this.insulation = insulation;
         this.slot = slot;
         this.stack = stack;
         this.strikethrough = strikethrough;
