@@ -20,6 +20,7 @@ public class MainSettingsConfig
 
     public static final ForgeConfigSpec.ConfigValue<Integer> DIFFICULTY;
     public static final ForgeConfigSpec.ConfigValue<String> VERSION;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> AUTO_UPDATE;
 
     public static final ForgeConfigSpec.ConfigValue<Double> MAX_HABITABLE_TEMPERATURE;
     public static final ForgeConfigSpec.ConfigValue<Double> MIN_HABITABLE_TEMPERATURE;
@@ -48,14 +49,19 @@ public class MainSettingsConfig
     {
         ConfigSettings.Difficulty defaultDiff = ConfigSettings.DEFAULT_DIFFICULTY;
 
-        BUILDER.comment("DO NOT EDIT THE SETTINGS IN THIS SECTION")
-               .push("Builtin");
+        BUILDER.push("Builtin");
 
         DIFFICULTY = BUILDER
+                .comment("DO NOT CHANGE THIS SETTING")
                 .defineInRange("Difficulty", defaultDiff.ordinal(), 0, ConfigSettings.Difficulty.values().length - 1);
 
         VERSION = BUILDER
+                .comment("The current version of Cold Sweat. This is used by the auto-updater")
                 .define("Version", ColdSweat.getVersion());
+
+        AUTO_UPDATE = BUILDER
+                .comment("Allows Cold Sweat's configs to be automatically updated with new additions & formatting changes")
+                .define("Auto Update", true);
 
         BUILDER.pop();
 
