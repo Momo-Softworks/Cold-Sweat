@@ -422,10 +422,10 @@ public class TooltipHandler
                 for (InsulatorData insulator : ConfigSettings.INSULATION_ITEMS.get().get(item))
                 {   validateInsulator(insulator, insulation, unmetInsulation);
                 }
-                if (!insulation.isEmpty() && !insulation.equals(armorInsulation))
+                if (!insulation.isEmpty() && !insulation.equals(Insulation.splitList(armorInsulation)))
                 {   addTooltip(tooltipStartIndex, new ClientInsulationTooltip(insulation, Insulation.Slot.ITEM, stack, false), elements);
                 }
-                if (!unmetInsulation.isEmpty() && !unmetInsulation.equals(unmetArmorInsulation))
+                if (!unmetInsulation.isEmpty() && !unmetInsulation.equals(Insulation.splitList(unmetArmorInsulation)))
                 {   addTooltip(tooltipStartIndex, new ClientInsulationTooltip(unmetInsulation, Insulation.Slot.ITEM, stack, true), elements);
                 }
             }

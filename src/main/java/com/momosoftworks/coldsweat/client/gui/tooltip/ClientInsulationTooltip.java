@@ -65,7 +65,10 @@ public class ClientInsulationTooltip extends Tooltip
 
 
     public ClientInsulationTooltip(List<Insulation> insulation, Insulation.Slot slot, ItemStack stack, boolean strikethrough)
-    {   this.insulation = insulation;
+    {if (slot != Insulation.Slot.ITEM)
+        {   insulation = Insulation.splitList(insulation);
+        }
+        this.insulation = insulation;
         this.slot = slot;
         this.stack = stack;
         this.strikethrough = strikethrough;

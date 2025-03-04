@@ -44,6 +44,15 @@ public abstract class Insulation implements NbtSerializable
 
     public abstract <T extends Insulation> T copy();
 
+    public static List<Insulation> splitList(List<Insulation> pairs)
+    {
+        List<Insulation> newPairs = new ArrayList<>();
+        for (Insulation pair : pairs)
+        {   newPairs.addAll(pair.split());
+        }
+        return newPairs;
+    }
+
     /**
      * Sort the list of insulation items, starting with cold insulation, then neutral, then heat, then adaptive.<br>
      * This method does not modify the input list

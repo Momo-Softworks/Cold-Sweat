@@ -166,20 +166,16 @@ public class ItemSettingsConfig
         BUILDER.push("Insulation");
         INSULATION_ITEMS = BUILDER
                 .comment("Defines the items that can be used for insulating armor in the Sewing Table",
-                         "Format: [[\"item_id\", cold, hot, \"static\", *nbt], [\"item_id\", amount, adapt-speed, \"adaptive\", *nbt], ...etc]",
+                         "Format: [[\"item_id\", cold, hot, *\"static\", *nbt, *fil_slots], [\"item_id\", amount, adapt-speed, \"adaptive\", *nbt, *fill_slots], ...etc]",
+                         "(* = Optional)",
                          "\"item_id\": The item's ID (i.e. \"minecraft:iron_ingot\"). Accepts tags with \"#\" (i.e. \"#minecraft:wool\").",
-                         "",
-                         "Adaptive Insulation: ",
-                         "\"amount\": The amount of insulation the item provides.",
-                         "\"adapt-speed\": The speed at which the insulation adapts to the environment.",
-                         "*\"type\": Optional. Either \"static\" or \"adaptive\". Defines the insulation type. Defaults to static.",
-                         "*\"nbt\": Optional. If set, the item will only provide insulation if it has the specified NBT tag.",
-                         "",
-                         "Static Insulation: ",
-                         "\"cold\": The amount of cold insulation the item provides.",
-                         "\"hot\": The amount of heat insulation the item provides.",
-                         "*\"type\": Optional. Either \"static\" or \"adaptive\". Defines the insulation type. Defaults to static.",
-                         "*\"nbt\": Optional. If set, the item will only provide insulation if it has the specified NBT tag."
+                         "cold: The cold insulation the item provides.",
+                         "hot: The heat insulation the item provides.",
+                         "amount: The amount of insulation the item provides.",
+                         "adapt-speed: The speed at which the insulation adapts to the environment.",
+                         "\"static\"/\"adaptive\": The type of insulation the item provides. Defaults to \"static\" if unset",
+                         "nbt: Optional. If set, the item will only provide insulation if it has the specified NBT tag.",
+                         "fill_slots: If true, the item will fill 1 slot per 2 insulation points. Otherwise, the item will fill 1 slot."
                 )
                 .defineListAllowEmpty(Arrays.asList("Insulation Ingredients"), () -> ListBuilder.begin(
                                 Arrays.asList("minecraft:leather",            1,  1),
@@ -229,27 +225,27 @@ public class ItemSettingsConfig
 
         INSULATING_ARMOR = BUILDER
                 .comment("Defines the items that provide insulation when worn",
-                        "See Insulation Ingredients for formatting")
+                        "See Insulation Ingredients for formatting. This setting does not have a \"fill_slots\" option")
                 .defineListAllowEmpty(Arrays.asList("Insulating Armor"), () -> ListBuilder.begin(
-                                Arrays.asList("minecraft:leather_helmet",      4,  4, "static", "", true),
-                                Arrays.asList("minecraft:leather_chestplate",  6,  6, "static", "", true),
-                                Arrays.asList("minecraft:leather_leggings",    5,  5, "static", "", true),
-                                Arrays.asList("minecraft:leather_boots",       4,  4, "static", "", true),
+                                Arrays.asList("minecraft:leather_helmet",      4,  4),
+                                Arrays.asList("minecraft:leather_chestplate",  6,  6),
+                                Arrays.asList("minecraft:leather_leggings",    5,  5),
+                                Arrays.asList("minecraft:leather_boots",       4,  4),
 
-                                Arrays.asList("cold_sweat:hoglin_headpiece",   0,  8, "static", "", true),
-                                Arrays.asList("cold_sweat:hoglin_tunic",       0,  12, "static", "", true),
-                                Arrays.asList("cold_sweat:hoglin_trousers",    0,  10, "static", "", true),
-                                Arrays.asList("cold_sweat:hoglin_hooves",      0,  8, "static", "", true),
+                                Arrays.asList("cold_sweat:hoglin_headpiece",   0,   8),
+                                Arrays.asList("cold_sweat:hoglin_tunic",       0,  12),
+                                Arrays.asList("cold_sweat:hoglin_trousers",    0,  10),
+                                Arrays.asList("cold_sweat:hoglin_hooves",      0,   8),
 
-                                Arrays.asList("cold_sweat:goat_fur_cap",       8,  0, "static", "", true),
-                                Arrays.asList("cold_sweat:goat_fur_parka",     12, 0, "static", "", true),
-                                Arrays.asList("cold_sweat:goat_fur_pants",     10, 0, "static", "", true),
-                                Arrays.asList("cold_sweat:goat_fur_boots",     8,  0, "static", "", true),
+                                Arrays.asList("cold_sweat:goat_fur_cap",       8,  0),
+                                Arrays.asList("cold_sweat:goat_fur_parka",     12, 0),
+                                Arrays.asList("cold_sweat:goat_fur_pants",     10, 0),
+                                Arrays.asList("cold_sweat:goat_fur_boots",     8,  0),
 
-                                Arrays.asList("cold_sweat:chameleon_scale_helmet", 8, 0.0085, "adaptive", "", true),
-                                Arrays.asList("cold_sweat:chameleon_scale_chestplate", 12, 0.0085, "adaptive", "", true),
-                                Arrays.asList("cold_sweat:chameleon_scale_leggings", 10, 0.0085, "adaptive", "", true),
-                                Arrays.asList("cold_sweat:chameleon_scale_boots", 8, 0.0085, "adaptive", "", true))
+                                Arrays.asList("cold_sweat:chameleon_scale_helmet", 8, 0.0085, "adaptive"),
+                                Arrays.asList("cold_sweat:chameleon_scale_chestplate", 12, 0.0085, "adaptive"),
+                                Arrays.asList("cold_sweat:chameleon_scale_leggings", 10, 0.0085, "adaptive"),
+                                Arrays.asList("cold_sweat:chameleon_scale_boots", 8, 0.0085, "adaptive"))
                             .addIf(CompatManager.isEnvironmentalLoaded(),
                                 () -> Arrays.asList("environmental:yak_pants", 7.5, -5)
                         ).build(),
@@ -262,8 +258,7 @@ public class ItemSettingsConfig
                                         && list.get(0) instanceof String
                                         && list.get(1) instanceof Number
                                         && list.get(2) instanceof Number
-                                        && (list.size() < 4 || list.get(3) instanceof String)
-                                        && (list.size() < 5 || list.get(4) instanceof String);
+                                        && (list.size() < 4 || list.get(3) instanceof String);
                             }
                             return false;
                         });
@@ -272,7 +267,7 @@ public class ItemSettingsConfig
         {
             INSULATING_CURIOS = BUILDER
                     .comment("Defines the items that provide insulation when worn in a curio slot",
-                             "See Insulation Ingredients for formatting")
+                             "See Insulation Ingredients for formatting. This setting does not have a \"fill_slots\" option")
                     .defineListAllowEmpty(Arrays.asList("Insulating Curios"), () -> Arrays.asList(
                             // Nothing defined
                         ),
