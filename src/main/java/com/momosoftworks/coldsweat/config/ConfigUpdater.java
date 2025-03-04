@@ -5,8 +5,8 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.config.spec.ItemSettingsConfig;
 import com.momosoftworks.coldsweat.config.spec.MainSettingsConfig;
 import com.momosoftworks.coldsweat.config.spec.WorldSettingsConfig;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.io.File;
@@ -148,6 +148,38 @@ public class ConfigUpdater
                 }
             }
             WorldSettingsConfig.BLOCK_TEMPERATURES.set(blockTemps);
+        }
+
+        /*
+         2.4-b01b
+         */
+        if (isBehind(configVersion, "2.4-b01b"))
+        {
+            // Update old insulation items
+            List<? extends List> itemInsulations = new ArrayList<>(ItemSettingsConfig.INSULATION_ITEMS.get());
+            for (List entry : itemInsulations)
+            {
+                if (!entry.contains("adaptive")) CSMath.setOrAppend(entry, 3, "static");
+                CSMath.setOrAppend(entry, 4, "");
+                CSMath.setOrAppend(entry, 5, true);
+            }
+            ItemSettingsConfig.INSULATION_ITEMS.set((List) itemInsulations);
+
+            // Chameleon armor
+            addConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, List.of("cold_sweat:chameleon_scale_helmet", 8, 0.0085, "adaptive", "", true));
+            addConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, List.of("cold_sweat:chameleon_scale_chestplate", 12, 0.0085, "adaptive", "", true));
+            addConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, List.of("cold_sweat:chameleon_scale_leggings", 10, 0.0085, "adaptive", "", true));
+            addConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, List.of("cold_sweat:chameleon_scale_boots", 8, 0.0085, "adaptive", "", true));
+
+            addConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, List.of("cold_sweat:chameleon_scale_helmet", 8, 0.0085, "adaptive"));
+            addConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, List.of("cold_sweat:chameleon_scale_chestplate", 12, 0.0085, "adaptive"));
+            addConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, List.of("cold_sweat:chameleon_scale_leggings", 10, 0.0085, "adaptive"));
+            addConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, List.of("cold_sweat:chameleon_scale_boots", 8, 0.0085, "adaptive"));
+
+            // Remove hearth bottom as a whitelisted block
+            List whitelist = new ArrayList<>(WorldSettingsConfig.SOURCE_SPREAD_WHITELIST.get());
+            whitelist.remove("cold_sweat:hearth_bottom");
+            WorldSettingsConfig.SOURCE_SPREAD_WHITELIST.set(whitelist);
         }
 
         // Update config version
