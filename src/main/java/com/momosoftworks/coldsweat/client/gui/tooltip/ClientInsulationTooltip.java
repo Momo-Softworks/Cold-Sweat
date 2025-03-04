@@ -39,6 +39,9 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
 
     public ClientInsulationTooltip(List<Insulation> insulation, Insulation.Slot slot, ItemStack stack, boolean strikethrough)
     {
+        if (slot != Insulation.Slot.ITEM)
+        {   insulation = Insulation.splitList(insulation);
+        }
         this.insulation = insulation;
         this.slot = slot;
         this.stack = stack;
