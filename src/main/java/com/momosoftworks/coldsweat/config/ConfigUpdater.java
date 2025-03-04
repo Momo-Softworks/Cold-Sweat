@@ -22,9 +22,14 @@ public class ConfigUpdater
         if (!MainSettingsConfig.AUTO_UPDATE.get()) return;
 
         String version = ColdSweat.getVersion();
-        //if (version.equals("0.0NONE")) return;
 
         String configVersion = MainSettingsConfig.VERSION.get();
+
+        if (isBehind(configVersion, "2.3-b05b"))
+        {
+            ColdSweat.LOGGER.error("Cancelling config auto-updater. Version {} is older than minimum supported version: 2.3-b05b", configVersion);
+            return;
+        }
 
         /*
          2.3
