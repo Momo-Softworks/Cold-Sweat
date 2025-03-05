@@ -26,10 +26,11 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public record PlayerDataRequirement(IntegerBounds level, Optional<GameType> gameType, Optional<Map<StatRequirement, IntegerBounds>> stats,
+public record PlayerDataRequirement(IntegerBounds level, Optional<GameType> gameType, Optional<List<StatRequirement>> stats,
                                     Optional<Map<ResourceLocation, Boolean>> recipes,
                                     Optional<Map<ResourceLocation, Either<AdvancementCompletionRequirement, AdvancementCriteriaRequirement>>> advancements,
                                     Optional<EntityRequirement> lookingAt) implements EntitySubRequirement, RequirementHolder
@@ -44,7 +45,7 @@ public record PlayerDataRequirement(IntegerBounds level, Optional<GameType> game
         return RecordCodecBuilder.mapCodec(instance -> instance.group(
                 IntegerBounds.CODEC.optionalFieldOf("level", IntegerBounds.NONE).forGetter(requirement -> requirement.level),
                 GameType.CODEC.optionalFieldOf("game_mode").forGetter(requirement -> requirement.gameType),
-                Codec.unboundedMap(StatRequirement.CODEC, IntegerBounds.CODEC).optionalFieldOf("stats").forGetter(requirement -> requirement.stats),
+                StatRequirement.CODEC.listOf().optionalFieldOf("stats").forGetter(requirement -> requirement.stats),
                 Codec.unboundedMap(ResourceLocation.CODEC, Codec.BOOL).optionalFieldOf("recipes").forGetter(requirement -> requirement.recipes),
                 Codec.unboundedMap(ResourceLocation.CODEC, Codec.either(AdvancementCompletionRequirement.CODEC, AdvancementCriteriaRequirement.CODEC)).optionalFieldOf("advancements").forGetter(requirement -> requirement.advancements),
                 lastCodec.optionalFieldOf("looking_at").forGetter(requirement -> requirement.lookingAt)
@@ -65,10 +66,10 @@ public record PlayerDataRequirement(IntegerBounds level, Optional<GameType> game
         }
         if (stats.isPresent())
         {
-            for (Map.Entry<StatRequirement, IntegerBounds> entry : stats.get().entrySet())
+            for (StatRequirement entry : stats.get())
             {
-                int value = serverPlayer.getStats().getValue(entry.getKey().stat());
-                if (!entry.getKey().test(entry.getKey().stat(), value))
+                int value = serverPlayer.getStats().getValue(entry.stat());
+                if (!entry.test(entry.stat(), value))
                 {   return false;
                 }
             }
@@ -152,7 +153,7 @@ public record PlayerDataRequirement(IntegerBounds level, Optional<GameType> game
         }
 
         public boolean test(Stat<?> stat, int value)
-        {   return statId.equals(BuiltInRegistries.STAT_TYPE.getKey(stat.getType())) && this.value.test(value);
+        {   return stat.getType() == type && this.stat.equals(stat) && this.value.test(value);
         }
 
         @Override
