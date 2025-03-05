@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.api.util.Temperature.Trait;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
+import com.momosoftworks.coldsweat.mixin_interface.IPassthrough;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModDamageSources;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
@@ -84,7 +85,7 @@ public class AbstractTempCap implements ITemperatureCap
         changed |= switch (trait)
         {
             case CORE  -> ((int) value) != ((int) getTrait(Trait.CORE));
-            case BASE  -> ((int) value) != ((int) getTrait(Temperature.Trait.BASE));
+            case BASE  -> ((int) value) != ((int) getTrait(Trait.BASE));
             case WORLD -> Math.abs(value - getTrait(Trait.WORLD)) >= 0.02;
             default -> true;
         };
@@ -170,7 +171,7 @@ public class AbstractTempCap implements ITemperatureCap
         if (!(entity instanceof Player player)) return;
 
         Temperature.apply(0, player, Trait.WORLD, getModifiers(Trait.WORLD));
-        Temperature.apply(getTrait(Trait.CORE), player, Temperature.Trait.CORE, getModifiers(Trait.CORE));
+        Temperature.apply(getTrait(Trait.CORE), player, Trait.CORE, getModifiers(Trait.CORE));
         Temperature.apply(0, player, Trait.BASE, getModifiers(Trait.BASE));
     }
 
@@ -193,13 +194,13 @@ public class AbstractTempCap implements ITemperatureCap
         // 1 if newWorldTemp is above max, -1 if below min, 0 if between the values (safe)
         int worldTempSign = CSMath.getSignForRange(newWorldTemp, minTemp, maxTemp);
 
-        boolean immuneToTemp = EntityTempManager.isPeacefulMode(entity);
+        boolean immuneToTemp = isPeacefulMode(entity);
         boolean isFullyColdDampened = worldTempSign < 0 && (coldDampening >= 1 || immuneToTemp);
         boolean isFullyHeatDampened = worldTempSign > 0 && (heatDampening >= 1 || immuneToTemp);
 
         // Don't change player temperature if they're in creative/spectator mode
         if (worldTempSign != 0 && (!(entity instanceof Player player) || !player.isCreative()) && !entity.isSpectator()
-        && !EntityTempManager.isPeacefulMode(entity))
+        && !isPeacefulMode(entity))
         {
             // How much hotter/colder the player's temp is compared to max/min
             double difference = Math.abs(newWorldTemp - CSMath.clamp(newWorldTemp, minTemp, maxTemp));
@@ -229,7 +230,7 @@ public class AbstractTempCap implements ITemperatureCap
                             // Heat dampening is positive; apply the change as a percentage of the dampening
                             : CSMath.blend(changeBy, 0, heatDampening, 0, 1));
             }
-            newCoreTemp += Temperature.apply(changeBy, entity, Trait.RATE, this.getModifiers(Temperature.Trait.RATE));
+            newCoreTemp += Temperature.apply(changeBy, entity, Trait.RATE, this.getModifiers(Trait.RATE));
         }
 
         // Get the sign of the player's core temperature (-1, 0, or 1)
@@ -285,19 +286,20 @@ public class AbstractTempCap implements ITemperatureCap
         this.tickHurting(entity, heatResistance, coldResistance);
     }
 
-    private double modifyFromAttribute(LivingEntity entity, Temperature.Trait type, double baseValue)
+    private double modifyFromAttribute(LivingEntity entity, Trait type, double baseValue)
     {
-        Supplier<Double> defaultSupplier = () -> Temperature.apply(baseValue, entity, type, this.getModifiers(type));
+        double defaultValue = Temperature.apply(baseValue, entity, type, this.getModifiers(type));
         AttributeInstance attribute = EntityTempManager.getAttribute(type, entity);
         double newValue;
         // If the attribute is null, return the default value
         if (attribute == null)
-        {   newValue = defaultSupplier.get();
+        {   newValue = defaultValue;
         }
         // If base attribute is unset
         else
         {
-            double base = CSMath.safeDouble(attribute.getBaseValue()).orElse(defaultSupplier.get());
+            ((IPassthrough) attribute).setPassthroughValue(defaultValue);
+            double base = CSMath.safeDouble(((IPassthrough) attribute).getRealBaseValue()).orElse(defaultValue);
 
             for (AttributeModifier mod : attribute.getModifiers(AttributeModifier.Operation.ADDITION))
             {   base += mod.getAmount();
@@ -327,9 +329,9 @@ public class AbstractTempCap implements ITemperatureCap
 
     public void tickHurting(LivingEntity entity, double heatResistance, double coldResistance)
     {
-        if (EntityTempManager.isPeacefulMode(entity)) return;
+        if (isPeacefulMode(entity)) return;
 
-        double bodyTemp = getTrait(Temperature.Trait.BODY);
+        double bodyTemp = getTrait(Trait.BODY);
 
         boolean hasGrace = entity.hasEffect(ModEffects.GRACE);
         boolean hasFireResist = entity.hasEffect(MobEffects.FIRE_RESISTANCE);
