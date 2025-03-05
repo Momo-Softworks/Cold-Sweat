@@ -21,9 +21,12 @@ import java.util.function.Predicate;
 
 public class LocationRequirement
 {
-    private final Optional<Integer> x;
-    private final Optional<Integer> y;
-    private final Optional<Integer> z;
+    private final Optional<IntegerBounds> x;
+    private final Optional<IntegerBounds> y;
+    private final Optional<IntegerBounds> z;
+    int xOffset;
+    int yOffset;
+    int zOffset;
     private final Optional<RegistryKey<Biome>> biome;
     private final Optional<RegistryKey<Structure<?>>> structure;
     private final Optional<RegistryKey<World>> dimension;
@@ -32,14 +35,19 @@ public class LocationRequirement
     private final Optional<FluidRequirement> fluid;
     private final Optional<Predicate<BlockInWorld>> predicate;
 
-    public LocationRequirement(Optional<Integer> x, Optional<Integer> y, Optional<Integer> z, Optional<RegistryKey<Biome>> biome,
-                               Optional<RegistryKey<Structure<?>>> structure, Optional<RegistryKey<World>> dimension,
-                               Optional<IntegerBounds> light, Optional<BlockRequirement> block, Optional<FluidRequirement> fluid,
+    public LocationRequirement(Optional<IntegerBounds> x, Optional<IntegerBounds> y, Optional<IntegerBounds> z,
+                               int xOffset, int yOffset, int zOffset,
+                               Optional<RegistryKey<Biome>> biome, Optional<RegistryKey<Structure<?>>> structure,
+                               Optional<RegistryKey<World>> dimension, Optional<IntegerBounds> light,
+                               Optional<BlockRequirement> block, Optional<FluidRequirement> fluid,
                                Optional<Predicate<BlockInWorld>> predicate)
     {
         this.x = x;
         this.y = y;
         this.z = z;
+        this.xOffset = xOffset;
+        this.yOffset = yOffset;
+        this.zOffset = zOffset;
         this.biome = biome;
         this.structure = structure;
         this.dimension = dimension;
@@ -50,9 +58,12 @@ public class LocationRequirement
     }
 
     public static final Codec<LocationRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.INT.optionalFieldOf("x").forGetter(location -> location.x),
-            Codec.INT.optionalFieldOf("y").forGetter(location -> location.y),
-            Codec.INT.optionalFieldOf("z").forGetter(location -> location.z),
+            IntegerBounds.CODEC.optionalFieldOf("x").forGetter(location -> location.x),
+            IntegerBounds.CODEC.optionalFieldOf("y").forGetter(location -> location.y),
+            IntegerBounds.CODEC.optionalFieldOf("z").forGetter(location -> location.z),
+            Codec.INT.optionalFieldOf("x_offset", 0).forGetter(location -> location.xOffset),
+            Codec.INT.optionalFieldOf("y_offset", 0).forGetter(location -> location.yOffset),
+            Codec.INT.optionalFieldOf("z_offset", 0).forGetter(location -> location.zOffset),
             ExtraCodecs.codec(Registry.BIOME_REGISTRY).optionalFieldOf("biome").forGetter(location -> location.biome),
             ExtraCodecs.codec(Registry.STRUCTURE_FEATURE_REGISTRY).optionalFieldOf("structure").forGetter(location -> location.structure),
             ExtraCodecs.codec(Registry.DIMENSION_REGISTRY).optionalFieldOf("dimension").forGetter(location -> location.dimension),
@@ -61,35 +72,49 @@ public class LocationRequirement
             FluidRequirement.CODEC.optionalFieldOf("fluid").forGetter(location -> location.fluid)
     ).apply(instance, LocationRequirement::new));
 
-    public LocationRequirement(Optional<Integer> x, Optional<Integer> y, Optional<Integer> z,
+    public LocationRequirement(Optional<IntegerBounds> x, Optional<IntegerBounds> y, Optional<IntegerBounds> z,
+                               int xOffset, int yOffset, int zOffset,
                                Optional<RegistryKey<Biome>> biome,
                                Optional<RegistryKey<Structure<?>>> structure,
                                Optional<RegistryKey<World>> dimension,
                                Optional<IntegerBounds> light, Optional<BlockRequirement> block,
                                Optional<FluidRequirement> fluid)
     {
-        this(x, y, z, biome, structure, dimension, light, block, fluid, Optional.empty());
+        this(x, y, z, xOffset, yOffset, zOffset, biome, structure, dimension, light, block, fluid, Optional.empty());
     }
 
     public LocationRequirement(Predicate<BlockInWorld> predicate)
     {
-        this(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-             Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(predicate));
+        this(Optional.empty(), Optional.empty(), Optional.empty(),
+             0, 0, 0,
+             Optional.empty(), Optional.empty(), Optional.empty(),
+             Optional.empty(), Optional.empty(), Optional.empty(),
+             Optional.of(predicate));
     }
 
     public static final LocationRequirement NONE = new LocationRequirement(Optional.empty(), Optional.empty(), Optional.empty(),
+                                                                           0, 0, 0,
                                                                            Optional.empty(), Optional.empty(), Optional.empty(),
                                                                            Optional.empty(), Optional.empty(), Optional.empty(),
                                                                            Optional.empty());
 
-    public Optional<Integer> x()
+    public Optional<IntegerBounds> x()
     {   return x;
     }
-    public Optional<Integer> y()
+    public Optional<IntegerBounds> y()
     {   return y;
     }
-    public Optional<Integer> z()
+    public Optional<IntegerBounds> z()
     {   return z;
+    }
+    public int xOffset()
+    {   return xOffset;
+    }
+    public int yOffset()
+    {   return yOffset;
+    }
+    public int zOffset()
+    {   return zOffset;
     }
     public Optional<RegistryKey<Biome>> biome()
     {   return biome;
@@ -121,9 +146,11 @@ public class LocationRequirement
         }
 
         BlockPos.Mutable pos = origin.mutable();
-        this.x.ifPresent(x -> pos.move(x, 0, 0));
-        this.y.ifPresent(y -> pos.move(0, y, 0));
-        this.z.ifPresent(z -> pos.move(0, 0, z));
+        pos.move(this.xOffset, this.yOffset, this.zOffset);
+
+        if (!this.x.map(range -> range.test(pos.getX())).orElse(true)) return false;
+        if (!this.y.map(range -> range.test(pos.getY())).orElse(true)) return false;
+        if (!this.z.map(range -> range.test(pos.getZ())).orElse(true)) return false;
 
         if (this.dimension.isPresent()
         && !level.dimension().equals(this.dimension.get()))
