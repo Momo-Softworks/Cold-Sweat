@@ -25,20 +25,20 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.GameType;
 import net.minecraft.world.World;
-import net.minecraftforge.registries.ForgeRegistries;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 public class PlayerDataRequirement implements EntitySubRequirement, RequirementHolder
 {
     private final Optional<GameType> gameType;
-    private final Optional<Map<StatRequirement, IntegerBounds>> stats;
+    private final Optional<List<StatRequirement>> stats;
     private final Optional<Map<ResourceLocation, Boolean>> recipes;
     private final Optional<Map<ResourceLocation, Either<AdvancementCompletionRequirement, AdvancementCriteriaRequirement>>> advancements;
     private final Optional<EntityRequirement> lookingAt;
 
-    public PlayerDataRequirement(Optional<GameType> gameType, Optional<Map<StatRequirement, IntegerBounds>> stats,
+    public PlayerDataRequirement(Optional<GameType> gameType, Optional<List<StatRequirement>> stats,
                                  Optional<Map<ResourceLocation, Boolean>> recipes,
                                  Optional<Map<ResourceLocation, Either<AdvancementCompletionRequirement, AdvancementCriteriaRequirement>>> advancements,
                                  Optional<EntityRequirement> lookingAt)
@@ -49,7 +49,6 @@ public class PlayerDataRequirement implements EntitySubRequirement, RequirementH
         this.advancements = advancements;
         this.lookingAt = lookingAt;
     }
-
     @Override
     public MapCodec<? extends EntitySubRequirement> getCodec()
     {   return getCodec(EntityRequirement.getCodec());
@@ -59,7 +58,7 @@ public class PlayerDataRequirement implements EntitySubRequirement, RequirementH
     {
         return RecordCodecBuilder.mapCodec(instance -> instance.group(
                 Codec.STRING.xmap(GameType::byName, GameType::getName).optionalFieldOf("game_mode").forGetter(requirement -> requirement.gameType),
-                Codec.unboundedMap(StatRequirement.CODEC, IntegerBounds.CODEC).optionalFieldOf("stats").forGetter(requirement -> requirement.stats),
+                StatRequirement.CODEC.listOf().optionalFieldOf("stats").forGetter(requirement -> requirement.stats),
                 Codec.unboundedMap(ResourceLocation.CODEC, Codec.BOOL).optionalFieldOf("recipes").forGetter(requirement -> requirement.recipes),
                 Codec.unboundedMap(ResourceLocation.CODEC, Codec.either(AdvancementCompletionRequirement.CODEC, AdvancementCriteriaRequirement.CODEC)).optionalFieldOf("advancements").forGetter(requirement -> requirement.advancements),
                 lastCodec.optionalFieldOf("looking_at").forGetter(requirement -> requirement.lookingAt)
@@ -69,7 +68,7 @@ public class PlayerDataRequirement implements EntitySubRequirement, RequirementH
     public Optional<GameType> gameType()
     {   return gameType;
     }
-    public Optional<Map<StatRequirement, IntegerBounds>> stats()
+    public Optional<List<StatRequirement>> stats()
     {   return stats;
     }
     public Optional<Map<ResourceLocation, Boolean>> recipes()
@@ -94,10 +93,10 @@ public class PlayerDataRequirement implements EntitySubRequirement, RequirementH
         }
         if (stats.isPresent())
         {
-            for (Map.Entry<StatRequirement, IntegerBounds> entry : stats.get().entrySet())
+            for (StatRequirement entry : stats.get())
             {
-                int value = serverPlayer.getStats().getValue(entry.getKey().stat());
-                if (!entry.getKey().test(entry.getKey().stat(), value))
+                int value = serverPlayer.getStats().getValue(entry.stat());
+                if (!entry.test(entry.stat(), value))
                 {   return false;
                 }
             }
@@ -199,7 +198,7 @@ public class PlayerDataRequirement implements EntitySubRequirement, RequirementH
         }
 
         public boolean test(Stat<?> stat, int value)
-        {   return statId.equals(ForgeRegistries.STAT_TYPES.getKey(stat.getType())) && this.value.test(value);
+        {   return stat.getType() == type && this.stat.equals(stat) && this.value.test(value);
         }
 
         @Override
