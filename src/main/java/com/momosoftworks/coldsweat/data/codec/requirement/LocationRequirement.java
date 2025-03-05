@@ -22,7 +22,8 @@ import net.minecraft.world.phys.Vec3;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-public record LocationRequirement(Optional<Integer> x, Optional<Integer> y, Optional<Integer> z,
+public record LocationRequirement(Optional<IntegerBounds> x, Optional<IntegerBounds> y, Optional<IntegerBounds> z,
+                                  int xOffset, int yOffset, int zOffset,
                                   Optional<Either<TagKey<Biome>, ResourceKey<Biome>>> biome,
                                   Optional<Either<TagKey<ConfiguredStructureFeature<?, ?>>, ResourceKey<ConfiguredStructureFeature<?, ?>>>> structure,
                                   Optional<Either<TagKey<Level>, ResourceKey<Level>>> dimension,
@@ -30,9 +31,12 @@ public record LocationRequirement(Optional<Integer> x, Optional<Integer> y, Opti
                                   Optional<FluidRequirement> fluid, Optional<Predicate<BlockInWorld>> predicate)
 {
     public static final Codec<LocationRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.INT.optionalFieldOf("x").forGetter(location -> location.x),
-            Codec.INT.optionalFieldOf("y").forGetter(location -> location.y),
-            Codec.INT.optionalFieldOf("z").forGetter(location -> location.z),
+            IntegerBounds.CODEC.optionalFieldOf("x").forGetter(location -> location.x),
+            IntegerBounds.CODEC.optionalFieldOf("y").forGetter(location -> location.y),
+            IntegerBounds.CODEC.optionalFieldOf("z").forGetter(location -> location.z),
+            Codec.INT.optionalFieldOf("x_offset", 0).forGetter(location -> location.xOffset),
+            Codec.INT.optionalFieldOf("y_offset", 0).forGetter(location -> location.yOffset),
+            Codec.INT.optionalFieldOf("z_offset", 0).forGetter(location -> location.zOffset),
             ConfigHelper.tagOrResourceKeyCodec(Registry.BIOME_REGISTRY).optionalFieldOf("biome").forGetter(location -> location.biome),
             ConfigHelper.tagOrResourceKeyCodec(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY).optionalFieldOf("structure").forGetter(location -> location.structure),
             ConfigHelper.tagOrResourceKeyCodec(Registry.DIMENSION_REGISTRY).optionalFieldOf("dimension").forGetter(location -> location.dimension),
@@ -41,23 +45,28 @@ public record LocationRequirement(Optional<Integer> x, Optional<Integer> y, Opti
             FluidRequirement.CODEC.optionalFieldOf("fluid").forGetter(location -> location.fluid)
     ).apply(instance, LocationRequirement::new));
 
-    public LocationRequirement(Optional<Integer> x, Optional<Integer> y, Optional<Integer> z,
+    public LocationRequirement(Optional<IntegerBounds> x, Optional<IntegerBounds> y, Optional<IntegerBounds> z,
+                               int xOffset, int yOffset, int zOffset,
                                Optional<Either<TagKey<Biome>, ResourceKey<Biome>>> biome,
                                Optional<Either<TagKey<ConfiguredStructureFeature<?, ?>>, ResourceKey<ConfiguredStructureFeature<?, ?>>>> structure,
                                Optional<Either<TagKey<Level>, ResourceKey<Level>>> dimension,
                                Optional<IntegerBounds> light, Optional<BlockRequirement> block,
                                Optional<FluidRequirement> fluid)
     {
-        this(x, y, z, biome, structure, dimension, light, block, fluid, Optional.empty());
+        this(x, y, z, xOffset, yOffset, zOffset, biome, structure, dimension, light, block, fluid, Optional.empty());
     }
 
     public LocationRequirement(Predicate<BlockInWorld> predicate)
     {
-        this(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-             Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(predicate));
+        this(Optional.empty(), Optional.empty(), Optional.empty(),
+             0, 0, 0,
+             Optional.empty(), Optional.empty(), Optional.empty(),
+             Optional.empty(), Optional.empty(), Optional.empty(),
+             Optional.of(predicate));
     }
 
     public static final LocationRequirement NONE = new LocationRequirement(Optional.empty(), Optional.empty(), Optional.empty(),
+                                                                           0, 0, 0,
                                                                            Optional.empty(), Optional.empty(), Optional.empty(),
                                                                            Optional.empty(), Optional.empty(), Optional.empty(),
                                                                            Optional.empty());
@@ -73,9 +82,11 @@ public record LocationRequirement(Optional<Integer> x, Optional<Integer> y, Opti
         }
 
         BlockPos.MutableBlockPos pos = origin.mutable();
-        this.x.ifPresent(x -> pos.move(x, 0, 0));
-        this.y.ifPresent(y -> pos.move(0, y, 0));
-        this.z.ifPresent(z -> pos.move(0, 0, z));
+        pos.move(this.xOffset, this.yOffset, this.zOffset);
+
+        if (!this.x.map(range -> range.test(pos.getX())).orElse(true)) return false;
+        if (!this.y.map(range -> range.test(pos.getY())).orElse(true)) return false;
+        if (!this.z.map(range -> range.test(pos.getZ())).orElse(true)) return false;
 
         if (this.dimension.isPresent()
         && !this.dimension.get().map(tag -> level.dimensionTypeRegistration().is(tag.location()),
