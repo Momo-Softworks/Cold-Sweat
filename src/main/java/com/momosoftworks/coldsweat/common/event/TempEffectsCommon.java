@@ -123,9 +123,8 @@ public class TempEffectsCommon
 
     public static int getTempResistance(Player player, boolean cold)
     {
-        AttributeInstance tempAttribute = cold ? player.getAttribute(ModAttributes.COLD_RESISTANCE)
-                                               : player.getAttribute(ModAttributes.HEAT_RESISTANCE);
-        if (tempAttribute == null) return 0;
-        return (int) CSMath.blend(0, 4, tempAttribute.getValue(), 0, 1);
+        double resistance = cold ? Temperature.get(player, Temperature.Trait.COLD_RESISTANCE)
+                                 : Temperature.get(player, Temperature.Trait.HEAT_RESISTANCE);
+        return (int) CSMath.blend(0, 4, resistance, 0, 1);
     }
 }

@@ -28,6 +28,7 @@ import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.data.codec.configuration.ItemCarryTempData;
 import com.momosoftworks.coldsweat.data.codec.configuration.MountData;
 import com.momosoftworks.coldsweat.data.codec.configuration.ItemCarryTempData.SlotType;
+import com.momosoftworks.coldsweat.mixin_interface.IPassthrough;
 import com.momosoftworks.coldsweat.util.entity.DummyPlayer;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.FastMap;
@@ -265,8 +266,14 @@ public class EntityTempManager
             // Get the old player's capability
             getTemperatureCap(oldPlayer).map(ITemperatureCap::getPersistentAttributes).orElse(new HashSet<>())
             .forEach(attr ->
-            {   newPlayer.getAttribute(Holder.direct(attr)).setBaseValue(oldPlayer.getAttribute(Holder.direct(attr)).getBaseValue());
-                getTemperatureCap(newPlayer).ifPresent(cap -> cap.markPersistentAttribute(attr));
+            {
+                AttributeInstance newAttr = newPlayer.getAttribute(attr);
+                IPassthrough oldAttr = (IPassthrough) oldPlayer.getAttribute(attr);
+                if (newAttr != null && oldAttr != null)
+                {
+                    newAttr.setBaseValue(oldAttr.getRealBaseValue());
+                    getTemperatureCap(newPlayer).ifPresent(cap -> cap.markPersistentAttribute(attr));
+                }
             });
         }
     }
@@ -901,8 +908,10 @@ public class EntityTempManager
     }
 
     public static boolean isTemperatureAttribute(Holder<Attribute> attribute)
-    {
-        return attribute.getKey().location().getNamespace().equals(ColdSweat.MOD_ID);
+    {   return attribute.getKey().location().getNamespace().equals(ColdSweat.MOD_ID);
+    }
+    public static boolean isTemperatureAttribute(Attribute attribute)
+    {   return BuiltInRegistries.ATTRIBUTE.getKey(attribute).getNamespace().equals(ColdSweat.MOD_ID);
     }
 
     public static List<AttributeInstance> getAllTemperatureAttributes(LivingEntity entity)

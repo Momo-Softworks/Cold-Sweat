@@ -21,6 +21,7 @@
     "MixinXPBar$MixinItemLabel"
   ],
   "mixins": [
+    "MixinAttributeValue",
     "MixinBlockUpdate$Server",
     "MixinCampfire",
     "MixinFreezingWater",

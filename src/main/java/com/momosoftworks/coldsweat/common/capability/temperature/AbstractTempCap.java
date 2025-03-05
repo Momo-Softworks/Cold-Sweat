@@ -9,9 +9,11 @@ import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.core.init.ModEffects;
+import com.momosoftworks.coldsweat.mixin_interface.IPassthrough;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModDamageSources;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -44,7 +46,7 @@ public class AbstractTempCap implements ITemperatureCap
     int syncTimer = 0;
     Temperature.Units preferredUnits = Temperature.Units.F;
 
-    private final Set<Attribute> persistentAttributes = new HashSet<>();
+    private final Set<Holder<Attribute>> persistentAttributes = new HashSet<>();
 
     // Map valid temperature types to a new EnumMap
     private final EnumMap<Trait, Double> traits = Arrays.stream(VALID_TEMPERATURE_TRAITS).collect(
@@ -122,17 +124,17 @@ public class AbstractTempCap implements ITemperatureCap
     }
 
     @Override
-    public void markPersistentAttribute(Attribute attribute)
+    public void markPersistentAttribute(Holder<Attribute> attribute)
     {   persistentAttributes.add(attribute);
     }
 
     @Override
-    public void clearPersistentAttribute(Attribute attribute)
+    public void clearPersistentAttribute(Holder<Attribute> attribute)
     {   persistentAttributes.remove(attribute);
     }
 
     @Override
-    public Collection<Attribute> getPersistentAttributes()
+    public Collection<Holder<Attribute>> getPersistentAttributes()
     {   return persistentAttributes;
     }
 
@@ -193,13 +195,13 @@ public class AbstractTempCap implements ITemperatureCap
         // 1 if newWorldTemp is above max, -1 if below min, 0 if between the values (safe)
         int worldTempSign = CSMath.getSignForRange(newWorldTemp, minTemp, maxTemp);
 
-        boolean immuneToTemp = EntityTempManager.isPeacefulMode(entity);
+        boolean immuneToTemp = isPeacefulMode(entity);
         boolean isFullyColdDampened = worldTempSign < 0 && (coldDampening >= 1 || immuneToTemp);
         boolean isFullyHeatDampened = worldTempSign > 0 && (heatDampening >= 1 || immuneToTemp);
 
         // Don't change player temperature if they're in creative/spectator mode
         if (worldTempSign != 0 && (!(entity instanceof Player player) || !player.isCreative()) && !entity.isSpectator()
-        && !EntityTempManager.isPeacefulMode(entity))
+        && !isPeacefulMode(entity))
         {
             // How much hotter/colder the player's temp is compared to max/min
             double difference = Math.abs(newWorldTemp - CSMath.clamp(newWorldTemp, minTemp, maxTemp));
@@ -287,17 +289,18 @@ public class AbstractTempCap implements ITemperatureCap
 
     private double modifyFromAttribute(LivingEntity entity, Trait type, double baseValue)
     {
-        Supplier<Double> defaultSupplier = () -> Temperature.apply(baseValue, entity, type, this.getModifiers(type));
+        double defaultValue = Temperature.apply(baseValue, entity, type, this.getModifiers(type));
         AttributeInstance attribute = EntityTempManager.getAttribute(type, entity);
         double newValue;
         // If the attribute is null, return the default value
         if (attribute == null)
-        {   newValue = defaultSupplier.get();
+        {   newValue = defaultValue;
         }
         // If base attribute is unset
         else
         {
-            double base = CSMath.safeDouble(attribute.getBaseValue()).orElse(defaultSupplier.get());
+            ((IPassthrough) attribute).setPassthroughValue(defaultValue);
+            double base = CSMath.safeDouble(((IPassthrough) attribute).getRealBaseValue()).orElse(defaultValue);
             Collection<AttributeModifier> attributeModifiers = EntityTempManager.getAllAttributeModifiers(entity, attribute, null);
 
             for (AttributeModifier mod : attributeModifiers.stream().filter(mod -> mod.operation() == AttributeModifier.Operation.ADD_VALUE).toList())
@@ -328,9 +331,9 @@ public class AbstractTempCap implements ITemperatureCap
 
     public void tickHurting(LivingEntity entity, double heatResistance, double coldResistance)
     {
-        if (EntityTempManager.isPeacefulMode(entity)) return;
+        if (isPeacefulMode(entity)) return;
 
-        double bodyTemp = getTrait(Temperature.Trait.BODY);
+        double bodyTemp = getTrait(Trait.BODY);
 
         boolean hasGrace = entity.hasEffect(ModEffects.GRACE);
         boolean hasFireResist = entity.hasEffect(MobEffects.FIRE_RESISTANCE);
@@ -385,8 +388,8 @@ public class AbstractTempCap implements ITemperatureCap
         nbt.put("TempModifiers", this.serializeModifiers());
         // Save the player's persistent attributes
         ListTag attributes = new ListTag();
-        for (Attribute attribute : this.getPersistentAttributes())
-        {   attributes.add(StringTag.valueOf(BuiltInRegistries.ATTRIBUTE.getKey(attribute).toString()));
+        for (Holder<Attribute> attribute : this.getPersistentAttributes())
+        {   attributes.add(StringTag.valueOf(attribute.getKey().toString()));
         }
         nbt.put("PersistentAttributes", attributes);
         return nbt;
@@ -431,7 +434,8 @@ public class AbstractTempCap implements ITemperatureCap
         // Load the player's persistent attributes
         ListTag attributes = nbt.getList("PersistentAttributes", 8);
         for (int i = 0; i < attributes.size(); i++)
-        {   this.markPersistentAttribute(BuiltInRegistries.ATTRIBUTE.get(ResourceLocation.parse(attributes.getString(i))));
+        {
+            BuiltInRegistries.ATTRIBUTE.getHolder(ResourceLocation.parse(attributes.getString(i))).ifPresent(this::markPersistentAttribute);
         }
     }
 
