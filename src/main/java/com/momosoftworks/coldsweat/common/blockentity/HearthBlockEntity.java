@@ -378,7 +378,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
                         if (playerBB.maxY - playerBB.minY < 1.5)
                         {   playerBB = playerBB.inflate(0, 0.5, 0);
                         }
-                        if (BlockPos.betweenClosedStream(playerBB).anyMatch(ps -> paths.contains(new SpreadPath(ps)))
+                        if (this.isAffectingPos(BlockPos.betweenClosedStream(playerBB).toArray(BlockPos[]::new))
                         && !WorldHelper.canSeeSky(level, player.blockPosition(), 64))
                         {   this.insulatePlayer(player);
                         }
@@ -860,6 +860,21 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
                 return false;
             });
         }
+    }
+
+    public boolean isAffectingPos(BlockPos... positions)
+    {
+        for (int i = 0; i < this.paths.size(); i++)
+        {
+            SpreadPath path = this.paths.get(i);
+            for (int j = 0; j < positions.length; j++)
+            {
+                if (path.pos.equals(positions[j]))
+                {   return true;
+                }
+            }
+        }
+        return false;
     }
 
     void resetPaths()
