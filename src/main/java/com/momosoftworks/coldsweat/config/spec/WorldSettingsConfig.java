@@ -604,7 +604,8 @@ public class WorldSettingsConfig
         BUILDER.pop();
 
 
-        BUILDER.push("Thermal Sources");
+        BUILDER.comment("\"Thermal sources\" are blocks that have a smokestack and emit frigidness/warmth, like the hearth, boiler, and iceobx")
+               .push("Thermal Sources");
 
         SOURCE_EFFECT_STRENGTH = BUILDER
                 .comment("How effective thermal sources are at normalizing temperature")
