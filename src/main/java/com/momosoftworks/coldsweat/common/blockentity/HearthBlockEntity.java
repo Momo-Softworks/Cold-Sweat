@@ -298,7 +298,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
             players.clear();
             for (Player player : this.level.players())
             {
-                Vec3 playerPos = CompatManager.Valkyrien.transformIfShipPos(level, player.position());
+                Vec3 playerPos = CompatManager.isValkyrienSkiesLoaded()
+                                 ? CompatManager.Valkyrien.transformIfShipPos(level, player.position())
+                                 : player.position();
                 if (playerPos.closerThan(pos.getCenter(), this.getMaxRange()))
                 {   players.add(player);
                     this.isPlayerNearby = true;
@@ -392,7 +394,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                         if (playerBB.maxY - playerBB.minY < 1.5)
                         {   playerBB = playerBB.inflate(0, 0.5, 0);
                         }
-                        playerBB = CompatManager.Valkyrien.transformIfShipPos(level, playerBB).inflate(-0.1);
+                        if (CompatManager.isValkyrienSkiesLoaded())
+                        {   playerBB = CompatManager.Valkyrien.transformIfShipPos(level, playerBB).inflate(-0.1);
+                        }
                         if (this.isAffectingPos(BlockPos.betweenClosedStream(playerBB).toArray(BlockPos[]::new))
                         && !WorldHelper.canSeeSky(level, player.blockPosition(), 64))
                         {   this.insulatePlayer(player);
@@ -1098,7 +1102,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     @OnlyIn(Dist.CLIENT)
     public void spawnAirParticle(int x, int y, int z, Random rand)
     {
-        if (rand.nextFloat() > (spreading ? 0.016f : 0.032f)) return;
+        if (rand.nextFloat() > (spreading ? 0.002f : 0.032f)) return;
 
         float xr = rand.nextFloat();
         float yr = rand.nextFloat();
