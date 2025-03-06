@@ -49,7 +49,7 @@ public class FoodData extends ConfigData implements RequirementHolder
     public static final Codec<FoodData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ItemRequirement.CODEC.optionalFieldOf("item", ItemRequirement.NONE).forGetter(FoodData::item),
             Codec.DOUBLE.fieldOf("temperature").forGetter(FoodData::temperature),
-            Codec.INT.optionalFieldOf("duration", -1).forGetter(FoodData::duration),
+            Codec.INT.optionalFieldOf("duration", 0).forGetter(FoodData::duration),
             EntityRequirement.getCodec().optionalFieldOf("entity", EntityRequirement.NONE).forGetter(FoodData::entityRequirement),
             Codec.STRING.listOf().optionalFieldOf("required_mods", Arrays.asList()).forGetter(FoodData::requiredMods)
     ).apply(instance, FoodData::new));
@@ -90,7 +90,7 @@ public class FoodData extends ConfigData implements RequirementHolder
         NbtRequirement nbtRequirement = entry.size() > 2
                                         ? new NbtRequirement(NBTHelper.parseCompoundNbt((String) entry.get(2)))
                                         : new NbtRequirement(new CompoundNBT());
-        int duration = entry.size() > 3 ? ((Number) entry.get(3)).intValue() : -1;
+        int duration = entry.size() > 3 ? ((Number) entry.get(3)).intValue() : 0;
         ItemRequirement itemRequirement = new ItemRequirement(items, nbtRequirement);
 
         return new FoodData(itemRequirement, temperature, duration, EntityRequirement.NONE);
