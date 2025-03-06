@@ -1209,11 +1209,13 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
 
     @Override
     public void setRemoved()
-    {   super.setRemoved();
+    {
+        super.setRemoved();
         HearthSaveDataHandler.HEARTH_POSITIONS.remove(Pair.of(this.getBlockPos(), this.getLevel().dimension().location()));
         if (this.level.isClientSide)
         {   ClientOnlyHelper.removeHearthPosition(this.getBlockPos());
         }
+        MinecraftForge.EVENT_BUS.unregister(this);
     }
 
     public Multimap<BlockPos, Direction> getPathLookup()
