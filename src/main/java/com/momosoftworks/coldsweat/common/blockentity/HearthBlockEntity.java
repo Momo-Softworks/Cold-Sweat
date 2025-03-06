@@ -1078,7 +1078,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     @OnlyIn(Dist.CLIENT)
     public void spawnAirParticle(int x, int y, int z, Random rand)
     {
-        if (rand.nextFloat() > (spreading ? 0.016f : 0.032f)) return;
+        if (rand.nextFloat() > (spreading ? 0.002f : 0.032f)) return;
 
         float xr = rand.nextFloat();
         float yr = rand.nextFloat();
