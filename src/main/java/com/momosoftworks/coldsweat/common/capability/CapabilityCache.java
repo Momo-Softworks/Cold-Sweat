@@ -1,17 +1,17 @@
 package com.momosoftworks.coldsweat.common.capability;
 
-import com.momosoftworks.coldsweat.util.math.FastMap;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
 
 import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class CapabilityCache<C, K extends ICapabilityProvider>
 {
-    protected final Map<K, LazyOptional<C>> cache = new FastMap<>();
+    protected final Map<K, LazyOptional<C>> cache = new WeakHashMap<>();
     protected final Supplier<Capability<C>> capability;
 
     public CapabilityCache(Supplier<Capability<C>> capability)
