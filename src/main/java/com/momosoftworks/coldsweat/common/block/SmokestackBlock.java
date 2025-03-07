@@ -3,20 +3,23 @@ package com.momosoftworks.coldsweat.common.block;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
+import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.IWaterLoggable;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.EnumProperty;
 import net.minecraft.state.StateContainer;
+import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
@@ -27,16 +30,23 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 
-public class SmokestackBlock extends Block
+public class SmokestackBlock extends Block implements IWaterLoggable
 {
     public static final EnumProperty<Facing> FACING = EnumProperty.create("facing", Facing.class);
     public static final BooleanProperty END = BooleanProperty.create("end");
     public static final BooleanProperty BASE = BooleanProperty.create("base");
     public static final BooleanProperty ENCASED = BooleanProperty.create("encased");
+    public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 
     public SmokestackBlock(Block.Properties properties)
-    {   super(properties);
-        this.registerDefaultState(this.defaultBlockState().setValue(FACING, Facing.UP).setValue(END, false).setValue(BASE, false).setValue(ENCASED, false));
+    {
+        super(properties);
+        this.registerDefaultState(this.defaultBlockState()
+                                  .setValue(FACING, Facing.UP)
+                                  .setValue(END, false)
+                                  .setValue(BASE, false)
+                                  .setValue(ENCASED, false)
+                                  .setValue(WATERLOGGED, false));
     }
 
     public static Properties getProperties()
@@ -108,7 +118,7 @@ public class SmokestackBlock extends Block
 
     @Override
     protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder)
-    {   builder.add(FACING, END, BASE, ENCASED);
+    {   builder.add(FACING, END, BASE, ENCASED, WATERLOGGED);
     }
 
     protected Facing calculateFacing(Facing facing, BlockPos pos, IWorld level)
@@ -172,6 +182,19 @@ public class SmokestackBlock extends Block
         if (facing != Facing.BEND)
         {   state = calculateConnections(state, pos, level);
         }
+        // Set waterlogged if needed
+        state = WorldHelper.waterlog(state, level, pos);
+        return state;
+    }
+
+    protected BlockState updateFluid(IWorld level, BlockState state, BlockPos pos)
+    {
+        if (state.getValue(FACING) == Facing.BEND || state.getValue(ENCASED))
+        {   return state.setValue(WATERLOGGED, false);
+        }
+        if (state.getValue(WATERLOGGED))
+        {   level.getLiquidTicks().scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
+        }
         return state;
     }
 
@@ -179,11 +202,21 @@ public class SmokestackBlock extends Block
     public BlockState updateShape(BlockState state, Direction neighborDir, BlockState neighborState,
                                   IWorld level, BlockPos pos, BlockPos neighborPos)
     {
+        // Update fluid
+        state = this.updateFluid(level, state, pos);
         // Update facing direction
         Facing facing = calculateFacing(state.getValue(FACING), pos, level);
         state = state.setValue(FACING, facing);
         state = calculateConnections(state, pos, level);
         return state;
+    }
+
+    @Override
+    public FluidState getFluidState(BlockState state)
+    {
+        return state.getValue(WATERLOGGED)
+               ? Fluids.WATER.getSource(false)
+               : super.getFluidState(state);
     }
 
     @Override
@@ -201,6 +234,8 @@ public class SmokestackBlock extends Block
     {
         if (state.getValue(ENCASED))
         {
+            // Update fluid
+            state = this.updateFluid(level, state, pos);
             // Replace with normal smokestack
             level.setBlock(pos, calculateConnections(state, pos, level).setValue(ENCASED, false), 3);
             ClientOnlyHelper.addDestroyBlockEffect(pos, state);

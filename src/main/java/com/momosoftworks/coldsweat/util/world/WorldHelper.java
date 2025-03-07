@@ -30,9 +30,11 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -674,6 +676,12 @@ public abstract class WorldHelper
             if (!predicate.test(offset)) return false;
         }
         return true;
+    }
+
+    public static BlockState waterlog(BlockState state, World level, BlockPos pos)
+    {
+        boolean waterAt = level.getFluidState(pos).getType() == Fluids.WATER;
+        return state.setValue(BlockStateProperties.WATERLOGGED, waterAt);
     }
 
     public static boolean shouldFreeze(IWorld levelReader, BlockPos pos, boolean mustBeAtEdge)
