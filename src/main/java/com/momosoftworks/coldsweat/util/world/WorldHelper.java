@@ -44,6 +44,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CampfireBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -51,6 +52,7 @@ import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -667,6 +669,12 @@ public abstract class WorldHelper
             if (!predicate.test(offset)) return false;
         }
         return true;
+    }
+
+    public static BlockState waterlog(BlockState state, Level level, BlockPos pos)
+    {
+        boolean waterAt = level.getFluidState(pos).getType() == Fluids.WATER;
+        return state.setValue(BlockStateProperties.WATERLOGGED, waterAt);
     }
 
     public static boolean shouldFreeze(LevelAccessor levelReader, BlockPos pos, boolean mustBeAtEdge)
