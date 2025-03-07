@@ -1,0 +1,12 @@
+{
+  "parent": "block/cube_all",
+  "textures": {
+    "down": "cold_sweat:block/smokestack_block_end",
+    "up": "cold_sweat:block/smokestack_block_end",
+    "north": "cold_sweat:block/smokestack_block_side",
+    "east": "cold_sweat:block/smokestack_block_side",
+    "south": "cold_sweat:block/smokestack_block_side",
+    "west": "cold_sweat:block/smokestack_block_side",
+    "particle": "cold_sweat:block/smokestack_block_side"
+  }
+}

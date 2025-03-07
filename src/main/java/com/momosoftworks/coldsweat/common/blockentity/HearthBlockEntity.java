@@ -742,7 +742,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         if (fromBlock instanceof SmokestackBlock)
         {
             SmokestackBlock.Facing facing = fromState.getValue(SmokestackBlock.FACING);
-            boolean isJunction = facing == SmokestackBlock.Facing.JUNCTION;
+            boolean isJunction = facing == SmokestackBlock.Facing.BEND;
 
             BlockState toState = level.getBlockState(toPos);
             boolean isToSmokestack = toState.getBlock() instanceof SmokestackBlock;
@@ -750,7 +750,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
 
             // Spreading from a junction
             if (isJunction)
-            {   return isToSmokestack && (toFacing == SmokestackBlock.Facing.JUNCTION || toFacing.getAxis() == toDirection.getAxis());
+            {   return isToSmokestack && (toFacing == SmokestackBlock.Facing.BEND || toFacing.getAxis() == toDirection.getAxis());
             }
             // Spreading from a directional smokestack
             else if (facing.getAxis() == toDirection.getAxis())
@@ -789,7 +789,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         if (state.getBlock() instanceof SmokestackBlock)
         {
             SmokestackBlock.Facing facing = state.getValue(SmokestackBlock.FACING);
-            return facing == SmokestackBlock.Facing.JUNCTION
+            return facing == SmokestackBlock.Facing.BEND
                    ? otherState.getBlock() instanceof SmokestackBlock
                    : facing.getAxis() == direction.getAxis();
         }
