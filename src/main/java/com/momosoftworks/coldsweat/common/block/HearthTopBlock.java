@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.common.block;
 import com.momosoftworks.coldsweat.core.init.ItemInit;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
@@ -18,9 +19,9 @@ import net.minecraft.world.World;
 
 public class HearthTopBlock extends SmokestackBlock
 {
-    public static Properties getProperties()
+    public static AbstractBlock.Properties getProperties()
     {
-        return Properties
+        return AbstractBlock.Properties
                 .of(Material.STONE)
                 .sound(SoundType.STONE)
                 .strength(2, 10)
@@ -39,9 +40,13 @@ public class HearthTopBlock extends SmokestackBlock
         if (stack.getItem() == ModItems.SMOKESTACK && level.getBlockState(pos.relative(rayTraceResult.getDirection())).canBeReplaced(new BlockItemUseContext(player, hand, stack, rayTraceResult)))
         {   return ActionResultType.PASS;
         }
+        ActionResultType baseResult = super.use(state, level, pos, player, hand, rayTraceResult);
+        if (baseResult.consumesAction())
+        {   return baseResult;
+        }
         BlockState belowState = level.getBlockState(pos.below());
         if (belowState.getBlock() instanceof HearthBottomBlock)
-        {   return belowState.getBlock().use(belowState, level, pos.below(), player, hand, rayTraceResult);
+        {   return belowState.getBlock().use(level.getBlockState(pos.below()), level, pos.below(), player, hand, rayTraceResult);
         }
         return ActionResultType.PASS;
     }

@@ -5,6 +5,7 @@ import com.momosoftworks.coldsweat.core.init.BlockEntityInit;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
+import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
@@ -160,11 +161,9 @@ public class HearthBottomBlock extends Block
     }
 
     @Override
-    public void onPlace(BlockState state, World world, BlockPos pos, BlockState lastState, boolean p_60570_)
+    public void onPlace(BlockState state, World level, BlockPos pos, BlockState lastState, boolean p_60570_)
     {
-        if (world.getBlockState(pos.above()).isAir())
-        {   world.setBlock(pos.above(), ModBlocks.HEARTH_TOP.defaultBlockState(), 2);
-        }
+        level.setBlock(pos.above(), WorldHelper.waterlog(ModBlocks.HEARTH_TOP.defaultBlockState(), level, pos.above()), 3);
     }
 
     @Override
@@ -216,7 +215,7 @@ public class HearthBottomBlock extends Block
     public BlockState getStateForPlacement(BlockItemUseContext context)
     {
         World level = context.getLevel();
-        return level.getBlockState(context.getClickedPos().above()).isAir()
+        return level.getBlockState(context.getClickedPos().above()).canBeReplaced()
                ? this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite())
                : null;
     }

@@ -3,11 +3,14 @@ package com.momosoftworks.coldsweat.common.block;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
+import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -19,6 +22,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
@@ -49,28 +53,47 @@ public class SmokestackBlock extends Block
     }
 
     @Override
+    public ActionResultType use(BlockState state, World level, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult)
+    {
+        ItemStack stack = player.getItemInHand(hand);
+        if (!player.isCrouching())
+        {
+            if (ModItemTags.ENCASES_SMOKESTACK.contains(stack.getItem()))
+            {
+                if (!state.getValue(ENCASED) && state.getValue(FACING) != Facing.BEND)
+                {
+                    level.setBlock(pos, state.setValue(ENCASED, true).setValue(END, false).setValue(BASE, false), 3);
+                    player.swing(hand, true);
+                    level.playSound(null, pos, this.getSoundType(state, level, pos, player).getPlaceSound(), SoundCategory.BLOCKS, 1f, 0.8f);
+                    if (!player.isCreative())
+                    {   stack.shrink(1);
+                    }
+                    return ActionResultType.CONSUME;
+                }
+            }
+        }
+        return super.use(state, level, pos, player, hand, rayTraceResult);
+    }
+
+    @Override
     public boolean propagatesSkylightDown(BlockState state, IBlockReader level, BlockPos pos)
-    {   return state.getValue(FACING) != Facing.JUNCTION;
+    {   return !state.getValue(ENCASED) && state.getValue(FACING) != Facing.BEND;
     }
 
     @Override
     public VoxelShape getShape(BlockState state, IBlockReader getter, BlockPos pos, ISelectionContext context)
     {
+        if (state.getValue(ENCASED))
+        {   return Block.box(0, 0, 0, 16, 16, 16);
+        }
         switch (state.getValue(FACING))
         {
-            case UP:
-            case DOWN:
-                return Block.box(4, 0, 4, 12, 16, 12);
-            case NORTH:
-            case SOUTH:
-                return Block.box(4, 4, 0, 12, 12, 16);
-            case EAST:
-            case WEST:
-                return Block.box(0, 4, 4, 16, 12, 12);
-            case JUNCTION:
-                return Block.box(0, 0, 0, 16, 16, 16);
+            case UP : case DOWN : return Block.box(4, 0, 4, 12, 16, 12);
+            case NORTH : case SOUTH : return Block.box(4, 4, 0, 12, 12, 16);
+            case EAST : case WEST : return Block.box(0, 4, 4, 16, 12, 12);
+            case BEND : return Block.box(0, 0, 0, 16, 16, 16);
         }
-        return null;
+        return VoxelShapes.block();
     }
 
     @Override
@@ -98,7 +121,7 @@ public class SmokestackBlock extends Block
             || dir == Direction.DOWN && neighborState.is(ModBlockTags.THERMAL_SOURCE))
             {
                 if (newDir != null && newDir.getAxis() != dir.getAxis())
-                {   return Facing.JUNCTION;
+                {   return Facing.BEND;
                 }
                 newDir = dir;
             }
@@ -109,7 +132,7 @@ public class SmokestackBlock extends Block
             if (neighbor.getBlock() instanceof SmokestackBlock)
             {
                 Facing neighborFacing = neighbor.getValue(FACING);
-                return neighborFacing == Facing.JUNCTION
+                return neighborFacing == Facing.BEND
                        ? facing.getAxis() != newDir.getAxis()
                          ? Facing.fromDirection(newDir.getOpposite())
                          : facing
@@ -127,7 +150,7 @@ public class SmokestackBlock extends Block
     protected BlockState calculateConnections(BlockState state, BlockPos pos, IWorld level)
     {
         Facing facing = state.getValue(FACING);
-        if (facing == Facing.JUNCTION)
+        if (facing == Facing.BEND)
         {   return state.setValue(END, false).setValue(BASE, false);
         }
         boolean connectedTop = level.getBlockState(pos.relative(facing.toDirection())).is(ModBlockTags.CONNECTS_SMOKESTACK);
@@ -146,7 +169,7 @@ public class SmokestackBlock extends Block
         facing = calculateFacing(facing, pos, level);
 
         BlockState state = this.defaultBlockState().setValue(FACING, facing);
-        if (facing != Facing.JUNCTION)
+        if (facing != Facing.BEND)
         {   state = calculateConnections(state, pos, level);
         }
         return state;
@@ -156,32 +179,35 @@ public class SmokestackBlock extends Block
     public BlockState updateShape(BlockState state, Direction neighborDir, BlockState neighborState,
                                   IWorld level, BlockPos pos, BlockPos neighborPos)
     {
-        Facing facing = state.getValue(ENCASED)
-                        ? Facing.JUNCTION
-                        : calculateFacing(state.getValue(FACING), pos, level);
+        // Update facing direction
+        Facing facing = calculateFacing(state.getValue(FACING), pos, level);
         state = state.setValue(FACING, facing);
         state = calculateConnections(state, pos, level);
         return state;
     }
 
     @Override
-    public ActionResultType use(BlockState state, World level, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult)
+    public float getDestroyProgress(BlockState state, PlayerEntity player, IBlockReader ilevel, BlockPos pos)
     {
-        ItemStack stack = player.getItemInHand(hand);
-        if (!player.isCrouching() && ModItemTags.ENCASES_SMOKESTACK.contains(stack.getItem()))
-        {
-            if (!state.getValue(ENCASED))
-            {
-                level.setBlock(pos, state.setValue(ENCASED, true).setValue(FACING, Facing.JUNCTION).setValue(END, false).setValue(BASE, false), 3);
-                player.swing(hand, true);
-                level.playSound(null, pos, this.getSoundType(state, level, pos, player).getPlaceSound(), SoundCategory.BLOCKS, 1f, 1f);
-                if (!player.isCreative())
-                {   stack.shrink(1);
-                }
-                return ActionResultType.CONSUME;
-            }
+        float progress = super.getDestroyProgress(state, player, ilevel, pos);
+        if (state.getValue(ENCASED))
+        {   progress *= 2;
         }
-        return super.use(state, level, pos, player, hand, rayTraceResult);
+        return progress;
+    }
+
+    @Override
+    public boolean removedByPlayer(BlockState state, World level, BlockPos pos, PlayerEntity player, boolean willHarvest, FluidState fluid)
+    {
+        if (state.getValue(ENCASED))
+        {
+            // Replace with normal smokestack
+            level.setBlock(pos, calculateConnections(state, pos, level).setValue(ENCASED, false), 3);
+            ClientOnlyHelper.addDestroyBlockEffect(pos, state);
+            level.playSound(null, pos, this.getSoundType(state, level, pos, player).getBreakSound(), SoundCategory.BLOCKS, 1f, 0.8f);
+            return false;
+        }
+        else return super.removedByPlayer(state, level, pos, player, willHarvest, fluid);
     }
 
     public enum Facing implements IStringSerializable
@@ -192,7 +218,7 @@ public class SmokestackBlock extends Block
         SOUTH("south"),
         EAST("east"),
         WEST("west"),
-        JUNCTION("junction");
+        BEND("bend");
 
         private final String name;
 

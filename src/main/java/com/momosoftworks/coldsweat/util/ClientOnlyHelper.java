@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.util;
 import com.momosoftworks.coldsweat.client.event.HearthDebugRenderer;
 import com.momosoftworks.coldsweat.client.gui.config.pages.ConfigPageOne;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.EntityTickableSound;
 import net.minecraft.client.network.play.ClientPlayNetHandler;
@@ -90,5 +91,9 @@ public class ClientOnlyHelper
             }
         }
         return false;
+    }
+
+    public static void addDestroyBlockEffect(BlockPos pos, BlockState state)
+    {   Minecraft.getInstance().particleEngine.destroy(pos, state);
     }
 }
