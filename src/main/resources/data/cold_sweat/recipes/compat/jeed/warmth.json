@@ -6,7 +6,9 @@
     }
   ],
   "type": "jeed:effect_provider",
-  "effect": "cold_sweat:warmth",
+  "effect": {
+      "id": "cold_sweat:warmth"
+  },
   "providers": [
     {
       "item": "cold_sweat:hearth"
