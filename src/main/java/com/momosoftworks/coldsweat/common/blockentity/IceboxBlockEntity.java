@@ -27,6 +27,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -316,15 +317,9 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
     {   return ParticleTypesInit.GROUND_MIST.get();
     }
 
-    @OnlyIn(Dist.CLIENT)
     @Override
-    public void spawnAirParticle(int x, int y, int z, Random rand)
+    public void spawnAirParticle(int x, int y, int z, RandomSource rand)
     {
-        ParticleStatus status = Minecraft.getInstance().options.particles().get();
-        if (status != ParticleStatus.ALL)
-        {   return;
-        }
-
         BlockPos pos = new BlockPos(x, y, z);
         boolean onGround = !this.level.getBlockState(pos.below()).isAir();
         if (rand.nextFloat() > (spreading ? 0.016f : 0.032f))
