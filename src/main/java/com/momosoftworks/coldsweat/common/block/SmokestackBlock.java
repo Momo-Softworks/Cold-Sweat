@@ -20,23 +20,32 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class SmokestackBlock extends Block
+public class SmokestackBlock extends Block implements SimpleWaterloggedBlock
 {
     public static final EnumProperty<Facing> FACING = EnumProperty.create("facing", Facing.class);
     public static final BooleanProperty END = BooleanProperty.create("end");
     public static final BooleanProperty BASE = BooleanProperty.create("base");
     public static final BooleanProperty ENCASED = BooleanProperty.create("encased");
+    public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
 
     public SmokestackBlock(Block.Properties properties)
-    {   super(properties);
-        this.registerDefaultState(this.defaultBlockState().setValue(FACING, Facing.UP).setValue(END, false).setValue(BASE, false).setValue(ENCASED, false));
+    {
+        super(properties);
+        this.registerDefaultState(this.defaultBlockState()
+                                  .setValue(FACING, Facing.UP)
+                                  .setValue(END, false)
+                                  .setValue(BASE, false)
+                                  .setValue(ENCASED, false)
+                                  .setValue(WATERLOGGED, false));
     }
 
     public static Properties getProperties()
@@ -112,7 +121,7 @@ public class SmokestackBlock extends Block
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
-    {   builder.add(FACING, END, BASE, ENCASED);
+    {   builder.add(FACING, END, BASE, ENCASED, WATERLOGGED);
     }
 
     protected Facing calculateFacing(Facing facing, BlockPos pos, LevelAccessor level)
@@ -176,6 +185,19 @@ public class SmokestackBlock extends Block
         if (facing != Facing.BEND)
         {   state = calculateConnections(state, pos, level);
         }
+        // Set waterlogged if needed
+        state = WorldHelper.waterlog(state, level, pos);
+        return state;
+    }
+
+    protected BlockState updateFluid(LevelAccessor level, BlockState state, BlockPos pos)
+    {
+        if (state.getValue(FACING) == Facing.BEND || state.getValue(ENCASED))
+        {   return state.setValue(WATERLOGGED, false);
+        }
+        if (state.getValue(WATERLOGGED))
+        {   level.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
+        }
         return state;
     }
 
@@ -183,11 +205,21 @@ public class SmokestackBlock extends Block
     public BlockState updateShape(BlockState state, Direction neighborDir, BlockState neighborState,
                                   LevelAccessor level, BlockPos pos, BlockPos neighborPos)
     {
+        // Update fluid
+        state = this.updateFluid(level, state, pos);
         // Update facing direction
         Facing facing = calculateFacing(state.getValue(FACING), pos, level);
         state = state.setValue(FACING, facing);
         state = calculateConnections(state, pos, level);
         return state;
+    }
+
+    @Override
+    public FluidState getFluidState(BlockState state)
+    {
+        return state.getValue(WATERLOGGED)
+               ? Fluids.WATER.getSource(false)
+               : super.getFluidState(state);
     }
 
     @Override
@@ -205,6 +237,8 @@ public class SmokestackBlock extends Block
     {
         if (state.getValue(ENCASED))
         {
+            // Update fluid
+            state = this.updateFluid(level, state, pos);
             // Replace with normal smokestack
             level.setBlock(pos, calculateConnections(state, pos, level).setValue(ENCASED, false), 3);
             level.addDestroyBlockEffect(pos, state);
