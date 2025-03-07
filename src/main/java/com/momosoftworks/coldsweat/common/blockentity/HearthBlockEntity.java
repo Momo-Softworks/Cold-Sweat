@@ -390,6 +390,11 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
                 if (!isClient)
                 {   this.tickDrainFuel();
                 }
+
+                // Spawn air particles
+                if (level.isClientSide)
+                {   this.spawnRandomAirParticles();
+                }
             }
         }
 
@@ -426,97 +431,95 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
             int spY = spreadPath.y;
             int spZ = spreadPath.z;
 
-            // Use try-finally because there's still stuff to do even if {continue} skips the rest of the loop
-            try
-            {   // Don't try to spread if the path is frozen
-                if (spreadPath.frozen)
-                {
-                    // Remove a 3D-checkerboard of paths after the Hearth is finished spreading to reduce pointless iteration overhead
-                    // The Hearth is "finished spreading" when all paths are frozen
-                    if (!spreading && (Math.abs(spY % 2) == 0) == (Math.abs(spX % 2) == Math.abs(spZ % 2)))
-                    {   paths.remove(i);
-                        // Go back and reiterate over the new path at this index
-                        i--;
-                    }
-                    // Don't do anything else with this path
-                    continue;
+            // Don't try to spread if the path is frozen
+            if (spreadPath.frozen)
+            {
+                // Remove a 3D-checkerboard of paths after the Hearth is finished spreading to reduce pointless iteration overhead
+                // The Hearth is "finished spreading" when all paths are frozen
+                if (!spreading && (Math.abs(spY % 2) == 0) == (Math.abs(spX % 2) == Math.abs(spZ % 2)))
+                {   paths.remove(i);
+                    // Go back and reiterate over the new path at this index
+                    i--;
                 }
-
-                /*
-                 Try to spread to new blocks
-                 */
-
-                // The origin of the path is usually the hearth's position,
-                // but if it's spreading through Create pipes then the origin is the end of the pipe
-                if (pathCount < this.getMaxPaths() && spreadPath.withinDistance(spreadPath.origin, this.getSpreadRange())
-                && CSMath.withinCubeDistance(spreadPath.origin, this.getBlockPos(), this.getMaxRange()))
-                {
-                    /*
-                     Spreading algorithm
-                     */
-                    if (workingChunk == null || !workingChunk.getPos().equals(new ChunkPos(pathPos)))
-                    {   workingChunk = WorldHelper.getChunk(level, pathPos);
-                    }
-                    BlockState state = workingChunk != null ? workingChunk.getBlockState(pathPos) : level.getBlockState(pathPos);
-
-                    // Build a map of what positions can see the sky
-                    Pair<Integer, Integer> flatPos = Pair.of(spX, spZ);
-                    Pair<Integer, Boolean> seeSkyState = seeSkyMap.get(flatPos);
-                    boolean canSeeSky;
-                    if (seeSkyState == null || (seeSkyState.getFirst() < spY != seeSkyState.getSecond()))
-                    {   seeSkyMap.put(flatPos, Pair.of(spY, canSeeSky = WorldHelper.canSeeSky(level, pathPos.above(), 64)));
-                    }
-                    else
-                    {   canSeeSky = seeSkyState.getSecond();
-                    }
-
-                    if (!canSeeSky || isTransferPipe(state))
-                    {
-                        // Try to spread in every direction from the current position
-                        for (int d = 0; d < DIRECTIONS.length; d++)
-                        {
-                            Direction direction = DIRECTIONS[d];
-
-                            // Don't try to spread backwards
-                            Direction pathDir = spreadPath.direction;
-                            if (direction == pathDir.getOpposite()) continue;
-
-                            BlockPos tryPos = pathPos.relative(direction);
-
-                            SpreadPath newPath = new SpreadPath(tryPos, direction).setOrigin(spreadPath.origin);
-
-                            // Check if this position hasn't been tried before, and if it's spread-able
-                            if (pathLookup.put(tryPos, direction) && this.canSpread(level, pathPos, tryPos, state, spreadPath.direction, direction, newPath))
-                            {   // Add the new path to the list
-                                this.addPath(newPath);
-                            }
-                        }
-                    }
-                    // Remove this path if it has skylight access
-                    else
-                    {   pathLookup.removeAll(pathPos);
-                        paths.remove(i);
-                        i--;
-                        continue;
-                    }
-                }
-                // Track frozen paths to know when the Hearth is done spreading
-                spreadPath.frozen = true;
-                this.frozenPaths++;
+                // Don't do anything else with this path
+                continue;
             }
 
             /*
-             Give insulation & spawn particles
+             Try to spread to new blocks
              */
-            finally
+
+            // The origin of the path is usually the hearth's position,
+            // but if it's spreading through Create pipes then the origin is the end of the pipe
+            if (pathCount < this.getMaxPaths() && spreadPath.withinDistance(spreadPath.origin, this.getSpreadRange())
+            && CSMath.withinCubeDistance(spreadPath.origin, this.getBlockPos(), this.getMaxRange()))
             {
-                // Air Particles
-                if (this.getLevel().isClientSide && showParticles)
-                {   Random rand = new Random();
-                    if (!(Minecraft.getInstance().options.renderDebug && ConfigSettings.HEARTH_DEBUG.get()))
-                    {   this.spawnAirParticle(spX, spY, spZ, rand);
+                /*
+                 Spreading algorithm
+                 */
+                if (workingChunk == null || !workingChunk.getPos().equals(new ChunkPos(pathPos)))
+                {   workingChunk = WorldHelper.getChunk(level, pathPos);
+                }
+                BlockState state = workingChunk != null ? workingChunk.getBlockState(pathPos) : level.getBlockState(pathPos);
+
+                // Build a map of what positions can see the sky
+                Pair<Integer, Integer> flatPos = Pair.of(spX, spZ);
+                Pair<Integer, Boolean> seeSkyState = seeSkyMap.get(flatPos);
+                boolean canSeeSky;
+                if (seeSkyState == null || (seeSkyState.getFirst() < spY != seeSkyState.getSecond()))
+                {   seeSkyMap.put(flatPos, Pair.of(spY, canSeeSky = WorldHelper.canSeeSky(level, pathPos.above(), 64)));
+                }
+                else
+                {   canSeeSky = seeSkyState.getSecond();
+                }
+
+                if (!canSeeSky || isTransferPipe(state))
+                {
+                    // Try to spread in every direction from the current position
+                    for (int d = 0; d < DIRECTIONS.length; d++)
+                    {
+                        Direction direction = DIRECTIONS[d];
+
+                        // Don't try to spread backwards
+                        Direction pathDir = spreadPath.direction;
+                        if (direction == pathDir.getOpposite()) continue;
+
+                        BlockPos tryPos = pathPos.relative(direction);
+
+                        SpreadPath newPath = new SpreadPath(tryPos, direction).setOrigin(spreadPath.origin);
+
+                        // Check if this position hasn't been tried before, and if it's spread-able
+                        if (pathLookup.put(tryPos, direction) && this.canSpread(level, pathPos, tryPos, state, spreadPath.direction, direction, newPath))
+                        {   // Add the new path to the list
+                            this.addPath(newPath);
+                        }
                     }
                 }
+                // Remove this path if it has skylight access
+                else
+                {   pathLookup.removeAll(pathPos);
+                    paths.remove(i);
+                    i--;
+                    continue;
+                }
+            }
+            // Track frozen paths to know when the Hearth is done spreading
+            spreadPath.frozen = true;
+            this.frozenPaths++;
+        }
+    }
+
+    protected void spawnRandomAirParticles()
+    {
+        if (this.level != null && this.level.isClientSide && showParticles
+        && !(Minecraft.getInstance().options.renderDebug && ConfigSettings.HEARTH_DEBUG.get()))
+        {
+            Random random = this.level.random;
+            int count = this.paths.size() / 100;
+            for (int i = 0; i < count; i++)
+            {
+                SpreadPath path = this.paths.get(random.nextInt(this.paths.size()));
+                this.spawnAirParticle(path.x, path.y, path.z, random);
             }
         }
     }
@@ -1081,9 +1084,12 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     {   return ParticleTypesInit.HEARTH_AIR.get();
     }
 
-    @OnlyIn(Dist.CLIENT)
     public void spawnAirParticle(int x, int y, int z, Random rand)
     {
+        ParticleStatus status = Minecraft.getInstance().options.particles;
+        if (status != ParticleStatus.ALL)
+        {   return;
+        }
         if (rand.nextFloat() > (spreading ? 0.016f : 0.032f)) return;
 
         float xr = rand.nextFloat();
