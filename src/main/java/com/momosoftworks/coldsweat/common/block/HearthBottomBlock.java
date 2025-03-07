@@ -6,6 +6,7 @@ import com.momosoftworks.coldsweat.core.init.ModBlockEntities;
 import com.momosoftworks.coldsweat.core.init.ModBlocks;
 import com.momosoftworks.coldsweat.util.item.ItemStackHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -176,9 +177,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
     @Override
     public void onPlace(BlockState state, Level level, BlockPos pos, BlockState lastState, boolean p_60570_)
     {
-        if (level.getBlockState(pos.above()).isAir())
-        {   level.setBlock(pos.above(), ModBlocks.HEARTH_TOP.value().defaultBlockState(), 2);
-        }
+        level.setBlock(pos.above(), WorldHelper.waterlog(ModBlocks.HEARTH_TOP.value().defaultBlockState(), level, pos.above()), 3);
     }
 
     @Override
@@ -230,7 +229,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
     public BlockState getStateForPlacement(BlockPlaceContext context)
     {
         Level level = context.getLevel();
-        return level.getBlockState(context.getClickedPos().above()).isAir()
+        return level.getBlockState(context.getClickedPos().above()).canBeReplaced()
                ? this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite())
                : null;
     }

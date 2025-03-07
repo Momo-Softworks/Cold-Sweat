@@ -1,6 +1,6 @@
 {
   "parent": "block/cube_all",
   "textures": {
-    "all": "cold_sweat:block/smokestack_junction"
+    "all": "cold_sweat:block/smokestack_block_side"
   }
 }
