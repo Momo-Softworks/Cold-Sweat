@@ -34,23 +34,20 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
-import oshi.util.tuples.Triplet;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 @EventBusSubscriber
 public class ShearableFurManager
 {
-    public static Map<Entity, IShearableCap> SERVER_CAP_CACHE = new HashMap<>();
-    public static Map<Entity, IShearableCap> CLIENT_CAP_CACHE = new HashMap<>();
+    public static boolean isShearable(Entity entity)
+    {   return entity instanceof Goat;
+    }
 
     public static Optional<IShearableCap> getFurCap(Entity entity)
     {
-        Map<Entity, IShearableCap> cache = entity.level().isClientSide ? CLIENT_CAP_CACHE : SERVER_CAP_CACHE;
-        return Optional.ofNullable(cache.computeIfAbsent(entity, e -> e.getCapability(ModCapabilities.SHEARABLE_FUR)));
+        return isShearable(entity) ? Optional.ofNullable(entity.getCapability(ModCapabilities.SHEARABLE_FUR)) : Optional.empty();
     }
 
     @SubscribeEvent

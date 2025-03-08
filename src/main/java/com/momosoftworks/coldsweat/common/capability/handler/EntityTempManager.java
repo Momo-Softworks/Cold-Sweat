@@ -80,16 +80,14 @@ public class EntityTempManager
 
     public static final Set<EntityType<? extends LivingEntity>> TEMPERATURE_ENABLED_ENTITIES = new HashSet<>(ImmutableSet.<EntityType<? extends LivingEntity>>builder().add(EntityType.PLAYER).build());
 
-    public static final Map<Entity, ITemperatureCap> SERVER_CAP_CACHE = new HashMap<>();
-    public static final Map<Entity, ITemperatureCap> CLIENT_CAP_CACHE = new HashMap<>();
     public static Map<Entity, Map<ResourceLocation, Double>> TEMP_MODIFIER_IMMUNITIES = new WeakHashMap<>();
 
     public static Optional<ITemperatureCap> getTemperatureCap(Entity entity)
     {
-        Map<Entity, ITemperatureCap> cache = entity.level().isClientSide ? CLIENT_CAP_CACHE : SERVER_CAP_CACHE;
-        return Optional.ofNullable(cache.computeIfAbsent(entity, e -> e.getCapability(entity instanceof Player
-                                                                                      ? ModCapabilities.PLAYER_TEMPERATURE
-                                                                                      : ModCapabilities.ENTITY_TEMPERATURE)));
+        return isTemperatureEnabled(entity)
+               ? Optional.ofNullable(entity.getCapability(entity instanceof Player ? ModCapabilities.PLAYER_TEMPERATURE
+                                                                                   : ModCapabilities.ENTITY_TEMPERATURE))
+               : Optional.empty();
     }
 
     /**
@@ -296,9 +294,6 @@ public class EntityTempManager
             {   Temperature.updateTemperature(newPlayer, cap, true);
             }
         });
-
-        SERVER_CAP_CACHE.remove(oldPlayer);
-        CLIENT_CAP_CACHE.remove(oldPlayer);
     }
 
     /**
