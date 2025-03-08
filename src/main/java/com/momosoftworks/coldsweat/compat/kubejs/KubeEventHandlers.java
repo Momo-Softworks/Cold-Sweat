@@ -8,6 +8,8 @@ import com.momosoftworks.coldsweat.api.event.core.registry.CreateRegistriesEvent
 import com.momosoftworks.coldsweat.compat.kubejs.event.*;
 import dev.latvian.mods.kubejs.event.EventGroup;
 import dev.latvian.mods.kubejs.event.EventHandler;
+import net.minecraft.core.RegistryAccess;
+
 import net.neoforged.bus.api.SubscribeEvent;
 
 public class KubeEventHandlers
@@ -26,7 +28,7 @@ public class KubeEventHandlers
     public static void buildRegistries(CreateRegistriesEvent.Pre event)
     {
         if (REGISTER.hasListeners())
-        {   REGISTER.post(new ModRegistriesEventJS());
+        {   REGISTER.post(new ModRegistriesEventJS(event.getRegistryAccess()));
         }
     }
 
