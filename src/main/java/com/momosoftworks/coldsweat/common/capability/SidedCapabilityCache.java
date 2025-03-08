@@ -6,13 +6,18 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fml.util.thread.EffectiveSide;
 
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public class SidedCapabilityCache<C, K extends ICapabilityProvider> extends CapabilityCache<C, K>
 {
-    private final CapabilityCache<C, K> clientCache = new CapabilityCache<>(this.capability);
+    protected final Predicate<K> invalidator;
+    protected final CapabilityCache<C, K> clientCache;
 
-    public SidedCapabilityCache(Capability<C> capability)
-    {   super(capability);
+    public SidedCapabilityCache(Capability<C> capability, Predicate<K> invalidator)
+    {
+        super(capability, invalidator);
+        this.invalidator = invalidator;
+        this.clientCache = new CapabilityCache<>(capability, invalidator);
     }
 
     @Override
