@@ -7,18 +7,22 @@ import net.minecraftforge.common.util.LazyOptional;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public class CapabilityCache<C, K extends ICapabilityProvider>
 {
     protected final Map<K, LazyOptional<C>> cache = new WeakHashMap<>();
+    protected final Predicate<K> invalidator;
     protected final Capability<C> capability;
 
-    public CapabilityCache(Capability<C> capability)
+    public CapabilityCache(Capability<C> capability, Predicate<K> invalidator)
     {   this.capability = capability;
+        this.invalidator = invalidator;
     }
 
     public LazyOptional<C> get(K key)
     {
+        this.cleanExpiredEntries();
         return cache.computeIfAbsent(key, e ->
         {
             LazyOptional<C> cap = e.getCapability(capability);
@@ -27,12 +31,20 @@ public class CapabilityCache<C, K extends ICapabilityProvider>
         });
     }
 
+    public int size()
+    {   return cache.size();
+    }
+
     public void remove(K key)
     {   cache.remove(key);
     }
 
     public void clear()
     {   cache.clear();
+    }
+
+    protected void cleanExpiredEntries()
+    {   cache.entrySet().removeIf(e -> invalidator.test(e.getKey()));
     }
 
     public void ifPresent(K key, Consumer<C> consumer)
