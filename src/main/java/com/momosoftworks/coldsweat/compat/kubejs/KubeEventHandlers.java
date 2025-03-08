@@ -7,6 +7,7 @@ import com.momosoftworks.coldsweat.api.event.core.init.GatherDefaultTempModifier
 import com.momosoftworks.coldsweat.compat.kubejs.event.*;
 import dev.architectury.event.EventResult;
 import dev.latvian.mods.kubejs.script.ScriptType;
+import net.minecraft.core.RegistryAccess;
 
 public class KubeEventHandlers
 {
@@ -30,8 +31,8 @@ public class KubeEventHandlers
         KubeEventSignatures.ADD_MODIFIER.register(KubeEventHandlers::onTempModifierAdd);
     }
 
-    private static void buildRegistries()
-    {   new ModRegistriesEventJS().post(ScriptType.SERVER, REGISTER);
+    private static void buildRegistries(RegistryAccess registryAccess)
+    {   new ModRegistriesEventJS(registryAccess).post(ScriptType.SERVER, REGISTER);
     }
 
     private static void gatherDefaultModifiers(GatherDefaultTempModifiersEvent event)
