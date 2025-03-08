@@ -62,7 +62,10 @@ import net.minecraft.world.gen.feature.structure.StructureManager;
 import net.minecraft.world.gen.feature.structure.StructureStart;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
 import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
@@ -72,10 +75,17 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
+@Mod.EventBusSubscriber
 public abstract class WorldHelper
 {
-    static Map<ResourceLocation, DummyPlayer> DUMMIES = new HashMap<>();
+    static Map<RegistryKey<World>, DummyPlayer> DUMMIES = new HashMap<>();
     static Map<RegistryKey<World>, List<TempSnapshot>> TEMPERATURE_CHECKS = new FastMap<>();
+
+    @SubscribeEvent
+    public static void clearCachesOnUnload(FMLServerStoppedEvent event)
+    {   DUMMIES.clear();
+        TEMPERATURE_CHECKS.clear();
+    }
 
     public static int getHeight(BlockPos pos, World level)
     {
@@ -649,7 +659,7 @@ public abstract class WorldHelper
 
     public static DummyPlayer getDummyPlayer(World level)
     {
-        ResourceLocation dimension = level.dimension().location();
+        RegistryKey<World> dimension = level.dimension();
         // There is one "dummy" entity per world, which TempModifiers are applied to
         DummyPlayer dummy = DUMMIES.get(dimension);
         // If the dummy for this dimension is invalid, make a new one
@@ -665,6 +675,14 @@ public abstract class WorldHelper
             Temperature.addModifiers(dummy, event.getModifiers(), Temperature.Trait.WORLD, Placement.Duplicates.BY_CLASS);
         }
         return dummy;
+    }
+
+    public Map<RegistryKey<World>, DummyPlayer> getDummyPlayers()
+    {   return DUMMIES;
+    }
+
+    public Map<RegistryKey<World>, List<TempSnapshot>> getWorldTempCache()
+    {   return TEMPERATURE_CHECKS;
     }
 
     public static boolean allAdjacentBlocksMatch(BlockPos pos, Predicate<BlockPos> predicate)
