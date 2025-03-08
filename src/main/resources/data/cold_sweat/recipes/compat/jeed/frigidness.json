@@ -6,7 +6,9 @@
     }
   ],
   "type": "jeed:effect_provider",
-  "effect": "cold_sweat:frigidness",
+  "effect": {
+      "id": "cold_sweat:frigidness"
+  },
   "providers": [
     {
       "item": "cold_sweat:hearth"
