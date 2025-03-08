@@ -514,16 +514,17 @@ public class WorldSettingsConfig
                          " *temperature-limit: The maximum world temperature at which this block temp will be effective.",
                          " - (Represents the minimum temp if the block temp is negative)")
                 .defineListAllowEmpty(List.of("Block Temperatures"), () -> List.of(
-                                            List.of("cold_sweat:boiler",         0.27, 7, "mc", 0.88, "lit=true", "", 4),
-                                            List.of("cold_sweat:icebox",        -0.27, 7, "mc", 0.88, "frosted=true", "", 0),
-                                            List.of("minecraft:fire",           0.476, 7, "mc", 0.9, "", "", 8),
-                                            List.of("#minecraft:campfires",     0.476, 7, "mc", 0.9, "lit=true", " ", 8),
-                                            List.of("minecraft:magma_block",     0.25, 3, "mc", 1.0),
-                                            List.of("minecraft:lava_cauldron",    0.5, 7, "mc", 1.5),
-                                            List.of("minecraft:ice",            -0.15, 4, "mc", 0.6, "", "", -0.7),
-                                            List.of("minecraft:packed_ice",     -0.25, 4, "mc", 1.0, "", "", -0.7),
-                                            List.of("minecraft:blue_ice",       -0.35, 4, "mc", 1.4, "", "", -0.7),
-                                            List.of("#minecraft:ice",           -0.15, 4, "mc", 0.6, "", "", -0.7)
+                                            List.of("cold_sweat:boiler",       0.27, 7, "mc", 0.88, "lit=true", "", 4),
+                                            List.of("cold_sweat:icebox",      -0.27, 7, "mc", 0.88, "frosted=true", "", 0),
+                                            List.of("minecraft:fire",         0.476, 7, "mc", 0.9, "", "", 8),
+                                            List.of("#minecraft:campfires",   0.476, 7, "mc", 0.9, "lit=true", " ", 8),
+                                            List.of("minecraft:magma_block",   0.25, 3, "mc", 1.0),
+                                            List.of("minecraft:lava_cauldron",  0.5, 7, "mc", 1.5),
+                                            List.of("minecraft:ice",          -0.15, 4, "mc", 0.6, "", "", -0.7),
+                                            List.of("minecraft:packed_ice",   -0.25, 4, "mc", 1.0, "", "", -0.7),
+                                            List.of("minecraft:blue_ice",     -0.35, 4, "mc", 1.4, "", "", -0.7),
+                                            List.of("#minecraft:ice",         -0.15, 4, "mc", 0.6, "", "", -0.7),
+                                            List.of("cold_sweat:soul_stalk",  -0.3,  6, "mc", 0.3, "section=3", "", 0)
                                       ),
                             it -> it instanceof List<?> list
                                     && list.size() >= 3
