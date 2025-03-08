@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.compat.kubejs.event.*;
 import dev.architectury.event.EventResult;
 import dev.latvian.mods.kubejs.event.EventGroup;
 import dev.latvian.mods.kubejs.event.EventHandler;
+import net.minecraft.core.RegistryAccess;
 
 
 public class KubeEventHandlers
@@ -32,10 +33,10 @@ public class KubeEventHandlers
         KubeEventSignatures.ADD_MODIFIER.register(KubeEventHandlers::onTempModifierAdd);
     }
 
-    private static void buildRegistries()
+    private static void buildRegistries(RegistryAccess registryAccess)
     {
         if (REGISTER.hasListeners())
-        {   REGISTER.post(new ModRegistriesEventJS());
+        {   REGISTER.post(new ModRegistriesEventJS(registryAccess));
         }
     }
 
