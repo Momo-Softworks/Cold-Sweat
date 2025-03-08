@@ -47,7 +47,7 @@ import java.util.stream.Stream;
 @Mod.EventBusSubscriber
 public class ItemInsulationManager
 {
-    public static SidedCapabilityCache<IInsulatableCap, ItemStack> CAP_CACHE = new SidedCapabilityCache<>(() -> ModCapabilities.ITEM_INSULATION);
+    public static SidedCapabilityCache<IInsulatableCap, ItemStack> CAP_CACHE = new SidedCapabilityCache<>(() -> ModCapabilities.ITEM_INSULATION, stack -> stack.isEmpty() || !isInsulatable(stack));
 
     @SubscribeEvent
     public static void attachCapabilityToItemHandler(AttachCapabilitiesEvent<ItemStack> event)
