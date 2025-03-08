@@ -7,7 +7,6 @@ import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
 import com.momosoftworks.coldsweat.api.temperature.modifier.*;
 import com.momosoftworks.coldsweat.api.util.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
-import com.momosoftworks.coldsweat.common.block.SmokestackBlock;
 import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.BiomeTempData;
@@ -59,6 +58,9 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.server.ServerStoppedEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.server.ServerLifecycleHooks;
@@ -68,10 +70,17 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.*;
 
+@Mod.EventBusSubscriber
 public abstract class WorldHelper
 {
-    static Map<ResourceLocation, DummyPlayer> DUMMIES = new HashMap<>();
+    static Map<ResourceKey<Level>, DummyPlayer> DUMMIES = new HashMap<>();
     static Map<ResourceKey<Level>, List<TempSnapshot>> TEMPERATURE_CHECKS = new FastMap<>();
+
+    @SubscribeEvent
+    public static void clearCachesOnUnload(ServerStoppedEvent event)
+    {   DUMMIES.clear();
+        TEMPERATURE_CHECKS.clear();
+    }
 
     public static int getHeight(BlockPos pos, Level level)
     {
@@ -642,7 +651,7 @@ public abstract class WorldHelper
 
     public static DummyPlayer getDummyPlayer(Level level)
     {
-        ResourceLocation dimension = level.dimension().location();
+        ResourceKey<Level> dimension = level.dimension();
         // There is one "dummy" entity per world, which TempModifiers are applied to
         DummyPlayer dummy = DUMMIES.get(dimension);
         // If the dummy for this dimension is invalid, make a new one
@@ -658,6 +667,14 @@ public abstract class WorldHelper
             Temperature.addModifiers(dummy, event.getModifiers(), Temperature.Trait.WORLD, Placement.Duplicates.BY_CLASS);
         }
         return dummy;
+    }
+
+    public Map<ResourceKey<Level>, DummyPlayer> getDummyPlayers()
+    {   return DUMMIES;
+    }
+
+    public Map<ResourceKey<Level>, List<TempSnapshot>> getWorldTempCache()
+    {   return TEMPERATURE_CHECKS;
     }
 
     public static boolean allAdjacentBlocksMatch(BlockPos pos, Predicate<BlockPos> predicate)
