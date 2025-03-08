@@ -114,7 +114,7 @@ public class BlockTempBuilderJS
             @Override
             public double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
             {
-                if (predicate.test(new BlockContainerJS(level, pos)))
+                if (this.hasBlock(state.getBlock()) && predicate.test(new BlockContainerJS(level, pos)))
                 {   return Temperature.convert(function.getTemperature(level, entity, state, pos, distance), units, Temperature.Units.MC, false);
                 }
                 return 0;
