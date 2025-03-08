@@ -7,6 +7,7 @@ import com.momosoftworks.coldsweat.api.event.core.init.GatherDefaultTempModifier
 import me.shedaniel.architectury.event.Event;
 import me.shedaniel.architectury.event.EventFactory;
 import me.shedaniel.architectury.event.EventResult;
+import net.minecraft.util.registry.DynamicRegistries;
 
 public interface KubeEventSignatures
 {
@@ -17,7 +18,7 @@ public interface KubeEventSignatures
     Event<KubeEventSignatures.AddModifier> ADD_MODIFIER = EventFactory.createEventResult();
 
     interface Registries
-    {   void buildRegistries();
+    {   void buildRegistries(DynamicRegistries registryAccess);
     }
     interface GatherModifiers
     {   void gatherDefaultModifiers(GatherDefaultTempModifiersEvent event);

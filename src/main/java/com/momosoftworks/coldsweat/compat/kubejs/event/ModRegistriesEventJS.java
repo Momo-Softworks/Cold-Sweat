@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.compat.kubejs.event;
 
 import com.google.common.collect.Multimap;
+import com.mojang.datafixers.util.Either;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
@@ -12,24 +13,35 @@ import com.momosoftworks.coldsweat.compat.kubejs.util.TempModifierDataJS;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
+import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.DynamicHolder;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import dev.latvian.kubejs.event.StartupEventJS;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.DynamicRegistries;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.feature.StructureFeature;
 
-import javax.xml.ws.Holder;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class ModRegistriesEventJS extends StartupEventJS
 {
+    DynamicRegistries registryAccess;
+
+    public ModRegistriesEventJS(DynamicRegistries registryAccess)
+    {   this.registryAccess = registryAccess;
+    }
+
     /*
      Block Temperature
      */
@@ -170,136 +182,89 @@ public class ModRegistriesEventJS extends StartupEventJS
         }
     }
 
+    private <K, V extends ConfigData> void addRegistryConfig(RegistryKey<Registry<K>> keyRegistry,
+                                                             DynamicHolder<? extends Map<K, V>> config,
+                                                             String[] rawKeys,
+                                                             Function<List<K>, V> constructor)
+    {
+        List<K> parsed = ConfigHelper.parseRegistryItems(keyRegistry, registryAccess, rawKeys);
+        if (parsed.isEmpty())
+        {   ColdSweat.LOGGER.error("Failed to find any {} in: {}", keyRegistry.location().getPath(), Arrays.toString(rawKeys));
+            return;
+        }
+        V configData = constructor.apply(parsed);
+        configData.setType(ConfigData.Type.KUBEJS);
+        if (!configData.areRequiredModsLoaded()) return;
+
+        for (K holder : parsed)
+        {   config.get(registryAccess).put(holder, configData);
+        }
+    }
+
     /*
      Biome Temperature
      */
 
-    public void addBiomeTemperature(String biomeId, double minTemp, double maxTemp, String units)
+    public void addBiomeTemperature(double minTemp, double maxTemp, String units, String... biomes)
     {
-        DynamicRegistries registryAccess = RegistryHelper.getDynamicRegistries();
-        if (registryAccess == null) return;
-        Biome biome = RegistryHelper.getBiome(new ResourceLocation(biomeId), registryAccess);
-        if (biome == null)
-        {   ColdSweat.LOGGER.error("Failed to find biome with ID: {}", biomeId);
-            return;
-        }
-        BiomeTempData biomeData = new BiomeTempData(biome, minTemp, maxTemp, Temperature.Units.fromID(units), false);
-        biomeData.setType(ConfigData.Type.KUBEJS);
-        if (!biomeData.areRequiredModsLoaded()) return;
-
-        ConfigSettings.BIOME_TEMPS.get().put(biome, biomeData);
+        this.addRegistryConfig(Registry.BIOME_REGISTRY, ConfigSettings.BIOME_TEMPS, biomes,
+                parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), false));
+    }
+    public void addBiomeTemperature(double minTemp, double maxTemp, String... biomes)
+    {   addBiomeTemperature(minTemp, maxTemp, "mc", biomes);
     }
 
-    public void addBiomeTemperature(String biomeId, double minTemp, double maxTemp)
-    {   addBiomeTemperature(biomeId, minTemp, maxTemp, "mc");
-    }
-
-    public void addBiomeOffset(String biomeId, double minTemp, double maxTemp, String units)
+    public void addBiomeOffset(double minTemp, double maxTemp, String units, String... biomes)
     {
-        DynamicRegistries registryAccess = RegistryHelper.getDynamicRegistries();
-        if (registryAccess == null) return;
-        Biome biome = RegistryHelper.getBiome(new ResourceLocation(biomeId), registryAccess);
-        if (biome == null)
-        {   ColdSweat.LOGGER.error("Failed to find biome with ID: {}", biomeId);
-            return;
-        }
-        BiomeTempData biomeData = new BiomeTempData(biome, minTemp, maxTemp, Temperature.Units.fromID(units), true);
-        biomeData.setType(ConfigData.Type.KUBEJS);
-        if (!biomeData.areRequiredModsLoaded()) return;
-
-        ConfigSettings.BIOME_OFFSETS.get().put(biome, biomeData);
+        this.addRegistryConfig(Registry.BIOME_REGISTRY, ConfigSettings.BIOME_OFFSETS, biomes,
+                parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), true));
     }
-
-    public void addBiomeOffset(String biomeId, double minTemp, double maxTemp)
-    {   addBiomeOffset(biomeId, minTemp, maxTemp, "mc");
+    public void addBiomeOffset(double minTemp, double maxTemp, String... biomes)
+    {   addBiomeOffset(minTemp, maxTemp, "mc", biomes);
     }
 
     /*
      Dimension Temperature
      */
 
-    public void addDimensionTemperature(String dimensionId, double temperature, String units)
+    public void addDimensionTemperature(double temperature, String units, String... dimensions)
     {
-        DynamicRegistries registryAccess = RegistryHelper.getDynamicRegistries();
-        if (registryAccess == null) return;
-        DimensionType dimension = RegistryHelper.getDimension(new ResourceLocation(dimensionId), registryAccess);
-        if (dimension == null)
-        {   ColdSweat.LOGGER.error("Failed to find dimension with ID: {}", dimensionId);
-            return;
-        }
-        DimensionTempData dimensionData = new DimensionTempData(dimension, temperature, Temperature.Units.fromID(units), false);
-        dimensionData.setType(ConfigData.Type.KUBEJS);
-        if (!dimensionData.areRequiredModsLoaded()) return;
-
-        ConfigSettings.DIMENSION_TEMPS.get().put(dimension, dimensionData);
+        this.addRegistryConfig(Registry.DIMENSION_TYPE_REGISTRY, ConfigSettings.DIMENSION_TEMPS, dimensions,
+                parsedDimensions -> new DimensionTempData(parsedDimensions, temperature, Temperature.Units.fromID(units), false));
+    }
+    public void addDimensionTemperature(double temperature, String... dimensions)
+    {   addDimensionTemperature(temperature, "mc", dimensions);
     }
 
-    public void addDimensionTemperature(String dimensionId, double temperature)
-    {   addDimensionTemperature(dimensionId, temperature, "mc");
-    }
-
-    public void addDimensionOffset(String dimensionId, double temperature, String units)
+    public void addDimensionOffset(double temperature, String units, String... dimensions)
     {
-        DynamicRegistries registryAccess = RegistryHelper.getDynamicRegistries();
-        if (registryAccess == null) return;
-        DimensionType dimension = RegistryHelper.getDimension(new ResourceLocation(dimensionId), registryAccess);
-        if (dimension == null)
-        {   ColdSweat.LOGGER.error("Failed to find dimension with ID: {}", dimensionId);
-            return;
-        }
-        DimensionTempData dimensionData = new DimensionTempData(dimension, temperature, Temperature.Units.fromID(units), true);
-        dimensionData.setType(ConfigData.Type.KUBEJS);
-        if (!dimensionData.areRequiredModsLoaded()) return;
-
-        ConfigSettings.DIMENSION_OFFSETS.get().put(dimension, dimensionData);
+        this.addRegistryConfig(Registry.DIMENSION_TYPE_REGISTRY, ConfigSettings.DIMENSION_OFFSETS, dimensions,
+                parsedDimensions -> new DimensionTempData(parsedDimensions, temperature, Temperature.Units.fromID(units), true));
     }
-
-    public void addDimensionOffset(String dimensionId, double temperature)
-    {   addDimensionOffset(dimensionId, temperature, "mc");
+    public void addDimensionOffset(double temperature, String... dimensions)
+    {   addDimensionOffset(temperature, "mc", dimensions);
     }
 
     /*
      Structure Temperature
      */
 
-    public void addStructureTemperature(String structureId, double temperature, String units)
+    public void addStructureTemperature(double temperature, String units, String... structures)
     {
-        DynamicRegistries registryAccess = RegistryHelper.getDynamicRegistries();
-        if (registryAccess == null) return;
-        StructureFeature<?, ?> structure = RegistryHelper.getStructure(new ResourceLocation(structureId), registryAccess);
-        if (structure == null)
-        {   ColdSweat.LOGGER.error("Failed to find structure with ID: {}", structureId);
-            return;
-        }
-        StructureTempData structureData = new StructureTempData(structure, temperature, Temperature.Units.fromID(units), false);
-        structureData.setType(ConfigData.Type.KUBEJS);
-        if (!structureData.areRequiredModsLoaded()) return;
-
-        ConfigSettings.STRUCTURE_TEMPS.get().put(structure, structureData);
+        this.addRegistryConfig(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, ConfigSettings.STRUCTURE_TEMPS, structures,
+                parsedStructures -> new StructureTempData(parsedStructures, temperature, Temperature.Units.fromID(units), false));
+    }
+    public void addStructureTemperature(double temperature, String... structures)
+    {   addStructureTemperature(temperature, "mc", structures);
     }
 
-    public void addStructureTemperature(String structureId, double temperature)
-    {   addStructureTemperature(structureId, temperature, "mc");
-    }
-
-    public void addStructureOffset(String structureId, double temperature, String units)
+    public void addStructureOffset(double temperature, String units, String... structures)
     {
-        DynamicRegistries registryAccess = RegistryHelper.getDynamicRegistries();
-        if (registryAccess == null) return;
-        StructureFeature<?, ?> structure = RegistryHelper.getStructure(new ResourceLocation(structureId), registryAccess);
-        if (structure == null)
-        {   ColdSweat.LOGGER.error("Failed to find structure with ID: {}", structureId);
-            return;
-        }
-        StructureTempData structureData = new StructureTempData(structure, temperature, Temperature.Units.fromID(units), true);
-        structureData.setType(ConfigData.Type.KUBEJS);
-        if (!structureData.areRequiredModsLoaded()) return;
-
-        ConfigSettings.STRUCTURE_OFFSETS.get().put(structure, structureData);
+        this.addRegistryConfig(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, ConfigSettings.STRUCTURE_OFFSETS, structures,
+                parsedStructures -> new StructureTempData(parsedStructures, temperature, Temperature.Units.fromID(units), true));
     }
-
-    public void addStructureOffset(String structureId, double temperature)
-    {   addStructureOffset(structureId, temperature, "mc");
+    public void addStructureOffset(double temperature, String... structures)
+    {   addStructureOffset(temperature, "mc", structures);
     }
 
     /*
