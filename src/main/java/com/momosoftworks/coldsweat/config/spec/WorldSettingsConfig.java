@@ -262,16 +262,17 @@ public class WorldSettingsConfig
                          " *temperature-limit: The maximum world temperature at which this block temp will be effective.",
                          " - (Represents the minimum temp if the block temp is negative)")
                 .defineListAllowEmpty(Arrays.asList("Block Temperatures"), () -> Arrays.asList(
-                                            Arrays.asList("cold_sweat:boiler",         0.27, 7, "mc", 0.88, "lit=true", "", 4),
-                                            Arrays.asList("cold_sweat:icebox",        -0.27, 7, "mc", 0.88, "frosted=true", "", 0),
-                                            Arrays.asList("minecraft:fire",           0.476, 7, "mc", 0.9, "", "", 8),
-                                            Arrays.asList("#minecraft:campfires",     0.476, 7, "mc", 0.9, "lit=true", " ", 8),
-                                            Arrays.asList("minecraft:magma_block",     0.25, 3, "mc", 1.0),
-                                            Arrays.asList("minecraft:lava_cauldron",    0.5, 7, "mc", 1.5),
-                                            Arrays.asList("minecraft:ice",            -0.15, 4, "mc", 0.6, "", "", -0.7),
-                                            Arrays.asList("minecraft:packed_ice",     -0.25, 4, "mc", 1.0, "", "", -0.7),
-                                            Arrays.asList("minecraft:blue_ice",       -0.35, 4, "mc", 1.4, "", "", -0.7),
-                                            Arrays.asList("#minecraft:ice",           -0.15, 4, "mc", 0.6, "", "", -0.7)
+                                            Arrays.asList("cold_sweat:boiler",       0.27, 7, "mc", 0.88, "lit=true", "", 4),
+                                            Arrays.asList("cold_sweat:icebox",      -0.27, 7, "mc", 0.88, "frosted=true", "", 0),
+                                            Arrays.asList("minecraft:fire",         0.476, 7, "mc", 0.9, "", "", 8),
+                                            Arrays.asList("#minecraft:campfires",   0.476, 7, "mc", 0.9, "lit=true", " ", 8),
+                                            Arrays.asList("minecraft:magma_block",   0.25, 3, "mc", 1.0),
+                                            Arrays.asList("minecraft:lava_cauldron",  0.5, 7, "mc", 1.5),
+                                            Arrays.asList("minecraft:ice",          -0.15, 4, "mc", 0.6, "", "", -0.7),
+                                            Arrays.asList("minecraft:packed_ice",   -0.25, 4, "mc", 1.0, "", "", -0.7),
+                                            Arrays.asList("minecraft:blue_ice",     -0.35, 4, "mc", 1.4, "", "", -0.7),
+                                            Arrays.asList("#minecraft:ice",         -0.15, 4, "mc", 0.6, "", "", -0.7),
+                                            Arrays.asList("cold_sweat:soul_stalk",  -0.3,  6, "mc", 0.3, "section=3", "", 0)
                                       ),
                                       it -> {
                                           if (!(it instanceof List<?>)) return false;
