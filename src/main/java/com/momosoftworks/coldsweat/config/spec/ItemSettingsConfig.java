@@ -177,7 +177,7 @@ public class ItemSettingsConfig
                          "nbt: Optional. If set, the item will only provide insulation if it has the specified NBT tag.",
                          "fill_slots: If true, the item will fill 1 slot per 2 insulation points. Otherwise, the item will fill 1 slot."
                 )
-                .defineListAllowEmpty(Arrays.asList("Insulation Ingredients"), () -> ListBuilder.begin(
+                .defineListAllowEmpty(Arrays.asList("Insulation Ingredients"), () -> ListBuilder.<List<?>>begin(
                                 Arrays.asList("minecraft:leather",            1,  1),
                                 Arrays.asList("cold_sweat:chameleon_molt",    2, 0.0085, "adaptive"),
                                 Arrays.asList("cold_sweat:hoglin_hide",       0,  2),
@@ -205,8 +205,17 @@ public class ItemSettingsConfig
                                 Arrays.asList("cold_sweat:chameleon_scale_leggings", 10, 0.0085, "adaptive", "", true),
                                 Arrays.asList("cold_sweat:chameleon_scale_boots", 8, 0.0085, "adaptive", "", true))
                             .addIf(CompatManager.isEnvironmentalLoaded(),
-                                () -> Arrays.asList("environmental:yak_hair", 1.5, -1)
-                        ).build(),
+                                () -> Arrays.asList("environmental:yak_hair", 1.5, -1))
+                            .addIf(CompatManager.isToughAsNailsLoaded(),
+                                () -> Arrays.asList("toughasnails:leaf_helmet",     0, Arrays.asList(1, 1, 1, 1), "static", "", true),
+                                () -> Arrays.asList("toughasnails:leaf_chestplate", 0, Arrays.asList(1, 1, 1, 1, 1, 1), "static", "", true),
+                                () -> Arrays.asList("toughasnails:leaf_leggings",   0, Arrays.asList(1, 1, 1, 1, 1), "static", "", true),
+                                () -> Arrays.asList("toughasnails:leaf_boots",      0, Arrays.asList(1, 1, 1, 1),  "static", "", true),
+                                () -> Arrays.asList("toughasnails:wool_helmet",     Arrays.asList(1.5, 1.5, 1.5, 1.5), 0, "static", "", true),
+                                () -> Arrays.asList("toughasnails:wool_chestplate", Arrays.asList(1.5, 1.5, 1.5, 1.5, 1.5, 1.5), 0, "static", "", true),
+                                () -> Arrays.asList("toughasnails:wool_leggings",   Arrays.asList(1.5, 1.5, 1.5, 1.5, 1.5), 0, "static", "", true),
+                                () -> Arrays.asList("toughasnails:wool_boots",      Arrays.asList(1.5, 1.5, 1.5, 1.5), 0,  "static", "", true))
+                            .build(),
                         it ->
                         {
                             if (it instanceof List<?>)
@@ -214,8 +223,8 @@ public class ItemSettingsConfig
                                 List<?> list = ((List<?>) it);
                                 return list.size() >= 3
                                     && list.get(0) instanceof String
-                                    && list.get(1) instanceof Number
-                                    && list.get(2) instanceof Number
+                                    && (list.get(1) instanceof Number || list.get(1) instanceof List<?>)
+                                    && (list.get(2) instanceof Number || list.get(2) instanceof List<?>)
                                     && (list.size() < 4 || list.get(3) instanceof String)
                                     && (list.size() < 5 || list.get(4) instanceof String)
                                     && (list.size() < 6 || list.get(5) instanceof Boolean);
@@ -226,7 +235,7 @@ public class ItemSettingsConfig
         INSULATING_ARMOR = BUILDER
                 .comment("Defines the items that provide insulation when worn",
                         "See Insulation Ingredients for formatting. This setting does not have a \"fill_slots\" option")
-                .defineListAllowEmpty(Arrays.asList("Insulating Armor"), () -> ListBuilder.begin(
+                .defineListAllowEmpty(Arrays.asList("Insulating Armor"), () -> ListBuilder.<List<?>>begin(
                                 Arrays.asList("minecraft:leather_helmet",      4,  4),
                                 Arrays.asList("minecraft:leather_chestplate",  6,  6),
                                 Arrays.asList("minecraft:leather_leggings",    5,  5),
@@ -247,8 +256,17 @@ public class ItemSettingsConfig
                                 Arrays.asList("cold_sweat:chameleon_scale_leggings", 10, 0.0085, "adaptive"),
                                 Arrays.asList("cold_sweat:chameleon_scale_boots", 8, 0.0085, "adaptive"))
                             .addIf(CompatManager.isEnvironmentalLoaded(),
-                                () -> Arrays.asList("environmental:yak_pants", 7.5, -5)
-                        ).build(),
+                                () -> Arrays.asList("environmental:yak_pants", 7.5, -5))
+                            .addIf(CompatManager.isToughAsNailsLoaded(),
+                                () -> Arrays.asList("toughasnails:leaf_helmet",     0, Arrays.asList(1, 1, 1, 1), "static", "", true),
+                                () -> Arrays.asList("toughasnails:leaf_chestplate", 0, Arrays.asList(1, 1, 1, 1, 1, 1), "static", "", true),
+                                () -> Arrays.asList("toughasnails:leaf_leggings",   0, Arrays.asList(1, 1, 1, 1, 1), "static", "", true),
+                                () -> Arrays.asList("toughasnails:leaf_boots",      0, Arrays.asList(1, 1, 1, 1),  "static", "", true),
+                                () -> Arrays.asList("toughasnails:wool_helmet",     Arrays.asList(1.5, 1.5, 1.5, 1.5), 0, "static", "", true),
+                                () -> Arrays.asList("toughasnails:wool_chestplate", Arrays.asList(1.5, 1.5, 1.5, 1.5, 1.5, 1.5), 0, "static", "", true),
+                                () -> Arrays.asList("toughasnails:wool_leggings",   Arrays.asList(1.5, 1.5, 1.5, 1.5, 1.5), 0, "static", "", true),
+                                () -> Arrays.asList("toughasnails:wool_boots",      Arrays.asList(1.5, 1.5, 1.5, 1.5), 0,  "static", "", true))
+                            .build(),
                         it ->
                         {
                             if (it instanceof List<?>)
@@ -256,9 +274,11 @@ public class ItemSettingsConfig
                                 List<?> list = ((List<?>) it);
                                 return list.size() >= 3
                                         && list.get(0) instanceof String
-                                        && list.get(1) instanceof Number
-                                        && list.get(2) instanceof Number
-                                        && (list.size() < 4 || list.get(3) instanceof String);
+                                        && (list.get(1) instanceof Number || list.get(1) instanceof List<?>)
+                                        && (list.get(2) instanceof Number || list.get(2) instanceof List<?>)
+                                        && (list.size() < 4 || list.get(3) instanceof String)
+                                        && (list.size() < 5 || list.get(5) instanceof String)
+                                        && list.size() < 6;
                             }
                             return false;
                         });

@@ -1,0 +1,20 @@
+{
+  "required_mods": [
+    "toughasnails"
+  ],
+  "blocks": [
+    "toughasnails:thermoregulator"
+  ],
+  "temperature": 0.5,
+  "range": 7,
+  "max_effect": 0.5,
+  "max_temp": "temperate",
+  "conditions": [
+    {
+      "state": {
+        "heating": true,
+        "enabled": true
+      }
+    }
+  ]
+}
