@@ -748,6 +748,16 @@ public class CSMath
         else list.set(index, entry);
     }
 
+    @SafeVarargs
+    public static <T> List<T> append(Collection<T>... lists)
+    {
+        List<T> appended = new ArrayList<>();
+        for (Collection<T> list : lists)
+        {   appended.addAll(list);
+        }
+        return appended;
+    }
+
     public static Class<?> getCallerClass(int depth)
     {
         StackTraceElement[] stElements = Thread.currentThread().getStackTrace();

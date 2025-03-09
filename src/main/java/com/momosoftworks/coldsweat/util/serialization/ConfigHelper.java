@@ -415,33 +415,6 @@ public class ConfigHelper
         saver.accept(list);
     }
 
-    public static void writeItemInsulations(Multimap<Item, InsulatorData> items, Consumer<List<? extends List<?>>> saver)
-    {
-        writeRegistryMultimap(items, insulator -> getTaggableListStrings(insulator.item().items().orElse(List.of()), Registry.ITEM_REGISTRY), insulator ->
-        {
-            if (insulator == null)
-            {   ColdSweat.LOGGER.error("Error writing item insulations: insulator value is null");
-                return List.of();
-            }
-            if (!insulator.entity().equals(EntityRequirement.NONE) || !insulator.attributes().getMap().isEmpty())
-            {   return List.of();
-            }
-            List<Object> itemData = new ArrayList<>();
-            itemData.add(insulator.insulation() instanceof StaticInsulation
-                         ? insulator.insulation().getCold()
-                         : ((AdaptiveInsulation) insulator.insulation()).getInsulation());
-            itemData.add(insulator.insulation() instanceof StaticInsulation
-                         ? insulator.insulation().getHeat()
-                         : ((AdaptiveInsulation) insulator.insulation()).getSpeed());
-            itemData.add(insulator.insulation() instanceof StaticInsulation
-                         ? "static"
-                         : "adaptive");
-            itemData.add(insulator.item().nbt().tag().toString());
-
-            return itemData;
-        }, saver);
-    }
-
     public static <T> Codec<Either<TagKey<T>, T>> tagOrBuiltinCodec(ResourceKey<Registry<T>> vanillaRegistry, IForgeRegistry<T> forgeRegistry)
     {
         return Codec.either(Codec.STRING.comapFlatMap(str ->

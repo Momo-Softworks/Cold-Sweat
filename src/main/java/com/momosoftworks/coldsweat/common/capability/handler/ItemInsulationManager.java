@@ -175,6 +175,7 @@ public class ItemInsulationManager
                          ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem()),
                          ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem()))
                .flatMap(Collection::stream).map(InsulatorData::insulation)
+               .flatMap(List::stream)
                .filter(ins -> !ins.isEmpty()).toList();
     }
 
