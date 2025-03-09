@@ -152,7 +152,7 @@ public class ItemSettingsConfig
                          "nbt: Optional. If set, the item will only provide insulation if it has the specified NBT tag.",
                          "fill_slots: If true, the item will fill 1 slot per 2 insulation points. Otherwise, the item will fill 1 slot."
                 )
-                .defineListAllowEmpty(List.of("Insulation Ingredients"), () -> ListBuilder.begin(
+                .defineListAllowEmpty(List.of("Insulation Ingredients"), () -> ListBuilder.<List<?>>begin(
                                 List.of("minecraft:leather",            1,  1),
                                 List.of("cold_sweat:chameleon_molt",    2, 0.0085, "adaptive"),
                                 List.of("cold_sweat:hoglin_hide",       0,  2),
@@ -180,12 +180,21 @@ public class ItemSettingsConfig
                                 List.of("cold_sweat:chameleon_scale_leggings", 10, 0.0085, "adaptive", "", true),
                                 List.of("cold_sweat:chameleon_scale_boots", 8, 0.0085, "adaptive", "", true))
                             .addIf(CompatManager.isEnvironmentalLoaded(),
-                                () -> List.of("environmental:yak_hair", 1.5, -1)
-                        ).build(),
+                                () -> List.of("environmental:yak_hair", 1.5, -1))
+                            .addIf(CompatManager.isToughAsNailsLoaded(),
+                                () -> List.of("toughasnails:leaf_helmet",     0, List.of(1, 1, 1, 1), "static", "", true),
+                                () -> List.of("toughasnails:leaf_chestplate", 0, List.of(1, 1, 1, 1, 1, 1), "static", "", true),
+                                () -> List.of("toughasnails:leaf_leggings",   0, List.of(1, 1, 1, 1, 1), "static", "", true),
+                                () -> List.of("toughasnails:leaf_boots",      0, List.of(1, 1, 1, 1),  "static", "", true),
+                                () -> List.of("toughasnails:wool_helmet",     List.of(1.5, 1.5, 1.5, 1.5), 0, "static", "", true),
+                                () -> List.of("toughasnails:wool_chestplate", List.of(1.5, 1.5, 1.5, 1.5, 1.5, 1.5), 0, "static", "", true),
+                                () -> List.of("toughasnails:wool_leggings",   List.of(1.5, 1.5, 1.5, 1.5, 1.5), 0, "static", "", true),
+                                () -> List.of("toughasnails:wool_boots",      List.of(1.5, 1.5, 1.5, 1.5), 0,  "static", "", true))
+                            .build(),
                         it -> it instanceof List<?> list && list.size() >= 3
                                 && list.get(0) instanceof String
-                                && list.get(1) instanceof Number
-                                && list.get(2) instanceof Number
+                                && (list.get(1) instanceof Number || list.get(1) instanceof List<?>)
+                                && (list.get(2) instanceof Number || list.get(2) instanceof List<?>)
                                 && (list.size() < 4 || list.get(3) instanceof String)
                                 && (list.size() < 5 || list.get(4) instanceof String)
                                 && (list.size() < 6 || list.get(5) instanceof Boolean));
@@ -193,7 +202,7 @@ public class ItemSettingsConfig
         INSULATING_ARMOR = BUILDER
                 .comment("Defines the items that provide insulation when worn",
                         "See Insulation Ingredients for formatting. This setting does not have a \"fill_slots\" option")
-                .defineListAllowEmpty(List.of("Insulating Armor"), () -> ListBuilder.begin(
+                .defineListAllowEmpty(List.of("Insulating Armor"), () -> ListBuilder.<List<?>>begin(
                                 List.of("minecraft:leather_helmet",      4,  4),
                                 List.of("minecraft:leather_chestplate",  6,  6),
                                 List.of("minecraft:leather_leggings",    5,  5),
@@ -214,13 +223,24 @@ public class ItemSettingsConfig
                                 List.of("cold_sweat:chameleon_scale_leggings", 10, 0.0085, "adaptive"),
                                 List.of("cold_sweat:chameleon_scale_boots", 8, 0.0085, "adaptive"))
                             .addIf(CompatManager.isEnvironmentalLoaded(),
-                                () -> List.of("environmental:yak_pants", 7.5, -5)
-                        ).build(),
+                                () -> List.of("environmental:yak_pants", 7.5, -5))
+                            .addIf(CompatManager.isToughAsNailsLoaded(),
+                                () -> List.of("toughasnails:leaf_helmet",     0, List.of(1, 1, 1, 1), "static", "", true),
+                                () -> List.of("toughasnails:leaf_chestplate", 0, List.of(1, 1, 1, 1, 1, 1), "static", "", true),
+                                () -> List.of("toughasnails:leaf_leggings",   0, List.of(1, 1, 1, 1, 1), "static", "", true),
+                                () -> List.of("toughasnails:leaf_boots",      0, List.of(1, 1, 1, 1),  "static", "", true),
+                                () -> List.of("toughasnails:wool_helmet",     List.of(1.5, 1.5, 1.5, 1.5), 0, "static", "", true),
+                                () -> List.of("toughasnails:wool_chestplate", List.of(1.5, 1.5, 1.5, 1.5, 1.5, 1.5), 0, "static", "", true),
+                                () -> List.of("toughasnails:wool_leggings",   List.of(1.5, 1.5, 1.5, 1.5, 1.5), 0, "static", "", true),
+                                () -> List.of("toughasnails:wool_boots",      List.of(1.5, 1.5, 1.5, 1.5), 0,  "static", "", true))
+                            .build(),
                         it -> it instanceof List<?> list && list.size() >= 3
                                 && list.get(0) instanceof String
-                                && list.get(1) instanceof Number
-                                && list.get(2) instanceof Number
-                                && (list.size() < 4 || list.get(3) instanceof String));
+                                && (list.get(1) instanceof Number || list.get(1) instanceof List<?>)
+                                && (list.get(2) instanceof Number || list.get(2) instanceof List<?>)
+                                && (list.size() < 4 || list.get(3) instanceof String)
+                                && (list.size() < 5 || list.get(5) instanceof String)
+                                && list.size() < 6);
 
         if (CompatManager.isCuriosLoaded())
         {
