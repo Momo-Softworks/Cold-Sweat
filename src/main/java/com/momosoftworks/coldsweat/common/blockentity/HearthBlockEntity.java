@@ -395,7 +395,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                         {   playerBB = CompatManager.Valkyrien.transformIfShipPos(level, playerBB);
                         }
                         if (this.isAffectingPos(WorldHelper.getOccupiedPositions(playerBB))
-                        && !WorldHelper.canSeeSky(level, BlockPos.containing(playerBB.getCenter()), 64))
+                        && !WorldHelper.canSeeSky(level, new BlockPos(playerBB.getCenter()), 64))
                         {   this.insulatePlayer(player);
                         }
                     }
