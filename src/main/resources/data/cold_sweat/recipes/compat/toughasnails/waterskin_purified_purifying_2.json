@@ -10,13 +10,17 @@
       "modid": "thirst"
     }
   ],
-  "ingredient": {
-    "item": "cold_sweat:filled_waterskin",
-    "nbt": "{Purity:2}"
+  "input": {
+    "id": "cold_sweat:filled_waterskin",
+    "tag": {
+      "Purity": 2
+    }
   },
   "result": {
-    "item": "cold_sweat:filled_waterskin",
-    "nbt": "{Purity:3}"
+    "id": "cold_sweat:filled_waterskin",
+    "tag": {
+      "Purity": 3
+    }
   },
   "purifytime": 200
 }
