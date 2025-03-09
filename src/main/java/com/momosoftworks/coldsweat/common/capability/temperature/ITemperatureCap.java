@@ -2,7 +2,6 @@ package com.momosoftworks.coldsweat.common.capability.temperature;
 
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
-import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -22,9 +21,9 @@ public interface ITemperatureCap
     void addModifier(TempModifier modifier, Temperature.Trait trait);
     void clearModifiers(Temperature.Trait trait);
 
-    void markPersistentAttribute(Holder<Attribute> attribute);
-    void clearPersistentAttribute(Holder<Attribute> attribute);
-    Collection<Holder<Attribute>> getPersistentAttributes();
+    void markPersistentAttribute(Attribute attribute);
+    void clearPersistentAttribute(Attribute attribute);
+    Collection<Attribute> getPersistentAttributes();
 
     void tick(LivingEntity entity);
     void tickDummy(LivingEntity entity);
