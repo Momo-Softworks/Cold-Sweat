@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.core.itemgroup;
 
 import com.momosoftworks.coldsweat.api.event.client.InsulatorTabBuildEvent;
+import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
@@ -64,7 +65,7 @@ public class InsulationItemsGroup extends ItemGroup
         // Sort by tags the items are in
         list.sort(Comparator.comparing(entry -> entry.getKey().getTags().stream().map(ResourceLocation::toString).reduce("", (a, b) -> a + b)));
         // Sort by insulation value
-        list.sort(Comparator.comparingInt(entry -> entry.getValue().insulation().getCompareValue()));
+        list.sort(Comparator.comparingInt(entry -> entry.getValue().insulation().stream().mapToInt(Insulation::getCompareValue).min().orElse(0)));
         // Sort by armor material and slot
         list.sort(Comparator.comparing(entry -> entry.getKey() instanceof ArmorItem
                                                ? ((ArmorItem) entry.getKey()).getMaterial().getName() + (3 - MobEntity.getEquipmentSlotForItem(entry.getKey().getDefaultInstance()).getIndex())

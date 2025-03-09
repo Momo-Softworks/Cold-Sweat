@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 public class InsulatorBuilderJS
 {
     public final Set<Item> items = new HashSet<>();
-    public Insulation insulation;
+    public List<Insulation> insulation;
     public Insulation.Slot slot;
     public Predicate<ItemStack> itemPredicate = null;
     public Predicate<Entity> entityPredicate = null;
@@ -48,13 +48,13 @@ public class InsulatorBuilderJS
 
     public InsulatorBuilderJS insulation(double cold, double heat)
     {
-        this.insulation = new StaticInsulation(cold, heat);
+        this.insulation.add(new StaticInsulation(cold, heat));
         return this;
     }
 
     public InsulatorBuilderJS adaptiveInsulation(double insulation, double speed)
     {
-        this.insulation = new AdaptiveInsulation(insulation, speed);
+        this.insulation.add(new AdaptiveInsulation(insulation, speed));
         return this;
     }
 

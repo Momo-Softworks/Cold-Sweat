@@ -483,33 +483,6 @@ public class ConfigHelper
         saver.accept(list);
     }
 
-    public static void writeItemInsulations(Multimap<Item, InsulatorData> items, Consumer<List<? extends List<?>>> saver)
-    {
-        writeRegistryMultimap(items, insulator -> getTaggableListStrings(insulator.item().items().orElse(Arrays.asList()), net.minecraft.util.registry.Registry.ITEM_REGISTRY), insulator ->
-        {
-            if (insulator == null)
-            {   ColdSweat.LOGGER.error("Error writing item insulations: insulator value is null");
-                return new ArrayList<>();
-            }
-            if (!insulator.entity().equals(EntityRequirement.NONE) || !insulator.attributes().getMap().isEmpty())
-            {   return new ArrayList<>();
-            }
-            List<Object> itemData = new ArrayList<>();
-            itemData.add(insulator.insulation() instanceof StaticInsulation
-                         ? insulator.insulation().getCold()
-                         : ((AdaptiveInsulation) insulator.insulation()).getInsulation());
-            itemData.add(insulator.insulation() instanceof StaticInsulation
-                         ? insulator.insulation().getHeat()
-                         : ((AdaptiveInsulation) insulator.insulation()).getSpeed());
-            itemData.add(insulator.insulation() instanceof StaticInsulation
-                         ? "static"
-                         : "adaptive");
-            itemData.add(insulator.item().nbt().tag().toString());
-
-            return itemData;
-        }, saver);
-    }
-
     public static <T extends IForgeRegistryEntry<T>> Codec<Either<ITag<T>, T>> tagOrBuiltinCodec(RegistryKey<Registry<T>> vanillaRegistry, Registry<T> forgeRegistry)
     {
         ITagCollection<T> vanillaTags = ConfigHelper.getTagsForRegistry(vanillaRegistry);

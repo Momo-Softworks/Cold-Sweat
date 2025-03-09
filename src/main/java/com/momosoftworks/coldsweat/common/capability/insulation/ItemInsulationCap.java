@@ -6,14 +6,16 @@ import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
-import com.momosoftworks.coldsweat.util.math.FastMultiMap;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.NBTDynamicOps;
 
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ItemInsulationCap implements IInsulatableCap
@@ -27,18 +29,26 @@ public class ItemInsulationCap implements IInsulatableCap
     {   return this.insulation;
     }
 
+    public List<InsulatorData> getInsulators()
+    {   return this.insulation.stream().map(Pair::getSecond).flatMap(Collection::stream).collect(Collectors.toList());
+    }
+
     public void calcAdaptiveInsulation(double worldTemp, double minTemp, double maxTemp)
     {
         for (Pair<ItemStack, Collection<InsulatorData>> entry : insulation)
         {
             for (InsulatorData insulatorData : entry.getSecond())
             {
-                Insulation entryInsul = insulatorData.insulation();
-                if (entryInsul instanceof AdaptiveInsulation)
+                List<Insulation> entryDataList = insulatorData.insulation();
+                for (int i = 0; i < entryDataList.size(); i++)
+                {
+                    Insulation entryInsul = entryDataList.get(i);
+                    if (entryInsul instanceof AdaptiveInsulation)
                 {
                     AdaptiveInsulation insul = (AdaptiveInsulation) entryInsul;
-                    double newFactor = AdaptiveInsulation.calculateChange(insul, worldTemp, minTemp, maxTemp);
-                    insul.setFactor(newFactor);
+                        double newFactor = AdaptiveInsulation.calculateChange(insul, worldTemp, minTemp, maxTemp);
+                        insul.setFactor(newFactor);
+                    }
                 }
             }
         }
@@ -79,10 +89,22 @@ public class ItemInsulationCap implements IInsulatableCap
         {   return false;
         }
 
-        List<Pair<ItemStack, Collection<InsulatorData>>> insulList = new ArrayList<>(this.insulation);
-        insulList.add(Pair.of(insulationItem, insulation));
-
-        return insulList.size() <= ItemInsulationManager.getInsulationSlots(armorItem);
+        int appliedInsulators = 0;
+        boolean hasSingleSlot = false;
+        for (InsulatorData data : CSMath.append(insulation, this.getInsulators()))
+        {
+            // Add all slots from multi-slot insulation
+            if (data.fillSlots())
+            {   appliedInsulators += Insulation.splitList(data.insulation()).size();
+            }
+            // All single-slot insulation counts as one
+            else if (!hasSingleSlot)
+            {   hasSingleSlot = true;
+                appliedInsulators++;
+            }
+        }
+        appliedInsulators = Math.max(1, appliedInsulators);
+        return appliedInsulators + this.insulation.size() <= ItemInsulationManager.getInsulationSlots(armorItem);
     }
 
     @Override
