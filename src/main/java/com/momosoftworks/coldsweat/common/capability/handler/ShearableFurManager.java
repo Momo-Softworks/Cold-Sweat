@@ -53,10 +53,14 @@ public class ShearableFurManager
 {
     public static SidedCapabilityCache<IShearableCap, Entity> CAP_CACHE = new SidedCapabilityCache<>(ModCapabilities.SHEARABLE_FUR, e -> !e.isAddedToWorld());
 
+    public static boolean isShearable(Entity entity)
+    {   return entity instanceof Goat;
+    }
+
     @SubscribeEvent
     public static void attachCapabilityToEntityHandler(AttachCapabilitiesEvent<Entity> event)
     {
-        if (event.getObject() instanceof Goat)
+        if (isShearable(event.getObject()))
         {
             // Make a new capability instance to attach to the entity
             IShearableCap cap = new ShearableFurCap();
@@ -95,7 +99,7 @@ public class ShearableFurManager
     }
 
     public static LazyOptional<IShearableCap> getFurCap(Entity entity)
-    {   return CAP_CACHE.get(entity);
+    {   return isShearable(entity) ? CAP_CACHE.get(entity) : LazyOptional.empty();
     }
 
     @SubscribeEvent
