@@ -10,6 +10,7 @@ import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.BlockRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.LocationRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
+import com.momosoftworks.coldsweat.data.codec.requirement.WorldTempRequirement;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
@@ -30,14 +31,14 @@ public class BlockTempData extends ConfigData implements IForgeRegistryEntry<Blo
     final double range;
     final double maxEffect;
     final boolean fade;
-    final double maxTemp;
-    final double minTemp;
+    final WorldTempRequirement maxTemp;
+    final WorldTempRequirement minTemp;
     final Temperature.Units units;
     final List<BlockRequirement> conditions;
     final LocationRequirement location;
 
     public BlockTempData(List<Either<TagKey<Block>, Block>> blocks, double temperature, double range,
-                         double maxEffect, boolean fade, double maxTemp, double minTemp,
+                         double maxEffect, boolean fade, WorldTempRequirement maxTemp, WorldTempRequirement minTemp,
                          Temperature.Units units, List<BlockRequirement> conditions,
                          LocationRequirement location, List<String> requiredMods)
     {
@@ -55,7 +56,7 @@ public class BlockTempData extends ConfigData implements IForgeRegistryEntry<Blo
     }
 
     public BlockTempData(List<Either<TagKey<Block>, Block>> blocks, double temperature, double range,
-                         double maxEffect, boolean fade, double maxTemp, double minTemp,
+                         double maxEffect, boolean fade, WorldTempRequirement maxTemp, WorldTempRequirement minTemp,
                          Temperature.Units units, List<BlockRequirement> conditions, LocationRequirement location)
     {
         this(blocks, temperature, range, maxEffect, fade, maxTemp, minTemp, units, conditions, location, ConfigHelper.getModIDs(blocks, ForgeRegistries.BLOCKS));
@@ -70,7 +71,7 @@ public class BlockTempData extends ConfigData implements IForgeRegistryEntry<Blo
     {
         this(blockTemp.getAffectedBlocks().stream().map(Either::<TagKey<Block>, Block>right).toList(),
              0, blockTemp.range(), blockTemp.maxEffect(),
-             true, blockTemp.maxTemperature(), blockTemp.minTemperature(), Temperature.Units.MC,
+             true, new WorldTempRequirement(blockTemp.maxTemperature()), new WorldTempRequirement(blockTemp.minTemperature()), Temperature.Units.MC,
              List.of(), LocationRequirement.NONE);
     }
 
@@ -80,8 +81,8 @@ public class BlockTempData extends ConfigData implements IForgeRegistryEntry<Blo
             Codec.DOUBLE.optionalFieldOf("range", Double.MAX_VALUE).forGetter(BlockTempData::range),
             Codec.DOUBLE.optionalFieldOf("max_effect", Double.MAX_VALUE).forGetter(BlockTempData::maxEffect),
             Codec.BOOL.optionalFieldOf("fade", true).forGetter(BlockTempData::fade),
-            Codec.DOUBLE.optionalFieldOf("max_temp", Double.MAX_VALUE).forGetter(BlockTempData::maxTemp),
-            Codec.DOUBLE.optionalFieldOf("min_temp", -Double.MAX_VALUE).forGetter(BlockTempData::minTemp),
+            WorldTempRequirement.CODEC.optionalFieldOf("max_temp", WorldTempRequirement.INFINITY).forGetter(BlockTempData::maxTemp),
+            WorldTempRequirement.CODEC.optionalFieldOf("min_temp", WorldTempRequirement.NEGATIVE_INFINITY).forGetter(BlockTempData::minTemp),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(BlockTempData::units),
             BlockRequirement.CODEC.listOf().optionalFieldOf("conditions", List.of()).forGetter(BlockTempData::conditions),
             LocationRequirement.CODEC.optionalFieldOf("location", LocationRequirement.NONE).forGetter(BlockTempData::location),
@@ -103,10 +104,10 @@ public class BlockTempData extends ConfigData implements IForgeRegistryEntry<Blo
     public boolean fade()
     {   return fade;
     }
-    public double maxTemp()
+    public WorldTempRequirement maxTemp()
     {   return maxTemp;
     }
-    public double minTemp()
+    public WorldTempRequirement minTemp()
     {   return minTemp;
     }
     public Temperature.Units units()
@@ -126,10 +127,10 @@ public class BlockTempData extends ConfigData implements IForgeRegistryEntry<Blo
     {   return Temperature.convert(maxEffect, units, Temperature.Units.MC, false);
     }
     public double getMaxTemp()
-    {   return Temperature.convert(maxTemp, units, Temperature.Units.MC, false);
+    {   return maxTemp.isConstant() ? Temperature.convert(maxTemp.get(), units, Temperature.Units.MC, false) : maxTemp.get();
     }
     public double getMinTemp()
-    {   return Temperature.convert(minTemp, units, Temperature.Units.MC, false);
+    {   return minTemp.isConstant() ? Temperature.convert(minTemp.get(), units, Temperature.Units.MC, false) : minTemp.get();
     }
 
     @Nullable
@@ -180,8 +181,9 @@ public class BlockTempData extends ConfigData implements IForgeRegistryEntry<Blo
         BlockRequirement blockRequirement = new BlockRequirement(Optional.empty(), blockPredicates, nbtRequirement,
                                                                  Optional.empty(), Optional.empty(), Optional.empty(), false);
 
-        return new BlockTempData(blocks, blockTemp, blockRange, maxEffect, true, maxTemperature,
-                                 minTemperature, units, List.of(blockRequirement), LocationRequirement.NONE);
+        return new BlockTempData(blocks, blockTemp, blockRange, maxEffect, true,
+                                 new WorldTempRequirement(maxTemperature), new WorldTempRequirement(minTemperature),
+                                 units, List.of(blockRequirement), LocationRequirement.NONE);
     }
 
     @Override
@@ -200,8 +202,8 @@ public class BlockTempData extends ConfigData implements IForgeRegistryEntry<Blo
             && Double.compare(that.temperature, temperature) == 0
             && Double.compare(that.range, range) == 0
             && Double.compare(that.maxEffect, maxEffect) == 0
-            && Double.compare(that.maxTemp, maxTemp) == 0
-            && Double.compare(that.minTemp, minTemp) == 0
+            && maxTemp.equals(that.maxTemp)
+            && minTemp.equals(that.minTemp)
             && fade == that.fade
             && blocks.equals(that.blocks)
             && conditions.equals(that.conditions);
