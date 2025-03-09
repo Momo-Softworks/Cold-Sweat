@@ -82,6 +82,7 @@ public class CompatManager
     private static final boolean SPOILED_LOADED = modLoaded("spoiled");
     private static final boolean SUPPLEMENTARIES_LOADED = modLoaded("supplementaries");
     private static final boolean VALKYRIEN_SKIES_LOADED = modLoaded("valkyrienskies");
+    private static final boolean TOUGH_AS_NAILS_LOADED = modLoaded("toughasnails");
 
     private static final List<String> SEASONS_MODS = fetchSeasonsMods();
 
@@ -194,6 +195,9 @@ public class CompatManager
     }
     public static boolean isValkyrienSkiesLoaded()
     {   return VALKYRIEN_SKIES_LOADED;
+    }
+    public static boolean isToughAsNailsLoaded()
+    {   return TOUGH_AS_NAILS_LOADED;
     }
 
     public static abstract class Curios
