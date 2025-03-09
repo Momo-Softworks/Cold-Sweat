@@ -118,7 +118,7 @@ public class BlockTempModifier extends TempModifier
                                 if (!blockTemp.isValid(world, blockpos, state)) continue;
                                 double temperature = blockTemp.getTemperature(world, entity, state, blockpos, distance);
                                 double tempToAdd = blockTemp.fade()
-                                                   ? CSMath.blend(temperature, 0, distance, 0, blockTemp.range())
+                                                   ? CSMath.blend(temperature, 0, distance, 0.5, blockTemp.range())
                                                    : temperature;
 
                                 // Store this block type's total effect on the player
