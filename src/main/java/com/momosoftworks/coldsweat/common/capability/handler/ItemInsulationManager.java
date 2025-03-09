@@ -105,7 +105,7 @@ public class ItemInsulationManager
     }
 
     public static LazyOptional<IInsulatableCap> getInsulationCap(ItemStack stack)
-    {   return CAP_CACHE.get(stack);
+    {   return isInsulatable(stack) ? CAP_CACHE.get(stack) : LazyOptional.empty();
     }
 
     @SubscribeEvent
