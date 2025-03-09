@@ -1,0 +1,26 @@
+{
+  "type": "toughasnails:water_purifying",
+  "conditions": [
+    {
+      "type": "forge:mod_loaded",
+      "modid": "toughasnails"
+    },
+    {
+      "type": "forge:mod_loaded",
+      "modid": "thirst"
+    }
+  ],
+  "input": {
+    "id": "cold_sweat:filled_waterskin",
+    "tag": {
+      "Purity": 0
+    }
+  },
+  "result": {
+    "id": "cold_sweat:filled_waterskin",
+    "tag": {
+      "Purity": 2
+    }
+  },
+  "purifytime": 200
+}
