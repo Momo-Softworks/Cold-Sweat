@@ -375,11 +375,10 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
                         if (player == null || player instanceof DummyPlayer) continue;
                         AxisAlignedBB playerBB = player.getBoundingBox().inflate(-0.1);
                         // Ensure height is at least 2 blocks tall
-                        if (playerBB.maxY - playerBB.minY < 1.5)
-                        {   playerBB = playerBB.inflate(0, 0.5, 0);
-                        }
-                        if (this.isAffectingPos(BlockPos.betweenClosedStream(playerBB).toArray(BlockPos[]::new))
-                        && !WorldHelper.canSeeSky(level, player.blockPosition(), 64))
+                        playerBB = new AxisAlignedBB(playerBB.minX, playerBB.minY, playerBB.minZ,
+                                                     playerBB.maxX, Math.max(playerBB.maxY, playerBB.minY + 2), playerBB.maxZ);
+                        if (this.isAffectingPos(WorldHelper.getOccupiedPositions(playerBB))
+                        && !WorldHelper.canSeeSky(level, new BlockPos(playerBB.getCenter()), 64))
                         {   this.insulatePlayer(player);
                         }
                     }
@@ -865,14 +864,14 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         }
     }
 
-    public boolean isAffectingPos(BlockPos... positions)
+    public boolean isAffectingPos(List<BlockPos> positions)
     {
         for (int i = 0; i < this.paths.size(); i++)
         {
             SpreadPath path = this.paths.get(i);
-            for (int j = 0; j < positions.length; j++)
+            for (int j = 0; j < positions.size(); j++)
             {
-                if (path.pos.equals(positions[j]))
+                if (path.pos.equals(positions.get(j)))
                 {   return true;
                 }
             }
