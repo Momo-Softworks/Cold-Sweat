@@ -48,6 +48,10 @@ public record ItemInsulationCap(List<Pair<ItemStack, List<InsulatorData>>> insul
     {   return ImmutableList.copyOf(this.insulation());
     }
 
+    public List<InsulatorData> getInsulators()
+    {   return this.insulation.stream().map(Pair::getSecond).flatMap(Collection::stream).toList();
+    }
+
     public ItemInsulationCap calcAdaptiveInsulation(double worldTemp, double minTemp, double maxTemp)
     {
         var insulation = new ArrayList<>(this.insulation());
@@ -55,11 +59,15 @@ public record ItemInsulationCap(List<Pair<ItemStack, List<InsulatorData>>> insul
         {
             for (InsulatorData insulatorData : entry.getSecond())
             {
-                Insulation entryInsul = insulatorData.insulation();
-                if (entryInsul instanceof AdaptiveInsulation insul)
+                List<Insulation> entryDataList = insulatorData.insulation();
+                for (int i = 0; i < entryDataList.size(); i++)
                 {
-                    double newFactor = AdaptiveInsulation.calculateChange(insul, worldTemp, minTemp, maxTemp);
-                    insul.setFactor(newFactor);
+                    Insulation entryInsul = entryDataList.get(i);
+                    if (entryInsul instanceof AdaptiveInsulation insul)
+                    {
+                        double newFactor = AdaptiveInsulation.calculateChange(insul, worldTemp, minTemp, maxTemp);
+                        insul.setFactor(newFactor);
+                    }
                 }
             }
         }
@@ -100,10 +108,22 @@ public record ItemInsulationCap(List<Pair<ItemStack, List<InsulatorData>>> insul
         {   return false;
         }
 
-        List<Pair<ItemStack, List<InsulatorData>>> insulList = new ArrayList<>(this.insulation);
-        insulList.add(Pair.of(insulationItem, insulation));
-
-        return insulList.size() <= ItemInsulationManager.getInsulationSlots(armorItem);
+        int appliedInsulators = 0;
+        boolean hasSingleSlot = false;
+        for (InsulatorData data : CSMath.append(insulation, this.getInsulators()))
+        {
+            // Add all slots from multi-slot insulation
+            if (data.fillSlots())
+            {   appliedInsulators += Insulation.splitList(data.insulation()).size();
+            }
+            // All single-slot insulation counts as one
+            else if (!hasSingleSlot)
+            {   hasSingleSlot = true;
+                appliedInsulators++;
+            }
+        }
+        appliedInsulators = Math.max(1, appliedInsulators);
+        return appliedInsulators + this.insulation.size() <= ItemInsulationManager.getInsulationSlots(armorItem);
     }
 
     public void serialize(RegistryFriendlyByteBuf buffer)

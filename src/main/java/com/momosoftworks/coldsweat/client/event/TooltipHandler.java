@@ -461,7 +461,7 @@ public class TooltipHandler
         boolean multiSlot = insulator.fillSlots();
         if (!insulator.insulation().isEmpty())
         {
-            List<Insulation> insulList = multiSlot ? insulator.insulation().split() : List.of(insulator.insulation());
+            List<Insulation> insulList = multiSlot ? Insulation.splitList(insulator.insulation()) : insulator.insulation();
             if (passesRequirement(insulator))
             {   insulation.addAll(insulList);
             }

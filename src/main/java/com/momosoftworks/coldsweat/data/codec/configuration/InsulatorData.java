@@ -29,22 +29,24 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class InsulatorData extends ConfigData implements RequirementHolder
 {
     final ItemRequirement item;
     final Insulation.Slot slot;
-    final Insulation insulation;
+    final List<Insulation> insulation;
     final EntityRequirement entity;
     final AttributeModifierMap attributes;
     final Map<ResourceLocation, Double> immuneTempModifiers;
     final boolean fillSlots;
 
     public InsulatorData(ItemRequirement item, Insulation.Slot slot,
-                         Insulation insulation, EntityRequirement entity,
+                         List<Insulation> insulation, EntityRequirement entity,
                          AttributeModifierMap attributes, Map<ResourceLocation, Double> immuneTempModifiers,
                          boolean fillSlots, List<String> requiredMods)
     {
@@ -58,17 +60,22 @@ public class InsulatorData extends ConfigData implements RequirementHolder
         this.fillSlots = fillSlots;
     }
 
-    public InsulatorData(ItemRequirement item, Insulation.Slot slot, Insulation insulation,
+    public InsulatorData(ItemRequirement item, Insulation.Slot slot, List<Insulation> insulation,
                          EntityRequirement entity, AttributeModifierMap attributes,
                          Map<ResourceLocation, Double> immuneTempModifiers, boolean fillSlots)
     {
         this(item, slot, insulation, entity, attributes, immuneTempModifiers, fillSlots, ConfigHelper.getModIDs(CSMath.listOrEmpty(item.items()), BuiltInRegistries.ITEM));
     }
 
+    private static final Codec<List<Insulation>> INSULATION_CODEC = Codec.either(Insulation.getCodec().listOf(), Insulation.getCodec())
+            .xmap(either -> either.map(left -> left.stream().filter(insul -> !insul.isEmpty()).toList(),
+                                       right -> right.isEmpty() ? List.of() : List.of(right)),
+                  list -> list.size() == 1 ? Either.right(list.get(0)) : Either.left(list));
+
     public static final Codec<InsulatorData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ItemRequirement.CODEC.fieldOf("item").forGetter(InsulatorData::item),
             Insulation.Slot.CODEC.fieldOf("type").forGetter(InsulatorData::slot),
-            Insulation.getCodec().fieldOf("insulation").forGetter(InsulatorData::insulation),
+            INSULATION_CODEC.fieldOf("insulation").forGetter(InsulatorData::insulation),
             EntityRequirement.getCodec().optionalFieldOf("entity", EntityRequirement.NONE).forGetter(InsulatorData::entity),
             AttributeModifierMap.CODEC.optionalFieldOf("attributes", new AttributeModifierMap()).forGetter(InsulatorData::attributes),
             Codec.unboundedMap(ResourceLocation.CODEC, Codec.DOUBLE).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(InsulatorData::immuneTempModifiers),
@@ -80,7 +87,7 @@ public class InsulatorData extends ConfigData implements RequirementHolder
     (buf, insulator) ->
     {
         ItemRequirement.STREAM_CODEC.encode(buf, insulator.item());
-        Insulation.getNetworkCodec().encode(buf, insulator.insulation());
+        buf.writeCollection(insulator.insulation(), Insulation.getNetworkCodec());
         buf.writeEnum(insulator.slot());
         buf.writeNbt(EntityRequirement.getCodec().encode(insulator.entity(), NbtOps.INSTANCE, new CompoundTag()).result().orElse(new CompoundTag()));
         AttributeModifierMap.STREAM_CODEC.encode(buf, insulator.attributes());
@@ -90,7 +97,7 @@ public class InsulatorData extends ConfigData implements RequirementHolder
     (buf) ->
     {
         ItemRequirement item = ItemRequirement.STREAM_CODEC.decode(buf);
-        Insulation insulation = Insulation.getNetworkCodec().decode(buf);
+        List<Insulation> insulation = buf.readCollection(ArrayList::new, Insulation.getNetworkCodec());
         Insulation.Slot slot = buf.readEnum(Insulation.Slot.class);
         EntityRequirement predicate = EntityRequirement.getCodec().decode(NbtOps.INSTANCE, buf.readNbt()).result().orElse(Pair.of(EntityRequirement.NONE, new CompoundTag())).getFirst();
         AttributeModifierMap attributes = AttributeModifierMap.STREAM_CODEC.decode(buf);
@@ -105,7 +112,7 @@ public class InsulatorData extends ConfigData implements RequirementHolder
     public Insulation.Slot slot()
     {   return slot;
     }
-    public Insulation insulation()
+    public List<Insulation> insulation()
     {   return insulation;
     }
     public EntityRequirement entity()
@@ -119,6 +126,13 @@ public class InsulatorData extends ConfigData implements RequirementHolder
     }
     public boolean fillSlots()
     {   return fillSlots;
+    }
+
+    public double getCold()
+    {   return insulation.stream().mapToDouble(Insulation::getCold).sum();
+    }
+    public double getHeat()
+    {   return insulation.stream().mapToDouble(Insulation::getHeat).sum();
     }
 
     @Override
@@ -142,14 +156,35 @@ public class InsulatorData extends ConfigData implements RequirementHolder
         if (items.isEmpty())
         {   return null;
         }
-        double insulVal1 = ((Number) entry.get(1)).doubleValue();
-        double insulVal2 = ((Number) entry.get(2)).doubleValue();
+
         boolean adaptive = entry.size() > 3 && entry.get(3).equals("adaptive");
+
+        List<Insulation> insulation = new ArrayList<>();
+        if (!adaptive)
+        {
+            // Error checking
+            if (!(entry.get(1) instanceof Number || entry.get(1) instanceof List<?> list && list.stream().allMatch(val -> val instanceof Number)))
+            {   ColdSweat.LOGGER.error("Error parsing {} insulator config: invalid cold insulation value: {}", slot.getSerializedName(), entry.get(1));
+                return null;
+            }
+            if (!(entry.get(2) instanceof Number || entry.get(2) instanceof List<?> list && list.stream().allMatch(val -> val instanceof Number)))
+            {   ColdSweat.LOGGER.error("Error parsing {} insulator config: invalid heat insulation valueL {}", slot.getSerializedName(), entry.get(2));
+                return null;
+            }
+            // Create/combine list of cold & hot insulation
+            List<Number> insulVal1 = entry.get(1) instanceof List ? (List<Number>) entry.get(1) : List.of((Number) entry.get(1));
+            List<Number> insulVal2 = entry.get(2) instanceof List ? (List<Number>) entry.get(2) : List.of((Number) entry.get(2));
+            List<Insulation> coldList = insulVal1.stream().map(val -> new StaticInsulation(val.doubleValue(), 0)).collect(Collectors.toList());
+            List<Insulation> hotList = insulVal2.stream().map(val -> new StaticInsulation(0, val.doubleValue())).collect(Collectors.toList());
+
+            insulation.addAll(Insulation.combine(coldList, hotList));
+        }
+        else
+        {   insulation.add(new AdaptiveInsulation(((Number) entry.get(1)).doubleValue(), ((Number) entry.get(2)).doubleValue()));
+        }
+
         ItemComponentsRequirement components = entry.size() > 4 ? ItemComponentsRequirement.parse((String) entry.get(4)) : new ItemComponentsRequirement();
         boolean multiSlot = entry.size() > 5 && (Boolean) entry.get(5);
-
-        Insulation insulation = adaptive ? new AdaptiveInsulation(insulVal1, insulVal2)
-                                         : new StaticInsulation(insulVal1, insulVal2);
 
         ItemRequirement itemRequirement = new ItemRequirement(items, components);
 
@@ -157,7 +192,7 @@ public class InsulatorData extends ConfigData implements RequirementHolder
     }
 
     public InsulatorData copy()
-    {   return new InsulatorData(this.item, this.slot, this.insulation.copy(), this.entity, this.attributes, new HashMap<>(this.immuneTempModifiers), this.fillSlots);
+    {   return new InsulatorData(this.item, this.slot, Insulation.deepCopy(this.insulation), this.entity, this.attributes, new HashMap<>(this.immuneTempModifiers), this.fillSlots);
     }
 
     @Override
