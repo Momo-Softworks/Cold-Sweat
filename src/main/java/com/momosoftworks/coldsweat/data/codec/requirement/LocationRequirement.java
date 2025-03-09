@@ -5,6 +5,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
+import com.momosoftworks.coldsweat.data.codec.util.WorldTempBounds;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
@@ -28,7 +29,8 @@ public record LocationRequirement(Optional<IntegerBounds> x, Optional<IntegerBou
                                   Optional<Either<TagKey<ConfiguredStructureFeature<?, ?>>, ResourceKey<ConfiguredStructureFeature<?, ?>>>> structure,
                                   Optional<Either<TagKey<Level>, ResourceKey<Level>>> dimension,
                                   Optional<IntegerBounds> light, Optional<BlockRequirement> block,
-                                  Optional<FluidRequirement> fluid, Optional<Predicate<BlockInWorld>> predicate)
+                                  Optional<FluidRequirement> fluid, Optional<WorldTempBounds> temperature,
+                                  Optional<Predicate<BlockInWorld>> predicate)
 {
     public static final Codec<LocationRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             IntegerBounds.CODEC.optionalFieldOf("x").forGetter(location -> location.x),
@@ -42,7 +44,8 @@ public record LocationRequirement(Optional<IntegerBounds> x, Optional<IntegerBou
             ConfigHelper.tagOrResourceKeyCodec(Registry.DIMENSION_REGISTRY).optionalFieldOf("dimension").forGetter(location -> location.dimension),
             IntegerBounds.CODEC.optionalFieldOf("light").forGetter(location -> location.light),
             BlockRequirement.CODEC.optionalFieldOf("block").forGetter(location -> location.block),
-            FluidRequirement.CODEC.optionalFieldOf("fluid").forGetter(location -> location.fluid)
+            FluidRequirement.CODEC.optionalFieldOf("fluid").forGetter(location -> location.fluid),
+            WorldTempBounds.CODEC.optionalFieldOf("temperature").forGetter(location -> location.temperature)
     ).apply(instance, LocationRequirement::new));
 
     public LocationRequirement(Optional<IntegerBounds> x, Optional<IntegerBounds> y, Optional<IntegerBounds> z,
@@ -51,9 +54,9 @@ public record LocationRequirement(Optional<IntegerBounds> x, Optional<IntegerBou
                                Optional<Either<TagKey<ConfiguredStructureFeature<?, ?>>, ResourceKey<ConfiguredStructureFeature<?, ?>>>> structure,
                                Optional<Either<TagKey<Level>, ResourceKey<Level>>> dimension,
                                Optional<IntegerBounds> light, Optional<BlockRequirement> block,
-                               Optional<FluidRequirement> fluid)
+                               Optional<FluidRequirement> fluid, Optional<WorldTempBounds> temperature)
     {
-        this(x, y, z, xOffset, yOffset, zOffset, biome, structure, dimension, light, block, fluid, Optional.empty());
+        this(x, y, z, xOffset, yOffset, zOffset, biome, structure, dimension, light, block, fluid, temperature, Optional.empty());
     }
 
     public LocationRequirement(Predicate<BlockInWorld> predicate)
@@ -62,14 +65,14 @@ public record LocationRequirement(Optional<IntegerBounds> x, Optional<IntegerBou
              0, 0, 0,
              Optional.empty(), Optional.empty(), Optional.empty(),
              Optional.empty(), Optional.empty(), Optional.empty(),
-             Optional.of(predicate));
+             Optional.empty(), Optional.of(predicate));
     }
 
     public static final LocationRequirement NONE = new LocationRequirement(Optional.empty(), Optional.empty(), Optional.empty(),
                                                                            0, 0, 0,
                                                                            Optional.empty(), Optional.empty(), Optional.empty(),
                                                                            Optional.empty(), Optional.empty(), Optional.empty(),
-                                                                           Optional.empty());
+                                                                           Optional.empty(), Optional.empty());
 
     public boolean test(Level level, Vec3 pos)
     {   return this.test(level, new BlockPos(pos));
@@ -121,8 +124,10 @@ public record LocationRequirement(Optional<IntegerBounds> x, Optional<IntegerBou
         {   return false;
         }
         if (this.fluid.isPresent() && !this.fluid.get().test(level, pos))
-        {
-            return false;
+        {   return false;
+        }
+        if (this.temperature.isPresent() && !this.temperature.get().test(WorldHelper.getRoughTemperatureAt(level, pos)))
+        {   return false;
         }
         return true;
     }
