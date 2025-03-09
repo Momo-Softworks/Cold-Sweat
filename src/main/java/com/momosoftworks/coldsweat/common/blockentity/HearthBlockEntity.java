@@ -367,11 +367,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                         if (player == null || player instanceof DummyPlayer) continue;
                         AABB playerBB = player.getBoundingBox().inflate(-0.1);
                         // Ensure height is at least 2 blocks tall
-                        if (playerBB.maxY - playerBB.minY < 1.5)
-                        {   playerBB = playerBB.inflate(0, 0.5, 0);
-                        }
-                        if (this.isAffectingPos(BlockPos.betweenClosedStream(playerBB).toArray(BlockPos[]::new))
-                        && !WorldHelper.canSeeSky(level, player.blockPosition(), 64))
+                        playerBB = playerBB.setMaxY(Math.max(playerBB.maxY, playerBB.minY + 2));
+                        if (this.isAffectingPos(WorldHelper.getOccupiedPositions(playerBB))
+                        && !WorldHelper.canSeeSky(level, BlockPos.containing(playerBB.getCenter()), 64))
                         {   this.insulatePlayer(player);
                         }
                     }
@@ -858,14 +856,14 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         }
     }
 
-    public boolean isAffectingPos(BlockPos... positions)
+    public boolean isAffectingPos(List<BlockPos> positions)
     {
         for (int i = 0; i < this.paths.size(); i++)
         {
             SpreadPath path = this.paths.get(i);
-            for (int j = 0; j < positions.length; j++)
+            for (int j = 0; j < positions.size(); j++)
             {
-                if (path.pos.equals(positions[j]))
+                if (path.pos.equals(positions.get(j)))
                 {   return true;
                 }
             }
