@@ -74,12 +74,12 @@ public class ProcessEquipmentInsulation
                     if (!armorInsulators.isEmpty()) // Add the armor's builtin insulation value (mutually exclusive with sewn insulation)
                     {
                         // Adapt builtin armor insulation
-                        Insulation firstInsulation = armorInsulators.get(0).insulation().copy();
+                        List<Insulation> firstInsulation = Insulation.deepCopy(armorInsulators.get(0).insulation());
                         double newFactor = 0;
-                        if (firstInsulation instanceof AdaptiveInsulation adaptive)
+                        if (!firstInsulation.isEmpty() && firstInsulation.get(0) instanceof AdaptiveInsulation adaptive)
                         {
                             // Get armor insulation adaptations from NBT
-                            AdaptiveInsulation.setFactorFromNBT(adaptive, armorStack);
+                            firstInsulation.forEach(insul -> AdaptiveInsulation.setFactorFromNBT(((AdaptiveInsulation) insul), armorStack));
                             newFactor = AdaptiveInsulation.calculateChange(adaptive, worldTemp, minTemp, maxTemp);
                             armorStack.getOrCreateTag().putDouble("InsulationAdaptation", newFactor);
                         }
@@ -90,14 +90,17 @@ public class ProcessEquipmentInsulation
                             if (!armorInsulator.test(player, armorStack))
                             {   continue;
                             }
-                            Insulation insulation = armorInsulator.insulation().copy();
-                            // Set adaptation to calculated value
-                            if (insulation instanceof AdaptiveInsulation adaptive)
-                            {   adaptive.setFactor(newFactor);
+                            List<Insulation> insulations = Insulation.deepCopy(armorInsulator.insulation());
+                            for (Insulation insul : insulations)
+                            {
+                                // Set adaptation to calculated value
+                                if (insul instanceof AdaptiveInsulation adaptive)
+                                {   adaptive.setFactor(newFactor);
+                                }
+                                // Store cold/hot insulation values
+                                mapAdd(armorInsulation, "cold_armor", insul.getCold());
+                                mapAdd(armorInsulation, "heat_armor", insul.getHeat());
                             }
-                            // Store cold/hot insulation values
-                            mapAdd(armorInsulation, "cold_armor", insulation.getCold());
-                            mapAdd(armorInsulation, "heat_armor", insulation.getHeat());
                         }
                     }
                     else // Add the armor's insulation value from the Sewing Table
@@ -169,8 +172,8 @@ public class ProcessEquipmentInsulation
                 {
                     if (insulator.test(player, curio))
                     {
-                        mapAdd(armorInsulation, "cold_curios", insulator.insulation().getCold());
-                        mapAdd(armorInsulation, "heat_curios", insulator.insulation().getHeat());
+                        mapAdd(armorInsulation, "cold_curios", insulator.getCold());
+                        mapAdd(armorInsulation, "heat_curios", insulator.getHeat());
                     }
                 }
             }
