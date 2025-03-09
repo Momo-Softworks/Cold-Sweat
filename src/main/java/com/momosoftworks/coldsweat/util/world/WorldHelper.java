@@ -839,5 +839,23 @@ public abstract class WorldHelper
         return Collections.emptyMap();
     }
 
+    public static List<BlockPos> getOccupiedPositions(AABB bb)
+    {
+        List<BlockPos> positions = new ArrayList<>();
+        int minX = (int) Math.floor(bb.minX);
+        int minY = (int) Math.floor(bb.minY);
+        int minZ = (int) Math.floor(bb.minZ);
+        int maxX = (int) Math.ceil(bb.maxX);
+        int maxY = (int) Math.ceil(bb.maxY);
+        int maxZ = (int) Math.ceil(bb.maxZ);
+
+        for (int x = minX; x < maxX; x++)
+        for (int y = minY; y < maxY; y++)
+        for (int z = minZ; z < maxZ; z++)
+        {   positions.add(new BlockPos(x, y, z));
+        }
+        return positions;
+    }
+
     public record TempSnapshot(Level level, BlockPos pos, long timestamp, double temperature) {}
 }
