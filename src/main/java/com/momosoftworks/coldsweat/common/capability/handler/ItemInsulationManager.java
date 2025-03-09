@@ -110,7 +110,7 @@ public class ItemInsulationManager
     public static LazyOptional<IInsulatableCap> getInsulationCap(ItemStack stack)
     {
         if (!(stack.getItem() instanceof IArmorVanishable)) return LazyOptional.empty();
-        return CAP_CACHE.get(stack);
+        return isInsulatable(stack) ? CAP_CACHE.get(stack) : LazyOptional.empty();
     }
 
     @SubscribeEvent

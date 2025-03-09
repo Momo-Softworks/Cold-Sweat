@@ -92,7 +92,7 @@ public class EntityTempManager
     public static Map<Entity, Map<ResourceLocation, Double>> TEMP_MODIFIER_IMMUNITIES = new WeakHashMap<>();
 
     public static LazyOptional<ITemperatureCap> getTemperatureCap(Entity entity)
-    {   return CAP_CACHE.get(entity);
+    {   return isTemperatureEnabled(entity) ? CAP_CACHE.get(entity) : LazyOptional.empty();
     }
 
     /**
