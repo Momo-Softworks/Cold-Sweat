@@ -346,7 +346,7 @@ public class ChameleonEntity extends AnimalEntity
     }
 
     public boolean isWalking()
-    {   return new Vector3d((float) getDeltaMovement().x, 0, (float) getDeltaMovement().z).length() > 0.01;
+    {   return new Vector3d((float) getDeltaMovement().x, 0, (float) getDeltaMovement().z).length() > 0.005;
     }
 
     @Override
