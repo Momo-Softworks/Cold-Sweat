@@ -4,56 +4,78 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.Decoder;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.compat.CompatManager;
+import com.momosoftworks.coldsweat.config.ConfigLoadingHandler;
+import com.momosoftworks.coldsweat.mixin_public.PublicMixinRegistration;
+import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.resources.*;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.GsonHelper;
+import org.checkerframework.checker.units.qual.A;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.valkyrienskies.core.impl.shadow.E;
 
+import java.io.InputStreamReader;
 import java.io.Reader;
+import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
-@Mixin(RegistryDataLoader.class)
+@Mixin(RegistryOps.class)
 public class MixinRegistration
 {
-    /**
-     * Injects into the datapack loading process to prevent CS registry elements from loading if their "required_mods" aren't met.
-     */
-    @Inject(method = "loadRegistryContents", at = @At(value = "INVOKE", target = "Lcom/google/gson/JsonParser;parseReader(Ljava/io/Reader;)Lcom/google/gson/JsonElement;", shift = At.Shift.BY, by = 2),
-            locals = LocalCapture.CAPTURE_FAILHARD)
-    private static <E> void loadRegistryContents(RegistryOps.RegistryInfoLookup pLookup, ResourceManager pManager, ResourceKey<? extends Registry<E>> pRegistryKey,
-                                                 WritableRegistry<E> pRegistry, Decoder<E> pDecoder, Map<ResourceKey<?>, Exception> pExceptions, CallbackInfo ci,
-                                                 // locals
-                                                 String s, FileToIdConverter filetoidconverter, RegistryOps<JsonElement> registryops, Iterator iterator,
-                                                 Map.Entry<ResourceLocation, Resource> entry, ResourceLocation resourcelocation, ResourceKey<E> resourcekey, Resource resource, Reader reader, JsonElement jsonelement)
+     @Inject(method = "createAndLoad(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/core/RegistryAccess$Writable;Lnet/minecraft/server/packs/resources/ResourceManager;)Lnet/minecraft/resources/RegistryOps;", at = @At("HEAD"))
+    private static <T> void captureResourceManager(DynamicOps<T> ops, RegistryAccess.Writable registryAccess, ResourceManager resourceManager, CallbackInfoReturnable<RegistryOps<T>> cir)
+    {   PublicMixinRegistration.RESOURCE_MANAGER = resourceManager;
+    }
+
+    @Mixin(targets = "net.minecraft.resources.RegistryResourceAccess$1")
+    public static final class Inner
     {
-        if (pRegistryKey.location().getNamespace().equals(ColdSweat.MOD_ID))
+        @Inject(method = "listResources", at = @At("RETURN"), cancellable = true)
+        private <E> void listResources(ResourceKey<? extends Registry<E>> registryKey, CallbackInfoReturnable<Collection<ResourceKey<E>>> cir)
         {
-            JsonObject json = jsonelement.getAsJsonObject();
-            if (json.has("required_mods"))
+            if (registryKey.location().getNamespace().equals(ColdSweat.MOD_ID))
             {
-                JsonArray requiredMods = json.getAsJsonArray("required_mods");
-                JsonArray conditions = json.getAsJsonArray("forge:conditions");
-                // Create conditions block if it doesn't exist
-                if (conditions == null)
-                {   conditions = new JsonArray();
-                    json.add("forge:conditions", conditions);
-                }
-                // Add required mods as forge conditions
-                for (JsonElement requiredMod : requiredMods)
+                Collection<ResourceKey<E>> map = cir.getReturnValue();
+                map.removeIf(entry ->
                 {
-                    JsonObject condition = new JsonObject();
-                    condition.addProperty("type", "forge:mod_loaded");
-                    condition.addProperty("modid", requiredMod.getAsString());
-                    conditions.add(condition);
-                }
+                    ResourceLocation location = entry.location();
+                    String absoluteLocation = String.format("%s/%s/%s.json", ColdSweat.MOD_ID, registryKey.location().getPath(), location.getPath());
+                    try (Resource resource = PublicMixinRegistration.RESOURCE_MANAGER.getResource(new ResourceLocation(registryKey.location().getNamespace(), absoluteLocation));
+                         Reader reader = new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))
+                    {
+                        JsonObject json = GsonHelper.parse(reader);
+                        if (json.has("required_mods"))
+                        {
+                            JsonArray requiredMods = json.getAsJsonArray("required_mods");
+                            for (JsonElement requiredMod : requiredMods)
+                            {
+                                if (!CompatManager.modLoaded(requiredMod.getAsString()))
+                                {   return true;
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {   return false;
+                    }
+                    return false;
+                });
+                cir.setReturnValue(map);
             }
         }
     }
