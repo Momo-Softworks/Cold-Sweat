@@ -222,7 +222,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
     public BlockState getStateForPlacement(BlockPlaceContext context)
     {
         Level level = context.getLevel();
-        return level.getBlockState(context.getClickedPos().above()).canBeReplaced()
+        return level.getBlockState(context.getClickedPos().above()).canBeReplaced(context)
                ? this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite())
                : null;
     }
