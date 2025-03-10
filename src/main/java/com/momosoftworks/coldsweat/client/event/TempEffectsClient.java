@@ -2,7 +2,6 @@ package com.momosoftworks.coldsweat.client.event;
 
 import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.vanilla.RenderLevelEvent;
 import com.momosoftworks.coldsweat.api.util.Temperature;
@@ -13,28 +12,21 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ModEffects;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.util.ObfuscationReflectionHelper;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
-import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
-
-import java.lang.reflect.Field;
-import java.util.List;
 
 @EventBusSubscriber(Dist.CLIENT)
 public class TempEffectsClient
 {
     static float BLEND_TEMP = 0;
-
     static float PREV_X_SWAY = 0;
     static float PREV_Y_SWAY = 0;
     static float X_SWAY_SPEED = 0;
@@ -57,10 +49,9 @@ public class TempEffectsClient
         {
             // Get the FPS of the game
             float frameTime = Minecraft.getInstance().getTimer().getRealtimeDeltaTicks();
-            float temp = (float) Temperature.get(player, Temperature.Trait.BODY);
             // Get a blended version of the player's temperature
             // More important for fog stuff
-            BLEND_TEMP += (temp - BLEND_TEMP) * frameTime / 20;
+            BLEND_TEMP = (float) CSMath.blend(Overlays.PREV_BODY_TEMP, Overlays.BODY_TEMP, event.getPartialTick(), 0, 1);
 
             if (ConfigSettings.DISTORTION_EFFECTS.get())
             {
