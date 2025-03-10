@@ -354,7 +354,7 @@ public class Chameleon extends Animal
     }
 
     public boolean isWalking()
-    {   return new Vec2((float) getDeltaMovement().x, (float) getDeltaMovement().z).length() > 0.01;
+    {   return new Vec2((float) getDeltaMovement().x, (float) getDeltaMovement().z).length() > 0.005;
     }
 
     @Override
