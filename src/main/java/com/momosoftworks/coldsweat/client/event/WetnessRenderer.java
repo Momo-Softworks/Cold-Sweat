@@ -119,7 +119,7 @@ public class WetnessRenderer
                 }
             }
         }
-        WAS_SUBMERGED = isSubmerged;
+        WAS_SUBMERGED = player.isAlive() && isSubmerged;
 
         // Spawn droplets randomly when the player is wet
         if (!paused && !isSubmerged && wetness > 0.01f && ((float) Math.random() * 0.05) < 0.0015f * wetness * (frametime * 2)
