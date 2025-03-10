@@ -153,7 +153,7 @@ dependencies {
 
     implementation fg.deobf("curse.maven:create-328085:4550987")
     implementation fg.deobf("curse.maven:curios-309927:4523009")
-    implementation fg.deobf("curse.maven:thirst-was-taken-679270:5071552")
+    compileOnly fg.deobf("curse.maven:thirst-was-taken-679270:5071552")
     compileOnly fg.deobf("curse.maven:spoiled-364918:4614777")
 
     implementation         ("org.valkyrienskies.core:api:${valk_skies_api_version}")
