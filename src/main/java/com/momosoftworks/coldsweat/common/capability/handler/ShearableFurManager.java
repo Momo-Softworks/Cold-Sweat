@@ -31,6 +31,7 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
@@ -54,6 +55,14 @@ public class ShearableFurManager
     {
         return isShearable(entity) ? Optional.ofNullable(CAP_CACHE.computeIfAbsent(entity, e -> e.getCapability(ModCapabilities.SHEARABLE_FUR)))
                                    : Optional.empty();
+    }
+
+    @SubscribeEvent
+    public static void cleanRemovedEntities(EntityLeaveLevelEvent event)
+    {
+        if (isShearable(event.getEntity()))
+        {   CAP_CACHE.entrySet().removeIf(e -> e.getKey().isRemoved());
+        }
     }
 
     @SubscribeEvent

@@ -70,6 +70,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 @EventBusSubscriber
 public class EntityTempManager
@@ -122,9 +123,10 @@ public class EntityTempManager
     public static void cleanRemovedEntities(EntityLeaveLevelEvent event)
     {
         if (isTemperatureEnabled(event.getEntity()))
-        {   SERVER_CAP_CACHE.remove(event.getEntity());
-            CLIENT_CAP_CACHE.remove(event.getEntity());
-            TEMP_MODIFIER_IMMUNITIES.remove(event.getEntity());
+        {   Predicate<Map.Entry<Entity, ?>> removal = e -> e.getKey().isRemoved();
+            SERVER_CAP_CACHE.entrySet().removeIf(removal);
+            CLIENT_CAP_CACHE.entrySet().removeIf(removal);
+            TEMP_MODIFIER_IMMUNITIES.entrySet().removeIf(removal);
         }
     }
 
