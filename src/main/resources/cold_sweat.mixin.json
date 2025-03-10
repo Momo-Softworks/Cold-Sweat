@@ -35,6 +35,7 @@
     "MixinMinecart",
     "MixinMobSpawning",
     "MixinPreServerLoad",
+    "MixinRegistration",
     "MixinShearsDispenseBehavior",
     "MixinSmithingRecipe",
     "MixinSoulCampfire",
