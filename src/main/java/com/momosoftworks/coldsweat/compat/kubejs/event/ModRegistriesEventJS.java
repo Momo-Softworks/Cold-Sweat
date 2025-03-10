@@ -20,7 +20,6 @@ import dev.latvian.mods.kubejs.event.StartupEventJS;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -206,7 +205,7 @@ public class ModRegistriesEventJS extends StartupEventJS
 
     public void addBiomeTemperature(double minTemp, double maxTemp, String units, String... biomes)
     {
-        this.addRegistryConfig(Registries.BIOME, ConfigSettings.BIOME_TEMPS, biomes,
+        this.addRegistryConfig(Registry.BIOME_REGISTRY, ConfigSettings.BIOME_TEMPS, biomes,
                 parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), false));
     }
     public void addBiomeTemperature(double minTemp, double maxTemp, String... biomes)
@@ -215,7 +214,7 @@ public class ModRegistriesEventJS extends StartupEventJS
 
     public void addBiomeOffset(double minTemp, double maxTemp, String units, String... biomes)
     {
-        this.addRegistryConfig(Registries.BIOME, ConfigSettings.BIOME_OFFSETS, biomes,
+        this.addRegistryConfig(Registry.BIOME_REGISTRY, ConfigSettings.BIOME_OFFSETS, biomes,
                 parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), true));
     }
     public void addBiomeOffset(double minTemp, double maxTemp, String... biomes)
@@ -228,7 +227,7 @@ public class ModRegistriesEventJS extends StartupEventJS
 
     public void addDimensionTemperature(double temperature, String units, String... dimensions)
     {
-        this.addRegistryConfig(Registries.DIMENSION_TYPE, ConfigSettings.DIMENSION_TEMPS, dimensions,
+        this.addRegistryConfig(Registry.DIMENSION_TYPE_REGISTRY, ConfigSettings.DIMENSION_TEMPS, dimensions,
                 parsedDimensions -> new DimensionTempData(parsedDimensions, temperature, Temperature.Units.fromID(units), false));
     }
     public void addDimensionTemperature(double temperature, String... dimensions)
@@ -237,7 +236,7 @@ public class ModRegistriesEventJS extends StartupEventJS
 
     public void addDimensionOffset(double temperature, String units, String... dimensions)
     {
-        this.addRegistryConfig(Registries.DIMENSION_TYPE, ConfigSettings.DIMENSION_OFFSETS, dimensions,
+        this.addRegistryConfig(Registry.DIMENSION_TYPE_REGISTRY, ConfigSettings.DIMENSION_OFFSETS, dimensions,
                 parsedDimensions -> new DimensionTempData(parsedDimensions, temperature, Temperature.Units.fromID(units), true));
     }
     public void addDimensionOffset(double temperature, String... dimensions)
@@ -250,7 +249,7 @@ public class ModRegistriesEventJS extends StartupEventJS
 
     public void addStructureTemperature(double temperature, String units, String... structures)
     {
-        this.addRegistryConfig(Registries.STRUCTURE, ConfigSettings.STRUCTURE_TEMPS, structures,
+        this.addRegistryConfig(Registry.STRUCTURE_REGISTRY, ConfigSettings.STRUCTURE_TEMPS, structures,
                 parsedStructures -> new StructureTempData(parsedStructures, temperature, Temperature.Units.fromID(units), false));
     }
     public void addStructureTemperature(double temperature, String... structures)
@@ -259,7 +258,7 @@ public class ModRegistriesEventJS extends StartupEventJS
 
     public void addStructureOffset(double temperature, String units, String... structures)
     {
-        this.addRegistryConfig(Registries.STRUCTURE, ConfigSettings.STRUCTURE_OFFSETS, structures,
+        this.addRegistryConfig(Registry.STRUCTURE_REGISTRY, ConfigSettings.STRUCTURE_OFFSETS, structures,
                 parsedStructures -> new StructureTempData(parsedStructures, temperature, Temperature.Units.fromID(units), true));
     }
     public void addStructureOffset(double temperature, String... structures)
