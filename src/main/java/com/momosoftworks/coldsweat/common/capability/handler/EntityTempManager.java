@@ -54,6 +54,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEquipmentChangeEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
@@ -79,14 +80,16 @@ public class EntityTempManager
 
     public static final Set<EntityType<? extends LivingEntity>> TEMPERATURE_ENABLED_ENTITIES = new HashSet<>(ImmutableSet.<EntityType<? extends LivingEntity>>builder().add(EntityType.PLAYER).build());
 
+    public static final Map<Entity, ITemperatureCap> SERVER_CAP_CACHE = new HashMap<>();
+    public static final Map<Entity, ITemperatureCap> CLIENT_CAP_CACHE = new HashMap<>();
     public static Map<Entity, Map<ResourceLocation, Double>> TEMP_MODIFIER_IMMUNITIES = new WeakHashMap<>();
 
     public static Optional<ITemperatureCap> getTemperatureCap(Entity entity)
     {
-        return isTemperatureEnabled(entity)
-               ? Optional.ofNullable(entity.getCapability(entity instanceof Player ? ModCapabilities.PLAYER_TEMPERATURE
-                                                                                   : ModCapabilities.ENTITY_TEMPERATURE))
-               : Optional.empty();
+        Map<Entity, ITemperatureCap> cache = entity.level().isClientSide ? CLIENT_CAP_CACHE : SERVER_CAP_CACHE;
+        return Optional.ofNullable(cache.computeIfAbsent(entity, e -> e.getCapability(entity instanceof Player
+                                                                                      ? ModCapabilities.PLAYER_TEMPERATURE
+                                                                                      : ModCapabilities.ENTITY_TEMPERATURE)));
     }
 
     /**
@@ -110,6 +113,16 @@ public class EntityTempManager
                     cap.getModifiers(trait).addAll(gatherEvent.getModifiers());
                 }
             });
+        }
+    }
+
+    @SubscribeEvent
+    public static void cleanRemovedEntities(EntityLeaveLevelEvent event)
+    {
+        if (isTemperatureEnabled(event.getEntity()))
+        {   SERVER_CAP_CACHE.remove(event.getEntity());
+            CLIENT_CAP_CACHE.remove(event.getEntity());
+            TEMP_MODIFIER_IMMUNITIES.remove(event.getEntity());
         }
     }
 

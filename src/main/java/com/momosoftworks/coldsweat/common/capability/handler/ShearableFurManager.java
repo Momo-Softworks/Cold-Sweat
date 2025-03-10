@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.common.capability.handler;
 
 import com.momosoftworks.coldsweat.common.capability.ModCapabilities;
 import com.momosoftworks.coldsweat.common.capability.shearing.IShearableCap;
+import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.network.message.SyncShearableDataMessage;
@@ -36,18 +37,23 @@ import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @EventBusSubscriber
 public class ShearableFurManager
 {
+    public static final Map<Entity, IShearableCap> CAP_CACHE = new HashMap<>();
+
     public static boolean isShearable(Entity entity)
     {   return entity instanceof Goat;
     }
 
     public static Optional<IShearableCap> getFurCap(Entity entity)
     {
-        return isShearable(entity) ? Optional.ofNullable(entity.getCapability(ModCapabilities.SHEARABLE_FUR)) : Optional.empty();
+        return isShearable(entity) ? Optional.ofNullable(CAP_CACHE.computeIfAbsent(entity, e -> e.getCapability(ModCapabilities.SHEARABLE_FUR)))
+                                   : Optional.empty();
     }
 
     @SubscribeEvent
