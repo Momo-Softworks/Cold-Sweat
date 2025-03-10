@@ -251,7 +251,7 @@ public class Overlays
     public static void onClientTick(TickEvent.ClientTickEvent event)
     {
         PlayerEntity player = Minecraft.getInstance().player;
-        if (event.phase == TickEvent.Phase.START && player != null)
+        if (event.phase == TickEvent.Phase.START && player != null && player.isAlive())
         {
             EntityTempManager.getTemperatureCap(player).ifPresent(icap ->
             {
