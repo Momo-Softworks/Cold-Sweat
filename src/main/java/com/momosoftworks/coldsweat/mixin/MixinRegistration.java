@@ -55,7 +55,6 @@ public class MixinRegistration
                     conditions.add(condition);
                 }
             }
-            jsonelement.getAsJsonObject().addProperty("test", "test");
         }
     }
 }
