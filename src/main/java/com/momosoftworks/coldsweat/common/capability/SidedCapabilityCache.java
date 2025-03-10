@@ -10,28 +10,23 @@ import java.util.function.Predicate;
 
 public class SidedCapabilityCache<C, K extends ICapabilityProvider> extends CapabilityCache<C, K>
 {
-    protected final Predicate<K> invalidator;
     protected final CapabilityCache<C, K> clientCache;
 
     public SidedCapabilityCache(Capability<C> capability, Predicate<K> invalidator)
     {
         super(capability, invalidator);
-        this.invalidator = invalidator;
         this.clientCache = new CapabilityCache<>(capability, invalidator);
     }
 
     @Override
     public LazyOptional<C> get(K key)
-    {
-        boolean isClient = EffectiveSide.get().isClient();
-        return isClient ? clientCache.get(key) : super.get(key);
+    {   return EffectiveSide.get().isClient() ? clientCache.get(key) : super.get(key);
     }
 
     @Override
     public void remove(K key)
     {
-        boolean isClient = EffectiveSide.get().isClient();
-        if (isClient)
+        if (EffectiveSide.get().isClient())
         {   clientCache.remove(key);
         }
         else super.remove(key);
@@ -51,32 +46,24 @@ public class SidedCapabilityCache<C, K extends ICapabilityProvider> extends Capa
         if (EffectiveSide.get().isClient())
         {   this.clearClient();
         }
-        else
-        {   this.clearServer();
-        }
+        else this.clearServer();
     }
 
     @Override
     public void ifPresent(K key, Consumer<C> consumer)
     {
-        boolean isClient = EffectiveSide.get().isClient();
-        if (isClient)
+        if (EffectiveSide.get().isClient())
         {   clientCache.ifPresent(key, consumer);
         }
-        else
-        {   super.ifPresent(key, consumer);
-        }
+        else  super.ifPresent(key, consumer);
     }
 
     @Override
     public void ifLazyPresent(K key, Consumer<LazyOptional<C>> consumer)
     {
-        boolean isClient = EffectiveSide.get().isClient();
-        if (isClient)
+        if (EffectiveSide.get().isClient())
         {   clientCache.ifLazyPresent(key, consumer);
         }
-        else
-        {   super.ifLazyPresent(key, consumer);
-        }
+        else super.ifLazyPresent(key, consumer);
     }
 }
