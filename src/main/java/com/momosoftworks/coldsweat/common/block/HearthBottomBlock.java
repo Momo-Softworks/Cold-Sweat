@@ -26,7 +26,6 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.IBlockReader;
-import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
 
@@ -215,7 +214,7 @@ public class HearthBottomBlock extends Block
     public BlockState getStateForPlacement(BlockItemUseContext context)
     {
         World level = context.getLevel();
-        return level.getBlockState(context.getClickedPos().above()).canBeReplaced()
+        return level.getBlockState(context.getClickedPos().above()).canBeReplaced(context)
                ? this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite())
                : null;
     }
