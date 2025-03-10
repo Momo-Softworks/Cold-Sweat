@@ -62,6 +62,7 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.world.SleepFinishedTimeEvent;
@@ -88,7 +89,7 @@ public class EntityTempManager
 
     public static final Set<EntityType<? extends LivingEntity>> TEMPERATURE_ENABLED_ENTITIES = new HashSet<>(Arrays.asList(EntityType.PLAYER));
 
-    public static SidedCapabilityCache<ITemperatureCap, Entity> CAP_CACHE = new SidedCapabilityCache<>(() -> ModCapabilities.ENTITY_TEMPERATURE, e -> !e.isAlive());
+    public static SidedCapabilityCache<ITemperatureCap, Entity> CAP_CACHE = new SidedCapabilityCache<>(() -> ModCapabilities.ENTITY_TEMPERATURE);
     public static Map<Entity, Map<ResourceLocation, Double>> TEMP_MODIFIER_IMMUNITIES = new WeakHashMap<>();
 
     public static LazyOptional<ITemperatureCap> getTemperatureCap(Entity entity)
@@ -163,6 +164,15 @@ public class EntityTempManager
                 cap.tick(living);
                 TaskScheduler.scheduleServer(() -> Temperature.updateTemperature(living, cap, true), 1);
             });
+        }
+    }
+
+    @SubscribeEvent
+    public static void cleanRemovedEntities(EntityLeaveWorldEvent event)
+    {
+        if (isTemperatureEnabled(event.getEntity()))
+        {   CAP_CACHE.removeIf(ent -> ent.removed);
+            TEMP_MODIFIER_IMMUNITIES.entrySet().removeIf(e -> e.getKey().removed);
         }
     }
 

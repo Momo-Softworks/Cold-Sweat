@@ -21,6 +21,11 @@ public class CapabilityCache<C, K extends ICapabilityProvider>
         this.invalidator = invalidator;
     }
 
+    public CapabilityCache(Supplier<Capability<C>> capability)
+    {   this.capability = capability;
+        this.invalidator = null;
+    }
+
     public LazyOptional<C> get(K key)
     {
         this.cleanExpiredEntries();
@@ -45,7 +50,10 @@ public class CapabilityCache<C, K extends ICapabilityProvider>
     }
 
     protected void cleanExpiredEntries()
-    {   cache.entrySet().removeIf(e -> invalidator.test(e.getKey()));
+    {
+        if (this.invalidator != null)
+        {   cache.entrySet().removeIf(e -> invalidator.test(e.getKey()));
+        }
     }
 
     public void ifPresent(K key, Consumer<C> consumer)
@@ -62,5 +70,9 @@ public class CapabilityCache<C, K extends ICapabilityProvider>
         if (cap != null)
         {   consumer.accept(cap);
         }
+    }
+
+    public void removeIf(Predicate<K> predicate)
+    {   cache.entrySet().removeIf(e -> predicate.test(e.getKey()));
     }
 }

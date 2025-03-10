@@ -41,7 +41,7 @@ import javax.annotation.Nullable;
 @Mod.EventBusSubscriber
 public class ShearableFurManager
 {
-    public static SidedCapabilityCache<IShearableCap, Entity> CAP_CACHE = new SidedCapabilityCache<>(() -> ModCapabilities.SHEARABLE_FUR, e -> !e.isAddedToWorld());
+    public static SidedCapabilityCache<IShearableCap, Entity> CAP_CACHE = new SidedCapabilityCache<>(() -> ModCapabilities.SHEARABLE_FUR, ent -> ent.removed);
 
     public static boolean isShearable(Entity entity)
     {   return entity instanceof GoatEntity || CompatManager.isGoat(entity);
