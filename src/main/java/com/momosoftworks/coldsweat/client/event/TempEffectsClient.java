@@ -34,7 +34,6 @@ import net.minecraftforge.fml.common.Mod;
 public class TempEffectsClient
 {
     static float BLEND_TEMP = 0;
-
     static float PREV_X_SWAY = 0;
     static float PREV_Y_SWAY = 0;
     static float X_SWAY_SPEED = 0;
@@ -57,10 +56,9 @@ public class TempEffectsClient
         {
             // Get the FPS of the game
             float frameTime = Minecraft.getInstance().getDeltaFrameTime();
-            float temp = (float) Temperature.get(player, Temperature.Trait.BODY);
             // Get a blended version of the player's temperature
             // More important for fog stuff
-            BLEND_TEMP += (temp - BLEND_TEMP) * frameTime / 20;
+            BLEND_TEMP = (float) CSMath.blend(Overlays.PREV_BODY_TEMP, Overlays.BODY_TEMP, event.getPartialTick(), 0, 1);
 
             if (ConfigSettings.DISTORTION_EFFECTS.get())
             {

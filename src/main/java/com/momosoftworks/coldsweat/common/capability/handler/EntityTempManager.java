@@ -155,6 +155,8 @@ public class EntityTempManager
                     cap.getModifiers(trait).clear();
                     cap.getModifiers(trait).addAll(gatherEvent.getModifiers());
                 }
+                cap.tick(living);
+                TaskScheduler.scheduleServer(() -> Temperature.updateTemperature(living, cap, true), 1);
             });
         }
     }
@@ -334,9 +336,6 @@ public class EntityTempManager
                 oldPlayer.reviveCaps();
                 getTemperatureCap(oldPlayer).ifPresent(cap::copy);
                 oldPlayer.invalidateCaps();
-            }
-            if (!newPlayer.level.isClientSide)
-            {   Temperature.updateTemperature(newPlayer, cap, true);
             }
         });
 
