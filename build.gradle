@@ -160,7 +160,7 @@ dependencies {
     implementation fg.deobf("curse.maven:create-328085:6247663")
     compileOnly("net.createmod.ponder:Ponder-Forge-1.20.1:1.0.37")
     implementation fg.deobf("curse.maven:curios-309927:5367944-sources-5367945")
-    compileOnly fg.deobf("curse.maven:thirst-was-taken-679270:5568703")
+    compileOnly fg.deobf("curse.maven:thirst-was-taken-679270:6274345")
     implementation fg.deobf("curse.maven:glitchcore-955399:5787839")
     implementation fg.deobf("curse.maven:serene-seasons-291874:5790653")
     implementation fg.deobf("curse.maven:spoiled-364918:4803042")
