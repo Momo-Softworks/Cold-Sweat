@@ -45,15 +45,15 @@ public class Overlays
                                                : VAGUE_TEMP_GAUGE;
 
     // Stuff for world temperature
-    public static double WORLD_TEMP = 0;
     static boolean ADVANCED_WORLD_TEMP = false;
+    public static double WORLD_TEMP = 0;
     static double PREV_WORLD_TEMP = 0;
     static double PLAYER_MAX_TEMP = 0;
     static double PLAYER_MIN_TEMP = 0;
 
     // Stuff for body temperature
     public static double BODY_TEMP = 0;
-    static double PREV_BODY_TEMP = 0;
+    public static double PREV_BODY_TEMP = 0;
     static int BLEND_BODY_TEMP = 0;
     static int ICON_BOB = 0;
     static int BODY_ICON = 0;

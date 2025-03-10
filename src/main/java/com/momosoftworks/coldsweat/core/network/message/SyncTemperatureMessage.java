@@ -4,6 +4,7 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.gui.Overlays;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -57,6 +58,7 @@ public class SyncTemperatureMessage
                         cap.deserializeTraits(message.traits);
                         if (message.instant && cap instanceof PlayerTempCap)
                         {   Overlays.setBodyTempInstant(cap.getTrait(Temperature.Trait.BODY));
+                            Overlays.setWorldTempInstant(Temperature.convert(cap.getTrait(Temperature.Trait.WORLD), Temperature.Units.MC, ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F, true));
                         }
                     });
                 }
