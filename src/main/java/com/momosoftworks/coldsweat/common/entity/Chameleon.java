@@ -410,9 +410,8 @@ public class Chameleon extends Animal
         }
 
         // Control temperature
-        if (this.tickCount % 20 == 0)
-        {   // Use the player's temperature if mounted
-            this.desiredTemp = (float) CSMath.clamp(Temperature.get(this, Temperature.Trait.WORLD), ConfigSettings.MIN_TEMP.get(), ConfigSettings.MAX_TEMP.get());
+        if (this.tickCount % 20 == 0 || this.tickCount  == 1)
+        {   this.desiredTemp = (float) CSMath.clamp(Temperature.get(this, Temperature.Trait.WORLD), ConfigSettings.MIN_TEMP.get(), ConfigSettings.MAX_TEMP.get());
         }
         this.setTemperature(this.getTemperature() + (this.desiredTemp - this.getTemperature()) * 0.03f);
 
@@ -819,5 +818,6 @@ public class Chameleon extends Animal
             });
         }
         this.setTemperature(nbt.getFloat("Temperature"));
+        this.desiredTemp = this.getTemperature();
     }
 }
