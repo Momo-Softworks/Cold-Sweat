@@ -18,6 +18,12 @@ public class SidedCapabilityCache<C, K extends ICapabilityProvider> extends Capa
         this.clientCache = new CapabilityCache<>(capability, invalidator);
     }
 
+    public SidedCapabilityCache(Capability<C> capability)
+    {
+        super(capability);
+        this.clientCache = new CapabilityCache<>(capability);
+    }
+
     @Override
     public LazyOptional<C> get(K key)
     {   return EffectiveSide.get().isClient() ? clientCache.get(key) : super.get(key);
