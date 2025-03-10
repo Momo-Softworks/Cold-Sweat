@@ -39,6 +39,7 @@
     "MixinMobSpawning",
     "MixinPreServerLoad",
     "MixinRegistration",
+    "MixinRegistration$Inner",
     "MixinShearsDispenseBehavior",
     "MixinSmithingRecipe",
     "MixinSoulCampfire",
