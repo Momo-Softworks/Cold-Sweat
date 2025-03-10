@@ -48,7 +48,7 @@ public class TempEffectsClient
     public static void setCamera(ViewportEvent.ComputeCameraAngles event)
     {
         Player player = Minecraft.getInstance().player;
-        if (player == null || !player.isAlive() && EntityTempManager.isPeacefulMode(player)) return;
+        if (player == null || !player.isAlive() || EntityTempManager.isPeacefulMode(player)) return;
 
         if (!Minecraft.getInstance().isPaused())
         {
