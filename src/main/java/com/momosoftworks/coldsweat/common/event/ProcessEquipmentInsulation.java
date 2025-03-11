@@ -102,20 +102,23 @@ public class ProcessEquipmentInsulation
                     else // Add the armor's insulation value from the Sewing Table
                     {
                         LazyOptional<IInsulatableCap> iCap = ItemInsulationManager.getInsulationCap(armorStack);
-                        List<InsulatorData> insulation = ItemInsulationManager.getEffectiveAppliedInsulation(armorStack, player);
+                        List<InsulatorData> insulators = ItemInsulationManager.getEffectiveAppliedInsulation(armorStack, player);
 
                         // Get the armor's insulation values
-                        for (InsulatorData value : insulation)
+                        for (InsulatorData value : insulators)
                         {
-                            if (value.insulation() instanceof StaticInsulation)
+                            for (Insulation insulation : value.insulation())
                             {
-                                mapAdd(armorInsulation, "cold_insulators", value.insulation().getCold());
-                                mapAdd(armorInsulation, "heat_insulators", value.insulation().getHeat());
-                            }
-                            else if (value.insulation() instanceof AdaptiveInsulation)
-                            {
-                                mapAdd(armorInsulation, "cold_insulators", CSMath.blend(((AdaptiveInsulation) value.insulation()).getInsulation() * 0.75, 0, ((AdaptiveInsulation) value.insulation()).getFactor(), -1, 1));
-                                mapAdd(armorInsulation, "heat_insulators", CSMath.blend(0, ((AdaptiveInsulation) value.insulation()).getInsulation() * 0.75, ((AdaptiveInsulation) value.insulation()).getFactor(), -1, 1));
+                                if (insulation instanceof StaticInsulation)
+                                {
+                                    mapAdd(armorInsulation, "cold_insulators", insulation.getCold());
+                                    mapAdd(armorInsulation, "heat_insulators", insulation.getHeat());
+                                }
+                                else if (insulation instanceof AdaptiveInsulation)
+                                {
+                                    mapAdd(armorInsulation, "cold_insulators", CSMath.blend(((AdaptiveInsulation) value.insulation()).getInsulation() * 0.75, 0, ((AdaptiveInsulation) value.insulation()).getFactor(), -1, 1));
+                                    mapAdd(armorInsulation, "heat_insulators", CSMath.blend(0, ((AdaptiveInsulation) value.insulation()).getInsulation() * 0.75, ((AdaptiveInsulation) value.insulation()).getFactor(), -1, 1));
+                                }
                             }
                         }
 
