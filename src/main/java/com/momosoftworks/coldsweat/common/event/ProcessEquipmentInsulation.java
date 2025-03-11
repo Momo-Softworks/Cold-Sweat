@@ -73,7 +73,7 @@ public class ProcessEquipmentInsulation
                         double newFactor = 0;
                         if (!firstInsulation.isEmpty() && firstInsulation.get(0) instanceof AdaptiveInsulation)
                         {
-                            AdaptiveInsulation adaptive = (AdaptiveInsulation) firstInsulation;
+                            AdaptiveInsulation adaptive = (AdaptiveInsulation) firstInsulation.get(0);
                             // Get armor insulation adaptations from NBT
                             firstInsulation.forEach(insul -> AdaptiveInsulation.setFactorFromNBT(((AdaptiveInsulation) insul), armorStack));
                             newFactor = AdaptiveInsulation.calculateChange(adaptive, worldTemp, minTemp, maxTemp);

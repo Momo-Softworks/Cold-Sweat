@@ -54,7 +54,7 @@ public class TempEffectsClient
             float frameTime = Minecraft.getInstance().getDeltaFrameTime();
             // Get a blended version of the player's temperature
             // More important for fog stuff
-            BLEND_TEMP = (float) CSMath.blend(Overlays.PREV_BODY_TEMP, Overlays.BODY_TEMP, event.getPartialTicks(), 0, 1);
+            BLEND_TEMP = (float) CSMath.blend(Overlays.PREV_BODY_TEMP, Overlays.BODY_TEMP, event.getRenderPartialTicks(), 0, 1);
 
             if (ConfigSettings.DISTORTION_EFFECTS.get())
             {
