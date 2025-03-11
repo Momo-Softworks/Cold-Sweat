@@ -65,7 +65,8 @@ public class MixinRegistration
                             for (JsonElement requiredMod : requiredMods)
                             {
                                 if (!CompatManager.modLoaded(requiredMod.getAsString()))
-                                {   return true;
+                                {   ColdSweat.LOGGER.warn("Skipping registration of {} {}: missing mod \"{}\"", registryKey.location(), location, requiredMod.getAsString());
+                                    return true;
                                 }
                             }
                         }
