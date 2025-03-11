@@ -1,7 +1,9 @@
 package com.momosoftworks.coldsweat.config;
 
 import com.google.common.collect.Multimap;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
@@ -650,6 +652,10 @@ public class ConfigLoadingHandler
             {
                 try (FileReader reader = new FileReader(file))
                 {
+                    JsonObject json = JSONUtils.parse(reader);
+                    if (!shouldLoadJSON(registry, file.getPath(), json))
+                    {   continue;
+                    }
                     codec.decode(registryOps, JSONUtils.parse(reader))
                             .resultOrPartial(ColdSweat.LOGGER::error)
                             .map(Pair::getFirst)
@@ -661,6 +667,22 @@ public class ConfigLoadingHandler
             }
         }
         return output;
+    }
+
+    private static boolean shouldLoadJSON(RegistryKey registryKey, String elementName, JsonObject json)
+    {
+        if (json.has("required_mods"))
+        {
+            JsonArray requiredMods = json.getAsJsonArray("required_mods");
+            for (JsonElement requiredMod : requiredMods)
+            {
+                if (!CompatManager.modLoaded(requiredMod.getAsString()))
+                {   ColdSweat.LOGGER.warn("Skipping registration of {} {}: missing mod \"{}\"", registryKey.location(), elementName, requiredMod.getAsString());
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     public static List<File> findFilesRecursive(File directory)
