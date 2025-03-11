@@ -113,8 +113,10 @@ public class EntityTempManager
                     cap.getModifiers(trait).clear();
                     cap.getModifiers(trait).addAll(gatherEvent.getModifiers());
                 }
-                cap.tick(living);
-                TaskScheduler.scheduleServer(() -> Temperature.updateTemperature(living, cap, true), 1);
+                TaskScheduler.scheduleServer(() ->
+                {   cap.tick(living);
+                    Temperature.updateTemperature(living, cap, true);
+                }, 1);
             });
         }
     }
