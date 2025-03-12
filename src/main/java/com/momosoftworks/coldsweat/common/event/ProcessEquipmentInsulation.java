@@ -1,6 +1,5 @@
 package com.momosoftworks.coldsweat.common.event;
 
-import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.event.common.insulation.InsulationTickEvent;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
@@ -20,10 +19,6 @@ import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.advancements.Advancement;
-import net.minecraft.client.Minecraft;
-import net.minecraft.nbt.DoubleTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -76,16 +71,7 @@ public class ProcessEquipmentInsulation
                     if (!armorInsulators.isEmpty()) // Add the armor's builtin insulation value (mutually exclusive with sewn insulation)
                     {
                         // Adapt builtin armor insulation
-                        List<Insulation> firstInsulation = Insulation.deepCopy(armorInsulators.get(0).insulation());
-                        double newFactor = 0;
-                        if (!firstInsulation.isEmpty() && firstInsulation.get(0) instanceof AdaptiveInsulation adaptive)
-                        {
-                            // Get armor insulation adaptations from NBT
-                            firstInsulation.forEach(insul -> AdaptiveInsulation.setFactorFromNBT(((AdaptiveInsulation) insul), armorStack));
-                            newFactor = AdaptiveInsulation.calculateChange(adaptive, worldTemp, minTemp, maxTemp);
-                            armorStack.getOrCreateTag().putDouble("InsulationAdaptation", newFactor);
-                        }
-
+                        Double newFactor = null;
                         for (InsulatorData armorInsulator : armorInsulators)
                         {
                             // Check if the player meets the predicate for the insulation
@@ -97,7 +83,13 @@ public class ProcessEquipmentInsulation
                             {
                                 // Set adaptation to calculated value
                                 if (insul instanceof AdaptiveInsulation adaptive)
-                                {   adaptive.setFactor(newFactor);
+                                {
+                                    if (newFactor == null)
+                                    {   AdaptiveInsulation.readFactorFromArmor(adaptive, armorStack);
+                                        newFactor = AdaptiveInsulation.calculateChange(adaptive, worldTemp, minTemp, maxTemp);
+                                        AdaptiveInsulation.setFactorToArmor(armorStack, newFactor);
+                                    }
+                                    adaptive.setFactor(newFactor);
                                 }
                                 // Store cold/hot insulation values
                                 mapAdd(armorInsulation, "cold_armor", insul.getCold());

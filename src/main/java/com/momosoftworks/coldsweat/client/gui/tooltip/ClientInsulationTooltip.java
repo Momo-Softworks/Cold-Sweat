@@ -480,7 +480,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
             if (insul instanceof AdaptiveInsulation adaptive)
             {
                 // Set factor stored in NBT
-                AdaptiveInsulation.setFactorFromNBT(adaptive, stack);
+                AdaptiveInsulation.readFactorFromArmor(adaptive, stack);
             }
             insulations.set(i, insul);
         }
