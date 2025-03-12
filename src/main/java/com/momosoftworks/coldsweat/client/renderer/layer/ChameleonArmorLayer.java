@@ -70,7 +70,7 @@ public class ChameleonArmorLayer<T extends LivingEntity, M extends BipedModel<T>
                 this.setPartVisibilities(model, slot);
                 this.renderModel(poseStack, buffer, light, armorItem, model, isInnerModel, 1.0f, 1.0f, 1.0f, 1.0f, Color.GREEN.getLayer(slot));
                 // Render overlay texture (red/blue)
-                double adaptiveFactor = AdaptiveInsulation.getFactorFromNBT(itemstack);
+                double adaptiveFactor = AdaptiveInsulation.getFactorFromArmor(itemstack);
                 ResourceLocation overlay = adaptiveFactor < 0 ? Color.BLUE.getLayer(slot) : Color.RED.getLayer(slot);
                 float alpha = (float) Math.abs(adaptiveFactor);
                 this.renderModel(poseStack, buffer, light, armorItem, model, isInnerModel, 1.0f, 1.0f, 1.0f, alpha, overlay);

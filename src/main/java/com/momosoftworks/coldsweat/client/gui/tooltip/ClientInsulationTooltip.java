@@ -14,13 +14,11 @@ import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.ItemRenderer;
-import net.minecraft.entity.MobEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import org.lwjgl.opengl.GL11;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -526,7 +524,7 @@ public class ClientInsulationTooltip extends Tooltip
             if (insul instanceof AdaptiveInsulation)
             {
                 // Set factor stored in NBT
-                AdaptiveInsulation.setFactorFromNBT(((AdaptiveInsulation) insul), stack);
+                AdaptiveInsulation.readFactorFromArmor(((AdaptiveInsulation) insul), stack);
             }
             insulations.set(i, insul);
         }

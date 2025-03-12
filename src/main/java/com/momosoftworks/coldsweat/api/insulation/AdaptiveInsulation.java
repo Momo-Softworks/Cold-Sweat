@@ -47,12 +47,15 @@ public class AdaptiveInsulation extends Insulation
         return newFactor;
     }
 
-    public static double getFactorFromNBT(ItemStack stack)
+    public static double getFactorFromArmor(ItemStack stack)
     {   return NBTHelper.getTagOrEmpty(stack).getDouble("InsulationAdaptation");
     }
-    public static void setFactorFromNBT(AdaptiveInsulation insulation, ItemStack stack)
+    public static void setFactorToArmor(ItemStack stack, double factor)
+    {   NBTHelper.getTagOrEmpty(stack).putDouble("InsulationAdaptation", factor);
+    }
+    public static void readFactorFromArmor(AdaptiveInsulation insulation, ItemStack stack)
     {
-        double storedFactor = getFactorFromNBT(stack);
+        double storedFactor = getFactorFromArmor(stack);
         if (storedFactor != 0)
         {   insulation.setFactor(storedFactor);
         }
