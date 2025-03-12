@@ -50,7 +50,10 @@ public class AdaptiveInsulation extends Insulation
     public static double getFactorFromArmor(ItemStack stack)
     {   return stack.getOrDefault(ModItemComponents.ARMOR_ADAPTATION, 0d);
     }
-    public static void setFactorFromArmor(AdaptiveInsulation insulation, ItemStack stack)
+    public static void setFactorToArmor(ItemStack stack, double factor)
+    {   stack.set(ModItemComponents.ARMOR_ADAPTATION, factor);
+    }
+    public static void readFactorFromArmor(AdaptiveInsulation insulation, ItemStack stack)
     {
         double storedFactor = getFactorFromArmor(stack);
         if (storedFactor != 0)
