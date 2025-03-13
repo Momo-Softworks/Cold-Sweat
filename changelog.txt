@@ -2851,6 +2851,8 @@ Technical Changes:
       - You can also warm yourself up this way!
 - Eating temperature-affecting foods now properly replaces the pre-existing effect for that item
       - i.e. eating a soul sprout will now reset the "coldness" timer if its effect is already active, rather than doing nothing
+! (1.21) Minimum NeoForge version is now 21.1.60
+
 Fixes:
 - (1.19) Fixed the inside of structures having no temperature
 - Fixed crash while ticking the icebox when Immersive Portals is installed
@@ -2882,3 +2884,65 @@ Technical Changes:
       - "raider": Checks pillager-specific data (part of an active raid, is the raid captain)
       - "slime": Checks the size of the slime
       - (1.18+) "snow_boots": Checks if the player is wearing boots that prevent falling through powder snow
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.4-b01b
+* Config settings from pre-2.4 versions will now be automatically updated to reflect new changes/formatting
+      - Added option to disable auto-updating in main.toml
+* Encased smokestacks now have openings on both ends like normal smokestacks
+* Decreased the default temperature of lava by 40%
+- Added new chameleon scale armor equip sound
+* The hearth's redstone inputs have been changed:
+      * Heat is now emitted if the left or back side is powered
+      * Cold is not emitted if the right or bottom side is powered
+      - Tweaked the design of the redstone inputs to be more obvious
+      - The redstone inputs are now hidden if "Automatic Hearth" is enabled in the configs
+- Smokestacks can now be waterlogged
+- Hearths can now be placed underwater
+- Made thermal source air particle distribution more random instead of emanating from the center
+* Added support for some Tough as Nails items:
+      - Wool armor: provides the same insulation as wool
+      - Leaf armor: provides the same insulation as leather, but with no cold protection
+      - Thermoregulator: now gives warmth & frigidness as a hearth would
+
+Fixes:
+* Fixed crash when a hearth is running and Valkyrien Skies is not installed
+* Fixed crash when using a hearth in a Valkyrien Skies ship
+* Fixed memory leak due to capability caches not clearing expired entries
+* Fixed memory leak due to destroyed/unloaded hearths continuing to listen for nearby block updates
+* Fixed memory leak due to cached world temperature values not being cleared upon leaving the world
+* Fixed food temperature being applied every tick if its duration is unset
+- Fixed JSON configs with required_mods still attempting to parse when the mods are not present
+- Fixed extraneous required field "factor" for adaptive insulation JSON
+* Fixed KubeJS configs for biomes, dimensions, and structures not working
+* Fixed thermal sources giving insulating effects in invalid locations if the player is standing on the same block as an output smokestack
+* Fixed thermal sources emitting fuel particles from all nearby pipes and smokestacks, even if they are not connected
+- Fixed the chameleon's eye height being too high
+- Fixed the chameleon's tongue not extending all the way when eating
+- Fixed chameleon scale leggings not covering the bottom of the player's body
+- Fixed water drip effects appearing when respawning after dying in water
+- Fixed temperature visually carrying over briefly after respawning
+- Fixed block temperature not being at full strength when standing right next to the block-
+- Fixed incorrect/outdated effect recipes for JEED
+- Fixed the chameleon's walk animation not playing when moving very slowly (like through soul sand)
+- Fixed chameleons not properly remembering their temperature when loading back into a world
+- Fixed ice not being mineable by tools with pickaxe-like abilities (multi-tools, Tetra tools, etc.)
+
+Technical Changes:
+* Insulation item configs now accept a list of insulation
+      - This allows for adding multiple types (or slots) of insulation to a single item
+      - Example: "insulation": [{"cold": 1, "hot": 0}, {"cold": 1, "hot": 0} (occupies 2 slots with lesser cold insulation)
+      - Defining a single insulation is still allowed as to not break existing JSON
+- Updated documentation for insulation-related TOML config settings
+- Armor and curio insulation settings no longer support the "fill_slots" field
+* Added new "world temp" requirement for JSON
+      - Accepts decimal values
+      - Also accepts some preset string values:
+            - "freezing", "cold", "cool", "temperate", "warm", "hot", "burning"
+            - Ordered from coldest to hottest. Based on the min/max temperature config settings
+      * Now used in the min/max_temp fields in block temperature JSON
+      * Added as "world temp bounds" to location requirement JSON:
+            - Has min/max values, each of which is a world temp requirement
+- Added "temperature" field to location requirement
+- The min/max temperature fields in block temperature JSON are now world temp requirements
