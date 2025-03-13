@@ -109,8 +109,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
 
     int lastHotFuel = 0;
     int lastColdFuel = 0;
-    boolean isSidePowered = false;
-    boolean isBackPowered = false;
+    boolean isCoolingOn = false;
+    boolean isHeatingOn = false;
     boolean shouldUseHotFuel = false;
     boolean shouldUseColdFuel = false;
     boolean hasHotFuel = false;
@@ -292,8 +292,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         boolean wasUsingHotFuel = this.shouldUseHotFuel;
         if (!ConfigSettings.SMART_HEARTH.get())
         {
-            this.shouldUseColdFuel = this.isSidePowered && this.getColdFuel() > 0;
-            this.shouldUseHotFuel = this.isBackPowered && this.getHotFuel() > 0;
+            this.shouldUseColdFuel = this.isCoolingOn && this.getColdFuel() > 0;
+            this.shouldUseHotFuel = this.isHeatingOn && this.getHotFuel() > 0;
         }
         if (!this.shouldUseColdFuel && !this.shouldUseHotFuel && !this.paths.isEmpty())
         {   this.forceUpdate();
@@ -516,46 +516,58 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
 
     public void checkInputSignal()
     {
-        boolean wasBackPowered = this.isBackPowered;
-        boolean wasSidePowered = this.isSidePowered;
-        // Get signals
         if (!this.level.isClientSide())
         {
-            this.isBackPowered = this.hasSignalFromBack();
-            this.isSidePowered = this.hasSignalFromSides();
-            // Update block state (if this is a hearth)
-            if (this.getBlockState().is(ModBlocks.HEARTH_BOTTOM))
+            boolean isHearth = this.getBlockState().is(ModBlocks.HEARTH_BOTTOM);
+            // Hide redstone inputs for smart hearths
+            if (ConfigSettings.SMART_HEARTH.get() && isHearth
+            && !this.getBlockState().getValue(HearthBottomBlock.SMART))
             {
-                if (wasBackPowered != this.isBackPowered)
-                {   level.setBlock(this.getBlockPos(), this.getBlockState().setValue(HearthBottomBlock.BACK_POWERED, this.isBackPowered), 3);
+                level.setBlock(this.getBlockPos(),
+                               this.getBlockState().setValue(HearthBottomBlock.HEATING, false)
+                                                   .setValue(HearthBottomBlock.COOLING, false)
+                                                   .setValue(HearthBottomBlock.SMART, true),
+                               2);
+                return;
+            }
+            // Get signals
+            boolean wasHeatingOn = this.isHeatingOn;
+            boolean wasCoolingOn = this.isCoolingOn;
+            this.isHeatingOn = this.hasHeatingSignal();
+            this.isCoolingOn = this.hasCoolingSignal();
+            // Update block state (if this is a hearth)
+            if (isHearth)
+            {
+                if (wasHeatingOn != this.isHeatingOn)
+                {   level.setBlock(this.getBlockPos(), this.getBlockState().setValue(HearthBottomBlock.HEATING, this.isHeatingOn), 3);
                 }
-                if (wasSidePowered != this.isSidePowered)
-                {   level.setBlock(this.getBlockPos(), this.getBlockState().setValue(HearthBottomBlock.SIDE_POWERED, this.isSidePowered), 3);
+                if (wasCoolingOn != this.isCoolingOn)
+                {   level.setBlock(this.getBlockPos(), this.getBlockState().setValue(HearthBottomBlock.COOLING, this.isCoolingOn), 3);
                 }
             }
             // Update signals for client
-            this.syncInputSignal(wasBackPowered, wasSidePowered);
+            this.syncInputSignal(wasHeatingOn, wasCoolingOn);
         }
     }
 
-    protected boolean hasSignalFromSides()
+    protected boolean hasCoolingSignal()
     {
         Direction facing = this.getBlockState().getValue(HearthBottomBlock.FACING);
-        return this.level.hasSignal(this.getBlockPos().relative(facing.getClockWise()), facing.getClockWise())
-            || this.level.hasSignal(this.getBlockPos().relative(facing.getCounterClockWise()), facing.getCounterClockWise());
-    }
-
-    protected boolean hasSignalFromBack()
-    {
-        Direction facing = this.getBlockState().getValue(HearthBottomBlock.FACING);
-        return this.level.hasSignal(this.getBlockPos().relative(facing.getOpposite()), facing.getOpposite())
+        return this.level.hasSignal(this.getBlockPos().relative(facing.getCounterClockWise()), facing.getCounterClockWise())
             || this.level.hasSignal(this.getBlockPos().relative(Direction.DOWN), Direction.DOWN);
     }
 
-    protected void syncInputSignal(boolean wasBackPowered, boolean wasSidePowered)
+    protected boolean hasHeatingSignal()
+    {
+        Direction facing = this.getBlockState().getValue(HearthBottomBlock.FACING);
+        return this.level.hasSignal(this.getBlockPos().relative(facing.getOpposite()), facing.getOpposite())
+            || this.level.hasSignal(this.getBlockPos().relative(facing.getClockWise()), facing.getClockWise());
+    }
+
+    protected void syncInputSignal(boolean wasHeatingOn, boolean wasCoolingOn)
     {
         // Update signals for client
-        if (this.level instanceof ServerLevel serverLevel && (wasBackPowered != this.isBackPowered || wasSidePowered != this.isSidePowered))
+        if (this.level instanceof ServerLevel serverLevel && (wasHeatingOn != this.isHeatingOn || wasCoolingOn != this.isCoolingOn))
         {
             serverLevel.getChunkSource().blockChanged(this.getBlockPos());
         }
@@ -1155,8 +1167,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         tag.putBoolean("ShouldUseColdFuel", this.shouldUseColdFuel);
         tag.putBoolean("ShouldUseHotFuel", this.shouldUseHotFuel);
         tag.putInt("InsulationLevel", insulationLevel);
-        tag.putBoolean("IsSidePowered", this.isSidePowered);
-        tag.putBoolean("IsBackPowered", this.isBackPowered);
+        tag.putBoolean("IsCooling", this.isCoolingOn);
+        tag.putBoolean("IsHeating", this.isHeatingOn);
         tag.putBoolean("HasSmokestack", this.hasSmokestack);
         this.saveEffects(tag);
 
@@ -1170,8 +1182,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         this.shouldUseColdFuel = tag.getBoolean("ShouldUseColdFuel");
         this.shouldUseHotFuel = tag.getBoolean("ShouldUseHotFuel");
         this.insulationLevel = tag.getInt("InsulationLevel");
-        this.isSidePowered = tag.getBoolean("IsSidePowered");
-        this.isBackPowered = tag.getBoolean("IsBackPowered");
+        this.isCoolingOn = tag.getBoolean("IsCooling");
+        this.isHeatingOn = tag.getBoolean("IsHeating");
         this.hasSmokestack = tag.getBoolean("HasSmokestack");
         this.loadEffects(tag);
     }
@@ -1233,20 +1245,20 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     {   return this.spreading;
     }
 
-    public boolean isSidePowered()
-    {   return this.isSidePowered;
+    public boolean isCoolingOn()
+    {   return this.isCoolingOn;
     }
 
     public boolean isBackPowered()
-    {   return this.isBackPowered;
+    {   return this.isHeatingOn;
     }
 
-    public void setSidePowered(boolean isPowered)
-    {   this.isSidePowered = isPowered;
+    public void setCooling(boolean isPowered)
+    {   this.isCoolingOn = isPowered;
     }
 
-    public void setBackPowered(boolean isPowered)
-    {   this.isBackPowered = isPowered;
+    public void setHeating(boolean isPowered)
+    {   this.isHeatingOn = isPowered;
     }
 
     public Map<BlockPos, Direction> getPipeEnds()

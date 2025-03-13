@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.common.block;
 
 import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
-
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ModBlockEntities;
 import com.momosoftworks.coldsweat.core.init.ModBlocks;
 import com.momosoftworks.coldsweat.util.item.ItemStackHelper;
@@ -47,8 +47,9 @@ import java.util.*;
 public class HearthBottomBlock extends Block implements EntityBlock
 {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
-    public static final BooleanProperty SIDE_POWERED = BooleanProperty.create("side_powered");
-    public static final BooleanProperty BACK_POWERED = BooleanProperty.create("back_powered");
+    public static final BooleanProperty COOLING = BooleanProperty.create("cooling");
+    public static final BooleanProperty HEATING = BooleanProperty.create("heating");
+    public static final BooleanProperty SMART = BooleanProperty.create("smart");
 
     public static Properties getProperties()
     {
@@ -69,8 +70,9 @@ public class HearthBottomBlock extends Block implements EntityBlock
     {
         super(properties);
         this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH)
-                                                          .setValue(SIDE_POWERED, false)
-                                                          .setValue(BACK_POWERED, false));
+                                                          .setValue(COOLING, false)
+                                                          .setValue(HEATING, false)
+                                                          .setValue(SMART, false));
     }
 
     @Nullable
@@ -222,7 +224,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
-    {   builder.add(FACING, SIDE_POWERED, BACK_POWERED);
+    {   builder.add(FACING, COOLING, HEATING, SMART);
     }
 
     @Override
@@ -231,6 +233,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
         Level level = context.getLevel();
         return level.getBlockState(context.getClickedPos().above()).canBeReplaced()
                ? this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite())
+                                         .setValue(SMART, ConfigSettings.SMART_HEARTH.get())
                : null;
     }
 
