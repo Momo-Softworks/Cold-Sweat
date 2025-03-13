@@ -235,12 +235,12 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
     }
 
     @Override
-    protected boolean hasSignalFromSides()
-    {   return Direction.stream().anyMatch(dir -> dir != Direction.UP && this.level.hasSignal(this.getBlockPos().relative(dir), dir));
+    protected boolean hasCoolingSignal()
+    {   return Direction.stream().anyMatch(dir -> this.level.hasSignal(this.getBlockPos().relative(dir), dir));
     }
 
     @Override
-    protected boolean hasSignalFromBack()
+    protected boolean hasHeatingSignal()
     {   return false;
     }
 

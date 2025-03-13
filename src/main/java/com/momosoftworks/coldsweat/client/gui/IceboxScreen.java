@@ -60,7 +60,7 @@ public class IceboxScreen extends AbstractHearthScreen<IceboxContainer>
 
         if (!ConfigSettings.SMART_HEARTH.get() && this.menu.te.hasSmokeStack())
         {
-            boolean powered = this.menu.te.isSidePowered();
+            boolean powered = this.menu.te.isCoolingOn();
 
             blit(matrixStack, leftPos + 117, topPos + 78, 176, powered ? 14 : 22, 14, 8, 256, 256);
 
