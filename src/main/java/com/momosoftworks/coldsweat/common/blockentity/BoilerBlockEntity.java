@@ -160,17 +160,16 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
     }
 
     @Override
-    protected boolean hasSignalFromBack()
+    protected boolean hasHeatingSignal()
     {
         return Arrays.stream(Direction.values()).anyMatch(direction ->
         {
-            return direction != Direction.UP && direction != this.getBlockState().getValue(BoilerBlock.FACING)
-                && this.level.hasSignal(this.worldPosition.relative(direction), direction);
+            return this.level.hasSignal(this.worldPosition.relative(direction), direction);
         });
     }
 
     @Override
-    protected boolean hasSignalFromSides()
+    protected boolean hasCoolingSignal()
     {   return false;
     }
 

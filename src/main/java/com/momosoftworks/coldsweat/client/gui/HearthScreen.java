@@ -46,7 +46,7 @@ public class HearthScreen extends AbstractHearthScreen<HearthContainer>
         // Render redstone indicators
         if (!ConfigSettings.SMART_HEARTH.get())
         {
-            boolean sidePowered = this.menu.te.isSidePowered();
+            boolean sidePowered = this.menu.te.isCoolingOn();
             boolean backPowered = this.menu.te.isBackPowered();
 
             blit(poseStack, leftPos + 60, topPos + 21, 176, backPowered ? 60 : 68, 14, 8, 256, 256);
