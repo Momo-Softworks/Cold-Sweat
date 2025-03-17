@@ -13,6 +13,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.common.ToolActions;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -58,7 +59,7 @@ public class IceBreakingEvents
         && !ForgeHooks.isCorrectToolForDrops(state, player))
         {
             // Increase speed for pickaxes (even if the tier isn't high enough)
-            if (ItemHelper.isEffectivelyPickaxe(tool))
+            if (tool.canPerformAction(ToolActions.PICKAXE_DIG))
             {   event.setNewSpeed(speed * 2);
             }
             // Non-pickaxes need a huge speed boost
@@ -79,7 +80,7 @@ public class IceBreakingEvents
         ItemStack tool = player.getItemInHand(InteractionHand.MAIN_HAND);
 
         if (isModifiableIceBlock(state))
-        {   event.setCanHarvest(ItemHelper.isEffectivelyPickaxe(tool) && event.getPlayer().getMainHandItem().isCorrectToolForDrops(state));
+        {   event.setCanHarvest(tool.canPerformAction(ToolActions.PICKAXE_DIG) && event.getPlayer().getMainHandItem().isCorrectToolForDrops(state));
         }
     }
 
