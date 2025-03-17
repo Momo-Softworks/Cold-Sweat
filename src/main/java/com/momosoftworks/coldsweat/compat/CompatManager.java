@@ -15,11 +15,13 @@ import com.simibubi.create.AllDataComponents;
 import com.simibubi.create.content.equipment.armor.BacktankItem;
 import com.simibubi.create.content.equipment.armor.BacktankUtil;
 import com.simibubi.create.content.equipment.armor.DivingHelmetItem;
+import com.simibubi.create.content.fluids.pipes.EncasedPipeBlock;
+import com.simibubi.create.content.fluids.pipes.FluidPipeBlock;
+import com.simibubi.create.content.fluids.pipes.GlassFluidPipeBlock;
 import dev.ghen.thirst.content.purity.ContainerWithPurity;
 import dev.ghen.thirst.content.purity.WaterPurity;
 import dev.ghen.thirst.foundation.common.event.RegisterThirstValueEvent;
 import glitchcore.event.EventManager;
-import glitchcore.event.TickEvent;
 import net.createmod.ponder.foundation.PonderIndex;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
@@ -221,11 +223,10 @@ public class CompatManager
     {
         public static boolean isFluidPipe(BlockState state)
         {
-            /*return CompatManager.isCreateLoaded()
+            return CompatManager.isCreateLoaded()
                 && (state.getBlock() instanceof FluidPipeBlock
                  || state.getBlock() instanceof GlassFluidPipeBlock
-                 || state.getBlock() instanceof EncasedPipeBlock);*/
-            return false;
+                 || state.getBlock() instanceof EncasedPipeBlock);
         }
     }
 
