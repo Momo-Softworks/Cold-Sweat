@@ -2,7 +2,6 @@ package com.momosoftworks.coldsweat.common.event;
 
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.loot.ModLootTables;
-import com.momosoftworks.coldsweat.util.item.ItemHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
@@ -15,6 +14,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IWorld;
 import net.minecraftforge.common.ForgeHooks;
+import net.minecraftforge.common.ToolType;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -60,7 +60,7 @@ public class IceBreakingEvents
         && !ForgeHooks.canHarvestBlock(state, event.getPlayer(), player.level, event.getPos()))
         {
             // Increase speed for pickaxes (even if the tier isn't high enough)
-            if (ItemHelper.isEffectivelyPickaxe(tool))
+            if (tool.getToolTypes().contains(ToolType.PICKAXE))
             {   event.setNewSpeed(speed * 2);
             }
             // Non-pickaxes need a huge speed boost
@@ -81,7 +81,7 @@ public class IceBreakingEvents
         ItemStack tool = player.getItemInHand(Hand.MAIN_HAND);
 
         if (isModifiableIceBlock(state))
-        {   event.setCanHarvest(ItemHelper.isEffectivelyPickaxe(tool) && isCorrectToolForDrops(tool, state));
+        {   event.setCanHarvest(tool.getToolTypes().contains(ToolType.PICKAXE) && isCorrectToolForDrops(tool, state));
         }
     }
 
