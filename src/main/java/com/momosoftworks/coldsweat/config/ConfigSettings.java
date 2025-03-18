@@ -168,6 +168,7 @@ public class ConfigSettings
     public static final DynamicHolder<Double> INSULATION_STRENGTH;
     public static final DynamicHolder<List<ResourceLocation>> DISABLED_MODIFIERS;
     public static final DynamicHolder<Double> MODIFIER_TICK_RATE;
+    public static final DynamicHolder<Double> DRYOFF_SPEED;
 
     // Client Settings
     /* NULL ON THE SERVER */
@@ -882,6 +883,12 @@ public class ConfigSettings
         (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "ModifierTickRate"),
         (decoder) -> decoder.getDouble("ModifierTickRate"),
         (saver) -> MainSettingsConfig.MODIFIER_TICK_RATE.set(saver),
+        SyncType.BOTH_WAYS);
+
+        DRYOFF_SPEED = addSyncedSetting("dryoff_speed", () -> 1.0, holder -> holder.set(MainSettingsConfig.DRYOFF_SPEED.get()),
+        (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "DryoffSpeed"),
+        (decoder) -> decoder.getDouble("DryoffSpeed"),
+        (saver) -> MainSettingsConfig.DRYOFF_SPEED.set(saver),
         SyncType.BOTH_WAYS);
 
 

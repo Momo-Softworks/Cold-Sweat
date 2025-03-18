@@ -43,11 +43,12 @@ public class WaterTempModifier extends TempModifier
         double minTemp = ConfigSettings.MIN_TEMP.get();
         double maxTemp = ConfigSettings.MAX_TEMP.get();
         double midTemp = CSMath.average(minTemp, maxTemp);
+        double configDrySpeed = ConfigSettings.DRYOFF_SPEED.get() * DRY_SPEED;
 
         double strength = this.getNBT().getDouble("Strength");
         double addAmount = WorldHelper.isInWater(entity) ? WATER_SOAK_SPEED // In water
                          : WorldHelper.isRainingAt(entity.level, entity.blockPosition()) ? RAIN_SOAK_SPEED // In rain
-                         : -CSMath.blendExp(DRY_SPEED, DRY_SPEED * 10, worldTemp, minTemp, maxTemp, 100); // Drying off
+                         : -CSMath.blendExp(configDrySpeed, configDrySpeed * 10, worldTemp, minTemp, maxTemp, 100); // Drying off
         double maxStrength = CSMath.clamp(Math.abs(midTemp - worldTemp) / 2, 0.23d, 0.5d);
 
         double newStrength = CSMath.clamp(strength + addAmount, 0d, maxStrength);
