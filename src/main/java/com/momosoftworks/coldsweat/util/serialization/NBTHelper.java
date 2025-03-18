@@ -7,6 +7,7 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -29,7 +30,7 @@ public class NBTHelper
 
     public static CompoundNBT modifierToTag(TempModifier modifier)
     {
-        // Write the modifier's data to a CompoundTag
+        // Write the modifier's data to a CompoundNBT
         CompoundNBT modifierTag = new CompoundNBT();
         ResourceLocation modifierId = TempModifierRegistry.getKey(modifier);
         if (modifierId == null)
@@ -58,7 +59,7 @@ public class NBTHelper
 
     public static Optional<TempModifier> tagToModifier(CompoundNBT modifierTag)
     {
-        // Create a new modifier from the CompoundTag
+        // Create a new modifier from the CompoundNBT
         Optional<TempModifier> optional = TempModifierRegistry.getValue(new ResourceLocation(modifierTag.getString("Id")));
         optional.ifPresent(modifier ->
         {
@@ -115,6 +116,23 @@ public class NBTHelper
      */
     public static CompoundNBT getTagOrEmpty(ItemStack stack)
     {   return CSMath.orElse(stack.getTag(), new CompoundNBT());
+    }
+    
+    public static <T extends CompoundNBT> T getOrPutTag(LivingEntity entity, String tag, T dfault)
+    {
+        CompoundNBT data = entity.getPersistentData();
+        if (!data.contains(tag))
+        {   data.put(tag, dfault);
+        }
+        return (T) data.get(tag);
+    }
+    public static <T extends CompoundNBT> T getOrPutTag(ItemStack stack, String tag, T dfault)
+    {
+        CompoundNBT data = stack.getOrCreateTag();
+        if (!data.contains(tag))
+        {   data.put(tag, dfault);
+        }
+        return (T) data.get(tag);
     }
 
     /**
