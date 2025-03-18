@@ -11,6 +11,7 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -27,6 +28,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 @EventBusSubscriber
 public class NBTHelper
@@ -137,6 +139,23 @@ public class NBTHelper
 
     public static void ensureTagAndDo(ItemStack stack, Consumer<CompoundTag> action)
     {   getOrCreateTag(stack).update(action);
+    }
+    
+    public static <T extends CompoundTag> T getOrPutTag(LivingEntity entity, String tag, T dfault)
+    {
+        CompoundTag data = entity.getPersistentData();
+        if (!data.contains(tag))
+        {   data.put(tag, dfault);
+        }
+        return (T) data.get(tag);
+    }
+    public static <T extends CompoundTag> T getOrPutTag(ItemStack stack, String tag, T dfault)
+    {
+        CompoundTag data = stack.getOrCreateTag();
+        if (!data.contains(tag))
+        {   data.put(tag, dfault);
+        }
+        return (T) data.get(tag);
     }
 
     /**
