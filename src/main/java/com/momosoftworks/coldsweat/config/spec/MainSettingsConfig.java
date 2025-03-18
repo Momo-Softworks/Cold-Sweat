@@ -44,6 +44,7 @@ public class MainSettingsConfig
 
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> DISABLED_TEMP_MODIFIERS;
     public static final ForgeConfigSpec.DoubleValue MODIFIER_TICK_RATE;
+    public static final ForgeConfigSpec.DoubleValue DRYOFF_SPEED;
 
     static 
     {
@@ -179,6 +180,10 @@ public class MainSettingsConfig
                 .comment("Changes the update rate for temperature modifiers on entities",
                          "Temperature modifiers control most of Cold Sweat's behavior, so lowering this value will improve performance at the cost of responsiveness")
                 .defineInRange("Modifier Tick Rate", 1.0, 0.1, 1.0);
+
+        DRYOFF_SPEED = BUILDER
+                .comment("A multiplier to the speed at which wet players dry off")
+                .defineInRange("Dryoff Speed", 1.0, 0.0, Double.POSITIVE_INFINITY);
 
         BUILDER.pop();
 
