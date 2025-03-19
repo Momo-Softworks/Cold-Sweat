@@ -14,13 +14,13 @@ import com.momosoftworks.coldsweat.api.event.core.registry.CreateRegistriesEvent
 import com.momosoftworks.coldsweat.api.event.vanilla.ServerConfigsLoadedEvent;
 import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
-import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTempConfig;
+import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.core.init.TempModifierInit;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
-import com.momosoftworks.coldsweat.data.codec.requirement.BlockRequirement;
+import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.LocationRequirement;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
@@ -43,7 +43,6 @@ import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.feature.StructureFeature;
-import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -483,8 +482,8 @@ public class ConfigLoadingHandler
             {   return;
             }
             Block[] blocks = RegistryHelper.mapTaggableList(blockTempData.blocks()).toArray(new Block[0]);
-            BlockTemp blockTemp = new BlockTempConfig(blockTempData.getTemperature() < 0 ? -blockTempData.getMaxEffect() : -Double.MAX_VALUE,
-                                                      blockTempData.getTemperature() > 0 ? blockTempData.getMaxEffect() : Double.MAX_VALUE,
+            BlockTemp blockTemp = new BlockTempConfig(blockTempData.getTemperature() < 0 ? -blockTempData.getMaxEffect() : Double.NEGATIVE_INFINITY,
+                                                      blockTempData.getTemperature() > 0 ? blockTempData.getMaxEffect() : Double.POSITIVE_INFINITY,
                                                       blockTempData.getMinTemp(),
                                                       blockTempData.getMaxTemp(),
                                                       blockTempData.range(),
@@ -493,13 +492,16 @@ public class ConfigLoadingHandler
                                                       blocks)
             {
                 final double temperature = blockTempData.getTemperature();
-                final LocationRequirement location = blockTempData.location();
+                final LocationRequirement locationRequirement = blockTempData.location();
+                final EntityRequirement entityRequirement = blockTempData.entity();
 
                 @Override
                 public double getTemperature(World level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
                 {
-                    if (!location.test(level, pos)) return 0;
-                    return temperature;
+                    if (locationRequirement.test(level, pos) && entityRequirement.test(entity))
+                    {   return temperature;
+                    }
+                    return 0;
                 }
             };
 

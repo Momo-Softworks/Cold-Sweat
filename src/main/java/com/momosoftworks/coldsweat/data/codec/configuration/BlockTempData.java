@@ -7,10 +7,7 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
-import com.momosoftworks.coldsweat.data.codec.requirement.BlockRequirement;
-import com.momosoftworks.coldsweat.data.codec.requirement.LocationRequirement;
-import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
-import com.momosoftworks.coldsweat.data.codec.requirement.WorldTempRequirement;
+import com.momosoftworks.coldsweat.data.codec.requirement.*;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
@@ -35,11 +32,12 @@ public class BlockTempData extends ConfigData
     final Temperature.Units units;
     final List<BlockRequirement> conditions;
     final LocationRequirement location;
+    final EntityRequirement entity;
 
     public BlockTempData(List<Either<ITag<Block>, Block>> blocks, double temperature, double range,
                          double maxEffect, boolean fade, WorldTempRequirement maxTemp, WorldTempRequirement minTemp,
                          Temperature.Units units, List<BlockRequirement> conditions,
-                         LocationRequirement location, List<String> requiredMods)
+                         LocationRequirement location, EntityRequirement entity, List<String> requiredMods)
     {
         super(requiredMods);
         this.blocks = blocks;
@@ -52,13 +50,15 @@ public class BlockTempData extends ConfigData
         this.units = units;
         this.conditions = conditions;
         this.location = location;
+        this.entity = entity;
     }
 
     public BlockTempData(List<Either<ITag<Block>, Block>> blocks, double temperature, double range,
                          double maxEffect, boolean fade, WorldTempRequirement maxTemp, WorldTempRequirement minTemp,
-                         Temperature.Units units, List<BlockRequirement> conditions, LocationRequirement location)
+                         Temperature.Units units, List<BlockRequirement> conditions, LocationRequirement location,
+                         EntityRequirement entity)
     {
-        this(blocks, temperature, range, maxEffect, fade, maxTemp, minTemp, units, conditions, location, ConfigHelper.getModIDs(blocks, ForgeRegistries.BLOCKS));
+        this(blocks, temperature, range, maxEffect, fade, maxTemp, minTemp, units, conditions, location, entity, ConfigHelper.getModIDs(blocks, ForgeRegistries.BLOCKS));
     }
 
     /**
@@ -71,20 +71,21 @@ public class BlockTempData extends ConfigData
         this(blockTemp.getAffectedBlocks().stream().map(Either::<ITag<Block>, Block>right).collect(Collectors.toList()),
              0, blockTemp.range(), blockTemp.maxEffect(),
              true, new WorldTempRequirement(blockTemp.maxTemperature()), new WorldTempRequirement(blockTemp.minTemperature()), Temperature.Units.MC,
-             Arrays.asList(), LocationRequirement.NONE);
+             Arrays.asList(), LocationRequirement.NONE, EntityRequirement.NONE);
     }
 
     public static final Codec<BlockTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ConfigHelper.tagOrBuiltinCodec(Registry.BLOCK_REGISTRY, Registry.BLOCK).listOf().fieldOf("blocks").forGetter(data -> data.blocks),
             Codec.DOUBLE.fieldOf("temperature").forGetter(data -> data.temperature),
-            Codec.DOUBLE.optionalFieldOf("range", Double.MAX_VALUE).forGetter(data -> data.range),
-            Codec.DOUBLE.optionalFieldOf("max_effect", Double.MAX_VALUE).forGetter(data -> data.maxEffect),
+            Codec.DOUBLE.optionalFieldOf("range", Double.POSITIVE_INFINITY).forGetter(data -> data.range),
+            Codec.DOUBLE.optionalFieldOf("max_effect", Double.POSITIVE_INFINITY).forGetter(data -> data.maxEffect),
             Codec.BOOL.optionalFieldOf("fade", true).forGetter(data -> data.fade),
             WorldTempRequirement.CODEC.optionalFieldOf("max_temp", WorldTempRequirement.INFINITY).forGetter(data -> data.maxTemp),
             WorldTempRequirement.CODEC.optionalFieldOf("min_temp", WorldTempRequirement.NEGATIVE_INFINITY).forGetter(data -> data.minTemp),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(data -> data.units),
             BlockRequirement.CODEC.listOf().optionalFieldOf("conditions", Arrays.asList()).forGetter(data -> data.conditions),
             LocationRequirement.CODEC.optionalFieldOf("location", LocationRequirement.NONE).forGetter(BlockTempData::location),
+            EntityRequirement.getCodec().optionalFieldOf("entity", EntityRequirement.NONE).forGetter(BlockTempData::entity),
             Codec.STRING.listOf().optionalFieldOf("required_mods", Arrays.asList()).forGetter(BlockTempData::requiredMods)
     ).apply(instance, BlockTempData::new));
 
@@ -117,6 +118,9 @@ public class BlockTempData extends ConfigData
     }
     public LocationRequirement location()
     {   return location;
+    }
+    public EntityRequirement entity()
+    {   return entity;
     }
 
     public double getTemperature()
@@ -157,7 +161,7 @@ public class BlockTempData extends ConfigData
         // Get min/max effect
         final double maxChange = entry.size() > 4 && entry.get(4) instanceof Number
                                  ? ((Number) entry.get(4)).doubleValue()
-                                 : Double.MAX_VALUE;
+                                 : Double.POSITIVE_INFINITY;
 
         // Get block predicate
         Optional<BlockRequirement.StateRequirement> blockPredicates = entry.size() > 5 && entry.get(5) instanceof String && !NBTHelper.isBlank((String) entry.get(5))
@@ -170,19 +174,19 @@ public class BlockTempData extends ConfigData
 
         double tempLimit = entry.size() > 7
                            ? ((Number) entry.get(7)).doubleValue()
-                           : Double.MAX_VALUE;
+                           : Double.POSITIVE_INFINITY;
 
-        double maxEffect = blockTemp > 0 ?  maxChange :  Double.MAX_VALUE;
+        double maxEffect = blockTemp > 0 ?  maxChange :  Double.POSITIVE_INFINITY;
 
-        double maxTemperature = blockTemp > 0 ? tempLimit : Double.MAX_VALUE;
-        double minTemperature = blockTemp < 0 ? tempLimit : -Double.MAX_VALUE;
+        double maxTemperature = blockTemp > 0 ? tempLimit : Double.POSITIVE_INFINITY;
+        double minTemperature = blockTemp < 0 ? tempLimit : Double.NEGATIVE_INFINITY;
 
         BlockRequirement blockRequirement = new BlockRequirement(Optional.empty(), blockPredicates, nbtRequirement,
                                                                  Optional.empty(), Optional.empty(), Optional.empty(), false);
 
         return new BlockTempData(blocks, blockTemp, blockRange, maxEffect, true,
                                  new WorldTempRequirement(maxTemperature), new WorldTempRequirement(minTemperature),
-                                 units, Arrays.asList(blockRequirement), LocationRequirement.NONE);
+                                 units, Arrays.asList(blockRequirement), LocationRequirement.NONE, EntityRequirement.NONE);
     }
 
     @Override
