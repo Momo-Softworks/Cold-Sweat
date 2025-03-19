@@ -316,6 +316,9 @@ public class AbstractTempCap implements ITemperatureCap
         if (newValue != baseValue)
         {   MinecraftForge.EVENT_BUS.post(new TemperatureChangedEvent(entity, type, getTrait(type), newValue));
         }
+        // Write new value to NBT
+        NBTHelper.getOrPutTag(entity, "Temperature", new CompoundTag()).putDouble(type.getSerializedName(), newValue);
+        // Return
         return newValue;
     }
 
