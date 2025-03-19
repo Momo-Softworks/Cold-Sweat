@@ -18,6 +18,7 @@ import com.momosoftworks.coldsweat.core.init.TempModifierInit;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
+import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.LocationRequirement;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.data.tag.ModDimensionTags;
@@ -507,8 +508,8 @@ public class ConfigLoadingHandler
             {   return;
             }
             Block[] blocks = RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.BLOCK, blockTempData.blocks()).toArray(Block[]::new);
-            BlockTemp blockTemp = new BlockTempConfig(blockTempData.getTemperature() < 0 ? -blockTempData.getMaxEffect() : -Double.MAX_VALUE,
-                                                      blockTempData.getTemperature() > 0 ? blockTempData.getMaxEffect() : Double.MAX_VALUE,
+            BlockTemp blockTemp = new BlockTempConfig(blockTempData.getTemperature() < 0 ? -blockTempData.getMaxEffect() : Double.NEGATIVE_INFINITY,
+                                                      blockTempData.getTemperature() > 0 ? blockTempData.getMaxEffect() : Double.POSITIVE_INFINITY,
                                                       blockTempData.getMinTemp(),
                                                       blockTempData.getMaxTemp(),
                                                       blockTempData.range(),
@@ -517,13 +518,16 @@ public class ConfigLoadingHandler
                                                       blocks)
             {
                 final double temperature = blockTempData.getTemperature();
-                final LocationRequirement location = blockTempData.location();
+                final LocationRequirement locationRequirement = blockTempData.location();
+                final EntityRequirement entityRequirement = blockTempData.entity();
 
                 @Override
                 public double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
                 {
-                    if (!location.test(level, pos)) return 0;
-                    return temperature;
+                    if (locationRequirement.test(level, pos) && entityRequirement.test(entity))
+                    {   return temperature;
+                    }
+                    return 0;
                 }
             };
 
