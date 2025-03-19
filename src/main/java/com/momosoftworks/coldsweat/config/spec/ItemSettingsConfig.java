@@ -274,7 +274,7 @@ public class ItemSettingsConfig
 
         INSULATION_STRENGTH = BUILDER
                 .comment("Defines the effectiveness of insulating items in protecting against temperature")
-                .defineInRange("Insulation Strength", 1.0, 0, Double.MAX_VALUE);
+                .defineInRange("Insulation Strength", 1.0, 0, Double.POSITIVE_INFINITY);
 
         INSULATION_BLACKLIST = BUILDER
                 .comment("Defines wearable items that cannot be insulated",

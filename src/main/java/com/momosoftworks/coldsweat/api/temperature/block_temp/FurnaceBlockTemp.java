@@ -12,7 +12,7 @@ public class FurnaceBlockTemp extends BlockTemp
 {
     public FurnaceBlockTemp()
     {
-        super(0, 0.88, -Double.MAX_VALUE, 12.6, 7, true,
+        super(0, 0.88, Double.NEGATIVE_INFINITY, 12.6, 7, true,
               ForgeRegistries.BLOCKS.getValues().stream().filter(block -> block instanceof AbstractFurnaceBlock).toArray(Block[]::new));
     }
 
