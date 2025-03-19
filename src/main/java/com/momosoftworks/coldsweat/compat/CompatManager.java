@@ -269,7 +269,7 @@ public class CompatManager
                 WeatherManagerServer weatherManager = ServerTickHandler.getWeatherManagerFor(level.dimension());
                 if (weatherManager == null) return null;
 
-                double distance = Double.MAX_VALUE;
+                double distance = Double.POSITIVE_INFINITY;
                 WeatherObject closestStorm = null;
                 for (WeatherObject stormObject : weatherManager.getStormObjects())
                 {
