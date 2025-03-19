@@ -21,8 +21,8 @@ public class TriggerHelper
         else
         {
             JsonObject range = entry.getAsJsonObject("range");
-            double below = Double.MAX_VALUE;
-            double above = -Double.MAX_VALUE;
+            double below = Double.POSITIVE_INFINITY;
+            double above = Double.NEGATIVE_INFINITY;
 
             if (range != null)
             {

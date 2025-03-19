@@ -13,7 +13,7 @@ public class NetherPortalBlockTemp extends BlockTemp
 {
     public NetherPortalBlockTemp()
     {
-        super(-1, 1, -Double.MAX_VALUE, Double.MAX_VALUE, 7, true, Blocks.NETHER_PORTAL);
+        super(-1, 1, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, 7, true, Blocks.NETHER_PORTAL);
     }
 
     @Override

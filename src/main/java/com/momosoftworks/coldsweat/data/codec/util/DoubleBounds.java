@@ -22,8 +22,8 @@ public class DoubleBounds
     }
 
     public static final Codec<DoubleBounds> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.DOUBLE.optionalFieldOf("min", -Double.MAX_VALUE).forGetter(bounds -> bounds.min),
-            Codec.DOUBLE.optionalFieldOf("max", Double.MAX_VALUE).forGetter(bounds -> bounds.max)
+            Codec.DOUBLE.optionalFieldOf("min", Double.NEGATIVE_INFINITY).forGetter(bounds -> bounds.min),
+            Codec.DOUBLE.optionalFieldOf("max", Double.POSITIVE_INFINITY).forGetter(bounds -> bounds.max)
     ).apply(instance, DoubleBounds::new));
 
     public static final Codec<DoubleBounds> CODEC = Codec.either(DIRECT_CODEC, Codec.DOUBLE).xmap(

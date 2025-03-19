@@ -98,7 +98,6 @@ public class TempModifierInit
     {
         long startMS = System.currentTimeMillis();
 
-        event.register(new LavaBlockTemp());
         event.register(new FurnaceBlockTemp());
         event.register(new NetherPortalBlockTemp());
         event.registerFirst(new SoulFireBlockTemp());

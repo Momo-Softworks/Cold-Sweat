@@ -56,7 +56,7 @@ public class EntityTempData extends ConfigData implements RequirementHolder
             Codec.DOUBLE.fieldOf("range").forGetter(data -> data.range),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(data -> data.units),
             EntityRequirement.getCodec().optionalFieldOf("affected_entity", EntityRequirement.NONE).forGetter(data -> data.otherEntityRequirement),
-            Codec.DOUBLE.optionalFieldOf("max_effect", Double.MAX_VALUE).forGetter(EntityTempData::maxEffect),
+            Codec.DOUBLE.optionalFieldOf("max_effect", Double.POSITIVE_INFINITY).forGetter(EntityTempData::maxEffect),
             Codec.BOOL.optionalFieldOf("affects_self", false).forGetter(EntityTempData::affectsSelf),
             Codec.STRING.listOf().optionalFieldOf("required_mods", Arrays.asList()).forGetter(EntityTempData::requiredMods)
     ).apply(instance, EntityTempData::new));
@@ -107,7 +107,7 @@ public class EntityTempData extends ConfigData implements RequirementHolder
                                   : Temperature.Units.MC;
         double maxEffect = entry.size() > 4
                            ? ((Number) entry.get(4)).doubleValue()
-                           : Double.MAX_VALUE;
+                           : Double.POSITIVE_INFINITY;
 
         EntityRequirement requirement = new EntityRequirement(entities);
 

@@ -482,7 +482,7 @@ public class ConfigSettings
                                                                   values.get(3).intValue())
                                       : new ScalingFormula.Dynamic(scalingType,
                                                                    values.get(0).doubleValue(),
-                                                                   values.size() > 2 ? values.get(2).doubleValue() : Double.MAX_VALUE));
+                                                                   values.size() > 2 ? values.get(2).doubleValue() : Double.POSITIVE_INFINITY));
         },
         (encoder) -> encoder.serialize(),
         (decoder) -> ScalingFormula.deserialize(decoder),
