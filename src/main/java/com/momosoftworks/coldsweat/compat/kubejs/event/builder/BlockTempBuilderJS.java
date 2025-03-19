@@ -21,9 +21,9 @@ import java.util.function.Predicate;
 public class BlockTempBuilderJS
 {
     public final Set<Block> blocks = new HashSet<>();
-    public double maxEffect = Double.MAX_VALUE;
-    public double maxTemperature = Double.MAX_VALUE;
-    public double minTemperature = -Double.MAX_VALUE;
+    public double maxEffect = Double.POSITIVE_INFINITY;
+    public double maxTemperature = Double.POSITIVE_INFINITY;
+    public double minTemperature = Double.NEGATIVE_INFINITY;
     public double range = ConfigSettings.BLOCK_RANGE.get();
     public boolean fade = true;
     public Temperature.Units units = Temperature.Units.MC;

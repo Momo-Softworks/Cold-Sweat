@@ -30,11 +30,11 @@ public abstract class BlockTemp
     public BlockTemp(Block... blocks)
     {
         validBlocks = ImmutableSet.<Block>builder().add(blocks).build();
-        this.minEffect = -Double.MAX_VALUE;
-        this.maxEffect = Double.MAX_VALUE;
-        this.minTemperature = -Double.MAX_VALUE;
-        this.maxTemperature = Double.MAX_VALUE;
-        this.range = Double.MAX_VALUE;
+        this.minEffect = Double.NEGATIVE_INFINITY;
+        this.maxEffect = Double.POSITIVE_INFINITY;
+        this.minTemperature = Double.NEGATIVE_INFINITY;
+        this.maxTemperature = Double.POSITIVE_INFINITY;
+        this.range = Double.POSITIVE_INFINITY;
         this.fade = true;
     }
 
