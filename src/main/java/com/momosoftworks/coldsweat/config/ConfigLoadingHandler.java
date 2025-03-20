@@ -2,7 +2,6 @@ package com.momosoftworks.coldsweat.config;
 
 import com.google.common.collect.Multimap;
 import com.google.gson.JsonElement;
-import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
@@ -19,7 +18,9 @@ import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
+import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.LocationRequirement;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.data.tag.ModDimensionTags;
 import com.momosoftworks.coldsweat.data.tag.ModEffectTags;
@@ -33,14 +34,12 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.tags.TagKey;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.structure.Structure;
@@ -373,10 +372,7 @@ public class ConfigLoadingHandler
             }
 
             // Add listed items as insulators
-            List<Item> items = new ArrayList<>();
-            insulator.item().items().ifPresent(itemList ->
-            {   items.addAll(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, itemList));
-            });
+            List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, insulator.item().flatListMap(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -408,10 +404,7 @@ public class ConfigLoadingHandler
             {   return;
             }
 
-            List<Item> items = new ArrayList<>();
-            fuelData.item().items().ifPresent(itemList ->
-            {   items.addAll(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, itemList));
-            });
+            List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, fuelData.item().flatListMap(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -439,10 +432,7 @@ public class ConfigLoadingHandler
             {   return;
             }
 
-            List<Item> items = new ArrayList<>();
-            foodData.item().items().ifPresent(itemList ->
-            {   items.addAll(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, itemList));
-            });
+            List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, foodData.item().flatListMap(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -463,10 +453,7 @@ public class ConfigLoadingHandler
             {   return;
             }
 
-            List<Item> items = new ArrayList<>();
-            carryTempData.item().items().ifPresent(itemList ->
-            {   items.addAll(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, itemList));
-            });
+            List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, carryTempData.item().flatListMap(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -487,10 +474,7 @@ public class ConfigLoadingHandler
             {   return;
             }
 
-            List<Item> items = new ArrayList<>();
-            dryingItemData.data().items().ifPresent(itemList ->
-            {   items.addAll(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, itemList));
-            });
+            List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, dryingItemData.item().flatListMap(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -510,24 +494,17 @@ public class ConfigLoadingHandler
             if (!blockTempData.areRequiredModsLoaded())
             {   return;
             }
-            Block[] blocks = RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.BLOCKS, blockTempData.blocks()).toArray(Block[]::new);
-            BlockTemp blockTemp = new BlockTempConfig(blockTempData.getTemperature() < 0 ? -blockTempData.getMaxEffect() : Double.NEGATIVE_INFINITY,
-                                                      blockTempData.getTemperature() > 0 ? blockTempData.getMaxEffect() : Double.POSITIVE_INFINITY,
-                                                      blockTempData.getMinTemp(),
-                                                      blockTempData.getMaxTemp(),
-                                                      blockTempData.range(),
-                                                      blockTempData.fade(),
-                                                      blockTempData.conditions(),
-                                                      blocks)
+            BlockTemp blockTemp = new BlockTempConfig(blockTempData)
             {
                 final double temperature = blockTempData.getTemperature();
-                final LocationRequirement locationRequirement = blockTempData.location();
-                final EntityRequirement entityRequirement = blockTempData.entity();
+                final NegatableList<LocationRequirement> locationRequirement = blockTempData.location();
+                final NegatableList<EntityRequirement> entityRequirement = blockTempData.entity();
 
                 @Override
                 public double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
                 {
-                    if (locationRequirement.test(level, pos) && entityRequirement.test(entity))
+                    if (locationRequirement.test(req -> req.test(level, pos))
+                    && entityRequirement.test(req -> req.test(entity)))
                     {   return temperature;
                     }
                     return 0;
@@ -625,7 +602,7 @@ public class ConfigLoadingHandler
             if (!mountData.areRequiredModsLoaded())
             {   return;
             }
-            List<EntityType<?>> entities = RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITY_TYPES, mountData.entity().entities().orElse(List.of()));
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITY_TYPES, mountData.entity().flatListMap(EntityRequirement::entities)));
             if (entities.isEmpty())
             {   entities.add(null);
             }
@@ -659,11 +636,7 @@ public class ConfigLoadingHandler
             if (!entityTempData.areRequiredModsLoaded())
             {   return;
             }
-            // Gather entity types and tags
-            List<Either<TagKey<EntityType<?>>, EntityType<?>>> types = new ArrayList<>();
-            entityTempData.entity().entities().ifPresent(type -> types.addAll(type));
-
-            List<EntityType<?>> entities = RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITY_TYPES, types);
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITY_TYPES, entityTempData.entity().flatListMap(EntityRequirement::entities)));
             if (entities.isEmpty())
             {   entities.add(null);
             }

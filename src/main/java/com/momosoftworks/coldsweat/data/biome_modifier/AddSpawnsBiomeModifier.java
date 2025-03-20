@@ -32,8 +32,7 @@ public record AddSpawnsBiomeModifier(boolean useConfigs) implements BiomeModifie
                     FunctionalSpawnerData spawnerData = new FunctionalSpawnerData(entityType, spawn.weight(), spawn.count().min(), spawn.count().max(),
                                                                                  (level, structureManager, chunkGenerator, category, data, pos) ->
                                                                                  {
-                                                                                     return spawn.location().test(level, pos)
-                                                                                         && spawn.blockBelow().test(level, pos.below());
+                                                                                     return spawn.location().test(req -> req.test(level, pos));
                                                                                  });
                     builder.getMobSpawnSettings().getSpawner(MobCategory.CREATURE).removeIf(oldData -> oldData.type == entityType);
                     builder.getMobSpawnSettings().addSpawn(MobCategory.CREATURE, spawnerData);

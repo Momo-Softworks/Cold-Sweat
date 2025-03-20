@@ -10,15 +10,21 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.tags.ITag;
 
+import java.util.List;
+
 @Mod.EventBusSubscriber
 public class FilterInsulationItemsTab
 {
+    /**
+     * If there are more than 6 items that belong to the same tag, only the first item will be added to the insulators tab
+     */
     @SubscribeEvent
     public static void filterItems(InsulatorTabBuildEvent event)
     {
         event.addCheck((item, insulator) ->
         {
-            for (Either<TagKey<Item>, Item> either : CSMath.listOrEmpty(insulator.item().items()))
+            List<Either<TagKey<Item>, Item>> items = insulator.item().flatMap(it -> CSMath.mutable(it.items()), CSMath::merge, List::removeAll).orElse(List.of());
+            for (Either<TagKey<Item>, Item> either : items)
             {
                 if (either.left().map(tag -> item.builtInRegistryHolder().is(tag)).orElse(false))
                 {

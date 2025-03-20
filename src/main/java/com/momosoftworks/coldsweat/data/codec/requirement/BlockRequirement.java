@@ -6,6 +6,7 @@ import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -25,56 +26,53 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
 
-public record BlockRequirement(Optional<List<Either<TagKey<Block>, Block>>> blocks, Optional<StateRequirement> state,
-                               Optional<NbtRequirement> nbt, Optional<List<Direction>> sturdyFaces,
-                               Optional<Boolean> withinWorldBounds, Optional<Boolean> replaceable,
-                               boolean negate)
+public record BlockRequirement(List<Either<TagKey<Block>, Block>> blocks, StateRequirement state,
+                               NbtRequirement nbt, List<Direction> sturdyFaces,
+                               Optional<Boolean> withinWorldBounds, Optional<Boolean> replaceable)
 {
-    public static final BlockRequirement NONE = new BlockRequirement(Optional.empty(), Optional.empty(), Optional.empty(),
-                                                                     Optional.empty(), Optional.empty(), Optional.empty(),
-                                                                     false);
+    public static final BlockRequirement NONE = new BlockRequirement(List.of(), StateRequirement.NONE, NbtRequirement.NONE, List.of(), Optional.empty(), Optional.empty());
 
     public static final Codec<BlockRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ConfigHelper.tagOrBuiltinCodec(Registry.BLOCK_REGISTRY, ForgeRegistries.BLOCKS).listOf().optionalFieldOf("blocks").forGetter(predicate -> predicate.blocks),
-            StateRequirement.CODEC.optionalFieldOf("state").forGetter(predicate -> predicate.state),
-            NbtRequirement.CODEC.optionalFieldOf("nbt").forGetter(predicate -> predicate.nbt),
-            Direction.CODEC.listOf().optionalFieldOf("sturdy_faces").forGetter(predicate -> predicate.sturdyFaces),
+            ConfigHelper.tagOrBuiltinCodec(Registry.BLOCK_REGISTRY, ForgeRegistries.BLOCKS).listOf().optionalFieldOf("blocks", List.of()).forGetter(predicate -> predicate.blocks),
+            StateRequirement.CODEC.optionalFieldOf("state", StateRequirement.NONE).forGetter(predicate -> predicate.state),
+            NbtRequirement.CODEC.optionalFieldOf("nbt", NbtRequirement.NONE).forGetter(predicate -> predicate.nbt),
+            Direction.CODEC.listOf().optionalFieldOf("sturdy_faces", List.of()).forGetter(predicate -> predicate.sturdyFaces),
             Codec.BOOL.optionalFieldOf("within_world_bounds").forGetter(predicate -> predicate.withinWorldBounds),
-            Codec.BOOL.optionalFieldOf("replaceable").forGetter(predicate -> predicate.replaceable),
-            Codec.BOOL.optionalFieldOf("negate", false).forGetter(predicate -> predicate.negate)
+            Codec.BOOL.optionalFieldOf("replaceable").forGetter(predicate -> predicate.replaceable)
     ).apply(instance, BlockRequirement::new));
+
+    public BlockRequirement(List<Either<TagKey<Block>, Block>> blocks)
+    {
+        this(blocks, StateRequirement.NONE, NbtRequirement.NONE, List.of(), Optional.empty(), Optional.empty());
+    }
 
     public boolean test(Level level, BlockPos pos, BlockState state)
     {
         if (!level.isLoaded(pos)) return false;
 
-        if (this.blocks.isPresent() && this.blocks.get().stream().noneMatch(either -> either.map(state::is, state::is)))
-        {   return false ^ this.negate;
+        if (!this.blocks.isEmpty() && this.blocks.stream().noneMatch(either -> either.map(state::is, state::is)))
+        {   return false;
         }
-        if (this.state.isPresent() && !this.state.get().test(state))
-        {   return false ^ this.negate;
+        if (!this.state.test(state))
+        {   return false;
         }
-        if (this.nbt.isPresent())
+        if (!this.nbt.isEmpty())
         {
             BlockEntity blockentity = level.getBlockEntity(pos);
-            return (blockentity != null && this.nbt.get().test(blockentity.saveWithFullMetadata())) ^ this.negate;
-        }
-        if (this.sturdyFaces.isPresent())
-        {
-            for (Direction face : this.sturdyFaces.get())
-            {
-                if (!state.isFaceSturdy(level, pos, face))
-                {   return false ^ this.negate;
-                }
+            if (blockentity != null && !this.nbt.test(blockentity.saveWithFullMetadata()))
+            {   return false;
             }
         }
+        if (!this.sturdyFaces.isEmpty() && this.sturdyFaces.stream().noneMatch(face -> state.isFaceSturdy(level, pos, face)))
+        {   return false;
+        }
         if (this.withinWorldBounds.isPresent())
-        {   return level.getWorldBorder().isWithinBounds(pos) ^ this.negate;
+        {   return level.getWorldBorder().isWithinBounds(pos);
         }
         if (this.replaceable.isPresent())
-        {   return state.isAir() || state.canBeReplaced(new DirectionalPlaceContext(level, pos, Direction.DOWN, ItemStack.EMPTY, Direction.UP)) ^ this.negate;
+        {   return state.isAir() || state.getMaterial().isReplaceable();
         }
-        return true ^ this.negate;
+        return true;
     }
 
     public boolean test(Level level, BlockPos pos)
@@ -97,8 +95,7 @@ public record BlockRequirement(Optional<List<Either<TagKey<Block>, Block>>> bloc
         if (obj == null || getClass() != obj.getClass()) return false;
 
         BlockRequirement that = (BlockRequirement) obj;
-        return negate == that.negate
-            && blocks.equals(that.blocks)
+        return blocks.equals(that.blocks)
             && state.equals(that.state)
             && nbt.equals(that.nbt)
             && sturdyFaces.equals(that.sturdyFaces)

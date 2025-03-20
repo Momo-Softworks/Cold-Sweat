@@ -9,29 +9,32 @@ import net.minecraft.world.entity.LivingEntity;
 
 import java.util.Optional;
 
-public record EquipmentRequirement(Optional<ItemRequirement> head, Optional<ItemRequirement> chest,
-                                   Optional<ItemRequirement> legs, Optional<ItemRequirement> feet,
-                                   Optional<ItemRequirement> mainHand, Optional<ItemRequirement> offHand)
+public record EquipmentRequirement(ItemRequirement head, ItemRequirement chest,
+                                   ItemRequirement legs, ItemRequirement feet,
+                                   ItemRequirement mainHand, ItemRequirement offHand)
 {
     public static final Codec<EquipmentRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ItemRequirement.CODEC.optionalFieldOf("head").forGetter(requirement -> requirement.head),
-            ItemRequirement.CODEC.optionalFieldOf("chest").forGetter(requirement -> requirement.chest),
-            ItemRequirement.CODEC.optionalFieldOf("legs").forGetter(requirement -> requirement.legs),
-            ItemRequirement.CODEC.optionalFieldOf("feet").forGetter(requirement -> requirement.feet),
-            ItemRequirement.CODEC.optionalFieldOf("mainhand").forGetter(requirement -> requirement.mainHand),
-            ItemRequirement.CODEC.optionalFieldOf("offhand").forGetter(requirement -> requirement.offHand)
+            ItemRequirement.CODEC.optionalFieldOf("head", ItemRequirement.NONE).forGetter(requirement -> requirement.head),
+            ItemRequirement.CODEC.optionalFieldOf("chest", ItemRequirement.NONE).forGetter(requirement -> requirement.chest),
+            ItemRequirement.CODEC.optionalFieldOf("legs", ItemRequirement.NONE).forGetter(requirement -> requirement.legs),
+            ItemRequirement.CODEC.optionalFieldOf("feet", ItemRequirement.NONE).forGetter(requirement -> requirement.feet),
+            ItemRequirement.CODEC.optionalFieldOf("mainhand", ItemRequirement.NONE).forGetter(requirement -> requirement.mainHand),
+            ItemRequirement.CODEC.optionalFieldOf("offhand", ItemRequirement.NONE).forGetter(requirement -> requirement.offHand)
     ).apply(instance, EquipmentRequirement::new));
+
+    public static final EquipmentRequirement NONE = new EquipmentRequirement(ItemRequirement.NONE, ItemRequirement.NONE,
+                                                                             ItemRequirement.NONE, ItemRequirement.NONE,
+                                                                             ItemRequirement.NONE, ItemRequirement.NONE);
 
     public boolean test(Entity entity)
     {
-        return head.isEmpty() && chest.isEmpty() && legs.isEmpty() && feet.isEmpty() && mainHand.isEmpty() && offHand.isEmpty()
-            || entity instanceof LivingEntity living
-            && (head.isEmpty()  || head.get().test(living.getItemBySlot(EquipmentSlot.HEAD), true))
-            && (chest.isEmpty() || chest.get().test(living.getItemBySlot(EquipmentSlot.CHEST), true))
-            && (legs.isEmpty()  || legs.get().test(living.getItemBySlot(EquipmentSlot.LEGS), true))
-            && (feet.isEmpty()  || feet.get().test(living.getItemBySlot(EquipmentSlot.FEET), true))
-            && (mainHand.isEmpty() || mainHand.get().test(living.getMainHandItem(), true))
-            && (offHand.isEmpty()  || offHand.get().test(living.getOffhandItem(), true));
+        return entity instanceof LivingEntity living
+            && head.test(living.getItemBySlot(EquipmentSlot.HEAD), true)
+            && chest.test(living.getItemBySlot(EquipmentSlot.CHEST), true)
+            && legs.test(living.getItemBySlot(EquipmentSlot.LEGS), true)
+            && feet.test(living.getItemBySlot(EquipmentSlot.FEET), true)
+            && mainHand.test(living.getMainHandItem(), true)
+            && offHand.test(living.getOffhandItem(), true);
     }
 
     @Override

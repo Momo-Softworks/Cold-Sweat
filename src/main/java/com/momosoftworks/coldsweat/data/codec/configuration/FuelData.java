@@ -8,7 +8,7 @@ import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.impl.RequirementHolder;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
-import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.nbt.CompoundTag;
@@ -16,18 +16,17 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
 import java.util.*;
 
 public class FuelData extends ConfigData implements RequirementHolder
 {
-    final ItemRequirement item;
+    final NegatableList<ItemRequirement> item;
     final FuelType type;
     final Double fuel;
 
-    public FuelData(ItemRequirement item, FuelType type, Double fuel, List<String> requiredMods)
+    public FuelData(NegatableList<ItemRequirement> item, FuelType type, Double fuel, List<String> requiredMods)
     {
         super(requiredMods);
         this.type = type;
@@ -35,19 +34,18 @@ public class FuelData extends ConfigData implements RequirementHolder
         this.item = item;
     }
 
-    public FuelData(ItemRequirement item, FuelType type, Double fuel)
-    {
-        this(item, type, fuel, ConfigHelper.getModIDs(CSMath.listOrEmpty(item.items()), ForgeRegistries.ITEMS));
+    public FuelData(NegatableList<ItemRequirement> item, FuelType type, Double fuel)
+    {   this(item, type, fuel, List.of());
     }
 
     public static final Codec<FuelData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ItemRequirement.CODEC.fieldOf("item").forGetter(FuelData::item),
+            NegatableList.codec(ItemRequirement.CODEC).optionalFieldOf("item", new NegatableList<>()).forGetter(FuelData::item),
             FuelType.CODEC.fieldOf("type").forGetter(FuelData::type),
             Codec.DOUBLE.fieldOf("fuel").forGetter(FuelData::fuel),
             Codec.STRING.listOf().optionalFieldOf("required_mods", List.of()).forGetter(FuelData::requiredMods)
     ).apply(instance, FuelData::new));
 
-    public ItemRequirement item()
+    public NegatableList<ItemRequirement> item()
     {   return item;
     }
     public FuelType type()
@@ -59,7 +57,7 @@ public class FuelData extends ConfigData implements RequirementHolder
 
     @Override
     public boolean test(ItemStack stack)
-    {   return item.test(stack, true);
+    {   return item.test(req -> req.test(stack, true));
     }
 
     @Nullable
@@ -78,7 +76,7 @@ public class FuelData extends ConfigData implements RequirementHolder
                                         : new NbtRequirement(new CompoundTag());
         ItemRequirement itemRequirement = new ItemRequirement(items, nbtRequirement);
 
-        return new FuelData(itemRequirement, fuelType, fuel);
+        return new FuelData(new NegatableList<>(itemRequirement), fuelType, fuel);
     }
 
     @Override
