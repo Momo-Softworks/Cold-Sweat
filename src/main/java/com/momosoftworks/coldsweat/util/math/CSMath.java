@@ -752,14 +752,25 @@ public class CSMath
         else list.set(index, entry);
     }
 
+    /**
+     * Merges the given collections together into a single list.<br>
+     * The collections are appended to each other in the order in which they are provided.
+     */
     @SafeVarargs
-    public static <T> List<T> append(Collection<T>... lists)
+    public static <T> List<T> merge(Collection<T>... lists)
     {
         List<T> appended = new ArrayList<>();
         for (Collection<T> list : lists)
         {   appended.addAll(list);
         }
         return appended;
+    }
+
+    /**
+     * Makes the given list mutable by converting it to an {@link ArrayList}.
+     */
+    public static <T> List<T> mutable(List<T> list)
+    {   return new ArrayList<>(list);
     }
 
     public static Class<?> getCallerClass(int depth)

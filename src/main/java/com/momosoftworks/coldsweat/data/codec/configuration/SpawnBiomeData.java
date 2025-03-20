@@ -7,6 +7,7 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.LocationRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
@@ -29,13 +30,12 @@ public class SpawnBiomeData extends ConfigData
     final EntityClassification category;
     final int weight;
     final IntegerBounds count;
-    final LocationRequirement location;
-    final LocationRequirement blockBelow;
+    final NegatableList<LocationRequirement> location;
 
     public SpawnBiomeData(List<Biome> biomes,
                           List<Either<ITag<EntityType<?>>, EntityType<?>>> entities,
-                          EntityClassification category, int weight, IntegerBounds count, LocationRequirement location,
-                          LocationRequirement blockBelow, List<String> requiredMods)
+                          EntityClassification category, int weight, IntegerBounds count, NegatableList<LocationRequirement> location,
+                          List<String> requiredMods)
     {
         super(requiredMods);
         this.biomes = biomes;
@@ -44,23 +44,21 @@ public class SpawnBiomeData extends ConfigData
         this.weight = weight;
         this.count = count;
         this.location = location;
-        this.blockBelow = blockBelow;
     }
 
     public SpawnBiomeData(List<Biome> biomes, List<Either<ITag<EntityType<?>>, EntityType<?>>> entities,
-                          EntityClassification category, int weight, IntegerBounds count, LocationRequirement location, LocationRequirement blockBelow)
+                          EntityClassification category, int weight, IntegerBounds count, NegatableList<LocationRequirement> location)
     {
-        this(biomes, entities, category, weight, count, location, blockBelow, ConfigHelper.getModIDs(biomes, Registry.BIOME_REGISTRY));
+        this(biomes, entities, category, weight, count, location, Arrays.asList());
     }
 
     public SpawnBiomeData(Collection<Biome> biomes, EntityClassification category,
                           int weight, Collection<EntityType<?>> entities,
-                          IntegerBounds count, LocationRequirement location, LocationRequirement blockBelow)
+                          IntegerBounds count, NegatableList<LocationRequirement> location)
     {
         this(new ArrayList<>(biomes),
              entities.stream().map(Either::<ITag<EntityType<?>>, EntityType<?>>right).collect(Collectors.toList()),
-             category, weight,
-             count, location, blockBelow);
+             category, weight, count, location);
     }
 
     public static final Codec<SpawnBiomeData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -69,8 +67,7 @@ public class SpawnBiomeData extends ConfigData
             EntityClassification.CODEC.fieldOf("category").forGetter(SpawnBiomeData::category),
             Codec.INT.fieldOf("weight").forGetter(SpawnBiomeData::weight),
             IntegerBounds.CODEC.optionalFieldOf("count", IntegerBounds.NONE).forGetter(SpawnBiomeData::count),
-            LocationRequirement.CODEC.optionalFieldOf("location", LocationRequirement.NONE).forGetter(SpawnBiomeData::location),
-            LocationRequirement.CODEC.optionalFieldOf("block_below", LocationRequirement.NONE).forGetter(SpawnBiomeData::blockBelow),
+            NegatableList.codec(LocationRequirement.CODEC).optionalFieldOf("location", new NegatableList<>()).forGetter(SpawnBiomeData::location),
             Codec.STRING.listOf().optionalFieldOf("required_mods", Arrays.asList()).forGetter(SpawnBiomeData::requiredMods)
     ).apply(instance, SpawnBiomeData::new));
 
@@ -89,11 +86,8 @@ public class SpawnBiomeData extends ConfigData
     public IntegerBounds count()
     {   return count;
     }
-    public LocationRequirement location()
+    public NegatableList<LocationRequirement> location()
     {   return location;
-    }
-    public LocationRequirement blockBelow()
-    {   return blockBelow;
     }
 
     @Nullable
@@ -107,7 +101,7 @@ public class SpawnBiomeData extends ConfigData
         if (biomes.isEmpty()) return null;
         return new SpawnBiomeData(biomes, Arrays.asList(Either.right(entityType)),
                                   EntityClassification.CREATURE, ((Number) entry.get(1)).intValue(),
-                                  new IntegerBounds(1, 1), LocationRequirement.NONE, LocationRequirement.NONE);
+                                  new IntegerBounds(1, 1), new NegatableList<>());
     }
 
     @Override
@@ -127,7 +121,6 @@ public class SpawnBiomeData extends ConfigData
             && weight == that.weight
             && entities.equals(that.entities)
             && count.equals(that.count)
-            && location.equals(that.location)
-            && blockBelow.equals(that.blockBelow);
+            && location.equals(that.location);
     }
 }

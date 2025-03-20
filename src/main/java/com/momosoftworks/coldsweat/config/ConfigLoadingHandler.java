@@ -21,7 +21,9 @@ import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
+import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.LocationRequirement;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.math.RegistryMultiMap;
@@ -348,10 +350,7 @@ public class ConfigLoadingHandler
             }
 
             // Add listed items as insulators
-            List<Item> items = new ArrayList<>();
-            insulator.item().items().ifPresent(itemList ->
-            {   items.addAll(RegistryHelper.mapTaggableList(itemList));
-            });
+            List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(insulator.item().flatListMap(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -383,10 +382,7 @@ public class ConfigLoadingHandler
             {   return;
             }
 
-            List<Item> items = new ArrayList<>();
-            fuelData.item().items().ifPresent(itemList ->
-            {   items.addAll(RegistryHelper.mapTaggableList(itemList));
-            });
+            List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(fuelData.item().flatListMap(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -413,10 +409,7 @@ public class ConfigLoadingHandler
             {   return;
             }
 
-            List<Item> items = new ArrayList<>();
-            foodData.item().items().ifPresent(itemList ->
-            {   items.addAll(RegistryHelper.mapTaggableList(itemList));
-            });
+            List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(foodData.item().flatListMap(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -436,10 +429,7 @@ public class ConfigLoadingHandler
             {   return;
             }
 
-            List<Item> items = new ArrayList<>();
-            carryTempData.item().items().ifPresent(itemList ->
-            {   items.addAll(RegistryHelper.mapTaggableList(itemList));
-            });
+            List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(carryTempData.item().flatListMap(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -459,10 +449,7 @@ public class ConfigLoadingHandler
             {   return;
             }
 
-            List<Item> items = new ArrayList<>();
-            dryingItemData.data().items().ifPresent(itemList ->
-            {   items.addAll(RegistryHelper.mapTaggableList(itemList));
-            });
+            List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(dryingItemData.item().flatListMap(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -481,24 +468,17 @@ public class ConfigLoadingHandler
             if (!blockTempData.areRequiredModsLoaded())
             {   return;
             }
-            Block[] blocks = RegistryHelper.mapTaggableList(blockTempData.blocks()).toArray(new Block[0]);
-            BlockTemp blockTemp = new BlockTempConfig(blockTempData.getTemperature() < 0 ? -blockTempData.getMaxEffect() : Double.NEGATIVE_INFINITY,
-                                                      blockTempData.getTemperature() > 0 ? blockTempData.getMaxEffect() : Double.POSITIVE_INFINITY,
-                                                      blockTempData.getMinTemp(),
-                                                      blockTempData.getMaxTemp(),
-                                                      blockTempData.range(),
-                                                      blockTempData.fade(),
-                                                      blockTempData.conditions(),
-                                                      blocks)
+            BlockTemp blockTemp = new BlockTempConfig(blockTempData)
             {
                 final double temperature = blockTempData.getTemperature();
-                final LocationRequirement locationRequirement = blockTempData.location();
-                final EntityRequirement entityRequirement = blockTempData.entity();
+                final NegatableList<LocationRequirement> locationRequirement = blockTempData.location();
+                final NegatableList<EntityRequirement> entityRequirement = blockTempData.entity();
 
                 @Override
                 public double getTemperature(World level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
                 {
-                    if (locationRequirement.test(level, pos) && entityRequirement.test(entity))
+                    if (locationRequirement.test(req -> req.test(level, pos))
+                    && entityRequirement.test(req -> req.test(entity)))
                     {   return temperature;
                     }
                     return 0;
@@ -591,7 +571,7 @@ public class ConfigLoadingHandler
             if (!mountData.areRequiredModsLoaded())
             {   return;
             }
-            List<EntityType<?>> entities = RegistryHelper.mapTaggableList(mountData.entity().entities().orElse(Arrays.asList()));
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapTaggableList(mountData.entity().flatListMap(EntityRequirement::entities)));
             if (entities.isEmpty())
             {   entities.add(null);
             }
@@ -623,11 +603,7 @@ public class ConfigLoadingHandler
             if (!entityTempData.areRequiredModsLoaded())
             {   return;
             }
-            // Gather entity types and tags
-            List<Either<ITag<EntityType<?>>, EntityType<?>>> types = new ArrayList<>();
-            entityTempData.entity().entities.ifPresent(type -> types.addAll(type));
-
-            List<EntityType<?>> entities = RegistryHelper.mapTaggableList(types);
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapTaggableList(entityTempData.entity().flatListMap(EntityRequirement::entities)));
             if (entities.isEmpty())
             {   entities.add(null);
             }

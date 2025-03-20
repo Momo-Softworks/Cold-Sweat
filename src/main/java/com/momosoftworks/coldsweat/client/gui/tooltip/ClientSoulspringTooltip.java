@@ -9,6 +9,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.ItemRenderer;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -62,11 +63,11 @@ public class ClientSoulspringTooltip extends Tooltip
             {
                 for (FuelData fuelData : ConfigSettings.SOULSPRING_LAMP_FUEL.get().get(item))
                 {
-                    ItemStack stack = new ItemStack(item, 1);
-                    stack.setTag(fuelData.item().nbt().tag());
-                    itemRenderer.renderGuiItem(stack,
-                                               x + ((i * 16) % 96),
-                                               y + 12 + CSMath.floor(i / 6d) * 16);
+                    // Compile item NBT
+                    CompoundNBT nbt = fuelData.item().flatMap(req -> req.nbt().tag(), CompoundNBT::merge).orElse(new CompoundNBT());
+                    // Render item
+                    itemRenderer.renderGuiItem(new ItemStack(item, 1, nbt),
+                                               x + ((i * 16) % 96), y + 12 + CSMath.floor(i / 6d) * 16);
                     i++;
                 }
             }

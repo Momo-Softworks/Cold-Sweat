@@ -11,16 +11,16 @@ import java.util.Optional;
 
 public class EquipmentRequirement
 {
-    private final Optional<ItemRequirement> head;
-    private final Optional<ItemRequirement> chest;
-    private final Optional<ItemRequirement> legs;
-    private final Optional<ItemRequirement> feet;
-    private final Optional<ItemRequirement> mainHand;
-    private final Optional<ItemRequirement> offHand;
+    private final ItemRequirement head;
+    private final ItemRequirement chest;
+    private final ItemRequirement legs;
+    private final ItemRequirement feet;
+    private final ItemRequirement mainHand;
+    private final ItemRequirement offHand;
 
-    public EquipmentRequirement(Optional<ItemRequirement> head, Optional<ItemRequirement> chest,
-                                Optional<ItemRequirement> legs, Optional<ItemRequirement> feet,
-                                Optional<ItemRequirement> mainHand, Optional<ItemRequirement> offHand)
+    public EquipmentRequirement(ItemRequirement head, ItemRequirement chest,
+                                ItemRequirement legs, ItemRequirement feet,
+                                ItemRequirement mainHand, ItemRequirement offHand)
     {
         this.head = head;
         this.chest = chest;
@@ -29,45 +29,47 @@ public class EquipmentRequirement
         this.mainHand = mainHand;
         this.offHand = offHand;
     }
-
     public static final Codec<EquipmentRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ItemRequirement.CODEC.optionalFieldOf("head").forGetter(requirement -> requirement.head),
-            ItemRequirement.CODEC.optionalFieldOf("chest").forGetter(requirement -> requirement.chest),
-            ItemRequirement.CODEC.optionalFieldOf("legs").forGetter(requirement -> requirement.legs),
-            ItemRequirement.CODEC.optionalFieldOf("feet").forGetter(requirement -> requirement.feet),
-            ItemRequirement.CODEC.optionalFieldOf("mainhand").forGetter(requirement -> requirement.mainHand),
-            ItemRequirement.CODEC.optionalFieldOf("offhand").forGetter(requirement -> requirement.offHand)
+            ItemRequirement.CODEC.optionalFieldOf("head", ItemRequirement.NONE).forGetter(requirement -> requirement.head),
+            ItemRequirement.CODEC.optionalFieldOf("chest", ItemRequirement.NONE).forGetter(requirement -> requirement.chest),
+            ItemRequirement.CODEC.optionalFieldOf("legs", ItemRequirement.NONE).forGetter(requirement -> requirement.legs),
+            ItemRequirement.CODEC.optionalFieldOf("feet", ItemRequirement.NONE).forGetter(requirement -> requirement.feet),
+            ItemRequirement.CODEC.optionalFieldOf("mainhand", ItemRequirement.NONE).forGetter(requirement -> requirement.mainHand),
+            ItemRequirement.CODEC.optionalFieldOf("offhand", ItemRequirement.NONE).forGetter(requirement -> requirement.offHand)
     ).apply(instance, EquipmentRequirement::new));
 
-    public Optional<ItemRequirement> head()
+    public static final EquipmentRequirement NONE = new EquipmentRequirement(ItemRequirement.NONE, ItemRequirement.NONE,
+                                                                             ItemRequirement.NONE, ItemRequirement.NONE,
+                                                                             ItemRequirement.NONE, ItemRequirement.NONE);
+
+    public ItemRequirement head()
     {   return head;
     }
-    public Optional<ItemRequirement> chest()
+    public ItemRequirement chest()
     {   return chest;
     }
-    public Optional<ItemRequirement> legs()
+    public ItemRequirement legs()
     {   return legs;
     }
-    public Optional<ItemRequirement> feet()
+    public ItemRequirement feet()
     {   return feet;
     }
-    public Optional<ItemRequirement> mainHand()
+    public ItemRequirement mainHand()
     {   return mainHand;
     }
-    public Optional<ItemRequirement> offHand()
+    public ItemRequirement offHand()
     {   return offHand;
     }
 
     public boolean test(Entity entity)
     {
-        return !head.isPresent() && !chest.isPresent() && !legs.isPresent() && !feet.isPresent() && !mainHand.isPresent() && !offHand.isPresent()
-            || entity instanceof LivingEntity
-            && (!head.isPresent() || head.get().test(((LivingEntity) entity).getItemBySlot(EquipmentSlotType.HEAD), true))
-            && (!chest.isPresent() || chest.get().test(((LivingEntity) entity).getItemBySlot(EquipmentSlotType.CHEST), true))
-            && (!legs.isPresent() || legs.get().test(((LivingEntity) entity).getItemBySlot(EquipmentSlotType.LEGS), true))
-            && (!feet.isPresent() || feet.get().test(((LivingEntity) entity).getItemBySlot(EquipmentSlotType.FEET), true))
-            && (!mainHand.isPresent() || mainHand.get().test(((LivingEntity) entity).getMainHandItem(), true))
-            && (!offHand.isPresent() || offHand.get().test(((LivingEntity) entity).getOffhandItem(), true));
+        return entity instanceof LivingEntity
+            && head.test(((LivingEntity) entity).getItemBySlot(EquipmentSlotType.HEAD), true)
+            && chest.test(((LivingEntity) entity).getItemBySlot(EquipmentSlotType.CHEST), true)
+            && legs.test(((LivingEntity) entity).getItemBySlot(EquipmentSlotType.LEGS), true)
+            && feet.test(((LivingEntity) entity).getItemBySlot(EquipmentSlotType.FEET), true)
+            && mainHand.test(((LivingEntity) entity).getMainHandItem(), true)
+            && offHand.test(((LivingEntity) entity).getOffhandItem(), true);
     }
 
     @Override

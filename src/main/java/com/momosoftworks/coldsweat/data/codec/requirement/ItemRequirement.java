@@ -16,16 +16,13 @@ import net.minecraft.potion.PotionUtils;
 import net.minecraft.tags.ITag;
 import net.minecraft.util.registry.Registry;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class ItemRequirement
 {
-    private final Optional<List<Either<ITag<Item>, Item>>> items;
+    private final List<Either<ITag<Item>, Item>> items;
     private final Optional<IntegerBounds> count;
     private final Optional<IntegerBounds> durability;
     private final Optional<List<EnchantmentRequirement>> enchantments;
@@ -33,7 +30,7 @@ public class ItemRequirement
     private final NbtRequirement nbt;
     private final Optional<Predicate<ItemStack>> predicate;
 
-    public ItemRequirement(Optional<List<Either<ITag<Item>, Item>>> items,
+    public ItemRequirement(List<Either<ITag<Item>, Item>> items,
                            Optional<IntegerBounds> count, Optional<IntegerBounds> durability,
                            Optional<List<EnchantmentRequirement>> enchantments,
                            Optional<Potion> potion, NbtRequirement nbt, Optional<Predicate<ItemStack>> predicate)
@@ -48,7 +45,7 @@ public class ItemRequirement
     }
 
     public static final Codec<ItemRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ConfigHelper.tagOrBuiltinCodec(Registry.ITEM_REGISTRY, Registry.ITEM).listOf().optionalFieldOf("items").forGetter(predicate -> predicate.items),
+            ConfigHelper.tagOrBuiltinCodec(Registry.ITEM_REGISTRY, Registry.ITEM).listOf().optionalFieldOf("items", Arrays.asList()).forGetter(predicate -> predicate.items),
             IntegerBounds.CODEC.optionalFieldOf("count").forGetter(predicate -> predicate.count),
             IntegerBounds.CODEC.optionalFieldOf("durability").forGetter(predicate -> predicate.durability),
             EnchantmentRequirement.CODEC.listOf().optionalFieldOf("enchantments").forGetter(predicate -> predicate.enchantments),
@@ -56,10 +53,10 @@ public class ItemRequirement
             NbtRequirement.CODEC.optionalFieldOf("nbt", new NbtRequirement()).forGetter(predicate -> predicate.nbt)
     ).apply(instance, ItemRequirement::new));
 
-    public static final ItemRequirement NONE = new ItemRequirement(Optional.empty(), Optional.empty(), Optional.empty(),
+    public static final ItemRequirement NONE = new ItemRequirement(Arrays.asList(), Optional.empty(), Optional.empty(),
                                                                    Optional.empty(), Optional.empty(), new NbtRequirement());
 
-    public ItemRequirement(Optional<List<Either<ITag<Item>, Item>>> items,
+    public ItemRequirement(List<Either<ITag<Item>, Item>> items,
                            Optional<IntegerBounds> count, Optional<IntegerBounds> durability,
                            Optional<List<EnchantmentRequirement>> enchantments,
                            Optional<Potion> potion, NbtRequirement nbt)
@@ -69,16 +66,21 @@ public class ItemRequirement
 
     public ItemRequirement(List<Either<ITag<Item>, Item>> items, NbtRequirement nbt)
     {
-        this(Optional.of(items), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), nbt);
+        this(items, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), nbt);
     }
 
     public ItemRequirement(Collection<Item> items, Predicate<ItemStack> predicate)
     {
-        this(Optional.of(items.stream().map(Either::<ITag<Item>, Item>right).collect(Collectors.toList())), Optional.empty(), Optional.empty(),
+        this(items.stream().map(Either::<ITag<Item>, Item>right).collect(Collectors.toList()), Optional.empty(), Optional.empty(),
              Optional.empty(), Optional.empty(), new NbtRequirement(), Optional.ofNullable(predicate));
     }
 
-    public Optional<List<Either<ITag<Item>, Item>>> items()
+    public ItemRequirement(Predicate<ItemStack> predicate)
+    {
+        this(Arrays.asList(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), new NbtRequirement(), Optional.of(predicate));
+    }
+
+    public List<Either<ITag<Item>, Item>> items()
     {   return items;
     }
     public Optional<IntegerBounds> count()
@@ -102,23 +104,21 @@ public class ItemRequirement
 
     public boolean test(ItemStack stack, boolean ignoreCount)
     {
-        if (stack.isEmpty() && items.isPresent() && !items.get().isEmpty())
+        if (stack.isEmpty() && !items.isEmpty())
         {   return false;
         }
 
-        if (items.isPresent())
+        if (!items.isEmpty())
+        checkItem:
         {
-            checkItem:
+            for (int i = 0; i < items.size(); i++)
             {
-                for (int i = 0; i < items.get().size(); i++)
-                {
-                    Either<ITag<Item>, Item> either = items.get().get(i);
-                    if (either.map(tag -> tag.contains(stack.getItem()), item -> stack.getItem() == item))
-                    {   break checkItem;
-                    }
+                Either<ITag<Item>, Item> either = items.get(i);
+                if (either.map(tag -> tag.contains(stack.getItem()), item -> stack.getItem() == item))
+                {   break checkItem;
                 }
-                return false;
             }
+            return false;
         }
         if (this.predicate.isPresent())
         {   return this.predicate.get().test(stack);

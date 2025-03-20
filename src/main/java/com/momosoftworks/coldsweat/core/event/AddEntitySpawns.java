@@ -65,8 +65,7 @@ public class AddEntitySpawns
                         FunctionalSpawnerData spawnerData = new FunctionalSpawnerData(entityType, spawn.weight(), spawn.count().min(), spawn.count().max(),
                                                                                       (level, structureManager, chunkGenerator, category, data, pos) ->
                                                                                       {
-                                                                                          return spawn.location().test(level, pos)
-                                                                                              && spawn.blockBelow().test(level, pos.below());
+                                                                                          return spawn.location().test(rq -> rq.test(level, pos));
                                                                                       });
                         spawners.removeIf(oldData -> oldData.type == entityType);
                         spawners.add(spawnerData);

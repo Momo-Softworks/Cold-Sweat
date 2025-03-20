@@ -13,6 +13,8 @@ import com.momosoftworks.coldsweat.config.spec.*;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
+import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
+import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.FastMap;
@@ -23,7 +25,10 @@ import com.momosoftworks.coldsweat.util.serialization.*;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
-import net.minecraft.nbt.*;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.StringNBT;
 import net.minecraft.potion.Effect;
 import net.minecraft.tags.ITag;
 import net.minecraft.util.ResourceLocation;
@@ -34,7 +39,6 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.feature.StructureFeature;
-import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.common.thread.EffectiveSide;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -42,7 +46,10 @@ import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.apache.logging.log4j.util.TriConsumer;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -399,7 +406,7 @@ public class ConfigSettings
 
                 data.setType(ConfigData.Type.TOML);
 
-                putRegistryEntries(dataMap, ForgeRegistries.ITEMS, data.item().items(), data);
+                putRegistryEntries(dataMap, ForgeRegistries.ITEMS, data.item().flatListMap(ItemRequirement::items), data);
             }
             ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.FUEL_DATA);
             holder.get().putAll(dataMap);
@@ -433,7 +440,7 @@ public class ConfigSettings
 
                 data.setType(ConfigData.Type.TOML);
 
-                putRegistryEntries(dataMap, ForgeRegistries.ITEMS, data.item().items(), data);
+                putRegistryEntries(dataMap, ForgeRegistries.ITEMS, data.item().flatListMap(ItemRequirement::items), data);
             }
             // Handle registry removals
             ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.INSULATOR_DATA);
@@ -511,7 +518,7 @@ public class ConfigSettings
 
                 data.setType(ConfigData.Type.TOML);
 
-                putRegistryEntries(dataMap, ForgeRegistries.ITEMS, data.data().items(), data);
+                putRegistryEntries(dataMap, ForgeRegistries.ITEMS, data.item().flatListMap(ItemRequirement::items), data);
             }
             // Handle registry removals
             ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.DRYING_ITEM_DATA);
@@ -544,7 +551,7 @@ public class ConfigSettings
                 FoodData data = FoodData.fromToml(list);
                 if (data == null) continue;
 
-                putRegistryEntries(dataMap, ForgeRegistries.ITEMS, data.item().items(), data);
+                putRegistryEntries(dataMap, ForgeRegistries.ITEMS, data.item().flatListMap(ItemRequirement::items), data);
             }
             // Handle registry removals
             ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.FOOD_DATA);
@@ -565,7 +572,7 @@ public class ConfigSettings
                 ItemCarryTempData data = ItemCarryTempData.fromToml(list);
                 if (data == null) continue;
 
-                putRegistryEntries(dataMap, ForgeRegistries.ITEMS, data.item().items(), data);
+                putRegistryEntries(dataMap, ForgeRegistries.ITEMS, data.item().flatListMap(ItemRequirement::items), data);
             }
             // Handle registry removals
             ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.CARRY_TEMP_DATA);
@@ -656,7 +663,7 @@ public class ConfigSettings
 
                 data.setType(ConfigData.Type.TOML);
 
-                putRegistryEntries(dataMap, ForgeRegistries.ENTITIES, data.entity().entities(), data);
+                putRegistryEntries(dataMap, ForgeRegistries.ENTITIES, data.entity().flatListMap(EntityRequirement::entities), data);
             }
             // Handle registry removals
             ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.MOUNT_DATA);
@@ -675,7 +682,7 @@ public class ConfigSettings
 
                 data.setType(ConfigData.Type.TOML);
 
-                putRegistryEntries(dataMap, ForgeRegistries.ENTITIES, data.entity().entities(), data);
+                putRegistryEntries(dataMap, ForgeRegistries.ENTITIES, data.entity().flatListMap(EntityRequirement::entities), data);
             }
             // Handle registry removals
             ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.ENTITY_TEMP_DATA);
@@ -1140,9 +1147,9 @@ public class ConfigSettings
         }
     }
 
-    private static <K extends IForgeRegistryEntry<K>, V> void putRegistryEntries(Multimap<K, V> map, IForgeRegistry<K> registry, Optional<List<Either<ITag<K>, K>>> list, V data)
+    private static <K extends IForgeRegistryEntry<K>, V> void putRegistryEntries(Multimap<K, V> map, IForgeRegistry<K> registry, List<Either<ITag<K>, K>> list, V data)
     {
-        RegistryHelper.mapTaggableList(CSMath.listOrEmpty(list)).forEach(entry -> map.put(entry, data));
+        RegistryHelper.mapTaggableList(list).forEach(entry -> map.put(entry, data));
     }
 
     public enum WaterEffectSetting implements StringRepresentable

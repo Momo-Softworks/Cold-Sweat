@@ -8,15 +8,22 @@ import net.minecraft.tags.ITag;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import java.util.Arrays;
+import java.util.List;
+
 @Mod.EventBusSubscriber
 public class FilterInsulationItemsTab
 {
+    /**
+     * If there are more than 6 items that belong to the same tag, only the first item will be added to the insulators tab
+     */
     @SubscribeEvent
     public static void filterItems(InsulatorTabBuildEvent event)
     {
         event.addCheck((item, insulator) ->
         {
-            for (Either<ITag<Item>, Item> either : CSMath.listOrEmpty(insulator.item().items()))
+            List<Either<ITag<Item>, Item>> items = insulator.item().flatMap(it -> CSMath.mutable(it.items()), CSMath::merge, List::removeAll).orElse(Arrays.asList());
+            for (Either<ITag<Item>, Item> either : items)
             {
                 if (either.left().map(tag -> tag.contains(item)).orElse(false))
                 {

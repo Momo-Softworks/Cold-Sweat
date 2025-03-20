@@ -3,20 +3,19 @@ package com.momosoftworks.coldsweat.compat.kubejs.event.builder;
 import com.momosoftworks.coldsweat.data.codec.configuration.MountData;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 import java.util.function.Predicate;
 
 public class InsulatingMountBuilderJS
 {
-    public final Set<EntityType<?>> entities = new HashSet<>();
-    public Predicate<Entity> entityPredicate = null;
-    public Predicate<Entity> riderPredicate = null;
+    public NegatableList<EntityRequirement> entityPredicate = new NegatableList<>();
+    public NegatableList<EntityRequirement> riderPredicate = new NegatableList<>();
     public double coldInsulation = 0;
     public double heatInsulation = 0;
 
@@ -25,19 +24,20 @@ public class InsulatingMountBuilderJS
 
     public InsulatingMountBuilderJS entities(String... entities)
     {
-        this.entities.addAll(RegistryHelper.mapTaggableList(ConfigHelper.getEntityTypes(entities)));
+        List<EntityType<?>> entityList = RegistryHelper.mapTaggableList(ConfigHelper.getEntityTypes(entities));
+        this.entityPredicate.add(new EntityRequirement(entityList, null), false);
         return this;
     }
 
     public InsulatingMountBuilderJS entityPredicate(Predicate<Entity> entityPredicate)
     {
-        this.entityPredicate = entityPredicate;
+        this.entityPredicate.add(new EntityRequirement(entityPredicate), false);
         return this;
     }
 
     public InsulatingMountBuilderJS riderPredicate(Predicate<Entity> riderPredicate)
     {
-        this.riderPredicate = riderPredicate;
+        this.riderPredicate.add(new EntityRequirement(riderPredicate), false);
         return this;
     }
 
@@ -55,7 +55,7 @@ public class InsulatingMountBuilderJS
 
     public MountData build()
     {
-        MountData data = new MountData(new EntityRequirement(this.entities, this.entityPredicate), new EntityRequirement(this.riderPredicate), this.coldInsulation, this.heatInsulation);
+        MountData data = new MountData(this.entityPredicate, this.riderPredicate, this.coldInsulation, this.heatInsulation);
         data.setType(ConfigData.Type.KUBEJS);
         return data;
     }

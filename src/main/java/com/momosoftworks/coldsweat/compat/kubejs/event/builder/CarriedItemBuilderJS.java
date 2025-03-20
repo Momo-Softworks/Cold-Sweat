@@ -12,31 +12,28 @@ import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
-import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class CarriedItemBuilderJS
 {
-    public final Set<Item> items = new HashSet<>();
     public final Set<Either<IntegerBounds, ItemCarryTempData.SlotType>> slots = new HashSet<>();
     public double temperature = 0;
     public double maxEffect = 0;
     public Temperature.Trait trait = Temperature.Trait.WORLD;
-    public Predicate<ItemStack> itemPredicate = null;
-    public Predicate<Entity> entityPredicate = null;
+    public NegatableList<ItemRequirement> itemPredicate = new NegatableList<>();
+    public NegatableList<EntityRequirement> entityPredicate = new NegatableList<>();
     public AttributeModifierMap attributes = new AttributeModifierMap();
     public Map<ResourceLocation, Double> immuneTempModifiers = new HashMap<>();
 
@@ -45,7 +42,8 @@ public class CarriedItemBuilderJS
 
     public CarriedItemBuilderJS items(String... items)
     {
-        this.items.addAll(RegistryHelper.mapTaggableList(ConfigHelper.getItems(items)));
+        List<Item> itemList = RegistryHelper.mapTaggableList(ConfigHelper.getItems(items));
+        this.itemPredicate.add(new ItemRequirement(itemList, null), false);
         return this;
     }
 
@@ -91,13 +89,13 @@ public class CarriedItemBuilderJS
 
     public CarriedItemBuilderJS itemPredicate(Predicate<ItemStack> itemPredicate)
     {
-        this.itemPredicate = itemPredicate;
+        this.itemPredicate.add(new ItemRequirement(itemPredicate), false);
         return this;
     }
 
     public CarriedItemBuilderJS entityPredicate(Predicate<Entity> entityPredicate)
     {
-        this.entityPredicate = entityPredicate;
+        this.entityPredicate.add(new EntityRequirement(entityPredicate), false);
         return this;
     }
 
@@ -125,8 +123,8 @@ public class CarriedItemBuilderJS
 
     public ItemCarryTempData build()
     {
-        ItemCarryTempData data = new ItemCarryTempData(new ItemRequirement(this.items, this.itemPredicate), ImmutableList.copyOf(this.slots),
-                                                       this.temperature, this.trait, maxEffect, new EntityRequirement(this.entityPredicate),
+        ItemCarryTempData data = new ItemCarryTempData(this.itemPredicate, ImmutableList.copyOf(this.slots),
+                                                       this.temperature, this.trait, maxEffect, this.entityPredicate,
                                                        this.attributes, this.immuneTempModifiers);
         data.setType(ConfigData.Type.KUBEJS);
         return data;
