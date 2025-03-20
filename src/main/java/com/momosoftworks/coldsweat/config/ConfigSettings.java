@@ -880,7 +880,12 @@ public class ConfigSettings
         (saver) -> WorldSettingsConfig.ICEBOX_FUEL_INTERVAL.set(saver),
         SyncType.BOTH_WAYS);
 
-        THERMOREGULATOR_INSULATION = addSyncedSetting("thermoregulator_insulation", () -> 1, holder -> holder.set(WorldSettingsConfig.THERMOREGULATOR_INSULATION.get()),
+        THERMOREGULATOR_INSULATION = addSyncedSetting("thermoregulator_insulation", () -> 1, holder ->
+        {
+            if (CompatManager.isToughAsNailsLoaded())
+            {   holder.set(WorldSettingsConfig.THERMOREGULATOR_INSULATION.get());
+            }
+        },
         (encoder) -> ConfigHelper.serializeNbtInt(encoder, "ThermoregulatorInsulation"),
         (decoder) -> decoder.getInt("ThermoregulatorInsulation"),
         (saver) -> WorldSettingsConfig.THERMOREGULATOR_INSULATION.set(saver),
