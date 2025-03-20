@@ -4,25 +4,27 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.data.codec.configuration.EntityTempData;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
 public class EntityTempBuilderJS
 {
-    public final Set<EntityType<?>> entities = new HashSet<>();
     public double temperature = 0;
     public double range = 0;
     public Temperature.Units units = Temperature.Units.MC;
     public double maxEffect = 0;
-    public Predicate<Entity> entityPredicate = null;
-    public Predicate<Entity> otherEntityPredicate = null;
+    public NegatableList<EntityRequirement> entityPredicate = new NegatableList<>();
+    public NegatableList<EntityRequirement> otherEntityPredicate = new NegatableList<>();
     public boolean affectsSelf = false;
 
     public EntityTempBuilderJS()
@@ -30,7 +32,8 @@ public class EntityTempBuilderJS
 
     public EntityTempBuilderJS entities(String... entities)
     {
-        this.entities.addAll(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITIES, ConfigHelper.getEntityTypes(entities)));
+        Collection<EntityType<?>> entList = RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITIES, ConfigHelper.getEntityTypes(entities));
+        this.entityPredicate.add(new EntityRequirement(entList, null), false);
         return this;
     }
 
@@ -60,13 +63,13 @@ public class EntityTempBuilderJS
 
     public EntityTempBuilderJS entityPredicate(Predicate<Entity> entityPredicate)
     {
-        this.entityPredicate = entityPredicate;
+        this.entityPredicate.add(new EntityRequirement(entityPredicate), false);
         return this;
     }
 
     public EntityTempBuilderJS otherEntityPredicate(Predicate<Entity> otherEntityPredicate)
     {
-        this.otherEntityPredicate = otherEntityPredicate;
+        this.otherEntityPredicate.add(new EntityRequirement(otherEntityPredicate), false);
         return this;
     }
 
@@ -78,8 +81,7 @@ public class EntityTempBuilderJS
 
     public EntityTempData build()
     {
-        EntityTempData data = new EntityTempData(new EntityRequirement(this.entities, this.entityPredicate), this.temperature, this.range, this.units,
-                                                 new EntityRequirement(this.otherEntityPredicate), this.maxEffect, this.affectsSelf);
+        EntityTempData data = new EntityTempData(this.entityPredicate, this.temperature, this.range, this.units, this.otherEntityPredicate, this.maxEffect, this.affectsSelf);
         data.setType(ConfigData.Type.KUBEJS);
         return data;
     }

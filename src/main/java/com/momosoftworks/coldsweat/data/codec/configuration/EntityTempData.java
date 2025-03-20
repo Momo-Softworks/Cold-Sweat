@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.impl.RequirementHolder;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.resources.ResourceLocation;
@@ -22,16 +23,16 @@ import java.util.List;
 
 public class EntityTempData extends ConfigData implements RequirementHolder, IForgeRegistryEntry<EntityTempData>
 {
-    final EntityRequirement entity;
+    final NegatableList<EntityRequirement> entity;
     final double temperature;
     final double range;
     final Temperature.Units units;
-    final EntityRequirement otherEntityRequirement;
+    final NegatableList<EntityRequirement> affectedEntity;
     final double maxEffect;
     final boolean affectsSelf;
 
-    public EntityTempData(EntityRequirement entity, double temperature, double range,
-                          Temperature.Units units, EntityRequirement otherEntityRequirement,
+    public EntityTempData(NegatableList<EntityRequirement> entity, double temperature, double range,
+                          Temperature.Units units, NegatableList<EntityRequirement> affectedEntity,
                           double maxEffect, boolean affectsSelf, List<String> requiredMods)
     {
         super(requiredMods);
@@ -39,30 +40,30 @@ public class EntityTempData extends ConfigData implements RequirementHolder, IFo
         this.temperature = temperature;
         this.range = range;
         this.units = units;
-        this.otherEntityRequirement = otherEntityRequirement;
+        this.affectedEntity = affectedEntity;
         this.maxEffect = maxEffect;
         this.affectsSelf = affectsSelf;
     }
 
-    public EntityTempData(EntityRequirement entity, double temperature, double range,
-                          Temperature.Units units, EntityRequirement otherEntityRequirement,
+    public EntityTempData(NegatableList<EntityRequirement> entity, double temperature, double range,
+                          Temperature.Units units, NegatableList<EntityRequirement> affectedEntity,
                           double maxEffect, boolean affectsSelf)
     {
-        this(entity, temperature, range, units, otherEntityRequirement, maxEffect, affectsSelf, ConfigHelper.getModIDs(CSMath.listOrEmpty(entity.entities()), ForgeRegistries.ENTITIES));
+        this(entity, temperature, range, units, affectedEntity, maxEffect, affectsSelf, List.of());
     }
 
     public static final Codec<EntityTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            EntityRequirement.getCodec().optionalFieldOf("entity", EntityRequirement.NONE).forGetter(EntityTempData::entity),
+            NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(EntityTempData::entity),
             Codec.DOUBLE.fieldOf("temperature").forGetter(EntityTempData::temperature),
             Codec.DOUBLE.fieldOf("range").forGetter(EntityTempData::range),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(EntityTempData::units),
-            EntityRequirement.getCodec().optionalFieldOf("affected_entity", EntityRequirement.NONE).forGetter(EntityTempData::playerRequirement),
+            NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("affected_entity", new NegatableList<>()).forGetter(EntityTempData::affectedEntity),
             Codec.DOUBLE.optionalFieldOf("max_effect", Double.POSITIVE_INFINITY).forGetter(EntityTempData::maxEffect),
             Codec.BOOL.optionalFieldOf("affects_self", false).forGetter(EntityTempData::affectsSelf),
             Codec.STRING.listOf().optionalFieldOf("required_mods", List.of()).forGetter(EntityTempData::requiredMods)
     ).apply(instance, EntityTempData::new));
 
-    public EntityRequirement entity()
+    public NegatableList<EntityRequirement> entity()
     {   return entity;
     }
     public double temperature()
@@ -74,8 +75,8 @@ public class EntityTempData extends ConfigData implements RequirementHolder, IFo
     public Temperature.Units units()
     {   return units;
     }
-    public EntityRequirement playerRequirement()
-    {   return otherEntityRequirement;
+    public NegatableList<EntityRequirement> affectedEntity()
+    {   return affectedEntity;
     }
     public double maxEffect()
     {   return maxEffect;
@@ -112,12 +113,12 @@ public class EntityTempData extends ConfigData implements RequirementHolder, IFo
 
         EntityRequirement requirement = new EntityRequirement(entities);
 
-        return new EntityTempData(requirement, temp, range, units, EntityRequirement.NONE, maxEffect, false);
+        return new EntityTempData(new NegatableList<>(requirement), temp, range, units, new NegatableList<>(), maxEffect, false);
     }
 
     @Override
     public boolean test(Entity entity)
-    {   return this.entity.test(entity);
+    {   return this.entity.test(req -> req.test(entity));
     }
 
     public boolean test(Entity entity, Entity affectedEntity)
@@ -125,7 +126,7 @@ public class EntityTempData extends ConfigData implements RequirementHolder, IFo
         return (this.affectsSelf || entity != affectedEntity)
             && entity.distanceTo(affectedEntity) <= range
             && this.test(entity)
-            && this.otherEntityRequirement.test(affectedEntity);
+            && this.affectedEntity.test(req -> req.test(affectedEntity));
     }
 
     public double getTemperatureEffect(Entity entity, Entity affectedPlayer)
@@ -149,7 +150,7 @@ public class EntityTempData extends ConfigData implements RequirementHolder, IFo
             && Double.compare(that.range, range) == 0
             && entity.equals(that.entity)
             && units == that.units
-            && otherEntityRequirement.equals(that.otherEntityRequirement)
+            && affectedEntity.equals(that.affectedEntity)
             && Double.compare(that.maxEffect, maxEffect) == 0
             && affectsSelf == that.affectsSelf;
     }
