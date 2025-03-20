@@ -74,6 +74,9 @@ public class WorldSettingsConfig
 
     public static final ModConfigSpec.ConfigValue<List<?>> OVERCAST_TEMP_OFFSET;
 
+    /* Compat */
+    public static final ModConfigSpec.ConfigValue<Integer> THERMOREGULATOR_INSULATION;
+
     static
     {
         /*
@@ -714,6 +717,18 @@ public class WorldSettingsConfig
                 .defineInRange("Icebox Fuel Consumption Interval", 40, 0, Integer.MAX_VALUE);
 
         BUILDER.pop();
+
+        if (CompatManager.isToughAsNailsLoaded())
+        {
+            BUILDER.push("Thermoregulator");
+            THERMOREGULATOR_INSULATION = BUILDER
+                    .comment("The amount of insulation that Tough as Nails's thermoregulator provides")
+                    .defineInRange("Thermoregulator Effect Strength", 10, 0, 10);
+            BUILDER.pop();
+        }
+        else
+        {   THERMOREGULATOR_INSULATION = null;
+        }
 
         BUILDER.pop();
 

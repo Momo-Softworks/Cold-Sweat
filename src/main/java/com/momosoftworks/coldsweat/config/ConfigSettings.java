@@ -125,6 +125,8 @@ public class ConfigSettings
     public static final DynamicHolder<Integer> ICEBOX_MAX_INSULATION;
     public static final DynamicHolder<Integer> ICEBOX_FUEL_INTERVAL;
 
+    public static final DynamicHolder<Integer> THERMOREGULATOR_INSULATION;
+
     public static final DynamicHolder<List<Block>> SLEEP_CHECK_IGNORE_BLOCKS;
     public static final DynamicHolder<Boolean> USE_CUSTOM_WATER_FREEZE_BEHAVIOR;
     public static final DynamicHolder<Boolean> USE_CUSTOM_ICE_DROPS;
@@ -876,6 +878,12 @@ public class ConfigSettings
         (encoder) -> ConfigHelper.serializeNbtInt(encoder, "IceboxFuelRate"),
         (decoder) -> decoder.getInt("IceboxFuelRate"),
         (saver) -> WorldSettingsConfig.ICEBOX_FUEL_INTERVAL.set(saver),
+        SyncType.BOTH_WAYS);
+
+        THERMOREGULATOR_INSULATION = addSyncedSetting("thermoregulator_insulation", () -> 1, holder -> holder.set(WorldSettingsConfig.THERMOREGULATOR_INSULATION.get()),
+        (encoder) -> ConfigHelper.serializeNbtInt(encoder, "ThermoregulatorInsulation"),
+        (decoder) -> decoder.getInt("ThermoregulatorInsulation"),
+        (saver) -> WorldSettingsConfig.THERMOREGULATOR_INSULATION.set(saver),
         SyncType.BOTH_WAYS);
 
         INSULATION_STRENGTH = addSyncedSetting("insulation_strength", () -> 1d, holder -> holder.set(ItemSettingsConfig.INSULATION_STRENGTH.get()),
