@@ -44,7 +44,8 @@
     "compat.MixinCreateConnect",
     "compat.MixinSereneIceMelt",
     "compat.MixinSpoiledIcebox",
-    "compat.MixinSpoiledIcebox$ContainerModifier"
+    "compat.MixinSpoiledIcebox$ContainerModifier",
+    "compat.MixinTaNThermoregulator"
   ],
   "minVersion": "0.8",
   "plugin": "com.momosoftworks.coldsweat.mixin_plugin.ColdSweatMixinPlugin"
