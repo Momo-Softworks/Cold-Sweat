@@ -10,7 +10,7 @@ import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemComponentsRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
-import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.ListBuilder;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -28,44 +28,39 @@ import java.util.List;
 public class DryingItemData extends ConfigData implements RequirementHolder
 {
     public static final Codec<DryingItemData> CODEC = RecordCodecBuilder.create(builder -> builder.group(
-            ItemRequirement.CODEC.fieldOf("item").forGetter(data -> data.data),
+            NegatableList.codec(ItemRequirement.CODEC).fieldOf("item").forGetter(data -> data.item),
             ItemStack.CODEC.optionalFieldOf("result", ItemStack.EMPTY).forGetter(data -> data.result),
-            EntityRequirement.getCodec().optionalFieldOf("entity", EntityRequirement.NONE).forGetter(data -> data.entity),
+            NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(data -> data.entity),
             SoundEvent.DIRECT_CODEC.optionalFieldOf("sound", SoundEvents.WET_GRASS_STEP).forGetter(data -> data.sound)
     ).apply(builder, DryingItemData::new));
 
-    private final ItemRequirement data;
+    private final NegatableList<ItemRequirement> item;
     private final ItemStack result;
-    private final EntityRequirement entity;
+    private final NegatableList<EntityRequirement> entity;
     private final SoundEvent sound;
 
-    public DryingItemData(ItemRequirement data, ItemStack result, EntityRequirement entity, SoundEvent sound,
+    public DryingItemData(NegatableList<ItemRequirement> item, ItemStack result, NegatableList<EntityRequirement> entity, SoundEvent sound,
                           List<String> requiredMods)
     {
         super(requiredMods);
-        this.data = data;
+        this.item = item;
         this.result = result;
         this.entity = entity;
         this.sound = sound;
     }
 
-    public DryingItemData(ItemRequirement data, ItemStack result, EntityRequirement entity, SoundEvent sound)
+    public DryingItemData(NegatableList<ItemRequirement> item, ItemStack result, NegatableList<EntityRequirement> entity, SoundEvent sound)
     {
-        this(data, result, entity, sound,
-             // Required mods
-             ListBuilder.begin(ConfigHelper.getModIDs(CSMath.listOrEmpty(data.items()), BuiltInRegistries.ITEM))
-             .add(BuiltInRegistries.ITEM.getKey(result.getItem()).getNamespace())
-             .add(sound.getLocation().getNamespace())
-             .build());
+        this(item, result, entity, sound, List.of(BuiltInRegistries.ITEM.getKey(result.getItem()).getNamespace()));
     }
 
-    public ItemRequirement data()
-    {   return data;
+    public NegatableList<ItemRequirement> item()
+    {   return item;
     }
     public ItemStack result()
     {   return result;
     }
-    public EntityRequirement entity()
+    public NegatableList<EntityRequirement> entity()
     {   return entity;
     }
     public SoundEvent sound()
@@ -90,19 +85,19 @@ public class DryingItemData extends ConfigData implements RequirementHolder
 
         if (result != null)
         {   ItemRequirement input = new ItemRequirement(items, new ItemComponentsRequirement());
-            return new DryingItemData(input, new ItemStack(result), EntityRequirement.NONE, BuiltInRegistries.SOUND_EVENT.get(sound));
+            return new DryingItemData(new NegatableList<>(input), new ItemStack(result), new NegatableList<>(), BuiltInRegistries.SOUND_EVENT.get(sound));
         }
         else return null;
     }
 
     @Override
     public boolean test(Entity entity)
-    {   return this.entity.test(entity);
+    {   return this.entity.test(req -> req.test(entity));
     }
 
     @Override
     public boolean test(ItemStack stack)
-    {   return this.data.test(stack, true);
+    {   return this.item.test(req -> req.test(stack, true));
     }
 
     @Override

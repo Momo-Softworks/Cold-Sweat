@@ -15,7 +15,7 @@ import com.momosoftworks.coldsweat.data.codec.requirement.ItemComponentsRequirem
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
 import com.momosoftworks.coldsweat.data.codec.util.CommonStreamCodecs;
-import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
@@ -37,16 +37,16 @@ import java.util.stream.Collectors;
 
 public class InsulatorData extends ConfigData implements RequirementHolder
 {
-    final ItemRequirement item;
+    final NegatableList<ItemRequirement> item;
     final Insulation.Slot slot;
     final List<Insulation> insulation;
-    final EntityRequirement entity;
+    final NegatableList<EntityRequirement> entity;
     final AttributeModifierMap attributes;
     final Map<ResourceLocation, Double> immuneTempModifiers;
     final boolean fillSlots;
 
-    public InsulatorData(ItemRequirement item, Insulation.Slot slot,
-                         List<Insulation> insulation, EntityRequirement entity,
+    public InsulatorData(NegatableList<ItemRequirement> item, Insulation.Slot slot,
+                         List<Insulation> insulation, NegatableList<EntityRequirement> entity,
                          AttributeModifierMap attributes, Map<ResourceLocation, Double> immuneTempModifiers,
                          boolean fillSlots, List<String> requiredMods)
     {
@@ -60,11 +60,11 @@ public class InsulatorData extends ConfigData implements RequirementHolder
         this.fillSlots = fillSlots;
     }
 
-    public InsulatorData(ItemRequirement item, Insulation.Slot slot, List<Insulation> insulation,
-                         EntityRequirement entity, AttributeModifierMap attributes,
+    public InsulatorData(NegatableList<ItemRequirement> item, Insulation.Slot slot, List<Insulation> insulation,
+                         NegatableList<EntityRequirement> entity, AttributeModifierMap attributes,
                          Map<ResourceLocation, Double> immuneTempModifiers, boolean fillSlots)
     {
-        this(item, slot, insulation, entity, attributes, immuneTempModifiers, fillSlots, ConfigHelper.getModIDs(CSMath.listOrEmpty(item.items()), BuiltInRegistries.ITEM));
+        this(item, slot, insulation, entity, attributes, immuneTempModifiers, fillSlots, List.of());
     }
 
     private static final Codec<List<Insulation>> INSULATION_CODEC = Codec.either(Insulation.getCodec().listOf(), Insulation.getCodec())
@@ -73,10 +73,10 @@ public class InsulatorData extends ConfigData implements RequirementHolder
                   list -> list.size() == 1 ? Either.right(list.get(0)) : Either.left(list));
 
     public static final Codec<InsulatorData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ItemRequirement.CODEC.fieldOf("item").forGetter(InsulatorData::item),
+            NegatableList.codec(ItemRequirement.CODEC).optionalFieldOf("item", new NegatableList<>()).forGetter(InsulatorData::item),
             Insulation.Slot.CODEC.fieldOf("type").forGetter(InsulatorData::slot),
             INSULATION_CODEC.fieldOf("insulation").forGetter(InsulatorData::insulation),
-            EntityRequirement.getCodec().optionalFieldOf("entity", EntityRequirement.NONE).forGetter(InsulatorData::entity),
+            NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(InsulatorData::entity),
             AttributeModifierMap.CODEC.optionalFieldOf("attributes", new AttributeModifierMap()).forGetter(InsulatorData::attributes),
             Codec.unboundedMap(ResourceLocation.CODEC, Codec.DOUBLE).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(InsulatorData::immuneTempModifiers),
             Codec.BOOL.optionalFieldOf("fill_slots", false).forGetter(InsulatorData::fillSlots),
@@ -86,27 +86,31 @@ public class InsulatorData extends ConfigData implements RequirementHolder
     public static final StreamCodec<RegistryFriendlyByteBuf, InsulatorData> STREAM_CODEC = StreamCodec.of(
     (buf, insulator) ->
     {
-        ItemRequirement.STREAM_CODEC.encode(buf, insulator.item());
+        NegatableList.streamCodec(ItemRequirement.STREAM_CODEC).encode(buf, insulator.item());
         buf.writeCollection(insulator.insulation(), Insulation.getNetworkCodec());
         buf.writeEnum(insulator.slot());
-        buf.writeNbt(EntityRequirement.getCodec().encode(insulator.entity(), NbtOps.INSTANCE, new CompoundTag()).result().orElse(new CompoundTag()));
+        buf.writeNbt(NegatableList.codec(EntityRequirement.getCodec())
+                     .encode(insulator.entity(), NbtOps.INSTANCE, new CompoundTag()).result()
+                     .orElse(new CompoundTag()));
         AttributeModifierMap.STREAM_CODEC.encode(buf, insulator.attributes());
         buf.writeMap(insulator.immuneTempModifiers(), ResourceLocation.STREAM_CODEC, CommonStreamCodecs.DOUBLE);
         buf.writeBoolean(insulator.fillSlots());
     },
     (buf) ->
     {
-        ItemRequirement item = ItemRequirement.STREAM_CODEC.decode(buf);
+        NegatableList<ItemRequirement> item = NegatableList.streamCodec(ItemRequirement.STREAM_CODEC).decode(buf);
         List<Insulation> insulation = buf.readCollection(ArrayList::new, Insulation.getNetworkCodec());
         Insulation.Slot slot = buf.readEnum(Insulation.Slot.class);
-        EntityRequirement predicate = EntityRequirement.getCodec().decode(NbtOps.INSTANCE, buf.readNbt()).result().orElse(Pair.of(EntityRequirement.NONE, new CompoundTag())).getFirst();
+        NegatableList<EntityRequirement> predicate = NegatableList.codec(EntityRequirement.getCodec())
+                                                     .decode(NbtOps.INSTANCE, buf.readNbt()).result()
+                                                     .orElse(Pair.of(new NegatableList<>(), new CompoundTag())).getFirst();
         AttributeModifierMap attributes = AttributeModifierMap.STREAM_CODEC.decode(buf);
         Map<ResourceLocation, Double> immuneTempModifiers = buf.readMap(ResourceLocation.STREAM_CODEC, CommonStreamCodecs.DOUBLE);
         boolean multiSlot = buf.readBoolean();
         return new InsulatorData(item, slot, insulation, predicate, attributes, immuneTempModifiers, multiSlot);
     });
 
-    public ItemRequirement item()
+    public NegatableList<ItemRequirement> item()
     {   return item;
     }
     public Insulation.Slot slot()
@@ -115,7 +119,7 @@ public class InsulatorData extends ConfigData implements RequirementHolder
     public List<Insulation> insulation()
     {   return insulation;
     }
-    public EntityRequirement entity()
+    public NegatableList<EntityRequirement> entity()
     {   return entity;
     }
     public AttributeModifierMap attributes()
@@ -137,12 +141,12 @@ public class InsulatorData extends ConfigData implements RequirementHolder
 
     @Override
     public boolean test(ItemStack stack)
-    {   return item.test(stack, true);
+    {   return item.test(rq -> rq.test(stack, true));
     }
 
     @Override
     public boolean test(Entity entity)
-    {   return entity == null || this.entity.test(entity);
+    {   return entity == null || this.entity.test(rq -> rq.test(entity));
     }
 
     @Nullable
@@ -188,7 +192,7 @@ public class InsulatorData extends ConfigData implements RequirementHolder
 
         ItemRequirement itemRequirement = new ItemRequirement(items, components);
 
-        return new InsulatorData(itemRequirement, slot, insulation, EntityRequirement.NONE, new AttributeModifierMap(), new HashMap<>(), multiSlot);
+        return new InsulatorData(new NegatableList<>(itemRequirement), slot, insulation, new NegatableList<>(), new AttributeModifierMap(), new HashMap<>(), multiSlot);
     }
 
     public InsulatorData copy()

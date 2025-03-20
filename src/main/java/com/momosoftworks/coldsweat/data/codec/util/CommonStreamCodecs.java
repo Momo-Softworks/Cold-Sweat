@@ -129,6 +129,24 @@ public class CommonStreamCodecs
         }
     }
 
+    public static <T, B extends FriendlyByteBuf> void writeList(B buf, Collection<T> collection, StreamEncoder<B, T> writer)
+    {
+        buf.writeVarInt(collection.size());
+        for (T t : collection)
+        {   writer.encode(buf, t);
+        }
+    }
+
+    public static <T, B extends FriendlyByteBuf> List<T> readList(B buf, StreamDecoder<B, T> reader)
+    {
+        int size = buf.readVarInt();
+        List<T> collection = new ArrayList<>(size);
+        for (int i = 0; i < size; i++)
+        {   collection.add(reader.decode(buf));
+        }
+        return collection;
+    }
+
     public static <K, V, U extends FriendlyByteBuf, W extends FriendlyByteBuf> void writeMap(FriendlyByteBuf buf, Map<K, V> map, StreamEncoder<U, ? super K> keyWriter, StreamEncoder<W, ? super V> valueWriter)
     {
         buf.writeVarInt(map.size());

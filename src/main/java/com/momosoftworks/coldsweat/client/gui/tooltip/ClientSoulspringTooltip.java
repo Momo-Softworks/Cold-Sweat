@@ -10,6 +10,10 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.PatchedDataComponentMap;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -55,7 +59,10 @@ public class ClientSoulspringTooltip implements ClientTooltipComponent
             {
                 for (FuelData fuelData : ConfigSettings.SOULSPRING_LAMP_FUEL.get().get(item))
                 {
-                    graphics.renderItem(new ItemStack(Holder.direct(item), 1, fuelData.item().components().getAsPatch()),
+                    // Compile item NBT
+                    DataComponentPatch components = new PatchedDataComponentMap(fuelData.item().flatMap(req -> req.components().components(), DataComponentMap::composite).orElse(DataComponentMap.builder().build())).asPatch();
+                    // Render item
+                    graphics.renderItem(new ItemStack(Holder.direct(item), 1, components),
                                         x + ((i * 16) % 96), y + 12 + CSMath.floor(i / 6d) * 16);
                     i++;
                 }

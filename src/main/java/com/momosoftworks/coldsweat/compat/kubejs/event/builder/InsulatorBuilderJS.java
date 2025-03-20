@@ -11,6 +11,7 @@ import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
@@ -28,11 +29,10 @@ import java.util.function.Predicate;
 
 public class InsulatorBuilderJS
 {
-    public final Set<Item> items = new HashSet<>();
     public List<Insulation> insulation;
     public Insulation.Slot slot;
-    public Predicate<ItemStack> itemPredicate = null;
-    public Predicate<Entity> entityPredicate = null;
+    public NegatableList<ItemRequirement> itemPredicate = new NegatableList<>();
+    public NegatableList<EntityRequirement> entityPredicate = new NegatableList<>();
     public AttributeModifierMap attributes = new AttributeModifierMap();
     public Map<ResourceLocation, Double> immuneTempModifiers = new HashMap<>();
     public boolean multiSlot = false;
@@ -42,7 +42,8 @@ public class InsulatorBuilderJS
 
     public InsulatorBuilderJS items(String... items)
     {
-        this.items.addAll(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, ConfigHelper.getItems(items)));
+        List<Item> itemList = RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, ConfigHelper.getItems(items));
+        this.itemPredicate.add(new ItemRequirement(itemList, null), false);
         return this;
     }
 
@@ -66,13 +67,13 @@ public class InsulatorBuilderJS
 
     public InsulatorBuilderJS itemPredicate(Predicate<ItemStack> itemPredicate)
     {
-        this.itemPredicate = itemPredicate;
+        this.itemPredicate.add(new ItemRequirement(itemPredicate), false);
         return this;
     }
 
     public InsulatorBuilderJS entityPredicate(Predicate<Entity> entityPredicate)
     {
-        this.entityPredicate = entityPredicate;
+        this.entityPredicate.add(new EntityRequirement(entityPredicate), false);
         return this;
     }
 
@@ -106,7 +107,7 @@ public class InsulatorBuilderJS
 
     public InsulatorData build()
     {
-        InsulatorData data = new InsulatorData(new ItemRequirement(this.items, this.itemPredicate), slot, insulation, new EntityRequirement(entityPredicate),
+        InsulatorData data = new InsulatorData(this.itemPredicate, slot, insulation, this.entityPredicate,
                                                attributes, immuneTempModifiers, multiSlot);
         data.setType(ConfigData.Type.KUBEJS);
         return data;

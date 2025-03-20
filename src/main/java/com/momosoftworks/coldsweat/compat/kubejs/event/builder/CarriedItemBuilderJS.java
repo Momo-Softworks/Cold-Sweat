@@ -14,6 +14,7 @@ import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.resources.ResourceLocation;
@@ -28,13 +29,12 @@ import java.util.function.Predicate;
 
 public class CarriedItemBuilderJS
 {
-    public final Set<Item> items = new HashSet<>();
     public final Set<Either<IntegerBounds, ItemCarryTempData.SlotType>> slots = new HashSet<>();
     public double temperature = 0;
     public double maxEffect = 0;
     public Temperature.Trait trait = Temperature.Trait.WORLD;
-    public Predicate<ItemStack> itemPredicate = null;
-    public Predicate<Entity> entityPredicate = null;
+    public NegatableList<ItemRequirement> itemPredicate = new NegatableList<>();
+    public NegatableList<EntityRequirement> entityPredicate = new NegatableList<>();
     public AttributeModifierMap attributes = new AttributeModifierMap();
     public Map<ResourceLocation, Double> immuneTempModifiers = new HashMap<>();
 
@@ -43,7 +43,8 @@ public class CarriedItemBuilderJS
 
     public CarriedItemBuilderJS items(String... items)
     {
-        this.items.addAll(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, ConfigHelper.getItems(items)));
+        List<Item> itemList = RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, ConfigHelper.getItems(items));
+        this.itemPredicate.add(new ItemRequirement(itemList, null), false);
         return this;
     }
 
@@ -89,13 +90,13 @@ public class CarriedItemBuilderJS
 
     public CarriedItemBuilderJS itemPredicate(Predicate<ItemStack> itemPredicate)
     {
-        this.itemPredicate = itemPredicate;
+        this.itemPredicate.add(new ItemRequirement(itemPredicate), false);
         return this;
     }
 
     public CarriedItemBuilderJS entityPredicate(Predicate<Entity> entityPredicate)
     {
-        this.entityPredicate = entityPredicate;
+        this.entityPredicate.add(new EntityRequirement(entityPredicate), false);
         return this;
     }
 
@@ -124,8 +125,8 @@ public class CarriedItemBuilderJS
 
     public ItemCarryTempData build()
     {
-        ItemCarryTempData data = new ItemCarryTempData(new ItemRequirement(this.items, this.itemPredicate), ImmutableList.copyOf(this.slots),
-                                                       this.temperature, this.trait, maxEffect, new EntityRequirement(this.entityPredicate),
+        ItemCarryTempData data = new ItemCarryTempData(this.itemPredicate, ImmutableList.copyOf(this.slots),
+                                                       this.temperature, this.trait, maxEffect, this.entityPredicate,
                                                        this.attributes, this.immuneTempModifiers);
         data.setType(ConfigData.Type.KUBEJS);
         return data;

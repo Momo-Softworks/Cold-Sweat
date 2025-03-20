@@ -6,29 +6,30 @@ import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.*;
+import java.util.List;
 import java.util.function.Predicate;
 
 public class FoodBuilderJS
 {
-    public final Set<Item> items = new HashSet<>();
     public double temperature = 0;
     public int duration = -1;
-    public Predicate<ItemStack> itemPredicate = null;
-    public Predicate<Entity> entityPredicate = null;
+    public NegatableList<ItemRequirement> itemPredicate = new NegatableList<>();
+    public NegatableList<EntityRequirement> entityPredicate = new NegatableList<>();
 
     public FoodBuilderJS()
     {}
 
     public FoodBuilderJS items(String... items)
     {
-        this.items.addAll(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, ConfigHelper.getItems(items)));
+        List<Item> itemList = RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, ConfigHelper.getItems(items));
+        itemPredicate.add(new ItemRequirement(itemList, null), false);
         return this;
     }
 
@@ -46,19 +47,19 @@ public class FoodBuilderJS
 
     public FoodBuilderJS itemPredicate(Predicate<ItemStack> itemPredicate)
     {
-        this.itemPredicate = itemPredicate;
+        this.itemPredicate.add(new ItemRequirement(itemPredicate), false);
         return this;
     }
 
     public FoodBuilderJS entityPredicate(Predicate<Entity> entityPredicate)
     {
-        this.entityPredicate = entityPredicate;
+        this.entityPredicate.add(new EntityRequirement(entityPredicate), false);
         return this;
     }
 
     public FoodData build()
     {
-        FoodData data = new FoodData(new ItemRequirement(this.items, this.itemPredicate),this.temperature,  this.duration, new EntityRequirement(this.entityPredicate));
+        FoodData data = new FoodData(this.itemPredicate,this.temperature,  this.duration, this.entityPredicate);
         data.setType(ConfigData.Type.KUBEJS);
         return data;
     }

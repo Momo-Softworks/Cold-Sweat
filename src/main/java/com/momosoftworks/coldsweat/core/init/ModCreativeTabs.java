@@ -9,6 +9,8 @@ import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.util.item.ItemStackHelper;
 import com.momosoftworks.coldsweat.util.serialization.ObjectBuilder;
 import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.PatchedDataComponentMap;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.*;
@@ -112,7 +114,7 @@ public class ModCreativeTabs
         return event.getItems().stream().map(entry ->
         {
             ItemStack stack = new ItemStack(entry.getKey());
-            DataComponentMap components = entry.getValue().item().components().components();
+            DataComponentPatch components = new PatchedDataComponentMap(entry.getValue().item().flatMap(req -> req.components().components(), DataComponentMap::composite).orElse(DataComponentMap.builder().build())).asPatch();
             stack.applyComponents(components);
             return stack;
         }).toList();

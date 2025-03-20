@@ -25,13 +25,13 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Predicate;
 
-public record ItemRequirement(Optional<List<Either<TagKey<Item>, Item>>> items,
+public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
                               Optional<IntegerBounds> count, Optional<IntegerBounds> durability,
                               Optional<List<EnchantmentRequirement>> enchantments,
                               Optional<Potion> potion, ItemComponentsRequirement components, Optional<Predicate<ItemStack>> predicate)
 {
     public static final Codec<ItemRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ConfigHelper.tagOrBuiltinCodec(Registries.ITEM, BuiltInRegistries.ITEM).listOf().optionalFieldOf("items").forGetter(predicate -> predicate.items),
+            ConfigHelper.tagOrBuiltinCodec(Registries.ITEM, BuiltInRegistries.ITEM).listOf().optionalFieldOf("items", List.of()).forGetter(predicate -> predicate.items),
             IntegerBounds.CODEC.optionalFieldOf("count").forGetter(predicate -> predicate.count),
             IntegerBounds.CODEC.optionalFieldOf("durability").forGetter(predicate -> predicate.durability),
             EnchantmentRequirement.CODEC.listOf().optionalFieldOf("enchantments").forGetter(predicate -> predicate.enchantments),
@@ -42,7 +42,7 @@ public record ItemRequirement(Optional<List<Either<TagKey<Item>, Item>>> items,
     public static final StreamCodec<RegistryFriendlyByteBuf, ItemRequirement> STREAM_CODEC = StreamCodec.of(
     (buf, predicate) ->
     {
-        CommonStreamCodecs.writeOptionalList(buf, predicate.items, CommonStreamCodecs.tagOrRegistryCodec(Registries.ITEM));
+        CommonStreamCodecs.writeList(buf, predicate.items, CommonStreamCodecs.tagOrRegistryCodec(Registries.ITEM));
         buf.writeOptional(predicate.count, IntegerBounds.STREAM_CODEC);
         buf.writeOptional(predicate.durability, IntegerBounds.STREAM_CODEC);
         CommonStreamCodecs.writeOptionalList(buf, predicate.enchantments, EnchantmentRequirement.STREAM_CODEC);
@@ -51,7 +51,7 @@ public record ItemRequirement(Optional<List<Either<TagKey<Item>, Item>>> items,
     },
     (buf) ->
     {
-        Optional<List<Either<TagKey<Item>, Item>>> items = CommonStreamCodecs.readOptionalList(buf, CommonStreamCodecs.tagOrRegistryCodec(Registries.ITEM));
+        List<Either<TagKey<Item>, Item>> items = CommonStreamCodecs.readList(buf, CommonStreamCodecs.tagOrRegistryCodec(Registries.ITEM));
         Optional<IntegerBounds> count = buf.readOptional(IntegerBounds.STREAM_CODEC);
         Optional<IntegerBounds> durability = buf.readOptional(IntegerBounds.STREAM_CODEC);
         Optional<List<EnchantmentRequirement>> enchantments = CommonStreamCodecs.readOptionalList(buf, EnchantmentRequirement.STREAM_CODEC);
@@ -60,10 +60,10 @@ public record ItemRequirement(Optional<List<Either<TagKey<Item>, Item>>> items,
         return new ItemRequirement(items, count, durability, enchantments, potion, components);
     });
 
-    public static final ItemRequirement NONE = new ItemRequirement(Optional.empty(), Optional.empty(), Optional.empty(),
+    public static final ItemRequirement NONE = new ItemRequirement(List.of(), Optional.empty(), Optional.empty(),
                                                                    Optional.empty(), Optional.empty(), new ItemComponentsRequirement());
 
-    public ItemRequirement(Optional<List<Either<TagKey<Item>, Item>>> items,
+    public ItemRequirement(List<Either<TagKey<Item>, Item>> items,
                            Optional<IntegerBounds> count, Optional<IntegerBounds> durability,
                            Optional<List<EnchantmentRequirement>> enchantments,
                            Optional<Potion> potion, ItemComponentsRequirement components)
@@ -73,34 +73,37 @@ public record ItemRequirement(Optional<List<Either<TagKey<Item>, Item>>> items,
 
     public ItemRequirement(List<Either<TagKey<Item>, Item>> items, ItemComponentsRequirement components)
     {
-        this(Optional.of(items), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), components);
+        this(items, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), components);
     }
 
     public ItemRequirement(Collection<Item> items, @Nullable Predicate<ItemStack> predicate)
     {
-        this(Optional.of(items.stream().map(Either::<TagKey<Item>, Item>right).toList()), Optional.empty(), Optional.empty(),
+        this(items.stream().map(Either::<TagKey<Item>, Item>right).toList(), Optional.empty(), Optional.empty(),
              Optional.empty(), Optional.empty(), new ItemComponentsRequirement(), Optional.ofNullable(predicate));
+    }
+
+    public ItemRequirement(Predicate<ItemStack> predicate)
+    {
+        this(List.of(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), new ItemComponentsRequirement(), Optional.of(predicate));
     }
 
     public boolean test(ItemStack stack, boolean ignoreCount)
     {
-        if (stack.isEmpty() && items.isPresent() && !items.get().isEmpty())
+        if (stack.isEmpty() && !items.isEmpty())
         {   return false;
         }
 
-        if (items.isPresent())
+        if (!items.isEmpty())
+        checkItem:
         {
-            checkItem:
+            for (int i = 0; i < items.size(); i++)
             {
-                for (int i = 0; i < items.get().size(); i++)
-                {
-                    Either<TagKey<Item>, Item> either = items.get().get(i);
-                    if (either.map(stack::is, stack::is))
-                    {   break checkItem;
-                    }
+                Either<TagKey<Item>, Item> either = items.get(i);
+                if (either.map(stack::is, stack::is))
+                {   break checkItem;
                 }
-                return false;
             }
+            return false;
         }
         if (this.predicate.isPresent())
         {   return this.predicate.get().test(stack);

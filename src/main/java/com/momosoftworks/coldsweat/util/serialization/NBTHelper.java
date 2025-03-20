@@ -149,14 +149,6 @@ public class NBTHelper
         }
         return (T) data.get(tag);
     }
-    public static <T extends CompoundTag> T getOrPutTag(ItemStack stack, String tag, T dfault)
-    {
-        CompoundTag data = stack.getOrCreateTag();
-        if (!data.contains(tag))
-        {   data.put(tag, dfault);
-        }
-        return (T) data.get(tag);
-    }
 
     /**
      * Used for storing Temperature values in the player's persistent data (NBT). <br>
