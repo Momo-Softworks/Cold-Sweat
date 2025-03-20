@@ -12,6 +12,7 @@ import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
@@ -34,17 +35,17 @@ import java.util.Optional;
 
 public class ItemCarryTempData extends ConfigData implements RequirementHolder
 {
-    final ItemRequirement item;
+    final NegatableList<ItemRequirement> item;
     final List<Either<IntegerBounds, SlotType>> slots;
     final double temperature;
     final Temperature.Trait trait;
     final Double maxEffect;
-    final EntityRequirement entityRequirement;
+    final NegatableList<EntityRequirement> entityRequirement;
     final AttributeModifierMap attributeModifiers;
     final Map<ResourceLocation, Double> immuneTempModifiers;
 
-    public ItemCarryTempData(ItemRequirement item, List<Either<IntegerBounds, SlotType>> slots, double temperature,
-                             Temperature.Trait trait, Double maxEffect, EntityRequirement entityRequirement, AttributeModifierMap attributeModifiers,
+    public ItemCarryTempData(NegatableList<ItemRequirement> item, List<Either<IntegerBounds, SlotType>> slots, double temperature,
+                             Temperature.Trait trait, Double maxEffect, NegatableList<EntityRequirement> entityRequirement, AttributeModifierMap attributeModifiers,
                              Map<ResourceLocation, Double> immuneTempModifiers, List<String> requiredMods)
     {
         super(requiredMods);
@@ -58,26 +59,26 @@ public class ItemCarryTempData extends ConfigData implements RequirementHolder
         this.immuneTempModifiers = immuneTempModifiers;
     }
 
-    public ItemCarryTempData(ItemRequirement item, List<Either<IntegerBounds, SlotType>> slots, double temperature,
-                             Temperature.Trait trait, Double maxEffect, EntityRequirement entityRequirement, AttributeModifierMap attributeModifiers,
+    public ItemCarryTempData(NegatableList<ItemRequirement> item, List<Either<IntegerBounds, SlotType>> slots, double temperature,
+                             Temperature.Trait trait, Double maxEffect, NegatableList<EntityRequirement> entityRequirement, AttributeModifierMap attributeModifiers,
                              Map<ResourceLocation, Double> immuneTempModifiers)
     {
-        this(item, slots, temperature, trait, maxEffect, entityRequirement, attributeModifiers, immuneTempModifiers, ConfigHelper.getModIDs(CSMath.listOrEmpty(item.items()), ForgeRegistries.ITEMS));
+        this(item, slots, temperature, trait, maxEffect, entityRequirement, attributeModifiers, immuneTempModifiers, List.of());
     }
 
     public static final Codec<ItemCarryTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ItemRequirement.CODEC.fieldOf("item").forGetter(ItemCarryTempData::item),
+            NegatableList.codec(ItemRequirement.CODEC).optionalFieldOf("item", new NegatableList<>()).forGetter(ItemCarryTempData::item),
             Codec.either(IntegerBounds.CODEC, SlotType.CODEC).listOf().fieldOf("slots").forGetter(ItemCarryTempData::slots),
             Codec.DOUBLE.fieldOf("temperature").forGetter(ItemCarryTempData::temperature),
             Temperature.Trait.CODEC.optionalFieldOf("trait", Temperature.Trait.WORLD).forGetter(ItemCarryTempData::trait),
             Codec.DOUBLE.optionalFieldOf("max_effect", Double.POSITIVE_INFINITY).forGetter(ItemCarryTempData::maxEffect),
-            EntityRequirement.getCodec().optionalFieldOf("entity", EntityRequirement.NONE).forGetter(ItemCarryTempData::entityRequirement),
+            NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(ItemCarryTempData::entityRequirement),
             AttributeModifierMap.CODEC.optionalFieldOf("attributes", new AttributeModifierMap()).forGetter(ItemCarryTempData::attributeModifiers),
             Codec.unboundedMap(ResourceLocation.CODEC, Codec.DOUBLE).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(ItemCarryTempData::immuneTempModifiers),
             Codec.STRING.listOf().optionalFieldOf("required_mods", List.of()).forGetter(ItemCarryTempData::requiredMods)
     ).apply(instance, ItemCarryTempData::new));
 
-    public ItemRequirement item()
+    public NegatableList<ItemRequirement> item()
     {   return item;
     }
     public List<Either<IntegerBounds, SlotType>> slots()
@@ -92,7 +93,7 @@ public class ItemCarryTempData extends ConfigData implements RequirementHolder
     public Double maxEffect()
     {   return maxEffect;
     }
-    public EntityRequirement entityRequirement()
+    public NegatableList<EntityRequirement> entityRequirement()
     {   return entityRequirement;
     }
     public AttributeModifierMap attributeModifiers()
@@ -104,7 +105,7 @@ public class ItemCarryTempData extends ConfigData implements RequirementHolder
 
     @Override
     public boolean test(Entity entity)
-    {   return entityRequirement.test(entity);
+    {   return entityRequirement.test(rq -> rq.test(entity));
     }
 
     public boolean test(Entity entity, ItemStack stack, @Nullable Integer slot, @Nullable EquipmentSlot equipmentSlot)
@@ -113,7 +114,7 @@ public class ItemCarryTempData extends ConfigData implements RequirementHolder
 
     public boolean test(Entity entity, ItemStack stack, SlotType slot)
     {
-        if (!test(entity) || !item().test(stack, true)) return false;
+        if (!test(entity) || !item().test(rq -> rq.test(stack, true))) return false;
         for (int i = 0; i < this.slots().size(); i++)
         {
             Optional<SlotType> slotType = this.slots().get(i).right();
@@ -126,7 +127,7 @@ public class ItemCarryTempData extends ConfigData implements RequirementHolder
 
     public boolean test(ItemStack stack, @Nullable Integer slot, @Nullable EquipmentSlot equipmentSlot)
     {
-        if (!item.test(stack, true))
+        if (!item.test(rq -> rq.test(stack, true)))
         {   return false;
         }
         if (slot == null && equipmentSlot == null)
@@ -181,7 +182,7 @@ public class ItemCarryTempData extends ConfigData implements RequirementHolder
         // compile item requirement
         ItemRequirement itemRequirement = new ItemRequirement(items, nbtRequirement);
 
-        return new ItemCarryTempData(itemRequirement, List.of(Either.right(slotType)), temp, trait, maxEffect, EntityRequirement.NONE, new AttributeModifierMap(), new FastMap<>());
+        return new ItemCarryTempData(new NegatableList<>(itemRequirement), List.of(Either.right(slotType)), temp, trait, maxEffect, new NegatableList<>(), new AttributeModifierMap(), new FastMap<>());
     }
 
     public String getSlotRangeName()

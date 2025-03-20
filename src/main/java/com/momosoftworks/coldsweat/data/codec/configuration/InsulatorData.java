@@ -13,7 +13,7 @@ import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
-import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.nbt.CompoundTag;
@@ -22,7 +22,6 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -30,16 +29,16 @@ import java.util.stream.Collectors;
 
 public class InsulatorData extends ConfigData implements RequirementHolder
 {
-    final ItemRequirement item;
+    final NegatableList<ItemRequirement> item;
     final Insulation.Slot slot;
     final List<Insulation> insulation;
-    final EntityRequirement entity;
+    final NegatableList<EntityRequirement> entity;
     final AttributeModifierMap attributes;
     final Map<ResourceLocation, Double> immuneTempModifiers;
     final boolean fillSlots;
 
-    public InsulatorData(ItemRequirement item, Insulation.Slot slot,
-                         List<Insulation> insulation, EntityRequirement entity,
+    public InsulatorData(NegatableList<ItemRequirement> item, Insulation.Slot slot,
+                         List<Insulation> insulation, NegatableList<EntityRequirement> entity,
                          AttributeModifierMap attributes, Map<ResourceLocation, Double> immuneTempModifiers,
                          boolean fillSlots, List<String> requiredMods)
     {
@@ -53,11 +52,11 @@ public class InsulatorData extends ConfigData implements RequirementHolder
         this.fillSlots = fillSlots;
     }
 
-    public InsulatorData(ItemRequirement item, Insulation.Slot slot, List<Insulation> insulation,
-                         EntityRequirement entity, AttributeModifierMap attributes,
+    public InsulatorData(NegatableList<ItemRequirement> item, Insulation.Slot slot, List<Insulation> insulation,
+                         NegatableList<EntityRequirement> entity, AttributeModifierMap attributes,
                          Map<ResourceLocation, Double> immuneTempModifiers, boolean fillSlots)
     {
-        this(item, slot, insulation, entity, attributes, immuneTempModifiers, fillSlots, ConfigHelper.getModIDs(CSMath.listOrEmpty(item.items()), ForgeRegistries.ITEMS));
+        this(item, slot, insulation, entity, attributes, immuneTempModifiers, fillSlots, List.of());
     }
 
     private static final Codec<List<Insulation>> INSULATION_CODEC = Codec.either(Insulation.getCodec().listOf(), Insulation.getCodec())
@@ -66,17 +65,17 @@ public class InsulatorData extends ConfigData implements RequirementHolder
                   list -> list.size() == 1 ? Either.right(list.get(0)) : Either.left(list));
 
     public static final Codec<InsulatorData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ItemRequirement.CODEC.fieldOf("item").forGetter(InsulatorData::item),
+            NegatableList.codec(ItemRequirement.CODEC).optionalFieldOf("item", new NegatableList<>()).forGetter(InsulatorData::item),
             Insulation.Slot.CODEC.fieldOf("type").forGetter(InsulatorData::slot),
             INSULATION_CODEC.fieldOf("insulation").forGetter(InsulatorData::insulation),
-            EntityRequirement.getCodec().optionalFieldOf("entity", EntityRequirement.NONE).forGetter(InsulatorData::entity),
+            NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(InsulatorData::entity),
             AttributeModifierMap.CODEC.optionalFieldOf("attributes", new AttributeModifierMap()).forGetter(InsulatorData::attributes),
             Codec.unboundedMap(ResourceLocation.CODEC, Codec.DOUBLE).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(InsulatorData::immuneTempModifiers),
             Codec.BOOL.optionalFieldOf("fill_slots", false).forGetter(InsulatorData::fillSlots),
             Codec.STRING.listOf().optionalFieldOf("required_mods", List.of()).forGetter(InsulatorData::requiredMods)
     ).apply(instance, InsulatorData::new));
 
-    public ItemRequirement item()
+    public NegatableList<ItemRequirement> item()
     {   return item;
     }
     public Insulation.Slot slot()
@@ -85,7 +84,7 @@ public class InsulatorData extends ConfigData implements RequirementHolder
     public List<Insulation> insulation()
     {   return insulation;
     }
-    public EntityRequirement entity()
+    public NegatableList<EntityRequirement> entity()
     {   return entity;
     }
     public AttributeModifierMap attributes()
@@ -107,12 +106,12 @@ public class InsulatorData extends ConfigData implements RequirementHolder
 
     @Override
     public boolean test(ItemStack stack)
-    {   return item.test(stack, true);
+    {   return item.test(rq -> rq.test(stack, true));
     }
 
     @Override
     public boolean test(Entity entity)
-    {   return entity == null || this.entity.test(entity);
+    {   return entity == null || this.entity.test(rq -> rq.test(entity));
     }
 
     @Nullable
@@ -158,7 +157,7 @@ public class InsulatorData extends ConfigData implements RequirementHolder
 
         ItemRequirement itemRequirement = new ItemRequirement(items, new NbtRequirement(tag));
 
-        return new InsulatorData(itemRequirement, slot, insulation, EntityRequirement.NONE, new AttributeModifierMap(), new HashMap<>(), multiSlot);
+        return new InsulatorData(new NegatableList<>(itemRequirement), slot, insulation, new NegatableList<>(), new AttributeModifierMap(), new HashMap<>(), multiSlot);
     }
 
     public InsulatorData copy()

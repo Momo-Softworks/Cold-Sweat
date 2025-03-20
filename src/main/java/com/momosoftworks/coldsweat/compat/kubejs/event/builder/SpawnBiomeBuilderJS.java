@@ -6,6 +6,7 @@ import com.momosoftworks.coldsweat.data.codec.configuration.SpawnBiomeData;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.LocationRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.core.Holder;
@@ -31,7 +32,7 @@ public class SpawnBiomeBuilderJS
     public int weight;
     public final Set<EntityType<?>> entities = new HashSet<>();
     public IntegerBounds count;
-    public Predicate<BlockInWorld> locationPredicate = null;
+    public NegatableList<LocationRequirement> locationPredicate = new NegatableList<>();
 
     public SpawnBiomeBuilderJS()
     {}
@@ -81,15 +82,13 @@ public class SpawnBiomeBuilderJS
 
     public SpawnBiomeBuilderJS locationPredicate(Predicate<BlockInWorld> locationPredicate)
     {
-        this.locationPredicate = locationPredicate;
+        this.locationPredicate.add(new LocationRequirement(locationPredicate), false);
         return this;
     }
 
     public SpawnBiomeData build()
     {
-        SpawnBiomeData data = new SpawnBiomeData(biomes, category, weight,
-                                                 entities,
-                                                 count, new LocationRequirement(locationPredicate), LocationRequirement.NONE);
+        SpawnBiomeData data = new SpawnBiomeData(biomes, category, weight, entities, count, locationPredicate);
         data.setType(ConfigData.Type.KUBEJS);
         return data;
     }

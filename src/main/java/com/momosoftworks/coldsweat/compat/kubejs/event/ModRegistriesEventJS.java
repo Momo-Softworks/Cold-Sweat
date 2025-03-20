@@ -13,6 +13,8 @@ import com.momosoftworks.coldsweat.compat.kubejs.util.TempModifierDataJS;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
+import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
+import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.DynamicHolder;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
@@ -28,10 +30,9 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraftforge.registries.ForgeRegistries;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -80,13 +81,12 @@ public class ModRegistriesEventJS extends StartupEventJS
             case ARMOR -> ConfigSettings.INSULATING_ARMORS.get();
             case CURIO -> ConfigSettings.INSULATING_CURIOS.get();
         };
-        if (insulatorJS.items.isEmpty())
-        {   insulatorJS.items.add(null);
+        if (insulatorJS.itemPredicate.isEmpty())
+        {   insulatorJS.itemPredicate.add(new ItemRequirement(Collections.singleton(null), null), false);
         }
-        for (Item item : insulatorJS.items)
+        for (Item item : RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, insulatorJS.itemPredicate.flatListMap(ItemRequirement::items)))
         {   map.put(item, insulator);
         }
-        ColdSweat.LOGGER.info("Registered KubeJS insulator for items: {}", insulatorJS.items);
     }
 
     /*
@@ -100,10 +100,10 @@ public class ModRegistriesEventJS extends StartupEventJS
         FoodData foodData = foodJS.build();
         if (!foodData.areRequiredModsLoaded()) return;
 
-        if (foodJS.items.isEmpty())
-        {   foodJS.items.add(null);
+        if (foodJS.itemPredicate.isEmpty())
+        {   foodJS.itemPredicate.add(new ItemRequirement(Collections.singleton(null), null), false);
         }
-        for (Item item : foodJS.items)
+        for (Item item : RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, foodJS.itemPredicate.flatListMap(ItemRequirement::items)))
         {   ConfigSettings.FOOD_TEMPERATURES.get().put(item, foodData);
         }
     }
@@ -119,10 +119,10 @@ public class ModRegistriesEventJS extends StartupEventJS
         FuelData fuelData = fuelJS.build(fuelType);
         if (!fuelData.areRequiredModsLoaded()) return;
 
-        if (fuelJS.items.isEmpty())
-        {   fuelJS.items.add(null);
+        if (fuelJS.itemPredicate.isEmpty())
+        {   fuelJS.itemPredicate.add(new ItemRequirement(Collections.singleton(null), null), false);
         }
-        for (Item item : fuelJS.items)
+        for (Item item : RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, fuelJS.itemPredicate.flatListMap(ItemRequirement::items)))
         {   config.get().put(item, fuelData);
         }
     }
@@ -154,10 +154,10 @@ public class ModRegistriesEventJS extends StartupEventJS
         ItemCarryTempData carryData = carriedItemJS.build();
         if (!carryData.areRequiredModsLoaded()) return;
 
-        if (carriedItemJS.items.isEmpty())
-        {   carriedItemJS.items.add(null);
+        if (carriedItemJS.itemPredicate.isEmpty())
+        {   carriedItemJS.itemPredicate.add(new ItemRequirement(Collections.singleton(null), null), false);
         }
-        for (Item item : carriedItemJS.items)
+        for (Item item : RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, carriedItemJS.itemPredicate.flatListMap(ItemRequirement::items)))
         {   ConfigSettings.CARRIED_ITEM_TEMPERATURES.get().put(item, carryData);
         }
     }
@@ -173,10 +173,10 @@ public class ModRegistriesEventJS extends StartupEventJS
         DryingItemData dryingData = dryingItemJS.build();
         if (!dryingData.areRequiredModsLoaded()) return;
 
-        if (dryingItemJS.items.isEmpty())
-        {   dryingItemJS.items.add(null);
+        if (dryingItemJS.itemPredicate.isEmpty())
+        {   dryingItemJS.itemPredicate.add(new ItemRequirement(Collections.singleton(null), null), false);
         }
-        for (Item item : dryingItemJS.items)
+        for (Item item : RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, dryingItemJS.itemPredicate.flatListMap(ItemRequirement::items)))
         {   ConfigSettings.DRYING_ITEMS.get().put(item, dryingData);
         }
     }
@@ -277,10 +277,10 @@ public class ModRegistriesEventJS extends StartupEventJS
         EntityTempData entityTempData = entityTempJS.build();
         if (!entityTempData.areRequiredModsLoaded()) return;
 
-        if (entityTempJS.entities.isEmpty())
-        {   entityTempJS.entities.add(null);
+        if (entityTempJS.entityPredicate.isEmpty())
+        {   entityTempJS.entityPredicate.add(new EntityRequirement(Collections.singleton(null), null), false);
         }
-        for (EntityType<?> item : entityTempJS.entities)
+        for (EntityType<?> item : RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITY_TYPES, entityTempJS.entityPredicate.flatListMap(EntityRequirement::entities)))
         {   ConfigSettings.ENTITY_TEMPERATURES.get().put(item, entityTempData);
         }
     }
@@ -296,10 +296,10 @@ public class ModRegistriesEventJS extends StartupEventJS
         MountData mountData = insulatingMountJS.build();
         if (!mountData.areRequiredModsLoaded()) return;
 
-        if (insulatingMountJS.entities.isEmpty())
-        {   insulatingMountJS.entities.add(null);
+        if (insulatingMountJS.entityPredicate.isEmpty())
+        {   insulatingMountJS.entityPredicate.add(new EntityRequirement(Collections.singleton(null), null), false);
         }
-        for (EntityType<?> item : insulatingMountJS.entities)
+        for (EntityType<?> item : RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITY_TYPES, insulatingMountJS.entityPredicate.flatListMap(EntityRequirement::entities)))
         {   ConfigSettings.INSULATED_MOUNTS.get().put(item, mountData);
         }
     }

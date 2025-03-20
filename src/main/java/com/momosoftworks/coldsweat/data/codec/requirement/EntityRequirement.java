@@ -5,10 +5,10 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.data.codec.requirement.sub_type.EntitySubRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.DoubleBounds;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
@@ -22,66 +22,63 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Predicate;
 
-public record EntityRequirement(Optional<List<Either<TagKey<EntityType<?>>, EntityType<?>>>> entities,
-                                Optional<LocationRequirement> location, Optional<LocationRequirement> steppingOn,
-                                Optional<EffectsRequirement> effects, Optional<NbtRequirement> nbt, Optional<EntityFlagsRequirement> flags,
-                                Optional<EquipmentRequirement> equipment, Optional<EntitySubRequirement> typeSpecificData,
-                                Optional<String> team, Optional<EntityRequirement> vehicle, Optional<EntityRequirement> passenger,
-                                Optional<EntityRequirement> target, Optional<Map<Temperature.Trait, DoubleBounds>> temperature,
+public record EntityRequirement(List<Either<TagKey<EntityType<?>>, EntityType<?>>> entities,
+                                LocationRequirement location, LocationRequirement steppingOn,
+                                Optional<EffectsRequirement> effects, NbtRequirement nbt, Optional<EntityFlagsRequirement> flags,
+                                EquipmentRequirement equipment, Optional<EntitySubRequirement> typeSpecificData,
+                                List<String> team, Optional<EntityRequirement> vehicle, Optional<EntityRequirement> passenger,
+                                Optional<EntityRequirement> target, Map<Temperature.Trait, DoubleBounds> temperature,
                                 Optional<Predicate<Entity>> predicate)
 {
-    public EntityRequirement(Optional<List<Either<TagKey<EntityType<?>>, EntityType<?>>>> type, Optional<LocationRequirement> location,
-                             Optional<LocationRequirement> steppingOn, Optional<EffectsRequirement> effects, Optional<NbtRequirement> nbt,
-                             Optional<EntityFlagsRequirement> flags, Optional<EquipmentRequirement> equipment, Optional<EntitySubRequirement> typeSpecificData,
-                             Optional<String> team, Optional<EntityRequirement> vehicle, Optional<EntityRequirement> passenger,
-                             Optional<EntityRequirement> target, Optional<Map<Temperature.Trait, DoubleBounds>> temperature)
+    public EntityRequirement(List<Either<TagKey<EntityType<?>>, EntityType<?>>> entities,
+                             LocationRequirement location, LocationRequirement steppingOn,
+                             Optional<EffectsRequirement> effects, NbtRequirement nbt, Optional<EntityFlagsRequirement> flags,
+                             EquipmentRequirement equipment, Optional<EntitySubRequirement> typeSpecificData,
+                             List<String> team, Optional<EntityRequirement> vehicle, Optional<EntityRequirement> passenger,
+                             Optional<EntityRequirement> target, Map<Temperature.Trait, DoubleBounds> temperature)
     {
-        this(type, location, steppingOn, effects, nbt, flags, equipment, typeSpecificData, team, vehicle, passenger, target, temperature, Optional.empty());;
+        this(entities, location, steppingOn, effects, nbt, flags, equipment, typeSpecificData, team, vehicle, passenger, target, temperature, Optional.empty());;
     }
 
     public EntityRequirement(List<Either<TagKey<EntityType<?>>, EntityType<?>>> entities)
     {
-        this(Optional.of(entities),
-             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),
-             Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
+        this(entities, LocationRequirement.NONE, LocationRequirement.NONE, Optional.empty(),
+             NbtRequirement.NONE, Optional.empty(), EquipmentRequirement.NONE,
+             Optional.empty(), new ArrayList<>(), Optional.empty(), Optional.empty(), Optional.empty(), new HashMap<>());
     }
 
     public EntityRequirement(Collection<EntityType<?>> entities, @Nullable Predicate<Entity> predicate)
     {
-        this(Optional.of(entities.stream().map(Either::<TagKey<EntityType<?>>, EntityType<?>>right).toList()),
-             Optional.empty(), Optional.empty(), Optional.empty(),
-             Optional.empty(), Optional.empty(), Optional.empty(),
-             Optional.empty(), Optional.empty(), Optional.empty(),
-             Optional.empty(), Optional.empty(), Optional.empty(),
+        this(entities.stream().map(Either::<TagKey<EntityType<?>>, EntityType<?>>right).toList(),
+             LocationRequirement.NONE, LocationRequirement.NONE, Optional.empty(),
+             NbtRequirement.NONE, Optional.empty(), EquipmentRequirement.NONE,
+             Optional.empty(), new ArrayList<>(), Optional.empty(), Optional.empty(), Optional.empty(), new HashMap<>(),
              Optional.ofNullable(predicate));
     }
 
     public EntityRequirement(Predicate<Entity> predicate)
     {
-        this(Optional.empty(), Optional.empty(), Optional.empty(),
-             Optional.empty(), Optional.empty(), Optional.empty(),
-             Optional.empty(), Optional.empty(), Optional.empty(),
-             Optional.empty(), Optional.empty(), Optional.empty(),
-             Optional.empty(), Optional.ofNullable(predicate));
+        this(new ArrayList<>(), LocationRequirement.NONE, LocationRequirement.NONE, Optional.empty(),
+             NbtRequirement.NONE, Optional.empty(), EquipmentRequirement.NONE,
+             Optional.empty(), new ArrayList<>(), Optional.empty(), Optional.empty(), Optional.empty(), new HashMap<>(),
+             Optional.ofNullable(predicate));
     }
 
-    public static final EntityRequirement NONE = new EntityRequirement(Optional.empty(), Optional.empty(), Optional.empty(),
-                                                                       Optional.empty(), Optional.empty(), Optional.empty(),
-                                                                       Optional.empty(), Optional.empty(), Optional.empty(),
-                                                                       Optional.empty(), Optional.empty(), Optional.empty(),
-                                                                       Optional.empty());
+    public static final EntityRequirement NONE = new EntityRequirement(new ArrayList<>(), LocationRequirement.NONE, LocationRequirement.NONE,
+                                                                       Optional.empty(), NbtRequirement.NONE, Optional.empty(), EquipmentRequirement.NONE,
+                                                                       Optional.empty(), new ArrayList<>(), Optional.empty(), Optional.empty(), Optional.empty(), new HashMap<>(), Optional.empty());
 
     public static final Codec<EntityRequirement> SIMPLE_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ConfigHelper.tagOrBuiltinCodec(Registries.ENTITY_TYPE, ForgeRegistries.ENTITY_TYPES).listOf().optionalFieldOf("entities").forGetter(requirement -> requirement.entities),
-            LocationRequirement.CODEC.optionalFieldOf("location").forGetter(requirement -> requirement.location),
-            LocationRequirement.CODEC.optionalFieldOf("stepping_on").forGetter(requirement -> requirement.steppingOn),
+            ConfigHelper.tagOrBuiltinCodec(Registries.ENTITY_TYPE, ForgeRegistries.ENTITY_TYPES).listOf().optionalFieldOf("entities", List.of()).forGetter(requirement -> requirement.entities),
+            LocationRequirement.CODEC.optionalFieldOf("location", LocationRequirement.NONE).forGetter(requirement -> requirement.location),
+            LocationRequirement.CODEC.optionalFieldOf("stepping_on", LocationRequirement.NONE).forGetter(requirement -> requirement.steppingOn),
             EffectsRequirement.CODEC.optionalFieldOf("effects").forGetter(requirement -> requirement.effects),
-            NbtRequirement.CODEC.optionalFieldOf("nbt").forGetter(requirement -> requirement.nbt),
+            NbtRequirement.CODEC.optionalFieldOf("nbt", NbtRequirement.NONE).forGetter(requirement -> requirement.nbt),
             EntityFlagsRequirement.CODEC.optionalFieldOf("flags").forGetter(requirement -> requirement.flags),
-            EquipmentRequirement.CODEC.optionalFieldOf("equipment").forGetter(requirement -> requirement.equipment),
-            EntitySubRequirement.CODEC.optionalFieldOf("type_data").forGetter(requirement -> requirement.typeSpecificData),
-            Codec.STRING.optionalFieldOf("team").forGetter(requirement -> requirement.team),
-            Codec.unboundedMap(Temperature.Trait.CODEC, DoubleBounds.CODEC).optionalFieldOf("temperature").forGetter(requirement -> requirement.temperature)
+            EquipmentRequirement.CODEC.optionalFieldOf("equipment", EquipmentRequirement.NONE).forGetter(requirement -> requirement.equipment),
+            EntitySubRequirement.CODEC.optionalFieldOf("type_specific").forGetter(requirement -> requirement.typeSpecificData),
+            Codec.STRING.listOf().optionalFieldOf("team", List.of()).forGetter(requirement -> requirement.team),
+            Codec.unboundedMap(Temperature.Trait.CODEC, DoubleBounds.CODEC).optionalFieldOf("temperature", new HashMap<>()).forGetter(requirement -> requirement.temperature)
     ).apply(instance, (type, location, standingOn, effects, nbt, flags, equipment, typeData, team, temperature) ->
             new EntityRequirement(type, location, standingOn, effects, nbt, flags, equipment, typeData, team,
                                   Optional.empty(), Optional.empty(), Optional.empty(), temperature)));
@@ -89,7 +86,7 @@ public record EntityRequirement(Optional<List<Either<TagKey<EntityType<?>>, Enti
     private static final List<Codec<EntityRequirement>> REQUIREMENT_CODEC_STACK = new ArrayList<>(List.of(SIMPLE_CODEC));
     // Allow for up to 16 layers of inner codecs
     static
-    {   for (int i = 0; i < 16; i++)
+    {   for (int i = 0; i < 4; i++)
         {   addCodecStack();
         }
     }
@@ -100,21 +97,20 @@ public record EntityRequirement(Optional<List<Either<TagKey<EntityType<?>>, Enti
 
     private static void addCodecStack()
     {
-        var latestCodec = REQUIREMENT_CODEC_STACK.get(REQUIREMENT_CODEC_STACK.size() - 1);
         var codec = RecordCodecBuilder.<EntityRequirement>create(instance -> instance.group(
-                ConfigHelper.tagOrBuiltinCodec(Registries.ENTITY_TYPE, ForgeRegistries.ENTITY_TYPES).listOf().optionalFieldOf("entities").forGetter(requirement -> requirement.entities),
-                LocationRequirement.CODEC.optionalFieldOf("location").forGetter(requirement -> requirement.location),
-                LocationRequirement.CODEC.optionalFieldOf("stepping_on").forGetter(requirement -> requirement.steppingOn),
+                ConfigHelper.tagOrBuiltinCodec(Registries.ENTITY_TYPE, ForgeRegistries.ENTITY_TYPES).listOf().optionalFieldOf("entities", List.of()).forGetter(requirement -> requirement.entities),
+                LocationRequirement.CODEC.optionalFieldOf("location", LocationRequirement.NONE).forGetter(requirement -> requirement.location),
+                LocationRequirement.CODEC.optionalFieldOf("stepping_on", LocationRequirement.NONE).forGetter(requirement -> requirement.steppingOn),
                 EffectsRequirement.CODEC.optionalFieldOf("effects").forGetter(requirement -> requirement.effects),
-                NbtRequirement.CODEC.optionalFieldOf("nbt").forGetter(requirement -> requirement.nbt),
+                NbtRequirement.CODEC.optionalFieldOf("nbt", NbtRequirement.NONE).forGetter(requirement -> requirement.nbt),
                 EntityFlagsRequirement.CODEC.optionalFieldOf("flags").forGetter(requirement -> requirement.flags),
-                EquipmentRequirement.CODEC.optionalFieldOf("equipment").forGetter(requirement -> requirement.equipment),
+                EquipmentRequirement.CODEC.optionalFieldOf("equipment", EquipmentRequirement.NONE).forGetter(requirement -> requirement.equipment),
                 EntitySubRequirement.CODEC.optionalFieldOf("type_specific").forGetter(requirement -> requirement.typeSpecificData),
-                Codec.STRING.optionalFieldOf("team").forGetter(requirement -> requirement.team),
-                latestCodec.optionalFieldOf("vehicle").forGetter(requirement -> requirement.vehicle),
-                latestCodec.optionalFieldOf("passenger").forGetter(requirement -> requirement.passenger),
-                latestCodec.optionalFieldOf("target").forGetter(requirement -> requirement.target),
-                Codec.unboundedMap(Temperature.Trait.CODEC, DoubleBounds.CODEC).optionalFieldOf("temperature").forGetter(requirement -> requirement.temperature)
+                Codec.STRING.listOf().optionalFieldOf("team", List.of()).forGetter(requirement -> requirement.team),
+                EntityRequirement.getCodec().optionalFieldOf("vehicle").forGetter(requirement -> requirement.vehicle),
+                EntityRequirement.getCodec().optionalFieldOf("passenger").forGetter(requirement -> requirement.passenger),
+                EntityRequirement.getCodec().optionalFieldOf("target").forGetter(requirement -> requirement.target),
+                Codec.unboundedMap(Temperature.Trait.CODEC, DoubleBounds.CODEC).optionalFieldOf("temperature", new HashMap<>()).forGetter(requirement -> requirement.temperature)
         ).apply(instance, EntityRequirement::new));
 
         REQUIREMENT_CODEC_STACK.add(codec);
@@ -123,7 +119,7 @@ public record EntityRequirement(Optional<List<Either<TagKey<EntityType<?>>, Enti
     public boolean test(Entity entity)
     {
         if (entity == null)
-        {   return true;
+        {   return false;
         }
         if (this.predicate.isPresent())
         {   return this.predicate.get().test(entity);
@@ -131,36 +127,34 @@ public record EntityRequirement(Optional<List<Either<TagKey<EntityType<?>>, Enti
         if (Objects.equals(this, NONE))
         {   return true;
         }
-        if (entities.isPresent())
+        if (!entities.isEmpty())
+        checkType:
         {
-            checkEntityType:
+            EntityType<?> type = entity.getType();
+            for (Either<TagKey<EntityType<?>>, EntityType<?>> either : this.entities)
             {
-                for (int i = 0; i < entities.get().size(); i++)
-                {
-                    Either<TagKey<EntityType<?>>, EntityType<?>> either = entities.get().get(i);
-                    if (either.map(entity.getType()::is, entity.getType()::equals))
-                    {   break checkEntityType;
-                    }
+                if (either.map(type::is, type::equals))
+                {   break checkType;
                 }
-                return false;
             }
+            return false;
         }
-        if (location.isPresent() && !location.get().test(entity.level(), entity.position()))
+        if (!location.test(entity.level(), entity.position()))
         {   return false;
         }
-        if (steppingOn.isPresent() && !steppingOn.get().test(entity.level(), entity.position().add(0, -0.5, 0)))
+        if (!steppingOn.test(entity.level(), entity.position().add(0, -0.5, 0)))
         {   return false;
         }
         if (effects.isPresent() && !effects.get().test(entity))
         {   return false;
         }
-        if (nbt.isPresent() && !nbt.get().test(entity))
+        if (!nbt.test(entity))
         {   return false;
         }
         if (flags.isPresent() && !flags.get().test(entity))
         {   return false;
         }
-        if (equipment.isPresent() && !equipment.get().test(entity))
+        if (!equipment.test(entity))
         {   return false;
         }
         if (typeSpecificData.isPresent() && !typeSpecificData.get().test(entity, entity.level(), entity.position()))
@@ -178,16 +172,19 @@ public record EntityRequirement(Optional<List<Either<TagKey<EntityType<?>>, Enti
             {   return false;
             }
         }
-        if (team.isPresent())
+        if (!team.isEmpty())
         {
             Team team = entity.getTeam();
-            if (team == null || !team.getName().equals(this.team.get()))
+            if (team == null || this.team.stream().noneMatch(str -> str.equals(team.getName())))
             {   return false;
             }
         }
-        if (temperature.isPresent() && entity instanceof LivingEntity living)
+        if (entity instanceof LivingEntity living)
         {
-            for (Map.Entry<Temperature.Trait, DoubleBounds> entry : temperature.get().entrySet())
+            if (!EntityTempManager.isTemperatureEnabled(living) && !temperature.isEmpty())
+            {   return false;
+            }
+            for (Map.Entry<Temperature.Trait, DoubleBounds> entry : temperature.entrySet())
             {
                 double value = Temperature.get(living, entry.getKey());
                 if (!entry.getValue().test(value))

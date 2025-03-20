@@ -9,7 +9,7 @@ import com.momosoftworks.coldsweat.data.codec.impl.RequirementHolder;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
-import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.nbt.CompoundTag;
@@ -17,20 +17,19 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
 public class FoodData extends ConfigData implements RequirementHolder
 {
-    final ItemRequirement item;
+    final NegatableList<ItemRequirement> item;
     final Double temperature;
     final int duration;
-    final EntityRequirement entityRequirement;
+    final NegatableList<EntityRequirement> entityRequirement;
 
-    public FoodData(ItemRequirement item, Double temperature, int duration,
-                    EntityRequirement entityRequirement, List<String> requiredMods)
+    public FoodData(NegatableList<ItemRequirement> item, Double temperature, int duration,
+                    NegatableList<EntityRequirement> entityRequirement, List<String> requiredMods)
     {
         super(requiredMods);
         this.temperature = temperature;
@@ -39,21 +38,21 @@ public class FoodData extends ConfigData implements RequirementHolder
         this.entityRequirement = entityRequirement;
     }
 
-    public FoodData(ItemRequirement item, Double temperature, int duration,
-                    EntityRequirement entityRequirement)
+    public FoodData(NegatableList<ItemRequirement> item, Double temperature, int duration,
+                    NegatableList<EntityRequirement> entityRequirement)
     {
-        this(item, temperature, duration, entityRequirement, ConfigHelper.getModIDs(CSMath.listOrEmpty(item.items()), ForgeRegistries.ITEMS));
+        this(item, temperature, duration, entityRequirement, List.of());
     }
 
     public static final Codec<FoodData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ItemRequirement.CODEC.optionalFieldOf("item", ItemRequirement.NONE).forGetter(FoodData::item),
+            NegatableList.codec(ItemRequirement.CODEC).optionalFieldOf("item", new NegatableList<>()).forGetter(FoodData::item),
             Codec.DOUBLE.fieldOf("temperature").forGetter(FoodData::temperature),
             Codec.INT.optionalFieldOf("duration", 0).forGetter(FoodData::duration),
-            EntityRequirement.getCodec().optionalFieldOf("entity", EntityRequirement.NONE).forGetter(FoodData::entityRequirement),
+            NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(FoodData::entityRequirement),
             Codec.STRING.listOf().optionalFieldOf("required_mods", List.of()).forGetter(FoodData::requiredMods)
     ).apply(instance, FoodData::new));
 
-    public ItemRequirement item()
+    public NegatableList<ItemRequirement> item()
     {   return item;
     }
     public Double temperature()
@@ -62,18 +61,18 @@ public class FoodData extends ConfigData implements RequirementHolder
     public int duration()
     {   return duration;
     }
-    public EntityRequirement entityRequirement()
+    public NegatableList<EntityRequirement> entityRequirement()
     {   return entityRequirement;
     }
 
     @Override
     public boolean test(ItemStack stack)
-    {   return item.test(stack, true);
+    {   return item.test(req -> req.test(stack, true));
     }
 
     @Override
     public boolean test(Entity entity)
-    {   return entityRequirement.test(entity);
+    {   return entityRequirement.test(req -> req.test(entity));
     }
 
     @Nullable
@@ -92,7 +91,7 @@ public class FoodData extends ConfigData implements RequirementHolder
         int duration = entry.size() > 3 ? ((Number) entry.get(3)).intValue() : 0;
         ItemRequirement itemRequirement = new ItemRequirement(items, nbtRequirement);
 
-        return new FoodData(itemRequirement, temperature, duration, EntityRequirement.NONE);
+        return new FoodData(new NegatableList<>(itemRequirement), temperature, duration, new NegatableList<>());
     }
 
     @Override

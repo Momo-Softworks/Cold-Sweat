@@ -22,13 +22,13 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Predicate;
 
-public record ItemRequirement(Optional<List<Either<TagKey<Item>, Item>>> items,
+public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
                               Optional<IntegerBounds> count, Optional<IntegerBounds> durability,
                               Optional<List<EnchantmentRequirement>> enchantments,
                               Optional<Potion> potion, NbtRequirement nbt, Optional<Predicate<ItemStack>> predicate)
 {
     public static final Codec<ItemRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ConfigHelper.tagOrBuiltinCodec(Registries.ITEM, ForgeRegistries.ITEMS).listOf().optionalFieldOf("items").forGetter(predicate -> predicate.items),
+            ConfigHelper.tagOrBuiltinCodec(Registries.ITEM, ForgeRegistries.ITEMS).listOf().optionalFieldOf("items", List.of()).forGetter(predicate -> predicate.items),
             IntegerBounds.CODEC.optionalFieldOf("count").forGetter(predicate -> predicate.count),
             IntegerBounds.CODEC.optionalFieldOf("durability").forGetter(predicate -> predicate.durability),
             EnchantmentRequirement.CODEC.listOf().optionalFieldOf("enchantments").forGetter(predicate -> predicate.enchantments),
@@ -36,10 +36,10 @@ public record ItemRequirement(Optional<List<Either<TagKey<Item>, Item>>> items,
             NbtRequirement.CODEC.optionalFieldOf("nbt", new NbtRequirement()).forGetter(predicate -> predicate.nbt)
     ).apply(instance, ItemRequirement::new));
 
-    public static final ItemRequirement NONE = new ItemRequirement(Optional.empty(), Optional.empty(), Optional.empty(),
+    public static final ItemRequirement NONE = new ItemRequirement(List.of(), Optional.empty(), Optional.empty(),
                                                                    Optional.empty(), Optional.empty(), new NbtRequirement());
 
-    public ItemRequirement(Optional<List<Either<TagKey<Item>, Item>>> items,
+    public ItemRequirement(List<Either<TagKey<Item>, Item>> items,
                            Optional<IntegerBounds> count, Optional<IntegerBounds> durability,
                            Optional<List<EnchantmentRequirement>> enchantments,
                            Optional<Potion> potion, NbtRequirement nbt)
@@ -49,34 +49,37 @@ public record ItemRequirement(Optional<List<Either<TagKey<Item>, Item>>> items,
 
     public ItemRequirement(List<Either<TagKey<Item>, Item>> items, NbtRequirement nbt)
     {
-        this(Optional.of(items), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), nbt);
+        this(items, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), nbt);
     }
 
     public ItemRequirement(Collection<Item> items, @Nullable Predicate<ItemStack> predicate)
     {
-        this(Optional.of(items.stream().map(Either::<TagKey<Item>, Item>right).toList()), Optional.empty(), Optional.empty(),
+        this(items.stream().map(Either::<TagKey<Item>, Item>right).toList(), Optional.empty(), Optional.empty(),
              Optional.empty(), Optional.empty(), new NbtRequirement(), Optional.ofNullable(predicate));
+    }
+
+    public ItemRequirement(Predicate<ItemStack> predicate)
+    {
+        this(List.of(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), new NbtRequirement(), Optional.of(predicate));
     }
 
     public boolean test(ItemStack stack, boolean ignoreCount)
     {
-        if (stack.isEmpty() && items.isPresent() && !items.get().isEmpty())
+        if (stack.isEmpty() && !items.isEmpty())
         {   return false;
         }
 
-        if (items.isPresent())
+        if (!items.isEmpty())
+        checkItem:
         {
-            checkItem:
+            for (int i = 0; i < items.size(); i++)
             {
-                for (int i = 0; i < items.get().size(); i++)
-                {
-                    Either<TagKey<Item>, Item> either = items.get().get(i);
-                    if (either.map(stack::is, stack::is))
-                    {   break checkItem;
-                    }
+                Either<TagKey<Item>, Item> either = items.get(i);
+                if (either.map(stack::is, stack::is))
+                {   break checkItem;
                 }
-                return false;
             }
+            return false;
         }
         if (this.predicate.isPresent())
         {   return this.predicate.get().test(stack);

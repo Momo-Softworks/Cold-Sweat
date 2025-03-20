@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -57,7 +58,10 @@ public class ClientSoulspringTooltip implements ClientTooltipComponent
             {
                 for (FuelData fuelData : ConfigSettings.SOULSPRING_LAMP_FUEL.get().get(item))
                 {
-                    graphics.renderItem(new ItemStack(item, 1, fuelData.item().nbt().tag()),
+                    // Compile item NBT
+                    CompoundTag nbt = fuelData.item().flatMap(req -> req.nbt().tag(), CompoundTag::merge).orElse(new CompoundTag());
+                    // Render item
+                    graphics.renderItem(new ItemStack(item, 1, nbt),
                                         x + ((i * 16) % 96), y + 12 + CSMath.floor(i / 6d) * 16);
                     i++;
                 }

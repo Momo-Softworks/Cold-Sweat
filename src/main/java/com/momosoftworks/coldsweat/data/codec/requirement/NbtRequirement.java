@@ -16,6 +16,8 @@ public record NbtRequirement(CompoundTag tag)
 {
     public static final Codec<NbtRequirement> CODEC = CompoundTag.CODEC.xmap(NbtRequirement::new, NbtRequirement::tag);
 
+    public static final NbtRequirement NONE = new NbtRequirement();
+
     public NbtRequirement()
     {   this(new CompoundTag());
     }
@@ -36,6 +38,10 @@ public record NbtRequirement(CompoundTag tag)
         else
         {   return compareNbt(this.tag, pTag, true);
         }
+    }
+
+    public boolean isEmpty()
+    {   return this.tag.isEmpty();
     }
 
     /**

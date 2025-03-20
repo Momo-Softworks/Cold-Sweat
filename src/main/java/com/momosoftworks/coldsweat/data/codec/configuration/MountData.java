@@ -7,6 +7,7 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.impl.RequirementHolder;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.tags.TagKey;
@@ -19,12 +20,12 @@ import java.util.List;
 
 public class MountData extends ConfigData implements RequirementHolder
 {
-    final EntityRequirement entity;
-    final EntityRequirement rider;
+    final NegatableList<EntityRequirement> entity;
+    final NegatableList<EntityRequirement> rider;
     final double coldInsulation;
     final double heatInsulation;
 
-    public MountData(EntityRequirement entity, EntityRequirement rider, double coldInsulation, double heatInsulation, List<String> requiredMods)
+    public MountData(NegatableList<EntityRequirement> entity, NegatableList<EntityRequirement> rider, double coldInsulation, double heatInsulation, List<String> requiredMods)
     {
         super(requiredMods);
         this.entity = entity;
@@ -33,23 +34,23 @@ public class MountData extends ConfigData implements RequirementHolder
         this.heatInsulation = heatInsulation;
     }
 
-    public MountData(EntityRequirement entity, EntityRequirement rider, double coldInsulation, double heatInsulation)
+    public MountData(NegatableList<EntityRequirement> entity, NegatableList<EntityRequirement> rider, double coldInsulation, double heatInsulation)
     {
-        this(entity, rider, coldInsulation, heatInsulation, ConfigHelper.getModIDs(CSMath.listOrEmpty(entity.entities()), ForgeRegistries.ENTITY_TYPES));
+        this(entity, rider, coldInsulation, heatInsulation, List.of());
     }
 
     public static Codec<MountData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            EntityRequirement.getCodec().optionalFieldOf("entity", EntityRequirement.NONE).forGetter(MountData::entity),
-            EntityRequirement.getCodec().optionalFieldOf("rider", EntityRequirement.NONE).forGetter(MountData::rider),
+            NegatableList.codec(EntityRequirement.getCodec()).fieldOf("entity").forGetter(MountData::entity),
+            NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("rider", new NegatableList<>()).forGetter(MountData::rider),
             Codec.DOUBLE.fieldOf("cold_insulation").forGetter(MountData::coldInsulation),
             Codec.DOUBLE.fieldOf("heat_insulation").forGetter(MountData::heatInsulation),
             Codec.STRING.listOf().optionalFieldOf("required_mods", List.of()).forGetter(MountData::requiredMods)
     ).apply(instance, MountData::new));
 
-    public EntityRequirement entity()
+    public NegatableList<EntityRequirement> entity()
     {   return entity;
     }
-    public EntityRequirement rider()
+    public NegatableList<EntityRequirement> rider()
     {   return rider;
     }
     public double coldInsulation()
@@ -74,12 +75,12 @@ public class MountData extends ConfigData implements RequirementHolder
                           ? coldInsul
                           : ((Number) entry.get(2)).doubleValue();
 
-        return new MountData(new EntityRequirement(entities), EntityRequirement.NONE, coldInsul, hotInsul);
+        return new MountData(new NegatableList<>(new EntityRequirement(entities)), new NegatableList<>(), coldInsul, hotInsul);
     }
 
     @Override
     public boolean test(Entity entity)
-    {   return this.entity.test(entity);
+    {   return this.entity.test(rq -> rq.test(entity));
     }
 
     @Override
