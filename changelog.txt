@@ -2901,12 +2901,14 @@ Technical Changes:
 - Smokestacks can now be waterlogged
 - Hearths can now be placed underwater
 - Made thermal source air particle distribution more random instead of emanating from the center
+- Added option to change the speed at which players naturally dry off
 * Added support for some Tough as Nails items:
       - Wool armor: provides the same insulation as wool
       - Leaf armor: provides the same insulation as leather, but with no cold protection
       - Thermoregulator: now gives warmth & frigidness as a hearth would
 
 Fixes:
+* (1.18) Fixed crash when loading KubeJS events
 * Fixed crash when a hearth is running and Valkyrien Skies is not installed
 * Fixed crash when using a hearth in a Valkyrien Skies ship
 * Fixed memory leak due to capability caches not clearing expired entries
@@ -2918,6 +2920,7 @@ Fixes:
 * Fixed KubeJS configs for biomes, dimensions, and structures not working
 * Fixed thermal sources giving insulating effects in invalid locations if the player is standing on the same block as an output smokestack
 * Fixed thermal sources emitting fuel particles from all nearby pipes and smokestacks, even if they are not connected
+* Fixed input items being deleted when shift-clicking the output slot of the sewing table
 - Fixed the chameleon's eye height being too high
 - Fixed the chameleon's tongue not extending all the way when eating
 - Fixed chameleon scale leggings not covering the bottom of the player's body
@@ -2928,6 +2931,7 @@ Fixes:
 - Fixed the chameleon's walk animation not playing when moving very slowly (like through soul sand)
 - Fixed chameleons not properly remembering their temperature when loading back into a world
 - Fixed ice not being mineable by tools with pickaxe-like abilities (multi-tools, Tetra tools, etc.)
+- Fixed particles emitted by encased smokestacks getting stuck inside the block
 
 Technical Changes:
 * Insulation item configs now accept a list of insulation
@@ -2944,5 +2948,11 @@ Technical Changes:
       * Now used in the min/max_temp fields in block temperature JSON
       * Added as "world temp bounds" to location requirement JSON:
             - Has min/max values, each of which is a world temp requirement
-- Added "temperature" field to location requirement
+* Added "temperature" field to location requirement
+* Some arguments for JSON configs now support a new type "Negatable List":
+      - Defines a list of "requirements" and "exclusions" which must be met
+      - Example: "entity":{"require":[{"entities":[#minecraft:skeletons]}],"exclude":[{"entities":[minecraft:wither_skeleton]}]}
+            - Applies to all skeleton types except wither skeletons
+      - Any block, entity, item, or location requirement can be negated in this way (except fields defined within other requirements)
+      - The "old" format of these arguments will continue to be supported (i.e. "entity":{"entities":[#minecraft:skeletons]})
 - The min/max temperature fields in block temperature JSON are now world temp requirements
