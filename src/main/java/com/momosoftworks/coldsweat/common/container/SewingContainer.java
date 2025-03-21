@@ -300,21 +300,28 @@ public class SewingContainer extends ItemCombinerMenu
     @Override
     public ItemStack quickMoveStack(Player player, int index)
     {
-        if (index == this.getResultSlot() && !isRemovingInsulation())
+        try
         {
-            this.quickMoving = true;
-            Slot resultSlot = this.slots.get(index);
-            ItemStack result = resultSlot.getItem();
-            do
+            if (index == this.getResultSlot() && !isRemovingInsulation())
             {
-                this.growItem(0, -1);
-                this.growItem(1, -1);
+                this.quickMoving = true;
+                Slot resultSlot = this.slots.get(index);
+                ItemStack result = resultSlot.getItem();
+                if (result.isEmpty())
+                {   return result;
+                }
+                do
+                {
+                    this.growItem(0, -1);
+                    this.growItem(1, -1);
+                }
+                while (this.insulateArmorItem(result, this.getItem(1)));
+                this.onTake(player, result);
             }
-            while (this.insulateArmorItem(result, this.getItem(1)));
-            this.onTake(player, result);
         }
-        ItemStack movedStack = super.quickMoveStack(player, index);
-        this.quickMoving = false;
-        return movedStack;
+        finally
+        {   this.quickMoving = false;
+        }
+        return super.quickMoveStack(player, index);
     }
 }
