@@ -765,9 +765,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
 
     protected boolean connectsTo(BlockState state, BlockState otherState, Direction direction)
     {
-        boolean otherIsSamePipe = state.getBlock() instanceof SmokestackBlock == otherState.getBlock() instanceof SmokestackBlock
-                               && CompatManager.Create.isFluidPipe(otherState) == CompatManager.Create.isFluidPipe(state);
-        return pipePointingTo(state, otherState, direction) && otherIsSamePipe;
+        return pipePointingTo(state, otherState, direction) && isTransferPipe(state) && isTransferPipe(otherState);
     }
 
     protected boolean pipePointingTo(BlockState state, BlockState otherState, Direction direction)
