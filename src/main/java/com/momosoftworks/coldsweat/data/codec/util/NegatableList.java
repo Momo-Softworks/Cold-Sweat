@@ -25,12 +25,12 @@ public class NegatableList<T>
                 codec.listOf().optionalFieldOf("exclude", List.of()).forGetter(predicate -> predicate.exclusions)
         ).apply(instance, NegatableList::new));
 
-        return ExtraCodecs.anyOf(listCodec, codec)
-                .comapFlatMap(obj -> {
-                          if (obj instanceof NegatableList<?> list)
-                          {   return DataResult.success((NegatableList<T>) list);
+        return Codec.either(listCodec, codec)
+                .comapFlatMap(either -> {
+                          if (either.left().isPresent())
+                          {   return DataResult.success(either.left().get());
                           }
-                          else return DataResult.success(new NegatableList<>(List.of((T) obj)));
+                          else return DataResult.success(new NegatableList<>(List.of((T) either.right().get())));
                       },
                       list -> {
                           if (list.singleton && list.exclusions.isEmpty())
