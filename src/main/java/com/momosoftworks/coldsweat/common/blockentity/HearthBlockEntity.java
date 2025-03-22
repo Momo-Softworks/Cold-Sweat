@@ -1056,9 +1056,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
             if (this.shouldUseColdFuel)
             {
                 if (rand.nextDouble() < this.getColdFuel() / 3000d)
-                {   double d0 = pos.getX() + 0.5 + face.getStepX() * 0.5;
-                    double d1 = pos.getY() + 0.5 + face.getStepY() * 0.5;
-                    double d2 = pos.getZ() + 0.5 + face.getStepZ() * 0.5;
+                {   double d0 = pos.getX() + 0.5 + face.getStepX() * 0.35;
+                    double d1 = pos.getY() + 0.5 + face.getStepY() * 0.35;
+                    double d2 = pos.getZ() + 0.5 + face.getStepZ() * 0.35;
                     double d3 = (rand.nextDouble() - 0.5) / 4;
                     double d4 = (rand.nextDouble() - 0.5) / 4;
                     double d5 = (rand.nextDouble() - 0.5) / 4;
@@ -1068,9 +1068,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
             if (this.shouldUseHotFuel)
             {
                 if (rand.nextDouble() < this.getHotFuel() / 3000d)
-                {   double d0 = pos.getX() + 0.5 + face.getStepX() * 0.5;
-                    double d1 = pos.getY() + 0.5 + face.getStepY() * 0.5;
-                    double d2 = pos.getZ() + 0.5 + face.getStepZ() * 0.5;
+                {   double d0 = pos.getX() + 0.5 + face.getStepX() * 0.35;
+                    double d1 = pos.getY() + 0.5 + face.getStepY() * 0.35;
+                    double d2 = pos.getZ() + 0.5 + face.getStepZ() * 0.35;
                     double d3 = (rand.nextDouble() - 0.5) / 2;
                     double d4 = (rand.nextDouble() - 0.5) / 2;
                     double d5 = (rand.nextDouble() - 0.5) / 2;
