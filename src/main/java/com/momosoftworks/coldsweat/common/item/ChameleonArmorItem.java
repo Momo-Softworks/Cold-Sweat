@@ -20,13 +20,20 @@ public class ChameleonArmorItem extends ArmorItem
     public <A extends BipedModel<?>> A getArmorModel(LivingEntity entityLiving, ItemStack stack, EquipmentSlotType armorSlot, A playerModel)
     {
         if (entityLiving instanceof PlayerEntity)
-        {   return (A) ArmorModels.EMPTY_ARMOR_MODEL;
+        {   return Client.getPlayerArmorModel();
         }
         else return Client.getRealArmorModel(entityLiving, stack, armorSlot);
     }
 
     public static final class Client
     {
+        /**
+         * Always returns empty, because the armor model is processed in {@link com.momosoftworks.coldsweat.client.renderer.layer.ChameleonArmorLayer}
+         */
+        public static <A extends BipedModel<?>> A getPlayerArmorModel()
+        {   return (A) ArmorModels.EMPTY_ARMOR_MODEL;
+        }
+
         public static <A extends BipedModel<?>> A getRealArmorModel(LivingEntity entityLiving, ItemStack itemStack, EquipmentSlotType armorSlot)
         {
             switch (armorSlot)
