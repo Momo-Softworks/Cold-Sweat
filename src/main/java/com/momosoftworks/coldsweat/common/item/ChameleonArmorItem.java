@@ -28,7 +28,7 @@ public class ChameleonArmorItem extends ArmorItem
             {
                 RegisterModels.checkForInitModels();
                 if (entityLiving instanceof Player)
-                {   return RegisterModels.EMPTY_ARMOR_MODEL; // Custom logic for player models
+                {   return Client.getPlayerArmorModel();
                 }
                 else return Client.getRealArmorModel(entityLiving, itemStack, armorSlot);
             }
@@ -37,6 +37,13 @@ public class ChameleonArmorItem extends ArmorItem
 
     public static final class Client
     {
+        /**
+         * Always returns empty, because the armor model is processed in {@link com.momosoftworks.coldsweat.client.renderer.layer.ChameleonArmorLayer}
+         */
+        public static <A extends HumanoidModel<?>> A getPlayerArmorModel()
+        {   return (A) RegisterModels.EMPTY_ARMOR_MODEL;
+        }
+
         public static HumanoidModel<?> getRealArmorModel(LivingEntity entityLiving, ItemStack itemStack, EquipmentSlot armorSlot)
         {
             RegisterModels.checkForInitModels();
