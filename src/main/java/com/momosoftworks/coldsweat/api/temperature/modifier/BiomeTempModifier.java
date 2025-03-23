@@ -64,7 +64,7 @@ public class BiomeTempModifier extends TempModifier
                 biomeCount++;
 
                 DimensionType dimension = level.dimensionType();
-                if (!dimension.hasCeiling())
+                if (!dimension.hasCeiling() && !level.dimensionType().hasFixedTime())
                 {
                     // Biome temp with time of day
                     double biomeTemp = WorldHelper.getBiomeTemperature(level, holder);
