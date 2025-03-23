@@ -524,7 +524,7 @@ public class ConfigLoadingHandler
             if (!biomeTempData.areRequiredModsLoaded())
             {   return;
             }
-            for (Holder<Biome> biome : RegistryHelper.mapVanillaRegistryTagList(Registries.BIOME, biomeTempData.biomes(), registryAccess))
+            for (Holder<Biome> biome : RegistryHelper.mapVanillaRegistryTagList(Registries.BIOME, biomeTempData.biomes().flatten(), registryAccess))
             {
                 if (biomeTempData.isOffset())
                 {   ConfigSettings.BIOME_OFFSETS.get(registryAccess).put(biome, biomeTempData);
@@ -546,7 +546,7 @@ public class ConfigLoadingHandler
             {   return;
             }
 
-            for (Holder<DimensionType> dimension : RegistryHelper.mapVanillaRegistryTagList(Registries.DIMENSION_TYPE, dimensionTempData.dimensions(), registryAccess))
+            for (Holder<DimensionType> dimension : RegistryHelper.mapVanillaRegistryTagList(Registries.DIMENSION_TYPE, dimensionTempData.dimensions().flatten(), registryAccess))
             {
                 if (dimensionTempData.isOffset())
                 {   ConfigSettings.DIMENSION_OFFSETS.get(registryAccess).put(dimension, dimensionTempData);
@@ -567,7 +567,7 @@ public class ConfigLoadingHandler
             if (!structureTempData.areRequiredModsLoaded())
             {   return;
             }
-            for (Holder<Structure> structure : RegistryHelper.mapVanillaRegistryTagList(Registries.STRUCTURE, structureTempData.structures(), registryAccess))
+            for (Holder<Structure> structure : RegistryHelper.mapVanillaRegistryTagList(Registries.STRUCTURE, structureTempData.structures().flatten(), registryAccess))
             {
                 if (structureTempData.isOffset())
                 {   ConfigSettings.STRUCTURE_OFFSETS.get(registryAccess).put(structure, structureTempData);
