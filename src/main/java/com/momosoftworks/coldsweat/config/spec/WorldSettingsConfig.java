@@ -84,10 +84,13 @@ public class WorldSettingsConfig
 
         DIMENSION_TEMP_OFFSETS = BUILDER
                 .comment("Applies an offset to the world's temperature across an entire dimension")
-            .defineListAllowEmpty(Arrays.asList("Dimension Temperature Offsets"), () -> Arrays.asList(
-                    Arrays.asList("minecraft:the_nether", 0.7),
-                    Arrays.asList("minecraft:the_end", -0.1)
-            ), it ->
+            .defineListAllowEmpty(Arrays.asList("Dimension Temperature Offsets"), () -> ListBuilder.begin(
+                        Arrays.asList("minecraft:the_nether", 0.7),
+                        Arrays.asList("minecraft:the_end", -0.1))
+                .addIf(CompatManager.isTwilightForestLoaded(), () -> Arrays.asList("twilightforest:twilight_forest_type", 0.2))
+                .addIf(CompatManager.isAetherLoaded(), () -> Arrays.asList("aether:the_aether", 0.7))
+                .build(),
+            it ->
             {
                 if (!(it instanceof List<?>)) return false;
                 List<?> list = (List<?>) it;
@@ -100,7 +103,8 @@ public class WorldSettingsConfig
             .comment("Defines the temperature of a dimension, overriding all other biome and dimension temperatures/settings")
             .defineListAllowEmpty(Arrays.asList("Dimension Temperatures"), () -> Arrays.asList(
                     // No default values
-            ), it ->
+            ),
+            it ->
             {
                 if (!(it instanceof List<?>)) return false;
                 List<?> list = (List<?>) it;

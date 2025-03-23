@@ -1,0 +1,28 @@
+{
+  "required_mods": [
+    "aether"
+  ],
+  "dimensions": [
+    "aether:the_aether"
+  ],
+  "regions": [
+    {
+      "bottom": {
+        "anchor": "world_top",
+        "depth": 1,
+        "temperature": {
+          "strength": 0
+        }
+      }
+    },
+    {
+      "top": {
+        "anchor": "world_top",
+        "depth": 0,
+        "temperature": {
+          "strength": 0
+        }
+      }
+    }
+  ]
+}
