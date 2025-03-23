@@ -311,7 +311,8 @@ public class ConfigSettings
         BIOME_TEMPS = addSyncedSettingWithRegistries("biome_temps", FastMap::new, (holder, registryAccess) ->
         {
             Map<Holder<Biome>, BiomeTempData> dataMap = ConfigHelper.getRegistryMap(WorldSettingsConfig.BIOME_TEMPERATURES.get(), registryAccess, Registries.BIOME,
-                                                                            toml -> BiomeTempData.fromToml(toml, false, registryAccess), BiomeTempData::biomes);
+                                                                                    toml -> BiomeTempData.fromToml(toml, false, registryAccess),
+                                                                                    data -> data.biomes().flatten());
             ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.BIOME_TEMP_DATA);
 
             holder.get(registryAccess).putAll(dataMap);
@@ -324,7 +325,8 @@ public class ConfigSettings
         BIOME_OFFSETS = addSyncedSettingWithRegistries("biome_offsets", FastMap::new, (holder, registryAccess) ->
         {
             Map<Holder<Biome>, BiomeTempData> dataMap = ConfigHelper.getRegistryMap(WorldSettingsConfig.BIOME_TEMP_OFFSETS.get(), registryAccess, Registries.BIOME,
-                                                                            toml -> BiomeTempData.fromToml(toml, true, registryAccess), BiomeTempData::biomes);
+                                                                                    toml -> BiomeTempData.fromToml(toml, true, registryAccess),
+                                                                                    data -> data.biomes().flatten());
             ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.BIOME_TEMP_DATA);
 
             holder.get(registryAccess).putAll(dataMap);
@@ -337,7 +339,8 @@ public class ConfigSettings
         DIMENSION_TEMPS = addSyncedSettingWithRegistries("dimension_temps", FastMap::new, (holder, registryAccess) ->
         {
             Map<Holder<DimensionType>, DimensionTempData> dataMap = ConfigHelper.getRegistryMap(WorldSettingsConfig.DIMENSION_TEMPERATURES.get(), registryAccess, Registries.DIMENSION_TYPE,
-                                                                                       toml -> DimensionTempData.fromToml(toml, false, registryAccess), DimensionTempData::dimensions);
+                                                                                                toml -> DimensionTempData.fromToml(toml, false, registryAccess),
+                                                                                                data -> data.dimensions().flatten());
             ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.DIMENSION_TEMP_DATA);
 
             holder.get(registryAccess).putAll(dataMap);
@@ -350,7 +353,8 @@ public class ConfigSettings
         DIMENSION_OFFSETS = addSyncedSettingWithRegistries("dimension_offsets", FastMap::new, (holder, registryAccess) ->
         {
             Map<Holder<DimensionType>, DimensionTempData> dataMap = ConfigHelper.getRegistryMap(WorldSettingsConfig.DIMENSION_TEMP_OFFSETS.get(), registryAccess, Registries.DIMENSION_TYPE,
-                                                                                       toml -> DimensionTempData.fromToml(toml, true, registryAccess), DimensionTempData::dimensions);
+                                                                                                toml -> DimensionTempData.fromToml(toml, true, registryAccess),
+                                                                                                data -> data.dimensions().flatten());
             ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.DIMENSION_TEMP_DATA);
 
             holder.get(registryAccess).putAll(dataMap);
@@ -363,7 +367,8 @@ public class ConfigSettings
         STRUCTURE_TEMPS = addSettingWithRegistries("structure_temperatures", FastMap::new, (holder, registryAccess) ->
         {
             Map<Holder<Structure>, StructureTempData> dataMap = ConfigHelper.getRegistryMap(WorldSettingsConfig.STRUCTURE_TEMPERATURES.get(), registryAccess, Registries.STRUCTURE,
-                                                                                   toml -> StructureTempData.fromToml(toml, false, registryAccess), StructureTempData::structures);
+                                                                                            toml -> StructureTempData.fromToml(toml, false, registryAccess),
+                                                                                            data -> data.structures().flatten());
             ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.STRUCTURE_TEMP_DATA);
 
             holder.get(registryAccess).putAll(dataMap);
@@ -372,7 +377,8 @@ public class ConfigSettings
         STRUCTURE_OFFSETS = addSettingWithRegistries("structure_offsets", FastMap::new, (holder, registryAccess) ->
         {
             Map<Holder<Structure>, StructureTempData> dataMap = ConfigHelper.getRegistryMap(WorldSettingsConfig.STRUCTURE_TEMP_OFFSETS.get(), registryAccess, Registries.STRUCTURE,
-                                                                                   toml -> StructureTempData.fromToml(toml, true, registryAccess), StructureTempData::structures);
+                                                                                            toml -> StructureTempData.fromToml(toml, true, registryAccess),
+                                                                                            data -> data.structures().flatten());
             ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.STRUCTURE_TEMP_DATA);
 
             holder.get(registryAccess).putAll(dataMap);
