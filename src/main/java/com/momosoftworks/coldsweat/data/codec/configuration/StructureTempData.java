@@ -6,6 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
@@ -20,12 +21,12 @@ import java.util.List;
 
 public class StructureTempData extends ConfigData implements IForgeRegistryEntry<StructureTempData>
 {
-    List<Either<TagKey<ConfiguredStructureFeature<?, ?>>, Holder<ConfiguredStructureFeature<?, ?>>>> structures;
+    NegatableList<Either<TagKey<ConfiguredStructureFeature<?, ?>>, Holder<ConfiguredStructureFeature<?, ?>>>> structures;
     double temperature;
     Temperature.Units units;
     boolean isOffset;
 
-    public StructureTempData(List<Either<TagKey<ConfiguredStructureFeature<?, ?>>, Holder<ConfiguredStructureFeature<?, ?>>>> structures, double temperature,
+    public StructureTempData(NegatableList<Either<TagKey<ConfiguredStructureFeature<?, ?>>, Holder<ConfiguredStructureFeature<?, ?>>>> structures, double temperature,
                              Temperature.Units units, boolean isOffset, List<String> requiredMods)
     {
         super(requiredMods);
@@ -35,27 +36,27 @@ public class StructureTempData extends ConfigData implements IForgeRegistryEntry
         this.isOffset = isOffset;
     }
 
-    public StructureTempData(List<Either<TagKey<ConfiguredStructureFeature<?, ?>>, Holder<ConfiguredStructureFeature<?, ?>>>> structures, double temperature,
+    public StructureTempData(NegatableList<Either<TagKey<ConfiguredStructureFeature<?, ?>>, Holder<ConfiguredStructureFeature<?, ?>>>> structures, double temperature,
                              Temperature.Units units, boolean isOffset)
     {
-        this(structures, temperature, units, isOffset, ConfigHelper.getModIDs(structures));
+        this(structures, temperature, units, isOffset, List.of());
     }
 
     public StructureTempData(Holder<ConfiguredStructureFeature<?, ?>> structure, double temperature,
                              Temperature.Units units, boolean isOffset)
     {
-        this(List.of(Either.right(structure)), temperature, units, isOffset);
+        this(new NegatableList<>(Either.right(structure)), temperature, units, isOffset);
     }
 
     public static final Codec<StructureTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ConfigHelper.tagOrHolderCodec(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, ConfiguredStructureFeature.CODEC).listOf().fieldOf("structures").forGetter(StructureTempData::structures),
+            NegatableList.listCodec(ConfigHelper.tagOrHolderCodec(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, ConfiguredStructureFeature.CODEC)).fieldOf("structures").forGetter(StructureTempData::structures),
             Codec.DOUBLE.fieldOf("temperature").forGetter(StructureTempData::temperature),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(StructureTempData::units),
             Codec.BOOL.optionalFieldOf("offset", false).forGetter(StructureTempData::isOffset),
             Codec.STRING.listOf().optionalFieldOf("required_mods", List.of()).forGetter(StructureTempData::requiredMods)
     ).apply(instance, StructureTempData::new));
 
-    public List<Either<TagKey<ConfiguredStructureFeature<?, ?>>, Holder<ConfiguredStructureFeature<?, ?>>>> structures()
+    public NegatableList<Either<TagKey<ConfiguredStructureFeature<?, ?>>, Holder<ConfiguredStructureFeature<?, ?>>>> structures()
     {   return structures;
     }
     public double temperature()
@@ -84,7 +85,7 @@ public class StructureTempData extends ConfigData implements IForgeRegistryEntry
         double temp = ((Number) entry.get(1)).doubleValue();
         Temperature.Units units = entry.size() == 3 ? Temperature.Units.valueOf(((String) entry.get(2)).toUpperCase()) : Temperature.Units.MC;
 
-        return new StructureTempData(structures, temp, units, isOffset);
+        return new StructureTempData(new NegatableList<>(structures), temp, units, isOffset);
     }
 
     @Override
