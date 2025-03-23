@@ -195,6 +195,7 @@ dependencies {
     runtimeOnly fg.deobf("curse.maven:packet-fixer-689467:5416166")
     runtimeOnly fg.deobf("curse.maven:attributefix-280510:4844658")
     runtimeOnly fg.deobf("curse.maven:customskinloader-286924:5497382")
+    implementation fg.deobf("curse.maven:tough-as-nails-246391:5815863")
 }
 
 publishing {
