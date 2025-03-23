@@ -75,6 +75,8 @@ public class CompatManager
     private static final boolean SPOILED_LOADED = modLoaded("spoiled");
     private static final boolean SUPPLEMENTARIES_LOADED = modLoaded("supplementaries");
     private static final boolean TOUGH_AS_NAILS_LOADED = modLoaded("toughasnails");
+    private static final boolean TWILIGHT_FOREST_LOADED = modLoaded("twilightforest");
+    private static final boolean AETHER_LOADED = modLoaded("aether");
 
     private static final List<String> SEASONS_MODS = fetchSeasonsMods();
 
@@ -190,6 +192,12 @@ public class CompatManager
     }
     public static boolean isToughAsNailsLoaded()
     {   return TOUGH_AS_NAILS_LOADED;
+    }
+    public static boolean isTwilightForestLoaded()
+    {   return TWILIGHT_FOREST_LOADED;
+    }
+    public static boolean isAetherLoaded()
+    {   return AETHER_LOADED;
     }
 
     public static abstract class Curios
