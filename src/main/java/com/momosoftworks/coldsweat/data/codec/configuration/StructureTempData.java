@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.registry.Registry;
@@ -17,12 +18,12 @@ import java.util.List;
 
 public class StructureTempData extends ConfigData
 {
-    List<StructureFeature<?, ?>> structures;
+    NegatableList<StructureFeature<?, ?>> structures;
     double temperature;
     Temperature.Units units;
     boolean isOffset;
 
-    public StructureTempData(List<StructureFeature<?, ?>> structures, double temperature,
+    public StructureTempData(NegatableList<StructureFeature<?, ?>> structures, double temperature,
                              Temperature.Units units, boolean isOffset, List<String> requiredMods)
     {
         super(requiredMods);
@@ -32,27 +33,27 @@ public class StructureTempData extends ConfigData
         this.isOffset = isOffset;
     }
 
-    public StructureTempData(List<StructureFeature<?, ?>> structures, double temperature,
+    public StructureTempData(NegatableList<StructureFeature<?, ?>> structures, double temperature,
                              Temperature.Units units, boolean isOffset)
     {
-        this(structures, temperature, units, isOffset, ConfigHelper.getModIDs(structures, Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY));
+        this(structures, temperature, units, isOffset, Arrays.asList());
     }
 
     public StructureTempData(StructureFeature<?, ?> structure, double temperature,
                              Temperature.Units units, boolean isOffset)
     {
-        this(Arrays.asList(structure), temperature, units, isOffset);
+        this(new NegatableList<>(structure), temperature, units, isOffset);
     }
 
     public static final Codec<StructureTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ConfigHelper.dynamicCodec(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY).listOf().fieldOf("structures").forGetter(data -> data.structures),
+            NegatableList.listCodec(ConfigHelper.dynamicCodec(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY)).fieldOf("structures").forGetter(data -> data.structures),
             Codec.DOUBLE.fieldOf("temperature").forGetter(data -> data.temperature),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(data -> data.units),
             Codec.BOOL.optionalFieldOf("offset", false).forGetter(data -> data.isOffset),
             Codec.STRING.listOf().optionalFieldOf("required_mods", Arrays.asList()).forGetter(StructureTempData::requiredMods)
     ).apply(instance, StructureTempData::new));
 
-    public List<StructureFeature<?, ?>> structures()
+    public NegatableList<StructureFeature<?, ?>> structures()
     {   return structures;
     }
     public double temperature()
@@ -81,7 +82,7 @@ public class StructureTempData extends ConfigData
         double temp = ((Number) entry.get(1)).doubleValue();
         Temperature.Units units = entry.size() == 3 ? Temperature.Units.valueOf(((String) entry.get(2)).toUpperCase()) : Temperature.Units.MC;
 
-        return new StructureTempData(structures, temp, units, isOffset);
+        return new StructureTempData(new NegatableList<>(structures), temp, units, isOffset);
     }
 
     @Override

@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.StringRepresentable;
@@ -23,10 +24,10 @@ import java.util.List;
 public class DepthTempData extends ConfigData
 {
     final List<TempRegion> temperatures;
-    final List<DimensionType> dimensions;
+    final NegatableList<DimensionType> dimensions;
 
     public DepthTempData(List<TempRegion> temperatures,
-                         List<DimensionType> dimensions,
+                         NegatableList<DimensionType> dimensions,
                          List<String> requiredMods)
     {
         super(requiredMods);
@@ -35,41 +36,34 @@ public class DepthTempData extends ConfigData
     }
 
     public DepthTempData(List<TempRegion> temperatures,
-                         List<DimensionType> dimensions)
+                         NegatableList<DimensionType> dimensions)
     {
-        this(temperatures, dimensions, ConfigHelper.getModIDs(dimensions, Registry.DIMENSION_TYPE_REGISTRY));
+        this(temperatures, dimensions, Arrays.asList());
     }
 
     public static final Codec<DepthTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             TempRegion.CODEC.listOf().fieldOf("regions").forGetter(data -> data.temperatures),
-            ConfigHelper.dynamicCodec(Registry.DIMENSION_TYPE_REGISTRY).listOf().fieldOf("dimensions").forGetter(data -> data.dimensions),
+            NegatableList.listCodec(ConfigHelper.dynamicCodec(Registry.DIMENSION_TYPE_REGISTRY)).fieldOf("dimensions").forGetter(data -> data.dimensions),
             Codec.STRING.listOf().optionalFieldOf("required_mods", Arrays.asList()).forGetter(DepthTempData::requiredMods)
     ).apply(instance, DepthTempData::new));
 
     public List<TempRegion> temperatures()
     {   return temperatures;
     }
-    public List<DimensionType> dimensions()
+    public NegatableList<DimensionType> dimensions()
     {   return dimensions;
     }
 
     public boolean withinBounds(World level, BlockPos pos)
-    {
-        DimensionType dim = level.dimensionType();
-        if (!CSMath.anyMatch(this.dimensions, dimension -> dimension.equals(dim)))
-        {   return false;
-        }
-        for (TempRegion region : temperatures)
-        {
-            if (region.withinBounds(level, pos))
-            {   return true;
-            }
-        }
-        return false;
+    {   return this.getRegion(level, pos) != null;
     }
 
     public TempRegion getRegion(World level, BlockPos pos)
     {
+        DimensionType dim = level.dimensionType();
+        if (!this.dimensions.test(dim::equals))
+        {   return null;
+        }
         for (TempRegion region : temperatures)
         {
             if (region.withinBounds(level, pos))

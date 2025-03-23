@@ -497,7 +497,7 @@ public class ConfigLoadingHandler
             if (!biomeTempData.areRequiredModsLoaded())
             {   return;
             }
-            for (Biome biome : biomeTempData.biomes())
+            for (Biome biome : biomeTempData.biomes().flatten())
             {
                 if (biomeTempData.isOffset())
                 {   ConfigSettings.BIOME_OFFSETS.get(registryAccess).put(biome, biomeTempData);
@@ -518,7 +518,7 @@ public class ConfigLoadingHandler
             {   return;
             }
 
-            for (DimensionType dimension : dimensionTempData.dimensions())
+            for (DimensionType dimension : dimensionTempData.dimensions().flatten())
             {
                 if (dimensionTempData.isOffset())
                 {   ConfigSettings.DIMENSION_OFFSETS.get(registryAccess).put(dimension, dimensionTempData);
@@ -538,7 +538,7 @@ public class ConfigLoadingHandler
             if (!structureTempData.areRequiredModsLoaded())
             {   return;
             }
-            for (StructureFeature<?, ?> structure : structureTempData.structures())
+            for (StructureFeature<?, ?> structure : structureTempData.structures().flatten())
             {
                 if (structureTempData.isOffset())
                 {   ConfigSettings.STRUCTURE_OFFSETS.get(registryAccess).put(structure, structureTempData);

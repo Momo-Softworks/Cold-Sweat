@@ -6,6 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.registry.Registry;
@@ -17,13 +18,13 @@ import java.util.List;
 
 public class BiomeTempData extends ConfigData
 {
-    final List<Biome> biomes;
+    final NegatableList<Biome> biomes;
     final double min;
     final double max;
     final Temperature.Units units;
     final boolean isOffset;
 
-    public BiomeTempData(List<Biome> biomes, double min, double max,
+    public BiomeTempData(NegatableList<Biome> biomes, double min, double max,
                          Temperature.Units units, boolean isOffset, List<String> requiredMods)
     {
         super(requiredMods);
@@ -34,18 +35,18 @@ public class BiomeTempData extends ConfigData
         this.isOffset = isOffset;
     }
 
-    public BiomeTempData(List<Biome> biomes, double min, double max,
+    public BiomeTempData(NegatableList<Biome> biomes, double min, double max,
                          Temperature.Units units, boolean isOffset)
     {
-        this(biomes, min, max, units, isOffset, ConfigHelper.getModIDs(biomes, Registry.BIOME_REGISTRY));
+        this(biomes, min, max, units, isOffset, Arrays.asList());
     }
 
-    public BiomeTempData(Biome biome, double min, double max, Temperature.Units units, boolean absolute)
-    {   this(Arrays.asList(biome), min, max, units, !absolute);
+    public BiomeTempData(Biome biome, double min, double max, Temperature.Units units, boolean isOffset)
+    {   this(new NegatableList<>(biome), min, max, units, isOffset);
     }
 
     public static final Codec<BiomeTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ConfigHelper.dynamicCodec(Registry.BIOME_REGISTRY).listOf().fieldOf("biomes").forGetter(data -> data.biomes),
+            NegatableList.listCodec(ConfigHelper.dynamicCodec(Registry.BIOME_REGISTRY)).fieldOf("biomes").forGetter(data -> data.biomes),
             Codec.mapEither(Codec.DOUBLE.fieldOf("temperature"), Codec.DOUBLE.fieldOf("min_temp")).xmap(
                     either ->
                     either.map(left -> left, right -> right),
@@ -59,7 +60,7 @@ public class BiomeTempData extends ConfigData
             Codec.STRING.listOf().optionalFieldOf("required_mods", Arrays.asList()).forGetter(BiomeTempData::requiredMods)
     ).apply(instance, BiomeTempData::new));
 
-    public List<Biome> biomes()
+    public NegatableList<Biome> biomes()
     {   return biomes;
     }
     public double min()
@@ -98,7 +99,7 @@ public class BiomeTempData extends ConfigData
         double max = ((Number) entry.get(2)).doubleValue();
 
         // Maps the biome ID to the temperature (and variance if present)
-        return new BiomeTempData(biomes, min, max, units, isOffset);
+        return new BiomeTempData(new NegatableList<>(biomes), min, max, units, isOffset);
     }
 
     @Override
