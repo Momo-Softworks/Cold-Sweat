@@ -17,6 +17,9 @@ public class NegatableList<T>
     private final List<T> exclusions;
     private final boolean singleton;
 
+    /**
+     * Provides a codec that can be either a qualified list or a single element.
+     */
     public static <T> Codec<NegatableList<T>> codec(Codec<T> codec) {
         Codec<NegatableList<T>> listCodec = RecordCodecBuilder.create(instance -> instance.group(
                 codec.listOf().fieldOf("require").forGetter(predicate -> predicate.requirements),
@@ -28,7 +31,7 @@ public class NegatableList<T>
                           if (either.left().isPresent())
                           {   return DataResult.success(either.left().get());
                           }
-                          else return DataResult.success(new NegatableList<>(List.of((T) either.right().get())));
+                          else return DataResult.success(new NegatableList<>(List.of(either.right().get())));
                       },
                       list -> {
                           if (list.singleton && list.exclusions.isEmpty())
@@ -36,6 +39,30 @@ public class NegatableList<T>
                           }
                           else return Either.left(list);
                       });
+    }
+
+    /**
+     * Provides a codec that can be either a qualified list or a list of elements.
+     */
+    public static <T> Codec<NegatableList<T>> listCodec(Codec<T> codec) {
+        Codec<NegatableList<T>> listCodec = RecordCodecBuilder.create(instance -> instance.group(
+                codec.listOf().fieldOf("require").forGetter(predicate -> predicate.requirements),
+                codec.listOf().optionalFieldOf("exclude", List.of()).forGetter(predicate -> predicate.exclusions)
+        ).apply(instance, NegatableList::new));
+
+        return Codec.either(listCodec, codec.listOf())
+                .comapFlatMap(either -> {
+                                  if (either.left().isPresent())
+                                  {   return DataResult.success(either.left().get());
+                                  }
+                                  else return DataResult.success(new NegatableList<>(either.right().get()));
+                              },
+                              list -> {
+                                    if (list.singleton && list.exclusions.isEmpty())
+                                    {   return Either.right(list.requirements);
+                                    }
+                                    else return Either.left(list);
+                              });
     }
 
     public NegatableList()
@@ -109,6 +136,10 @@ public class NegatableList<T>
 
     public <N> List<N> listMap(Function<T, N> mapper)
     {   return this.flatMap(mapper.andThen(p -> CSMath.mutable(List.of(p))), CSMath::merge, List::removeAll).orElse(List.of());
+    }
+
+    public List<T> flatten()
+    {   return this.listMap(p -> p);
     }
 
     public <N> List<N> flatListMap(Function<T, List<N>> mapper)
