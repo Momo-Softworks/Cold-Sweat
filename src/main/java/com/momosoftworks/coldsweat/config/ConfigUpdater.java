@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.config;
 
 import com.google.common.io.Files;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.config.spec.ItemSettingsConfig;
 import com.momosoftworks.coldsweat.config.spec.MainSettingsConfig;
 import com.momosoftworks.coldsweat.config.spec.WorldSettingsConfig;
@@ -189,6 +190,14 @@ public class ConfigUpdater
             List whitelist = new ArrayList<>(WorldSettingsConfig.SOURCE_SPREAD_WHITELIST.get());
             whitelist.remove("cold_sweat:hearth_bottom");
             WorldSettingsConfig.SOURCE_SPREAD_WHITELIST.set(whitelist);
+
+            // Add modded dimension temperature offsets
+            if (CompatManager.isTwilightForestLoaded())
+            {   addConfigSetting(WorldSettingsConfig.DIMENSION_TEMP_OFFSETS, List.of("twilightforest:twilight_forest_type", 0.2));
+            }
+            if (CompatManager.isAetherLoaded())
+            {   addConfigSetting(WorldSettingsConfig.DIMENSION_TEMP_OFFSETS, List.of("aether:the_aether", 0.7));
+            }
         }
 
         // Update config version
