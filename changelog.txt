@@ -2901,7 +2901,7 @@ Technical Changes:
 
 
 ------------------------------------------------------------------------------------------------------------------------
-2.4-b01b
+2.4-b02a
 * Config settings from pre-2.4 versions will now be automatically updated to reflect new changes/formatting
       - Added option to disable auto-updating in main.toml
 * Encased smokestacks now have openings on both ends like normal smokestacks
