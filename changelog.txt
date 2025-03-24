@@ -2920,6 +2920,7 @@ Technical Changes:
       - Wool armor: provides the same insulation as wool
       - Leaf armor: provides the same insulation as leather, but with no cold protection
       - Thermoregulator: now gives warmth & frigidness as a hearth would
+* Adjusted default world temperature for the Twilight Forest and Aether dimensions
 
 Fixes:
 * (1.18) Fixed crash when loading KubeJS events
