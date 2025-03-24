@@ -18,7 +18,7 @@ import java.util.function.Predicate;
 public class FoodBuilderJS
 {
     public double temperature = 0;
-    public int duration = -1;
+    public int duration = 0;
     public NegatableList<ItemRequirement> itemPredicate = new NegatableList<>();
     public NegatableList<EntityRequirement> entityPredicate = new NegatableList<>();
 
