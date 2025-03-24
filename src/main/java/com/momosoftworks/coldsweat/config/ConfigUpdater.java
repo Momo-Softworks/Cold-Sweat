@@ -160,9 +160,9 @@ public class ConfigUpdater
         }
 
         /*
-         2.4-b01b
+         2.4-b02a
          */
-        if (isBehind(configVersion, "2.4-b01b"))
+        if (isBehind(configVersion, "2.4-b02a"))
         {
             // Update old insulation items
             List<? extends List> itemInsulations = new ArrayList<>(ItemSettingsConfig.INSULATION_ITEMS.get());

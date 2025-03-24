@@ -145,9 +145,9 @@ repositories {
 }
 
 dependencies {
-    implementation "curse.maven:thirst-was-taken-679270:5857373"
-    implementation "curse.maven:tough-as-nails-246391:5833252"
+    compileOnly "curse.maven:tough-as-nails-246391:5833252"
 
+    implementation "curse.maven:thirst-was-taken-679270:5857373"
     implementation "curse.maven:serene-seasons-291874:5613014"
     implementation "curse.maven:glitchcore-955399:5645390"
     implementation "curse.maven:spoiled-364918:5490658"
