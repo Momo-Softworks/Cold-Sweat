@@ -139,28 +139,6 @@ public class MixinSoulLampRendering
         }
     }
 
-    @Mixin(HumanoidArmorLayer.class)
-    public static class ChestplateArms<T extends LivingEntity, M extends HumanoidModel<T>, A extends HumanoidModel<T>>
-    {
-        HumanoidArmorLayer<T, M, A> self = (HumanoidArmorLayer<T, M, A>) (Object) this;
-
-        @Inject(method = "renderArmorPiece", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/HumanoidModel;copyPropertiesTo(Lnet/minecraft/client/model/HumanoidModel;)V", shift = At.Shift.AFTER))
-        public void renderChestplateArms(PoseStack poseStack, MultiBufferSource buffer, T entity, EquipmentSlot slot, int light, A model, CallbackInfo ci)
-        {
-            if (slot == EquipmentSlot.CHEST)
-            {
-                if (EntityHelper.holdingLamp(entity, HumanoidArm.RIGHT))
-                {
-                    RenderLampHand.rotateArmorShoulder(entity, model, HumanoidArm.RIGHT, ClientOnlyHelper.isPlayerModelSlim(self));
-                }
-                if (EntityHelper.holdingLamp(entity, HumanoidArm.LEFT))
-                {
-                    RenderLampHand.rotateArmorShoulder(entity, model, HumanoidArm.LEFT, ClientOnlyHelper.isPlayerModelSlim(self));
-                }
-            }
-        }
-    }
-
     @Mixin(HumanoidModel.class)
     public static class ShiftWidePlayerArm
     {
