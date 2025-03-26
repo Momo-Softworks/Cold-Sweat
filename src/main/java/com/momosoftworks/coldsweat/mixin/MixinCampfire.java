@@ -1,13 +1,11 @@
 package com.momosoftworks.coldsweat.mixin;
 
-import com.momosoftworks.coldsweat.common.item.FilledWaterskinItem;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ModItemComponents;
 import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.item.ItemStack;
@@ -30,7 +28,7 @@ public class MixinCampfire
             at = @At(value = "HEAD"))
     private static void onItemCook(Level level, BlockPos pos, BlockState state, CampfireBlockEntity blockEntity, CallbackInfo ci)
     {
-        double waterskinStrength = ConfigSettings.WATERSKIN_STRENGTH.get();
+        double waterskinStrength = ConfigSettings.WATERSKIN_CONSUME_STRENGTH.get();
         double tempRate = ConfigSettings.TEMP_RATE.get();
 
         for (int i = 0; i < blockEntity.getItems().size(); i++)
@@ -65,7 +63,7 @@ public class MixinCampfire
     {
         if (result.is(ModItems.FILLED_WATERSKIN))
         {
-            double waterskinStrength = ConfigSettings.WATERSKIN_STRENGTH.get();
+            double waterskinStrength = ConfigSettings.WATERSKIN_CONSUME_STRENGTH.get();
             BlockState state = level.getBlockState(BlockPos.containing(x, y, z));
 
             if (state.is(BlockTags.CAMPFIRES) && CSMath.getIfNotNull(BuiltInRegistries.BLOCK.getKey(state.getBlock()), ResourceLocation::toString, "").contains("soul"))
