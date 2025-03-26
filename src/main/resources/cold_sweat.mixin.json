@@ -14,7 +14,6 @@
     "MixinItemTooltip",
     "MixinPickEntity",
     "MixinSoulLampRendering",
-    "MixinSoulLampRendering$ChestplateArms",
     "MixinSoulLampRendering$HeldItem",
     "MixinSoulLampRendering$ShiftWidePlayerArm",
     "MixinXPBar",
