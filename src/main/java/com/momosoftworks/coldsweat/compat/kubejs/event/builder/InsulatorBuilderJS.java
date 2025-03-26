@@ -27,8 +27,8 @@ import java.util.function.Predicate;
 
 public class InsulatorBuilderJS
 {
-    public List<Insulation> insulation;
-    public Insulation.Slot slot;
+    public List<Insulation> insulation = new ArrayList<>();
+    public Insulation.Slot slot = null;
     public NegatableList<ItemRequirement> itemPredicate = new NegatableList<>();
     public NegatableList<EntityRequirement> entityPredicate = new NegatableList<>();
     public AttributeModifierMap attributes = new AttributeModifierMap();
