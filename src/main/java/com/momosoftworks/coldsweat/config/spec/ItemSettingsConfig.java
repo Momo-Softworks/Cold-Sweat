@@ -35,7 +35,9 @@ public class ItemSettingsConfig
     public static final ForgeConfigSpec.ConfigValue<List<?>> INSULATION_SLOTS;
     public static final ForgeConfigSpec.DoubleValue INSULATION_STRENGTH;
 
-    public static final ForgeConfigSpec.IntValue WATERSKIN_STRENGTH;
+    public static final ForgeConfigSpec.IntValue WATERSKIN_CONSUME_STRENGTH;
+    public static final ForgeConfigSpec.DoubleValue WATERSKIN_HOTBAR_STRENGTH;
+    public static final ForgeConfigSpec.DoubleValue WATERSKIN_NEUTRALIZE_SPEED;
     public static final ForgeConfigSpec.DoubleValue SOULSPRING_LAMP_STRENGTH;
 
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> DRYING_ITEMS;
@@ -361,9 +363,17 @@ public class ItemSettingsConfig
                     }
                     return false;
                 });
-        WATERSKIN_STRENGTH = BUILDER
-                .comment("Defines how much a waterskin will change the player's body temperature by when used")
+        WATERSKIN_CONSUME_STRENGTH = BUILDER
+                .comment("Defines how much a waterskin will change the player's body temperature when used")
                 .defineInRange("Waterskin Strength", 50, 0, Integer.MAX_VALUE);
+
+        WATERSKIN_HOTBAR_STRENGTH = BUILDER
+                .comment("A multiplier for how effective a waterskin's over-time effect is, when held in the player's hotbar")
+                .defineInRange("Waterskin Hotbar Strength", 1.0, 0, Double.POSITIVE_INFINITY);
+
+        WATERSKIN_NEUTRALIZE_SPEED = BUILDER
+                .comment("A multiplier for how quickly a waterskin will return to its neutral temperature when being used in the hotbar")
+                .defineInRange("Waterskin Neutralize Speed", 1.0, 0, Double.POSITIVE_INFINITY);
 
         SOULSPRING_LAMP_STRENGTH = BUILDER
                 .comment("Determines the strength of the Soulspring Lamp's effect before it is overwhelmed",

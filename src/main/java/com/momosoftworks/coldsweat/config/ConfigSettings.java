@@ -151,7 +151,9 @@ public class ConfigSettings
 
     public static final DynamicHolder<Multimap<Item, ItemCarryTempData>> CARRIED_ITEM_TEMPERATURES;
 
-    public static final DynamicHolder<Integer> WATERSKIN_STRENGTH;
+    public static final DynamicHolder<Integer> WATERSKIN_CONSUME_STRENGTH;
+    public static final DynamicHolder<Double> WATERSKIN_HOTBAR_STRENGTH;
+    public static final DynamicHolder<Double> WATERSKIN_NEUTRALIZE_SPEED;
     public static final DynamicHolder<Double> SOULSPRING_LAMP_STRENGTH;
 
     public static final DynamicHolder<List<DimensionType>> LAMP_DIMENSIONS;
@@ -590,7 +592,23 @@ public class ConfigSettings
         (saver) -> {},
         SyncType.ONE_WAY);
 
-        WATERSKIN_STRENGTH = addSetting("waterskin_strength", () -> 50, holder -> holder.set(ItemSettingsConfig.WATERSKIN_STRENGTH.get()));
+        WATERSKIN_CONSUME_STRENGTH = addSyncedSetting("waterskin_consume_strength", () -> 50, holder -> holder.set(ItemSettingsConfig.WATERSKIN_CONSUME_STRENGTH.get()),
+        (encoder) -> ConfigHelper.serializeNbtInt(encoder, "WaterskinConsumeStrength"),
+        (decoder) -> decoder.getInt("WaterskinConsumeStrength"),
+        (saver) -> ItemSettingsConfig.WATERSKIN_CONSUME_STRENGTH.set(saver),
+        SyncType.BOTH_WAYS);
+
+        WATERSKIN_HOTBAR_STRENGTH = addSyncedSetting("waterskin_hotbar_strength", () -> 1.0, holder -> holder.set(ItemSettingsConfig.WATERSKIN_HOTBAR_STRENGTH.get()),
+        (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "WaterskinHotbarStrength"),
+        (decoder) -> decoder.getDouble("WaterskinHotbarStrength"),
+        (saver) -> ItemSettingsConfig.WATERSKIN_HOTBAR_STRENGTH.set(saver),
+        SyncType.BOTH_WAYS);
+
+        WATERSKIN_NEUTRALIZE_SPEED = addSyncedSetting("waterskin_neutralize_speed", () -> 1.0, holder -> holder.set(ItemSettingsConfig.WATERSKIN_NEUTRALIZE_SPEED.get()),
+        (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "WaterskinNeutralizeSpeed"),
+        (decoder) -> decoder.getDouble("WaterskinNeutralizeSpeed"),
+        (saver) -> ItemSettingsConfig.WATERSKIN_NEUTRALIZE_SPEED.set(saver),
+        SyncType.BOTH_WAYS);
 
         SOULSPRING_LAMP_STRENGTH = addSetting("soulspring_lamp_strength", () -> 0.6d, holder -> holder.set(ItemSettingsConfig.SOULSPRING_LAMP_STRENGTH.get()));
 
