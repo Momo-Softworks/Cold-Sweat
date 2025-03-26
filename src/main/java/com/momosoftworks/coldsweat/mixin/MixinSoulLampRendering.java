@@ -153,28 +153,6 @@ public class MixinSoulLampRendering
         }
     }
 
-    @Mixin(BipedArmorLayer.class)
-    public static class ChestplateArms<T extends LivingEntity, M extends BipedModel<T>, A extends BipedModel<T>>
-    {
-        BipedArmorLayer<T, M, A> self = (BipedArmorLayer<T, M, A>) (Object) this;
-
-        @Inject(method = "renderArmorPiece", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/model/BipedModel;copyPropertiesTo(Lnet/minecraft/client/renderer/entity/model/BipedModel;)V", shift = At.Shift.AFTER))
-        public void renderChestplateArms(MatrixStack poseStack, IRenderTypeBuffer buffer, T entity, EquipmentSlotType slot, int light, A model, CallbackInfo ci)
-        {
-            if (slot == EquipmentSlotType.CHEST)
-            {
-                if (EntityHelper.holdingLamp(entity, HandSide.RIGHT))
-                {
-                    RenderLampHand.rotateArmorShoulder(entity, model, HandSide.RIGHT, ClientOnlyHelper.isPlayerModelSlim(self));
-                }
-                if (EntityHelper.holdingLamp(entity, HandSide.LEFT))
-                {
-                    RenderLampHand.rotateArmorShoulder(entity, model, HandSide.LEFT, ClientOnlyHelper.isPlayerModelSlim(self));
-                }
-            }
-        }
-    }
-
     @Mixin(BipedModel.class)
     public static class ShiftWidePlayerArm
     {

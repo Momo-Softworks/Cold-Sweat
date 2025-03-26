@@ -169,41 +169,6 @@ public class RenderLampHand
         return pitchFactor;
     }
 
-    public static void rotateArmorShoulder(LivingEntity entity, BipedModel<?> model, HandSide side, boolean slim)
-    {
-        float partialTick = Minecraft.getInstance().getFrameTime();
-        float playerPitch = entity.getViewXRot(partialTick);
-        float attackAnim = entity.getAttackAnim(partialTick);
-        if (side == HandSide.RIGHT)
-        {
-            float xRot = model.rightArm.xRot;
-            model.rightArm.zRot -= CSMath.toRadians(90);
-            model.rightArm.xRot = -model.rightArm.yRot - CSMath.toRadians(90);
-            model.rightArm.yRot = xRot + CSMath.toRadians(90);
-            model.rightArm.x += 1;
-            if (!slim)
-            {   model.rightArm.y -= 1;
-            }
-            float pitchSwingHeight = playerPitch < 0 ? playerPitch/20 : playerPitch/60;
-            float pitchRot = (float) (Math.pow(attackAnim - 0.5, 2) - 0.25) * pitchSwingHeight;
-            model.rightArm.zRot += pitchRot * 0.4f;
-            model.rightArm.yRot += pitchRot * 0.2f;
-        }
-        else if (side == HandSide.LEFT)
-        {
-            float xRot = model.leftArm.xRot;
-            model.leftArm.zRot += CSMath.toRadians(90);
-            model.leftArm.xRot = model.leftArm.yRot - CSMath.toRadians(90);
-            model.leftArm.yRot = -xRot - CSMath.toRadians(90);
-            model.leftArm.x -= 1;
-            if (!slim)
-            {   model.leftArm.y -= 1;
-            }
-            float pitchSwingHeight = playerPitch < 0 ? playerPitch/20 : playerPitch/60;
-            model.rightArm.yRot += (Math.pow(attackAnim - 0.5, 2) - 0.25) * pitchSwingHeight * -1;
-        }
-    }
-
     private static void renderHand(MatrixStack ms, IRenderTypeBuffer bufferSource, int light, AbstractClientPlayerEntity player, boolean isRightHand,
                                    Hand hand, FirstPersonRenderer handRenderer, PlayerRenderer playerRenderer, ItemStack itemStack)
     {
