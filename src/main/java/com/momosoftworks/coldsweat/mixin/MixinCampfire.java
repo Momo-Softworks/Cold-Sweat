@@ -29,7 +29,7 @@ public class MixinCampfire
             at = @At(value = "HEAD"))
     private static void onItemCook(Level level, BlockPos pos, BlockState state, CampfireBlockEntity blockEntity, CallbackInfo ci)
     {
-        double waterskinStrength = ConfigSettings.WATERSKIN_STRENGTH.get();
+        double waterskinStrength = ConfigSettings.WATERSKIN_CONSUME_STRENGTH.get();
         double tempRate = ConfigSettings.TEMP_RATE.get();
 
         for (int i = 0; i < blockEntity.getItems().size(); i++)
@@ -65,7 +65,7 @@ public class MixinCampfire
     {
         if (result.is(ModItems.FILLED_WATERSKIN))
         {
-            double waterskinStrength = ConfigSettings.WATERSKIN_STRENGTH.get();
+            double waterskinStrength = ConfigSettings.WATERSKIN_CONSUME_STRENGTH.get();
             CompoundTag tag = result.getOrCreateTag();
             BlockState state = level.getBlockState(BlockPos.containing(x, y, z));
 

@@ -46,7 +46,7 @@ import java.util.*;
 
 public class FilledWaterskinItem extends Item
 {
-    public static final double EFFECT_RATE = 0.4;
+    public static final double EFFECT_RATE = 0.5;
     public static final String NBT_TEMPERATURE = "Temperature";
 
     public FilledWaterskinItem()
@@ -65,11 +65,12 @@ public class FilledWaterskinItem extends Item
             double itemTemp = itemstack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
             if (itemTemp != 0 && slot <= 8 || player.getOffhandItem().equals(itemstack))
             {
-                double temp = (EFFECT_RATE / 20) * ConfigSettings.TEMP_RATE.get();
-                double newTemp = CSMath.shrink(itemTemp, temp * 5);
+                double drainAmt = (EFFECT_RATE / 20) * ConfigSettings.WATERSKIN_NEUTRALIZE_SPEED.get();
+                double newTemp = CSMath.shrink(itemTemp, drainAmt * 5);
 
+                double tempEffect = (EFFECT_RATE / 20) * ConfigSettings.WATERSKIN_HOTBAR_STRENGTH.get();
                 itemstack.getOrCreateTag().putDouble(FilledWaterskinItem.NBT_TEMPERATURE, newTemp);
-                Temperature.addModifier(player, new WaterskinTempModifier(temp * CSMath.sign(itemTemp)).expires(5), Temperature.Trait.CORE, Placement.Duplicates.ALLOW);
+                Temperature.addModifier(player, new WaterskinTempModifier(tempEffect * CSMath.sign(itemTemp)).expires(5), Temperature.Trait.CORE, Placement.Duplicates.ALLOW);
             }
         }
     }
@@ -78,8 +79,7 @@ public class FilledWaterskinItem extends Item
     {
         if (!(entity instanceof Player player && stack.is(ModItems.FILLED_WATERSKIN))) return false;
 
-        Level level = player.level();
-        double amount = stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE) * (ConfigSettings.WATERSKIN_STRENGTH.get() / 50d);
+        double amount = stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE) * (ConfigSettings.WATERSKIN_CONSUME_STRENGTH.get() / 50d);
         Temperature.addModifier(player, new WaterskinTempModifier(amount).expires(0), Temperature.Trait.CORE, Placement.Duplicates.ALLOW);
 
         // Play empty sound
@@ -132,6 +132,7 @@ public class FilledWaterskinItem extends Item
         }
     }
 
+    @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand)
     {
         if (player.isCrouching())
@@ -188,7 +189,7 @@ public class FilledWaterskinItem extends Item
 
     @Override
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity)
-    {   double amount = stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE) * (ConfigSettings.WATERSKIN_STRENGTH.get() / 50d);
+    {   double amount = stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE) * (ConfigSettings.WATERSKIN_CONSUME_STRENGTH.get() / 50d);
         Temperature.addModifier(entity, new WaterskinTempModifier(amount / 100).expires(100), Temperature.Trait.CORE, Placement.Duplicates.ALLOW);
         return entity instanceof Player player && player.isCreative()
                ? stack
@@ -223,17 +224,17 @@ public class FilledWaterskinItem extends Item
 
             tooltip.add(Component.empty());
             tooltip.add(Component.translatable("tooltip.cold_sweat.hotbar").withStyle(ChatFormatting.GRAY));
-            Component tempEffectText = (temp > 0  ? Component.translatable("tooltip.cold_sweat.temperature_effect", "+" + CSMath.round(EFFECT_RATE * ConfigSettings.TEMP_RATE.get(), 2)).withStyle(TooltipHandler.HOT) :
+            double effectRate = EFFECT_RATE * ConfigSettings.WATERSKIN_HOTBAR_STRENGTH.get();
+            Component tempEffectText = (temp > 0  ? Component.translatable("tooltip.cold_sweat.temperature_effect", "+" + CSMath.round(effectRate, 2)).withStyle(TooltipHandler.HOT) :
                                         temp == 0 ? Component.translatable("tooltip.cold_sweat.temperature_effect", "+0").withStyle(ChatFormatting.WHITE)
-                                                  : Component.translatable("tooltip.cold_sweat.temperature_effect", "-" + CSMath.round(EFFECT_RATE * ConfigSettings.TEMP_RATE.get(), 2)).withStyle(TooltipHandler.COLD))
+                                                  : Component.translatable("tooltip.cold_sweat.temperature_effect", "-" + CSMath.round(effectRate, 2)).withStyle(TooltipHandler.COLD))
                         .append(perSecond);
             tooltip.add(tempEffectText);
 
+            // Info tooltip for drinking/pouring functionality
             Component tempText = temp > 0  ? Component.translatable("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp)).withStyle(TooltipHandler.HOT) :
                                  temp == 0 ? Component.translatable("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp)).withStyle(ChatFormatting.WHITE)
                                            : Component.translatable("tooltip.cold_sweat.temperature_effect", CSMath.formatDoubleOrInt(temp)).withStyle(TooltipHandler.COLD);
-
-            // Info tooltip for drinking/pouring functionality
             tooltip.add(Component.empty());
             tooltip.add(Component.translatable("tooltip.cold_sweat.consumed").withStyle(ChatFormatting.GRAY));
             tooltip.add(tempText);
