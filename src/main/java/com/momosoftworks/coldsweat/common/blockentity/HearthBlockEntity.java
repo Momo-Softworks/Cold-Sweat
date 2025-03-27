@@ -104,13 +104,13 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     FluidStack coldFuel = new FluidStack(Fluids.WATER, 0);
     FluidStack hotFuel = new FluidStack(Fluids.LAVA, 0);
 
-    FluidHandler bottomFuelHandler = new BottomFluidHandler();
-    final LazyOptional<IFluidHandler> bottomFuelHolder = LazyOptional.of(() -> {
-        return this.bottomFuelHandler;
+    FluidHandler hotFuelHandler = new HotFluidHandler();
+    final LazyOptional<IFluidHandler> hotFuelHolder = LazyOptional.of(() -> {
+        return this.hotFuelHandler;
     });
-    FluidHandler sidesFuelHandler = new SidesFluidHandler();
-    final LazyOptional<IFluidHandler> sidesFuelHolder = LazyOptional.of(() -> {
-        return this.sidesFuelHandler;
+    FluidHandler coldFuelHandler = new ColdFluidHandler();
+    final LazyOptional<IFluidHandler> coldFuelHolder = LazyOptional.of(() -> {
+        return this.coldFuelHandler;
     });
 
     NonNullList<ItemStack> items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
@@ -240,6 +240,14 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
      */
     public boolean hasSmokeStack()
     {   return true;
+    }
+
+    public List<Direction> getHeatingSides()
+    {   return Arrays.asList(Direction.EAST, Direction.SOUTH);
+    }
+
+    public List<Direction> getCoolingSides()
+    {   return Arrays.asList(Direction.WEST, Direction.DOWN);
     }
 
     @Override
@@ -562,15 +570,27 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     protected boolean hasCoolingSignal()
     {
         Direction facing = this.getBlockState().getValue(HearthBottomBlock.FACING);
-        return this.level.hasSignal(this.getBlockPos().relative(facing.getCounterClockWise()), facing.getCounterClockWise())
-            || this.level.hasSignal(this.getBlockPos().relative(Direction.DOWN), Direction.DOWN);
+        for (Direction side : this.getCoolingSides())
+        {
+            Direction rotatedSide = CSMath.directionToRotation(facing).rotate(side);
+            if (this.level.hasSignal(this.getBlockPos().relative(rotatedSide), rotatedSide))
+            {   return true;
+            }
+        }
+        return false;
     }
 
     protected boolean hasHeatingSignal()
     {
         Direction facing = this.getBlockState().getValue(HearthBottomBlock.FACING);
-        return this.level.hasSignal(this.getBlockPos().relative(facing.getOpposite()), facing.getOpposite())
-            || this.level.hasSignal(this.getBlockPos().relative(facing.getClockWise()), facing.getClockWise());
+        for (Direction side : this.getHeatingSides())
+        {
+            Direction rotatedSide = CSMath.directionToRotation(facing).rotate(side);
+            if (this.level.hasSignal(this.getBlockPos().relative(rotatedSide), rotatedSide))
+            {   return true;
+            }
+        }
+        return false;
     }
 
     protected void syncInputSignal(boolean wasHeatingOn, boolean wasCoolingOn)
@@ -1206,15 +1226,16 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     {   return new SUpdateTileEntityPacket(this.getBlockPos(), 0, this.getUpdateTag());
     }
 
-    public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction facing)
+    @Override
+    public <T> LazyOptional<T> getCapability(Capability<T> capability, Direction face)
     {
-        Direction facingDir = this.getBlockState().getValue(HearthBottomBlock.FACING);
-        return capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY && facing != null
-             ? facing == Direction.DOWN || facing == facingDir.getOpposite()
-                       ? bottomFuelHolder.cast()
-             : facing != Direction.UP && facing != facingDir
-                       ? sidesFuelHolder.cast()
-             : super.getCapability(capability, facing) : super.getCapability(capability, facing);
+        return capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY && face != null
+             ? this.getHeatingSides().contains(face)
+                       ? hotFuelHolder.cast()
+             : this.getCoolingSides().contains(face)
+                       ? coldFuelHolder.cast()
+                       : super.getCapability(capability, face)
+             : super.getCapability(capability, face);
     }
 
     public void addPath(SpreadPath path)
@@ -1268,7 +1289,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     {   return this.isCoolingOn;
     }
 
-    public boolean isBackPowered()
+    public boolean isHeatingOn()
     {   return this.isHeatingOn;
     }
 
@@ -1368,7 +1389,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     /**
      * Drains from water storage by default
      */
-    private class SidesFluidHandler extends FluidHandler
+    private class ColdFluidHandler extends FluidHandler
     {
         @Override
         public FluidStack drain(int amount, FluidAction fluidAction)
@@ -1388,7 +1409,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     /**
      * Drains from lava storage by default
      */
-    private class BottomFluidHandler extends FluidHandler
+    private class HotFluidHandler extends FluidHandler
     {
         @Override
         public FluidStack drain(int amount, FluidAction fluidAction)

@@ -5,6 +5,7 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.Direction;
+import net.minecraft.util.Rotation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.VoxelShape;
@@ -964,6 +965,18 @@ public class CSMath
 
             // Draw the vertical strip
             AbstractGui.fill(ps, stripX, y1, nextStripX, y2, color);
+        }
+    }
+
+    public static Rotation directionToRotation(Direction direction)
+    {
+        switch (direction)
+        {
+            case NORTH : { return Rotation.NONE; }
+            case EAST : { return Rotation.CLOCKWISE_90; }
+            case SOUTH : { return Rotation.CLOCKWISE_180; }
+            case WEST : { return Rotation.COUNTERCLOCKWISE_90; }
+            default : { return Rotation.NONE; }
         }
     }
 }

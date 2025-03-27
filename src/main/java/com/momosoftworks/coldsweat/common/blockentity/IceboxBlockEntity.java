@@ -45,6 +45,7 @@ import net.minecraftforge.items.wrapper.SidedInvWrapper;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
 @OnlyIn(value = Dist.CLIENT, _interface = IChestLid.class)
@@ -219,13 +220,13 @@ public class IceboxBlockEntity extends HearthBlockEntity implements ITickableTil
     }
 
     @Override
-    protected boolean hasCoolingSignal()
-    {   return Arrays.stream(Direction.values()).anyMatch(dir -> this.level.hasSignal(this.getBlockPos().relative(dir), dir));
+    public List<Direction> getCoolingSides()
+    {   return Arrays.asList(Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST, Direction.DOWN);
     }
 
     @Override
-    protected boolean hasHeatingSignal()
-    {   return false;
+    public List<Direction> getHeatingSides()
+    {   return Arrays.asList();
     }
 
     @Override
@@ -339,18 +340,18 @@ public class IceboxBlockEntity extends HearthBlockEntity implements ITickableTil
     }
 
     @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction facing)
+    public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction face)
     {
-        if (!this.remove && facing != null && capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
+        if (!this.remove && face != null && capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
         {
-            if (facing == Direction.UP)
+            if (face == Direction.UP)
                 return slotHandlers[0].cast();
-            else if (facing == Direction.DOWN)
+            else if (face == Direction.DOWN)
                 return slotHandlers[1].cast();
             else
                 return slotHandlers[2].cast();
         }
-        return super.getCapability(capability, facing);
+        return super.getCapability(capability, face);
     }
 
     @Override
