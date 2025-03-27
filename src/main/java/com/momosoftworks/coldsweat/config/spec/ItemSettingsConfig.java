@@ -206,8 +206,6 @@ public class ItemSettingsConfig
                                 Arrays.asList("cold_sweat:chameleon_scale_chestplate", 12, 0.0085, "adaptive", "", true),
                                 Arrays.asList("cold_sweat:chameleon_scale_leggings", 10, 0.0085, "adaptive", "", true),
                                 Arrays.asList("cold_sweat:chameleon_scale_boots", 8, 0.0085, "adaptive", "", true))
-                            .addIf(CompatManager.isEnvironmentalLoaded(),
-                                () -> Arrays.asList("environmental:yak_hair", 1.5, -1))
                             .addIf(CompatManager.isToughAsNailsLoaded(),
                                 () -> Arrays.asList("toughasnails:leaf_helmet",     0, Arrays.asList(1, 1, 1, 1), "static", "", true),
                                 () -> Arrays.asList("toughasnails:leaf_chestplate", 0, Arrays.asList(1, 1, 1, 1, 1, 1), "static", "", true),
@@ -257,8 +255,6 @@ public class ItemSettingsConfig
                                 Arrays.asList("cold_sweat:chameleon_scale_chestplate", 12, 0.0085, "adaptive"),
                                 Arrays.asList("cold_sweat:chameleon_scale_leggings", 10, 0.0085, "adaptive"),
                                 Arrays.asList("cold_sweat:chameleon_scale_boots", 8, 0.0085, "adaptive"))
-                            .addIf(CompatManager.isEnvironmentalLoaded(),
-                                () -> Arrays.asList("environmental:yak_pants", 7.5, -5))
                             .addIf(CompatManager.isToughAsNailsLoaded(),
                                 () -> Arrays.asList("toughasnails:leaf_helmet",     0, Arrays.asList(1, 1, 1, 1)),
                                 () -> Arrays.asList("toughasnails:leaf_chestplate", 0, Arrays.asList(1, 1, 1, 1, 1, 1)),
