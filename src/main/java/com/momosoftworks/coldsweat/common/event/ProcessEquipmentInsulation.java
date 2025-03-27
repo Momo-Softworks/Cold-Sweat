@@ -101,20 +101,12 @@ public class ProcessEquipmentInsulation
                         List<InsulatorData> insulators = ItemInsulationManager.getEffectiveAppliedInsulation(armorStack, player);
 
                         // Get the armor's insulation values
-                        for (InsulatorData value : insulators)
+                        for (InsulatorData insulator : insulators)
                         {
-                            for (Insulation insulation : value.insulation())
+                            for (Insulation insulation : insulator.insulation())
                             {
-                                if (insulation instanceof StaticInsulation insul)
-                                {
-                                    mapAdd(armorInsulation, "cold_insulators", insul.getCold());
-                                    mapAdd(armorInsulation, "heat_insulators", insul.getHeat());
-                                }
-                                else if (insulation instanceof AdaptiveInsulation insul)
-                                {
-                                    mapAdd(armorInsulation, "cold_insulators", CSMath.blend(insul.getInsulation() * 0.75, 0, insul.getFactor(), -1, 1));
-                                    mapAdd(armorInsulation, "heat_insulators", CSMath.blend(0, insul.getInsulation() * 0.75, insul.getFactor(), -1, 1));
-                                }
+                                mapAdd(armorInsulation, "cold_insulators", insulation.getCold());
+                                mapAdd(armorInsulation, "heat_insulators", insulation.getHeat());
                             }
                         }
 
