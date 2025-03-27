@@ -4,12 +4,10 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.block.BoilerBlock;
 import com.momosoftworks.coldsweat.common.container.BoilerContainer;
 import com.momosoftworks.coldsweat.common.item.FilledWaterskinItem;
+import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
-import com.momosoftworks.coldsweat.core.network.message.BlockDataUpdateMessage;
 import com.momosoftworks.coldsweat.data.codec.configuration.FuelData;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
-import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.registries.ModBlockEntities;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
@@ -21,7 +19,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -34,10 +31,9 @@ import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.wrapper.SidedInvWrapper;
-import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class BoilerBlockEntity extends HearthBlockEntity
@@ -175,17 +171,13 @@ public class BoilerBlockEntity extends HearthBlockEntity
     }
 
     @Override
-    protected boolean hasHeatingSignal()
-    {
-        return Direction.stream().anyMatch(direction ->
-        {
-            return this.level.hasSignal(this.worldPosition.relative(direction), direction);
-        });
+    public List<Direction> getHeatingSides()
+    {   return Arrays.asList(Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST, Direction.DOWN);
     }
 
     @Override
-    protected boolean hasCoolingSignal()
-    {   return false;
+    public List<Direction> getCoolingSides()
+    {   return List.of();
     }
 
     @Override
@@ -266,17 +258,17 @@ public class BoilerBlockEntity extends HearthBlockEntity
     }
 
     @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction facing)
+    public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction face)
     {
-        if (!this.remove && facing != null && capability == ForgeCapabilities.ITEM_HANDLER)
+        if (!this.remove && face != null && capability == ForgeCapabilities.ITEM_HANDLER)
         {
-            return switch (facing)
+            return switch (face)
             {
                 case UP -> slotHandlers[0].cast();
                 case DOWN -> slotHandlers[1].cast();
                 default -> slotHandlers[2].cast();
             };
         }
-        return super.getCapability(capability, facing);
+        return super.getCapability(capability, face);
     }
 }

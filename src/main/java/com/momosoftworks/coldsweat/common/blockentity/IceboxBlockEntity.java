@@ -6,8 +6,6 @@ import com.momosoftworks.coldsweat.common.container.IceboxContainer;
 import com.momosoftworks.coldsweat.common.item.FilledWaterskinItem;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ParticleTypesInit;
-import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
-import com.momosoftworks.coldsweat.core.network.message.BlockDataUpdateMessage;
 import com.momosoftworks.coldsweat.data.codec.configuration.FuelData;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.registries.ModBlockEntities;
@@ -15,8 +13,6 @@ import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.ParticleStatus;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
@@ -24,7 +20,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
@@ -39,19 +34,15 @@ import net.minecraft.world.level.block.entity.ChestLidController;
 import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
 import net.minecraft.world.level.block.entity.LidBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.wrapper.SidedInvWrapper;
-import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEntity
 {
@@ -235,13 +226,13 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
     }
 
     @Override
-    protected boolean hasCoolingSignal()
-    {   return Direction.stream().anyMatch(dir -> this.level.hasSignal(this.getBlockPos().relative(dir), dir));
+    public List<Direction> getCoolingSides()
+    {   return Arrays.asList(Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST, Direction.DOWN);
     }
 
     @Override
-    protected boolean hasHeatingSignal()
-    {   return false;
+    public List<Direction> getHeatingSides()
+    {   return List.of();
     }
 
     @Override
@@ -355,18 +346,18 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
     }
 
     @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction facing)
+    public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction face)
     {
-        if (!this.remove && facing != null && capability == ForgeCapabilities.ITEM_HANDLER)
+        if (!this.remove && face != null && capability == ForgeCapabilities.ITEM_HANDLER)
         {
-            if (facing == Direction.UP)
+            if (face == Direction.UP)
                 return slotHandlers[0].cast();
-            else if (facing == Direction.DOWN)
+            else if (face == Direction.DOWN)
                 return slotHandlers[1].cast();
             else
                 return slotHandlers[2].cast();
         }
-        return super.getCapability(capability, facing);
+        return super.getCapability(capability, face);
     }
 
     @Override
