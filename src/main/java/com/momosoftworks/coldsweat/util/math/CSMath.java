@@ -6,6 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -916,6 +917,18 @@ public class CSMath
 
             // Draw the vertical strip
             graphics.fill(stripX, y1, nextStripX, y2, color);
+        }
+    }
+
+    public static Rotation directionToRotation(Direction direction)
+    {
+        switch (direction)
+        {
+            case NORTH -> { return Rotation.NONE; }
+            case EAST -> { return Rotation.CLOCKWISE_90; }
+            case SOUTH -> { return Rotation.CLOCKWISE_180; }
+            case WEST -> { return Rotation.COUNTERCLOCKWISE_90; }
+            default -> { return Rotation.NONE; }
         }
     }
 }

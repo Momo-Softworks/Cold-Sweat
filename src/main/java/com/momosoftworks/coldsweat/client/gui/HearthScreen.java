@@ -43,7 +43,7 @@ public class HearthScreen extends AbstractHearthScreen<HearthContainer>
         if (!ConfigSettings.SMART_HEARTH.get())
         {
             boolean sidePowered = this.menu.te.isCoolingOn();
-            boolean backPowered = this.menu.te.isBackPowered();
+            boolean backPowered = this.menu.te.isHeatingOn();
 
             graphics.blit(HEARTH_GUI, leftPos + 60, topPos + 21, 176, backPowered ? 60 : 68, 14, 8, 256, 256);
             graphics.blit(HEARTH_GUI, leftPos + 102, topPos + 21, 190, sidePowered ? 60 : 68, 14, 8, 256, 256);
