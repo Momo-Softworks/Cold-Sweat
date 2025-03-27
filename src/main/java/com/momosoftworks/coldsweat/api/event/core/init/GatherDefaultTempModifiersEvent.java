@@ -75,6 +75,6 @@ public class GatherDefaultTempModifiersEvent extends Event
     }
 
     public void removeModifiers(TempModifier modifier, Placement.Duplicates matchPolicy)
-    {   modifiers.removeIf(mod -> Placement.Duplicates.check(matchPolicy, mod, modifier));
+    {   modifiers.removeIf(mod -> matchPolicy.check(mod, modifier));
     }
 }

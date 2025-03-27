@@ -3,10 +3,7 @@ package com.momosoftworks.coldsweat.core.init;
 import com.mojang.brigadier.CommandDispatcher;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.command.BaseCommand;
-import com.momosoftworks.coldsweat.common.command.argument.AttributeOperationArgument;
-import com.momosoftworks.coldsweat.common.command.argument.TempAttributeTraitArgument;
-import com.momosoftworks.coldsweat.common.command.argument.TempModifierTraitArgument;
-import com.momosoftworks.coldsweat.common.command.argument.TemperatureTraitArgument;
+import com.momosoftworks.coldsweat.common.command.argument.*;
 import com.momosoftworks.coldsweat.common.command.impl.TempCommand;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
@@ -43,15 +40,14 @@ public class ModCommands
 
     public static final DeferredRegister<ArgumentTypeInfo<?, ?>> ARGUMENTS = DeferredRegister.create(Registries.COMMAND_ARGUMENT_TYPE, ColdSweat.MOD_ID);
 
-    public static final DeferredHolder<ArgumentTypeInfo<?, ?>, ArgumentTypeInfo<?, ?>> TEMP_MODIFIER_TYPE =
-            ARGUMENTS.register("temp_modifier_type", () -> ArgumentTypeInfos.registerByClass(TempModifierTraitArgument.class, new TempModifierTraitArgument.Info()));
-
-    public static final DeferredHolder<ArgumentTypeInfo<?, ?>, ArgumentTypeInfo<?, ?>> TEMPERATURE_TYPE =
-            ARGUMENTS.register("temperature_type", () -> ArgumentTypeInfos.registerByClass(TemperatureTraitArgument.class, new TemperatureTraitArgument.Info()));
-
-    public static final DeferredHolder<ArgumentTypeInfo<?, ?>, ArgumentTypeInfo<?, ?>> ATTRIBUTE_TRAIT_TYPE =
-            ARGUMENTS.register("attribute_trait_type", () -> ArgumentTypeInfos.registerByClass(TempAttributeTraitArgument.class, new TempAttributeTraitArgument.Info()));
-
-    public static final DeferredHolder<ArgumentTypeInfo<?, ?>, ArgumentTypeInfo<?, ?>> MODIFIER_OPERATION =
-            ARGUMENTS.register("attribute_operation_type", () -> ArgumentTypeInfos.registerByClass(AttributeOperationArgument.class, new AttributeOperationArgument.Info()));
+    public static final DeferredHolder<ArgumentTypeInfo<?, ?>, ArgumentTypeInfo<?, ?>> TEMP_MODIFIER_TRAIT = ARGUMENTS.register("temp_modifier_type",
+                                                                                       () -> ArgumentTypeInfos.registerByClass(TempModifierTraitArgument.class, new TempModifierTraitArgument.Info()));
+    public static final DeferredHolder<ArgumentTypeInfo<?, ?>, ArgumentTypeInfo<?, ?>> TEMPERATURE_TRAIT = ARGUMENTS.register("temperature_type",
+                                                                                       () -> ArgumentTypeInfos.registerByClass(TemperatureTraitArgument.class, new TemperatureTraitArgument.Info()));
+    public static final DeferredHolder<ArgumentTypeInfo<?, ?>, ArgumentTypeInfo<?, ?>> ATTRIBUTE_TRAIT_TRAIT = ARGUMENTS.register("attribute_trait_type",
+                                                                                       () -> ArgumentTypeInfos.registerByClass(TempAttributeTraitArgument.class, new TempAttributeTraitArgument.Info()));
+    public static final DeferredHolder<ArgumentTypeInfo<?, ?>, ArgumentTypeInfo<?, ?>> ENUM = ARGUMENTS.register("attribute_operation_type",
+                                                                                       () -> ArgumentTypeInfos.registerByClass(NicerEnumArgument.class, new NicerEnumArgument.Info()));
+    public static final DeferredHolder<ArgumentTypeInfo<?, ?>, ArgumentTypeInfo<?, ?>> TEMP_MODIFIER = ARGUMENTS.register("temp_modifier",
+                                                                                       () -> ArgumentTypeInfos.registerByClass(TempModifierArgument.class, new TempModifierArgument.Info()));
 }

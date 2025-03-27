@@ -240,6 +240,11 @@
   "commands.cold_sweat.temperature.clear.many.result":    "Cleared temperature property \"%d\" for %d entities",
   "commands.cold_sweat.temperature.clear.all.single.result":  "Cleared all temperature properties for %d",
   "commands.cold_sweat.temperature.clear.all.many.result":    "Cleared all temperature properties for %d entities",
+  "commands.cold_sweat.temp_modifier.invalid": "Invalid temperature modifier: \"%s\"",
+  "commands.cold_sweat.temp_modifier.single.add.result": "Applied modifier %s to %s",
+  "commands.cold_sweat.temp_modifier.many.add.result":   "Applied modifier %s to %d entities",
+  "commands.cold_sweat.temp_modifier.single.remove.result": "Removed modifier %s from %s",
+  "commands.cold_sweat.temp_modifier.many.remove.result":   "Removed modifier %s from %d entities",
 
 
   "advancements.cold_sweat.root.title": "Cold Sweat",

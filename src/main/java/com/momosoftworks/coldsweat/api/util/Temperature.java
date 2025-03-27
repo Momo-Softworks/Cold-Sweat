@@ -196,7 +196,7 @@ public class Temperature
      * * @param matchPolicy The strictness of the check for finding the TempModifier to replace.
      */
     public static boolean addOrReplaceModifier(LivingEntity entity, TempModifier modifier, Trait trait, Placement.Duplicates matchPolicy)
-    {   return addModifier(entity, modifier, trait, Placement.Duplicates.ALLOW, 1, Placement.of(Placement.Mode.REPLACE_OR_ADD, Placement.Order.FIRST, mod -> Placement.Duplicates.check(matchPolicy, modifier, mod)));
+    {   return addModifier(entity, modifier, trait, Placement.Duplicates.ALLOW, 1, Placement.of(Placement.Mode.REPLACE_OR_ADD, Placement.Order.FIRST, mod -> matchPolicy.check(modifier, mod)));
     }
 
     /**
@@ -208,7 +208,7 @@ public class Temperature
      * @param matchPolicy The strictness of the check for finding the TempModifier to replace.
      */
     public static boolean replaceModifier(LivingEntity entity, TempModifier modifier, Trait trait, Placement.Duplicates matchPolicy)
-    {   return addModifier(entity, modifier, trait, Placement.Duplicates.ALLOW, 1, Placement.of(Placement.Mode.REPLACE, Placement.Order.FIRST, mod -> Placement.Duplicates.check(matchPolicy, modifier, mod)));
+    {   return addModifier(entity, modifier, trait, Placement.Duplicates.ALLOW, 1, Placement.of(Placement.Mode.REPLACE, Placement.Order.FIRST, mod -> matchPolicy.check(modifier, mod)));
     }
 
     /**
@@ -253,7 +253,7 @@ public class Temperature
         boolean isReplacing = placement.mode().isReplacing();
         boolean isForward = placement.order() == Placement.Order.FIRST;
 
-        int existingMatches = (int) modifiers.stream().filter(mod -> Placement.Duplicates.check(duplicatePolicy, modifier, mod)).count();
+        int existingMatches = (int) modifiers.stream().filter(mod -> duplicatePolicy.check(modifier, mod)).count();
 
         // The number of TempModifiers that match the predicate
         int hits = isReplacing ? 0 : existingMatches;
