@@ -100,9 +100,9 @@ public record Placement(Mode mode, Order order, Predicate<TempModifier> predicat
         {   this.name = name;
         }
 
-        public static boolean check(Duplicates policy, TempModifier modA, TempModifier modB)
+        public boolean check(TempModifier modA, TempModifier modB)
         {
-            return switch (policy)
+            return switch (this)
             {
                 case ALLOW    -> false;
                 case BY_CLASS -> modA.getClass().equals(modB.getClass());
