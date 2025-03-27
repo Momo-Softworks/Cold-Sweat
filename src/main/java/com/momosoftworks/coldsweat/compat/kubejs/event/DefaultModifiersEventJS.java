@@ -59,7 +59,7 @@ public class DefaultModifiersEventJS extends LivingEntityEventJS
     public void removeModifiers(TempModifier modifier, String matchPolicy)
     {
         Placement.Duplicates policy = Placement.Duplicates.byName(matchPolicy);
-        event.getModifiers().removeIf(mod -> Placement.Duplicates.check(policy, mod, modifier));
+        event.getModifiers().removeIf(mod -> policy.check(mod, modifier));
     }
 
     public Placement placed(String mode, String order, Predicate<TempModifier> predicate)

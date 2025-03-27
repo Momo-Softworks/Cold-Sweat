@@ -9,9 +9,7 @@ import com.momosoftworks.coldsweat.common.capability.shearing.IShearableCap;
 import com.momosoftworks.coldsweat.common.capability.shearing.ShearableFurCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.EntityTempCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
-import com.momosoftworks.coldsweat.common.command.argument.TempAttributeTraitArgument;
-import com.momosoftworks.coldsweat.common.command.argument.TempModifierTraitArgument;
-import com.momosoftworks.coldsweat.common.command.argument.TemperatureTraitArgument;
+import com.momosoftworks.coldsweat.common.command.argument.*;
 import com.momosoftworks.coldsweat.config.*;
 import com.momosoftworks.coldsweat.config.spec.*;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
@@ -110,9 +108,11 @@ public class ColdSweat
             InsulationItemsGroup.INSULATION_ITEMS.register();
 
             // Register custom command arguments
-            ArgumentTypes.register("temperature", TemperatureTraitArgument.class, new TemperatureTraitArgument.Serializer());
-            ArgumentTypes.register("temp_attribute", TempAttributeTraitArgument.class, new TempAttributeTraitArgument.Serializer());
-            ArgumentTypes.register("temp_modifier", TempModifierTraitArgument.class, new TempModifierTraitArgument.Serializer());
+            ArgumentTypes.register("temperature_trait", TemperatureTraitArgument.class, new TemperatureTraitArgument.Serializer());
+            ArgumentTypes.register("temp_attribute_trait", TempAttributeTraitArgument.class, new TempAttributeTraitArgument.Serializer());
+            ArgumentTypes.register("temp_modifier_trait", TempModifierTraitArgument.class, new TempModifierTraitArgument.Serializer());
+            ArgumentTypes.register("temp_modifier", TempModifierArgument.class, new TempModifierArgument.Serializer());
+            ArgumentTypes.register("enum", NicerEnumArgument.class, new NicerEnumArgument.Serializer());
         });
     }
 

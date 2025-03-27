@@ -120,9 +120,9 @@ public class Placement
         {   this.name = name;
         }
 
-        public static boolean check(Duplicates policy, TempModifier modA, TempModifier modB)
+        public boolean check(TempModifier modA, TempModifier modB)
         {
-            switch (policy)
+            switch (this)
             {
                 case ALLOW    : return false;
                 case BY_CLASS : return modA.getClass().equals(modB.getClass());
