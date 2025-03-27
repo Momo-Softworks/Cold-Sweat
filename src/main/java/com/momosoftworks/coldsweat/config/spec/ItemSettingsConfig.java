@@ -260,14 +260,14 @@ public class ItemSettingsConfig
                             .addIf(CompatManager.isEnvironmentalLoaded(),
                                 () -> Arrays.asList("environmental:yak_pants", 7.5, -5))
                             .addIf(CompatManager.isToughAsNailsLoaded(),
-                                () -> Arrays.asList("toughasnails:leaf_helmet",     0, Arrays.asList(1, 1, 1, 1), "static", "", true),
-                                () -> Arrays.asList("toughasnails:leaf_chestplate", 0, Arrays.asList(1, 1, 1, 1, 1, 1), "static", "", true),
-                                () -> Arrays.asList("toughasnails:leaf_leggings",   0, Arrays.asList(1, 1, 1, 1, 1), "static", "", true),
-                                () -> Arrays.asList("toughasnails:leaf_boots",      0, Arrays.asList(1, 1, 1, 1),  "static", "", true),
-                                () -> Arrays.asList("toughasnails:wool_helmet",     Arrays.asList(1.5, 1.5, 1.5, 1.5), 0, "static", "", true),
-                                () -> Arrays.asList("toughasnails:wool_chestplate", Arrays.asList(1.5, 1.5, 1.5, 1.5, 1.5, 1.5), 0, "static", "", true),
-                                () -> Arrays.asList("toughasnails:wool_leggings",   Arrays.asList(1.5, 1.5, 1.5, 1.5, 1.5), 0, "static", "", true),
-                                () -> Arrays.asList("toughasnails:wool_boots",      Arrays.asList(1.5, 1.5, 1.5, 1.5), 0,  "static", "", true))
+                                () -> Arrays.asList("toughasnails:leaf_helmet",     0, Arrays.asList(1, 1, 1, 1)),
+                                () -> Arrays.asList("toughasnails:leaf_chestplate", 0, Arrays.asList(1, 1, 1, 1, 1, 1)),
+                                () -> Arrays.asList("toughasnails:leaf_leggings",   0, Arrays.asList(1, 1, 1, 1, 1)),
+                                () -> Arrays.asList("toughasnails:leaf_boots",      0, Arrays.asList(1, 1, 1, 1)),
+                                () -> Arrays.asList("toughasnails:wool_helmet",     Arrays.asList(1.5, 1.5, 1.5, 1.5), 0),
+                                () -> Arrays.asList("toughasnails:wool_chestplate", Arrays.asList(1.5, 1.5, 1.5, 1.5, 1.5, 1.5), 0),
+                                () -> Arrays.asList("toughasnails:wool_leggings",   Arrays.asList(1.5, 1.5, 1.5, 1.5, 1.5), 0),
+                                () -> Arrays.asList("toughasnails:wool_boots",      Arrays.asList(1.5, 1.5, 1.5, 1.5), 0))
                             .build(),
                         it ->
                         {
