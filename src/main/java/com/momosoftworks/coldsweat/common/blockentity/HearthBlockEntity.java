@@ -252,9 +252,23 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     public List<Direction> getHeatingSides()
     {   return Arrays.asList(Direction.EAST, Direction.SOUTH);
     }
+    public boolean isHeatingSide(Direction side)
+    {
+        if (side == null) return false;
+        Direction facing = this.getBlockState().getValue(HearthBottomBlock.FACING);
+        Direction rotatedSide = CSMath.directionToRotation(facing).rotate(side);
+        return this.getHeatingSides().contains(rotatedSide);
+    }
 
     public List<Direction> getCoolingSides()
     {   return Arrays.asList(Direction.WEST, Direction.DOWN);
+    }
+    public boolean isCoolingSide(Direction side)
+    {
+        if (side == null) return false;
+        Direction facing = this.getBlockState().getValue(HearthBottomBlock.FACING);
+        Direction rotatedSide = CSMath.directionToRotation(facing).rotate(side);
+        return this.getCoolingSides().contains(rotatedSide);
     }
 
     @Override
@@ -1244,9 +1258,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     public <T> LazyOptional<T> getCapability(Capability<T> capability, Direction face)
     {
         return capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY && face != null
-             ? this.getHeatingSides().contains(face)
+             ? this.isHeatingSide(face)
                        ? hotFuelHolder.cast()
-             : this.getCoolingSides().contains(face)
+             : this.isCoolingSide(face)
                        ? coldFuelHolder.cast()
                        : super.getCapability(capability, face)
              : super.getCapability(capability, face);
