@@ -3,10 +3,7 @@ package com.momosoftworks.coldsweat.core.init;
 import com.mojang.brigadier.CommandDispatcher;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.command.BaseCommand;
-import com.momosoftworks.coldsweat.common.command.argument.NicerEnumArgument;
-import com.momosoftworks.coldsweat.common.command.argument.TempAttributeTraitArgument;
-import com.momosoftworks.coldsweat.common.command.argument.TempModifierTraitArgument;
-import com.momosoftworks.coldsweat.common.command.argument.TemperatureTraitArgument;
+import com.momosoftworks.coldsweat.common.command.argument.*;
 import com.momosoftworks.coldsweat.common.command.impl.TempCommand;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
@@ -51,4 +48,6 @@ public class CommandInit
                                                                () -> ArgumentTypeInfos.registerByClass(TempModifierTraitArgument.class, new TempModifierTraitArgument.Info()));
     public static final RegistryObject<ArgumentTypeInfo<?, ?>> ENUM_TYPE = ARGUMENTS.register("enum_type",
                                                                () -> ArgumentTypeInfos.registerByClass(NicerEnumArgument.class, new NicerEnumArgument.Info()));
+    public static final RegistryObject<ArgumentTypeInfo<?, ?>> TEMP_MODIFIER_ARGUMENT = ARGUMENTS.register("temp_modifier",
+                                                               () -> ArgumentTypeInfos.registerByClass(TempModifierArgument.class, new TempModifierArgument.Info()));
 }
