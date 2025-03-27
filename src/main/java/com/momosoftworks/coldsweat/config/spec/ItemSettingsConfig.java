@@ -227,14 +227,14 @@ public class ItemSettingsConfig
                             .addIf(CompatManager.isEnvironmentalLoaded(),
                                 () -> List.of("environmental:yak_pants", 7.5, -5))
                             .addIf(CompatManager.isToughAsNailsLoaded(),
-                                () -> List.of("toughasnails:leaf_helmet",     0, List.of(1, 1, 1, 1), "static", "", true),
-                                () -> List.of("toughasnails:leaf_chestplate", 0, List.of(1, 1, 1, 1, 1, 1), "static", "", true),
-                                () -> List.of("toughasnails:leaf_leggings",   0, List.of(1, 1, 1, 1, 1), "static", "", true),
-                                () -> List.of("toughasnails:leaf_boots",      0, List.of(1, 1, 1, 1),  "static", "", true),
-                                () -> List.of("toughasnails:wool_helmet",     List.of(1.5, 1.5, 1.5, 1.5), 0, "static", "", true),
-                                () -> List.of("toughasnails:wool_chestplate", List.of(1.5, 1.5, 1.5, 1.5, 1.5, 1.5), 0, "static", "", true),
-                                () -> List.of("toughasnails:wool_leggings",   List.of(1.5, 1.5, 1.5, 1.5, 1.5), 0, "static", "", true),
-                                () -> List.of("toughasnails:wool_boots",      List.of(1.5, 1.5, 1.5, 1.5), 0,  "static", "", true))
+                                () -> List.of("toughasnails:leaf_helmet",     0, List.of(1, 1, 1, 1)),
+                                () -> List.of("toughasnails:leaf_chestplate", 0, List.of(1, 1, 1, 1, 1, 1)),
+                                () -> List.of("toughasnails:leaf_leggings",   0, List.of(1, 1, 1, 1, 1)),
+                                () -> List.of("toughasnails:leaf_boots",      0, List.of(1, 1, 1, 1)),
+                                () -> List.of("toughasnails:wool_helmet",     List.of(1.5, 1.5, 1.5, 1.5), 0),
+                                () -> List.of("toughasnails:wool_chestplate", List.of(1.5, 1.5, 1.5, 1.5, 1.5, 1.5), 0),
+                                () -> List.of("toughasnails:wool_leggings",   List.of(1.5, 1.5, 1.5, 1.5, 1.5), 0),
+                                () -> List.of("toughasnails:wool_boots",      List.of(1.5, 1.5, 1.5, 1.5), 0))
                             .build(),
                         it -> it instanceof List<?> list && list.size() >= 3
                                 && list.get(0) instanceof String
