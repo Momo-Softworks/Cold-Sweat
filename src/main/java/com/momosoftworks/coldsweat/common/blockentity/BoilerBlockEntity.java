@@ -4,6 +4,7 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.block.BoilerBlock;
 import com.momosoftworks.coldsweat.common.container.BoilerContainer;
 import com.momosoftworks.coldsweat.compat.CompatManager;
+import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ModBlockEntities;
 import com.momosoftworks.coldsweat.core.init.ModItemComponents;
@@ -26,6 +27,9 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class BoilerBlockEntity extends HearthBlockEntity
 {
@@ -158,17 +162,13 @@ public class BoilerBlockEntity extends HearthBlockEntity
     }
 
     @Override
-    protected boolean hasHeatingSignal()
-    {
-        return Direction.stream().anyMatch(direction ->
-        {
-            return this.level.hasSignal(this.worldPosition.relative(direction), direction);
-        });
+    public List<Direction> getHeatingSides()
+    {   return Arrays.asList(Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST, Direction.DOWN);
     }
 
     @Override
-    protected boolean hasCoolingSignal()
-    {   return false;
+    public List<Direction> getCoolingSides()
+    {   return List.of();
     }
 
     @Override

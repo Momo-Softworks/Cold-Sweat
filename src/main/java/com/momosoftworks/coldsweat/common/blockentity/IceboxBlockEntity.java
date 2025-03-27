@@ -8,8 +8,6 @@ import com.momosoftworks.coldsweat.core.init.*;
 import com.momosoftworks.coldsweat.data.codec.configuration.FuelData;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.ParticleStatus;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleOptions;
@@ -29,11 +27,10 @@ import net.minecraft.world.level.block.entity.ChestLidController;
 import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
 import net.minecraft.world.level.block.entity.LidBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Random;
+import java.util.Arrays;
+import java.util.List;
 
 public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEntity
 {
@@ -208,13 +205,13 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
     }
 
     @Override
-    protected boolean hasCoolingSignal()
-    {   return Direction.stream().anyMatch(dir -> this.level.hasSignal(this.getBlockPos().relative(dir), dir));
+    public List<Direction> getCoolingSides()
+    {   return Arrays.asList(Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST, Direction.DOWN);
     }
 
     @Override
-    protected boolean hasHeatingSignal()
-    {   return false;
+    public List<Direction> getHeatingSides()
+    {   return List.of();
     }
 
     @Override

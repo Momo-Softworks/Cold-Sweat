@@ -13,11 +13,11 @@ import com.momosoftworks.coldsweat.config.spec.*;
 import com.momosoftworks.coldsweat.core.init.*;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.compat.CompatManager;
-import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.SpawnPlacementTypes;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -31,6 +31,8 @@ import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
 import net.neoforged.neoforge.registries.DataPackRegistryEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.List;
 
 @Mod(ColdSweat.MOD_ID)
 public class ColdSweat
@@ -126,17 +128,16 @@ public class ColdSweat
         {   return new ShearableFurCap();
         });
 
-        // Register fluid handlers for hearth-like blocks
-        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.HEARTH.value(), (hearth, facing) ->
+        for (BlockEntityType<? extends HearthBlockEntity> blockEntityType : List.of(ModBlockEntities.HEARTH.value(), ModBlockEntities.BOILER.value(), ModBlockEntities.ICEBOX.value()))
         {
-            return facing == Direction.DOWN
-                           ? new HearthBlockEntity.BottomFluidHandler(hearth)
-                 : facing != Direction.UP
-                           ? new HearthBlockEntity.SidesFluidHandler(hearth)
-                 : null;
-        });
-        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.BOILER.value(), (boiler, facing) -> new HearthBlockEntity.BottomFluidHandler(boiler));
-        event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, ModBlockEntities.ICEBOX.value(), (icebox, facing) -> new HearthBlockEntity.SidesFluidHandler(icebox));
+            // Register fluid handlers for hearth-like blocks
+            event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, blockEntityType, (hearthLike, facing) ->
+            {
+                return hearthLike.isHeatingSide(facing) ? new HearthBlockEntity.HotFluidHandler(hearthLike)
+                     : hearthLike.isCoolingSide(facing) ? new HearthBlockEntity.ColdFluidHandler(hearthLike)
+                     : null;
+            });
+        }
     }
 
     public void updateConfigs(FMLLoadCompleteEvent event)

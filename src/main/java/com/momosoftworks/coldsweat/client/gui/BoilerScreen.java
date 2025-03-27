@@ -51,7 +51,7 @@ public class BoilerScreen extends AbstractHearthScreen<BoilerContainer>
 
         if (!ConfigSettings.SMART_HEARTH.get() && this.menu.te.hasSmokeStack())
         {
-            boolean powered = this.menu.te.isBackPowered();
+            boolean powered = this.menu.te.isHeatingOn();
 
             graphics.blit(BOILER_GUI, leftPos + 117, topPos + 78, 176, powered ? 14 : 22, 14, 8, 256, 256);
 

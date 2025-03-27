@@ -229,6 +229,28 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     {   return true;
     }
 
+    public List<Direction> getHeatingSides()
+    {   return Arrays.asList(Direction.EAST, Direction.SOUTH);
+    }
+    public boolean isHeatingSide(Direction side)
+    {
+        if (side == null) return false;
+        Direction facing = this.getBlockState().getValue(HearthBottomBlock.FACING);
+        Direction rotatedSide = CSMath.directionToRotation(facing).rotate(side);
+        return this.getHeatingSides().contains(rotatedSide);
+    }
+
+    public List<Direction> getCoolingSides()
+    {   return Arrays.asList(Direction.WEST, Direction.DOWN);
+    }
+    public boolean isCoolingSide(Direction side)
+    {
+        if (side == null) return false;
+        Direction facing = this.getBlockState().getValue(HearthBottomBlock.FACING);
+        Direction rotatedSide = CSMath.directionToRotation(facing).rotate(side);
+        return this.getCoolingSides().contains(rotatedSide);
+    }
+
     @Override
     protected Component getDefaultName() {
         return Component.translatable("container." + ColdSweat.MOD_ID + ".hearth");
@@ -553,15 +575,27 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     protected boolean hasCoolingSignal()
     {
         Direction facing = this.getBlockState().getValue(HearthBottomBlock.FACING);
-        return this.level.hasSignal(this.getBlockPos().relative(facing.getCounterClockWise()), facing.getCounterClockWise())
-            || this.level.hasSignal(this.getBlockPos().relative(Direction.DOWN), Direction.DOWN);
+        for (Direction side : this.getCoolingSides())
+        {
+            Direction rotatedSide = CSMath.directionToRotation(facing).rotate(side);
+            if (this.level.hasSignal(this.getBlockPos().relative(rotatedSide), rotatedSide))
+            {   return true;
+            }
+        }
+        return false;
     }
 
     protected boolean hasHeatingSignal()
     {
         Direction facing = this.getBlockState().getValue(HearthBottomBlock.FACING);
-        return this.level.hasSignal(this.getBlockPos().relative(facing.getOpposite()), facing.getOpposite())
-            || this.level.hasSignal(this.getBlockPos().relative(facing.getClockWise()), facing.getClockWise());
+        for (Direction side : this.getHeatingSides())
+        {
+            Direction rotatedSide = CSMath.directionToRotation(facing).rotate(side);
+            if (this.level.hasSignal(this.getBlockPos().relative(rotatedSide), rotatedSide))
+            {   return true;
+            }
+        }
+        return false;
     }
 
     protected void syncInputSignal(boolean wasHeatingOn, boolean wasCoolingOn)
@@ -1247,7 +1281,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     {   return this.isCoolingOn;
     }
 
-    public boolean isBackPowered()
+    public boolean isHeatingOn()
     {   return this.isHeatingOn;
     }
 
@@ -1353,9 +1387,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     /**
      * Drains from water storage by default
      */
-    public static class SidesFluidHandler extends FluidHandler
+    public static class ColdFluidHandler extends FluidHandler
     {
-        public SidesFluidHandler(HearthBlockEntity hearth)
+        public ColdFluidHandler(HearthBlockEntity hearth)
         {   super(hearth);
         }
 
@@ -1377,9 +1411,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     /**
      * Drains from lava storage by default
      */
-    public static class BottomFluidHandler extends FluidHandler
+    public static class HotFluidHandler extends FluidHandler
     {
-        public BottomFluidHandler(HearthBlockEntity hearth)
+        public HotFluidHandler(HearthBlockEntity hearth)
         {   super(hearth);
         }
 
