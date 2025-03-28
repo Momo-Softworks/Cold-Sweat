@@ -375,11 +375,11 @@ public class TempCommand extends BaseCommand
                                     Placement.of(mode, order, mod -> otherId == null || TempModifierRegistry.getKey(mod).equals(otherId)));
         }
         if (entities.size() == 1)
-        {   source.sendSuccess(() -> Component.translatable("commands.cold_sweat.temp_modifier.single.add.result",
+        {   source.sendSuccess(Component.translatable("commands.cold_sweat.temp_modifier.single.add.result",
                                                             modifierId, entities.iterator().next().getName().getString()), true);
         }
         else
-        {   source.sendSuccess(() -> Component.translatable("commands.cold_sweat.temp_modifier.many.add.result",
+        {   source.sendSuccess(Component.translatable("commands.cold_sweat.temp_modifier.many.add.result",
                                                             modifierId, entities.size()), true);
         }
         return entities.size();
@@ -415,11 +415,11 @@ public class TempCommand extends BaseCommand
             Temperature.removeModifiers(((LivingEntity) entity), trait, count, Placement.Order.FIRST, mod -> TempModifierRegistry.getKey(mod).equals(modifierId));
         }
         if (entities.size() == 1)
-        {   source.sendSuccess(() -> Component.translatable("commands.cold_sweat.temp_modifier.single.remove.result",
+        {   source.sendSuccess(Component.translatable("commands.cold_sweat.temp_modifier.single.remove.result",
                                                             modifierId, entities.iterator().next().getName().getString()), true);
         }
         else
-        {   source.sendSuccess(() -> Component.translatable("commands.cold_sweat.temp_modifier.many.remove.result",
+        {   source.sendSuccess(Component.translatable("commands.cold_sweat.temp_modifier.many.remove.result",
                                                             modifierId, entities.size()), true);
         }
         return entities.size();
