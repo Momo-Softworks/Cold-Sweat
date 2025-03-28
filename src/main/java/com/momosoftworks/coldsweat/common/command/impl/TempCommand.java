@@ -108,7 +108,7 @@ public class TempCommand extends BaseCommand
                         )
                 )
                 /* Modify attributes */
-                .then(Commands.literal("modify")
+                .then(Commands.literal("attribute")
                         .then(Commands.argument("entities", EntityArgument.entities())
                                 /* Clear all attributes */
                                 .then(Commands.literal("clear")
