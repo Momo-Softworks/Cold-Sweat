@@ -42,7 +42,7 @@ public class KubePlugin extends KubeJSPlugin
     public static void onTempChanged(TemperatureChangedEvent event)
     {
         EventResult result = KubeEventSignatures.TEMPERATURE_CHANGED.invoker().onTemperatureChanged(event);
-        if (result.isFalse())
+        if (result.isTrue())
         {   event.setCanceled(true);
         }
     }
@@ -53,7 +53,7 @@ public class KubePlugin extends KubeJSPlugin
         if (!event.getPlayer().level.isClientSide())
         {
             EventResult result = KubeEventSignatures.INSULATE_ITEM.invoker().insulateItem(event);
-            if (result.isFalse())
+            if (result.isTrue())
             {   event.setCanceled(true);
             }
         }
@@ -65,7 +65,7 @@ public class KubePlugin extends KubeJSPlugin
         if (!event.getEntity().level.isClientSide())
         {
             EventResult result = KubeEventSignatures.ADD_MODIFIER.invoker().addModifier(event);
-            if (result.isFalse())
+            if (result.isTrue())
             {   event.setCanceled(true);
             }
         }
