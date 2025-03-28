@@ -40,14 +40,14 @@ public class CommandInit
 
     public static final DeferredRegister<ArgumentTypeInfo<?, ?>> ARGUMENTS = DeferredRegister.create(ForgeRegistries.COMMAND_ARGUMENT_TYPES, ColdSweat.MOD_ID);
 
-    public static final RegistryObject<ArgumentTypeInfo<?, ?>> TEMP_MODIFIER_TYPE = ARGUMENTS.register("temp_modifier_type",
+    public static final RegistryObject<ArgumentTypeInfo<?, ?>> TEMP_MODIFIER_TRAIT = ARGUMENTS.register("temp_modifier_trait",
                                                                () -> ArgumentTypeInfos.registerByClass(TemperatureTraitArgument.class, new TemperatureTraitArgument.Info()));
-    public static final RegistryObject<ArgumentTypeInfo<?, ?>> TEMPERATURE_TYPE = ARGUMENTS.register("temperature_type",
+    public static final RegistryObject<ArgumentTypeInfo<?, ?>> TEMPERATURE_TRAIT = ARGUMENTS.register("temperature_trait",
                                                                () -> ArgumentTypeInfos.registerByClass(TempAttributeTraitArgument.class, new TempAttributeTraitArgument.Info()));
-    public static final RegistryObject<ArgumentTypeInfo<?, ?>> ATTRIBUTE_TRAIT_TYPE = ARGUMENTS.register("attribute_trait_type",
+    public static final RegistryObject<ArgumentTypeInfo<?, ?>> ATTRIBUTE_TRAIT = ARGUMENTS.register("attribute_trait",
                                                                () -> ArgumentTypeInfos.registerByClass(TempModifierTraitArgument.class, new TempModifierTraitArgument.Info()));
-    public static final RegistryObject<ArgumentTypeInfo<?, ?>> ENUM_TYPE = ARGUMENTS.register("enum_type",
+    public static final RegistryObject<ArgumentTypeInfo<?, ?>> ENUM = ARGUMENTS.register("enum",
                                                                () -> ArgumentTypeInfos.registerByClass(NicerEnumArgument.class, new NicerEnumArgument.Info()));
-    public static final RegistryObject<ArgumentTypeInfo<?, ?>> TEMP_MODIFIER_ARGUMENT = ARGUMENTS.register("temp_modifier",
+    public static final RegistryObject<ArgumentTypeInfo<?, ?>> TEMP_MODIFIER = ARGUMENTS.register("temp_modifier",
                                                                () -> ArgumentTypeInfos.registerByClass(TempModifierArgument.class, new TempModifierArgument.Info()));
 }
