@@ -28,9 +28,9 @@ public class ChameleonChestplateModel<T extends LivingEntity> extends HumanoidMo
 
         PartDefinition chest_armor = body.addOrReplaceChild("chest_armor", CubeListBuilder.create().texOffs(0, 64).addBox(-4.0F, -24.5F, -2.0F, 8.0F, 12.0F, 4.0F, new CubeDeformation(scale)), PartPose.offset(0.0F, 24.0F, 0.0F));
 
-        PartDefinition right_arm_armor = right_arm.addOrReplaceChild("right_arm_armor", CubeListBuilder.create().texOffs(0, 80).addBox(-3.25F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(scale, scale*2, scale)), PartPose.offset(0.0F, -1.5F, 0.0F));
+        PartDefinition right_arm_armor = right_arm.addOrReplaceChild("right_arm_armor", CubeListBuilder.create().texOffs(0, 80).addBox(-3.25F, -0.2F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(scale, scale*2, scale)), PartPose.offset(0.0F, -1.5F, 0.0F));
 
-        PartDefinition left_arm_armor = left_arm.addOrReplaceChild("left_arm_armor", CubeListBuilder.create().texOffs(0, 80).mirror().addBox(-0.75F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(scale, scale*2, scale)).mirror(false), PartPose.offset(0.0F, -1.5F, 0.0F));
+        PartDefinition left_arm_armor = left_arm.addOrReplaceChild("left_arm_armor", CubeListBuilder.create().texOffs(0, 80).mirror().addBox(-0.75F, -0.2F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(scale, scale*2, scale)).mirror(false), PartPose.offset(0.0F, -1.5F, 0.0F));
 
         return LayerDefinition.create(meshdefinition, 64, 128);
 	}
