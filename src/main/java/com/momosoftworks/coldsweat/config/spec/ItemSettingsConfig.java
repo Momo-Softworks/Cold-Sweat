@@ -143,7 +143,7 @@ public class ItemSettingsConfig
         BUILDER.push("Insulation");
         INSULATION_ITEMS = BUILDER
                 .comment("Defines the items that can be used for insulating armor in the Sewing Table",
-                         "Format: [[\"item_id\", cold, hot, *\"static\", *nbt, *fil_slots], [\"item_id\", amount, adapt-speed, \"adaptive\", *nbt, *fill_slots], ...etc]",
+                         "Format: [[\"item_id\", cold, hot, *\"static\", *\"nbt\", *fil_slots], [\"item_id\", amount, adapt-speed, \"adaptive\", *\"nbt\", *fill_slots], ...etc]",
                          "(* = Optional)",
                          "\"item_id\": The item's ID (i.e. \"minecraft:iron_ingot\"). Accepts tags with \"#\" (i.e. \"#minecraft:wool\").",
                          "cold: The cold insulation the item provides.",
@@ -290,7 +290,7 @@ public class ItemSettingsConfig
 
         FOOD_TEMPERATURES = BUILDER
                 .comment("Defines items that affect the player's temperature when consumed",
-                        "Format: [[\"item_id\", amount, *nbt, *duration], [\"item_id\", amount, *nbt, *duration], ...etc]",
+                        "Format: [[\"item_id\", amount, *\"nbt\", *duration], [\"item_id\", amount, *\"nbt\", *duration], ...etc]",
                         "Negative values are cold foods, positive values are hot foods",
                         "nbt: Optional. If set, the item will only affect the player's temperature if it has the specified NBT tag.",
                         "duration: Optional. If set, the player's temperature will remain increased/decreased for this amount of time (in ticks).")
@@ -340,7 +340,7 @@ public class ItemSettingsConfig
 
         CARRIED_ITEM_TEMPERATURES = BUILDER
                 .comment("Defines items that affect the player's temperature when in the inventory",
-                         "Format: [[\"item_id\", temperature, strict_type, trait, *nbt, *max_effect], [\"item_id\", temperature, strict_type, trait, *nbt, *max_effect], ...etc]",
+                         "Format: [[\"item_id\", temperature, \"strict_type\", \"trait\", *\"nbt\", *max_effect], [\"item_id\", temperature, \"strict_type\", \"trait\", *\"nbt\", *max_effect], ...etc]",
                          "temperature: The temperature change the item will apply to the entity. For core temperature, this is applied every tick",
                          "strict_type: Either \"inventory\", \"hotbar\", or \"hand\". Defines what slots the item must be in to apply to the entity",
                          "trait: The temperature trait to apply the effect to. Typical values are \"core\" for body temperature or \"world\" for ambient temperature. More on the mod documentation page.",
