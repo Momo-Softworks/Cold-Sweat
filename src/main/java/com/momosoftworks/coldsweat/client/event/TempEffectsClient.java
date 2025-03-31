@@ -58,7 +58,7 @@ public class TempEffectsClient
             float frameTime = Minecraft.getInstance().getDeltaFrameTime();
             // Get a blended version of the player's temperature
             // More important for fog stuff
-            BLEND_TEMP = (float) CSMath.blend(Overlays.PREV_BODY_TEMP, Overlays.BODY_TEMP, event.getPartialTicks(), 0, 1);
+            BLEND_TEMP = (float) Overlays.BLEND_BODY_TEMP;
 
             if (ConfigSettings.DISTORTION_EFFECTS.get())
             {
@@ -78,8 +78,8 @@ public class TempEffectsClient
                 // Sway camera for heatstroke
                 else if (BLEND_TEMP >= 50 && HOT_IMMUNITY < 1)
                 {
-                    float immunityModifier = (float) CSMath.blend(BLEND_TEMP, 50, HOT_IMMUNITY, 0, 1);
-                    float factor = CSMath.blend(0, 20, immunityModifier, 50, 100);
+                    float factor = CSMath.blend(0, 20, BLEND_TEMP, 50, 100);
+                    factor = (float) CSMath.blend(factor, 0, HOT_IMMUNITY, 0, 1);
 
                     // Set random sway speed every once in a while
                     if (TIME_SINCE_NEW_SWAY > 100 || X_SWAY_SPEED == 0 || Y_SWAY_SPEED == 0)
@@ -105,6 +105,13 @@ public class TempEffectsClient
                     // Save the previous sway
                     PREV_X_SWAY = xOffs;
                     PREV_Y_SWAY = yOffs;
+                }
+                else
+                {
+                    PREV_X_SWAY = 0;
+                    PREV_Y_SWAY = 0;
+                    X_SWAY_PHASE = 0;
+                    Y_SWAY_PHASE = 0;
                 }
             }
         }
