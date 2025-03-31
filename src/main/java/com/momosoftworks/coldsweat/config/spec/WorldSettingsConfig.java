@@ -522,6 +522,7 @@ public class WorldSettingsConfig
                 .defineListAllowEmpty(List.of("Block Temperatures"), () -> List.of(
                                             List.of("cold_sweat:boiler",       0.27, 7, "mc", 0.88, "lit=true", "", 4),
                                             List.of("cold_sweat:icebox",      -0.27, 7, "mc", 0.88, "frosted=true", "", 0),
+                                            List.of("minecraft:lava",          0.25, 7, "mc", 4, "", "", 21.5),
                                             List.of("minecraft:fire",         0.476, 7, "mc", 0.9, "", "", 8),
                                             List.of("#minecraft:campfires",   0.476, 7, "mc", 0.9, "lit=true", " ", 8),
                                             List.of("minecraft:magma_block",   0.25, 3, "mc", 1.0),
