@@ -1,18 +1,19 @@
 package com.momosoftworks.coldsweat.compat.kubejs.event.builder;
 
+import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.data.codec.configuration.MountData;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 
 public class InsulatingMountBuilderJS
@@ -21,6 +22,7 @@ public class InsulatingMountBuilderJS
     public NegatableList<EntityRequirement> riderPredicate = new NegatableList<>();
     public double coldInsulation = 0;
     public double heatInsulation = 0;
+    public Map<ResourceLocation, Double> modifierImmunities = new HashMap<>();
 
     public InsulatingMountBuilderJS()
     {}
@@ -56,9 +58,20 @@ public class InsulatingMountBuilderJS
         return this;
     }
 
+    public InsulatingMountBuilderJS immuneToModifier(String modifierId, double immunity)
+    {
+        ResourceLocation location = new ResourceLocation(modifierId);
+        if (!TempModifierRegistry.containsKey(location))
+        {   ColdSweat.LOGGER.warn("Tried to add immunity to non-existent temperature modifier: {}", location);
+            return this;
+        }
+        this.modifierImmunities.put(new ResourceLocation(modifierId), immunity);
+        return this;
+    }
+
     public MountData build()
     {
-        MountData data = new MountData(this.entityPredicate, this.riderPredicate, this.coldInsulation, this.heatInsulation);
+        MountData data = new MountData(this.entityPredicate, this.riderPredicate, this.coldInsulation, this.heatInsulation, this.modifierImmunities);
         data.setType(ConfigData.Type.KUBEJS);
         return data;
     }
