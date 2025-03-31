@@ -1,0 +1,10 @@
+{
+  "entity": {
+    "entities": [
+      "minecraft:strider"
+    ]
+  },
+  "immune_temp_modifiers": {
+    "cold_sweat:blocks": 0.5
+  }
+}
