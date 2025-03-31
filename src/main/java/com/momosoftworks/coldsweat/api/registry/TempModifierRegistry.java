@@ -53,6 +53,10 @@ public class TempModifierRegistry
     {   return CSMath.getIfNotNull(getHolder(modifier), TempModifierHolder::getId, null);
     }
 
+    public static boolean containsKey(ResourceLocation id)
+    {   return TEMP_MODIFIERS.containsKey(id);
+    }
+
     @Nullable
     public static TempModifierHolder getHolder(TempModifier modifier)
     {

@@ -470,6 +470,7 @@ public class EntityTempManager
 
             if (entity instanceof PlayerEntity)
             {
+                // Get immunities from insulators
                 PlayerEntity player = (PlayerEntity) entity;
                 for (Map.Entry<ItemStack, Pair<ItemCarryTempData, Either<Integer, ItemCarryTempData.SlotType>>> entry : getInventoryTemperaturesOnEntity(player).entrySet())
                 {
@@ -479,6 +480,13 @@ public class EntityTempManager
                     if (entry.getValue().getSecond().map(slot -> invTemp.test(player, stack, slot, null),
                                                          slot -> invTemp.test(entity, stack, slot)))
                     {   immunities.putAll(invTemp.immuneTempModifiers());
+                    }
+                }
+                // Get immunities from mount
+                if (player.getVehicle() != null)
+                {
+                    for (MountData mountData : ConfigSettings.INSULATED_MOUNTS.get().get(player.getVehicle().getType()))
+                    {   immunities.putAll(mountData.modifierImmunities());
                     }
                 }
             }

@@ -8,16 +8,17 @@ import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.impl.RequirementHolder;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
-import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.tags.ITag;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MountData extends ConfigData implements RequirementHolder
 {
@@ -25,26 +26,31 @@ public class MountData extends ConfigData implements RequirementHolder
     final NegatableList<EntityRequirement> rider;
     final double coldInsulation;
     final double heatInsulation;
+    final Map<ResourceLocation, Double> modifierImmunities;
 
-    public MountData(NegatableList<EntityRequirement> entity, NegatableList<EntityRequirement> rider, double coldInsulation, double heatInsulation, List<String> requiredMods)
+    public MountData(NegatableList<EntityRequirement> entity, NegatableList<EntityRequirement> rider, double coldInsulation, double heatInsulation,
+                     Map<ResourceLocation, Double> modifierImmunities, List<String> requiredMods)
     {
         super(requiredMods);
         this.entity = entity;
         this.rider = rider;
         this.coldInsulation = coldInsulation;
         this.heatInsulation = heatInsulation;
+        this.modifierImmunities = modifierImmunities;
     }
 
-    public MountData(NegatableList<EntityRequirement> entity, NegatableList<EntityRequirement> rider, double coldInsulation, double heatInsulation)
+    public MountData(NegatableList<EntityRequirement> entity, NegatableList<EntityRequirement> rider, double coldInsulation, double heatInsulation,
+                     Map<ResourceLocation, Double> modifierImmunities)
     {
-        this(entity, rider, coldInsulation, heatInsulation, Arrays.asList());
+        this(entity, rider, coldInsulation, heatInsulation, modifierImmunities, Arrays.asList());
     }
 
     public static Codec<MountData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             NegatableList.codec(EntityRequirement.getCodec()).fieldOf("entity").forGetter(MountData::entity),
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("rider", new NegatableList<>()).forGetter(MountData::rider),
-            Codec.DOUBLE.fieldOf("cold_insulation").forGetter(MountData::coldInsulation),
-            Codec.DOUBLE.fieldOf("heat_insulation").forGetter(MountData::heatInsulation),
+            Codec.DOUBLE.optionalFieldOf("cold_insulation", 0d).forGetter(MountData::coldInsulation),
+            Codec.DOUBLE.optionalFieldOf("heat_insulation", 0d).forGetter(MountData::heatInsulation),
+            Codec.unboundedMap(ResourceLocation.CODEC, Codec.DOUBLE).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(MountData::modifierImmunities),
             Codec.STRING.listOf().optionalFieldOf("required_mods", Arrays.asList()).forGetter(MountData::requiredMods)
     ).apply(instance, MountData::new));
 
@@ -59,6 +65,9 @@ public class MountData extends ConfigData implements RequirementHolder
     }
     public double heatInsulation()
     {   return heatInsulation;
+    }
+    public Map<ResourceLocation, Double> modifierImmunities()
+    {   return modifierImmunities;
     }
 
     @Nullable
@@ -76,7 +85,7 @@ public class MountData extends ConfigData implements RequirementHolder
                           ? coldInsul
                           : ((Number) entry.get(2)).doubleValue();
 
-        return new MountData(new NegatableList<>(new EntityRequirement(entities)), new NegatableList<>(), coldInsul, hotInsul);
+        return new MountData(new NegatableList<>(new EntityRequirement(entities)), new NegatableList<>(), coldInsul, hotInsul, new HashMap<>());
     }
 
     @Override
