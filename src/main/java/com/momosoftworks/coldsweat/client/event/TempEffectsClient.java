@@ -43,7 +43,7 @@ public class TempEffectsClient
     public static void setCamera(ViewportEvent.ComputeCameraAngles event)
     {
         Player player = Minecraft.getInstance().player;
-        if (player == null || !player.isAlive() || EntityTempManager.isPeacefulMode(player)) return;
+        if (isPlayerInvalid(player)) return;
 
         if (!Minecraft.getInstance().isPaused())
         {
@@ -114,18 +114,18 @@ public class TempEffectsClient
     public static void onClientTick(ClientTickEvent.Post event)
     {
         Player player = Minecraft.getInstance().player;
-        if (player == null || EntityTempManager.isPeacefulMode(player)) return;
+        if (isPlayerInvalid(player)) return;
         if (player.tickCount % 5 == 0)
         {
             // Set cold immunity
             if (player.hasEffect(ModEffects.ICE_RESISTANCE) && ConfigSettings.ICE_RESISTANCE_ENABLED.get())
-                {   COLD_IMMUNITY = 1;
-                }
+            {   COLD_IMMUNITY = 1;
+            }
             else COLD_IMMUNITY = Temperature.get(player, Temperature.Trait.COLD_RESISTANCE);
                 // Set heat immunity
             if (player.hasEffect(MobEffects.FIRE_RESISTANCE) && ConfigSettings.FIRE_RESISTANCE_ENABLED.get())
             {   HOT_IMMUNITY = 1;
-                }
+            }
             else HOT_IMMUNITY  = Temperature.get(player, Temperature.Trait.HEAT_RESISTANCE);
         }
     }
@@ -134,7 +134,7 @@ public class TempEffectsClient
     public static void setFogDistance(ViewportEvent.RenderFog event)
     {
         Player player = Minecraft.getInstance().player;
-        if (player == null || EntityTempManager.isPeacefulMode(player)) return;
+        if (isPlayerInvalid(player)) return;
 
         double fogDistance = ConfigSettings.HEATSTROKE_FOG_DISTANCE.get();
         if (fogDistance >= 64) return;
@@ -170,7 +170,7 @@ public class TempEffectsClient
     public static void vignette(RenderGuiLayerEvent.Pre event)
     {
         Player player = Minecraft.getInstance().player;
-        if (player == null || EntityTempManager.isPeacefulMode(player)) return;
+        if (isPlayerInvalid(player)) return;
         if (event.getName() == VanillaGuiLayers.CAMERA_OVERLAYS
         && ((BLEND_TEMP > 0 && HOT_IMMUNITY < 1) || (BLEND_TEMP < 0 && COLD_IMMUNITY < 1)))
         {
@@ -207,14 +207,12 @@ public class TempEffectsClient
     @SubscribeEvent
     public static void onRenderBlur(RenderLevelEvent.Post event)
     {
-        Minecraft mc = Minecraft.getInstance();
+        if (isPlayerInvalid(Minecraft.getInstance().player)) return;
         PostProcessShaderManager shaderManager = PostProcessShaderManager.getInstance();
 
-        float playerTemp = (float) Overlays.BODY_TEMP;
-        if (ConfigSettings.DISTORTION_EFFECTS.get() && playerTemp >= 50 && HOT_IMMUNITY < 1
-        && mc.player != null && !EntityTempManager.isPeacefulMode(mc.player))
+        if (ConfigSettings.DISTORTION_EFFECTS.get() && BLEND_TEMP >= 50 && HOT_IMMUNITY < 1)
         {
-            float blur = CSMath.blend(0f, 12f, playerTemp, 50, 100);
+            float blur = CSMath.blend(0f, 12f, BLEND_TEMP, 50, 100);
             blur = (float) CSMath.blend(blur, 0, HOT_IMMUNITY, 0, 1);
             if (!shaderManager.hasEffect("heat_blur"))
             {   shaderManager.loadEffect("heat_blur", PostProcessShaderManager.BLOBS);
@@ -229,5 +227,9 @@ public class TempEffectsClient
         }
 
         shaderManager.process(event.getPartialTick());
+    }
+
+    private static boolean isPlayerInvalid(Player player)
+    {   return player == null || !player.isAlive() || EntityTempManager.isPeacefulMode(player) || player.hasEffect(ModEffects.GRACE);
     }
 }
