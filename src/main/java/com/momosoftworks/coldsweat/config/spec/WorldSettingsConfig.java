@@ -506,7 +506,7 @@ public class WorldSettingsConfig
 
         BLOCK_TEMPERATURES = BUILDER
                 .comment(" Format:",
-                         " [[\"block-ids\", <temperature>, <range>, <*units>, <*max effect>, <*predicates>, <*nbt>, <*temperature-limit>], [etc...], [etc...]]",
+                         " [[\"block-ids\", <temperature>, <range>, <*units>, <*max effect>, <*predicates>, <*\"nbt\">, <*temperature-limit>], [etc...], [etc...]]",
                          " * = Optional",
                          " ",
                          " Arguments:",
