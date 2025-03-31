@@ -49,9 +49,9 @@ public class Overlays
     static double PLAYER_MIN_TEMP = 0;
 
     // Stuff for body temperature
-    public static double BODY_TEMP = 0;
-    public static double PREV_BODY_TEMP = 0;
-    static int BLEND_BODY_TEMP = 0;
+    static double BODY_TEMP = 0;
+    static double PREV_BODY_TEMP = 0;
+    public static double BLEND_BODY_TEMP = 0;
     static int ICON_BOB = 0;
     static double BODY_TEMP_SEVERITY = 0;
 
@@ -125,7 +125,7 @@ public class Overlays
             if (mc.gameMode.canHurtPlayer() && mc.getCameraEntity() instanceof PlayerEntity && !Minecraft.getInstance().options.hideGui)
             {
                 // Blend body temperature (per frame)
-                BLEND_BODY_TEMP = (int) CSMath.blend(PREV_BODY_TEMP, BODY_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
+                BLEND_BODY_TEMP = CSMath.blend(PREV_BODY_TEMP, BODY_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
 
                 // Get text color
                 int color;
@@ -190,7 +190,7 @@ public class Overlays
                 int scaledWidth = mc.getWindow().getGuiScaledWidth();
                 int scaledHeight = mc.getWindow().getGuiScaledHeight();
 
-                    String s = "" + Math.min(Math.abs(BLEND_BODY_TEMP), 100);
+                    String s = "" + Math.min(Math.abs((int)BLEND_BODY_TEMP), 100);
                     int x = (scaledWidth - font.width(s)) / 2 + ConfigSettings.BODY_READOUT_POS.get().x();
                     int y = scaledHeight - 31 - 10 + ConfigSettings.BODY_READOUT_POS.get().y();
 
@@ -280,18 +280,15 @@ public class Overlays
 
                 // Blend body temp (per tick)
                 PREV_BODY_TEMP = BODY_TEMP;
-                double currentTemp = cap.getTrait(Temperature.Trait.BODY);
-                BODY_TEMP = Math.abs(currentTemp - BODY_TEMP) < 0.1 ? currentTemp : BODY_TEMP + (cap.getTrait(Temperature.Trait.BODY) - BODY_TEMP) / 5;
+
+                BODY_TEMP = BODY_TEMP + (cap.getTrait(Temperature.Trait.BODY) - BODY_TEMP) / 5;
 
                 // Handle effects for the icon (bobbing, stage, transition)
                 // Get icon bob
                 ICON_BOB = player.tickCount % 3 == 0 && Math.random() < 0.3 ? 1 : 0;
 
                 // Get the severity of the player's body temperature
-                BODY_TEMP_SEVERITY = getBodySeverity(BLEND_BODY_TEMP);
-
-                // Get the severity of the player's body temperature
-                BODY_TEMP_SEVERITY = getBodySeverity(BLEND_BODY_TEMP);
+                BODY_TEMP_SEVERITY = getBodySeverity((int) BLEND_BODY_TEMP);
             });
         }
     }

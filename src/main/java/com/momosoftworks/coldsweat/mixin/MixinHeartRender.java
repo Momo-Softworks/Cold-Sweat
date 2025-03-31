@@ -59,7 +59,7 @@ public abstract class MixinHeartRender
         || player.hasEffect(ModEffects.GRACE)) return;
         if (player.hasEffect(ModEffects.ICE_RESISTANCE)) return;
 
-        double temp = Overlays.BODY_TEMP;
+        double temp = Overlays.BLEND_BODY_TEMP;
         float maxHealth = player.getMaxHealth();
         boolean isHardcore = player.level.getLevelData().isHardcore();
 
