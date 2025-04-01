@@ -44,7 +44,7 @@ import java.util.stream.Stream;
 @Mod.EventBusSubscriber
 public class ItemInsulationManager
 {
-    public static SidedCapabilityCache<IInsulatableCap, ItemStack> CAP_CACHE = new SidedCapabilityCache<>(ModCapabilities.ITEM_INSULATION, stack -> stack.isEmpty() || !isInsulatable(stack));
+    public static SidedCapabilityCache<IInsulatableCap, ItemStack> CAP_CACHE = new SidedCapabilityCache<>(ModCapabilities.ITEM_INSULATION);
 
     @SubscribeEvent
     public static void attachCapabilityToItemHandler(AttachCapabilitiesEvent<ItemStack> event)
@@ -176,8 +176,7 @@ public class ItemInsulationManager
      */
     public static boolean isInsulatable(ItemStack stack)
     {
-        return stack.getItem() instanceof Wearable
-            && getBuiltinInsulation(stack).isEmpty();
+        return stack.getItem() instanceof Wearable && !hasBuiltinInsulation(stack);
     }
 
     /**
@@ -186,12 +185,22 @@ public class ItemInsulationManager
      */
     public static List<Insulation> getBuiltinInsulation(ItemStack stack)
     {
+        if (!hasBuiltinInsulation(stack)) return ImmutableList.of();
+
         return Stream.of(ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()),
                          ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem()),
                          ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem()))
                .flatMap(Collection::stream).map(InsulatorData::insulation)
                .flatMap(List::stream)
                .filter(ins -> !ins.isEmpty()).toList();
+    }
+
+    public static boolean hasBuiltinInsulation(ItemStack stack)
+    {
+        Item item = stack.getItem();
+        return ConfigSettings.INSULATION_ITEMS.get().containsKey(item)
+            || ConfigSettings.INSULATING_ARMORS.get().containsKey(item)
+            || ConfigSettings.INSULATING_CURIOS.get().containsKey(item);
     }
 
     /**
