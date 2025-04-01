@@ -48,7 +48,7 @@ public class ElevationTempModifier extends TempModifier
 
         int skylight = entity.level().getBrightness(LightLayer.SKY, entity.blockPosition());
 
-        Map<BlockPos, Pair<DepthTempData.TempRegion, Double>> depthRegions = new FastMap<>();
+        Map<Pair<BlockPos, BlockPos>, Pair<DepthTempData.TempRegion, Double>> depthRegions = new FastMap<>();
 
         for (Pair<BlockPos, Double> pair : depthTable)
         {
@@ -67,20 +67,23 @@ public class ElevationTempModifier extends TempModifier
                 {
                     DepthTempData.TempRegion region = data.getRegion(level, pos);
                     if (region == null) continue;
-                    depthRegions.put(pos, Pair.of(region, distance));
+                    depthRegions.put(Pair.of(pos, originalPos), Pair.of(region, distance));
                     break findRegion;
                 }
-                depthRegions.put(pos, Pair.of(null, distance));
+                depthRegions.put(Pair.of(pos, originalPos), Pair.of(null, distance));
             }
         }
+        double midTemp = Temperature.getNeutralWorldTemp(entity);
 
         return temp ->
         {
             List<Pair<Double, Double>> depthTemps = new ArrayList<>();
 
-            for (Map.Entry<BlockPos, Pair<DepthTempData.TempRegion, Double>> entry : depthRegions.entrySet())
+            for (Map.Entry<Pair<BlockPos, BlockPos>, Pair<DepthTempData.TempRegion, Double>> entry : depthRegions.entrySet())
             {
-                BlockPos pos = entry.getKey();
+                BlockPos pos;
+                if (temp >= midTemp) pos = entry.getKey().getFirst();
+                else pos = entry.getKey().getSecond();
                 DepthTempData.TempRegion region = entry.getValue().getFirst();
                 double distance = entry.getValue().getSecond();
 
