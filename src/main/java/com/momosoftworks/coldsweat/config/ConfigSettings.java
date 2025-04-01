@@ -136,6 +136,7 @@ public class ConfigSettings
     public static final DynamicHolder<Multimap<Item, InsulatorData>> INSULATING_ARMORS;
     public static final DynamicHolder<Multimap<Item, InsulatorData>> INSULATING_CURIOS;
     public static final DynamicHolder<ScalingFormula> INSULATION_SLOTS;
+    public static final DynamicHolder<Multimap<Item, ItemInsulationSlotsData>> INSULATION_SLOT_OVERRIDES;
     public static final DynamicHolder<List<Item>> INSULATION_BLACKLIST;
     public static final DynamicHolder<Multimap<Item, DryingItemData>> DRYING_ITEMS;
 
@@ -399,19 +400,11 @@ public class ConfigSettings
         DEPTH_REGIONS = addSetting("depth_regions", ArrayList::new, holder -> {});
 
         TriConsumer<FuelData.FuelType, ForgeConfigSpec.ConfigValue<List<? extends List<?>>>, DynamicHolder<Multimap<Item, FuelData>>> fuelAdder =
-        (fuelType, configValue, holder) ->
+        (fuelType, config, holder) ->
         {
-            Multimap<Item, FuelData> dataMap = new RegistryMultiMap<>();
-            for (List<?> list : configValue.get())
-            {
-                FuelData data = FuelData.fromToml(list, fuelType);
-                if (data == null) continue;
-
-                data.setType(ConfigData.Type.TOML);
-
-                putRegistryEntries(dataMap, ForgeRegistries.ITEMS, data.item().flatListMap(ItemRequirement::items), data);
-            }
-            ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.FUEL_DATA);
+            Multimap<Item, FuelData> dataMap = ConfigHelper.parseTomlRegistry(config, list -> FuelData.fromToml(list, fuelType),
+                                                                              data -> data.item().flatListMap(ItemRequirement::items),
+                                                                              ForgeRegistries.ITEMS, ModRegistries.FUEL_DATA);
             holder.get().putAll(dataMap);
         };
         BOILER_FUEL = addSetting("boiler_fuel_items", RegistryMultiMap::new, holder -> fuelAdder.accept(FuelData.FuelType.BOILER, ItemSettingsConfig.BOILER_FUELS, holder));
@@ -432,22 +425,11 @@ public class ConfigSettings
                                                        .collect(ArrayList::new, List::add, List::addAll)));
 
         TriConsumer<ForgeConfigSpec.ConfigValue<List<? extends List<?>>>, DynamicHolder<Multimap<Item, InsulatorData>>, Insulation.Slot> insulatorAdder =
-        (configValue, holder, slot) ->
+        (config, holder, slot) ->
         {
-            // Read the insulation items from the config
-            Multimap<Item, InsulatorData> dataMap = new RegistryMultiMap<>();
-            for (List<?> list : configValue.get())
-            {
-                InsulatorData data = InsulatorData.fromToml(list, slot);
-                if (data == null) continue;
-
-                data.setType(ConfigData.Type.TOML);
-
-                putRegistryEntries(dataMap, ForgeRegistries.ITEMS, data.item().flatListMap(ItemRequirement::items), data);
-            }
-            // Handle registry removals
-            ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.INSULATOR_DATA);
-            // Add entries
+            Multimap<Item, InsulatorData> dataMap = ConfigHelper.parseTomlRegistry(config, list -> InsulatorData.fromToml(list, slot),
+                                                                                   data -> data.item().flatListMap(ItemRequirement::items),
+                                                                                   ForgeRegistries.ITEMS, ModRegistries.INSULATOR_DATA);
             holder.get().putAll(dataMap);
         };
         INSULATION_ITEMS = addSyncedSetting("insulation_items", RegistryMultiMap::new, holder -> insulatorAdder.accept(ItemSettingsConfig.INSULATION_ITEMS, holder, Insulation.Slot.ITEM),
@@ -505,6 +487,19 @@ public class ConfigSettings
         },
         SyncType.BOTH_WAYS);
 
+        INSULATION_SLOT_OVERRIDES = addSyncedSetting("insulation_slot_overrides", RegistryMultiMap::new, holder ->
+        {
+            Multimap<Item, ItemInsulationSlotsData> dataMap = ConfigHelper.parseTomlRegistry(ItemSettingsConfig.INSULATION_SLOT_OVERRIDES,
+                                                                                             ItemInsulationSlotsData::fromToml,
+                                                                                             data -> data.item().flatListMap(ItemRequirement::items),
+                                                                                             ForgeRegistries.ITEMS, ModRegistries.INSULATION_SLOTS_DATA);
+            holder.get().putAll(dataMap);
+        },
+        (encoder) -> ConfigHelper.serializeMultimapRegistry(encoder, "InsulationSlotOverrides", Registries.ITEM, ModRegistries.INSULATION_SLOTS_DATA, item -> ForgeRegistries.ITEMS.getKey(item)),
+        (decoder) -> ConfigHelper.deserializeMultimapRegistry(decoder, "InsulationSlotOverrides", ModRegistries.INSULATION_SLOTS_DATA, rl -> ForgeRegistries.ITEMS.getValue(rl)),
+        (saver) -> {},
+        SyncType.ONE_WAY);
+
         INSULATION_BLACKLIST = addSetting("insulation_blacklist", ArrayList::new,
                                           holder -> holder.get().addAll(ItemSettingsConfig.INSULATION_BLACKLIST.get()
                                                     .stream()
@@ -513,19 +508,10 @@ public class ConfigSettings
 
         DRYING_ITEMS = addSyncedSetting("drying_items", RegistryMultiMap::new, holder ->
         {
-            Multimap<Item, DryingItemData> dataMap = new RegistryMultiMap<>();
-            for (List<?> entry : ItemSettingsConfig.DRYING_ITEMS.get())
-            {
-                DryingItemData data = DryingItemData.fromToml(entry);
-                if (data == null) continue;
-
-                data.setType(ConfigData.Type.TOML);
-
-                putRegistryEntries(dataMap, ForgeRegistries.ITEMS, data.item().flatListMap(ItemRequirement::items), data);
-            }
-            // Handle registry removals
-            ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.DRYING_ITEM_DATA);
-            // Add entries
+            Multimap<Item, DryingItemData> dataMap = ConfigHelper.parseTomlRegistry(ItemSettingsConfig.DRYING_ITEMS,
+                                                                                    DryingItemData::fromToml,
+                                                                                    data -> data.item().flatListMap(ItemRequirement::items),
+                                                                                    ForgeRegistries.ITEMS, ModRegistries.DRYING_ITEM_DATA);
             holder.get().putAll(dataMap);
         },
         (encoder) -> ConfigHelper.serializeMultimapRegistry(encoder, "DryingItems", Registries.ITEM, ModRegistries.DRYING_ITEM_DATA, ForgeRegistries.ITEMS::getKey),
@@ -547,18 +533,10 @@ public class ConfigSettings
 
         FOOD_TEMPERATURES = addSyncedSetting("food_temperatures", RegistryMultiMap::new, holder ->
         {
-            // Read the food temperatures from the config
-            Multimap<Item, FoodData> dataMap = new RegistryMultiMap<>();
-            for (List<?> list : ItemSettingsConfig.FOOD_TEMPERATURES.get())
-            {
-                FoodData data = FoodData.fromToml(list);
-                if (data == null) continue;
-
-                putRegistryEntries(dataMap, ForgeRegistries.ITEMS, data.item().flatListMap(ItemRequirement::items), data);
-            }
-            // Handle registry removals
-            ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.FOOD_DATA);
-            // Add entries
+            Multimap<Item, FoodData> dataMap = ConfigHelper.parseTomlRegistry(ItemSettingsConfig.FOOD_TEMPERATURES,
+                                                                              FoodData::fromToml,
+                                                                              data -> data.item().flatListMap(ItemRequirement::items),
+                                                                              ForgeRegistries.ITEMS, ModRegistries.FOOD_DATA);
             holder.get().putAll(dataMap);
         },
         (encoder) -> ConfigHelper.serializeMultimapRegistry(encoder, "FoodTemperatures", Registries.ITEM, ModRegistries.FOOD_DATA, item -> ForgeRegistries.ITEMS.getKey(item)),
@@ -568,18 +546,10 @@ public class ConfigSettings
 
         CARRIED_ITEM_TEMPERATURES = addSyncedSetting("carried_item_temps", RegistryMultiMap::new, holder ->
         {
-            // Read the insulation items from the config
-            Multimap<Item, ItemCarryTempData> dataMap = new RegistryMultiMap<>();
-            for (List<?> list : ItemSettingsConfig.CARRIED_ITEM_TEMPERATURES.get())
-            {
-                ItemCarryTempData data = ItemCarryTempData.fromToml(list);
-                if (data == null) continue;
-
-                putRegistryEntries(dataMap, ForgeRegistries.ITEMS, data.item().flatListMap(ItemRequirement::items), data);
-            }
-            // Handle registry removals
-            ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.CARRY_TEMP_DATA);
-            // Add entries
+            Multimap<Item, ItemCarryTempData> dataMap = ConfigHelper.parseTomlRegistry(ItemSettingsConfig.CARRIED_ITEM_TEMPERATURES,
+                                                                                       ItemCarryTempData::fromToml,
+                                                                                       data -> data.item().flatListMap(ItemRequirement::items),
+                                                                                       ForgeRegistries.ITEMS, ModRegistries.CARRY_TEMP_DATA);
             holder.get().putAll(dataMap);
         },
         (encoder) -> ConfigHelper.serializeMultimapRegistry(encoder, "CarriedItemTemps", Registries.ITEM, ModRegistries.CARRY_TEMP_DATA, item -> ForgeRegistries.ITEMS.getKey(item)),
@@ -680,39 +650,19 @@ public class ConfigSettings
 
         INSULATED_MOUNTS = addSetting("insulated_entities", RegistryMultiMap::new, holder ->
         {
-            // Read the insulation items from the config
-            Multimap<EntityType<?>, MountData> dataMap = new RegistryMultiMap<>();
-            for (List<?> list : EntitySettingsConfig.INSULATED_MOUNTS.get())
-            {
-                MountData data = MountData.fromToml(list);
-                if (data == null) continue;
-
-                data.setType(ConfigData.Type.TOML);
-
-                putRegistryEntries(dataMap, ForgeRegistries.ENTITY_TYPES, data.entity().flatListMap(EntityRequirement::entities), data);
-            }
-            // Handle registry removals
-            ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.MOUNT_DATA);
-            // Add entries
+            Multimap<EntityType<?>, MountData> dataMap = ConfigHelper.parseTomlRegistry(EntitySettingsConfig.INSULATED_MOUNTS,
+                                                                                        MountData::fromToml,
+                                                                                        data -> data.entity().flatListMap(EntityRequirement::entities),
+                                                                                        ForgeRegistries.ENTITY_TYPES, ModRegistries.MOUNT_DATA);
             holder.get().putAll(dataMap);
         });
 
         ENTITY_TEMPERATURES = addSetting("entity_temperatures", RegistryMultiMap::new, holder ->
         {
-            // Read the insulation items from the config
-            Multimap<EntityType<?>, EntityTempData> dataMap = new RegistryMultiMap<>();
-            for (List<?> list : EntitySettingsConfig.ENTITY_TEMPERATURES.get())
-            {
-                EntityTempData data = EntityTempData.fromToml(list);
-                if (data == null) continue;
-
-                data.setType(ConfigData.Type.TOML);
-
-                putRegistryEntries(dataMap, ForgeRegistries.ENTITY_TYPES, data.entity().flatListMap(EntityRequirement::entities), data);
-            }
-            // Handle registry removals
-            ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.ENTITY_TEMP_DATA);
-            // Add entries
+            Multimap<EntityType<?>, EntityTempData> dataMap = ConfigHelper.parseTomlRegistry(EntitySettingsConfig.ENTITY_TEMPERATURES,
+                                                                                             EntityTempData::fromToml,
+                                                                                             data -> data.entity().flatListMap(EntityRequirement::entities),
+                                                                                             ForgeRegistries.ENTITY_TYPES, ModRegistries.ENTITY_TEMP_DATA);
             holder.get().putAll(dataMap);
         });
 

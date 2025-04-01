@@ -23,6 +23,7 @@ public class ModRegistries
     public static final ResourceKey<Registry<FoodData>> FOOD_DATA = createRegistry(ResourceKey.createRegistryKey(new ResourceLocation(ColdSweat.MOD_ID, "item/food")), FoodData.CODEC, FoodData.class);
     public static final ResourceKey<Registry<ItemCarryTempData>> CARRY_TEMP_DATA = createRegistry(ResourceKey.createRegistryKey(new ResourceLocation(ColdSweat.MOD_ID, "item/carried_temp")), ItemCarryTempData.CODEC, ItemCarryTempData.class);
     public static final ResourceKey<Registry<DryingItemData>> DRYING_ITEM_DATA = createRegistry(ResourceKey.createRegistryKey(new ResourceLocation(ColdSweat.MOD_ID, "item/drying_item")), DryingItemData.CODEC, DryingItemData.class);
+    public static final ResourceKey<Registry<ItemInsulationSlotsData>> INSULATION_SLOTS_DATA = createRegistry(ResourceKey.createRegistryKey(new ResourceLocation(ColdSweat.MOD_ID, "item/insulation_slots")), ItemInsulationSlotsData.CODEC, ItemInsulationSlotsData.class);
 
     // World Registries
     public static final ResourceKey<Registry<BlockTempData>> BLOCK_TEMP_DATA = createRegistry(ResourceKey.createRegistryKey(new ResourceLocation(ColdSweat.MOD_ID, "block/block_temp")), BlockTempData.CODEC, BlockTempData.class);
@@ -39,7 +40,7 @@ public class ModRegistries
     // Special registries
     public static final ResourceKey<Registry<RemoveRegistryData<?>>> REMOVE_REGISTRY_DATA = createRegistry(ResourceKey.createRegistryKey(new ResourceLocation(ColdSweat.MOD_ID, "remove")), RemoveRegistryData.CODEC, null);
 
-    public static <K, V extends ConfigData> ResourceKey<Registry<V>> createRegistry(ResourceKey<Registry<V>> registry, Codec<V> codec, Class<V> type)
+    public static <V extends ConfigData> ResourceKey<Registry<V>> createRegistry(ResourceKey<Registry<V>> registry, Codec<V> codec, Class<V> type)
     {
         REGISTRIES.put(registry.location().getPath(), new RegistryHolder<>(registry, codec, type));
         return registry;
