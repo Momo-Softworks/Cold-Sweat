@@ -52,7 +52,9 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraftforge.registries.ForgeRegistries;
 
+import javax.xml.ws.Holder;
 import java.io.*;
 import java.nio.file.Path;
 import java.util.*;
@@ -227,6 +229,10 @@ public class ConfigLoadingHandler
         Collection<DryingItemData> dryingItems = event.getRegistry(ModRegistries.DRYING_ITEM_DATA);
         addDryingItemConfigs(dryingItems);
         logRegistryLoaded(String.format("Loaded %s drying items", dryingItems.size()), dryingItems);
+        // insulation slots
+        Collection<ItemInsulationSlotsData> insulationSlots = event.getRegistry(ModRegistries.INSULATION_SLOTS_DATA);
+        addInsulationSlotConfigs(insulationSlots);
+        logRegistryLoaded(String.format("Loaded %s insulation slots configs", insulationSlots.size()), insulationSlots);
 
         // block temperatures
         Collection<BlockTempData> blockTemps = event.getRegistry(ModRegistries.BLOCK_TEMP_DATA);
@@ -456,6 +462,26 @@ public class ConfigLoadingHandler
 
             for (Item item : items)
             {   ConfigSettings.DRYING_ITEMS.get().put(item, dryingItemData);
+            }
+        });
+    }
+
+    private static void addInsulationSlotConfigs(Collection<ItemInsulationSlotsData> insulationSlots)
+    {
+        insulationSlots.forEach(insulationSlotData ->
+        {
+            // Check if the required mods are loaded
+            if (!insulationSlotData.areRequiredModsLoaded())
+            {   return;
+            }
+
+            List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(insulationSlotData.item().flatListMap(ItemRequirement::items)));
+            if (items.isEmpty())
+            {   items.add(null);
+            }
+
+            for (Item item : items)
+            {   ConfigSettings.INSULATION_SLOT_OVERRIDES.get().put(item, insulationSlotData);
             }
         });
     }

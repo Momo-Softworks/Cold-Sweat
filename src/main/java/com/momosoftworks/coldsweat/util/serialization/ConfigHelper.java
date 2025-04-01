@@ -9,15 +9,13 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
-import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
+import com.momosoftworks.coldsweat.config.ConfigLoadingHandler;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.configuration.FuelData;
-import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
-import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.math.FastMultiMap;
+import com.momosoftworks.coldsweat.util.math.RegistryMultiMap;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityType;
 import net.minecraft.fluid.Fluid;
@@ -35,6 +33,7 @@ import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.registry.Registry;
+import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
@@ -192,6 +191,30 @@ public class ConfigHelper
     {   return parseBuiltinItems(net.minecraft.util.registry.Registry.ENTITY_TYPE_REGISTRY, ForgeRegistries.ENTITIES, entities);
     }
 
+    public static <K extends IForgeRegistryEntry<K>, V extends ConfigData> Multimap<K, V> parseTomlRegistry(ForgeConfigSpec.ConfigValue<List<? extends List<?>>> config, Function<List<?>, V> tomlParser,
+                                                                                                            Function<V, List<Either<ITag<K>, K>>> keyListGetter,
+                                                                                                            IForgeRegistry<K> keyRegistry, ModRegistries.ConfigRegistry<V> valueRegistry)
+    {
+        Multimap<K, V> dataMap = new RegistryMultiMap<>();
+        for (List<?> entry : config.get())
+        {
+            V data = tomlParser.apply(entry);
+            if (data == null) continue;
+
+            data.setType(ConfigData.Type.TOML);
+
+            putRegistryEntries(dataMap, keyRegistry, keyListGetter.apply(data), data);
+        }
+        // Handle registry removals
+        ConfigLoadingHandler.removeEntries(dataMap.values(), valueRegistry);
+        return dataMap;
+    }
+
+    private static <K extends IForgeRegistryEntry<K>, V> void putRegistryEntries(Multimap<K, V> map, IForgeRegistry<K> registry, List<Either<ITag<K>, K>> list, V data)
+    {
+        RegistryHelper.mapTaggableList(list).forEach(entry -> map.put(entry, data));
+    }
+
     public static <K, V extends ConfigData> Map<K, V> getRegistryMap(List<? extends List<?>> source, DynamicRegistries dynamicRegistries, RegistryKey<Registry<K>> keyRegistry,
                                                                              Function<List<?>, V> valueCreator, Function<V, List<Either<ITag<K>, K>>> taggedListGetter)
     {
@@ -322,7 +345,7 @@ public class ConfigHelper
                                                                                 DynamicRegistries dynamicRegistries)
     {
         Registry<K> registry = dynamicRegistries.registryOrThrow(gameRegistry);
-        return deserializeEitherRegistry(tag, key, modRegistry, rl -> registry.getOptional(rl).orElse(null), dynamicRegistries);
+        return deserializeEitherRegistry(tag, key, modRegistry, k -> registry.getOptional(k).orElse(null), dynamicRegistries);
     }
 
     private static <K, V extends ConfigData> Map<K, V> deserializeEitherRegistry(CompoundNBT tag, String key,

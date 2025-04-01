@@ -10,6 +10,7 @@ import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
+import com.momosoftworks.coldsweat.data.codec.configuration.ItemInsulationSlotsData;
 import com.momosoftworks.coldsweat.util.TypedField;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.enchantment.IArmorVanishable;
@@ -22,6 +23,7 @@ import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.IContainerListener;
 import net.minecraft.item.ArmorItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
@@ -42,6 +44,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 @Mod.EventBusSubscriber
@@ -167,11 +170,18 @@ public class ItemInsulationManager
     /**
      * @return The number of insulation slots on this armor item, or 0 if it does not support insulation
      */
-    public static int getInsulationSlots(ItemStack item)
+    public static int getInsulationSlots(ItemStack stack)
     {
-        return isInsulatable(item)
-               ? ConfigSettings.INSULATION_SLOTS.get().getSlots(MobEntity.getEquipmentSlotForItem(item), item)
-               : 0;
+        if (isInsulatable(stack))
+        {
+            Item item = stack.getItem();
+            Optional<ItemInsulationSlotsData> slotOverride = ConfigSettings.INSULATION_SLOT_OVERRIDES.get().get(item).stream().findFirst();
+            if (slotOverride.isPresent() && slotOverride.get().test(stack))
+            {   return slotOverride.get().slots();
+            }
+            else return ConfigSettings.INSULATION_SLOTS.get().getSlots(MobEntity.getEquipmentSlotForItem(stack), stack);
+        }
+        else return 0;
     }
 
     /**
