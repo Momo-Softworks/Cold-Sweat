@@ -9,15 +9,14 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
-import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
+import com.momosoftworks.coldsweat.config.ConfigLoadingHandler;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
-import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import net.minecraft.core.RegistryAccess;
 import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.math.FastMultiMap;
+import com.momosoftworks.coldsweat.util.math.RegistryMultiMap;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.*;
@@ -32,6 +31,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
@@ -67,7 +67,7 @@ public class ConfigHelper
             else
             {
                 ResourceLocation id = new ResourceLocation(objString);
-                Optional<Holder<T>> obj = reg.getHolder(ResourceKey.create(registry, id));
+                Optional<Holder<T>> obj = reg.getHolder(net.minecraft.resources.ResourceKey.create(registry, id));
                 if (!reg.containsKey(id) || obj.isEmpty())
                 {
                     ColdSweat.LOGGER.error("Error parsing config: {} \"{}\" does not exist", registry.location().getPath(), objString);
@@ -128,6 +128,30 @@ public class ConfigHelper
     }
     public static List<Either<TagKey<EntityType<?>>, EntityType<?>>> getEntityTypes(String[] entities)
     {   return parseBuiltinItems(Registry.ENTITY_TYPE_REGISTRY, ForgeRegistries.ENTITIES, entities);
+    }
+
+    public static <K extends IForgeRegistryEntry<K>, V extends ConfigData> Multimap<K, V> parseTomlRegistry(ForgeConfigSpec.ConfigValue<List<? extends List<?>>> config, Function<List<?>, V> tomlParser,
+                                                                                                            Function<V, List<Either<TagKey<K>, K>>> keyListGetter,
+                                                                                                            IForgeRegistry<K> keyRegistry, ResourceKey<Registry<V>> valueRegistry)
+    {
+        Multimap<K, V> dataMap = new RegistryMultiMap<>();
+        for (List<?> entry : config.get())
+        {
+            V data = tomlParser.apply(entry);
+            if (data == null) continue;
+
+            data.setType(ConfigData.Type.TOML);
+
+            putRegistryEntries(dataMap, keyRegistry, keyListGetter.apply(data), data);
+        }
+        // Handle registry removals
+        ConfigLoadingHandler.removeEntries(dataMap.values(), valueRegistry);
+        return dataMap;
+    }
+
+    private static <K extends IForgeRegistryEntry<K>, V> void putRegistryEntries(Multimap<K, V> map, IForgeRegistry<K> registry, List<Either<TagKey<K>, K>> list, V data)
+    {
+        RegistryHelper.mapForgeRegistryTagList(registry, list).forEach(entry -> map.put(entry, data));
     }
 
     public static <K, V extends ConfigData> Map<Holder<K>, V> getRegistryMap(List<? extends List<?>> source, RegistryAccess registryAccess, ResourceKey<Registry<K>> keyRegistry,
@@ -247,7 +271,7 @@ public class ConfigHelper
                                                                                         RegistryAccess registryAccess)
     {
         Registry<K> registry = registryAccess.registryOrThrow(gameRegistry);
-        return deserializeEitherRegistry(tag, key, modRegistry, k -> registry.getHolder(ResourceKey.create(gameRegistry, k)).orElse(null), registryAccess);
+        return deserializeEitherRegistry(tag, key, modRegistry, k -> registry.getHolder(net.minecraft.resources.ResourceKey.create(gameRegistry, k)).orElse(null), registryAccess);
     }
 
     private static <K, V extends ConfigData> Map<K, V> deserializeEitherRegistry(CompoundTag tag, String key,
@@ -346,7 +370,7 @@ public class ConfigHelper
                                                                                                      RegistryAccess registryAccess)
     {
         Registry<K> registry = registryAccess.registryOrThrow(gameRegistry);
-        return deserializeEitherMultimapRegistry(tag, key, modRegistry, k -> registry.getHolder(ResourceKey.create(gameRegistry, k)).orElse(null), registryAccess);
+        return deserializeEitherMultimapRegistry(tag, key, modRegistry, k -> registry.getHolder(net.minecraft.resources.ResourceKey.create(gameRegistry, k)).orElse(null), registryAccess);
     }
 
     private static <K, V extends ConfigData> Multimap<K, V> deserializeEitherMultimapRegistry(CompoundTag tag, String key,
@@ -455,7 +479,7 @@ public class ConfigHelper
                                                           return DataResult.success(TagKey.create(vanillaRegistry, itemLocation));
                                                       },
                                                       key -> "#" + key.location()),
-                            ResourceKey.codec(vanillaRegistry));
+                            net.minecraft.resources.ResourceKey.codec(vanillaRegistry));
     }
 
     public static <T> String serializeTagOrResourceKey(Either<TagKey<T>, ResourceKey<T>> obj)

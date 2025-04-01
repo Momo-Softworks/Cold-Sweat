@@ -121,7 +121,7 @@ public class Overlays
         if (gui.shouldDrawSurvivalElements() && !Minecraft.getInstance().options.hideGui)
         {
             // Blend body temperature (per frame)
-            BLEND_BODY_TEMP = CSMath.blend(PREV_BODY_TEMP, BODY_TEMP, Minecraft.getInstance().getPartialTick(), 0, 1);
+            BLEND_BODY_TEMP = CSMath.blend(PREV_BODY_TEMP, BODY_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
 
             // Get text color
             int color = switch (((int) BODY_TEMP_SEVERITY))

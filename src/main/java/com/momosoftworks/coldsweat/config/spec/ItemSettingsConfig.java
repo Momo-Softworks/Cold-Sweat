@@ -32,6 +32,7 @@ public class ItemSettingsConfig
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> INSULATION_BLACKLIST;
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> INSULATING_ARMOR;
     public static final ForgeConfigSpec.ConfigValue<List<?>> INSULATION_SLOTS;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> INSULATION_SLOT_OVERRIDES;
     public static final ForgeConfigSpec.DoubleValue INSULATION_STRENGTH;
 
     public static final ForgeConfigSpec.IntValue WATERSKIN_CONSUME_STRENGTH;
@@ -269,6 +270,16 @@ public class ItemSettingsConfig
                          "- Format: [number, max-slots] (a positive integer or decimal; the rate of increase)")
                 .defineList("Insulation Slots", List.of("static", 4, 6, 5, 4),
                         it -> it instanceof Number || it instanceof String);
+
+        INSULATION_SLOT_OVERRIDES = BUILDER
+                .comment("Allows for overriding the number of insulation slots for specific items",
+                         "Format: [[\"item_id\", slot_count, *\"nbt\"], [\"item_id\", slot_count, *\"nbt\"], ...etc]")
+                .defineListAllowEmpty(List.of("Insulation Slot Overrides"), () -> List.of(
+                ),
+                it -> it instanceof List<?> list && list.size() == 2
+                        && list.get(0) instanceof String
+                        && list.get(1) instanceof Number
+                        && (list.size() < 3 || list.get(2) instanceof String));
 
         INSULATION_STRENGTH = BUILDER
                 .comment("Defines the effectiveness of insulating items in protecting against temperature")
