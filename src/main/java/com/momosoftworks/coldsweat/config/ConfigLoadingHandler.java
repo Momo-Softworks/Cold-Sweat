@@ -241,6 +241,10 @@ public class ConfigLoadingHandler
         Collection<Holder<DryingItemData>> dryingItems = event.getRegistry(ModRegistries.DRYING_ITEM_DATA);
         addDryingItemConfigs(dryingItems);
         logRegistryLoaded(String.format("Loaded %s drying items", dryingItems.size()), dryingItems);
+        // insulation slots
+        Collection<Holder<ItemInsulationSlotsData>> insulationSlots = event.getRegistry(ModRegistries.INSULATION_SLOTS_DATA);
+        addInsulationSlotConfigs(insulationSlots);
+        logRegistryLoaded(String.format("Loaded %s insulation slots configs", insulationSlots.size()), insulationSlots);
 
         // block temperatures
         Collection<Holder<BlockTempData>> blockTemps = event.getRegistry(ModRegistries.BLOCK_TEMP_DATA);

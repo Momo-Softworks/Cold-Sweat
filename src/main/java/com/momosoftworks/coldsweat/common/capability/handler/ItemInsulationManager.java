@@ -7,6 +7,7 @@ import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCa
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ModItemComponents;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
+import com.momosoftworks.coldsweat.data.codec.configuration.ItemInsulationSlotsData;
 import com.momosoftworks.coldsweat.util.item.ItemStackHelper;
 import net.minecraft.core.Holder;
 import net.minecraft.world.entity.Entity;
@@ -15,6 +16,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.Equipable;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -51,11 +53,18 @@ public class ItemInsulationManager
     /**
      * @return The number of insulation slots on this armor item, or 0 if it does not support insulation
      */
-    public static int getInsulationSlots(ItemStack item)
+    public static int getInsulationSlots(ItemStack stack)
     {
-        return isInsulatable(item)
-               ? ConfigSettings.INSULATION_SLOTS.get().getSlots(((Equipable) item.getItem()).getEquipmentSlot(), item)
-               : 0;
+        if (isInsulatable(stack))
+        {
+            Item item = stack.getItem();
+            Optional<ItemInsulationSlotsData> slotOverride = ConfigSettings.INSULATION_SLOT_OVERRIDES.get().get(item).stream().findFirst();
+            if (slotOverride.isPresent() && slotOverride.get().test(stack))
+            {   return slotOverride.get().slots();
+            }
+            else return ConfigSettings.INSULATION_SLOTS.get().getSlots(((Equipable) item).getEquipmentSlot(), stack);
+        }
+        else return 0;
     }
 
     /**
