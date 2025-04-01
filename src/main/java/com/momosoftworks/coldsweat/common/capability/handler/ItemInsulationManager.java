@@ -29,6 +29,7 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -107,6 +108,14 @@ public class ItemInsulationManager
     @SubscribeEvent
     public static void handleInventoryOpen(PlayerContainerEvent event)
     {   event.getEntity().getPersistentData().putBoolean("InventoryOpen", event instanceof PlayerContainerEvent.Open);
+    }
+
+    @SubscribeEvent
+    public static void clearCachePeriodically(TickEvent.LevelTickEvent event)
+    {
+        if (event.phase == TickEvent.Phase.END && event.level.getGameTime() % 200 == 0)
+        {   CAP_CACHE.clear();
+        }
     }
 
     static ContainerListener INSULATION_LISTENER = new ContainerListener()
