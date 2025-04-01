@@ -4,6 +4,8 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.function.Consumer;
@@ -51,8 +53,23 @@ public class CapabilityCache<C, K extends ICapabilityProvider>
 
     protected void cleanExpiredEntries()
     {
-        if (this.invalidator != null)
-        {   cache.entrySet().removeIf(e -> invalidator.test(e.getKey()));
+        synchronized (cache)
+        {
+            if (this.invalidator != null)
+            {
+                List<K> removedKeys = new ArrayList<>();
+                for (Map.Entry<K, LazyOptional<C>> entry : cache.entrySet())
+                {
+                    K key = entry.getKey();
+                    LazyOptional<C> value = entry.getValue();
+                    if (invalidator.test(key) || !value.isPresent())
+                    {   removedKeys.add(key);
+                    }
+                }
+                for (int i = 0; i < removedKeys.size(); i++)
+                {   cache.remove(removedKeys.get(i));
+                }
+            }
         }
     }
 
