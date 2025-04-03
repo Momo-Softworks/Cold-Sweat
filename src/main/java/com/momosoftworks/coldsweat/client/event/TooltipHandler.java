@@ -265,14 +265,13 @@ public class TooltipHandler
             {
                 if (stack.isEmpty())
                 {   HOVERED_STACK = stack;
-                    return;
                 }
-                if (HOVERED_ITEM_UPDATE_COOLDOWN <= 0
+                else if (HOVERED_ITEM_UPDATE_COOLDOWN <= 0
                 || ItemInsulationManager.getAllInsulatorsForStack(stack).stream().map(InsulatorData::getId).anyMatch(id -> !HOVERED_STACK_PREDICATES.containsKey(id)))
                 {
                     HOVERED_STACK = stack;
                     HOVERED_ITEM_UPDATE_COOLDOWN = 5;
-                    PacketDistributor.sendToServer(SyncItemPredicatesMessage.fromClient(stack, hoveredSlot.index, equipmentSlot));
+                    PacketDistributor.sendToServer(SyncItemPredicatesMessage.fromClient(stack.copy(), hoveredSlot.index, equipmentSlot));
                 }
             }
         }
