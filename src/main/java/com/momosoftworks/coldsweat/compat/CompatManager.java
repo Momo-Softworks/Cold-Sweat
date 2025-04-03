@@ -86,27 +86,17 @@ public class CompatManager
         if (mod == null)
         {   return false;
         }
+        ArtifactVersion version = mod.getMods().get(0).getVersion();
 
-        ArtifactVersion version = mod.getFile().getJarVersion();
-        if (!minVersion.isEmpty())
+        if (!minVersion.isEmpty() && version.compareTo(new DefaultArtifactVersion(minVersion)) < 0)
         {
-            if (version.compareTo(new DefaultArtifactVersion(minVersion)) >= 0)
-            {   return true;
-            }
-            else
-            {   ColdSweat.LOGGER.error("Cold Sweat requires {} {} or higher for compat to be enabled!", modID, version);
-                return false;
-            }
+            ColdSweat.LOGGER.error("Cold Sweat requires {} {} or higher for compat to be enabled! (found {})", modID, minVersion, version);
+            return false;
         }
-        if (!maxVersion.isEmpty())
+        if (!maxVersion.isEmpty() && version.compareTo(new DefaultArtifactVersion(maxVersion)) > 0)
         {
-            if (version.compareTo(new DefaultArtifactVersion(maxVersion)) <= 0)
-            {   return true;
-            }
-            else
-            {   ColdSweat.LOGGER.error("Cold Sweat requires {} {} or lower for compat to be enabled!", modID, version);
-                return false;
-            }
+            ColdSweat.LOGGER.error("Cold Sweat requires {} {} or lower for compat to be enabled! (found {})", modID, maxVersion, version);
+            return false;
         }
         else return true;
     }
