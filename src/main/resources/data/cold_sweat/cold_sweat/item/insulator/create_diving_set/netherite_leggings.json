@@ -43,15 +43,15 @@
   "attributes": {
     "cold_sweat:heat_dampening": [
       {
-        "name": "cold_sweat:diving_suit_bonus",
+        "name": "cs:netherite_diving_set_bonus",
         "amount": 0.25,
         "operation": "add_value"
       }
     ],
     "cold_sweat:cold_dampening": [
       {
-        "name": "cold_sweat:diving_suit_bonus",
-        "amount": 0.25,
+        "name": "cs:netherite_diving_set_bonus",
+        "amount": 0.1,
         "operation": "add_value"
       }
     ]

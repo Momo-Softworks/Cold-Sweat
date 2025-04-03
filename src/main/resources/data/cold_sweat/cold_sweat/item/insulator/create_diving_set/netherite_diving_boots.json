@@ -29,8 +29,8 @@
         "items": [
           "create:netherite_backtank"
         ],
-        "components": {
-          "create:air": "1-9999"
+        "nbt": {
+          "Air": "1-9999"
         }
       },
       "legs": {
@@ -41,18 +41,18 @@
     }
   },
   "attributes": {
-    "generic.step_height": [
+    "cold_sweat:heat_dampening": [
       {
-        "name": "cold_sweat:diving_suit_bonus",
+        "name": "cs:netherite_diving_set_bonus",
         "amount": 0.25,
         "operation": "add_value"
       }
     ],
-    "generic.water_movement_efficiency": [
+    "cold_sweat:cold_dampening": [
       {
-        "name": "cold_sweat:diving_suit_bonus",
-        "amount": 1.0,
-        "operation": "add_multiplied_total"
+        "name": "cs:netherite_diving_set_bonus",
+        "amount": 0.1,
+        "operation": "add_value"
       }
     ]
   }
