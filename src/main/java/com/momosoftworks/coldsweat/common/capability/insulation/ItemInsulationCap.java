@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.common.capability.insulation;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -10,16 +9,9 @@ import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
-import com.momosoftworks.coldsweat.data.codec.util.CommonStreamCodecs;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.math.FastMap;
-import com.momosoftworks.coldsweat.util.math.FastMultiMap;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.codec.StreamDecoder;
 import net.minecraft.network.codec.StreamEncoder;
 import net.minecraft.world.item.ItemStack;
@@ -123,7 +115,7 @@ public record ItemInsulationCap(List<Pair<ItemStack, List<InsulatorData>>> insul
             }
         }
         appliedInsulators = Math.max(1, appliedInsulators);
-        return appliedInsulators + this.insulation.size() <= ItemInsulationManager.getInsulationSlots(armorItem);
+        return appliedInsulators <= ItemInsulationManager.getInsulationSlots(armorItem);
     }
 
     public void serialize(RegistryFriendlyByteBuf buffer)
@@ -133,11 +125,11 @@ public record ItemInsulationCap(List<Pair<ItemStack, List<InsulatorData>>> insul
         for (int i = 0; i < this.insulation().size(); i++)
         {
             Pair<ItemStack, List<InsulatorData>> entry = this.insulation().get(i);
-            Collection<InsulatorData> insulList = entry.getSecond();
             // Store ItemStack data
             ItemStack.STREAM_CODEC.encode(buffer, entry.getFirst());
             // Store insulation data
-            buffer.writeCollection(insulList, (StreamEncoder) InsulatorData.STREAM_CODEC);
+            Collection<InsulatorData> insulList = entry.getSecond();
+            buffer.writeCollection(insulList, (StreamEncoder) InsulatorData.SIMPLE_STREAM_CODEC);
         }
     }
 
@@ -147,8 +139,10 @@ public record ItemInsulationCap(List<Pair<ItemStack, List<InsulatorData>>> insul
         int size = buffer.readInt();
         for (int i = 0; i < size; i++)
         {
+            // Read ItemStack data
             ItemStack stack = ItemStack.STREAM_CODEC.decode(buffer);
-            List<InsulatorData> insulList = buffer.readList((StreamDecoder) InsulatorData.STREAM_CODEC);
+            // Read insulation data
+            List<InsulatorData> insulList = buffer.readList((StreamDecoder) InsulatorData.SIMPLE_STREAM_CODEC);
             insulation.add(Pair.of(stack, insulList));
         }
         return new ItemInsulationCap(insulation);

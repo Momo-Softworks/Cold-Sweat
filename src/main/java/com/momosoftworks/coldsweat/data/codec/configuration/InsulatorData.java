@@ -17,7 +17,6 @@ import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
 import com.momosoftworks.coldsweat.data.codec.util.CommonStreamCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -108,6 +107,21 @@ public class InsulatorData extends ConfigData implements RequirementHolder
         Map<ResourceLocation, Double> immuneTempModifiers = buf.readMap(ResourceLocation.STREAM_CODEC, CommonStreamCodecs.DOUBLE);
         boolean multiSlot = buf.readBoolean();
         return new InsulatorData(item, slot, insulation, predicate, attributes, immuneTempModifiers, multiSlot);
+    });
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, InsulatorData> SIMPLE_STREAM_CODEC = StreamCodec.of(
+    (buf, insulator) ->
+    {
+        buf.writeEnum(insulator.slot());
+        buf.writeCollection(insulator.insulation(), Insulation.getNetworkCodec());
+        buf.writeBoolean(insulator.fillSlots());
+    },
+    (buf) ->
+    {
+        Insulation.Slot slot = buf.readEnum(Insulation.Slot.class);
+        List<Insulation> insulation = buf.readCollection(ArrayList::new, Insulation.getNetworkCodec());
+        boolean multiSlot = buf.readBoolean();
+        return new InsulatorData(new NegatableList<>(), slot, insulation, new NegatableList<>(), new AttributeModifierMap(), new HashMap<>(), multiSlot);
     });
 
     public NegatableList<ItemRequirement> item()
