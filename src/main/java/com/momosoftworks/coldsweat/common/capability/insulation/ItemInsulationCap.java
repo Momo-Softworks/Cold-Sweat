@@ -101,18 +101,14 @@ public record ItemInsulationCap(List<Pair<ItemStack, List<InsulatorData>>> insul
         }
 
         int appliedInsulators = 0;
-        boolean hasSingleSlot = false;
         for (InsulatorData data : CSMath.merge(insulation, this.getInsulators()))
         {
             // Add all slots from multi-slot insulation
             if (data.fillSlots())
             {   appliedInsulators += Insulation.splitList(data.insulation()).size();
             }
-            // All single-slot insulation counts as one
-            else if (!hasSingleSlot)
-            {   hasSingleSlot = true;
-                appliedInsulators++;
-            }
+            // Single-slot insulators only count as one
+            else appliedInsulators++;
         }
         appliedInsulators = Math.max(1, appliedInsulators);
         return appliedInsulators <= ItemInsulationManager.getInsulationSlots(armorItem);
