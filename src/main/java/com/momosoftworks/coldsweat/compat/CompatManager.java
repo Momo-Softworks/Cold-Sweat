@@ -337,15 +337,9 @@ public class CompatManager
         {
             if (isIcebergLoaded())
             {
-                return new Object()
-            {
-                public int getLegendaryTTStartIndex()
-                {
-                    int index = CSMath.getIndexOf(tooltip, element -> element.right().map(component -> component instanceof TitleBreakComponent).orElse(false));
-                    if (index == -1) return 0;
-                    return index;
-                }
-            }.getLegendaryTTStartIndex();
+                int index = CSMath.getIndexOf(tooltip, element -> element.right().map(component -> component instanceof TitleBreakComponent).orElse(false));
+                if (index == -1) return 0;
+                return index;
             }
             return 0;
         }
