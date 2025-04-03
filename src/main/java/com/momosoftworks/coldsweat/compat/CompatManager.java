@@ -1,6 +1,6 @@
 package com.momosoftworks.coldsweat.compat;
 
-import com.anthonyhilyard.iceberg.util.Tooltips;
+import com.anthonyhilyard.iceberg.component.TitleBreakComponent;
 import com.mojang.datafixers.util.Either;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.core.init.FetchSeasonsModsEvent;
@@ -71,7 +71,7 @@ public class CompatManager
     private static final boolean TOOLTIPS_LOADED = modLoaded("legendarytooltips");
     private static final boolean PRIMAL_WINTER_LOADED = modLoaded("primalwinter");
     private static final boolean THIRST_LOADED = modLoaded("thirst", "1.21.0-2.1.0");
-    private static final boolean ICEBERG_LOADED = modLoaded("iceberg");
+    private static final boolean ICEBERG_LOADED = modLoaded("iceberg", "1.3.0");
     private static final boolean SPOILED_LOADED = modLoaded("spoiled");
     private static final boolean SUPPLEMENTARIES_LOADED = modLoaded("supplementaries");
     private static final boolean TOUGH_AS_NAILS_LOADED = modLoaded("toughasnails");
@@ -351,7 +351,7 @@ public class CompatManager
             {
                 public int getLegendaryTTStartIndex()
                 {
-                    int index = CSMath.getIndexOf(tooltip, element -> element.right().map(component -> component instanceof Tooltips.TitleBreakComponent).orElse(false));
+                    int index = CSMath.getIndexOf(tooltip, element -> element.right().map(component -> component instanceof TitleBreakComponent).orElse(false));
                     if (index == -1) return 0;
                     return index;
                 }

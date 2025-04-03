@@ -152,7 +152,7 @@ dependencies {
     implementation "curse.maven:glitchcore-955399:5645390"
     implementation "curse.maven:spoiled-364918:5490658"
     implementation "curse.maven:curios-continuation-1037991:5747224"
-    implementation "curse.maven:iceberg-520110:5590963"
+    implementation "curse.maven:iceberg-520110:6379432"
     implementation "curse.maven:create-328085:6247669"
     compileOnly("net.createmod.ponder:Ponder-NeoForge-1.21.1:1.0.39")
 
