@@ -1,6 +1,6 @@
 package com.momosoftworks.coldsweat.compat;
 
-import com.anthonyhilyard.iceberg.util.Tooltips;
+import com.anthonyhilyard.iceberg.component.TitleBreakComponent;
 import com.mojang.datafixers.util.Either;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.core.init.FetchSeasonsModsEvent;
@@ -341,7 +341,7 @@ public class CompatManager
             {
                 public int getLegendaryTTStartIndex()
                 {
-                    int index = CSMath.getIndexOf(tooltip, element -> element.right().map(component -> component instanceof Tooltips.TitleBreakComponent).orElse(false));
+                    int index = CSMath.getIndexOf(tooltip, element -> element.right().map(component -> component instanceof TitleBreakComponent).orElse(false));
                     if (index == -1) return 0;
                     return index;
                 }
