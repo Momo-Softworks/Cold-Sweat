@@ -2,26 +2,21 @@ package com.momosoftworks.coldsweat.core.network.message;
 
 import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
-import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.client.event.TooltipHandler;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.network.BufferHelper;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
-import com.momosoftworks.coldsweat.data.ModRegistries;
-import com.momosoftworks.coldsweat.data.codec.configuration.*;
+import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.impl.RequirementHolder;
 import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.serialization.DynamicHolder;
-import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.network.NetworkDirection;
@@ -29,17 +24,16 @@ import net.minecraftforge.fml.network.NetworkEvent;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class SyncItemPredicatesMessage
 {
     private final Map<UUID, Boolean> predicateMap = new FastMap<>();
-    ItemStack stack = ItemStack.EMPTY;
-    int inventorySlot = 0;
+    ItemStack stack;
+    int inventorySlot;
     @Nullable
-    EquipmentSlotType equipmentSlot = null;
+    EquipmentSlotType equipmentSlot;
 
     public static SyncItemPredicatesMessage fromClient(ItemStack stack, int inventorySlot, @Nullable EquipmentSlotType equipmentSlot)
     {   return new SyncItemPredicatesMessage(stack, inventorySlot, equipmentSlot);
@@ -59,6 +53,9 @@ public class SyncItemPredicatesMessage
     public SyncItemPredicatesMessage(ItemStack stack, int inventorySlot, @Nullable EquipmentSlotType equipmentSlot, Entity entity)
     {
         this.stack = stack;
+        this.inventorySlot = inventorySlot;
+        this.equipmentSlot = equipmentSlot;
+
         this.checkInsulator(stack, entity);
         this.checkInsulatingArmor(stack, entity);
         this.checkInsulatingCurio(stack, entity);
@@ -131,15 +128,15 @@ public class SyncItemPredicatesMessage
     }
 
     private void checkInsulator(ItemStack stack, Entity entity)
-    {   this.checkItemRequirement(stack, entity, (DynamicHolder) ConfigSettings.INSULATION_ITEMS);
+    {   this.checkItemRequirement(stack, entity, ConfigSettings.INSULATION_ITEMS);
     }
 
     private void checkInsulatingArmor(ItemStack stack, Entity entity)
-    {   this.checkItemRequirement(stack, entity, (DynamicHolder) ConfigSettings.INSULATING_ARMORS);
+    {   this.checkItemRequirement(stack, entity, ConfigSettings.INSULATING_ARMORS);
     }
 
     private void checkInsulatingCurio(ItemStack stack, Entity entity)
-    {   this.checkItemRequirement(stack, entity, (DynamicHolder) ConfigSettings.INSULATING_CURIOS);
+    {   this.checkItemRequirement(stack, entity, ConfigSettings.INSULATING_CURIOS);
     }
 
     private void checkArmorInsulation(ItemStack stack, Entity entity)
@@ -159,23 +156,23 @@ public class SyncItemPredicatesMessage
     }
 
     private void checkFood(ItemStack stack, Entity entity)
-    {   this.checkItemRequirement(stack, entity, (DynamicHolder) ConfigSettings.FOOD_TEMPERATURES);
+    {   this.checkItemRequirement(stack, entity, ConfigSettings.FOOD_TEMPERATURES);
     }
 
     private void checkBoilerFuel(ItemStack stack)
-    {   this.checkItemRequirement(stack, null, (DynamicHolder) ConfigSettings.BOILER_FUEL);
+    {   this.checkItemRequirement(stack, null, ConfigSettings.BOILER_FUEL);
     }
 
     private void checkIceboxFuel(ItemStack stack)
-    {   this.checkItemRequirement(stack, null, (DynamicHolder) ConfigSettings.ICEBOX_FUEL);
+    {   this.checkItemRequirement(stack, null, ConfigSettings.ICEBOX_FUEL);
     }
 
     private void checkHearthFuel(ItemStack stack)
-    {   this.checkItemRequirement(stack, null, (DynamicHolder) ConfigSettings.HEARTH_FUEL);
+    {   this.checkItemRequirement(stack, null, ConfigSettings.HEARTH_FUEL);
     }
 
     private void checkSoulLampFuel(ItemStack stack)
-    {   this.checkItemRequirement(stack, null, (DynamicHolder) ConfigSettings.SOULSPRING_LAMP_FUEL);
+    {   this.checkItemRequirement(stack, null, ConfigSettings.SOULSPRING_LAMP_FUEL);
     }
 
     private void checkCarriedTemps(ItemStack stack, int invSlot, EquipmentSlotType equipmentSlot, Entity entity)
@@ -195,10 +192,10 @@ public class SyncItemPredicatesMessage
     }
 
     private void checkDryingItems(ItemStack stack, Entity entity)
-    {   this.checkItemRequirement(stack, entity, (DynamicHolder) ConfigSettings.DRYING_ITEMS);
+    {   this.checkItemRequirement(stack, entity, ConfigSettings.DRYING_ITEMS);
     }
 
-    private void checkItemRequirement(ItemStack stack, Entity entity, DynamicHolder<Multimap<Item, RequirementHolder>> configSetting)
+    private void checkItemRequirement(ItemStack stack, Entity entity, DynamicHolder<? extends Multimap<Item, ? extends RequirementHolder>> configSetting)
     {
         Map<UUID, Boolean> configMap = new FastMap<>();
         configSetting.get().get(stack.getItem())
