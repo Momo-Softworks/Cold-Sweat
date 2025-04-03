@@ -4,13 +4,14 @@ import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class ModItemComponents
 {
-    public static final DeferredRegister<DataComponentType<?>> DATA_COMPONENTS = DeferredRegister.DataComponents.createDataComponents(ColdSweat.MOD_ID);
+    public static final DeferredRegister<DataComponentType<?>> DATA_COMPONENTS = DeferredRegister.createDataComponents(Registries.DATA_COMPONENT_TYPE, ColdSweat.MOD_ID);
 
     public static final DeferredHolder<DataComponentType<?>, DataComponentType<Double>> SOULSPRING_LAMP_FUEL = DATA_COMPONENTS.register("fuel",
                                                () -> DataComponentType.<Double>builder().persistent(Codec.DOUBLE).networkSynchronized(ByteBufCodecs.DOUBLE).build());
