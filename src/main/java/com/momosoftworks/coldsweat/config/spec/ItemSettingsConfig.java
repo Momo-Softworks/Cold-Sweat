@@ -238,7 +238,7 @@ public class ItemSettingsConfig
                                 && (list.get(1) instanceof Number || list.get(1) instanceof List<?>)
                                 && (list.get(2) instanceof Number || list.get(2) instanceof List<?>)
                                 && (list.size() < 4 || list.get(3) instanceof String)
-                                && (list.size() < 5 || list.get(5) instanceof String)
+                                && (list.size() < 5 || list.get(4) instanceof String)
                                 && list.size() < 6);
 
         if (CompatManager.isCuriosLoaded())
