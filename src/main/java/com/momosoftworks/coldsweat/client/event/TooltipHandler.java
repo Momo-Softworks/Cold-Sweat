@@ -100,12 +100,17 @@ public class TooltipHandler
         if (CompatManager.isIcebergLoaded())
         {   tooltipStartIndex = CompatManager.LegendaryTooltips.getTooltipStartIndex(tooltip) + 1;
         }
-        else for (tooltipStartIndex = 0; tooltipStartIndex < tooltip.size(); tooltipStartIndex++)
+        else findTitle:
         {
-            if (tooltip.get(tooltipStartIndex).left().map(FormattedText::getString).map(String::strip).orElse("").equals(hoverName))
-            {   tooltipStartIndex++;
-                break;
+            for (tooltipStartIndex = 0; tooltipStartIndex < tooltip.size(); tooltipStartIndex++)
+            {
+                if (tooltip.get(tooltipStartIndex).left().map(FormattedText::getString).map(String::strip).orElse("").equals(hoverName))
+                {
+                    tooltipStartIndex++;
+                    break findTitle;
+                }
             }
+            tooltipStartIndex = 1;
         }
         tooltipStartIndex = CSMath.clamp(tooltipStartIndex, 0, tooltip.size());
         return tooltipStartIndex;
