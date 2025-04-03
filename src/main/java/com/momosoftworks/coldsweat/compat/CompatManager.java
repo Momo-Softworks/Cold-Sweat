@@ -62,7 +62,7 @@ public class CompatManager
     private static final boolean SPIRIT_LOADED = modLoaded("spirit");
     private static final boolean BYG_LOADED = modLoaded("byg");
     private static final boolean BWG_LOADED = modLoaded("biomeswevegone");
-    private static final boolean CREATE_LOADED = modLoaded("create", "0.5.1");
+    private static final boolean CREATE_LOADED = modLoaded("create", "6.0.0");
     private static final boolean ATMOSPHERIC_LOADED = modLoaded("atmospheric");
     private static final boolean ENVIRONMENTAL_LOADED = modLoaded("environmental");
     private static final boolean TERRALITH_LOADED = modLoaded("terralith");
