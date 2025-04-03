@@ -1,7 +1,10 @@
 package com.momosoftworks.coldsweat.util.item;
 
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
@@ -9,6 +12,7 @@ import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.LevelAccessor;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
 
@@ -64,5 +68,23 @@ public class ItemStackHelper
         }
 
         return EquipmentSlot.MAINHAND;
+    }
+
+    public static boolean canApplyEnchantment(ItemStack item, Holder<Enchantment> enchantment)
+    {
+        if (item.has(DataComponents.ENCHANTMENTS))
+        {
+            for (Object2IntMap.Entry<Holder<Enchantment>> entry : item.get(DataComponents.ENCHANTMENTS).entrySet())
+            {
+                Holder<Enchantment> itemEnch = entry.getKey();
+
+                if (itemEnch.value().exclusiveSet().contains(enchantment)
+                || enchantment.value().exclusiveSet().contains(itemEnch))
+                {   return false;
+                }
+            }
+            return true;
+        }
+        else return false;
     }
 }

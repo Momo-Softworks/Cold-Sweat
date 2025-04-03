@@ -231,13 +231,12 @@ public class SewingContainer extends ItemCombinerMenu
         // Transfer enchantments
         if (armorItem.has(DataComponents.ENCHANTMENTS) && insulator.has(DataComponents.ENCHANTMENTS))
         {
-            ItemEnchantments armorEnch = ItemStackHelper.getOrCreateComponent(armorItem, DataComponents.ENCHANTMENTS, () -> ItemEnchantments.EMPTY);
             ItemEnchantments.Mutable insulatorEnch = new ItemEnchantments.Mutable(ItemStackHelper.getOrCreateComponent(insulator, DataComponents.ENCHANTMENTS, () -> ItemEnchantments.EMPTY));
             insulatorEnch.removeIf(ench ->
             {
                 if (ench == null) return false;
 
-                if (ench.value().canEnchant(armorItem) && EnchantmentHelper.isEnchantmentCompatible(armorEnch.keySet(), ench))
+                if (armorItem.supportsEnchantment(ench) && ItemStackHelper.canApplyEnchantment(armorItem, ench))
                 {   armorItem.enchant(ench, insulatorEnch.getLevel(ench));
                     return true;
                 }
@@ -294,7 +293,6 @@ public class SewingContainer extends ItemCombinerMenu
                     this.growItem(1, -1);
                 }
                 while (this.insulateArmorItem(result, this.getItem(1)));
-                this.onTake(player, result);
             }
         }
         finally
