@@ -316,7 +316,6 @@ public class SewingContainer extends ItemCombinerMenu
                     this.growItem(1, -1);
                 }
                 while (this.insulateArmorItem(result, this.getItem(1)));
-                this.onTake(player, result);
             }
         }
         finally
