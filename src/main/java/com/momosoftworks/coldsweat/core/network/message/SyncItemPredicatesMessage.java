@@ -36,9 +36,9 @@ public class SyncItemPredicatesMessage implements CustomPacketPayload
     public static final StreamCodec<RegistryFriendlyByteBuf, SyncItemPredicatesMessage> CODEC = CustomPacketPayload.codec(SyncItemPredicatesMessage::encode, SyncItemPredicatesMessage::decode);
 
     private final Map<UUID, Boolean> predicateMap = new FastMap<>();
-    ItemStack stack = ItemStack.EMPTY;
-    int inventorySlot = 0;
-    @Nullable EquipmentSlot equipmentSlot = null;
+    ItemStack stack;
+    int inventorySlot;
+    @Nullable EquipmentSlot equipmentSlot;
 
     public static SyncItemPredicatesMessage fromClient(ItemStack stack, int inventorySlot, @Nullable EquipmentSlot equipmentSlot)
     {   return new SyncItemPredicatesMessage(stack, inventorySlot, equipmentSlot);
@@ -58,6 +58,9 @@ public class SyncItemPredicatesMessage implements CustomPacketPayload
     public SyncItemPredicatesMessage(ItemStack stack, int inventorySlot, @Nullable EquipmentSlot equipmentSlot, Entity entity)
     {
         this.stack = stack;
+        this.inventorySlot = inventorySlot;
+        this.equipmentSlot = equipmentSlot;
+
         this.checkInsulator(stack, entity);
         this.checkInsulatingArmor(stack, entity);
         this.checkInsulatingCurio(stack, entity);
@@ -126,15 +129,15 @@ public class SyncItemPredicatesMessage implements CustomPacketPayload
     }
 
     private void checkInsulator(ItemStack stack, Entity entity)
-    {   this.checkItemRequirement(stack, entity, (DynamicHolder) ConfigSettings.INSULATION_ITEMS);
+    {   this.checkItemRequirement(stack, entity, ConfigSettings.INSULATION_ITEMS);
     }
 
     private void checkInsulatingArmor(ItemStack stack, Entity entity)
-    {   this.checkItemRequirement(stack, entity, (DynamicHolder) ConfigSettings.INSULATING_ARMORS);
+    {   this.checkItemRequirement(stack, entity, ConfigSettings.INSULATING_ARMORS);
     }
 
     private void checkInsulatingCurio(ItemStack stack, Entity entity)
-    {   this.checkItemRequirement(stack, entity, (DynamicHolder) ConfigSettings.INSULATING_CURIOS);
+    {   this.checkItemRequirement(stack, entity, ConfigSettings.INSULATING_CURIOS);
     }
 
     private void checkArmorInsulation(ItemStack stack, Entity entity)
