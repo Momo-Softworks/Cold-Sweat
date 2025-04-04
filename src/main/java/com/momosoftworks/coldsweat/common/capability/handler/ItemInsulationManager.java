@@ -114,9 +114,9 @@ public class ItemInsulationManager
     }
 
     @SubscribeEvent
-    public static void clearCachePeriodically(TickEvent.LevelTickEvent event)
+    public static void clearCachePeriodically(TickEvent.WorldTickEvent event)
     {
-        if (event.phase == TickEvent.Phase.END && event.level.getGameTime() % 200 == 0)
+        if (event.phase == TickEvent.Phase.END && event.world.getGameTime() % 200 == 0)
         {   CAP_CACHE.clear();
         }
     }
