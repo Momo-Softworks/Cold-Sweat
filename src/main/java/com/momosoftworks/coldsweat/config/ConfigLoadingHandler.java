@@ -212,6 +212,9 @@ public class ConfigLoadingHandler
         CreateRegistriesEvent.Pre event = new CreateRegistriesEvent.Pre(registryAccess, registries, REMOVED_REGISTRIES);
         NeoForge.EVENT_BUS.post(event);
 
+        // Remove registries that don't have required loaded mods
+        registries.values().removeIf(holder -> holder.value().areRequiredModsLoaded());
+
         // Remove registry entries that match removal criteria
         removeRegistries(event.getRegistries());
 
@@ -363,10 +366,6 @@ public class ConfigLoadingHandler
         insulators.forEach(holder ->
         {
             InsulatorData insulator = holder.value();
-            // Check if the required mods are loaded
-            if (!insulator.areRequiredModsLoaded())
-            {   return;
-            }
 
             // Add listed items as insulators
             List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, insulator.item().flatListMap(ItemRequirement::items)));
@@ -396,10 +395,6 @@ public class ConfigLoadingHandler
         fuels.forEach(holder ->
         {
             FuelData fuelData = holder.value();
-            // Check if the required mods are loaded
-            if (!fuelData.areRequiredModsLoaded())
-            {   return;
-            }
 
             List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, fuelData.item().flatListMap(ItemRequirement::items)));
             if (items.isEmpty())
@@ -424,10 +419,6 @@ public class ConfigLoadingHandler
         foods.forEach(holder ->
         {
             FoodData foodData = holder.value();
-            // Check if the required mods are loaded
-            if (!foodData.areRequiredModsLoaded())
-            {   return;
-            }
 
             List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, foodData.item().flatListMap(ItemRequirement::items)));
             if (items.isEmpty())
@@ -445,10 +436,6 @@ public class ConfigLoadingHandler
         carryTemps.forEach(holder ->
         {
             ItemCarryTempData carryTempData = holder.value();
-            // Check if the required mods are loaded
-            if (!carryTempData.areRequiredModsLoaded())
-            {   return;
-            }
 
             List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, carryTempData.item().flatListMap(ItemRequirement::items)));
             if (items.isEmpty())
@@ -466,10 +453,6 @@ public class ConfigLoadingHandler
         dryingItems.forEach(holder ->
         {
             DryingItemData dryingItemData = holder.value();
-            // Check if the required mods are loaded
-            if (!dryingItemData.areRequiredModsLoaded())
-            {   return;
-            }
 
             List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, dryingItemData.item().flatListMap(ItemRequirement::items)));
             if (items.isEmpty())
@@ -482,15 +465,28 @@ public class ConfigLoadingHandler
         });
     }
 
+    private static void addInsulationSlotConfigs(Collection<Holder<ItemInsulationSlotsData>> insulationSlots)
+    {
+        insulationSlots.forEach(holder ->
+        {
+            ItemInsulationSlotsData insulationSlotData = holder.value();
+
+            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, insulationSlotData.item().flatListMap(ItemRequirement::items)));
+            if (items.isEmpty())
+            {   items.add(null);
+            }
+
+            for (Item item : items)
+            {   ConfigSettings.INSULATION_SLOT_OVERRIDES.get().put(item, insulationSlotData);
+            }
+        });
+    }
+
     private static void addBlockTempConfigs(Collection<Holder<BlockTempData>> blockTemps)
     {
         blockTemps.forEach(holder ->
         {
             BlockTempData blockTempData = holder.value();
-            // Check if the required mods are loaded
-            if (!blockTempData.areRequiredModsLoaded())
-            {   return;
-            }
             BlockTemp blockTemp = new BlockTempConfig(blockTempData)
             {
                 final double temperature = blockTempData.getTemperature();
@@ -517,10 +513,7 @@ public class ConfigLoadingHandler
         biomeTemps.forEach(holder ->
         {
             BiomeTempData biomeTempData = holder.value();
-            // Check if the required mods are loaded
-            if (!biomeTempData.areRequiredModsLoaded())
-            {   return;
-            }
+
             for (Holder<Biome> biome : RegistryHelper.mapRegistryTagList(Registries.BIOME, biomeTempData.biomes().flatten(), registryAccess))
             {
                 if (biomeTempData.isOffset())
@@ -538,10 +531,6 @@ public class ConfigLoadingHandler
         dimensionTemps.forEach(holder ->
         {
             DimensionTempData dimensionTempData = holder.value();
-            // Check if the required mods are loaded
-            if (!dimensionTempData.areRequiredModsLoaded())
-            {   return;
-            }
 
             for (Holder<DimensionType> dimension : RegistryHelper.mapRegistryTagList(Registries.DIMENSION_TYPE, dimensionTempData.dimensions().flatten(), registryAccess))
             {
@@ -560,10 +549,7 @@ public class ConfigLoadingHandler
         structureTemps.forEach(holder ->
         {
             StructureTempData structureTempData = holder.value();
-            // Check if the required mods are loaded
-            if (!structureTempData.areRequiredModsLoaded())
-            {   return;
-            }
+
             for (Holder<Structure> structure : RegistryHelper.mapRegistryTagList(Registries.STRUCTURE, structureTempData.structures().flatten(), registryAccess))
             {
                 if (structureTempData.isOffset())
@@ -580,13 +566,7 @@ public class ConfigLoadingHandler
     {
         // Add the depth temps to the config
         for (Holder<DepthTempData> holder : depthTemps)
-        {
-            DepthTempData depthData = holder.value();
-            // Check if the required mods are loaded
-            if (!depthData.areRequiredModsLoaded())
-            {   return;
-            }
-            ConfigSettings.DEPTH_REGIONS.get().add(depthData);
+        {   ConfigSettings.DEPTH_REGIONS.get().add(holder.value());
         }
     }
 
@@ -595,10 +575,7 @@ public class ConfigLoadingHandler
         mounts.forEach(holder ->
         {
             MountData mountData = holder.value();
-            // Check if the required mods are loaded
-            if (!mountData.areRequiredModsLoaded())
-            {   return;
-            }
+
             List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, mountData.entity().flatListMap(EntityRequirement::entities)));
             if (entities.isEmpty())
             {   entities.add(null);
@@ -614,10 +591,7 @@ public class ConfigLoadingHandler
         spawnBiomes.forEach(holder ->
         {
             SpawnBiomeData spawnBiomeData = holder.value();
-            // Check if the required mods are loaded
-            if (!spawnBiomeData.areRequiredModsLoaded())
-            {   return;
-            }
+
             for (Holder<Biome> biome : RegistryHelper.mapRegistryTagList(Registries.BIOME, spawnBiomeData.biomes(), registryAccess))
             {   ConfigSettings.ENTITY_SPAWN_BIOMES.get(registryAccess).put(biome, spawnBiomeData);
             }
@@ -629,10 +603,7 @@ public class ConfigLoadingHandler
         entityTemps.forEach(holder ->
         {
             EntityTempData entityTempData = holder.value();
-            // Check if the required mods are loaded
-            if (!entityTempData.areRequiredModsLoaded())
-            {   return;
-            }
+
             List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, entityTempData.entity().flatListMap(EntityRequirement::entities)));
             if (entities.isEmpty())
             {   entities.add(null);
