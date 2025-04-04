@@ -216,7 +216,7 @@ public class ConfigLoadingHandler
         MinecraftForge.EVENT_BUS.post(event);
 
         // Remove registries that don't have required loaded mods
-        registries.values().removeIf(holder -> holder.get().areRequiredModsLoaded());
+        registries.values().removeIf(holder -> !holder.get().areRequiredModsLoaded());
 
         // Remove registry entries that match removal criteria
         removeRegistries(event.getRegistries());
@@ -627,7 +627,8 @@ public class ConfigLoadingHandler
         List<Holder<T>> output = new ArrayList<>();
         DynamicOps<JsonElement> registryOps = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
 
-        Path coldSweatDataPath = FMLPaths.CONFIGDIR.get().resolve("coldsweat/data").resolve(registry.location().getPath());
+        String configFolder = registry.location().getNamespace().replace("_", "");
+        Path coldSweatDataPath = FMLPaths.CONFIGDIR.get().resolve(configFolder + "/data").resolve(registry.location().getPath());
         File jsonDirectory = coldSweatDataPath.toFile();
 
         if (!jsonDirectory.exists())
