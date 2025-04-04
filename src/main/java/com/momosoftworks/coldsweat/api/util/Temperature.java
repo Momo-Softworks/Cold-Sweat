@@ -358,6 +358,10 @@ public class Temperature
     {   removeModifiers(entity, trait, Integer.MAX_VALUE, Placement.Order.FIRST, condition);
     }
 
+    public static void removeModifiers(LivingEntity entity, Trait trait, Class<? extends TempModifier> clazz)
+    {   removeModifiers(entity, trait, Integer.MAX_VALUE, Placement.Order.FIRST, clazz::isInstance);
+    }
+
     /**
      * Gets all TempModifiers of the specified type on the player
      * @param entity is the entity being sampled
