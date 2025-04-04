@@ -52,8 +52,7 @@ public class RemoveRegistryData<T extends ConfigData> extends ConfigData impleme
     {
         Optional<Tag> serializedOpt = ModRegistries.getCodec((ResourceKey) registry).encodeStart(NbtOps.INSTANCE, object).result();
         return serializedOpt.map(serialized ->
-        {   return matches.test(nbt -> NbtRequirement.compareNbt(nbt, serialized, true))
-                || entries.stream().anyMatch(entry -> entry.equals(object.registryId()));
+        {   return matches.test(nbt -> NbtRequirement.compareNbt(nbt, serialized, true));
         }).orElse(false);
     }
 

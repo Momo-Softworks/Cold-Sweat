@@ -170,9 +170,7 @@ public class ConfigLoadingHandler
         for (Map.Entry<String, ModRegistries.RegistryHolder<?>> entry : ModRegistries.getRegistries().entrySet())
         {
             ResourceKey<Registry<? extends ConfigData>> key = (ResourceKey) entry.getValue().registry();
-            registries.putAll(key, registryAccess.registryOrThrow(key).holders()
-                                   .peek(holder -> holder.value().setRegistryId(holder.key().location()))
-                                   .toList());
+            registries.putAll(key, registryAccess.registryOrThrow(key).holders().toList());
         }
         return registries;
     }
@@ -642,10 +640,7 @@ public class ConfigLoadingHandler
                     codec.decode(registryOps, GsonHelper.parse(reader))
                             .resultOrPartial(ColdSweat.LOGGER::error)
                             .map(Pair::getFirst)
-                            .ifPresent(configData -> {
-                                configData.setRegistryId(new ResourceLocation(registry.location().getNamespace(), file.getName()));
-                                output.add(Holder.direct(configData));
-                            });
+                            .ifPresent(configData -> output.add(Holder.direct(configData)));
                 }
                 catch (Exception e)
                 {   ColdSweat.LOGGER.error("Failed to parse JSON config setting in {}: {}", registry.location(), file.getName(), e);
