@@ -41,7 +41,7 @@ public abstract class CreateRegistriesEvent extends Event
     }
 
     /**
-     * Fired directly after registries have been gathered, before registry removals are triggered.
+     * Fired directly after registries have been gathered, before registry removals are processed.
      */
     public static class Pre extends CreateRegistriesEvent
     {
@@ -64,7 +64,7 @@ public abstract class CreateRegistriesEvent extends Event
      * Fired after Cold Sweat's registries have been gathered and committed to {@link com.momosoftworks.coldsweat.config.ConfigSettings}.<br>
      * Registry removals have been processed at this point.<br>
      * <br>
-     * This event should be used to commit your custom registries.
+     * <b>Use this event to commit your custom registries.</b>
      */
     public static class Post extends CreateRegistriesEvent
     {
