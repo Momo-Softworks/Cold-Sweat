@@ -583,7 +583,8 @@ public class ConfigLoadingHandler
         List<T> output = new ArrayList<>();
         DynamicOps<JsonElement> registryOps = JsonOps.INSTANCE;
 
-        Path coldSweatDataPath = FMLPaths.CONFIGDIR.get().resolve("coldsweat/data").resolve(registry.location().getPath());
+        String configFolder = registry.location().getNamespace().replace("_", "");
+        Path coldSweatDataPath = FMLPaths.CONFIGDIR.get().resolve(configFolder + "/data").resolve(registry.location().getPath());
         File jsonDirectory = coldSweatDataPath.toFile();
 
         if (!jsonDirectory.exists())
