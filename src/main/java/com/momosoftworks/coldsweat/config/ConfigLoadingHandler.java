@@ -293,7 +293,7 @@ public class ConfigLoadingHandler
         {
             List<? extends ConfigData> sortedHolders = new ArrayList<>(registries.get(key));
             sortedHolders.sort(Comparator.comparing(holder ->
-            {   return RegistryHelper.getKey(holder).getPath().equals("default") ? 1 : 0;
+            {   return RegistryHelper.getKey(holder).getPath().startsWith("default") ? 1 : 0;
             }));
             registries.replaceValues(key, (Iterable) sortedHolders);
         }
