@@ -17,7 +17,6 @@ public abstract class ConfigData implements NbtSerializable
     private UUID id = UUID.randomUUID();
     private Type registryType;
     List<String> requiredMods;
-    ResourceLocation registryId;
 
     public ConfigData(List<String> requiredMods)
     {   this.requiredMods = requiredMods;
@@ -37,10 +36,6 @@ public abstract class ConfigData implements NbtSerializable
     {   return requiredMods;
     }
 
-    public ResourceLocation registryId()
-    {   return registryId;
-    }
-
     @Internal
     public void setId(UUID id)
     {   this.id = id;
@@ -49,11 +44,6 @@ public abstract class ConfigData implements NbtSerializable
     @Internal
     public void setRegistryType(Type registryType)
     {   this.registryType = registryType;
-    }
-
-    @Internal
-    public void setRegistryId(ResourceLocation registryId)
-    {   this.registryId = registryId;
     }
 
     @Override
