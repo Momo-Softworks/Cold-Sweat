@@ -558,7 +558,7 @@ public class EntityTempManager
                 }
 
                 if (player.isOnFire() && Temperature.hasModifier(player, Temperature.Trait.WORLD, WaterTempModifier.class))
-                {   player.extinguishFire();
+                {   player.clearFire();
                     Temperature.removeModifiers(player, Temperature.Trait.WORLD, WaterTempModifier.class);
                 }
             }
