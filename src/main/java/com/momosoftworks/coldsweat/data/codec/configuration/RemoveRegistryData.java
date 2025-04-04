@@ -35,7 +35,7 @@ public class RemoveRegistryData<T extends ConfigData> extends ConfigData
             Codec.STRING.xmap(ModRegistries::getRegistry, ModRegistries::getRegistryName).fieldOf("registry").forGetter(data -> (RegistryKey) data.registry),
             NegatableList.codec(CompoundNBT.CODEC).fieldOf("matches").forGetter(data -> data.matches),
             ResourceLocation.CODEC.listOf().fieldOf("entries").forGetter(data -> data.entries)
-    ).apply(instance, (key, matches, entries) -> new RemoveRegistryData<>((RegistryKey) key, (NegatableList<CompoundNBT>) matches, entries)));
+    ).apply(instance, (key, matches, entries) -> new RemoveRegistryData<>((RegistryKey) key, (NegatableList) matches, (List) entries)));
 
     public RegistryKey<Registry<T>> registry()
     {   return registry;
