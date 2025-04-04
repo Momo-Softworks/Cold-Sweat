@@ -2,7 +2,6 @@ package com.momosoftworks.coldsweat.core.network.message;
 
 import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
-import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.client.event.TooltipHandler;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -147,7 +146,7 @@ public class SyncItemPredicatesMessage
                 for (Pair<ItemStack, Collection<InsulatorData>> pair : cap.getInsulation())
                 {
                     for (InsulatorData insulatorData : pair.getSecond())
-                    {   this.predicateMap.put(insulatorData.getId(), insulatorData.test(entity, stack));
+                    {   this.predicateMap.put(insulatorData.uuid(), insulatorData.test(entity, stack));
                     }
                 }
             });
@@ -182,7 +181,7 @@ public class SyncItemPredicatesMessage
                                               .stream()
                                               .map(data ->
                                               {   boolean test = data.test(entity, stack, invSlot, equipmentSlot);
-                                                  return Map.entry(data.getId(), test);
+                                                  return Map.entry(data.uuid(), test);
                                               })
                                               .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
@@ -200,7 +199,7 @@ public class SyncItemPredicatesMessage
         configSetting.get().get(stack.getItem())
         .forEach(data ->
         {
-            UUID id = ((ConfigData) data).getId();
+            UUID id = ((ConfigData) data).uuid();
             configMap.put(id, data.test(entity, stack));
         });
         this.predicateMap.putAll(configMap);

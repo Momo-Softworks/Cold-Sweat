@@ -15,9 +15,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Predicate;
 
 public class DryingItemBuilderJS
@@ -64,7 +62,7 @@ public class DryingItemBuilderJS
     public DryingItemData build()
     {
         DryingItemData data = new DryingItemData(this.itemPredicate, this.result, this.entityPredicate, this.sound);
-        data.setType(ConfigData.Type.KUBEJS);
+        data.setRegistryType(ConfigData.Type.KUBEJS);
         return data;
     }
 }
