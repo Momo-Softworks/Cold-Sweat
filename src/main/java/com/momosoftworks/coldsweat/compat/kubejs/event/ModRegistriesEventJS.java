@@ -193,7 +193,7 @@ public class ModRegistriesEventJS extends StartupEventJS
             return;
         }
         V configData = constructor.apply(parsed);
-        configData.setType(ConfigData.Type.KUBEJS);
+        configData.setRegistryType(ConfigData.Type.KUBEJS);
         if (!configData.areRequiredModsLoaded()) return;
 
         for (Holder<K> holder : RegistryHelper.mapVanillaRegistryTagList(keyRegistry, parsed, registryAccess))

@@ -34,6 +34,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -170,7 +171,9 @@ public class ConfigLoadingHandler
         for (Map.Entry<String, ModRegistries.RegistryHolder<?>> entry : ModRegistries.getRegistries().entrySet())
         {
             ResourceKey<Registry<? extends ConfigData>> key = (ResourceKey) entry.getValue().registry();
-            registries.putAll(key, registryAccess.registryOrThrow(key).holders().collect(Collectors.toSet()));
+            registries.putAll(key, registryAccess.registryOrThrow(key).holders()
+                                   .peek(holder -> holder.value().setRegistryId(holder.key().location()))
+                                   .toList());
         }
         return registries;
     }
@@ -208,7 +211,7 @@ public class ConfigLoadingHandler
 
         // Mark holders as "JSON"
         for (Holder<? extends ConfigData> holder : registries.values())
-        {   holder.value().setType(ConfigData.Type.JSON);
+        {   holder.value().setRegistryType(ConfigData.Type.JSON);
         }
 
         // Fire registry creation event
@@ -410,7 +413,7 @@ public class ConfigLoadingHandler
 
             for (Item item : items)
             {
-                switch (fuelData.type())
+                switch (fuelData.fuelType())
                 {
                     case BOILER -> ConfigSettings.BOILER_FUEL.get().put(item, fuelData);
                     case ICEBOX -> ConfigSettings.ICEBOX_FUEL.get().put(item, fuelData);
@@ -622,7 +625,7 @@ public class ConfigLoadingHandler
         });
     }
 
-    private static <T> List<Holder<T>> parseConfigData(ResourceKey<Registry<T>> registry, Codec<T> codec, RegistryAccess registryAccess)
+    private static <T extends ConfigData> List<Holder<T>> parseConfigData(ResourceKey<Registry<T>> registry, Codec<T> codec, RegistryAccess registryAccess)
     {
         List<Holder<T>> output = new ArrayList<>();
         DynamicOps<JsonElement> registryOps = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
@@ -643,7 +646,10 @@ public class ConfigLoadingHandler
                     codec.decode(registryOps, GsonHelper.parse(reader))
                             .resultOrPartial(ColdSweat.LOGGER::error)
                             .map(Pair::getFirst)
-                            .ifPresent(insulator -> output.add(Holder.direct(insulator)));
+                            .ifPresent(configData -> {
+                                configData.setRegistryId(new ResourceLocation(registry.location().getNamespace(), file.getName()));
+                                output.add(Holder.direct(configData));
+                            });
                 }
                 catch (Exception e)
                 {   ColdSweat.LOGGER.error("Failed to parse JSON config setting in {}: {}", registry.location(), file.getName(), e);
