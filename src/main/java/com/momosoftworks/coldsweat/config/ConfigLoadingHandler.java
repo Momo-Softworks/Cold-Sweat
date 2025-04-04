@@ -203,6 +203,9 @@ public class ConfigLoadingHandler
         CreateRegistriesEvent.Pre event = new CreateRegistriesEvent.Pre(registryAccess, registries, REMOVED_REGISTRIES);
         MinecraftForge.EVENT_BUS.post(event);
 
+        // Remove registries that don't have required loaded mods
+        registries.values().removeIf(data -> !data.areRequiredModsLoaded());
+
         // Remove registry entries that match removal criteria
         removeRegistries(event.getRegistries());
 
@@ -350,11 +353,6 @@ public class ConfigLoadingHandler
     {
         insulators.forEach(insulator ->
         {
-            // Check if the required mods are loaded
-            if (!insulator.areRequiredModsLoaded())
-            {   return;
-            }
-
             // Add listed items as insulators
             List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(insulator.item().flatListMap(ItemRequirement::items)));
             if (items.isEmpty())
@@ -383,11 +381,6 @@ public class ConfigLoadingHandler
     {
         fuels.forEach(fuelData ->
         {
-            // Check if the required mods are loaded
-            if (!fuelData.areRequiredModsLoaded())
-            {   return;
-            }
-
             List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(fuelData.item().flatListMap(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
@@ -410,11 +403,6 @@ public class ConfigLoadingHandler
     {
         foods.forEach(foodData ->
         {
-            // Check if the required mods are loaded
-            if (!foodData.areRequiredModsLoaded())
-            {   return;
-            }
-
             List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(foodData.item().flatListMap(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
@@ -430,11 +418,6 @@ public class ConfigLoadingHandler
     {
         carryTemps.forEach(carryTempData ->
         {
-            // Check if the required mods are loaded
-            if (!carryTempData.areRequiredModsLoaded())
-            {   return;
-            }
-
             List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(carryTempData.item().flatListMap(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
@@ -450,11 +433,6 @@ public class ConfigLoadingHandler
     {
         dryingItems.forEach(dryingItemData ->
         {
-            // Check if the required mods are loaded
-            if (!dryingItemData.areRequiredModsLoaded())
-            {   return;
-            }
-
             List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(dryingItemData.item().flatListMap(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
@@ -470,11 +448,6 @@ public class ConfigLoadingHandler
     {
         insulationSlots.forEach(insulationSlotData ->
         {
-            // Check if the required mods are loaded
-            if (!insulationSlotData.areRequiredModsLoaded())
-            {   return;
-            }
-
             List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(insulationSlotData.item().flatListMap(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
@@ -490,10 +463,6 @@ public class ConfigLoadingHandler
     {
         blockTemps.forEach(blockTempData ->
         {
-            // Check if the required mods are loaded
-            if (!blockTempData.areRequiredModsLoaded())
-            {   return;
-            }
             BlockTemp blockTemp = new BlockTempConfig(blockTempData)
             {
                 final double temperature = blockTempData.getTemperature();
@@ -519,10 +488,6 @@ public class ConfigLoadingHandler
     {
         biomeTemps.forEach(biomeTempData ->
         {
-            // Check if the required mods are loaded
-            if (!biomeTempData.areRequiredModsLoaded())
-            {   return;
-            }
             for (Biome biome : biomeTempData.biomes().flatten())
             {
                 if (biomeTempData.isOffset())
@@ -539,11 +504,6 @@ public class ConfigLoadingHandler
     {
         dimensionTemps.forEach(dimensionTempData ->
         {
-            // Check if the required mods are loaded
-            if (!dimensionTempData.areRequiredModsLoaded())
-            {   return;
-            }
-
             for (DimensionType dimension : dimensionTempData.dimensions().flatten())
             {
                 if (dimensionTempData.isOffset())
@@ -560,10 +520,6 @@ public class ConfigLoadingHandler
     {
         structureTemps.forEach(structureTempData ->
         {
-            // Check if the required mods are loaded
-            if (!structureTempData.areRequiredModsLoaded())
-            {   return;
-            }
             for (StructureFeature<?, ?> structure : structureTempData.structures().flatten())
             {
                 if (structureTempData.isOffset())
@@ -580,12 +536,7 @@ public class ConfigLoadingHandler
     {
         // Add the depth temps to the config
         for (DepthTempData depthData : depthTemps)
-        {
-            // Check if the required mods are loaded
-            if (!depthData.areRequiredModsLoaded())
-            {   return;
-            }
-            ConfigSettings.DEPTH_REGIONS.get().add(depthData);
+        {   ConfigSettings.DEPTH_REGIONS.get().add(depthData);
         }
     }
 
@@ -593,10 +544,6 @@ public class ConfigLoadingHandler
     {
         mounts.forEach(mountData ->
         {
-            // Check if the required mods are loaded
-            if (!mountData.areRequiredModsLoaded())
-            {   return;
-            }
             List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapTaggableList(mountData.entity().flatListMap(EntityRequirement::entities)));
             if (entities.isEmpty())
             {   entities.add(null);
@@ -611,10 +558,6 @@ public class ConfigLoadingHandler
     {
         spawnBiomes.forEach(spawnBiomeData ->
         {
-            // Check if the required mods are loaded
-            if (!spawnBiomeData.areRequiredModsLoaded())
-            {   return;
-            }
             for (Biome biome : spawnBiomeData.biomes())
             {   ConfigSettings.ENTITY_SPAWN_BIOMES.get(registryAccess).put(biome, spawnBiomeData);
             }
@@ -625,10 +568,6 @@ public class ConfigLoadingHandler
     {
         entityTemps.forEach(entityTempData ->
         {
-            // Check if the required mods are loaded
-            if (!entityTempData.areRequiredModsLoaded())
-            {   return;
-            }
             List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapTaggableList(entityTempData.entity().flatListMap(EntityRequirement::entities)));
             if (entities.isEmpty())
             {   entities.add(null);
