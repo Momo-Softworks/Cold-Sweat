@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.NBTDynamicOps;
@@ -18,9 +19,9 @@ import java.util.Optional;
 public class RemoveRegistryData<T extends ConfigData> extends ConfigData
 {
     private final RegistryKey<Registry<T>> registry;
-    private final List<CompoundNBT> entries;
+    private final NegatableList<CompoundNBT> entries;
 
-    public RemoveRegistryData(RegistryKey<Registry<T>> registry, List<CompoundNBT> entries)
+    public RemoveRegistryData(RegistryKey<Registry<T>> registry, NegatableList<CompoundNBT> entries)
     {
         super(Arrays.asList());
         this.registry = registry;
@@ -29,29 +30,22 @@ public class RemoveRegistryData<T extends ConfigData> extends ConfigData
 
     public static final Codec<RemoveRegistryData<? extends ConfigData>> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.xmap(ModRegistries::getRegistry, ModRegistries::getRegistryName).fieldOf("registry").forGetter(data -> (RegistryKey) data.registry),
-            CompoundNBT.CODEC.listOf().fieldOf("matches").forGetter(data -> data.entries)
-    ).apply(instance, (key, ent) -> new RemoveRegistryData<>((RegistryKey) key, (List<CompoundNBT>) ent)));
+            NegatableList.codec(CompoundNBT.CODEC).fieldOf("matches").forGetter(data -> data.entries)
+    ).apply(instance, (key, ent) -> new RemoveRegistryData<>((RegistryKey) key, (NegatableList<CompoundNBT>) ent)));
 
     public RegistryKey<Registry<T>> registry()
     {   return registry;
     }
-    public List<CompoundNBT> entries()
+    public NegatableList<CompoundNBT> entries()
     {   return entries;
     }
 
     public boolean matches(T object)
     {
-        Optional<INBT> serialized = ModRegistries.getCodec((RegistryKey) registry).encodeStart(NBTDynamicOps.INSTANCE, object).result();
-        if (serialized.isPresent())
-        {
-            for (CompoundNBT data : entries)
-            {
-                if (NbtRequirement.compareNbt(data, serialized.get(), true))
-                {   return true;
-                }
-            }
-        }
-        return false;
+        Optional<INBT> serializedOpt = ModRegistries.getCodec((RegistryKey) registry).encodeStart(NBTDynamicOps.INSTANCE, object).result();
+        return serializedOpt.map(serialized ->
+        {   return entries.test(nbt -> NbtRequirement.compareNbt(nbt, serialized, true));
+        }).orElse(false);
     }
 
     @Override
