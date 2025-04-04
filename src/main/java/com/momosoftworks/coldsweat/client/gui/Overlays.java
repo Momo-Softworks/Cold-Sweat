@@ -122,11 +122,11 @@ public class Overlays
              Body Temperature
              */
 
+            // Blend body temperature (per frame)
+            BLEND_BODY_TEMP = CSMath.blend(PREV_BODY_TEMP, BODY_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
+
             if (mc.gameMode.canHurtPlayer() && mc.getCameraEntity() instanceof PlayerEntity && !Minecraft.getInstance().options.hideGui)
             {
-                // Blend body temperature (per frame)
-                BLEND_BODY_TEMP = CSMath.blend(PREV_BODY_TEMP, BODY_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
-
                 // Get text color
                 int color;
                 switch (((int) BODY_TEMP_SEVERITY))
