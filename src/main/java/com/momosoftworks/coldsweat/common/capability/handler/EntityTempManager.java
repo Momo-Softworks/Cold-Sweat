@@ -485,7 +485,7 @@ public class EntityTempManager
      * Handle modifiers for freezing, burning, and being wet
      */
     @SubscribeEvent
-    public static void handleWaterAndFreezing(PlayerTickEvent.Pre event)
+    public static void handleWaterFreezingFire(PlayerTickEvent.Pre event)
     {
         Player player = event.getEntity();
 
@@ -501,6 +501,11 @@ public class EntityTempManager
 
                 if (player.isFreezing())
                 {   Temperature.addOrReplaceModifier(player, new FreezingTempModifier(player.getTicksFrozen() / 13.5f).expires(5), Temperature.Trait.BASE, Placement.Duplicates.BY_CLASS);
+                }
+
+                if (player.isOnFire() && Temperature.hasModifier(player, Temperature.Trait.WORLD, WaterTempModifier.class))
+                {   player.extinguishFire();
+                    Temperature.removeModifiers(player, Temperature.Trait.WORLD, WaterTempModifier.class);
                 }
             }
 
