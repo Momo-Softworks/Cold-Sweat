@@ -2,22 +2,16 @@ package com.momosoftworks.coldsweat.core.network.message;
 
 import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
-import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.client.event.TooltipHandler;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
-import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.impl.RequirementHolder;
 import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.serialization.DynamicHolder;
-import net.minecraft.core.Registry;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -152,7 +146,7 @@ public class SyncItemPredicatesMessage
                 for (Pair<ItemStack, Collection<InsulatorData>> pair : cap.getInsulation())
                 {
                     for (InsulatorData insulatorData : pair.getSecond())
-                    {   this.predicateMap.put(insulatorData.getId(), insulatorData.test(entity, stack));
+                    {   this.predicateMap.put(insulatorData.uuid(), insulatorData.test(entity, stack));
                     }
                 }
             });
@@ -187,7 +181,7 @@ public class SyncItemPredicatesMessage
                                               .stream()
                                               .map(data ->
                                               {   boolean test = data.test(entity, stack, invSlot, equipmentSlot);
-                                                  return Map.entry(data.getId(), test);
+                                                  return Map.entry(data.uuid(), test);
                                               })
                                               .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
@@ -205,7 +199,7 @@ public class SyncItemPredicatesMessage
         configSetting.get().get(stack.getItem())
         .forEach(data ->
         {
-            UUID id = ((ConfigData) data).getId();
+            UUID id = ((ConfigData) data).uuid();
             configMap.put(id, data.test(entity, stack));
         });
         this.predicateMap.putAll(configMap);

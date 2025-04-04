@@ -126,7 +126,7 @@ public class CarriedItemBuilderJS
         ItemCarryTempData data = new ItemCarryTempData(this.itemPredicate, ImmutableList.copyOf(this.slots),
                                                        this.temperature, this.trait, maxEffect, this.entityPredicate,
                                                        this.attributes, this.immuneTempModifiers);
-        data.setType(ConfigData.Type.KUBEJS);
+        data.setRegistryType(ConfigData.Type.KUBEJS);
         return data;
     }
 }

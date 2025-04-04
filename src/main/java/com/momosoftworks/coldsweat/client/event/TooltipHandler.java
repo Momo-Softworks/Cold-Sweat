@@ -67,7 +67,7 @@ public class TooltipHandler
     public static HashMap<UUID, Boolean> HOVERED_STACK_PREDICATES = new HashMap<>();
 
     public static <T extends ConfigData> boolean passesRequirement(T element)
-    {   return HOVERED_STACK_PREDICATES.getOrDefault(element.getId(), true);
+    {   return HOVERED_STACK_PREDICATES.getOrDefault(element.uuid(), true);
     }
 
     public static boolean isShiftDown()
@@ -256,7 +256,7 @@ public class TooltipHandler
                 {   HOVERED_STACK = stack;
                 }
                 else if (HOVERED_ITEM_UPDATE_COOLDOWN <= 0
-                || ItemInsulationManager.getAllInsulatorsForStack(stack).stream().map(InsulatorData::getId).anyMatch(id -> !HOVERED_STACK_PREDICATES.containsKey(id)))
+                || ItemInsulationManager.getAllInsulatorsForStack(stack).stream().map(InsulatorData::uuid).anyMatch(id -> !HOVERED_STACK_PREDICATES.containsKey(id)))
                 {
                     HOVERED_STACK = stack;
                     HOVERED_ITEM_UPDATE_COOLDOWN = 5;
