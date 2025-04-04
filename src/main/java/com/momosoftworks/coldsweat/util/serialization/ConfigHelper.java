@@ -143,7 +143,7 @@ public class ConfigHelper
             V data = tomlParser.apply(entry);
             if (data == null) continue;
 
-            data.setType(ConfigData.Type.TOML);
+            data.setRegistryType(ConfigData.Type.TOML);
 
             putRegistryEntries(dataMap, keyRegistry, keyListGetter.apply(data), data);
         }
@@ -179,7 +179,7 @@ public class ConfigHelper
             V data = valueCreator.apply(entry);
             if (data != null)
             {
-                data.setType(ConfigData.Type.TOML);
+                data.setRegistryType(ConfigData.Type.TOML);
                 for (Holder<K> key : RegistryHelper.mapRegistryTagList(keyRegistry, taggedListGetter.apply(data), registryAccess))
                 {   mapAdder.accept(map, key, data);
                 }
@@ -254,7 +254,7 @@ public class ConfigHelper
             .resultOrPartial(e -> ColdSweat.LOGGER.error("Error serializing {} {}: {}", modRegistry.location(), entry.getValue(), e))
             .ifPresent(encoded ->
             {
-                ((CompoundTag) encoded).putUUID("UUID", entry.getValue().getId());
+                ((CompoundTag) encoded).putUUID("UUID", entry.getValue().uuid());
                 mapTag.put(elementId.toString(), encoded);
             });
         }
@@ -350,7 +350,7 @@ public class ConfigHelper
                 .resultOrPartial(e -> ColdSweat.LOGGER.error("Error serializing {} {}: {}", modRegistry.location(), entry.getValue(), e))
                 .ifPresent(encoded ->
                 {
-                    ((CompoundTag) encoded).putUUID("UUID", value.getId());
+                    ((CompoundTag) encoded).putUUID("UUID", value.uuid());
                     valuesTag.add(encoded);
                 });
             }

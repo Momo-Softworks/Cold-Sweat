@@ -193,7 +193,7 @@ public class ModRegistriesEventJS implements KubeStartupEvent
             return;
         }
         V configData = constructor.apply(parsed);
-        configData.setType(ConfigData.Type.KUBEJS);
+        configData.setRegistryType(ConfigData.Type.KUBEJS);
         if (!configData.areRequiredModsLoaded()) return;
 
         for (Holder<K> holder : RegistryHelper.mapRegistryTagList(keyRegistry, parsed, registryAccess))

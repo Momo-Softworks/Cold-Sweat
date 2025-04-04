@@ -62,7 +62,7 @@ public class DryingItemBuilderJS
     public DryingItemData build()
     {
         DryingItemData data = new DryingItemData(this.itemPredicate, this.result, this.entityPredicate, this.sound);
-        data.setType(ConfigData.Type.KUBEJS);
+        data.setRegistryType(ConfigData.Type.KUBEJS);
         return data;
     }
 }
