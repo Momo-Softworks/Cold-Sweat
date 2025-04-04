@@ -42,7 +42,7 @@ public class FuelBuilderJS
     public FuelData build(FuelData.FuelType fuelType)
     {
         FuelData data = new FuelData(this.itemPredicate, fuelType, this.fuel);
-        data.setType(ConfigData.Type.KUBEJS);
+        data.setRegistryType(ConfigData.Type.KUBEJS);
         return data;
     }
 }

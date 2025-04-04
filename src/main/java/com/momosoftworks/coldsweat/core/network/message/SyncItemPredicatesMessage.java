@@ -148,7 +148,7 @@ public class SyncItemPredicatesMessage
                 for (Pair<ItemStack, Collection<InsulatorData>> pair : cap.getInsulation())
                 {
                     for (InsulatorData insulatorData : pair.getSecond())
-                    {   this.predicateMap.put(insulatorData.getId(), insulatorData.test(entity, stack));
+                    {   this.predicateMap.put(insulatorData.uuid(), insulatorData.test(entity, stack));
                     }
                 }
             });
@@ -183,7 +183,7 @@ public class SyncItemPredicatesMessage
                                               .stream()
                                               .map(data ->
                                               {   boolean test = data.test(entity, stack, invSlot, equipmentSlot);
-                                                  return new AbstractMap.SimpleEntry<>(data.getId(), test);
+                                                  return new AbstractMap.SimpleEntry<>(data.uuid(), test);
                                               })
                                               .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
@@ -201,7 +201,7 @@ public class SyncItemPredicatesMessage
         configSetting.get().get(stack.getItem())
         .forEach(data ->
         {
-            UUID id = ((ConfigData) data).getId();
+            UUID id = ((ConfigData) data).uuid();
             configMap.put(id, data.test(entity, stack));
         });
         this.predicateMap.putAll(configMap);

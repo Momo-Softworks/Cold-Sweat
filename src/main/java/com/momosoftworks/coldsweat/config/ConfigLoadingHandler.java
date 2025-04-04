@@ -196,7 +196,7 @@ public class ConfigLoadingHandler
 
         // Mark holders as "JSON"
         for (ConfigData data : registries.values())
-        {   data.setType(ConfigData.Type.JSON);
+        {   data.setRegistryType(ConfigData.Type.JSON);
         }
 
         // Fire registry creation event
@@ -388,7 +388,7 @@ public class ConfigLoadingHandler
 
             for (Item item : items)
             {
-                switch (fuelData.type())
+                switch (fuelData.fuelType())
                 {
                     case BOILER : ConfigSettings.BOILER_FUEL.get().put(item, fuelData); break;
                     case ICEBOX : ConfigSettings.ICEBOX_FUEL.get().put(item, fuelData); break;
@@ -578,7 +578,7 @@ public class ConfigLoadingHandler
         });
     }
 
-    private static <T> List<T> parseConfigData(RegistryKey<Registry<T>> registry, Codec<T> codec, DynamicRegistries registryAccess)
+    private static <T extends ConfigData> List<T> parseConfigData(RegistryKey<Registry<T>> registry, Codec<T> codec, DynamicRegistries registryAccess)
     {
         List<T> output = new ArrayList<>();
         DynamicOps<JsonElement> registryOps = JsonOps.INSTANCE;
@@ -603,7 +603,10 @@ public class ConfigLoadingHandler
                     codec.decode(registryOps, JSONUtils.parse(reader))
                             .resultOrPartial(ColdSweat.LOGGER::error)
                             .map(Pair::getFirst)
-                            .ifPresent(insulator -> output.add(insulator));
+                            .ifPresent(configData -> {
+                                configData.setRegistryId(new ResourceLocation(registry.location().getNamespace(), file.getName()));
+                                output.add(configData);
+                            });
                 }
                 catch (Exception e)
                 {   ColdSweat.LOGGER.error("Failed to parse JSON config setting in {}: {}", registry.location(), file.getName(), e);

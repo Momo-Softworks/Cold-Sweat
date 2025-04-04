@@ -109,7 +109,7 @@ public class InsulatorBuilderJS
     {
         InsulatorData data = new InsulatorData(this.itemPredicate, slot, insulation, this.entityPredicate,
                                                attributes, immuneTempModifiers, multiSlot);
-        data.setType(ConfigData.Type.KUBEJS);
+        data.setRegistryType(ConfigData.Type.KUBEJS);
         return data;
     }
 }
