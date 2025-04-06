@@ -108,7 +108,8 @@ public class TooltipHandler
         {
             for (--tooltipEndIndex; tooltipEndIndex > 0; tooltipEndIndex--)
             {
-                if (tooltip.get(tooltipEndIndex).left().map(text -> text.getString().equals(ForgeRegistries.ITEMS.getKey(stack.getItem()).toString())).orElse(false))
+                String itemId = ForgeRegistries.ITEMS.getKey(stack.getItem()).toString();
+                if (tooltip.get(tooltipEndIndex).left().map(text -> text.getString().equals(itemId)).orElse(false))
                 {   break;
                 }
             }
@@ -235,7 +236,7 @@ public class TooltipHandler
             if (strikethrough)
             {   params.add("strikethrough");
             }
-            MutableComponent newComponent = setComponentContents(component, new TranslatableContents(translatable.getKey(), "_", params.toArray()));
+            MutableComponent newComponent = setComponentContents(component, new TranslatableContents(translatable.getKey(), translatable.getFallback(), params.toArray()));
             if (strikethrough)
             {   newComponent.setStyle(Style.EMPTY.withColor(7561572));
             }
