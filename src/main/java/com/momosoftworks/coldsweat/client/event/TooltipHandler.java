@@ -1,7 +1,5 @@
 package com.momosoftworks.coldsweat.client.event;
 
-import com.google.common.collect.Multimap;
-import com.google.common.collect.MultimapBuilder;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Either;
@@ -271,12 +269,16 @@ public class TooltipHandler
                 if (stack.isEmpty())
                 {   HOVERED_STACK = stack;
                 }
-                else if (HOVERED_ITEM_UPDATE_COOLDOWN <= 0
-                || ItemInsulationManager.getAllInsulatorsForStack(stack).stream().map(InsulatorData::uuid).anyMatch(id -> !HOVERED_STACK_PREDICATES.containsKey(id)))
+                else
                 {
-                    HOVERED_STACK = stack;
-                    HOVERED_ITEM_UPDATE_COOLDOWN = 5;
-                    PacketDistributor.sendToServer(SyncItemPredicatesMessage.fromClient(stack.copy(), hoveredSlot.index, equipmentSlot));
+                    List<InsulatorData> insulators = ItemInsulationManager.getAllInsulatorsForStack(stack);
+                    if (!insulators.isEmpty()
+                    && (HOVERED_ITEM_UPDATE_COOLDOWN <= 0 || insulators.stream().anyMatch(insulator -> !HOVERED_STACK_PREDICATES.containsKey(insulator.uuid()))))
+                    {
+                        HOVERED_STACK = stack;
+                        HOVERED_ITEM_UPDATE_COOLDOWN = 5;
+                        PacketDistributor.sendToServer(SyncItemPredicatesMessage.fromClient(stack.copy(), hoveredSlot.index, equipmentSlot));
+                    }
                 }
             }
         }
