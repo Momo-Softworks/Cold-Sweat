@@ -52,6 +52,7 @@ import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -103,7 +104,8 @@ public class TooltipHandler
         {
             for (--tooltipEndIndex; tooltipEndIndex > 0; tooltipEndIndex--)
             {
-                if (tooltip.get(tooltipEndIndex).getString().equals(stack.getItem().getRegistryName().toString()))
+                String itemId = ForgeRegistries.ITEMS.getKey(stack.getItem()).toString();
+                if (tooltip.get(tooltipEndIndex).getString().equals(itemId))
                 {   break;
                 }
             }
