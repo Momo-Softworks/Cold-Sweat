@@ -121,7 +121,8 @@ public class TooltipHandler
         {
             for (--tooltipEndIndex; tooltipEndIndex > 0; tooltipEndIndex--)
             {
-                if (tooltip.get(tooltipEndIndex).left().map(text -> text.getString().equals(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString())).orElse(false))
+                String itemId = BuiltInRegistries.ITEM.getKey(stack.getItem()).toString();
+                if (tooltip.get(tooltipEndIndex).left().map(text -> text.getString().equals(itemId)).orElse(false))
                 {   break;
                 }
             }
