@@ -99,7 +99,8 @@ public class TooltipHandler
         {
             for (--tooltipEndIndex; tooltipEndIndex > 0; tooltipEndIndex--)
             {
-                if (tooltip.get(tooltipEndIndex).left().map(text -> text.getString().equals(ForgeRegistries.ITEMS.getKey(stack.getItem()).toString())).orElse(false))
+                String itemId = ForgeRegistries.ITEMS.getKey(stack.getItem()).toString();
+                if (tooltip.get(tooltipEndIndex).left().map(text -> text.getString().equals(itemId)).orElse(false))
                 {   break;
                 }
             }
