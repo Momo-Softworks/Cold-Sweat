@@ -63,13 +63,30 @@ public class EquipmentRequirement
 
     public boolean test(Entity entity)
     {
-        return entity instanceof LivingEntity
-            && head.test(((LivingEntity) entity).getItemBySlot(EquipmentSlotType.HEAD), true)
-            && chest.test(((LivingEntity) entity).getItemBySlot(EquipmentSlotType.CHEST), true)
-            && legs.test(((LivingEntity) entity).getItemBySlot(EquipmentSlotType.LEGS), true)
-            && feet.test(((LivingEntity) entity).getItemBySlot(EquipmentSlotType.FEET), true)
-            && mainHand.test(((LivingEntity) entity).getMainHandItem(), true)
-            && offHand.test(((LivingEntity) entity).getOffhandItem(), true);
+        return this.equals(NONE)
+            || (entity instanceof LivingEntity
+            && testSlot(EquipmentSlotType.HEAD, ((LivingEntity) entity))
+            && testSlot(EquipmentSlotType.CHEST, ((LivingEntity) entity))
+            && testSlot(EquipmentSlotType.LEGS, ((LivingEntity) entity))
+            && testSlot(EquipmentSlotType.FEET, ((LivingEntity) entity))
+            && testSlot(EquipmentSlotType.MAINHAND, ((LivingEntity) entity))
+            && testSlot(EquipmentSlotType.OFFHAND, ((LivingEntity) entity)));
+    }
+
+    private boolean testSlot(EquipmentSlotType slot, LivingEntity entity)
+    {
+        ItemRequirement requirement;
+        switch (slot)
+        {
+            case HEAD : requirement = head; break;
+            case CHEST : requirement = chest; break;
+            case LEGS : requirement = legs; break;
+            case FEET : requirement = feet; break;
+            case MAINHAND : requirement = mainHand; break;
+            case OFFHAND : requirement = offHand; break;
+            default: requirement = head; break;
+        }
+        return requirement.test(entity.getItemBySlot(slot), true);
     }
 
     @Override
