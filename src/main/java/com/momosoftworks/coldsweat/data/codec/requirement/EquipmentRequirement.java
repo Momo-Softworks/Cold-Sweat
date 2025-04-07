@@ -48,6 +48,7 @@ public record EquipmentRequirement(ItemRequirement head, ItemRequirement chest,
             case FEET -> feet;
             case MAINHAND -> mainHand;
             case OFFHAND -> offHand;
+            default -> ItemRequirement.NONE;
         };
         return requirement.test(entity.getItemBySlot(slot), true);
     }
