@@ -2971,3 +2971,42 @@ Technical Changes:
       - Any block, entity, item, or location requirement can be negated in this way (except fields defined within other requirements)
       - The "old" format of these arguments will continue to be supported (i.e. "entity":{"entities":[#minecraft:skeletons]})
 - The min/max temperature fields in block temperature JSON are now world temp requirements
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.4-b02b
+- Added "modifier" subcommand for /temperature
+      - Enables adding/removing temperature modifiers on entities
+- The "modify" subcommand for /temperature has been renamed to "attribute"
+- Added new configs for the waterskin:
+      - "Waterskin Hotbar Strength": The strength of the gradual cooling/heating of waterskins in the hotbar
+      - "Waterskin Neutralize Speed": The speed at which waterskins' temperature will drain when in the hotbar
+- Tweaked sewing table block and GUI textures
+- Changed the sewing table recipe to be consistent with other workstations (like the smithing table)
+- Moved the hearth's fluid intakes to coincide with its fuel inputs
+- If the player is on fire and wet, they will now be extinguished and dried off
+- Lava temperature is now TOML-based so it can be more easily changed
+
+Fixes:
+- (1.21) Fixed the hearth & other thermal sources not accepting fluid input
+* (1.21) Fixed Thirst Was Taken compat module not loading if mod is present
+- (1.21) Fixed incorrect attribute modifiers for the Create netherite diving set bonus
+* (1.21) Fixed network lag when synchronizing insulated armor items
+* (1.21) Fixed network error when fetching the tooltip for insulator items in some cases
+* Fixed crash when checking the formatting for insulating armor items
+- Fixed crash when using Iceberg 1.3.0+
+* Fixed crash when cleaning up cached capabilities in some cases
+* Fixed insulation items not working properly when applied to armor
+* Fixed only being able to insulate half of the slots on armor
+- Fixed incorrect logic when applying insulators that only take up one slot
+- Fixed KubeJS insulator configs not compiling properly
+* Fixed distortion effects triggering when the player has the Grace effect
+- Fixed adaptive insulation tooltips displaying incorrectly
+- Fixed tooltip metadata being modified incorrectly for armor items
+- Fixed the shoulders on the chameleon scale chestplate being slightly too low
+
+Technical Changes:
+- All JSON configs that start with the word "default" will be loaded last, rather than just the ones named "default"
+- Registry removal configs now accept a negatable list of NBT
+- Insulating mount JSON now has an "immune_temp_modifiers" field, similar to insulator items
+- The "cold_insulation" and "heat_insulation" fields in insulating mount JSON are now optional (defaulting to 0)
