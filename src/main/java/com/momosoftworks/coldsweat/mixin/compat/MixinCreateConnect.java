@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.mixin.compat;
 
 import com.momosoftworks.coldsweat.common.block.SmokestackBlock;
-import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.simibubi.create.content.fluids.pipes.FluidPipeBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -19,9 +18,9 @@ public class MixinCreateConnect
      * Enable Create pipes connecting to the smokestack of the hearth
      */
     @Inject(method = "canConnectTo", at = @At("HEAD"), cancellable = true, remap = false)
-    private static void shouldPipesConnectTo(BlockAndTintGetter world, BlockPos neighborPos, BlockState neighbor, Direction direction, CallbackInfoReturnable<Boolean> cir)
+    private static void shouldPipesConnectTo(BlockAndTintGetter world, BlockPos pos, BlockState neighborState, Direction direction, CallbackInfoReturnable<Boolean> cir)
     {
-        if (direction == Direction.DOWN && neighbor.getBlock() instanceof SmokestackBlock)
+        if (neighborState.getBlock() instanceof SmokestackBlock)
         {   cir.setReturnValue(true);
         }
     }

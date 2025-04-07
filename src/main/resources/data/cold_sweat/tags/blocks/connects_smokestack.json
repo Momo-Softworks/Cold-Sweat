@@ -3,6 +3,14 @@
   "values": [
     "cold_sweat:smokestack",
     "cold_sweat:hearth_top",
-    "#minecraft:walls"
+    "#minecraft:walls",
+    {
+      "required": false,
+      "id": "create:fluid_pipe"
+    },
+    {
+      "required": false,
+      "id": "create:encased_fluid_pipe"
+    }
   ]
 }
