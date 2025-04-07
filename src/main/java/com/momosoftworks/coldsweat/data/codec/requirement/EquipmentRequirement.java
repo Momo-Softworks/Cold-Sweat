@@ -28,13 +28,28 @@ public record EquipmentRequirement(ItemRequirement head, ItemRequirement chest,
 
     public boolean test(Entity entity)
     {
-        return entity instanceof LivingEntity living
-            && head.test(living.getItemBySlot(EquipmentSlot.HEAD), true)
-            && chest.test(living.getItemBySlot(EquipmentSlot.CHEST), true)
-            && legs.test(living.getItemBySlot(EquipmentSlot.LEGS), true)
-            && feet.test(living.getItemBySlot(EquipmentSlot.FEET), true)
-            && mainHand.test(living.getMainHandItem(), true)
-            && offHand.test(living.getOffhandItem(), true);
+        return this.equals(NONE)
+            || (entity instanceof LivingEntity living
+            && testSlot(EquipmentSlot.HEAD, living)
+            && testSlot(EquipmentSlot.CHEST, living)
+            && testSlot(EquipmentSlot.LEGS, living)
+            && testSlot(EquipmentSlot.FEET, living)
+            && testSlot(EquipmentSlot.MAINHAND, living)
+            && testSlot(EquipmentSlot.OFFHAND, living));
+    }
+
+    private boolean testSlot(EquipmentSlot slot, LivingEntity entity)
+    {
+        ItemRequirement requirement = switch (slot)
+        {
+            case HEAD -> head;
+            case CHEST -> chest;
+            case LEGS -> legs;
+            case FEET -> feet;
+            case MAINHAND -> mainHand;
+            case OFFHAND -> offHand;
+        };
+        return requirement.test(entity.getItemBySlot(slot), true);
     }
 
     @Override
