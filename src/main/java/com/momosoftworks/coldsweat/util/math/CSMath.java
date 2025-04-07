@@ -913,7 +913,7 @@ public class CSMath
         }
     }
 
-    public static Rotation directionToRotation(Direction direction)
+    public static Rotation rotationFromNorth(Direction direction)
     {
         switch (direction)
         {
@@ -921,6 +921,18 @@ public class CSMath
             case EAST -> { return Rotation.CLOCKWISE_90; }
             case SOUTH -> { return Rotation.CLOCKWISE_180; }
             case WEST -> { return Rotation.COUNTERCLOCKWISE_90; }
+            default -> { return Rotation.NONE; }
+        }
+    }
+
+    public static Rotation rotationToNorth(Direction direction)
+    {
+        switch (direction)
+        {
+            case NORTH -> { return Rotation.NONE; }
+            case EAST -> { return Rotation.COUNTERCLOCKWISE_90; }
+            case SOUTH -> { return Rotation.CLOCKWISE_180; }
+            case WEST -> { return Rotation.CLOCKWISE_90; }
             default -> { return Rotation.NONE; }
         }
     }

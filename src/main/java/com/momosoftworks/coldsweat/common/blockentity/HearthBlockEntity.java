@@ -236,7 +236,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     {
         if (side == null) return false;
         Direction facing = this.getBlockState().getValue(HearthBottomBlock.FACING);
-        Direction rotatedSide = CSMath.directionToRotation(facing).rotate(side);
+        Direction rotatedSide = CSMath.rotationToNorth(facing).rotate(side);
         return this.getHeatingSides().contains(rotatedSide);
     }
 
@@ -247,7 +247,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     {
         if (side == null) return false;
         Direction facing = this.getBlockState().getValue(HearthBottomBlock.FACING);
-        Direction rotatedSide = CSMath.directionToRotation(facing).rotate(side);
+        Direction rotatedSide = CSMath.rotationToNorth(facing).rotate(side);
         return this.getCoolingSides().contains(rotatedSide);
     }
 
@@ -577,7 +577,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         Direction facing = this.getBlockState().getValue(HearthBottomBlock.FACING);
         for (Direction side : this.getCoolingSides())
         {
-            Direction rotatedSide = CSMath.directionToRotation(facing).rotate(side);
+            Direction rotatedSide = CSMath.rotationFromNorth(facing).rotate(side);
             if (this.level.hasSignal(this.getBlockPos().relative(rotatedSide), rotatedSide))
             {   return true;
             }
@@ -590,7 +590,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         Direction facing = this.getBlockState().getValue(HearthBottomBlock.FACING);
         for (Direction side : this.getHeatingSides())
         {
-            Direction rotatedSide = CSMath.directionToRotation(facing).rotate(side);
+            Direction rotatedSide = CSMath.rotationFromNorth(facing).rotate(side);
             if (this.level.hasSignal(this.getBlockPos().relative(rotatedSide), rotatedSide))
             {   return true;
             }
