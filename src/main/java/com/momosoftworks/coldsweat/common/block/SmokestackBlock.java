@@ -29,6 +29,8 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
+import javax.annotation.Nullable;
+
 public class SmokestackBlock extends Block implements SimpleWaterloggedBlock
 {
     public static final EnumProperty<Facing> FACING = EnumProperty.create("facing", Facing.class);
@@ -141,6 +143,9 @@ public class SmokestackBlock extends Block implements SimpleWaterloggedBlock
         }
         if (newDir != null)
         {
+            if (newDir.getAxis() == facing.getAxis())
+            {   return facing;
+            }
             BlockState neighbor = level.getBlockState(pos.relative(newDir));
             if (neighbor.getBlock() instanceof SmokestackBlock)
             {
@@ -153,9 +158,7 @@ public class SmokestackBlock extends Block implements SimpleWaterloggedBlock
                          ? Facing.fromDirection(newDir.getOpposite())
                          : neighborFacing;
             }
-            else if (neighbor.is(ModBlockTags.THERMAL_SOURCE) && newDir == Direction.DOWN)
-            {   return Facing.fromDirection(newDir.getOpposite());
-            }
+            else return Facing.fromDirection(newDir.getOpposite());
         }
         return facing;
     }
@@ -304,8 +307,9 @@ public class SmokestackBlock extends Block implements SimpleWaterloggedBlock
             };
         }
 
+        @Nullable
         public Direction.Axis getAxis()
-        {   return this.toDirection().getAxis();
+        {   return this == BEND ? null : this.toDirection().getAxis();
         }
 
         public Facing rotate(Rotation rotation)

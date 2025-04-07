@@ -18,9 +18,9 @@ public class MixinCreateConnect
      * Enable Create pipes connecting to the smokestack of the hearth
      */
     @Inject(method = "canConnectTo", at = @At("HEAD"), cancellable = true, remap = false)
-    private static void shouldPipesConnectTo(BlockAndTintGetter world, BlockPos neighborPos, BlockState neighbor, Direction direction, CallbackInfoReturnable<Boolean> cir)
+    private static void shouldPipesConnectTo(BlockAndTintGetter world, BlockPos pos, BlockState neighborState, Direction direction, CallbackInfoReturnable<Boolean> cir)
     {
-        if (direction == Direction.DOWN && neighbor.getBlock() instanceof SmokestackBlock)
+        if (neighborState.getBlock() instanceof SmokestackBlock)
         {   cir.setReturnValue(true);
         }
     }
