@@ -768,7 +768,7 @@ public class EntityTempManager
                 {
                     MountData entityInsul = ConfigSettings.INSULATED_MOUNTS.get().get(mount.getType())
                                                   .stream().filter(mnt -> mnt.test(mount)).findFirst().orElse(null);
-                    if (entityInsul != null && entityInsul.test(mount))
+                    if (entityInsul != null)
                     {   Temperature.addOrReplaceModifier(player, new MountTempModifier(entityInsul.coldInsulation(), entityInsul.heatInsulation()).tickRate(5).expires(5), Temperature.Trait.RATE, Placement.Duplicates.BY_CLASS);
                     }
                 }
