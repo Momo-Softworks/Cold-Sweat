@@ -33,7 +33,7 @@ public class TempModifierArgument implements ArgumentType<ResourceLocation>
     @Override
     public ResourceLocation parse(StringReader stringReader) throws CommandSyntaxException
     {   ResourceLocation location = ResourceLocation.read(stringReader);
-        if (location.getNamespace().equals("minecraft"))
+        if (location.getNamespace().equals(ResourceLocation.DEFAULT_NAMESPACE))
         {   location = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, location.getPath());
         }
         return location;
