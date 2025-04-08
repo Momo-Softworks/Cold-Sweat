@@ -201,6 +201,14 @@ public class ConfigUpdater
             }
         }
 
+        /*
+         2.4-b02b
+         */
+        if (isBehind(configVersion, "2.4-b02b"))
+        {
+            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, Arrays.asList("minecraft:lava", 0.25, 7, "mc", 4, "", "", 21.5));
+        }
+
         // Update config version
         MainSettingsConfig.VERSION.set(version);
 
