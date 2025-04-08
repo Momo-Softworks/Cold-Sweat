@@ -33,35 +33,34 @@ public class ItemInit
             new Item(new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
 
     // Armor Items
+    public static final Item.Properties ARMOR_PROPERTIES = new Item.Properties().stacksTo(1).tab(ColdSweatGroup.COLD_SWEAT);
+
     public static final RegistryObject<Item> HOGLIN_HEADPIECE = ITEMS.register("hoglin_headpiece", () ->
-            new HoglinArmorItem(ModArmorMaterials.HOGLIN, EquipmentSlotType.HEAD, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
-
+            new HoglinArmorItem(ModArmorMaterials.HOGLIN, EquipmentSlotType.HEAD, ARMOR_PROPERTIES));
     public static final RegistryObject<Item> HOGLIN_TUNIC = ITEMS.register("hoglin_tunic", () ->
-            new HoglinArmorItem(ModArmorMaterials.HOGLIN, EquipmentSlotType.CHEST, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
-
+            new HoglinArmorItem(ModArmorMaterials.HOGLIN, EquipmentSlotType.CHEST, ARMOR_PROPERTIES));
     public static final RegistryObject<Item> HOGLIN_TROUSERS = ITEMS.register("hoglin_trousers", () ->
-            new HoglinArmorItem(ModArmorMaterials.HOGLIN, EquipmentSlotType.LEGS, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
-
+            new HoglinArmorItem(ModArmorMaterials.HOGLIN, EquipmentSlotType.LEGS, ARMOR_PROPERTIES));
     public static final RegistryObject<Item> HOGLIN_HOOVES = ITEMS.register("hoglin_hooves", () ->
-            new HoglinArmorItem(ModArmorMaterials.HOGLIN, EquipmentSlotType.FEET, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
+            new HoglinArmorItem(ModArmorMaterials.HOGLIN, EquipmentSlotType.FEET, ARMOR_PROPERTIES));
 
     public static final RegistryObject<Item> GOAT_FUR_CAP = ITEMS.register("goat_fur_cap", () ->
-            new FurArmorItem(ModArmorMaterials.GOAT_FUR, EquipmentSlotType.HEAD, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
+            new FurArmorItem(ModArmorMaterials.GOAT_FUR, EquipmentSlotType.HEAD, ARMOR_PROPERTIES));
     public static final RegistryObject<Item> GOAT_FUR_PARKA = ITEMS.register("goat_fur_parka", () ->
-            new FurArmorItem(ModArmorMaterials.GOAT_FUR, EquipmentSlotType.CHEST, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
+            new FurArmorItem(ModArmorMaterials.GOAT_FUR, EquipmentSlotType.CHEST, ARMOR_PROPERTIES));
     public static final RegistryObject<Item> GOAT_FUR_PANTS = ITEMS.register("goat_fur_pants", () ->
-            new FurArmorItem(ModArmorMaterials.GOAT_FUR, EquipmentSlotType.LEGS, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
+            new FurArmorItem(ModArmorMaterials.GOAT_FUR, EquipmentSlotType.LEGS, ARMOR_PROPERTIES));
     public static final RegistryObject<Item> GOAT_FUR_BOOTS = ITEMS.register("goat_fur_boots", () ->
-            new FurArmorItem(ModArmorMaterials.GOAT_FUR, EquipmentSlotType.FEET, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
+            new FurArmorItem(ModArmorMaterials.GOAT_FUR, EquipmentSlotType.FEET, ARMOR_PROPERTIES));
 
     public static final RegistryObject<Item> CHAMELEON_HELMET = ITEMS.register("chameleon_scale_helmet", () ->
-            new ChameleonArmorItem(ModArmorMaterials.CHAMELEON, EquipmentSlotType.HEAD, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
+            new ChameleonArmorItem(ModArmorMaterials.CHAMELEON, EquipmentSlotType.HEAD, ARMOR_PROPERTIES));
     public static final RegistryObject<Item> CHAMELEON_CHESTPLATE = ITEMS.register("chameleon_scale_chestplate", () ->
-            new ChameleonArmorItem(ModArmorMaterials.CHAMELEON, EquipmentSlotType.CHEST, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
+            new ChameleonArmorItem(ModArmorMaterials.CHAMELEON, EquipmentSlotType.CHEST, ARMOR_PROPERTIES));
     public static final RegistryObject<Item> CHAMELEON_LEGGINGS = ITEMS.register("chameleon_scale_leggings", () ->
-            new ChameleonArmorItem(ModArmorMaterials.CHAMELEON, EquipmentSlotType.LEGS, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
+            new ChameleonArmorItem(ModArmorMaterials.CHAMELEON, EquipmentSlotType.LEGS, ARMOR_PROPERTIES));
     public static final RegistryObject<Item> CHAMELEON_BOOTS = ITEMS.register("chameleon_scale_boots", () ->
-            new ChameleonArmorItem(ModArmorMaterials.CHAMELEON, EquipmentSlotType.FEET, new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
+            new ChameleonArmorItem(ModArmorMaterials.CHAMELEON, EquipmentSlotType.FEET, ARMOR_PROPERTIES));
 
     // Block Items
     public static final RegistryObject<BlockItem> BOILER = ITEMS.register("boiler", () -> new BlockItem(BlockInit.BOILER.get(), BoilerBlock.getItemProperties()));
