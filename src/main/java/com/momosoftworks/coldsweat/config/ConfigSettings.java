@@ -468,10 +468,6 @@ public class ConfigSettings
         INSULATION_SLOTS = addSyncedSetting("insulation_slots", () -> new ScalingFormula.Static(0, 0, 0, 0), holder ->
         {
             List<?> list = ItemSettingsConfig.INSULATION_SLOTS.get();
-            // Handle legacy insulation notation
-            if (list.size() == 4 && list.stream().allMatch(el -> el instanceof Integer))
-            {   list = List.of("static", list.get(0), list.get(1), list.get(2), list.get(3));
-            }
             String mode = ((String) list.get(0));
 
             ScalingFormula.Type scalingType = ScalingFormula.Type.byName(mode);

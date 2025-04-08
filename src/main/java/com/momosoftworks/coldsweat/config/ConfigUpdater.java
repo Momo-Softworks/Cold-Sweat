@@ -207,6 +207,18 @@ public class ConfigUpdater
             addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, List.of("minecraft:lava", 0.25, 7, "mc", 4, "", "", 21.5));
         }
 
+        /*
+         2.4-b03a
+         */
+        if (isBehind(configVersion, "2.4-b03a"))
+        {
+            // Handle legacy insulation notation
+            List<?> list = new ArrayList<>(ItemSettingsConfig.INSULATION_SLOTS.get());
+            if (list.size() == 4 && list.stream().allMatch(el -> el instanceof Integer))
+            {   ItemSettingsConfig.INSULATION_SLOTS.set(List.of("static", list.get(0), list.get(1), list.get(2), list.get(3)));
+            }
+        }
+
         // Update config version
         MainSettingsConfig.VERSION.set(version);
 
