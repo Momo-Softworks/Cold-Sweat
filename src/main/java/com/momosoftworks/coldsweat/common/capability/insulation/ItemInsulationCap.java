@@ -155,15 +155,7 @@ public class ItemInsulationCap implements IInsulatableCap
             ItemStack stack = ItemStack.of(entryNBT.getCompound("Item"));
             Collection<InsulatorData> insulators = new ArrayList<>();
             ListNBT pairListNBT = entryNBT.getList("Values", 10);
-            // Handle legacy insulation
-            if (!pairListNBT.isEmpty() && !pairListNBT.getCompound(0).contains("Insulator"))
-            {
-                for (InsulatorData insulator : ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()))
-                {   insulators.add(insulator.copy());
-                }
-            }
-            // Handle normal insulation
-            else for (int j = 0; j < pairListNBT.size(); j++)
+            for (int j = 0; j < pairListNBT.size(); j++)
             {
                 CompoundNBT mappingNBT = pairListNBT.getCompound(j);
                 InsulatorData.CODEC.decode(NBTDynamicOps.INSTANCE, mappingNBT.getCompound("Insulator")).map(Pair::getFirst).result()
