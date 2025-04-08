@@ -7,6 +7,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -31,7 +32,11 @@ public class TempModifierArgument implements ArgumentType<ResourceLocation>
 
     @Override
     public ResourceLocation parse(StringReader stringReader) throws CommandSyntaxException
-    {   return ResourceLocation.read(stringReader);
+    {   ResourceLocation location = ResourceLocation.read(stringReader);
+        if (location.getNamespace().equals("minecraft"))
+        {   location = new ResourceLocation(ColdSweat.MOD_ID, location.getPath());
+        }
+        return location;
     }
 
     @Override
