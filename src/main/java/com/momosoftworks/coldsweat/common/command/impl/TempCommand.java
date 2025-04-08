@@ -378,11 +378,11 @@ public class TempCommand extends BaseCommand
         }
         if (entities.size() == 1)
         {   source.sendSuccess(() -> Component.translatable("commands.cold_sweat.temp_modifier.single.add.result",
-                                                            modifierId, entities.iterator().next().getName().getString()), true);
+                                                            modifierId.toString(), entities.iterator().next().getName().getString()), true);
         }
         else
         {   source.sendSuccess(() -> Component.translatable("commands.cold_sweat.temp_modifier.many.add.result",
-                                                            modifierId, entities.size()), true);
+                                                            modifierId.toString(), entities.size()), true);
         }
         return entities.size();
     }
@@ -408,7 +408,7 @@ public class TempCommand extends BaseCommand
             return 0;
         }
         if (TempModifierRegistry.getValue(modifierId).isEmpty())
-        {   source.sendFailure(Component.translatable("commands.cold_sweat.temp_modifier.invalid", modifierId));
+        {   source.sendFailure(Component.translatable("commands.cold_sweat.temp_modifier.invalid", modifierId.toString()));
             return 0;
         }
 
@@ -418,11 +418,11 @@ public class TempCommand extends BaseCommand
         }
         if (entities.size() == 1)
         {   source.sendSuccess(() -> Component.translatable("commands.cold_sweat.temp_modifier.single.remove.result",
-                                                            modifierId, entities.iterator().next().getName().getString()), true);
+                                                            modifierId.toString(), entities.iterator().next().getName().getString()), true);
         }
         else
         {   source.sendSuccess(() -> Component.translatable("commands.cold_sweat.temp_modifier.many.remove.result",
-                                                            modifierId, entities.size()), true);
+                                                            modifierId.toString(), entities.size()), true);
         }
         return entities.size();
     }
