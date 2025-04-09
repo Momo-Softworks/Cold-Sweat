@@ -161,6 +161,9 @@ public abstract class WorldHelper
             try
             {
                 BlockState state = chunk.getBlockState(pos2);
+                if (ConfigSettings.THERMAL_SOURCE_SPREAD_BLACKLIST.get().contains(state.getBlock()))
+                {   return false;
+                }
                 if (state.isAir() || state.getMaterial().isLiquid() || ConfigSettings.THERMAL_SOURCE_SPREAD_WHITELIST.get().contains(state.getBlock()))
                 {   continue;
                 }
