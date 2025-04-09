@@ -61,6 +61,13 @@ public class AbstractTempCap implements ITemperatureCap
     public boolean showBodyTemp;
     public boolean showWorldTemp;
 
+    public AbstractTempCap(LivingEntity entity)
+    {   this.deserializeNBT(entity.getPersistentData().getCompound("Temperature"));
+    }
+
+    public AbstractTempCap()
+    {}
+
     @Override
     public double getTrait(Trait trait)
     {   // Special case for BODY

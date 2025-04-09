@@ -12,6 +12,14 @@ import net.minecraft.world.entity.player.Player;
  */
 public class PlayerTempCap extends AbstractTempCap
 {
+    public PlayerTempCap()
+    {   super();
+    }
+
+    public PlayerTempCap(LivingEntity entity)
+    {   super(entity);
+    }
+
     @Override
     public void tickHurting(LivingEntity entity, double heatResistance, double coldResistance)
     {

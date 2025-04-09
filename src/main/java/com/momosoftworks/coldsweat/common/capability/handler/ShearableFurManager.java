@@ -62,6 +62,7 @@ public class ShearableFurManager
     {
         if (isShearable(event.getEntity()))
         {   CAP_CACHE.entrySet().removeIf(e -> e.getKey().isRemoved());
+            writeData(event.getEntity());
         }
     }
 
@@ -218,7 +219,15 @@ public class ShearableFurManager
                 else
                 {   PacketDistributor.sendToPlayersTrackingEntity(entity, new SyncShearableDataMessage(entity.getId(), cap.serializeNBT()));
                 }
+                writeData(entity);
             });
         }
+    }
+
+    public static void writeData(Entity entity)
+    {
+        getFurCap(entity).ifPresent(cap ->
+        {   entity.getPersistentData().put("FurData", cap.serializeNBT());
+        });
     }
 }

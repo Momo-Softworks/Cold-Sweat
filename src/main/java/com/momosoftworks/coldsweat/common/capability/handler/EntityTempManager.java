@@ -122,13 +122,15 @@ public class EntityTempManager
     }
 
     @SubscribeEvent
-    public static void cleanRemovedEntities(EntityLeaveLevelEvent event)
+    public static void finalizeEntities(EntityLeaveLevelEvent event)
     {
         if (isTemperatureEnabled(event.getEntity()))
-        {   Predicate<Map.Entry<Entity, ?>> removal = e -> e.getKey().isRemoved();
+        {
+            Predicate<Map.Entry<Entity, ?>> removal = e -> e.getKey().isRemoved();
             SERVER_CAP_CACHE.entrySet().removeIf(removal);
             CLIENT_CAP_CACHE.entrySet().removeIf(removal);
             TEMP_MODIFIER_IMMUNITIES.entrySet().removeIf(removal);
+            writeData(event.getEntity());
         }
     }
 
@@ -189,6 +191,7 @@ public class EntityTempManager
             if (sync.get())
             {   Temperature.updateModifiers(entity, cap);
             }
+            writeData(entity);
         });
     }
 
@@ -947,5 +950,12 @@ public class EntityTempManager
             }
         });
         return allModifiers;
+    }
+
+    public static void writeData(Entity entity)
+    {
+        getTemperatureCap(entity).ifPresent(cap ->
+        {   entity.getPersistentData().put("Temperature", cap.serializeNBT());
+        });
     }
 }

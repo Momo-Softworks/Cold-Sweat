@@ -1,9 +1,17 @@
 package com.momosoftworks.coldsweat.common.capability.shearing;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.LivingEntity;
 
 public class ShearableFurCap implements IShearableCap
 {
+    public ShearableFurCap()
+    {}
+
+    public ShearableFurCap(LivingEntity entity)
+    {   this.deserializeNBT(entity.getPersistentData().getCompound("FurData"));
+    }
+
     boolean sheared = false;
     int furGrowthCooldown = 0;
     int age = 0;

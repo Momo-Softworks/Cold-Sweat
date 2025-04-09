@@ -16,6 +16,7 @@ import com.momosoftworks.coldsweat.compat.CompatManager;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.SpawnPlacementTypes;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -110,14 +111,14 @@ public class ColdSweat
     {
         // Register temperature for temperature-enabled entities
         event.registerEntity(ModCapabilities.PLAYER_TEMPERATURE, EntityType.PLAYER, (entity, context) ->
-        {   return new PlayerTempCap();
+        {   return new PlayerTempCap(entity);
         });
         for (EntityType<?> type : BuiltInRegistries.ENTITY_TYPE)
         {
             event.registerEntity(ModCapabilities.ENTITY_TEMPERATURE, type, (entity, context) ->
             {
-                if (EntityTempManager.isTemperatureEnabled(entity))
-                {   return new EntityTempCap();
+                if (EntityTempManager.isTemperatureEnabled(entity) && entity instanceof LivingEntity living)
+                {   return new EntityTempCap(living);
                 }
                 return null;
             });
@@ -125,7 +126,7 @@ public class ColdSweat
 
         // Register shearable fur for goats
         event.registerEntity(ModCapabilities.SHEARABLE_FUR, EntityType.GOAT, (entity, context) ->
-        {   return new ShearableFurCap();
+        {   return new ShearableFurCap(entity);
         });
 
         for (BlockEntityType<? extends HearthBlockEntity> blockEntityType : List.of(ModBlockEntities.HEARTH.value(), ModBlockEntities.BOILER.value(), ModBlockEntities.ICEBOX.value()))
