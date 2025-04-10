@@ -96,7 +96,20 @@ public abstract class WorldHelper
         IChunk chunk = getChunk(level, pos);
         if (chunk == null) return seaLevel;
 
-        return chunk.getHeight(Heightmap.Type.OCEAN_FLOOR, pos.getX() & 15, pos.getZ() & 15);
+        if (level.isClientSide())
+        {
+            int y = level.getMaxBuildHeight();
+            BlockPos.Mutable mutable = pos.mutable();
+            BlockState state = null;
+            for (; state == null || state.canBeReplaced(); y--)
+            {
+                ChunkSection section = WorldHelper.getChunkSection(chunk, mutable.getY());
+                state = section.getBlockState(mutable.getX() & 15, mutable.getY() & 15, mutable.getZ() & 15);
+                mutable.setY(y);
+            }
+            return y;
+        }
+        else return chunk.getHeight(Heightmap.Type.MOTION_BLOCKING, pos.getX(), pos.getZ());
     }
 
     /**
