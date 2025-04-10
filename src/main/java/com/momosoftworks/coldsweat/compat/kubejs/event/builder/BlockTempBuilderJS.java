@@ -27,6 +27,7 @@ public class BlockTempBuilderJS
     public double range = ConfigSettings.BLOCK_RANGE.get();
     public boolean fade = true;
     public Temperature.Units units = Temperature.Units.MC;
+    public boolean logarithmic = false;
     public Predicate<BlockContainerJS> predicate = blockInstance -> true;
 
     public BlockTempBuilderJS()
@@ -100,6 +101,12 @@ public class BlockTempBuilderJS
         return this;
     }
 
+    public BlockTempBuilderJS logarithmic(boolean logarithmic)
+    {
+        this.logarithmic = logarithmic;
+        return this;
+    }
+
     @FunctionalInterface
     public interface Function
     {
@@ -109,7 +116,7 @@ public class BlockTempBuilderJS
     public BlockTemp build(Function function)
     {
         return new BlockTemp(-maxEffect, maxEffect, minTemperature, maxTemperature, range, fade,
-                             blocks.toArray(new Block[0]))
+                             logarithmic, blocks.toArray(new Block[0]))
         {
             @Override
             public double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
