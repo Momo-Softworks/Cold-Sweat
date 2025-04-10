@@ -35,11 +35,12 @@ public class BlockTempData extends ConfigData
     final Temperature.Units units;
     final NegatableList<LocationRequirement> location;
     final NegatableList<EntityRequirement> entity;
+    final boolean logarithmic;
 
     public BlockTempData(NegatableList<BlockRequirement> block, double temperature, double range,
                          double maxEffect, boolean fade, WorldTempRequirement maxTemp, WorldTempRequirement minTemp,
                          Temperature.Units units, NegatableList<LocationRequirement> location,
-                         NegatableList<EntityRequirement> entity, List<String> requiredMods)
+                         NegatableList<EntityRequirement> entity, boolean logarithmic, List<String> requiredMods)
     {
         super(requiredMods);
         this.block = block;
@@ -52,13 +53,14 @@ public class BlockTempData extends ConfigData
         this.units = units;
         this.location = location;
         this.entity = entity;
+        this.logarithmic = logarithmic;
     }
 
     public BlockTempData(NegatableList<BlockRequirement> block, double temperature, double range,
                          double maxEffect, boolean fade, WorldTempRequirement maxTemp, WorldTempRequirement minTemp,
-                         Temperature.Units units, NegatableList<LocationRequirement> location, NegatableList<EntityRequirement> entity)
+                         Temperature.Units units, NegatableList<LocationRequirement> location, NegatableList<EntityRequirement> entity, boolean logarithmic)
     {
-        this(block, temperature, range, maxEffect, fade, maxTemp, minTemp, units, location, entity, Arrays.asList());
+        this(block, temperature, range, maxEffect, fade, maxTemp, minTemp, units, location, entity, logarithmic, Arrays.asList());
     }
 
     /**
@@ -71,7 +73,7 @@ public class BlockTempData extends ConfigData
         this(new NegatableList<>(new BlockRequirement(blockTemp.getAffectedBlocks().stream().map(Either::<ITag<Block>, Block>right).collect(Collectors.toList()))),
              0, blockTemp.range(), blockTemp.maxEffect(),
              true, new WorldTempRequirement(blockTemp.maxTemperature()), new WorldTempRequirement(blockTemp.minTemperature()), Temperature.Units.MC,
-             new NegatableList<>(), new NegatableList<>());
+             new NegatableList<>(), new NegatableList<>(), blockTemp.logarithmic());
     }
 
     public static final Codec<BlockTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -85,6 +87,7 @@ public class BlockTempData extends ConfigData
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(BlockTempData::units),
             NegatableList.codec(LocationRequirement.CODEC).optionalFieldOf("location", new NegatableList<>()).forGetter(BlockTempData::location),
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(BlockTempData::entity),
+            Codec.BOOL.optionalFieldOf("logarithmic", false).forGetter(BlockTempData::logarithmic),
             Codec.STRING.listOf().optionalFieldOf("required_mods", Arrays.asList()).forGetter(BlockTempData::requiredMods)
     ).apply(instance, BlockTempData::new));
 
@@ -117,6 +120,9 @@ public class BlockTempData extends ConfigData
     }
     public NegatableList<EntityRequirement> entity()
     {   return entity;
+    }
+    public boolean logarithmic()
+    {   return logarithmic;
     }
 
     public double getTemperature()
@@ -172,6 +178,10 @@ public class BlockTempData extends ConfigData
                            ? ((Number) entry.get(7)).doubleValue()
                            : Double.POSITIVE_INFINITY;
 
+        boolean logarithmic = entry.size() > 8 && entry.get(8) instanceof Boolean
+                              ? (Boolean) entry.get(8)
+                              : false;
+
         double maxEffect = blockTemp > 0 ?  maxChange :  Double.POSITIVE_INFINITY;
 
         double maxTemperature = blockTemp > 0 ? tempLimit : Double.POSITIVE_INFINITY;
@@ -181,7 +191,7 @@ public class BlockTempData extends ConfigData
 
         return new BlockTempData(new NegatableList<>(blockRequirement), blockTemp, blockRange, maxEffect, true,
                                  new WorldTempRequirement(maxTemperature), new WorldTempRequirement(minTemperature),
-                                 units, new NegatableList<>(), new NegatableList<>());
+                                 units, new NegatableList<>(), new NegatableList<>(), logarithmic);
     }
 
     @Override

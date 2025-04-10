@@ -268,7 +268,7 @@ public class WorldSettingsConfig
                 .defineListAllowEmpty(Arrays.asList("Block Temperatures"), () -> Arrays.asList(
                                             Arrays.asList("cold_sweat:boiler",       0.27, 7, "mc", 0.88, "lit=true", "", 4),
                                             Arrays.asList("cold_sweat:icebox",      -0.27, 7, "mc", 0.88, "frosted=true", "", 0),
-                                            Arrays.asList("minecraft:lava",          0.25, 7, "mc", 4, "", "", 21.5),
+                                            Arrays.asList("minecraft:lava",          0.5, 7, "mc", 4, "", "", 21.5, true),
                                             Arrays.asList("minecraft:fire",         0.476, 7, "mc", 0.9, "", "", 8),
                                             Arrays.asList("#minecraft:campfires",   0.476, 7, "mc", 0.9, "lit=true", " ", 8),
                                             Arrays.asList("minecraft:magma_block",   0.25, 3, "mc", 1.0),

@@ -21,6 +21,7 @@ public abstract class BlockTemp
     private final double minTemperature;
     private final double range;
     private final boolean fade;
+    private final boolean logarithmic;
 
     public abstract double getTemperature(World world, @Nullable LivingEntity entity, BlockState state, BlockPos pos, double distance);
 
@@ -28,18 +29,7 @@ public abstract class BlockTemp
     {   return true;
     }
 
-    public BlockTemp(Block... blocks)
-    {
-        validBlocks = ImmutableSet.<Block>builder().add(blocks).build();
-        this.minEffect = Double.NEGATIVE_INFINITY;
-        this.maxEffect = Double.POSITIVE_INFINITY;
-        this.minTemperature = Double.NEGATIVE_INFINITY;
-        this.maxTemperature = Double.POSITIVE_INFINITY;
-        this.range = Double.POSITIVE_INFINITY;
-        this.fade = true;
-    }
-
-    public BlockTemp(double minEffect, double maxEffect, double minTemp, double maxTemp, double range, boolean fade, Block... blocks)
+    public BlockTemp(double minEffect, double maxEffect, double minTemp, double maxTemp, double range, boolean fade, boolean logarithmic, Block... blocks)
     {
         this.validBlocks = ImmutableSet.<Block>builder().add(blocks).build();
         this.minEffect = minEffect;
@@ -48,6 +38,18 @@ public abstract class BlockTemp
         this.maxTemperature = maxTemp;
         this.range = range;
         this.fade = fade;
+        this.logarithmic = logarithmic;
+    }
+
+    public BlockTemp(double minEffect, double maxEffect, double minTemp, double maxTemp, double range, boolean fade, Block... blocks)
+    {
+        this(minEffect, maxEffect, minTemp, maxTemp, range, fade, false, blocks);
+    }
+
+    public BlockTemp(Block... blocks)
+    {
+        this(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY,
+             Double.POSITIVE_INFINITY, true, false, blocks);
     }
 
     public boolean hasBlock(Block block)
@@ -89,6 +91,13 @@ public abstract class BlockTemp
      */
     public double minTemperature()
     {   return minTemperature;
+    }
+
+    /**
+     * As more of these blocks are present, the temperature will change with diminishing returns
+     */
+    public boolean logarithmic()
+    {   return logarithmic;
     }
 
     public double range()
