@@ -14,10 +14,10 @@ public abstract class BlockTempConfig extends BlockTemp
 {
     private final NegatableList<BlockRequirement> predicates;
 
-    public BlockTempConfig(double minEffect, double maxEffect, double minTemp, double maxTemp, double range, boolean fade,
+    public BlockTempConfig(double minEffect, double maxEffect, double minTemp, double maxTemp, double range, boolean fade, boolean logarithmic,
                            NegatableList<BlockRequirement> predicates, Block... blocks)
     {
-        super(minEffect, maxEffect, minTemp, maxTemp, range, fade, blocks);
+        super(minEffect, maxEffect, minTemp, maxTemp, range, fade, logarithmic, blocks);
         this.predicates = predicates;
     }
 
@@ -29,6 +29,7 @@ public abstract class BlockTempConfig extends BlockTemp
               data.getMaxTemp(),
               data.range(),
               data.fade(),
+              data.logarithmic(),
               RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.BLOCK, data.block().flatListMap(BlockRequirement::blocks)).toArray(new Block[0]));
         this.predicates = data.block();
     }

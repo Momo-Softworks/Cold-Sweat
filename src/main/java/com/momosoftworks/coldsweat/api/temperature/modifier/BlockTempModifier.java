@@ -152,7 +152,11 @@ public class BlockTempModifier extends TempModifier
                 double min = be.minTemperature();
                 double max = be.maxTemperature();
                 if (!CSMath.betweenInclusive(temp, min, max)) continue;
-                temp = CSMath.clamp(temp + effect.getValue(), min, max);
+                double effectValue = effect.getValue();
+                if (be.logarithmic())
+                {   effectValue = 1/Math.pow(effectValue, -0.68);
+                }
+                temp = CSMath.clamp(temp + effectValue, min, max);
             }
             return temp;
         };
