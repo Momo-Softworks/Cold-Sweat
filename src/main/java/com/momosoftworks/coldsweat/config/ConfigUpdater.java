@@ -210,15 +210,12 @@ public class ConfigUpdater
         }
 
         /*
-         2.4-b03a
+         2.4-b02c
          */
-        if (isBehind(configVersion, "2.4-b03a"))
+        if (isBehind(configVersion, "2.4-b02c"))
         {
-            // Handle legacy insulation notation
-            List<?> list = new ArrayList<>(ItemSettingsConfig.INSULATION_SLOTS.get());
-            if (list.size() == 4 && list.stream().allMatch(el -> el instanceof Integer))
-            {   ItemSettingsConfig.INSULATION_SLOTS.set(Arrays.asList("static", list.get(0), list.get(1), list.get(2), list.get(3)));
-            }
+            removeConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, "minecraft:lava");
+            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, Arrays.asList("minecraft:lava", 0.25, 7, "mc", 4, "", "", 21.5, true));
         }
 
         // Update config version
@@ -361,7 +358,7 @@ public class ConfigUpdater
         return Integer.compare(parts1.length, parts2.length);
     }
 
-    public static void replaceConfigSetting(ForgeConfigSpec.ConfigValue<List<? extends List<?>>> config, String key,
+    public static boolean replaceConfigSetting(ForgeConfigSpec.ConfigValue<List<? extends List<?>>> config, String key,
                                             Consumer<List<Object>> modifier)
     {
         List<List<?>> setting = new ArrayList<>(config.get());
@@ -375,13 +372,15 @@ public class ConfigUpdater
                     modifier.accept(element);
                     setting.set(i, element);
                     config.set(setting);
+                    return true;
                 }
                 catch (Exception e)
                 {   ColdSweat.LOGGER.error("Failed to update config setting {} for key '{}'", config.getPath(), key, e);
+                    return false;
                 }
-                break;
             }
         }
+        return false;
     }
 
     public static void addConfigSetting(ForgeConfigSpec.ConfigValue<List<? extends List<?>>> config, List<?> newSetting)
