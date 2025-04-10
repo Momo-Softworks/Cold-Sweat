@@ -7,7 +7,6 @@ import com.momosoftworks.coldsweat.config.spec.ItemSettingsConfig;
 import com.momosoftworks.coldsweat.config.spec.MainSettingsConfig;
 import com.momosoftworks.coldsweat.config.spec.WorldSettingsConfig;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
@@ -208,6 +207,15 @@ public class ConfigUpdater
             addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, List.of("minecraft:lava", 0.25, 7, "mc", 4, "", "", 21.5));
         }
 
+        /*
+         2.4-b02c
+         */
+        if (isBehind(configVersion, "2.4-b02c"))
+        {
+            removeConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, "minecraft:lava");
+            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, List.of("minecraft:lava", 0.25, 7, "mc", 4, "", "", 21.5, true));
+        }
+
         // Update config version
         MainSettingsConfig.VERSION.set(version);
 
@@ -336,7 +344,7 @@ public class ConfigUpdater
         return Integer.compare(parts1.length, parts2.length);
     }
 
-    public static void replaceConfigSetting(ModConfigSpec.ConfigValue<List<? extends List<?>>> config, String key,
+    public static boolean replaceConfigSetting(ModConfigSpec.ConfigValue<List<? extends List<?>>> config, String key,
                                             Consumer<List<Object>> modifier)
     {
         List<List<?>> setting = new ArrayList<>(config.get());
@@ -350,13 +358,15 @@ public class ConfigUpdater
                     modifier.accept(element);
                     setting.set(i, element);
                     config.set(setting);
+                    return true;
                 }
                 catch (Exception e)
                 {   ColdSweat.LOGGER.error("Failed to update config setting {} for key '{}'", config.getPath(), key, e);
+                    return false;
                 }
-                break;
             }
         }
+        return false;
     }
 
     public static void addConfigSetting(ModConfigSpec.ConfigValue<List<? extends List<?>>> config, List<?> newSetting)
