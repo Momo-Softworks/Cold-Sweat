@@ -101,11 +101,6 @@ public class TempModifierInit
     public static void registerTempModifiers(TempModifierRegisterEvent event)
     {
         long startMS = System.currentTimeMillis();
-        String compatPath = "com.momosoftworks.coldsweat.api.temperature.modifier.compat.";
-        String sereneSeasons = compatPath + "SereneSeasonsTempModifier";
-        String weatherStorms = compatPath + "StormTempModifier";
-        String curios = compatPath + "CuriosTempModifier";
-        String valkyrienSkies = compatPath + "ValkShipBlockTempModifier";
 
         event.register(new ResourceLocation(ColdSweat.MOD_ID, "blocks"), BlockTempModifier::new);
         event.register(new ResourceLocation(ColdSweat.MOD_ID, "biomes"), BiomeTempModifier::new);
@@ -126,6 +121,12 @@ public class TempModifierInit
         event.register(new ResourceLocation(ColdSweat.MOD_ID, "acclimation"), AcclimationTempModifier::new);
 
         // Compat
+        String compatPath = "com.momosoftworks.coldsweat.api.temperature.modifier.compat.";
+        String sereneSeasons = compatPath + "SereneSeasonsTempModifier";
+        String weatherStorms = compatPath + "StormTempModifier";
+        String curios = compatPath + "CuriosTempModifier";
+        String valkyrienSkies = compatPath + "ValkShipBlockTempModifier";
+
         if (CompatManager.isSereneSeasonsLoaded())
         {   event.registerByClassName(new ResourceLocation("sereneseasons", "season"), sereneSeasons);
         }
