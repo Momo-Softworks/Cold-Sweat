@@ -21,7 +21,6 @@
     "compat.MixinCreateOverlay"
   ],
   "mixins": [
-    "MixinAttributeValue",
     "MixinBlockUpdate$Server",
     "MixinCampfire",
     "MixinFreezingWater",

@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.common.capability.temperature;
 
+import com.google.common.math.DoubleMath;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.common.temperautre.TemperatureChangedEvent;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
@@ -8,7 +9,6 @@ import com.momosoftworks.coldsweat.api.util.Temperature.Trait;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
-import com.momosoftworks.coldsweat.mixin_interface.IPassthrough;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModDamageSources;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
@@ -288,18 +288,17 @@ public class AbstractTempCap implements ITemperatureCap
 
     private double modifyFromAttribute(LivingEntity entity, Trait type, double baseValue)
     {
-        double defaultValue = Temperature.apply(baseValue, entity, type, this.getModifiers(type));
+        Supplier<Double> defaultSupplier = () -> Temperature.apply(baseValue, entity, type, this.getModifiers(type));
         AttributeInstance attribute = EntityTempManager.getAttribute(type, entity);
         double newValue;
         // If the attribute is null, return the default value
         if (attribute == null)
-        {   newValue = defaultValue;
+        {   newValue = defaultSupplier.get();
         }
         // If base attribute is unset
         else
         {
-            ((IPassthrough) attribute).setPassthroughValue(defaultValue);
-            double base = CSMath.safeDouble(((IPassthrough) attribute).getRealBaseValue()).orElse(defaultValue);
+            double base = CSMath.safeDouble(attribute.getBaseValue()).orElse(defaultSupplier.get());
 
             for (AttributeModifier mod : attribute.getModifiers(AttributeModifier.Operation.ADDITION))
             {   base += mod.getAmount();
@@ -313,7 +312,7 @@ public class AbstractTempCap implements ITemperatureCap
             }
             newValue = value;
         }
-        if (newValue != baseValue)
+        if (!DoubleMath.fuzzyEquals(newValue, baseValue, 0.0001))
         {   MinecraftForge.EVENT_BUS.post(new TemperatureChangedEvent(entity, type, getTrait(type), newValue));
         }
         // Write new value to NBT
