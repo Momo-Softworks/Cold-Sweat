@@ -134,12 +134,14 @@ public class ChameleonModel<T extends Chameleon> extends AgeableListModel<T>
 		boolean hasLookTarget = entity.isWalking() || entity.getEatTimer() > 0;
 		// Blend smoothly to the desired pitch using frameTime
 		// There is no slop in head rotation if the Chameleon is moving
+        if (Double.isNaN(entity.xRotHead)) entity.xRotHead = 0;
 		entity.xRotHead += ((hasLookTarget ? desiredXHead : CSMath.clamp(entity.xRotHead, desiredXHead - 0.4f, desiredXHead + 0.4f)) - entity.xRotHead) * tickDelta;
 
 		// Get the yaw (left/right) of the head in Radians
 		float desiredYHead = CSMath.toRadians(netHeadYaw);
 		// Blend smoothly to the desired yaw using frameTime
 		// There is no slop in head rotation if the Chameleon is moving
+        if (Double.isNaN(entity.yRotHead)) entity.yRotHead = 0;
 		entity.yRotHead += ((hasLookTarget ? desiredYHead : CSMath.clamp(entity.yRotHead, desiredYHead - 0.6f, desiredYHead + 0.6f)) - entity.yRotHead) * tickDelta;
 
 		// Move the right eye if the Chameleon is looking at an object to its right
@@ -318,6 +320,7 @@ public class ChameleonModel<T extends Chameleon> extends AgeableListModel<T>
 
 			// Up/down tail movement (takes into account player head rotation)
 			float playerYVel = (float) velocity.y;
+            if (Double.isNaN(entity.xRotTail)) entity.xRotTail = 0;
 			float tailRot = entity.xRotTail += (CSMath.clamp(playerYVel, -0.5, 0.5) - entity.xRotTail) * frameTime * 8;
 			tailRot *= CSMath.clamp(Math.abs(tail.xRot + tail2.xRot + tail3.xRot + playerXHead) - 2.3, -1, 1);
 			tail.xRot += tailRot;
