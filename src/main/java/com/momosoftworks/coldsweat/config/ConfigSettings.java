@@ -4,6 +4,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Either;
+import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.slot.ScalingFormula;
@@ -25,10 +26,7 @@ import com.momosoftworks.coldsweat.util.serialization.*;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.StringNBT;
+import net.minecraft.nbt.*;
 import net.minecraft.potion.Effect;
 import net.minecraft.tags.ITag;
 import net.minecraft.util.ResourceLocation;
@@ -179,6 +177,9 @@ public class ConfigSettings
     public static final DynamicHolder<List<ResourceLocation>> DISABLED_MODIFIERS;
     public static final DynamicHolder<Double> MODIFIER_TICK_RATE;
     public static final DynamicHolder<Double> DRYOFF_SPEED;
+    public static final DynamicHolder<Double> ACCLIMATION_SPEED;
+    public static final DynamicHolder<Pair<Double, Double>> MIN_ACCLIMATION_RANGE;
+    public static final DynamicHolder<Pair<Double, Double>> MAX_ACCLIMATION_RANGE;
 
     // Client Settings
     /* NULL ON THE SERVER */
@@ -866,6 +867,32 @@ public class ConfigSettings
         (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "DryoffSpeed"),
         (decoder) -> decoder.getDouble("DryoffSpeed"),
         (saver) -> MainSettingsConfig.DRYOFF_SPEED.set(saver),
+        SyncType.BOTH_WAYS);
+
+        ACCLIMATION_SPEED = addSyncedSetting("acclimation_speed", () -> 1.0, holder -> holder.set(MainSettingsConfig.ACCLIMATION_SPEED.get()),
+        (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "AcclimationSpeed"),
+        (decoder) -> decoder.getDouble("AcclimationSpeed"),
+        (saver) -> MainSettingsConfig.ACCLIMATION_SPEED.set(saver),
+        SyncType.BOTH_WAYS);
+
+        MIN_ACCLIMATION_RANGE = addSyncedSetting("min_acclimation_range", () -> Pair.of(0.0, 0.0), holder ->
+        {
+            List<? extends Number> range = MainSettingsConfig.MIN_ACCLIMATION_RANGE.get();
+            holder.set(Pair.of(range.get(0).doubleValue(), range.get(1).doubleValue()));
+        },
+        (encoder) -> ConfigHelper.serializeNbtPair(encoder, DoubleNBT::valueOf, DoubleNBT::valueOf, "MinAcclimationRange"),
+        (decoder) -> ConfigHelper.deserializeNbtPair(decoder, DoubleNBT::getAsDouble, DoubleNBT::getAsDouble, "MinAcclimationRange"),
+        (saver) -> MainSettingsConfig.MIN_ACCLIMATION_RANGE.set(Arrays.asList(saver.getFirst(), saver.getSecond())),
+        SyncType.BOTH_WAYS);
+
+        MAX_ACCLIMATION_RANGE = addSyncedSetting("max_acclimation_range", () -> Pair.of(0.0, 0.0), holder ->
+        {
+            List<? extends Number> range = MainSettingsConfig.MAX_ACCLIMATION_RANGE.get();
+            holder.set(Pair.of(range.get(0).doubleValue(), range.get(1).doubleValue()));
+        },
+        (encoder) -> ConfigHelper.serializeNbtPair(encoder, DoubleNBT::valueOf, DoubleNBT::valueOf, "MaxAcclimationRange"),
+        (decoder) -> ConfigHelper.deserializeNbtPair(decoder, DoubleNBT::getAsDouble, DoubleNBT::getAsDouble, "MaxAcclimationRange"),
+        (saver) -> MainSettingsConfig.MAX_ACCLIMATION_RANGE.set(Arrays.asList(saver.getFirst(), saver.getSecond())),
         SyncType.BOTH_WAYS);
 
 

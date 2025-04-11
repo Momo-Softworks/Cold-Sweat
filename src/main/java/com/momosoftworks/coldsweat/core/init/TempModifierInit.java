@@ -126,6 +126,7 @@ public class TempModifierInit
         event.register(new ResourceLocation(ColdSweat.MOD_ID, "soul_sprout"), SoulSproutTempModifier::new);
         event.register(new ResourceLocation(ColdSweat.MOD_ID, "inventory_items"), InventoryItemsTempModifier::new);
         event.register(new ResourceLocation(ColdSweat.MOD_ID, "entities"), EntitiesTempModifier::new);
+        event.register(new ResourceLocation(ColdSweat.MOD_ID, "acclimation"), AcclimationTempModifier::new);
 
         // Compat
         if (CompatManager.isSereneSeasonsLoaded())

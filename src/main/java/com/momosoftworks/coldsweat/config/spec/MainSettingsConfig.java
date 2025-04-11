@@ -47,6 +47,10 @@ public class MainSettingsConfig
     public static final ForgeConfigSpec.DoubleValue MODIFIER_TICK_RATE;
     public static final ForgeConfigSpec.DoubleValue DRYOFF_SPEED;
 
+    public static final ForgeConfigSpec.ConfigValue<Double> ACCLIMATION_SPEED;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends Number>> MIN_ACCLIMATION_RANGE;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends Number>> MAX_ACCLIMATION_RANGE;
+
     static 
     {
         ConfigSettings.Difficulty defaultDiff = ConfigSettings.DEFAULT_DIFFICULTY;
@@ -151,6 +155,22 @@ public class MainSettingsConfig
                 .comment("The player's mining speed will be reduced by this amount when they are too cold",
                          "Represented as a percentage in decimal form")
                 .defineInRange("Freezing Mining Impairment", defaultDiff.getOrDefault(ConfigSettings.COLD_MINING_IMPAIRMENT, 0.5), 0, 1);
+
+            BUILDER.pop();
+
+            BUILDER.push("Acclimation");
+
+            ACCLIMATION_SPEED = BUILDER
+                .comment("The speed at which the player acclimates to hot or cold environments")
+                .defineInRange("Acclimation Speed", defaultDiff.getOrDefault(ConfigSettings.ACCLIMATION_SPEED, 0.0016), 0, Double.POSITIVE_INFINITY);
+
+            MIN_ACCLIMATION_RANGE = BUILDER
+                .comment("The offset to the player's minimum habitable temperature when they acclimate to cold (first value) or hot (second value) environments")
+                .defineListAllowEmpty("Min Acclimation Range", Arrays.asList(-0.4, 0.2), o -> o instanceof Number);
+
+            MAX_ACCLIMATION_RANGE = BUILDER
+                .comment("The offset to the player's maximum habitable temperature when they acclimate to cold (first value) or hot (second value) environments")
+                .defineListAllowEmpty("Max Acclimation Range", Arrays.asList(-0.2, 0.4), o -> o instanceof Number);
 
             BUILDER.pop();
         BUILDER.pop();
