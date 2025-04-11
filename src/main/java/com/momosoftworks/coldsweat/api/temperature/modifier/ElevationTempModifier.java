@@ -79,9 +79,11 @@ public class ElevationTempModifier extends TempModifier
 
             for (Map.Entry<Pair<BlockPos, BlockPos>, Pair<DepthTempData.TempRegion, Double>> entry : depthRegions.entrySet())
             {
+                // Only use light for hot environments
                 BlockPos pos;
                 if (temp >= midTemp) pos = entry.getKey().getFirst();
                 else pos = entry.getKey().getSecond();
+                // Get the region and distance
                 DepthTempData.TempRegion region = entry.getValue().getFirst();
                 double distance = entry.getValue().getSecond();
 
