@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.common.capability.temperature;
 
+import com.google.common.math.DoubleMath;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.common.temperautre.TemperatureChangedEvent;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
@@ -319,7 +320,7 @@ public class AbstractTempCap implements ITemperatureCap
             }
             newValue = value;
         }
-        if (newValue != baseValue)
+        if (!DoubleMath.fuzzyEquals(newValue, baseValue, 0.0001))
         {   NeoForge.EVENT_BUS.post(new TemperatureChangedEvent(entity, type, getTrait(type), newValue));
         }
         // Write new value to NBT
