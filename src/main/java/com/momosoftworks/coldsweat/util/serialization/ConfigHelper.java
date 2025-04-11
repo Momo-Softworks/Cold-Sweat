@@ -207,6 +207,27 @@ public class ConfigHelper
         return tag;
     }
 
+    public static <A, B> CompoundTag serializeNbtPair(Pair<A, B> value, Function<A, Tag> left, Function<B, Tag> right, String key)
+    {
+        CompoundTag tag = new CompoundTag();
+        tag.put(key + "_left", left.apply(value.getFirst()));
+        tag.put(key + "_right", right.apply(value.getSecond()));
+        return tag;
+    }
+
+    public static <A, B, T extends Tag> Pair<A, B> deserializeNbtPair(CompoundTag tag, Function<T, A> left, Function<T, B> right, String key)
+    {
+        try
+        {
+            T leftTag = (T) tag.get(key + "_left");
+            T rightTag = (T) tag.get(key + "_right");
+            return Pair.of(left.apply(leftTag), right.apply(rightTag));
+        }
+        catch (ClassCastException e)
+        {   throw ColdSweat.LOGGER.throwing(new ClassCastException(String.format("Error deserializing config setting {}: Wrong object type.", tag)));
+        }
+    }
+
     public static CompoundTag serializeNbtString(String value, String key)
     {
         CompoundTag tag = new CompoundTag();
