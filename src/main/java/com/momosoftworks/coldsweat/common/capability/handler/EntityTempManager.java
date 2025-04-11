@@ -368,6 +368,7 @@ public class EntityTempManager
     {
         // Default TempModifiers for players
         boolean isPlayer = event.getEntity() instanceof Player;
+        Temperature.Trait trait = event.getTrait();
 
         // TempModifier tick rate is generally slower for entities than for players
         int slowTickRate = 60;
@@ -375,7 +376,7 @@ public class EntityTempManager
         int mediumTickRate2 = isPlayer ? 10 : 20;
         int fastTickRate = isPlayer ? 5 : 20;
 
-        if (event.getTrait() == Temperature.Trait.WORLD)
+        if (trait == Temperature.Trait.WORLD)
         {
             event.addModifier(new BiomeTempModifier(isPlayer ? 49 : 16).tickRate(mediumTickRate),
                               Placement.Duplicates.BY_CLASS, Placement.BEFORE_FIRST);
@@ -408,8 +409,10 @@ public class EntityTempManager
                                   Placement.Duplicates.BY_CLASS,
                                   Placement.of(Mode.AFTER, Order.FIRST, mod2 -> mod2 instanceof BlockTempModifier));
         }
-
-        else if (isPlayer && event.getTrait().isForModifiers())
+        else if (isPlayer && trait == Temperature.Trait.FREEZING_POINT || trait == Temperature.Trait.BURNING_POINT)
+        {   event.addModifier(new AcclimationTempModifier().tickRate(20), Placement.Duplicates.BY_CLASS, Placement.AFTER_LAST);
+        }
+        else if (isPlayer && trait.isForModifiers())
         {   event.addModifier(new InventoryItemsTempModifier().tickRate(5), Placement.Duplicates.BY_CLASS, Placement.AFTER_LAST);
         }
     }
