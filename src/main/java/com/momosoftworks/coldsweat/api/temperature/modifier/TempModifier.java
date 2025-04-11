@@ -108,11 +108,11 @@ public abstract class TempModifier
      * Every other time {@code calculate()} is called, the stored value will be returned until X ticks have passed.<br>
      * (new TempModifiers ALWAYS run {@code getResult()} when they are called for the first time).<br>
      * <br>
-     * @param ticks the number of ticks between each call to {@code getResult()}.
+     * @param interval the number of ticks between each call to {@code getResult()}.
      * @return this TempModifier instance (allows for in-line building).
      */
-    public final <T extends TempModifier> T tickRate(int ticks)
-    {   tickRate = Math.max(1, ticks);
+    public final <T extends TempModifier> T tickRate(int interval)
+    {   tickRate = Math.max(1, interval);
         return (T) this;
     }
 
