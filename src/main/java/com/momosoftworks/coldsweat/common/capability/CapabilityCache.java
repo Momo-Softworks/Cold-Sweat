@@ -52,23 +52,8 @@ public class CapabilityCache<C, K extends ICapabilityProvider>
 
     protected void cleanExpiredEntries()
     {
-        synchronized (cache)
-        {
-            if (this.invalidator != null)
-            {
-                List<K> removedKeys = new ArrayList<>();
-                for (Map.Entry<K, LazyOptional<C>> entry : cache.entrySet())
-                {
-                    K key = entry.getKey();
-                    LazyOptional<C> value = entry.getValue();
-                    if (invalidator.test(key) || !value.isPresent())
-                    {   removedKeys.add(key);
-                    }
-                }
-                for (int i = 0; i < removedKeys.size(); i++)
-                {   cache.remove(removedKeys.get(i));
-                }
-            }
+        if (this.invalidator != null)
+        {   this.removeIf(this.invalidator);
         }
     }
 
@@ -89,6 +74,21 @@ public class CapabilityCache<C, K extends ICapabilityProvider>
     }
 
     public void removeIf(Predicate<K> predicate)
-    {   cache.entrySet().removeIf(e -> predicate.test(e.getKey()));
+    {
+        synchronized (cache)
+        {
+            List<K> removedKeys = new ArrayList<>(cache.size());
+            for (Map.Entry<K, LazyOptional<C>> entry : cache.entrySet())
+            {
+                K key = entry.getKey();
+                LazyOptional<C> value = entry.getValue();
+                if (predicate.test(key) || !value.isPresent())
+                {   removedKeys.add(key);
+                }
+            }
+            for (int i = 0; i < removedKeys.size(); i++)
+            {   cache.remove(removedKeys.get(i));
+            }
+        }
     }
 }
