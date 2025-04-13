@@ -162,15 +162,15 @@ public class MainSettingsConfig
 
             ACCLIMATION_SPEED = BUILDER
                 .comment("The speed at which the player acclimates to hot or cold environments")
-                .defineInRange("Acclimation Speed", defaultDiff.getOrDefault(ConfigSettings.ACCLIMATION_SPEED, 0.0016), 0, Double.POSITIVE_INFINITY);
+                .defineInRange("Acclimation Speed", defaultDiff.getOrDefault(ConfigSettings.ACCLIMATION_SPEED, 0.0011), 0, Double.POSITIVE_INFINITY);
 
             MIN_ACCLIMATION_RANGE = BUILDER
                 .comment("The offset to the player's minimum habitable temperature when they acclimate to cold (first value) or hot (second value) environments")
-                .defineListAllowEmpty("Min Acclimation Range", Arrays.asList(-0.4, 0.2), o -> o instanceof Number);
+                .defineListAllowEmpty("Min Acclimation Range", Arrays.asList(-0.46, 0.23), o -> o instanceof Number);
 
             MAX_ACCLIMATION_RANGE = BUILDER
                 .comment("The offset to the player's maximum habitable temperature when they acclimate to cold (first value) or hot (second value) environments")
-                .defineListAllowEmpty("Max Acclimation Range", Arrays.asList(-0.2, 0.4), o -> o instanceof Number);
+                .defineListAllowEmpty("Max Acclimation Range", Arrays.asList(-0.23, 0.46), o -> o instanceof Number);
 
             BUILDER.pop();
         BUILDER.pop();
