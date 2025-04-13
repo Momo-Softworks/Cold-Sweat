@@ -4,8 +4,6 @@ import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
@@ -16,6 +14,9 @@ public class AcclimationTempModifier extends TempModifier
     @Override
     protected Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
+        if (entity instanceof Player player && player.isCreative())
+        {   return temp -> temp;
+        }
         double minTemp = Temperature.get(entity, Temperature.Trait.FREEZING_POINT);
         double maxTemp = Temperature.get(entity, Temperature.Trait.BURNING_POINT);
         double tempFactor = CSMath.blend(-1, 1, Temperature.get(entity, Temperature.Trait.WORLD), minTemp, maxTemp);
