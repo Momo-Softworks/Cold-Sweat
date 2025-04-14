@@ -15,7 +15,6 @@ import com.momosoftworks.coldsweat.common.command.BaseCommand;
 import com.momosoftworks.coldsweat.common.command.argument.*;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.mixin_interface.IPassthrough;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.ChatFormatting;
@@ -444,15 +443,15 @@ public class TempCommand extends BaseCommand
 
         source.sendSuccess(() -> Component.translatable("commands.cold_sweat.temperature.debug", living.getDisplayName(), trait.getSerializedName()).withStyle(ChatFormatting.WHITE), false);
 
-        if (attribute != null && CSMath.safeDouble(((IPassthrough) attribute).getRealBaseValue()).isPresent())
+        if (attribute != null && CSMath.safeDouble(attribute.getBaseValue()).isPresent())
         {
             source.sendSuccess(() ->
                                Component.literal(ForgeRegistries.ATTRIBUTES.getKey(attribute.getAttribute()).toString()).withStyle(ChatFormatting.GOLD)
                        .append(Component.literal(" → ").withStyle(ChatFormatting.WHITE))
-                       .append(Component.literal(((IPassthrough) attribute).getRealValue()+"")
+                       .append(Component.literal(attribute.getValue()+"")
                                         .withStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)
-                                        .withHoverEvent(getConvertedUnitHover(trait, ((IPassthrough) attribute).getRealValue(), preferredUnits)))), false);
-            lastValue = ((IPassthrough) attribute).getRealBaseValue();
+                                        .withHoverEvent(getConvertedUnitHover(trait, attribute.getValue(), preferredUnits)))), false);
+            lastValue = attribute.getBaseValue();
         }
         else for (TempModifier modifier : Temperature.getModifiers(living, trait))
         {

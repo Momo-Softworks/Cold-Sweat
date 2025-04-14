@@ -27,7 +27,6 @@ import com.momosoftworks.coldsweat.data.codec.configuration.ItemCarryTempData;
 import com.momosoftworks.coldsweat.data.codec.configuration.MountData;
 import com.momosoftworks.coldsweat.data.codec.configuration.ItemCarryTempData.SlotType;
 import com.momosoftworks.coldsweat.compat.CompatManager;
-import com.momosoftworks.coldsweat.mixin_interface.IPassthrough;
 import com.momosoftworks.coldsweat.util.entity.DummyPlayer;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.FastMap;
@@ -327,10 +326,10 @@ public class EntityTempManager
             .forEach(attr ->
             {
                 AttributeInstance newAttr = newPlayer.getAttribute(attr);
-                IPassthrough oldAttr = (IPassthrough) oldPlayer.getAttribute(attr);
+                AttributeInstance oldAttr = oldPlayer.getAttribute(attr);
                 if (newAttr != null && oldAttr != null)
                 {
-                    newAttr.setBaseValue(oldAttr.getRealBaseValue());
+                    newAttr.setBaseValue(oldAttr.getBaseValue());
                     getTemperatureCap(newPlayer).ifPresent(cap -> cap.markPersistentAttribute(attr));
                 }
             });
