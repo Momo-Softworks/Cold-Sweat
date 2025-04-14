@@ -21,10 +21,10 @@ public class PlayerTempCap extends AbstractTempCap
     }
 
     @Override
-    public void tickHurting(LivingEntity entity, double heatResistance, double coldResistance)
+    public void tickHurting(LivingEntity entity)
     {
         if ((!(entity instanceof Player player) || !player.isCreative()) && !entity.isSpectator())
-        {   super.tickHurting(entity, heatResistance, coldResistance);
+        {   super.tickHurting(entity);
         }
     }
 
