@@ -94,12 +94,13 @@ public abstract class WorldHelper
         {
             int y = level.getMaxBuildHeight();
             BlockPos.MutableBlockPos mutable = pos.mutable();
+            LevelChunkSection section;
             BlockState state = null;
             for (; state == null || state.canBeReplaced(); y--)
             {
-                LevelChunkSection section = WorldHelper.getChunkSection(chunk, mutable.getY());
-                state = section.getBlockState(mutable.getX() & 15, mutable.getY() & 15, mutable.getZ() & 15);
                 mutable.setY(y);
+                section = WorldHelper.getChunkSection(chunk, mutable.getY());
+                state = section.getBlockState(mutable.getX() & 15, mutable.getY() & 15, mutable.getZ() & 15);
             }
             return y;
         }
