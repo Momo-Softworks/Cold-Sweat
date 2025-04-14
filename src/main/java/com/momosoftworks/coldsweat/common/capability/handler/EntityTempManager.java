@@ -325,8 +325,14 @@ public class EntityTempManager
             oldPlayer.reviveCaps();
             getTemperatureCap(oldPlayer).map(ITemperatureCap::getPersistentAttributes).orElse(new HashSet<>())
             .forEach(attr ->
-            {   newPlayer.getAttribute(attr).setBaseValue(oldPlayer.getAttribute(attr).getBaseValue());
-                getTemperatureCap(newPlayer).ifPresent(cap -> cap.markPersistentAttribute(attr));
+            {
+                AttributeInstance newAttr = newPlayer.getAttribute(attr);
+                AttributeInstance oldAttr = oldPlayer.getAttribute(attr);
+                if (newAttr != null && oldAttr != null)
+                {
+                    newAttr.setBaseValue(oldAttr.getBaseValue());
+                    getTemperatureCap(newPlayer).ifPresent(cap -> cap.markPersistentAttribute(attr));
+                }
             });
             oldPlayer.invalidateCaps();
         }
