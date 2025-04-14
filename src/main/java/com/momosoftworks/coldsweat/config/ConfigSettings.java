@@ -78,7 +78,11 @@ public class ConfigSettings
     public static final DynamicHolder<Double> COLD_MINING_IMPAIRMENT;
     public static final DynamicHolder<Double> COLD_MOVEMENT_SLOWDOWN;
     public static final DynamicHolder<Double> COLD_KNOCKBACK_REDUCTION;
+    public static final DynamicHolder<Double> SHIVER_INTENSITY;
     public static final DynamicHolder<Double> HEATSTROKE_FOG_DISTANCE;
+    public static final DynamicHolder<Double> HEATSTROKE_BLUR_AMOUNT;
+    public static final DynamicHolder<Double> HEATSTROKE_SWAY_AMOUNT;
+    public static final DynamicHolder<Double> HEATSTROKE_SWAY_SPEED;
 
     // World Settings
     public static final DynamicHolder<Map<Holder<Biome>, BiomeTempData>> BIOME_TEMPS;
@@ -313,7 +317,6 @@ public class ConfigSettings
         (decoder) -> decoder.getDouble("HeatstrokeFogDistance"),
         (saver) -> MainSettingsConfig.HEATSTROKE_FOG.set(saver),
         SyncType.BOTH_WAYS);
-
 
         BIOME_TEMPS = addSyncedSettingWithRegistries("biome_temps", FastMap::new, (holder, registryAccess) ->
         {
@@ -954,6 +957,11 @@ public class ConfigSettings
 
         WATER_EFFECT_SETTING = addClientSetting("show_water_effect", () -> WaterEffectSetting.ALL, holder -> holder.set(WaterEffectSetting.values()[ClientSettingsConfig.WATER_EFFECT_SETTING.get()]));
         WATER_DROPLET_SCALE = addClientSetting("water_droplet_scale", () -> new IntegerBounds(40, 48), holder -> holder.set(new IntegerBounds(ClientSettingsConfig.WATER_DROPLET_SCALE.get().toArray(Integer[]::new))));
+
+        SHIVER_INTENSITY = addClientSetting("shiver_intensity", () -> 1.0, holder -> holder.set(ClientSettingsConfig.SHIVER_INTENSITY.get()));
+        HEATSTROKE_BLUR_AMOUNT = addClientSetting("heatstroke_blur_amount", () -> 1.0, holder -> holder.set(ClientSettingsConfig.HEATSTROKE_BLUR.get()));
+        HEATSTROKE_SWAY_AMOUNT = addClientSetting("heatstroke_sway_amount", () -> 1.0, holder -> holder.set(ClientSettingsConfig.HEATSTROKE_SWAY_AMOUNT.get()));
+        HEATSTROKE_SWAY_SPEED = addClientSetting("heatstroke_sway_speed", () -> 1.0, holder -> holder.set(ClientSettingsConfig.HEATSTROKE_SWAY_SPEED.get()));
 
         boolean seasonsModLoaded = !CompatManager.getSeasonsMods().isEmpty();
         SUMMER_TEMPS = addSetting("summer_temps", SeasonalTempData::new, holder -> holder.set(seasonsModLoaded ? SeasonalTempData.fromToml(WorldSettingsConfig.getSummerTemps()) : new SeasonalTempData()));

@@ -43,8 +43,7 @@ public class ConfigScreen
     public static int MOUSE_X = 0;
     public static int MOUSE_Y = 0;
 
-    static List<Function<Screen, AbstractConfigPage>> PAGES = new ArrayList<>(Arrays.asList(ConfigPageOne::new, ConfigPageTwo::new, ConfigPageThree::new,
-                                                                                            ConfigPageFour::new));
+    static List<Function<Screen, AbstractConfigPage>> PAGES = new ArrayList<>(Arrays.asList(ConfigPageOne::new, ConfigPageTwo::new, ConfigPageThree::new));
     public static int FIRST_PAGE = 0;
     public static int LAST_PAGE = PAGES.size() - 1;
     public static int CURRENT_PAGE = 0;

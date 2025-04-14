@@ -61,11 +61,13 @@ public class TempEffectsClient
                     double tickTime = player.tickCount + event.getPartialTick();
                     float shiverIntensity = CSMath.blend(((float) Math.sin(tickTime / 10) + 1) * 0.03f + 0.01f,
                                                 0f, BLEND_TEMP, -100, -50);
+                    shiverIntensity *= ConfigSettings.SHIVER_INTENSITY.get();
                     // Multiply the effect for lower framerates
                     shiverIntensity *= Minecraft.getInstance().getTimer().getRealtimeDeltaTicks() * 10;
+                    // Factor in cold immunity
                     shiverIntensity = (float) CSMath.blend(shiverIntensity, 0, COLD_IMMUNITY, 0, 1);
-                    float shiverRotation = (float) (Math.sin(tickTime * 2.5) * shiverIntensity);
                     // Rotate camera
+                    float shiverRotation = (float) (Math.sin(tickTime * 2.5) * shiverIntensity);
                     player.setYRot(player.getYRot() + shiverRotation);
                 }
                 // Sway camera for heatstroke
@@ -73,13 +75,14 @@ public class TempEffectsClient
                 {
                     float factor = CSMath.blend(0, 20, BLEND_TEMP, 50, 100);
                     factor = (float) CSMath.blend(factor, 0, HOT_IMMUNITY, 0, 1);
+                    factor *= ConfigSettings.HEATSTROKE_SWAY_AMOUNT.get();
 
                     // Set random sway speed every once in a while
                     if (TIME_SINCE_NEW_SWAY > 100 || X_SWAY_SPEED == 0 || Y_SWAY_SPEED == 0)
                     {
                         TIME_SINCE_NEW_SWAY = 0;
-                        X_SWAY_SPEED = (float) (Math.random() * 0.003f + 0.004f);
-                        Y_SWAY_SPEED = (float) (Math.random() * 0.003f + 0.004f);
+                        X_SWAY_SPEED = (float) ((Math.random() * 0.003f + 0.004f) * ConfigSettings.HEATSTROKE_SWAY_SPEED.get());
+                        Y_SWAY_SPEED = (float) ((Math.random() * 0.003f + 0.004f) * ConfigSettings.HEATSTROKE_SWAY_SPEED.get());
                     }
                     TIME_SINCE_NEW_SWAY += frameTime;
 
@@ -208,12 +211,15 @@ public class TempEffectsClient
     public static void onRenderBlur(RenderLevelEvent.Post event)
     {
         if (isPlayerInvalid(Minecraft.getInstance().player)) return;
+        double blurMultiplier = ConfigSettings.HEATSTROKE_BLUR_AMOUNT.get();
+        if (blurMultiplier == 0) return;
         PostProcessShaderManager shaderManager = PostProcessShaderManager.getInstance();
 
         if (ConfigSettings.DISTORTION_EFFECTS.get() && BLEND_TEMP >= 50 && HOT_IMMUNITY < 1)
         {
             float blur = CSMath.blend(0f, 12f, BLEND_TEMP, 50, 100);
             blur = (float) CSMath.blend(blur, 0, HOT_IMMUNITY, 0, 1);
+            blur *= blurMultiplier;
             if (!shaderManager.hasEffect("heat_blur"))
             {   shaderManager.loadEffect("heat_blur", PostProcessShaderManager.BLOBS);
             }
