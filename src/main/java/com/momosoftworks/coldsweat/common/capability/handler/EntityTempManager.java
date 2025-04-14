@@ -564,7 +564,7 @@ public class EntityTempManager
                 }
 
                 if (player.isFreezing())
-                {   Temperature.addOrReplaceModifier(player, new FreezingTempModifier(player.getTicksFrozen() / 13.5f).expires(5), Temperature.Trait.BASE, Placement.Duplicates.BY_CLASS);
+                {   Temperature.addOrReplaceModifier(player, new FreezingTempModifier(), Temperature.Trait.BASE, Placement.Duplicates.BY_CLASS);
                 }
 
                 if (player.isOnFire() && Temperature.hasModifier(player, Temperature.Trait.WORLD, WaterTempModifier.class))
