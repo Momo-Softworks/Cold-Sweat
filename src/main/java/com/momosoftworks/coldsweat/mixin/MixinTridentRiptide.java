@@ -7,6 +7,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TridentItem;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -25,16 +26,5 @@ public class MixinTridentRiptide
     @Redirect(method = "use", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;isInWaterOrRain()Z"))
     private boolean allowUseWhenWet(Player player)
     {   return player.isInWaterOrRain() || Temperature.getModifier(player, Temperature.Trait.WORLD, WaterTempModifier.class).isPresent();
-    }
-
-    @Inject(method = "releaseUsing", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;startAutoSpinAttack(I)V"))
-    private void removeWetnessOnUse(ItemStack stack, Level level, LivingEntity entity, int timeLeft, CallbackInfo ci)
-    {
-        TaskScheduler.scheduleServer(() ->
-        {
-            if (!entity.isInWaterOrBubble())
-            {   Temperature.removeModifiers(entity, Temperature.Trait.WORLD, mod -> mod instanceof WaterTempModifier);
-            }
-        }, 5);
     }
 }
