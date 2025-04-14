@@ -35,6 +35,7 @@ import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -47,6 +48,7 @@ import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.inventory.container.*;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.TridentItem;
 import net.minecraft.item.UseAction;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.potion.EffectInstance;
@@ -331,8 +333,8 @@ public class EntityTempManager
             getTemperatureCap(oldPlayer).map(ITemperatureCap::getPersistentAttributes).orElse(new HashSet<>())
             .forEach(attr ->
             {
-                AttributeInstance newAttr = newPlayer.getAttribute(attr);
-                AttributeInstance oldAttr = oldPlayer.getAttribute(attr);
+                ModifiableAttributeInstance newAttr = newPlayer.getAttribute(attr);
+                ModifiableAttributeInstance oldAttr = oldPlayer.getAttribute(attr);
                 if (newAttr != null && oldAttr != null)
                 {
                     newAttr.setBaseValue(oldAttr.getBaseValue());
@@ -570,6 +572,23 @@ public class EntityTempManager
                     Temperature.removeModifiers(player, Temperature.Trait.WORLD, WaterTempModifier.class);
                 }
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onTridentUse(LivingEntityUseItemEvent.Stop event)
+    {
+        LivingEntity entity = event.getEntityLiving();
+        ItemStack stack = event.getItem();
+
+        if (!entity.level.isClientSide())
+        {
+            TaskScheduler.scheduleServer(() ->
+            {
+                if (stack.getItem() instanceof TridentItem && EnchantmentHelper.getRiptide(stack) > 0 && !entity.isInWaterOrBubble())
+                {   Temperature.removeModifiers(entity, Temperature.Trait.WORLD, WaterTempModifier.class);
+                }
+            }, 5);
         }
     }
 
