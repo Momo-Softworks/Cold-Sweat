@@ -189,6 +189,7 @@ public class AbstractTempCap implements ITemperatureCap
         double heatDampening   = this.modifyFromAttribute(entity, Trait.HEAT_DAMPENING, 0);
         double coldResistance  = this.modifyFromAttribute(entity, Trait.COLD_RESISTANCE, 0);
         double heatResistance  = this.modifyFromAttribute(entity, Trait.HEAT_RESISTANCE, 0);
+        double rate = 0;
 
         // 1 if newWorldTemp is above max, -1 if below min, 0 if between the values (safe)
         int worldTempSign = CSMath.signForRange(newWorldTemp, minTemp, maxTemp);
@@ -206,10 +207,10 @@ public class AbstractTempCap implements ITemperatureCap
 
             // How much the player's temperature should change
             double changeBy = (Math.max(
-                    // Change proportionally to the extremity of the world temperature
-                    (difference / 7d) * ConfigSettings.TEMP_RATE.get().floatValue(),
+                    // Change proportionally to the w of the world temperature
+                    (difference / 7d) * ConfigSettings.TEMP_RATE.get(),
                     // Ensure a minimum speed for temperature change
-                    Math.abs(ConfigSettings.TEMP_RATE.get().floatValue() / 50d)
+                    Math.abs(ConfigSettings.TEMP_RATE.get() / 50d)
             // If it's hot or cold
             ) * worldTempSign);
 
@@ -229,7 +230,8 @@ public class AbstractTempCap implements ITemperatureCap
                             // Heat dampening is positive; apply the change as a percentage of the dampening
                             : CSMath.blend(changeBy, 0, heatDampening, 0, 1));
             }
-            newCoreTemp += Temperature.apply(changeBy, entity, Trait.RATE, this.getModifiers(Temperature.Trait.RATE));
+            rate = Temperature.apply(changeBy, entity, Trait.RATE, this.getModifiers(Temperature.Trait.RATE));
+            newCoreTemp += rate;
         }
 
         // Get the sign of the player's core temperature (-1, 0, or 1)
@@ -271,6 +273,7 @@ public class AbstractTempCap implements ITemperatureCap
         this.setTrait(Trait.HEAT_RESISTANCE, heatResistance);
         this.setTrait(Trait.COLD_DAMPENING, coldDampening);
         this.setTrait(Trait.HEAT_DAMPENING, heatDampening);
+        this.setTrait(Trait.RATE, rate);
 
         if (syncTimer > 0)
         {   syncTimer--;
@@ -282,7 +285,7 @@ public class AbstractTempCap implements ITemperatureCap
         }
 
         // Deal damage to the player at a set interval if temperature is critical
-        this.tickHurting(entity, heatResistance, coldResistance);
+        this.tickHurting(entity);
     }
 
     private double modifyFromAttribute(LivingEntity entity, Temperature.Trait type, double baseValue)
@@ -328,27 +331,33 @@ public class AbstractTempCap implements ITemperatureCap
         syncTimer = 5;
     }
 
-    public void tickHurting(LivingEntity entity, double heatResistance, double coldResistance)
+    public void tickHurting(LivingEntity entity)
     {
         if (EntityTempManager.isPeacefulMode(entity)) return;
 
         double bodyTemp = getTrait(Temperature.Trait.BODY);
+        double heatResistance = getTrait(Trait.HEAT_RESISTANCE);
+        double coldResistance = getTrait(Trait.COLD_RESISTANCE);
+        double damage = ConfigSettings.TEMP_DAMAGE.get();
+        double rate = this.getTrait(Trait.RATE);
 
         boolean hasGrace = entity.hasEffect(ModEffects.GRACE);
         boolean hasFireResist = entity.hasEffect(Effects.FIRE_RESISTANCE);
         boolean hasIceResist = entity.hasEffect(ModEffects.ICE_RESISTANCE);
 
-        if (!hasGrace && entity.tickCount % 40 == 0)
+        double extremity = CSMath.blend(-4, 4, rate, -0.7, 0.7);
+        int interval = (int) Math.max(1, CSMath.roundDownNearest(Math.abs(extremity), 1));
+        if (!hasGrace && entity.tickCount % (40 / interval) == 0)
         {
             if (bodyTemp >= 100 && !(hasFireResist && ConfigSettings.FIRE_RESISTANCE_ENABLED.get()))
             {
                 DamageSource hot = ModDamageSources.HOT;
-                entity.hurt(hot, (float) CSMath.blend(ConfigSettings.TEMP_DAMAGE.get(), 0, heatResistance, 0, 1));
+                entity.hurt(hot, (float) CSMath.blend(damage, 0, heatResistance, 0, 1));
             }
             else if (bodyTemp <= -100 && !(hasIceResist && ConfigSettings.ICE_RESISTANCE_ENABLED.get()))
             {
                 DamageSource cold = ModDamageSources.COLD;
-                entity.hurt(cold, (float) CSMath.blend(ConfigSettings.TEMP_DAMAGE.get(), 0, coldResistance, 0, 1));
+                entity.hurt(cold, (float) CSMath.blend(damage, 0, coldResistance, 0, 1));
             }
         }
     }
