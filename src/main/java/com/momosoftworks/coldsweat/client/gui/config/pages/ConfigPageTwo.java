@@ -79,7 +79,7 @@ public class ConfigPageTwo extends AbstractConfigPage
                              5, 100,
                              (value, button) -> ConfigSettings.WATER_DROPLET_SCALE.set(new IntegerBounds(value.intValue(), (int) (value * 1.2))),
                              button -> button.setValue(CSMath.blend(0, 1, ConfigSettings.WATER_DROPLET_SCALE.get().min(), 5, 100)),
-                             false, false, new TranslatableComponent("cold_sweat.config.water_droplet_scale.desc"));
+                             false, true, new TranslatableComponent("cold_sweat.config.water_droplet_scale.desc"));
 
         // Direction Buttons: Steve Head
         this.addDirectionPanel("icon_directions", Side.RIGHT, new TranslatableComponent("cold_sweat.config.temp_icon_location.name"),

@@ -50,6 +50,11 @@ public class ClientSettingsConfig
     public static final ForgeConfigSpec.IntValue WATER_EFFECT_SETTING;
     public static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> WATER_DROPLET_SCALE;
 
+    public static final ForgeConfigSpec.ConfigValue<Double> SHIVER_INTENSITY;
+    public static final ForgeConfigSpec.ConfigValue<Double> HEATSTROKE_BLUR;
+    public static final ForgeConfigSpec.ConfigValue<Double> HEATSTROKE_SWAY_AMOUNT;
+    public static final ForgeConfigSpec.ConfigValue<Double> HEATSTROKE_SWAY_SPEED;
+
     static 
     {
         /*
@@ -114,6 +119,18 @@ public class ClientSettingsConfig
             HIGH_CONTRAST_MODE = BUILDER
                     .comment("Enables high contrast mode for UI elements")
                     .define("High Contrast", false);
+            SHIVER_INTENSITY = BUILDER
+                    .comment("The intensity of the shivering effect when the player is too cold")
+                    .defineInRange("Shiver Intensity", 1.0, 0.0, 2.0);
+            HEATSTROKE_BLUR = BUILDER
+                    .comment("The amount of blur applied to the screen when the player is too hot")
+                    .defineInRange("Heatstroke Blur Strength", 1.0, 0.0, 1.0);
+            HEATSTROKE_SWAY_AMOUNT = BUILDER
+                    .comment("The amount of camera sway applied when the player is too hot")
+                    .defineInRange("Heatstroke Sway Amount", 1.0, 0.0, 2.0);
+            HEATSTROKE_SWAY_SPEED = BUILDER
+                    .comment("The speed of the camera sway applied when the player is too hot")
+                    .defineInRange("Heatstroke Sway Speed", 1.0, 0.0, 2.0);
         BUILDER.pop();
 
         BUILDER.push("Misc");
