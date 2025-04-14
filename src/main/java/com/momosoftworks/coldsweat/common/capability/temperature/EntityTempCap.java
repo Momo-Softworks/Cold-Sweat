@@ -10,7 +10,7 @@ import net.minecraft.world.entity.player.Player;
 public class EntityTempCap extends AbstractTempCap
 {
     @Override
-    public void tickHurting(LivingEntity entity, double heatResistance, double coldResistance)
+    public void tickHurting(LivingEntity entity)
     {}
 
     @Override

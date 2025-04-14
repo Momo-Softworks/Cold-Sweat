@@ -315,7 +315,7 @@ public class TempCommand extends BaseCommand
                                                                Temperature.Units.F);
         for (Entity target : entities.stream().sorted(Comparator.comparing(player -> player.getName().getString())).toList())
         {   //Compose & send message
-            double temp = CSMath.truncate(Temperature.convertIfNeeded(Temperature.get((LivingEntity) target, trait), trait, preferredUnits), 1);
+            double temp = CSMath.truncate(Temperature.convertIfNeeded(Temperature.get((LivingEntity) target, trait), trait, preferredUnits), 2);
             String unitsName = trait.isForWorld() ? " " + preferredUnits.getFormattedName() : "";
             source.sendSuccess(new TranslatableComponent("commands.cold_sweat.temperature.get.result", target.getName().getString(),
                                                             trait.getSerializedName(), temp + unitsName),
