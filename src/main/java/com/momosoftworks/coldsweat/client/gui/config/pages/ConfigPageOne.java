@@ -94,13 +94,16 @@ public class ConfigPageOne extends AbstractConfigPage
                 input -> input.setValue(String.valueOf(ConfigSettings.TEMP_RATE.get())),
                 true, true, false, new TranslationTextComponent("cold_sweat.config.temperature_rate.desc"));
 
-        // Difficulty button
+        // Difficulty button...
         this.addButton("difficulty", Side.RIGHT, () -> new TranslationTextComponent("cold_sweat.config.difficulty.name").append(
                         " (" + ConfigSettings.Difficulty.getFormattedName(ConfigSettings.DIFFICULTY.get()).getString() + ")..."),
                 button -> minecraft.setScreen(new ConfigPageDifficulty(this)),
                 true, false, false, new TranslationTextComponent("cold_sweat.config.difficulty.desc"));
 
-        this.addEmptySpace(Side.RIGHT, 1);
+        // Temp Effects Button...
+        this.addButton("temp_effects", Side.RIGHT, () -> new TranslationTextComponent("cold_sweat.config.temp_effects.name"),
+                button -> MINECRAFT.setScreen(new ConfigPageTempEffects(this)),
+                true, false, false, new TranslationTextComponent("cold_sweat.config.temp_effects.desc"));
 
 
         // Misc. Temp Effects
