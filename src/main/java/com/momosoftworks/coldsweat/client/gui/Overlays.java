@@ -122,11 +122,12 @@ public class Overlays
 
         // Blend body temperature (per frame)
         BLEND_BODY_TEMP = CSMath.blend(PREV_BODY_TEMP, BODY_TEMP, Minecraft.getInstance().getPartialTick(), 0, 1);
+        double bodyTempInt = CSMath.roundNearest(BLEND_BODY_TEMP, 1);
 
         if (gui.shouldDrawSurvivalElements() && !Minecraft.getInstance().options.hideGui)
         {
             // Get text color
-            int color = switch (((int) BODY_TEMP_SEVERITY))
+            int color = switch ((int) BODY_TEMP_SEVERITY)
             {   case  7, -7 -> 16777215;
                 case  6 -> 16777132;
                 case  5 -> 16767856;
@@ -136,14 +137,14 @@ public class Overlays
                 case -4 -> 7528447;
                 case -5 -> 8713471;
                 case -6 -> 11599871;
-                default -> BLEND_BODY_TEMP > 0 ? 16744509
-                                               : BLEND_BODY_TEMP < 0 ? 4233468
-                                                                     : 11513775;
+                default -> bodyTempInt > 0 ? 16744509
+                         : bodyTempInt < 0 ? 4233468
+                         : 11513775;
             };
 
             // Get the outer border color when readout is > 100
-            int colorBG = BLEND_BODY_TEMP < 0 ? 1122643
-                        : BLEND_BODY_TEMP > 0 ? 5376516
+            int colorBG = bodyTempInt < 0 ? 1122643
+                        : bodyTempInt > 0 ? 5376516
                         : 0;
 
             int bobLevel = Math.min(Math.abs(((int) BODY_TEMP_SEVERITY)), 3);
@@ -157,7 +158,7 @@ public class Overlays
             // Render old icon (if blending)
             if (ConfigSettings.BODY_ICON_ENABLED.get())
             {
-                int icon = Math.abs(BLEND_BODY_TEMP) < 100 ?  CSMath.floor(BODY_TEMP_SEVERITY) : 4 * CSMath.sign(BODY_TEMP_SEVERITY);
+                int icon = Math.abs(bodyTempInt) < 100 ?  CSMath.floor(BODY_TEMP_SEVERITY) : 4 * CSMath.sign(BODY_TEMP_SEVERITY);
                 int iconX = (width / 2) - 5 + ConfigSettings.BODY_ICON_POS.get().x();
                 int iconYOffset = ADVANCED_WORLD_TEMP && ConfigSettings.MOVE_BODY_ICON_WHEN_ADVANCED.get()
                                   ? 54
@@ -167,14 +168,14 @@ public class Overlays
                 graphics.blit(BODY_TEMP_GAUGE_LOCATION.get(), iconX, iconY, 0, 40 - icon * 10, 10, 10, 10, 90);
 
                 // Render new icon if temperature changing
-                if (CSMath.betweenExclusive(Math.abs(BLEND_BODY_TEMP), 0, 100))
+                if (CSMath.betweenExclusive(Math.abs(bodyTempInt), 0, 100))
                 {
                     // render new icon over old icon
                     double blend = CSMath.blend(1, 9, Math.abs(BODY_TEMP_SEVERITY), Math.abs(CSMath.floor(BODY_TEMP_SEVERITY)), Math.abs(CSMath.ceil(BODY_TEMP_SEVERITY)));
                     graphics.blit(BODY_TEMP_GAUGE_LOCATION.get(),
                                   iconX, iconY + 10 - CSMath.ceil(blend), 0,
                                   // UV Y-coordinate for the icon in this stage
-                                  40 - CSMath.grow(icon, BLEND_BODY_TEMP > 0 ? 0 : 2) * 10 - CSMath.ceil(blend),
+                                  40 - CSMath.grow(icon, bodyTempInt > 0 ? 0 : 2) * 10 - CSMath.ceil(blend),
                                   10, CSMath.ceil(blend), 10, 90);
                 }
             }
@@ -186,7 +187,7 @@ public class Overlays
                 int scaledWidth = mc.getWindow().getGuiScaledWidth();
                 int scaledHeight = mc.getWindow().getGuiScaledHeight();
 
-                String s = "" + Math.min(Math.abs((int)BLEND_BODY_TEMP), 100);
+                String s = "" + (int) Math.min(Math.abs(bodyTempInt), 100);
                 int x = (scaledWidth - font.width(s)) / 2 + ConfigSettings.BODY_READOUT_POS.get().x();
                 int y = scaledHeight - 31 - 10 + ConfigSettings.BODY_READOUT_POS.get().y();
 
