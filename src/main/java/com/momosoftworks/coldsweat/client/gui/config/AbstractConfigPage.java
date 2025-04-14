@@ -77,14 +77,23 @@ public abstract class AbstractConfigPage extends Screen
     ImageButton nextNavButton;
     ImageButton prevNavButton;
 
+    public AbstractConfigPage(Screen parentScreen)
+    {   super(Component.translatable("cold_sweat.config.title"));
+        this.parentScreen = parentScreen;
+    }
+
+    public AbstractConfigPage(Screen parentScreen, Component title)
+    {   super(title);
+        this.parentScreen = parentScreen;
+    }
+
     public abstract Component sectionOneTitle();
 
     @Nullable
     public abstract Component sectionTwoTitle();
 
-    public AbstractConfigPage(Screen parentScreen)
-    {   super(Component.translatable("cold_sweat.config.title"));
-        this.parentScreen = parentScreen;
+    public boolean showNavigation()
+    {   return true;
     }
 
     /**
@@ -141,14 +150,13 @@ public abstract class AbstractConfigPage extends Screen
         Component label = dynamicLabel.get();
 
         boolean shouldBeActive = !requireOP || MINECRAFT.player == null || MINECRAFT.player.hasPermissions(2);
-        int buttonX = this.width / 2;
-        int xOffset = side == Side.LEFT ? -179 : 56;
-        int buttonY = this.height / 4 - 8 + (side == Side.LEFT ? leftSideLength : rightSideLength);
+        int widgetX = this.width / 2 + (side == Side.LEFT ? -179 : 56);
+        int widgetY = this.height / 4 - 8 + (side == Side.LEFT ? leftSideLength : rightSideLength);
         // Extend the button if the text is too long
         int buttonWidth = 152 + Math.max(0, font.width(label) - 140);
 
         // Make the button
-        Button button = new ConfigButton(buttonX + xOffset, buttonY, buttonWidth, 20, label, button1 ->
+        Button button = new ConfigButton(widgetX, widgetY, buttonWidth, 20, label, button1 ->
         {
             onClick.accept(button1);
             button1.setMessage(dynamicLabel.get());
@@ -163,7 +171,7 @@ public abstract class AbstractConfigPage extends Screen
 
         // Add the clientside indicator
         if (clientside)
-        {   this.addRenderableOnly(new ConfigImage(TEXTURE, this.width / 2 + xOffset - 18, buttonY + 3, 16, 15, 0, 144));
+        {   this.createClientsideIcon(id, widgetX - 16, widgetY + 4);
         }
 
         List<Component> tooltipList = new ArrayList<>(Arrays.asList(tooltip));
@@ -199,13 +207,14 @@ public abstract class AbstractConfigPage extends Screen
                                    Component... tooltip)
     {
         boolean shouldBeActive = !requireOP || MINECRAFT.player == null || MINECRAFT.player.hasPermissions(2);
-        int xOffset = side == Side.LEFT ? -82 : 151;
-        int yOffset = (side == Side.LEFT ? this.leftSideLength : this.rightSideLength) - 2;
         int labelOffset = font.width(label.getString()) > 90 ?
-                          font.width(label.getString()) - 84 : 0;
+                          font.width(label.getString()) - 86 : 0;
+        int boxWidth = Math.max(51 - labelOffset, 30);
+        int widgetX = this.width / 2 + (side == Side.LEFT ? -80 : 155);
+        int widgetY = this.height / 4 + (side == Side.LEFT ? this.leftSideLength : this.rightSideLength) - 2;
 
         // Make the input
-        EditBox textBox = new EditBox(this.font, this.width / 2 + xOffset + labelOffset, this.height / 4 - 6 + yOffset, 51, 22, Component.literal(""))
+        EditBox textBox = new EditBox(this.font, widgetX + labelOffset, widgetY - 6, boxWidth, 18, Component.literal(""))
         {
             public void onEdit()
             {
@@ -248,10 +257,10 @@ public abstract class AbstractConfigPage extends Screen
         textBox.setValue(ConfigScreen.TWO_PLACES.format(Double.parseDouble(textBox.getValue())));
 
         // Make the label
-        ConfigLabel configLabel = new ConfigLabel(id, label.getString(), this.width / 2 + xOffset - 95, this.height / 4 + yOffset, shouldBeActive ? 16777215 : 8421504);
+        ConfigLabel configLabel = new ConfigLabel(id, label.getString(), widgetX - 95, widgetY, shouldBeActive ? 16777215 : 8421504);
         // Add the clientside indicator
         if (clientside)
-        {   this.addRenderableOnly(new ConfigImage(TEXTURE, this.width / 2 + xOffset - 115, this.height / 4 - 4 + yOffset, 16, 15, 0, 144));
+        {   this.createClientsideIcon(id, widgetX - 115, widgetY - 2);
         }
 
         List<Component> tooltipList = new ArrayList<>(Arrays.asList(tooltip));
@@ -267,9 +276,9 @@ public abstract class AbstractConfigPage extends Screen
 
         // Mark this space as used
         if (side == Side.LEFT)
-            this.leftSideLength += ConfigScreen.OPTION_SIZE * 1.2;
+            this.leftSideLength += ConfigScreen.OPTION_SIZE * 1;
         else
-            this.rightSideLength += ConfigScreen.OPTION_SIZE * 1.2;
+            this.rightSideLength += ConfigScreen.OPTION_SIZE * 1;
     }
 
     /**
@@ -287,8 +296,8 @@ public abstract class AbstractConfigPage extends Screen
     protected void addDirectionPanel(String id, Side side, Component label, Consumer<Integer> leftRightPressed, Consumer<Integer> upDownPressed, Runnable reset, Supplier<Boolean> hide,
                                      boolean requireOP, boolean setsCustomDifficulty, boolean clientside, boolean canHide, Component... tooltip)
     {
-        int xOffset = side == Side.LEFT ? -97 : 136;
-        int yOffset = side == Side.LEFT ? this.leftSideLength : this.rightSideLength;
+        int widgetX = this.width / 2 + (side == Side.LEFT ? -97 : 136);
+        int widgetY = this.height / 4 + (side == Side.LEFT ? this.leftSideLength : this.rightSideLength);
 
         boolean shouldBeActive = !requireOP || MINECRAFT.player == null || MINECRAFT.player.hasPermissions(2);
 
@@ -300,7 +309,7 @@ public abstract class AbstractConfigPage extends Screen
         List<GuiEventListener> widgetBatch = new ArrayList<>();
 
         // Left button
-        ImageButton leftButton = new ImageButton(this.width / 2 + xOffset + labelOffset, this.height / 4 - 8 + yOffset, 14, 20, 0, 0, 20, TEXTURE, button ->
+        ImageButton leftButton = new ImageButton(widgetX + labelOffset, widgetY - 8, 14, 20, 0, 0, 20, TEXTURE, button ->
         {
             leftRightPressed.accept(-1);
             if (setsCustomDifficulty)
@@ -311,7 +320,7 @@ public abstract class AbstractConfigPage extends Screen
         widgetBatch.add(leftButton);
 
         // Up button
-        ImageButton upButton = new ImageButton(this.width / 2 + xOffset + 14 + labelOffset, this.height / 4 - 8 + yOffset, 20, 10, 14, 0, 20, TEXTURE, button ->
+        ImageButton upButton = new ImageButton(widgetX + 14 + labelOffset, widgetY - 8, 20, 10, 14, 0, 20, TEXTURE, button ->
         {
             upDownPressed.accept(-1);
             if (setsCustomDifficulty)
@@ -322,7 +331,7 @@ public abstract class AbstractConfigPage extends Screen
         widgetBatch.add(upButton);
 
         // Down button
-        ImageButton downButton = new ImageButton(this.width / 2 + xOffset + 14 + labelOffset, this.height / 4 + 2 + yOffset, 20, 10, 14, 10, 20, TEXTURE, button ->
+        ImageButton downButton = new ImageButton(widgetX + 14 + labelOffset, widgetY + 2, 20, 10, 14, 10, 20, TEXTURE, button ->
         {
             upDownPressed.accept(1);
             if (setsCustomDifficulty)
@@ -333,7 +342,7 @@ public abstract class AbstractConfigPage extends Screen
         widgetBatch.add(downButton);
 
         // Right button
-        ImageButton rightButton = new ImageButton(this.width / 2 + xOffset + 34 + labelOffset, this.height / 4 - 8 + yOffset, 14, 20, 34, 0, 20, TEXTURE, button ->
+        ImageButton rightButton = new ImageButton(widgetX + 34 + labelOffset, widgetY - 8, 14, 20, 34, 0, 20, TEXTURE, button ->
         {
             leftRightPressed.accept(1);
             if (setsCustomDifficulty)
@@ -344,7 +353,7 @@ public abstract class AbstractConfigPage extends Screen
         widgetBatch.add(rightButton);
 
         // Reset button
-        ImageButton resetButton = new ImageButton(this.width / 2 + xOffset + 52 + labelOffset, this.height / 4 - 8 + yOffset, 20, canHide ? 10 : 20, canHide ? 68 : 48, 0, 20, TEXTURE, button ->
+        ImageButton resetButton = new ImageButton(widgetX + 52 + labelOffset, widgetY - 8, 20, canHide ? 10 : 20, canHide ? 68 : 48, 0, 20, TEXTURE, button ->
         {
             reset.run();
             if (setsCustomDifficulty)
@@ -357,7 +366,7 @@ public abstract class AbstractConfigPage extends Screen
         // hide button, displayed directly under the reset button if canHide is true
         if (canHide)
         {
-            ImageButton hideButton = new ImageButton(this.width / 2 + xOffset + 52 + labelOffset, this.height / 4 + 2 + yOffset, 20, 10, 68, 10, 20, TEXTURE, button ->
+            ImageButton hideButton = new ImageButton(widgetX + 52 + labelOffset, widgetY + 2, 20, 10, 68, 10, 20, TEXTURE, button ->
             {
                 if (setsCustomDifficulty)
                 {   ConfigSettings.DIFFICULTY.set(ConfigSettings.Difficulty.CUSTOM);
@@ -371,10 +380,10 @@ public abstract class AbstractConfigPage extends Screen
         }
 
         // Add the option text
-        ConfigLabel configLabel = new ConfigLabel(id, label.getString(), this.width / 2 + xOffset - 79, this.height / 4 + yOffset, shouldBeActive ? 16777215 : 8421504);
+        ConfigLabel configLabel = new ConfigLabel(id, label.getString(), widgetX - 79, widgetY, shouldBeActive ? 16777215 : 8421504);
         // Add the clientside indicator
         if (clientside)
-        {   this.addRenderableOnly(new ConfigImage(TEXTURE, this.width / 2 + xOffset - 98, this.height / 4 - 8 + yOffset + 5, 16, 15, 0, 144));
+        {   this.createClientsideIcon(id, widgetX - 96, widgetY - 8 + 5);
         }
         widgetBatch.add(configLabel);
 
@@ -390,9 +399,9 @@ public abstract class AbstractConfigPage extends Screen
 
         // Add height to the list
         if (side == Side.LEFT)
-            this.leftSideLength += ConfigScreen.OPTION_SIZE * 1.2;
+            this.leftSideLength += ConfigScreen.OPTION_SIZE * 1.05;
         else
-            this.rightSideLength += ConfigScreen.OPTION_SIZE * 1.2;
+            this.rightSideLength += ConfigScreen.OPTION_SIZE * 1.05;
     }
 
     protected void addSliderButton(String id, Side side, Supplier<Component> dynamicLabel, double minVal, double maxVal,
@@ -402,13 +411,12 @@ public abstract class AbstractConfigPage extends Screen
     {
         Component label = dynamicLabel.get();
         boolean shouldBeActive = !requireOP || this.minecraft.player == null || this.minecraft.player.hasPermissions(2);
-        int buttonX = this.width / 2;
-        int xOffset = side == Side.LEFT ? -179 : 56;
-        int buttonY = this.height / 4 - 8 + (side == Side.LEFT ? leftSideLength : rightSideLength);
+        int widgetX = this.width / 2 + (side == Side.LEFT ? -179 : 56);
+        int widgetY = this.height / 4 - 8 + (side == Side.LEFT ? leftSideLength : rightSideLength);
         int buttonWidth = 152 + Math.max(0, font.width(label) - 140);
 
         // Make the input
-        ConfigSliderButton sliderButton = new ConfigSliderButton(buttonX + xOffset, buttonY, buttonWidth, 20, label, 0d)
+        ConfigSliderButton sliderButton = new ConfigSliderButton(widgetX, widgetY, buttonWidth, 20, label, 0d)
         {
             @Override
             protected void updateMessage()
@@ -431,7 +439,7 @@ public abstract class AbstractConfigPage extends Screen
 
         // Add the clientside indicator
         if (clientside)
-        {   this.addRenderableOnly(new ConfigImage(TEXTURE, this.width / 2 + xOffset - 115, buttonY, 16, 15, 0, 144));
+        {   this.createClientsideIcon(id, widgetX - 16, widgetY + 4);
         }
 
         List<Component> tooltipList = new ArrayList<>(Arrays.asList(tooltip));
@@ -453,9 +461,20 @@ public abstract class AbstractConfigPage extends Screen
 
     }
 
+    protected void createClientsideIcon(String id, int x, int y)
+    {
+        ConfigImage icon = new ConfigImage(TEXTURE, x, y, 12, 12, 0, 144);
+        this.addRenderableOnly(icon);
+        String iconId = String.format("%s_client", id);
+        this.setTooltip(iconId, List.of(Component.translatable("cold_sweat.config.clientside_warning")));
+        this.addWidgetBatch(iconId, List.of(icon), true);
+    }
+
     @Override
     protected void init()
     {
+        MOUSE_STILL_TIMER = 0;
+        this.setDragging(false);
         this.leftSideLength = 0;
         this.rightSideLength = 0;
 
@@ -469,21 +488,24 @@ public abstract class AbstractConfigPage extends Screen
         );
 
         // Navigation
-        nextNavButton = new ImageButton(this.width - 32, 12, 20, 20, 0, 88, 20, TEXTURE,
+        if (this.showNavigation())
+        {
+            nextNavButton = new ImageButton(this.width - 32, 12, 20, 20, 0, 88, 20, TEXTURE,
                 button ->
                 {   ConfigScreen.CURRENT_PAGE++;
                     MINECRAFT.setScreen(ConfigScreen.getPage(ConfigScreen.CURRENT_PAGE, parentScreen));
                 });
-        if (ConfigScreen.CURRENT_PAGE < ConfigScreen.LAST_PAGE)
-            this.addRenderableWidget(nextNavButton);
+            if (ConfigScreen.CURRENT_PAGE < ConfigScreen.LAST_PAGE)
+                this.addRenderableWidget(nextNavButton);
 
-        prevNavButton = new ImageButton(this.width - 76, 12, 20, 20, 20, 88, 20, TEXTURE,
-                button ->
-                {   ConfigScreen.CURRENT_PAGE--;
-                    MINECRAFT.setScreen(ConfigScreen.getPage(ConfigScreen.CURRENT_PAGE, parentScreen));
-                });
-        if (ConfigScreen.CURRENT_PAGE > ConfigScreen.FIRST_PAGE)
-            this.addRenderableWidget(prevNavButton);
+            prevNavButton = new ImageButton(this.width - 76, 12, 20, 20, 20, 88, 20, TEXTURE,
+                    button ->
+                    {   ConfigScreen.CURRENT_PAGE--;
+                        MINECRAFT.setScreen(ConfigScreen.getPage(ConfigScreen.CURRENT_PAGE, parentScreen));
+                    });
+            if (ConfigScreen.CURRENT_PAGE > ConfigScreen.FIRST_PAGE)
+                this.addRenderableWidget(prevNavButton);
+        }
     }
 
     @Override
@@ -496,7 +518,10 @@ public abstract class AbstractConfigPage extends Screen
         graphics.drawCenteredString(this.font, this.title.getString(), this.width / 2, TITLE_HEIGHT, 0xFFFFFF);
 
         // Page Number
-        graphics.drawString(this.font, Component.literal((ConfigScreen.CURRENT_PAGE + 1) + "/" + (ConfigScreen.LAST_PAGE + 1)), this.width - 53, 18, 16777215, true);
+        if (showNavigation())
+        {   graphics.drawString(this.font, net.minecraft.network.chat.Component.literal((ConfigScreen.CURRENT_PAGE + 1) + "/" + (ConfigScreen.LAST_PAGE + 1)),
+                                this.width - 53, 18, 16777215, true);
+        }
 
         // Section 1 Title
         graphics.drawString(this.font, this.sectionOneTitle(), this.width / 2 - 204, this.height / 4 - 28, 16777215, true);

@@ -24,7 +24,7 @@ public class ConfigPageThree extends AbstractConfigPage
     @Nullable
     @Override
     public Component sectionTwoTitle()
-    {   return Component.translatable("cold_sweat.config.section.difficulty");
+    {   return Component.translatable("cold_sweat.config.section.thermal_source");
     }
 
     @Override
@@ -67,50 +67,28 @@ public class ConfigPageThree extends AbstractConfigPage
                              true, false,
                              Component.translatable("cold_sweat.config.modifier_tick_rate.desc"));
 
-        // Freezing Hearts Percentage
-        this.addSliderButton("freezing_hearts", Side.RIGHT,
-                             () -> getSliderPercentageText(Component.translatable("cold_sweat.config.cold_freezing_hearts.name"), ConfigSettings.HEARTS_FREEZING_PERCENTAGE.get(), 0),
-                             0, 1,
-                             (value, button) -> ConfigSettings.HEARTS_FREEZING_PERCENTAGE.set(value),
-                             (button) -> button.setValue(ConfigSettings.HEARTS_FREEZING_PERCENTAGE.get()),
-                             true, false,
-                             Component.translatable("cold_sweat.config.cold_freezing_hearts.desc"));
+        // Smart Hearth
+        this.addButton("smart_hearth", Side.RIGHT, () -> getToggleButtonText(Component.translatable("cold_sweat.config.smart_source.name", Component.translatable("block.cold_sweat.hearth_bottom").getString()),
+                                                                            ConfigSettings.SMART_HEARTH.get()),
+                       button -> ConfigSettings.SMART_HEARTH.set(!ConfigSettings.SMART_HEARTH.get()),
+                       true, false, false, Component.translatable("cold_sweat.config.smart_source.desc"));
 
-        // Cold Mining Speed
-        this.addSliderButton("cold_mining_speed", Side.RIGHT,
-                             () -> getSliderPercentageText(Component.translatable("cold_sweat.config.cold_mining_impairment.name"), ConfigSettings.COLD_MINING_IMPAIRMENT.get(), 0),
-                             0, 1,
-                             (value, button) -> ConfigSettings.COLD_MINING_IMPAIRMENT.set(value),
-                             (button) -> button.setValue(ConfigSettings.COLD_MINING_IMPAIRMENT.get()),
-                             true, false,
-                             Component.translatable("cold_sweat.config.cold_mining_impairment.desc"));
+        // Smart Boiler
+        this.addButton("smart_boiler", Side.RIGHT, () -> getToggleButtonText(Component.translatable("cold_sweat.config.smart_source.name", Component.translatable("block.cold_sweat.boiler").getString()),
+                                                                            ConfigSettings.SMART_BOILER.get()),
+                       button -> ConfigSettings.SMART_BOILER.set(!ConfigSettings.SMART_BOILER.get()),
+                       true, false, false, Component.translatable("cold_sweat.config.smart_source.desc"));
 
-        // Cold Movement Speed
-        this.addSliderButton("cold_movement_speed", Side.RIGHT,
-                             () -> getSliderPercentageText(Component.translatable("cold_sweat.config.cold_movement_slowdown.name"), ConfigSettings.COLD_MOVEMENT_SLOWDOWN.get(), 0),
-                             0, 1,
-                             (value, button) -> ConfigSettings.COLD_MOVEMENT_SLOWDOWN.set(value),
-                             (button) -> button.setValue(ConfigSettings.COLD_MOVEMENT_SLOWDOWN.get()),
-                             true, false,
-                             Component.translatable("cold_sweat.config.cold_movement_slowdown.desc"));
+        // Smart Icebox
+        this.addButton("smart_icebox", Side.RIGHT, () -> getToggleButtonText(Component.translatable("cold_sweat.config.smart_source.name", Component.translatable("block.cold_sweat.icebox").getString()),
+                                                                            ConfigSettings.SMART_ICEBOX.get()),
+                       button -> ConfigSettings.SMART_ICEBOX.set(!ConfigSettings.SMART_ICEBOX.get()),
+                       true, false, false, Component.translatable("cold_sweat.config.smart_source.desc"));
 
-        // Cold Knockback Reduction
-        this.addSliderButton("cold_knockback_reduction", Side.RIGHT,
-                             () -> getSliderPercentageText(Component.translatable("cold_sweat.config.cold_knockback_reduction.name"), ConfigSettings.COLD_KNOCKBACK_REDUCTION.get(), 0),
-                             0, 1,
-                             (value, button) -> ConfigSettings.COLD_KNOCKBACK_REDUCTION.set(value),
-                             (button) -> button.setValue(ConfigSettings.COLD_KNOCKBACK_REDUCTION.get()),
-                             true, false,
-                             Component.translatable("cold_sweat.config.cold_knockback_reduction.desc"));
-
-        // Heat Fog Distance
-        this.addSliderButton("heat_fog_distance", Side.RIGHT,
-                             () -> getSliderText(Component.translatable("cold_sweat.config.heat_fog_distance.name"), ConfigSettings.HEATSTROKE_FOG_DISTANCE.get().intValue(), 0, 64, 64),
-                             0, 1,
-                             (value, button) -> ConfigSettings.HEATSTROKE_FOG_DISTANCE.set(value * 64),
-                             (button) -> button.setValue(ConfigSettings.HEATSTROKE_FOG_DISTANCE.get() / 64),
-                             true, false,
-                             Component.translatable("cold_sweat.config.heat_fog_distance.desc"));
+        // Source Debug
+        this.addButton("source_debug", Side.RIGHT, () -> getToggleButtonText(Component.translatable("cold_sweat.config.source_debug.name"), ConfigSettings.HEARTH_DEBUG.get()),
+                       button -> ConfigSettings.HEARTH_DEBUG.set(!ConfigSettings.HEARTH_DEBUG.get()),
+                       true, false, false, Component.translatable("cold_sweat.config.source_debug.desc"));
     }
 
     @Override
