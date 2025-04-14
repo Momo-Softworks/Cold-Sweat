@@ -28,7 +28,6 @@ import oshi.util.tuples.Triplet;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class WetnessRenderer
@@ -100,7 +99,7 @@ public class WetnessRenderer
         boolean justExitedWater = WAS_SUBMERGED && !isSubmerged;
         if (justExitedWater)
         {
-            for (int i = 0; i < 15; i++)
+            for (int i = 0; i < 10; i++)
             {
                 Droplet newDrop = createDrop(screenWidth);
                 newDrop.yMotion = getRandomVelocity(frametime) / 2 + 0.3f;
@@ -252,7 +251,8 @@ public class WetnessRenderer
     {
         IntegerBounds dropSize = ConfigSettings.WATER_DROPLET_SCALE.get();
         int size = dropSize.getRandom();
-        return new Droplet(new Vec2f((int) (Math.random() * screenWidth), -size), 1f, size);
+        int x = (int) (Math.random() < 0.5 ? (Math.random() * screenWidth / 4) : (screenWidth - Math.random() * screenWidth / 4));
+        return new Droplet(new Vec2f(x, -size), 1f, size);
     }
 
     private static void renderQuad(PoseStack poseStack, BufferBuilder bufferBuilder, int x, int y,
