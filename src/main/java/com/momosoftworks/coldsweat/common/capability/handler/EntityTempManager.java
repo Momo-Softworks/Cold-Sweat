@@ -47,7 +47,9 @@ import net.minecraft.world.entity.vehicle.Minecart;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TridentItem;
 import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -537,6 +539,23 @@ public class EntityTempManager
                 {   player.setTicksFrozen(player.getTicksFrozen() - 1);
                 }
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onTridentUse(LivingEntityUseItemEvent.Stop event)
+    {
+        LivingEntity entity = event.getEntity();
+        ItemStack stack = event.getItem();
+
+        if (!entity.level().isClientSide())
+        {
+            TaskScheduler.scheduleServer(() ->
+            {
+                if (stack.getItem() instanceof TridentItem && EnchantmentHelper.getTridentSpinAttackStrength(stack, entity) > 0 && !entity.isInWaterOrBubble())
+                {   Temperature.removeModifiers(entity, Temperature.Trait.WORLD, WaterTempModifier.class);
+                }
+            }, 5);
         }
     }
 
