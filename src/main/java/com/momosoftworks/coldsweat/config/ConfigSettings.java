@@ -862,14 +862,17 @@ public class ConfigSettings
         SyncType.BOTH_WAYS);
 
         THERMOREGULATOR_INSULATION = addSyncedSetting("thermoregulator_insulation", () -> 1, holder ->
-        {
-            if (CompatManager.isToughAsNailsLoaded())
+        {   if (CompatManager.isToughAsNailsLoaded())
             {   holder.set(WorldSettingsConfig.THERMOREGULATOR_INSULATION.get());
             }
         },
         (encoder) -> ConfigHelper.serializeNbtInt(encoder, "ThermoregulatorInsulation"),
         (decoder) -> decoder.getInt("ThermoregulatorInsulation"),
-        (saver) -> WorldSettingsConfig.THERMOREGULATOR_INSULATION.set(saver),
+        (saver) ->
+        {   if (CompatManager.isToughAsNailsLoaded())
+            {   WorldSettingsConfig.THERMOREGULATOR_INSULATION.set(saver);
+            }
+        },
         SyncType.BOTH_WAYS);
 
         INSULATION_STRENGTH = addSyncedSetting("insulation_strength", () -> 1d, holder -> holder.set(ItemSettingsConfig.INSULATION_STRENGTH.get()),
