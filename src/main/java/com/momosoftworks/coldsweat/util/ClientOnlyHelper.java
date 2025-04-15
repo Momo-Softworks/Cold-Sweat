@@ -1,11 +1,14 @@
 package com.momosoftworks.coldsweat.util;
 
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.momosoftworks.coldsweat.client.event.HearthDebugRenderer;
 import com.momosoftworks.coldsweat.client.gui.config.pages.ConfigPageOne;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.EntityTickableSound;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.network.play.ClientPlayNetHandler;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.entity.model.BipedModel;
@@ -95,5 +98,33 @@ public class ClientOnlyHelper
 
     public static void addDestroyBlockEffect(BlockPos pos, BlockState state)
     {   Minecraft.getInstance().particleEngine.destroy(pos, state);
+    }
+
+    public static void renderVerticalCropText(String text, int x, int y, int height, int color, MatrixStack poseStack)
+    {
+        FontRenderer font = Minecraft.getInstance().font;
+        Minecraft mc = Minecraft.getInstance();
+
+        if (height > 0)
+        {
+            // Enable scissor test to only render the bottom portion of the text
+            int guiScale = (int) mc.getWindow().getGuiScale();
+            int windowHeight = mc.getWindow().getHeight();
+
+            // Convert coordinates to screen space for the scissor test
+            int scissorX = x * guiScale;
+            int scissorY = windowHeight - (y + font.lineHeight) * guiScale;
+            int scissorWidth = font.width(text) * guiScale;
+            int scissorHeight = height * guiScale;
+
+            // Enable scissor test (this limits rendering to just the specified rectangle)
+            RenderSystem.enableScissor(scissorX, scissorY, scissorWidth, scissorHeight);
+
+            // Draw the white text (only the portion inside the scissor region will be visible)
+            font.draw(poseStack, text, x, y, color);
+
+            // Disable scissor test
+            RenderSystem.disableScissor();
+        }
     }
 }
