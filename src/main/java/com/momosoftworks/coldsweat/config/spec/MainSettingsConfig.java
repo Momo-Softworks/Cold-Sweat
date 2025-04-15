@@ -165,11 +165,11 @@ public class MainSettingsConfig
 
             MIN_ACCLIMATION_RANGE = BUILDER
                 .comment("The offset to the player's minimum habitable temperature when they acclimate to cold (first value) or hot (second value) environments")
-                .defineListAllowEmpty("Min Acclimation Range", List.of(-0.46, 0.23), o -> o instanceof Number);
+                .defineListAllowEmpty(List.of("Min Acclimation Range"), () -> List.of(-0.46, 0.23), o -> o instanceof Number);
 
             MAX_ACCLIMATION_RANGE = BUILDER
                 .comment("The offset to the player's maximum habitable temperature when they acclimate to cold (first value) or hot (second value) environments")
-                .defineListAllowEmpty("Max Acclimation Range", List.of(-0.23, 0.46), o -> o instanceof Number);
+                .defineListAllowEmpty(List.of("Max Acclimation Range"), () -> List.of(-0.23, 0.46), o -> o instanceof Number);
 
             BUILDER.pop();
         BUILDER.pop();

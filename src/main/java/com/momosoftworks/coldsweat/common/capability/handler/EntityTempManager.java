@@ -596,10 +596,10 @@ public class EntityTempManager
     @SubscribeEvent
     public static void onTridentUse(LivingEntityUseItemEvent.Stop event)
     {
-        LivingEntity entity = event.getEntity();
+        LivingEntity entity = event.getEntityLiving();
         ItemStack stack = event.getItem();
 
-        if (!entity.level().isClientSide())
+        if (!entity.level.isClientSide())
         {
             TaskScheduler.scheduleServer(() ->
             {
