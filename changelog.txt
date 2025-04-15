@@ -3014,6 +3014,7 @@ Technical Changes:
 * Added new "Temperature Effects" sub-page to the config menu, which allows for individually tweaking the negative effects of freezing/overheating
       - This includes new settings for changing the blur and camera sway effects from overheating
 - Water droplets caused by being wet now only show on the sides of the screen to reduce obstruction
+- The body temperature readout (with a thermometer) now shows a gradient rising from the bottom as the player's temperature exceeds 100/-100
 
 Fixes:
 * Fixed crash when saving configs and Tough as Nails isn't loaded

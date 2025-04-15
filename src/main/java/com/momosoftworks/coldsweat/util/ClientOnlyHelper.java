@@ -1,8 +1,12 @@
 package com.momosoftworks.coldsweat.util;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.momosoftworks.coldsweat.client.event.HearthDebugRenderer;
 import com.momosoftworks.coldsweat.client.gui.config.pages.ConfigPageOne;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
@@ -87,5 +91,33 @@ public class ClientOnlyHelper
             }
         }
         return false;
+    }
+
+    public static void renderVerticalCropText(String text, int x, int y, int height, int color, PoseStack poseStack)
+    {
+        Font font = Minecraft.getInstance().font;
+        Minecraft mc = Minecraft.getInstance();
+
+        if (height > 0)
+        {
+            // Enable scissor test to only render the bottom portion of the text
+            int guiScale = (int) mc.getWindow().getGuiScale();
+            int windowHeight = mc.getWindow().getHeight();
+
+            // Convert coordinates to screen space for the scissor test
+            int scissorX = x * guiScale;
+            int scissorY = windowHeight - (y + font.lineHeight) * guiScale;
+            int scissorWidth = font.width(text) * guiScale;
+            int scissorHeight = height * guiScale;
+
+            // Enable scissor test (this limits rendering to just the specified rectangle)
+            RenderSystem.enableScissor(scissorX, scissorY, scissorWidth, scissorHeight);
+
+            // Draw the white text (only the portion inside the scissor region will be visible)
+            font.draw(poseStack, text, x, y, color);
+
+            // Disable scissor test
+            RenderSystem.disableScissor();
+        }
     }
 }
