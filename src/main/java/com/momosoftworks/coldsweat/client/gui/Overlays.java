@@ -7,6 +7,7 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -126,20 +127,9 @@ public class Overlays
         if (shouldDrawSurvivalElements() && !Minecraft.getInstance().options.hideGui)
         {
             // Get text color
-            int color = switch ((int) BODY_TEMP_SEVERITY)
-            {   case  7, -7 -> 16777215;
-                case  6 -> 16777132;
-                case  5 -> 16767856;
-                case  4 -> 16759634;
-                case  3 -> 16751174;
-                case -3 -> 6078975;
-                case -4 -> 7528447;
-                case -5 -> 8713471;
-                case -6 -> 11599871;
-                default -> bodyTempInt > 0 ? 16744509
-                         : bodyTempInt < 0 ? 4233468
-                         : 11513775;
-            };
+            int color = bodyTempInt > 0 ? 16744509
+                      : bodyTempInt < 0 ? 4233468
+                      : 11513775;
 
             // Get the outer border color when readout is > 100
             int colorBG = bodyTempInt < 0 ? 1122643
@@ -198,6 +188,21 @@ public class Overlays
 
                 // Draw the readout
                 graphics.drawString(font, s, x, y, color, false);
+
+                // Render white overlay if temp is > 100
+                if (Math.abs(bodyTempInt) > 100)
+                {
+                    // Calculate the height of the white overlay
+                    int textHeight = font.wordWrapHeight(s, 100);
+                    int overlayHeight = (int) CSMath.roundUpNearest(CSMath.blend(2, textHeight, Math.abs(bodyTempInt), 100, 150), 1);
+                    // Overlay color
+                    int overlayColor = overlayHeight > 3 ? bodyTempInt > 0 ? 16777132 : 11599871
+                                     : bodyTempInt > 0 ? 16771975 : 8713471;
+                    int overlayColor2 = bodyTempInt > 0 ? 16759634 : 7528447;
+
+                    ClientOnlyHelper.renderVerticalCropText(s, x, y, Math.min(textHeight, overlayHeight + 1), overlayColor2, graphics);
+                    ClientOnlyHelper.renderVerticalCropText(s, x, y, overlayHeight, overlayColor, graphics);
+                }
             }
         }
     };
