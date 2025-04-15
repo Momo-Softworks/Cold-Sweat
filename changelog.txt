@@ -3010,3 +3010,39 @@ Technical Changes:
 - Registry removal configs now accept a negatable list of NBT
 - Insulating mount JSON now has an "immune_temp_modifiers" field, similar to insulator items
 - The "cold_insulation" and "heat_insulation" fields in insulating mount JSON are now optional (defaulting to 0)
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.4-b02c
+* Added a new "acclimation" mechanic:
+      - By spending time in hotter or colder climates, player can now adapt to more comfortably live in them
+      - This causes their livable temperature range to be shifted upward or downward
+      - The player can acclimate to live in climates up to 20°F/10°C hotter or colder than normal (configurable)
+      - Complete acclimation takes about 15 minutes (also configurable)
+* The rate at which the player is damaged by freezing/overheating is now dependent on how fast they are freezing/overheating
+      - For example, if the player is in a 100°F/37°C area, they will take damage at the normal rate
+      - If the player is in a 400°F/200°C area, they will take damage much faster
+      - Wearing insulation slows down the rate of damage
+* Lava now increases the player's temperature logarithmically (A.K.A. diminishing returns), as the amount of lava increases
+      - This means one block of lava is more effective than before, but a whole pool of lava is slightly less effective
+      - This should make it more fair as both a tool for warming up and a hazard to avoid
+* Added new "Temperature Effects" sub-page to the config menu, which allows for individually tweaking the negative effects of freezing/overheating
+      - This includes new settings for changing the blur and camera sway effects from overheating
+- Water droplets caused by being wet now only show on the sides of the screen to reduce obstruction
+
+Fixes:
+* Fixed crash when saving configs and Tough as Nails isn't loaded
+- Fixed crash when saving the player's NBT data in some cases
+* Fixed ConcurrentModificationException crash when managing cached capability data
+* (1.21) Fixed armor items stacking to 64
+- Fixed mount configs only working for living entities
+- Fixed the thermal source spread blacklist not being used for determining if the hearth is under a roof
+- Fixed how smokestacks and Create fluid pipes connect to thermal sources and each other
+- Fixed the chameleon's head and tail disappearing after a long time of being loaded
+- Fixed bug that caused attributes to sometimes throw errors when queried
+- Fixed the player's wetness not being removed after using a trident
+- Fixed rounding error on the body temperature readout
+
+Technical Changes:
+- Added "logarithmic" (boolean) field to block temp JSON and KubeJS configs
+      - Makes a block deliver "diminishing returns" as more of them are present around the player
