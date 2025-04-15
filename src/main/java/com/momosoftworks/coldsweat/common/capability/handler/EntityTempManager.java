@@ -599,7 +599,7 @@ public class EntityTempManager
         LivingEntity entity = event.getEntity();
         ItemStack stack = event.getItem();
 
-        if (!entity.level().isClientSide())
+        if (!entity.level.isClientSide())
         {
             TaskScheduler.scheduleServer(() ->
             {

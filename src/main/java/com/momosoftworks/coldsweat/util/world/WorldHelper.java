@@ -96,7 +96,7 @@ public abstract class WorldHelper
             BlockPos.MutableBlockPos mutable = pos.mutable();
             LevelChunkSection section;
             BlockState state = null;
-            for (; state == null || state.canBeReplaced(); y--)
+            for (; state == null || state.getMaterial().isReplaceable(); y--)
             {
                 mutable.setY(y);
                 section = WorldHelper.getChunkSection(chunk, mutable.getY());
