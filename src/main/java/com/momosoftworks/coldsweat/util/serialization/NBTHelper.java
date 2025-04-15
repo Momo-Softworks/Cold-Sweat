@@ -118,18 +118,18 @@ public class NBTHelper
     {   return CSMath.orElse(stack.getTag(), new CompoundNBT());
     }
     
-    public static <T extends CompoundNBT> T getOrPutTag(LivingEntity entity, String tag, T dfault)
+    public static <T extends INBT> T getOrPutTag(LivingEntity entity, String tag, T dfault)
     {
         CompoundNBT data = entity.getPersistentData();
-        if (!data.contains(tag))
+        if (!data.contains(tag) || data.get(tag).getId() != dfault.getId())
         {   data.put(tag, dfault);
         }
         return (T) data.get(tag);
     }
-    public static <T extends CompoundNBT> T getOrPutTag(ItemStack stack, String tag, T dfault)
+    public static <T extends INBT> T getOrPutTag(ItemStack stack, String tag, T dfault)
     {
         CompoundNBT data = stack.getOrCreateTag();
-        if (!data.contains(tag))
+        if (!data.contains(tag) || data.get(tag).getId() != dfault.getId())
         {   data.put(tag, dfault);
         }
         return (T) data.get(tag);
