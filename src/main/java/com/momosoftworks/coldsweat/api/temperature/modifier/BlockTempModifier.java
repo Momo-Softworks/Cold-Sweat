@@ -25,6 +25,8 @@ import java.util.function.Function;
 
 public class BlockTempModifier extends TempModifier
 {
+    protected static final double LOG_FACTOR = 0.52;
+
     public BlockTempModifier() {}
 
     public BlockTempModifier(int range)
@@ -121,10 +123,23 @@ public class BlockTempModifier extends TempModifier
                                                    ? CSMath.blend(temperature, 0, distance, 0.5, blockTemp.range())
                                                    : temperature;
 
-                                // Store this block type's total effect on the player
-                                // Dampen the effect with each block between the player and the block
-                                double blockTempTotal = blockTempEffects.getOrDefault(blockTemp, 0d) + tempToAdd / (blocks[0] + 1);
-                                blockTempEffects.put(blockTemp, CSMath.clamp(blockTempTotal, blockTemp.minEffect(), blockTemp.maxEffect()));
+                                double blockTempTotal = blockTempEffects.getOrDefault(blockTemp, 0d);
+                                if (blockTemp.logarithmic())
+                                {   // Calculate amount of increase
+                                    double newTotal = Math.pow(Math.pow(blockTempTotal, 1/LOG_FACTOR) + tempToAdd, LOG_FACTOR);
+                                    double delta = newTotal - blockTempTotal;
+                                    // Dampen the effect with each block between the player and the source
+                                    delta /= (blocks[0] + 1);
+                                    // Store this block type's total effect on the player
+                                    blockTempEffects.put(blockTemp, CSMath.clamp(blockTempTotal + delta, blockTemp.minEffect(), blockTemp.maxEffect()));
+                                }
+                                else
+                                {   // Dampen the effect with each block between the player and the source
+                                    tempToAdd /= (blocks[0] + 1);
+                                    // Store this block type's total effect on the player
+                                    double newTotal = blockTempTotal + tempToAdd;
+                                    blockTempEffects.put(blockTemp, CSMath.clamp(newTotal, blockTemp.minEffect(), blockTemp.maxEffect()));
+                                }
                                 // Used to trigger advancements
                                 if (shouldTickAdvancements)
                                 {   triggers.add(new Triplet<>(blockpos, blockTemp, distance));
@@ -157,9 +172,6 @@ public class BlockTempModifier extends TempModifier
                 double max = be.maxTemperature();
                 if (!CSMath.betweenInclusive(temp, min, max)) continue;
                 double effectValue = effect.getValue();
-                if (be.logarithmic())
-                {   effectValue = 1/Math.pow(effectValue, -0.68);
-                }
                 temp = CSMath.clamp(temp + effectValue, min, max);
             }
             return temp;
