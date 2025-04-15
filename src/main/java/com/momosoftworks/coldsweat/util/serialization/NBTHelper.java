@@ -141,10 +141,10 @@ public class NBTHelper
     {   getOrCreateTag(stack).update(action);
     }
     
-    public static <T extends CompoundTag> T getOrPutTag(LivingEntity entity, String tag, T dfault)
+    public static <T extends Tag> T getOrPutTag(LivingEntity entity, String tag, T dfault)
     {
         CompoundTag data = entity.getPersistentData();
-        if (!data.contains(tag))
+        if (!data.contains(tag) || data.get(tag).getId() != dfault.getId())
         {   data.put(tag, dfault);
         }
         return (T) data.get(tag);
