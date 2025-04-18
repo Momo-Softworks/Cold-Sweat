@@ -171,7 +171,7 @@ public class Temperature
      * @return The first modifier of the given class that is applied to the player.
      */
     public static <T extends TempModifier> Optional<T> getModifier(LivingEntity entity, Trait trait, Class<T> modClass)
-    {   return getModifier(EntityTempManager.getTemperatureCap(entity).orElse(new PlayerTempCap()), trait, modClass);
+    {   return EntityTempManager.getTemperatureCap(entity).map(cap -> getModifier(cap, trait, modClass)).orElse(Optional.empty());
     }
 
     public static <T extends TempModifier> Optional<T> getModifier(ITemperatureCap cap, Trait trait, Class<T> modClass)
@@ -184,7 +184,7 @@ public class Temperature
     @Nullable
     public static TempModifier getModifier(LivingEntity entity, Trait trait, Predicate<TempModifier> condition)
     {
-        for (TempModifier modifier : EntityTempManager.getTemperatureCap(entity).orElse(new PlayerTempCap()).getModifiers(trait))
+        for (TempModifier modifier : EntityTempManager.getTemperatureCap(entity).map(cap -> cap.getModifiers(trait)).orElse(List.of()))
         {
             if (condition.test(modifier))
             {   return modifier;
