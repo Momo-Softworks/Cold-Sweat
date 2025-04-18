@@ -33,6 +33,7 @@
     "MixinMinecart",
     "MixinMobSpawning",
     "MixinPreServerLoad",
+    "MixinPreventFreezing",
     "MixinRegistration",
     "MixinShearsDispenseBehavior",
     "MixinSmithingRecipe",
