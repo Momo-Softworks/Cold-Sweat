@@ -83,6 +83,8 @@ public abstract class WorldHelper
 
     public static int getHeight(BlockPos pos, Level level)
     {
+        int minHeight = level.getMinBuildHeight();
+        int maxHeight = level.getMaxBuildHeight();
         int seaLevel = level.getSeaLevel();
         // If chunk isn't loaded, return sea level
         if (!level.isLoaded(pos)) return seaLevel;
@@ -94,13 +96,14 @@ public abstract class WorldHelper
         {
             int y = level.getMaxBuildHeight();
             BlockPos.MutableBlockPos mutable = pos.mutable();
-            LevelChunkSection section;
             BlockState state = null;
             for (; state == null || state.getMaterial().isReplaceable(); y--)
             {
+                if (!CSMath.betweenInclusive(mutable.getY(), minHeight, maxHeight))
+                {   return seaLevel;
+                }
                 mutable.setY(y);
-                section = WorldHelper.getChunkSection(chunk, mutable.getY());
-                state = section.getBlockState(mutable.getX() & 15, mutable.getY() & 15, mutable.getZ() & 15);
+                state = chunk.getBlockState(mutable);
             }
             return y;
         }
