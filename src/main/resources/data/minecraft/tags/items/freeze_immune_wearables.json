@@ -4,6 +4,8 @@
     "cold_sweat:goat_fur_cap",
     "cold_sweat:goat_fur_parka",
     "cold_sweat:goat_fur_pants",
-    "cold_sweat:goat_fur_boots"
+    "cold_sweat:goat_fur_boots",
+    "minecraft:leather",
+    "cold_sweat:goat_fur"
   ]
 }

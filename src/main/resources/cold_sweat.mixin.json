@@ -34,6 +34,7 @@
     "MixinMinecart",
     "MixinMobSpawning",
     "MixinPreServerLoad",
+    "MixinPreventFreezing",
     "MixinRegistration",
     "MixinRegistration$Inner",
     "MixinShearsDispenseBehavior",
