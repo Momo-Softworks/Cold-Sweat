@@ -1,0 +1,59 @@
+{
+  "parent": "cold_sweat:extreme_temps",
+  "display": {
+    "icon": {
+      "item": "cold_sweat:smokestack"
+    },
+    "title": {
+      "translate": "advancements.cold_sweat.use_smokestack.title"
+    },
+    "description": {
+      "translate": "advancements.cold_sweat.use_smokestack.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "placed_smokestack": {
+      "trigger": "minecraft:placed_block",
+      "conditions": {
+        "block": "cold_sweat:smokestack"
+      }
+    },
+    "placed_boiler": {
+      "trigger": "minecraft:placed_block",
+      "conditions": {
+        "block": "cold_sweat:boiler"
+      }
+    },
+    "placed_icebox": {
+      "trigger": "minecraft:placed_block",
+      "conditions": {
+        "block": "cold_sweat:icebox"
+      }
+    },
+    "has_warmth": {
+      "trigger": "minecraft:effects_changed",
+      "conditions": {
+        "effects": {
+          "cold_sweat:warmth": {}
+        }
+      }
+    },
+    "has_frigidness": {
+      "trigger": "minecraft:effects_changed",
+      "conditions": {
+        "effects": {
+          "cold_sweat:frigidness": {}
+        }
+      }
+    }
+  },
+  "requirements": [
+    [ "placed_smokestack" ],
+    [ "placed_boiler", "placed_icebox" ],
+    [ "has_warmth", "has_frigidness" ]
+  ]
+}
