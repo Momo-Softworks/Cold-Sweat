@@ -37,6 +37,14 @@
               "flags": {
                 "is_on_fire": true
               }
+            },
+            "location": {
+              "block": {
+                "blocks": [
+                  "minecraft:fire",
+                  "minecraft:lava"
+                ]
+              }
             }
           }
         ]

@@ -1,5 +1,5 @@
 {
-  "parent": "cold_sweat:extreme_temps",
+  "parent": "cold_sweat:use_smokestack",
   "display": {
     "icon": {
       "item": "cold_sweat:hearth"
@@ -16,11 +16,19 @@
     "hidden": false
   },
   "criteria": {
-    "has_insulation": {
+    "has_warmth": {
       "trigger": "minecraft:effects_changed",
       "conditions": {
         "effects": {
-          "cold_sweat:insulated": {}
+          "cold_sweat:warmth": {}
+        }
+      }
+    },
+    "has_frigidness": {
+      "trigger": "minecraft:effects_changed",
+      "conditions": {
+        "effects": {
+          "cold_sweat:frigidness": {}
         }
       }
     },
@@ -39,6 +47,6 @@
   },
   "requirements": [
     [ "placed_hearth" ],
-    [ "has_insulation" ]
+    [ "has_warmth", "has_frigidness" ]
   ]
 }
