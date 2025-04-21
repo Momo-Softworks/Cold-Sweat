@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.core.init;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.client.InsulatorTabBuildEvent;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
+import com.momosoftworks.coldsweat.common.item.SoulspringLampItem;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
@@ -42,8 +43,8 @@ public class CreativeTabInit
                         ModItems.INSULATED_MINECART.getDefaultInstance(),
                         ObjectBuilder.build(() ->
                         {   ItemStack stack = ModItems.SOULSPRING_LAMP.getDefaultInstance();
-                            stack.getOrCreateTag().putBoolean("Lit", true);
-                            stack.getOrCreateTag().putDouble("Fuel", 64);
+                            SoulspringLampItem.setLit(stack, true);
+                            SoulspringLampItem.setFuel(stack, 64);
                             return stack;
                         }),
                         ModItems.SOUL_SPROUT.getDefaultInstance(),

@@ -67,7 +67,6 @@ public class SoulSpringLampRenderer extends BlockEntityWithoutLevelRenderer
     {
         if (stack.is(ModItems.SOULSPRING_LAMP))
         {
-            RenderSystem.setShaderColor(1, 1, 1, 1);
             Minecraft mc = Minecraft.getInstance();
             float time = mc.level != null
                          ? mc.level.getGameTime() + mc.getPartialTick()
@@ -76,22 +75,23 @@ public class SoulSpringLampRenderer extends BlockEntityWithoutLevelRenderer
             double fuel = SoulspringLampItem.getFuel(stack);
 
             ResourceLocation texture = getTexture(stack);
-            VertexConsumer frameVertexes = buffer.getBuffer(RenderType.entityTranslucent(TEXTURE_FRAME));
 
             if (fuel > 0)
             {
                 heart.y = -14.0F + (float) Math.sin(time / 8) * 1.2f;
-                heart.yRot = CSMath.toRadians((time * 2) % 360);
-                heart.xRot = CSMath.toRadians((time * 2 + 10) % 360);
+                heart.xRot = CSMath.toRadians((time * 2) % 360);
+                heart.yRot = CSMath.toRadians((time * 2 + 10) % 360);
+                heart.zRot = CSMath.toRadians((time * 0.5 + 5) % 360);
             }
             else
             {
                 heart.y = -14.0F;
                 heart.yRot = 0;
                 heart.xRot = 0;
+                heart.zRot = 0;
             }
 
-            float emission = (float) CSMath.blend(0, 1, fuel, 0, 64);
+            float emission = SoulspringLampItem.isLit(stack) ? (float) CSMath.blend(0, 1, fuel, 0, 64) : 0;
 
             RenderSystem.enableBlend();
             RenderSystem.enableDepthTest();
@@ -102,6 +102,7 @@ public class SoulSpringLampRenderer extends BlockEntityWithoutLevelRenderer
             poseStack.mulPose(Axis.ZP.rotationDegrees(180));
 
             // Render frame
+            VertexConsumer frameVertexes = buffer.getBuffer(RenderType.entityTranslucent(TEXTURE_FRAME));
             this.base.render(poseStack, frameVertexes, light, overlay);
 
             // Render heart
@@ -112,23 +113,18 @@ public class SoulSpringLampRenderer extends BlockEntityWithoutLevelRenderer
             poseStack.scale(heartScale, heartScale, heartScale);
             // Render
             VertexConsumer heartVtx = buffer.getBuffer(RenderType.entityTranslucent(texture));
-            this.heart.render(poseStack, heartVtx, light, overlay);
-            RenderSystem.setShaderColor(1, 1, 1, 1-emission);
+            this.heart.render(poseStack, heartVtx, light, overlay, 1, 1, 1, 1-emission);
             // Emission
             VertexConsumer heartVtxEmissive = buffer.getBuffer(RenderType.entityTranslucentEmissive(texture));
-            this.heart.render(poseStack, heartVtxEmissive, light, overlay);
-            RenderSystem.setShaderColor(1, 1, 1, emission);
+            this.heart.render(poseStack, heartVtxEmissive, light, overlay, 1, 1, 1, emission);
             poseStack.popPose();
 
             // Render glass
             VertexConsumer glassVtx = buffer.getBuffer(RenderType.entityTranslucent(texture));
-            this.base.render(poseStack, glassVtx, light, overlay);
-            RenderSystem.setShaderColor(1, 1, 1, 1-emission);
-
-            // Render glass emission
+            this.base.render(poseStack, glassVtx, light, overlay, 1, 1, 1, 1-emission);
+            // Emission
             VertexConsumer glassVtxEmissive = buffer.getBuffer(RenderType.entityTranslucentEmissive(texture));
-            this.base.render(poseStack, glassVtxEmissive, light, overlay);
-            RenderSystem.setShaderColor(1, 1, 1, emission);
+            this.base.render(poseStack, glassVtxEmissive, light, overlay, 1, 1, 1, emission);
             poseStack.popPose();
         }
         else

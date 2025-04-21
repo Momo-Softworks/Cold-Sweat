@@ -133,7 +133,7 @@ public class SoulspringLampItem extends Item
                             && itemTag.getBoolean("Lit") != shouldBeOn)
                     {
                         itemTag.putInt("stateChangeTimer", 2);
-                        itemTag.putBoolean("Lit", shouldBeOn);
+                        setLit(stack, shouldBeOn);
 
                         if (getFuel(stack) < 0.5)
                             setFuel(stack, 0);
@@ -168,6 +168,13 @@ public class SoulspringLampItem extends Item
 
     public static double getFuel(ItemStack stack)
     {   return stack.getOrCreateTag().getDouble("Fuel");
+    }
+
+    public static boolean isLit(ItemStack stack)
+    {   return stack.getOrCreateTag().getBoolean("Lit");
+    }
+    public static void setLit(ItemStack stack, boolean lit)
+    {   stack.getOrCreateTag().putBoolean("Lit", lit);
     }
 
     public static double getFuelForStack(ItemStack item)
