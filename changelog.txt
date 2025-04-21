@@ -3032,3 +3032,17 @@ Fixes:
 Technical Changes:
 - Added "logarithmic" (boolean) field to block temp JSON and KubeJS configs
       - Makes a block deliver "diminishing returns" as more of them are present around the player
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.4-b02d
+* The heart of the sea inside the soulspring lamp is now animated
+- Added new advancement "Getting Cozy" for successfully creating a setup with the icebox/boiler and a smokestack
+- The "Desperate Measures" advancement now requires the player to be standing in fire or lava to prevent accidental triggering
+- Renamed the "Dressed to Go" advancement to "Dressed for a Quest"
+- Using 4 or more insulation items that are part of the #minecraft:freeze_immune_wearables will now prevent the player from freezing in powder snow
+      - Added leather and goat fur to the tag by default
+
+Fixes:
+* Fixed crash when in a dimension with no floor (like the End or Aether)
+- Fixed the "Home Sweet Home" advancement not being obtainable
