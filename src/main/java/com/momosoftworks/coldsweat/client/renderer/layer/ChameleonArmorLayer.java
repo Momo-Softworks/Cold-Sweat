@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
+import com.momosoftworks.coldsweat.client.event.RegisterModels;
 import com.momosoftworks.coldsweat.client.renderer.model.armor.*;
 import com.momosoftworks.coldsweat.common.item.ChameleonArmorItem;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -40,10 +41,10 @@ public class ChameleonArmorLayer<T extends LivingEntity, M extends BipedModel<T>
                        float pLimbSwing, float pLimbSwingAmount, float pPartialTicks, float pAgeInTicks,
                        float pNetHeadYaw, float pHeadPitch)
     {
-        ArmorModels.CHAMELEON_HELMET_MODEL = new ChameleonHelmetModel<>();
-        ArmorModels.CHAMELEON_CHESTPLATE_MODEL = new ChameleonChestplateModel<>();
-        ArmorModels.CHAMELEON_LEGGINGS_MODEL = new ChameleonLeggingsModel<>();
-        ArmorModels.CHAMELEON_BOOTS_MODEL = new ChameleonBootsModel<>();
+        RegisterModels.CHAMELEON_HELMET_MODEL = new ChameleonHelmetModel<>();
+        RegisterModels.CHAMELEON_CHESTPLATE_MODEL = new ChameleonChestplateModel<>();
+        RegisterModels.CHAMELEON_LEGGINGS_MODEL = new ChameleonLeggingsModel<>();
+        RegisterModels.CHAMELEON_BOOTS_MODEL = new ChameleonBootsModel<>();
         this.renderArmorPiece(poseStack, buffer, entity, EquipmentSlotType.CHEST, light);
         this.renderArmorPiece(poseStack, buffer, entity, EquipmentSlotType.LEGS, light);
         this.renderArmorPiece(poseStack, buffer, entity, EquipmentSlotType.FEET, light);

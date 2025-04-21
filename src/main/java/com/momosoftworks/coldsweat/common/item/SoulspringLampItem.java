@@ -6,9 +6,11 @@ import com.momosoftworks.coldsweat.api.temperature.modifier.SoulLampTempModifier
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.client.event.RegisterModels;
+import com.momosoftworks.coldsweat.client.renderer.item.SoulSpringLampRenderer;
+import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.core.network.message.ParticleBatchMessage;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
@@ -18,9 +20,7 @@ import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
-import net.minecraft.client.Minecraft;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.settings.ParticleStatus;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.CreatureAttribute;
 import net.minecraft.entity.Entity;
@@ -54,7 +54,7 @@ import java.util.Optional;
 public class SoulspringLampItem extends Item
 {
     public SoulspringLampItem()
-    {   super(new Properties().tab(ColdSweatGroup.COLD_SWEAT).stacksTo(1).fireResistant().rarity(Rarity.UNCOMMON));
+    {   super(new Properties().tab(ColdSweatGroup.COLD_SWEAT).stacksTo(1).fireResistant().rarity(Rarity.UNCOMMON).setISTER(SoulSpringLampRenderer::new));
     }
 
     @Override
@@ -125,10 +125,10 @@ public class SoulspringLampItem extends Item
                     CompoundNBT itemTag = stack.getOrCreateTag();
                     // If the conditions are not met, turn off the lamp
                     if (itemTag.getInt("stateChangeTimer") <= 0
-                            && itemTag.getBoolean("Lit") != shouldBeOn)
+                            && isLit(stack) != shouldBeOn)
                     {
                         itemTag.putInt("stateChangeTimer", 2);
-                        itemTag.putBoolean("Lit", shouldBeOn);
+                        setLit(stack, shouldBeOn);
 
                         if (getFuel(stack) < 0.5)
                             setFuel(stack, 0);
@@ -149,20 +149,27 @@ public class SoulspringLampItem extends Item
     {   return slotChanged;
     }
 
-    private static void setFuel(ItemStack stack, double fuel)
+    public static void setFuel(ItemStack stack, double fuel)
     {   stack.getOrCreateTag().putDouble("Fuel", fuel);
     }
 
-    private static void addFuel(ItemStack stack, double amount)
+    public static void addFuel(ItemStack stack, double amount)
     {   setFuel(stack, Math.min(64, getFuel(stack) + amount));
     }
 
-    private static void addFuel(ItemStack stack, ItemStack fuelStack)
+    public static void addFuel(ItemStack stack, ItemStack fuelStack)
     {   addFuel(stack, getFuelForStack(fuelStack) * fuelStack.getCount());
     }
 
-    private static double getFuel(ItemStack stack)
+    public static double getFuel(ItemStack stack)
     {   return stack.getOrCreateTag().getDouble("Fuel");
+    }
+
+    public static boolean isLit(ItemStack stack)
+    {   return stack.getOrCreateTag().getBoolean("Lit");
+    }
+    public static void setLit(ItemStack stack, boolean lit)
+    {   stack.getOrCreateTag().putBoolean("Lit", lit);
     }
 
     public static double getFuelForStack(ItemStack item)
@@ -221,8 +228,8 @@ public class SoulspringLampItem extends Item
         if (this.allowdedIn(tab))
         {
             ItemStack stack = new ItemStack(this);
-            stack.getOrCreateTag().putBoolean("Lit", true);
-            stack.getOrCreateTag().putDouble("Fuel", 64);
+            setLit(stack, true);
+            setFuel(stack, 64);
             itemList.add(stack);
         }
     }
