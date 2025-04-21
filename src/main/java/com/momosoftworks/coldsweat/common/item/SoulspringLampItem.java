@@ -4,6 +4,7 @@ import com.momosoftworks.coldsweat.api.temperature.modifier.SoulLampTempModifier
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.client.event.RegisterModels;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -14,6 +15,7 @@ import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
+import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -30,6 +32,7 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -37,12 +40,27 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 @Mod.EventBusSubscriber
 public class SoulspringLampItem extends Item
 {
     public SoulspringLampItem()
     {   super(new Properties().stacksTo(1).fireResistant().rarity(Rarity.UNCOMMON));
+    }
+
+    @Override
+    public void initializeClient(Consumer<IClientItemExtensions> consumer)
+    {
+        consumer.accept(new IClientItemExtensions()
+        {
+            @Override
+            public BlockEntityWithoutLevelRenderer getCustomRenderer()
+            {
+                RegisterModels.checkForInitModels();
+                return RegisterModels.SOULSPRING_LAMP_RENDERER;
+            }
+        });
     }
 
     @Override
@@ -136,19 +154,19 @@ public class SoulspringLampItem extends Item
     {   return slotChanged;
     }
 
-    private static void setFuel(ItemStack stack, double fuel)
+    public static void setFuel(ItemStack stack, double fuel)
     {   stack.getOrCreateTag().putDouble("Fuel", fuel);
     }
 
-    private static void addFuel(ItemStack stack, double amount)
+    public static void addFuel(ItemStack stack, double amount)
     {   setFuel(stack, Math.min(64, getFuel(stack) + amount));
     }
 
-    private static void addFuel(ItemStack stack, ItemStack fuelStack)
+    public static void addFuel(ItemStack stack, ItemStack fuelStack)
     {   addFuel(stack, getFuelForStack(fuelStack) * fuelStack.getCount());
     }
 
-    private static double getFuel(ItemStack stack)
+    public static double getFuel(ItemStack stack)
     {   return stack.getOrCreateTag().getDouble("Fuel");
     }
 

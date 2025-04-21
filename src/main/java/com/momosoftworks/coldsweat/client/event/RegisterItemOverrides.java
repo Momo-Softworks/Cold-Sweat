@@ -31,17 +31,6 @@ public class RegisterItemOverrides
     {
         event.enqueueWork(() ->
         {
-            ItemProperties.register(ItemInit.SOULSPRING_LAMP.get(), new ResourceLocation(ColdSweat.MOD_ID, "soulspring_state"), (stack, level, entity, id) ->
-            {
-                CompoundTag tag = stack.getOrCreateTag();
-                if (tag.getBoolean("Lit"))
-                {
-                    return tag.getInt("Fuel") > 43 ? 3 :
-                           tag.getInt("Fuel") > 22 ? 2 : 1;
-                }
-                return 0;
-            });
-
             ItemProperties.register(ItemInit.FILLED_WATERSKIN.get(), new ResourceLocation(ColdSweat.MOD_ID, "water_temperature"), (stack, level, entity, id) ->
             {
                 return stack.getOrCreateTag().getFloat(FilledWaterskinItem.NBT_TEMPERATURE);

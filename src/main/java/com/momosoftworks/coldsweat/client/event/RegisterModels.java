@@ -1,18 +1,34 @@
 package com.momosoftworks.coldsweat.client.event;
 
+import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.client.renderer.block.IceboxBlockEntityRenderer;
 import com.momosoftworks.coldsweat.client.renderer.entity.ChameleonEntityRenderer;
+import com.momosoftworks.coldsweat.client.renderer.item.SoulSpringLampRenderer;
 import com.momosoftworks.coldsweat.client.renderer.layer.ChameleonArmorLayer;
 import com.momosoftworks.coldsweat.client.renderer.model.armor.*;
 import com.momosoftworks.coldsweat.client.renderer.model.entity.ChameleonModel;
 import com.momosoftworks.coldsweat.core.init.EntityInit;
+import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
+import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.SimpleBakedModel;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.Item;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.RenderTypeGroup;
 import net.minecraftforge.client.event.EntityRenderersEvent;
+import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.ForgeRegistries;
+
+import java.util.*;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class RegisterModels
@@ -33,6 +49,8 @@ public class RegisterModels
     public static ChameleonBootsModel<?> CHAMELEON_BOOTS_MODEL = null;
 
     public static EmptyArmorModel<?> EMPTY_ARMOR_MODEL = null;
+
+    public static BlockEntityWithoutLevelRenderer SOULSPRING_LAMP_RENDERER = null;
 
     public static void checkForInitModels()
     {
@@ -56,6 +74,8 @@ public class RegisterModels
         CHAMELEON_BOOTS_MODEL = new ChameleonBootsModel<>(mcModels.bakeLayer(ChameleonBootsModel.LAYER_LOCATION));
 
         EMPTY_ARMOR_MODEL = new EmptyArmorModel<>(mcModels.bakeLayer(EmptyArmorModel.LAYER_LOCATION));
+
+        SOULSPRING_LAMP_RENDERER = new SoulSpringLampRenderer(Minecraft.getInstance().getBlockEntityRenderDispatcher(), mcModels);
     }
 
     @SubscribeEvent
@@ -81,12 +101,52 @@ public class RegisterModels
         event.registerLayerDefinition(EmptyArmorModel.LAYER_LOCATION, EmptyArmorModel::createArmorLayer);
 
         event.registerLayerDefinition(IceboxBlockEntityRenderer.LAYER_LOCATION, IceboxBlockEntityRenderer::createBodyLayer);
+        event.registerLayerDefinition(SoulSpringLampRenderer.LAYER_LOCATION, SoulSpringLampRenderer::createBodyLayer);
     }
 
     @SubscribeEvent
     public static void registerRenderers(EntityRenderersEvent.RegisterRenderers event)
     {
         event.registerEntityRenderer(EntityInit.CHAMELEON.get(), ChameleonEntityRenderer::new);
+    }
+
+    @SubscribeEvent
+    public static void overrideModels(ModelEvent.ModifyBakingResult event)
+    {
+        forceCustomItemModel(ModItems.SOULSPRING_LAMP, event.getModels()).ifPresent(pair ->
+        {   event.getModels().put(pair.getFirst(), pair.getSecond());
+        });
+    }
+
+    /**
+     * Forces the item's model to return {@code true} for {@link BakedModel#isCustomRenderer()}.
+     * Used for custom item BEWLRs.
+     */
+    private static Optional<Pair<ResourceLocation, BakedModel>> forceCustomItemModel(Item item, Map<ResourceLocation, BakedModel> modelSet)
+    {
+        ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(item);
+        Optional<Map.Entry<ResourceLocation, BakedModel>> modelOpt = modelSet.entrySet().stream().filter(entry -> entry.getKey().toString().contains(itemId.toString())).findFirst();
+
+        if (modelOpt.isPresent() && modelOpt.get().getValue() instanceof SimpleBakedModel model)
+        {
+            RandomSource random = RandomSource.create();
+            List<BakedQuad> unculledFaces = model.getQuads(null, null, random);
+            Map<Direction, List<BakedQuad>> culledFaces = Arrays.stream(Direction.values())
+                    .map(dir -> Pair.of(dir, model.getQuads(null, dir, random)))
+                    .collect(() -> new EnumMap<>(Direction.class), (map, pair) -> map.put(pair.getFirst(), pair.getSecond()), EnumMap::putAll);
+
+            SimpleBakedModel customModel = new SimpleBakedModel(unculledFaces, culledFaces, model.useAmbientOcclusion(),
+                                                                model.usesBlockLight(), model.isGui3d(), model.getParticleIcon(),
+                                                                model.getTransforms(), model.getOverrides(), new RenderTypeGroup(null, null, null))
+            {
+                @Override
+                public boolean isCustomRenderer()
+                {   return true;
+                }
+            };
+            return Optional.of(Pair.of(modelOpt.get().getKey(), customModel));
+        }
+        return Optional.empty();
     }
 
     @SubscribeEvent
