@@ -67,7 +67,6 @@ public class SoulSpringLampRenderer extends BlockEntityWithoutLevelRenderer
     {
         if (stack.is(ModItems.SOULSPRING_LAMP))
         {
-            RenderSystem.setShaderColor(1, 1, 1, 0);
             Minecraft mc = Minecraft.getInstance();
             float time = mc.level != null
                          ? mc.level.getGameTime() + mc.getPartialTick()
