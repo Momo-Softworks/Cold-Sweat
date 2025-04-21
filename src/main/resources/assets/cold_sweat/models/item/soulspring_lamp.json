@@ -151,12 +151,5 @@
         "rotation": [0, 90, 0],
         "translation": [0, -4.25, -1.25]
       }
-    },
-	"overrides":
-	[
-		{ "predicate": { "cold_sweat:soulspring_state": 0 },  "model": "cold_sweat:item/soulspring_lamp_off" },
-		{ "predicate": { "cold_sweat:soulspring_state": 1 },  "model": "cold_sweat:item/soulspring_lamp_flickering" },
-		{ "predicate": { "cold_sweat:soulspring_state": 2 },  "model": "cold_sweat:item/soulspring_lamp_dim" },
-		{ "predicate": { "cold_sweat:soulspring_state": 3 },  "model": "cold_sweat:item/soulspring_lamp_full" }
-	]
+    }
 }
