@@ -89,6 +89,7 @@ public class SoulSpringLampRenderer extends BlockEntityWithoutLevelRenderer
                 heart.y = -14.0F;
                 heart.yRot = 0;
                 heart.xRot = 0;
+                heart.zRot = 0;
             }
 
             float emission = SoulspringLampItem.isLit(stack) ? (float) CSMath.blend(0, 1, fuel, 0, 64) : 0;
