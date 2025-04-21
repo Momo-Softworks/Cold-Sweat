@@ -4,6 +4,7 @@ import com.momosoftworks.coldsweat.api.temperature.modifier.SoulLampTempModifier
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.client.event.RegisterModels;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ModAdvancementTriggers;
@@ -15,6 +16,7 @@ import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
+import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
@@ -35,10 +37,12 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 @EventBusSubscriber
 public class SoulspringLampItem extends Item
@@ -49,6 +53,20 @@ public class SoulspringLampItem extends Item
                               .component(ModItemComponents.SOULSPRING_LAMP_LIT, false)
                               .component(ModItemComponents.SOULSPRING_LAMP_FUEL, 0d)
                               .component(DataComponents.CUSTOM_DATA, CustomData.of(new CompoundTag())));
+    }
+
+    @Override
+    public void initializeClient(Consumer<IClientItemExtensions> consumer)
+    {
+        consumer.accept(new IClientItemExtensions()
+        {
+            @Override
+            public BlockEntityWithoutLevelRenderer getCustomRenderer()
+            {
+                RegisterModels.checkForInitModels();
+                return RegisterModels.SOULSPRING_LAMP_RENDERER;
+            }
+        });
     }
 
     @Override
@@ -121,7 +139,7 @@ public class SoulspringLampItem extends Item
                     && CSMath.orElse(stack.get(ModItemComponents.SOULSPRING_LAMP_LIT), false) != shouldBeOn)
                     {
                         stack.set(DataComponents.CUSTOM_DATA, itemTag.update(tag -> tag.putInt("stateChangeTimer", 2)));
-                        stack.set(ModItemComponents.SOULSPRING_LAMP_LIT, shouldBeOn);
+                        setLit(stack, shouldBeOn);
 
                         if (getFuel(stack) < 0.5)
                             setFuel(stack, 0);
@@ -142,20 +160,27 @@ public class SoulspringLampItem extends Item
     {   return slotChanged;
     }
 
-    private static void setFuel(ItemStack stack, double fuel)
+    public static void setFuel(ItemStack stack, double fuel)
     {   stack.set(ModItemComponents.SOULSPRING_LAMP_FUEL, fuel);
     }
 
-    private static void addFuel(ItemStack stack, double amount)
+    public static void addFuel(ItemStack stack, double amount)
     {   setFuel(stack, Math.min(64, getFuel(stack) + amount));
     }
 
-    private static void addFuel(ItemStack stack, ItemStack fuelStack)
+    public static void addFuel(ItemStack stack, ItemStack fuelStack)
     {   addFuel(stack, getFuelForStack(fuelStack) * fuelStack.getCount());
     }
 
-    private static double getFuel(ItemStack stack)
+    public static double getFuel(ItemStack stack)
     {   return stack.getOrDefault(ModItemComponents.SOULSPRING_LAMP_FUEL, 0d);
+    }
+
+    public static boolean isLit(ItemStack stack)
+    {   return stack.getOrDefault(ModItemComponents.SOULSPRING_LAMP_LIT, false);
+    }
+    public static void setLit(ItemStack stack, boolean lit)
+    {   stack.set(ModItemComponents.SOULSPRING_LAMP_LIT, lit);
     }
 
     public static double getFuelForStack(ItemStack item)

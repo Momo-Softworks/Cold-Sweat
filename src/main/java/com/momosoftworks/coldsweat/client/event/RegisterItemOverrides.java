@@ -32,18 +32,6 @@ public class RegisterItemOverrides
     {
         event.enqueueWork(() ->
         {
-            ItemProperties.register(ModItems.SOULSPRING_LAMP.get(), ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "soulspring_state"), (stack, level, entity, id) ->
-            {
-                Boolean isLit = CSMath.orElse(stack.get(ModItemComponents.SOULSPRING_LAMP_LIT), false);
-                Double fuel = CSMath.orElse(stack.get(ModItemComponents.SOULSPRING_LAMP_FUEL), 0d);
-                if (isLit)
-                {
-                    return fuel > 43 ? 3 :
-                           fuel > 22 ? 2 : 1;
-                }
-                return 0;
-            });
-
             ItemProperties.register(ModItems.FILLED_WATERSKIN.get(), ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "water_temperature"), (stack, level, entity, id) ->
             {
                 return stack.getOrDefault(ModItemComponents.WATER_TEMPERATURE, 0d).floatValue();
