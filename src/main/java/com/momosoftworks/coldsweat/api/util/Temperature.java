@@ -184,7 +184,7 @@ public class Temperature
     @Nullable
     public static TempModifier getModifier(LivingEntity entity, Trait trait, Predicate<TempModifier> condition)
     {
-        for (TempModifier modifier : EntityTempManager.getTemperatureCap(entity).map(cap -> cap.getModifiers(trait)).orElse(List.of()))
+        for (TempModifier modifier : EntityTempManager.getTemperatureCap(entity).map(cap -> cap.getModifiers(trait)).orElse(Arrays.asList()))
         {
             if (condition.test(modifier))
             {   return modifier;
