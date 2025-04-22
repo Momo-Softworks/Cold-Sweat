@@ -50,10 +50,12 @@ public class ClientSettingsConfig
     public static final ForgeConfigSpec.IntValue WATER_EFFECT_SETTING;
     public static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> WATER_DROPLET_SCALE;
 
-    public static final ForgeConfigSpec.ConfigValue<Double> SHIVER_INTENSITY;
-    public static final ForgeConfigSpec.ConfigValue<Double> HEATSTROKE_BLUR;
-    public static final ForgeConfigSpec.ConfigValue<Double> HEATSTROKE_SWAY_AMOUNT;
-    public static final ForgeConfigSpec.ConfigValue<Double> HEATSTROKE_SWAY_SPEED;
+    public static final ForgeConfigSpec.DoubleValue SHIVER_INTENSITY;
+    public static final ForgeConfigSpec.DoubleValue HEATSTROKE_BLUR;
+    public static final ForgeConfigSpec.DoubleValue HEATSTROKE_SWAY_AMOUNT;
+    public static final ForgeConfigSpec.DoubleValue HEATSTROKE_SWAY_SPEED;
+
+    public static final ForgeConfigSpec.BooleanValue ANIMATED_SOUL_SPRING_LAMP;
 
     static 
     {
@@ -153,6 +155,10 @@ public class ClientSettingsConfig
             EXPAND_TOOLTIPS = BUILDER
                     .comment("Automatically expands all collapsible tooltips")
                     .define("Expand Tooltips", false);
+            ANIMATED_SOUL_SPRING_LAMP = BUILDER
+                    .comment("Enables the animated soul spring lamp model",
+                             "Disable this if there are visual errors like missing textures")
+                    .define("Animated Soul Spring Lamp", true);
         BUILDER.pop();
 
         SPEC = BUILDER.build();
