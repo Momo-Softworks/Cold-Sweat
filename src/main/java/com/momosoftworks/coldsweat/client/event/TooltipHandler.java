@@ -37,7 +37,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.*;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.util.StringUtil;
@@ -57,9 +56,7 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderTooltipEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
-import net.neoforged.neoforge.event.ItemAttributeModifierEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
-import org.jetbrains.annotations.ApiStatus;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -70,8 +67,9 @@ public class TooltipHandler
 {
     public static final Style COLD = Style.EMPTY.withColor(3767039);
     public static final Style HOT = Style.EMPTY.withColor(16736574);
-    public static final Component EXPAND_TOOLTIP = Component.literal("?").withStyle(Style.EMPTY.withColor(ChatFormatting.BLUE).withUnderlined(true))
-                                           .append(Component.literal(" 'Shift'").withStyle(Style.EMPTY.withColor(ChatFormatting.GRAY).withUnderlined(false)));
+    public static final Component EXPAND_TOOLTIP = Component.literal("[").withStyle(ChatFormatting.GRAY)
+               .append(Component.literal("Shift").withStyle(ChatFormatting.WHITE))
+               .append(Component.literal("]").withStyle(ChatFormatting.GRAY));
     public static final DecimalFormat ATTRIBUTE_MODIFIER_FORMAT = Util.make(new DecimalFormat("#.##"), (format) -> {
         format.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ROOT));
     });
