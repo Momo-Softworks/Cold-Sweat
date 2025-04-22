@@ -1,14 +1,20 @@
 package com.momosoftworks.coldsweat.client.gui.config.pages;
 
+import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.client.event.DrawConfigButton;
+import com.momosoftworks.coldsweat.client.event.RegisterItemOverrides;
 import com.momosoftworks.coldsweat.client.gui.config.AbstractConfigPage;
 import com.momosoftworks.coldsweat.client.gui.config.ConfigScreen;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.Vec2i;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.registries.ModItems;
+import com.momosoftworks.coldsweat.util.serialization.DynamicHolder;
 import net.minecraft.client.gui.screen.OptionsScreen;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.item.ItemModelsProperties;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -59,11 +65,6 @@ public class ConfigPageTwo extends AbstractConfigPage
                 },
                 false, false, true, new TranslationTextComponent("cold_sweat.config.hearth_debug.desc"));
 
-        // Icon Bobbing
-        this.addButton("icon_bobbing", Side.LEFT, () -> getToggleButtonText(new TranslationTextComponent("cold_sweat.config.icon_bobbing.name"), ConfigSettings.ICON_BOBBING.get()),
-                button -> ConfigSettings.ICON_BOBBING.set(!ConfigSettings.ICON_BOBBING.get()),
-                false, false, true, new TranslationTextComponent("cold_sweat.config.icon_bobbing.desc"));
-
         // High Contrast
         this.addButton("high_contrast", Side.LEFT, () -> getToggleButtonText(new TranslationTextComponent("cold_sweat.config.high_contrast.name"), ConfigSettings.HIGH_CONTRAST.get()),
                 button -> ConfigSettings.HIGH_CONTRAST.set(!ConfigSettings.HIGH_CONTRAST.get()),
@@ -82,7 +83,21 @@ public class ConfigPageTwo extends AbstractConfigPage
                              button -> button.setValue(CSMath.blend(0, 1, ConfigSettings.WATER_DROPLET_SCALE.get().min(), 5, 100)),
                              false, true, new TranslationTextComponent("cold_sweat.config.water_droplet_scale.desc"));
 
-        // Direction Buttons: Steve Head
+        // Animate Soulspring Lamp
+        this.addButton("animate_soulspring_lamp", Side.LEFT,
+                       () -> getToggleButtonText(new TranslationTextComponent("cold_sweat.config.animate_soulspring_lamp.name"), ConfigSettings.ANIMATED_SOULSPRING_LAMP_MODEL.get()),
+                       button ->
+                       {
+                           DynamicHolder<Boolean> setting = ConfigSettings.ANIMATED_SOULSPRING_LAMP_MODEL;
+                           setting.set(!setting.get());
+                           if (!setting.get())
+                           {    ItemModelsProperties.register(ModItems.SOULSPRING_LAMP, new ResourceLocation(ColdSweat.MOD_ID, "soulspring_state"), RegisterItemOverrides.SOULSPRING_LAMP_PROPERTIES);
+                           }
+                           else RegisterItemOverrides.unregister(ModItems.SOULSPRING_LAMP);
+                       },
+                       false, false, true, new TranslationTextComponent("cold_sweat.config.animate_soulspring_lamp.desc"));
+
+        // Direction Buttons: Body Temp Icon
         this.addDirectionPanel("icon_directions", Side.RIGHT, new TranslationTextComponent("cold_sweat.config.temp_icon_location.name"),
                 amount -> ConfigSettings.BODY_ICON_POS.set(new Vec2i(ConfigSettings.BODY_ICON_POS.get().x() + amount * ConfigScreen.SHIFT_AMOUNT.get(),
                                                                    ConfigSettings.BODY_ICON_POS.get().y())),
@@ -114,6 +129,7 @@ public class ConfigPageTwo extends AbstractConfigPage
                 false, false, true, true, new TranslationTextComponent("cold_sweat.config.temp_readout_location.desc"),
                                           new TranslationTextComponent("cold_sweat.config.offset_shift.name").withStyle(TextFormatting.GRAY));
 
+        // Direction Buttons: World Temp Gauge
         this.addDirectionPanel("gauge_directions", Side.RIGHT, new TranslationTextComponent("cold_sweat.config.world_temp_location.name"),
                 amount -> ConfigSettings.WORLD_GAUGE_POS.set(new Vec2i(ConfigSettings.WORLD_GAUGE_POS.get().x() + amount * ConfigScreen.SHIFT_AMOUNT.get(),
                                                                           ConfigSettings.WORLD_GAUGE_POS.get().y())),
@@ -138,6 +154,11 @@ public class ConfigPageTwo extends AbstractConfigPage
         this.addButton("icon_bobbing", Side.RIGHT, () -> getToggleButtonText(new TranslationTextComponent("cold_sweat.config.icon_bobbing.name"), ConfigSettings.ICON_BOBBING.get()),
                 button -> ConfigSettings.ICON_BOBBING.set(!ConfigSettings.ICON_BOBBING.get()),
                 false, false, true, new TranslationTextComponent("cold_sweat.config.icon_bobbing.desc"));
+
+        // Icon Bobbing
+        this.addButton("icon_bobbing", Side.RIGHT, () -> getToggleButtonText(new TranslationTextComponent("cold_sweat.config.icon_bobbing.name"), ConfigSettings.ICON_BOBBING.get()),
+                       button -> ConfigSettings.ICON_BOBBING.set(!ConfigSettings.ICON_BOBBING.get()),
+                       false, false, true, new TranslationTextComponent("cold_sweat.config.icon_bobbing.desc"));
 
         // Move body temp icon
         this.addButton("move_body_icon", Side.RIGHT, () -> getToggleButtonText(new TranslationTextComponent("cold_sweat.config.move_body_icon.name"), ConfigSettings.MOVE_BODY_ICON_WHEN_ADVANCED.get()),

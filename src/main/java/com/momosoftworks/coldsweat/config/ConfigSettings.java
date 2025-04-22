@@ -219,6 +219,8 @@ public class ConfigSettings
     public static final DynamicHolder<WaterEffectSetting> WATER_EFFECT_SETTING;
     public static final DynamicHolder<IntegerBounds> WATER_DROPLET_SCALE;
 
+    public static final DynamicHolder<Boolean> ANIMATED_SOULSPRING_LAMP_MODEL;
+
 
     // Makes the settings instantiation collapsible & easier to read
     static
@@ -942,6 +944,8 @@ public class ConfigSettings
         HEATSTROKE_BLUR_AMOUNT = addClientSetting("heatstroke_blur_amount", () -> 1.0, holder -> holder.set(ClientSettingsConfig.HEATSTROKE_BLUR.get()));
         HEATSTROKE_SWAY_AMOUNT = addClientSetting("heatstroke_sway_amount", () -> 1.0, holder -> holder.set(ClientSettingsConfig.HEATSTROKE_SWAY_AMOUNT.get()));
         HEATSTROKE_SWAY_SPEED = addClientSetting("heatstroke_sway_speed", () -> 1.0, holder -> holder.set(ClientSettingsConfig.HEATSTROKE_SWAY_SPEED.get()));
+
+        ANIMATED_SOULSPRING_LAMP_MODEL = addClientSetting("animated_soulspring_lamp_model", () -> true, holder -> holder.set(ClientSettingsConfig.ANIMATED_SOUL_SPRING_LAMP.get()));
 
         boolean seasonsModLoaded = !CompatManager.getSeasonsMods().isEmpty();
         SUMMER_TEMPS = addSetting("summer_temps", SeasonalTempData::new, holder -> holder.set(seasonsModLoaded ? SeasonalTempData.fromToml(WorldSettingsConfig.getSummerTemps()) : new SeasonalTempData()));

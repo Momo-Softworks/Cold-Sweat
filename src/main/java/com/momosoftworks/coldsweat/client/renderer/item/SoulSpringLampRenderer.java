@@ -23,11 +23,11 @@ import java.util.concurrent.Callable;
 
 public class SoulSpringLampRenderer extends ItemStackTileEntityRenderer implements Callable<ItemStackTileEntityRenderer>
 {
-    public static final ResourceLocation TEXTURE_FRAME = new ResourceLocation(ColdSweat.MOD_ID, "textures/item/soulspring_lamp/soulspring_lamp_frame.png");
-    public static final ResourceLocation TEXTURE_0 = new ResourceLocation(ColdSweat.MOD_ID, "textures/item/soulspring_lamp/soulspring_lamp_0.png");
-    public static final ResourceLocation TEXTURE_1 = new ResourceLocation(ColdSweat.MOD_ID, "textures/item/soulspring_lamp/soulspring_lamp_1.png");
-    public static final ResourceLocation TEXTURE_2 = new ResourceLocation(ColdSweat.MOD_ID, "textures/item/soulspring_lamp/soulspring_lamp_2.png");
-    public static final ResourceLocation TEXTURE_3 = new ResourceLocation(ColdSweat.MOD_ID, "textures/item/soulspring_lamp/soulspring_lamp_3.png");
+    public static final ResourceLocation TEXTURE_FRAME = new ResourceLocation(ColdSweat.MOD_ID, "textures/item/soulspring_lamp/render/soulspring_lamp_frame.png");
+    public static final ResourceLocation TEXTURE_0 = new ResourceLocation(ColdSweat.MOD_ID, "textures/item/soulspring_lamp/render/soulspring_lamp_0.png");
+    public static final ResourceLocation TEXTURE_1 = new ResourceLocation(ColdSweat.MOD_ID, "textures/item/soulspring_lamp/render/soulspring_lamp_1.png");
+    public static final ResourceLocation TEXTURE_2 = new ResourceLocation(ColdSweat.MOD_ID, "textures/item/soulspring_lamp/render/soulspring_lamp_2.png");
+    public static final ResourceLocation TEXTURE_3 = new ResourceLocation(ColdSweat.MOD_ID, "textures/item/soulspring_lamp/render/soulspring_lamp_3.png");
 
     private static final int FULL_BRIGHT = 15728880;
 

@@ -1,9 +1,9 @@
 package com.momosoftworks.coldsweat.client.event;
 
 import com.mojang.datafixers.util.Pair;
-import com.momosoftworks.coldsweat.client.renderer.item.SoulSpringLampRenderer;
 import com.momosoftworks.coldsweat.client.renderer.layer.ChameleonArmorLayer;
 import com.momosoftworks.coldsweat.client.renderer.model.armor.*;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.client.Minecraft;
@@ -11,7 +11,6 @@ import net.minecraft.client.renderer.entity.PlayerRenderer;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.SimpleBakedModel;
-import net.minecraft.client.renderer.tileentity.ItemStackTileEntityRenderer;
 import net.minecraft.item.Item;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
@@ -23,6 +22,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class RegisterModels
@@ -44,6 +44,8 @@ public class RegisterModels
 
     public static EmptyArmorModel<?> EMPTY_ARMOR_MODEL = new EmptyArmorModel<>();
 
+    private static Map<ResourceLocation, IBakedModel> BAKED_MODELS = new HashMap<>();
+
     @SubscribeEvent
     public static void addLayers (FMLClientSetupEvent event)
     {
@@ -61,19 +63,26 @@ public class RegisterModels
     @SubscribeEvent
     public static void overrideModels(ModelBakeEvent event)
     {
-        forceCustomItemModel(ModItems.SOULSPRING_LAMP, event.getModelRegistry()).ifPresent(pair ->
-        {   event.getModelRegistry().put(pair.getFirst(), pair.getSecond());
-        });
+        BAKED_MODELS = event.getModelRegistry();
+        forceCustomItemModel(ModItems.SOULSPRING_LAMP, ConfigSettings.ANIMATED_SOULSPRING_LAMP_MODEL);
+    }
+
+    public static Map.Entry<ResourceLocation, IBakedModel> getBakedModel(Item item)
+    {
+        ResourceLocation itemID = ForgeRegistries.ITEMS.getKey(item);
+        return BAKED_MODELS.entrySet().stream()
+                .filter(entry -> entry.getKey().toString().contains(itemID.toString()))
+                .findFirst()
+                .orElse(null);
     }
 
     /**
      * Forces the item's model to return {@code true} for {@link IBakedModel#isCustomRenderer()}.
      * Used for custom item ISTERs.
      */
-    private static Optional<Pair<ResourceLocation, IBakedModel>> forceCustomItemModel(Item item, Map<ResourceLocation, IBakedModel> modelSet)
+    public static void forceCustomItemModel(Item item, Supplier<Boolean> custom)
     {
-        ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(item);
-        Optional<Map.Entry<ResourceLocation, IBakedModel>> modelOpt = modelSet.entrySet().stream().filter(entry -> entry.getKey().toString().contains(itemId.toString())).findFirst();
+        Optional<Map.Entry<ResourceLocation, IBakedModel>> modelOpt = Optional.ofNullable(getBakedModel(item));
 
         if (modelOpt.isPresent() && modelOpt.get().getValue() instanceof SimpleBakedModel)
         {
@@ -90,11 +99,10 @@ public class RegisterModels
             {
                 @Override
                 public boolean isCustomRenderer()
-                {   return true;
+                {   return custom.get();
                 }
             };
-            return Optional.of(Pair.of(modelOpt.get().getKey(), customModel));
+            BAKED_MODELS.put(modelOpt.get().getKey(), customModel);
         }
-        return Optional.empty();
     }
 }
