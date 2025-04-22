@@ -59,8 +59,9 @@ public class TooltipHandler
 {
     public static final Style COLD = Style.EMPTY.withColor(3767039);
     public static final Style HOT = Style.EMPTY.withColor(16736574);
-    public static final Component EXPAND_TOOLTIP = new TextComponent("?").withStyle(Style.EMPTY.withColor(ChatFormatting.BLUE).withUnderlined(true))
-                                           .append(new TextComponent(" 'Shift'").withStyle(Style.EMPTY.withColor(ChatFormatting.GRAY).withUnderlined(false)));
+    public static final Component EXPAND_TOOLTIP = new TextComponent("[").withStyle(ChatFormatting.GRAY)
+               .append(new TextComponent("Shift").withStyle(ChatFormatting.WHITE))
+               .append(new TextComponent("]").withStyle(ChatFormatting.GRAY));
 
     private static int HOVERED_ITEM_UPDATE_COOLDOWN = 0;
     private static ItemStack HOVERED_STACK = ItemStack.EMPTY;
