@@ -14,7 +14,7 @@ import java.util.function.*;
  * Contains a value that updates as needed (usually when a player interacts with the config screen). <br>
  * If added to {@link ConfigSettings#CONFIG_SETTINGS}, it will be synced to the client.
  */
-public class DynamicHolder<T>
+public class DynamicHolder<T> implements Supplier<T>
 {
     private T value;
     private Supplier<T> valueCreator;
@@ -92,6 +92,7 @@ public class DynamicHolder<T>
         return holder;
     }
 
+    @Override
     public T get()
     {
         if (this.requireRegistries)

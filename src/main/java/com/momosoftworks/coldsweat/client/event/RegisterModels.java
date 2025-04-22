@@ -1,20 +1,25 @@
 package com.momosoftworks.coldsweat.client.event;
 
 import com.mojang.datafixers.util.Pair;
+import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.client.renderer.block.IceboxBlockEntityRenderer;
 import com.momosoftworks.coldsweat.client.renderer.entity.ChameleonEntityRenderer;
 import com.momosoftworks.coldsweat.client.renderer.item.SoulSpringLampRenderer;
 import com.momosoftworks.coldsweat.client.renderer.layer.ChameleonArmorLayer;
 import com.momosoftworks.coldsweat.client.renderer.model.armor.*;
 import com.momosoftworks.coldsweat.client.renderer.model.entity.ChameleonModel;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.EntityInit;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.minecraft.client.renderer.ItemModelShaper;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.client.resources.model.SimpleBakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -25,9 +30,12 @@ import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import java.lang.reflect.Field;
 import java.util.*;
+import java.util.function.Supplier;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class RegisterModels
@@ -50,6 +58,8 @@ public class RegisterModels
     public static EmptyArmorModel<?> EMPTY_ARMOR_MODEL = null;
 
     public static BlockEntityWithoutLevelRenderer SOULSPRING_LAMP_RENDERER = null;
+
+    private static Map<ResourceLocation, BakedModel> BAKED_MODELS = new HashMap<>();
 
     public static void checkForInitModels()
     {
@@ -112,19 +122,26 @@ public class RegisterModels
     @SubscribeEvent
     public static void overrideModels(ModelBakeEvent event)
     {
-        forceCustomItemModel(ModItems.SOULSPRING_LAMP, event.getModelRegistry()).ifPresent(pair ->
-        {   event.getModelRegistry().put(pair.getFirst(), pair.getSecond());
-        });
+        BAKED_MODELS = event.getModelRegistry();
+        forceCustomItemModel(ModItems.SOULSPRING_LAMP, ConfigSettings.ANIMATED_SOULSPRING_LAMP_MODEL);
+    }
+
+    public static Map.Entry<ResourceLocation, BakedModel> getBakedModel(Item item)
+    {
+        ResourceLocation itemID = ForgeRegistries.ITEMS.getKey(item);
+        return BAKED_MODELS.entrySet().stream()
+                .filter(entry -> entry.getKey().toString().contains(itemID.toString()))
+                .findFirst()
+                .orElse(null);
     }
 
     /**
      * Forces the item's model to return {@code true} for {@link BakedModel#isCustomRenderer()}.
      * Used for custom item BEWLRs.
      */
-    private static Optional<Pair<ResourceLocation, BakedModel>> forceCustomItemModel(Item item, Map<ResourceLocation, BakedModel> modelSet)
+    public static void forceCustomItemModel(Item item, Supplier<Boolean> custom)
     {
-        ResourceLocation itemId = ForgeRegistries.ITEMS.getKey(item);
-        Optional<Map.Entry<ResourceLocation, BakedModel>> modelOpt = modelSet.entrySet().stream().filter(entry -> entry.getKey().toString().contains(itemId.toString())).findFirst();
+        Optional<Map.Entry<ResourceLocation, BakedModel>> modelOpt = Optional.ofNullable(getBakedModel(item));
 
         if (modelOpt.isPresent() && modelOpt.get().getValue() instanceof SimpleBakedModel model)
         {
@@ -140,12 +157,11 @@ public class RegisterModels
             {
                 @Override
                 public boolean isCustomRenderer()
-                {   return true;
+                {   return custom.get();
                 }
             };
-            return Optional.of(Pair.of(modelOpt.get().getKey(), customModel));
+            BAKED_MODELS.put(modelOpt.get().getKey(), customModel);
         }
-        return Optional.empty();
     }
 
     @SubscribeEvent
