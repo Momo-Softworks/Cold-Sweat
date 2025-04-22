@@ -25,11 +25,11 @@ import net.minecraft.world.item.ItemStack;
 
 public class SoulSpringLampRenderer extends BlockEntityWithoutLevelRenderer
 {
-    public static final ResourceLocation TEXTURE_FRAME = new ResourceLocation(ColdSweat.MOD_ID, "textures/item/soulspring_lamp/soulspring_lamp_frame.png");
-    public static final ResourceLocation TEXTURE_0 = new ResourceLocation(ColdSweat.MOD_ID, "textures/item/soulspring_lamp/soulspring_lamp_0.png");
-    public static final ResourceLocation TEXTURE_1 = new ResourceLocation(ColdSweat.MOD_ID, "textures/item/soulspring_lamp/soulspring_lamp_1.png");
-    public static final ResourceLocation TEXTURE_2 = new ResourceLocation(ColdSweat.MOD_ID, "textures/item/soulspring_lamp/soulspring_lamp_2.png");
-    public static final ResourceLocation TEXTURE_3 = new ResourceLocation(ColdSweat.MOD_ID, "textures/item/soulspring_lamp/soulspring_lamp_3.png");
+    public static final ResourceLocation TEXTURE_FRAME = new ResourceLocation(ColdSweat.MOD_ID, "textures/item/soulspring_lamp/render/soulspring_lamp_frame.png");
+    public static final ResourceLocation TEXTURE_0 = new ResourceLocation(ColdSweat.MOD_ID, "textures/item/soulspring_lamp/render/soulspring_lamp_0.png");
+    public static final ResourceLocation TEXTURE_1 = new ResourceLocation(ColdSweat.MOD_ID, "textures/item/soulspring_lamp/render/soulspring_lamp_1.png");
+    public static final ResourceLocation TEXTURE_2 = new ResourceLocation(ColdSweat.MOD_ID, "textures/item/soulspring_lamp/render/soulspring_lamp_2.png");
+    public static final ResourceLocation TEXTURE_3 = new ResourceLocation(ColdSweat.MOD_ID, "textures/item/soulspring_lamp/render/soulspring_lamp_3.png");
 
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(ColdSweat.MOD_ID, "soulspring_lamp"), "main");
 
