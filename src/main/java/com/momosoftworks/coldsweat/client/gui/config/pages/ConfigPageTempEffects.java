@@ -76,7 +76,7 @@ public class ConfigPageTempEffects extends AbstractConfigPage
                              0, 2.0,
                              (value, button) -> ConfigSettings.SHIVER_INTENSITY.set(value),
                              (button) -> button.setValue(ConfigSettings.SHIVER_INTENSITY.get() / 2),
-                             true, false,
+                             false, true,
                              new TranslatableComponent("cold_sweat.config.shiver_intensity.desc"));
 
 
@@ -86,7 +86,7 @@ public class ConfigPageTempEffects extends AbstractConfigPage
                              0, 1,
                              (value, button) -> ConfigSettings.HEATSTROKE_BLUR_AMOUNT.set(value),
                              (button) -> button.setValue(ConfigSettings.HEATSTROKE_BLUR_AMOUNT.get()),
-                             true, false,
+                             false, true,
                              new TranslatableComponent("cold_sweat.config.heat_blur_amount.desc"));
 
         // Heat Sway Amount (0 to 2.0)
@@ -95,7 +95,7 @@ public class ConfigPageTempEffects extends AbstractConfigPage
                              0, 2.0,
                              (value, button) -> ConfigSettings.HEATSTROKE_SWAY_AMOUNT.set(value),
                              (button) -> button.setValue(ConfigSettings.HEATSTROKE_SWAY_AMOUNT.get() / 2),
-                             true, false,
+                             false, true,
                              new TranslatableComponent("cold_sweat.config.heat_sway_amount.desc"));
 
         // Heat Sway Speed (0 to 2.0)
@@ -104,7 +104,7 @@ public class ConfigPageTempEffects extends AbstractConfigPage
                              0, 2.0,
                              (value, button) -> ConfigSettings.HEATSTROKE_SWAY_SPEED.set(value),
                              (button) -> button.setValue(ConfigSettings.HEATSTROKE_SWAY_SPEED.get() / 2),
-                             true, false,
+                             false, true,
                              new TranslatableComponent("cold_sweat.config.heat_sway_speed.desc"));
 
         // Heat Fog Distance
