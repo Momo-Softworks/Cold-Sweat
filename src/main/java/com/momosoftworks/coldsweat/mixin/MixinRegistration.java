@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.Decoder;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.compat.CompatManager;
 import net.minecraft.core.Registry;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.resources.*;
@@ -39,7 +40,23 @@ public class MixinRegistration
             JsonObject json = jsonelement.getAsJsonObject();
             if (json.has("required_mods"))
             {
-                JsonArray requiredMods = json.getAsJsonArray("required_mods");
+                JsonArray requiredMods = new JsonArray();
+                JsonArray excludedMods = new JsonArray();
+                JsonElement requiredModField = json.get("required_mods");
+                if (requiredModField.isJsonArray())
+                {
+                    requiredMods = requiredModField.getAsJsonArray();
+                }
+                else
+                {
+                    JsonObject requiredModCompound = requiredModField.getAsJsonObject();
+                    if (requiredModCompound.has("require"))
+                    {   requiredMods = requiredModCompound.getAsJsonArray("require");
+                    }
+                    if (requiredModCompound.has("exclude"))
+                    {   excludedMods = requiredModCompound.getAsJsonArray("exclude");
+                    }
+                }
                 JsonArray conditions = json.getAsJsonArray("forge:conditions");
                 // Create conditions block if it doesn't exist
                 if (conditions == null)
@@ -53,6 +70,18 @@ public class MixinRegistration
                     condition.addProperty("type", "forge:mod_loaded");
                     condition.addProperty("modid", requiredMod.getAsString());
                     conditions.add(condition);
+                }
+                // Add excluded mods as an impossible forge condition
+                for (JsonElement excludedMod : excludedMods)
+                {
+                    if (!CompatManager.modLoaded(excludedMod.getAsString()))
+                    {
+                        JsonObject condition = new JsonObject();
+                        condition.addProperty("type", "forge:mod_loaded");
+                        condition.addProperty("modid", "cs_impossible");
+                        conditions.add(condition);
+                        break;
+                    }
                 }
             }
         }

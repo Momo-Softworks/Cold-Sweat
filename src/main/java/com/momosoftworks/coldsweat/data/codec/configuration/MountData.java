@@ -28,7 +28,7 @@ public class MountData extends ConfigData implements RequirementHolder
     final Map<ResourceLocation, Double> modifierImmunities;
 
     public MountData(NegatableList<EntityRequirement> entity, NegatableList<EntityRequirement> rider, double coldInsulation, double heatInsulation,
-                     Map<ResourceLocation, Double> modifierImmunities, List<String> requiredMods)
+                     Map<ResourceLocation, Double> modifierImmunities, NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.entity = entity;
@@ -41,7 +41,7 @@ public class MountData extends ConfigData implements RequirementHolder
     public MountData(NegatableList<EntityRequirement> entity, NegatableList<EntityRequirement> rider, double coldInsulation, double heatInsulation,
                      Map<ResourceLocation, Double> modifierImmunities)
     {
-        this(entity, rider, coldInsulation, heatInsulation, modifierImmunities, List.of());
+        this(entity, rider, coldInsulation, heatInsulation, modifierImmunities, new NegatableList<>());
     }
 
     public static Codec<MountData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -50,7 +50,7 @@ public class MountData extends ConfigData implements RequirementHolder
             Codec.DOUBLE.optionalFieldOf("cold_insulation", 0d).forGetter(MountData::coldInsulation),
             Codec.DOUBLE.optionalFieldOf("heat_insulation", 0d).forGetter(MountData::heatInsulation),
             Codec.unboundedMap(ResourceLocation.CODEC, Codec.DOUBLE).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(MountData::modifierImmunities),
-            Codec.STRING.listOf().optionalFieldOf("required_mods", List.of()).forGetter(MountData::requiredMods)
+            NegatableList.listCodec(Codec.STRING).optionalFieldOf("required_mods", new NegatableList<>()).forGetter(ConfigData::requiredMods)
     ).apply(instance, MountData::new));
 
     public NegatableList<EntityRequirement> entity()
