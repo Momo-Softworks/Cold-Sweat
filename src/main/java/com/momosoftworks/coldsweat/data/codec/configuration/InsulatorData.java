@@ -41,7 +41,7 @@ public class InsulatorData extends ConfigData implements RequirementHolder, IFor
     public InsulatorData(NegatableList<ItemRequirement> item, Insulation.Slot slot,
                          List<Insulation> insulation, NegatableList<EntityRequirement> entity,
                          AttributeModifierMap attributes, Map<ResourceLocation, Double> immuneTempModifiers,
-                         boolean fillSlots, List<String> requiredMods)
+                         boolean fillSlots, NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.item = item;
@@ -57,7 +57,7 @@ public class InsulatorData extends ConfigData implements RequirementHolder, IFor
                          NegatableList<EntityRequirement> entity, AttributeModifierMap attributes,
                          Map<ResourceLocation, Double> immuneTempModifiers, boolean fillSlots)
     {
-        this(item, slot, insulation, entity, attributes, immuneTempModifiers, fillSlots, List.of());
+        this(item, slot, insulation, entity, attributes, immuneTempModifiers, fillSlots, new NegatableList<>());
     }
 
     private static final Codec<List<Insulation>> INSULATION_CODEC = Codec.either(Insulation.getCodec().listOf(), Insulation.getCodec())
@@ -73,7 +73,7 @@ public class InsulatorData extends ConfigData implements RequirementHolder, IFor
             AttributeModifierMap.CODEC.optionalFieldOf("attributes", new AttributeModifierMap()).forGetter(InsulatorData::attributes),
             Codec.unboundedMap(ResourceLocation.CODEC, Codec.DOUBLE).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(InsulatorData::immuneTempModifiers),
             Codec.BOOL.optionalFieldOf("fill_slots", false).forGetter(InsulatorData::fillSlots),
-            Codec.STRING.listOf().optionalFieldOf("required_mods", List.of()).forGetter(InsulatorData::requiredMods)
+            NegatableList.listCodec(Codec.STRING).optionalFieldOf("required_mods", new NegatableList<>()).forGetter(ConfigData::requiredMods)
     ).apply(instance, InsulatorData::new));
 
     public NegatableList<ItemRequirement> item()

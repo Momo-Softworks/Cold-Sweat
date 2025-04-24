@@ -36,7 +36,7 @@ public class SpawnBiomeData extends ConfigData implements IForgeRegistryEntry<Sp
     public SpawnBiomeData(List<Either<TagKey<Biome>, Holder<Biome>>> biomes,
                           List<Either<TagKey<EntityType<?>>, EntityType<?>>> entities,
                           MobCategory category, int weight, IntegerBounds count, NegatableList<LocationRequirement> location,
-                          List<String> requiredMods)
+                          NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.biomes = biomes;
@@ -50,7 +50,7 @@ public class SpawnBiomeData extends ConfigData implements IForgeRegistryEntry<Sp
     public SpawnBiomeData(List<Either<TagKey<Biome>, Holder<Biome>>> biomes, List<Either<TagKey<EntityType<?>>, EntityType<?>>> entities,
                           MobCategory category, int weight, IntegerBounds count, NegatableList<LocationRequirement> location)
     {
-        this(biomes, entities, category, weight, count, location, List.of());
+        this(biomes, entities, category, weight, count, location, new NegatableList<>());
     }
 
     public SpawnBiomeData(Collection<Holder<Biome>> biomes, MobCategory category,
@@ -69,7 +69,7 @@ public class SpawnBiomeData extends ConfigData implements IForgeRegistryEntry<Sp
             Codec.INT.fieldOf("weight").forGetter(SpawnBiomeData::weight),
             IntegerBounds.CODEC.optionalFieldOf("count", IntegerBounds.NONE).forGetter(SpawnBiomeData::count),
             NegatableList.codec(LocationRequirement.CODEC).optionalFieldOf("location", new NegatableList<>()).forGetter(SpawnBiomeData::location),
-            Codec.STRING.listOf().optionalFieldOf("required_mods", List.of()).forGetter(SpawnBiomeData::requiredMods)
+            NegatableList.listCodec(Codec.STRING).optionalFieldOf("required_mods", new NegatableList<>()).forGetter(ConfigData::requiredMods)
     ).apply(instance, SpawnBiomeData::new));
 
     public List<Either<TagKey<Biome>, Holder<Biome>>> biomes()

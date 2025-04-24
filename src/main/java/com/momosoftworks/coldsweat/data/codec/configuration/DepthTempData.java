@@ -32,7 +32,7 @@ public class DepthTempData extends ConfigData implements IForgeRegistryEntry<Dep
 
     public DepthTempData(List<TempRegion> temperatures,
                          NegatableList<Either<TagKey<DimensionType>, Holder<DimensionType>>> dimensions,
-                         List<String> requiredMods)
+                         NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.temperatures = temperatures;
@@ -42,13 +42,13 @@ public class DepthTempData extends ConfigData implements IForgeRegistryEntry<Dep
     public DepthTempData(List<TempRegion> temperatures,
                          NegatableList<Either<TagKey<DimensionType>, Holder<DimensionType>>> dimensions)
     {
-        this(temperatures, dimensions, List.of());
+        this(temperatures, dimensions, new NegatableList<>());
     }
 
     public static final Codec<DepthTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             TempRegion.CODEC.listOf().fieldOf("regions").forGetter(DepthTempData::temperatures),
             NegatableList.listCodec(ConfigHelper.tagOrHolderCodec(Registry.DIMENSION_TYPE_REGISTRY, DimensionType.CODEC)).fieldOf("dimensions").forGetter(DepthTempData::dimensions),
-            Codec.STRING.listOf().optionalFieldOf("required_mods", List.of()).forGetter(DepthTempData::requiredMods)
+            NegatableList.listCodec(Codec.STRING).optionalFieldOf("required_mods", new NegatableList<>()).forGetter(ConfigData::requiredMods)
     ).apply(instance, DepthTempData::new));
 
     public List<TempRegion> temperatures()

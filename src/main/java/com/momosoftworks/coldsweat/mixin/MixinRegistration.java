@@ -3,29 +3,23 @@ package com.momosoftworks.coldsweat.mixin;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.serialization.Decoder;
 import com.mojang.serialization.DynamicOps;
-import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.compat.CompatManager;
-import com.momosoftworks.coldsweat.config.ConfigLoadingHandler;
 import com.momosoftworks.coldsweat.mixin_public.PublicMixinRegistration;
-import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.WritableRegistry;
-import net.minecraft.resources.*;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.resources.RegistryResourceAccess;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
-import org.checkerframework.checker.units.qual.A;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.valkyrienskies.core.impl.shadow.E;
 
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -61,11 +55,34 @@ public class MixinRegistration
                         JsonObject json = GsonHelper.parse(reader);
                         if (json.has("required_mods"))
                         {
-                            JsonArray requiredMods = json.getAsJsonArray("required_mods");
+                            JsonArray requiredMods = new JsonArray();
+                            JsonArray excludedMods = new JsonArray();
+                            JsonElement requiredModField = json.get("required_mods");
+                            if (requiredModField.isJsonArray())
+                            {
+                                requiredMods = requiredModField.getAsJsonArray();
+                            }
+                            else
+                            {
+                                JsonObject requiredModCompound = requiredModField.getAsJsonObject();
+                                if (requiredModCompound.has("require"))
+                                {   requiredMods = requiredModCompound.getAsJsonArray("require");
+                                }
+                                if (requiredModCompound.has("exclude"))
+                                {   excludedMods = requiredModCompound.getAsJsonArray("exclude");
+                                }
+                            }
                             for (JsonElement requiredMod : requiredMods)
                             {
                                 if (!CompatManager.modLoaded(requiredMod.getAsString()))
                                 {   ColdSweat.LOGGER.warn("Skipping registration of {} {}: missing mod \"{}\"", registryKey.location(), location, requiredMod.getAsString());
+                                    return true;
+                                }
+                            }
+                            for (JsonElement excludedMod : excludedMods)
+                            {
+                                if (CompatManager.modLoaded(excludedMods.getAsString()))
+                                {   ColdSweat.LOGGER.warn("Skipping registration of {} {}: disallowed mod \"{}\" is loaded", registryKey.location(), location, excludedMod.getAsString());
                                     return true;
                                 }
                             }

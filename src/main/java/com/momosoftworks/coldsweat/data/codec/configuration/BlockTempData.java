@@ -39,7 +39,7 @@ public class BlockTempData extends ConfigData implements IForgeRegistryEntry<Blo
     public BlockTempData(NegatableList<BlockRequirement> block, double temperature, double range,
                          double maxEffect, boolean fade, WorldTempRequirement maxTemp, WorldTempRequirement minTemp,
                          Temperature.Units units, NegatableList<LocationRequirement> location,
-                         NegatableList<EntityRequirement> entity, boolean logarithmic, List<String> requiredMods)
+                         NegatableList<EntityRequirement> entity, boolean logarithmic, NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.block = block;
@@ -59,7 +59,7 @@ public class BlockTempData extends ConfigData implements IForgeRegistryEntry<Blo
                          double maxEffect, boolean fade, WorldTempRequirement maxTemp, WorldTempRequirement minTemp,
                          Temperature.Units units, NegatableList<LocationRequirement> location, NegatableList<EntityRequirement> entity, boolean logarithmic)
     {
-        this(block, temperature, range, maxEffect, fade, maxTemp, minTemp, units, location, entity, logarithmic, List.of());
+        this(block, temperature, range, maxEffect, fade, maxTemp, minTemp, units, location, entity, logarithmic, new NegatableList<>());
     }
 
     /**
@@ -87,7 +87,7 @@ public class BlockTempData extends ConfigData implements IForgeRegistryEntry<Blo
             NegatableList.codec(LocationRequirement.CODEC).optionalFieldOf("location", new NegatableList<>()).forGetter(BlockTempData::location),
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(BlockTempData::entity),
             Codec.BOOL.optionalFieldOf("logarithmic", false).forGetter(BlockTempData::logarithmic),
-            Codec.STRING.listOf().optionalFieldOf("required_mods", List.of()).forGetter(BlockTempData::requiredMods)
+            NegatableList.listCodec(Codec.STRING).optionalFieldOf("required_mods", new NegatableList<>()).forGetter(ConfigData::requiredMods)
     ).apply(instance, BlockTempData::new));
 
     public NegatableList<BlockRequirement> block()
