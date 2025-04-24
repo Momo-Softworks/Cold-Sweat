@@ -66,8 +66,13 @@ public class ChangelogGenerator {
                 }
             }
 
+            if (version.isEmpty()) {
+                System.err.println("No version number found in the changelog.");
+                return;
+            }
+
             // Parse sections
-            List<Section> sections = parseSections(lines);
+            List<Section> sections = parseSections(lines.subList(1, lines.size()));
 
             // Generate HTML
             generateHTML(writer, version, sections);
@@ -93,9 +98,7 @@ public class ChangelogGenerator {
             String trimmed = line.trim();
 
             // Skip empty lines and version number (but allow !! lines)
-            if (trimmed.isEmpty() ||
-                    (sections.size() == 1 && currentSection.items.isEmpty() &&
-                            !trimmed.endsWith(":") && !trimmed.startsWith("!!"))) {
+            if (trimmed.isEmpty()) {
                 continue;
             }
 
