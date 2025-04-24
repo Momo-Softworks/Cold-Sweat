@@ -4,21 +4,20 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.api.annotation.Internal;
 import com.momosoftworks.coldsweat.compat.CompatManager;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.resources.ResourceLocation;
 
-import java.util.List;
 import java.util.UUID;
 
 public abstract class ConfigData implements NbtSerializable
 {
     private UUID id = UUID.randomUUID();
     private Type registryType;
-    List<String> requiredMods;
+    NegatableList<String> requiredMods;
 
-    public ConfigData(List<String> requiredMods)
+    public ConfigData(NegatableList<String> requiredMods)
     {   this.requiredMods = requiredMods;
     }
 
@@ -32,7 +31,7 @@ public abstract class ConfigData implements NbtSerializable
     {   return registryType;
     }
 
-    public List<String> requiredMods()
+    public NegatableList<String> requiredMods()
     {   return requiredMods;
     }
 
@@ -57,8 +56,7 @@ public abstract class ConfigData implements NbtSerializable
     }
 
     public boolean areRequiredModsLoaded()
-    {
-        return requiredMods.stream().allMatch(mod -> mod.equals("minecraft") || CompatManager.modLoaded(mod));
+    {   return requiredMods.test(mod -> mod.equals("minecraft") || CompatManager.modLoaded(mod));
     }
 
     @Override

@@ -26,7 +26,7 @@ public class DimensionTempData extends ConfigData
 
     public DimensionTempData(NegatableList<Either<TagKey<DimensionType>, Holder<DimensionType>>> dimensions,
                              double temperature, Temperature.Units units, boolean isOffset,
-                             List<String> requiredMods)
+                             NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.dimensions = dimensions;
@@ -38,7 +38,7 @@ public class DimensionTempData extends ConfigData
     public DimensionTempData(NegatableList<Either<TagKey<DimensionType>, Holder<DimensionType>>> dimensions,
                              double temperature, Temperature.Units units, boolean isOffset)
     {
-        this(dimensions, temperature, units, isOffset, List.of());
+        this(dimensions, temperature, units, isOffset, new NegatableList<>());
     }
 
     public DimensionTempData(Holder<DimensionType> dimension, double temperature, Temperature.Units units, boolean isOffset)
@@ -50,7 +50,7 @@ public class DimensionTempData extends ConfigData
             Codec.DOUBLE.fieldOf("temperature").forGetter(DimensionTempData::temperature),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(DimensionTempData::units),
             Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(DimensionTempData::isOffset),
-            Codec.STRING.listOf().optionalFieldOf("required_mods", List.of()).forGetter(DimensionTempData::requiredMods)
+            NegatableList.listCodec(Codec.STRING).optionalFieldOf("required_mods", new NegatableList<>()).forGetter(ConfigData::requiredMods)
     ).apply(instance, DimensionTempData::new));
 
     public NegatableList<Either<TagKey<DimensionType>, Holder<DimensionType>>> dimensions()

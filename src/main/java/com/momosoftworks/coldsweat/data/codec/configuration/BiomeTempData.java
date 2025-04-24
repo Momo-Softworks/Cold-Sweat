@@ -26,7 +26,7 @@ public class BiomeTempData extends ConfigData
     final boolean isOffset;
 
     public BiomeTempData(NegatableList<Either<TagKey<Biome>, Holder<Biome>>> biomes, double min, double max,
-                         Temperature.Units units, boolean isOffset, List<String> requiredMods)
+                         Temperature.Units units, boolean isOffset, NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.biomes = biomes;
@@ -39,7 +39,7 @@ public class BiomeTempData extends ConfigData
     public BiomeTempData(NegatableList<Either<TagKey<Biome>, Holder<Biome>>> biomes, double min, double max,
                          Temperature.Units units, boolean isOffset)
     {
-        this(biomes, min, max, units, isOffset, List.of());
+        this(biomes, min, max, units, isOffset, new NegatableList<>());
     }
 
     public BiomeTempData(Holder<Biome> biome, double min, double max, Temperature.Units units, boolean isOffset)
@@ -54,7 +54,7 @@ public class BiomeTempData extends ConfigData
                 either -> either.map(left -> left, right -> right), Either::right).forGetter(BiomeTempData::max),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(BiomeTempData::units),
             Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(BiomeTempData::isOffset),
-            Codec.STRING.listOf().optionalFieldOf("required_mods", List.of()).forGetter(BiomeTempData::requiredMods)
+            NegatableList.listCodec(Codec.STRING).optionalFieldOf("required_mods", new NegatableList<>()).forGetter(ConfigData::requiredMods)
     ).apply(instance, BiomeTempData::new));
 
     public NegatableList<Either<TagKey<Biome>, Holder<Biome>>> biomes()
