@@ -25,7 +25,7 @@ public class RemoveRegistryData<T extends ConfigData> extends ConfigData
 
     public RemoveRegistryData(RegistryKey<Registry<T>> registry, NegatableList<CompoundNBT> matches, List<ResourceLocation> entries)
     {
-        super(Arrays.asList());
+        super(new NegatableList<>());
         this.registry = registry;
         this.matches = matches;
         this.entries = entries;

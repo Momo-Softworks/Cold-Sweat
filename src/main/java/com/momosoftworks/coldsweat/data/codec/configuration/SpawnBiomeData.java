@@ -35,7 +35,7 @@ public class SpawnBiomeData extends ConfigData
     public SpawnBiomeData(List<Biome> biomes,
                           List<Either<ITag<EntityType<?>>, EntityType<?>>> entities,
                           EntityClassification category, int weight, IntegerBounds count, NegatableList<LocationRequirement> location,
-                          List<String> requiredMods)
+                          NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.biomes = biomes;
@@ -49,7 +49,7 @@ public class SpawnBiomeData extends ConfigData
     public SpawnBiomeData(List<Biome> biomes, List<Either<ITag<EntityType<?>>, EntityType<?>>> entities,
                           EntityClassification category, int weight, IntegerBounds count, NegatableList<LocationRequirement> location)
     {
-        this(biomes, entities, category, weight, count, location, Arrays.asList());
+        this(biomes, entities, category, weight, count, location, new NegatableList<>());
     }
 
     public SpawnBiomeData(Collection<Biome> biomes, EntityClassification category,
@@ -68,7 +68,7 @@ public class SpawnBiomeData extends ConfigData
             Codec.INT.fieldOf("weight").forGetter(SpawnBiomeData::weight),
             IntegerBounds.CODEC.optionalFieldOf("count", IntegerBounds.NONE).forGetter(SpawnBiomeData::count),
             NegatableList.codec(LocationRequirement.CODEC).optionalFieldOf("location", new NegatableList<>()).forGetter(SpawnBiomeData::location),
-            Codec.STRING.listOf().optionalFieldOf("required_mods", Arrays.asList()).forGetter(SpawnBiomeData::requiredMods)
+            NegatableList.listCodec(Codec.STRING).optionalFieldOf("required_mods", new NegatableList<>()).forGetter(ConfigData::requiredMods)
     ).apply(instance, SpawnBiomeData::new));
 
     public List<Biome> biomes()

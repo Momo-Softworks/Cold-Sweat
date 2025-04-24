@@ -24,7 +24,7 @@ public class DimensionTempData extends ConfigData
 
     public DimensionTempData(NegatableList<DimensionType> dimensions,
                              double temperature, Temperature.Units units, boolean isOffset,
-                             List<String> requiredMods)
+                             NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.dimensions = dimensions;
@@ -36,7 +36,7 @@ public class DimensionTempData extends ConfigData
     public DimensionTempData(NegatableList<DimensionType> dimensions,
                              double temperature, Temperature.Units units, boolean isOffset)
     {
-        this(dimensions, temperature, units, isOffset, Arrays.asList());
+        this(dimensions, temperature, units, isOffset, new NegatableList<>());
     }
 
     public DimensionTempData(DimensionType dimension, double temperature, Temperature.Units units, boolean isOffset)
@@ -44,11 +44,11 @@ public class DimensionTempData extends ConfigData
     }
 
     public static final Codec<DimensionTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            NegatableList.listCodec(ConfigHelper.dynamicCodec(Registry.DIMENSION_TYPE_REGISTRY)).fieldOf("dimensions").forGetter(data -> data.dimensions),
-            Codec.DOUBLE.fieldOf("temperature").forGetter(data -> data.temperature),
-            Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(data -> data.units),
-            Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(data -> data.isOffset),
-            Codec.STRING.listOf().optionalFieldOf("required_mods", Arrays.asList()).forGetter(DimensionTempData::requiredMods)
+            NegatableList.listCodec(ConfigHelper.dynamicCodec(Registry.DIMENSION_TYPE_REGISTRY)).fieldOf("dimensions").forGetter(DimensionTempData::dimensions),
+            Codec.DOUBLE.fieldOf("temperature").forGetter(DimensionTempData::temperature),
+            Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(DimensionTempData::units),
+            Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(DimensionTempData::isOffset),
+            NegatableList.listCodec(Codec.STRING).optionalFieldOf("required_mods", new NegatableList<>()).forGetter(ConfigData::requiredMods)
     ).apply(instance, DimensionTempData::new));
 
     public NegatableList<DimensionType> dimensions()

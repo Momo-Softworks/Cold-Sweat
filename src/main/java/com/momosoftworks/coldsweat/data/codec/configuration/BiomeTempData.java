@@ -25,7 +25,7 @@ public class BiomeTempData extends ConfigData
     final boolean isOffset;
 
     public BiomeTempData(NegatableList<Biome> biomes, double min, double max,
-                         Temperature.Units units, boolean isOffset, List<String> requiredMods)
+                         Temperature.Units units, boolean isOffset, NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.biomes = biomes;
@@ -38,7 +38,7 @@ public class BiomeTempData extends ConfigData
     public BiomeTempData(NegatableList<Biome> biomes, double min, double max,
                          Temperature.Units units, boolean isOffset)
     {
-        this(biomes, min, max, units, isOffset, Arrays.asList());
+        this(biomes, min, max, units, isOffset, new NegatableList<>());
     }
 
     public BiomeTempData(Biome biome, double min, double max, Temperature.Units units, boolean isOffset)
@@ -52,12 +52,10 @@ public class BiomeTempData extends ConfigData
                     either.map(left -> left, right -> right),
                     Either::right).forGetter(data -> data.min),
             Codec.mapEither(Codec.DOUBLE.fieldOf("temperature"), Codec.DOUBLE.fieldOf("max_temp")).xmap(
-                    either ->
-                    either.map(left -> left, right -> right),
-                    Either::right).forGetter(data -> data.max),
-            Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(data -> data.units),
-            Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(data -> data.isOffset),
-            Codec.STRING.listOf().optionalFieldOf("required_mods", Arrays.asList()).forGetter(BiomeTempData::requiredMods)
+                either -> either.map(left -> left, right -> right), Either::right).forGetter(BiomeTempData::max),
+            Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(BiomeTempData::units),
+            Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(BiomeTempData::isOffset),
+            NegatableList.listCodec(Codec.STRING).optionalFieldOf("required_mods", new NegatableList<>()).forGetter(ConfigData::requiredMods)
     ).apply(instance, BiomeTempData::new));
 
     public NegatableList<Biome> biomes()

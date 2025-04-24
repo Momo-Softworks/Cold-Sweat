@@ -617,12 +617,35 @@ public class ConfigLoadingHandler
     {
         if (json.has("required_mods"))
         {
-            JsonArray requiredMods = json.getAsJsonArray("required_mods");
+            JsonArray requiredMods = new JsonArray();
+            JsonArray excludedMods = new JsonArray();
+            JsonElement requiredModField = json.get("required_mods");
+            if (requiredModField.isJsonArray())
+            {
+                requiredMods = requiredModField.getAsJsonArray();
+            }
+            else
+            {
+                JsonObject requiredModCompound = requiredModField.getAsJsonObject();
+                if (requiredModCompound.has("require"))
+                {   requiredMods = requiredModCompound.getAsJsonArray("require");
+                }
+                if (requiredModCompound.has("exclude"))
+                {   excludedMods = requiredModCompound.getAsJsonArray("exclude");
+                }
+            }
             for (JsonElement requiredMod : requiredMods)
             {
                 if (!CompatManager.modLoaded(requiredMod.getAsString()))
                 {   ColdSweat.LOGGER.warn("Skipping registration of {} {}: missing mod \"{}\"", registryKey.location(), elementName, requiredMod.getAsString());
-                    return false;
+                    return true;
+                }
+            }
+            for (JsonElement excludedMod : excludedMods)
+            {
+                if (CompatManager.modLoaded(excludedMods.getAsString()))
+                {   ColdSweat.LOGGER.warn("Skipping registration of {} {}: disallowed mod \"{}\" is loaded", registryKey.location(), elementName, excludedMod.getAsString());
+                    return true;
                 }
             }
         }

@@ -31,7 +31,7 @@ public class FoodData extends ConfigData implements RequirementHolder
     final NegatableList<EntityRequirement> entityRequirement;
 
     public FoodData(NegatableList<ItemRequirement> item, Double temperature, int duration,
-                    NegatableList<EntityRequirement> entityRequirement, List<String> requiredMods)
+                    NegatableList<EntityRequirement> entityRequirement, NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.temperature = temperature;
@@ -43,7 +43,7 @@ public class FoodData extends ConfigData implements RequirementHolder
     public FoodData(NegatableList<ItemRequirement> item, Double temperature, int duration,
                     NegatableList<EntityRequirement> entityRequirement)
     {
-        this(item, temperature, duration, entityRequirement, Arrays.asList());
+        this(item, temperature, duration, entityRequirement, new NegatableList<>());
     }
 
     public static final Codec<FoodData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -51,7 +51,7 @@ public class FoodData extends ConfigData implements RequirementHolder
             Codec.DOUBLE.fieldOf("temperature").forGetter(FoodData::temperature),
             Codec.INT.optionalFieldOf("duration", 0).forGetter(FoodData::duration),
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(FoodData::entityRequirement),
-            Codec.STRING.listOf().optionalFieldOf("required_mods", Arrays.asList()).forGetter(FoodData::requiredMods)
+            NegatableList.listCodec(Codec.STRING).optionalFieldOf("required_mods", new NegatableList<>()).forGetter(ConfigData::requiredMods)
     ).apply(instance, FoodData::new));
 
     public NegatableList<ItemRequirement> item()

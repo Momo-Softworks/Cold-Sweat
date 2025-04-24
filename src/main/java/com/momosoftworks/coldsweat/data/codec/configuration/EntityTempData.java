@@ -32,7 +32,7 @@ public class EntityTempData extends ConfigData implements RequirementHolder
 
     public EntityTempData(NegatableList<EntityRequirement> entity, double temperature, double range,
                           Temperature.Units units, NegatableList<EntityRequirement> affectedEntity,
-                          double maxEffect, boolean affectsSelf, List<String> requiredMods)
+                          double maxEffect, boolean affectsSelf, NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.entity = entity;
@@ -48,7 +48,7 @@ public class EntityTempData extends ConfigData implements RequirementHolder
                           Temperature.Units units, NegatableList<EntityRequirement> affectedEntity,
                           double maxEffect, boolean affectsSelf)
     {
-        this(entity, temperature, range, units, affectedEntity, maxEffect, affectsSelf, Arrays.asList());
+        this(entity, temperature, range, units, affectedEntity, maxEffect, affectsSelf, new NegatableList<>());
     }
 
     public static final Codec<EntityTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -59,7 +59,7 @@ public class EntityTempData extends ConfigData implements RequirementHolder
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("affected_entity", new NegatableList<>()).forGetter(EntityTempData::affectedEntity),
             Codec.DOUBLE.optionalFieldOf("max_effect", Double.POSITIVE_INFINITY).forGetter(EntityTempData::maxEffect),
             Codec.BOOL.optionalFieldOf("affects_self", false).forGetter(EntityTempData::affectsSelf),
-            Codec.STRING.listOf().optionalFieldOf("required_mods", Arrays.asList()).forGetter(EntityTempData::requiredMods)
+            NegatableList.listCodec(Codec.STRING).optionalFieldOf("required_mods", new NegatableList<>()).forGetter(ConfigData::requiredMods)
     ).apply(instance, EntityTempData::new));
 
     public NegatableList<EntityRequirement> entity()

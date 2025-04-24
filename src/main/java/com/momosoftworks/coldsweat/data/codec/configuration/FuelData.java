@@ -27,7 +27,7 @@ public class FuelData extends ConfigData implements RequirementHolder
     final FuelType type;
     final Double fuel;
 
-    public FuelData(NegatableList<ItemRequirement> item, FuelType type, Double fuel, List<String> requiredMods)
+    public FuelData(NegatableList<ItemRequirement> item, FuelType type, Double fuel, NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.type = type;
@@ -36,14 +36,14 @@ public class FuelData extends ConfigData implements RequirementHolder
     }
 
     public FuelData(NegatableList<ItemRequirement> item, FuelType type, Double fuel)
-    {   this(item, type, fuel, Arrays.asList());
+    {   this(item, type, fuel, new NegatableList<>());
     }
 
     public static final Codec<FuelData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             NegatableList.codec(ItemRequirement.CODEC).optionalFieldOf("item", new NegatableList<>()).forGetter(FuelData::item),
             FuelType.CODEC.fieldOf("type").forGetter(FuelData::fuelType),
             Codec.DOUBLE.fieldOf("fuel").forGetter(FuelData::fuel),
-            Codec.STRING.listOf().optionalFieldOf("required_mods", Arrays.asList()).forGetter(FuelData::requiredMods)
+            NegatableList.listCodec(Codec.STRING).optionalFieldOf("required_mods", new NegatableList<>()).forGetter(ConfigData::requiredMods)
     ).apply(instance, FuelData::new));
 
     public NegatableList<ItemRequirement> item()

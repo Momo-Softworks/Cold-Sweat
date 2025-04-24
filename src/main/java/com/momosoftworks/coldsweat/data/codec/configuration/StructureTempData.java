@@ -24,7 +24,7 @@ public class StructureTempData extends ConfigData
     boolean isOffset;
 
     public StructureTempData(NegatableList<StructureFeature<?, ?>> structures, double temperature,
-                             Temperature.Units units, boolean isOffset, List<String> requiredMods)
+                             Temperature.Units units, boolean isOffset, NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.structures = structures;
@@ -36,7 +36,7 @@ public class StructureTempData extends ConfigData
     public StructureTempData(NegatableList<StructureFeature<?, ?>> structures, double temperature,
                              Temperature.Units units, boolean isOffset)
     {
-        this(structures, temperature, units, isOffset, Arrays.asList());
+        this(structures, temperature, units, isOffset, new NegatableList<>());
     }
 
     public StructureTempData(StructureFeature<?, ?> structure, double temperature,
@@ -46,11 +46,11 @@ public class StructureTempData extends ConfigData
     }
 
     public static final Codec<StructureTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            NegatableList.listCodec(ConfigHelper.dynamicCodec(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY)).fieldOf("structures").forGetter(data -> data.structures),
-            Codec.DOUBLE.fieldOf("temperature").forGetter(data -> data.temperature),
-            Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(data -> data.units),
-            Codec.BOOL.optionalFieldOf("offset", false).forGetter(data -> data.isOffset),
-            Codec.STRING.listOf().optionalFieldOf("required_mods", Arrays.asList()).forGetter(StructureTempData::requiredMods)
+            NegatableList.listCodec(ConfigHelper.dynamicCodec(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY)).fieldOf("structures").forGetter(StructureTempData::structures),
+            Codec.DOUBLE.fieldOf("temperature").forGetter(StructureTempData::temperature),
+            Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(StructureTempData::units),
+            Codec.BOOL.optionalFieldOf("offset", false).forGetter(StructureTempData::isOffset),
+            NegatableList.listCodec(Codec.STRING).optionalFieldOf("required_mods", new NegatableList<>()).forGetter(ConfigData::requiredMods)
     ).apply(instance, StructureTempData::new));
 
     public NegatableList<StructureFeature<?, ?>> structures()
