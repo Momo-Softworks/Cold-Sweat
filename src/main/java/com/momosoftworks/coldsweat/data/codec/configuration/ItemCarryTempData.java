@@ -44,7 +44,7 @@ public class ItemCarryTempData extends ConfigData implements RequirementHolder
 
     public ItemCarryTempData(NegatableList<ItemRequirement> item, List<Either<IntegerBounds, SlotType>> slots, double temperature,
                              Temperature.Trait trait, Double maxEffect, NegatableList<EntityRequirement> entityRequirement, AttributeModifierMap attributeModifiers,
-                             Map<ResourceLocation, Double> immuneTempModifiers, List<String> requiredMods)
+                             Map<ResourceLocation, Double> immuneTempModifiers, NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.item = item;
@@ -61,7 +61,7 @@ public class ItemCarryTempData extends ConfigData implements RequirementHolder
                              Temperature.Trait trait, Double maxEffect, NegatableList<EntityRequirement> entityRequirement, AttributeModifierMap attributeModifiers,
                              Map<ResourceLocation, Double> immuneTempModifiers)
     {
-        this(item, slots, temperature, trait, maxEffect, entityRequirement, attributeModifiers, immuneTempModifiers, List.of());
+        this(item, slots, temperature, trait, maxEffect, entityRequirement, attributeModifiers, immuneTempModifiers, new NegatableList<>());
     }
 
     public static final Codec<ItemCarryTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -73,7 +73,7 @@ public class ItemCarryTempData extends ConfigData implements RequirementHolder
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(ItemCarryTempData::entityRequirement),
             AttributeModifierMap.CODEC.optionalFieldOf("attributes", new AttributeModifierMap()).forGetter(ItemCarryTempData::attributeModifiers),
             Codec.unboundedMap(ResourceLocation.CODEC, Codec.DOUBLE).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(ItemCarryTempData::immuneTempModifiers),
-            Codec.STRING.listOf().optionalFieldOf("required_mods", List.of()).forGetter(ItemCarryTempData::requiredMods)
+            NegatableList.listCodec(Codec.STRING).optionalFieldOf("required_mods", new NegatableList<>()).forGetter(ConfigData::requiredMods)
     ).apply(instance, ItemCarryTempData::new));
 
     public NegatableList<ItemRequirement> item()

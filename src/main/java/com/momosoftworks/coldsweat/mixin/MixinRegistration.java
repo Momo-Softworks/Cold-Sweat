@@ -7,11 +7,11 @@ import com.mojang.serialization.Decoder;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import net.minecraft.core.RegistrationInfo;
-import net.minecraft.core.Registry;
 import net.minecraft.core.WritableRegistry;
-import net.minecraft.resources.*;
+import net.minecraft.resources.RegistryDataLoader;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.packs.resources.Resource;
-import net.minecraft.server.packs.resources.ResourceManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -19,8 +19,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.io.Reader;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.Optional;
 
 @Mixin(RegistryDataLoader.class)
@@ -41,13 +39,38 @@ public class MixinRegistration
             JsonObject json = jsonElement.getAsJsonObject();
             if (json.has("required_mods"))
             {
-                JsonArray requiredMods = json.getAsJsonArray("required_mods");
+                JsonArray requiredMods = new JsonArray();
+                JsonArray excludedMods = new JsonArray();
+                JsonElement requiredModField = json.get("required_mods");
+                if (requiredModField.isJsonArray())
+                {
+                    requiredMods = requiredModField.getAsJsonArray();
+                }
+                else
+                {
+                    JsonObject requiredModCompound = requiredModField.getAsJsonObject();
+                    if (requiredModCompound.has("require"))
+                    {   requiredMods = requiredModCompound.getAsJsonArray("require");
+                    }
+                    if (requiredModCompound.has("exclude"))
+                    {   excludedMods = requiredModCompound.getAsJsonArray("exclude");
+                    }
+                }
                 // Add required mods as forge conditions
                 for (JsonElement requiredMod : requiredMods)
                 {
                     if (!CompatManager.modLoaded(requiredMod.getAsString()))
-                    {   ColdSweat.LOGGER.warn("Skipping registration of {} {}: missing mod \"{}\"", registry.key().location(), elementKey.location(), requiredMod.getAsString());
+                    {   ColdSweat.LOGGER.info("Skipping registration of {} {}: missing mod \"{}\"", registry.key().location(), elementKey.location(), requiredMod.getAsString());
                         ci.cancel();
+                        return;
+                    }
+                }
+                for (JsonElement excludedMod : excludedMods)
+                {
+                    if (CompatManager.modLoaded(excludedMod.getAsString()))
+                    {   ColdSweat.LOGGER.info("Skipping registration of {} {}: disallowed mod \"{}\" is loaded", registry.key().location(), elementKey.location(), excludedMod.getAsString());
+                        ci.cancel();
+                        return;
                     }
                 }
             }

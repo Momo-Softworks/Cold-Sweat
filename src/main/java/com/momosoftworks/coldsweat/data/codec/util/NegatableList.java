@@ -24,22 +24,22 @@ public class NegatableList<T>
      */
     public static <T> Codec<NegatableList<T>> codec(Codec<T> codec) {
         Codec<NegatableList<T>> listCodec = RecordCodecBuilder.create(instance -> instance.group(
-                codec.listOf().fieldOf("require").forGetter(predicate -> predicate.requirements),
+                codec.listOf().optionalFieldOf("require", List.of()).forGetter(predicate -> predicate.requirements),
                 codec.listOf().optionalFieldOf("exclude", List.of()).forGetter(predicate -> predicate.exclusions)
         ).apply(instance, NegatableList::new));
 
-        return Codec.either(listCodec, codec)
+        return Codec.either(codec, listCodec)
                 .comapFlatMap(either -> {
-                          if (either.left().isPresent())
-                          {   return DataResult.success(either.left().get());
+                          if (either.right().isPresent())
+                          {   return DataResult.success(either.right().get());
                           }
-                          else return DataResult.success(new NegatableList<>(List.of(either.right().get())));
+                          else return DataResult.success(new NegatableList<>(List.of(either.left().get())));
                       },
                       list -> {
                           if (list.singleton && list.exclusions.isEmpty())
-                          {   return Either.right(list.requirements.get(0));
+                          {   return Either.left(list.requirements.get(0));
                           }
-                          else return Either.left(list);
+                          else return Either.right(list);
                       });
     }
 
@@ -48,22 +48,22 @@ public class NegatableList<T>
      */
     public static <T> Codec<NegatableList<T>> listCodec(Codec<T> codec) {
         Codec<NegatableList<T>> listCodec = RecordCodecBuilder.create(instance -> instance.group(
-                codec.listOf().fieldOf("require").forGetter(predicate -> predicate.requirements),
+                codec.listOf().optionalFieldOf("require", List.of()).forGetter(predicate -> predicate.requirements),
                 codec.listOf().optionalFieldOf("exclude", List.of()).forGetter(predicate -> predicate.exclusions)
         ).apply(instance, NegatableList::new));
 
-        return Codec.either(listCodec, codec.listOf())
+        return Codec.either(codec.listOf(), listCodec)
                 .comapFlatMap(either -> {
-                                  if (either.left().isPresent())
-                                  {   return DataResult.success(either.left().get());
+                                  if (either.right().isPresent())
+                                  {   return DataResult.success(either.right().get());
                                   }
-                                  else return DataResult.success(new NegatableList<>(either.right().get()));
+                                  else return DataResult.success(new NegatableList<>(either.left().get()));
                               },
                               list -> {
                                     if (list.singleton && list.exclusions.isEmpty())
-                                    {   return Either.right(list.requirements);
+                                    {   return Either.left(list.requirements);
                                     }
-                                    else return Either.left(list);
+                                    else return Either.right(list);
                               });
     }
 

@@ -25,7 +25,7 @@ public class StructureTempData extends ConfigData
     boolean isOffset;
 
     public StructureTempData(NegatableList<Either<TagKey<Structure>, Holder<Structure>>> structures, double temperature,
-                             Temperature.Units units, boolean isOffset, List<String> requiredMods)
+                             Temperature.Units units, boolean isOffset, NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.structures = structures;
@@ -37,7 +37,7 @@ public class StructureTempData extends ConfigData
     public StructureTempData(NegatableList<Either<TagKey<Structure>, Holder<Structure>>> structures, double temperature,
                              Temperature.Units units, boolean isOffset)
     {
-        this(structures, temperature, units, isOffset, List.of());
+        this(structures, temperature, units, isOffset, new NegatableList<>());
     }
 
     public StructureTempData(Holder<Structure> structure, double temperature,
@@ -51,7 +51,7 @@ public class StructureTempData extends ConfigData
             Codec.DOUBLE.fieldOf("temperature").forGetter(StructureTempData::temperature),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(StructureTempData::units),
             Codec.BOOL.optionalFieldOf("offset", false).forGetter(StructureTempData::isOffset),
-            Codec.STRING.listOf().optionalFieldOf("required_mods", List.of()).forGetter(StructureTempData::requiredMods)
+            NegatableList.listCodec(Codec.STRING).optionalFieldOf("required_mods", new NegatableList<>()).forGetter(ConfigData::requiredMods)
     ).apply(instance, StructureTempData::new));
 
     public NegatableList<Either<TagKey<Structure>, Holder<Structure>>> structures()
