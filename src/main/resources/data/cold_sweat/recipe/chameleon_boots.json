@@ -2,7 +2,6 @@
   "type": "minecraft:crafting_shaped",
   "pattern":
   [
-    "MMM",
     "M M",
     "M M"
   ],
@@ -15,7 +14,7 @@
   },
   "result":
   {
-    "item": "cold_sweat:chameleon_scale_leggings",
+    "id": "cold_sweat:chameleon_scale_boots",
     "count": 1
   }
 }

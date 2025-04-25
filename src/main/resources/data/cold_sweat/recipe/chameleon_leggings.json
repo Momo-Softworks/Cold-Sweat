@@ -2,9 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "pattern":
   [
-    "M M",
     "MMM",
-    "MMM"
+    "M M",
+    "M M"
   ],
   "key":
   {
@@ -15,7 +15,7 @@
   },
   "result":
   {
-    "item": "cold_sweat:chameleon_scale_chestplate",
+    "id": "cold_sweat:chameleon_scale_leggings",
     "count": 1
   }
 }
