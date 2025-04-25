@@ -532,7 +532,7 @@ public class WorldSettingsConfig
                          "Format: [[\"structure_1\", temperature1, *units], [\"structure_2\", temperature2, *units]... etc]",
                          "(* = optional)")
                 .defineListAllowEmpty(List.of("Structure Temperatures"), () -> List.of(
-                        List.of("minecraft:igloo", 65, "F")
+                        // empty
                 ), it -> it instanceof List<?> list
                         && list.get(0) instanceof String
                         && list.get(1) instanceof Number
