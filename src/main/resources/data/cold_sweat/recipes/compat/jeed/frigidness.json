@@ -1,17 +1,20 @@
 {
+  "type": "jeed:effect_provider",
   "conditions": [
     {
       "modid": "jeed",
       "type": "forge:mod_loaded"
     }
   ],
-  "type": "jeed:effect_provider",
   "effect": {
       "id": "cold_sweat:frigidness"
   },
   "providers": [
     {
       "item": "cold_sweat:hearth"
+    },
+    {
+      "item": "cold_sweat:icebox"
     }
   ]
 }
