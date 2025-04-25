@@ -1,15 +1,16 @@
 {
-  "required_mods": {
-    "exclude": [
-      "soul_fire_d"
-    ]
-  },
+  "required_mods": [
+    "soul_fire_d"
+  ],
   "entity": {
     "flags": {
       "is_on_fire": true
+    },
+    "nbt": {
+      "FireType": "minecraft:soul"
     }
   },
-  "temperature": 15,
+  "temperature": -15,
   "units": "f",
   "range": 6,
   "affects_self": true
