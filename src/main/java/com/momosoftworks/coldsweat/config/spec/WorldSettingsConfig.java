@@ -324,15 +324,11 @@ public class WorldSettingsConfig
                          "Format: [[\"structure_1\", temperature1, *units], [\"structure_2\", temperature2, *units]... etc]",
                          "(* = optional)")
                 .defineListAllowEmpty(Arrays.asList("Structure Temperatures"), () -> Arrays.asList(
-                        Arrays.asList("minecraft:igloo", 65, "F")
-                ), it ->
-                {
-                    if (!(it instanceof List<?>)) return false;
-                    List<?> list = (List<?>) it;
-                    return list.get(0) instanceof String
-                        && list.get(1) instanceof Number
-                        && (list.size() < 3 || list.get(2) instanceof String);
-                });
+                        // empty
+                ), it -> it instanceof List<?>
+                        && ((List<?>) it).get(0) instanceof String
+                        && ((List<?>) it).get(1) instanceof Number
+                        && (((List<?>) it).size() < 3 || ((List<?>) it).get(2) instanceof String));
 
         STRUCTURE_TEMP_OFFSETS = BUILDER
                 .comment("Offsets the world temperature when the player is within this structure",
