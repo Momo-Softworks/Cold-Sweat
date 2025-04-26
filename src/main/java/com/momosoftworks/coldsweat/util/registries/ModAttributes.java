@@ -7,6 +7,7 @@ public class ModAttributes
 {
     public static final Attribute WORLD_TEMPERATURE = AttributeInit.WORLD_TEMPERATURE.get();
     public static final Attribute BASE_BODY_TEMPERATURE = AttributeInit.BASE_BODY_TEMPERATURE.get();
+    public static final Attribute TEMP_RATE = AttributeInit.TEMP_RATE.get();
 
     public static final Attribute BURNING_POINT   = AttributeInit.BURNING_POINT.get();
     public static final Attribute FREEZING_POINT  = AttributeInit.FREEZING_POINT.get();

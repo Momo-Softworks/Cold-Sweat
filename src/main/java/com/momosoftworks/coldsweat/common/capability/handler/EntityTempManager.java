@@ -21,6 +21,7 @@ import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap
 import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
+import com.momosoftworks.coldsweat.core.init.ParticleTypesInit;
 import com.momosoftworks.coldsweat.data.codec.configuration.FoodData;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.data.codec.configuration.ItemCarryTempData;
@@ -238,6 +239,29 @@ public class EntityTempManager
             if (sync.get())
             {   Temperature.updateModifiers(entity, cap);
             }
+
+            // Spawn particles for uninhabitable entities
+            if (ConfigSettings.ENTITY_CLIMATES.get().containsKey(entity.getType()))
+            {
+                if (entity.tickCount % 15 == 0 && entity.getRandom().nextDouble() < 0.3)
+                {
+                    double worldTemp = cap.getTrait(Temperature.Trait.WORLD);
+                    double entityX = entity.getX();
+                    double entityY = entity.getY() + entity.getBbHeight();
+                    double entityZ = entity.getZ();
+
+                    if (worldTemp < cap.getTrait(Temperature.Trait.FREEZING_POINT))
+                    {
+                        WorldHelper.spawnParticleBatch(entity.level, ParticleTypesInit.MOB_COLD.get(), entityX, entityY, entityZ, 0.5, 0.5, 0.5,
+                                                       entity.getRandom().nextInt(2) + 3, 0);
+                    }
+                    else if (worldTemp > cap.getTrait(Temperature.Trait.BURNING_POINT))
+                    {
+                        WorldHelper.spawnParticleBatch(entity.level, ParticleTypesInit.MOB_HOT.get(), entityX, entityY, entityZ, 0.5, 0.5, 0.5,
+                                                       entity.getRandom().nextInt(2) + 3, 0);
+                    }
+                }
+            }
         });
     }
 
@@ -296,12 +320,7 @@ public class EntityTempManager
         effectsPerTrait.forEach((trait, temp) ->
         {
             Optional<InventoryItemsTempModifier> modifier = Temperature.getModifier(entity, trait, InventoryItemsTempModifier.class);
-            if (!modifier.isPresent())
-            {   Temperature.addModifier(entity, new InventoryItemsTempModifier(temp), trait, Placement.Duplicates.BY_CLASS);
-            }
-            else
-            {   modifier.get().getNBT().putDouble("Effect", temp);
-            }
+            modifier.ifPresent(mod -> mod.getNBT().putDouble("Effect", temp));
         });
     }
 
@@ -369,15 +388,24 @@ public class EntityTempManager
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void defineDefaultModifiers(GatherDefaultTempModifiersEvent event)
     {
-        // Default TempModifiers for players
         boolean isPlayer = event.getEntity() instanceof PlayerEntity;
         Temperature.Trait trait = event.getTrait();
 
+        // Use approximations for climate-enabled entities
+        if (ConfigSettings.ENTITY_CLIMATES.get().containsKey(event.getEntity().getType()))
+        {
+            if (trait == Temperature.Trait.WORLD)
+            {   event.addModifier(new EntityClimateTempModifier().tickRate(60));
+            }
+            return;
+        }
+
         // TempModifier tick rate is generally slower for entities than for players
-        int slowTickRate = 60;
-        int mediumTickRate = isPlayer ? 10 : 40;
-        int mediumTickRate2 = isPlayer ? 10 : 20;
-        int fastTickRate = isPlayer ? 5 : 20;
+        double tickMultiplier = isPlayer ? 1 : 2;
+        int slowTickRate = (int) Math.min(60 * tickMultiplier, 400);
+        int mediumTickRate = (int) (10 * tickMultiplier * 2);
+        int mediumTickRate2 = (int) (10 * tickMultiplier);
+        int fastTickRate = (int) (5 * tickMultiplier * 2);
 
         if (trait == Temperature.Trait.WORLD)
         {
@@ -903,17 +931,7 @@ public class EntityTempManager
      */
     public static void setAttribute(Temperature.Trait trait, LivingEntity entity, double value)
     {
-        switch (trait)
-        {
-            case WORLD : CSMath.doIfNotNull(entity.getAttribute(ModAttributes.WORLD_TEMPERATURE), att -> att.setBaseValue(value)); break;
-            case BASE  : CSMath.doIfNotNull(entity.getAttribute(ModAttributes.BASE_BODY_TEMPERATURE), att -> att.setBaseValue(value)); break;
-            case HEAT_RESISTANCE : CSMath.doIfNotNull(entity.getAttribute(ModAttributes.HEAT_RESISTANCE), att -> att.setBaseValue(value)); break;
-            case COLD_RESISTANCE : CSMath.doIfNotNull(entity.getAttribute(ModAttributes.COLD_RESISTANCE), att -> att.setBaseValue(value)); break;
-            case HEAT_DAMPENING  : CSMath.doIfNotNull(entity.getAttribute(ModAttributes.HEAT_DAMPENING), att -> att.setBaseValue(value)); break;
-            case COLD_DAMPENING  : CSMath.doIfNotNull(entity.getAttribute(ModAttributes.COLD_DAMPENING), att -> att.setBaseValue(value)); break;
-            case FREEZING_POINT : CSMath.doIfNotNull(entity.getAttribute(ModAttributes.FREEZING_POINT), att -> att.setBaseValue(value)); break;
-            case BURNING_POINT  : CSMath.doIfNotNull(entity.getAttribute(ModAttributes.BURNING_POINT), att -> att.setBaseValue(value)); break;
-        }
+        CSMath.doIfNotNull(getAttribute(trait, entity), att -> att.setBaseValue(value));
     }
 
     /**
@@ -927,6 +945,7 @@ public class EntityTempManager
         {
             case WORLD : return entity.getAttribute(ModAttributes.WORLD_TEMPERATURE);
             case BASE  : return entity.getAttribute(ModAttributes.BASE_BODY_TEMPERATURE);
+            case RATE  : return entity.getAttribute(ModAttributes.TEMP_RATE);
             case FREEZING_POINT  : return entity.getAttribute(ModAttributes.FREEZING_POINT);
             case BURNING_POINT   : return entity.getAttribute(ModAttributes.BURNING_POINT);
             case HEAT_RESISTANCE : return entity.getAttribute(ModAttributes.HEAT_RESISTANCE);
@@ -965,19 +984,10 @@ public class EntityTempManager
 
     public static AttributeModifier makeAttributeModifier(Temperature.Trait trait, double value, AttributeModifier.Operation operation)
     {
-        switch (trait)
-        {
-            case WORLD : return new AttributeModifier("World Temperature Modifier", value, operation);
-            case BASE  : return new AttributeModifier("Base Body Temperature Modifier", value, operation);
-
-            case FREEZING_POINT : return new AttributeModifier("Freezing Point Modifier", value, operation);
-            case BURNING_POINT  : return new AttributeModifier("Burning Point Modifier", value, operation);
-            case HEAT_RESISTANCE : return new AttributeModifier("Heat Resistance Modifier", value, operation);
-            case COLD_RESISTANCE : return new AttributeModifier("Cold Resistance Modifier", value, operation);
-            case HEAT_DAMPENING  : return new AttributeModifier("Heat Dampening Modifier", value, operation);
-            case COLD_DAMPENING  : return new AttributeModifier("Cold Dampening Modifier", value, operation);
-            default : throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("\"" + trait + "\" is not a valid trait!"));
+        if (!trait.isForAttributes())
+        {   throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("\"" + trait + "\" is not a valid trait!"));
         }
+        return new AttributeModifier(String.format("%s temperature modifier", trait.getSerializedName()), value, operation);
     }
 
     public static boolean isTemperatureAttribute(Attribute attribute)

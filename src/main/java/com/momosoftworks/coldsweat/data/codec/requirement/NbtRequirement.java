@@ -7,7 +7,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
 
 import javax.annotation.Nullable;
-
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
@@ -33,21 +32,21 @@ public class NbtRequirement
     {   return tag;
     }
 
-    public boolean test(ItemStack pStack)
-    {   return this.tag.isEmpty() || this.test(pStack.getTag());
+    public boolean test(ItemStack stack)
+    {   return this.tag.isEmpty() || this.test(stack.getTag());
     }
 
-    public boolean test(Entity pEntity)
-    {   return this.tag.isEmpty() || this.test(getEntityTagToCompare(pEntity));
+    public boolean test(Entity entity)
+    {   return this.tag.isEmpty() || this.test(getEntityTagToCompare(entity));
     }
 
-    public boolean test(@Nullable INBT pTag)
+    public boolean test(@Nullable CompoundNBT nbt)
     {
-        if (pTag == null)
+        if (nbt == null)
         {   return this.tag.isEmpty();
         }
         else
-        {   return compareNbt(this.tag, pTag, true);
+        {   return compareNbt(this.tag, nbt, true);
         }
     }
 

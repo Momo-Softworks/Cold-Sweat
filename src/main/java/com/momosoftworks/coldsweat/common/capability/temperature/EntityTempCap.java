@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.common.capability.temperature;
 
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 
@@ -10,8 +11,9 @@ import net.minecraft.entity.player.PlayerEntity;
 public class EntityTempCap extends AbstractTempCap
 {
     @Override
-    public void tickHurting(LivingEntity entity)
-    {}
+    public int getHurtInterval(LivingEntity entity)
+    {   return ConfigSettings.ENTITY_CLIMATES.get().containsKey(entity.getType()) ? 200 : -1;
+    }
 
     @Override
     public void syncValues(LivingEntity entity)

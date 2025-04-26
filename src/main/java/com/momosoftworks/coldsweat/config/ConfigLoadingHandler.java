@@ -270,6 +270,10 @@ public class ConfigLoadingHandler
         Collection<EntityTempData> entityTemps = event.getRegistry(ModRegistries.ENTITY_TEMP_DATA);
         addEntityTempConfigs(entityTemps);
         logRegistryLoaded(String.format("Loaded %s entity temperatures", entityTemps.size()), entityTemps);
+        // entity climates
+        Collection<EntityClimateData> entityClimates = event.getRegistry(ModRegistries.ENTITY_CLIMATE_DATA);
+        addEntityClimateConfigs(entityClimates);
+        logRegistryLoaded(String.format("Loaded %s entity climates", entityClimates.size()), entityClimates);
 
         CreateRegistriesEvent.Post postEvent = new CreateRegistriesEvent.Post(registryAccess, event.getRegistries());
         MinecraftForge.EVENT_BUS.post(postEvent);
@@ -574,6 +578,20 @@ public class ConfigLoadingHandler
             }
             for (EntityType<?> entity : entities)
             {   ConfigSettings.ENTITY_TEMPERATURES.get().put(entity, entityTempData);
+            }
+        });
+    }
+
+    private static void addEntityClimateConfigs(Collection<EntityClimateData> entityTemps)
+    {
+        entityTemps.forEach(entityTempData ->
+        {
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapTaggableList(entityTempData.entity().flatListMap(EntityRequirement::entities)));
+            if (entities.isEmpty())
+            {   entities.add(null);
+            }
+            for (EntityType<?> entity : entities)
+            {   ConfigSettings.ENTITY_CLIMATES.get().put(entity, entityTempData);
             }
         });
     }

@@ -203,7 +203,26 @@ public class ConfigHelper
 
             data.setRegistryType(ConfigData.Type.TOML);
 
-            putRegistryEntries(dataMap, keyRegistry, keyListGetter.apply(data), data);
+            RegistryHelper.mapTaggableList(keyListGetter.apply(data)).forEach(ent -> dataMap.put(ent, data));
+        }
+        // Handle registry removals
+        ConfigLoadingHandler.removeEntries(dataMap.values(), valueRegistry);
+        return dataMap;
+    }
+
+    public static <K extends IForgeRegistryEntry<K>, V extends ConfigData> Map<K, V> parseTomlRegistryUnique(ForgeConfigSpec.ConfigValue<List<? extends List<?>>> config, Function<List<?>, V> tomlParser,
+                                                                                                             Function<V, List<Either<ITag<K>, K>>> keyListGetter,
+                                                                                                             IForgeRegistry<K> keyRegistry, ModRegistries.ConfigRegistry<V> valueRegistry)
+    {
+        Map<K, V> dataMap = new HashMap<>();
+        for (List<?> entry : config.get())
+        {
+            V data = tomlParser.apply(entry);
+            if (data == null) continue;
+
+            data.setRegistryType(ConfigData.Type.TOML);
+
+            RegistryHelper.mapTaggableList(keyListGetter.apply(data)).forEach(ent -> dataMap.put(ent, data));
         }
         // Handle registry removals
         ConfigLoadingHandler.removeEntries(dataMap.values(), valueRegistry);

@@ -27,6 +27,10 @@ public class EntitiesTempModifier extends TempModifier
         // Search for entities in an 8-block radius
         AxisAlignedBB aabb = new AxisAlignedBB(affectedEnt.blockPosition()).move(0, affectedEnt.getBbHeight() / 2 - 0.5, 0).inflate(16);
         List<Entity> entities = affectedEnt.level.getEntities((Entity) null, aabb, e -> true);
+        // Limit tested entities to 10
+        if (entities.size() > 10)
+        {    entities = entities.subList(0, 10);
+        }
 
         Map<EntityTempData, Double> effects = new FastMap<>();
 
