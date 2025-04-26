@@ -82,7 +82,7 @@ public class DepthTempData extends ConfigData
         for (TempRegion region : temperatures)
         {
             if (region.withinBounds(level, pos))
-            {   return region.getTemperature(temperature, pos, level);
+            {   return region.getTemperature(temperature, pos, level, region.top.getHeight(pos, level), region.bottom.getHeight(pos, level));
             }
         }
         return null;
@@ -145,39 +145,16 @@ public class DepthTempData extends ConfigData
                 && pos.getY() >= bottom.getHeight(pos, level);
         }
 
-        public double getTemperature(double temperature, BlockPos pos, Level level)
+        public double getTemperature(double temperature, BlockPos pos, Level level, int topHeight, int bottomHeight)
         {
             double topTemp = Temperature.convert(top.getTemperature(temperature), top.units, Temperature.Units.MC, true);
             double bottomTemp = Temperature.convert(bottom.getTemperature(temperature), bottom.units, Temperature.Units.MC, true);
             return switch (rampType)
             {
-                case CONSTANT ->
-                {   yield pos.getY() <= bottom.getHeight(pos, level) ? bottomTemp : topTemp;
-                }
-                case LINEAR ->
-                {
-                    yield CSMath.blend(bottomTemp,
-                                       topTemp,
-                                       pos.getY(),
-                                       bottom.getHeight(pos, level),
-                                       top.getHeight(pos, level));
-                }
-                case EXPONENTIAL ->
-                {
-                    yield CSMath.blendExp(bottomTemp,
-                                          topTemp,
-                                          pos.getY(),
-                                          bottom.getHeight(pos, level),
-                                          top.getHeight(pos, level));
-                }
-                case LOGARITHMIC ->
-                {
-                    yield CSMath.blendLog(bottomTemp,
-                                          topTemp,
-                                          pos.getY(),
-                                          bottom.getHeight(pos, level),
-                                          top.getHeight(pos, level));
-                }
+                case CONSTANT -> pos.getY() <= bottom.getHeight(pos, level) ? bottomTemp : topTemp;
+                case LINEAR -> CSMath.blend(bottomTemp, topTemp, pos.getY(), bottomHeight, topHeight);
+                case EXPONENTIAL -> CSMath.blendExp(bottomTemp, topTemp, pos.getY(), bottomHeight, topHeight);
+                case LOGARITHMIC -> CSMath.blendLog(bottomTemp, topTemp, pos.getY(), bottomHeight, topHeight);
             };
         }
 

@@ -15,4 +15,6 @@ public class ParticleTypesInit
     public static final RegistryObject<SimpleParticleType> STEAM = PARTICLES.register("steam", () -> new SimpleParticleType(true));
     public static final RegistryObject<SimpleParticleType> GROUND_MIST = PARTICLES.register("ground_mist", () -> new SimpleParticleType(true));
     public static final RegistryObject<SimpleParticleType> MIST = PARTICLES.register("mist", () -> new SimpleParticleType(true));
+    public static final RegistryObject<SimpleParticleType> MOB_COLD = PARTICLES.register("mob_cold", () -> new SimpleParticleType(true));
+    public static final RegistryObject<SimpleParticleType> MOB_HOT = PARTICLES.register("mob_hot", () -> new SimpleParticleType(true));
 }

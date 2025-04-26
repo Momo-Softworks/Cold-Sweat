@@ -141,7 +141,25 @@ public class ConfigHelper
 
             data.setRegistryType(ConfigData.Type.TOML);
 
-            putRegistryEntries(dataMap, keyRegistry, keyListGetter.apply(data), data);
+            RegistryHelper.mapForgeRegistryTagList(keyRegistry, keyListGetter.apply(data)).forEach(ent -> dataMap.put(ent, data));
+        }
+        // Handle registry removals
+        ConfigLoadingHandler.removeEntries(dataMap.values(), valueRegistry);
+        return dataMap;
+    }
+
+    public static <K, V extends ConfigData> Map<K, V> parseTomlRegistryUnique(ForgeConfigSpec.ConfigValue<List<? extends List<?>>> config, Function<List<?>, V> tomlParser, Function<V, List<Either<TagKey<K>, K>>> keyListGetter,
+                                                                              IForgeRegistry<K> keyRegistry, ResourceKey<Registry<V>> valueRegistry)
+    {
+        Map<K, V> dataMap = new HashMap<>();
+        for (List<?> entry : config.get())
+        {
+            V data = tomlParser.apply(entry);
+            if (data == null) continue;
+
+            data.setRegistryType(ConfigData.Type.TOML);
+
+            RegistryHelper.mapForgeRegistryTagList(keyRegistry, keyListGetter.apply(data)).forEach(ent -> dataMap.put(ent, data));
         }
         // Handle registry removals
         ConfigLoadingHandler.removeEntries(dataMap.values(), valueRegistry);
@@ -651,5 +669,20 @@ public class ConfigHelper
                                 obj -> obj.unwrapKey().map(key -> key.location().getNamespace()).orElse("")));
         }
         return mods;
+    }
+
+    public static double doubleArg(List<?> entry, int index)
+    {
+        if (entry.size() <= index)
+        {   ColdSweat.LOGGER.error("Error parsing config: not enough arguments");
+            return 0;
+        }
+        if (entry.get(index) instanceof Number number)
+        {   return number.doubleValue();
+        }
+        else
+        {   ColdSweat.LOGGER.error("Error parsing config: invalid double value \"{}\"", entry.get(index));
+            return 0;
+        }
     }
 }

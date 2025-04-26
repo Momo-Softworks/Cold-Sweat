@@ -9,6 +9,7 @@ import com.momosoftworks.coldsweat.api.util.Temperature.Trait;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
+import com.momosoftworks.coldsweat.data.codec.configuration.EntityClimateData;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModDamageSources;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
@@ -231,7 +232,11 @@ public class AbstractTempCap implements ITemperatureCap
                             // Heat dampening is positive; apply the change as a percentage of the dampening
                             : CSMath.blend(changeBy, 0, heatDampening, 0, 1));
             }
-            rate = Temperature.apply(changeBy, entity, Trait.RATE, this.getModifiers(Trait.RATE));
+            // Apply temp/attribute modifiers
+            rate = this.modifyFromAttribute(entity, Trait.RATE, changeBy);
+            // Apply rate multiplier if entity has climate data
+            rate *= CSMath.getIfNotNull(ConfigSettings.ENTITY_CLIMATES.get().get(entity.getType()), EntityClimateData::rate, 1.0);
+            // Apply the rate to entity's temperature
             newCoreTemp += rate;
         }
 
@@ -332,26 +337,36 @@ public class AbstractTempCap implements ITemperatureCap
         syncTimer = 5;
     }
 
+    public int getHurtInterval(LivingEntity entity)
+    {   return 40;
+    }
+
     public void tickHurting(LivingEntity entity)
     {
         if (isPeacefulMode(entity)) return;
 
-        double bodyTemp = getTrait(Trait.BODY);
-        double heatResistance = getTrait(Trait.HEAT_RESISTANCE);
-        double coldResistance = getTrait(Trait.COLD_RESISTANCE);
+        double bodyTemp = this.getTrait(Trait.BODY);
+        double heatResistance = this.getTrait(Trait.HEAT_RESISTANCE);
+        double coldResistance = this.getTrait(Trait.COLD_RESISTANCE);
         double damage = ConfigSettings.TEMP_DAMAGE.get();
         double rate = this.getTrait(Trait.RATE);
+        int hurtInterval = this.getHurtInterval(entity);
+
+        if (hurtInterval < 1) return;
 
         boolean hasGrace = entity.hasEffect(ModEffects.GRACE);
         boolean hasFireResist = entity.hasEffect(MobEffects.FIRE_RESISTANCE);
         boolean hasIceResist = entity.hasEffect(ModEffects.ICE_RESISTANCE);
 
-        Registry<DamageType> damageTypes = entity.level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE);
+        // Don't damage faster if body temp is equalizing
+        double rateFactor = CSMath.sign(bodyTemp) == CSMath.sign(rate) ? Math.abs(rate) : 0;
+        // Get damage interval based on rate of temp change
+        int rateInterval = (int) CSMath.blend(1, 4, rateFactor, 0, 0.7);
 
-        double extremity = CSMath.blend(-4, 4, rate, -0.7, 0.7);
-        int interval = (int) Math.max(1, CSMath.roundDownNearest(Math.abs(extremity), 1));
-        if (!hasGrace && entity.tickCount % (40 / interval) == 0)
+        if (!hasGrace && entity.tickCount % (hurtInterval / rateInterval) == 0)
         {
+            Registry<DamageType> damageTypes = entity.level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE);
+
             if (bodyTemp >= 100 && !(hasFireResist && ConfigSettings.FIRE_RESISTANCE_ENABLED.get()))
             {
                 DamageSource hot = new DamageSource(damageTypes.getHolderOrThrow(ModDamageSources.HOT));

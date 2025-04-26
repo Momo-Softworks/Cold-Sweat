@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.core.event;
 
 import com.momosoftworks.coldsweat.api.event.core.init.EnableTemperatureEvent;
 import com.momosoftworks.coldsweat.api.event.vanilla.ServerConfigsLoadedEvent;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModAttributes;
 import com.momosoftworks.coldsweat.util.registries.ModEntities;
@@ -39,6 +40,7 @@ public class AddTempAttributes
             event.add(EntityType.PLAYER, ModAttributes.FREEZING_POINT, Double.NaN);
             event.add(EntityType.PLAYER, ModAttributes.BASE_BODY_TEMPERATURE, Double.NaN);
             event.add(EntityType.PLAYER, ModAttributes.WORLD_TEMPERATURE, Double.NaN);
+            event.add(EntityType.PLAYER, ModAttributes.TEMP_RATE, Double.NaN);
         }
     }
 
@@ -97,6 +99,7 @@ public class AddTempAttributes
             builder.add(ModAttributes.FREEZING_POINT, Double.NaN);
             builder.add(ModAttributes.BASE_BODY_TEMPERATURE, Double.NaN);
             builder.add(ModAttributes.WORLD_TEMPERATURE, Double.NaN);
+            builder.add(ModAttributes.TEMP_RATE, Double.NaN);
 
             getForgeAttributes().put(type, builder.build());
         }
@@ -108,7 +111,7 @@ public class AddTempAttributes
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onEnableTemperatureEvent(EnableTemperatureEvent event)
     {
-        if (event.getEntityType() == ModEntities.CHAMELEON)
+        if (event.getEntityType() == ModEntities.CHAMELEON || ConfigSettings.ENTITY_CLIMATES.get().containsKey(event.getEntityType()))
         {   event.setEnabled(true);
         }
     }
