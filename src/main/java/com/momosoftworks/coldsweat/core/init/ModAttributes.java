@@ -13,6 +13,7 @@ public class ModAttributes
 
     public static final DeferredHolder<Attribute, Attribute> WORLD_TEMPERATURE = ATTRIBUTES.register("world_temperature", () -> new RangedAttribute("attribute.world_temperature", Double.NaN, Double.NaN, Double.POSITIVE_INFINITY).setSyncable(true));
     public static final DeferredHolder<Attribute, Attribute> BASE_BODY_TEMPERATURE = ATTRIBUTES.register("base_temperature", () -> new RangedAttribute("attribute.base_temperature", Double.NaN, Double.NaN, Double.POSITIVE_INFINITY).setSyncable(true));
+    public static final DeferredHolder<Attribute, Attribute> TEMP_RATE = ATTRIBUTES.register("temperature_rate", () -> new RangedAttribute("attribute.temperature_rate", Double.NaN, Double.NaN, Double.POSITIVE_INFINITY).setSyncable(true));
 
     public static final DeferredHolder<Attribute, Attribute> BURNING_POINT = ATTRIBUTES.register("burning_point", () -> new RangedAttribute("attribute.burning_point", Double.NaN, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY).setSyncable(true));
     public static final DeferredHolder<Attribute, Attribute> FREEZING_POINT = ATTRIBUTES.register("freezing_point", () -> new RangedAttribute("attribute.freezing_point", Double.NaN, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY).setSyncable(true));

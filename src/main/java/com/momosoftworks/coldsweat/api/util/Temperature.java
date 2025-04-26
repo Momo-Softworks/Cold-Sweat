@@ -458,7 +458,7 @@ public class Temperature
         CORE("core", true, true, false),
         BASE("base", true, true, true),
         BODY("body", false, false, false),
-        RATE("rate", true, true, false),
+        RATE("rate", true, true, true),
 
         FREEZING_POINT("freezing_point", true, true, true),
         BURNING_POINT("burning_point", true, true, true),

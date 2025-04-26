@@ -15,4 +15,6 @@ public class ModParticleTypes
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> STEAM = PARTICLES.register("steam", () -> new SimpleParticleType(true));
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> GROUND_MIST = PARTICLES.register("ground_mist", () -> new SimpleParticleType(true));
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> MIST = PARTICLES.register("mist", () -> new SimpleParticleType(true));
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> MOB_COLD  = PARTICLES.register("mob_cold", () -> new SimpleParticleType(true));
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> MOB_HOT  = PARTICLES.register("mob_hot", () -> new SimpleParticleType(true));
 }

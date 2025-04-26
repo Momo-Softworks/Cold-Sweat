@@ -55,8 +55,9 @@ import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -117,8 +118,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     boolean hasColdFuel = false;
     int insulationLevel = 0;
 
-    boolean isPlayerNearby = false;
-    List<Player> players = new ArrayList<>();
+    boolean isEntityNearby = false;
+    List<LivingEntity> entities = new ArrayList<>();
     int rebuildCooldown = 0;
     boolean forceRebuild = false;
     List<BlockPos> queuedUpdates = new ArrayList<>();
@@ -292,16 +293,19 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
 
         if (rebuildCooldown > 0) rebuildCooldown--;
 
-        // Locate nearby players
+        // Locate nearby entities
         if (this.level != null && this.ticksExisted % 20 == 0)
         {
-            this.isPlayerNearby = false;
-            players.clear();
-            for (Player player : this.level.players())
+            this.isEntityNearby = false;
+            entities.clear();
+            AABB searchArea = new AABB(pos).inflate(this.getMaxRange());
+
+            for (Entity entity : this.level.getEntities((Entity) null, searchArea, EntityTempManager::isTemperatureEnabled))
             {
-                if (player.blockPosition().closerThan(pos, this.getMaxRange()))
-                {   players.add(player);
-                    this.isPlayerNearby = true;
+                if (!(entity instanceof LivingEntity living)) continue;
+                if (living.blockPosition().closerThan(pos, this.getMaxRange()))
+                {   entities.add(living);
+                    this.isEntityNearby = true;
                 }
             }
         }
@@ -333,7 +337,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
             {   insulationLevel++;
             }
 
-            if ((this.shouldUseColdFuel || this.shouldUseHotFuel || (ConfigSettings.SMART_HEARTH.get() && this.isPlayerNearby)))
+            if ((this.shouldUseColdFuel || this.shouldUseHotFuel || (ConfigSettings.SMART_HEARTH.get() && this.isEntityNearby)))
             {
                 // Determine whether particles are enabled
                 if (this.ticksExisted % 20 == 0)
@@ -383,19 +387,19 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                     {   this.resetFuelStatus();
                     }
                     // Provide insulation to players & calculate fuel usage
-                    for (int i = 0; i < players.size(); i++)
+                    for (int i = 0; i < entities.size(); i++)
                     {
-                        Player player = players.get(i);
-                        if (player == null || player instanceof DummyPlayer) continue;
-                        AABB playerBB = player.getBoundingBox().inflate(-0.1);
+                        LivingEntity entity = entities.get(i);
+                        if (entity == null || entity instanceof DummyPlayer) continue;
+                        AABB playerBB = entity.getBoundingBox().inflate(-0.1);
                         // Ensure height is at least 2 blocks tall
                         playerBB = playerBB.setMaxY(Math.max(playerBB.maxY, playerBB.minY + 2));
                         if (this.isAffectingPos(WorldHelper.getOccupiedPositions(playerBB))
                         && !WorldHelper.canSeeSky(level, BlockPos.containing(playerBB.getCenter()), 64))
-                        {   this.insulatePlayer(player);
+                        {   this.insulateEntity(entity);
                         }
                     }
-                    players.clear();
+                    entities.clear();
                 }
 
                 // Drain fuel
@@ -710,36 +714,36 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         }
     }
 
-    void insulatePlayer(Player player)
+    void insulateEntity(LivingEntity entity)
     {
         for (int i = 0; i < effects.size(); i++)
         {
             MobEffectInstance effect = effects.get(i);
-            player.addEffect(new MobEffectInstance(effect.getEffect(),
+            entity.addEffect(new MobEffectInstance(effect.getEffect(),
                                                    effect.getEffect() == MobEffects.NIGHT_VISION
                                                        ? 399
                                                        : 119,
                                                    effect.getAmplifier(), effect.isAmbient(), effect.isVisible(), effect.showIcon()));
         }
 
-        if (!ConfigSettings.SMART_HEARTH.get() || this.shouldInsulatePlayer(player))
+        if (!ConfigSettings.SMART_HEARTH.get() || this.shouldInsulateEntity(entity))
         {
             int maxEffect = this.getMaxInsulationLevel() - 1;
             int effectLevel = (int) Math.min(maxEffect, (insulationLevel / (double) this.getInsulationTime()) * maxEffect);
             if (shouldUseColdFuel)
-            {   player.addEffect(new MobEffectInstance(ModEffects.FRIGIDNESS, 60, effectLevel, false, false, true));
+            {   entity.addEffect(new MobEffectInstance(ModEffects.FRIGIDNESS, 60, effectLevel, false, false, true));
             }
             if (shouldUseHotFuel)
-            {   player.addEffect(new MobEffectInstance(ModEffects.WARMTH, 60, effectLevel, false, false, true));
+            {   entity.addEffect(new MobEffectInstance(ModEffects.WARMTH, 60, effectLevel, false, false, true));
             }
         }
     }
 
-    protected boolean shouldInsulatePlayer(Player player)
+    protected boolean shouldInsulateEntity(LivingEntity entity)
     {
         AtomicBoolean shouldInsulate = new AtomicBoolean(false);
         if (!shouldUseColdFuel || !shouldUseHotFuel)
-        EntityTempManager.getTemperatureCap(player).ifPresent(cap ->
+        EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
         {
             double temp = CSMath.getIfNotNull(Temperature.getModifier(cap, Temperature.Trait.WORLD, ThermalSourceTempModifier.class).orElse(null),
                                               TempModifier::getLastInput,

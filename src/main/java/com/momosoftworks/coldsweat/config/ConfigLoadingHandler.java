@@ -32,7 +32,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -280,6 +279,10 @@ public class ConfigLoadingHandler
         Collection<Holder<EntityTempData>> entityTemps = event.getRegistry(ModRegistries.ENTITY_TEMP_DATA);
         addEntityTempConfigs(entityTemps);
         logRegistryLoaded(String.format("Loaded %s entity temperatures", entityTemps.size()), entityTemps);
+        // entity climates
+        Collection<Holder<EntityClimateData>> entityClimates = event.getRegistry(ModRegistries.ENTITY_CLIMATE_DATA);
+        addEntityClimateConfigs(entityClimates);
+        logRegistryLoaded(String.format("Loaded %s entity climates", entityClimates.size()), entityClimates);
 
         CreateRegistriesEvent.Post postEvent = new CreateRegistriesEvent.Post(registryAccess, event.getRegistries());
         NeoForge.EVENT_BUS.post(postEvent);
@@ -615,6 +618,22 @@ public class ConfigLoadingHandler
             }
             for (EntityType<?> entity : entities)
             {   ConfigSettings.ENTITY_TEMPERATURES.get().put(entity, entityTempData);
+            }
+        });
+    }
+
+    private static void addEntityClimateConfigs(Collection<Holder<EntityClimateData>> entityTemps)
+    {
+        entityTemps.forEach(holder ->
+        {
+            EntityClimateData entityTempData = holder.value();
+
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, entityTempData.entity().flatListMap(EntityRequirement::entities)));
+            if (entities.isEmpty())
+            {   entities.add(null);
+            }
+            for (EntityType<?> entity : entities)
+            {   ConfigSettings.ENTITY_CLIMATES.get().put(entity, entityTempData);
             }
         });
     }

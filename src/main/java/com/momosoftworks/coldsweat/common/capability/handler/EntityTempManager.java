@@ -4,10 +4,10 @@ import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.api.event.vanilla.ContainerChangedEvent;
-import com.momosoftworks.coldsweat.api.event.vanilla.LivingEntityLoadAdditionalEvent;
 import com.momosoftworks.coldsweat.api.event.common.temperautre.TempModifierEvent;
 import com.momosoftworks.coldsweat.api.event.core.init.GatherDefaultTempModifiersEvent;
+import com.momosoftworks.coldsweat.api.event.vanilla.ContainerChangedEvent;
+import com.momosoftworks.coldsweat.api.event.vanilla.LivingEntityLoadAdditionalEvent;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.modifier.*;
 import com.momosoftworks.coldsweat.api.util.Placement;
@@ -16,18 +16,15 @@ import com.momosoftworks.coldsweat.api.util.Placement.Order;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.ModCapabilities;
 import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
-import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.core.init.ModAttributes;
-import com.momosoftworks.coldsweat.core.init.ModBlocks;
-import com.momosoftworks.coldsweat.core.init.ModEffects;
-import com.momosoftworks.coldsweat.core.init.ModItems;
-import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.compat.CompatManager;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.core.event.TaskScheduler;
+import com.momosoftworks.coldsweat.core.init.*;
 import com.momosoftworks.coldsweat.data.codec.configuration.FoodData;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.data.codec.configuration.ItemCarryTempData;
-import com.momosoftworks.coldsweat.data.codec.configuration.MountData;
 import com.momosoftworks.coldsweat.data.codec.configuration.ItemCarryTempData.SlotType;
+import com.momosoftworks.coldsweat.data.codec.configuration.MountData;
 import com.momosoftworks.coldsweat.util.entity.DummyPlayer;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.FastMap;
@@ -38,7 +35,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -193,7 +193,29 @@ public class EntityTempManager
             if (sync.get())
             {   Temperature.updateModifiers(entity, cap);
             }
-            writeData(entity);
+
+            // Spawn particles for uninhabitable entities
+            if (ConfigSettings.ENTITY_CLIMATES.get().containsKey(entity.getType()))
+            {
+                if (entity.tickCount % 15 == 0 && entity.getRandom().nextDouble() < 0.3)
+                {
+                    double worldTemp = cap.getTrait(Temperature.Trait.WORLD);
+                    double entityX = entity.getX();
+                    double entityY = entity.getY() + entity.getBbHeight();
+                    double entityZ = entity.getZ();
+
+                    if (worldTemp < cap.getTrait(Temperature.Trait.FREEZING_POINT))
+                    {
+                        WorldHelper.spawnParticleBatch(entity.level(), ModParticleTypes.MOB_COLD.get(), entityX, entityY, entityZ, 0.5, 0.5, 0.5,
+                                                       entity.getRandom().nextInt(3, 5), 0);
+                    }
+                    else if (worldTemp > cap.getTrait(Temperature.Trait.BURNING_POINT))
+                    {
+                        WorldHelper.spawnParticleBatch(entity.level(), ModParticleTypes.MOB_HOT.get(), entityX, entityY, entityZ, 0.5, 0.5, 0.5,
+                                                       entity.getRandom().nextInt(3, 5), 0);
+                    }
+                }
+            }
         });
     }
 
@@ -251,12 +273,7 @@ public class EntityTempManager
         effectsPerTrait.forEach((trait, temp) ->
         {
             Optional<InventoryItemsTempModifier> modifier = Temperature.getModifier(entity, trait, InventoryItemsTempModifier.class);
-            if (modifier.isEmpty())
-            {   Temperature.addModifier(entity, new InventoryItemsTempModifier(temp), trait, Placement.Duplicates.BY_CLASS);
-            }
-            else
-            {   modifier.get().getNBT().putDouble("Effect", temp);
-            }
+            modifier.ifPresent(mod -> mod.getNBT().putDouble("Effect", temp));
         });
     }
 
@@ -322,15 +339,24 @@ public class EntityTempManager
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void defineDefaultModifiers(GatherDefaultTempModifiersEvent event)
     {
-        // Default TempModifiers for players
         boolean isPlayer = event.getEntity() instanceof Player;
         Temperature.Trait trait = event.getTrait();
 
+        // Use approximations for climate-enabled entities
+        if (ConfigSettings.ENTITY_CLIMATES.get().containsKey(event.getEntity().getType()))
+        {
+            if (trait == Temperature.Trait.WORLD)
+            {   event.addModifier(new EntityClimateTempModifier().tickRate(60));
+            }
+            return;
+        }
+
         // TempModifier tick rate is generally slower for entities than for players
-        int slowTickRate = 60;
-        int mediumTickRate = isPlayer ? 10 : 40;
-        int mediumTickRate2 = isPlayer ? 10 : 20;
-        int fastTickRate = isPlayer ? 5 : 20;
+        double tickMultiplier = isPlayer ? 1 : 2;
+        int slowTickRate = (int) Math.min(60 * tickMultiplier, 400);
+        int mediumTickRate = (int) (10 * tickMultiplier * 2);
+        int mediumTickRate2 = (int) (10 * tickMultiplier);
+        int fastTickRate = (int) (5 * tickMultiplier * 2);
 
         if (trait == Temperature.Trait.WORLD)
         {
@@ -878,17 +904,7 @@ public class EntityTempManager
      */
     public static void setAttribute(Temperature.Trait trait, LivingEntity entity, double value)
     {
-        switch (trait)
-        {
-            case WORLD -> CSMath.doIfNotNull(entity.getAttribute(ModAttributes.WORLD_TEMPERATURE), att -> att.setBaseValue(value));
-            case BASE  -> CSMath.doIfNotNull(entity.getAttribute(ModAttributes.BASE_BODY_TEMPERATURE), att -> att.setBaseValue(value));
-            case HEAT_RESISTANCE -> CSMath.doIfNotNull(entity.getAttribute(ModAttributes.HEAT_RESISTANCE), att -> att.setBaseValue(value));
-            case COLD_RESISTANCE -> CSMath.doIfNotNull(entity.getAttribute(ModAttributes.COLD_RESISTANCE), att -> att.setBaseValue(value));
-            case HEAT_DAMPENING  -> CSMath.doIfNotNull(entity.getAttribute(ModAttributes.HEAT_DAMPENING), att -> att.setBaseValue(value));
-            case COLD_DAMPENING  -> CSMath.doIfNotNull(entity.getAttribute(ModAttributes.COLD_DAMPENING), att -> att.setBaseValue(value));
-            case FREEZING_POINT -> CSMath.doIfNotNull(entity.getAttribute(ModAttributes.FREEZING_POINT), att -> att.setBaseValue(value));
-            case BURNING_POINT  -> CSMath.doIfNotNull(entity.getAttribute(ModAttributes.BURNING_POINT), att -> att.setBaseValue(value));
-        }
+        CSMath.doIfNotNull(getAttribute(trait, entity), att -> att.setBaseValue(value));
     }
 
     /**
@@ -902,6 +918,7 @@ public class EntityTempManager
         {
             case WORLD -> entity.getAttribute(ModAttributes.WORLD_TEMPERATURE);
             case BASE  -> entity.getAttribute(ModAttributes.BASE_BODY_TEMPERATURE);
+            case RATE  -> entity.getAttribute(ModAttributes.TEMP_RATE);
             case FREEZING_POINT  -> entity.getAttribute(ModAttributes.FREEZING_POINT);
             case BURNING_POINT   -> entity.getAttribute(ModAttributes.BURNING_POINT);
             case HEAT_RESISTANCE -> entity.getAttribute(ModAttributes.HEAT_RESISTANCE);
@@ -940,19 +957,10 @@ public class EntityTempManager
 
     public static AttributeModifier makeAttributeModifier(Temperature.Trait trait, double value, AttributeModifier.Operation operation)
     {
-        return switch (trait)
-        {
-            case WORLD -> new AttributeModifier(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "world_temp_modifier"), value, operation);
-            case BASE  -> new AttributeModifier(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "base_temp_modifier"), value, operation);
-
-            case FREEZING_POINT -> new AttributeModifier(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "freezing_point_modifier"), value, operation);
-            case BURNING_POINT  -> new AttributeModifier(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "burning_point_modifier"), value, operation);
-            case HEAT_RESISTANCE -> new AttributeModifier(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "heat_resistance_modifier"), value, operation);
-            case COLD_RESISTANCE -> new AttributeModifier(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "cold_resistance_modifier"), value, operation);
-            case HEAT_DAMPENING  -> new AttributeModifier(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "heat_dampening_modifier"), value, operation);
-            case COLD_DAMPENING  -> new AttributeModifier(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "cold_dampening_modifier"), value, operation);
-            default -> throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("\"" + trait + "\" is not a valid trait!"));
-        };
+        if (!trait.isForAttributes())
+        {   throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("\"" + trait + "\" is not a valid trait!"));
+        }
+        return new AttributeModifier(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, trait.getSerializedName() + "_modifier"), value, operation);
     }
 
     public static boolean isTemperatureAttribute(Holder<Attribute> attribute)
