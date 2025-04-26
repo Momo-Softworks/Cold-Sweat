@@ -43,5 +43,7 @@ public class ParticleUtil
         event.register(ParticleTypesInit.STEAM.get(), VaporParticle.SteamFactory::new);
         event.register(ParticleTypesInit.GROUND_MIST.get(), VaporParticle.GroundMistFactory::new);
         event.register(ParticleTypesInit.MIST.get(), VaporParticle.MistFactory::new);
+        event.register(ParticleTypesInit.MOB_COLD.get(), EntityTempParticle.Factory::new);
+        event.register(ParticleTypesInit.MOB_HOT.get(), EntityTempParticle.Factory::new);
     }
 }
