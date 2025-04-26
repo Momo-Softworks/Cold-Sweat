@@ -45,5 +45,7 @@ public class ParticleUtil
         Minecraft.getInstance().particleEngine.register(ParticleTypesInit.STEAM.get(), VaporParticle.SteamFactory::new);
         Minecraft.getInstance().particleEngine.register(ParticleTypesInit.MIST.get(), VaporParticle.MistFactory::new);
         Minecraft.getInstance().particleEngine.register(ParticleTypesInit.GROUND_MIST.get(), VaporParticle.GroundMistFactory::new);
+        Minecraft.getInstance().particleEngine.register(ParticleTypesInit.MOB_COLD.get(), EntityTempParticle.Factory::new);
+        Minecraft.getInstance().particleEngine.register(ParticleTypesInit.MOB_HOT.get(), EntityTempParticle.Factory::new);
     }
 }

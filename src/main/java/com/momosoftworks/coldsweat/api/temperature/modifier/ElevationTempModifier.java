@@ -6,8 +6,8 @@ import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.BiomeTempData;
 import com.momosoftworks.coldsweat.data.codec.configuration.DepthTempData;
+import com.momosoftworks.coldsweat.data.codec.configuration.DimensionTempData;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
@@ -16,7 +16,6 @@ import net.minecraft.world.level.LightLayer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 
 public class ElevationTempModifier extends TempModifier
@@ -33,13 +32,18 @@ public class ElevationTempModifier extends TempModifier
     @Override
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
-        if (entity.level.dimensionType().hasCeiling()) return temp -> temp;
-
         Level level = entity.level;
 
-        List<Pair<BlockPos, Double>> depthTable = new ArrayList<>();
+        // If a dimension temperature override is defined, return
+        DimensionTempData dimTempOverride = ConfigSettings.DIMENSION_TEMPS.get(entity.level.registryAccess()).get(level.dimensionTypeRegistration());
+        if (dimTempOverride != null)
+        {   return temp -> temp + dimTempOverride.getTemperature();
+        }
+        // Don't calculate elevation for roofed dimensions
+        if (level.dimensionType().hasCeiling()) return temp -> temp;
 
         // Collect a list of depths taken at regular intervals around the entity, and their distances from the player
+        List<Pair<BlockPos, Double>> depthTable = new ArrayList<>();
         for (BlockPos pos : WorldHelper.getPositionGrid(entity.blockPosition(), this.getNBT().getInt("Samples"), 10))
         {
             depthTable.add(Pair.of(pos, CSMath.getDistance(entity.blockPosition(), pos)));
@@ -50,7 +54,7 @@ public class ElevationTempModifier extends TempModifier
                                  : entity.blockPosition();
         int skylight = entity.level.getBrightness(LightLayer.SKY, translatedPos);
 
-        Map<Pair<BlockPos, BlockPos>, Pair<DepthTempData.TempRegion, Double>> depthRegions = new FastMap<>();
+        List<Pair<Elevation, RegionEntry>> depthRegions = new ArrayList<>(depthTable.size());
 
         for (Pair<BlockPos, Double> pair : depthTable)
         {
@@ -69,36 +73,59 @@ public class ElevationTempModifier extends TempModifier
                 {
                     DepthTempData.TempRegion region = data.getRegion(level, pos);
                     if (region == null) continue;
-                    depthRegions.put(Pair.of(pos, originalPos), Pair.of(region, distance));
+                    int regionMax = region.top().getHeight(pos, level);
+                    int regionMin = region.bottom().getHeight(pos, level);
+                    depthRegions.add(Pair.of(new Elevation(pos, originalPos), new RegionEntry(region, distance, regionMin, regionMax)));
                     break findRegion;
                 }
-                depthRegions.put(Pair.of(pos, originalPos), Pair.of(null, distance));
+                depthRegions.add(Pair.of(new Elevation(pos, originalPos), new RegionEntry(null, distance, 0, 0)));
             }
         }
         double midTemp = Temperature.getNeutralWorldTemp(entity);
+
+        DimensionTempData dimTempOffsetConf = ConfigSettings.DIMENSION_OFFSETS.get(entity.level.registryAccess()).get(level.dimensionTypeRegistration());
+        double dimOffset = dimTempOffsetConf != null ? dimTempOffsetConf.getTemperature() : 0;
 
         return temp ->
         {
             List<Pair<Double, Double>> depthTemps = new ArrayList<>();
 
-            for (Map.Entry<Pair<BlockPos, BlockPos>, Pair<DepthTempData.TempRegion, Double>> entry : depthRegions.entrySet())
+            for (Pair<Elevation, RegionEntry> entry : depthRegions)
             {
+                Elevation elevation = entry.getFirst();
+                RegionEntry regionEntry = entry.getSecond();
                 // Only use light for hot environments
-                BlockPos pos;
-                if (temp >= midTemp) pos = entry.getKey().getFirst();
-                else pos = entry.getKey().getSecond();
+                BlockPos pos = temp >= midTemp
+                               ? elevation.lightPos()
+                               : elevation.pos();
                 // Get the region and distance
-                DepthTempData.TempRegion region = entry.getValue().getFirst();
-                double distance = entry.getValue().getSecond();
+                DepthTempData.TempRegion region = regionEntry.region();
+                if (region != null)
+                {
+                    double distance = regionEntry.distance();
+                    int maxY = regionEntry.maxY();
+                    int minY = regionEntry.minY();
 
-                double depthTemp = CSMath.getIfNotNull(region, reg -> reg.getTemperature(temp, pos, level), temp);
-                double weight = 1 / (distance / 10 + 1);
-                // Add the weighted temperature to the list
-                depthTemps.add(new Pair<>(depthTemp, weight));
+                    double depthTemp = region.getTemperature(temp, pos, level, maxY, minY);
+                    double weight = 1 / (distance / 10 + 1);
+                    // Add the weighted temperature to the list
+                    depthTemps.add(new Pair<>(depthTemp, weight));
+                }
             }
-            if (depthTemps.isEmpty()) return temp;
+            if (depthTemps.isEmpty())
+            {   return temp;
+            }
             // Calculate the weighted average of the depth temperatures
             return CSMath.weightedAverage(depthTemps);
         };
     }
+
+    private record RegionEntry(DepthTempData.TempRegion region, double distance, int minY, int maxY)
+    {}
+
+    /**
+     * Stores a BlockPos (pos) and the BlockPos after being offset by the light level (lightPos).
+     */
+    private record Elevation(BlockPos lightPos, BlockPos pos)
+    {}
 }

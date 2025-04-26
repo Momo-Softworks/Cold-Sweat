@@ -19,11 +19,15 @@ public class EntitySettingsConfig
     private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> INSULATED_MOUNTS;
+
     public static final ForgeConfigSpec.ConfigValue<List<?>> GOAT_FUR_GROWTH_STATS;
     public static final ForgeConfigSpec.ConfigValue<List<?>> CHAMELEON_SHED_STATS;
+
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> CHAMELEON_SPAWN_BIOMES;
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> GOAT_SPAWN_BIOMES;
+
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> ENTITY_TEMPERATURES;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> ENTITY_CLIMATES;
 
     static
     {
@@ -56,6 +60,33 @@ public class EntitySettingsConfig
                       && list.get(1) instanceof Number
                       && list.get(2) instanceof Number
                       && (list.size() < 4 || list.get(3) instanceof String));
+
+        ENTITY_CLIMATES = BUILDER
+                .comment("Defines entities that are affected by temperature and the climates they can live in",
+                         "Format: [[\"entity_id\", min_temp, max_temp, *rate, *units], [\"entity_id\", min_temp, max_temp, *rate, *units], etc...]",
+                         "min_temp: The minimum livable temperature, as an offset to the minimum temperature for players",
+                         "max_temp: The maximum livable temperature, as an offset to the maximum temperature for players",
+                         "rate: (Optional) A multiplier to the rate at which the entity overheats or freezes, based on players' rate",
+                         "units: (Optional) The units used for the min/max temperature values (MC, F, or C). Defaults to MC")
+                .defineListAllowEmpty(List.of("Entity Climate Settings"), () -> Arrays.asList(
+                        List.of("minecraft:chicken", 10, 10, 0.6, "F"),
+                        List.of("minecraft:pig", 0, 0, 0.5, "F"),
+                        List.of("minecraft:cow", 0, 10, 0.2, "F"),
+                        List.of("minecraft:mooshroom", 10, 20, 0.2, "F"),
+                        List.of("minecraft:sheep", -20, -10, 0.3, "F"),
+                        List.of("minecraft:goat", -40, -15, 0.4, "F"),
+                        List.of("minecraft:horse", -5, 10, 0.3, "F"),
+                        List.of("minecraft:donkey", -5, 10, 0.3, "F"),
+                        List.of("minecraft:mule", -5, 10, 0.3, "F"),
+                        List.of("minecraft:llama", -10, 0, 0.4, "F")
+                ),
+                it -> it instanceof List<?> list
+                      && list.size() >= 3
+                      && list.get(0) instanceof String
+                      && list.get(1) instanceof Number
+                      && list.get(2) instanceof Number
+                      && (list.size() < 4 || list.get(3) instanceof Number)
+                      && (list.size() < 5 || list.get(4) instanceof String));
 
         BUILDER.pop();
 

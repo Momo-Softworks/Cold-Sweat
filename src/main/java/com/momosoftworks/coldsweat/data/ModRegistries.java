@@ -36,6 +36,7 @@ public class ModRegistries
     public static final ResourceKey<Registry<MountData>> MOUNT_DATA = createRegistry(ResourceKey.createRegistryKey(new ResourceLocation(ColdSweat.MOD_ID, "entity/mount")), MountData.CODEC, MountData.class);
     public static final ResourceKey<Registry<SpawnBiomeData>> ENTITY_SPAWN_BIOME_DATA = createRegistry(ResourceKey.createRegistryKey(new ResourceLocation(ColdSweat.MOD_ID, "entity/spawn_biome")), SpawnBiomeData.CODEC, SpawnBiomeData.class);
     public static final ResourceKey<Registry<EntityTempData>> ENTITY_TEMP_DATA = createRegistry(ResourceKey.createRegistryKey(new ResourceLocation(ColdSweat.MOD_ID, "entity/entity_temp")), EntityTempData.CODEC, EntityTempData.class);
+    public static final ResourceKey<Registry<EntityClimateData>> ENTITY_CLIMATE_DATA = createRegistry(ResourceKey.createRegistryKey(new ResourceLocation(ColdSweat.MOD_ID, "entity/climate")), EntityClimateData.CODEC, EntityClimateData.class);
 
     // Special registries
     public static final ResourceKey<Registry<RemoveRegistryData<?>>> REMOVE_REGISTRY_DATA = createRegistry(ResourceKey.createRegistryKey(new ResourceLocation(ColdSweat.MOD_ID, "remove")), RemoveRegistryData.CODEC, (Class) RemoveRegistryData.class);

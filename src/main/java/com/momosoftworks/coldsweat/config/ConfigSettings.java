@@ -13,7 +13,6 @@ import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.config.spec.*;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
-import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
@@ -49,6 +48,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.apache.logging.log4j.util.TriConsumer;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -180,6 +180,7 @@ public class ConfigSettings
     public static final DynamicHolder<Multimap<Holder<Biome>, SpawnBiomeData>> ENTITY_SPAWN_BIOMES;
     public static final DynamicHolder<Multimap<EntityType<?>, MountData>> INSULATED_MOUNTS;
     public static final DynamicHolder<Multimap<EntityType<?>, EntityTempData>> ENTITY_TEMPERATURES;
+    public static final DynamicHolder<Map<EntityType<?>, EntityClimateData>> ENTITY_CLIMATES;
 
     // Misc Settings
     public static final DynamicHolder<Double> INSULATION_STRENGTH;
@@ -677,6 +678,19 @@ public class ConfigSettings
                                                                                              ForgeRegistries.ENTITIES, ModRegistries.ENTITY_TEMP_DATA);
             holder.get().putAll(dataMap);
         });
+
+        ENTITY_CLIMATES = addSyncedSetting("entity_climates", HashMap::new, holder ->
+        {
+            Map<EntityType<?>, EntityClimateData> dataMap = ConfigHelper.parseTomlRegistryUnique(EntitySettingsConfig.ENTITY_CLIMATES,
+                                                                                                 EntityClimateData::fromToml,
+                                                                                                 data -> data.entity().flatListMap(EntityRequirement::entities),
+                                                                                                 ForgeRegistries.ENTITIES, ModRegistries.ENTITY_CLIMATE_DATA);
+            holder.get().putAll(dataMap);
+        },
+        (encoder) -> ConfigHelper.serializeRegistry(encoder, "TempAffectedEntities", Registry.ENTITY_TYPE_REGISTRY, ModRegistries.ENTITY_CLIMATE_DATA, item -> ForgeRegistries.ENTITIES.getKey(item)),
+        (decoder) -> ConfigHelper.deserializeRegistry(decoder, "TempAffectedEntities", ModRegistries.ENTITY_CLIMATE_DATA, rl -> ForgeRegistries.ENTITIES.getValue(rl)),
+        (saver) -> {},
+        SyncType.ONE_WAY);
 
         BLOCK_RANGE = addSyncedSetting("block_range", () -> 7, holder -> holder.set(WorldSettingsConfig.MAX_BLOCK_TEMP_RANGE.get()),
         (encoder) -> ConfigHelper.serializeNbtInt(encoder, "BlockRange"),
