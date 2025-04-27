@@ -97,7 +97,7 @@ public record BlockRequirement(List<Either<TagKey<Block>, Block>> blocks, StateR
 
     public record StateRequirement(Map<String, Object> properties)
     {
-        public static final Codec<StateRequirement> CODEC = Codec.unboundedMap(Codec.STRING, ExtraCodecs.anyOf(Codec.BOOL, Codec.INT, Codec.STRING, IntegerBounds.CODEC))
+        public static final Codec<StateRequirement> CODEC = Codec.unboundedMap(Codec.STRING, ExtraCodecs.anyOf(IntegerBounds.CODEC, Codec.BOOL, Codec.STRING, Codec.STRING.listOf()))
                                                                  .xmap(StateRequirement::new, StateRequirement::properties);
 
         public static final StateRequirement NONE = new StateRequirement(new HashMap<>());
@@ -127,6 +127,26 @@ public record BlockRequirement(List<Either<TagKey<Block>, Block>> blocks, StateR
                     if (!property.getPossibleValues().contains(bounds.min())
                     || !property.getPossibleValues().contains(bounds.max())
                     || !bounds.test((Integer) state.getValue(property)))
+                    {   return false;
+                    }
+                }
+                else if (value instanceof List<?> list)
+                {
+                    if (list.isEmpty())
+                    {   return true;
+                    }
+                    for (Object val : list)
+                    {
+                        if (state.getValue(property).toString().equals(val.toString()))
+                        {   return true;
+                        }
+                    }
+                    return false;
+                }
+                else if (value instanceof Boolean bool)
+                {
+                    if (!property.getPossibleValues().contains(bool)
+                    || !state.getValue(property).equals(bool))
                     {   return false;
                     }
                 }
