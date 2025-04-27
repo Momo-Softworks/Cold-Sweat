@@ -96,16 +96,15 @@ public class NBTHelper
     public static int incrementTag(Object owner, String key, int amount, Predicate<Integer> predicate)
     {
         CompoundTag tag;
-        if (owner instanceof Entity entity)
-        {   tag = entity.getPersistentData();
+        switch (owner)
+        {
+            case Entity entity -> tag = entity.getPersistentData();
+            case ItemStack stack -> tag = stack.get(DataComponents.CUSTOM_DATA).copyTag();
+            case BlockEntity blockEntity -> tag = blockEntity.getPersistentData();
+            case null, default ->
+            {   return 0;
+            }
         }
-        else if (owner instanceof ItemStack stack)
-        {   tag = stack.get(DataComponents.CUSTOM_DATA).copyTag();
-        }
-        else if (owner instanceof BlockEntity blockEntity)
-        {   tag = blockEntity.getPersistentData();
-        }
-        else return 0;
 
         int value = tag.getInt(key);
         if (predicate.test(value))
@@ -122,7 +121,7 @@ public class NBTHelper
      * Gets an item's tag, without creating a new one if it is not present.<br>
      * An empty {@link CompoundTag} will be returned in that case, so a null check will not be necessary.<br>
      * <br>
-     * Use the item's data component directly if you need to write to the tag.<br>
+     * Use {@link NBTHelper#getOrCreateTag(ItemStack)} if you need to write to the tag.<br>
      * @return The item's tag, or an empty tag if it is not present
      */
     public static CompoundTag getTagOrEmpty(ItemStack stack)
@@ -230,64 +229,36 @@ public class NBTHelper
     @Nullable
     public static Object getValue(Tag tag)
     {
-        if (tag instanceof IntTag integer)
-        {   return integer.getAsInt();
-        }
-        else if (tag instanceof FloatTag floating)
-        {   return floating.getAsFloat();
-        }
-        else if (tag instanceof DoubleTag doubleTag)
-        {   return doubleTag.getAsDouble();
-        }
-        else if (tag instanceof LongTag longTag)
-        {   return longTag.getAsLong();
-        }
-        else if (tag instanceof ShortTag shortTag)
-        {   return shortTag.getAsShort();
-        }
-        else if (tag instanceof ByteTag byteTag)
-        {   return byteTag.getAsByte();
-        }
-        else if (tag instanceof ByteArrayTag byteArray)
-        {   return byteArray.getAsString();
-        }
-        else if (tag instanceof IntArrayTag intArray)
-        {   return intArray.getAsIntArray();
-        }
-        else if (tag instanceof LongArrayTag longArray)
-        {   return longArray.getAsLongArray();
-        }
-        else if (tag instanceof StringTag string)
-        {   return string.getAsString();
-        }
-        return null;
+        return switch (tag)
+        {
+            case IntTag integer -> integer.getAsInt();
+            case FloatTag floating -> floating.getAsFloat();
+            case DoubleTag doubleTag -> doubleTag.getAsDouble();
+            case LongTag longTag -> longTag.getAsLong();
+            case ShortTag shortTag -> shortTag.getAsShort();
+            case ByteTag byteTag -> byteTag.getAsByte();
+            case ByteArrayTag byteArray -> byteArray.getAsString();
+            case IntArrayTag intArray -> intArray.getAsIntArray();
+            case LongArrayTag longArray -> longArray.getAsLongArray();
+            case StringTag string -> string.getAsString();
+            case null, default -> null;
+        };
     }
 
     @Nullable
     public static Tag writeValue(Object obj)
     {
-        if (obj instanceof Integer integer)
-        {   return IntTag.valueOf(integer);
-        }
-        else if (obj instanceof Float floating)
-        {   return FloatTag.valueOf(floating);
-        }
-        else if (obj instanceof Double doubleTag)
-        {   return DoubleTag.valueOf(doubleTag);
-        }
-        else if (obj instanceof Long longTag)
-        {   return LongTag.valueOf(longTag);
-        }
-        else if (obj instanceof Short shortTag)
-        {   return ShortTag.valueOf(shortTag);
-        }
-        else if (obj instanceof Byte byteTag)
-        {   return ByteTag.valueOf(byteTag);
-        }
-        else if (obj instanceof String string)
-        {   return StringTag.valueOf(string);
-        }
-        return null;
+        return switch (obj)
+        {
+            case Integer integer -> IntTag.valueOf(integer);
+            case Float floating -> FloatTag.valueOf(floating);
+            case Double doubleTag -> DoubleTag.valueOf(doubleTag);
+            case Long longTag -> LongTag.valueOf(longTag);
+            case Short shortTag -> ShortTag.valueOf(shortTag);
+            case Byte byteTag -> ByteTag.valueOf(byteTag);
+            case String string -> StringTag.valueOf(string);
+            case null, default -> null;
+        };
     }
 
     public static class ItemMutator
