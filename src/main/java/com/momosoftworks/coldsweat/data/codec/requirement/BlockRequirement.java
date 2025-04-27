@@ -25,23 +25,21 @@ import net.minecraft.world.level.material.FluidState;
 import java.util.*;
 
 public record BlockRequirement(List<Either<TagKey<Block>, Block>> blocks, StateRequirement state,
-                               NbtRequirement nbt, List<Direction> sturdyFaces,
-                               Optional<Boolean> withinWorldBounds, Optional<Boolean> replaceable)
+                               NbtRequirement nbt, List<Direction> sturdyFaces, Optional<Boolean> replaceable)
 {
-    public static final BlockRequirement NONE = new BlockRequirement(List.of(), StateRequirement.NONE, NbtRequirement.NONE, List.of(), Optional.empty(), Optional.empty());
+    public static final BlockRequirement NONE = new BlockRequirement(List.of(), StateRequirement.NONE, NbtRequirement.NONE, List.of(), Optional.empty());
 
     public static final Codec<BlockRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ConfigHelper.tagOrBuiltinCodec(Registries.BLOCK, BuiltInRegistries.BLOCK).listOf().optionalFieldOf("blocks", List.of()).forGetter(predicate -> predicate.blocks),
             StateRequirement.CODEC.optionalFieldOf("state", StateRequirement.NONE).forGetter(predicate -> predicate.state),
             NbtRequirement.CODEC.optionalFieldOf("nbt", NbtRequirement.NONE).forGetter(predicate -> predicate.nbt),
             Direction.CODEC.listOf().optionalFieldOf("sturdy_faces", List.of()).forGetter(predicate -> predicate.sturdyFaces),
-            Codec.BOOL.optionalFieldOf("within_world_bounds").forGetter(predicate -> predicate.withinWorldBounds),
             Codec.BOOL.optionalFieldOf("replaceable").forGetter(predicate -> predicate.replaceable)
     ).apply(instance, BlockRequirement::new));
 
     public BlockRequirement(List<Either<TagKey<Block>, Block>> blocks)
     {
-        this(blocks, StateRequirement.NONE, NbtRequirement.NONE, List.of(), Optional.empty(), Optional.empty());
+        this(blocks, StateRequirement.NONE, NbtRequirement.NONE, List.of(), Optional.empty());
     }
 
     public boolean test(Level level, BlockPos pos, BlockState state)
@@ -63,9 +61,6 @@ public record BlockRequirement(List<Either<TagKey<Block>, Block>> blocks, StateR
         }
         if (!this.sturdyFaces.isEmpty() && this.sturdyFaces.stream().noneMatch(face -> state.isFaceSturdy(level, pos, face)))
         {   return false;
-        }
-        if (this.withinWorldBounds.isPresent())
-        {   return level.getWorldBorder().isWithinBounds(pos);
         }
         if (this.replaceable.isPresent())
         {   return state.isAir() || state.canBeReplaced();
@@ -97,7 +92,6 @@ public record BlockRequirement(List<Either<TagKey<Block>, Block>> blocks, StateR
             && state.equals(that.state)
             && nbt.equals(that.nbt)
             && sturdyFaces.equals(that.sturdyFaces)
-            && withinWorldBounds.equals(that.withinWorldBounds)
             && replaceable.equals(that.replaceable);
     }
 
