@@ -300,7 +300,7 @@ public class ModRegistriesEventJS implements KubeStartupEvent
         if (entityClimateJS.entityPredicate.isEmpty())
         {   entityClimateJS.entityPredicate.add(new EntityRequirement(Collections.singleton(null), null), false);
         }
-        for (EntityType<?> item : RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITY_TYPES, entityClimateJS.entityPredicate.flatListMap(EntityRequirement::entities)))
+        for (EntityType<?> item : RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, entityClimateJS.entityPredicate.flatListMap(EntityRequirement::entities)))
         {   ConfigSettings.ENTITY_CLIMATES.get().put(item, entityClimateData);
         }
     }
