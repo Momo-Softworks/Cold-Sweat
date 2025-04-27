@@ -287,6 +287,25 @@ public class ModRegistriesEventJS implements KubeStartupEvent
     }
 
     /*
+     Entity Climate
+     */
+
+    public void addEntityClimate(Consumer<EntityClimateBuilderJS> builder)
+    {
+        EntityClimateBuilderJS entityClimateJS = new EntityClimateBuilderJS();
+        builder.accept(entityClimateJS);
+        EntityClimateData entityClimateData = entityClimateJS.build();
+        if (!entityClimateData.areRequiredModsLoaded()) return;
+
+        if (entityClimateJS.entityPredicate.isEmpty())
+        {   entityClimateJS.entityPredicate.add(new EntityRequirement(Collections.singleton(null), null), false);
+        }
+        for (EntityType<?> item : RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITY_TYPES, entityClimateJS.entityPredicate.flatListMap(EntityRequirement::entities)))
+        {   ConfigSettings.ENTITY_CLIMATES.get().put(item, entityClimateData);
+        }
+    }
+
+    /*
      Insulating Mounts
      */
 
