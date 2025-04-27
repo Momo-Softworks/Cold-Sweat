@@ -29,8 +29,8 @@
         "items": [
           "create:netherite_backtank"
         ],
-        "nbt": {
-          "Air": "1-9999"
+        "components": {
+          "create:air": "1-9999"
         }
       },
       "legs": {
