@@ -4,15 +4,12 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
-import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
-import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
+import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
+import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.fluid.FluidState;
-import net.minecraft.item.DirectionalPlaceContext;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.state.Property;
 import net.minecraft.state.StateContainer;
@@ -148,7 +145,7 @@ public class BlockRequirement
         {   this.properties = properties;
         }
 
-        public static final Codec<StateRequirement> CODEC = Codec.unboundedMap(Codec.STRING, ExtraCodecs.anyOf(Codec.BOOL, Codec.INT, Codec.STRING, IntegerBounds.CODEC))
+        public static final Codec<StateRequirement> CODEC = Codec.unboundedMap(Codec.STRING, ExtraCodecs.anyOf(IntegerBounds.CODEC, Codec.BOOL, Codec.STRING, Codec.STRING.listOf()))
                                                                  .xmap(StateRequirement::new, req -> req.properties);
 
         public static final StateRequirement NONE = new StateRequirement(new HashMap<>());
@@ -179,6 +176,28 @@ public class BlockRequirement
                     if (!property.getPossibleValues().contains(bounds.min)
                     || !property.getPossibleValues().contains(bounds.max)
                     || !bounds.test((Integer) state.getValue(property)))
+                    {   return false;
+                    }
+                }
+                else if (value instanceof List<?>)
+                {
+                    List<?> list = (List<?>) value;
+                    if (list.isEmpty())
+                    {   return true;
+                    }
+                    for (Object val : list)
+                    {
+                        if (state.getValue(property).toString().equals(val.toString()))
+                        {   return true;
+                        }
+                    }
+                    return false;
+                }
+                else if (value instanceof Boolean)
+                {
+                    Boolean bool = (Boolean) value;
+                    if (!property.getPossibleValues().contains(bool)
+                    || !state.getValue(property).equals(bool))
                     {   return false;
                     }
                 }
