@@ -111,12 +111,6 @@ public class ModCreativeTabs
         InsulatorTabBuildEvent event = new InsulatorTabBuildEvent(list);
         NeoForge.EVENT_BUS.post(event);
 
-        return event.getItems().stream().map(entry ->
-        {
-            ItemStack stack = new ItemStack(entry.getKey());
-            DataComponentPatch components = new PatchedDataComponentMap(entry.getValue().item().flatMap(req -> req.components().components(), DataComponentMap::composite).orElse(DataComponentMap.builder().build())).asPatch();
-            stack.applyComponents(components);
-            return stack;
-        }).toList();
+        return event.getItems().stream().map(entry -> new ItemStack(entry.getKey())).toList();
     }
 }
