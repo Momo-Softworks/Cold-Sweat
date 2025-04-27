@@ -548,7 +548,7 @@ public class Temperature
                 if (unit.getSerializedName().equals(lowercase))
                     return unit;
             }
-            return null;
+            throw new IllegalArgumentException("Invalid temperature unit: " + id);
         }
 
         public String getFormattedName()
