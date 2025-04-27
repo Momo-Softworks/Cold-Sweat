@@ -45,6 +45,10 @@ public class KubeBindings
         }
     }
 
+    public double convertTemperature(double temperature, String from, String to, boolean absolute)
+    {   return Temperature.convert(temperature, Temperature.Units.fromID(from), Temperature.Units.fromID(to), absolute);
+    }
+
     @Nullable
     public TempModifier createModifier(String id)
     {   return TempModifierRegistry.getValue(ResourceLocation.parse(id)).orElse(null);
