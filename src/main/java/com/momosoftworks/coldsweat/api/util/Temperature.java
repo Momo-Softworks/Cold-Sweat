@@ -112,6 +112,8 @@ public class Temperature
      */
     public static double apply(double currentTemp, LivingEntity entity, Trait trait, boolean ignoreTickMultiplier, TempModifier... modifiers)
     {
+        if (modifiers.length == 0) return currentTemp;
+
         double temp2 = currentTemp;
         for (TempModifier modifier : modifiers)
         {
@@ -433,12 +435,11 @@ public class Temperature
     }
 
     public static EnumMap<Trait, List<TempModifier>> getModifiers(LivingEntity entity)
-    {
-        EnumMap<Trait, List<TempModifier>> map = new EnumMap<>(Trait.class);
-        for (Trait trait : EntityTempManager.VALID_MODIFIER_TRAITS)
-        {   map.put(trait, getModifiers(entity, trait));
-        }
-        return map;
+    {   return EntityTempManager.getTemperatureCap(entity).map(ITemperatureCap::getModifiers).orElseGet(() -> new EnumMap<>(Trait.class));
+    }
+
+    public static void clearModifiers(LivingEntity entity, Trait trait)
+    {   EntityTempManager.getTemperatureCap(entity).ifPresent(cap -> cap.clearModifiers(trait));
     }
 
     /**
