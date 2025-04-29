@@ -26,7 +26,7 @@
                 "condition": "minecraft:block_state_property",
                 "block": "cold_sweat:soul_stalk",
                 "properties": {
-                  "section": "0"
+                  "section": "base"
                 }
               }
             },
@@ -36,7 +36,17 @@
                 "condition": "minecraft:block_state_property",
                 "block": "cold_sweat:soul_stalk",
                 "properties": {
-                  "section": "3"
+                  "section": "top"
+                }
+              }
+            },
+            {
+              "condition": "minecraft:inverted",
+              "term": {
+                "condition": "minecraft:block_state_property",
+                "block": "cold_sweat:soul_stalk",
+                "properties": {
+                  "section": "bud"
                 }
               }
             }
@@ -58,14 +68,14 @@
                   "condition": "minecraft:block_state_property",
                   "block": "cold_sweat:soul_stalk",
                   "properties": {
-                    "section": "2"
+                    "section": "bud"
                   }
                 },
                 {
                   "condition": "minecraft:block_state_property",
                   "block": "cold_sweat:soul_stalk",
                   "properties": {
-                    "section": "3"
+                    "section": "top"
                   }
                 }
               ]
