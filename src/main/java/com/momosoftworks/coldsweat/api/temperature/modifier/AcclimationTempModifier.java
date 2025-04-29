@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.api.temperature.modifier;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.util.entity.DummyPlayer;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -14,7 +15,7 @@ public class AcclimationTempModifier extends TempModifier
     @Override
     protected Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
-        if (entity instanceof PlayerEntity && ((PlayerEntity) entity).isCreative())
+        if (entity instanceof DummyPlayer || entity instanceof PlayerEntity && ((PlayerEntity) entity).isCreative())
         {   return temp -> temp;
         }
         double minTemp = Temperature.get(entity, Temperature.Trait.FREEZING_POINT);

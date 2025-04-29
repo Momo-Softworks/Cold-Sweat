@@ -17,7 +17,6 @@ import net.minecraft.scoreboard.Team;
 import net.minecraft.tags.ITag;
 import net.minecraft.util.registry.Registry;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -222,9 +221,6 @@ public class EntityRequirement
         if (effects.isPresent() && !effects.get().test(entity))
         {   return false;
         }
-        if (!nbt.test(entity))
-        {   return false;
-        }
         if (flags.isPresent() && !flags.get().test(entity))
         {   return false;
         }
@@ -252,6 +248,9 @@ public class EntityRequirement
             if (team == null || this.team.stream().noneMatch(str -> str.equals(team.getName())))
             {   return false;
             }
+        }
+        if (!nbt.test(entity))
+        {   return false;
         }
         if (entity instanceof LivingEntity)
         {

@@ -5,8 +5,8 @@ import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.vanilla.BlockStateChangedEvent;
-import com.momosoftworks.coldsweat.api.temperature.modifier.ThermalSourceTempModifier;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
+import com.momosoftworks.coldsweat.api.temperature.modifier.ThermalSourceTempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.event.HearthDebugRenderer;
 import com.momosoftworks.coldsweat.common.block.HearthBottomBlock;
@@ -42,7 +42,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.ParticleStatus;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.inventory.ISidedInventory;
@@ -67,7 +66,6 @@ import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
@@ -313,11 +311,8 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
             for (Entity entity : this.level.getEntities((Entity) null, searchArea, EntityTempManager::isTemperatureEnabled))
             {
                 if (!(entity instanceof LivingEntity)) continue;
-                Vector3d entityPos = entity.position();
-                if (entityPos.closerThan(CSMath.getCenterPos(pos), this.getMaxRange()))
-                {   entities.add((LivingEntity) entity);
-                    this.isEntityNearby = true;
-                }
+                this.entities.add((LivingEntity) entity);
+                this.isEntityNearby = true;
             }
         }
 

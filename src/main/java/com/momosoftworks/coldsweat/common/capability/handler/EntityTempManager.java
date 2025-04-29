@@ -28,6 +28,7 @@ import com.momosoftworks.coldsweat.data.codec.configuration.ItemCarryTempData;
 import com.momosoftworks.coldsweat.data.codec.configuration.MountData;
 import com.momosoftworks.coldsweat.data.codec.configuration.ItemCarryTempData.SlotType;
 import com.momosoftworks.coldsweat.compat.CompatManager;
+import com.momosoftworks.coldsweat.data.tag.ModEntityTags;
 import com.momosoftworks.coldsweat.util.entity.DummyPlayer;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.FastMap;
@@ -156,20 +157,27 @@ public class EntityTempManager
             getTemperatureCap(living).ifPresent(cap ->
             {
                 // Add default modifiers every time the entity joins the world
-                for (Temperature.Trait trait : VALID_MODIFIER_TRAITS)
-                {
-                    GatherDefaultTempModifiersEvent gatherEvent = new GatherDefaultTempModifiersEvent(living, trait);
-                    MinecraftForge.EVENT_BUS.post(gatherEvent);
-
-                    cap.getModifiers(trait).clear();
-                    cap.getModifiers(trait).addAll(gatherEvent.getModifiers());
-                }
+                Map<Temperature.Trait, List<TempModifier>> modifiers = gatherTempModifiers(living);
+                cap.getModifiers().clear();
+                cap.getModifiers().putAll(modifiers);
                 TaskScheduler.scheduleServer(() ->
                 {   cap.tick(living);
                     Temperature.updateTemperature(living, cap, true);
                 }, 1);
             });
         }
+    }
+
+    public static Map<Temperature.Trait, List<TempModifier>> gatherTempModifiers(LivingEntity entity)
+    {
+        Map<Temperature.Trait, List<TempModifier>> modifiers = new EnumMap<>(Temperature.Trait.class);
+        for (Temperature.Trait trait : VALID_MODIFIER_TRAITS)
+        {
+            GatherDefaultTempModifiersEvent gatherEvent = new GatherDefaultTempModifiersEvent(entity, trait);
+            MinecraftForge.EVENT_BUS.post(gatherEvent);
+            modifiers.put(trait, gatherEvent.getModifiers());
+        }
+        return modifiers;
     }
 
     @SubscribeEvent
@@ -213,13 +221,17 @@ public class EntityTempManager
 
         getTemperatureCap(entity).ifPresent(cap ->
         {
+            // Tick modifiers serverside
             if (!entity.level.isClientSide)
-            {   // Tick modifiers serverside
-                cap.tick(entity);
+            {
+                // Tick modifiers 1/4 as much for entities
+                if (entity instanceof PlayerEntity || entity.tickCount % 5 == 0)
+                {   cap.tick(entity);
+                }
             }
+            // Tick modifiers clientside
             else
-            {   // Tick modifiers clientside
-                cap.tickDummy(entity);
+            {   cap.tickDummy(entity);
             }
 
             // Remove expired modifiers
@@ -241,9 +253,9 @@ public class EntityTempManager
             }
 
             // Spawn particles for uninhabitable entities
-            if (ConfigSettings.ENTITY_CLIMATES.get().containsKey(entity.getType()))
+            if (!entity.level.isClientSide() && hasClimateData(entity))
             {
-                if (entity.tickCount % 15 == 0 && entity.getRandom().nextDouble() < 0.3)
+                if (entity.tickCount % 5 == 0 && entity.getRandom().nextDouble() < 0.1)
                 {
                     double worldTemp = cap.getTrait(Temperature.Trait.WORLD);
                     double entityX = entity.getX();
@@ -253,12 +265,12 @@ public class EntityTempManager
                     if (worldTemp < cap.getTrait(Temperature.Trait.FREEZING_POINT))
                     {
                         WorldHelper.spawnParticleBatch(entity.level, ParticleTypesInit.MOB_COLD.get(), entityX, entityY, entityZ, 0.5, 0.5, 0.5,
-                                                       entity.getRandom().nextInt(2) + 3, 0);
+                                                       entity.getRandom().nextInt(2) + 2, 0);
                     }
                     else if (worldTemp > cap.getTrait(Temperature.Trait.BURNING_POINT))
                     {
                         WorldHelper.spawnParticleBatch(entity.level, ParticleTypesInit.MOB_HOT.get(), entityX, entityY, entityZ, 0.5, 0.5, 0.5,
-                                                       entity.getRandom().nextInt(2) + 3, 0);
+                                                       entity.getRandom().nextInt(2) + 2, 0);
                     }
                 }
             }
@@ -269,12 +281,9 @@ public class EntityTempManager
     public static void tickInventoryTempItems(LivingEvent.LivingUpdateEvent event)
     {
         LivingEntity entity = event.getEntityLiving();
-        if (entity.tickCount % 10 != 0 || !isTemperatureEnabled(event.getEntity())) return;
+        if (entity.tickCount % 10 != 0 || !isTemperatureEnabled(entity)) return;
 
-        Map<Temperature.Trait, Double> effectsPerTrait = Arrays.stream(VALID_MODIFIER_TRAITS).collect(
-                () -> new EnumMap<>(Temperature.Trait.class),
-                (map, type) -> map.put(type, 0.0),
-                EnumMap::putAll);
+        Map<Temperature.Trait, Double> effectsPerTrait = new EnumMap<>(Temperature.Trait.class);
         Map<ItemCarryTempData, Double> effectsPerCarriedTemp = new FastMap<>();
 
         // Get temperature of equipped items
@@ -388,31 +397,47 @@ public class EntityTempManager
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void defineDefaultModifiers(GatherDefaultTempModifiersEvent event)
     {
-        boolean isPlayer = event.getEntity() instanceof PlayerEntity;
+        LivingEntity entity = event.getEntity();
+        boolean isPlayer = entity instanceof PlayerEntity;
+        boolean isTempSensitive = entity.getType().is(ModEntityTags.TEMPERATURE_SENSITIVE);
         Temperature.Trait trait = event.getTrait();
 
-        // Use approximations for climate-enabled entities
-        if (ConfigSettings.ENTITY_CLIMATES.get().containsKey(event.getEntity().getType()))
+        // Use a far more performant (less accurate) check for climate-enabled entities
+        if (hasClimateData(entity))
         {
-            if (trait == Temperature.Trait.WORLD)
-            {   event.addModifier(new EntityClimateTempModifier().tickRate(60));
+            if (!ConfigSettings.ADVANCED_ENTITY_TEMPERATURE.get())
+            {
+                if (trait == Temperature.Trait.WORLD)
+                {
+                    event.addModifier(new EntityClimateTempModifier().tickRate(200), Placement.Duplicates.BY_CLASS, Placement.BEFORE_FIRST);
+                    // Reset modifiers if the entity was previously advanced
+                    if (!Temperature.hasModifier(entity, Temperature.Trait.WORLD, EntityClimateTempModifier.class))
+                    {   Temperature.clearModifiers(entity, Temperature.Trait.WORLD);
+                    }
+                }
+                return;
             }
-            return;
+            // If the entity is advanced, remove the EntityClimateTempModifier
+            else
+            {   Temperature.removeModifiers(entity, Temperature.Trait.WORLD, EntityClimateTempModifier.class);
+            }
         }
 
         // TempModifier tick rate is generally slower for entities than for players
-        double tickMultiplier = isPlayer ? 1 : 2;
+        double tickMultiplier = isPlayer ? 1
+                              : isTempSensitive ? 4
+                              : 40;
         int slowTickRate = (int) Math.min(60 * tickMultiplier, 400);
         int mediumTickRate = (int) (10 * tickMultiplier * 2);
         int mediumTickRate2 = (int) (10 * tickMultiplier);
-        int fastTickRate = (int) (5 * tickMultiplier * 2);
+        int fastTickRate = (int) (5 * tickMultiplier);
 
         if (trait == Temperature.Trait.WORLD)
         {
-            event.addModifier(new BiomeTempModifier(isPlayer ? 49 : 16).tickRate(mediumTickRate),
+            event.addModifier(new BiomeTempModifier(isPlayer ? 49 : isTempSensitive ? 16 : 9).tickRate(mediumTickRate),
                               Placement.Duplicates.BY_CLASS, Placement.BEFORE_FIRST);
 
-            event.addModifier(new ElevationTempModifier(isPlayer ? 49 : 16).tickRate(mediumTickRate),
+            event.addModifier(new ElevationTempModifier(isPlayer ? 49 : isTempSensitive ? 16 : 1).tickRate(mediumTickRate),
                               Placement.Duplicates.BY_CLASS, Placement.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof BiomeTempModifier));
 
             event.addModifier(new BlockTempModifier(isPlayer ? -1 : 4).tickRate(fastTickRate),
@@ -437,7 +462,7 @@ public class EntityTempManager
                                   Placement.Duplicates.BY_CLASS,
                                   Placement.of(Mode.AFTER, Order.FIRST, mod2 -> mod2 instanceof BlockTempModifier));
         }
-        else if (isPlayer && trait == Temperature.Trait.FREEZING_POINT || trait == Temperature.Trait.BURNING_POINT)
+        else if (isPlayer && (trait == Temperature.Trait.FREEZING_POINT || trait == Temperature.Trait.BURNING_POINT))
         {   event.addModifier(new AcclimationTempModifier().tickRate(20), Placement.Duplicates.BY_CLASS, Placement.AFTER_LAST);
         }
         else if (isPlayer && trait.isForModifiers())
@@ -509,7 +534,7 @@ public class EntityTempManager
 
             if (entity instanceof PlayerEntity)
             {
-                // Get immunities from insulators
+                // Get immunities from inventory items
                 PlayerEntity player = (PlayerEntity) entity;
                 for (Map.Entry<ItemStack, Pair<ItemCarryTempData, Either<Integer, ItemCarryTempData.SlotType>>> entry : getInventoryTemperaturesOnEntity(player).entrySet())
                 {
@@ -843,6 +868,12 @@ public class EntityTempManager
     }
     public static boolean isTemperatureEnabled(Entity entity)
     {   return TEMPERATURE_ENABLED_ENTITIES.contains(entity.getType());
+    }
+    public static boolean hasClimateData(EntityType<?> entity)
+    {   return ConfigSettings.ENTITY_CLIMATES.get().containsKey(entity);
+    }
+    public static boolean hasClimateData(Entity entity)
+    {   return ConfigSettings.ENTITY_CLIMATES.get().containsKey(entity.getType());
     }
 
     public static boolean isPeacefulMode(LivingEntity entity)

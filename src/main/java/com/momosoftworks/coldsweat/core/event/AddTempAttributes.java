@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.core.event;
 import com.google.common.collect.Maps;
 import com.momosoftworks.coldsweat.api.event.core.init.EnableTemperatureEvent;
 import com.momosoftworks.coldsweat.api.event.vanilla.ServerConfigsLoadedEvent;
+import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModAttributes;
@@ -130,7 +131,8 @@ public class AddTempAttributes
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onEnableTemperatureEvent(EnableTemperatureEvent event)
     {
-        if (event.getEntityType() == ModEntities.CHAMELEON || ConfigSettings.ENTITY_CLIMATES.get().containsKey(event.getEntityType()))
+        if (event.getEntityType() == ModEntities.CHAMELEON
+        || (ConfigSettings.ENABLE_ENTITY_CLIMATES.get() && EntityTempManager.hasClimateData(event.getEntityType())))
         {   event.setEnabled(true);
         }
     }

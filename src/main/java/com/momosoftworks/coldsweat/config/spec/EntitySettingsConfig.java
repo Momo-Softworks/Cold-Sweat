@@ -28,6 +28,8 @@ public class EntitySettingsConfig
 
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> ENTITY_TEMPERATURES;
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> ENTITY_CLIMATES;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_ENTITY_CLIMATES;
+    public static final ForgeConfigSpec.BooleanValue ADVANCED_ENTITY_TEMPERATURE;
 
     static
     {
@@ -84,8 +86,8 @@ public class EntitySettingsConfig
                 .defineListAllowEmpty(Arrays.asList("Entity Climate Settings"), () -> Arrays.asList(
                         Arrays.asList("minecraft:chicken", 10, 10, 0.6, "F"),
                         Arrays.asList("minecraft:pig", 0, 0, 0.5, "F"),
-                        Arrays.asList("minecraft:cow", 0, 10, 0.2, "F"),
-                        Arrays.asList("minecraft:mooshroom", 10, 20, 0.2, "F"),
+                        Arrays.asList("minecraft:cow", 0, 20, 0.2, "F"),
+                        Arrays.asList("minecraft:mooshroom", 0, 20, 0.2, "F"),
                         Arrays.asList("minecraft:sheep", -20, -10, 0.3, "F"),
                         Arrays.asList("minecraft:goat", -40, -15, 0.4, "F"),
                         Arrays.asList("minecraft:horse", -5, 10, 0.3, "F"),
@@ -100,6 +102,16 @@ public class EntitySettingsConfig
                       && ((List<?>) it).get(2) instanceof Number
                       && (((List<?>) it).size() < 4 || ((List<?>) it).get(3) instanceof Number)
                       && (((List<?>) it).size() < 5 || ((List<?>) it).get(4) instanceof String));
+
+        ENABLE_ENTITY_CLIMATES = BUILDER
+                .comment("Enables the temperature system for entities",
+                         "If disabled, entities will not be harmed by temperature")
+                .define("Enable Entity Climates", true);
+
+        ADVANCED_ENTITY_TEMPERATURE = BUILDER
+                .comment("Enables more precise temperature calculations for entities",
+                         "This option might cause performance issues for large amounts of entities")
+                .define("Use Advanced Entity Climates", false);
 
         BUILDER.pop();
 
