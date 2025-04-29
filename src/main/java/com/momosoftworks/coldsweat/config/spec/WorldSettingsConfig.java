@@ -273,8 +273,8 @@ public class WorldSettingsConfig
                                             Arrays.asList("#minecraft:campfires",   0.476, 7, "mc", 0.9, "lit=true", " ", 8),
                                             Arrays.asList("minecraft:magma_block",   0.25, 3, "mc", 1.0),
                                             Arrays.asList("minecraft:lava_cauldron",  0.5, 7, "mc", 1.5),
-                                            Arrays.asList("minecraft:ice",          -0.15, 4, "mc", 0.6, "", "", -0.7),
-                                            Arrays.asList("minecraft:packed_ice",   -0.25, 4, "mc", 1.0, "", "", -0.7),
+                                            Arrays.asList("minecraft:ice",          -0.15, 4, "mc", 0.3, "", "", 0.05),
+                                            Arrays.asList("minecraft:packed_ice",   -0.25, 4, "mc", 1.0, "", "", -0.3),
                                             Arrays.asList("minecraft:blue_ice",     -0.35, 4, "mc", 1.4, "", "", -0.7),
                                             Arrays.asList("#minecraft:ice",         -0.15, 4, "mc", 0.6, "", "", -0.7)
                                       ),
