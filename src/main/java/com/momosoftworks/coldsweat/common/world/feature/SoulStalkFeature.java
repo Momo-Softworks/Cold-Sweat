@@ -78,9 +78,9 @@ public class SoulStalkFeature extends Feature<SoulStalkFeatureConfig>
                 int height = new Random().nextInt(5) + 2;
                 for (int i = 0; i < height && isAirOrLeaves(level, pos.above()); i++)
                 {   pos.move(0, 1, 0);
-                    level.setBlock(pos, ModBlocks.SOUL_STALK.defaultBlockState().setValue(SoulStalkBlock.SECTION, new Random().nextInt(2) + 1), 2);
+                    level.setBlock(pos, ModBlocks.SOUL_STALK.defaultBlockState().setValue(SoulStalkBlock.SECTION, SoulStalkBlock.getRandomMidsection()), 2);
                 }
-                level.setBlock(pos, ModBlocks.SOUL_STALK.defaultBlockState().setValue(SoulStalkBlock.SECTION, 3), 2);
+                level.setBlock(pos, ModBlocks.SOUL_STALK.defaultBlockState().setValue(SoulStalkBlock.SECTION, SoulStalkBlock.Section.TOP), 2);
 
                 successes++;
                 int minCount = config.minCount();

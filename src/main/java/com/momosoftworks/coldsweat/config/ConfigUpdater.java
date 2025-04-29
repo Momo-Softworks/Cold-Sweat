@@ -216,6 +216,14 @@ public class ConfigUpdater
             addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, List.of("minecraft:lava", 0.25, 7, "mc", 4, "", "", 21.5, true));
         }
 
+        /*
+         2.4-b03a
+         */
+        if (isBehind(configVersion, "2.4-b03a"))
+        {
+            removeConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, "cold_sweat:soul_stalk");
+        }
+
         // Update config version
         MainSettingsConfig.VERSION.set(version);
 
