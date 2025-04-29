@@ -29,10 +29,10 @@ public class EntityClimateBuilderJS
         return this;
     }
 
-    public EntityClimateBuilderJS temperature(double minTemp, double maxTemp)
+    public EntityClimateBuilderJS temperature(double minTempOffset, double maxTempOffset)
     {
-        this.minTemp = minTemp;
-        this.maxTemp = maxTemp;
+        this.minTemp = minTempOffset;
+        this.maxTemp = maxTempOffset;
         return this;
     }
 

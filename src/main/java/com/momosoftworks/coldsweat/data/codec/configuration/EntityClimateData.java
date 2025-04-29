@@ -43,8 +43,8 @@ public class EntityClimateData extends ConfigData implements RequirementHolder
 
     public static final Codec<EntityClimateData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(EntityClimateData::entity),
-            Codec.DOUBLE.fieldOf("min_temp").forGetter(EntityClimateData::minTemp),
-            Codec.DOUBLE.fieldOf("max_temp").forGetter(EntityClimateData::maxTemp),
+            Codec.DOUBLE.fieldOf("min_temp_offset").forGetter(EntityClimateData::minTempOffset),
+            Codec.DOUBLE.fieldOf("max_temp_offset").forGetter(EntityClimateData::maxTempOffset),
             Codec.DOUBLE.optionalFieldOf("rate", 1.0).forGetter(EntityClimateData::rate),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(EntityClimateData::units)
     ).apply(instance, EntityClimateData::new));
@@ -52,10 +52,10 @@ public class EntityClimateData extends ConfigData implements RequirementHolder
     public NegatableList<EntityRequirement> entity()
     {   return entity;
     }
-    public double minTemp()
+    public double minTempOffset()
     {   return minTemp;
     }
-    public double maxTemp()
+    public double maxTempOffset()
     {   return maxTemp;
     }
     public double rate()
