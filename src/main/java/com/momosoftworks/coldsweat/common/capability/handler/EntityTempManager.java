@@ -132,7 +132,7 @@ public class EntityTempManager
     }
 
     @SubscribeEvent
-    public static void finalizeEntities(EntityLeaveLevelEvent event)
+    public static synchronized void finalizeEntities(EntityLeaveLevelEvent event)
     {
         if (isTemperatureEnabled(event.getEntity()))
         {
