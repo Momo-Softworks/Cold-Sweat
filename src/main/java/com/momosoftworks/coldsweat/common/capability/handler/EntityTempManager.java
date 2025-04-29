@@ -358,13 +358,12 @@ public class EntityTempManager
         {
             if (!ConfigSettings.ADVANCED_ENTITY_TEMPERATURE.get())
             {
-                if (trait == Temperature.Trait.WORLD)
-                {
-                    event.addModifier(new EntityClimateTempModifier().tickRate(200), Placement.Duplicates.BY_CLASS, Placement.BEFORE_FIRST);
-                    // Reset modifiers if the entity was previously advanced
-                    if (!Temperature.hasModifier(entity, Temperature.Trait.WORLD, EntityClimateTempModifier.class))
-                    {   Temperature.clearModifiers(entity, Temperature.Trait.WORLD);
-                    }
+                if (trait.isForWorld())
+                {   event.addModifier(new EntityClimateTempModifier().tickRate(200), Placement.Duplicates.BY_CLASS, Placement.BEFORE_FIRST);
+                }
+                // Reset modifiers if the entity was previously advanced
+                if (!Temperature.hasModifier(entity, Temperature.Trait.WORLD, EntityClimateTempModifier.class))
+                {   Temperature.getModifiers(entity).clear();
                 }
                 return;
             }
