@@ -652,11 +652,13 @@ public abstract class WorldHelper
     public static double getBlockTemperature(World level, BlockState block)
     {
         Collection<BlockTemp> blockTemps = BlockTempRegistry.getBlockTempsFor(block);
-        double temp = 0;
         for (BlockTemp blockTemp : blockTemps)
-        {   temp += blockTemp.getTemperature(level, null, block, BlockPos.ZERO, 0);
+        {
+            if (blockTemp.isValid(level, BlockPos.ZERO, block))
+            {   return blockTemp.getTemperature(level, null, block, BlockPos.ZERO, 0);
+            }
         }
-        return temp;
+        return 0;
     }
 
     public static double getTemperatureAt(World level, BlockPos pos)
@@ -714,6 +716,10 @@ public abstract class WorldHelper
 
     public Map<RegistryKey<World>, DummyPlayer> getDummyPlayers()
     {   return DUMMY_PLAYERS;
+    }
+
+    public Map<RegistryKey<World>, DummyEntity> getDummyEntities()
+    {   return DUMMY_ENTITIES;
     }
 
     public Map<RegistryKey<World>, Map<BlockPos, TempSnapshot>> getWorldTempCache()
