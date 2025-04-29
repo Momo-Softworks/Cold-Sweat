@@ -30,6 +30,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particles.IParticleData;
@@ -61,7 +62,6 @@ import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.gen.feature.structure.StructureManager;
 import net.minecraft.world.gen.feature.structure.StructureStart;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
@@ -603,28 +603,42 @@ public abstract class WorldHelper
     }
 
     /**
-     * Returns a cached temperature value
+     * Returns a cached temperature value<br>
+     * <br>
+     * <b>Flags:</b><br>
+     * 1 = sensitive<br>
+     * 2 = force update<br>
      */
-    public static double getRoughTemperatureAt(World level, BlockPos pos, boolean sensitive)
+    public static double getRoughTemperatureAt(World level, BlockPos pos, int flags)
     {
+        boolean sensitive = (flags & 1) != 0;
+        boolean forceUpdate = (flags & 2) != 0;
+
         Map<BlockPos, TempSnapshot> snapshots = TEMPERATURE_CHECKS.computeIfAbsent(level.dimension(), dim -> new HashMap<>());
         int tickSpeedMultiplier = 1 + level.getGameRules().getInt(GameRules.RULE_RANDOMTICKING) / 20;
 
         BlockPos segment = new BlockPos(pos.getX() >> 3, pos.getY() >> 3, pos.getZ() >> 3);
-        TempSnapshot snapshot = snapshots.get(segment);
-        int interval = sensitive ? 200 : 1000;
 
-        if (snapshot != null)
+        // Use cached value if not forced update
+        if (!forceUpdate)
         {
-            long gameTime = level.getGameTime();
-            if (gameTime - snapshot.timestamp < interval / tickSpeedMultiplier)
-            {   return snapshot.temperature();
+            int interval = sensitive ? 200 : 1000;
+            TempSnapshot snapshot = snapshots.get(segment);
+            if (snapshot != null)
+            {
+                long gameTime = level.getGameTime();
+                if (gameTime - snapshot.timestamp < interval / tickSpeedMultiplier)
+                {   return snapshot.temperature();
+                }
             }
         }
-        // Get temperature based on dummy entity
+
+        /* Get temperature based on dummy entity */
+        // Init dummy at this location
         DummyEntity dummy = getDummyEntity(level);
         Vector3d newPos = CSMath.getCenterPos(pos);
         dummy.setPos(newPos.x, newPos.y, newPos.z);
+        // Get modifiers
         List<TempModifier> modifiers = new ArrayList<>(Temperature.getModifiers(dummy, Temperature.Trait.WORLD));
 
         // Get insulation from hearths
@@ -635,15 +649,15 @@ public abstract class WorldHelper
         if (maxCoolingHeating.getSecond() > 0)
         {   modifiers.add(new WarmthTempModifier(maxCoolingHeating.getSecond()));
         }
+        // Get & store temperature
         double tempAt = Temperature.apply(0, dummy, Temperature.Trait.WORLD, modifiers, true);
-
         snapshots.put(segment, new TempSnapshot(level.getGameTime(), tempAt));
 
         return tempAt;
     }
 
     public static double getRoughTemperatureAt(World level, BlockPos pos)
-    {   return getRoughTemperatureAt(level, pos, false);
+    {   return getRoughTemperatureAt(level, pos, 0);
     }
 
     /**
@@ -748,21 +762,15 @@ public abstract class WorldHelper
         if (pos.getY() >= 0 && pos.getY() < levelReader.getMaxBuildHeight()
         && levelReader instanceof ServerWorld)
         {
-            if (surroundedByIce(levelReader, pos))
+            if (surroundedByBlock(levelReader, pos, Blocks.ICE))
             {   return true;
             }
-            DynamicHolder<Boolean> freezingTemp = DynamicHolder.create(() -> getRoughTemperatureAt((ServerWorld) levelReader, pos) < 0f);
+            DynamicHolder<Boolean> freezingTemp = DynamicHolder.create(() -> getRoughTemperatureAt((ServerWorld) levelReader, pos, 4) < 0f);
 
             if (!mustBeAtEdge)
             {   return freezingTemp.get();
             }
-
-            boolean surroundedByWater = levelReader.isWaterAt(pos.north())
-                                     && levelReader.isWaterAt(pos.south())
-                                     && levelReader.isWaterAt(pos.east())
-                                     && levelReader.isWaterAt(pos.west());
-
-            return !surroundedByWater && freezingTemp.get();
+            return !surroundedByFluid(levelReader, pos, Fluids.WATER) && freezingTemp.get();
         }
         return false;
     }
@@ -772,7 +780,7 @@ public abstract class WorldHelper
         if (pos.getY() >= 0 && pos.getY() < levelReader.getMaxBuildHeight()
         && levelReader instanceof ServerWorld)
         {
-            if (mustBeAtEdge && surroundedByIce(levelReader, pos))
+            if (mustBeAtEdge && surroundedByBlock(levelReader, pos, Blocks.ICE))
             {   return false;
             }
             return getRoughTemperatureAt((ServerWorld) levelReader, pos) >= 0f;
@@ -780,12 +788,20 @@ public abstract class WorldHelper
         return false;
     }
 
-    public static boolean surroundedByIce(IWorld level, BlockPos pos)
+    public static boolean surroundedByBlock(IWorld level, BlockPos pos, Block block)
     {
-        return level.getBlockState(pos.north()).is(Blocks.ICE)
-            && level.getBlockState(pos.south()).is(Blocks.ICE)
-            && level.getBlockState(pos.east()).is(Blocks.ICE)
-            && level.getBlockState(pos.west()).is(Blocks.ICE);
+        return level.getBlockState(pos.north()).is(block)
+            && level.getBlockState(pos.south()).is(block)
+            && level.getBlockState(pos.east()).is(block)
+            && level.getBlockState(pos.west()).is(block);
+    }
+
+    public static boolean surroundedByFluid(IWorld level, BlockPos pos, Fluid fluid)
+    {
+        return level.getBlockState(pos.north()).getFluidState().getType() == fluid
+            && level.getBlockState(pos.south()).getFluidState().getType() == fluid
+            && level.getBlockState(pos.east()).getFluidState().getType() == fluid
+            && level.getBlockState(pos.west()).getFluidState().getType() == fluid;
     }
 
     public static boolean nextToSoulFire(IWorld level, BlockPos pos)

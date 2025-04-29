@@ -14,14 +14,14 @@ public class EntityClimateTempModifier extends TempModifier
     {
         switch (trait)
         {
-            case WORLD ->
-            {   double worldTemp = WorldHelper.getRoughTemperatureAt(entity.level, entity.blockPosition(), true);
+            case WORLD :
+            {   double worldTemp = WorldHelper.getRoughTemperatureAt(entity.level, entity.blockPosition(), 1);
                 return temp -> temp + worldTemp;
             }
-            case BURNING_POINT ->
+            case BURNING_POINT :
             {   return temp -> temp + ConfigSettings.ENTITY_CLIMATES.get().get(entity.getType()).getMaxOffset();
             }
-            case FREEZING_POINT ->
+            case FREEZING_POINT :
             {   return temp -> temp + ConfigSettings.ENTITY_CLIMATES.get().get(entity.getType()).getMinOffset();
             }
         }
