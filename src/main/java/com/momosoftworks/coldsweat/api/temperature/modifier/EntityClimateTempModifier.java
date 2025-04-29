@@ -15,7 +15,7 @@ public class EntityClimateTempModifier extends TempModifier
         switch (trait)
         {
             case WORLD ->
-            {   double worldTemp = WorldHelper.getRoughTemperatureAt(entity.level, entity.blockPosition(), true);
+            {   double worldTemp = WorldHelper.getRoughTemperatureAt(entity.level, entity.blockPosition(), 1);
                 return temp -> temp + worldTemp;
             }
             case BURNING_POINT ->
