@@ -50,6 +50,7 @@ import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -594,27 +595,41 @@ public abstract class WorldHelper
     }
 
     /**
-     * Returns a cached temperature value
+     * Returns a cached temperature value<br>
+     * <br>
+     * <b>Flags:</b><br>
+     * 1 = sensitive<br>
+     * 2 = force update<br>
      */
-    public static double getRoughTemperatureAt(Level level, BlockPos pos, boolean sensitive)
+    public static double getRoughTemperatureAt(Level level, BlockPos pos, int flags)
     {
+        boolean sensitive = (flags & 1) != 0;
+        boolean forceUpdate = (flags & 2) != 0;
+
         Map<BlockPos, TempSnapshot> snapshots = TEMPERATURE_CHECKS.computeIfAbsent(level.dimension(), dim -> new HashMap<>());
         int tickSpeedMultiplier = 1 + level.getGameRules().getInt(GameRules.RULE_RANDOMTICKING) / 20;
 
         BlockPos segment = new BlockPos(pos.getX() >> 3, pos.getY() >> 3, pos.getZ() >> 3);
-        TempSnapshot snapshot = snapshots.get(segment);
-        int interval = sensitive ? 200 : 1000;
 
-        if (snapshot != null)
+        // Use cached value if not forced update
+        if (!forceUpdate)
         {
-            long gameTime = level.getGameTime();
-            if (gameTime - snapshot.timestamp < interval / tickSpeedMultiplier)
-            {   return snapshot.temperature();
+            int interval = sensitive ? 200 : 1000;
+            TempSnapshot snapshot = snapshots.get(segment);
+            if (snapshot != null)
+            {
+                long gameTime = level.getGameTime();
+                if (gameTime - snapshot.timestamp < interval / tickSpeedMultiplier)
+                {   return snapshot.temperature();
+                }
             }
         }
-        // Get temperature based on dummy entity
+
+        /* Get temperature based on dummy entity */
+        // Init dummy at this location
         DummyEntity dummy = getDummyEntity(level);
         dummy.setPos(CSMath.getCenterPos(pos));
+        // Get modifiers
         List<TempModifier> modifiers = new ArrayList<>(Temperature.getModifiers(dummy, Temperature.Trait.WORLD));
 
         // Get insulation from hearths
@@ -625,15 +640,15 @@ public abstract class WorldHelper
         if (maxCoolingHeating.getSecond() > 0)
         {   modifiers.add(new WarmthTempModifier(maxCoolingHeating.getSecond()));
         }
+        // Get & store temperature
         double tempAt = Temperature.apply(0, dummy, Temperature.Trait.WORLD, modifiers, true);
-
         snapshots.put(segment, new TempSnapshot(level.getGameTime(), tempAt));
 
         return tempAt;
     }
 
     public static double getRoughTemperatureAt(Level level, BlockPos pos)
-    {   return getRoughTemperatureAt(level, pos, false);
+    {   return getRoughTemperatureAt(level, pos, 0);
     }
 
     /**
@@ -737,21 +752,15 @@ public abstract class WorldHelper
         if (pos.getY() >= levelReader.getMinBuildHeight() && pos.getY() < levelReader.getMaxBuildHeight()
         && levelReader instanceof ServerLevel serverLevel)
         {
-            if (surroundedByIce(levelReader, pos))
+            if (surroundedByBlock(levelReader, pos, Blocks.ICE))
             {   return true;
             }
-            DynamicHolder<Boolean> freezingTemp = DynamicHolder.create(() -> getRoughTemperatureAt(serverLevel, pos) < 0f);
+            DynamicHolder<Boolean> freezingTemp = DynamicHolder.create(() -> getRoughTemperatureAt(serverLevel, pos, 4) < 0f);
 
             if (!mustBeAtEdge)
             {   return freezingTemp.get();
             }
-
-            boolean surroundedByWater = levelReader.isWaterAt(pos.north())
-                                     && levelReader.isWaterAt(pos.south())
-                                     && levelReader.isWaterAt(pos.east())
-                                     && levelReader.isWaterAt(pos.west());
-
-            return !surroundedByWater && freezingTemp.get();
+            return !surroundedByFluid(levelReader, pos, Fluids.WATER) && freezingTemp.get();
         }
         return false;
     }
@@ -761,7 +770,7 @@ public abstract class WorldHelper
         if (pos.getY() >= levelReader.getMinBuildHeight() && pos.getY() < levelReader.getMaxBuildHeight()
         && levelReader instanceof ServerLevel serverLevel)
         {
-            if (mustBeAtEdge && surroundedByIce(levelReader, pos))
+            if (mustBeAtEdge && surroundedByBlock(levelReader, pos, Blocks.ICE))
             {   return false;
             }
             return getRoughTemperatureAt(serverLevel, pos) >= 0f;
@@ -769,12 +778,20 @@ public abstract class WorldHelper
         return false;
     }
 
-    public static boolean surroundedByIce(LevelAccessor level, BlockPos pos)
+    public static boolean surroundedByBlock(LevelAccessor level, BlockPos pos, Block block)
     {
-        return level.getBlockState(pos.north()).is(Blocks.ICE)
-            && level.getBlockState(pos.south()).is(Blocks.ICE)
-            && level.getBlockState(pos.east()).is(Blocks.ICE)
-            && level.getBlockState(pos.west()).is(Blocks.ICE);
+        return level.getBlockState(pos.north()).is(block)
+            && level.getBlockState(pos.south()).is(block)
+            && level.getBlockState(pos.east()).is(block)
+            && level.getBlockState(pos.west()).is(block);
+    }
+
+    public static boolean surroundedByFluid(LevelAccessor level, BlockPos pos, Fluid fluid)
+    {
+        return level.getBlockState(pos.north()).getFluidState().is(fluid)
+            && level.getBlockState(pos.south()).getFluidState().is(fluid)
+            && level.getBlockState(pos.east()).getFluidState().is(fluid)
+            && level.getBlockState(pos.west()).getFluidState().is(fluid);
     }
 
     public static boolean nextToSoulFire(LevelAccessor level, BlockPos pos)
