@@ -181,7 +181,7 @@ public class EntityTempManager
     }
 
     @SubscribeEvent
-    public static void cleanRemovedEntities(EntityLeaveWorldEvent event)
+    public static synchronized void cleanRemovedEntities(EntityLeaveWorldEvent event)
     {
         if (isTemperatureEnabled(event.getEntity()))
         {   CAP_CACHE.removeIf(ent -> ent.removed);
