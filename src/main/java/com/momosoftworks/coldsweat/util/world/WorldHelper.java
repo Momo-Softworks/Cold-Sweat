@@ -1,15 +1,15 @@
 package com.momosoftworks.coldsweat.util.world;
 
 import com.mojang.datafixers.util.Pair;
-import com.momosoftworks.coldsweat.api.event.core.init.GatherDefaultTempModifiersEvent;
 import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
 import com.momosoftworks.coldsweat.api.temperature.modifier.*;
-import com.momosoftworks.coldsweat.api.util.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
+import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.BiomeTempData;
+import com.momosoftworks.coldsweat.util.entity.DummyEntity;
 import com.momosoftworks.coldsweat.util.entity.DummyPlayer;
 import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.serialization.DynamicHolder;
@@ -58,7 +58,6 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
-import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
@@ -71,12 +70,14 @@ import java.util.function.*;
 @EventBusSubscriber
 public abstract class WorldHelper
 {
-    static Map<ResourceKey<Level>, DummyPlayer> DUMMIES = new HashMap<>();
-    static Map<ResourceKey<Level>, List<TempSnapshot>> TEMPERATURE_CHECKS = new FastMap<>();
+    static Map<ResourceKey<Level>, DummyPlayer> DUMMY_PLAYERS = new HashMap<>();
+    static Map<ResourceKey<Level>, DummyEntity> DUMMY_ENTITIES = new HashMap<>();
+    static Map<ResourceKey<Level>, Map<BlockPos, TempSnapshot>> TEMPERATURE_CHECKS = new FastMap<>();
 
     @SubscribeEvent
     public static void clearCachesOnUnload(ServerStoppedEvent event)
-    {   DUMMIES.clear();
+    {   DUMMY_PLAYERS.clear();
+        DUMMY_ENTITIES.clear();
         TEMPERATURE_CHECKS.clear();
     }
 
@@ -589,59 +590,47 @@ public abstract class WorldHelper
         return CSMath.blend(temps.getFirst(), temps.getSecond(), Math.sin(level.dayTime() / (12000 / Math.PI)), -1, 1);
     }
 
-
     /**
      * Returns a cached temperature value
      */
-    public static double getRoughTemperatureAt(Level level, BlockPos pos)
+    public static double getRoughTemperatureAt(Level level, BlockPos pos, boolean sensitive)
     {
-        List<TempSnapshot> snapshots = TEMPERATURE_CHECKS.computeIfAbsent(level.dimension(), dim -> new ArrayList<>());
-        int tickSpeedMultiplier = Math.max(1, level.getGameRules().getInt(GameRules.RULE_RANDOMTICKING) / 20);
+        Map<BlockPos, TempSnapshot> snapshots = TEMPERATURE_CHECKS.computeIfAbsent(level.dimension(), dim -> new HashMap<>());
+        int tickSpeedMultiplier = 1 + level.getGameRules().getInt(GameRules.RULE_RANDOMTICKING) / 20;
 
-        for (int i = 0; i < snapshots.size(); i++)
+        BlockPos segment = new BlockPos(pos.getX() >> 3, pos.getY() >> 3, pos.getZ() >> 3);
+        TempSnapshot snapshot = snapshots.get(segment);
+        int interval = sensitive ? 200 : 1000;
+
+        if (snapshot != null)
         {
-            TempSnapshot snapshot = snapshots.get(i);
-            if (level == snapshot.level() && CSMath.withinCubeDistance(pos, snapshot.pos(), 10))
-            {
-                if (level.getGameTime() - snapshot.timestamp < 200 / tickSpeedMultiplier)
-                {   return snapshot.temperature();
-                }
-                else
-                {   snapshots.remove(i);
-                    i--;
-                }
+            long gameTime = level.getGameTime();
+            if (gameTime - snapshot.timestamp < interval / tickSpeedMultiplier)
+            {   return snapshot.temperature();
             }
         }
-        DummyPlayer dummy = getDummyPlayer(level);
-        // Move the dummy to the position being tested
+        // Get temperature based on dummy entity
+        DummyEntity dummy = getDummyEntity(level);
         dummy.setPos(CSMath.getCenterPos(pos));
-
         List<TempModifier> modifiers = new ArrayList<>(Temperature.getModifiers(dummy, Temperature.Trait.WORLD));
-        for (int i = 0; i < modifiers.size(); i++)
-        {
-            TempModifier modifier = modifiers.get(i);
-            if (modifier instanceof BlockTempModifier) modifiers.set(i, new BlockTempModifier(3));
-            else if (modifier instanceof BiomeTempModifier) modifiers.set(i, new BiomeTempModifier(9));
-            else if (modifier instanceof ElevationTempModifier) modifiers.set(i, new ElevationTempModifier(9));
-            else if (modifier instanceof DepthBiomeTempModifier) modifiers.set(i, new DepthBiomeTempModifier(3));
-        }
 
         // Get insulation from hearths
-        Pair<Integer, Integer> maxCoolingHeating = getInsulationFromNearbySources(level, pos, 2);
-        int maxCoolingLevel = maxCoolingHeating.getFirst();
-        int maxHeatingLevel = maxCoolingHeating.getSecond();
-        if (maxCoolingLevel > 0)
-        {   modifiers.add(new FrigidnessTempModifier(maxCoolingLevel));
+        Pair<Integer, Integer> maxCoolingHeating = getInsulationAt(level, pos, 2);
+        if (maxCoolingHeating.getFirst() > 0)
+        {   modifiers.add(new FrigidnessTempModifier(maxCoolingHeating.getFirst()));
         }
-        if (maxHeatingLevel > 0)
-        {   modifiers.add(new WarmthTempModifier(maxHeatingLevel));
+        if (maxCoolingHeating.getSecond() > 0)
+        {   modifiers.add(new WarmthTempModifier(maxCoolingHeating.getSecond()));
         }
-
         double tempAt = Temperature.apply(0, dummy, Temperature.Trait.WORLD, modifiers, true);
 
-        snapshots.add(new TempSnapshot(level, pos, level.getGameTime(), tempAt));
+        snapshots.put(segment, new TempSnapshot(level.getGameTime(), tempAt));
 
         return tempAt;
+    }
+
+    public static double getRoughTemperatureAt(Level level, BlockPos pos)
+    {   return getRoughTemperatureAt(level, pos, false);
     }
 
     /**
@@ -662,34 +651,58 @@ public abstract class WorldHelper
         DummyPlayer dummy = getDummyPlayer(level);
         // Move the dummy to the position being tested
         dummy.setPos(CSMath.getCenterPos(pos));
-        return Temperature.apply(0, dummy, Temperature.Trait.WORLD, Temperature.getModifiers(dummy, Temperature.Trait.WORLD), true);
+        List<TempModifier> modifiers = new ArrayList<>(Temperature.getModifiers(dummy, Temperature.Trait.WORLD));
+
+        // Get insulation from hearths
+        Pair<Integer, Integer> maxCoolingHeating = getInsulationAt(level, pos, 2);
+        if (maxCoolingHeating.getFirst() > 0)
+        {   modifiers.add(new FrigidnessTempModifier(maxCoolingHeating.getFirst()));
+        }
+        if (maxCoolingHeating.getSecond() > 0)
+        {   modifiers.add(new WarmthTempModifier(maxCoolingHeating.getSecond()));
+        }
+        return Temperature.apply(0, dummy, Temperature.Trait.WORLD, modifiers, true);
     }
 
     public static DummyPlayer getDummyPlayer(Level level)
     {
         ResourceKey<Level> dimension = level.dimension();
         // There is one "dummy" entity per world, which TempModifiers are applied to
-        DummyPlayer dummy = DUMMIES.get(dimension);
+        DummyPlayer dummy = DUMMY_PLAYERS.get(dimension);
         // If the dummy for this dimension is invalid, make a new one
         if (dummy == null || dummy.level() != level)
         {
-            WorldHelper.DUMMIES.put(dimension, dummy = new DummyPlayer(level));
+            WorldHelper.DUMMY_PLAYERS.put(dimension, dummy = new DummyPlayer(level));
             // Use default player modifiers to determine the temperature
-            GatherDefaultTempModifiersEvent event = new GatherDefaultTempModifiersEvent(dummy, Temperature.Trait.WORLD);
-            NeoForge.EVENT_BUS.post(event);
-            for (TempModifier modifier : event.getModifiers())
-            {   modifier.tickRate(1);
-            }
-            Temperature.addModifiers(dummy, event.getModifiers(), Temperature.Trait.WORLD, Placement.Duplicates.BY_CLASS);
+            Map<Temperature.Trait, List<TempModifier>> defaultModifiers = EntityTempManager.gatherTempModifiers(dummy);
+            defaultModifiers.get(Temperature.Trait.WORLD).forEach(mod -> mod.tickRate(1));
+            Temperature.getModifiers(dummy).putAll(defaultModifiers);
+        }
+        return dummy;
+    }
+
+    public static DummyEntity getDummyEntity(Level level)
+    {
+        ResourceKey<Level> dimension = level.dimension();
+        // There is one "dummy" entity per world, which TempModifiers are applied to
+        DummyEntity dummy = DUMMY_ENTITIES.get(dimension);
+        // If the dummy for this dimension is invalid, make a new one
+        if (dummy == null || dummy.level() != level)
+        {
+            WorldHelper.DUMMY_ENTITIES.put(dimension, dummy = new DummyEntity(level));
+            // Use default player modifiers to determine the temperature
+            Map<Temperature.Trait, List<TempModifier>> defaultModifiers = EntityTempManager.gatherTempModifiers(dummy);
+            defaultModifiers.get(Temperature.Trait.WORLD).forEach(mod -> mod.tickRate(1));
+            Temperature.getModifiers(dummy).putAll(defaultModifiers);
         }
         return dummy;
     }
 
     public Map<ResourceKey<Level>, DummyPlayer> getDummyPlayers()
-    {   return DUMMIES;
+    {   return DUMMY_PLAYERS;
     }
 
-    public Map<ResourceKey<Level>, List<TempSnapshot>> getWorldTempCache()
+    public Map<ResourceKey<Level>, Map<BlockPos, TempSnapshot>> getWorldTempCache()
     {   return TEMPERATURE_CHECKS;
     }
 
@@ -770,7 +783,7 @@ public abstract class WorldHelper
         return false;
     }
 
-    public static Pair<Integer, Integer> getInsulationFromNearbySources(Level level, BlockPos pos, int chunkRadius)
+    public static Pair<Integer, Integer> getInsulationAt(Level level, BlockPos pos, int chunkRadius)
     {
         int maxCoolingLevel = 0;
         int maxHeatingLevel = 0;
@@ -781,8 +794,9 @@ public abstract class WorldHelper
             ChunkAccess chunk = getChunk(level, chunkPos.x + x, chunkPos.z + z);
             if (chunk == null) continue;
 
-            for (BlockEntity be : getBlockEntities(chunk).values())
+            for (BlockPos bePos : chunk.getBlockEntitiesPos())
             {
+                BlockEntity be = chunk.getBlockEntity(bePos);
                 if (be instanceof HearthBlockEntity hearth && hearth.getPathLookup().containsKey(pos))
                 {
                     maxCoolingLevel = Math.max(maxCoolingLevel, hearth.getCoolingLevel());
@@ -791,19 +805,6 @@ public abstract class WorldHelper
             }
         }
         return Pair.of(maxCoolingLevel, maxHeatingLevel);
-    }
-
-    private static final Field CHUNK_BLOCK_ENTITIES = ObfuscationReflectionHelper.findField(ChunkAccess.class, "blockEntities");
-    static { CHUNK_BLOCK_ENTITIES.setAccessible(true); }
-    public static Map<BlockPos, BlockEntity> getBlockEntities(ChunkAccess chunk)
-    {
-        try
-        {   return (Map<BlockPos, BlockEntity>) CHUNK_BLOCK_ENTITIES.get(chunk);
-        }
-        catch (IllegalAccessException e)
-        {   e.printStackTrace();
-        }
-        return Collections.emptyMap();
     }
 
     public static List<BlockPos> getOccupiedPositions(AABB bb)
@@ -824,5 +825,5 @@ public abstract class WorldHelper
         return positions;
     }
 
-    public record TempSnapshot(Level level, BlockPos pos, long timestamp, double temperature) {}
+    public record TempSnapshot(long timestamp, double temperature) {}
 }

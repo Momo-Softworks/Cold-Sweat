@@ -10,6 +10,7 @@ import net.neoforged.bus.api.Event;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -49,8 +50,8 @@ public class GatherDefaultTempModifiersEvent extends Event
     {   this.modifiers.addAll(modifiers);
     }
 
-    public void addModifier(TempModifier modifier, Placement.Duplicates duplicatePolicy, Placement params)
-    {   Temperature.addModifier(modifiers, modifier, duplicatePolicy, 1, params);
+    public boolean addModifier(TempModifier modifier, Placement.Duplicates duplicatePolicy, Placement params)
+    {   return Temperature.addModifier(modifiers, modifier, duplicatePolicy, 1, params);
     }
 
     public void addModifiers(List<TempModifier> modifiers, Placement.Duplicates duplicatePolicy, Placement params)
@@ -65,13 +66,14 @@ public class GatherDefaultTempModifiersEvent extends Event
      * @param id The ID of the TempModifier to add
      * @param modifierBuilder Called on the TempModifier when it is created for additional processing
      */
-    public void addModifierById(ResourceLocation id, Consumer<TempModifier> modifierBuilder, Placement.Duplicates duplicatePolicy, Placement params)
+    public boolean addModifierById(ResourceLocation id, Consumer<TempModifier> modifierBuilder, Placement.Duplicates duplicatePolicy, Placement params)
     {
-        TempModifierRegistry.getValue(id).ifPresent(mod ->
-        {
-            modifierBuilder.accept(mod);
-            addModifier(mod, duplicatePolicy, params);
-        });
+        Optional<TempModifier> mod = TempModifierRegistry.getValue(id);
+        if (mod.isPresent())
+        {   modifierBuilder.accept(mod.get());
+            return addModifier(mod.get(), duplicatePolicy, params);
+        }
+        return false;
     }
 
     public void removeModifiers(TempModifier modifier, Placement.Duplicates matchPolicy)

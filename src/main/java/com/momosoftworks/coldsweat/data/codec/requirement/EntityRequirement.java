@@ -148,9 +148,6 @@ public record EntityRequirement(List<Either<TagKey<EntityType<?>>, EntityType<?>
         if (effects.isPresent() && !effects.get().test(entity))
         {   return false;
         }
-        if (!nbt.test(entity))
-        {   return false;
-        }
         if (flags.isPresent() && !flags.get().test(entity))
         {   return false;
         }
@@ -178,6 +175,9 @@ public record EntityRequirement(List<Either<TagKey<EntityType<?>>, EntityType<?>
             if (team == null || this.team.stream().noneMatch(str -> str.equals(team.getName())))
             {   return false;
             }
+        }
+        if (!nbt.test(entity))
+        {   return false;
         }
         if (entity instanceof LivingEntity living)
         {

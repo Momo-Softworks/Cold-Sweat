@@ -37,6 +37,33 @@ public abstract class TempModifier
     public TempModifier() {}
 
     /**
+     * TempModifiers can be configured to run {@link TempModifier#calculate(LivingEntity, Temperature.Trait)} at a specified interval.<br>
+     * This is useful if the TempModifier is expensive to calculate, and you want to avoid it being called each tick.<br>
+     * <br>
+     * Every X ticks, the TempModifier's {@code getResult()} function will be called, then stored internally.<br>
+     * Every other time {@code calculate()} is called, the stored value will be returned until X ticks have passed.<br>
+     * (new TempModifiers ALWAYS run {@code getResult()} when they are called for the first time).<br>
+     * <br>
+     * @param interval the number of ticks between each call to {@code getResult()}.
+     * @return this TempModifier instance (allows for in-line building).
+     */
+    public final <T extends TempModifier> T tickRate(int interval)
+    {   tickRate = Math.max(1, interval);
+        return (T) this;
+    }
+
+    /**
+     * Sets the number of ticks this TempModifier will exist before it is automatically removed.<br>
+     * @param ticks the number of ticks this modifier will last.
+     * @return this TempModifier instance (allows for in-line building).
+     */
+    public final <T extends TempModifier> T expires(int ticks)
+    {
+        expireTicks = ticks;
+        return (T) this;
+    }
+
+    /**
      * Determines what the provided temperature would be, given the player it is being applied to.<br>
      * This is basically a simple in-out system. It is given a temperature, and returns a new temperature based on the PlayerEntity.<br>
      * <br>
@@ -80,40 +107,16 @@ public abstract class TempModifier
         return lastOutput = function.apply(temp);
     }
 
-    /**
-     * Sets the number of ticks this TempModifier will exist before it is automatically removed.<br>
-     * @param ticks the number of ticks this modifier will last.
-     * @return this TempModifier instance (allows for in-line building).
-     */
-    public final <T extends TempModifier> T expires(int ticks)
-    {
-        expireTicks = ticks;
-        return (T) this;
-    }
     public final int getExpireTime()
     {   return expireTicks;
     }
+
     public final int getTicksExisted()
     {   return ticksExisted;
     }
+
     public final int setTicksExisted(int ticks)
     {   return ticksExisted = ticks;
-    }
-
-    /**
-     * TempModifiers can be configured to run {@link TempModifier#calculate(LivingEntity, Temperature.Trait)} at a specified interval.<br>
-     * This is useful if the TempModifier is expensive to calculate, and you want to avoid it being called each tick.<br>
-     * <br>
-     * Every X ticks, the TempModifier's {@code getResult()} function will be called, then stored internally.<br>
-     * Every other time {@code calculate()} is called, the stored value will be returned until X ticks have passed.<br>
-     * (new TempModifiers ALWAYS run {@code getResult()} when they are called for the first time).<br>
-     * <br>
-     * @param interval the number of ticks between each call to {@code getResult()}.
-     * @return this TempModifier instance (allows for in-line building).
-     */
-    public final <T extends TempModifier> T tickRate(int interval)
-    {   tickRate = Math.max(1, interval);
-        return (T) this;
     }
 
     public final int getTickRate()

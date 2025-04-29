@@ -58,6 +58,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -303,10 +304,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
             for (Entity entity : this.level.getEntities((Entity) null, searchArea, EntityTempManager::isTemperatureEnabled))
             {
                 if (!(entity instanceof LivingEntity living)) continue;
-                if (living.blockPosition().closerThan(pos, this.getMaxRange()))
-                {   entities.add(living);
-                    this.isEntityNearby = true;
-                }
+                this.entities.add(living);
+                this.isEntityNearby = true;
             }
         }
 

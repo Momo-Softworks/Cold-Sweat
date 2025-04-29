@@ -173,6 +173,8 @@ public class ConfigSettings
     public static final DynamicHolder<Multimap<EntityType<?>, MountData>> INSULATED_MOUNTS;
     public static final DynamicHolder<Multimap<EntityType<?>, EntityTempData>> ENTITY_TEMPERATURES;
     public static final DynamicHolder<Map<EntityType<?>, EntityClimateData>> ENTITY_CLIMATES;
+    public static final DynamicHolder<Boolean> ENABLE_ENTITY_CLIMATES;
+    public static final DynamicHolder<Boolean> ADVANCED_ENTITY_TEMPERATURE;
 
     // Misc Settings
     public static final DynamicHolder<Double> INSULATION_STRENGTH;
@@ -687,6 +689,18 @@ public class ConfigSettings
         (decoder) -> ConfigHelper.deserializeRegistry(decoder, "TempAffectedEntities", ModRegistries.ENTITY_CLIMATE_DATA, rl -> BuiltInRegistries.ENTITY_TYPE.get(rl)),
         (saver) -> {},
         SyncType.ONE_WAY);
+
+        ENABLE_ENTITY_CLIMATES = addSyncedSetting("enable_entity_climates", () -> true, holder -> holder.set(EntitySettingsConfig.ENABLE_ENTITY_CLIMATES.get()),
+        (encoder) -> ConfigHelper.serializeNbtBool(encoder, "EnableEntityClimates"),
+        (decoder) -> decoder.getBoolean("EnableEntityClimates"),
+        (saver) -> EntitySettingsConfig.ENABLE_ENTITY_CLIMATES.set(saver),
+        SyncType.BOTH_WAYS);
+
+        ADVANCED_ENTITY_TEMPERATURE = addSyncedSetting("advanced_entity_temperature", () -> true, holder -> holder.set(EntitySettingsConfig.ADVANCED_ENTITY_TEMPERATURE.get()),
+        (encoder) -> ConfigHelper.serializeNbtBool(encoder, "AdvancedEntityTemperature"),
+        (decoder) -> decoder.getBoolean("AdvancedEntityTemperature"),
+        (saver) -> EntitySettingsConfig.ADVANCED_ENTITY_TEMPERATURE.set(saver),
+        SyncType.BOTH_WAYS);
 
         BLOCK_RANGE = addSyncedSetting("block_range", () -> 7, holder -> holder.set(WorldSettingsConfig.MAX_BLOCK_TEMP_RANGE.get()),
         (encoder) -> ConfigHelper.serializeNbtInt(encoder, "BlockRange"),

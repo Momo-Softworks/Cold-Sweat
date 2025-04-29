@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.core.event;
 
 import com.momosoftworks.coldsweat.api.event.core.init.EnableTemperatureEvent;
 import com.momosoftworks.coldsweat.api.event.vanilla.ServerConfigsLoadedEvent;
+import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.core.init.ModAttributes;
@@ -13,7 +14,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.DefaultAttributes;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.ModLoader;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.common.NeoForge;
@@ -112,7 +112,8 @@ public class AddTempAttributes
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onEnableTemperatureEvent(EnableTemperatureEvent event)
     {
-        if (event.getEntityType() == ModEntities.CHAMELEON.value() || ConfigSettings.ENTITY_CLIMATES.get().containsKey(event.getEntityType()))
+        if (event.getEntityType() == ModEntities.CHAMELEON
+       .value() || (ConfigSettings.ENABLE_ENTITY_CLIMATES.get() && EntityTempManager.hasClimateData(event.getEntityType())))
         {   event.setEnabled(true);
         }
     }
