@@ -11,7 +11,7 @@ public class EntityClimateTempModifier extends TempModifier
     @Override
     protected Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
-        double worldTemp = WorldHelper.getRoughTemperatureAt(entity.level(), entity.blockPosition());
+        double worldTemp = WorldHelper.getRoughTemperatureAt(entity.level(), entity.blockPosition(), true);
         return temp -> temp + worldTemp;
     }
 }

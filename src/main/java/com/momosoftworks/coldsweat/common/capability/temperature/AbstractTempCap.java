@@ -60,6 +60,9 @@ public class AbstractTempCap implements ITemperatureCap
             (map, type) -> map.put(type, new ArrayList<>()),
             EnumMap::putAll);
 
+    private final EnumMap<Trait, AttributeInstance> attributes = new EnumMap<>(Trait.class);
+    private final Map<AttributeInstance, Map<AttributeModifier.Operation, Set<AttributeModifier>>> attributeModifiers = new HashMap<>();
+
     public boolean showBodyTemp;
     public boolean showWorldTemp;
 
@@ -108,6 +111,11 @@ public class AbstractTempCap implements ITemperatureCap
     @Override
     public void addModifier(TempModifier modifier, Trait trait)
     {   modifiers.get(trait).add(modifier);
+    }
+
+    @Override
+    public EnumMap<Trait, List<TempModifier>> getModifiers()
+    {   return modifiers;
     }
 
     @Override
@@ -235,7 +243,7 @@ public class AbstractTempCap implements ITemperatureCap
             // Apply temp/attribute modifiers
             rate = this.modifyFromAttribute(entity, Trait.RATE, changeBy);
             // Apply rate multiplier if entity has climate data
-            rate *= CSMath.getIfNotNull(ConfigSettings.ENTITY_CLIMATES.get().get(entity.getType()), EntityClimateData::rate, 1.0);
+            rate *= CSMath.getIfNotNull(ConfigSettings.ENTITY_CLIMATES.get().get(entity.getType()), EntityClimateData::rate, 0.25) * 4;
             // Apply the rate to entity's temperature
             newCoreTemp += rate;
         }
@@ -294,37 +302,54 @@ public class AbstractTempCap implements ITemperatureCap
         this.tickHurting(entity);
     }
 
-    private double modifyFromAttribute(LivingEntity entity, Trait type, double baseValue)
+    private double modifyFromAttribute(LivingEntity entity, Trait trait, double baseValue)
     {
-        Supplier<Double> defaultSupplier = () -> Temperature.apply(baseValue, entity, type, this.getModifiers(type));
-        AttributeInstance attribute = EntityTempManager.getAttribute(type, entity);
+        Supplier<Double> defaultSupplier = () -> Temperature.apply(baseValue, entity, trait, this.getModifiers(trait));
+        AttributeInstance attribute = attributes.computeIfAbsent(trait, t -> EntityTempManager.getAttribute(trait, entity));
+
         double newValue;
         // If the attribute is null, return the default value
         if (attribute == null)
         {   newValue = defaultSupplier.get();
         }
-        // If base attribute is unset
         else
         {
-            double base = CSMath.safeDouble(attribute.getBaseValue()).orElse(defaultSupplier.get());
+            double base = CSMath.safeDouble(attribute.getBaseValue()).orElseGet(defaultSupplier);
+            Map<AttributeModifier.Operation, Set<AttributeModifier>> modifiers = this.attributeModifiers.computeIfAbsent(attribute, a ->
+            {
+                Map<AttributeModifier.Operation, Set<AttributeModifier>> map = new HashMap<>();
+                for (AttributeModifier.Operation operation : AttributeModifier.Operation.values())
+                {   map.put(operation, a.getModifiers(operation));
+                }
+                return map;
+            });
 
-            for (AttributeModifier mod : attribute.getModifiers(AttributeModifier.Operation.ADDITION))
-            {   base += mod.getAmount();
+            if (modifiers.isEmpty())
+            {   newValue = base;
             }
-            double value = base;
-            for (AttributeModifier mod : attribute.getModifiers(AttributeModifier.Operation.MULTIPLY_BASE))
-            {   value += base * mod.getAmount();
+            else
+            {
+                for (AttributeModifier mod : modifiers.get(AttributeModifier.Operation.ADDITION))
+                {   base += mod.getAmount();
+                }
+                double value = base;
+                for (AttributeModifier mod : modifiers.get(AttributeModifier.Operation.MULTIPLY_BASE))
+                {   value += base * mod.getAmount();
+                }
+                for (AttributeModifier mod : modifiers.get(AttributeModifier.Operation.MULTIPLY_TOTAL))
+                {
+                        value *= 1.0D + mod.getAmount();
+                }
+                newValue = value;
             }
-            for (AttributeModifier mod : attribute.getModifiers(AttributeModifier.Operation.MULTIPLY_TOTAL))
-            {   value *= 1.0D + mod.getAmount();
-            }
-            newValue = value;
         }
-        if (!DoubleMath.fuzzyEquals(newValue, baseValue, 0.0001))
-        {   MinecraftForge.EVENT_BUS.post(new TemperatureChangedEvent(entity, type, getTrait(type), newValue));
+        if (!DoubleMath.fuzzyEquals(newValue, baseValue, 0.001))
+        {
+            // Fire temperature change event
+            MinecraftForge.EVENT_BUS.post(new TemperatureChangedEvent(entity, trait, getTrait(trait), newValue));
+            // Write new value to NBT
+            NBTHelper.getOrPutTag(entity, "Temperature", new CompoundTag()).putDouble(trait.getSerializedName(), newValue);
         }
-        // Write new value to NBT
-        NBTHelper.getOrPutTag(entity, "Temperature", new CompoundTag()).putDouble(type.getSerializedName(), newValue);
         // Return
         return newValue;
     }
