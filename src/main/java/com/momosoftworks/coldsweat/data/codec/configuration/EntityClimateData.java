@@ -65,11 +65,11 @@ public class EntityClimateData extends ConfigData implements RequirementHolder
     {   return units;
     }
 
-    public double getMinTemp()
-    {   return Temperature.convert(minTemp, units, Temperature.Units.MC, true);
+    public double getMinOffset()
+    {   return Temperature.convert(minTemp, units, Temperature.Units.MC, false);
     }
-    public double getMaxTemp()
-    {   return Temperature.convert(maxTemp, units, Temperature.Units.MC, true);
+    public double getMaxOffset()
+    {   return Temperature.convert(maxTemp, units, Temperature.Units.MC, false);
     }
 
     @Nullable
