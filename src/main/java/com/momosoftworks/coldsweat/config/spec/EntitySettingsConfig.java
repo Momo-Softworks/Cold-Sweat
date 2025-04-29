@@ -28,6 +28,8 @@ public class EntitySettingsConfig
 
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> ENTITY_TEMPERATURES;
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> ENTITY_CLIMATES;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_ENTITY_CLIMATES;
+    public static final ForgeConfigSpec.BooleanValue ADVANCED_ENTITY_TEMPERATURE;
 
     static
     {
@@ -71,8 +73,8 @@ public class EntitySettingsConfig
                 .defineListAllowEmpty(List.of("Entity Climate Settings"), () -> Arrays.asList(
                         List.of("minecraft:chicken", 10, 10, 0.6, "F"),
                         List.of("minecraft:pig", 0, 0, 0.5, "F"),
-                        List.of("minecraft:cow", 0, 10, 0.2, "F"),
-                        List.of("minecraft:mooshroom", 10, 20, 0.2, "F"),
+                        List.of("minecraft:cow", 0, 20, 0.2, "F"),
+                        List.of("minecraft:mooshroom", 0, 20, 0.2, "F"),
                         List.of("minecraft:sheep", -20, -10, 0.3, "F"),
                         List.of("minecraft:goat", -40, -15, 0.4, "F"),
                         List.of("minecraft:horse", -5, 10, 0.3, "F"),
@@ -87,6 +89,16 @@ public class EntitySettingsConfig
                       && list.get(2) instanceof Number
                       && (list.size() < 4 || list.get(3) instanceof Number)
                       && (list.size() < 5 || list.get(4) instanceof String));
+
+        ENABLE_ENTITY_CLIMATES = BUILDER
+                .comment("Enables the temperature system for entities",
+                         "If disabled, entities will not be harmed by temperature")
+                .define("Enable Entity Climates", true);
+
+        ADVANCED_ENTITY_TEMPERATURE = BUILDER
+                .comment("Enables more precise temperature calculations for entities",
+                         "This option might cause performance issues for large amounts of entities")
+                .define("Use Advanced Entity Climates", false);
 
         BUILDER.pop();
 
