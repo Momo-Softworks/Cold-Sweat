@@ -47,17 +47,12 @@ public class AbstractTempCap implements ITemperatureCap
     private final Set<Attribute> persistentAttributes = new HashSet<>();
 
     // Map valid temperature types to a new EnumMap
-    private final EnumMap<Trait, Double> traits = Arrays.stream(VALID_TEMPERATURE_TRAITS).collect(
-            () -> new EnumMap<>(Trait.class),
-            (map, type) -> map.put(type, 0.0),
-            EnumMap::putAll);
+    private final EnumMap<Trait, Double> traits = new EnumMap<>(Trait.class);
 
     // Map valid modifier types to a new EnumMap
-    private final EnumMap<Trait, List<TempModifier>> modifiers = Arrays.stream(VALID_MODIFIER_TRAITS).collect(
-            () -> new EnumMap<>(Trait.class),
-            (map, type) -> map.put(type, new ArrayList<>()),
-            EnumMap::putAll);
+    private final EnumMap<Trait, List<TempModifier>> modifiers = new EnumMap<>(Trait.class);
 
+    // Store entity's attribute data for faster access
     private final EnumMap<Trait, ModifiableAttributeInstance> attributes = new EnumMap<>(Trait.class);
     private final Map<ModifiableAttributeInstance, Map<AttributeModifier.Operation, Set<AttributeModifier>>> attributeModifiers = new HashMap<>();
 
@@ -66,14 +61,17 @@ public class AbstractTempCap implements ITemperatureCap
 
     @Override
     public double getTrait(Trait trait)
-    {   // Special case for BODY
-        if (trait == Trait.BODY) return getTrait(Trait.CORE) + getTrait(Trait.BASE);
+    {
+        // Special case for BODY
+        if (trait == Trait.BODY)
+        {   return getTrait(Trait.CORE) + getTrait(Trait.BASE);
+        }
         // Throw exception if this temperature trait is not supported
-        if (!traits.containsKey(trait))
+        if (!trait.isForTemperature())
         {   throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("Invalid temperature trait: " + trait));
         }
 
-        return traits.get(trait);
+        return traits.computeIfAbsent(trait, t -> 0.0);
     }
 
     @Override
@@ -84,17 +82,18 @@ public class AbstractTempCap implements ITemperatureCap
     @Override
     public void setTrait(Trait trait, double value)
     {
+        // Throw exception if this temperature trait is not supported
+        if (!trait.isForTemperature())
+        {   throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("Invalid temperature trait: " + trait));
+        }
         switch (trait)
         {
             case CORE  : changed |= ((int) value) != ((int) getTrait(Trait.CORE)); break;
             case BASE  : changed |= ((int) value) != ((int) getTrait(Temperature.Trait.BASE)); break;
             case WORLD : changed |= Math.abs(value - getTrait(Trait.WORLD)) >= 0.02; break;
             default : changed |= true;
-        };
-        // Throw exception if this temperature trait is not supported
-        if (traits.replace(trait, value) == null)
-        {   throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("Invalid temperature trait: " + trait));
         }
+        traits.put(trait, value);
     }
 
     public void setTrait(Trait trait, double value, LivingEntity entity)
@@ -108,7 +107,11 @@ public class AbstractTempCap implements ITemperatureCap
 
     @Override
     public void addModifier(TempModifier modifier, Trait trait)
-    {   modifiers.get(trait).add(modifier);
+    {
+        if (!trait.isForModifiers())
+        {   throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("Invalid modifier trait: " + trait));
+        }
+        this.getModifiers(trait).add(modifier);
     }
 
     @Override
@@ -118,10 +121,12 @@ public class AbstractTempCap implements ITemperatureCap
 
     @Override
     public List<TempModifier> getModifiers(Trait trait)
-    {   // Throw exception if this modifier type is not supported
-        return modifiers.computeIfAbsent(trait, t ->
-        {   throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("Invalid modifier trait: " + t));
-        });
+    {
+        // Throw exception if this modifier type is not supported
+        if (!trait.isForModifiers())
+        {   throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("Invalid modifier trait: " + trait));
+        }
+        return modifiers.computeIfAbsent(trait, t -> new ArrayList<>());
     }
 
     @Override
