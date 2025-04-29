@@ -19,10 +19,10 @@ public class EntityClimateTempModifier extends TempModifier
                 return temp -> temp + worldTemp;
             }
             case BURNING_POINT ->
-            {   return temp -> temp + ConfigSettings.ENTITY_CLIMATES.get().get(entity.getType()).getMaxTemp();
+            {   return temp -> temp + ConfigSettings.ENTITY_CLIMATES.get().get(entity.getType()).getMaxOffset();
             }
             case FREEZING_POINT ->
-            {   return temp -> temp + ConfigSettings.ENTITY_CLIMATES.get().get(entity.getType()).getMinTemp();
+            {   return temp -> temp + ConfigSettings.ENTITY_CLIMATES.get().get(entity.getType()).getMinOffset();
             }
         }
         return temp -> temp;
