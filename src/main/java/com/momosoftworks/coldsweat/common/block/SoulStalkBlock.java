@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.common.block;
 
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.core.init.ModBlocks;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
@@ -33,7 +32,7 @@ public class SoulStalkBlock extends Block
     public static final IntegerProperty AGE = BlockStateProperties.AGE_15;
     public static final EnumProperty<Section> SECTION = EnumProperty.create("section", Section.class);
     protected static final VoxelShape SHAPE = Block.box(3.0D, 0.0D, 3.0D, 13.0D, 16.0D, 13.0D);
-    protected static final VoxelShape SHAPE_BUD = Block.box(5.0D, 0.0D, 5.0D, 11.0D, 13.0D, 11.0D);
+    protected static final VoxelShape SHAPE_BUD = Block.box(4.5D, 0.0D, 4.5D, 11.5D, 14.0D, 11.5D);
 
     public SoulStalkBlock(Properties p_49795_)
     {
@@ -48,7 +47,7 @@ public class SoulStalkBlock extends Block
                 .sound(SoundType.BIG_DRIPLEAF)
                 .strength(0f, 0.5f)
                 .randomTicks()
-                .lightLevel(state -> state.getValue(SECTION).hasFruit() ? 6 : 0)
+                .lightLevel(state -> state.getValue(SECTION).hasFruit() ? 4 : 0)
                 .noOcclusion()
                 .noCollission();
     }
