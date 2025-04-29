@@ -1,19 +1,23 @@
 {
   "variants":
   {
-    "section=0":
+    "section=base":
     {
       "model": "cold_sweat:block/soul_stalk_base"
     },
-    "section=1":
+    "section=middle":
     {
       "model": "cold_sweat:block/soul_stalk"
     },
-    "section=2":
+    "section=middle_sprout":
     {
       "model": "cold_sweat:block/soul_stalk_sprouts"
     },
-    "section=3":
+    "section=top":
+    {
+      "model": "cold_sweat:block/soul_stalk_top"
+    },
+    "section=bud":
     {
       "model": "cold_sweat:block/soul_stalk_bud"
     }

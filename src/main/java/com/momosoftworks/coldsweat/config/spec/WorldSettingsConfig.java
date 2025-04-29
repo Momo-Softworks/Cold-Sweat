@@ -276,8 +276,7 @@ public class WorldSettingsConfig
                                             Arrays.asList("minecraft:ice",          -0.15, 4, "mc", 0.6, "", "", -0.7),
                                             Arrays.asList("minecraft:packed_ice",   -0.25, 4, "mc", 1.0, "", "", -0.7),
                                             Arrays.asList("minecraft:blue_ice",     -0.35, 4, "mc", 1.4, "", "", -0.7),
-                                            Arrays.asList("#minecraft:ice",         -0.15, 4, "mc", 0.6, "", "", -0.7),
-                                            Arrays.asList("cold_sweat:soul_stalk",  -0.3,  6, "mc", 0.3, "section=3", "", 0)
+                                            Arrays.asList("#minecraft:ice",         -0.15, 4, "mc", 0.6, "", "", -0.7)
                                       ),
                                       it -> {
                                           if (!(it instanceof List<?>)) return false;
