@@ -77,6 +77,13 @@
                   "properties": {
                     "section": "top"
                   }
+                },
+                {
+                  "condition": "minecraft:block_state_property",
+                  "block": "cold_sweat:soul_stalk",
+                  "properties": {
+                    "section": "middle_sprout"
+                  }
                 }
               ]
             }
