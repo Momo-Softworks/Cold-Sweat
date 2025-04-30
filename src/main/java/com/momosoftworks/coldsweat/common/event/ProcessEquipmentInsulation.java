@@ -174,7 +174,9 @@ public class ProcessEquipmentInsulation
                 double cold = insulationEvent.getProperty("cold");
                 double heat = insulationEvent.getProperty("heat");
 
-                Temperature.addOrReplaceModifier(player, new ArmorInsulationTempModifier(cold, heat).tickRate(20).expires(20), Temperature.Trait.RATE, Placement.Duplicates.BY_CLASS);
+                if (cold > 0 || heat > 0)
+                {   Temperature.addOrReplaceModifier(player, new ArmorInsulationTempModifier(cold, heat).tickRate(20).expires(20), Temperature.Trait.RATE, Placement.Duplicates.BY_CLASS);
+                }
             }
 
             // Award advancement for full insulation
