@@ -135,7 +135,7 @@ public class NegatableList<T>
     }
 
     public <N> List<N> listMap(Function<T, N> mapper)
-    {   return this.flatMap(mapper.andThen(p -> CSMath.mutable(List.of(p))), CSMath::merge, List::removeAll).orElse(List.of());
+    {   return this.flatMap(mapper.andThen(p -> CSMath.mutable(List.of(p))), CSMath::append, List::removeAll).orElse(List.of());
     }
 
     public List<T> flatten()

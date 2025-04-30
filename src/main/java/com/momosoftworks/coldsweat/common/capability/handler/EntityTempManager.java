@@ -272,74 +272,6 @@ public class EntityTempManager
         });
     }
 
-    @SubscribeEvent
-    public static void tickInventoryTempItems(LivingEvent.LivingTickEvent event)
-    {
-        LivingEntity entity = event.getEntity();
-        if (entity.tickCount % 10 != 0 || !isTemperatureEnabled(entity)) return;
-
-        Map<Temperature.Trait, Double> effectsPerTrait = new EnumMap<>(Temperature.Trait.class);
-        Map<ItemCarryTempData, Double> effectsPerCarriedTemp = new FastMap<>();
-
-        // Get temperature of equipped items
-        for (EquipmentSlot slot : EquipmentSlot.values())
-        {
-            ItemStack stack = entity.getItemBySlot(slot);
-            if (!stack.isEmpty())
-            {
-                Item item = stack.getItem();
-                ConfigSettings.CARRIED_ITEM_TEMPERATURES.get().get(item).forEach(
-                carried ->
-                {   checkAndAddCarriedTemp(entity, stack, null, slot, carried, effectsPerCarriedTemp);
-                });
-            }
-        }
-
-        // Get temperature of main inventory items
-        if (entity instanceof Player player)
-        {
-            for (Slot slot : player.inventoryMenu.slots)
-            {
-                ItemStack stack = slot.getItem();
-                if (!stack.isEmpty())
-                {
-                    Item item = stack.getItem();
-                    ConfigSettings.CARRIED_ITEM_TEMPERATURES.get().get(item).forEach(
-                    carried ->
-                    {   checkAndAddCarriedTemp(entity, stack, slot.index, null, carried, effectsPerCarriedTemp);
-                    });
-                }
-            }
-        }
-
-        for (Map.Entry<ItemCarryTempData, Double> entry : effectsPerCarriedTemp.entrySet())
-        {
-            Temperature.Trait trait = entry.getKey().trait();
-            double temp = entry.getValue();
-
-            effectsPerTrait.put(trait, effectsPerTrait.get(trait) + temp);
-        }
-
-        effectsPerTrait.forEach((trait, temp) ->
-        {
-            Optional<InventoryItemsTempModifier> modifier = Temperature.getModifier(entity, trait, InventoryItemsTempModifier.class);
-            modifier.ifPresent(mod -> mod.getNBT().putDouble("Effect", temp));
-        });
-    }
-
-    private static void checkAndAddCarriedTemp(LivingEntity entity, ItemStack stack, Integer slot, EquipmentSlot equipmentSlot,
-                                               ItemCarryTempData carried, Map<ItemCarryTempData, Double> effectsPerCarriedTemp)
-    {
-        if (carried.test(entity, stack, slot, equipmentSlot))
-        {
-            double temp = carried.temperature() * stack.getCount();
-            double currentEffect = effectsPerCarriedTemp.getOrDefault(carried, 0.0);
-            double newEffect = Math.min(carried.maxEffect(), Math.abs(currentEffect + temp)) * CSMath.sign(currentEffect + temp);
-
-            effectsPerCarriedTemp.put(carried, newEffect);
-        }
-    }
-
     /**
      * Transfer the player's capability when traveling from the End
      */
@@ -404,20 +336,20 @@ public class EntityTempManager
         // Use a far more performant (less accurate) check for climate-enabled entities
         if (hasClimateData(entity))
         {
-            if (!ConfigSettings.ADVANCED_ENTITY_TEMPERATURE.get())
+            boolean isAdvanced = ConfigSettings.ADVANCED_ENTITY_TEMPERATURE.get();
+            boolean wasAdvanced = entity.getPersistentData().getBoolean("AdvancedTemperature");
+            // Clear modifiers if the "Advanced" setting was changed
+            if (isAdvanced != wasAdvanced)
+            {   Temperature.getModifiers(entity).clear();
+                entity.getPersistentData().putBoolean("AdvancedTemperature", isAdvanced);
+            }
+            // Use basic temp calculation if not advanced
+            if (!isAdvanced)
             {
                 if (trait.isForWorld())
                 {   event.addModifier(new EntityClimateTempModifier().tickRate(200), Placement.Duplicates.BY_CLASS, Placement.BEFORE_FIRST);
                 }
-                // Reset modifiers if the entity was previously advanced
-                if (!Temperature.hasModifier(entity, Temperature.Trait.WORLD, EntityClimateTempModifier.class))
-                {   Temperature.getModifiers(entity).clear();
-                }
                 return;
-            }
-            // If the entity is advanced, remove the EntityClimateTempModifier
-            else
-            {   Temperature.removeModifiers(entity, Temperature.Trait.WORLD, EntityClimateTempModifier.class);
             }
         }
 
@@ -463,11 +395,13 @@ public class EntityTempManager
                                   Placement.Duplicates.BY_CLASS,
                                   Placement.of(Mode.AFTER, Order.FIRST, mod2 -> mod2 instanceof BlockTempModifier));
         }
-        else if (isPlayer && (trait == Temperature.Trait.FREEZING_POINT || trait == Temperature.Trait.BURNING_POINT))
-        {   event.addModifier(new AcclimationTempModifier().tickRate(20), Placement.Duplicates.BY_CLASS, Placement.AFTER_LAST);
+        else if (trait == Temperature.Trait.FREEZING_POINT || trait == Temperature.Trait.BURNING_POINT)
+        {
+            if (isPlayer) event.addModifier(new AcclimationTempModifier().tickRate(20), Placement.Duplicates.BY_CLASS, Placement.AFTER_LAST);
         }
-        else if (isPlayer && trait.isForModifiers())
-        {   event.addModifier(new InventoryItemsTempModifier().tickRate(5), Placement.Duplicates.BY_CLASS, Placement.AFTER_LAST);
+        else if (trait == Temperature.Trait.ALL)
+        {
+            if (isPlayer) event.addModifier(new InventoryItemsTempModifier().tickRate(5), Placement.Duplicates.BY_CLASS, Placement.AFTER_LAST);
         }
     }
 

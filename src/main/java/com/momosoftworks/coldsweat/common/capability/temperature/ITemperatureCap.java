@@ -18,6 +18,7 @@ public interface ITemperatureCap
 
     EnumMap<Temperature.Trait, List<TempModifier>> getModifiers();
     List<TempModifier> getModifiers(Temperature.Trait trait);
+    List<TempModifier> getAllModifiers(Temperature.Trait trait);
     boolean hasModifier(Temperature.Trait trait, Class<? extends TempModifier> mod);
     void addModifier(TempModifier modifier, Temperature.Trait trait);
     void clearModifiers(Temperature.Trait trait);
