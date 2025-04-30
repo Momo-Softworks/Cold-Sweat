@@ -111,8 +111,7 @@ public class AbstractTempCap implements ITemperatureCap
     public void addModifier(TempModifier modifier, Trait trait)
     {
         if (!trait.isForModifiers())
-        {   throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("Invalid modifier trait: " + trait));
-        }
+            throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("Invalid modifier trait: " + trait));
         this.getModifiers(trait).add(modifier);
     }
 
@@ -126,9 +125,15 @@ public class AbstractTempCap implements ITemperatureCap
     {
         // Throw exception if this modifier type is not supported
         if (!trait.isForModifiers())
-        {   throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("Invalid modifier trait: " + trait));
-        }
+            throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("Invalid modifier trait: " + trait));
         return modifiers.computeIfAbsent(trait, t -> new ArrayList<>());
+    }
+
+    @Override
+    public List<TempModifier> getAllModifiers(Trait trait)
+    {
+        if (trait == Trait.ALL) return getModifiers(trait);
+        return CSMath.append(getModifiers(trait), getModifiers(Trait.ALL));
     }
 
     @Override
@@ -174,7 +179,7 @@ public class AbstractTempCap implements ITemperatureCap
     {   return showWorldTemp;
     }
 
-    /* See Temperature.class for more temperature-related methods */
+    /* See Temperature class for more temperature-related methods */
 
     /**
      * Used for clientside ticking of TempModifiers. The result is not used.
@@ -182,32 +187,40 @@ public class AbstractTempCap implements ITemperatureCap
     @Override
     public void tickDummy(LivingEntity entity)
     {
-        if (!(entity instanceof Player player)) return;
+        if (!(entity instanceof Player)) return;
 
-        Temperature.apply(0, player, Trait.WORLD, getModifiers(Trait.WORLD));
-        Temperature.apply(getTrait(Trait.CORE), player, Trait.CORE, getModifiers(Trait.CORE));
-        Temperature.apply(0, player, Trait.BASE, getModifiers(Trait.BASE));
+        Temperature.apply(0, entity, Trait.WORLD, this.getAllModifiers(Trait.WORLD));
+        Temperature.apply(0, entity, Trait.BASE, this.getAllModifiers(Trait.WORLD));
+        Temperature.apply(this.getTrait(Trait.CORE), entity, Trait.CORE, this.getAllModifiers(Trait.CORE));
+        Temperature.apply(ConfigSettings.MAX_TEMP.get(), entity, Trait.BURNING_POINT, this.getAllModifiers(Trait.BURNING_POINT));
+        Temperature.apply(ConfigSettings.MIN_TEMP.get(), entity, Trait.FREEZING_POINT, this.getAllModifiers(Trait.FREEZING_POINT));
+        Temperature.apply(0, entity, Trait.COLD_DAMPENING, this.getAllModifiers(Trait.COLD_DAMPENING));
+        Temperature.apply(0, entity, Trait.HEAT_DAMPENING, this.getAllModifiers(Trait.HEAT_DAMPENING));
+        Temperature.apply(0, entity, Trait.COLD_RESISTANCE, this.getAllModifiers(Trait.COLD_RESISTANCE));
+        Temperature.apply(0, entity, Trait.HEAT_RESISTANCE, this.getAllModifiers(Trait.HEAT_RESISTANCE));
+        Temperature.apply(0, entity, Trait.RATE, this.getAllModifiers(Trait.RATE));
     }
 
     @Override
     public void tick(LivingEntity entity)
     {
-        // Tick TempModifiers and pre-attribute-bases
-        double newWorldTemp = this.modifyFromAttribute(entity, Trait.WORLD, 0);
-        double newBaseTemp  = this.modifyFromAttribute(entity, Trait.BASE, 0);
-        double newCoreTemp  = Temperature.apply(getTrait(Trait.CORE), entity, Trait.CORE, getModifiers(Trait.CORE));
-
-        // Get abilities
-        double maxTemp = this.modifyFromAttribute(entity, Trait.BURNING_POINT, ConfigSettings.MAX_TEMP.get());
+        // Tick temp modifiers applied to ALL traits
+        Temperature.apply(0, entity, Trait.ALL, this.getModifiers(Trait.ALL));
+        // Apply temp modifiers
+        double worldTemp = this.modifyFromAttribute(entity, Trait.WORLD, 0);
+        double baseTemp  = this.modifyFromAttribute(entity, Trait.BASE,  0);
+        double coreTemp  = Temperature.apply(this.getTrait(Trait.CORE), entity, Trait.CORE, this.getAllModifiers(Trait.CORE));
+        double maxTemp = this.modifyFromAttribute(entity, Trait.BURNING_POINT,  ConfigSettings.MAX_TEMP.get());
         double minTemp = this.modifyFromAttribute(entity, Trait.FREEZING_POINT, ConfigSettings.MIN_TEMP.get());
-        double coldDampening   = this.modifyFromAttribute(entity, Trait.COLD_DAMPENING, 0);
-        double heatDampening   = this.modifyFromAttribute(entity, Trait.HEAT_DAMPENING, 0);
-        double coldResistance  = this.modifyFromAttribute(entity, Trait.COLD_RESISTANCE, 0);
-        double heatResistance  = this.modifyFromAttribute(entity, Trait.HEAT_RESISTANCE, 0);
+        double coldDampening  = this.modifyFromAttribute(entity, Trait.COLD_DAMPENING,  0);
+        double heatDampening  = this.modifyFromAttribute(entity, Trait.HEAT_DAMPENING,  0);
+        double coldResistance = this.modifyFromAttribute(entity, Trait.COLD_RESISTANCE, 0);
+        double heatResistance = this.modifyFromAttribute(entity, Trait.HEAT_RESISTANCE, 0);
+
         double rate = 0;
 
         // 1 if newWorldTemp is above max, -1 if below min, 0 if between the values (safe)
-        int worldTempSign = CSMath.getSignForRange(newWorldTemp, minTemp, maxTemp);
+        int worldTempSign = CSMath.getSignForRange(worldTemp, minTemp, maxTemp);
 
         boolean immuneToTemp = isPeacefulMode(entity);
         boolean isFullyColdDampened = worldTempSign < 0 && (coldDampening >= 1 || immuneToTemp);
@@ -218,7 +231,7 @@ public class AbstractTempCap implements ITemperatureCap
         && !isPeacefulMode(entity))
         {
             // How much hotter/colder the player's temp is compared to max/min
-            double difference = Math.abs(newWorldTemp - CSMath.clamp(newWorldTemp, minTemp, maxTemp));
+            double difference = Math.abs(worldTemp - CSMath.clamp(worldTemp, minTemp, maxTemp));
 
             // How much the player's temperature should change
             double changeBy = (Math.max(
@@ -250,11 +263,11 @@ public class AbstractTempCap implements ITemperatureCap
             // Apply rate multiplier if entity has climate data
             rate *= CSMath.getIfNotNull(ConfigSettings.ENTITY_CLIMATES.get().get(entity.getType()), EntityClimateData::rate, 0.25) * 4;
             // Apply the rate to entity's temperature
-            newCoreTemp += rate;
+            coreTemp += rate;
         }
 
         // Get the sign of the player's core temperature (-1, 0, or 1)
-        int coreTempSign = CSMath.sign(newCoreTemp);
+        int coreTempSign = CSMath.sign(coreTemp);
         // If needed, blend the player's temperature back to 0
         List<TempModifier> coreModifiers = this.getModifiers(Trait.CORE);
         boolean hasCoreModifiers = !coreModifiers.isEmpty() && (coreModifiers.get(0).getLastInput() == coreModifiers.get(coreModifiers.size()-1).getLastOutput());
@@ -269,7 +282,7 @@ public class AbstractTempCap implements ITemperatureCap
         }
         // Else if the player's core temp is not the same as the world temp
         else if (coreTempSign != 0 && coreTempSign != worldTempSign)
-        {   amount = (coreTempSign == 1 ? newWorldTemp - maxTemp : newWorldTemp - minTemp) / 3;
+        {   amount = (coreTempSign == 1 ? worldTemp - maxTemp : worldTemp - minTemp) / 3;
         }
         // Blend back to 0
         if (amount != 0)
@@ -278,13 +291,13 @@ public class AbstractTempCap implements ITemperatureCap
             if (hasCoreModifiers)
             {   changeBy /= 2;
             }
-            newCoreTemp += CSMath.minAbs(changeBy, -getTrait(Trait.CORE));
+            coreTemp += CSMath.minAbs(changeBy, -getTrait(Trait.CORE));
         }
 
         // Write the new temperature values
-        this.setTrait(Trait.CORE, CSMath.clamp(newCoreTemp, -150, 150), entity);
-        this.setTrait(Trait.BASE, CSMath.clamp(newBaseTemp, -150, 150), entity);
-        this.setTrait(Trait.WORLD, newWorldTemp, entity);
+        this.setTrait(Trait.CORE, CSMath.clamp(coreTemp, -150, 150), entity);
+        this.setTrait(Trait.BASE, CSMath.clamp(baseTemp, -150, 150), entity);
+        this.setTrait(Trait.WORLD, worldTemp, entity);
         // Write the new ability values
         this.setTrait(Trait.BURNING_POINT, maxTemp);
         this.setTrait(Trait.FREEZING_POINT, minTemp);
@@ -309,7 +322,7 @@ public class AbstractTempCap implements ITemperatureCap
 
     private double modifyFromAttribute(LivingEntity entity, Trait trait, double baseValue)
     {
-        Supplier<Double> defaultSupplier = () -> Temperature.apply(baseValue, entity, trait, this.getModifiers(trait));
+        Supplier<Double> defaultSupplier = () -> Temperature.apply(baseValue, entity, trait, this.getAllModifiers(trait));
         AttributeInstance attribute = attributes.computeIfAbsent(trait, t -> EntityTempManager.getAttribute(trait, entity));
 
         double newValue;

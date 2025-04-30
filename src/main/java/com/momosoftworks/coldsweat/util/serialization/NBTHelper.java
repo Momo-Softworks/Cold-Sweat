@@ -140,8 +140,8 @@ public class NBTHelper
     /**
      * Used for storing Temperature values in the player's persistent data (NBT). <br>
      * <br>
-     * @param trait The type of Temperature to be stored. ({@link Temperature.Trait#WORLD} should only be stored when needed to prevent lag)
-     * @return The NBT tag name for the given type
+     * @param trait The type of Temperature to be stored.
+     * @return The NBT tag name for the given trait.
      */
     public static String getTraitTagKey(Temperature.Trait trait)
     {   return trait.getSerializedName();
