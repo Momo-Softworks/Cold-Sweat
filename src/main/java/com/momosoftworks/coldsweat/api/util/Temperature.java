@@ -7,7 +7,6 @@ import com.momosoftworks.coldsweat.api.event.common.temperautre.TemperatureChang
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
-import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.SyncTempModifiersMessage;
@@ -17,10 +16,7 @@ import com.momosoftworks.coldsweat.util.math.InterruptibleIterator;
 import com.momosoftworks.coldsweat.util.serialization.StringRepresentable;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.LazyOptional;
@@ -177,7 +173,7 @@ public class Temperature
     }
 
     public static <T extends TempModifier> Optional<T> getModifier(ITemperatureCap cap, Trait trait, Class<T> modClass)
-    {   return (Optional<T>) cap.getModifiers(trait).stream().filter(modClass::isInstance).findFirst();
+    {   return (Optional<T>) cap.getAllModifiers(trait).stream().filter(modClass::isInstance).findFirst();
     }
 
     /**
@@ -186,7 +182,7 @@ public class Temperature
     @Nullable
     public static TempModifier getModifier(LivingEntity entity, Trait trait, Predicate<TempModifier> condition)
     {
-        for (TempModifier modifier : EntityTempManager.getTemperatureCap(entity).map(cap -> cap.getModifiers(trait)).orElse(Arrays.asList()))
+        for (TempModifier modifier : EntityTempManager.getTemperatureCap(entity).map(cap -> cap.getAllModifiers(trait)).orElse(Arrays.asList()))
         {
             if (condition.test(modifier))
             {   return modifier;
@@ -370,13 +366,26 @@ public class Temperature
     }
 
     /**
-     * Gets all TempModifiers of the specified type on the player
+     * Gets all TempModifiers of the specified type on the entity.<br>
+     * This includes modifiers applied to {@link Trait#ALL}
      * @param entity is the entity being sampled
      * @param trait determines which TempModifier list to pull from
-     * @return an immutable list of all TempModifiers for the specified trait
+     * @return an <b>IMMUTABLE</b> list of all TempModifiers for the specified trait
      */
     public static List<TempModifier> getModifiers(LivingEntity entity, Trait trait)
-    {   return EntityTempManager.getTemperatureCap(entity).map(cap -> ImmutableList.copyOf(cap.getModifiers(trait))).orElse(ImmutableList.of());
+    {   return EntityTempManager.getTemperatureCap(entity).map(cap -> ImmutableList.copyOf(cap.getAllModifiers(trait))).orElse(ImmutableList.of());
+    }
+
+    /**
+     * Directly gets the list of TempModifiers of the specified type on the entity.<br>
+     * Changes to this list will be reflected on the entity.<br>
+     * <b>For most operations, consider using the other helper methods instead.</b>
+     * @param entity is the entity being sampled
+     * @param trait determines which TempModifier list to pull from
+     * @return The TempModifiers for the specified trait.
+     */
+    public static List<TempModifier> accessModifiers(LivingEntity entity, Trait trait)
+    {   return EntityTempManager.getTemperatureCap(entity).map(cap -> cap.getModifiers(trait)).orElse(ImmutableList.of());
     }
 
     /**
@@ -388,9 +397,7 @@ public class Temperature
     {
         EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
         {
-            if (cap.getModifiers(trait) != null)
-            {   cap.getModifiers(trait).forEach(action);
-            }
+            cap.getAllModifiers(trait).forEach(action);
         });
     }
 
@@ -398,9 +405,7 @@ public class Temperature
     {
         EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
         {
-            if (cap.getModifiers(trait) != null)
-            {   CSMath.breakableForEach(cap.getModifiers(trait), action);
-            }
+            CSMath.breakableForEach(cap.getAllModifiers(trait), action);
         });
     }
 
@@ -463,6 +468,8 @@ public class Temperature
      * {@link #HEAT_RESISTANCE}: Resistance to heat temperature-related damage. <br>
      * {@link #COLD_DAMPENING}: Changes the rate of body temperature increase. <br>
      * {@link #HEAT_DAMPENING}: Changes the rate of body temperature decrease. <br>
+     * <br>
+     * {@link #ALL}: Modifiers added to this trait are applied to all temperature stats. <br>
      */
     public enum Trait implements StringRepresentable
     {
@@ -477,7 +484,9 @@ public class Temperature
         COLD_RESISTANCE("cold_resistance", true, true, true),
         HEAT_RESISTANCE("heat_resistance", true, true, true),
         COLD_DAMPENING("cold_dampening", true, true, true),
-        HEAT_DAMPENING("heat_dampening", true, true, true);
+        HEAT_DAMPENING("heat_dampening", true, true, true),
+
+        ALL("all", false, true, false);
 
         public static final Codec<Trait> CODEC = StringRepresentable.fromEnum(Trait::values);
 

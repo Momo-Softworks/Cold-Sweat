@@ -758,9 +758,23 @@ public class CSMath
      * The collections are appended to each other in the order in which they are provided.
      */
     @SafeVarargs
-    public static <T> List<T> merge(Collection<T>... lists)
+    public static <T> List<T> append(Collection<T>... lists)
     {
         List<T> appended = new ArrayList<>();
+        for (Collection<T> list : lists)
+        {   appended.addAll(list);
+        }
+        return appended;
+    }
+
+    /**
+     * Merges the given collections together into a single (duplicate-safe) set.<br>
+     * The collections are merged in the order in which they are provided.
+     */
+    @SafeVarargs
+    public static <T> Set<T> merge(Collection<T>... lists)
+    {
+        Set<T> appended = new HashSet<>();
         for (Collection<T> list : lists)
         {   appended.addAll(list);
         }

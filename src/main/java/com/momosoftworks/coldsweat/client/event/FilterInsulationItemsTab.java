@@ -22,7 +22,7 @@ public class FilterInsulationItemsTab
     {
         event.addCheck((item, insulator) ->
         {
-            List<Either<ITag<Item>, Item>> items = insulator.item().flatMap(it -> CSMath.mutable(it.items()), CSMath::merge, List::removeAll).orElse(Arrays.asList());
+            List<Either<ITag<Item>, Item>> items = insulator.item().flatMap(it -> CSMath.mutable(it.items()), CSMath::append, List::removeAll).orElse(Arrays.asList());
             for (Either<ITag<Item>, Item> either : items)
             {
                 if (either.left().map(tag -> tag.contains(item)).orElse(false))

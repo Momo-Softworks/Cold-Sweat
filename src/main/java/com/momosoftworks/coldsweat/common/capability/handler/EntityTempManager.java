@@ -345,7 +345,6 @@ public class EntityTempManager
             effectsPerCarriedTemp.put(carried, newEffect);
         }
     }
-
     /**
      * Transfer the player's capability when traveling from the End
      */
@@ -405,20 +404,20 @@ public class EntityTempManager
         // Use a far more performant (less accurate) check for climate-enabled entities
         if (hasClimateData(entity))
         {
-            if (!ConfigSettings.ADVANCED_ENTITY_TEMPERATURE.get())
+            boolean isAdvanced = ConfigSettings.ADVANCED_ENTITY_TEMPERATURE.get();
+            boolean wasAdvanced = entity.getPersistentData().getBoolean("AdvancedTemperature");
+            // Clear modifiers if the "Advanced" setting was changed
+            if (isAdvanced != wasAdvanced)
+            {   Temperature.getModifiers(entity).clear();
+                entity.getPersistentData().putBoolean("AdvancedTemperature", isAdvanced);
+            }
+            // Use basic temp calculation if not advanced
+            if (!isAdvanced)
             {
                 if (trait.isForWorld())
                 {   event.addModifier(new EntityClimateTempModifier().tickRate(200), Placement.Duplicates.BY_CLASS, Placement.BEFORE_FIRST);
                 }
-                // Reset modifiers if the entity was previously advanced
-                if (!Temperature.hasModifier(entity, Temperature.Trait.WORLD, EntityClimateTempModifier.class))
-                {   Temperature.getModifiers(entity).clear();
-                }
                 return;
-            }
-            // If the entity is advanced, remove the EntityClimateTempModifier
-            else
-            {   Temperature.removeModifiers(entity, Temperature.Trait.WORLD, EntityClimateTempModifier.class);
             }
         }
 
@@ -461,11 +460,13 @@ public class EntityTempManager
                                   Placement.Duplicates.BY_CLASS,
                                   Placement.of(Mode.AFTER, Order.FIRST, mod2 -> mod2 instanceof BlockTempModifier));
         }
-        else if (isPlayer && (trait == Temperature.Trait.FREEZING_POINT || trait == Temperature.Trait.BURNING_POINT))
-        {   event.addModifier(new AcclimationTempModifier().tickRate(20), Placement.Duplicates.BY_CLASS, Placement.AFTER_LAST);
+        else if (trait == Temperature.Trait.FREEZING_POINT || trait == Temperature.Trait.BURNING_POINT)
+        {
+            if (isPlayer) event.addModifier(new AcclimationTempModifier().tickRate(20), Placement.Duplicates.BY_CLASS, Placement.AFTER_LAST);
         }
-        else if (isPlayer && trait.isForModifiers())
-        {   event.addModifier(new InventoryItemsTempModifier().tickRate(5), Placement.Duplicates.BY_CLASS, Placement.AFTER_LAST);
+        else if (trait == Temperature.Trait.ALL)
+        {
+            if (isPlayer) event.addModifier(new InventoryItemsTempModifier().tickRate(5), Placement.Duplicates.BY_CLASS, Placement.AFTER_LAST);
         }
     }
 
