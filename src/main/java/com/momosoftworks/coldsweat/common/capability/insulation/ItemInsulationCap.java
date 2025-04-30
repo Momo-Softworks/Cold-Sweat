@@ -101,7 +101,7 @@ public record ItemInsulationCap(List<Pair<ItemStack, List<InsulatorData>>> insul
         }
 
         int appliedInsulators = 0;
-        for (InsulatorData data : CSMath.merge(insulation, this.getInsulators()))
+        for (InsulatorData data : CSMath.append(insulation, this.getInsulators()))
         {
             // Add all slots from multi-slot insulation
             if (data.fillSlots())
