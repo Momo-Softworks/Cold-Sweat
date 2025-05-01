@@ -2,11 +2,15 @@ package com.momosoftworks.coldsweat.config;
 
 import com.google.common.io.Files;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.api.temperature.modifier.InventoryItemsTempModifier;
+import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.config.spec.ItemSettingsConfig;
 import com.momosoftworks.coldsweat.config.spec.MainSettingsConfig;
 import com.momosoftworks.coldsweat.config.spec.WorldSettingsConfig;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.loading.FMLPaths;
 
@@ -15,8 +19,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class ConfigUpdater
+public class ModUpdater
 {
+    public static void updateEntity(LivingEntity entity)
+    {
+        String entityVersion = entity.getPersistentData().getString("cs:version");
+        if (isBehind(entityVersion, "2.3-b03a"))
+        {
+            EntityTempManager.getTemperatureCap(entity).ifPresent(cap -> cap.getModifiers().forEach((trait, list) ->
+            {
+                if (trait != Temperature.Trait.ALL)
+                {   list.removeIf(mod -> mod.getClass() == InventoryItemsTempModifier.class);
+                }
+            }));
+        }
+        entity.getPersistentData().putString("cs:version", ColdSweat.getVersion());
+    }
+
     public static void updateConfigs()
     {
         // Do not run if auto-update is disabled
