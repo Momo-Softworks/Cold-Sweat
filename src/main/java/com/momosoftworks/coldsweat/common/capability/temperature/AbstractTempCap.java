@@ -127,15 +127,8 @@ public class AbstractTempCap implements ITemperatureCap
     }
 
     @Override
-    public List<TempModifier> getAllModifiers(Trait trait)
-    {
-        if (trait == Trait.ALL) return getModifiers(trait);
-        return CSMath.append(getModifiers(trait), getModifiers(Trait.ALL));
-    }
-
-    @Override
     public boolean hasModifier(Trait trait, Class<? extends TempModifier> mod)
-    {   return getModifiers(trait).stream().anyMatch(mod::isInstance);
+    {   return this.getModifiers(trait).stream().anyMatch(mod::isInstance);
     }
 
     @Override
@@ -186,27 +179,25 @@ public class AbstractTempCap implements ITemperatureCap
     {
         if (!(entity instanceof Player)) return;
 
-        Temperature.apply(0, entity, Trait.WORLD, this.getAllModifiers(Trait.WORLD));
-        Temperature.apply(0, entity, Trait.BASE, this.getAllModifiers(Trait.WORLD));
-        Temperature.apply(this.getTrait(Trait.CORE), entity, Temperature.Trait.CORE, this.getAllModifiers(Trait.CORE));
-        Temperature.apply(ConfigSettings.MAX_TEMP.get(), entity, Trait.BURNING_POINT, this.getAllModifiers(Trait.BURNING_POINT));
-        Temperature.apply(ConfigSettings.MIN_TEMP.get(), entity, Trait.FREEZING_POINT, this.getAllModifiers(Trait.FREEZING_POINT));
-        Temperature.apply(0, entity, Trait.COLD_DAMPENING, this.getAllModifiers(Trait.COLD_DAMPENING));
-        Temperature.apply(0, entity, Trait.HEAT_DAMPENING, this.getAllModifiers(Trait.HEAT_DAMPENING));
-        Temperature.apply(0, entity, Trait.COLD_RESISTANCE, this.getAllModifiers(Trait.COLD_RESISTANCE));
-        Temperature.apply(0, entity, Trait.HEAT_RESISTANCE, this.getAllModifiers(Trait.HEAT_RESISTANCE));
-        Temperature.apply(0, entity, Trait.RATE, this.getAllModifiers(Trait.RATE));
+        Temperature.apply(0, entity, Trait.WORLD, this.getModifiers(Trait.WORLD));
+        Temperature.apply(0, entity, Trait.BASE, this.getModifiers(Trait.WORLD));
+        Temperature.apply(this.getTrait(Trait.CORE), entity, Temperature.Trait.CORE, this.getModifiers(Trait.CORE));
+        Temperature.apply(ConfigSettings.MAX_TEMP.get(), entity, Trait.BURNING_POINT, this.getModifiers(Trait.BURNING_POINT));
+        Temperature.apply(ConfigSettings.MIN_TEMP.get(), entity, Trait.FREEZING_POINT, this.getModifiers(Trait.FREEZING_POINT));
+        Temperature.apply(0, entity, Trait.COLD_DAMPENING, this.getModifiers(Trait.COLD_DAMPENING));
+        Temperature.apply(0, entity, Trait.HEAT_DAMPENING, this.getModifiers(Trait.HEAT_DAMPENING));
+        Temperature.apply(0, entity, Trait.COLD_RESISTANCE, this.getModifiers(Trait.COLD_RESISTANCE));
+        Temperature.apply(0, entity, Trait.HEAT_RESISTANCE, this.getModifiers(Trait.HEAT_RESISTANCE));
+        Temperature.apply(0, entity, Trait.RATE, this.getModifiers(Trait.RATE));
     }
 
     @Override
     public void tick(LivingEntity entity)
     {
-        // Tick temp modifiers applied to ALL traits
-        Temperature.apply(0, entity, Trait.ALL, this.getModifiers(Trait.ALL));
         // Apply temp modifiers
         double worldTemp = this.modifyFromAttribute(entity, Trait.WORLD, 0);
         double baseTemp  = this.modifyFromAttribute(entity, Trait.BASE,  0);
-        double coreTemp  = Temperature.apply(this.getTrait(Trait.CORE), entity, Trait.CORE, this.getAllModifiers(Trait.CORE));
+        double coreTemp  = Temperature.apply(this.getTrait(Trait.CORE), entity, Trait.CORE, this.getModifiers(Trait.CORE));
         double maxTemp = this.modifyFromAttribute(entity, Trait.BURNING_POINT,  ConfigSettings.MAX_TEMP.get());
         double minTemp = this.modifyFromAttribute(entity, Trait.FREEZING_POINT, ConfigSettings.MIN_TEMP.get());
         double coldDampening  = this.modifyFromAttribute(entity, Trait.COLD_DAMPENING,  0);
@@ -319,7 +310,7 @@ public class AbstractTempCap implements ITemperatureCap
 
     private double modifyFromAttribute(LivingEntity entity, Temperature.Trait trait, double baseValue)
     {
-        Supplier<Double> defaultSupplier = () -> Temperature.apply(baseValue, entity, trait, this.getAllModifiers(trait));
+        Supplier<Double> defaultSupplier = () -> Temperature.apply(baseValue, entity, trait, this.getModifiers(trait));
         AttributeInstance attribute = attributes.computeIfAbsent(trait, t -> EntityTempManager.getAttribute(trait, entity));
 
         double newValue;
@@ -511,20 +502,25 @@ public class AbstractTempCap implements ITemperatureCap
     @Override
     public void deserializeModifiers(CompoundTag nbt)
     {
+        Map<Trait, List<TempModifier>> modifiers = new EnumMap<>(Trait.class);
+        Map<Integer, Optional<TempModifier>> modifierHashes = new HashMap<>();
         for (Trait trait : VALID_MODIFIER_TRAITS)
         {
-            getModifiers(trait).clear();
-
             // Get the list of modifiers from the player's persistent data
-            ListTag modifiers = nbt.getList(NBTHelper.getTraitTagKey(trait), 10);
+            ListTag modTags = nbt.getList(NBTHelper.getTraitTagKey(trait), 10);
 
             // For each modifier in the list
-            modifiers.forEach(modNBT ->
+            modTags.forEach(entry ->
             {
-                NBTHelper.tagToModifier((CompoundTag) modNBT).ifPresent(modifier ->
-                {   getModifiers(trait).add(modifier);
+                CompoundTag modNBT = ((CompoundTag) entry);
+                Optional<TempModifier> modOpt = modifierHashes.computeIfAbsent(modNBT.getInt("Hash"), hash -> NBTHelper.tagToModifier(modNBT));
+                modOpt.ifPresent(modifier ->
+                {   modifiers.computeIfAbsent(trait, t -> new ArrayList<>()).add(modifier);
                 });
             });
         }
+        // Add the modifiers to the player's modifiers
+        this.modifiers.clear();
+        this.modifiers.putAll(modifiers);
     }
 }

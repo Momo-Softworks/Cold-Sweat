@@ -28,9 +28,7 @@ public class ModUpdater
         {
             EntityTempManager.getTemperatureCap(entity).ifPresent(cap -> cap.getModifiers().forEach((trait, list) ->
             {
-                if (trait != Temperature.Trait.ALL)
-                {   list.removeIf(mod -> mod.getClass() == InventoryItemsTempModifier.class);
-                }
+                list.removeIf(mod -> mod.getClass() == InventoryItemsTempModifier.class);
             }));
         }
         entity.getPersistentData().putString("cs:version", ColdSweat.getVersion());

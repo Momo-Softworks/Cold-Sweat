@@ -56,9 +56,9 @@ public class SoulSproutItem extends ItemNameBlockItem
         {
             Level level = source.getLevel();
             Position position = DispenserBlock.getDispensePosition(source);
-            BlockPos pos = BlockPos.containing(position);
+            BlockPos pos = new BlockPos(position);
 
-            if (level.getBlockState(pos).canBeReplaced())
+            if (level.getBlockState(pos).getMaterial().isReplaceable())
             {
                 BlockState state = ModBlocks.SOUL_STALK.defaultBlockState();
                 if (state.canSurvive(level, pos))
