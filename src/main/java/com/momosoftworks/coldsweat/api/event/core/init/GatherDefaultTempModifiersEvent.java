@@ -14,20 +14,21 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
- * Determines the default {@link TempModifier}s that will be applied to an entity upon spawning.<br>
- * This event is fired EVERY TIME the entity joins the world, so make sure to properly check for duplicates.
+ * Use {@link DefaultTempModifiersEvent} instead, which is fired for all traits at once.
+ * This event is deprecated and will be removed in a future version.
  */
+@Deprecated(since = "2.4", forRemoval = true)
 public class GatherDefaultTempModifiersEvent extends Event
 {
     private final List<TempModifier> modifiers;
     private final LivingEntity entity;
     private final Temperature.Trait trait;
 
-    public GatherDefaultTempModifiersEvent(LivingEntity entity, Temperature.Trait trait)
+    public GatherDefaultTempModifiersEvent(LivingEntity entity, List<TempModifier> modifiers, Temperature.Trait trait)
     {
         this.entity = entity;
         this.trait = trait;
-        this.modifiers = new ArrayList<>(Temperature.accessModifiers(entity, trait));
+        this.modifiers = modifiers;
     }
 
     public List<TempModifier> getModifiers()

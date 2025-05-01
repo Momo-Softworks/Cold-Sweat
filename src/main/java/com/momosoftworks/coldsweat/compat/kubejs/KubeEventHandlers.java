@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.compat.kubejs;
 import com.momosoftworks.coldsweat.api.event.common.insulation.InsulateItemEvent;
 import com.momosoftworks.coldsweat.api.event.common.temperautre.TempModifierEvent;
 import com.momosoftworks.coldsweat.api.event.common.temperautre.TemperatureChangedEvent;
+import com.momosoftworks.coldsweat.api.event.core.init.DefaultTempModifiersEvent;
 import com.momosoftworks.coldsweat.api.event.core.init.GatherDefaultTempModifiersEvent;
 import com.momosoftworks.coldsweat.compat.kubejs.event.*;
 import dev.architectury.event.EventResult;
@@ -40,7 +41,7 @@ public class KubeEventHandlers
         }
     }
 
-    private static void gatherDefaultModifiers(GatherDefaultTempModifiersEvent event)
+    private static void gatherDefaultModifiers(DefaultTempModifiersEvent event)
     {
         if (GATHER_DEFAULT_MODIFIERS.hasListeners())
         {   GATHER_DEFAULT_MODIFIERS.post(new DefaultModifiersEventJS(event));

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.api.event.core.init.DefaultTempModifiersEvent;
 import com.momosoftworks.coldsweat.api.event.vanilla.ContainerChangedEvent;
 import com.momosoftworks.coldsweat.api.event.common.temperautre.TempModifierEvent;
 import com.momosoftworks.coldsweat.api.event.core.init.GatherDefaultTempModifiersEvent;
@@ -80,12 +81,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
+import static com.momosoftworks.coldsweat.api.util.Temperature.Trait;
+
 @Mod.EventBusSubscriber
 public class EntityTempManager
 {
-    public static final Temperature.Trait[] VALID_TEMPERATURE_TRAITS = Arrays.stream(Temperature.Trait.values()).filter(Temperature.Trait::isForTemperature).toArray(Temperature.Trait[]::new);
-    public static final Temperature.Trait[] VALID_MODIFIER_TRAITS = Arrays.stream(Temperature.Trait.values()).filter(Temperature.Trait::isForModifiers).toArray(Temperature.Trait[]::new);
-    public static final Temperature.Trait[] VALID_ATTRIBUTE_TRAITS = Arrays.stream(Temperature.Trait.values()).filter(Temperature.Trait::isForAttributes).toArray(Temperature.Trait[]::new);
+    public static final Trait[] VALID_TEMPERATURE_TRAITS = Arrays.stream(Trait.values()).filter(Trait::isForTemperature).toArray(Trait[]::new);
+    public static final Trait[] VALID_MODIFIER_TRAITS = Arrays.stream(Trait.values()).filter(Trait::isForModifiers).toArray(Trait[]::new);
+    public static final Trait[] VALID_ATTRIBUTE_TRAITS = Arrays.stream(Trait.values()).filter(Trait::isForAttributes).toArray(Trait[]::new);
 
     public static final Set<EntityType<? extends LivingEntity>> TEMPERATURE_ENABLED_ENTITIES = new HashSet<>(List.of(EntityType.PLAYER));
 
@@ -152,12 +155,11 @@ public class EntityTempManager
      * Add default modifiers to players and temperature-enabled entities
      */
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void defineDefaultModifiers(GatherDefaultTempModifiersEvent event)
+    public static void defineDefaultModifiers(DefaultTempModifiersEvent event)
     {
         LivingEntity entity = event.getEntity();
         boolean isPlayer = entity instanceof Player;
         boolean isTempSensitive = entity.getType().is(ModEntityTags.TEMPERATURE_SENSITIVE);
-        Temperature.Trait trait = event.getTrait();
 
         // Use a far more performant (less accurate) check for climate-enabled entities
         if (hasClimateData(entity))
@@ -172,9 +174,9 @@ public class EntityTempManager
             // Use basic temp calculation if not advanced
             if (!isAdvanced)
             {
-                if (trait.isForWorld())
-                {   event.addModifier(new EntityClimateTempModifier().tickRate(200), Placement.Duplicates.BY_CLASS, Placement.BEFORE_FIRST);
-                }
+                event.addModifier(List.of(Trait.WORLD, Trait.FREEZING_POINT, Trait.BURNING_POINT),
+                                  new EntityClimateTempModifier().tickRate(200),
+                                  Placement.Duplicates.BY_CLASS, Placement.BEFORE_FIRST);
                 return;
             }
         }
@@ -188,46 +190,42 @@ public class EntityTempManager
         int mediumTickRate2 = (int) (10 * tickMultiplier);
         int fastTickRate = (int) (5 * tickMultiplier);
 
-        if (trait == Temperature.Trait.WORLD)
+        event.addModifier(Trait.WORLD, new BiomeTempModifier(isPlayer ? 49 : isTempSensitive ? 16 : 9).tickRate(mediumTickRate),
+                          Placement.Duplicates.BY_CLASS, Placement.BEFORE_FIRST);
+
+        event.addModifier(Trait.WORLD, new ElevationTempModifier(isPlayer ? 49 : isTempSensitive ? 16 : 1).tickRate(mediumTickRate),
+                          Placement.Duplicates.BY_CLASS, Placement.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof BiomeTempModifier));
+
+        event.addModifier(Trait.WORLD, new DepthBiomeTempModifier(isPlayer ? 6 : isTempSensitive ? 5 : 3).tickRate(mediumTickRate),
+                          Placement.Duplicates.BY_CLASS, Placement.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof ElevationTempModifier));
+
+        event.addModifier(Trait.WORLD, new BlockTempModifier(isPlayer ? -1 : 4).tickRate(fastTickRate),
+                          Placement.Duplicates.BY_CLASS, Placement.AFTER_LAST);
+
+        event.addModifier(Trait.WORLD, new EntitiesTempModifier().tickRate(mediumTickRate2),
+                          Placement.Duplicates.BY_CLASS, Placement.AFTER_LAST);
+
+        // Serene Seasons compat
+        event.addModifierById(Trait.WORLD, new ResourceLocation("sereneseasons:season"),
+                              mod -> mod.tickRate(slowTickRate),
+                              Placement.Duplicates.BY_CLASS,
+                              Placement.of(Mode.BEFORE, Order.FIRST, mod2 -> mod2 instanceof ElevationTempModifier));
+        // Weather2 Compat
+        event.addModifierById(Trait.WORLD, new ResourceLocation("weather2:storm"),
+                              mod -> mod.tickRate(slowTickRate),
+                              Placement.Duplicates.BY_CLASS,
+                              Placement.of(Mode.BEFORE, Order.FIRST, mod2 -> mod2 instanceof ElevationTempModifier));
+        // Valkyrien Skies Compat
+        event.addModifierById(Trait.WORLD, new ResourceLocation("valkyrienskies:ship_blocks"),
+                              mod -> mod.tickRate(mediumTickRate2),
+                              Placement.Duplicates.BY_CLASS,
+                              Placement.of(Mode.AFTER, Order.FIRST, mod2 -> mod2 instanceof BlockTempModifier));
+
+        if (isPlayer && !(entity instanceof DummyPlayer))
         {
-            event.addModifier(new BiomeTempModifier(isPlayer ? 49 : isTempSensitive ? 16 : 9).tickRate(mediumTickRate),
-                              Placement.Duplicates.BY_CLASS, Placement.BEFORE_FIRST);
-
-            event.addModifier(new ElevationTempModifier(isPlayer ? 49 : isTempSensitive ? 16 : 1).tickRate(mediumTickRate),
-                              Placement.Duplicates.BY_CLASS, Placement.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof BiomeTempModifier));
-
-            event.addModifier(new DepthBiomeTempModifier(isPlayer ? 6 : isTempSensitive ? 5 : 3).tickRate(mediumTickRate),
-                              Placement.Duplicates.BY_CLASS, Placement.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof ElevationTempModifier));
-
-            event.addModifier(new BlockTempModifier(isPlayer ? -1 : 4).tickRate(fastTickRate),
-                              Placement.Duplicates.BY_CLASS, Placement.AFTER_LAST);
-
-            event.addModifier(new EntitiesTempModifier().tickRate(mediumTickRate2),
-                              Placement.Duplicates.BY_CLASS, Placement.AFTER_LAST);
-
-            // Serene Seasons compat
-            event.addModifierById(new ResourceLocation("sereneseasons:season"),
-                                  mod -> mod.tickRate(slowTickRate),
-                                  Placement.Duplicates.BY_CLASS,
-                                  Placement.of(Mode.BEFORE, Order.FIRST, mod2 -> mod2 instanceof ElevationTempModifier));
-            // Weather2 Compat
-            event.addModifierById(new ResourceLocation("weather2:storm"),
-                                  mod -> mod.tickRate(slowTickRate),
-                                  Placement.Duplicates.BY_CLASS,
-                                  Placement.of(Mode.BEFORE, Order.FIRST, mod2 -> mod2 instanceof ElevationTempModifier));
-            // Valkyrien Skies Compat
-            event.addModifierById(new ResourceLocation("valkyrienskies:ship_blocks"),
-                                  mod -> mod.tickRate(mediumTickRate2),
-                                  Placement.Duplicates.BY_CLASS,
-                                  Placement.of(Mode.AFTER, Order.FIRST, mod2 -> mod2 instanceof BlockTempModifier));
-        }
-        else if (trait == Temperature.Trait.FREEZING_POINT || trait == Temperature.Trait.BURNING_POINT)
-        {
-            if (isPlayer) event.addModifier(new AcclimationTempModifier().tickRate(20), Placement.Duplicates.BY_CLASS, Placement.AFTER_LAST);
-        }
-        else if (trait == Temperature.Trait.ALL)
-        {
-            if (isPlayer) event.addModifier(new InventoryItemsTempModifier().tickRate(5), Placement.Duplicates.BY_CLASS, Placement.AFTER_LAST);
+            event.addModifier(List.of(Trait.FREEZING_POINT, Trait.BURNING_POINT),
+                              new AcclimationTempModifier().tickRate(20), Placement.Duplicates.BY_CLASS, Placement.AFTER_LAST);
+            event.addModifier(Arrays.asList(VALID_MODIFIER_TRAITS), new InventoryItemsTempModifier().tickRate(5), Placement.Duplicates.BY_CLASS, Placement.AFTER_LAST);
         }
     }
 
@@ -243,7 +241,7 @@ public class EntityTempManager
             getTemperatureCap(living).ifPresent(cap ->
             {
                 // Add default modifiers every time the entity joins the world
-                Map<Temperature.Trait, List<TempModifier>> modifiers = gatherTempModifiers(living);
+                Map<Trait, List<TempModifier>> modifiers = gatherTempModifiers(living);
                 cap.getModifiers().clear();
                 cap.getModifiers().putAll(modifiers);
                 TaskScheduler.scheduleServer(() ->
@@ -254,12 +252,16 @@ public class EntityTempManager
         }
     }
 
-    public static Map<Temperature.Trait, List<TempModifier>> gatherTempModifiers(LivingEntity entity)
+    public static Map<Trait, List<TempModifier>> gatherTempModifiers(LivingEntity entity)
     {
-        Map<Temperature.Trait, List<TempModifier>> modifiers = new EnumMap<>(Temperature.Trait.class);
-        for (Temperature.Trait trait : VALID_MODIFIER_TRAITS)
+        DefaultTempModifiersEvent modifiersEvent = new DefaultTempModifiersEvent(entity);
+        MinecraftForge.EVENT_BUS.post(modifiersEvent);
+        Map<Trait, List<TempModifier>> modifiers = modifiersEvent.getModifiers();
+
+        /* DEPRECATED. Will be removed in a future version. */
+        for (Trait trait : VALID_MODIFIER_TRAITS)
         {
-            GatherDefaultTempModifiersEvent gatherEvent = new GatherDefaultTempModifiersEvent(entity, trait);
+            GatherDefaultTempModifiersEvent gatherEvent = new GatherDefaultTempModifiersEvent(entity, modifiers.get(trait), trait);
             MinecraftForge.EVENT_BUS.post(gatherEvent);
             modifiers.put(trait, gatherEvent.getModifiers());
         }
@@ -271,7 +273,7 @@ public class EntityTempManager
     {
         if (isTemperatureEnabled(event.getEntity()))
         {   CAP_CACHE.removeIf(Entity::isRemoved);
-            TEMP_MODIFIER_IMMUNITIES.entrySet().removeIf(e -> e.getKey().isRemoved());
+            TEMP_MODIFIER_IMMUNITIES.keySet().removeIf(Entity::isRemoved);
         }
     }
 
@@ -299,17 +301,21 @@ public class EntityTempManager
             {   cap.tickDummy(entity);
             }
 
-            // Remove expired modifiers
+            // Tick modifiers & removed expired
             AtomicBoolean sync = new AtomicBoolean(false);
-            for (Temperature.Trait trait : VALID_MODIFIER_TRAITS)
+            for (Trait trait : VALID_MODIFIER_TRAITS)
             {
                 cap.getModifiers(trait).removeIf(modifier ->
                 {
-                    int expireTime = modifier.getExpireTime();
+                    // Tick modifier
+                    modifier.tick(entity);
+                    // Sync if the modifier is dirty
                     if (modifier.isDirty())
                     {   sync.set(true);
                         modifier.markClean();
                     }
+                    // Remove expired modifiers
+                    int expireTime = modifier.getExpireTime();
                     return (modifier.setTicksExisted(modifier.getTicksExisted() + 1) > expireTime && expireTime != -1);
                 });
             }
@@ -322,17 +328,17 @@ public class EntityTempManager
             {
                 if (entity.tickCount % 5 == 0 && entity.getRandom().nextDouble() < 0.1)
                 {
-                    double worldTemp = cap.getTrait(Temperature.Trait.WORLD);
+                    double worldTemp = cap.getTrait(Trait.WORLD);
                     double entityX = entity.getX();
                     double entityY = entity.getY() + entity.getBbHeight();
                     double entityZ = entity.getZ();
 
-                    if (worldTemp < cap.getTrait(Temperature.Trait.FREEZING_POINT))
+                    if (worldTemp < cap.getTrait(Trait.FREEZING_POINT))
                     {
                         WorldHelper.spawnParticleBatch(entity.level, ParticleTypesInit.MOB_COLD.get(), entityX, entityY, entityZ, 0.5, 0.5, 0.5,
                                                        entity.getRandom().nextInt(2, 4), 0);
                     }
-                    else if (worldTemp > cap.getTrait(Temperature.Trait.BURNING_POINT))
+                    else if (worldTemp > cap.getTrait(Trait.BURNING_POINT))
                     {
                         WorldHelper.spawnParticleBatch(entity.level, ParticleTypesInit.MOB_HOT.get(), entityX, entityY, entityZ, 0.5, 0.5, 0.5,
                                                        entity.getRandom().nextInt(2, 4), 0);
@@ -534,16 +540,16 @@ public class EntityTempManager
             {
                 if (!player.isSpectator() && (WorldHelper.isInWater(player) || player.tickCount % 40 == 0
                 && WorldHelper.isRainingAt(player.level, player.blockPosition())))
-                {   Temperature.addModifier(player, new WaterTempModifier(0.01f).tickRate(5), Temperature.Trait.WORLD, Placement.Duplicates.BY_CLASS);
+                {   Temperature.addModifier(player, new WaterTempModifier(0.01f).tickRate(5), Trait.WORLD, Placement.Duplicates.BY_CLASS);
                 }
 
                 if (player.isFreezing())
-                {   Temperature.addOrReplaceModifier(player, new FreezingTempModifier(), Temperature.Trait.BASE, Placement.Duplicates.BY_CLASS);
+                {   Temperature.addOrReplaceModifier(player, new FreezingTempModifier(), Trait.BASE, Placement.Duplicates.BY_CLASS);
                 }
 
-                if (player.isOnFire() && Temperature.hasModifier(player, Temperature.Trait.WORLD, WaterTempModifier.class))
+                if (player.isOnFire() && Temperature.hasModifier(player, Trait.WORLD, WaterTempModifier.class))
                 {   player.clearFire();
-                    Temperature.removeModifiers(player, Temperature.Trait.WORLD, WaterTempModifier.class);
+                    Temperature.removeModifiers(player, Trait.WORLD, WaterTempModifier.class);
                 }
             }
 
@@ -554,7 +560,7 @@ public class EntityTempManager
 
                 if (!hasIcePotion)
                 {
-                    Temperature.getModifier(player, Temperature.Trait.RATE, ArmorInsulationTempModifier.class).ifPresent(insulModifier ->
+                    Temperature.getModifier(player, Trait.RATE, ArmorInsulationTempModifier.class).ifPresent(insulModifier ->
                     {   insulation.updateAndGet(v -> (v + insulModifier.getNBT().getDouble("Hot") + insulModifier.getNBT().getDouble("Cold")));
                     });
                 }
@@ -577,7 +583,7 @@ public class EntityTempManager
             TaskScheduler.scheduleServer(() ->
             {
                 if (stack.getItem() instanceof TridentItem && EnchantmentHelper.getRiptide(stack) > 0 && !entity.isInWaterOrBubble())
-                {   Temperature.removeModifiers(entity, Temperature.Trait.WORLD, WaterTempModifier.class);
+                {   Temperature.removeModifiers(entity, Trait.WORLD, WaterTempModifier.class);
                 }
             }, 5);
         }
@@ -691,9 +697,9 @@ public class EntityTempManager
             int strength = effect.getAmplifier() + 1;
             // Add TempModifier on potion effect added
             ThermalSourceTempModifier newMod = (isWarmth ? new WarmthTempModifier(strength) : new FrigidnessTempModifier(strength)).expires(effect.getDuration());
-            ThermalSourceTempModifier oldMod = Temperature.getModifier(entity, Temperature.Trait.WORLD, ThermalSourceTempModifier.class).orElse(null);
+            ThermalSourceTempModifier oldMod = Temperature.getModifier(entity, Trait.WORLD, ThermalSourceTempModifier.class).orElse(null);
             if (oldMod == null || oldMod.getStrength() <= strength)
-            {   Temperature.addOrReplaceModifier(entity, newMod, Temperature.Trait.WORLD, Placement.Duplicates.BY_CLASS);
+            {   Temperature.addOrReplaceModifier(entity, newMod, Trait.WORLD, Placement.Duplicates.BY_CLASS);
             }
         }
     }
@@ -707,7 +713,7 @@ public class EntityTempManager
         if (effect != null && !entity.level.isClientSide && isTemperatureEnabled(entity)
         && (effect.getEffect() == ModEffects.FRIGIDNESS || effect.getEffect() == ModEffects.WARMTH))
         {
-            Optional<ThermalSourceTempModifier> modifier = Temperature.getModifier(entity, Temperature.Trait.WORLD, ThermalSourceTempModifier.class);
+            Optional<ThermalSourceTempModifier> modifier = Temperature.getModifier(entity, Trait.WORLD, ThermalSourceTempModifier.class);
             if (modifier.isPresent())
             {
                 boolean isWarmth = effect.getEffect() == ModEffects.WARMTH;
@@ -716,7 +722,7 @@ public class EntityTempManager
                 if (isWarmth) nbt.putInt("Warming", 0);
                 else nbt.putInt("Cooling", 0);
                 if (isWarmth ? !entity.hasEffect(ModEffects.FRIGIDNESS) : !entity.hasEffect(ModEffects.WARMTH))
-                {   Temperature.removeModifiers(entity, Temperature.Trait.WORLD, mod -> mod instanceof ThermalSourceTempModifier);
+                {   Temperature.removeModifiers(entity, Trait.WORLD, mod -> mod instanceof ThermalSourceTempModifier);
                 }
             }
         }
@@ -735,8 +741,8 @@ public class EntityTempManager
                 if (player.isSleeping())
                 {
                     // Divide the player's current temperature by 4
-                    double temp = Temperature.get(player, Temperature.Trait.CORE);
-                    Temperature.set(player, Temperature.Trait.CORE, temp / 4f);
+                    double temp = Temperature.get(player, Trait.CORE);
+                    Temperature.set(player, Trait.CORE, temp / 4f);
                 }
             });
         }
@@ -756,7 +762,7 @@ public class EntityTempManager
                 Entity mount = player.getVehicle();
                 // If insulated minecart
                 if (mount instanceof Minecart minecart && minecart.getDisplayBlockState().getBlock() == ModBlocks.MINECART_INSULATION)
-                {   Temperature.addOrReplaceModifier(player, new MountTempModifier(1, 1).tickRate(5).expires(5), Temperature.Trait.RATE, Placement.Duplicates.BY_CLASS);
+                {   Temperature.addOrReplaceModifier(player, new MountTempModifier(1, 1).tickRate(5).expires(5), Trait.RATE, Placement.Duplicates.BY_CLASS);
                 }
                 // If insulated entity (defined in config)
                 else
@@ -764,7 +770,7 @@ public class EntityTempManager
                     MountData entityInsul = ConfigSettings.INSULATED_MOUNTS.get().get(mount.getType())
                                                   .stream().filter(mnt -> mnt.test(mount)).findFirst().orElse(null);
                     if (entityInsul != null)
-                    {   Temperature.addOrReplaceModifier(player, new MountTempModifier(entityInsul.coldInsulation(), entityInsul.heatInsulation()).tickRate(5).expires(5), Temperature.Trait.RATE, Placement.Duplicates.BY_CLASS);
+                    {   Temperature.addOrReplaceModifier(player, new MountTempModifier(entityInsul.coldInsulation(), entityInsul.heatInsulation()).tickRate(5).expires(5), Trait.RATE, Placement.Duplicates.BY_CLASS);
                     }
                 }
             }
@@ -789,7 +795,7 @@ public class EntityTempManager
                 {
                     double temperature = foodData.temperature();
                     int duration = foodData.duration();
-                    Temperature.Trait trait = foodData.duration() > 0 ? Temperature.Trait.BASE : Temperature.Trait.CORE;
+                    Trait trait = foodData.duration() > 0 ? Trait.BASE : Trait.CORE;
                     // Custom class for soul sprouts
                     FoodTempModifier foodModifier = item.getItem() == ModItems.SOUL_SPROUT
                                                     ? new SoulSproutTempModifier(temperature)
@@ -903,20 +909,20 @@ public class EntityTempManager
     }
 
     /**
-     * Sets the corresponding attribute value for the given {@link Temperature.Trait}.
+     * Sets the corresponding attribute value for the given {@link Trait}.
      * @param trait the type or ability to get the attribute for
      */
-    public static void setAttribute(Temperature.Trait trait, LivingEntity entity, double value)
+    public static void setAttribute(Trait trait, LivingEntity entity, double value)
     {
         CSMath.doIfNotNull(getAttribute(trait, entity), att -> att.setBaseValue(value));
     }
 
     /**
-     * Gets the corresponding attribute value for the given {@link Temperature.Trait}.
+     * Gets the corresponding attribute value for the given {@link Trait}.
      * @param trait the type or ability to get the attribute for
      */
     @Nullable
-    public static AttributeInstance getAttribute(Temperature.Trait trait, LivingEntity entity)
+    public static AttributeInstance getAttribute(Trait trait, LivingEntity entity)
     {
         return switch (trait)
         {
@@ -959,7 +965,7 @@ public class EntityTempManager
         return modifiers;
     }
 
-    public static AttributeModifier makeAttributeModifier(Temperature.Trait trait, double value, AttributeModifier.Operation operation)
+    public static AttributeModifier makeAttributeModifier(Trait trait, double value, AttributeModifier.Operation operation)
     {
         if (!trait.isForAttributes())
         {   throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("\"" + trait + "\" is not a valid trait!"));
@@ -985,7 +991,7 @@ public class EntityTempManager
         List<TempModifier> allModifiers = new ArrayList<>();
         getTemperatureCap(entity).ifPresent(cap ->
         {
-            for (Temperature.Trait trait : VALID_MODIFIER_TRAITS)
+            for (Trait trait : VALID_MODIFIER_TRAITS)
             {   allModifiers.addAll(cap.getModifiers(trait));
             }
         });
