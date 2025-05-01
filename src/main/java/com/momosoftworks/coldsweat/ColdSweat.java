@@ -8,7 +8,7 @@ import com.momosoftworks.coldsweat.common.capability.shearing.ShearableFurCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.EntityTempCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
 import com.momosoftworks.coldsweat.common.entity.Chameleon;
-import com.momosoftworks.coldsweat.config.ConfigUpdater;
+import com.momosoftworks.coldsweat.config.ModUpdater;
 import com.momosoftworks.coldsweat.config.spec.*;
 import com.momosoftworks.coldsweat.core.init.*;
 import com.momosoftworks.coldsweat.data.ModRegistries;
@@ -70,7 +70,7 @@ public class ColdSweat
         ModAdvancementTriggers.TRIGGERS.register(bus);
         ModItemComponents.DATA_COMPONENTS.register(bus);
 
-        ConfigUpdater.updateFileNames();
+        ModUpdater.updateFileNames();
 
         // Setup configs
         WorldSettingsConfig.setup(modContainer);
@@ -142,6 +142,6 @@ public class ColdSweat
     }
 
     public void updateConfigs(FMLLoadCompleteEvent event)
-    {   ConfigUpdater.updateConfigs();
+    {   ModUpdater.updateConfigs();
     }
 }
