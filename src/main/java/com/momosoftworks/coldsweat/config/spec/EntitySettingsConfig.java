@@ -92,7 +92,7 @@ public class EntitySettingsConfig
         ENABLE_ENTITY_CLIMATES = BUILDER
                 .comment("Enables the temperature system for entities",
                          "If disabled, entities will not be harmed by temperature")
-                .define("Enable Entity Climates", true);
+                .define("Enable Entity Climates", false);
 
         ADVANCED_ENTITY_TEMPERATURE = BUILDER
                 .comment("Enables more precise temperature calculations for entities",
