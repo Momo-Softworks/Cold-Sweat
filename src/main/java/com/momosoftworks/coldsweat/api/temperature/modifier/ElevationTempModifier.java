@@ -109,10 +109,10 @@ public class ElevationTempModifier extends TempModifier
                 }
             }
             if (depthTemps.isEmpty())
-            {   return temp;
+            {   return temp + dimOffset;
             }
             // Calculate the weighted average of the depth temperatures
-            return CSMath.weightedAverage(depthTemps);
+            return CSMath.weightedAverage(depthTemps) + dimOffset;
         };
     }
 
