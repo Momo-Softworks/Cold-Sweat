@@ -64,7 +64,7 @@ public class ColdSweat
         AttributeInit.ATTRIBUTES.register(bus);
         CommandInit.ARGUMENTS.register(bus);
 
-        ConfigUpdater.updateFileNames();
+        ModUpdater.updateFileNames();
 
         // Setup configs
         WorldSettingsConfig.setup();
@@ -117,6 +117,6 @@ public class ColdSweat
     }
 
     public void updateConfigs(FMLLoadCompleteEvent event)
-    {   ConfigUpdater.updateConfigs();
+    {   ModUpdater.updateConfigs();
     }
 }
