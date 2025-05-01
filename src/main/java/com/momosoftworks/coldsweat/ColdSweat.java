@@ -75,7 +75,7 @@ public class ColdSweat
         SensorTypeInit.SENSORS.register(bus);
         MemoryInit.MEMORIES.register(bus);
 
-        ConfigUpdater.updateFileNames();
+        ModUpdater.updateFileNames();
 
         // Setup configs
         WorldSettingsConfig.setup();
@@ -89,7 +89,7 @@ public class ColdSweat
     }
 
     public static String getVersion()
-    {   return ConfigUpdater.getVersionString(ModList.get().getModContainerById(MOD_ID).get().getModInfo().getVersion());
+    {   return ModUpdater.getVersionString(ModList.get().getModContainerById(MOD_ID).get().getModInfo().getVersion());
     }
 
     public void commonSetup(final FMLCommonSetupEvent event)
@@ -136,7 +136,7 @@ public class ColdSweat
     }
 
     public void updateConfigs(FMLLoadCompleteEvent event)
-    {   ConfigUpdater.updateConfigs();
+    {   ModUpdater.updateConfigs();
     }
 
     public void registerCurioSlots(InterModEnqueueEvent event)
