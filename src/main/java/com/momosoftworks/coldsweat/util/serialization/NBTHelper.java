@@ -54,6 +54,8 @@ public class NBTHelper
         // Read the modifier's ticks existed
         modifierTag.putInt("TicksExisted", modifier.getTicksExisted());
 
+        modifierTag.putInt("Hash", modifier.hashCode());
+
         return modifierTag;
     }
 

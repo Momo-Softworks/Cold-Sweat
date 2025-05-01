@@ -23,15 +23,15 @@ import javax.annotation.Nullable;
 
 public class KubeBindings
 {
-    public DynamicHolder<?> getConfigSetting(String id)
+    public static DynamicHolder<?> getConfigSetting(String id)
     {   return ConfigSettings.getSetting(id);
     }
 
-    public DynamicRegistries getRegistryAccess()
+    public static DynamicRegistries getRegistryAccess()
     {   return RegistryHelper.getDynamicRegistries();
     }
 
-    public double getTemperature(Entity entity, String trait)
+    public static double getTemperature(Entity entity, String trait)
     {
         if (entity instanceof LivingEntity)
         {   return Temperature.get(((LivingEntity) entity), Temperature.Trait.fromID(trait));
@@ -39,34 +39,34 @@ public class KubeBindings
         return 0;
     }
 
-    public void setTemperature(Entity entity, String trait, double temperature)
+    public static void setTemperature(Entity entity, String trait, double temperature)
     {
         if (entity instanceof LivingEntity)
         {   Temperature.set(((LivingEntity) entity), Temperature.Trait.fromID(trait), temperature);
         }
     }
 
-    public double convertTemperature(double temperature, String from, String to, boolean absolute)
+    public static double convertTemperature(double temperature, String from, String to, boolean absolute)
     {   return Temperature.convert(temperature, Temperature.Units.fromID(from), Temperature.Units.fromID(to), absolute);
     }
 
     @Nullable
-    public TempModifier createModifier(String id)
+    public static TempModifier createModifier(String id)
     {   return TempModifierRegistry.getValue(new ResourceLocation(id)).orElse(null);
     }
 
-    public void addModifier(Entity entity, TempModifier modifier, String trait)
+    public static void addModifier(Entity entity, TempModifier modifier, String trait)
     {
         if (entity instanceof LivingEntity)
         {   Temperature.addModifier(((LivingEntity) entity), modifier, Temperature.Trait.fromID(trait), Placement.Duplicates.ALLOW);
         }
     }
 
-    public Temperature.Trait getTrait(String id)
+    public static Temperature.Trait getTrait(String id)
     {   return Temperature.Trait.fromID(id);
     }
 
-    public double getColdInsulation(Entity entity)
+    public static double getColdInsulation(Entity entity)
     {
         if (!(entity instanceof LivingEntity))
         {   return 0;
@@ -78,7 +78,7 @@ public class KubeBindings
         return coldInsulation;
     }
 
-    public double getHeatInsulation(Entity entity)
+    public static double getHeatInsulation(Entity entity)
     {
         if (!(entity instanceof LivingEntity))
         {   return 0;
@@ -90,15 +90,15 @@ public class KubeBindings
         return heatInsulation;
     }
 
-    public double getBlockTemperature(BlockContainerJS block)
+    public static double getBlockTemperature(BlockContainerJS block)
     {   return WorldHelper.getBlockTemperature(block.getLevel().minecraftLevel, block.getBlockState());
     }
 
-    public double getBiomeTemperature(WorldJS level, BlockPos pos)
+    public static double getBiomeTemperature(WorldJS level, BlockPos pos)
     {   return WorldHelper.getBiomeTemperature(level.minecraftLevel, level.minecraftLevel.getBiome(pos));
     }
 
-    public double getTemperatureAt(World level, BlockPos pos)
+    public static double getTemperatureAt(World level, BlockPos pos)
     {   return WorldHelper.getTemperatureAt(level, pos);
     }
 }

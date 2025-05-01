@@ -33,10 +33,12 @@ public class InventoryItemsTempModifier extends TempModifier
     @Override
     protected Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
-        if (trait != Temperature.Trait.ALL)
-        {   return temp -> temp + this.effectsPerTrait.getOrDefault(trait, 0.0);
-        }
+        return temp -> temp + this.effectsPerTrait.getOrDefault(trait, 0.0);
+    }
 
+    @Override
+    public void tick(LivingEntity entity)
+    {
         effectsPerTrait.clear();
 
         Map<ItemCarryTempData, Double> effectsPerCarriedTemp = new HashMap<>();
@@ -80,7 +82,6 @@ public class InventoryItemsTempModifier extends TempModifier
 
             effectsPerTrait.put(dataTrait, effectsPerTrait.getOrDefault(dataTrait, 0.0) + temp);
         }
-        return temp -> temp;
     }
 
     private static void checkAndAddCarriedTemp(LivingEntity entity, ItemStack stack, Integer slot, EquipmentSlotType equipmentSlot,

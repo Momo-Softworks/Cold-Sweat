@@ -40,10 +40,9 @@ public abstract class TempModifier
      * TempModifiers can be configured to run {@link TempModifier#calculate(LivingEntity, Temperature.Trait)} at a specified interval.<br>
      * This is useful if the TempModifier is expensive to calculate, and you want to avoid it being called each tick.<br>
      * <br>
-     * Every X ticks, the TempModifier's {@code getResult()} function will be called, then stored internally.<br>
-     * Every other time {@code calculate()} is called, the stored value will be returned until X ticks have passed.<br>
-     * (new TempModifiers ALWAYS run {@code getResult()} when they are called for the first time).<br>
-     * <br>
+     * Every X ticks, the TempModifier's {@code calculate()} function will be called, then stored internally.<br>
+     * Every other time {@code update()} is called, the stored value will be returned until X ticks have passed.<br>
+     * (new TempModifiers always run {@code calculate()} when they are called for the first time).<br>
      * @param interval the number of ticks between each call to {@code getResult()}.
      * @return this TempModifier instance (allows for in-line building).
      */
@@ -53,7 +52,7 @@ public abstract class TempModifier
     }
 
     /**
-     * Sets the number of ticks this TempModifier will exist before it is automatically removed.<br>
+     * Sets the number of ticks this TempModifier will exist before it is automatically removed.
      * @param ticks the number of ticks this modifier will last.
      * @return this TempModifier instance (allows for in-line building).
      */
@@ -66,11 +65,16 @@ public abstract class TempModifier
     /**
      * Determines what the provided temperature would be, given the player it is being applied to.<br>
      * This is basically a simple in-out system. It is given a temperature, and returns a new temperature based on the PlayerEntity.<br>
-     * <br>
-     * @param entity the entity that is being affected by the modifier.<br>
-     * @return the new temperature.<br>
+     * @param entity the entity that is being affected by the modifier.
+     * @return the new temperature.
      */
     protected abstract Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait);
+
+    /**
+     * Called every tick on the temperature modifier.<br>
+     * Use this to handle calculations that aren't trait-specific.
+     */
+    public void tick(LivingEntity entity) {}
 
     /**
      * Posts this TempModifier's {@link #calculate(LivingEntity, Temperature.Trait)} to the Forge event bus.<br>

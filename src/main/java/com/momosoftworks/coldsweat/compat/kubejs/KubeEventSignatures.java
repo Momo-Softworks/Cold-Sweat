@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.compat.kubejs;
 import com.momosoftworks.coldsweat.api.event.common.insulation.InsulateItemEvent;
 import com.momosoftworks.coldsweat.api.event.common.temperautre.TempModifierEvent;
 import com.momosoftworks.coldsweat.api.event.common.temperautre.TemperatureChangedEvent;
+import com.momosoftworks.coldsweat.api.event.core.init.DefaultTempModifiersEvent;
 import com.momosoftworks.coldsweat.api.event.core.init.GatherDefaultTempModifiersEvent;
 import me.shedaniel.architectury.event.Event;
 import me.shedaniel.architectury.event.EventFactory;
@@ -21,7 +22,7 @@ public interface KubeEventSignatures
     {   void buildRegistries(DynamicRegistries registryAccess);
     }
     interface GatherModifiers
-    {   void gatherDefaultModifiers(GatherDefaultTempModifiersEvent event);
+    {   void gatherDefaultModifiers(DefaultTempModifiersEvent event);
     }
     interface TemperatureChanged
     {   EventResult onTemperatureChanged(TemperatureChangedEvent event);
