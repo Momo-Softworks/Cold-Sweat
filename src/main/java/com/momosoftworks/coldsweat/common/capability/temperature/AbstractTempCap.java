@@ -513,7 +513,9 @@ public class AbstractTempCap implements ITemperatureCap
             modTags.forEach(entry ->
             {
                 CompoundTag modNBT = ((CompoundTag) entry);
-                Optional<TempModifier> modOpt = modifierHashes.computeIfAbsent(modNBT.getInt("Hash"), hash -> NBTHelper.tagToModifier(modNBT));
+                Optional<TempModifier> modOpt = modNBT.contains("Hash")
+                                                ? modifierHashes.computeIfAbsent(modNBT.getInt("Hash"), hash -> NBTHelper.tagToModifier(modNBT))
+                                                : NBTHelper.tagToModifier(modNBT);
                 modOpt.ifPresent(modifier ->
                 {   modifiers.computeIfAbsent(trait, t -> new ArrayList<>()).add(modifier);
                 });
