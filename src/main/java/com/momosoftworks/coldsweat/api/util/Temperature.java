@@ -147,14 +147,6 @@ public class Temperature
     }
 
     /**
-     * Deprecated. Moved to {@link WorldHelper}
-     */
-    @Deprecated(since = "2.3.10", forRemoval = true)
-    public static double getTemperatureAt(BlockPos pos, Level level)
-    {   return WorldHelper.getTemperatureAt(level, pos);
-    }
-
-    /**
      * @param modClass The class of the TempModifier to check for
      * @param trait The type of TempModifier to check for
      * @return true if the player has a TempModifier that extends the given class
