@@ -131,7 +131,7 @@ public class SoulStalkBlock extends Block
         if (!level.isClientSide && holding.is(ModItemTags.GROWS_SOUL_STALK))
         {
             if (getHeight(level, pos) >= MAX_HEIGHT)
-            {   return super.use(state, level, pos, player, hand, rayTraceResult);
+            {   return super.useItemOn(stack, state, level, pos, player, hand, rayTraceResult);
             }
             // Grow soul stalk
             boolean grew = applyGrowingItem(level, pos);
