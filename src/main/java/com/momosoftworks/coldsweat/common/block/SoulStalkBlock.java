@@ -87,7 +87,7 @@ public class SoulStalkBlock extends Block implements IPlantable
     }
 
     public static Section getRandomMidsection()
-    {   return Math.random() < 0.3 ? Section.MIDDLE_SPROUT : Section.MIDDLE;
+    {   return Math.random() < 0.5 ? Section.MIDDLE_SPROUT : Section.MIDDLE;
     }
 
     public static int getRandomGrowth()
@@ -124,22 +124,29 @@ public class SoulStalkBlock extends Block implements IPlantable
         ItemStack holding = player.getItemInHand(hand);
         if (!level.isClientSide && ModItemTags.GROWS_SOUL_STALK.contains(holding.getItem()))
         {
+            if (getHeight(level, pos) >= MAX_HEIGHT)
+            {   return super.use(state, level, pos, player, hand, rayTraceResult);
+            }
             // Grow soul stalk
             boolean grew = applyGrowingItem(level, pos);
+            if (!player.abilities.instabuild)
+            {   holding.shrink(1);
+            }
             // Spawn particles
             Vector3d centerPos = CSMath.getCenterPos(pos);
             player.swing(hand, true);
             if (grew)
             {
-                centerPos = centerPos.add(0, 1, 0);
                 WorldHelper.spawnParticleBatch(level, ParticleTypes.SOUL, centerPos.x, centerPos.y, centerPos.z, 0.75, 0.75, 0.75, 5, 0.01);
-                level.playSound(null, pos, SoundEvents.WEEPING_VINES_PLACE, SoundCategory.BLOCKS, 1f, 1f);
+                level.playSound(null, pos, SoundEvents.SWEET_BERRY_BUSH_PLACE, SoundCategory.BLOCKS, 1f, 0.8f);
+            }
+            else
+            {   level.playSound(null, pos, SoundEvents.WEEPING_VINES_PLACE, SoundCategory.BLOCKS, 0.6f, 1.5f);
             }
             return ActionResultType.CONSUME;
         }
         return super.use(state, level, pos, player, hand, rayTraceResult);
     }
-
 
     public static boolean applyGrowingItem(World level, BlockPos pos)
     {
