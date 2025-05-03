@@ -62,19 +62,21 @@ public class WaterTempModifier extends TempModifier
         {   this.expires(0);
         }
 
-        return temp ->
+        return temp -> temp - newStrength;
+    }
+
+    @Override
+    public void tick(LivingEntity entity)
+    {
+        if (entity.level().isClientSide() && ConfigSettings.WATER_EFFECT_SETTING.get().showParticles() && !entity.isInWater())
         {
-            if (entity.level().isClientSide() && ConfigSettings.WATER_EFFECT_SETTING.get().showParticles() && !entity.isInWater())
+            if (Math.random() < this.getNBT().getDouble("Strength") * 2)
             {
-                if (Math.random() < strength * 2)
-                {
-                    double randX = entity.getBbWidth() * (Math.random() - 0.5);
-                    double randY = entity.getBbHeight() * Math.random();
-                    double randZ = entity.getBbWidth() * (Math.random() - 0.5);
-                    entity.level().addParticle(ParticleTypes.FALLING_WATER, entity.getX() + randX, entity.getY() + randY, entity.getZ() + randZ, 0, 0, 0);
-                }
+                double randX = entity.getBbWidth() * (Math.random() - 0.5);
+                double randY = entity.getBbHeight() * Math.random();
+                double randZ = entity.getBbWidth() * (Math.random() - 0.5);
+                entity.level().addParticle(ParticleTypes.FALLING_WATER, entity.getX() + randX, entity.getY() + randY, entity.getZ() + randZ, 0, 0, 0);
             }
-            return temp - newStrength;
-        };
+        }
     }
 }
