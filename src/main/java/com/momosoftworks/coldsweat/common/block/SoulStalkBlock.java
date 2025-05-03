@@ -90,7 +90,6 @@ public class SoulStalkBlock extends Block implements IPlantable
     @SubscribeEvent
     public static void registerDispenserBehaviors(ServerStartedEvent event)
     {
-        System.out.println("All glowmeal items " + ForgeRegistries.ITEMS.tags().getTag(ModItemTags.GROWS_SOUL_STALK).stream().toList());
         for (Item item : ForgeRegistries.ITEMS.tags().getTag(ModItemTags.GROWS_SOUL_STALK))
         {   DispenserBlock.registerBehavior(item, GROWABLE_DISPENSE_BEHAVIOR);
         }
