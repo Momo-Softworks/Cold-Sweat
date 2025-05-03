@@ -16,14 +16,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.DispenserBlock;
-import net.minecraft.world.level.block.state.BlockState;
 
 public class SoulSproutItem extends ItemNameBlockItem
 {
     public SoulSproutItem(Block block, Properties properties)
     {   super(block, properties);
-        DispenserBlock.registerBehavior(this, DISPENSE_BEHAVIOR);
     }
 
     @Override
@@ -48,27 +45,4 @@ public class SoulSproutItem extends ItemNameBlockItem
     {   entity.clearFire();
         return super.finishUsingItem(stack, level, entity);
     }
-
-    public static final DispenseItemBehavior DISPENSE_BEHAVIOR = new DefaultDispenseItemBehavior()
-    {
-        @Override
-        protected ItemStack execute(BlockSource source, ItemStack stack)
-        {
-            Level level = source.level();
-            Position position = DispenserBlock.getDispensePosition(source);
-            BlockPos pos = BlockPos.containing(position);
-
-            if (level.getBlockState(pos).canBeReplaced())
-            {
-                BlockState state = ModBlocks.SOUL_STALK.get().defaultBlockState();
-                if (state.canSurvive(level, pos))
-                {
-                    level.setBlock(pos, state, 3);
-                    stack.shrink(1);
-                    return stack;
-                }
-            }
-            return super.execute(source, stack);
-        }
-    };
 }
