@@ -141,7 +141,7 @@ public class SoulStalkBlock extends Block implements IPlantable
             {
                 centerPos = centerPos.add(0, 1, 0);
                 WorldHelper.spawnParticleBatch(level, ParticleTypes.SOUL, centerPos.x, centerPos.y, centerPos.z, 0.75, 0.75, 0.75, 5, 0.01);
-                level.playSound(null, pos, SoundEvents.BONE_MEAL_USE, SoundSource.BLOCKS, 1.5f, 0.8f);
+                level.playSound(null, pos, SoundEvents.WEEPING_VINES_PLACE, SoundSource.BLOCKS, 1f, 1f);
             }
             return InteractionResult.CONSUME;
         }
