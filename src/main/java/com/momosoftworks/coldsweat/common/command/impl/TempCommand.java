@@ -453,20 +453,20 @@ public class TempCommand extends BaseCommand
         }
         else for (TempModifier modifier : Temperature.getModifiers(living, trait))
         {
-            double lastInput = modifier.getLastInput();
-            double lastOutput = modifier.getLastOutput();
+            double lastInput = modifier.getLastInput(trait);
+            double lastOutput = modifier.getLastOutput(trait);
 
             source.sendSuccess(new StringTextComponent("")
-                       .append(new StringTextComponent(CSMath.truncate(modifier.getLastInput(), 2)+"")
+                       .append(new StringTextComponent(CSMath.truncate(lastInput, 2)+"")
                                         .withStyle(Style.EMPTY.withColor(TextFormatting.WHITE)
                                         .withHoverEvent(getConvertedUnitHover(trait, lastInput, preferredUnits))))
                        .append(new StringTextComponent(" → ").withStyle(Style.EMPTY.withColor(TextFormatting.WHITE).withHoverEvent(null)))
                        .append(new StringTextComponent(modifier.toString()).withStyle(TextFormatting.GRAY))
                        .append(new StringTextComponent(" → ").withStyle(TextFormatting.WHITE))
-                       .append(new StringTextComponent(CSMath.truncate(modifier.getLastOutput(), 2)+"")
+                       .append(new StringTextComponent(CSMath.truncate(lastOutput, 2)+"")
                                         .withStyle(Style.EMPTY.withColor(TextFormatting.AQUA)
                                         .withHoverEvent(getConvertedUnitHover(trait, lastOutput, preferredUnits)))), false);
-            lastValue = modifier.getLastOutput();
+            lastValue = lastOutput;
         }
         // Print attributes affecting the trait
         if (attribute != null)
