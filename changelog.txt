@@ -3036,3 +3036,61 @@ Technical Changes:
 Fixes:
 * Fixed crash when in a dimension with no floor (like the End or Aether)
 - Fixed the "Home Sweet Home" advancement not being obtainable
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.4-b03a
+* Entities can now be configured to be affected by temperature
+      ! This mechanic is experimental and disabled by default. It can be enabled in entity.toml
+      - Configured animals will heat up and cool down, and can die from overheating/freezing
+      - Default entities are pigs, cows, sheep, chickens, goats, horses, donkeys, mules, and llamas
+      - Each of these entities are also best suited for different climates
+      - Entities in an uninhabitable climate will emit hot or cold "angry" particles
+      - Entity temperature uses a heavily simplified version of the player temperature system
+            - This should be fine in most scenarios, but the option is present to enable more robust measurements
+            - This is disabled by default, as it is less performant
+      - Configurable via TOML, JSON, and KubeJS
+* Soul stalks now have an initial "bud" stage when placed
+      - This is a small, 1-block-tall stage that will grow into a full stalk
+* Glowstone can now be used to "bonemeal" soul stalks (#cold_sweat:grows_soul_stalk)
+      - It can also be applied by a dispenser
+- The boiler now only lights up when it is performing a fuel-draining task:
+      - Heating waterskins
+      - Purifying drinkable items (with Thirst Was Taken)
+      - Warming a room with a smokestack
+- Soul stalks now grow twice as fast, and bear soul sprouts 60% more often
+- Added setting to toggle the new animated model for the soulspring lamp
+- Added support for Soul Fire'd:
+      - When an entity is burning from soul fire, it will now emit cold
+      - This is an entity_temp defined via JSON
+- Soul fire now deals contact damage (like normal fire)
+- Naturally-generated igloos are no longer warmer inside
+- Updated the effect icon for ice resistance
+
+Fixes:
+- Fixed Just Enough Effect Descriptions recipes not showing the icebox and boiler as sources of frigidness and warmth
+- Fixed some of the settings in the Temperature Effects tab not being marked as clientside when they should be
+
+Technical Changes:
+- The list of "required_mods" in JSON configs is now a negatable list
+* Changed how the GatherDefaultTempModifiers event works:
+      - Name changed to DefaultTempModifiersEvent
+      - Now fired for all temperature traits simultaneously instead of a separate event for each trait
+      - Now uses a Map<Trait, List<TempModifier>> for collecting modifiers
+      - Methods for adding/removing modifiers must now specify the trait to apply to
+      - The old version of the event still functions, but is deprecated and will be deleted in a future release
+* A single modifier instance can now be added to multiple traits on an entity
+      - This single instance will be preserved when saving & loading the entity
+      - getLastInput() and getLastOutput() are now stored per-trait, and now take in a Trait argument
+      - Added getFunction() method to TempModifier, which also takes in a Trait argument
+* Added tick() method to TempModifier
+      - Naturally, this method is called every tick
+      - This can be used to handle central calculations that aren't tied to any specific trait
+- The player's body temperature equalization rate is no longer halved when temperature modifiers are applied to it
+      - For some custom temperature modifiers applied to the CORE trait, this means their rate might need to be increased
+- Removed Temperature#getTemperatureAt(), since it was moved to WorldHelper in 2.3.10
+- WorldHelper#getRoughTemperatureAt() now uses a less accurate but more performant method of getting the temperature
+      - Now accepts flags as a 3rd argument. 1 = use more accurate temperature, 2 = force update (forces a new calculation)
+      - The "more accurate" system is the old system, which is generally still less precise and more performant than getTemperatureAt()
+- Block requirements now accept a list of enum properties when checking block state (i.e. "type": ["top", "bottom"])
+- Added convert() method to KubeJS (mirror of the method from the Temperature class)
