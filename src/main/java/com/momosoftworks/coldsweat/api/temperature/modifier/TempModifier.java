@@ -9,6 +9,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.common.MinecraftForge;
 
+import static com.momosoftworks.coldsweat.api.util.Temperature.Trait;
+
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -26,9 +30,9 @@ public abstract class TempModifier
     private int expireTicks = -1;
     private int ticksExisted = 0;
     private int tickRate = 1;
-    private double lastInput = 0;
-    private double lastOutput = 0;
-    private Function<Double, Double> function = temp -> temp;
+    private final Map<Trait, Double> lastInput = new EnumMap<>(Trait.class);
+    private final Map<Trait, Double> lastOutput = new EnumMap<>(Trait.class);
+    private final Map<Trait, Function<Double, Double>> function = new EnumMap<>(Trait.class);
     private boolean changed = false;
 
     /**
@@ -68,7 +72,7 @@ public abstract class TempModifier
      * @param entity the entity that is being affected by the modifier.
      * @return the new temperature.
      */
-    protected abstract Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait);
+    protected abstract Function<Double, Double> calculate(LivingEntity entity, Trait trait);
 
     /**
      * Called every tick on the temperature modifier.<br>
@@ -77,38 +81,40 @@ public abstract class TempModifier
     public void tick(LivingEntity entity) {}
 
     /**
-     * Posts this TempModifier's {@link #calculate(LivingEntity, Temperature.Trait)} to the Forge event bus.<br>
+     * Posts this TempModifier's {@link #calculate(LivingEntity, Trait)} to the Forge event bus.<br>
      * Returns the stored value if this TempModifier has a tickRate set, and it is not the right tick.<br>
      * <br>
-     * @param temp the Temperature being fed into the {@link #calculate(LivingEntity, Temperature.Trait)} method.
+     * @param temp the Temperature being fed into the {@link #calculate(LivingEntity, Trait)} method.
      * @param entity the entity that is being affected by the modifier.
      */
-    public final double update(double temp, LivingEntity entity, Temperature.Trait trait)
+    public final double update(double temp, LivingEntity entity, Trait trait)
     {
         TempModifierEvent.Calculate.Pre pre = new TempModifierEvent.Calculate.Pre(this, entity, temp, trait);
         MinecraftForge.EVENT_BUS.post(pre);
         if (pre.isCanceled())
         {
-            this.function = pre.getFunction();
-            return this.apply(pre.getTemperature());
+            this.function.put(trait, pre.getFunction());
+            return this.apply(trait, pre.getTemperature());
         }
 
         TempModifierEvent.Calculate.Post post = new TempModifierEvent.Calculate.Post(this, entity, pre.getTemperature(), this.calculate(entity, trait), trait);
         MinecraftForge.EVENT_BUS.post(post);
 
-        this.function = post.getFunction();
+        this.function.put(trait, post.getFunction());
 
-        return this.apply(post.getTemperature());
+        return this.apply(trait, post.getTemperature());
     }
 
     /**
      * @param temp the Temperature to calculate with
      * @return The result of this TempModifier's unique stored function. Stores the input and output.
      */
-    public double apply(double temp)
+    public double apply(Trait trait, double temp)
     {
-        lastInput = temp;
-        return lastOutput = function.apply(temp);
+        lastInput.put(trait, temp);
+        double output = this.getFunction(trait).apply(temp);
+        lastOutput.put(trait, output);
+        return output;
     }
 
     public final int getExpireTime()
@@ -127,18 +133,22 @@ public abstract class TempModifier
     {   return tickRate;
     }
 
+    public final Function<Double, Double> getFunction(Trait trait)
+    {   return function.computeIfAbsent(trait, t -> (temp -> temp));
+    }
+
     /**
      * @return The Temperature this TempModifier was last given
      */
-    public final double getLastInput()
-    {   return lastInput;
+    public final double getLastInput(Trait trait)
+    {   return lastInput.getOrDefault(trait, 0.0);
     }
 
     /**
      * @return The Temperature this TempModifier's function last returned
      */
-    public final double getLastOutput()
-    {   return lastOutput;
+    public final double getLastOutput(Trait trait)
+    {   return lastOutput.getOrDefault(trait, 0.0);
     }
 
     public final CompoundTag getNBT()
