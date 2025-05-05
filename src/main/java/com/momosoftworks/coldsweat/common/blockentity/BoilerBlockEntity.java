@@ -40,6 +40,9 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
     public static int[] WATERSKIN_SLOTS = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     public static int[] FUEL_SLOT = {0};
 
+    protected boolean hasWaterskins = false;
+    protected boolean hasDrinkables = false;
+
     LazyOptional<? extends IItemHandler>[] slotHandlers =
             SidedInvWrapper.create(this, Direction.UP, Direction.DOWN, Direction.NORTH);
 
@@ -72,15 +75,10 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
 
         if (this.getFuel() > 0)
         {
-            // Set state to lit
-            if (!state.getValue(BoilerBlock.LIT))
-            {   level.setBlock(pos, state.setValue(BoilerBlock.LIT, true), 3);
-            }
-            boolean hasItemStacks = false;
-
             // Warm up waterskins
             if (ticksExisted % (int) (20 / Math.max(1, ConfigSettings.TEMP_RATE.get())) == 0)
             {
+                hasWaterskins = false;
                 for (int i = 1; i < 10; i++)
                 {
                     ItemStack stack = getItem(i);
@@ -88,16 +86,16 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
                     double itemTemp = tag.getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
 
                     if (stack.getItem() == ModItems.FILLED_WATERSKIN && itemTemp < 50)
-                    {   hasItemStacks = true;
-                        tag.putDouble(FilledWaterskinItem.NBT_TEMPERATURE, Math.min(50, itemTemp + 1));
+                    {   tag.putDouble(FilledWaterskinItem.NBT_TEMPERATURE, Math.min(50, itemTemp + 1));
+                        hasWaterskins = true;
                     }
                 }
             }
-            if (hasItemStacks) setFuel(getFuel() - 1);
         }
-        // if no fuel, set state to unlit
-        else if (state.getValue(BoilerBlock.LIT))
-        {   level.setBlock(pos, state.setValue(BoilerBlock.LIT, false), 3);
+        // Update lit state
+        boolean shouldBeLit = this.getFuel() > 0 && (this.hasWaterskins || this.hasDrinkables || this.shouldUseHotFuel);
+        if (state.getValue(BoilerBlock.LIT) != shouldBeLit)
+        {   level.setBlock(pos, state.setValue(BoilerBlock.LIT, shouldBeLit), 3);
         }
     }
 
