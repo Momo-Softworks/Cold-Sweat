@@ -12,6 +12,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import static com.momosoftworks.coldsweat.api.util.Temperature.Trait;
 
 import java.util.EnumMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -133,6 +134,10 @@ public abstract class TempModifier
     {   return tickRate;
     }
 
+    /**
+     * @return The current function that has been calculated for the given trait via {@link #calculate(LivingEntity, Trait)}.<br>
+     * Returns a default (no-op) function if one hasn't been calculated for the given trait.
+     */
     public final Function<Double, Double> getFunction(Trait trait)
     {   return function.computeIfAbsent(trait, t -> (temp -> temp));
     }
