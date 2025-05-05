@@ -68,7 +68,7 @@ public class FilledWaterskinItem extends Item
                 double drainAmt = (EFFECT_RATE / 20) * ConfigSettings.WATERSKIN_NEUTRALIZE_SPEED.get();
                 double newTemp = CSMath.shrink(itemTemp, drainAmt * 5);
 
-                double tempEffect = (EFFECT_RATE / 20) * ConfigSettings.WATERSKIN_HOTBAR_STRENGTH.get();
+                double tempEffect = (EFFECT_RATE / 10) * ConfigSettings.WATERSKIN_HOTBAR_STRENGTH.get();
                 itemstack.getOrCreateTag().putDouble(FilledWaterskinItem.NBT_TEMPERATURE, newTemp);
                 Temperature.addModifier(player, new WaterskinTempModifier(tempEffect * CSMath.sign(itemTemp)).expires(5), Temperature.Trait.CORE, Placement.Duplicates.ALLOW);
             }
