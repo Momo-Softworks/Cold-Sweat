@@ -436,7 +436,7 @@ public class CompatManager
                         for (Player player : event.getLevel().players())
                         {
                             Temperature.getModifier(player, Temperature.Trait.WORLD, SereneSeasonsTempModifier.class)
-                                       .ifPresent(mod -> mod.update(mod.getLastInput(), player, Temperature.Trait.WORLD));
+                                       .ifPresent(mod -> mod.update(mod.getLastInput(Temperature.Trait.WORLD), player, Temperature.Trait.WORLD));
                         }
                     });
                 }
