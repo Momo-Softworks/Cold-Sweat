@@ -317,8 +317,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         boolean wasUsingHotFuel = this.shouldUseHotFuel;
         if (!ConfigSettings.SMART_HEARTH.get())
         {
-            this.shouldUseColdFuel = this.isCoolingOn && this.getColdFuel() > 0;
-            this.shouldUseHotFuel = this.isHeatingOn && this.getHotFuel() > 0;
+            this.shouldUseColdFuel = this.hasSmokestack && this.isCoolingOn && this.getColdFuel() > 0;
+            this.shouldUseHotFuel = this.hasSmokestack && this.isHeatingOn && this.getHotFuel() > 0;
         }
         if (!this.shouldUseColdFuel && !this.shouldUseHotFuel && !this.paths.isEmpty())
         {   this.forceUpdate();
@@ -745,7 +745,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
         {
             double temp = CSMath.getIfNotNull(Temperature.getModifier(cap, Temperature.Trait.WORLD, ThermalSourceTempModifier.class).orElse(null),
-                                              TempModifier::getLastInput,
+                                              mod -> mod.getLastInput(Temperature.Trait.WORLD),
                                               cap.getTrait(Temperature.Trait.WORLD));
             double min = cap.getTrait(Temperature.Trait.FREEZING_POINT);
             double max = cap.getTrait(Temperature.Trait.BURNING_POINT);
