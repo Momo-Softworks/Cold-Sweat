@@ -81,7 +81,7 @@ public class SoulspringLampItem extends Item
                 double max = Temperature.get(living, Temperature.Trait.BURNING_POINT);
 
                 double temp = Temperature.getModifier(living, Temperature.Trait.WORLD, SoulLampTempModifier.class)
-                              .map(TempModifier::getLastInput).orElseGet(() -> Temperature.get(living, Temperature.Trait.WORLD));
+                              .map(mod -> mod.getLastInput(Temperature.Trait.WORLD)).orElseGet(() -> Temperature.get(living, Temperature.Trait.WORLD));
 
                 // Is in valid dimension
                 if ((ConfigSettings.LAMP_DIMENSIONS.get(level.registryAccess()).contains(level.dimensionType()))
