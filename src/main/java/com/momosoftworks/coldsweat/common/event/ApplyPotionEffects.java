@@ -4,12 +4,15 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ModEffects;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
+import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 
 @EventBusSubscriber
-public class GracePeriod
+public class ApplyPotionEffects
 {
     @SubscribeEvent
     public static void onSpawn(EntityJoinLevelEvent event)
@@ -19,6 +22,15 @@ public class GracePeriod
         {
             event.getEntity().getPersistentData().putBoolean("GivenGracePeriod", true);
             ((Player) event.getEntity()).addEffect(new MobEffectInstance(ModEffects.GRACE, ConfigSettings.GRACE_LENGTH.get(), 0, false, false, true));
+        }
+    }
+
+    @SubscribeEvent
+    public static void onGoldenAppleEaten(LivingEntityUseItemEvent.Finish event)
+    {
+        ItemStack item = event.getItem();
+        if (item.is(Items.ENCHANTED_GOLDEN_APPLE))
+        {   event.getEntity().addEffect(new MobEffectInstance(ModEffects.ICE_RESISTANCE, 6000, 0));
         }
     }
 }
