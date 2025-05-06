@@ -96,9 +96,12 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
             }
         }
         // Update lit state
-        boolean shouldBeLit = this.getFuel() > 0 && (this.hasWaterskins || this.shouldUseHotFuel);
-        if (state.getValue(BoilerBlock.LIT) != shouldBeLit)
-        {   level.setBlock(pos, state.setValue(BoilerBlock.LIT, shouldBeLit), 3);
+        if (!this.level.isClientSide())
+        {
+            boolean shouldBeLit = this.getFuel() > 0 && (this.hasWaterskins || this.shouldUseHotFuel);
+            if (state.getValue(BoilerBlock.LIT) != shouldBeLit)
+            {   level.setBlock(pos, state.setValue(BoilerBlock.LIT, shouldBeLit), 3);
+            }
         }
     }
 
@@ -117,6 +120,13 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
                 break;
             }
         }
+    }
+
+    @Override
+    protected void init()
+    {
+        super.init();
+        this.checkForItems();
     }
 
     @Override
