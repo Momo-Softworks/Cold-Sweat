@@ -3064,6 +3064,9 @@ Fixes:
 - Updated the effect icon for ice resistance
 
 Fixes:
+- (1.18, 1.19) Fixed Thirst Was Taken support not being enabled when the mod is installed
+- Fixed the boiler not draining fuel when warming waterskins or purifying drinkable items
+- Fixed chunkloading deadlock when scanning for temperature-affecting structures in some cases
 - Fixed Just Enough Effect Descriptions recipes not showing the icebox and boiler as sources of frigidness and warmth
 - Fixed some of the settings in the Temperature Effects tab not being marked as clientside when they should be
 
