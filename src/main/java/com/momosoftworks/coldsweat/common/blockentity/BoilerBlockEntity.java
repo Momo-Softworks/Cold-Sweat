@@ -99,6 +99,30 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
         }
     }
 
+    public void checkForItems()
+    {
+        this.hasWaterskins = false;
+        this.hasDrinkables = false;
+
+        for (int i = 1; i < 10; i++)
+        {
+            if (this.hasWaterskins && this.hasDrinkables)
+            {   break;
+            }
+            ItemStack stack = getItem(i);
+            CompoundTag tag = NBTHelper.getTagOrEmpty(stack);
+            double itemTemp = tag.getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
+
+            if (stack.is(ModItems.FILLED_WATERSKIN) && itemTemp < 50)
+            {   this.hasWaterskins = true;
+            }
+            else if (CompatManager.isThirstLoaded() && CompatManager.Thirst.hasWaterPurity(stack)
+            && CompatManager.Thirst.getWaterPurity(stack) < 3)
+            {   this.hasDrinkables = true;
+            }
+        }
+    }
+
     @Override
     public int getSpreadRange()
     {   return ConfigSettings.BOILER_RANGE.get();

@@ -42,6 +42,12 @@ public class BoilerContainer extends Container
                 public boolean mayPlace(ItemStack stack)
                 {   return ModItemTags.BOILER_VALID.contains(stack.getItem());
                 }
+
+                @Override
+                public void setChanged()
+                {   super.setChanged();
+                    te.checkForItems();
+                }
             });
         }
 
