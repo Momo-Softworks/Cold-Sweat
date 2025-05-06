@@ -41,7 +41,6 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
     public static int[] FUEL_SLOT = {0};
 
     protected boolean hasWaterskins = false;
-    protected boolean hasDrinkables = false;
 
     LazyOptional<? extends IItemHandler>[] slotHandlers =
             SidedInvWrapper.create(this, Direction.UP, Direction.DOWN, Direction.NORTH);
@@ -75,13 +74,13 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
 
         if (this.getFuel() > 0)
         {
-            // Warm up waterskins
-            if (ticksExisted % (int) (20 / Math.max(1, ConfigSettings.TEMP_RATE.get())) == 0)
+            if (this.ticksExisted % (int) (20 / Math.max(1, ConfigSettings.TEMP_RATE.get())) == 0)
             {
-                hasWaterskins = false;
+                // Warm up waterskins
+                this.hasWaterskins = false;
                 for (int i = 1; i < 10; i++)
                 {
-                    ItemStack stack = getItem(i);
+                    ItemStack stack = this.getItem(i);
                     CompoundNBT tag = NBTHelper.getTagOrEmpty(stack);
                     double itemTemp = tag.getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
 
@@ -90,10 +89,14 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
                         hasWaterskins = true;
                     }
                 }
+                // Drain fuel
+                if (this.hasWaterskins)
+                {   this.setFuel(this.getFuel() - 1);
+                }
             }
         }
         // Update lit state
-        boolean shouldBeLit = this.getFuel() > 0 && (this.hasWaterskins || this.hasDrinkables || this.shouldUseHotFuel);
+        boolean shouldBeLit = this.getFuel() > 0 && (this.hasWaterskins || this.shouldUseHotFuel);
         if (state.getValue(BoilerBlock.LIT) != shouldBeLit)
         {   level.setBlock(pos, state.setValue(BoilerBlock.LIT, shouldBeLit), 3);
         }
@@ -102,23 +105,16 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
     public void checkForItems()
     {
         this.hasWaterskins = false;
-        this.hasDrinkables = false;
 
         for (int i = 1; i < 10; i++)
         {
-            if (this.hasWaterskins && this.hasDrinkables)
-            {   break;
-            }
-            ItemStack stack = getItem(i);
-            CompoundTag tag = NBTHelper.getTagOrEmpty(stack);
+            ItemStack stack = this.getItem(i);
+            CompoundNBT tag = NBTHelper.getTagOrEmpty(stack);
             double itemTemp = tag.getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
 
-            if (stack.is(ModItems.FILLED_WATERSKIN) && itemTemp < 50)
+            if (stack.getItem() == ModItems.FILLED_WATERSKIN && itemTemp < 50)
             {   this.hasWaterskins = true;
-            }
-            else if (CompatManager.isThirstLoaded() && CompatManager.Thirst.hasWaterPurity(stack)
-            && CompatManager.Thirst.getWaterPurity(stack) < 3)
-            {   this.hasDrinkables = true;
+                break;
             }
         }
     }
