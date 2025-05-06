@@ -117,9 +117,12 @@ public class BoilerBlockEntity extends HearthBlockEntity
             }
         }
         // Update lit state
-        boolean shouldBeLit = this.getFuel() > 0 && (this.hasWaterskins || this.hasDrinkables || this.shouldUseHotFuel);
-        if (state.getValue(BoilerBlock.LIT) != shouldBeLit)
-        {   level.setBlock(pos, state.setValue(BoilerBlock.LIT, shouldBeLit), 3);
+        if (!this.level.isClientSide())
+        {
+            boolean shouldBeLit = this.getFuel() > 0 && (this.hasWaterskins || this.hasDrinkables || this.shouldUseHotFuel);
+            if (state.getValue(BoilerBlock.LIT) != shouldBeLit)
+            {   level.setBlock(pos, state.setValue(BoilerBlock.LIT, shouldBeLit), 3);
+            }
         }
     }
 
@@ -145,6 +148,13 @@ public class BoilerBlockEntity extends HearthBlockEntity
             {   this.hasDrinkables = true;
             }
         }
+    }
+
+    @Override
+    protected void init()
+    {
+        super.init();
+        this.checkForItems();
     }
 
     @Override
