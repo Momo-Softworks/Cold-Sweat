@@ -79,13 +79,13 @@ public class BoilerBlockEntity extends HearthBlockEntity
 
         if (this.getFuel() > 0)
         {
-            // Warm up waterskins
-            if (ticksExisted % (int) (20 / Math.max(1, ConfigSettings.TEMP_RATE.get())) == 0)
+            if (this.ticksExisted % (int) (20 / Math.max(1, ConfigSettings.TEMP_RATE.get())) == 0)
             {
-                hasWaterskins = false;
+                // Warm up waterskins
+                this.hasWaterskins = false;
                 for (int i = 1; i < 10; i++)
                 {
-                    ItemStack stack = getItem(i);
+                    ItemStack stack = this.getItem(i);
                     CompoundTag tag = NBTHelper.getTagOrEmpty(stack);
                     double itemTemp = tag.getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
 
@@ -94,13 +94,17 @@ public class BoilerBlockEntity extends HearthBlockEntity
                         hasWaterskins = true;
                     }
                 }
+                // Drain fuel
+                if (this.hasWaterskins || this.hasDrinkables)
+                {   this.setFuel(this.getFuel() - 1);
+                }
             }
-            if (ticksExisted % (200 / Math.max(1, ConfigSettings.TEMP_RATE.get())) == 0)
+            if (this.ticksExisted % (200 / Math.max(1, ConfigSettings.TEMP_RATE.get())) == 0)
             {
-                hasDrinkables = false;
+                this.hasDrinkables = false;
                 for (int i = 1; i < 10; i++)
                 {
-                    ItemStack stack = getItem(i);
+                    ItemStack stack = this.getItem(i);
                     if (CompatManager.isThirstLoaded() && CompatManager.Thirst.hasWaterPurity(stack)
                     && CompatManager.Thirst.getWaterPurity(stack) < 3)
                     {
@@ -127,7 +131,7 @@ public class BoilerBlockEntity extends HearthBlockEntity
             if (this.hasWaterskins && this.hasDrinkables)
             {   break;
             }
-            ItemStack stack = getItem(i);
+            ItemStack stack = this.getItem(i);
             CompoundTag tag = NBTHelper.getTagOrEmpty(stack);
             double itemTemp = tag.getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
 
