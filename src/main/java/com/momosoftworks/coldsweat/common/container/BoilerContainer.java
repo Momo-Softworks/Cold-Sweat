@@ -42,6 +42,12 @@ public class BoilerContainer extends AbstractContainerMenu
                 public boolean mayPlace(ItemStack stack)
                 {   return stack.is(ModItemTags.BOILER_VALID) || (CompatManager.isThirstLoaded() && CompatManager.Thirst.hasWaterPurity(stack));
                 }
+
+                @Override
+                public void setChanged()
+                {   super.setChanged();
+                    te.checkForItems();
+                }
             });
         }
 
