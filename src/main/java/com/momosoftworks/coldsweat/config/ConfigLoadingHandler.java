@@ -341,16 +341,16 @@ public class ConfigLoadingHandler
     private static void removeRegistries(Multimap<ResourceKey<Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries)
     {
         ColdSweat.LOGGER.info("Handling registry removals...");
-        for (Map.Entry<ResourceKey<Registry<? extends ConfigData>>, Collection<RemoveRegistryData<? extends ConfigData>>> entry : REMOVED_REGISTRIES.asMap().entrySet())
+        for (var entry : REMOVED_REGISTRIES.asMap().entrySet())
         {
             removeEntries((Collection) entry.getValue(), (Collection) registries.get(entry.getKey()));
         }
     }
 
-    private static <T extends ConfigData, H extends Holder<T>> void removeEntries(Collection<RemoveRegistryData<T>> removals, Collection<H> registry)
+    private static <T extends ConfigData> void removeEntries(Collection<RemoveRegistryData<T>> removals, Collection<Holder<T>> registry)
     {
         for (RemoveRegistryData<T> data : removals)
-        {   registry.removeIf(holder -> data.matches(holder.value()));
+        {   registry.removeIf(data::matches);
         }
     }
 
