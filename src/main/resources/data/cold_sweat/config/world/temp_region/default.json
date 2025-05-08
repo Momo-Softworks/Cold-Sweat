@@ -8,18 +8,22 @@
       "bottom": {
         "anchor": "world_top",
         "depth": 1,
+        "units": "c",
         "temperature": {
-          "strength": 0
+          "value": -273.15,
+          "strength": 0.005
         }
       }
     },
     {
-      "type": "constant",
+      "type": "linear",
       "top": {
         "anchor": "world_top",
         "depth": 0,
+        "units": "c",
         "temperature": {
-          "strength": 0
+          "value": -273.15,
+          "strength": 0.005
         }
       },
       "bottom": {
@@ -56,8 +60,8 @@
       },
       "bottom": {
         "anchor": "world_bottom",
-        "depth": -3,
-        "temperature": 110,
+        "depth": 1,
+        "temperature": 90,
         "units": "f"
       }
     },
@@ -65,13 +69,13 @@
       "type": "linear",
       "top": {
         "anchor": "world_bottom",
-        "depth": -4,
-        "temperature": 110,
+        "depth": 0,
+        "temperature": 90,
         "units": "f"
       },
       "bottom": {
         "anchor": "world_bottom",
-        "depth": -68,
+        "depth": -319,
         "temperature": -273.15,
         "units": "c"
       }
@@ -80,7 +84,7 @@
       "type": "constant",
       "top": {
         "anchor": "world_bottom",
-        "depth": -69,
+        "depth": -320,
         "temperature": -273.15,
         "units": "c"
       }
