@@ -6,6 +6,7 @@ import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
@@ -32,8 +33,8 @@ public class RemoveRegistryData<T extends ConfigData> extends ConfigData
 
     public static final Codec<RemoveRegistryData<?>> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.xmap(s -> (ResourceKey)ModRegistries.getRegistry(s), key -> ModRegistries.getRegistryName(key)).fieldOf("registry").forGetter(data -> data.registry()),
-            NegatableList.codec(CompoundTag.CODEC).fieldOf("matches").forGetter(data -> data.matches),
-            ResourceLocation.CODEC.listOf().fieldOf("entries").forGetter(data -> data.entries)
+            NegatableList.codec(CompoundTag.CODEC).optionalFieldOf("matches", new NegatableList<>()).forGetter(data -> data.matches),
+            ResourceLocation.CODEC.listOf().optionalFieldOf("entries", List.of()).forGetter(data -> data.entries)
     ).apply(instance, RemoveRegistryData::new));
 
     public ResourceKey<Registry<T>> registry()
@@ -49,6 +50,19 @@ public class RemoveRegistryData<T extends ConfigData> extends ConfigData
     public boolean matches(T object)
     {
         Optional<Tag> serializedOpt = ModRegistries.getCodec((ResourceKey) registry).encodeStart(NbtOps.INSTANCE, object).result();
+        return serializedOpt.map(serialized ->
+        {   return matches.test(nbt -> NbtRequirement.compareNbt(nbt, serialized, true));
+        }).orElse(false);
+    }
+
+    public boolean matches(Holder<T> holder)
+    {
+        // Check if object ID is in the entries list
+        if (this.entries().stream().anyMatch(id -> holder.unwrapKey().map(k -> k.location().equals(id)).orElse(false)))
+        {   return true;
+        }
+        // Check if object contents matches
+        Optional<Tag> serializedOpt = ModRegistries.getCodec((ResourceKey) registry).encodeStart(NbtOps.INSTANCE, holder.value()).result();
         return serializedOpt.map(serialized ->
         {   return matches.test(nbt -> NbtRequirement.compareNbt(nbt, serialized, true));
         }).orElse(false);
