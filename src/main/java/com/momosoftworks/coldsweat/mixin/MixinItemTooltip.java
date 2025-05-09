@@ -99,11 +99,17 @@ public class MixinItemTooltip
         {
             for (InsulatorData insulator : ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem()))
             {
-                modifiers.putAll(insulator.attributes().getMap());
                 if (TooltipHandler.passesRequirement(insulator))
                 {   INSULATION_MODIFIERS.putAll(insulator.attributes().getMap());
                 }
-                else UNMET_MODIFIERS.putAll(insulator.attributes().getMap());
+                else
+                {
+                    if (insulator.hideIfUnmet())
+                    {   continue;
+                    }
+                    UNMET_MODIFIERS.putAll(insulator.attributes().getMap());
+                }
+                modifiers.putAll(insulator.attributes().getMap());
             }
             ItemInsulationManager.getInsulationCap(stack).ifPresent(cap ->
             {
@@ -111,11 +117,17 @@ public class MixinItemTooltip
                 {
                     for (InsulatorData insulator : ConfigSettings.INSULATION_ITEMS.get().get(item.getItem()))
                     {
-                        modifiers.putAll(insulator.attributes().getMap());
                         if (TooltipHandler.passesRequirement(insulator))
                         {   INSULATION_MODIFIERS.putAll(insulator.attributes().getMap());
                         }
-                        else UNMET_MODIFIERS.putAll(insulator.attributes().getMap());
+                        else
+                        {
+                            if (insulator.hideIfUnmet())
+                            {   continue;
+                            }
+                            UNMET_MODIFIERS.putAll(insulator.attributes().getMap());
+                        }
+                        modifiers.putAll(insulator.attributes().getMap());
                     }
                 });
             });
