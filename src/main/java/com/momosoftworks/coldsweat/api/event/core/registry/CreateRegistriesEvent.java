@@ -22,9 +22,9 @@ import java.util.*;
 public abstract class CreateRegistriesEvent extends Event
 {
     RegistryAccess registryAccess;
-    Multimap<ResourceKey<Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries;
+    Multimap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries;
 
-    public CreateRegistriesEvent(RegistryAccess registryAccess, Multimap<ResourceKey<Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries)
+    public CreateRegistriesEvent(RegistryAccess registryAccess, Multimap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries)
     {
         this.registryAccess = registryAccess;
         this.registries = registries;
@@ -34,24 +34,28 @@ public abstract class CreateRegistriesEvent extends Event
     {   return registryAccess;
     }
 
-    public Multimap<ResourceKey<Registry<? extends ConfigData>>, Holder<? extends ConfigData>> getRegistries()
+    public Multimap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> getRegistries()
     {   return registries;
     }
 
-    public <T> Collection<Holder<T>> getRegistry(ResourceKey<Registry<T>> key)
-    {   return (Collection<Holder<T>>) registries.get((ResourceKey) key);
+    public <T extends ConfigData> Collection<Holder<T>> getRegistry(ResourceKey<? extends Registry<T>> key)
+    {   return (Collection) registries.get(key);
     }
 
     /**
-     * Fired directly after registries have been gathered, before registry removals are processed.
+     * Fired directly after registries have been gathered, before registry removals are processed.<br>
+     * <br>
+     * Registry entries can be modified during this event, and they will be committed to Cold Sweat's runtime configs.
      */
     public static class Pre extends CreateRegistriesEvent
     {
         private Multimap<ResourceKey<Registry<? extends ConfigData>>, RemoveRegistryData<?>> removals;
 
-        public Pre(RegistryAccess registryAccess, Multimap<ResourceKey<Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries,
+        public Pre(RegistryAccess registryAccess,
+                   Multimap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries,
                    Multimap<ResourceKey<Registry<? extends ConfigData>>, RemoveRegistryData<?>> removals)
-        {   super(registryAccess, registries);
+        {
+            super(registryAccess, registries);
         }
 
         /**
@@ -70,7 +74,7 @@ public abstract class CreateRegistriesEvent extends Event
      */
     public static class Post extends CreateRegistriesEvent
     {
-        public Post(RegistryAccess registryAccess, Multimap<ResourceKey<Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries)
+        public Post(RegistryAccess registryAccess, Multimap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries)
         {   super(registryAccess, registries);
         }
     }
