@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.data.codec.configuration;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.ModRegistries;
@@ -24,19 +25,25 @@ public class RemoveRegistryData<T extends ConfigData> extends ConfigData impleme
     private final ResourceKey<Registry<T>> registry;
     private final NegatableList<CompoundTag> matches;
     private final List<ResourceLocation> entries;
+    private final List<ConfigData.Type> registryTypes;
 
-    public RemoveRegistryData(ResourceKey<Registry<T>> registry, NegatableList<CompoundTag> matches, List<ResourceLocation> entries)
+    public RemoveRegistryData(ResourceKey<Registry<T>> registry, NegatableList<CompoundTag> matches, List<ResourceLocation> entries, List<Type> registryTypes)
     {
         super(new NegatableList<>());
         this.registry = registry;
         this.matches = matches;
         this.entries = entries;
+        this.registryTypes = registryTypes;
     }
+
+    private static final Codec<List<ConfigData.Type>> CONFIG_TYPE_CODEC = Codec.either(Type.CODEC, Type.CODEC.listOf())
+                                                                          .xmap(either -> either.map(List::of, r -> r), Either::right);
 
     public static final Codec<RemoveRegistryData<?>> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.xmap(s -> (ResourceKey)ModRegistries.getRegistry(s), key -> ModRegistries.getRegistryName(key)).fieldOf("registry").forGetter(data -> data.registry()),
-            NegatableList.codec(CompoundTag.CODEC).optionalFieldOf("matches", new NegatableList<>()).forGetter(data -> data.matches),
-            ResourceLocation.CODEC.listOf().optionalFieldOf("entries", List.of()).forGetter(data -> data.entries)
+            NegatableList.codec(CompoundTag.CODEC).optionalFieldOf("matches", new NegatableList<>()).forGetter(RemoveRegistryData::matches),
+            ResourceLocation.CODEC.listOf().optionalFieldOf("entries", List.of()).forGetter(RemoveRegistryData::entries),
+            CONFIG_TYPE_CODEC.optionalFieldOf("config_type", List.of()).forGetter(RemoveRegistryData::configTypes)
     ).apply(instance, RemoveRegistryData::new));
 
     public ResourceKey<Registry<T>> registry()
@@ -48,9 +55,21 @@ public class RemoveRegistryData<T extends ConfigData> extends ConfigData impleme
     public List<ResourceLocation> entries()
     {   return entries;
     }
+    public List<ConfigData.Type> configTypes()
+    {   return registryTypes;
+    }
+
+    private boolean checkType(T object)
+    {
+        return this.registryTypes.isEmpty()
+            || this.registryTypes.contains(object.registryType());
+    }
 
     public boolean matches(T object)
     {
+        if (!checkType(object))
+        {   return false;
+        }
         Optional<Tag> serializedOpt = ModRegistries.getCodec((ResourceKey) registry).encodeStart(NbtOps.INSTANCE, object).result();
         return serializedOpt.map(serialized ->
         {   return matches.test(nbt -> NbtRequirement.compareNbt(nbt, serialized, true));
@@ -59,15 +78,15 @@ public class RemoveRegistryData<T extends ConfigData> extends ConfigData impleme
 
     public boolean matches(Holder<T> holder)
     {
+        if (!checkType(holder.value()))
+        {   return false;
+        }
         // Check if object ID is in the entries list
-        if (this.entries().stream().anyMatch(id -> holder.unwrapKey().map(k -> k.location().equals(id)).orElse(false)))
+        ResourceLocation key = holder.unwrapKey().map(ResourceKey::location).orElse(null);
+        if (key != null && entries.contains(key))
         {   return true;
         }
-        // Check if object contents matches
-        Optional<Tag> serializedOpt = ModRegistries.getCodec((ResourceKey) registry).encodeStart(NbtOps.INSTANCE, holder.value()).result();
-        return serializedOpt.map(serialized ->
-        {   return matches.test(nbt -> NbtRequirement.compareNbt(nbt, serialized, true));
-        }).orElse(false);
+        return this.matches(holder.value());
     }
 
     @Override
