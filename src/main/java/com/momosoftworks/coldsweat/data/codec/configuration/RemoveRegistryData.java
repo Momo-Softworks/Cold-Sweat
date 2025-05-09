@@ -39,7 +39,7 @@ public class RemoveRegistryData<T extends ConfigData> extends ConfigData
 
     public static final Codec<RemoveRegistryData<? extends ConfigData>> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.xmap(ModRegistries::getRegistry, ModRegistries::getRegistryName).fieldOf("registry").forGetter(data -> (RegistryKey) data.registry),
-            NegatableList.codec(CompoundNBT.CODEC).optionalFieldOf("matches", new NegatableList<>()).forGetter(RemoveRegistryData::matches),
+            NegatableList.listCodec(CompoundNBT.CODEC).optionalFieldOf("matches", new NegatableList<>()).forGetter(RemoveRegistryData::matches),
             ResourceLocation.CODEC.listOf().optionalFieldOf("entries", Arrays.asList()).forGetter(RemoveRegistryData::entries),
             CONFIG_TYPE_CODEC.optionalFieldOf("config_type", Arrays.asList()).forGetter(RemoveRegistryData::configTypes)
     ).apply(instance, (key, matches, entries, type) -> new RemoveRegistryData<>((RegistryKey) key, (NegatableList) matches, (List) entries, type)));
