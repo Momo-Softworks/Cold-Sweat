@@ -6,6 +6,7 @@ import com.momosoftworks.coldsweat.api.annotation.Internal;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
+import com.momosoftworks.coldsweat.util.serialization.StringRepresentable;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTDynamicOps;
 import net.minecraft.util.ResourceLocation;
@@ -78,10 +79,34 @@ public abstract class ConfigData implements NbtSerializable
                 && ((ConfigData) obj).requiredMods().equals(this.requiredMods());
     }
 
-    public enum Type
+    public enum Type implements StringRepresentable
     {
-        TOML,
-        JSON,
-        KUBEJS
+        TOML("toml"),
+        JSON("json"),
+        KUBEJS("kubejs");
+
+        public static final Codec<Type> CODEC = StringRepresentable.fromEnum(Type::values);
+
+        private final String name;
+
+        Type(String name)
+        {   this.name = name;
+        }
+
+        @Override
+        public String getSerializedName()
+        {   return name;
+        }
+
+        public static Type byId(String name)
+        {
+            for (Type type : values())
+            {
+                if (type.name.equals(name))
+                {   return type;
+                }
+            }
+            return TOML;
+        }
     }
 }
