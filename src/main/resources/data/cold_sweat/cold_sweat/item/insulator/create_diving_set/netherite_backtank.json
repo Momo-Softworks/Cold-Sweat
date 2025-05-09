@@ -9,7 +9,7 @@
     ]
   },
   "insulation": {
-    "heat": 0,
+    "heat": 2,
     "cold": 0
   },
   "entity": {
@@ -44,14 +44,14 @@
     "cold_sweat:heat_dampening": [
       {
         "name": "cs:netherite_diving_set_bonus",
-        "amount": 0.25,
+        "amount": 1.0,
         "operation": "addition"
       }
     ],
     "cold_sweat:cold_dampening": [
       {
         "name": "cs:netherite_diving_set_bonus",
-        "amount": 0.1,
+        "amount": 0.5,
         "operation": "addition"
       }
     ]
