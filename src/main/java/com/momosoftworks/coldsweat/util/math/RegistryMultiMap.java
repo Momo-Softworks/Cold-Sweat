@@ -179,7 +179,7 @@ public class RegistryMultiMap<K, V> implements Multimap<K, V>
     @Override
     public LinkedHashSet<V> get(K key)
     {
-        LinkedHashSet<V> values = CSMath.orElse(internal.get(key), new LinkedHashSet<>());
+        LinkedHashSet<V> values = internal.computeIfAbsent(key, k -> new LinkedHashSet<>());
         LinkedHashSet<V> nullValues = internal.get(null);
         if (nullValues != null)
         {   values.addAll(nullValues);
