@@ -1,13 +1,14 @@
 package com.momosoftworks.coldsweat.compat.kubejs;
 
+import com.google.common.collect.Multimap;
 import com.momosoftworks.coldsweat.api.event.common.insulation.InsulateItemEvent;
 import com.momosoftworks.coldsweat.api.event.common.temperautre.TempModifierEvent;
 import com.momosoftworks.coldsweat.api.event.common.temperautre.TemperatureChangedEvent;
 import com.momosoftworks.coldsweat.api.event.core.init.DefaultTempModifiersEvent;
+import com.momosoftworks.coldsweat.api.event.core.registry.CreateRegistriesEvent;
 import com.momosoftworks.coldsweat.compat.kubejs.event.*;
 import dev.architectury.event.EventResult;
 import dev.latvian.mods.kubejs.script.ScriptType;
-import net.minecraft.core.RegistryAccess;
 
 public class KubeEventHandlers
 {
@@ -31,8 +32,8 @@ public class KubeEventHandlers
         KubeEventSignatures.ADD_MODIFIER.register(KubeEventHandlers::onTempModifierAdd);
     }
 
-    private static void buildRegistries(RegistryAccess registryAccess)
-    {   new ModRegistriesEventJS(registryAccess).post(ScriptType.SERVER, REGISTER);
+    private static void buildRegistries(CreateRegistriesEvent.Pre event)
+    {   new ModRegistriesEventJS(event).post(ScriptType.SERVER, REGISTER);
     }
 
     private static void gatherDefaultModifiers(DefaultTempModifiersEvent event)

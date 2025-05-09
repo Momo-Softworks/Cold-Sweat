@@ -4,11 +4,10 @@ import com.momosoftworks.coldsweat.api.event.common.insulation.InsulateItemEvent
 import com.momosoftworks.coldsweat.api.event.common.temperautre.TempModifierEvent;
 import com.momosoftworks.coldsweat.api.event.common.temperautre.TemperatureChangedEvent;
 import com.momosoftworks.coldsweat.api.event.core.init.DefaultTempModifiersEvent;
-import com.momosoftworks.coldsweat.api.event.core.init.GatherDefaultTempModifiersEvent;
+import com.momosoftworks.coldsweat.api.event.core.registry.CreateRegistriesEvent;
 import dev.architectury.event.Event;
 import dev.architectury.event.EventFactory;
 import dev.architectury.event.EventResult;
-import net.minecraft.core.RegistryAccess;
 
 public interface KubeEventSignatures
 {
@@ -19,7 +18,7 @@ public interface KubeEventSignatures
     Event<KubeEventSignatures.AddModifier> ADD_MODIFIER = EventFactory.createEventResult();
 
     interface Registries
-    {   void buildRegistries(RegistryAccess registryAccess);
+    {   void buildRegistries(CreateRegistriesEvent.Pre event);
     }
     interface GatherModifiers
     {   void gatherDefaultModifiers(DefaultTempModifiersEvent event);
