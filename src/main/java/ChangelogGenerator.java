@@ -10,22 +10,31 @@ public class ChangelogGenerator {
 
     private static final String HEADER_STYLE = """
             color: #ffffff; 
-            font-size: 1.5em; 
+            font-size: 20; 
             font-weight: bold;""";
 
     private static final String SECTION_STYLE = """
             color: #ffffff; 
-            font-size: 1.17em; 
+            font-size: 16; 
             font-weight: bold;""";
 
     private static final String WARNING_STYLE = "color: orange;";
     private static final String URGENT_STYLE = "color: #e06c75; font-weight: bold;";  // Softer red color
 
+    static class Item {
+        String prefix; // "", "*", "!", "!!"
+        String content;
+        List<Item> children = new ArrayList<>();
+
+        Item(String prefix, String content) {
+            this.prefix = prefix;
+            this.content = content;
+        }
+    }
+
     static class Section {
         String title;
-        List<String> items = new ArrayList<>();
-        Map<String, List<String>> subItems = new HashMap<>();
-        Map<String, List<String>> warnings = new HashMap<>();
+        List<Item> items = new ArrayList<>();
 
         Section(String title) {
             this.title = title;
@@ -86,10 +95,13 @@ public class ChangelogGenerator {
         List<Section> sections = new ArrayList<>();
         Section currentSection = new Section(""); // Default section for items before first section header
         sections.add(currentSection);
-        String currentItem = null;
+
+        // Stack to keep track of the current item hierarchy
+        // Each entry is a pair of [Item, IndentLevel]
+        List<Map.Entry<Item, Integer>> itemStack = new ArrayList<>();
 
         for (String line : lines) {
-            // Get original indentation level
+            // Calculate indentation level
             int indent = 0;
             while (indent < line.length() && line.charAt(indent) == ' ') {
                 indent++;
@@ -97,53 +109,55 @@ public class ChangelogGenerator {
 
             String trimmed = line.trim();
 
-            // Skip empty lines and version number (but allow !! lines)
+            // Skip empty lines
             if (trimmed.isEmpty()) {
                 continue;
             }
 
-            // Check if line is a list item first
-            boolean isListItem = trimmed.startsWith("*") || trimmed.startsWith("-") || trimmed.startsWith("!!");
-
             // New section (ends with : and not indented and not a list item)
-            if (trimmed.endsWith(":") && indent == 0 && !isListItem) {
+            if (trimmed.endsWith(":") && indent == 0 && !isListItem(trimmed)) {
                 currentSection = new Section(trimmed);
                 sections.add(currentSection);
-                currentItem = null;
+                itemStack.clear(); // Reset item stack for new section
                 continue;
             }
 
-            // Main item (starts with *, - or !!)
-            if ((trimmed.startsWith("*") || trimmed.startsWith("-") || trimmed.startsWith("!!")) && indent < 4) {
-                String prefix = trimmed.startsWith("!!") ? "!!" : trimmed.substring(0, 1);
-                String content = trimmed.startsWith("!!") ? trimmed.substring(2).trim() : trimmed.substring(1).trim();
-                currentItem = prefix + "\n" + content;  // Store prefix and content separately
-                currentSection.items.add(currentItem);
-                currentSection.subItems.put(currentItem, new ArrayList<>());
-            }
-            // Warning (starts with !)
-            else if (trimmed.startsWith("!") && !trimmed.startsWith("!!")) {
-                currentItem = "!\n" + trimmed.substring(1).trim();  // Store with warning prefix
-                currentSection.items.add(currentItem);
-                currentSection.subItems.put(currentItem, new ArrayList<>());
-            }
-            // Sub-item (indented with spaces or starts with dash)
-            else if (indent >= 4 || (trimmed.startsWith("-") && indent >= 2)) {
-                if (currentItem != null) {
-                    String subItemContent = trimmed.startsWith("-") ? trimmed.substring(1).trim() : trimmed;
-                    if (trimmed.startsWith("*")) {
-                        subItemContent = trimmed.substring(1).trim();
+            // Parse the line into a new item
+            Item newItem = parseItem(trimmed);
+
+            // Determine where to add this item based on indentation
+            if (indent == 0 || itemStack.isEmpty()) {
+                // Top-level item
+                currentSection.items.add(newItem);
+                itemStack.clear();
+                itemStack.add(new AbstractMap.SimpleEntry<>(newItem, indent));
+            } else {
+                // Find the parent item based on indentation
+                int i = itemStack.size() - 1;
+                while (i >= 0) {
+                    if (itemStack.get(i).getValue() < indent) {
+                        break;
                     }
-                    currentSection.subItems.get(currentItem).add(
-                            (trimmed.startsWith("*") ? "*\n" : "") + subItemContent
-                    );
+                    i--;
                 }
-            }
-            // Regular item
-            else if (!trimmed.isEmpty()) {
-                currentItem = "\n" + trimmed;  // No prefix for regular items
-                currentSection.items.add(currentItem);
-                currentSection.subItems.put(currentItem, new ArrayList<>());
+
+                if (i >= 0) {
+                    // Found a parent
+                    Item parent = itemStack.get(i).getKey();
+                    parent.children.add(newItem);
+
+                    // Remove all items in stack after the parent
+                    while (itemStack.size() > i + 1) {
+                        itemStack.remove(itemStack.size() - 1);
+                    }
+                } else {
+                    // No parent found, add as top-level
+                    currentSection.items.add(newItem);
+                    itemStack.clear();
+                }
+
+                // Add the new item to the stack
+                itemStack.add(new AbstractMap.SimpleEntry<>(newItem, indent));
             }
         }
 
@@ -153,6 +167,25 @@ public class ChangelogGenerator {
         }
 
         return sections;
+    }
+
+    private static Item parseItem(String line) {
+        // Identify item type by prefix
+        if (line.startsWith("!!")) {
+            return new Item("!!", line.substring(2).trim());
+        } else if (line.startsWith("!")) {
+            return new Item("!", line.substring(1).trim());
+        } else if (line.startsWith("*")) {
+            return new Item("*", line.substring(1).trim());
+        } else if (line.startsWith("-")) {
+            return new Item("-", line.substring(1).trim());
+        } else {
+            return new Item("", line);
+        }
+    }
+
+    private static boolean isListItem(String line) {
+        return line.startsWith("*") || line.startsWith("-") || line.startsWith("!!") || line.startsWith("!");
     }
 
     private static void generateHTML(BufferedWriter writer, String version, List<Section> sections)
@@ -171,56 +204,11 @@ public class ChangelogGenerator {
             writer.write(String.format("<span style=\"%s\">%s</span>\n",
                                        SECTION_STYLE, section.title));
 
-            writer.write("<ul style=\"font-size: 0.83em;\">\n");
+            writer.write("<ul style=\"font-size: 13;\">\n");
 
-            // Write items
-            for (String item : section.items) {
-                // Split prefix and content
-                String[] parts = item.split("\n", 2);
-                String prefix = parts[0];
-                String content = parts[1];
-
-                if (prefix.equals("*")) {
-                    writer.write(String.format("<li><span style=\"color: #ffffff; font-weight: bold;\">%s</span>\n", content));
-                } else if (prefix.equals("!")) {
-                    writer.write(String.format("<li style=\"%s\">! %s\n", WARNING_STYLE, content));
-                } else if (prefix.equals("!!")) {
-                    writer.write(String.format("<li style=\"%s\">!! %s\n", URGENT_STYLE, content));
-                } else {
-                    writer.write(String.format("<li>%s\n", content));
-                }
-
-                // Start sub-items list if we have any sub-items or warnings
-                List<String> subItems = section.subItems.get(item);
-                List<String> warnings = section.warnings.get(item);
-                if (!subItems.isEmpty() || (warnings != null && !warnings.isEmpty())) {
-                    writer.write("<ul style=\"margin-left: 40px;\">\n");
-
-                    // Write sub-items
-                    for (String subItem : subItems) {
-                        // Check if sub-item is important
-                        String[] subParts = subItem.split("\n", 2);
-                        boolean subImportant = subParts[0].equals("*");
-                        String subContent = subParts.length > 1 ? subParts[1] : subParts[0];
-
-                        if (subImportant) {
-                            writer.write(String.format("<li><span style=\"color: #ffffff; font-weight: bold;\">%s</span></li>\n", subContent));
-                        } else {
-                            writer.write(String.format("<li>%s</li>\n", subContent));
-                        }
-                    }
-
-                    // Write warnings
-                    if (warnings != null) {
-                        for (String warning : warnings) {
-                            writer.write(String.format("<li style=\"%s\">! %s</li>\n", WARNING_STYLE, warning));
-                        }
-                    }
-
-                    writer.write("</ul>\n");
-                }
-
-                writer.write("</li>\n");
+            // Write items recursively
+            for (Item item : section.items) {
+                writeItem(writer, item, 0);
             }
 
             writer.write("</ul>\n<br>\n");
@@ -228,5 +216,29 @@ public class ChangelogGenerator {
 
         // Close document
         writer.write("</div>");
+    }
+
+    private static void writeItem(BufferedWriter writer, Item item, int level) throws IOException {
+        // Format the item based on its prefix
+        switch (item.prefix) {
+            case "*" -> writer.write(String.format("<li><span style=\"color: #ffffff; font-weight: bold;\">%s</span>", item.content));
+            case "!" -> writer.write(String.format("<li style=\"%s\">! %s", WARNING_STYLE, item.content));
+            case "!!" -> writer.write(String.format("<li style=\"%s\">!! %s", URGENT_STYLE, item.content));
+            case "-" -> writer.write(String.format("<li>%s", item.content));
+            default -> writer.write(String.format("<li>%s", item.content));
+        }
+
+        // If this item has children, start a new nested list
+        if (!item.children.isEmpty()) {
+            writer.write("\n<ul style=\"margin-left: " + (40 + (level * 10)) + "px;\">\n");
+
+            for (Item child : item.children) {
+                writeItem(writer, child, level + 1);
+            }
+
+            writer.write("</ul>\n");
+        }
+
+        writer.write("</li>\n");
     }
 }
