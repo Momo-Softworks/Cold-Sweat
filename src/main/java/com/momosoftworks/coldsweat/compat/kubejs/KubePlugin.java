@@ -9,6 +9,7 @@ import dev.latvian.kubejs.KubeJSPlugin;
 import dev.latvian.kubejs.script.BindingsEvent;
 import me.shedaniel.architectury.event.EventResult;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 
@@ -26,12 +27,12 @@ public class KubePlugin extends KubeJSPlugin
     {   event.add("coldsweat", new KubeBindings());
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void fireRegistries(CreateRegistriesEvent.Pre event)
-    {   KubeEventSignatures.REGISTRIES.invoker().buildRegistries(event.getRegistryAccess());
+    {   KubeEventSignatures.REGISTRIES.invoker().buildRegistries(event);
     }
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGH)
     public static void gatherDefaultModifiers(DefaultTempModifiersEvent event)
     {
         if (!event.getEntity().level.isClientSide())

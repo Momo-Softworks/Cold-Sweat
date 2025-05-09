@@ -20,9 +20,9 @@ import java.util.Collection;
 public abstract class CreateRegistriesEvent extends Event
 {
     DynamicRegistries registryAccess;
-    Multimap<RegistryKey<Registry<? extends ConfigData>>, ? extends ConfigData> registries;
+    Multimap<RegistryKey<? extends Registry<? extends ConfigData>>, ? extends ConfigData> registries;
 
-    public CreateRegistriesEvent(DynamicRegistries registryAccess, Multimap<RegistryKey<Registry<? extends ConfigData>>, ? extends ConfigData> registries)
+    public CreateRegistriesEvent(DynamicRegistries registryAccess, Multimap<RegistryKey<? extends Registry<? extends ConfigData>>, ? extends ConfigData> registries)
     {
         this.registryAccess = registryAccess;
         this.registries = registries;
@@ -32,24 +32,28 @@ public abstract class CreateRegistriesEvent extends Event
     {   return registryAccess;
     }
 
-    public Multimap<RegistryKey<Registry<? extends ConfigData>>, ? extends ConfigData> getRegistries()
+    public Multimap<RegistryKey<? extends Registry<? extends ConfigData>>, ? extends ConfigData> getRegistries()
     {   return registries;
     }
 
-    public <T extends ConfigData> Collection<T> getRegistry(ModRegistries.ConfigRegistry<T> key)
-    {   return (Collection<T>) registries.get((RegistryKey) key.key());
+    public <T extends ConfigData> Collection<T> getRegistry(ModRegistries.ConfigRegistry<T> registry)
+    {   return (Collection) registries.get(registry.key());
     }
 
     /**
-     * Fired directly after registries have been gathered, before registry removals are processed.
+     * Fired directly after registries have been gathered, before registry removals are processed.<br>
+     * <br>
+     * Registry entries can be modified during this event, and they will be committed to Cold Sweat's runtime configs.
      */
     public static class Pre extends CreateRegistriesEvent
     {
         private Multimap<RegistryKey<Registry<? extends ConfigData>>, RemoveRegistryData<?>> removals;
 
-        public Pre(DynamicRegistries registryAccess, Multimap<RegistryKey<Registry<? extends ConfigData>>, ? extends ConfigData> registries,
+        public Pre(DynamicRegistries registryAccess,
+                   Multimap<RegistryKey<? extends Registry<? extends ConfigData>>, ? extends ConfigData> registries,
                    Multimap<RegistryKey<Registry<? extends ConfigData>>, RemoveRegistryData<?>> removals)
-        {   super(registryAccess, registries);
+        {
+            super(registryAccess, registries);
         }
 
         /**
@@ -68,7 +72,7 @@ public abstract class CreateRegistriesEvent extends Event
      */
     public static class Post extends CreateRegistriesEvent
     {
-        public Post(DynamicRegistries registryAccess, Multimap<RegistryKey<Registry<? extends ConfigData>>, ? extends ConfigData> registries)
+        public Post(DynamicRegistries registryAccess, Multimap<RegistryKey<? extends Registry<? extends ConfigData>>, ? extends ConfigData> registries)
         {   super(registryAccess, registries);
         }
     }

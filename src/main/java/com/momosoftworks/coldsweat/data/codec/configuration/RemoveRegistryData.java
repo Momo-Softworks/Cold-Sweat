@@ -35,7 +35,7 @@ public class RemoveRegistryData<T extends ConfigData> extends ConfigData
     }
 
     private static final Codec<List<ConfigData.Type>> CONFIG_TYPE_CODEC = Codec.either(Type.CODEC, Type.CODEC.listOf())
-                                                                          .xmap(either -> either.map(List::of, r -> r), Either::right);
+                                                                          .xmap(either -> either.map(Arrays::asList, r -> r), Either::right);
 
     public static final Codec<RemoveRegistryData<? extends ConfigData>> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.xmap(ModRegistries::getRegistry, ModRegistries::getRegistryName).fieldOf("registry").forGetter(data -> (RegistryKey) data.registry),

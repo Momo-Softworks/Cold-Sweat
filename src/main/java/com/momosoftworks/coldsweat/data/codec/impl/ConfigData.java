@@ -12,6 +12,7 @@ import net.minecraft.nbt.NBTDynamicOps;
 import net.minecraft.util.ResourceLocation;
 
 import java.util.Optional;
+import javax.annotation.Nullable;
 import java.util.UUID;
 
 public abstract class ConfigData implements NbtSerializable
@@ -98,15 +99,15 @@ public abstract class ConfigData implements NbtSerializable
         {   return name;
         }
 
-        public static Type byId(String name)
+        @Nullable
+        public static Type byName(String name)
         {
-            for (Type type : values())
+            for (Type type : Type.values())
             {
-                if (type.name.equals(name))
-                {   return type;
-                }
+                if (type.getSerializedName().equals(name))
+                    return type;
             }
-            return TOML;
+            return null;
         }
     }
 }

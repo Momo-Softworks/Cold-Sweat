@@ -70,7 +70,7 @@ public class ConfigLoadingHandler
         });
 
         DynamicRegistries registryAccess = event.getServer().registryAccess();
-        Multimap<RegistryKey<Registry<? extends ConfigData>>, ? extends ConfigData> registries = new RegistryMultiMap<>();
+        Multimap<RegistryKey<? extends Registry<? extends ConfigData>>, ? extends ConfigData> registries = new RegistryMultiMap<>();
 
         // User JSON configs (config folder)
         ColdSweat.LOGGER.info("Loading registries from configs...");
@@ -181,7 +181,7 @@ public class ConfigLoadingHandler
         return registries;
     }
 
-    private static void logAndAddRegistries(DynamicRegistries registryAccess, Multimap<RegistryKey<Registry<? extends ConfigData>>, ? extends ConfigData> registries)
+    private static void logAndAddRegistries(DynamicRegistries registryAccess, Multimap<RegistryKey<? extends Registry<? extends ConfigData>>, ? extends ConfigData> registries)
     {
         // Ensure default registry entries load last
         setDefaultRegistryPriority(registries, registryAccess);
@@ -289,9 +289,9 @@ public class ConfigLoadingHandler
         }
     }
 
-    private static void setDefaultRegistryPriority(Multimap<RegistryKey<Registry<? extends ConfigData>>, ? extends ConfigData> registries, DynamicRegistries dynamicRegistries)
+    private static void setDefaultRegistryPriority(Multimap<RegistryKey<? extends Registry<? extends ConfigData>>, ? extends ConfigData> registries, DynamicRegistries dynamicRegistries)
     {
-        for (RegistryKey<Registry<? extends ConfigData>> key : registries.keySet())
+        for (RegistryKey<? extends Registry<? extends ConfigData>> key : registries.keySet())
         {
             List<? extends ConfigData> sortedHolders = new ArrayList<>(registries.get(key));
             sortedHolders.sort(Comparator.comparing(holder ->
@@ -315,7 +315,7 @@ public class ConfigLoadingHandler
         });
     }
 
-    private static void removeRegistries(Multimap<RegistryKey<Registry<? extends ConfigData>>, ? extends ConfigData> registries)
+    private static void removeRegistries(Multimap<RegistryKey<? extends Registry<? extends ConfigData>>, ? extends ConfigData> registries)
     {
         ColdSweat.LOGGER.info("Handling registry removals...");
         for (Map.Entry entry : REMOVED_REGISTRIES.asMap().entrySet())

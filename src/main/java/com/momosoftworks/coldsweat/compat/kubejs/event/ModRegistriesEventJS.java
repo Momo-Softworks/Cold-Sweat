@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.compat.kubejs.event;
 
 import com.google.common.collect.Multimap;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.api.event.core.registry.CreateRegistriesEvent;
 import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
@@ -9,7 +10,7 @@ import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.compat.kubejs.event.builder.*;
 import com.momosoftworks.coldsweat.compat.kubejs.util.TempModifierDataJS;
-import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
@@ -38,10 +39,10 @@ import java.util.function.Function;
 
 public class ModRegistriesEventJS extends StartupEventJS
 {
-    DynamicRegistries registryAccess;
+    private final CreateRegistriesEvent.Pre event;
 
-    public ModRegistriesEventJS(DynamicRegistries registryAccess)
-    {   this.registryAccess = registryAccess;
+    public ModRegistriesEventJS(CreateRegistriesEvent.Pre event)
+    {   this.event = event;
     }
 
     /*
@@ -75,20 +76,10 @@ public class ModRegistriesEventJS extends StartupEventJS
         builder.accept(insulatorJS);
         InsulatorData insulator = insulatorJS.build();
 
-        Multimap<Item, InsulatorData> map;
-        switch (insulatorJS.slot)
-        {
-            case ITEM : map = ConfigSettings.INSULATION_ITEMS.get(); break;
-            case ARMOR : map = ConfigSettings.INSULATING_ARMORS.get(); break;
-            case CURIO : map = ConfigSettings.INSULATING_CURIOS.get(); break;
-            default : throw new IllegalArgumentException();
-        }
         if (insulatorJS.itemPredicate.isEmpty())
         {   insulatorJS.itemPredicate.add(new ItemRequirement(Collections.singleton(null), null), false);
         }
-        for (Item item : RegistryHelper.mapTaggableList(insulatorJS.itemPredicate.flatListMap(ItemRequirement::items)))
-        {   map.put(item, insulator);
-        }
+        this.event.getRegistry(ModRegistries.INSULATOR_DATA).add(insulator);
     }
 
     /*
@@ -105,16 +96,14 @@ public class ModRegistriesEventJS extends StartupEventJS
         if (foodJS.itemPredicate.isEmpty())
         {   foodJS.itemPredicate.add(new ItemRequirement(Collections.singleton(null), null), false);
         }
-        for (Item item : RegistryHelper.mapTaggableList(foodJS.itemPredicate.flatListMap(ItemRequirement::items)))
-        {   ConfigSettings.FOOD_TEMPERATURES.get().put(item, foodData);
-        }
+        this.event.getRegistry(ModRegistries.FOOD_DATA).add(foodData);
     }
 
     /*
      Fuel
      */
 
-    private void addFuel(Consumer<FuelBuilderJS> builder, DynamicHolder<Multimap<Item, FuelData>> config, FuelData.FuelType fuelType)
+    private void addFuel(Consumer<FuelBuilderJS> builder, FuelData.FuelType fuelType)
     {
         FuelBuilderJS fuelJS = new FuelBuilderJS();
         builder.accept(fuelJS);
@@ -124,25 +113,23 @@ public class ModRegistriesEventJS extends StartupEventJS
         if (fuelJS.itemPredicate.isEmpty())
         {   fuelJS.itemPredicate.add(new ItemRequirement(Collections.singleton(null), null), false);
         }
-        for (Item item : RegistryHelper.mapTaggableList(fuelJS.itemPredicate.flatListMap(ItemRequirement::items)))
-        {   config.get().put(item, fuelData);
-        }
+        this.event.getRegistry(ModRegistries.FUEL_DATA).add(fuelData);
     }
 
     public void addHearthFuel(Consumer<FuelBuilderJS> builder)
-    {   addFuel(builder, ConfigSettings.HEARTH_FUEL, FuelData.FuelType.HEARTH);
+    {   addFuel(builder, FuelData.FuelType.HEARTH);
     }
 
     public void addBoilerFuel(Consumer<FuelBuilderJS> builder)
-    {   addFuel(builder, ConfigSettings.BOILER_FUEL, FuelData.FuelType.BOILER);
+    {   addFuel(builder, FuelData.FuelType.BOILER);
     }
 
     public void addIceboxFuel(Consumer<FuelBuilderJS> builder)
-    {   addFuel(builder, ConfigSettings.ICEBOX_FUEL, FuelData.FuelType.ICEBOX);
+    {   addFuel(builder, FuelData.FuelType.ICEBOX);
     }
 
     public void addSoulspringLampFuel(Consumer<FuelBuilderJS> builder)
-    {   addFuel(builder, ConfigSettings.SOULSPRING_LAMP_FUEL, FuelData.FuelType.SOUL_LAMP);
+    {   addFuel(builder, FuelData.FuelType.SOUL_LAMP);
     }
 
     /*
@@ -159,9 +146,7 @@ public class ModRegistriesEventJS extends StartupEventJS
         if (carriedItemJS.itemPredicate.isEmpty())
         {   carriedItemJS.itemPredicate.add(new ItemRequirement(Collections.singleton(null), null), false);
         }
-        for (Item item : RegistryHelper.mapTaggableList(carriedItemJS.itemPredicate.flatListMap(ItemRequirement::items)))
-        {   ConfigSettings.CARRIED_ITEM_TEMPERATURES.get().put(item, carryData);
-        }
+        this.event.getRegistry(ModRegistries.CARRY_TEMP_DATA).add(carryData);
     }
 
     /*
@@ -178,17 +163,15 @@ public class ModRegistriesEventJS extends StartupEventJS
         if (dryingItemJS.itemPredicate.isEmpty())
         {   dryingItemJS.itemPredicate.add(new ItemRequirement(Collections.singleton(null), null), false);
         }
-        for (Item item : RegistryHelper.mapTaggableList(dryingItemJS.itemPredicate.flatListMap(ItemRequirement::items)))
-        {   ConfigSettings.DRYING_ITEMS.get().put(item, dryingData);
-        }
+        this.event.getRegistry(ModRegistries.DRYING_ITEM_DATA).add(dryingData);
     }
 
     private <K, V extends ConfigData> void addRegistryConfig(RegistryKey<Registry<K>> keyRegistry,
-                                                             DynamicHolder<? extends Map<K, V>> config,
+                                                             ModRegistries.ConfigRegistry<V> modRegistry,
                                                              String[] rawKeys,
                                                              Function<List<K>, V> constructor)
     {
-        List<K> parsed = ConfigHelper.parseRegistryItems(keyRegistry, registryAccess, rawKeys);
+        List<K> parsed = ConfigHelper.parseRegistryItems(keyRegistry, this.event.getRegistryAccess(), rawKeys);
         if (parsed.isEmpty())
         {   ColdSweat.LOGGER.error("Failed to find any {} in: {}", keyRegistry.location().getPath(), Arrays.toString(rawKeys));
             return;
@@ -197,9 +180,7 @@ public class ModRegistriesEventJS extends StartupEventJS
         configData.setRegistryType(ConfigData.Type.KUBEJS);
         if (!configData.areRequiredModsLoaded()) return;
 
-        for (K holder : parsed)
-        {   config.get(registryAccess).put(holder, configData);
-        }
+        this.event.getRegistry(modRegistry).add(configData);
     }
 
     /*
@@ -208,7 +189,7 @@ public class ModRegistriesEventJS extends StartupEventJS
 
     public void addBiomeTemperature(double minTemp, double maxTemp, String units, String... biomes)
     {
-        this.addRegistryConfig(Registry.BIOME_REGISTRY, ConfigSettings.BIOME_TEMPS, biomes,
+        this.addRegistryConfig(Registry.BIOME_REGISTRY, ModRegistries.BIOME_TEMP_DATA, biomes,
                 parsedBiomes -> new BiomeTempData(new NegatableList<>(parsedBiomes), minTemp, maxTemp, Temperature.Units.fromID(units), false));
     }
     public void addBiomeTemperature(double minTemp, double maxTemp, String... biomes)
@@ -217,7 +198,7 @@ public class ModRegistriesEventJS extends StartupEventJS
 
     public void addBiomeOffset(double minTemp, double maxTemp, String units, String... biomes)
     {
-        this.addRegistryConfig(Registry.BIOME_REGISTRY, ConfigSettings.BIOME_OFFSETS, biomes,
+        this.addRegistryConfig(Registry.BIOME_REGISTRY, ModRegistries.BIOME_TEMP_DATA, biomes,
                 parsedBiomes -> new BiomeTempData(new NegatableList<>(parsedBiomes), minTemp, maxTemp, Temperature.Units.fromID(units), true));
     }
     public void addBiomeOffset(double minTemp, double maxTemp, String... biomes)
@@ -230,7 +211,7 @@ public class ModRegistriesEventJS extends StartupEventJS
 
     public void addDimensionTemperature(double temperature, String units, String... dimensions)
     {
-        this.addRegistryConfig(Registry.DIMENSION_TYPE_REGISTRY, ConfigSettings.DIMENSION_TEMPS, dimensions,
+        this.addRegistryConfig(Registry.DIMENSION_TYPE_REGISTRY, ModRegistries.DIMENSION_TEMP_DATA, dimensions,
                 parsedDimensions -> new DimensionTempData(new NegatableList<>(parsedDimensions), temperature, Temperature.Units.fromID(units), false));
     }
     public void addDimensionTemperature(double temperature, String... dimensions)
@@ -239,7 +220,7 @@ public class ModRegistriesEventJS extends StartupEventJS
 
     public void addDimensionOffset(double temperature, String units, String... dimensions)
     {
-        this.addRegistryConfig(Registry.DIMENSION_TYPE_REGISTRY, ConfigSettings.DIMENSION_OFFSETS, dimensions,
+        this.addRegistryConfig(Registry.DIMENSION_TYPE_REGISTRY, ModRegistries.DIMENSION_TEMP_DATA, dimensions,
                 parsedDimensions -> new DimensionTempData(new NegatableList<>(parsedDimensions), temperature, Temperature.Units.fromID(units), true));
     }
     public void addDimensionOffset(double temperature, String... dimensions)
@@ -252,7 +233,7 @@ public class ModRegistriesEventJS extends StartupEventJS
 
     public void addStructureTemperature(double temperature, String units, String... structures)
     {
-        this.addRegistryConfig(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, ConfigSettings.STRUCTURE_TEMPS, structures,
+        this.addRegistryConfig(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, ModRegistries.STRUCTURE_TEMP_DATA, structures,
                 parsedStructures -> new StructureTempData(new NegatableList<>(parsedStructures), temperature, Temperature.Units.fromID(units), false));
     }
     public void addStructureTemperature(double temperature, String... structures)
@@ -261,7 +242,7 @@ public class ModRegistriesEventJS extends StartupEventJS
 
     public void addStructureOffset(double temperature, String units, String... structures)
     {
-        this.addRegistryConfig(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, ConfigSettings.STRUCTURE_OFFSETS, structures,
+        this.addRegistryConfig(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, ModRegistries.STRUCTURE_TEMP_DATA, structures,
                 parsedStructures -> new StructureTempData(new NegatableList<>(parsedStructures), temperature, Temperature.Units.fromID(units), true));
     }
     public void addStructureOffset(double temperature, String... structures)
@@ -282,9 +263,7 @@ public class ModRegistriesEventJS extends StartupEventJS
         if (entityTempJS.entityPredicate.isEmpty())
         {   entityTempJS.entityPredicate.add(new EntityRequirement(Collections.singleton(null), null), false);
         }
-        for (EntityType<?> item : RegistryHelper.mapTaggableList(entityTempJS.entityPredicate.flatListMap(EntityRequirement::entities)))
-        {   ConfigSettings.ENTITY_TEMPERATURES.get().put(item, entityTempData);
-        }
+        this.event.getRegistry(ModRegistries.ENTITY_TEMP_DATA).add(entityTempData);
     }
 
     /*
@@ -301,9 +280,7 @@ public class ModRegistriesEventJS extends StartupEventJS
         if (entityClimateJS.entityPredicate.isEmpty())
         {   entityClimateJS.entityPredicate.add(new EntityRequirement(Collections.singleton(null), null), false);
         }
-        for (EntityType<?> item : RegistryHelper.mapTaggableList(entityClimateJS.entityPredicate.flatListMap(EntityRequirement::entities)))
-        {   ConfigSettings.ENTITY_CLIMATES.get().put(item, entityClimateData);
-        }
+        this.event.getRegistry(ModRegistries.ENTITY_CLIMATE_DATA).add(entityClimateData);
     }
 
     /*
@@ -320,9 +297,7 @@ public class ModRegistriesEventJS extends StartupEventJS
         if (insulatingMountJS.entityPredicate.isEmpty())
         {   insulatingMountJS.entityPredicate.add(new EntityRequirement(Collections.singleton(null), null), false);
         }
-        for (EntityType<?> item : RegistryHelper.mapTaggableList(insulatingMountJS.entityPredicate.flatListMap(EntityRequirement::entities)))
-        {   ConfigSettings.INSULATED_MOUNTS.get().put(item, mountData);
-        }
+        this.event.getRegistry(ModRegistries.MOUNT_DATA).add(mountData);
     }
 
     /*
@@ -339,9 +314,7 @@ public class ModRegistriesEventJS extends StartupEventJS
         if (spawnBiomeJS.biomes.isEmpty())
         {   spawnBiomeJS.biomes.add(null);
         }
-        for (Biome biome : spawnBiomeJS.biomes)
-        {   ConfigSettings.ENTITY_SPAWN_BIOMES.get().put(biome, spawnBiomeData);
-        }
+        this.event.getRegistry(ModRegistries.ENTITY_SPAWN_BIOME_DATA).add(spawnBiomeData);
     }
 
     /*
