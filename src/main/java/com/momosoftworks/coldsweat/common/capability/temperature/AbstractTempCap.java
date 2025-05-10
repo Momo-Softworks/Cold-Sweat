@@ -34,6 +34,7 @@ import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager.*;
 
@@ -179,6 +180,15 @@ public class AbstractTempCap implements ITemperatureCap
     {   return showWorldTemp;
     }
 
+    private AttributeInstance getAttribute(LivingEntity entity, Trait trait)
+    {   return attributes.computeIfAbsent(trait, t -> EntityTempManager.getAttribute(t, entity));
+    }
+
+    private Set<AttributeModifier> getAttributeModifiers(AttributeInstance attribute, AttributeModifier.Operation operation)
+    {
+        return attribute.getModifiers().stream().filter(mod -> mod.operation() == operation).collect(Collectors.toSet());
+    }
+
     /* See Temperature class for more temperature-related methods */
 
     /**
@@ -316,7 +326,7 @@ public class AbstractTempCap implements ITemperatureCap
     private double modifyFromAttribute(LivingEntity entity, Trait trait, double baseValue)
     {
         Supplier<Double> defaultSupplier = () -> Temperature.apply(baseValue, entity, trait, this.getModifiers(trait));
-        AttributeInstance attribute = attributes.computeIfAbsent(trait, t -> EntityTempManager.getAttribute(trait, entity));
+        AttributeInstance attribute = this.getAttribute(entity, trait);
 
         double newValue;
         // If the attribute is null, return the default value
@@ -326,28 +336,20 @@ public class AbstractTempCap implements ITemperatureCap
         else
         {
             double base = CSMath.safeDouble(attribute.getBaseValue()).orElseGet(defaultSupplier);
-            Map<AttributeModifier.Operation, Set<AttributeModifier>> modifiers = this.attributeModifiers.computeIfAbsent(attribute, a ->
-            {
-                Map<AttributeModifier.Operation, Set<AttributeModifier>> map = new HashMap<>();
-                for (AttributeModifier modifier : a.getModifiers())
-                {   map.computeIfAbsent(modifier.operation(), o -> new HashSet<>()).add(modifier);
-                }
-                return map;
-            });
 
             if (modifiers.isEmpty())
             {   newValue = base;
             }
             else
             {
-                for (AttributeModifier mod : modifiers.get(AttributeModifier.Operation.ADD_VALUE))
+                for (AttributeModifier mod : this.getAttributeModifiers(attribute, AttributeModifier.Operation.ADD_VALUE))
                 {   base += mod.amount();
                 }
                 double value = base;
-                for (AttributeModifier mod : modifiers.get(AttributeModifier.Operation.ADD_MULTIPLIED_BASE))
+                for (AttributeModifier mod : this.getAttributeModifiers(attribute, AttributeModifier.Operation.ADD_MULTIPLIED_BASE))
                 {   value += base * mod.amount();
                 }
-                for (AttributeModifier mod : modifiers.get(AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL))
+                for (AttributeModifier mod : this.getAttributeModifiers(attribute, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL))
                 {
                         value *= 1.0D + mod.amount();
                 }
