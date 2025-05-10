@@ -93,7 +93,6 @@ public class ModRegistriesEventJS extends StartupEventJS
         {   foodJS.itemPredicate.add(new ItemRequirement(Collections.singleton(null), null), false);
         }
         this.event.getRegistry(ModRegistries.FOOD_DATA).add(Holder.direct(foodData));
-        System.out.println(event.getRegistries());
     }
 
     /*
