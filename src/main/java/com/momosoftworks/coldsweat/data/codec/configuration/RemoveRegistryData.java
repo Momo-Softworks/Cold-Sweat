@@ -21,11 +21,11 @@ import java.util.Optional;
 public class RemoveRegistryData<T extends ConfigData> extends ConfigData
 {
     private final ResourceKey<Registry<T>> registry;
-    private final NegatableList<CompoundTag> matches;
+    private final NegatableList<NbtRequirement> matches;
     private final List<ResourceLocation> entries;
     private final List<ConfigData.Type> registryTypes;
 
-    public RemoveRegistryData(ResourceKey<Registry<T>> registry, NegatableList<CompoundTag> matches, List<ResourceLocation> entries, List<Type> registryTypes)
+    public RemoveRegistryData(ResourceKey<Registry<T>> registry, NegatableList<NbtRequirement> matches, List<ResourceLocation> entries, List<Type> registryTypes)
     {
         super(new NegatableList<>());
         this.registry = registry;
@@ -39,7 +39,7 @@ public class RemoveRegistryData<T extends ConfigData> extends ConfigData
 
     public static final Codec<RemoveRegistryData<?>> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.xmap(s -> (ResourceKey)ModRegistries.getRegistry(s), key -> ModRegistries.getRegistryName(key)).fieldOf("registry").forGetter(data -> data.registry()),
-            NegatableList.listCodec(CompoundTag.CODEC).optionalFieldOf("matches", new NegatableList<>()).forGetter(RemoveRegistryData::matches),
+            NegatableList.listCodec(NbtRequirement.CODEC).optionalFieldOf("matches", new NegatableList<>()).forGetter(RemoveRegistryData::matches),
             ResourceLocation.CODEC.listOf().optionalFieldOf("entries", List.of()).forGetter(RemoveRegistryData::entries),
             CONFIG_TYPE_CODEC.optionalFieldOf("config_type", List.of()).forGetter(RemoveRegistryData::configTypes)
     ).apply(instance, RemoveRegistryData::new));
@@ -47,7 +47,7 @@ public class RemoveRegistryData<T extends ConfigData> extends ConfigData
     public ResourceKey<Registry<T>> registry()
     {   return registry;
     }
-    public NegatableList<CompoundTag> matches()
+    public NegatableList<NbtRequirement> matches()
     {   return matches;
     }
     public List<ResourceLocation> entries()
@@ -70,7 +70,7 @@ public class RemoveRegistryData<T extends ConfigData> extends ConfigData
         }
         Optional<Tag> serializedOpt = ModRegistries.getCodec((ResourceKey) registry).encodeStart(NbtOps.INSTANCE, object).result();
         return serializedOpt.map(serialized ->
-        {   return matches.test(nbt -> NbtRequirement.compareNbt(nbt, serialized, true));
+        {   return matches.test(nbt -> nbt.test((CompoundTag) serialized));
         }).orElse(false);
     }
 
