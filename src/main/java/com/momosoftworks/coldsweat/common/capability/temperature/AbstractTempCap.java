@@ -172,6 +172,23 @@ public class AbstractTempCap implements ITemperatureCap
     {   return showWorldTemp;
     }
 
+    private AttributeInstance getAttribute(LivingEntity entity, Trait trait)
+    {   return attributes.computeIfAbsent(trait, t -> EntityTempManager.getAttribute(t, entity));
+    }
+
+    private Set<AttributeModifier> getAttributeModifiers(AttributeInstance attribute, AttributeModifier.Operation operation)
+    {
+        Map<AttributeModifier.Operation, Set<AttributeModifier>> modifiers = this.attributeModifiers.computeIfAbsent(attribute, at ->
+        {
+            Map<AttributeModifier.Operation, Set<AttributeModifier>> map = new HashMap<>();
+            for (AttributeModifier.Operation op : AttributeModifier.Operation.values())
+            {   map.put(op, at.getModifiers(op));
+            }
+            return map;
+        });
+        return modifiers.computeIfAbsent(operation, attribute::getModifiers);
+    }
+
     /* See Temperature class for more temperature-related methods */
 
     /**
@@ -309,7 +326,7 @@ public class AbstractTempCap implements ITemperatureCap
     private double modifyFromAttribute(LivingEntity entity, Trait trait, double baseValue)
     {
         Supplier<Double> defaultSupplier = () -> Temperature.apply(baseValue, entity, trait, this.getModifiers(trait));
-        AttributeInstance attribute = attributes.computeIfAbsent(trait, t -> EntityTempManager.getAttribute(trait, entity));
+        AttributeInstance attribute = this.getAttribute(entity, trait);
 
         double newValue;
         // If the attribute is null, return the default value
@@ -319,28 +336,20 @@ public class AbstractTempCap implements ITemperatureCap
         else
         {
             double base = CSMath.safeDouble(attribute.getBaseValue()).orElseGet(defaultSupplier);
-            Map<AttributeModifier.Operation, Set<AttributeModifier>> modifiers = this.attributeModifiers.computeIfAbsent(attribute, a ->
-            {
-                Map<AttributeModifier.Operation, Set<AttributeModifier>> map = new HashMap<>();
-                for (AttributeModifier.Operation operation : AttributeModifier.Operation.values())
-                {   map.put(operation, a.getModifiers(operation));
-                }
-                return map;
-            });
 
             if (modifiers.isEmpty())
             {   newValue = base;
             }
             else
             {
-                for (AttributeModifier mod : modifiers.get(AttributeModifier.Operation.ADDITION))
+                for (AttributeModifier mod : this.getAttributeModifiers(attribute, AttributeModifier.Operation.ADDITION))
                 {   base += mod.getAmount();
                 }
                 double value = base;
-                for (AttributeModifier mod : modifiers.get(AttributeModifier.Operation.MULTIPLY_BASE))
+                for (AttributeModifier mod : this.getAttributeModifiers(attribute, AttributeModifier.Operation.MULTIPLY_BASE))
                 {   value += base * mod.getAmount();
                 }
-                for (AttributeModifier mod : modifiers.get(AttributeModifier.Operation.MULTIPLY_TOTAL))
+                for (AttributeModifier mod : this.getAttributeModifiers(attribute, AttributeModifier.Operation.MULTIPLY_TOTAL))
                 {
                         value *= 1.0D + mod.getAmount();
                 }
