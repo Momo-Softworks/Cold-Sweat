@@ -82,22 +82,6 @@ public class ItemInsulationManager
 
             // Attach the capability to the item
             event.addCapability(new ResourceLocation(ColdSweat.MOD_ID, "item_insulation"), provider);
-
-            // Legacy code for updating items using the pre-2.2 insulation system
-            CompoundTag stackNBT = NBTHelper.getTagOrEmpty(stack);
-            if (stack.getItem() instanceof ArmorItem armor)
-            {
-                if (stackNBT.getBoolean("insulated"))
-                {   stackNBT.remove("insulated");
-                    switch (armor.getType().getSlot())
-                    {   case HEAD  : itemInsulationCap.addInsulationItem(Items.LEATHER_HELMET.getDefaultInstance()); break;
-                        case CHEST : itemInsulationCap.addInsulationItem(Items.LEATHER_CHESTPLATE.getDefaultInstance()); break;
-                        case LEGS  : itemInsulationCap.addInsulationItem(Items.LEATHER_LEGGINGS.getDefaultInstance()); break;
-                        case FEET  : itemInsulationCap.addInsulationItem(Items.LEATHER_BOOTS.getDefaultInstance()); break;
-                        default    : itemInsulationCap.addInsulationItem(ItemStack.EMPTY); break;
-                    }
-                }
-            }
         }
     }
 
@@ -174,7 +158,9 @@ public class ItemInsulationManager
      */
     public static boolean isInsulatable(ItemStack stack)
     {
-        return stack.getItem() instanceof Equipable && !hasBuiltinInsulation(stack);
+        return stack.getItem() instanceof Equipable
+            && !ConfigSettings.INSULATION_BLACKLIST.get().contains(stack.getItem())
+            && getBuiltinInsulation(stack).isEmpty();
     }
 
     /**

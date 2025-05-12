@@ -55,12 +55,9 @@ public class SewingContainer extends ItemCombinerMenu
     protected ItemCombinerMenuSlotDefinition createInputSlotDefinitions()
     {
         return ItemCombinerMenuSlotDefinition.create()
-        .withSlot(0, 43, 26, (stack) ->
-        {   return stack.getItem() instanceof Equipable && !ConfigSettings.INSULATION_BLACKLIST.get().contains(stack.getItem())
-                && ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()).isEmpty();
-        })
+        .withSlot(0, 43, 26, ItemInsulationManager::isInsulatable)
         .withSlot(1, 43, 53, (stack) ->
-        {   return !ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()).isEmpty()
+        {   return ConfigSettings.INSULATION_ITEMS.get().containsKey(stack.getItem())
                 || stack.is(Tags.Items.SHEARS);
         })
         .withResultSlot(2, 121, 39).build();
