@@ -160,7 +160,9 @@ public class ItemInsulationManager
      */
     public static boolean isInsulatable(ItemStack stack)
     {
-        return stack.getItem() instanceof Wearable && !hasBuiltinInsulation(stack);
+        return stack.getItem() instanceof Wearable
+            && !ConfigSettings.INSULATION_BLACKLIST.get().contains(stack.getItem())
+            && getBuiltinInsulation(stack).isEmpty();
     }
 
     /**
