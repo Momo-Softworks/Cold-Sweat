@@ -182,7 +182,9 @@ public class ItemInsulationManager
      */
     public static boolean isInsulatable(ItemStack stack)
     {
-        return stack.getItem() instanceof IArmorVanishable && !hasBuiltinInsulation(stack);
+        return stack.getItem() instanceof IArmorVanishable
+            && !ConfigSettings.INSULATION_BLACKLIST.get().contains(stack.getItem())
+            && getBuiltinInsulation(stack).isEmpty();
     }
 
     /**

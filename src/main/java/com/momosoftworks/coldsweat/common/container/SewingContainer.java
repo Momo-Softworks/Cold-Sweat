@@ -53,9 +53,7 @@ public class SewingContainer extends AbstractRepairContainer
             {   this.index = 0;
             }
             public boolean mayPlace(ItemStack stack)
-            {
-                return stack.getItem() instanceof IArmorVanishable && !ConfigSettings.INSULATION_BLACKLIST.get().contains(stack.getItem())
-                    && ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()).isEmpty();
+            {   return ItemInsulationManager.isInsulatable(stack);
             }
         });
         this.slots.set(1, new Slot(this.inputSlots, 1, 43, 53)
@@ -64,7 +62,7 @@ public class SewingContainer extends AbstractRepairContainer
             }
             public boolean mayPlace(ItemStack stack)
             {
-                return !ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()).isEmpty()
+                return ConfigSettings.INSULATION_ITEMS.get().containsKey(stack.getItem())
                     || Tags.Items.SHEARS.contains(stack.getItem());
             }
         });
