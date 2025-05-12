@@ -9,7 +9,7 @@
     ]
   },
   "insulation": {
-    "heat": 2,
+    "heat": 0,
     "cold": 0
   },
   "entity": {
