@@ -57,9 +57,7 @@ public class SewingContainer extends ItemCombinerMenu
             {   this.index = 0;
             }
             public boolean mayPlace(ItemStack stack)
-            {
-                return stack.getItem() instanceof Wearable && !ConfigSettings.INSULATION_BLACKLIST.get().contains(stack.getItem())
-                    && ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()).isEmpty();
+            {   return ItemInsulationManager.isInsulatable(stack);
             }
         });
         this.slots.set(1, new Slot(this.inputSlots, 1, 43, 53)
@@ -68,7 +66,7 @@ public class SewingContainer extends ItemCombinerMenu
             }
             public boolean mayPlace(ItemStack stack)
             {
-                return !ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()).isEmpty()
+                return ConfigSettings.INSULATION_ITEMS.get().containsKey(stack.getItem())
                     || stack.is(Tags.Items.SHEARS);
             }
         });
