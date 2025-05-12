@@ -30,14 +30,17 @@ public class MixinItemTooltipAdditional
     public static void addModifiers(AddAttributeTooltipsEvent event)
     {
         ItemStack stack = event.getStack();
-        for (InsulatorData data : ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem()))
+        for (InsulatorData insulator : ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem()))
         {
-            for (Map.Entry<Holder<Attribute>, AttributeModifier> entry : data.attributes().getMap().entries())
+            for (Map.Entry<Holder<Attribute>, AttributeModifier> entry : insulator.attributes().getMap().entries())
             {
                 Holder<Attribute> attribute = entry.getKey();
                 AttributeModifier modifier = entry.getValue();
-                event.addTooltipLines(TooltipHandler.getFormattedAttributeModifier(attribute, modifier.amount(), modifier.operation(),
-                                                                                   true, !TooltipHandler.passesRequirement(data)));
+                boolean passes = TooltipHandler.passesRequirement(insulator);
+                if (!passes && insulator.hideIfUnmet())
+                {   continue;
+                }
+                event.addTooltipLines(TooltipHandler.getFormattedAttributeModifier(attribute, modifier.amount(), modifier.operation(), true, !passes));
             }
         }
         ItemInsulationManager.getInsulationCap(stack).ifPresent(cap ->
@@ -50,8 +53,11 @@ public class MixinItemTooltipAdditional
                     {
                         Holder<Attribute> attribute = entry.getKey();
                         AttributeModifier modifier = entry.getValue();
-                        event.addTooltipLines(TooltipHandler.getFormattedAttributeModifier(attribute, modifier.amount(), modifier.operation(),
-                                                                                           true, !TooltipHandler.passesRequirement(insulator)));
+                        boolean passes = TooltipHandler.passesRequirement(insulator);
+                        if (!passes && insulator.hideIfUnmet())
+                        {   continue;
+                        }
+                        event.addTooltipLines(TooltipHandler.getFormattedAttributeModifier(attribute, modifier.amount(), modifier.operation(), true, !passes));
                     }
                 }
             });

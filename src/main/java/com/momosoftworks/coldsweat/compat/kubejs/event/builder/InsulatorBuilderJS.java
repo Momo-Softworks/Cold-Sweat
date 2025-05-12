@@ -35,7 +35,8 @@ public class InsulatorBuilderJS
     public NegatableList<EntityRequirement> entityPredicate = new NegatableList<>();
     public AttributeModifierMap attributes = new AttributeModifierMap();
     public Map<ResourceLocation, Double> immuneTempModifiers = new HashMap<>();
-    public boolean multiSlot = false;
+    public boolean fillSlots = false;
+    public boolean hideIfUnmet = false;
 
     public InsulatorBuilderJS()
     {}
@@ -99,16 +100,22 @@ public class InsulatorBuilderJS
         return this;
     }
 
-    public InsulatorBuilderJS multiSlot(boolean multiSlot)
+    public InsulatorBuilderJS fillSlots(boolean multiSlot)
     {
-        this.multiSlot = multiSlot;
+        this.fillSlots = multiSlot;
+        return this;
+    }
+
+    public InsulatorBuilderJS hideIfUnmet(boolean hide)
+    {
+        this.hideIfUnmet = hide;
         return this;
     }
 
     public InsulatorData build()
     {
-        InsulatorData data = new InsulatorData(this.itemPredicate, slot, insulation, this.entityPredicate,
-                                               attributes, immuneTempModifiers, multiSlot);
+        InsulatorData data = new InsulatorData(this.itemPredicate, this.slot, this.insulation, this.entityPredicate,
+                                               this.attributes, this.immuneTempModifiers, this.fillSlots, this.hideIfUnmet);
         data.setRegistryType(ConfigData.Type.KUBEJS);
         return data;
     }

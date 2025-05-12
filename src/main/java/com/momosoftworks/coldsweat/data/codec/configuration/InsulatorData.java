@@ -43,11 +43,12 @@ public class InsulatorData extends ConfigData implements RequirementHolder
     final AttributeModifierMap attributes;
     final Map<ResourceLocation, Double> immuneTempModifiers;
     final boolean fillSlots;
+    final boolean hideIfUnmet;
 
     public InsulatorData(NegatableList<ItemRequirement> item, Insulation.Slot slot,
                          List<Insulation> insulation, NegatableList<EntityRequirement> entity,
                          AttributeModifierMap attributes, Map<ResourceLocation, Double> immuneTempModifiers,
-                         boolean fillSlots, NegatableList<String> requiredMods)
+                         boolean fillSlots, boolean hideIfUnmet, NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.item = item;
@@ -57,13 +58,14 @@ public class InsulatorData extends ConfigData implements RequirementHolder
         this.attributes = attributes;
         this.immuneTempModifiers = immuneTempModifiers;
         this.fillSlots = fillSlots;
+        this.hideIfUnmet = hideIfUnmet;
     }
 
     public InsulatorData(NegatableList<ItemRequirement> item, Insulation.Slot slot, List<Insulation> insulation,
                          NegatableList<EntityRequirement> entity, AttributeModifierMap attributes,
-                         Map<ResourceLocation, Double> immuneTempModifiers, boolean fillSlots)
+                         Map<ResourceLocation, Double> immuneTempModifiers, boolean fillSlots, boolean hideIfUnmet)
     {
-        this(item, slot, insulation, entity, attributes, immuneTempModifiers, fillSlots, new NegatableList<>());
+        this(item, slot, insulation, entity, attributes, immuneTempModifiers, fillSlots, hideIfUnmet, new NegatableList<>());
     }
 
     private static final Codec<List<Insulation>> INSULATION_CODEC = Codec.either(Insulation.getCodec().listOf(), Insulation.getCodec())
@@ -79,6 +81,7 @@ public class InsulatorData extends ConfigData implements RequirementHolder
             AttributeModifierMap.CODEC.optionalFieldOf("attributes", new AttributeModifierMap()).forGetter(InsulatorData::attributes),
             Codec.unboundedMap(ResourceLocation.CODEC, Codec.DOUBLE).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(InsulatorData::immuneTempModifiers),
             Codec.BOOL.optionalFieldOf("fill_slots", false).forGetter(InsulatorData::fillSlots),
+            Codec.BOOL.optionalFieldOf("hide_if_unmet", false).forGetter(InsulatorData::hideIfUnmet),
             NegatableList.listCodec(Codec.STRING).optionalFieldOf("required_mods", new NegatableList<>()).forGetter(ConfigData::requiredMods)
     ).apply(instance, InsulatorData::new));
 
@@ -94,6 +97,7 @@ public class InsulatorData extends ConfigData implements RequirementHolder
         AttributeModifierMap.STREAM_CODEC.encode(buf, insulator.attributes());
         buf.writeMap(insulator.immuneTempModifiers(), ResourceLocation.STREAM_CODEC, CommonStreamCodecs.DOUBLE);
         buf.writeBoolean(insulator.fillSlots());
+        buf.writeBoolean(insulator.hideIfUnmet);
     },
     (buf) ->
     {
@@ -106,7 +110,8 @@ public class InsulatorData extends ConfigData implements RequirementHolder
         AttributeModifierMap attributes = AttributeModifierMap.STREAM_CODEC.decode(buf);
         Map<ResourceLocation, Double> immuneTempModifiers = buf.readMap(ResourceLocation.STREAM_CODEC, CommonStreamCodecs.DOUBLE);
         boolean multiSlot = buf.readBoolean();
-        return new InsulatorData(item, slot, insulation, predicate, attributes, immuneTempModifiers, multiSlot);
+        boolean hideIfUnmet = buf.readBoolean();
+        return new InsulatorData(item, slot, insulation, predicate, attributes, immuneTempModifiers, multiSlot, hideIfUnmet);
     });
 
     public static final StreamCodec<RegistryFriendlyByteBuf, InsulatorData> SIMPLE_STREAM_CODEC = StreamCodec.of(
@@ -115,13 +120,15 @@ public class InsulatorData extends ConfigData implements RequirementHolder
         buf.writeEnum(insulator.slot());
         buf.writeCollection(insulator.insulation(), Insulation.getNetworkCodec());
         buf.writeBoolean(insulator.fillSlots());
+        buf.writeBoolean(insulator.hideIfUnmet);
     },
     (buf) ->
     {
         Insulation.Slot slot = buf.readEnum(Insulation.Slot.class);
         List<Insulation> insulation = buf.readCollection(ArrayList::new, Insulation.getNetworkCodec());
         boolean multiSlot = buf.readBoolean();
-        return new InsulatorData(new NegatableList<>(), slot, insulation, new NegatableList<>(), new AttributeModifierMap(), new HashMap<>(), multiSlot);
+        boolean hideIfUnmet = buf.readBoolean();
+        return new InsulatorData(new NegatableList<>(), slot, insulation, new NegatableList<>(), new AttributeModifierMap(), new HashMap<>(), multiSlot, hideIfUnmet);
     });
 
     public NegatableList<ItemRequirement> item()
@@ -144,6 +151,9 @@ public class InsulatorData extends ConfigData implements RequirementHolder
     }
     public boolean fillSlots()
     {   return fillSlots;
+    }
+    public boolean hideIfUnmet()
+    {   return hideIfUnmet;
     }
 
     public double getCold()
@@ -206,11 +216,12 @@ public class InsulatorData extends ConfigData implements RequirementHolder
 
         ItemRequirement itemRequirement = new ItemRequirement(items, components);
 
-        return new InsulatorData(new NegatableList<>(itemRequirement), slot, insulation, new NegatableList<>(), new AttributeModifierMap(), new HashMap<>(), multiSlot);
+        return new InsulatorData(new NegatableList<>(itemRequirement), slot, insulation, new NegatableList<>(), new AttributeModifierMap(), new HashMap<>(), multiSlot, false);
     }
 
     public InsulatorData copy()
-    {   return new InsulatorData(this.item, this.slot, Insulation.deepCopy(this.insulation), this.entity, this.attributes, new HashMap<>(this.immuneTempModifiers), this.fillSlots);
+    {   return new InsulatorData(this.item, this.slot, Insulation.deepCopy(this.insulation), this.entity,
+                                 this.attributes, new HashMap<>(this.immuneTempModifiers), this.fillSlots, this.hideIfUnmet);
     }
 
     @Override
