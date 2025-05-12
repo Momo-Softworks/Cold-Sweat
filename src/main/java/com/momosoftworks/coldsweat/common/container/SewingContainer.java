@@ -23,7 +23,6 @@ import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.common.NeoForge;
@@ -55,12 +54,9 @@ public class SewingContainer extends ItemCombinerMenu
     protected ItemCombinerMenuSlotDefinition createInputSlotDefinitions()
     {
         return ItemCombinerMenuSlotDefinition.create()
-        .withSlot(0, 43, 26, (stack) ->
-        {   return stack.getItem() instanceof Equipable && !ConfigSettings.INSULATION_BLACKLIST.get().contains(stack.getItem())
-                && ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()).isEmpty();
-        })
+        .withSlot(0, 43, 26, ItemInsulationManager::isInsulatable)
         .withSlot(1, 43, 53, (stack) ->
-        {   return !ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()).isEmpty()
+        {   return ConfigSettings.INSULATION_ITEMS.get().containsKey(stack.getItem())
                 || stack.is(Tags.Items.TOOLS_SHEAR);
         })
         .withResultSlot(2, 121, 39).build();

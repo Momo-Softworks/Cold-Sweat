@@ -74,6 +74,7 @@ public class ItemInsulationManager
     public static boolean isInsulatable(ItemStack stack)
     {
         return stack.getItem() instanceof Equipable
+            && !ConfigSettings.INSULATION_BLACKLIST.get().contains(stack.getItem())
             && getBuiltinInsulation(stack).isEmpty();
     }
 
