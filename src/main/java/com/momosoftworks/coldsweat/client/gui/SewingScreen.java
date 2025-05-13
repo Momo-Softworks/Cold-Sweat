@@ -1,26 +1,33 @@
 package com.momosoftworks.coldsweat.client.gui;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.client.gui.util.CyclingSlotBackground;
+import com.momosoftworks.coldsweat.common.container.SewingContainer;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.common.container.SewingContainer;
 import net.minecraft.world.entity.player.Inventory;
 
-import javax.annotation.Nonnull;
+import java.util.List;
 
 public class SewingScreen extends AbstractContainerScreen<SewingContainer>
 {
     private static final ResourceLocation SEWING_GUI = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/screen/sewing_gui.png");
+    private static final ResourceLocation ARMOR_ICON = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/sprites/sewing/sewing_armor_slot.png");
+    private static final ResourceLocation LEATHER_ICON = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/sprites/sewing/sewing_insulator_slot.png");
+    private static final ResourceLocation SHEARS_ICON = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/sprites/sewing/sewing_shears_slot.png");
+
+    CyclingSlotBackground insulatorBackground;
+    CyclingSlotBackground armorBackground;
 
     public SewingScreen(SewingContainer screenContainer, Inventory inv, Component titleIn)
     {
         super(screenContainer, inv, titleIn);
         this.imageWidth = 176;
         this.imageHeight = 201;
+        this.insulatorBackground = new CyclingSlotBackground(1, List.of(LEATHER_ICON, SHEARS_ICON));
+        this.armorBackground = new CyclingSlotBackground(0, List.of(ARMOR_ICON));
     }
 
     @Override
@@ -38,16 +45,19 @@ public class SewingScreen extends AbstractContainerScreen<SewingContainer>
     }
 
     @Override
+    protected void containerTick()
+    {
+        super.containerTick();
+        this.insulatorBackground.tick();
+        this.armorBackground.tick();
+    }
+
+    @Override
     protected void renderBg(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY)
     {
-        RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
         graphics.blit(SEWING_GUI, this.leftPos, this.topPos, 0, 0, this.getXSize(), this.getYSize());
 
-        if (!menu.getSlot(0).hasItem())
-        {   graphics.blit(SEWING_GUI, this.getGuiLeft() + 43, this.getGuiTop() + 26, 176, 0, 16, 16);
-        }
-        if (!menu.getSlot(1).hasItem())
-        {   graphics.blit(SEWING_GUI, this.getGuiLeft() + 43, this.getGuiTop() + 53, 192, 0, 16, 16);
-        }
+        this.armorBackground.render(this.getMenu(), graphics, partialTicks, this.getGuiLeft(), this.getGuiTop());
+        this.insulatorBackground.render(this.getMenu(), graphics, partialTicks, this.getGuiLeft(), this.getGuiTop());
     }
 }
