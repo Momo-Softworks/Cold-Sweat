@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.client.gui;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.client.gui.util.CyclingSlotBackground;
 import com.momosoftworks.coldsweat.common.container.SewingContainer;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.entity.player.PlayerInventory;
@@ -10,18 +11,30 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
+import java.util.Arrays;
+import java.util.List;
 import javax.annotation.Nonnull;
 
 public class SewingScreen extends ContainerScreen<SewingContainer>
 {
     private static final ResourceLocation SEWING_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/sewing_gui.png");
-    static final TranslationTextComponent NAME = new TranslationTextComponent("container." + ColdSweat.MOD_ID + ".sewing_table");
+    private static ResourceLocation ARMOR_ICON = new ResourceLocation(ColdSweat.MOD_ID, "gui/sprites/sewing/sewing_armor_slot");
+    private static ResourceLocation LEATHER_ICON = new ResourceLocation(ColdSweat.MOD_ID, "gui/sprites/sewing/sewing_insulator_slot");
+    private static ResourceLocation SHEARS_ICON = new ResourceLocation(ColdSweat.MOD_ID, "gui/sprites/sewing/sewing_shears_slot");
+
+    CyclingSlotBackground insulatorBackground;
+    CyclingSlotBackground armorBackground;
 
     public SewingScreen(SewingContainer screenContainer, PlayerInventory inv, ITextComponent title)
     {
-        super(screenContainer, inv, NAME);
+        super(screenContainer, inv, title);
+        ARMOR_ICON = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/sprites/sewing/sewing_armor_slot.png");
+        LEATHER_ICON = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/sprites/sewing/sewing_insulator_slot.png");
+        SHEARS_ICON = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/sprites/sewing/sewing_shears_slot.png");
         this.imageWidth = 176;
         this.imageHeight = 201;
+        this.insulatorBackground = new CyclingSlotBackground(1, Arrays.asList(LEATHER_ICON, SHEARS_ICON));
+        this.armorBackground = new CyclingSlotBackground(0, Arrays.asList(ARMOR_ICON));
     }
 
     @Override
@@ -36,22 +49,24 @@ public class SewingScreen extends ContainerScreen<SewingContainer>
     protected void init()
     {
         super.init();
-        this.titleLabelX = this.getXSize() / 2 - this.font.width(NAME) / 2;
+        this.titleLabelX = this.getXSize() / 2 - this.font.width(this.title) / 2;
     }
 
-    @SuppressWarnings("deprecation")
+    @Override
+    public void tick()
+    {
+        super.tick();
+        this.insulatorBackground.tick();
+        this.armorBackground.tick();
+    }
+
     @Override
     protected void renderBg(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY)
     {
-        RenderSystem.color4f(1f, 1f, 1f, 1f);
         this.minecraft.textureManager.bind(SEWING_GUI);
         this.blit(matrixStack, this.leftPos, this.topPos, 0, 0, this.getXSize(), this.getYSize());
 
-        if (!menu.getSlot(0).hasItem())
-        {   this.blit(matrixStack, this.getGuiLeft() + 43, this.getGuiTop() + 26, 176, 0, 16, 16);
-        }
-        if (!menu.getSlot(1).hasItem())
-        {   this.blit(matrixStack, this.getGuiLeft() + 43, this.getGuiTop() + 53, 192, 0, 16, 16);
-        }
+        this.armorBackground.render(this.getMenu(), matrixStack, partialTicks, this.getGuiLeft(), this.getGuiTop());
+        this.insulatorBackground.render(this.getMenu(), matrixStack, partialTicks, this.getGuiLeft(), this.getGuiTop());
     }
 }
