@@ -16,9 +16,9 @@ import java.util.List;
 public class SewingScreen extends AbstractContainerScreen<SewingContainer>
 {
     private static final ResourceLocation SEWING_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/sewing_gui.png");
-    private static ResourceLocation ARMOR_ICON = new ResourceLocation(ColdSweat.MOD_ID, "gui/sprites/sewing/sewing_armor_slot");
-    private static ResourceLocation LEATHER_ICON = new ResourceLocation(ColdSweat.MOD_ID, "gui/sprites/sewing/sewing_insulator_slot");
-    private static ResourceLocation SHEARS_ICON = new ResourceLocation(ColdSweat.MOD_ID, "gui/sprites/sewing/sewing_shears_slot");
+    private static ResourceLocation ARMOR_ICON = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/sprites/sewing/sewing_armor_slot.png");
+    private static ResourceLocation LEATHER_ICON = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/sprites/sewing/sewing_insulator_slot.png");
+    private static ResourceLocation SHEARS_ICON = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/sprites/sewing/sewing_shears_slot.png");
 
     CyclingSlotBackground insulatorBackground;
     CyclingSlotBackground armorBackground;
@@ -26,9 +26,6 @@ public class SewingScreen extends AbstractContainerScreen<SewingContainer>
     public SewingScreen(SewingContainer screenContainer, Inventory inv, Component titleIn)
     {
         super(screenContainer, inv, titleIn);
-        ARMOR_ICON = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/sprites/sewing/sewing_armor_slot.png");
-        LEATHER_ICON = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/sprites/sewing/sewing_insulator_slot.png");
-        SHEARS_ICON = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/sprites/sewing/sewing_shears_slot.png");
         this.imageWidth = 176;
         this.imageHeight = 201;
         this.insulatorBackground = new CyclingSlotBackground(1, List.of(LEATHER_ICON, SHEARS_ICON));
