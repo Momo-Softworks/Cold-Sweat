@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.client.gui;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.client.gui.util.CyclingSlotBackground;
 import com.momosoftworks.coldsweat.common.container.SewingContainer;
@@ -9,18 +8,16 @@ import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
 
-import java.util.Arrays;
-import java.util.List;
 import javax.annotation.Nonnull;
+import java.util.Arrays;
 
 public class SewingScreen extends ContainerScreen<SewingContainer>
 {
     private static final ResourceLocation SEWING_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/sewing_gui.png");
-    private static ResourceLocation ARMOR_ICON = new ResourceLocation(ColdSweat.MOD_ID, "gui/sprites/sewing/sewing_armor_slot");
-    private static ResourceLocation LEATHER_ICON = new ResourceLocation(ColdSweat.MOD_ID, "gui/sprites/sewing/sewing_insulator_slot");
-    private static ResourceLocation SHEARS_ICON = new ResourceLocation(ColdSweat.MOD_ID, "gui/sprites/sewing/sewing_shears_slot");
+    private static ResourceLocation ARMOR_ICON = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/sprites/sewing/sewing_armor_slot.png");
+    private static ResourceLocation LEATHER_ICON = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/sprites/sewing/sewing_insulator_slot.png");
+    private static ResourceLocation SHEARS_ICON = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/sprites/sewing/sewing_shears_slot.png");
 
     CyclingSlotBackground insulatorBackground;
     CyclingSlotBackground armorBackground;
@@ -28,9 +25,6 @@ public class SewingScreen extends ContainerScreen<SewingContainer>
     public SewingScreen(SewingContainer screenContainer, PlayerInventory inv, ITextComponent title)
     {
         super(screenContainer, inv, title);
-        ARMOR_ICON = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/sprites/sewing/sewing_armor_slot.png");
-        LEATHER_ICON = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/sprites/sewing/sewing_insulator_slot.png");
-        SHEARS_ICON = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/sprites/sewing/sewing_shears_slot.png");
         this.imageWidth = 176;
         this.imageHeight = 201;
         this.insulatorBackground = new CyclingSlotBackground(1, Arrays.asList(LEATHER_ICON, SHEARS_ICON));
