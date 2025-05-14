@@ -29,27 +29,25 @@ public class BlockRequirement
     private final StateRequirement state;
     private final NbtRequirement nbt;
     private final List<Direction> sturdyFaces;
-    private final Optional<Boolean> withinWorldBounds;
     private final Optional<Boolean> replaceable;
 
     public BlockRequirement(List<Either<ITag<Block>, Block>> blocks, StateRequirement state,
                             NbtRequirement nbt, List<Direction> sturdyFaces,
-                            Optional<Boolean> withinWorldBounds, Optional<Boolean> replaceable)
+                            Optional<Boolean> replaceable)
     {
         this.blocks = blocks;
         this.state = state;
         this.nbt = nbt;
         this.sturdyFaces = sturdyFaces;
-        this.withinWorldBounds = withinWorldBounds;
         this.replaceable = replaceable;
     }
 
     public BlockRequirement(List<Either<ITag<Block>, Block>> blocks)
     {
-        this(blocks, StateRequirement.NONE, NbtRequirement.NONE, Arrays.asList(), Optional.empty(), Optional.empty());
+        this(blocks, StateRequirement.NONE, NbtRequirement.NONE, Arrays.asList(), Optional.empty());
     }
 
-    public static final BlockRequirement NONE = new BlockRequirement(Arrays.asList(), StateRequirement.NONE, NbtRequirement.NONE, Arrays.asList(), Optional.empty(), Optional.empty());
+    public static final BlockRequirement NONE = new BlockRequirement(Arrays.asList(), StateRequirement.NONE, NbtRequirement.NONE, Arrays.asList(), Optional.empty());
 
 
     public static final Codec<BlockRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -57,7 +55,6 @@ public class BlockRequirement
             StateRequirement.CODEC.optionalFieldOf("state", StateRequirement.NONE).forGetter(predicate -> predicate.state),
             NbtRequirement.CODEC.optionalFieldOf("nbt", NbtRequirement.NONE).forGetter(predicate -> predicate.nbt),
             Codec.STRING.xmap(Direction::byName, Direction::getName).listOf().optionalFieldOf("sturdy_faces", Arrays.asList()).forGetter(predicate -> predicate.sturdyFaces),
-            Codec.BOOL.optionalFieldOf("within_world_bounds").forGetter(predicate -> predicate.withinWorldBounds),
             Codec.BOOL.optionalFieldOf("replaceable").forGetter(predicate -> predicate.replaceable)
     ).apply(instance, BlockRequirement::new));
 
@@ -72,9 +69,6 @@ public class BlockRequirement
     }
     public List<Direction> sturdyFaces()
     {   return sturdyFaces;
-    }
-    public Optional<Boolean> withinWorldBounds()
-    {   return withinWorldBounds;
     }
     public Optional<Boolean> replaceable()
     {   return replaceable;
@@ -99,9 +93,6 @@ public class BlockRequirement
         }
         if (!this.sturdyFaces.isEmpty() && this.sturdyFaces.stream().noneMatch(face -> state.isFaceSturdy(level, pos, face)))
         {   return false;
-        }
-        if (this.withinWorldBounds.isPresent())
-        {   return level.getWorldBorder().isWithinBounds(pos);
         }
         if (this.replaceable.isPresent())
         {   return state.isAir() || state.getMaterial().isReplaceable();
@@ -133,7 +124,6 @@ public class BlockRequirement
             && state.equals(that.state)
             && nbt.equals(that.nbt)
             && sturdyFaces.equals(that.sturdyFaces)
-            && withinWorldBounds.equals(that.withinWorldBounds)
             && replaceable.equals(that.replaceable);
     }
 
