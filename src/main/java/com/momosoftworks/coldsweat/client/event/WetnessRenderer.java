@@ -99,7 +99,7 @@ public class WetnessRenderer
 
         // Spawn a bunch of droplets when the player exits the water
         boolean justExitedWater = WAS_SUBMERGED && !isSubmerged;
-        if (justExitedWater)
+        if (justExitedWater && !player.isSpectator())
         {
             for (int i = 0; i < 10; i++)
             {
