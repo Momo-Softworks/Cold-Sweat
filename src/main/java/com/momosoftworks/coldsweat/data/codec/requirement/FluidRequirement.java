@@ -1,8 +1,10 @@
 package com.momosoftworks.coldsweat.data.codec.requirement;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
@@ -14,13 +16,12 @@ import net.minecraftforge.registries.ForgeRegistries;
 import java.util.List;
 import java.util.Optional;
 
-public record FluidRequirement(Optional<List<Fluid>> fluids, Optional<TagKey<Fluid>> tag, Optional<BlockRequirement.StateRequirement> state, Optional<NbtRequirement> nbt)
+public record FluidRequirement(List<Either<TagKey<Fluid>, Fluid>> fluids, BlockRequirement.StateRequirement state, Optional<Boolean> isSource)
 {
     public static final Codec<FluidRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ForgeRegistries.FLUIDS.getCodec().listOf().optionalFieldOf("fluids").forGetter(predicate -> predicate.fluids),
-            TagKey.codec(Registries.FLUID).optionalFieldOf("tag").forGetter(predicate -> predicate.tag),
-            BlockRequirement.StateRequirement.CODEC.optionalFieldOf("state").forGetter(predicate -> predicate.state),
-            NbtRequirement.CODEC.optionalFieldOf("nbt").forGetter(predicate -> predicate.nbt)
+            ConfigHelper.tagOrBuiltinCodec(Registries.FLUID, ForgeRegistries.FLUIDS).listOf().optionalFieldOf("fluids", List.of()).forGetter(FluidRequirement::fluids),
+            BlockRequirement.StateRequirement.CODEC.optionalFieldOf("state", BlockRequirement.StateRequirement.NONE).forGetter(FluidRequirement::state),
+            Codec.BOOL.optionalFieldOf("is_source").forGetter(FluidRequirement::isSource)
     ).apply(instance, FluidRequirement::new));
 
     public boolean test(Level pLevel, BlockPos pPos)
@@ -34,16 +35,16 @@ public record FluidRequirement(Optional<List<Fluid>> fluids, Optional<TagKey<Flu
         }
     }
 
-    public boolean test(FluidState pState)
+    public boolean test(FluidState state)
     {
-        if (this.tag.isPresent() && !pState.is(this.tag.get()))
+        if (this.fluids.stream().anyMatch(either -> either.map(state::is, state::is)))
         {   return false;
         }
-        else if (this.fluids.isPresent() && !fluids.get().contains(pState.getType()))
+        if (this.isSource.isPresent() && this.isSource.get() != state.isSource())
         {   return false;
         }
         else
-        {   return this.state.isEmpty() || state.get().test(pState);
+        {   return this.state.test(state);
         }
     }
 
@@ -60,8 +61,6 @@ public record FluidRequirement(Optional<List<Fluid>> fluids, Optional<TagKey<Flu
 
         FluidRequirement that = (FluidRequirement) obj;
         return fluids.equals(that.fluids)
-            && tag.equals(that.tag)
-            && state.equals(that.state)
-            && nbt.equals(that.nbt);
+            && state.equals(that.state);
     }
 }
