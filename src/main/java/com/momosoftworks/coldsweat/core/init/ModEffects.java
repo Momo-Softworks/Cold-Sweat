@@ -14,7 +14,7 @@ public class ModEffects
 {
     public static final DeferredRegister<MobEffect> EFFECTS = DeferredRegister.create(Registries.MOB_EFFECT, ColdSweat.MOD_ID);
 
-    public static final DeferredHolder<MobEffect, MobEffect> FRIGIDNESS = EFFECTS.register("chill", FrigidnessEffect::new);
+    public static final DeferredHolder<MobEffect, MobEffect> FRIGIDNESS = EFFECTS.register("frigidness", FrigidnessEffect::new);
     public static final DeferredHolder<MobEffect, MobEffect> WARMTH = EFFECTS.register("warmth", WarmthEffect::new);
     public static final DeferredHolder<MobEffect, MobEffect> GRACE = EFFECTS.register("grace", GraceEffect::new);
     public static final DeferredHolder<MobEffect, MobEffect> ICE_RESISTANCE = EFFECTS.register("ice_resistance", IceResistanceEffect::new);
