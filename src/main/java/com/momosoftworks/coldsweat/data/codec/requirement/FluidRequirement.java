@@ -1,12 +1,10 @@
 package com.momosoftworks.coldsweat.data.codec.requirement;
 
-import com.google.gson.JsonElement;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
-import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -18,17 +16,12 @@ import net.minecraft.world.level.material.FluidState;
 import java.util.List;
 import java.util.Optional;
 
-public record FluidRequirement(Optional<List<Either<TagKey<Fluid>, Fluid>>> fluids, Optional<TagKey<Fluid>> tag, Optional<BlockRequirement.StateRequirement> state, Optional<NbtRequirement> nbt)
+public record FluidRequirement(List<Either<TagKey<Fluid>, Fluid>> fluids, BlockRequirement.StateRequirement state, Optional<Boolean> isSource)
 {
     public static final Codec<FluidRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.either(ConfigHelper.tagOrBuiltinCodec(Registries.FLUID, BuiltInRegistries.FLUID).listOf(),
-                         ConfigHelper.tagOrBuiltinCodec(Registries.FLUID, BuiltInRegistries.FLUID))
-            .xmap(either -> either.map(l -> l, r -> List.of(r)),
-                  either -> either.size() == 1 ? Either.right(either.get(0)) : Either.left(either))
-            .optionalFieldOf("fluids").forGetter(predicate -> predicate.fluids),
-            TagKey.codec(Registries.FLUID).optionalFieldOf("tag").forGetter(predicate -> predicate.tag),
-            BlockRequirement.StateRequirement.CODEC.optionalFieldOf("state").forGetter(predicate -> predicate.state),
-            NbtRequirement.CODEC.optionalFieldOf("nbt").forGetter(predicate -> predicate.nbt)
+            ConfigHelper.tagOrBuiltinCodec(Registries.FLUID, BuiltInRegistries.FLUID).listOf().optionalFieldOf("fluids", List.of()).forGetter(FluidRequirement::fluids),
+            BlockRequirement.StateRequirement.CODEC.optionalFieldOf("state", BlockRequirement.StateRequirement.NONE).forGetter(FluidRequirement::state),
+            Codec.BOOL.optionalFieldOf("is_source").forGetter(FluidRequirement::isSource)
     ).apply(instance, FluidRequirement::new));
 
     public boolean test(Level level, BlockPos pos)
@@ -37,17 +30,21 @@ public record FluidRequirement(Optional<List<Either<TagKey<Fluid>, Fluid>>> flui
         {   return false;
         }
         else
-        {
-            FluidState flState = level.getFluidState(pos);
-            if (this.tag.isPresent() && !flState.is(this.tag.get()))
-            {   return false;
-            }
-            else if (this.fluids.isPresent() && !RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.FLUID, fluids.get()).contains(flState.getType()))
-            {   return false;
-            }
-            else
-            {   return this.state.isEmpty() || state.get().test(flState);
-            }
+        {   FluidState lState = level.getFluidState(pos);
+            return this.test(lState);
+        }
+    }
+
+    public boolean test(FluidState state)
+    {
+        if (this.fluids.stream().anyMatch(either -> either.map(state::is, state::is)))
+        {   return false;
+        }
+        if (this.isSource.isPresent() && this.isSource.get() != state.isSource())
+        {   return false;
+        }
+        else
+        {   return this.state.test(state);
         }
     }
 
@@ -64,8 +61,6 @@ public record FluidRequirement(Optional<List<Either<TagKey<Fluid>, Fluid>>> flui
 
         FluidRequirement that = (FluidRequirement) obj;
         return fluids.equals(that.fluids)
-            && tag.equals(that.tag)
-            && state.equals(that.state)
-            && nbt.equals(that.nbt);
+            && state.equals(that.state);
     }
 }
