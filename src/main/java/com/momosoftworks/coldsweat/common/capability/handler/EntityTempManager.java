@@ -88,7 +88,7 @@ public class EntityTempManager
 
     public static final Map<Entity, ITemperatureCap> SERVER_CAP_CACHE = new HashMap<>();
     public static final Map<Entity, ITemperatureCap> CLIENT_CAP_CACHE = new HashMap<>();
-    public static Map<Entity, Map<ResourceLocation, Double>> TEMP_MODIFIER_IMMUNITIES = new WeakHashMap<>();
+    public static final Map<Entity, Map<ResourceLocation, Double>> TEMP_MODIFIER_IMMUNITIES = new WeakHashMap<>();
 
     public static Optional<ITemperatureCap> getTemperatureCap(Entity entity)
     {
@@ -230,9 +230,15 @@ public class EntityTempManager
         if (isTemperatureEnabled(event.getEntity()))
         {
             Predicate<Map.Entry<Entity, ?>> removal = e -> e.getKey().isRemoved();
-            SERVER_CAP_CACHE.entrySet().removeIf(removal);
-            CLIENT_CAP_CACHE.entrySet().removeIf(removal);
-            TEMP_MODIFIER_IMMUNITIES.entrySet().removeIf(removal);
+            synchronized (SERVER_CAP_CACHE)
+            {   SERVER_CAP_CACHE.entrySet().removeIf(removal);
+            }
+            synchronized (CLIENT_CAP_CACHE)
+            {   CLIENT_CAP_CACHE.entrySet().removeIf(removal);
+            }
+            synchronized (TEMP_MODIFIER_IMMUNITIES)
+            {   TEMP_MODIFIER_IMMUNITIES.entrySet().removeIf(removal);
+            }
             writeData(event.getEntity());
         }
     }
