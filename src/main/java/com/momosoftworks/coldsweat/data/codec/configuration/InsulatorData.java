@@ -14,12 +14,13 @@ import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemComponentsRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
-import com.momosoftworks.coldsweat.data.codec.util.CommonStreamCodecs;
+import com.momosoftworks.coldsweat.data.codec.util.StreamCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -85,51 +86,20 @@ public class InsulatorData extends ConfigData implements RequirementHolder
             NegatableList.listCodec(Codec.STRING).optionalFieldOf("required_mods", new NegatableList<>()).forGetter(ConfigData::requiredMods)
     ).apply(instance, InsulatorData::new));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, InsulatorData> STREAM_CODEC = StreamCodec.of(
-    (buf, insulator) ->
-    {
-        NegatableList.streamCodec(ItemRequirement.STREAM_CODEC).encode(buf, insulator.item());
-        buf.writeCollection(insulator.insulation(), Insulation.getNetworkCodec());
-        buf.writeEnum(insulator.slot());
-        buf.writeNbt(NegatableList.codec(EntityRequirement.getCodec())
-                     .encode(insulator.entity(), NbtOps.INSTANCE, new CompoundTag()).result()
-                     .orElse(new CompoundTag()));
-        AttributeModifierMap.STREAM_CODEC.encode(buf, insulator.attributes());
-        buf.writeMap(insulator.immuneTempModifiers(), ResourceLocation.STREAM_CODEC, CommonStreamCodecs.DOUBLE);
-        buf.writeBoolean(insulator.fillSlots());
-        buf.writeBoolean(insulator.hideIfUnmet);
-    },
-    (buf) ->
-    {
-        NegatableList<ItemRequirement> item = NegatableList.streamCodec(ItemRequirement.STREAM_CODEC).decode(buf);
-        List<Insulation> insulation = buf.readCollection(ArrayList::new, Insulation.getNetworkCodec());
-        Insulation.Slot slot = buf.readEnum(Insulation.Slot.class);
-        NegatableList<EntityRequirement> predicate = NegatableList.codec(EntityRequirement.getCodec())
-                                                     .decode(NbtOps.INSTANCE, buf.readNbt()).result()
-                                                     .orElse(Pair.of(new NegatableList<>(), new CompoundTag())).getFirst();
-        AttributeModifierMap attributes = AttributeModifierMap.STREAM_CODEC.decode(buf);
-        Map<ResourceLocation, Double> immuneTempModifiers = buf.readMap(ResourceLocation.STREAM_CODEC, CommonStreamCodecs.DOUBLE);
-        boolean multiSlot = buf.readBoolean();
-        boolean hideIfUnmet = buf.readBoolean();
-        return new InsulatorData(item, slot, insulation, predicate, attributes, immuneTempModifiers, multiSlot, hideIfUnmet);
-    });
+    public static final StreamCodec<RegistryFriendlyByteBuf, InsulatorData> STREAM_CODEC = ByteBufCodecs.fromCodecWithRegistries(CODEC);
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, InsulatorData> SIMPLE_STREAM_CODEC = StreamCodec.of(
-    (buf, insulator) ->
-    {
-        buf.writeEnum(insulator.slot());
-        buf.writeCollection(insulator.insulation(), Insulation.getNetworkCodec());
-        buf.writeBoolean(insulator.fillSlots());
-        buf.writeBoolean(insulator.hideIfUnmet);
-    },
-    (buf) ->
-    {
-        Insulation.Slot slot = buf.readEnum(Insulation.Slot.class);
-        List<Insulation> insulation = buf.readCollection(ArrayList::new, Insulation.getNetworkCodec());
-        boolean multiSlot = buf.readBoolean();
-        boolean hideIfUnmet = buf.readBoolean();
-        return new InsulatorData(new NegatableList<>(), slot, insulation, new NegatableList<>(), new AttributeModifierMap(), new HashMap<>(), multiSlot, hideIfUnmet);
-    });
+    public static final StreamCodec<RegistryFriendlyByteBuf, InsulatorData> SIMPLE_STREAM_CODEC = StreamCodec.composite(
+            Insulation.Slot.STREAM_CODEC,
+            InsulatorData::slot,
+            StreamCodecs.list(Insulation.getNetworkCodec()),
+            InsulatorData::insulation,
+            ByteBufCodecs.BOOL,
+            InsulatorData::fillSlots,
+            ByteBufCodecs.BOOL,
+            InsulatorData::hideIfUnmet,
+            (slot, insulation, fillSlots, hideIfUnmet) ->
+                    new InsulatorData(new NegatableList<>(), slot, insulation, new NegatableList<>(), new AttributeModifierMap(), new HashMap<>(), fillSlots, hideIfUnmet)
+    );
 
     public NegatableList<ItemRequirement> item()
     {   return item;

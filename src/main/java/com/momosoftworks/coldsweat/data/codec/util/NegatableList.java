@@ -5,6 +5,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 
@@ -67,20 +68,20 @@ public class NegatableList<T>
                               });
     }
 
-    public static <T>StreamCodec<RegistryFriendlyByteBuf, NegatableList<T>> streamCodec(StreamCodec<RegistryFriendlyByteBuf, T> codec)
+    public static <T, B extends ByteBuf> StreamCodec<B, NegatableList<T>> streamCodec(StreamCodec<B, T> codec)
     {
         return new StreamCodec<>()
         {
             @Override
-            public NegatableList<T> decode(RegistryFriendlyByteBuf buf)
+            public NegatableList<T> decode(B buf)
             {
                 List<T> requirements = new ArrayList<>();
                 List<T> exclusions = new ArrayList<>();
-                int size = buf.readVarInt();
+                int size = buf.readInt();
                 for (int i = 0; i < size; i++)
                 {   requirements.add(codec.decode(buf));
                 }
-                size = buf.readVarInt();
+                size = buf.readInt();
                 for (int i = 0; i < size; i++)
                 {   exclusions.add(codec.decode(buf));
                 }
@@ -88,11 +89,11 @@ public class NegatableList<T>
             }
 
             @Override
-            public void encode(RegistryFriendlyByteBuf buf, NegatableList<T> list)
+            public void encode(B buf, NegatableList<T> list)
             {
-                buf.writeVarInt(list.requirements.size());
+                buf.writeInt(list.requirements.size());
                 list.requirements.forEach(e -> codec.encode(buf, e));
-                buf.writeVarInt(list.exclusions.size());
+                buf.writeInt(list.exclusions.size());
                 list.exclusions.forEach(e -> codec.encode(buf, e));
             }
         };

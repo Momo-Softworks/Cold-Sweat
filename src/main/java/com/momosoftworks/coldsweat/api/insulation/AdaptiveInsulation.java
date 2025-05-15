@@ -4,7 +4,10 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.core.init.ModItemComponents;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
@@ -17,6 +20,8 @@ public class AdaptiveInsulation extends Insulation
             Codec.DOUBLE.optionalFieldOf("factor", 0d).forGetter(AdaptiveInsulation::getFactor),
             Codec.DOUBLE.fieldOf("adapt_speed").forGetter(AdaptiveInsulation::getSpeed)
     ).apply(instance, AdaptiveInsulation::new));
+
+    public static final StreamCodec<ByteBuf, AdaptiveInsulation> STREAM_CODEC = ByteBufCodecs.fromCodec(CODEC);
 
     private final double insulation;
     private final double speed;

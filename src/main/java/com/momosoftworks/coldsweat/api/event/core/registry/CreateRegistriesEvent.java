@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
+import com.momosoftworks.coldsweat.util.math.RegistryMultiMap;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -22,9 +23,9 @@ import java.util.*;
 public abstract class CreateRegistriesEvent extends Event
 {
     RegistryAccess registryAccess;
-    Multimap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries;
+    RegistryMultiMap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries;
 
-    public CreateRegistriesEvent(RegistryAccess registryAccess, Multimap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries)
+    public CreateRegistriesEvent(RegistryAccess registryAccess, RegistryMultiMap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries)
     {
         this.registryAccess = registryAccess;
         this.registries = registries;
@@ -34,12 +35,20 @@ public abstract class CreateRegistriesEvent extends Event
     {   return registryAccess;
     }
 
-    public Multimap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> getRegistries()
+    public RegistryMultiMap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> getRegistries()
     {   return registries;
     }
 
     public <T extends ConfigData> Collection<Holder<T>> getRegistry(ResourceKey<? extends Registry<T>> key)
     {   return (Collection) registries.get(key);
+    }
+
+    public <T extends ConfigData> void addRegistry(ResourceKey<? extends Registry<T>> key, Holder<T> value)
+    {   registries.asMap().computeIfAbsent(key, k -> new LinkedHashSet<>()).add(value);
+    }
+
+    public <T extends ConfigData> void addRegistries(ResourceKey<? extends Registry<T>> key, Collection<Holder<T>> values)
+    {   registries.asMap().computeIfAbsent(key, k -> new LinkedHashSet<>()).addAll(values);
     }
 
     /**
@@ -52,7 +61,7 @@ public abstract class CreateRegistriesEvent extends Event
         private Multimap<ResourceKey<Registry<? extends ConfigData>>, RemoveRegistryData<?>> removals;
 
         public Pre(RegistryAccess registryAccess,
-                   Multimap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries,
+                   RegistryMultiMap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries,
                    Multimap<ResourceKey<Registry<? extends ConfigData>>, RemoveRegistryData<?>> removals)
         {
             super(registryAccess, registries);
@@ -74,7 +83,7 @@ public abstract class CreateRegistriesEvent extends Event
      */
     public static class Post extends CreateRegistriesEvent
     {
-        public Post(RegistryAccess registryAccess, Multimap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries)
+        public Post(RegistryAccess registryAccess, RegistryMultiMap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries)
         {   super(registryAccess, registries);
         }
     }

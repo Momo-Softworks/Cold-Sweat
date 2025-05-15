@@ -8,6 +8,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.impl.RequirementHolder;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.entity.EntityHelper;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.CriterionProgress;
@@ -30,10 +31,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public record PlayerDataRequirement(IntegerBounds level, Optional<GameType> gameType, Optional<List<StatRequirement>> stats,
+public record PlayerDataRequirement(IntegerBounds level, Optional<GameType> gameType, NegatableList<StatRequirement> stats,
                                     Optional<Map<ResourceLocation, Boolean>> recipes,
                                     Optional<Map<ResourceLocation, Either<AdvancementCompletionRequirement, AdvancementCriteriaRequirement>>> advancements,
-                                    Optional<EntityRequirement> lookingAt) implements EntitySubRequirement, RequirementHolder
+                                    EntityRequirement lookingAt) implements EntitySubRequirement, RequirementHolder
 {
     @Override
     public MapCodec<? extends EntitySubRequirement> getCodec()
@@ -44,11 +45,11 @@ public record PlayerDataRequirement(IntegerBounds level, Optional<GameType> game
     {
         return RecordCodecBuilder.mapCodec(instance -> instance.group(
                 IntegerBounds.CODEC.optionalFieldOf("level", IntegerBounds.NONE).forGetter(requirement -> requirement.level),
-                GameType.CODEC.optionalFieldOf("game_mode").forGetter(requirement -> requirement.gameType),
-                StatRequirement.CODEC.listOf().optionalFieldOf("stats").forGetter(requirement -> requirement.stats),
-                Codec.unboundedMap(ResourceLocation.CODEC, Codec.BOOL).optionalFieldOf("recipes").forGetter(requirement -> requirement.recipes),
-                Codec.unboundedMap(ResourceLocation.CODEC, Codec.either(AdvancementCompletionRequirement.CODEC, AdvancementCriteriaRequirement.CODEC)).optionalFieldOf("advancements").forGetter(requirement -> requirement.advancements),
-                lastCodec.optionalFieldOf("looking_at").forGetter(requirement -> requirement.lookingAt)
+                GameType.CODEC.optionalFieldOf("game_mode").forGetter(PlayerDataRequirement::gameType),
+                NegatableList.listCodec(StatRequirement.CODEC).optionalFieldOf("stats", new NegatableList<>()).forGetter(PlayerDataRequirement::stats),
+                Codec.unboundedMap(ResourceLocation.CODEC, Codec.BOOL).optionalFieldOf("recipes").forGetter(PlayerDataRequirement::recipes),
+                Codec.unboundedMap(ResourceLocation.CODEC, Codec.either(AdvancementCompletionRequirement.CODEC, AdvancementCriteriaRequirement.CODEC)).optionalFieldOf("advancements").forGetter(PlayerDataRequirement::advancements),
+                lastCodec.optionalFieldOf("looking_at", EntityRequirement.NONE).forGetter(PlayerDataRequirement::lookingAt)
         ).apply(instance, PlayerDataRequirement::new));
     }
 
@@ -64,15 +65,8 @@ public record PlayerDataRequirement(IntegerBounds level, Optional<GameType> game
         if (gameType.isPresent() && serverPlayer.gameMode.getGameModeForPlayer() != gameType.get())
         {   return false;
         }
-        if (stats.isPresent())
-        {
-            for (StatRequirement entry : stats.get())
-            {
-                int value = serverPlayer.getStats().getValue(entry.stat());
-                if (!entry.test(entry.stat(), value))
-                {   return false;
-                }
-            }
+        if (!stats.test(stat -> stat.test(stat.stat(), serverPlayer.getStats().getValue(stat.stat()))))
+        {   return false;
         }
         if (recipes.isPresent())
         {
@@ -93,7 +87,7 @@ public record PlayerDataRequirement(IntegerBounds level, Optional<GameType> game
                 }
             }
         }
-        if (lookingAt.isPresent())
+        if (lookingAt != EntityRequirement.NONE)
         {
             Vec3 vec3 = player.getEyePosition();
             Vec3 vec31 = player.getViewVector(1.0F);
@@ -104,7 +98,7 @@ public record PlayerDataRequirement(IntegerBounds level, Optional<GameType> game
             }
 
             Entity hitEntity = entityhitresult.getEntity();
-            if (!this.lookingAt.get().test(hitEntity) || !player.hasLineOfSight(hitEntity))
+            if (!this.lookingAt.test(hitEntity))
             {   return false;
             }
         }

@@ -25,19 +25,4 @@ public class AttributeCodecs
                     OPERATION_CODEC.fieldOf("operation").forGetter(AttributeModifier::operation)
             ).apply(instance, AttributeModifier::new)
     );
-
-    public static final StreamCodec<FriendlyByteBuf, AttributeModifier> MODIFIER_STREAM_CODEC = StreamCodec.of(
-            (buf, modifier) ->
-            {
-                buf.writeResourceLocation(modifier.id());
-                buf.writeDouble(modifier.amount());
-                buf.writeEnum(modifier.operation());
-            },
-            (buf) -> new AttributeModifier(buf.readResourceLocation(), buf.readDouble(), buf.readEnum(AttributeModifier.Operation.class))
-    );
-
-    public static Codec<Attribute> ATTRIBUTE_CODEC = ResourceLocation.CODEC.xmap(
-            BuiltInRegistries.ATTRIBUTE::get,
-            BuiltInRegistries.ATTRIBUTE::getKey
-    );
 }

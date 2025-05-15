@@ -4,8 +4,9 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.momosoftworks.coldsweat.data.codec.util.CommonStreamCodecs;
+import com.momosoftworks.coldsweat.data.codec.util.StreamCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -25,47 +26,28 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Predicate;
 
-public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
-                              Optional<IntegerBounds> count, Optional<IntegerBounds> durability,
-                              Optional<List<EnchantmentRequirement>> enchantments,
+public record ItemRequirement(NegatableList<Either<TagKey<Item>, Item>> items,
+                              IntegerBounds count, IntegerBounds durability,
+                              NegatableList<EnchantmentRequirement> enchantments,
                               Optional<Potion> potion, ItemComponentsRequirement components, Optional<Predicate<ItemStack>> predicate)
 {
     public static final Codec<ItemRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ConfigHelper.tagOrBuiltinCodec(Registries.ITEM, BuiltInRegistries.ITEM).listOf().optionalFieldOf("items", List.of()).forGetter(predicate -> predicate.items),
-            IntegerBounds.CODEC.optionalFieldOf("count").forGetter(predicate -> predicate.count),
-            IntegerBounds.CODEC.optionalFieldOf("durability").forGetter(predicate -> predicate.durability),
-            EnchantmentRequirement.CODEC.listOf().optionalFieldOf("enchantments").forGetter(predicate -> predicate.enchantments),
+            NegatableList.listCodec(ConfigHelper.tagOrBuiltinCodec(Registries.ITEM, BuiltInRegistries.ITEM)).optionalFieldOf("items", new NegatableList<>()).forGetter(predicate -> predicate.items),
+            IntegerBounds.CODEC.optionalFieldOf("count", IntegerBounds.NONE).forGetter(predicate -> predicate.count),
+            IntegerBounds.CODEC.optionalFieldOf("durability", IntegerBounds.NONE).forGetter(predicate -> predicate.durability),
+            NegatableList.listCodec(EnchantmentRequirement.CODEC).optionalFieldOf("enchantments", new NegatableList<>()).forGetter(predicate -> predicate.enchantments),
             BuiltInRegistries.POTION.byNameCodec().optionalFieldOf("potion").forGetter(predicate -> predicate.potion),
             ItemComponentsRequirement.CODEC.optionalFieldOf("components", new ItemComponentsRequirement()).forGetter(predicate -> predicate.components)
     ).apply(instance, ItemRequirement::new));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, ItemRequirement> STREAM_CODEC = StreamCodec.of(
-    (buf, predicate) ->
-    {
-        CommonStreamCodecs.writeList(buf, predicate.items, CommonStreamCodecs.tagOrRegistryCodec(Registries.ITEM));
-        buf.writeOptional(predicate.count, IntegerBounds.STREAM_CODEC);
-        buf.writeOptional(predicate.durability, IntegerBounds.STREAM_CODEC);
-        CommonStreamCodecs.writeOptionalList(buf, predicate.enchantments, EnchantmentRequirement.STREAM_CODEC);
-        CommonStreamCodecs.writeOptional(buf, predicate.potion, ByteBufCodecs.registry(Registries.POTION));
-        ItemComponentsRequirement.STREAM_CODEC.encode(buf, predicate.components);
-    },
-    (buf) ->
-    {
-        List<Either<TagKey<Item>, Item>> items = CommonStreamCodecs.readList(buf, CommonStreamCodecs.tagOrRegistryCodec(Registries.ITEM));
-        Optional<IntegerBounds> count = buf.readOptional(IntegerBounds.STREAM_CODEC);
-        Optional<IntegerBounds> durability = buf.readOptional(IntegerBounds.STREAM_CODEC);
-        Optional<List<EnchantmentRequirement>> enchantments = CommonStreamCodecs.readOptionalList(buf, EnchantmentRequirement.STREAM_CODEC);
-        Optional<Potion> potion = CommonStreamCodecs.readOptional(buf, ByteBufCodecs.registry(Registries.POTION));
-        ItemComponentsRequirement components = ItemComponentsRequirement.STREAM_CODEC.decode(buf);
-        return new ItemRequirement(items, count, durability, enchantments, potion, components);
-    });
+    public static final StreamCodec<RegistryFriendlyByteBuf, ItemRequirement> STREAM_CODEC = ByteBufCodecs.fromCodecWithRegistries(CODEC);
 
-    public static final ItemRequirement NONE = new ItemRequirement(List.of(), Optional.empty(), Optional.empty(),
-                                                                   Optional.empty(), Optional.empty(), new ItemComponentsRequirement());
+    public static final ItemRequirement NONE = new ItemRequirement(new NegatableList<>(), IntegerBounds.NONE, IntegerBounds.NONE,
+                                                                   new NegatableList<>(), Optional.empty(), new ItemComponentsRequirement());
 
-    public ItemRequirement(List<Either<TagKey<Item>, Item>> items,
-                           Optional<IntegerBounds> count, Optional<IntegerBounds> durability,
-                           Optional<List<EnchantmentRequirement>> enchantments,
+    public ItemRequirement(NegatableList<Either<TagKey<Item>, Item>> items,
+                           IntegerBounds count, IntegerBounds durability,
+                           NegatableList<EnchantmentRequirement> enchantments,
                            Optional<Potion> potion, ItemComponentsRequirement components)
     {
         this(items, count, durability, enchantments, potion, components, Optional.empty());
@@ -73,18 +55,18 @@ public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
 
     public ItemRequirement(List<Either<TagKey<Item>, Item>> items, ItemComponentsRequirement components)
     {
-        this(items, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), components);
+        this(new NegatableList<>(items), IntegerBounds.NONE, IntegerBounds.NONE, new NegatableList<>(), Optional.empty(), components);
     }
 
     public ItemRequirement(Collection<Item> items, @Nullable Predicate<ItemStack> predicate)
     {
-        this(items.stream().map(Either::<TagKey<Item>, Item>right).toList(), Optional.empty(), Optional.empty(),
-             Optional.empty(), Optional.empty(), new ItemComponentsRequirement(), Optional.ofNullable(predicate));
+        this(new NegatableList<>(items.stream().map(Either::<TagKey<Item>, Item>right).toList()), IntegerBounds.NONE, IntegerBounds.NONE,
+             new NegatableList<>(), Optional.empty(), new ItemComponentsRequirement(), Optional.ofNullable(predicate));
     }
 
     public ItemRequirement(Predicate<ItemStack> predicate)
     {
-        this(List.of(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), new ItemComponentsRequirement(), Optional.of(predicate));
+        this(new NegatableList<>(), IntegerBounds.NONE, IntegerBounds.NONE, new NegatableList<>(), Optional.empty(), new ItemComponentsRequirement(), Optional.of(predicate));
     }
 
     public boolean test(ItemStack stack, boolean ignoreCount)
@@ -93,17 +75,8 @@ public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
         {   return false;
         }
 
-        if (!items.isEmpty())
-        checkItem:
-        {
-            for (int i = 0; i < items.size(); i++)
-            {
-                Either<TagKey<Item>, Item> either = items.get(i);
-                if (either.map(stack::is, stack::is))
-                {   break checkItem;
-                }
-            }
-            return false;
+        if (!items.test(either -> either.map(stack::is, stack::is)))
+        {   return false;
         }
         if (this.predicate.isPresent())
         {   return this.predicate.get().test(stack);
@@ -111,10 +84,10 @@ public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
         if (!this.components.test(stack.getComponents()))
         {   return false;
         }
-        if (!ignoreCount && count.isPresent() && !count.get().test(stack.getCount()))
+        if (!ignoreCount && !count.test(stack.getCount()))
         {   return false;
         }
-        else if (durability.isPresent() && !durability.get().test(stack.getMaxDamage() - stack.getDamageValue()))
+        else if (!durability.test(stack.getMaxDamage() - stack.getDamageValue()))
         {   return false;
         }
         else if (potion.isPresent() && !potion.get().getEffects().equals(stack.getOrDefault(DataComponents.POTION_CONTENTS, new PotionContents(Potions.AWKWARD)).potion().get().value().getEffects()))
@@ -123,15 +96,12 @@ public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
         else if (!components.test(stack.getComponents()))
         {   return false;
         }
-        else if (enchantments.isPresent())
+        else if (!enchantments.isEmpty())
         {
             ItemEnchantments stackEnchantments = stack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
             stackEnchantments.entrySet().addAll(stack.getOrDefault(DataComponents.STORED_ENCHANTMENTS, ItemEnchantments.EMPTY).entrySet());
-            for (EnchantmentRequirement enchantment : enchantments.get())
-            {
-                if (!enchantment.test(stackEnchantments))
-                {   return false;
-                }
+            if (!enchantments.test(enchantment -> enchantment.test(stackEnchantments)))
+            {   return false;
             }
         }
         return true;

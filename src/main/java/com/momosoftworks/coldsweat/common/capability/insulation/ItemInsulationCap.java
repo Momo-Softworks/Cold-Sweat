@@ -9,8 +9,10 @@ import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
+import com.momosoftworks.coldsweat.data.codec.util.StreamCodecs;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.codec.StreamDecoder;
 import net.minecraft.network.codec.StreamEncoder;
@@ -29,8 +31,7 @@ public record ItemInsulationCap(List<Pair<ItemStack, List<InsulatorData>>> insul
             ITEM_INSULATION_PAIR_CODEC.listOf().fieldOf("insulation").forGetter(ItemInsulationCap::insulation)
     ).apply(instance, ItemInsulationCap::new));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, ItemInsulationCap> STREAM_CODEC = StreamCodec.of((buf, insul) -> insul.serialize(buf),
-                                                                                                              (buf) -> ItemInsulationCap.deserialize(buf));
+    public static final StreamCodec<RegistryFriendlyByteBuf, ItemInsulationCap> STREAM_CODEC = ByteBufCodecs.fromCodecWithRegistries(CODEC);
 
     public ItemInsulationCap()
     {   this(new ArrayList<>());

@@ -67,7 +67,7 @@ public class ConfigLoadingHandler
         BlockTempRegistry.flush();
 
         RegistryAccess registryAccess = event.getServer().registryAccess();
-        Multimap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries = new RegistryMultiMap<>();
+        RegistryMultiMap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries = new RegistryMultiMap<>();
 
         // User JSON configs (config folder)
         ColdSweat.LOGGER.info("Loading registries from configs...");
@@ -195,7 +195,7 @@ public class ConfigLoadingHandler
         return registries;
     }
 
-    private static void logAndAddRegistries(RegistryAccess registryAccess, Multimap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries)
+    private static void logAndAddRegistries(RegistryAccess registryAccess, RegistryMultiMap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries)
     {
         // Ensure default registry entries load last
         setDefaultRegistryPriority(registries);
@@ -376,7 +376,7 @@ public class ConfigLoadingHandler
             InsulatorData insulator = holder.value();
 
             // Add listed items as insulators
-            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, insulator.item().flatListMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, insulator.item().flatListMap(req -> req.items().flatten())));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -404,7 +404,7 @@ public class ConfigLoadingHandler
         {
             FuelData fuelData = holder.value();
 
-            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, fuelData.item().flatListMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, fuelData.item().flatListMap(req -> req.items().flatten())));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -428,7 +428,7 @@ public class ConfigLoadingHandler
         {
             FoodData foodData = holder.value();
 
-            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, foodData.item().flatListMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, foodData.item().flatListMap(req -> req.items().flatten())));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -445,7 +445,7 @@ public class ConfigLoadingHandler
         {
             ItemCarryTempData carryTempData = holder.value();
 
-            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, carryTempData.item().flatListMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, carryTempData.item().flatListMap(req -> req.items().flatten())));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -462,7 +462,7 @@ public class ConfigLoadingHandler
         {
             DryingItemData dryingItemData = holder.value();
 
-            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, dryingItemData.item().flatListMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, dryingItemData.item().flatListMap(req -> req.items().flatten())));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -479,7 +479,7 @@ public class ConfigLoadingHandler
         {
             ItemInsulationSlotsData insulationSlotData = holder.value();
 
-            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, insulationSlotData.item().flatListMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, insulationSlotData.item().flatListMap(req -> req.items().flatten())));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -584,7 +584,7 @@ public class ConfigLoadingHandler
         {
             MountData mountData = holder.value();
 
-            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, mountData.entity().flatListMap(EntityRequirement::entities)));
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, mountData.entity().flatListMap(req -> req.entities().flatten())));
             if (entities.isEmpty())
             {   entities.add(null);
             }
@@ -612,7 +612,7 @@ public class ConfigLoadingHandler
         {
             EntityTempData entityTempData = holder.value();
 
-            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, entityTempData.entity().flatListMap(EntityRequirement::entities)));
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, entityTempData.entity().flatListMap(req -> req.entities().flatten())));
             if (entities.isEmpty())
             {   entities.add(null);
             }
@@ -628,7 +628,7 @@ public class ConfigLoadingHandler
         {
             EntityClimateData entityTempData = holder.value();
 
-            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, entityTempData.entity().flatListMap(EntityRequirement::entities)));
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, entityTempData.entity().flatListMap(req -> req.entities().flatten())));
             if (entities.isEmpty())
             {   entities.add(null);
             }

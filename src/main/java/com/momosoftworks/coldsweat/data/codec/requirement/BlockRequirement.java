@@ -24,13 +24,13 @@ import net.minecraft.world.level.material.FluidState;
 
 import java.util.*;
 
-public record BlockRequirement(List<Either<TagKey<Block>, Block>> blocks, StateRequirement state,
+public record BlockRequirement(NegatableList<Either<TagKey<Block>, Block>> blocks, StateRequirement state,
                                NbtRequirement nbt, List<Direction> sturdyFaces, Optional<Boolean> replaceable)
 {
-    public static final BlockRequirement NONE = new BlockRequirement(List.of(), StateRequirement.NONE, NbtRequirement.NONE, List.of(), Optional.empty());
+    public static final BlockRequirement NONE = new BlockRequirement(new NegatableList<>(), StateRequirement.NONE, NbtRequirement.NONE, List.of(), Optional.empty());
 
     public static final Codec<BlockRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ConfigHelper.tagOrBuiltinCodec(Registries.BLOCK, BuiltInRegistries.BLOCK).listOf().optionalFieldOf("blocks", List.of()).forGetter(predicate -> predicate.blocks),
+            NegatableList.listCodec(ConfigHelper.tagOrBuiltinCodec(Registries.BLOCK, BuiltInRegistries.BLOCK)).optionalFieldOf("blocks", new NegatableList<>()).forGetter(predicate -> predicate.blocks),
             StateRequirement.CODEC.optionalFieldOf("state", StateRequirement.NONE).forGetter(predicate -> predicate.state),
             NbtRequirement.CODEC.optionalFieldOf("nbt", NbtRequirement.NONE).forGetter(predicate -> predicate.nbt),
             Direction.CODEC.listOf().optionalFieldOf("sturdy_faces", List.of()).forGetter(predicate -> predicate.sturdyFaces),
@@ -39,14 +39,14 @@ public record BlockRequirement(List<Either<TagKey<Block>, Block>> blocks, StateR
 
     public BlockRequirement(List<Either<TagKey<Block>, Block>> blocks)
     {
-        this(blocks, StateRequirement.NONE, NbtRequirement.NONE, List.of(), Optional.empty());
+        this(new NegatableList<>(blocks), StateRequirement.NONE, NbtRequirement.NONE, List.of(), Optional.empty());
     }
 
     public boolean test(Level level, BlockPos pos, BlockState state)
     {
         if (!level.isLoaded(pos)) return false;
 
-        if (!this.blocks.isEmpty() && this.blocks.stream().noneMatch(either -> either.map(state::is, state::is)))
+        if (!this.blocks.isEmpty() && this.blocks.test(either -> either.map(state::is, state::is)))
         {   return false;
         }
         if (!this.state.test(state))

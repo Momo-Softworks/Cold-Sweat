@@ -4,7 +4,10 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +18,8 @@ public class StaticInsulation extends Insulation
             Codec.DOUBLE.fieldOf("cold").forGetter(StaticInsulation::getCold),
             Codec.DOUBLE.fieldOf("heat").forGetter(StaticInsulation::getHeat)
     ).apply(instance, StaticInsulation::new));
+
+    public static final StreamCodec<ByteBuf, StaticInsulation> STREAM_CODEC = ByteBufCodecs.fromCodec(CODEC);
 
     private final double cold;
     private final double heat;

@@ -23,7 +23,7 @@ public class FilterInsulationItemsTab
     {
         event.addCheck((item, insulator) ->
         {
-            List<Either<TagKey<Item>, Item>> items = insulator.item().flatMap(it -> CSMath.mutable(it.items()), CSMath::append, List::removeAll).orElse(List.of());
+            List<Either<TagKey<Item>, Item>> items = insulator.item().flatMap(it -> CSMath.mutable(it.items().flatten()), CSMath::append, List::removeAll).orElse(List.of());
             for (Either<TagKey<Item>, Item> either : items)
             {
                 if (either.left().map(tag -> item.builtInRegistryHolder().is(tag)).orElse(false))

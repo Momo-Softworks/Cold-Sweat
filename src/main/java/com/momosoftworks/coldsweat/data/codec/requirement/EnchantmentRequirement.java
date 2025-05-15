@@ -4,42 +4,34 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.momosoftworks.coldsweat.data.codec.util.StreamCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 
-import java.util.Optional;
 
-public record EnchantmentRequirement(Either<TagKey<Enchantment>, Holder<Enchantment>> enchantment, Optional<IntegerBounds> level)
+public record EnchantmentRequirement(Either<TagKey<Enchantment>, Holder<Enchantment>> enchantment, IntegerBounds level)
 {
     public static final Codec<EnchantmentRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ConfigHelper.tagOrHolderCodec(Registries.ENCHANTMENT).fieldOf("enchantment").forGetter(requirement -> requirement.enchantment),
-            IntegerBounds.CODEC.optionalFieldOf("levels").forGetter(requirement -> requirement.level)
+            IntegerBounds.CODEC.optionalFieldOf("levels", IntegerBounds.NONE).forGetter(requirement -> requirement.level)
     ).apply(instance, EnchantmentRequirement::new));
 
-    public static StreamCodec<RegistryFriendlyByteBuf, EnchantmentRequirement> STREAM_CODEC = StreamCodec.of(
-            (buf, requirement) ->
-            {
-                buf.writeUtf(ConfigHelper.serializeTagOrRegistryObject(Registries.ENCHANTMENT, requirement.enchantment));
-                buf.writeOptional(requirement.level, IntegerBounds.STREAM_CODEC);
-            },
-            (buf) -> new EnchantmentRequirement(ConfigHelper.deserializeTagOrRegistryObject(buf.readUtf(), Registries.ENCHANTMENT),
-                                                buf.readOptional(IntegerBounds.STREAM_CODEC))
-    );
+    public static StreamCodec<RegistryFriendlyByteBuf, EnchantmentRequirement> STREAM_CODEC = ByteBufCodecs.fromCodecWithRegistries(CODEC);
 
     public boolean test(Holder<Enchantment> enchantment, int level)
     {
-        return this.enchantment.map(
-                     tag -> enchantment.is(tag),
-                     ench -> ench == enchantment)
-               && this.level.map(bounds -> bounds.test(level)).orElse(true);
+        return this.enchantment.map(tag -> enchantment.is(tag),
+                                    enchantment::equals)
+            && this.level.test(level);
     }
 
     public boolean test(ItemEnchantments enchantments)

@@ -4,8 +4,10 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.StringRepresentable;
 import org.checkerframework.checker.units.qual.C;
@@ -36,17 +38,12 @@ public abstract class Insulation implements NbtSerializable
         (buf, insul) ->
         {
             if (insul instanceof StaticInsulation st)
-            {
-                buf.writeUtf("static");
-                buf.writeDouble(st.getCold());
-                buf.writeDouble(st.getHeat());
+            {   buf.writeUtf("static");
+                StaticInsulation.STREAM_CODEC.encode(buf, st);
             }
             else if (insul instanceof AdaptiveInsulation ad)
-            {
-                buf.writeUtf("adaptive");
-                buf.writeDouble(ad.getInsulation());
-                buf.writeDouble(ad.getFactor());
-                buf.writeDouble(ad.getSpeed());
+            {   buf.writeUtf("adaptive");
+                AdaptiveInsulation.STREAM_CODEC.encode(buf, ad);
             }
             else buf.writeUtf("none");
         },
@@ -54,10 +51,13 @@ public abstract class Insulation implements NbtSerializable
         {
             String type = buf.readUtf();
             if (type.equals("static"))
-            {   return new StaticInsulation(buf.readDouble(), buf.readDouble());
+            {   return StaticInsulation.STREAM_CODEC.decode(buf);
             }
             else if (type.equals("adaptive"))
-            {   return new AdaptiveInsulation(buf.readDouble(), buf.readDouble(), buf.readDouble());
+            {   return AdaptiveInsulation.STREAM_CODEC.decode(buf);
+            }
+            else if (type.equals("none"))
+            {   return new StaticInsulation(0, 0);
             }
             return null;
         });
@@ -227,6 +227,7 @@ public abstract class Insulation implements NbtSerializable
         }
 
         public static final Codec<Slot> CODEC = Codec.STRING.xmap(Slot::byName, Slot::getSerializedName);
+        public static final StreamCodec<ByteBuf, Slot> STREAM_CODEC = ByteBufCodecs.fromCodec(CODEC);
 
         @Override
         public String getSerializedName()

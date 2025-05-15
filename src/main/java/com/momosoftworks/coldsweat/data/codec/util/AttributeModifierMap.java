@@ -6,9 +6,12 @@ import com.momosoftworks.coldsweat.util.math.FastMultiMap;
 import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -25,29 +28,7 @@ public class AttributeModifierMap implements NbtSerializable
                                      (mp, ent) -> mp.put(ent.getKey(), new ArrayList<>(ent.getValue())),
                                      HashMap::putAll));
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, AttributeModifierMap> STREAM_CODEC = StreamCodec.of(
-            (buf, map) ->
-            {
-                buf.writeVarInt(map.getMap().size());
-                for (Holder<Attribute> attribute : map.getMap().keySet())
-                {
-                    buf.writeResourceLocation(attribute.getKey().location());
-                    buf.writeCollection(map.get(attribute), AttributeCodecs.MODIFIER_STREAM_CODEC);
-                }
-            },
-            (buf) ->
-            {
-                Multimap<Holder<Attribute>, AttributeModifier> map = new FastMultiMap<>();
-                int size = buf.readVarInt();
-                for (int i = 0; i < size; i++)
-                {
-                    Holder<Attribute> attribute = BuiltInRegistries.ATTRIBUTE.getHolder(buf.readResourceLocation()).orElseThrow();
-                    List<AttributeModifier> list = buf.readCollection(ArrayList::new, AttributeCodecs.MODIFIER_STREAM_CODEC);
-                    map.putAll(attribute, list);
-                }
-                return new AttributeModifierMap(map);
-            }
-    );
+    public static final StreamCodec<RegistryFriendlyByteBuf, AttributeModifierMap> STREAM_CODEC = ByteBufCodecs.fromCodecWithRegistries(CODEC);
 
     private final Multimap<Holder<Attribute>, AttributeModifier> map = new FastMultiMap<>();
 
@@ -68,6 +49,10 @@ public class AttributeModifierMap implements NbtSerializable
 
     public AttributeModifierMap(Multimap<Holder<Attribute>, AttributeModifier> map)
     {   this.map.putAll(map);
+    }
+
+    public AttributeModifierMap(AttributeModifierMap original)
+    {   this.map.putAll(original.map);
     }
 
     public void put(Holder<Attribute> attribute, AttributeModifier modifier)

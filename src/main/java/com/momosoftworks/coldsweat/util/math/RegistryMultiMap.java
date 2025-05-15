@@ -28,7 +28,7 @@ public class RegistryMultiMap<K, V> implements Multimap<K, V>
         }
     }
 
-    private final FastMap<K, LinkedHashSet<V>> internal = new FastMap<>();
+    private final Map<K, Set<V>> internal = new HashMap<>();
     private int totalSize = 0;
 
     @Override
@@ -177,10 +177,10 @@ public class RegistryMultiMap<K, V> implements Multimap<K, V>
      * Returns the values associated with this key, as well as those associated with the "null" key.
      */
     @Override
-    public LinkedHashSet<V> get(K key)
+    public Set<V> get(K key)
     {
-        LinkedHashSet<V> values = internal.computeIfAbsent(key, k -> new LinkedHashSet<>());
-        LinkedHashSet<V> nullValues = internal.get(null);
+        Set<V> values = internal.getOrDefault(key, new LinkedHashSet<>());
+        Set<V> nullValues = internal.get(null);
         if (nullValues != null)
         {   values.addAll(nullValues);
         }
@@ -190,7 +190,7 @@ public class RegistryMultiMap<K, V> implements Multimap<K, V>
     /**
      * Strictly returns values which are assigned to the key, excluding null entries.
      */
-    public LinkedHashSet<V> getRaw(K key)
+    public Set<V> getRaw(K key)
     {   return CSMath.orElse(internal.get(key), new LinkedHashSet<>());
     }
 
@@ -204,7 +204,7 @@ public class RegistryMultiMap<K, V> implements Multimap<K, V>
     public Multiset<K> keys()
     {
         HashMultiset<K> keys = HashMultiset.create();
-        for (Map.Entry<K, LinkedHashSet<V>> entry : internal.entrySet())
+        for (Map.Entry<K, Set<V>> entry : internal.entrySet())
         {
             keys.add(entry.getKey(), entry.getValue().size());
         }
@@ -221,7 +221,7 @@ public class RegistryMultiMap<K, V> implements Multimap<K, V>
             {
                 return new Iterator<V>()
                 {
-                    private final Iterator<LinkedHashSet<V>> setIterator = internal.values().iterator();
+                    private final Iterator<Set<V>> setIterator = internal.values().iterator();
                     private Iterator<V> currentIterator = Collections.emptyIterator();
 
                     @Override
@@ -270,8 +270,8 @@ public class RegistryMultiMap<K, V> implements Multimap<K, V>
             {
                 return new Iterator<Map.Entry<K, V>>()
                 {
-                    private final Iterator<Map.Entry<K, LinkedHashSet<V>>> entryIterator = internal.entrySet().iterator();
-                    private Map.Entry<K, LinkedHashSet<V>> currentEntry;
+                    private final Iterator<Map.Entry<K, Set<V>>> entryIterator = internal.entrySet().iterator();
+                    private Map.Entry<K, Set<V>> currentEntry;
                     private Iterator<V> valueIterator = Collections.emptyIterator();
 
                     @Override

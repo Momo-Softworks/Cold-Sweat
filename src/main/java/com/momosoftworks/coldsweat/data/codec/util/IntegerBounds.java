@@ -4,7 +4,9 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
 import java.util.Objects;
@@ -21,14 +23,7 @@ public record IntegerBounds(int min, int max)
             bounds -> bounds.max == bounds.min ? Either.right(bounds.min) : Either.left(bounds)
     );
 
-    public static final StreamCodec<FriendlyByteBuf, IntegerBounds> STREAM_CODEC = StreamCodec.of(
-            (buf, bounds) ->
-            {
-                buf.writeInt(bounds.min());
-                buf.writeInt(bounds.max());
-            },
-            (buf) -> new IntegerBounds(buf.readInt(), buf.readInt())
-    );
+    public static final StreamCodec<ByteBuf, IntegerBounds> STREAM_CODEC = ByteBufCodecs.fromCodec(CODEC);
 
     public static IntegerBounds NONE = new IntegerBounds(-Integer.MAX_VALUE, Integer.MAX_VALUE);
 
