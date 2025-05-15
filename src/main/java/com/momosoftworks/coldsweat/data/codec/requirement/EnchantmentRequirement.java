@@ -14,19 +14,18 @@ import net.minecraftforge.registries.ForgeRegistries;
 import java.util.Map;
 import java.util.Optional;
 
-public record EnchantmentRequirement(Either<TagKey<Enchantment>, Enchantment> enchantment, Optional<IntegerBounds> level)
+public record EnchantmentRequirement(Either<TagKey<Enchantment>, Enchantment> enchantment, IntegerBounds level)
 {
     public static final Codec<EnchantmentRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ConfigHelper.tagOrBuiltinCodec(Registries.ENCHANTMENT, ForgeRegistries.ENCHANTMENTS).fieldOf("enchantment").forGetter(requirement -> requirement.enchantment),
-            IntegerBounds.CODEC.optionalFieldOf("levels").forGetter(requirement -> requirement.level)
+            IntegerBounds.CODEC.optionalFieldOf("levels", IntegerBounds.NONE).forGetter(requirement -> requirement.level)
     ).apply(instance, EnchantmentRequirement::new));
 
     public boolean test(Enchantment enchantment, int level)
     {
-        return this.enchantment.map(
-                     tag -> ForgeRegistries.ENCHANTMENTS.tags().getTag(tag).contains(enchantment),
-                     ench -> ench == enchantment)
-               && this.level.map(bounds -> bounds.test(level)).orElse(true);
+        return this.enchantment.map(tag -> ForgeRegistries.ENCHANTMENTS.tags().getTag(tag).contains(enchantment),
+                                    enchantment::equals)
+            && this.level.test(level);
     }
 
     public boolean test(Map<Enchantment, Integer> enchantments)

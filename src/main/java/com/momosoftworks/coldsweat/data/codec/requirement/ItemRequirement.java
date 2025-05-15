@@ -5,6 +5,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -22,26 +23,26 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Predicate;
 
-public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
-                              Optional<IntegerBounds> count, Optional<IntegerBounds> durability,
-                              Optional<List<EnchantmentRequirement>> enchantments,
+public record ItemRequirement(NegatableList<Either<TagKey<Item>, Item>> items,
+                              IntegerBounds count, IntegerBounds durability,
+                              NegatableList<EnchantmentRequirement> enchantments,
                               Optional<Potion> potion, NbtRequirement nbt, Optional<Predicate<ItemStack>> predicate)
 {
     public static final Codec<ItemRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ConfigHelper.tagOrBuiltinCodec(Registries.ITEM, ForgeRegistries.ITEMS).listOf().optionalFieldOf("items", List.of()).forGetter(predicate -> predicate.items),
-            IntegerBounds.CODEC.optionalFieldOf("count").forGetter(predicate -> predicate.count),
-            IntegerBounds.CODEC.optionalFieldOf("durability").forGetter(predicate -> predicate.durability),
-            EnchantmentRequirement.CODEC.listOf().optionalFieldOf("enchantments").forGetter(predicate -> predicate.enchantments),
+            NegatableList.listCodec(ConfigHelper.tagOrBuiltinCodec(Registries.ITEM, ForgeRegistries.ITEMS)).optionalFieldOf("items", new NegatableList<>()).forGetter(predicate -> predicate.items),
+            IntegerBounds.CODEC.optionalFieldOf("count", IntegerBounds.NONE).forGetter(predicate -> predicate.count),
+            IntegerBounds.CODEC.optionalFieldOf("durability", IntegerBounds.NONE).forGetter(predicate -> predicate.durability),
+            NegatableList.listCodec(EnchantmentRequirement.CODEC).optionalFieldOf("enchantments", new NegatableList<>()).forGetter(predicate -> predicate.enchantments),
             ForgeRegistries.POTIONS.getCodec().optionalFieldOf("potion").forGetter(predicate -> predicate.potion),
             NbtRequirement.CODEC.optionalFieldOf("nbt", new NbtRequirement()).forGetter(predicate -> predicate.nbt)
     ).apply(instance, ItemRequirement::new));
 
-    public static final ItemRequirement NONE = new ItemRequirement(List.of(), Optional.empty(), Optional.empty(),
-                                                                   Optional.empty(), Optional.empty(), new NbtRequirement());
+    public static final ItemRequirement NONE = new ItemRequirement(new NegatableList<>(), IntegerBounds.NONE, IntegerBounds.NONE,
+                                                                   new NegatableList<>(), Optional.empty(), new NbtRequirement());
 
-    public ItemRequirement(List<Either<TagKey<Item>, Item>> items,
-                           Optional<IntegerBounds> count, Optional<IntegerBounds> durability,
-                           Optional<List<EnchantmentRequirement>> enchantments,
+    public ItemRequirement(NegatableList<Either<TagKey<Item>, Item>> items,
+                           IntegerBounds count, IntegerBounds durability,
+                           NegatableList<EnchantmentRequirement> enchantments,
                            Optional<Potion> potion, NbtRequirement nbt)
     {
         this(items, count, durability, enchantments, potion, nbt, Optional.empty());
@@ -49,18 +50,18 @@ public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
 
     public ItemRequirement(List<Either<TagKey<Item>, Item>> items, NbtRequirement nbt)
     {
-        this(items, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), nbt);
+        this(new NegatableList<>(items), IntegerBounds.NONE, IntegerBounds.NONE, new NegatableList<>(), Optional.empty(), nbt);
     }
 
     public ItemRequirement(Collection<Item> items, @Nullable Predicate<ItemStack> predicate)
     {
-        this(items.stream().map(Either::<TagKey<Item>, Item>right).toList(), Optional.empty(), Optional.empty(),
-             Optional.empty(), Optional.empty(), new NbtRequirement(), Optional.ofNullable(predicate));
+        this(new NegatableList<>(items.stream().map(Either::<TagKey<Item>, Item>right).toList()), IntegerBounds.NONE, IntegerBounds.NONE,
+             new NegatableList<>(), Optional.empty(), new NbtRequirement(), Optional.ofNullable(predicate));
     }
 
     public ItemRequirement(Predicate<ItemStack> predicate)
     {
-        this(List.of(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), new NbtRequirement(), Optional.of(predicate));
+        this(new NegatableList<>(), IntegerBounds.NONE, IntegerBounds.NONE, new NegatableList<>(), Optional.empty(), new NbtRequirement(), Optional.of(predicate));
     }
 
     public boolean test(ItemStack stack, boolean ignoreCount)
@@ -69,17 +70,8 @@ public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
         {   return false;
         }
 
-        if (!items.isEmpty())
-        checkItem:
-        {
-            for (int i = 0; i < items.size(); i++)
-            {
-                Either<TagKey<Item>, Item> either = items.get(i);
-                if (either.map(stack::is, stack::is))
-                {   break checkItem;
-                }
-            }
-            return false;
+        if (!items.test(either -> either.map(stack::is, stack::is)))
+        {   return false;
         }
         if (this.predicate.isPresent())
         {   return this.predicate.get().test(stack);
@@ -87,10 +79,10 @@ public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
         if (!this.nbt.test(stack.getTag()))
         {   return false;
         }
-        if (!ignoreCount && count.isPresent() && !count.get().test(stack.getCount()))
+        if (!ignoreCount && !count.test(stack.getCount()))
         {   return false;
         }
-        else if (durability.isPresent() && !durability.get().test(stack.getMaxDamage() - stack.getDamageValue()))
+        else if (!durability.test(stack.getMaxDamage() - stack.getDamageValue()))
         {   return false;
         }
         else if (potion.isPresent() && !potion.get().getEffects().equals(PotionUtils.getPotion(stack).getEffects()))
@@ -99,15 +91,12 @@ public record ItemRequirement(List<Either<TagKey<Item>, Item>> items,
         else if (!nbt.test(stack.getTag()))
         {   return false;
         }
-        else if (enchantments.isPresent())
+        else if (!enchantments.isEmpty())
         {
             Map<Enchantment, Integer> stackEnchantments = EnchantmentHelper.deserializeEnchantments(stack.getEnchantmentTags());
             stackEnchantments.putAll(EnchantmentHelper.deserializeEnchantments(EnchantedBookItem.getEnchantments(stack)));
-            for (EnchantmentRequirement enchantment : enchantments.get())
-            {
-                if (!enchantment.test(stackEnchantments))
-                {   return false;
-                }
+            if (!enchantments.test(enchantment -> enchantment.test(stackEnchantments)))
+            {   return false;
             }
         }
         return true;
