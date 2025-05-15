@@ -4,7 +4,6 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.momosoftworks.coldsweat.data.codec.util.StreamCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
