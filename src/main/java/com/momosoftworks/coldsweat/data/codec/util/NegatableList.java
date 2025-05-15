@@ -202,6 +202,10 @@ public class NegatableList<T>
     {   return listMap(mapper).stream().flatMap(List::stream).toList();
     }
 
+    public <N> List<N> nestedFlatMap(Function<T, NegatableList<N>> mapper)
+    {   return listMap(mapper).stream().map(NegatableList::flatten).flatMap(List::stream).toList();
+    }
+
     public boolean test(Predicate<T> test)
     {
         if (!this.requirements.isEmpty())

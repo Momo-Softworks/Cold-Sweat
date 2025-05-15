@@ -380,7 +380,7 @@ public class ConfigLoadingHandler
             InsulatorData insulator = holder.value();
 
             // Add listed items as insulators
-            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, insulator.item().flatListMap(req -> req.items().flatten())));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, insulator.item().nestedFlatMap(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -408,7 +408,7 @@ public class ConfigLoadingHandler
         {
             FuelData fuelData = holder.value();
 
-            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, fuelData.item().flatListMap(req -> req.items().flatten())));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, fuelData.item().nestedFlatMap(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -432,7 +432,7 @@ public class ConfigLoadingHandler
         {
             FoodData foodData = holder.value();
 
-            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, foodData.item().flatListMap(req -> req.items().flatten())));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, foodData.item().nestedFlatMap(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -449,7 +449,7 @@ public class ConfigLoadingHandler
         {
             ItemCarryTempData carryTempData = holder.value();
 
-            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, carryTempData.item().flatListMap(req -> req.items().flatten())));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, carryTempData.item().nestedFlatMap(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -466,7 +466,7 @@ public class ConfigLoadingHandler
         {
             DryingItemData dryingItemData = holder.value();
 
-            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, dryingItemData.item().flatListMap(req -> req.items().flatten())));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, dryingItemData.item().nestedFlatMap(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -483,7 +483,7 @@ public class ConfigLoadingHandler
         {
             ItemInsulationSlotsData insulationSlotData = holder.value();
 
-            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, insulationSlotData.item().flatListMap(req -> req.items().flatten())));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, insulationSlotData.item().nestedFlatMap(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -588,7 +588,7 @@ public class ConfigLoadingHandler
         {
             MountData mountData = holder.value();
 
-            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, mountData.entity().flatListMap(req -> req.entities().flatten())));
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, mountData.entity().nestedFlatMap(EntityRequirement::entities)));
             if (entities.isEmpty())
             {   entities.add(null);
             }
@@ -616,7 +616,7 @@ public class ConfigLoadingHandler
         {
             EntityTempData entityTempData = holder.value();
 
-            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, entityTempData.entity().flatListMap(req -> req.entities().flatten())));
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, entityTempData.entity().nestedFlatMap(EntityRequirement::entities)));
             if (entities.isEmpty())
             {   entities.add(null);
             }
@@ -632,7 +632,7 @@ public class ConfigLoadingHandler
         {
             EntityClimateData entityTempData = holder.value();
 
-            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, entityTempData.entity().flatListMap(req -> req.entities().flatten())));
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, entityTempData.entity().nestedFlatMap(EntityRequirement::entities)));
             if (entities.isEmpty())
             {   entities.add(null);
             }
