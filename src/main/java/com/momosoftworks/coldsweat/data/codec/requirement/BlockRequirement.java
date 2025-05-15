@@ -47,7 +47,7 @@ public record BlockRequirement(NegatableList<Either<TagKey<Block>, Block>> block
     {
         if (!level.isLoaded(pos)) return false;
 
-        if (!this.blocks.isEmpty() && this.blocks.test(either -> either.map(state::is, state::is)))
+        if (!this.blocks.test(either -> either.map(state::is, state::is)))
         {   return false;
         }
         if (!this.state.test(state))
