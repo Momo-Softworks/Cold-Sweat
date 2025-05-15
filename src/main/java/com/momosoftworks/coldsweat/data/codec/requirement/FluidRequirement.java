@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
@@ -13,13 +14,14 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import java.util.List;
 import java.util.Optional;
 
-public record FluidRequirement(List<Either<TagKey<Fluid>, Fluid>> fluids, BlockRequirement.StateRequirement state, Optional<Boolean> isSource)
+public record FluidRequirement(NegatableList<Either<TagKey<Fluid>, Fluid>> fluids, BlockRequirement.StateRequirement state, Optional<Boolean> isSource)
 {
+    public static final FluidRequirement NONE = new FluidRequirement(new NegatableList<>(), BlockRequirement.StateRequirement.NONE, Optional.empty());
+
     public static final Codec<FluidRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ConfigHelper.tagOrBuiltinCodec(Registry.FLUID_REGISTRY, ForgeRegistries.FLUIDS).listOf().optionalFieldOf("fluids", List.of()).forGetter(FluidRequirement::fluids),
+            NegatableList.listCodec(ConfigHelper.tagOrBuiltinCodec(Registry.FLUID_REGISTRY, ForgeRegistries.FLUIDS)).optionalFieldOf("fluids", new NegatableList<>()).forGetter(FluidRequirement::fluids),
             BlockRequirement.StateRequirement.CODEC.optionalFieldOf("state", BlockRequirement.StateRequirement.NONE).forGetter(FluidRequirement::state),
             Codec.BOOL.optionalFieldOf("is_source").forGetter(FluidRequirement::isSource)
     ).apply(instance, FluidRequirement::new));
@@ -37,7 +39,7 @@ public record FluidRequirement(List<Either<TagKey<Fluid>, Fluid>> fluids, BlockR
 
     public boolean test(FluidState state)
     {
-        if (this.fluids.stream().anyMatch(either -> either.map(state::is, state::is)))
+        if (this.fluids.test(either -> either.map(state::is, state::is)))
         {   return false;
         }
         if (this.isSource.isPresent() && this.isSource.get() != state.isSource())

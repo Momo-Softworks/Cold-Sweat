@@ -5,6 +5,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.data.codec.util.WorldTempBounds;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
@@ -23,56 +24,57 @@ import net.minecraft.world.phys.Vec3;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-public record LocationRequirement(Optional<IntegerBounds> x, Optional<IntegerBounds> y, Optional<IntegerBounds> z,
+public record LocationRequirement(IntegerBounds x, IntegerBounds y, IntegerBounds z,
                                   int xOffset, int yOffset, int zOffset,
-                                  Optional<Either<TagKey<Biome>, ResourceKey<Biome>>> biome,
-                                  Optional<Either<TagKey<ConfiguredStructureFeature<?, ?>>, ResourceKey<ConfiguredStructureFeature<?, ?>>>> structure,
-                                  Optional<Either<TagKey<Level>, ResourceKey<Level>>> dimension,
-                                  Optional<IntegerBounds> light, Optional<BlockRequirement> block,
-                                  Optional<FluidRequirement> fluid, Optional<WorldTempBounds> temperature,
+                                  NegatableList<Either<TagKey<Biome>, ResourceKey<Biome>>> biome,
+                                  NegatableList<Either<TagKey<ConfiguredStructureFeature<?, ?>>, ResourceKey<ConfiguredStructureFeature<?, ?>>>> structure,
+                                  NegatableList<Either<TagKey<Level>, ResourceKey<Level>>> dimension,
+                                  IntegerBounds light, BlockRequirement block,
+                                  FluidRequirement fluid, WorldTempBounds temperature,
                                   Optional<Predicate<BlockInWorld>> predicate)
 {
     public static final Codec<LocationRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            IntegerBounds.CODEC.optionalFieldOf("x").forGetter(location -> location.x),
-            IntegerBounds.CODEC.optionalFieldOf("y").forGetter(location -> location.y),
-            IntegerBounds.CODEC.optionalFieldOf("z").forGetter(location -> location.z),
+            IntegerBounds.CODEC.optionalFieldOf("x", IntegerBounds.NONE).forGetter(location -> location.x),
+            IntegerBounds.CODEC.optionalFieldOf("y", IntegerBounds.NONE).forGetter(location -> location.y),
+            IntegerBounds.CODEC.optionalFieldOf("z", IntegerBounds.NONE).forGetter(location -> location.z),
             Codec.INT.optionalFieldOf("x_offset", 0).forGetter(location -> location.xOffset),
             Codec.INT.optionalFieldOf("y_offset", 0).forGetter(location -> location.yOffset),
             Codec.INT.optionalFieldOf("z_offset", 0).forGetter(location -> location.zOffset),
-            ConfigHelper.tagOrResourceKeyCodec(Registry.BIOME_REGISTRY).optionalFieldOf("biome").forGetter(location -> location.biome),
-            ConfigHelper.tagOrResourceKeyCodec(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY).optionalFieldOf("structure").forGetter(location -> location.structure),
-            ConfigHelper.tagOrResourceKeyCodec(Registry.DIMENSION_REGISTRY).optionalFieldOf("dimension").forGetter(location -> location.dimension),
-            IntegerBounds.CODEC.optionalFieldOf("light").forGetter(location -> location.light),
-            BlockRequirement.CODEC.optionalFieldOf("block").forGetter(location -> location.block),
-            FluidRequirement.CODEC.optionalFieldOf("fluid").forGetter(location -> location.fluid),
-            WorldTempBounds.CODEC.optionalFieldOf("temperature").forGetter(location -> location.temperature)
+            NegatableList.listCodec(ConfigHelper.tagOrResourceKeyCodec(Registry.BIOME_REGISTRY)).optionalFieldOf("biome", new NegatableList<>()).forGetter(location -> location.biome),
+            NegatableList.listCodec(ConfigHelper.tagOrResourceKeyCodec(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY)).optionalFieldOf("structure", new NegatableList<>()).forGetter(location -> location.structure),
+            NegatableList.listCodec(ConfigHelper.tagOrResourceKeyCodec(Registry.DIMENSION_REGISTRY)).optionalFieldOf("dimension", new NegatableList<>()).forGetter(location -> location.dimension),
+            IntegerBounds.CODEC.optionalFieldOf("light", IntegerBounds.NONE).forGetter(location -> location.light),
+            BlockRequirement.CODEC.optionalFieldOf("block", BlockRequirement.NONE).forGetter(location -> location.block),
+            FluidRequirement.CODEC.optionalFieldOf("fluid", FluidRequirement.NONE).forGetter(location -> location.fluid),
+            WorldTempBounds.CODEC.optionalFieldOf("temperature", WorldTempBounds.NONE).forGetter(location -> location.temperature)
     ).apply(instance, LocationRequirement::new));
 
-    public LocationRequirement(Optional<IntegerBounds> x, Optional<IntegerBounds> y, Optional<IntegerBounds> z,
+    public LocationRequirement(IntegerBounds x, IntegerBounds y, IntegerBounds z,
                                int xOffset, int yOffset, int zOffset,
-                               Optional<Either<TagKey<Biome>, ResourceKey<Biome>>> biome,
-                               Optional<Either<TagKey<ConfiguredStructureFeature<?, ?>>, ResourceKey<ConfiguredStructureFeature<?, ?>>>> structure,
-                               Optional<Either<TagKey<Level>, ResourceKey<Level>>> dimension,
-                               Optional<IntegerBounds> light, Optional<BlockRequirement> block,
-                               Optional<FluidRequirement> fluid, Optional<WorldTempBounds> temperature)
+                               NegatableList<Either<TagKey<Biome>, ResourceKey<Biome>>> biome,
+                               NegatableList<Either<TagKey<ConfiguredStructureFeature<?, ?>>, ResourceKey<ConfiguredStructureFeature<?, ?>>>> structure,
+                               NegatableList<Either<TagKey<Level>, ResourceKey<Level>>> dimension,
+                               IntegerBounds light, BlockRequirement block,
+                               FluidRequirement fluid, WorldTempBounds temperature)
     {
         this(x, y, z, xOffset, yOffset, zOffset, biome, structure, dimension, light, block, fluid, temperature, Optional.empty());
     }
 
     public LocationRequirement(Predicate<BlockInWorld> predicate)
     {
-        this(Optional.empty(), Optional.empty(), Optional.empty(),
+        this(IntegerBounds.NONE, IntegerBounds.NONE, IntegerBounds.NONE,
              0, 0, 0,
-             Optional.empty(), Optional.empty(), Optional.empty(),
-             Optional.empty(), Optional.empty(), Optional.empty(),
-             Optional.empty(), Optional.of(predicate));
+             new NegatableList<>(), new NegatableList<>(), new NegatableList<>(),
+             IntegerBounds.NONE, BlockRequirement.NONE,
+             FluidRequirement.NONE, WorldTempBounds.NONE,
+             Optional.of(predicate));
     }
 
-    public static final LocationRequirement NONE = new LocationRequirement(Optional.empty(), Optional.empty(), Optional.empty(),
+    public static final LocationRequirement NONE = new LocationRequirement(IntegerBounds.NONE, IntegerBounds.NONE, IntegerBounds.NONE,
                                                                            0, 0, 0,
-                                                                           Optional.empty(), Optional.empty(), Optional.empty(),
-                                                                           Optional.empty(), Optional.empty(), Optional.empty(),
-                                                                           Optional.empty(), Optional.empty());
+                                                                           new NegatableList<>(), new NegatableList<>(), new NegatableList<>(),
+                                                                           IntegerBounds.NONE, BlockRequirement.NONE,
+                                                                           FluidRequirement.NONE, WorldTempBounds.NONE);
 
     public boolean test(Level level, Vec3 pos)
     {   return this.test(level, new BlockPos(pos));
@@ -87,46 +89,43 @@ public record LocationRequirement(Optional<IntegerBounds> x, Optional<IntegerBou
         BlockPos.MutableBlockPos pos = origin.mutable();
         pos.move(this.xOffset, this.yOffset, this.zOffset);
 
-        if (!this.x.map(range -> range.test(pos.getX())).orElse(true)) return false;
-        if (!this.y.map(range -> range.test(pos.getY())).orElse(true)) return false;
-        if (!this.z.map(range -> range.test(pos.getZ())).orElse(true)) return false;
+        if (!this.x.test(pos.getX())) return false;
+        if (!this.y.test(pos.getY())) return false;
+        if (!this.z.test(pos.getZ())) return false;
 
-        if (this.dimension.isPresent()
-        && !this.dimension.get().map(tag -> level.dimensionTypeRegistration().is(tag.location()),
-                                     key -> level.dimension().equals(key)))
+        if (!this.dimension.test(either -> either.map(tag -> level.dimensionTypeRegistration().is(tag.location()),
+                                                      key -> level.dimension().equals(key))))
         {   return false;
         }
 
-        if (this.biome.isPresent()
-        && !this.biome.get().map(tag -> level.getBiomeManager().getNoiseBiomeAtPosition(pos).is(tag),
-                                 key -> level.getBiomeManager().getNoiseBiomeAtPosition(pos).is(key)))
+        if (this.biome.test(either -> either.map(tag -> level.getBiomeManager().getNoiseBiomeAtPosition(pos).is(tag),
+                                                 key -> level.getBiomeManager().getNoiseBiomeAtPosition(pos).is(key))))
         {   return false;
         }
 
-        if (this.structure.isPresent())
+        if (!this.structure.isEmpty())
         {
             StructureFeatureManager structureManager = WorldHelper.getServerLevel(level).structureFeatureManager();
-            StructureStart structureStart = this.structure.get().map(tag -> WorldHelper.getStructureWithPieceAt(structureManager, pos, tag),
-                                                                     key -> structureManager.getStructureWithPieceAt(pos, key));
-            if (structureStart == null || structureStart == StructureStart.INVALID_START)
+            if (!this.structure.test(either ->
+            {
+                StructureStart structureStart = either.map(tag -> WorldHelper.getStructureWithPieceAt(structureManager, pos, tag),
+                                                           key -> structureManager.getStructureWithPieceAt(pos, key));
+                return structureStart != null && structureStart != StructureStart.INVALID_START;
+            }))
             {   return false;
             }
         }
 
-        if (this.light.isPresent())
-        {
-            int light = level.getMaxLocalRawBrightness(pos);
-            if (light < this.light.get().min() || light > this.light.get().max())
-            {   return false;
-            }
-        }
-        if (this.block.isPresent() && !this.block.get().test(level, pos))
+        if (!this.light.test(level.getMaxLocalRawBrightness(pos)))
         {   return false;
         }
-        if (this.fluid.isPresent() && !this.fluid.get().test(level, pos))
+        if (!this.block.test(level, pos))
         {   return false;
         }
-        if (this.temperature.isPresent() && !this.temperature.get().test(WorldHelper.getRoughTemperatureAt(level, pos)))
+        if (!this.fluid.test(level, pos))
+        {   return false;
+        }
+        if (!this.temperature.test(WorldHelper.getRoughTemperatureAt(level, pos)))
         {   return false;
         }
         return true;
