@@ -8,6 +8,8 @@ import com.momosoftworks.coldsweat.util.math.CSMath;
 
 public record WorldTempBounds(WorldTempRequirement min, WorldTempRequirement max)
 {
+    public static final WorldTempBounds NONE = new WorldTempBounds(WorldTempRequirement.NEGATIVE_INFINITY, WorldTempRequirement.INFINITY);
+
     public static final Codec<WorldTempBounds> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
             WorldTempRequirement.CODEC.optionalFieldOf("min", WorldTempRequirement.NEGATIVE_INFINITY).forGetter(bounds -> bounds.min),
             WorldTempRequirement.CODEC.optionalFieldOf("max", WorldTempRequirement.INFINITY).forGetter(bounds -> bounds.max)
