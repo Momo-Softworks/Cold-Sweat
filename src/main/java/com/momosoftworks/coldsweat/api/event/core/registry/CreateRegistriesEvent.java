@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.api.event.core.registry;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.configuration.RemoveRegistryData;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
@@ -15,7 +16,7 @@ import java.util.Collection;
 /**
  * Gives subscribers unrestricted access to Cold Sweat's registries as they are being loaded.<br>
  * <br>
- * Fired on the Forge event bus when Cold Sweat's registries are gathered, but before they are committed to {@link com.momosoftworks.coldsweat.config.ConfigSettings} where they become usable.<br>
+ * Fired on the Forge event bus when Cold Sweat's registries are gathered, but before they are committed to {@link ConfigSettings} where they become usable.<br>
  */
 public abstract class CreateRegistriesEvent extends Event
 {
@@ -38,6 +39,14 @@ public abstract class CreateRegistriesEvent extends Event
 
     public <T extends ConfigData> Collection<T> getRegistry(ModRegistries.ConfigRegistry<T> registry)
     {   return (Collection) registries.get(registry.key());
+    }
+
+    public <T extends ConfigData> void addRegistry(ModRegistries.ConfigRegistry<T> registry, T value)
+    {   ((Multimap) registries).put(registry.key(), value);
+    }
+
+    public <T extends ConfigData> void addRegistries(ModRegistries.ConfigRegistry<T> registry, Collection<T> values)
+    {   ((Multimap) registries).putAll(registry.key(), values);
     }
 
     /**
@@ -65,7 +74,7 @@ public abstract class CreateRegistriesEvent extends Event
     }
 
     /**
-     * Fired after Cold Sweat's registries have been gathered and committed to {@link com.momosoftworks.coldsweat.config.ConfigSettings}.<br>
+     * Fired after Cold Sweat's registries have been gathered and committed to {@link ConfigSettings}.<br>
      * Registry removals have been processed at this point.<br>
      * <br>
      * <b>Use this event to commit your custom registries.</b>
