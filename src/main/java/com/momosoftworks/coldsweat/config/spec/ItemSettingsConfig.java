@@ -407,9 +407,9 @@ public class ItemSettingsConfig
 
         CARRIED_ITEM_TEMPERATURES = BUILDER
                 .comment("Defines items that affect the player's temperature when in the inventory",
-                         "Format: [[\"item_id\", temperature, \"strict_type\", \"trait\", *\"nbt\", *max_effect], [\"item_id\", temperature, \"strict_type\", \"trait\", *\"nbt\", *max_effect], ...etc]",
+                         "Format: [[\"item_id\", temperature, \"slot_range\", \"trait\", *\"nbt\", *max_effect], [\"item_id\", temperature, \"slot_range\", \"trait\", *\"nbt\", *max_effect], ...etc]",
                          "temperature: The temperature change the item will apply to the entity. For core temperature, this is applied every tick",
-                         "strict_type: Either \"inventory\", \"hotbar\", or \"hand\". Defines what slots the item must be in to apply to the entity",
+                         "slot_range: Either \"inventory\", \"hotbar\", or \"hand\". Defines what slots the item must be in to apply to the entity (inventory includes hotbar)",
                          "trait: The temperature trait to apply the effect to. Typical values are \"core\" for body temperature or \"world\" for ambient temperature. More on the mod documentation page.",
                          "nbt: Optional. The NBT data the item must have to apply to the entity.",
                          "max_effect: Optional. The maximum temperature effect the item can apply to the entity.")

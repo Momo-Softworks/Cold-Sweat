@@ -8,6 +8,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.impl.RequirementHolder;
 import com.momosoftworks.coldsweat.data.codec.requirement.sub_type.EntitySubRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.entity.EntityHelper;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.CriterionProgress;
@@ -26,29 +27,17 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.GameType;
 import net.minecraft.world.World;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 public class PlayerDataRequirement implements EntitySubRequirement, RequirementHolder
 {
     private final Optional<GameType> gameType;
-    private final Optional<List<StatRequirement>> stats;
+    private final NegatableList<StatRequirement> stats;
     private final Optional<Map<ResourceLocation, Boolean>> recipes;
     private final Optional<Map<ResourceLocation, Either<AdvancementCompletionRequirement, AdvancementCriteriaRequirement>>> advancements;
-    private final Optional<EntityRequirement> lookingAt;
+    private final EntityRequirement lookingAt;
 
-    public PlayerDataRequirement(Optional<GameType> gameType, Optional<List<StatRequirement>> stats,
-                                 Optional<Map<ResourceLocation, Boolean>> recipes,
-                                 Optional<Map<ResourceLocation, Either<AdvancementCompletionRequirement, AdvancementCriteriaRequirement>>> advancements,
-                                 Optional<EntityRequirement> lookingAt)
-    {
-        this.gameType = gameType;
-        this.stats = stats;
-        this.recipes = recipes;
-        this.advancements = advancements;
-        this.lookingAt = lookingAt;
-    }
     @Override
     public MapCodec<? extends EntitySubRequirement> getCodec()
     {   return getCodec(EntityRequirement.getCodec());
@@ -57,18 +46,30 @@ public class PlayerDataRequirement implements EntitySubRequirement, RequirementH
     public static MapCodec<PlayerDataRequirement> getCodec(Codec<EntityRequirement> lastCodec)
     {
         return RecordCodecBuilder.mapCodec(instance -> instance.group(
-                Codec.STRING.xmap(GameType::byName, GameType::getName).optionalFieldOf("game_mode").forGetter(requirement -> requirement.gameType),
-                StatRequirement.CODEC.listOf().optionalFieldOf("stats").forGetter(requirement -> requirement.stats),
-                Codec.unboundedMap(ResourceLocation.CODEC, Codec.BOOL).optionalFieldOf("recipes").forGetter(requirement -> requirement.recipes),
-                Codec.unboundedMap(ResourceLocation.CODEC, Codec.either(AdvancementCompletionRequirement.CODEC, AdvancementCriteriaRequirement.CODEC)).optionalFieldOf("advancements").forGetter(requirement -> requirement.advancements),
-                lastCodec.optionalFieldOf("looking_at").forGetter(requirement -> requirement.lookingAt)
+                Codec.STRING.xmap(GameType::byName, GameType::getName).optionalFieldOf("game_mode").forGetter(PlayerDataRequirement::gameType),
+                NegatableList.listCodec(StatRequirement.CODEC).optionalFieldOf("stats", new NegatableList<>()).forGetter(PlayerDataRequirement::stats),
+                Codec.unboundedMap(ResourceLocation.CODEC, Codec.BOOL).optionalFieldOf("recipes").forGetter(PlayerDataRequirement::recipes),
+                Codec.unboundedMap(ResourceLocation.CODEC, Codec.either(AdvancementCompletionRequirement.CODEC, AdvancementCriteriaRequirement.CODEC)).optionalFieldOf("advancements").forGetter(PlayerDataRequirement::advancements),
+                lastCodec.optionalFieldOf("looking_at", EntityRequirement.NONE).forGetter(PlayerDataRequirement::lookingAt)
         ).apply(instance, PlayerDataRequirement::new));
+    }
+
+    public PlayerDataRequirement(Optional<GameType> gameType, NegatableList<StatRequirement> stats,
+                                 Optional<Map<ResourceLocation, Boolean>> recipes,
+                                 Optional<Map<ResourceLocation, Either<AdvancementCompletionRequirement, AdvancementCriteriaRequirement>>> advancements,
+                                 EntityRequirement lookingAt)
+    {
+        this.gameType = gameType;
+        this.stats = stats;
+        this.recipes = recipes;
+        this.advancements = advancements;
+        this.lookingAt = lookingAt;
     }
 
     public Optional<GameType> gameType()
     {   return gameType;
     }
-    public Optional<List<StatRequirement>> stats()
+    public NegatableList<StatRequirement> stats()
     {   return stats;
     }
     public Optional<Map<ResourceLocation, Boolean>> recipes()
@@ -77,7 +78,7 @@ public class PlayerDataRequirement implements EntitySubRequirement, RequirementH
     public Optional<Map<ResourceLocation, Either<AdvancementCompletionRequirement, AdvancementCriteriaRequirement>>> advancements()
     {   return advancements;
     }
-    public Optional<EntityRequirement> lookingAt()
+    public EntityRequirement lookingAt()
     {   return lookingAt;
     }
 
@@ -91,15 +92,8 @@ public class PlayerDataRequirement implements EntitySubRequirement, RequirementH
         if (gameType.isPresent() && EntityHelper.getGameModeForPlayer(player) != gameType.get())
         {   return false;
         }
-        if (stats.isPresent())
-        {
-            for (StatRequirement entry : stats.get())
-            {
-                int value = serverPlayer.getStats().getValue(entry.stat());
-                if (!entry.test(entry.stat(), value))
-                {   return false;
-                }
-            }
+        if (!stats.test(stat -> stat.test(stat.stat(), serverPlayer.getStats().getValue(stat.stat()))))
+        {   return false;
         }
         if (recipes.isPresent())
         {
@@ -120,7 +114,7 @@ public class PlayerDataRequirement implements EntitySubRequirement, RequirementH
                 }
             }
         }
-        if (lookingAt.isPresent())
+        if (lookingAt != EntityRequirement.NONE)
         {
             Vector3d vec3 = player.getEyePosition(0);
             Vector3d vec31 = player.getViewVector(1.0F);
@@ -131,7 +125,7 @@ public class PlayerDataRequirement implements EntitySubRequirement, RequirementH
             }
 
             Entity hitEntity = entityhitresult.getEntity();
-            if (!this.lookingAt.get().test(hitEntity) || !player.canSee(hitEntity))
+            if (!this.lookingAt.test(hitEntity))
             {   return false;
             }
         }

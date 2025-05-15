@@ -6,6 +6,7 @@ import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -25,13 +26,13 @@ import java.util.*;
 
 public class BlockRequirement
 {
-    private final List<Either<ITag<Block>, Block>> blocks;
+    private final NegatableList<Either<ITag<Block>, Block>> blocks;
     private final StateRequirement state;
     private final NbtRequirement nbt;
     private final List<Direction> sturdyFaces;
     private final Optional<Boolean> replaceable;
 
-    public BlockRequirement(List<Either<ITag<Block>, Block>> blocks, StateRequirement state,
+    public BlockRequirement(NegatableList<Either<ITag<Block>, Block>> blocks, StateRequirement state,
                             NbtRequirement nbt, List<Direction> sturdyFaces,
                             Optional<Boolean> replaceable)
     {
@@ -42,23 +43,21 @@ public class BlockRequirement
         this.replaceable = replaceable;
     }
 
-    public BlockRequirement(List<Either<ITag<Block>, Block>> blocks)
-    {
-        this(blocks, StateRequirement.NONE, NbtRequirement.NONE, Arrays.asList(), Optional.empty());
+    public BlockRequirement(NegatableList<Either<ITag<Block>, Block>> blocks)
+    {   this(blocks, StateRequirement.NONE, NbtRequirement.NONE, Arrays.asList(), Optional.empty());
     }
 
-    public static final BlockRequirement NONE = new BlockRequirement(Arrays.asList(), StateRequirement.NONE, NbtRequirement.NONE, Arrays.asList(), Optional.empty());
-
+    public static final BlockRequirement NONE = new BlockRequirement(new NegatableList<>(), StateRequirement.NONE, NbtRequirement.NONE, Arrays.asList(), Optional.empty());
 
     public static final Codec<BlockRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ConfigHelper.tagOrBuiltinCodec(Registry.BLOCK_REGISTRY, Registry.BLOCK).listOf().optionalFieldOf("blocks", Arrays.asList()).forGetter(predicate -> predicate.blocks),
+            NegatableList.listCodec(ConfigHelper.tagOrBuiltinCodec(Registry.BLOCK_REGISTRY, ForgeRegistries.BLOCKS)).optionalFieldOf("blocks", new NegatableList<>()).forGetter(predicate -> predicate.blocks),
             StateRequirement.CODEC.optionalFieldOf("state", StateRequirement.NONE).forGetter(predicate -> predicate.state),
             NbtRequirement.CODEC.optionalFieldOf("nbt", NbtRequirement.NONE).forGetter(predicate -> predicate.nbt),
             Codec.STRING.xmap(Direction::byName, Direction::getName).listOf().optionalFieldOf("sturdy_faces", Arrays.asList()).forGetter(predicate -> predicate.sturdyFaces),
             Codec.BOOL.optionalFieldOf("replaceable").forGetter(predicate -> predicate.replaceable)
     ).apply(instance, BlockRequirement::new));
 
-    public List<Either<ITag<Block>, Block>> blocks()
+    public NegatableList<Either<ITag<Block>, Block>> blocks()
     {   return blocks;
     }
     public StateRequirement state()
@@ -78,7 +77,7 @@ public class BlockRequirement
     {
         if (!level.isLoaded(pos)) return false;
 
-        if (!this.blocks.isEmpty() && this.blocks.stream().noneMatch(either -> either.map(state::is, state::is)))
+        if (!this.blocks.isEmpty() && this.blocks.test(either -> either.map(state::is, state::is)))
         {   return false;
         }
         if (!this.state.test(state))

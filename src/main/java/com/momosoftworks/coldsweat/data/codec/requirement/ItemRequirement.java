@@ -5,6 +5,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -22,17 +23,29 @@ import java.util.stream.Collectors;
 
 public class ItemRequirement
 {
-    private final List<Either<ITag<Item>, Item>> items;
-    private final Optional<IntegerBounds> count;
-    private final Optional<IntegerBounds> durability;
-    private final Optional<List<EnchantmentRequirement>> enchantments;
+    private final NegatableList<Either<ITag<Item>, Item>> items;
+    private final IntegerBounds count;
+    private final IntegerBounds durability;
+    private final NegatableList<EnchantmentRequirement> enchantments;
     private final Optional<Potion> potion;
     private final NbtRequirement nbt;
     private final Optional<Predicate<ItemStack>> predicate;
 
-    public ItemRequirement(List<Either<ITag<Item>, Item>> items,
-                           Optional<IntegerBounds> count, Optional<IntegerBounds> durability,
-                           Optional<List<EnchantmentRequirement>> enchantments,
+    public static final Codec<ItemRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            NegatableList.listCodec(ConfigHelper.tagOrBuiltinCodec(Registry.ITEM_REGISTRY, Registry.ITEM)).optionalFieldOf("items", new NegatableList<>()).forGetter(predicate -> predicate.items),
+            IntegerBounds.CODEC.optionalFieldOf("count", IntegerBounds.NONE).forGetter(predicate -> predicate.count),
+            IntegerBounds.CODEC.optionalFieldOf("durability", IntegerBounds.NONE).forGetter(predicate -> predicate.durability),
+            NegatableList.listCodec(EnchantmentRequirement.CODEC).optionalFieldOf("enchantments", new NegatableList<>()).forGetter(predicate -> predicate.enchantments),
+            Registry.POTION.optionalFieldOf("potion").forGetter(predicate -> predicate.potion),
+            NbtRequirement.CODEC.optionalFieldOf("nbt", new NbtRequirement()).forGetter(predicate -> predicate.nbt)
+    ).apply(instance, ItemRequirement::new));
+
+    public static final ItemRequirement NONE = new ItemRequirement(new NegatableList<>(), IntegerBounds.NONE, IntegerBounds.NONE,
+                                                                   new NegatableList<>(), Optional.empty(), new NbtRequirement());
+
+    public ItemRequirement(NegatableList<Either<ITag<Item>, Item>> items,
+                           IntegerBounds count, IntegerBounds durability,
+                           NegatableList<EnchantmentRequirement> enchantments,
                            Optional<Potion> potion, NbtRequirement nbt, Optional<Predicate<ItemStack>> predicate)
     {
         this.items = items;
@@ -44,21 +57,9 @@ public class ItemRequirement
         this.predicate = predicate;
     }
 
-    public static final Codec<ItemRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ConfigHelper.tagOrBuiltinCodec(Registry.ITEM_REGISTRY, Registry.ITEM).listOf().optionalFieldOf("items", Arrays.asList()).forGetter(predicate -> predicate.items),
-            IntegerBounds.CODEC.optionalFieldOf("count").forGetter(predicate -> predicate.count),
-            IntegerBounds.CODEC.optionalFieldOf("durability").forGetter(predicate -> predicate.durability),
-            EnchantmentRequirement.CODEC.listOf().optionalFieldOf("enchantments").forGetter(predicate -> predicate.enchantments),
-            Registry.POTION.optionalFieldOf("potion").forGetter(predicate -> predicate.potion),
-            NbtRequirement.CODEC.optionalFieldOf("nbt", new NbtRequirement()).forGetter(predicate -> predicate.nbt)
-    ).apply(instance, ItemRequirement::new));
-
-    public static final ItemRequirement NONE = new ItemRequirement(Arrays.asList(), Optional.empty(), Optional.empty(),
-                                                                   Optional.empty(), Optional.empty(), new NbtRequirement());
-
-    public ItemRequirement(List<Either<ITag<Item>, Item>> items,
-                           Optional<IntegerBounds> count, Optional<IntegerBounds> durability,
-                           Optional<List<EnchantmentRequirement>> enchantments,
+    public ItemRequirement(NegatableList<Either<ITag<Item>, Item>> items,
+                           IntegerBounds count, IntegerBounds durability,
+                           NegatableList<EnchantmentRequirement> enchantments,
                            Optional<Potion> potion, NbtRequirement nbt)
     {
         this(items, count, durability, enchantments, potion, nbt, Optional.empty());
@@ -66,30 +67,30 @@ public class ItemRequirement
 
     public ItemRequirement(List<Either<ITag<Item>, Item>> items, NbtRequirement nbt)
     {
-        this(items, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), nbt);
+        this(new NegatableList<>(items), IntegerBounds.NONE, IntegerBounds.NONE, new NegatableList<>(), Optional.empty(), nbt);
     }
 
     public ItemRequirement(Collection<Item> items, Predicate<ItemStack> predicate)
     {
-        this(items.stream().map(Either::<ITag<Item>, Item>right).collect(Collectors.toList()), Optional.empty(), Optional.empty(),
-             Optional.empty(), Optional.empty(), new NbtRequirement(), Optional.ofNullable(predicate));
+        this(new NegatableList<>(items.stream().map(Either::<ITag<Item>, Item>right).collect(Collectors.toList())), IntegerBounds.NONE, IntegerBounds.NONE,
+             new NegatableList<>(), Optional.empty(), new NbtRequirement(), Optional.ofNullable(predicate));
     }
 
     public ItemRequirement(Predicate<ItemStack> predicate)
     {
-        this(Arrays.asList(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), new NbtRequirement(), Optional.of(predicate));
+        this(new NegatableList<>(), IntegerBounds.NONE, IntegerBounds.NONE, new NegatableList<>(), Optional.empty(), new NbtRequirement(), Optional.of(predicate));
     }
 
-    public List<Either<ITag<Item>, Item>> items()
+    public NegatableList<Either<ITag<Item>, Item>> items()
     {   return items;
     }
-    public Optional<IntegerBounds> count()
+    public IntegerBounds count()
     {   return count;
     }
-    public Optional<IntegerBounds> durability()
+    public IntegerBounds durability()
     {   return durability;
     }
-    public Optional<List<EnchantmentRequirement>> enchantments()
+    public NegatableList<EnchantmentRequirement> enchantments()
     {   return enchantments;
     }
     public Optional<Potion> potion()
@@ -108,17 +109,8 @@ public class ItemRequirement
         {   return false;
         }
 
-        if (!items.isEmpty())
-        checkItem:
-        {
-            for (int i = 0; i < items.size(); i++)
-            {
-                Either<ITag<Item>, Item> either = items.get(i);
-                if (either.map(tag -> tag.contains(stack.getItem()), item -> stack.getItem() == item))
-                {   break checkItem;
-                }
-            }
-            return false;
+        if (!items.test(either -> either.map(tag -> tag.contains(stack.getItem()), item -> stack.getItem() == item)))
+        {   return false;
         }
         if (this.predicate.isPresent())
         {   return this.predicate.get().test(stack);
@@ -126,10 +118,10 @@ public class ItemRequirement
         if (!this.nbt.test(stack.getTag()))
         {   return false;
         }
-        if (!ignoreCount && count.isPresent() && !count.get().test(stack.getCount()))
+        if (!ignoreCount && !count.test(stack.getCount()))
         {   return false;
         }
-        else if (durability.isPresent() && !durability.get().test(stack.getMaxDamage() - stack.getDamageValue()))
+        else if (!durability.test(stack.getMaxDamage() - stack.getDamageValue()))
         {   return false;
         }
         else if (potion.isPresent() && !potion.get().getEffects().equals(PotionUtils.getPotion(stack).getEffects()))
@@ -138,15 +130,12 @@ public class ItemRequirement
         else if (!nbt.test(stack.getTag()))
         {   return false;
         }
-        else if (enchantments.isPresent())
+        else if (!enchantments.isEmpty())
         {
             Map<Enchantment, Integer> stackEnchantments = EnchantmentHelper.deserializeEnchantments(stack.getEnchantmentTags());
             stackEnchantments.putAll(EnchantmentHelper.deserializeEnchantments(EnchantedBookItem.getEnchantments(stack)));
-            for (EnchantmentRequirement enchantment : enchantments.get())
-            {
-                if (!enchantment.test(stackEnchantments))
-                {   return false;
-                }
+            if (!enchantments.test(enchantment -> enchantment.test(stackEnchantments)))
+            {   return false;
             }
         }
         return true;

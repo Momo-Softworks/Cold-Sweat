@@ -5,19 +5,16 @@ import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.NBTDynamicOps;
 import net.minecraft.util.registry.Registry;
 
 import java.util.Map;
-import java.util.Optional;
 
 public class EnchantmentRequirement
 {
     private final Enchantment enchantment;
-    private final Optional<IntegerBounds> level;
+    private final IntegerBounds level;
 
-    public EnchantmentRequirement(Enchantment enchantment, Optional<IntegerBounds> level)
+    public EnchantmentRequirement(Enchantment enchantment, IntegerBounds level)
     {
         this.enchantment = enchantment;
         this.level = level;
@@ -25,18 +22,18 @@ public class EnchantmentRequirement
 
     public static final Codec<EnchantmentRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Registry.ENCHANTMENT.fieldOf("enchantment").forGetter(requirement -> requirement.enchantment),
-            IntegerBounds.CODEC.optionalFieldOf("levels").forGetter(requirement -> requirement.level)
+            IntegerBounds.CODEC.optionalFieldOf("levels", IntegerBounds.NONE).forGetter(requirement -> requirement.level)
     ).apply(instance, EnchantmentRequirement::new));
 
     public Enchantment enchantment()
     {   return enchantment;
     }
-    public Optional<IntegerBounds> level()
+    public IntegerBounds level()
     {   return level;
     }
 
     public boolean test(Enchantment enchantment, int level)
-    {   return this.enchantment == enchantment && this.level.map(bounds -> bounds.test(level)).orElse(true);
+    {   return this.enchantment == enchantment && this.level.test(level);
     }
 
     public boolean test(Map<Enchantment, Integer> enchantments)
