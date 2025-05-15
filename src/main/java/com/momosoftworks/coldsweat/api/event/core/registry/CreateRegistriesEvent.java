@@ -40,6 +40,14 @@ public abstract class CreateRegistriesEvent extends Event
     {   return (Collection) registries.get(key);
     }
 
+    public <T extends ConfigData> void addRegistry(ResourceKey<? extends Registry<T>> key, Holder<T> value)
+    {   registries.put(key, value);
+    }
+
+    public <T extends ConfigData> void addRegistries(ResourceKey<? extends Registry<T>> key, Collection<Holder<T>> values)
+    {   registries.putAll(key, values);
+    }
+
     /**
      * Fired directly after registries have been gathered, before registry removals are processed.<br>
      * <br>
