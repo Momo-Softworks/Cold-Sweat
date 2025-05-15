@@ -417,7 +417,7 @@ public class ConfigSettings
         (fuelType, config, holder) ->
         {
             Multimap<Item, FuelData> dataMap = ConfigHelper.parseTomlRegistry(config, list -> FuelData.fromToml(list, fuelType),
-                                                                              data -> data.item().flatListMap(ItemRequirement::items),
+                                                                              data -> data.item().nestedFlatMap(ItemRequirement::items),
                                                                               ForgeRegistries.ITEMS, ModRegistries.FUEL_DATA);
             holder.get().putAll(dataMap);
         };
@@ -442,7 +442,7 @@ public class ConfigSettings
         (config, holder, slot) ->
         {
             Multimap<Item, InsulatorData> dataMap = ConfigHelper.parseTomlRegistry(config, list -> InsulatorData.fromToml(list, slot),
-                                                                                   data -> data.item().flatListMap(ItemRequirement::items),
+                                                                                   data -> data.item().nestedFlatMap(ItemRequirement::items),
                                                                                    ForgeRegistries.ITEMS, ModRegistries.INSULATOR_DATA);
             holder.get().putAll(dataMap);
         };
@@ -501,7 +501,7 @@ public class ConfigSettings
         {
             Multimap<Item, ItemInsulationSlotsData> dataMap = ConfigHelper.parseTomlRegistry(ItemSettingsConfig.INSULATION_SLOT_OVERRIDES,
                                                                                              ItemInsulationSlotsData::fromToml,
-                                                                                             data -> data.item().flatListMap(ItemRequirement::items),
+                                                                                             data -> data.item().nestedFlatMap(ItemRequirement::items),
                                                                                              ForgeRegistries.ITEMS, ModRegistries.INSULATION_SLOTS_DATA);
             holder.get().putAll(dataMap);
         },
@@ -520,7 +520,7 @@ public class ConfigSettings
         {
             Multimap<Item, DryingItemData> dataMap = ConfigHelper.parseTomlRegistry(ItemSettingsConfig.DRYING_ITEMS,
                                                                                     DryingItemData::fromToml,
-                                                                                    data -> data.item().flatListMap(ItemRequirement::items),
+                                                                                    data -> data.item().nestedFlatMap(ItemRequirement::items),
                                                                                     ForgeRegistries.ITEMS, ModRegistries.DRYING_ITEM_DATA);
             holder.get().putAll(dataMap);
         },
@@ -545,7 +545,7 @@ public class ConfigSettings
         {
             Multimap<Item, FoodData> dataMap = ConfigHelper.parseTomlRegistry(ItemSettingsConfig.FOOD_TEMPERATURES,
                                                                               FoodData::fromToml,
-                                                                              data -> data.item().flatListMap(ItemRequirement::items),
+                                                                              data -> data.item().nestedFlatMap(ItemRequirement::items),
                                                                               ForgeRegistries.ITEMS, ModRegistries.FOOD_DATA);
             holder.get().putAll(dataMap);
         },
@@ -558,7 +558,7 @@ public class ConfigSettings
         {
             Multimap<Item, ItemCarryTempData> dataMap = ConfigHelper.parseTomlRegistry(ItemSettingsConfig.CARRIED_ITEM_TEMPERATURES,
                                                                                        ItemCarryTempData::fromToml,
-                                                                                       data -> data.item().flatListMap(ItemRequirement::items),
+                                                                                       data -> data.item().nestedFlatMap(ItemRequirement::items),
                                                                                        ForgeRegistries.ITEMS, ModRegistries.CARRY_TEMP_DATA);
             holder.get().putAll(dataMap);
         },
@@ -655,7 +655,7 @@ public class ConfigSettings
         {
             Multimap<EntityType<?>, MountData> dataMap = ConfigHelper.parseTomlRegistry(EntitySettingsConfig.INSULATED_MOUNTS,
                                                                                         MountData::fromToml,
-                                                                                        data -> data.entity().flatListMap(EntityRequirement::entities),
+                                                                                        data -> data.entity().nestedFlatMap(d -> d.entities()),
                                                                                         ForgeRegistries.ENTITIES, ModRegistries.MOUNT_DATA);
             holder.get().putAll(dataMap);
         });
@@ -664,7 +664,7 @@ public class ConfigSettings
         {
             Multimap<EntityType<?>, EntityTempData> dataMap = ConfigHelper.parseTomlRegistry(EntitySettingsConfig.ENTITY_TEMPERATURES,
                                                                                              EntityTempData::fromToml,
-                                                                                             data -> data.entity().flatListMap(EntityRequirement::entities),
+                                                                                             data -> data.entity().nestedFlatMap(EntityRequirement::entities),
                                                                                              ForgeRegistries.ENTITIES, ModRegistries.ENTITY_TEMP_DATA);
             holder.get().putAll(dataMap);
         });
@@ -673,7 +673,7 @@ public class ConfigSettings
         {
             Map<EntityType<?>, EntityClimateData> dataMap = ConfigHelper.parseTomlRegistryUnique(EntitySettingsConfig.ENTITY_CLIMATES,
                                                                                                  EntityClimateData::fromToml,
-                                                                                                 data -> data.entity().flatListMap(EntityRequirement::entities),
+                                                                                                 data -> data.entity().nestedFlatMap(EntityRequirement::entities),
                                                                                                  ForgeRegistries.ENTITIES, ModRegistries.ENTITY_CLIMATE_DATA);
             holder.get().putAll(dataMap);
         },

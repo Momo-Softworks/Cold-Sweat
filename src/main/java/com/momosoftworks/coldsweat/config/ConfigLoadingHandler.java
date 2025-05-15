@@ -353,7 +353,7 @@ public class ConfigLoadingHandler
         insulators.forEach(insulator ->
         {
             // Add listed items as insulators
-            List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(insulator.item().flatListMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(insulator.item().nestedFlatMap(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -380,7 +380,7 @@ public class ConfigLoadingHandler
     {
         fuels.forEach(fuelData ->
         {
-            List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(fuelData.item().flatListMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(fuelData.item().nestedFlatMap(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -402,7 +402,7 @@ public class ConfigLoadingHandler
     {
         foods.forEach(foodData ->
         {
-            List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(foodData.item().flatListMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(foodData.item().nestedFlatMap(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -417,7 +417,7 @@ public class ConfigLoadingHandler
     {
         carryTemps.forEach(carryTempData ->
         {
-            List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(carryTempData.item().flatListMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(carryTempData.item().nestedFlatMap(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -432,7 +432,7 @@ public class ConfigLoadingHandler
     {
         dryingItems.forEach(dryingItemData ->
         {
-            List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(dryingItemData.item().flatListMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(dryingItemData.item().nestedFlatMap(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -447,7 +447,7 @@ public class ConfigLoadingHandler
     {
         insulationSlots.forEach(insulationSlotData ->
         {
-            List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(insulationSlotData.item().flatListMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(insulationSlotData.item().nestedFlatMap(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -543,7 +543,7 @@ public class ConfigLoadingHandler
     {
         mounts.forEach(mountData ->
         {
-            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapTaggableList(mountData.entity().flatListMap(EntityRequirement::entities)));
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapTaggableList(mountData.entity().nestedFlatMap(EntityRequirement::entities)));
             if (entities.isEmpty())
             {   entities.add(null);
             }
@@ -567,7 +567,7 @@ public class ConfigLoadingHandler
     {
         entityTemps.forEach(entityTempData ->
         {
-            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapTaggableList(entityTempData.entity().flatListMap(EntityRequirement::entities)));
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapTaggableList(entityTempData.entity().nestedFlatMap(EntityRequirement::entities)));
             if (entities.isEmpty())
             {   entities.add(null);
             }
@@ -581,7 +581,7 @@ public class ConfigLoadingHandler
     {
         entityTemps.forEach(entityTempData ->
         {
-            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapTaggableList(entityTempData.entity().flatListMap(EntityRequirement::entities)));
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapTaggableList(entityTempData.entity().nestedFlatMap(EntityRequirement::entities)));
             if (entities.isEmpty())
             {   entities.add(null);
             }

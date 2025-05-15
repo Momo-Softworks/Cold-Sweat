@@ -21,6 +21,7 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
 
@@ -43,14 +44,14 @@ public class BlockRequirement
         this.replaceable = replaceable;
     }
 
-    public BlockRequirement(NegatableList<Either<ITag<Block>, Block>> blocks)
-    {   this(blocks, StateRequirement.NONE, NbtRequirement.NONE, Arrays.asList(), Optional.empty());
+    public BlockRequirement(List<Either<ITag<Block>, Block>> blocks)
+    {   this(new NegatableList<>(blocks), StateRequirement.NONE, NbtRequirement.NONE, Arrays.asList(), Optional.empty());
     }
 
     public static final BlockRequirement NONE = new BlockRequirement(new NegatableList<>(), StateRequirement.NONE, NbtRequirement.NONE, Arrays.asList(), Optional.empty());
 
     public static final Codec<BlockRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            NegatableList.listCodec(ConfigHelper.tagOrBuiltinCodec(Registry.BLOCK_REGISTRY, ForgeRegistries.BLOCKS)).optionalFieldOf("blocks", new NegatableList<>()).forGetter(predicate -> predicate.blocks),
+            NegatableList.listCodec(ConfigHelper.tagOrBuiltinCodec(Registry.BLOCK_REGISTRY, Registry.BLOCK)).optionalFieldOf("blocks", new NegatableList<>()).forGetter(predicate -> predicate.blocks),
             StateRequirement.CODEC.optionalFieldOf("state", StateRequirement.NONE).forGetter(predicate -> predicate.state),
             NbtRequirement.CODEC.optionalFieldOf("nbt", NbtRequirement.NONE).forGetter(predicate -> predicate.nbt),
             Codec.STRING.xmap(Direction::byName, Direction::getName).listOf().optionalFieldOf("sturdy_faces", Arrays.asList()).forGetter(predicate -> predicate.sturdyFaces),

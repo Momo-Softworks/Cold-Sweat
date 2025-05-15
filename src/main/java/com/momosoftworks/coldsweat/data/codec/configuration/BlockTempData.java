@@ -187,7 +187,7 @@ public class BlockTempData extends ConfigData
         double maxTemperature = blockTemp > 0 ? tempLimit : Double.POSITIVE_INFINITY;
         double minTemperature = blockTemp < 0 ? tempLimit : Double.NEGATIVE_INFINITY;
 
-        BlockRequirement blockRequirement = new BlockRequirement(blocks, blockPredicates, nbtRequirement, Arrays.asList(), Optional.empty(), Optional.empty());
+        BlockRequirement blockRequirement = new BlockRequirement(new NegatableList<>(blocks), blockPredicates, nbtRequirement, Arrays.asList(), Optional.empty());
 
         return new BlockTempData(new NegatableList<>(blockRequirement), blockTemp, blockRange, maxEffect, true,
                                  new WorldTempRequirement(maxTemperature), new WorldTempRequirement(minTemperature),

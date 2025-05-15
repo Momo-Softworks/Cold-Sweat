@@ -153,7 +153,7 @@ public class EntityRequirement
         REQUIREMENT_CODEC_STACK.add(codec);
     }
 
-    public List<Either<ITag<EntityType<?>>, EntityType<?>>> entities()
+    public NegatableList<Either<ITag<EntityType<?>>, EntityType<?>>> entities()
     {   return entities;
     }
     public LocationRequirement location()
@@ -177,7 +177,7 @@ public class EntityRequirement
     public Optional<EntitySubRequirement> typeSpecificData()
     {   return typeSpecificData;
     }
-    public List<String> team()
+    public NegatableList<String> team()
     {   return team;
     }
     public Optional<EntityRequirement> vehicle()
