@@ -10,8 +10,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import java.util.List;
-
 public abstract class BlockTempConfig extends BlockTemp
 {
     private final NegatableList<BlockRequirement> predicates;
@@ -32,7 +30,7 @@ public abstract class BlockTempConfig extends BlockTemp
               data.range(),
               data.fade(),
               data.logarithmic(),
-              RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.BLOCKS, data.block().flatListMap(BlockRequirement::blocks)).toArray(new Block[0]));
+              RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.BLOCKS, data.block().nestedFlatMap(BlockRequirement::blocks)).toArray(new Block[0]));
         this.predicates = data.block();
     }
 

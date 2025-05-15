@@ -379,7 +379,7 @@ public class ConfigLoadingHandler
             InsulatorData insulator = holder.get();
 
             // Add listed items as insulators
-            List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, insulator.item().flatListMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, insulator.item().nestedFlatMap(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -407,7 +407,7 @@ public class ConfigLoadingHandler
         {
             FuelData fuelData = holder.get();
 
-            List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, fuelData.item().flatListMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, fuelData.item().nestedFlatMap(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -431,7 +431,7 @@ public class ConfigLoadingHandler
         {
             FoodData foodData = holder.get();
 
-            List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, foodData.item().flatListMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, foodData.item().nestedFlatMap(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -448,7 +448,7 @@ public class ConfigLoadingHandler
         {
             ItemCarryTempData carryTempData = holder.get();
 
-            List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, carryTempData.item().flatListMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, carryTempData.item().nestedFlatMap(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -465,7 +465,7 @@ public class ConfigLoadingHandler
         {
             DryingItemData dryingItemData = holder.get();
 
-            List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, dryingItemData.item().flatListMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, dryingItemData.item().nestedFlatMap(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -482,7 +482,7 @@ public class ConfigLoadingHandler
         {
             ItemInsulationSlotsData insulationSlotData = holder.get();
 
-            List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, insulationSlotData.item().flatListMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, insulationSlotData.item().nestedFlatMap(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -588,7 +588,7 @@ public class ConfigLoadingHandler
         {
             MountData mountData = holder.get();
 
-            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITY_TYPES, mountData.entity().flatListMap(EntityRequirement::entities)));
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITY_TYPES, mountData.entity().nestedFlatMap(EntityRequirement::entities)));
             if (entities.isEmpty())
             {   entities.add(null);
             }
@@ -616,7 +616,7 @@ public class ConfigLoadingHandler
         {
             EntityTempData entityTempData = holder.get();
 
-            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITY_TYPES, entityTempData.entity().flatListMap(EntityRequirement::entities)));
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITY_TYPES, entityTempData.entity().nestedFlatMap(EntityRequirement::entities)));
             if (entities.isEmpty())
             {   entities.add(null);
             }
@@ -632,7 +632,7 @@ public class ConfigLoadingHandler
         {
             EntityClimateData entityTempData = holder.get();
 
-            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITY_TYPES, entityTempData.entity().flatListMap(EntityRequirement::entities)));
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITY_TYPES, entityTempData.entity().nestedFlatMap(EntityRequirement::entities)));
             if (entities.isEmpty())
             {   entities.add(null);
             }
