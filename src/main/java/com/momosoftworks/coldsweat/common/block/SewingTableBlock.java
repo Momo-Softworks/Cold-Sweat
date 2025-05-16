@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.common.block;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -67,8 +68,7 @@ public class SewingTableBlock extends Block implements MenuProvider
 
     @Override
     public Component getDisplayName()
-    {
-        return null;
+    {   return new TranslatableComponent("container.cold_sweat.sewing_table");
     }
 
     @Nullable
