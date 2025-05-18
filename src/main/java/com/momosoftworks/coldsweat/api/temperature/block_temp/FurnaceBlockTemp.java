@@ -20,16 +20,17 @@ public class FurnaceBlockTemp extends BlockTemp
 
     @Override
     public double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
-    {
-        if (state.hasProperty(AbstractFurnaceBlock.LIT) && state.getValue(AbstractFurnaceBlock.LIT))
-        {   return 0.33;
-        }
-        return 0;
+    {   return 0.33;
     }
 
     @Override
     public boolean hasBlock(Block block)
     {
         return block instanceof AbstractFurnaceBlock;
+    }
+
+    @Override
+    public boolean isValid(Level level, BlockPos pos, BlockState state)
+    {   return state.hasProperty(AbstractFurnaceBlock.LIT) && state.getValue(AbstractFurnaceBlock.LIT);
     }
 }
