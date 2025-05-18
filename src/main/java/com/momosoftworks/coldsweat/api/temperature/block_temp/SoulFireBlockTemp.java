@@ -17,11 +17,12 @@ public class SoulFireBlockTemp extends BlockTemp
     @Override
     public double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
     {
-        if (state.is(Blocks.SOUL_FIRE) || state.getValue(CampfireBlock.LIT))
-        {
-            int coldness = ConfigSettings.COLD_SOUL_FIRE.get() ? -1 : 1;
-            return 0.476 * coldness;
-        }
-        return 0;
+        int coldness = ConfigSettings.COLD_SOUL_FIRE.get() ? -1 : 1;
+        return 0.476 * coldness;
+    }
+
+    @Override
+    public boolean isValid(Level level, BlockPos pos, BlockState state)
+    {   return state.is(Blocks.SOUL_FIRE) || state.getValue(CampfireBlock.LIT);
     }
 }
