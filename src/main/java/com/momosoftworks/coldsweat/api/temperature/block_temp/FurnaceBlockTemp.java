@@ -1,7 +1,5 @@
 package com.momosoftworks.coldsweat.api.temperature.block_temp;
 
-import com.momosoftworks.coldsweat.api.util.Temperature;
-import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.block.AbstractFurnaceBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -20,16 +18,17 @@ public class FurnaceBlockTemp extends BlockTemp
 
     @Override
     public double getTemperature(World world, LivingEntity entity, BlockState state, BlockPos pos, double distance)
-    {
-        if (state.hasProperty(AbstractFurnaceBlock.LIT) && state.getValue(AbstractFurnaceBlock.LIT))
-        {   return 0.33;
-        }
-        return 0;
+    {   return 0.33;
     }
 
     @Override
     public boolean hasBlock(Block block)
     {
         return block instanceof AbstractFurnaceBlock;
+    }
+
+    @Override
+    public boolean isValid(World level, BlockPos pos, BlockState state)
+    {   return state.hasProperty(AbstractFurnaceBlock.LIT) && state.getValue(AbstractFurnaceBlock.LIT);
     }
 }
