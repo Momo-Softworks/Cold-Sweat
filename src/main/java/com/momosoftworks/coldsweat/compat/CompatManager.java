@@ -10,11 +10,13 @@ import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.compat.create.ColdSweatPonderPlugin;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ModItems;
+import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
+import com.momosoftworks.coldsweat.data.tag.ModInsulatorTags;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.simibubi.create.AllDataComponents;
 import com.simibubi.create.content.equipment.armor.BacktankItem;
 import com.simibubi.create.content.equipment.armor.BacktankUtil;
-import com.simibubi.create.content.equipment.armor.DivingHelmetItem;
 import com.simibubi.create.content.fluids.pipes.EncasedPipeBlock;
 import com.simibubi.create.content.fluids.pipes.FluidPipeBlock;
 import com.simibubi.create.content.fluids.pipes.GlassFluidPipeBlock;
@@ -24,7 +26,6 @@ import dev.ghen.thirst.foundation.common.event.RegisterThirstValueEvent;
 import glitchcore.event.EventManager;
 import net.createmod.ponder.foundation.PonderIndex;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -476,16 +477,13 @@ public class CompatManager
 
         if (!player.isCreative() && !player.isInLava()
         && backTank.getItem() instanceof BacktankItem
-        && backTank.has(DataComponents.FIRE_RESISTANT)
         && (ConfigSettings.HEAT_DRAINS_BACKTANK.get() && worldTemp > burningPoint || ConfigSettings.COLD_DRAINS_BACKTANK.get() && worldTemp < freezingPoint))
         {
             // Ensure player is wearing a full set of fire-resistant armor
-            ItemStack helmet = player.getItemBySlot(EquipmentSlot.HEAD);
-            if (!helmet.has(DataComponents.FIRE_RESISTANT) || !(helmet.getItem() instanceof DivingHelmetItem)) return;
-            ItemStack boots = player.getItemBySlot(EquipmentSlot.FEET);
-            if (!boots.has(DataComponents.FIRE_RESISTANT)) return;
-            ItemStack pants = player.getItemBySlot(EquipmentSlot.LEGS);
-            if (!pants.has(DataComponents.FIRE_RESISTANT)) return;
+            List<InsulatorData> drainingInsulators = ConfigHelper.getTaggedConfigsFor(backTank.getItem(), ModInsulatorTags.DRAINS_BACKTANK, ConfigSettings.INSULATING_ARMORS.get());
+            if (drainingInsulators.stream().noneMatch(insulator -> insulator.test(player, backTank)))
+            {   return;
+            }
 
             if (player.level().isClientSide)
                 USING_BACKTANK = true;
