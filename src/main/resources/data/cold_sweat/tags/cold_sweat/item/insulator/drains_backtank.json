@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "cold_sweat:create/netherite_backtank",
+      "required": false
+    }
+  ]
+}

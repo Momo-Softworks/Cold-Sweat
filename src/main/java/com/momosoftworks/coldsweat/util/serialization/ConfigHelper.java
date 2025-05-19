@@ -617,72 +617,19 @@ public class ConfigHelper
         return builder.toString();
     }
 
-    public static <T> List<String> getTaggableListStrings(List<Either<TagKey<T>, T>> list, ResourceKey<Registry<T>> registry)
+    public static <K, T extends ConfigData> List<T> getTaggedConfigsFor(K object, TagKey<T> tag, Multimap<K, T> config)
     {
         RegistryAccess registryAccess = RegistryHelper.getRegistryAccess();
-        if (registryAccess == null) return List.of();
-        List<String> strings = new ArrayList<>();
+        Registry<T> registry = registryAccess.registryOrThrow(tag.registry());
 
-        for (Either<TagKey<T>, T> entry : list)
-        {   strings.add(serializeTagOrRegistryObject(registry, entry, registryAccess));
-        }
-        return strings;
-    }
-
-    public static List<String> getModIDs(String[] ids)
-    {
-        List<String> modIDs = new ArrayList<>();
-        for (String id : ids)
+        List<T> results = new ArrayList<>();
+        for (T configData : config.get(object))
         {
-            String[] split = id.split(":");
-            if (split.length > 1)
-            {   modIDs.add(split[0].replace("#", ""));
+            Holder<T> holder = registry.wrapAsHolder(configData);
+            if (holder.is(tag))
+            {   results.add(configData);
             }
         }
-        return modIDs;
-    }
-
-    public static String getModID(String id)
-    {
-        String[] split = id.split(":");
-        if (split.length > 1)
-        {   return split[0].replace("#", "");
-        }
-        return "";
-    }
-
-    public static <T> List<String> getModIDs(List<Either<TagKey<T>, T>> list, IForgeRegistry<T> registry)
-    {
-        return list.stream().map(either -> either.map(tag -> tag.location().getNamespace(),
-                                                      obj -> Optional.ofNullable(registry.getKey(obj)).map(ResourceLocation::getNamespace).orElse("")))
-                   .distinct()
-                   .filter(s -> !s.isEmpty())
-                   .toList();
-    }
-
-    public static <T> List<String> getModIDs(List<Either<TagKey<T>, Holder<T>>> list)
-    {
-        List<String> mods = new ArrayList<>();
-        for (Either<TagKey<T>, Holder<T>> either : list)
-        {
-            mods.add(either.map(tag -> tag.location().getNamespace(),
-                                obj -> obj.unwrapKey().map(key -> key.location().getNamespace()).orElse("")));
-        }
-        return mods;
-    }
-
-    public static double doubleArg(List<?> entry, int index)
-    {
-        if (entry.size() <= index)
-        {   ColdSweat.LOGGER.error("Error parsing config: not enough arguments");
-            return 0;
-        }
-        if (entry.get(index) instanceof Number number)
-        {   return number.doubleValue();
-        }
-        else
-        {   ColdSweat.LOGGER.error("Error parsing config: invalid double value \"{}\"", entry.get(index));
-            return 0;
-        }
+        return results;
     }
 }
