@@ -2,24 +2,18 @@ package com.momosoftworks.coldsweat.util.serialization;
 
 import com.mojang.datafixers.util.Either;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.world.WorldHelper;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.loading.FMLEnvironment;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
+import net.minecraftforge.event.server.ServerAboutToStartEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.IForgeRegistry;
 
 import javax.annotation.Nullable;
@@ -29,41 +23,34 @@ import java.util.Optional;
 
 public class RegistryHelper
 {
+    private static RegistryAccess REGISTRY_ACCESS = null;
+
     @Nullable
     public static <T> Registry<T> getRegistry(ResourceKey<Registry<T>> registry)
     {   return CSMath.getIfNotNull(getRegistryAccess(), access -> access.registryOrThrow(registry), null);
     }
 
+    @Mod.EventBusSubscriber
+    public static class GetAccessServer
+    {
+        @SubscribeEvent
+        public static void onServerLoading(ServerAboutToStartEvent event)
+        {   REGISTRY_ACCESS = event.getServer().registryAccess();
+        }
+    }
+
+    @Mod.EventBusSubscriber(Dist.CLIENT)
+    public static class GetAccessClient
+    {
+        @SubscribeEvent
+        public static void onClientLoading(ClientPlayerNetworkEvent.LoggingIn event)
+        {   REGISTRY_ACCESS = event.getPlayer().connection.registryAccess();
+        }
+    }
+
     @Nullable
     public static RegistryAccess getRegistryAccess()
-    {
-        RegistryAccess access = null;
-
-        MinecraftServer server = WorldHelper.getServer();
-
-        if (server != null)
-        {
-            Level level = server.getLevel(Level.OVERWORLD);
-            if (level != null)
-            {   access = level.registryAccess();
-            }
-            else access = server.registryAccess();
-        }
-
-        if (access == null && FMLEnvironment.dist == Dist.CLIENT)
-        {
-            if (Minecraft.getInstance().level != null)
-            {   access = Minecraft.getInstance().level.registryAccess();
-            }
-            else
-            {
-                ClientPacketListener connection = Minecraft.getInstance().getConnection();
-                if (connection != null)
-                {   access = connection.registryAccess();
-                }
-            }
-        }
-        return access;
+    {   return REGISTRY_ACCESS;
     }
 
     public static <T> List<T> mapForgeRegistryTagList(IForgeRegistry<T> registry, List<Either<TagKey<T>, T>> eitherList)
@@ -108,35 +95,5 @@ public class RegistryHelper
     @Nullable
     public static ResourceLocation getKey(Holder<?> holder)
     {   return holder.unwrapKey().map(ResourceKey::location).orElse(null);
-    }
-
-    @Nullable
-    public static Holder<Biome> getBiome(ResourceLocation biomeId, RegistryAccess registryAccess)
-    {   return registryAccess.registryOrThrow(Registries.BIOME).getHolder(ResourceKey.create(Registries.BIOME, biomeId)).orElse(null);
-    }
-
-    @Nullable
-    public static ResourceLocation getBiomeId(Biome biome, RegistryAccess registryAccess)
-    {   return registryAccess.registryOrThrow(Registries.BIOME).getKey(biome);
-    }
-
-    @Nullable
-    public static Holder<DimensionType> getDimension(ResourceLocation dimensionId, RegistryAccess registryAccess)
-    {   return registryAccess.registryOrThrow(Registries.DIMENSION_TYPE).getHolder(ResourceKey.create(Registries.DIMENSION_TYPE, dimensionId)).orElse(null);
-    }
-
-    @Nullable
-    public static ResourceLocation getDimensionId(DimensionType dimension, RegistryAccess registryAccess)
-    {   return registryAccess.registryOrThrow(Registries.DIMENSION_TYPE).getKey(dimension);
-    }
-
-    @Nullable
-    public static Holder<Structure> getStructure(ResourceLocation structureId, RegistryAccess registryAccess)
-    {   return registryAccess.registryOrThrow(Registries.STRUCTURE).getHolder(ResourceKey.create(Registries.STRUCTURE, structureId)).orElse(null);
-    }
-
-    @Nullable
-    public static ResourceLocation getStructureId(Structure structure, RegistryAccess registryAccess)
-    {   return registryAccess.registryOrThrow(Registries.STRUCTURE).getKey(structure);
     }
 }
