@@ -19,53 +19,61 @@ public class NegatableList<T>
     private final List<T> requirements;
     private final List<T> exclusions;
     private final boolean singleton;
+    private final boolean requireAll;
+    private final boolean excludeAll;
+
+    private static <T> Codec<NegatableList<T>> getCodec(Codec<T> codec)
+    {
+        return RecordCodecBuilder.create(instance -> instance.group(
+                codec.listOf().optionalFieldOf("require", List.of()).forGetter(predicate -> predicate.requirements),
+                codec.listOf().optionalFieldOf("exclude", List.of()).forGetter(predicate -> predicate.exclusions),
+                Codec.BOOL.optionalFieldOf("require_all", false).forGetter(predicate -> predicate.requireAll),
+                Codec.BOOL.optionalFieldOf("exclude_all", false).forGetter(predicate -> predicate.excludeAll)
+        ).apply(instance, NegatableList::new));
+    }
 
     /**
      * Provides a codec that can be either a qualified list or a single element.
      */
-    public static <T> Codec<NegatableList<T>> codec(Codec<T> codec) {
-        Codec<NegatableList<T>> listCodec = RecordCodecBuilder.create(instance -> instance.group(
-                codec.listOf().optionalFieldOf("require", List.of()).forGetter(predicate -> predicate.requirements),
-                codec.listOf().optionalFieldOf("exclude", List.of()).forGetter(predicate -> predicate.exclusions)
-        ).apply(instance, NegatableList::new));
+    public static <T> Codec<NegatableList<T>> codec(Codec<T> codec)
+    {
+        Codec<NegatableList<T>> listCodec = getCodec(codec);
 
-        return Codec.either(codec, listCodec)
-                .comapFlatMap(either -> {
-                          if (either.right().isPresent())
-                          {   return DataResult.success(either.right().get());
-                          }
-                          else return DataResult.success(new NegatableList<>(List.of(either.left().get())));
-                      },
-                      list -> {
-                          if (list.singleton && list.exclusions.isEmpty())
-                          {   return Either.left(list.requirements.get(0));
-                          }
-                          else return Either.right(list);
-                      });
+        return Codec.either(codec, listCodec).comapFlatMap(
+                either -> {
+                    if (either.right().isPresent())
+                    {   return DataResult.success(either.right().get());
+                    }
+                    else return DataResult.success(new NegatableList<>(either.left().get()));
+                },
+                list -> {
+                    if (list.singleton && list.exclusions.isEmpty())
+                    {   return Either.left(list.requirements.get(0));
+                    }
+                    else return Either.right(list);
+                });
     }
 
     /**
      * Provides a codec that can be either a qualified list or a list of elements.
      */
-    public static <T> Codec<NegatableList<T>> listCodec(Codec<T> codec) {
-        Codec<NegatableList<T>> listCodec = RecordCodecBuilder.create(instance -> instance.group(
-                codec.listOf().optionalFieldOf("require", List.of()).forGetter(predicate -> predicate.requirements),
-                codec.listOf().optionalFieldOf("exclude", List.of()).forGetter(predicate -> predicate.exclusions)
-        ).apply(instance, NegatableList::new));
+    public static <T> Codec<NegatableList<T>> listCodec(Codec<T> codec)
+    {
+        Codec<NegatableList<T>> listCodec = getCodec(codec);
 
-        return Codec.either(codec.listOf(), listCodec)
-                .comapFlatMap(either -> {
-                                  if (either.right().isPresent())
-                                  {   return DataResult.success(either.right().get());
-                                  }
-                                  else return DataResult.success(new NegatableList<>(either.left().get()));
-                              },
-                              list -> {
-                                    if (list.singleton && list.exclusions.isEmpty())
-                                    {   return Either.left(list.requirements);
-                                    }
-                                    else return Either.right(list);
-                              });
+        return Codec.either(codec.listOf(), listCodec).comapFlatMap(
+                either -> {
+                      if (either.right().isPresent())
+                      {   return DataResult.success(either.right().get());
+                      }
+                      else return DataResult.success(new NegatableList<>(either.left().get(), false, false));
+                },
+                list -> {
+                      if (list.singleton && list.exclusions.isEmpty())
+                      {   return Either.left(list.requirements);
+                      }
+                      else return Either.right(list);
+                });
     }
 
     public static <T, B extends ByteBuf> StreamCodec<B, NegatableList<T>> streamCodec(StreamCodec<B, T> codec)
@@ -104,6 +112,8 @@ public class NegatableList<T>
         this.requirements = new ArrayList<>();
         this.exclusions = new ArrayList<>();
         this.singleton = false;
+        this.requireAll = false;
+        this.excludeAll = false;
     }
 
     public NegatableList(T requirement)
@@ -111,20 +121,32 @@ public class NegatableList<T>
         this.requirements = new ArrayList<>(List.of(requirement));
         this.exclusions = new ArrayList<>();
         this.singleton = true;
+        this.requireAll = false;
+        this.excludeAll = false;
     }
 
-    public NegatableList(List<T> requirements)
+    public NegatableList(List<T> requirements, boolean requireAll, boolean excludeAll)
     {
         this.requirements = new ArrayList<>(requirements);
         this.exclusions = new ArrayList<>();
         this.singleton = requirements.size() == 1;
+        this.requireAll = requireAll;
+        this.excludeAll = excludeAll;
+    }
+    public NegatableList(List<T> requirements)
+    {   this(requirements, false, false);
     }
 
-    public NegatableList(List<T> requirements, List<T> exclusions)
+    public NegatableList(List<T> requirements, List<T> exclusions, boolean requireAll, boolean excludeAll)
     {
         this.requirements = new ArrayList<>(requirements);
         this.exclusions = new ArrayList<>(exclusions);
         this.singleton = exclusions.isEmpty() && requirements.size() == 1;
+        this.requireAll = requireAll;
+        this.excludeAll = excludeAll;
+    }
+    public NegatableList(List<T> requirements, List<T> exclusions)
+    {   this(requirements, exclusions, false, false);
     }
 
     public List<T> requirements()
@@ -184,21 +206,34 @@ public class NegatableList<T>
     {
         if (!this.requirements.isEmpty())
         {
-            for (int i = 0; i < this.requirements.size(); i++)
+            require:
             {
-                if (!test.test(this.requirements.get(i)))
-                {   return false;
+                for (int i = 0; i < this.requirements.size(); i++)
+                {
+                    boolean result = test.test(this.requirements.get(i));
+                    if (this.requireAll && !result)
+                    {   return false;
+                    }
+                    if (!this.requireAll && result)
+                    {   break require;
+                    }
                 }
+                return this.requireAll;
             }
         }
         if (!this.exclusions.isEmpty())
         {
             for (int i = 0; i < this.exclusions.size(); i++)
             {
-                if (test.test(this.exclusions.get(i)))
+                boolean result = test.test(this.exclusions.get(i));
+                if (this.excludeAll && !result)
+                {   break;
+                }
+                if (!this.excludeAll && result)
                 {   return false;
                 }
             }
+            return !this.excludeAll;
         }
         return true;
     }

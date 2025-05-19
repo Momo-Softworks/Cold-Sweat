@@ -45,13 +45,12 @@ public class DryingItemData extends ConfigData implements RequirementHolder
         this(item, result, entity, sound, new NegatableList<>(BuiltInRegistries.ITEM.getKey(result.getItem()).getNamespace()));
     }
 
-    public static final Codec<DryingItemData> CODEC = RecordCodecBuilder.create(builder -> builder.group(
+    public static final Codec<DryingItemData> CODEC = createCodec(RecordCodecBuilder.create(builder -> builder.group(
             NegatableList.codec(ItemRequirement.CODEC).fieldOf("item").forGetter(data -> data.item),
             ItemStack.CODEC.optionalFieldOf("result", ItemStack.EMPTY).forGetter(data -> data.result),
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(data -> data.entity),
-            SoundEvent.DIRECT_CODEC.optionalFieldOf("sound", SoundEvents.WET_GRASS_STEP).forGetter(data -> data.sound),
-            NegatableList.listCodec(Codec.STRING).optionalFieldOf("required_mods", new NegatableList<>()).forGetter(ConfigData::requiredMods)
-    ).apply(builder, DryingItemData::new));
+            SoundEvent.DIRECT_CODEC.optionalFieldOf("sound", SoundEvents.WET_GRASS_STEP).forGetter(data -> data.sound)
+    ).apply(builder, DryingItemData::new)));
 
     public NegatableList<ItemRequirement> item()
     {   return item;

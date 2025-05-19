@@ -114,34 +114,4 @@ public record ItemInsulationCap(List<Pair<ItemStack, List<InsulatorData>>> insul
         appliedInsulators = Math.max(1, appliedInsulators);
         return appliedInsulators <= ItemInsulationManager.getInsulationSlots(armorItem);
     }
-
-    public void serialize(RegistryFriendlyByteBuf buffer)
-    {
-        buffer.writeInt(this.insulation().size());
-        // Iterate over insulation items
-        for (int i = 0; i < this.insulation().size(); i++)
-        {
-            Pair<ItemStack, List<InsulatorData>> entry = this.insulation().get(i);
-            // Store ItemStack data
-            ItemStack.STREAM_CODEC.encode(buffer, entry.getFirst());
-            // Store insulation data
-            Collection<InsulatorData> insulList = entry.getSecond();
-            buffer.writeCollection(insulList, (StreamEncoder) InsulatorData.SIMPLE_STREAM_CODEC);
-        }
-    }
-
-    public static ItemInsulationCap deserialize(RegistryFriendlyByteBuf buffer)
-    {
-        List<Pair<ItemStack, List<InsulatorData>>> insulation = new ArrayList<>();
-        int size = buffer.readInt();
-        for (int i = 0; i < size; i++)
-        {
-            // Read ItemStack data
-            ItemStack stack = ItemStack.STREAM_CODEC.decode(buffer);
-            // Read insulation data
-            List<InsulatorData> insulList = buffer.readList((StreamDecoder) InsulatorData.SIMPLE_STREAM_CODEC);
-            insulation.add(Pair.of(stack, insulList));
-        }
-        return new ItemInsulationCap(insulation);
-    }
 }

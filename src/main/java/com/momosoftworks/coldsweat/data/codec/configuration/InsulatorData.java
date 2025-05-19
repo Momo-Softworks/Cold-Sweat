@@ -74,7 +74,7 @@ public class InsulatorData extends ConfigData implements RequirementHolder
                                        right -> right.isEmpty() ? List.of() : List.of(right)),
                   list -> list.size() == 1 ? Either.right(list.get(0)) : Either.left(list));
 
-    public static final Codec<InsulatorData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+    public static final Codec<InsulatorData> CODEC = createCodec(RecordCodecBuilder.create(instance -> instance.group(
             NegatableList.codec(ItemRequirement.CODEC).optionalFieldOf("item", new NegatableList<>()).forGetter(InsulatorData::item),
             Insulation.Slot.CODEC.fieldOf("type").forGetter(InsulatorData::slot),
             INSULATION_CODEC.fieldOf("insulation").forGetter(InsulatorData::insulation),
@@ -82,9 +82,8 @@ public class InsulatorData extends ConfigData implements RequirementHolder
             AttributeModifierMap.CODEC.optionalFieldOf("attributes", new AttributeModifierMap()).forGetter(InsulatorData::attributes),
             Codec.unboundedMap(ResourceLocation.CODEC, Codec.DOUBLE).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(InsulatorData::immuneTempModifiers),
             Codec.BOOL.optionalFieldOf("fill_slots", false).forGetter(InsulatorData::fillSlots),
-            Codec.BOOL.optionalFieldOf("hide_if_unmet", false).forGetter(InsulatorData::hideIfUnmet),
-            NegatableList.listCodec(Codec.STRING).optionalFieldOf("required_mods", new NegatableList<>()).forGetter(ConfigData::requiredMods)
-    ).apply(instance, InsulatorData::new));
+            Codec.BOOL.optionalFieldOf("hide_if_unmet", false).forGetter(InsulatorData::hideIfUnmet)
+    ).apply(instance, InsulatorData::new)));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, InsulatorData> STREAM_CODEC = ByteBufCodecs.fromCodecWithRegistries(CODEC);
 

@@ -5,9 +5,11 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.api.event.vanilla.RenderLevelEvent;
 import com.momosoftworks.coldsweat.common.item.SoulspringLampItem;
 import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import glitchcore.event.TickEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.model.geom.ModelLayerLocation;
@@ -22,7 +24,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.event.RenderFrameEvent;
 
+@EventBusSubscriber(Dist.CLIENT)
 public class SoulSpringLampRenderer extends BlockEntityWithoutLevelRenderer
 {
     public static final ResourceLocation TEXTURE_FRAME = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/item/soulspring_lamp/render/soulspring_lamp_frame.png");
@@ -32,6 +39,8 @@ public class SoulSpringLampRenderer extends BlockEntityWithoutLevelRenderer
     public static final ResourceLocation TEXTURE_3 = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/item/soulspring_lamp/render/soulspring_lamp_3.png");
 
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "soulspring_lamp"), "main");
+
+    private static float TIME = 0;
 
     private final ModelPart base;
     private final ModelPart heart;
@@ -68,9 +77,6 @@ public class SoulSpringLampRenderer extends BlockEntityWithoutLevelRenderer
         if (stack.is(ModItems.SOULSPRING_LAMP))
         {
             Minecraft mc = Minecraft.getInstance();
-            float time = mc.level != null
-                         ? mc.level.getGameTime() + mc.getTimer().getGameTimeDeltaPartialTick(true)
-                         : 0;
             boolean isFirstPerson = mc.options.getCameraType().isFirstPerson();
             double fuel = SoulspringLampItem.getFuel(stack);
 
@@ -78,10 +84,10 @@ public class SoulSpringLampRenderer extends BlockEntityWithoutLevelRenderer
 
             if (fuel > 0)
             {
-                heart.y = -14.0F + (float) Math.sin(time / 8) * 1.2f;
-                heart.xRot = CSMath.toRadians((time * 2) % 360);
-                heart.yRot = CSMath.toRadians((time * 2 + 10) % 360);
-                heart.zRot = CSMath.toRadians((time * 0.5 + 5) % 360);
+                heart.y = -14.0F + (float) Math.sin(TIME / 8) * 1.2f;
+                heart.xRot = CSMath.toRadians((TIME * 2) % 360);
+                heart.yRot = CSMath.toRadians((TIME * 2 + 10) % 360);
+                heart.zRot = CSMath.toRadians((TIME * 0.5 + 5) % 360);
             }
             else
             {
@@ -152,5 +158,14 @@ public class SoulSpringLampRenderer extends BlockEntityWithoutLevelRenderer
             case 3 -> TEXTURE_3;
             default -> TEXTURE_0;
         };
+    }
+
+    @SubscribeEvent
+    public static void tickTimer(RenderLevelEvent.Post event)
+    {
+        Minecraft mc = Minecraft.getInstance();
+        if (!mc.isPaused())
+        {   TIME += mc.getTimer().getRealtimeDeltaTicks();
+        }
     }
 }
