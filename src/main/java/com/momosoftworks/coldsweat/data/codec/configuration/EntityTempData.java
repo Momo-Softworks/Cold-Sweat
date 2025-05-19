@@ -52,16 +52,15 @@ public class EntityTempData extends ConfigData implements RequirementHolder, IFo
         this(entity, temperature, range, units, affectedEntity, maxEffect, affectsSelf, new NegatableList<>());
     }
 
-    public static final Codec<EntityTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+    public static final Codec<EntityTempData> CODEC = createCodec(RecordCodecBuilder.create(instance -> instance.group(
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(EntityTempData::entity),
             Codec.DOUBLE.fieldOf("temperature").forGetter(EntityTempData::temperature),
             Codec.DOUBLE.fieldOf("range").forGetter(EntityTempData::range),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(EntityTempData::units),
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("affected_entity", new NegatableList<>()).forGetter(EntityTempData::affectedEntity),
             Codec.DOUBLE.optionalFieldOf("max_effect", Double.POSITIVE_INFINITY).forGetter(EntityTempData::maxEffect),
-            Codec.BOOL.optionalFieldOf("affects_self", false).forGetter(EntityTempData::affectsSelf),
-            NegatableList.listCodec(Codec.STRING).optionalFieldOf("required_mods", new NegatableList<>()).forGetter(ConfigData::requiredMods)
-    ).apply(instance, EntityTempData::new));
+            Codec.BOOL.optionalFieldOf("affects_self", false).forGetter(EntityTempData::affectsSelf)
+    ).apply(instance, EntityTempData::new)));
 
     public NegatableList<EntityRequirement> entity()
     {   return entity;

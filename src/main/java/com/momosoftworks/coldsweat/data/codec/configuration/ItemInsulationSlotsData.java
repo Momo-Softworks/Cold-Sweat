@@ -35,11 +35,10 @@ public class ItemInsulationSlotsData extends ConfigData implements RequirementHo
     {   this(item, slots, new NegatableList<>());
     }
 
-    public static final Codec<ItemInsulationSlotsData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+    public static final Codec<ItemInsulationSlotsData> CODEC = createCodec(RecordCodecBuilder.create(instance -> instance.group(
             NegatableList.codec(ItemRequirement.CODEC).optionalFieldOf("item", new NegatableList<>()).forGetter(ItemInsulationSlotsData::item),
-            Codec.INT.fieldOf("slots").forGetter(ItemInsulationSlotsData::slots),
-            NegatableList.listCodec(Codec.STRING).optionalFieldOf("required_mods", new NegatableList<>()).forGetter(ConfigData::requiredMods)
-    ).apply(instance, ItemInsulationSlotsData::new));
+            Codec.INT.fieldOf("slots").forGetter(ItemInsulationSlotsData::slots)
+    ).apply(instance, ItemInsulationSlotsData::new)));
 
     public NegatableList<ItemRequirement> item()
     {   return item;

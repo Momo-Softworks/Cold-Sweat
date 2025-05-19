@@ -40,12 +40,11 @@ public class FuelData extends ConfigData implements RequirementHolder, IForgeReg
     {   this(item, type, fuel, new NegatableList<>());
     }
 
-    public static final Codec<FuelData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+    public static final Codec<FuelData> CODEC = createCodec(RecordCodecBuilder.create(instance -> instance.group(
             NegatableList.codec(ItemRequirement.CODEC).optionalFieldOf("item", new NegatableList<>()).forGetter(FuelData::item),
             FuelType.CODEC.fieldOf("type").forGetter(FuelData::fuelType),
-            Codec.DOUBLE.fieldOf("fuel").forGetter(FuelData::fuel),
-            NegatableList.listCodec(Codec.STRING).optionalFieldOf("required_mods", new NegatableList<>()).forGetter(ConfigData::requiredMods)
-    ).apply(instance, FuelData::new));
+            Codec.DOUBLE.fieldOf("fuel").forGetter(FuelData::fuel)
+    ).apply(instance, FuelData::new)));
 
     public NegatableList<ItemRequirement> item()
     {   return item;

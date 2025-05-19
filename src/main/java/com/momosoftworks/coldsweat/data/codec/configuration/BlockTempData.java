@@ -75,7 +75,7 @@ public class BlockTempData extends ConfigData implements IForgeRegistryEntry<Blo
              new NegatableList<>(), new NegatableList<>(), blockTemp.logarithmic());
     }
 
-    public static final Codec<BlockTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+    public static final Codec<BlockTempData> CODEC = createCodec(RecordCodecBuilder.create(instance -> instance.group(
             NegatableList.codec(BlockRequirement.CODEC).fieldOf("block").forGetter(BlockTempData::block),
             Codec.DOUBLE.fieldOf("temperature").forGetter(BlockTempData::temperature),
             Codec.DOUBLE.optionalFieldOf("range", Double.POSITIVE_INFINITY).forGetter(BlockTempData::range),
@@ -86,9 +86,8 @@ public class BlockTempData extends ConfigData implements IForgeRegistryEntry<Blo
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(BlockTempData::units),
             NegatableList.codec(LocationRequirement.CODEC).optionalFieldOf("location", new NegatableList<>()).forGetter(BlockTempData::location),
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(BlockTempData::entity),
-            Codec.BOOL.optionalFieldOf("logarithmic", false).forGetter(BlockTempData::logarithmic),
-            NegatableList.listCodec(Codec.STRING).optionalFieldOf("required_mods", new NegatableList<>()).forGetter(ConfigData::requiredMods)
-    ).apply(instance, BlockTempData::new));
+            Codec.BOOL.optionalFieldOf("logarithmic", false).forGetter(BlockTempData::logarithmic)
+    ).apply(instance, BlockTempData::new)));
 
     public NegatableList<BlockRequirement> block()
     {   return block;
