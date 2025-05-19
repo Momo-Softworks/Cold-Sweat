@@ -255,7 +255,7 @@ public abstract class WorldHelper
 
     public static Optional<Holder<Structure>> getStructureAt(Level level, BlockPos pos)
     {
-        if (!(level instanceof ServerLevel serverLevel)) return Optional.empty();
+        if (!(level instanceof ServerLevel serverLevel) || !level.isLoaded(pos)) return Optional.empty();
 
         StructureManager structureManager = serverLevel.structureManager();
         Registry<Structure> structureRegistry = serverLevel.registryAccess().registryOrThrow(Registries.STRUCTURE);
