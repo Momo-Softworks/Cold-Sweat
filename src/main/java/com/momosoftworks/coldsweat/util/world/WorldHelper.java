@@ -257,7 +257,7 @@ public abstract class WorldHelper
 
     public static Optional<Holder<ConfiguredStructureFeature<?,?>>> getStructureAt(Level level, BlockPos pos)
     {
-        if (!(level instanceof ServerLevel serverLevel)) return Optional.empty();
+        if (!(level instanceof ServerLevel serverLevel) || !level.isLoaded(pos)) return Optional.empty();
 
         StructureFeatureManager structureManager = serverLevel.structureFeatureManager();
         Registry<ConfiguredStructureFeature<?, ?>> structureRegistry = serverLevel.registryAccess().registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY);
