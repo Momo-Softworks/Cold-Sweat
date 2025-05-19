@@ -40,11 +40,10 @@ public class DepthTempData extends ConfigData
         this(temperatures, dimensions, new NegatableList<>());
     }
 
-    public static final Codec<DepthTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+    public static final Codec<DepthTempData> CODEC = createCodec(RecordCodecBuilder.create(instance -> instance.group(
             TempRegion.CODEC.listOf().fieldOf("regions").forGetter(DepthTempData::temperatures),
-            NegatableList.listCodec(ConfigHelper.dynamicCodec(Registry.DIMENSION_TYPE_REGISTRY)).fieldOf("dimensions").forGetter(DepthTempData::dimensions),
-            NegatableList.listCodec(Codec.STRING).optionalFieldOf("required_mods", new NegatableList<>()).forGetter(ConfigData::requiredMods)
-    ).apply(instance, DepthTempData::new));
+            NegatableList.listCodec(ConfigHelper.dynamicCodec(Registry.DIMENSION_TYPE_REGISTRY)).fieldOf("dimensions").forGetter(DepthTempData::dimensions)
+    ).apply(instance, DepthTempData::new)));
 
     public List<TempRegion> temperatures()
     {   return temperatures;

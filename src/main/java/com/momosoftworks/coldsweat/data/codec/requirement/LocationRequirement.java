@@ -158,15 +158,18 @@ public class LocationRequirement
         BlockPos.Mutable pos = origin.mutable();
         pos.move(this.xOffset, this.yOffset, this.zOffset);
 
-        if (!this.x.test(pos.getX())) return false;
-        if (!this.y.test(pos.getY())) return false;
-        if (!this.z.test(pos.getZ())) return false;
+        if (!this.x.test(pos.getX()))
+            return false;
+        if (!this.y.test(pos.getY()))
+            return false;
+        if (!this.z.test(pos.getZ()))
+            return false;
 
         if (this.dimension.isPresent()
         && !level.dimension().equals(this.dimension.get()))
         {   return false;
         }
-        if (this.biome.isPresent()
+        if (!this.biome.isPresent()
         && !this.biome.get().location().equals(level.getBiome(pos).getRegistryName()))
         {   return false;
         }
@@ -183,7 +186,7 @@ public class LocationRequirement
         if (!this.fluid.test(level, pos))
         {   return false;
         }
-        if (!this.temperature.test(WorldHelper.getRoughTemperatureAt(level, pos)))
+        if (this.temperature != WorldTempBounds.NONE && !this.temperature.test(WorldHelper.getRoughTemperatureAt(level, pos)))
         {   return false;
         }
         return true;

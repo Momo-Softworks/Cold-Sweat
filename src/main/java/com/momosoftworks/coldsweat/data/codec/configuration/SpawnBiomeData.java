@@ -61,15 +61,14 @@ public class SpawnBiomeData extends ConfigData
              category, weight, count, location);
     }
 
-    public static final Codec<SpawnBiomeData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+    public static final Codec<SpawnBiomeData> CODEC = createCodec(RecordCodecBuilder.create(instance -> instance.group(
             ConfigHelper.dynamicCodec(Registry.BIOME_REGISTRY).listOf().fieldOf("biomes").forGetter(SpawnBiomeData::biomes),
             ConfigHelper.tagOrBuiltinCodec(Registry.ENTITY_TYPE_REGISTRY, Registry.ENTITY_TYPE).listOf().fieldOf("entities").forGetter(SpawnBiomeData::entities),
             EntityClassification.CODEC.fieldOf("category").forGetter(SpawnBiomeData::category),
             Codec.INT.fieldOf("weight").forGetter(SpawnBiomeData::weight),
             IntegerBounds.CODEC.optionalFieldOf("count", IntegerBounds.NONE).forGetter(SpawnBiomeData::count),
-            NegatableList.codec(LocationRequirement.CODEC).optionalFieldOf("location", new NegatableList<>()).forGetter(SpawnBiomeData::location),
-            NegatableList.listCodec(Codec.STRING).optionalFieldOf("required_mods", new NegatableList<>()).forGetter(ConfigData::requiredMods)
-    ).apply(instance, SpawnBiomeData::new));
+            NegatableList.codec(LocationRequirement.CODEC).optionalFieldOf("location", new NegatableList<>()).forGetter(SpawnBiomeData::location)
+    ).apply(instance, SpawnBiomeData::new)));
 
     public List<Biome> biomes()
     {   return biomes;

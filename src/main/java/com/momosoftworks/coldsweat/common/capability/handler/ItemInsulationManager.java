@@ -224,7 +224,7 @@ public class ItemInsulationManager
         {
             getInsulationCap(stack).ifPresent(cap ->
             {
-                for (Pair<ItemStack, Collection<InsulatorData>> pair : cap.getInsulation())
+                for (Pair<ItemStack, List<InsulatorData>> pair : cap.getInsulation())
                 {   insulators.addAll(ConfigSettings.INSULATION_ITEMS.get().get(pair.getFirst().getItem()));
                 }
             });

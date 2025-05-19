@@ -59,7 +59,7 @@ public class FluidRequirement
 
     public boolean test(FluidState state)
     {
-        if (this.fluids.test(either -> either.map(tag -> state.is(tag), fluid -> state.getType() == fluid)))
+        if (!this.fluids.test(either -> either.map(tag -> state.is(tag), fluid -> state.getType() == fluid)))
         {   return false;
         }
         if (this.isSource.isPresent() && this.isSource.get() != state.isSource())

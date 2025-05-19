@@ -43,13 +43,12 @@ public class DimensionTempData extends ConfigData
     {   this(new NegatableList<>(dimension), temperature, units, isOffset);
     }
 
-    public static final Codec<DimensionTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+    public static final Codec<DimensionTempData> CODEC = createCodec(RecordCodecBuilder.create(instance -> instance.group(
             NegatableList.listCodec(ConfigHelper.dynamicCodec(Registry.DIMENSION_TYPE_REGISTRY)).fieldOf("dimensions").forGetter(DimensionTempData::dimensions),
             Codec.DOUBLE.fieldOf("temperature").forGetter(DimensionTempData::temperature),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(DimensionTempData::units),
-            Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(DimensionTempData::isOffset),
-            NegatableList.listCodec(Codec.STRING).optionalFieldOf("required_mods", new NegatableList<>()).forGetter(ConfigData::requiredMods)
-    ).apply(instance, DimensionTempData::new));
+            Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(DimensionTempData::isOffset)
+    ).apply(instance, DimensionTempData::new)));
 
     public NegatableList<DimensionType> dimensions()
     {   return dimensions;

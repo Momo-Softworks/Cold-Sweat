@@ -18,6 +18,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import java.util.concurrent.Callable;
 
@@ -30,6 +32,7 @@ public class SoulSpringLampRenderer extends ItemStackTileEntityRenderer implemen
     public static final ResourceLocation TEXTURE_3 = new ResourceLocation(ColdSweat.MOD_ID, "textures/item/soulspring_lamp/render/soulspring_lamp_3.png");
 
     private static final int FULL_BRIGHT = 15728880;
+    private static float TIME = 0;
 
     private SoulspringLampModel model;
 
@@ -74,9 +77,6 @@ public class SoulSpringLampRenderer extends ItemStackTileEntityRenderer implemen
         if (stack.getItem() == ModItems.SOULSPRING_LAMP)
         {
             Minecraft mc = Minecraft.getInstance();
-            float time = mc.level != null
-                         ? mc.level.getGameTime() + mc.getFrameTime()
-                         : 0;
             boolean isFirstPerson = mc.options.getCameraType().isFirstPerson();
             double fuel = SoulspringLampItem.getFuel(stack);
 
@@ -84,10 +84,10 @@ public class SoulSpringLampRenderer extends ItemStackTileEntityRenderer implemen
 
             if (fuel > 0)
             {
-                this.model.heart.y = -14.0F + (float) Math.sin(time / 8) * 1.2f;
-                this.model.heart.xRot = CSMath.toRadians((time * 2) % 360);
-                this.model.heart.yRot = CSMath.toRadians((time * 2 + 10) % 360);
-                this.model.heart.zRot = CSMath.toRadians((time * 0.5 + 5) % 360);
+                this.model.heart.y = -14.0F + (float) Math.sin(TIME / 8) * 1.2f;
+                this.model.heart.xRot = CSMath.toRadians((TIME * 2) % 360);
+                this.model.heart.yRot = CSMath.toRadians((TIME * 2 + 10) % 360);
+                this.model.heart.zRot = CSMath.toRadians((TIME * 0.5 + 5) % 360);
             }
             else
             {
@@ -160,5 +160,14 @@ public class SoulSpringLampRenderer extends ItemStackTileEntityRenderer implemen
     @Override
     public ItemStackTileEntityRenderer call()
     {   return this;
+    }
+
+    @SubscribeEvent
+    public static void tickTimer(TickEvent.RenderTickEvent event)
+    {
+        Minecraft mc = Minecraft.getInstance();
+        if (!mc.isPaused() && event.phase == TickEvent.Phase.START)
+        {   TIME += mc.getDeltaFrameTime();
+        }
     }
 }
