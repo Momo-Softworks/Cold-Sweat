@@ -7,13 +7,15 @@ import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.compat.create.ColdSweatDisplayBehaviors;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.BlockInit;
+import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
+import com.momosoftworks.coldsweat.data.tag.ModInsulatorTags;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
+import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import com.simibubi.create.content.equipment.armor.BacktankItem;
 import com.simibubi.create.content.equipment.armor.BacktankUtil;
-import com.simibubi.create.content.equipment.armor.DivingHelmetItem;
 import com.simibubi.create.content.fluids.pipes.EncasedPipeBlock;
 import com.simibubi.create.content.fluids.pipes.FluidPipeBlock;
 import com.simibubi.create.content.fluids.pipes.GlassFluidPipeBlock;
@@ -415,16 +417,13 @@ public class CompatManager
 
         if (!player.isCreative() && !player.isInLava()
         && backTank.getItem() instanceof BacktankItem
-        && backTank.getItem().isFireResistant()
         && (ConfigSettings.HEAT_DRAINS_BACKTANK.get() && worldTemp > burningPoint || ConfigSettings.COLD_DRAINS_BACKTANK.get() && worldTemp < freezingPoint))
         {
             // Ensure player is wearing a full set of fire-resistant armor
-            ItemStack helmet = player.getItemBySlot(EquipmentSlot.HEAD);
-            if (!helmet.getItem().isFireResistant() || !(helmet.getItem() instanceof DivingHelmetItem)) return;
-            ItemStack boots = player.getItemBySlot(EquipmentSlot.FEET);
-            if (!boots.getItem().isFireResistant()) return;
-            ItemStack pants = player.getItemBySlot(EquipmentSlot.LEGS);
-            if (!pants.getItem().isFireResistant()) return;
+            List<InsulatorData> drainingInsulators = ConfigHelper.getTaggedConfigsFor(backTank.getItem(), ModInsulatorTags.DRAINS_BACKTANK, ConfigSettings.INSULATING_ARMORS.get());
+            if (drainingInsulators.stream().noneMatch(insulator -> insulator.test(player, backTank)))
+            {   return;
+            }
 
             if (player.level.isClientSide)
                 USING_BACKTANK = true;
