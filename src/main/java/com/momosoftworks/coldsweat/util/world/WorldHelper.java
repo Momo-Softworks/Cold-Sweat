@@ -262,7 +262,7 @@ public abstract class WorldHelper
 
     public static Optional<StructureFeature<?, ?>> getStructureAt(World level, BlockPos pos)
     {
-        if (!(level instanceof ServerWorld)) return Optional.empty();
+        if (!(level instanceof ServerWorld) || !level.isLoaded(pos)) return Optional.empty();
 
         ServerWorld serverLevel = ((ServerWorld) level);
         StructureManager structureManager = serverLevel.structureFeatureManager();
