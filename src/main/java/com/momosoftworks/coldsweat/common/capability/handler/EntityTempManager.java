@@ -444,7 +444,7 @@ public class EntityTempManager
         LivingEntity entity = event.getEntity();
         if (!entity.level().isClientSide() && entity.tickCount % 20 == 0 && isTemperatureEnabled(entity))
         {
-            Map<ResourceLocation, Double> immunities = new FastMap<>();
+            Map<ResourceLocation, Double> immunities = new HashMap<>();
             for (Map.Entry<ItemStack, InsulatorData> entry : getInsulatorsOnEntity(entity).entrySet())
             {
                 InsulatorData insulator = entry.getValue();
