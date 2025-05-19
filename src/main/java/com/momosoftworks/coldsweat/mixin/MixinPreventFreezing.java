@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Collection;
+import java.util.List;
 
 @Mixin(LivingEntity.class)
 public abstract class MixinPreventFreezing
@@ -30,7 +30,7 @@ public abstract class MixinPreventFreezing
             LazyOptional<IInsulatableCap> cap = ItemInsulationManager.getInsulationCap(armorItem);
             if (cap.isPresent())
             {
-                for (Pair<ItemStack, Collection<InsulatorData>> pair : cap.resolve().get().getInsulation())
+                for (Pair<ItemStack, List<InsulatorData>> pair : cap.resolve().get().getInsulation())
                 {
                     if (pair.getFirst().is(ItemTags.FREEZE_IMMUNE_WEARABLES))
                     {

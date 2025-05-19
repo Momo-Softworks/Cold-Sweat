@@ -66,7 +66,7 @@ public class ItemCarryTempData extends ConfigData implements RequirementHolder
         this(item, slots, temperature, trait, maxEffect, entityRequirement, attributeModifiers, immuneTempModifiers, new NegatableList<>());
     }
 
-    public static final Codec<ItemCarryTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+    public static final Codec<ItemCarryTempData> CODEC = createCodec(RecordCodecBuilder.create(instance -> instance.group(
             NegatableList.codec(ItemRequirement.CODEC).optionalFieldOf("item", new NegatableList<>()).forGetter(ItemCarryTempData::item),
             Codec.either(IntegerBounds.CODEC, SlotType.CODEC).listOf().fieldOf("slots").forGetter(ItemCarryTempData::slots),
             Codec.DOUBLE.fieldOf("temperature").forGetter(ItemCarryTempData::temperature),
@@ -74,9 +74,8 @@ public class ItemCarryTempData extends ConfigData implements RequirementHolder
             Codec.DOUBLE.optionalFieldOf("max_effect", Double.POSITIVE_INFINITY).forGetter(ItemCarryTempData::maxEffect),
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(ItemCarryTempData::entityRequirement),
             AttributeModifierMap.CODEC.optionalFieldOf("attributes", new AttributeModifierMap()).forGetter(ItemCarryTempData::attributeModifiers),
-            Codec.unboundedMap(ResourceLocation.CODEC, Codec.DOUBLE).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(ItemCarryTempData::immuneTempModifiers),
-            NegatableList.listCodec(Codec.STRING).optionalFieldOf("required_mods", new NegatableList<>()).forGetter(ConfigData::requiredMods)
-    ).apply(instance, ItemCarryTempData::new));
+            Codec.unboundedMap(ResourceLocation.CODEC, Codec.DOUBLE).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(ItemCarryTempData::immuneTempModifiers)
+    ).apply(instance, ItemCarryTempData::new)));
 
     public NegatableList<ItemRequirement> item()
     {   return item;
@@ -114,7 +113,9 @@ public class ItemCarryTempData extends ConfigData implements RequirementHolder
 
     public boolean test(Entity entity, ItemStack stack, SlotType slot)
     {
-        if (!test(entity) || !item().test(rq -> rq.test(stack, true))) return false;
+        if (!this.test(entity) || !this.item().test(rq -> rq.test(stack, true)))
+        {   return false;
+        }
         for (int i = 0; i < this.slots().size(); i++)
         {
             Optional<SlotType> slotType = this.slots().get(i).right();

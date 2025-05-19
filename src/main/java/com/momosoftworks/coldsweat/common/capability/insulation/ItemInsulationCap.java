@@ -1,6 +1,9 @@
 package com.momosoftworks.coldsweat.common.capability.insulation;
 
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
@@ -8,20 +11,36 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.*;
 
 public class ItemInsulationCap implements IInsulatableCap
 {
-    private final List<Pair<ItemStack, Collection<InsulatorData>>> insulation = new ArrayList<>();
+    private final List<Pair<ItemStack, List<InsulatorData>>> insulation = new ArrayList<>();
     private boolean changed = false;
-    private CompoundTag oldSerialized = null;
+    private CompoundTag serializedData = null;
+
+    public static final Codec<Pair<ItemStack, List<InsulatorData>>> ITEM_INSULATION_PAIR_CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            ItemStack.CODEC.fieldOf("item").forGetter(Pair::getFirst),
+            InsulatorData.CODEC.listOf().fieldOf("insulation").forGetter(Pair::getSecond)
+    ).apply(instance, Pair::new));
+
+    public static final Codec<ItemInsulationCap> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            ITEM_INSULATION_PAIR_CODEC.listOf().fieldOf("insulation").forGetter(ItemInsulationCap::getInsulation)
+    ).apply(instance, ItemInsulationCap::new));
+
+    public ItemInsulationCap()
+    {}
+
+    public ItemInsulationCap(List<Pair<ItemStack, List<InsulatorData>>> insulation)
+    {   this.insulation.addAll(insulation);
+    }
 
     @Override
-    public List<Pair<ItemStack, Collection<InsulatorData>>> getInsulation()
+    public List<Pair<ItemStack, List<InsulatorData>>> getInsulation()
     {   return this.insulation;
     }
 
@@ -31,7 +50,7 @@ public class ItemInsulationCap implements IInsulatableCap
 
     public void calcAdaptiveInsulation(double worldTemp, double minTemp, double maxTemp)
     {
-        for (Pair<ItemStack, Collection<InsulatorData>> entry : insulation)
+        for (Pair<ItemStack, List<InsulatorData>> entry : insulation)
         {
             for (InsulatorData insulatorData : entry.getSecond())
             {
@@ -52,7 +71,7 @@ public class ItemInsulationCap implements IInsulatableCap
 
     public void addInsulationItem(ItemStack stack)
     {
-        Collection<InsulatorData> insulation = ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()).stream().map(InsulatorData::copy).toList();
+        List<InsulatorData> insulation = ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()).stream().map(InsulatorData::copy).toList();
 
         if (!insulation.isEmpty())
         {   this.insulation.add(Pair.of(stack, insulation));
@@ -62,7 +81,7 @@ public class ItemInsulationCap implements IInsulatableCap
 
     public ItemStack removeInsulationItem(ItemStack stack)
     {
-        Optional<Pair<ItemStack, Collection<InsulatorData>>> toRemove = this.insulation.stream().filter(entry -> entry.getFirst().equals(stack)).findFirst();
+        Optional<Pair<ItemStack, List<InsulatorData>>> toRemove = this.insulation.stream().filter(entry -> entry.getFirst().equals(stack)).findFirst();
         toRemove.ifPresent(pair ->
         {
             this.insulation.remove(pair);
@@ -101,68 +120,30 @@ public class ItemInsulationCap implements IInsulatableCap
     @Override
     public CompoundTag serializeNBT()
     {
-        if (!this.changed && this.oldSerialized != null)
-        {   return this.oldSerialized;
+        if (!this.changed && this.serializedData != null)
+        {   return serializedData;
         }
-        // Save the insulation items
-        ListTag insulNBT = new ListTag();
-        // Iterate over insulation items
-        for (int i = 0; i < insulation.size(); i++)
-        {
-            Pair<ItemStack, Collection<InsulatorData>> entry = insulation.get(i);
-
-            CompoundTag entryNBT = new CompoundTag();
-            Collection<InsulatorData> insulators = entry.getSecond();
-            // Store ItemStack data
-            entryNBT.put("Item", entry.getFirst().save(new CompoundTag()));
-            // Store insulation data
-            ListTag entryInsulList = new ListTag();
-            for (InsulatorData insulMapping : insulators)
-            {
-                CompoundTag mappingNBT = new CompoundTag();
-                mappingNBT.put("Insulator", insulMapping.serialize());
-                entryInsulList.add(mappingNBT);
-            }
-            entryNBT.put("Values", entryInsulList);
-            // Add the item to the list
-            insulNBT.add(entryNBT);
-        }
-
-        CompoundTag tag = new CompoundTag();
-        tag.put("Insulation", insulNBT);
-
-        this.oldSerialized = tag;
+        DataResult<Tag> result = CODEC.encodeStart(NbtOps.INSTANCE, this);
+        CompoundTag nbt = (CompoundTag) result.result().orElse(new CompoundTag());
+        this.serializedData = nbt;
         this.changed = false;
-        return tag;
+        return nbt;
     }
 
     @Override
     public void deserializeNBT(CompoundTag tag)
     {
-        this.insulation.clear();
-
-        // Load the insulation items
-        ListTag insulNBT = tag.getList("Insulation", 10);
-
-        for (int i = 0; i < insulNBT.size(); i++)
+        if (Objects.equals(tag, this.serializedData)) return;
+        CODEC.decode(NbtOps.INSTANCE, tag).result().ifPresent(result ->
         {
-            CompoundTag entryNBT = insulNBT.getCompound(i);
-
-            ItemStack stack = ItemStack.of(entryNBT.getCompound("Item"));
-            Collection<InsulatorData> insulators = new ArrayList<>();
-            ListTag pairListNBT = entryNBT.getList("Values", 10);
-            for (int j = 0; j < pairListNBT.size(); j++)
+            List<Pair<ItemStack, List<InsulatorData>>> newInsulation = result.getFirst().getInsulation();
+            if (!newInsulation.equals(this.insulation))
             {
-                CompoundTag mappingNBT = pairListNBT.getCompound(j);
-                InsulatorData.CODEC.decode(NbtOps.INSTANCE, mappingNBT.getCompound("Insulator")).map(Pair::getFirst).result()
-                .ifPresent(insulators::add);
+                this.insulation.clear();
+                this.insulation.addAll(newInsulation);
+                this.changed = true;
             }
-            this.insulation.add(Pair.of(stack, insulators));
-        }
-
-        if (!tag.equals(this.oldSerialized))
-        {   this.changed = true;
-        }
+        });
     }
 
     @Override

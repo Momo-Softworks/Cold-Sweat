@@ -46,16 +46,15 @@ public class BiomeTempData extends ConfigData
     {   this(new NegatableList<>(Either.right(biome)), min, max, units, isOffset);
     }
 
-    public static final Codec<BiomeTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+    public static final Codec<BiomeTempData> CODEC = createCodec(RecordCodecBuilder.create(instance -> instance.group(
             NegatableList.listCodec(ConfigHelper.tagOrHolderCodec(Registry.BIOME_REGISTRY, Biome.CODEC)).fieldOf("biomes").forGetter(BiomeTempData::biomes),
             Codec.mapEither(Codec.DOUBLE.fieldOf("temperature"), Codec.DOUBLE.fieldOf("min_temp")).xmap(
                 either -> either.map(left -> left, right -> right), Either::right).forGetter(BiomeTempData::min),
             Codec.mapEither(Codec.DOUBLE.fieldOf("temperature"), Codec.DOUBLE.fieldOf("max_temp")).xmap(
                 either -> either.map(left -> left, right -> right), Either::right).forGetter(BiomeTempData::max),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(BiomeTempData::units),
-            Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(BiomeTempData::isOffset),
-            NegatableList.listCodec(Codec.STRING).optionalFieldOf("required_mods", new NegatableList<>()).forGetter(ConfigData::requiredMods)
-    ).apply(instance, BiomeTempData::new));
+            Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(BiomeTempData::isOffset)
+    ).apply(instance, BiomeTempData::new)));
 
     public NegatableList<Either<TagKey<Biome>, Holder<Biome>>> biomes()
     {   return biomes;

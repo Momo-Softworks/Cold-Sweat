@@ -39,7 +39,7 @@ public record FluidRequirement(NegatableList<Either<TagKey<Fluid>, Fluid>> fluid
 
     public boolean test(FluidState state)
     {
-        if (this.fluids.test(either -> either.map(state::is, state::is)))
+        if (!this.fluids.test(either -> either.map(state::is, state::is)))
         {   return false;
         }
         if (this.isSource.isPresent() && this.isSource.get() != state.isSource())
