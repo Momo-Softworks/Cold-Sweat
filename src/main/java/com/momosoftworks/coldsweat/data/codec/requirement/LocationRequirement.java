@@ -89,16 +89,19 @@ public record LocationRequirement(IntegerBounds x, IntegerBounds y, IntegerBound
         BlockPos.MutableBlockPos pos = origin.mutable();
         pos.move(this.xOffset, this.yOffset, this.zOffset);
 
-        if (!this.x.test(pos.getX())) return false;
-        if (!this.y.test(pos.getY())) return false;
-        if (!this.z.test(pos.getZ())) return false;
+        if (!this.x.test(pos.getX()))
+            return false;
+        if (!this.y.test(pos.getY()))
+            return false;
+        if (!this.z.test(pos.getZ()))
+            return false;
 
         if (!this.dimension.test(either -> either.map(tag -> level.dimensionTypeRegistration().is(tag.location()),
                                                       key -> level.dimension().equals(key))))
         {   return false;
         }
 
-        if (this.biome.test(either -> either.map(tag -> level.getBiomeManager().getNoiseBiomeAtPosition(pos).is(tag),
+        if (!this.biome.test(either -> either.map(tag -> level.getBiomeManager().getNoiseBiomeAtPosition(pos).is(tag),
                                                  key -> level.getBiomeManager().getNoiseBiomeAtPosition(pos).is(key))))
         {   return false;
         }
@@ -125,7 +128,7 @@ public record LocationRequirement(IntegerBounds x, IntegerBounds y, IntegerBound
         if (!this.fluid.test(level, pos))
         {   return false;
         }
-        if (!this.temperature.test(WorldHelper.getRoughTemperatureAt(level, pos)))
+        if (this.temperature != WorldTempBounds.NONE && !this.temperature.test(WorldHelper.getRoughTemperatureAt(level, pos)))
         {   return false;
         }
         return true;

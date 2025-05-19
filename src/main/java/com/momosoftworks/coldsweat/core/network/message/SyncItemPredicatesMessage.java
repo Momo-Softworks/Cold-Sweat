@@ -142,7 +142,7 @@ public class SyncItemPredicatesMessage
         {
             ItemInsulationManager.getInsulationCap(stack).ifPresent(cap ->
             {
-                for (Pair<ItemStack, Collection<InsulatorData>> pair : cap.getInsulation())
+                for (Pair<ItemStack, List<InsulatorData>> pair : cap.getInsulation())
                 {
                     for (InsulatorData insulatorData : pair.getSecond())
                     {   this.predicateMap.put(insulatorData.uuid(), insulatorData.test(entity, stack));
@@ -199,7 +199,9 @@ public class SyncItemPredicatesMessage
         .forEach(data ->
         {
             UUID id = ((ConfigData) data).uuid();
+            System.out.println("-- TEST ITEM REQUIREMENT --");
             configMap.put(id, data.test(entity, stack));
+            System.out.println("-- TEST END --");
         });
         this.predicateMap.putAll(configMap);
     }

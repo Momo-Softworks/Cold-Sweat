@@ -46,13 +46,12 @@ public class StructureTempData extends ConfigData
         this(new NegatableList<>(Either.right(structure)), temperature, units, isOffset);
     }
 
-    public static final Codec<StructureTempData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+    public static final Codec<StructureTempData> CODEC = createCodec(RecordCodecBuilder.create(instance -> instance.group(
             NegatableList.listCodec(ConfigHelper.tagOrHolderCodec(Registries.STRUCTURE, Structure.CODEC)).fieldOf("structures").forGetter(StructureTempData::structures),
             Codec.DOUBLE.fieldOf("temperature").forGetter(StructureTempData::temperature),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(StructureTempData::units),
-            Codec.BOOL.optionalFieldOf("offset", false).forGetter(StructureTempData::isOffset),
-            NegatableList.listCodec(Codec.STRING).optionalFieldOf("required_mods", new NegatableList<>()).forGetter(ConfigData::requiredMods)
-    ).apply(instance, StructureTempData::new));
+            Codec.BOOL.optionalFieldOf("offset", false).forGetter(StructureTempData::isOffset)
+    ).apply(instance, StructureTempData::new)));
 
     public NegatableList<Either<TagKey<Structure>, Holder<Structure>>> structures()
     {   return structures;

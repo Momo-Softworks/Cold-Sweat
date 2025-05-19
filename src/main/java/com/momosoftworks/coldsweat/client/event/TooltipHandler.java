@@ -373,11 +373,11 @@ public class TooltipHandler
                     {   cap.deserializeNBT(stack.getOrCreateTag());
                     }
 
-                    List<Pair<ItemStack, Collection<InsulatorData>>> insulatorPairs = cap.getInsulation();
+                    List<Pair<ItemStack, List<InsulatorData>>> insulatorPairs = cap.getInsulation();
 
                     for (int i = 0; i < insulatorPairs.size(); i++)
                     {
-                        Pair<ItemStack, Collection<InsulatorData>> pair = insulatorPairs.get(i);
+                        Pair<ItemStack, List<InsulatorData>> pair = insulatorPairs.get(i);
                         for (InsulatorData insulator : pair.getSecond())
                         {   validateInsulator(insulator, armorInsulation, insulator.hideIfUnmet() ? new ArrayList<>() : unmetArmorInsulation);
                         }
