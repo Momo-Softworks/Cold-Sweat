@@ -1,6 +1,5 @@
 package com.momosoftworks.coldsweat.data.codec.configuration;
 
-import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -8,6 +7,7 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
+import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
@@ -18,7 +18,6 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class DepthTempData extends ConfigData
@@ -222,22 +221,16 @@ public class DepthTempData extends ConfigData
         {
             public static final TempContainer NONE = new TempContainer(0, ContainerType.STATIC, 1.0);
 
-            public static final Codec<TempContainer> CODEC = Codec.either(
-                RecordCodecBuilder.<TempContainer>create(instance -> instance.group(
+            private static final Codec<TempContainer> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
                     Codec.DOUBLE.optionalFieldOf("value", Double.NaN).forGetter(container -> container.temperature),
                     ContainerType.CODEC.optionalFieldOf("type", ContainerType.STATIC).forGetter(container -> container.type),
                     Codec.doubleRange(0, 1).optionalFieldOf("strength", 1.0).forGetter(container -> container.strength)
-                ).apply(instance, (temp, type, strength) ->
-                {
-                    if (type == ContainerType.STATIC && temp.equals(Double.NaN) && strength > 0)
-                    {   throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("Static temperature container must have a temperature"));
-                    }
-                    return new TempContainer(temp, type, strength);
-                })),
+            ).apply(instance, TempContainer::new));
+
+            public static final Codec<TempContainer> CODEC = (Codec) ExtraCodecs.anyOf(
+                DIRECT_CODEC,
                 Codec.DOUBLE.xmap(d -> new TempContainer(d, ContainerType.STATIC, 1.0), container -> container.temperature)
-            )
-            .xmap(either -> either.map(c -> c, c -> c), container -> container.type == ContainerType.STATIC
-                                                                     ? Either.right(container) : Either.left(container));
+            );
 
             public final double temperature;
             public final ContainerType type;
