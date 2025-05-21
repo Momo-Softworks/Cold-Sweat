@@ -33,8 +33,8 @@ public class RemoveRegistryData<T extends ConfigData> extends ConfigData
 
     public static final Codec<RemoveRegistryData<? extends ConfigData>> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.xmap(ModRegistries::getRegistry, ModRegistries::getRegistryName).fieldOf("registry").forGetter(data -> (RegistryKey) data.registry),
-            NegatableList.codec(CompoundNBT.CODEC).fieldOf("matches").forGetter(data -> data.matches),
-            ResourceLocation.CODEC.listOf().fieldOf("entries").forGetter(data -> data.entries)
+            NegatableList.codec(CompoundNBT.CODEC).optionalFieldOf("matches", new NegatableList<>()).forGetter(data -> data.matches),
+            ResourceLocation.CODEC.listOf().optionalFieldOf("entries", Arrays.asList()).forGetter(data -> data.entries)
     ).apply(instance, (key, matches, entries) -> new RemoveRegistryData<>((RegistryKey) key, (NegatableList) matches, (List) entries)));
 
     public RegistryKey<Registry<T>> registry()
@@ -49,6 +49,9 @@ public class RemoveRegistryData<T extends ConfigData> extends ConfigData
 
     public boolean matches(T object)
     {
+        if (this.entries().stream().anyMatch(id -> object.registryId().map(rl -> rl.equals(id)).orElse(false)))
+        {   return true;
+        }
         Optional<INBT> serializedOpt = ModRegistries.getCodec((RegistryKey) registry).encodeStart(NBTDynamicOps.INSTANCE, object).result();
         return serializedOpt.map(serialized ->
         {   return matches.test(nbt -> NbtRequirement.compareNbt(nbt, serialized, true));

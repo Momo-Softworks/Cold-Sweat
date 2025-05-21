@@ -4,9 +4,7 @@ import com.google.common.collect.Multimap;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.ColdSweat;
@@ -28,13 +26,11 @@ import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.math.RegistryMultiMap;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 import net.minecraft.resources.IResource;
-import net.minecraft.tags.ITag;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
@@ -52,12 +48,11 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.registries.ForgeRegistries;
 
-import javax.xml.ws.Holder;
 import java.io.*;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber
@@ -70,17 +65,20 @@ public class ConfigLoadingHandler
     {
         ConfigSettings.clear();
         BlockTempRegistry.flush();
+        ModRegistries.getRegistries().forEach((registryKey, registry) ->
+        {   registry.flush();
+        });
 
         DynamicRegistries registryAccess = event.getServer().registryAccess();
         Multimap<RegistryKey<Registry<? extends ConfigData>>, ? extends ConfigData> registries = new RegistryMultiMap<>();
 
         // User JSON configs (config folder)
         ColdSweat.LOGGER.info("Loading registries from configs...");
-        registries.putAll((Multimap) collectUserRegistries(registryAccess));
+        registries.putAll((Multimap) collectUserRegistries());
 
         // JSON configs (data resources)
         ColdSweat.LOGGER.info("Loading registries from data resources...");
-        registries.putAll((Multimap) collectDataRegistries(registryAccess));
+        registries.putAll((Multimap) collectDataRegistries());
 
         // Load JSON data into the config settings
         logAndAddRegistries(registryAccess, registries);
@@ -107,12 +105,8 @@ public class ConfigLoadingHandler
     /**
      * Loads JSON-based configs from data resources
      */
-    public static Multimap<RegistryKey<Registry<? extends ConfigData>>, ? extends ConfigData> collectDataRegistries(DynamicRegistries registryAccess)
+    public static Multimap<RegistryKey<Registry<? extends ConfigData>>, ? extends ConfigData> collectDataRegistries()
     {
-        if (registryAccess == null)
-        {   ColdSweat.LOGGER.error("Failed to load registries from null DynamicRegistries");
-            return new RegistryMultiMap<>();
-        }
         /*
          Add blocks from tags to configs
          */
@@ -144,12 +138,18 @@ public class ConfigLoadingHandler
                     IResource resource = ModRegistries.getResourceManager().getResource(resourceLocation);
                     try (InputStream inputStream = resource.getInputStream())
                     {
+                        JsonObject json = JSONUtils.parse(new InputStreamReader(inputStream));
+                        String relativePath = resourceLocation.getPath().replace(registryPath.getPath(), "");
+                        relativePath = relativePath.substring(1, relativePath.length() - 5);
+                        ResourceLocation registryId = new ResourceLocation(resourceLocation.getNamespace(), relativePath);
                         // Create a reader from the input stream
-                        registry.codec().parse(JsonOps.INSTANCE, JSONUtils.parse(new InputStreamReader(inputStream)))
+                        registry.codec().parse(JsonOps.INSTANCE, json)
                                 .resultOrPartial(ColdSweat.LOGGER::error)
                                 .ifPresent(data ->
                                 {
-                                    ((ModRegistries.ConfigRegistry) registry).register(resourceLocation, data);
+                                    data.setRegistryType(ConfigData.Type.JSON);
+                                    data.setRegistryId(registryId);
+                                    ((ModRegistries.ConfigRegistry) registry).register(registryId, data);
                                     ((RegistryMultiMap) registries).put(registry.key(), data);
                                 });
                     }
@@ -166,22 +166,17 @@ public class ConfigLoadingHandler
     /**
      * Loads JSON-based configs from the configs folder
      */
-    public static Multimap<RegistryKey<Registry<? extends ConfigData>>, ? extends ConfigData> collectUserRegistries(DynamicRegistries registryAccess)
+    public static Multimap<RegistryKey<Registry<? extends ConfigData>>, ? extends ConfigData> collectUserRegistries()
     {
-        if (registryAccess == null)
-        {   ColdSweat.LOGGER.error("Failed to load registries from null DynamicRegistries");
-            return new RegistryMultiMap<>();
-        }
-
         /*
          Parse user-defined JSON data from the configs folder
         */
         Multimap<RegistryKey<Registry<? extends ConfigData>>, ? extends ConfigData> registries = new RegistryMultiMap<>();
         for (Map.Entry<String, ModRegistries.ConfigRegistry<?>> entry : ModRegistries.getRegistries().entrySet())
         {
-            RegistryKey<Registry<? extends ConfigData>> key = (RegistryKey) entry.getValue().key();
-            Codec<?> codec = entry.getValue().codec();
-            registries.putAll(key, parseConfigData((RegistryKey) key, (Codec) codec, registryAccess));
+            ModRegistries.ConfigRegistry<? extends ConfigData> registry = entry.getValue();
+            RegistryKey key = registry.key();
+            registries.putAll(key, (Collection) parseConfigData(registry));
         }
         return registries;
     }
@@ -192,7 +187,7 @@ public class ConfigLoadingHandler
         setDefaultRegistryPriority(registries, registryAccess);
 
         // Load registry removals
-        loadRegistryRemovals(registryAccess);
+        loadRegistryRemovals();
 
         // Mark holders as "JSON"
         for (ConfigData data : registries.values())
@@ -306,13 +301,13 @@ public class ConfigLoadingHandler
         }
     }
 
-    private static void loadRegistryRemovals(DynamicRegistries registryAccess)
+    private static void loadRegistryRemovals()
     {
         // Clear the static map
         REMOVED_REGISTRIES.clear();
         // Gather registry removals & add them to the static map
         Collection<RemoveRegistryData<?>> removals = ModRegistries.REMOVE_REGISTRY_DATA.data().values();
-        removals.addAll(parseConfigData(ModRegistries.REMOVE_REGISTRY_DATA.key(), RemoveRegistryData.CODEC, registryAccess));
+        removals.addAll(parseConfigData(ModRegistries.REMOVE_REGISTRY_DATA));
         removals.forEach(data ->
         {
             RegistryKey<Registry<? extends ConfigData>> key = (RegistryKey) data.registry();
@@ -323,13 +318,13 @@ public class ConfigLoadingHandler
     private static void removeRegistries(Multimap<RegistryKey<Registry<? extends ConfigData>>, ? extends ConfigData> registries)
     {
         ColdSweat.LOGGER.info("Handling registry removals...");
-        for (Map.Entry<RegistryKey<Registry<? extends ConfigData>>, Collection<RemoveRegistryData<? extends ConfigData>>> entry : REMOVED_REGISTRIES.asMap().entrySet())
+        for (Map.Entry entry : REMOVED_REGISTRIES.asMap().entrySet())
         {
-            removeEntries((Collection) entry.getValue(), (Collection) registries.get(entry.getKey()));
+            removeEntries((Collection) entry.getValue(), registries.get((RegistryKey) entry.getKey()));
         }
     }
 
-    private static <T extends ConfigData, H extends T> void removeEntries(Collection<RemoveRegistryData<T>> removals, Collection<H> registry)
+    private static <T extends ConfigData> void removeEntries(Collection<RemoveRegistryData<T>> removals, Collection<T> registry)
     {
         for (RemoveRegistryData<T> data : removals)
         {   registry.removeIf(data::matches);
@@ -596,13 +591,14 @@ public class ConfigLoadingHandler
         });
     }
 
-    private static <T extends ConfigData> List<T> parseConfigData(RegistryKey<Registry<T>> registry, Codec<T> codec, DynamicRegistries registryAccess)
+    private static <T extends ConfigData> List<T> parseConfigData(ModRegistries.ConfigRegistry<T> registry)
     {
+        RegistryKey<Registry<T>> registryKey = registry.key();
         List<T> output = new ArrayList<>();
         DynamicOps<JsonElement> registryOps = JsonOps.INSTANCE;
 
-        String configFolder = registry.location().getNamespace().replace("_", "");
-        Path coldSweatDataPath = FMLPaths.CONFIGDIR.get().resolve(configFolder + "/data").resolve(registry.location().getPath());
+        String configFolder = registryKey.location().getNamespace().replace("_", "");
+        Path coldSweatDataPath = FMLPaths.CONFIGDIR.get().resolve(configFolder + "/data").resolve(registryKey.location().getPath());
         File jsonDirectory = coldSweatDataPath.toFile();
 
         if (!jsonDirectory.exists())
@@ -615,16 +611,21 @@ public class ConfigLoadingHandler
                 try (FileReader reader = new FileReader(file))
                 {
                     JsonObject json = JSONUtils.parse(reader);
-                    if (!shouldLoadJSON(registry, file.getPath(), json))
+                    if (!shouldLoadJSON(registryKey, file.getPath(), json))
                     {   continue;
                     }
-                    codec.decode(registryOps, JSONUtils.parse(reader))
+                    registry.codec().decode(registryOps, JSONUtils.parse(reader))
                             .resultOrPartial(ColdSweat.LOGGER::error)
                             .map(Pair::getFirst)
-                            .ifPresent(configData -> output.add(configData));
+                            .ifPresent(configData ->
+                            {
+                                configData.setRegistryType(ConfigData.Type.JSON);
+                                configData.setRegistryId(new ResourceLocation(ColdSweat.MOD_ID, file.getPath()));
+                                output.add(configData);
+                            });
                 }
                 catch (Exception e)
-                {   ColdSweat.LOGGER.error("Failed to parse JSON config setting in {}: {}", registry.location(), file.getName(), e);
+                {   ColdSweat.LOGGER.error("Failed to parse JSON config setting in {}: {}", registryKey.location(), file.getName(), e);
                 }
             }
         }

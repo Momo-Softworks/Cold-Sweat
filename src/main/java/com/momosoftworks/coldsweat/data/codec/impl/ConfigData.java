@@ -8,14 +8,17 @@ import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTDynamicOps;
+import net.minecraft.util.ResourceLocation;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public abstract class ConfigData implements NbtSerializable
 {
     private UUID id = UUID.randomUUID();
     private Type registryType;
-    NegatableList<String> requiredMods;
+    private NegatableList<String> requiredMods;
+    private ResourceLocation registryId;
 
     public ConfigData(NegatableList<String> requiredMods)
     {   this.requiredMods = requiredMods;
@@ -35,6 +38,10 @@ public abstract class ConfigData implements NbtSerializable
     {   return requiredMods;
     }
 
+    public Optional<ResourceLocation> registryId()
+    {   return Optional.of(registryId);
+    }
+
     @Internal
     public void setId(UUID id)
     {   this.id = id;
@@ -43,6 +50,11 @@ public abstract class ConfigData implements NbtSerializable
     @Internal
     public void setRegistryType(Type registryType)
     {   this.registryType = registryType;
+    }
+
+    @Internal
+    public void setRegistryId(ResourceLocation registryId)
+    {   this.registryId = registryId;
     }
 
     @Override
