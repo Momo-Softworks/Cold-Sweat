@@ -10,6 +10,7 @@ import net.minecraftforge.eventbus.api.Event;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * Determines the default {@link TempModifier}s that will be applied to an entity upon spawning.<br>
@@ -86,7 +87,7 @@ public class DefaultTempModifiersEvent extends Event
         }
     }
 
-    public void removeModifiers(TempModifier modifier, Temperature.Trait trait, Placement.Duplicates matchPolicy)
-    {   this.getModifiers(trait).removeIf(mod -> matchPolicy.check(mod, modifier));
+    public void removeModifiers(Temperature.Trait trait, Predicate<TempModifier> predicate)
+    {   this.getModifiers(trait).removeIf(predicate);
     }
 }
