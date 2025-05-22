@@ -11,6 +11,7 @@ import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.registry.Registry;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
@@ -33,7 +34,7 @@ public class RegistryHelper
     @Mod.EventBusSubscriber
     public static class GetAccessServer
     {
-        @SubscribeEvent
+        @SubscribeEvent(priority = EventPriority.HIGHEST)
         public static void onServerLoading(FMLServerAboutToStartEvent event)
         {   REGISTRY_ACCESS = event.getServer().registryAccess();
         }
@@ -42,7 +43,7 @@ public class RegistryHelper
     @Mod.EventBusSubscriber(Dist.CLIENT)
     public static class GetAccessClient
     {
-        @SubscribeEvent
+        @SubscribeEvent(priority = EventPriority.HIGHEST)
         public static void onClientLoading(ClientPlayerNetworkEvent.LoggedInEvent event)
         {   REGISTRY_ACCESS = event.getPlayer().connection.registryAccess();
         }

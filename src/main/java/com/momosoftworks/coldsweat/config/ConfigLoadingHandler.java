@@ -47,12 +47,12 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
+import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.io.*;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber
@@ -61,7 +61,7 @@ public class ConfigLoadingHandler
     public static final Multimap<RegistryKey<Registry<? extends ConfigData>>, RemoveRegistryData<?>> REMOVED_REGISTRIES = new RegistryMultiMap<>();
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void loadConfigs(ServerConfigsLoadedEvent event)
+    public static void loadConfigs(FMLServerAboutToStartEvent event)
     {
         ConfigSettings.clear();
         BlockTempRegistry.flush();
@@ -129,7 +129,6 @@ public class ConfigLoadingHandler
         Multimap<RegistryKey<Registry<? extends ConfigData>>, ? extends ConfigData> registries = new RegistryMultiMap<>();
         for (ModRegistries.ConfigRegistry<?> registry : ModRegistries.getRegistries().values())
         {
-            registry.flush();
             try
             {
                 ResourceLocation registryPath = new ResourceLocation(ColdSweat.MOD_ID, "config/" + registry.key().location().getPath());

@@ -169,7 +169,7 @@ public class LocationRequirement
         && !level.dimension().equals(this.dimension.get()))
         {   return false;
         }
-        if (!this.biome.isPresent()
+        if (this.biome.isPresent()
         && !this.biome.get().location().equals(level.getBiome(pos).getRegistryName()))
         {   return false;
         }
