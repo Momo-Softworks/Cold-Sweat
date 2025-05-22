@@ -78,7 +78,7 @@ public class BlockAffectTempTrigger extends AbstractCriterionTrigger<BlockAffect
             return this.distance.matches(((float) distance))
                 && this.totalEffect.matches(((float) totalEffect))
                 && this.block.matches(player.getLevel(), pos)
-                && conditions.stream().allMatch(condition -> condition.matches(temps.get(condition.trait())));
+                && conditions.stream().allMatch(condition -> condition.matches(temps.getOrDefault(condition.trait(), 0d)));
         }
 
         @Override
