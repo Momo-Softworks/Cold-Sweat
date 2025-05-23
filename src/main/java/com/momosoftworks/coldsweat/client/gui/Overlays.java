@@ -250,9 +250,9 @@ public class Overlays
 
     static
     {
-        OverlayRegistry.registerOverlayBelow(ForgeIngameGui.CHAT_PANEL_ELEMENT, "world_temp", WORLD_TEMP_OVERLAY);
-        OverlayRegistry.registerOverlayBelow(ForgeIngameGui.CHAT_PANEL_ELEMENT, "body_temp", BODY_TEMP_OVERLAY);
-        OverlayRegistry.registerOverlayBelow(ForgeIngameGui.CHAT_PANEL_ELEMENT, "vague_temp", VAGUE_TEMP_OVERLAY);
+        OverlayRegistry.registerOverlayBelow(ForgeIngameGui.HOTBAR_ELEMENT, "world_temp", WORLD_TEMP_OVERLAY);
+        OverlayRegistry.registerOverlayBelow(ForgeIngameGui.HOTBAR_ELEMENT, "body_temp", BODY_TEMP_OVERLAY);
+        OverlayRegistry.registerOverlayBelow(ForgeIngameGui.HOTBAR_ELEMENT, "vague_temp", VAGUE_TEMP_OVERLAY);
     }
 
     @Mod.EventBusSubscriber(value = Dist.CLIENT)
