@@ -252,9 +252,9 @@ public class Overlays
 
     @SubscribeEvent
     public static void registerOverlays(RegisterGuiOverlaysEvent event)
-    {   event.registerBelow(VanillaGuiOverlay.CHAT_PANEL.id(), "world_temp", WORLD_TEMP_OVERLAY);
-        event.registerBelow(VanillaGuiOverlay.CHAT_PANEL.id(), "body_temp", BODY_TEMP_OVERLAY);
-        event.registerBelow(VanillaGuiOverlay.CHAT_PANEL.id(), "vague_temp", VAGUE_TEMP_OVERLAY);
+    {   event.registerBelow(VanillaGuiOverlay.HOTBAR.id(), "world_temp", WORLD_TEMP_OVERLAY);
+        event.registerBelow(VanillaGuiOverlay.HOTBAR.id(), "body_temp", BODY_TEMP_OVERLAY);
+        event.registerBelow(VanillaGuiOverlay.HOTBAR.id(), "vague_temp", VAGUE_TEMP_OVERLAY);
     }
 
     @Mod.EventBusSubscriber(value = Dist.CLIENT)
