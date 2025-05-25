@@ -24,6 +24,7 @@ import com.momosoftworks.coldsweat.data.codec.requirement.LocationRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.RegistryMultiMap;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.block.BlockState;
@@ -63,6 +64,7 @@ public class ConfigLoadingHandler
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void loadConfigs(FMLServerAboutToStartEvent event)
     {
+        long startTime = System.nanoTime();
         ConfigSettings.clear();
         BlockTempRegistry.flush();
         ModRegistries.getRegistries().forEach((registryKey, registry) ->
@@ -91,6 +93,9 @@ public class ConfigLoadingHandler
         // Java BlockTemps
         ColdSweat.LOGGER.info("Loading BlockTemps...");
         TempModifierInit.buildBlockRegistries();
+
+        long endTime = System.nanoTime();
+        ColdSweat.LOGGER.info("Loaded mod registries in {}ms", CSMath.truncate((endTime - startTime) / 1_000_000.0, 1));
     }
 
     @Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
@@ -111,16 +116,16 @@ public class ConfigLoadingHandler
          Add blocks from tags to configs
          */
         ConfigSettings.THERMAL_SOURCE_SPREAD_WHITELIST.get().addAll(ModBlockTags.HEARTH_SPREAD_WHITELIST.getValues().stream().peek(holder ->
-                                                           {   ColdSweat.LOGGER.info("Adding block {} to hearth spread whitelist", holder);
+                                                           {   ColdSweat.LOGGER.debug("Adding block {} to hearth spread whitelist", holder);
                                                            }).collect(Collectors.toSet()));
         ConfigSettings.THERMAL_SOURCE_SPREAD_BLACKLIST.get().addAll(ModBlockTags.HEARTH_SPREAD_BLACKLIST.getValues().stream().peek(holder ->
-                                                           {   ColdSweat.LOGGER.info("Adding block {} to hearth spread blacklist", holder);
+                                                           {   ColdSweat.LOGGER.debug("Adding block {} to hearth spread blacklist", holder);
                                                            }).collect(Collectors.toSet()));
         ConfigSettings.SLEEP_CHECK_IGNORE_BLOCKS.get().addAll(ModBlockTags.IGNORE_SLEEP_CHECK.getValues().stream().peek(holder ->
-                                                           {   ColdSweat.LOGGER.info("Disabling sleeping conditions check for block {}", holder);
+                                                           {   ColdSweat.LOGGER.debug("Disabling sleeping conditions check for block {}", holder);
                                                            }).collect(Collectors.toSet()));
         ConfigSettings.INSULATION_BLACKLIST.get().addAll(ModItemTags.NOT_INSULATABLE.getValues().stream().peek(holder ->
-                                                           {   ColdSweat.LOGGER.info("Adding item {} to insulation blacklist", holder);
+                                                           {   ColdSweat.LOGGER.debug("Adding item {} to insulation blacklist", holder);
                                                            }).collect(Collectors.toSet()));
 
         /*
