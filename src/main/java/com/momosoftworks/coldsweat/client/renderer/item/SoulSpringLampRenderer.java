@@ -18,11 +18,14 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
 
 import java.util.concurrent.Callable;
 
+@Mod.EventBusSubscriber(Dist.CLIENT)
 public class SoulSpringLampRenderer extends ItemStackTileEntityRenderer implements Callable<ItemStackTileEntityRenderer>
 {
     public static final ResourceLocation TEXTURE_FRAME = new ResourceLocation(ColdSweat.MOD_ID, "textures/item/soulspring_lamp/render/soulspring_lamp_frame.png");

@@ -46,6 +46,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import java.util.List;
 import java.util.Optional;
@@ -54,7 +55,13 @@ import java.util.Optional;
 public class SoulspringLampItem extends Item
 {
     public SoulspringLampItem()
-    {   super(new Properties().tab(ColdSweatGroup.COLD_SWEAT).stacksTo(1).fireResistant().rarity(Rarity.UNCOMMON).setISTER(SoulSpringLampRenderer::new));
+    {
+        super(new Properties(){{
+            tab(ColdSweatGroup.COLD_SWEAT).stacksTo(1).fireResistant().rarity(Rarity.UNCOMMON);
+            if (FMLEnvironment.dist != Dist.DEDICATED_SERVER)
+            {   setISTER(SoulSpringLampRenderer::new);
+            }
+        }});
     }
 
     @Override
