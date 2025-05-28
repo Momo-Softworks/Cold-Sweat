@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ParticleTypesInit;
 import com.momosoftworks.coldsweat.data.codec.configuration.FuelData;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlockEntities;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
@@ -237,8 +238,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
 
     @Override
     public int getItemFuel(ItemStack item)
-    {   return ConfigHelper.findFirstFuelMatching(ConfigSettings.ICEBOX_FUEL, item)
-               .map(FuelData::fuel).orElse(0d).intValue();
+    {   return CSMath.getIfNotNull(ConfigHelper.getFirstOrNull(ConfigSettings.ICEBOX_FUEL, item.getItem(), data -> data.test(item)), FuelData::fuel, 0d).intValue();
     }
 
     @Override

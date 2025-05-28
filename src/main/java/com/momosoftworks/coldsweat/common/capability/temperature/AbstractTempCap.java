@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.common.capability.temperature;
 import com.google.common.math.DoubleMath;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.common.temperautre.TemperatureChangedEvent;
+import com.momosoftworks.coldsweat.api.temperature.effect.TempEffect;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.api.util.Temperature.Trait;
@@ -13,6 +14,7 @@ import com.momosoftworks.coldsweat.data.codec.configuration.EntityClimateData;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModDamageSources;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
+import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
@@ -57,6 +59,8 @@ public class AbstractTempCap implements ITemperatureCap
     // Store entity's attribute data for faster access
     private final EnumMap<Trait, AttributeInstance> attributes = new EnumMap<>(Trait.class);
     private final Map<AttributeInstance, Map<AttributeModifier.Operation, Set<AttributeModifier>>> attributeModifiers = new HashMap<>();
+
+    private final Set<TempEffect> tempEffects = new HashSet<>();
 
     public boolean showBodyTemp;
     public boolean showWorldTemp;
@@ -189,6 +193,18 @@ public class AbstractTempCap implements ITemperatureCap
         return modifiers.computeIfAbsent(operation, attribute::getModifiers);
     }
 
+    @Override
+    public void addTempEffect(TempEffect effect)
+    {   tempEffects.add(effect);
+    }
+
+    @Override
+    public void clearTempEffects()
+    {
+        this.tempEffects.forEach(MinecraftForge.EVENT_BUS::unregister);
+        tempEffects.clear();
+    }
+
     /* See Temperature class for more temperature-related methods */
 
     /**
@@ -269,7 +285,7 @@ public class AbstractTempCap implements ITemperatureCap
             // Apply temp/attribute modifiers
             rate = this.modifyFromAttribute(entity, Trait.RATE, changeBy);
             // Apply rate multiplier if entity has climate data
-            rate *= CSMath.getIfNotNull(ConfigSettings.ENTITY_CLIMATES.get().get(entity.getType()), EntityClimateData::rate, 0.25) * 4;
+            rate *= CSMath.getIfNotNull(ConfigHelper.getFirstOrNull(ConfigSettings.ENTITY_CLIMATES, entity.getType(), data -> data.test(entity)), EntityClimateData::rate, 0.25) * 4;
             // Apply the rate to entity's temperature
             coreTemp += rate;
         }

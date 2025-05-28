@@ -26,19 +26,25 @@ public record DoubleBounds(double min, double max)
     }
 
     public boolean test(double value)
-    {   return value >= min && value <= max;
+    {   return CSMath.betweenInclusive(value, min, max);
     }
 
-    public boolean contains(DoubleBounds bounds)
-    {   return bounds.min >= min && bounds.max <= max;
+    public boolean contains(IntegerBounds bounds)
+    {   return test(bounds.min()) && test(bounds.max());
     }
 
     public double getRandom()
-    {   return min + (Math.random() * (max - min));
+    {
+        double realMin = Math.min(min, max);
+        double realMax = Math.max(min, max);
+        return realMin + Math.random() * (realMax - realMin + 1);
     }
 
     public double clamp(double value)
-    {   return CSMath.clamp(value, min, max);
+    {
+        double realMin = Math.min(min, max);
+        double realMax = Math.max(min, max);
+        return CSMath.clamp(value, realMin, realMax);
     }
 
     @Override
