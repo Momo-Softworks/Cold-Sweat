@@ -182,9 +182,7 @@ public class SoulspringLampItem extends Item
     }
 
     public static double getFuelForStack(ItemStack item)
-    {
-        return ConfigHelper.findFirstFuelMatching(ConfigSettings.SOULSPRING_LAMP_FUEL, item)
-                .map(FuelData::fuel).orElse(0d).intValue();
+    {   return CSMath.getIfNotNull(ConfigHelper.getFirstOrNull(ConfigSettings.SOULSPRING_LAMP_FUEL, item.getItem(), data -> data.test(item)), FuelData::fuel, 0d);
     }
 
     // Restore fuel if player hits an enemy

@@ -27,19 +27,25 @@ public record IntegerBounds(int min, int max)
     }
 
     public boolean test(int value)
-    {   return value >= min && value <= max;
+    {   return CSMath.betweenInclusive(value, min, max);
     }
 
     public boolean contains(IntegerBounds bounds)
-    {   return bounds.min >= min && bounds.max <= max;
+    {   return test(bounds.min()) && test(bounds.max());
     }
 
     public int getRandom()
-    {   return min + (int) (Math.random() * (max - min + 1));
+    {
+        int realMin = Math.min(min, max);
+        int realMax = Math.max(min, max);
+        return realMin + (int) (Math.random() * (realMax - realMin + 1));
     }
 
     public int clamp(int value)
-    {   return CSMath.clamp(value, min, max);
+    {
+        int realMin = Math.min(min, max);
+        int realMax = Math.max(min, max);
+        return CSMath.clamp(value, realMin, realMax);
     }
 
     @Override
