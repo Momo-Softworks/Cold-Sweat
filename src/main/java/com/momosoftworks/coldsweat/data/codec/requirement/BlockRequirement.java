@@ -45,7 +45,7 @@ public record BlockRequirement(NegatableList<Either<TagKey<Block>, Block>> block
 
     public boolean test(Level level, BlockPos pos, BlockState state)
     {
-        if (!level.isLoaded(pos)) return false;
+        if (!level.isLoaded(pos)) return true;
 
         if (!this.blocks.test(either -> either.map(state::is, state::is)))
         {   return false;
@@ -63,18 +63,14 @@ public record BlockRequirement(NegatableList<Either<TagKey<Block>, Block>> block
         if (!this.sturdyFaces.isEmpty() && this.sturdyFaces.stream().noneMatch(face -> state.isFaceSturdy(level, pos, face)))
         {   return false;
         }
-        if (this.replaceable.isPresent())
-        {   return state.isAir() || state.getMaterial().isReplaceable();
+        if (this.replaceable.isPresent() && !(state.isAir() || state.getMaterial().isReplaceable()))
+        {   return false;
         }
         return true;
     }
 
     public boolean test(Level level, BlockPos pos)
-    {
-        if (!level.isLoaded(pos))
-        {   return false;
-        }
-        return this.test(level, pos, level.getBlockState(pos));
+    {   return this.test(level, pos, level.getBlockState(pos));
     }
 
     @Override
@@ -113,6 +109,7 @@ public record BlockRequirement(NegatableList<Either<TagKey<Block>, Block>> block
 
         public <S extends StateHolder<?, S>> boolean test(StateDefinition<?, S> stateDefinition, S state)
         {
+            testStates:
             for (Map.Entry<String, Object> entry : this.properties.entrySet())
             {
                 String key = entry.getKey();
@@ -134,12 +131,12 @@ public record BlockRequirement(NegatableList<Either<TagKey<Block>, Block>> block
                 else if (value instanceof List<?> list)
                 {
                     if (list.isEmpty())
-                    {   return true;
+                    {   continue;
                     }
                     for (Object val : list)
                     {
                         if (state.getValue(property).toString().equals(val.toString()))
-                        {   return true;
+                        {   continue testStates;
                         }
                     }
                     return false;

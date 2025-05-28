@@ -100,12 +100,10 @@ public record LocationRequirement(IntegerBounds x, IntegerBounds y, IntegerBound
                                                       key -> level.dimension().equals(key))))
         {   return false;
         }
-
         if (!this.biome.test(either -> either.map(tag -> level.getBiomeManager().getNoiseBiomeAtPosition(pos).is(tag),
                                                  key -> level.getBiomeManager().getNoiseBiomeAtPosition(pos).is(key))))
         {   return false;
         }
-
         if (!this.structure.isEmpty())
         {
             StructureFeatureManager structureManager = WorldHelper.getServerLevel(level).structureFeatureManager();
@@ -118,7 +116,6 @@ public record LocationRequirement(IntegerBounds x, IntegerBounds y, IntegerBound
             {   return false;
             }
         }
-
         if (!this.light.test(level.getMaxLocalRawBrightness(pos)))
         {   return false;
         }
