@@ -74,6 +74,7 @@ public class ColdSweat
         ActivityInit.ACTIVITIES.register(bus);
         SensorTypeInit.SENSORS.register(bus);
         MemoryInit.MEMORIES.register(bus);
+        TempEffectInit.REGISTRY_REGISTER.register(bus);
 
         ModUpdater.updateFileNames();
 

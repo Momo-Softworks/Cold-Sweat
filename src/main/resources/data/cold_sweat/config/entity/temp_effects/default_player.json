@@ -1,0 +1,53 @@
+{
+  "entity": {
+    "entities": [
+      "minecraft:player"
+    ]
+  },
+  "effects": [
+    {
+      "effect": "cold_sweat:freeze_mining_speed",
+      "range": { "min": -50, "max": -100 }
+    },
+    {
+      "effect": "cold_sweat:freeze_movement_speed",
+      "range": { "min": -50, "max": -100 }
+    },
+    {
+      "effect": "cold_sweat:freeze_knockback",
+      "range": { "min": -50, "max": -100 }
+    },
+    {
+      "effect": "cold_sweat:freeze_healing",
+      "range": { "min": -50, "max": -100 }
+    },
+    {
+      "effect": "cold_sweat:freeze_hearts",
+      "range": { "min": -50, "max": -100 }
+    },
+    {
+      "effect": "cold_sweat:freeze_shiver",
+      "range": { "min": -50, "max": -100 }
+    },
+    {
+      "effect": "cold_sweat:freeze_overlay",
+      "range": { "min": -50, "max": -100 }
+    },
+    {
+      "effect": "cold_sweat:heat_blur",
+      "range": { "min": 50, "max": 100 }
+    },
+    {
+      "effect": "cold_sweat:heat_fog",
+      "range": { "min": 50, "max": 100 }
+    },
+    {
+      "effect": "cold_sweat:heat_sway",
+      "range": { "min": 50, "max": 100 }
+    },
+    {
+      "effect": "cold_sweat:heat_vignette",
+      "range": { "min": 50, "max": 100 }
+    }
+  ]
+}

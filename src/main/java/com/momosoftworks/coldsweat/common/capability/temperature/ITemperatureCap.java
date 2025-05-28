@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.common.capability.temperature;
 
+import com.momosoftworks.coldsweat.api.temperature.effect.TempEffect;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import net.minecraft.entity.LivingEntity;
@@ -25,6 +26,9 @@ public interface ITemperatureCap
     void markPersistentAttribute(Attribute attribute);
     void clearPersistentAttribute(Attribute attribute);
     Collection<Attribute> getPersistentAttributes();
+
+    void addTempEffect(TempEffect effect);
+    void clearTempEffects();
 
     void tick(LivingEntity entity);
     void tickDummy(LivingEntity entity);

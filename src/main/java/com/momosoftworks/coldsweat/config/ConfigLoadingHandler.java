@@ -9,7 +9,6 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.core.registry.CreateRegistriesEvent;
-import com.momosoftworks.coldsweat.api.event.vanilla.ServerConfigsLoadedEvent;
 import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTempConfig;
@@ -50,7 +49,9 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraftforge.registries.ForgeRegistries;
 
+import javax.xml.ws.Holder;
 import java.io.*;
 import java.nio.file.Path;
 import java.util.*;
@@ -273,6 +274,10 @@ public class ConfigLoadingHandler
         Collection<EntityClimateData> entityClimates = event.getRegistry(ModRegistries.ENTITY_CLIMATE_DATA);
         addEntityClimateConfigs(entityClimates);
         logRegistryLoaded(String.format("Loaded %s entity climates", entityClimates.size()), entityClimates);
+        // temp effects
+        Collection<TempEffectsData> tempEffects = event.getRegistry(ModRegistries.TEMP_EFFECTS_DATA);
+        addTempEffectsConfigs(tempEffects);
+        logRegistryLoaded(String.format("Loaded %s temp effects", tempEffects.size()), tempEffects);
 
         CreateRegistriesEvent.Post postEvent = new CreateRegistriesEvent.Post(registryAccess, event.getRegistries());
         MinecraftForge.EVENT_BUS.post(postEvent);
@@ -591,6 +596,20 @@ public class ConfigLoadingHandler
             }
             for (EntityType<?> entity : entities)
             {   ConfigSettings.ENTITY_CLIMATES.get().put(entity, entityTempData);
+            }
+        });
+    }
+
+    private static void addTempEffectsConfigs(Collection<TempEffectsData> tempEffects)
+    {
+        tempEffects.forEach(tempEffectsData ->
+        {
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapTaggableList(tempEffectsData.entity().nestedFlatMap(EntityRequirement::entities)));
+            if (entities.isEmpty())
+            {   entities.add(null);
+            }
+            for (EntityType<?> entity : entities)
+            {   ConfigSettings.ENTITY_TEMP_EFFECTS.get().put(entity, tempEffectsData);
             }
         });
     }

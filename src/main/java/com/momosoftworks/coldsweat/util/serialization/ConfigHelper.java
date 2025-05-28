@@ -665,4 +665,13 @@ public class ConfigHelper
         }
         return builder.toString();
     }
+
+    public static <K, V> V getFirstOrNull(DynamicHolder<Multimap<K, V>> map, K key, Predicate<V> filter)
+    {
+        Collection<V> values = map.get().get(key).stream().filter(filter).collect(Collectors.toList());
+        if (values.isEmpty())
+        {   return null;
+        }
+        return values.iterator().next();
+    }
 }

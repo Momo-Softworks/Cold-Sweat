@@ -963,8 +963,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     }
 
     public int getItemFuel(ItemStack item)
-    {   return ConfigHelper.findFirstFuelMatching(ConfigSettings.HEARTH_FUEL, item)
-               .map(FuelData::fuel).orElse(0d).intValue();
+    {   return CSMath.getIfNotNull(ConfigHelper.getFirstOrNull(ConfigSettings.HEARTH_FUEL, item.getItem(), data -> data.test(item)), FuelData::fuel, 0d).intValue();
     }
 
     public int getHotFuel()

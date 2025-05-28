@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.data;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.api.temperature.effect.TempEffect;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.util.exceptions.RegistryFailureException;
@@ -52,6 +53,7 @@ public class ModRegistries
     public static final ConfigRegistry<SpawnBiomeData> ENTITY_SPAWN_BIOME_DATA = createRegistry(RegistryKey.createRegistryKey(new ResourceLocation(ColdSweat.MOD_ID, "entity/spawn_biome")), SpawnBiomeData.CODEC, SpawnBiomeData.class);
     public static final ConfigRegistry<EntityTempData> ENTITY_TEMP_DATA = createRegistry(RegistryKey.createRegistryKey(new ResourceLocation(ColdSweat.MOD_ID, "entity/entity_temp")), EntityTempData.CODEC, EntityTempData.class);
     public static final ConfigRegistry<EntityClimateData> ENTITY_CLIMATE_DATA = createRegistry(RegistryKey.createRegistryKey(new ResourceLocation(ColdSweat.MOD_ID, "entity/climate")), EntityClimateData.CODEC, EntityClimateData.class);
+    public static final ConfigRegistry<TempEffectsData> TEMP_EFFECTS_DATA = createRegistry(RegistryKey.createRegistryKey(new ResourceLocation(ColdSweat.MOD_ID, "entity/temp_effects")), TempEffectsData.CODEC, TempEffectsData.class);
 
     // Special registries
     public static final ConfigRegistry<RemoveRegistryData<?>> REMOVE_REGISTRY_DATA = createRegistry(RegistryKey.createRegistryKey(new ResourceLocation(ColdSweat.MOD_ID, "remove")), RemoveRegistryData.CODEC, (Class) RemoveRegistryData.class);
