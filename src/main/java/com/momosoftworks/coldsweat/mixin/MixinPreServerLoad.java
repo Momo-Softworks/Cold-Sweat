@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ServerLifecycleHooks.class)
 public class MixinPreServerLoad
 {
-    @Inject(method = "handleServerAboutToStart", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/fml/config/ConfigTracker;loadConfigs(Lnet/minecraftforge/fml/config/ModConfig$Type;Ljava/nio/file/Path;)V"), remap = false)
+    @Inject(method = "handleServerAboutToStart", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/fml/config/ConfigTracker;loadConfigs(Lnet/minecraftforge/fml/config/ModConfig$Type;Ljava/nio/file/Path;)V", shift = At.Shift.AFTER), remap = false)
     private static void onPreServerLoad(MinecraftServer server, CallbackInfoReturnable<Boolean> cir)
     {   MinecraftForge.EVENT_BUS.post(new ServerConfigsLoadedEvent(server));
     }

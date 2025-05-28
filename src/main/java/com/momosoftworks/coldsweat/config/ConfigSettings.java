@@ -180,7 +180,8 @@ public class ConfigSettings
     public static final DynamicHolder<Multimap<Holder<Biome>, SpawnBiomeData>> ENTITY_SPAWN_BIOMES;
     public static final DynamicHolder<Multimap<EntityType<?>, MountData>> INSULATED_MOUNTS;
     public static final DynamicHolder<Multimap<EntityType<?>, EntityTempData>> ENTITY_TEMPERATURES;
-    public static final DynamicHolder<Map<EntityType<?>, EntityClimateData>> ENTITY_CLIMATES;
+    public static final DynamicHolder<Multimap<EntityType<?>, EntityClimateData>> ENTITY_CLIMATES;
+    public static final DynamicHolder<Multimap<EntityType<?>, TempEffectsData>> ENTITY_TEMP_EFFECTS;
     public static final DynamicHolder<Boolean> ENABLE_ENTITY_CLIMATES;
     public static final DynamicHolder<Boolean> ADVANCED_ENTITY_TEMPERATURE;
 
@@ -681,16 +682,22 @@ public class ConfigSettings
             holder.get().putAll(dataMap);
         });
 
-        ENTITY_CLIMATES = addSyncedSetting("entity_climates", HashMap::new, holder ->
+        ENTITY_CLIMATES = addSyncedSetting("entity_climates", RegistryMultiMap::new, holder ->
         {
-            Map<EntityType<?>, EntityClimateData> dataMap = ConfigHelper.parseTomlRegistryUnique(EntitySettingsConfig.ENTITY_CLIMATES,
+            Multimap<EntityType<?>, EntityClimateData> dataMap = ConfigHelper.parseTomlRegistry(EntitySettingsConfig.ENTITY_CLIMATES,
                                                                                                  EntityClimateData::fromToml,
                                                                                                  data -> data.entity().nestedFlatMap(EntityRequirement::entities),
                                                                                                  ForgeRegistries.ENTITIES, ModRegistries.ENTITY_CLIMATE_DATA);
             holder.get().putAll(dataMap);
         },
-        (encoder) -> ConfigHelper.serializeRegistry(encoder, "TempAffectedEntities", Registry.ENTITY_TYPE_REGISTRY, ModRegistries.ENTITY_CLIMATE_DATA, item -> ForgeRegistries.ENTITIES.getKey(item)),
-        (decoder) -> ConfigHelper.deserializeRegistry(decoder, "TempAffectedEntities", ModRegistries.ENTITY_CLIMATE_DATA, rl -> ForgeRegistries.ENTITIES.getValue(rl)),
+        (encoder) -> ConfigHelper.serializeMultimapRegistry(encoder, "TempAffectedEntities", Registry.ENTITY_TYPE_REGISTRY, ModRegistries.ENTITY_CLIMATE_DATA, item -> ForgeRegistries.ENTITIES.getKey(item)),
+        (decoder) -> ConfigHelper.deserializeMultimapRegistry(decoder, "TempAffectedEntities", ModRegistries.ENTITY_CLIMATE_DATA, rl -> ForgeRegistries.ENTITIES.getValue(rl)),
+        (saver) -> {},
+        SyncType.ONE_WAY);
+
+        ENTITY_TEMP_EFFECTS = addSyncedSetting("temp_effects", RegistryMultiMap::new, holder -> {},
+        (encoder) -> ConfigHelper.serializeMultimapRegistry(encoder, "TempEffects", Registry.ENTITY_TYPE_REGISTRY, ModRegistries.TEMP_EFFECTS_DATA, item -> ForgeRegistries.ENTITIES.getKey(item)),
+        (decoder) -> ConfigHelper.deserializeMultimapRegistry(decoder, "TempEffects", ModRegistries.TEMP_EFFECTS_DATA, rl -> ForgeRegistries.ENTITIES.getValue(rl)),
         (saver) -> {},
         SyncType.ONE_WAY);
 

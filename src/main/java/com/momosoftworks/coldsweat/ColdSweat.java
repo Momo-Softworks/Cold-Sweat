@@ -69,6 +69,7 @@ public class ColdSweat
         SoundInit.SOUNDS.register(bus);
         FeatureInit.FEATURES.register(bus);
         AttributeInit.ATTRIBUTES.register(bus);
+        TempEffectInit.REGISTRY_REGISTER.register(bus);
 
         ModUpdater.updateFileNames();
 

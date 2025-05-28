@@ -40,8 +40,10 @@ public class PreventPlayerSleep
         }
         // If the player's world temperature is critical
         else if (!CSMath.betweenExclusive(worldTemp, minTemp, maxTemp))
-        {   // Let the player sleep if they're resistant to damage
-            if (TempEffectsCommon.getTempResistance(event.getPlayer(), minTemp > worldTemp) >= 4)
+        {
+            // Let the player sleep if they're resistant to damage
+            double tempResistance = Temperature.get(player, worldTemp > maxTemp ? Temperature.Trait.HEAT_RESISTANCE : Temperature.Trait.COLD_RESISTANCE);
+            if (tempResistance >= 1)
             {   return;
             }
             // Prevent sleep with message

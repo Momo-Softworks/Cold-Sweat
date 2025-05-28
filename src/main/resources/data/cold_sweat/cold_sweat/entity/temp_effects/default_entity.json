@@ -1,0 +1,10 @@
+{
+  "entity": {
+    "entities": {
+      "exclude": [
+        "minecraft:player"
+      ]
+    }
+  },
+  "effects": []
+}
