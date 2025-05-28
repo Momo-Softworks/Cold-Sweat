@@ -49,7 +49,7 @@ public class FluidRequirement
     public boolean test(World pLevel, BlockPos pPos)
     {
         if (!pLevel.isLoaded(pPos))
-        {   return false;
+        {   return true;
         }
         else
         {   FluidState lState = pLevel.getFluidState(pPos);

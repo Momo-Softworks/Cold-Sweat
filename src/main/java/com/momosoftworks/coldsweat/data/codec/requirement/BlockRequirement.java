@@ -21,7 +21,6 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
 
@@ -76,7 +75,7 @@ public class BlockRequirement
 
     public boolean test(World level, BlockPos pos, BlockState state)
     {
-        if (!level.isLoaded(pos)) return false;
+        if (!level.isLoaded(pos)) return true;
 
         if (!this.blocks.test(either -> either.map(state::is, state::is)))
         {   return false;
@@ -94,18 +93,14 @@ public class BlockRequirement
         if (!this.sturdyFaces.isEmpty() && this.sturdyFaces.stream().noneMatch(face -> state.isFaceSturdy(level, pos, face)))
         {   return false;
         }
-        if (this.replaceable.isPresent())
-        {   return state.isAir() || state.getMaterial().isReplaceable();
+        if (this.replaceable.isPresent() && !(state.isAir() || state.getMaterial().isReplaceable()))
+        {   return false;
         }
         return true;
     }
 
     public boolean test(World level, BlockPos pos)
-    {
-        if (!level.isLoaded(pos))
-        {   return false;
-        }
-        return this.test(level, pos, level.getBlockState(pos));
+    {   return this.test(level, pos, level.getBlockState(pos));
     }
 
     @Override
@@ -150,6 +145,7 @@ public class BlockRequirement
 
         public <S extends StateHolder<?, S>> boolean test(StateContainer<?, S> stateDefinition, S state)
         {
+            testStates:
             for (Map.Entry<String, Object> entry : this.properties.entrySet())
             {
                 String key = entry.getKey();
@@ -173,12 +169,12 @@ public class BlockRequirement
                 {
                     List<?> list = (List<?>) value;
                     if (list.isEmpty())
-                    {   return true;
+                    {   continue;
                     }
                     for (Object val : list)
                     {
                         if (state.getValue(property).toString().equals(val.toString()))
-                        {   return true;
+                        {   continue testStates;
                         }
                     }
                     return false;
