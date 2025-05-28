@@ -13,22 +13,21 @@ import com.momosoftworks.coldsweat.client.gui.tooltip.SoulspringTooltip;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
 import com.momosoftworks.coldsweat.common.item.SoulspringLampItem;
+import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
-import com.momosoftworks.coldsweat.core.network.message.SyncItemPredicatesMessage;
-import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
-import com.momosoftworks.coldsweat.data.codec.configuration.FoodData;
-import com.momosoftworks.coldsweat.data.codec.configuration.FuelData;
-import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.core.init.ModAttributes;
 import com.momosoftworks.coldsweat.core.init.ModItemComponents;
 import com.momosoftworks.coldsweat.core.init.ModItems;
+import com.momosoftworks.coldsweat.core.network.message.SyncItemPredicatesMessage;
+import com.momosoftworks.coldsweat.data.codec.configuration.FoodData;
+import com.momosoftworks.coldsweat.data.codec.configuration.FuelData;
+import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
+import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
-import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.entity.EntityHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.FastMap;
-import com.momosoftworks.coldsweat.util.serialization.DynamicHolder;
+import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -486,10 +485,7 @@ public class TooltipHandler
                 double fuel = screen.getSlotUnderMouse().getItem().getOrDefault(ModItemComponents.SOULSPRING_LAMP_FUEL, 0d);
                 ItemStack carriedStack = screen.getMenu().getCarried();
 
-                FuelData itemFuel = ConfigSettings.SOULSPRING_LAMP_FUEL.get().get(carriedStack.getItem())
-                                         .stream()
-                                         .filter(predicate -> predicate.test(carriedStack))
-                                         .findFirst().orElse(null);
+                FuelData itemFuel = ConfigHelper.getFirstOrNull(ConfigSettings.SOULSPRING_LAMP_FUEL, carriedStack.getItem(), data -> data.test(carriedStack));
                 if (!carriedStack.isEmpty()
                 && itemFuel != null)
                 {

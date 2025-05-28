@@ -46,6 +46,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class ConfigHelper
@@ -780,5 +781,14 @@ public class ConfigHelper
             }
         }
         return results;
+    }
+
+    public static <K, V> V getFirstOrNull(DynamicHolder<Multimap<K, V>> map, K key, Predicate<V> filter)
+    {
+        Collection<V> values = map.get().get(key).stream().filter(filter).toList();
+        if (values.isEmpty())
+        {   return null;
+        }
+        return values.iterator().next();
     }
 }

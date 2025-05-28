@@ -211,14 +211,26 @@ public class CSMath
      * Calculates if the given value is between two values (inclusive)
      */
     public static boolean betweenInclusive(double value, double min, double max)
-    {   return value >= min && value <= max;
+    {
+        if (min > max)
+        {   double temp = min;
+            min = max;
+            max = temp;
+        }
+        return value >= min && value <= max;
     }
 
     /**
      * Calculates if the given value is between two values (exclusive)
      */
     public static boolean betweenExclusive(double value, double min, double max)
-    {   return value > min && value < max;
+    {
+        if (min > max)
+        {   double temp = min;
+            min = max;
+            max = temp;
+        }
+        return value > min && value < max;
     }
 
     /**

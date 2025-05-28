@@ -283,6 +283,10 @@ public class ConfigLoadingHandler
         Collection<Holder<EntityClimateData>> entityClimates = event.getRegistry(ModRegistries.ENTITY_CLIMATE_DATA);
         addEntityClimateConfigs(entityClimates);
         logRegistryLoaded(String.format("Loaded %s entity climates", entityClimates.size()), entityClimates);
+        // temp effects
+        Collection<Holder<TempEffectsData>> tempEffects = event.getRegistry(ModRegistries.TEMP_EFFECTS_DATA);
+        addTempEffectsConfigs(tempEffects);
+        logRegistryLoaded(String.format("Loaded %s temp effects", tempEffects.size()), tempEffects);
 
         CreateRegistriesEvent.Post postEvent = new CreateRegistriesEvent.Post(registryAccess, event.getRegistries());
         NeoForge.EVENT_BUS.post(postEvent);
@@ -634,6 +638,22 @@ public class ConfigLoadingHandler
             }
             for (EntityType<?> entity : entities)
             {   ConfigSettings.ENTITY_CLIMATES.get().put(entity, entityTempData);
+            }
+        });
+    }
+
+    private static void addTempEffectsConfigs(Collection<Holder<TempEffectsData>> tempEffects)
+    {
+        tempEffects.forEach(holder ->
+        {
+            TempEffectsData tempEffectsData = holder.value();
+
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, tempEffectsData.entity().nestedFlatMap(EntityRequirement::entities)));
+            if (entities.isEmpty())
+            {   entities.add(null);
+            }
+            for (EntityType<?> entity : entities)
+            {   ConfigSettings.ENTITY_TEMP_EFFECTS.get().put(entity, tempEffectsData);
             }
         });
     }

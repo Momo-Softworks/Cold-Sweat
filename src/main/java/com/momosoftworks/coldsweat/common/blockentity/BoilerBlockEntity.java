@@ -11,6 +11,7 @@ import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.core.init.ModSounds;
 import com.momosoftworks.coldsweat.data.codec.configuration.FuelData;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -207,8 +208,7 @@ public class BoilerBlockEntity extends HearthBlockEntity
 
     @Override
     public int getItemFuel(ItemStack item)
-    {   return ConfigHelper.findFirstFuelMatching(ConfigSettings.BOILER_FUEL, item)
-               .map(FuelData::fuel).orElse(0d).intValue();
+    {   return CSMath.getIfNotNull(ConfigHelper.getFirstOrNull(ConfigSettings.BOILER_FUEL, item.getItem(), data -> data.test(item)), FuelData::fuel, 0d).intValue();
     }
 
     @Override
