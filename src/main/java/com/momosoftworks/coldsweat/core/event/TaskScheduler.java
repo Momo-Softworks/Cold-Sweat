@@ -7,6 +7,10 @@ import net.minecraftforge.fml.common.Mod;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+/**
+ * A utility class that allows for scheduling {@link Runnable} tasks to be executed after a delay.<br>
+ * Tasks will not be preserved if the server or client restarts, so this should be used for short-term tasks only.<br>
+ */
 @Mod.EventBusSubscriber
 public class TaskScheduler
 {
@@ -48,7 +52,8 @@ public class TaskScheduler
     }
 
     /**
-     * Executes the given Runnable on the serverside after a specified delay
+     * Executes the given Runnable on the logical server after a specified delay.<br>
+     * If this is called on the client, the task will not execute.
      * @param task The code to execute
      * @param delay The delay in ticks
      */
@@ -57,7 +62,8 @@ public class TaskScheduler
     }
 
     /**
-     * Executes the given Runnable on the serverside after a specified delay
+     * Executes the given Runnable on the logical client after a specified delay.<br>
+     * If this is called on the server, the task will not execute.
      * @param task The code to execute
      * @param delay The delay in ticks
      */
@@ -65,6 +71,9 @@ public class TaskScheduler
     {   CLIENT_SCHEDULE.add(new QueueEntry(task, delay));
     }
 
+    /**
+     * Executes the given Runnable on both logical sides after a specified delay.<br>
+     */
     public static void schedule(Runnable task, int delay)
     {   scheduleServer(task, delay);
         scheduleClient(task, delay);
@@ -78,18 +87,6 @@ public class TaskScheduler
         public QueueEntry(Runnable task, int time)
         {   this.task = task;
             this.time = time;
-        }
-
-        public Runnable getTask()
-        {   return task;
-        }
-
-        public int getTime()
-        {   return time;
-        }
-
-        public void setTime(int time)
-        {   this.time = time;
         }
     }
 }
