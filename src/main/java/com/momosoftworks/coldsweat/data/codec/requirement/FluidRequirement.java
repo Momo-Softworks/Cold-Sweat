@@ -29,7 +29,7 @@ public record FluidRequirement(NegatableList<Either<TagKey<Fluid>, Fluid>> fluid
     public boolean test(Level pLevel, BlockPos pPos)
     {
         if (!pLevel.isLoaded(pPos))
-        {   return false;
+        {   return true;
         }
         else
         {   FluidState lState = pLevel.getFluidState(pPos);
