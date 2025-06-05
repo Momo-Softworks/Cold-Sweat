@@ -234,11 +234,11 @@ public class CSMath
     }
 
     /**
-     * Returns a number between the two given values {@code blendFrom} and {@code blendTo}, based on factor.<br>
-     * If {@code factor} = rangeMin, returns {@code blendFrom}. If {@code factor} = {@code rangeMax}, returns {@code blendTo}.<br>
-     * @param blendFrom The minimum value.
-     * @param blendTo The maximum value.
-     * @param factor The "progress" between blendFrom and blendTo.
+     * Returns a number between {@code blendFrom} and {@code blendTo}, proportional to {@code factor} between {@code rangeMin} and {@code rangeMax}.<br>
+     * Example: {@code blend(0, 1, 5, 0, 10)} yields 0.5, because 5 is halfway between 0 and 10, so 0.5 is halfway between 0 and 1.<br>
+     * @param blendFrom The minimum return value.
+     * @param blendTo The maximum return value.
+     * @param factor The input value.
      * @param rangeMin The minimum of the range of values over which to interpolate.
      * @param rangeMax The maximum of the range of values over which to interpolate.
      * @return The interpolated value.
@@ -256,26 +256,25 @@ public class CSMath
      * Floating-point overload for {@link #blend(double, double, double, double, double)}.
      */
     public static float blend(float blendFrom, float blendTo, float factor, float rangeMin, float rangeMax)
-    {
-        if (rangeMin > rangeMax) return blend(blendTo, blendFrom, factor, rangeMax, rangeMin);
-
-        if (factor <= rangeMin) return blendFrom;
-        if (factor >= rangeMax) return blendTo;
-        return (blendTo - blendFrom) / (rangeMax - rangeMin) * (factor - rangeMin) + blendFrom;
+    {   return (float) blend((double) blendFrom, blendTo, factor, rangeMin, rangeMax);
     }
 
     /**
      * A blend function with a logarithmic curve (starts fast, then slows down).<br>
      * @return The interpolated value.
      */
-    public static double blendLog(double blendFrom, double blendTo, double factor, double rangeMin, double rangeMax, double intensity)
+    public static double blendLog(double blendFrom, double blendTo, double factor, double rangeMin, double rangeMax)
     {
-        factor = clamp(factor, rangeMin, rangeMax);
+        if (factor <= rangeMin) return blendFrom;
+        if (factor >= rangeMax) return blendTo;
+        return (blendTo - blendFrom) / Math.sqrt(rangeMax - rangeMin) * Math.sqrt(factor - rangeMin) + blendFrom;
+    }
 
-        double normalizedFactor = (factor - rangeMin) / (rangeMax - rangeMin);
-        double logFactor = Math.log(intensity * normalizedFactor + 1) / Math.log(intensity + 1);
-
-        return blendFrom + (blendTo - blendFrom) * logFactor;
+    /**
+     * Floating-point overload for {@link #blendLog(double, double, double, double, double)}.
+     */
+    public static float blendLog(float blendFrom, float blendTo, float factor, float rangeMin, float rangeMax)
+    {   return (float) blendLog((double) blendFrom, blendTo, factor, rangeMin, rangeMax);
     }
 
     public static double blendExp(double blendFrom, double blendTo, double factor, double rangeMin, double rangeMax, double intensity)
@@ -298,7 +297,7 @@ public class CSMath
     }
 
     // Eases in and out, like a combination of blendLog and blendExp
-    public static float blendInOut(float blendFrom, float blendTo, float factor, float rangeMin, float rangeMax)
+    public static float blendEase(float blendFrom, float blendTo, float factor, float rangeMin, float rangeMax)
     {
         // Ensure factor is within the specified range
         factor = Math.max(rangeMin, Math.min(factor, rangeMax));
