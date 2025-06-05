@@ -202,9 +202,7 @@ public class SyncItemPredicatesMessage
         .forEach(data ->
         {
             UUID id = ((ConfigData) data).uuid();
-            System.out.println("-- TEST ITEM REQUIREMENT --");
             configMap.put(id, data.test(entity, stack));
-            System.out.println("-- TEST END --");
         });
         this.predicateMap.putAll(configMap);
     }
