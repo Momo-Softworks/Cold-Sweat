@@ -21,10 +21,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.NBTDynamicOps;
+import net.minecraft.nbt.*;
 import net.minecraft.resources.IResource;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.tags.*;
@@ -322,11 +319,78 @@ public class ConfigHelper
         }
     }
 
-    public static CompoundNBT serializeNbtString(String value, String key)
+    public static <V extends IForgeRegistryEntry<V>> CompoundNBT serializeBuiltinRegistryList(Collection<V> list, String key, IForgeRegistry<V> registry)
     {
         CompoundNBT tag = new CompoundNBT();
-        tag.putString(key, value);
+        ListNBT ListNBT = new ListNBT();
+
+        for (V value : list)
+        {
+            ResourceLocation id = registry.getKey(value);
+            if (id == null)
+            {   ColdSweat.LOGGER.error("Error serializing {} for {}: found unregistered element", registry.getRegistryName(), key);
+                continue;
+            }
+            ListNBT.add(StringNBT.valueOf(id.toString()));
+        }
+        tag.put(key, ListNBT);
         return tag;
+    }
+
+    public static <V extends IForgeRegistryEntry<V>> List<V> deserializeBuiltinRegistryList(CompoundNBT tag, String key, IForgeRegistry<V> registry)
+    {
+        List<V> list = new ArrayList<>();
+        ListNBT ListNBT = tag.getList(key, 8); // 8 is the type for StringNBT
+
+        for (INBT entry : ListNBT)
+        {
+            ResourceLocation id = new ResourceLocation(entry.getAsString());
+            V value = registry.getValue(id);
+            if (value == null)
+            {   ColdSweat.LOGGER.error("Error deserializing {} for {}: \"{}\" does not exist", registry.getRegistryName(), key, entry.getAsString());
+                continue;
+            }
+            list.add(value);
+        }
+        return list;
+    }
+
+    public static <V> CompoundNBT serializeRegistryList(Collection<V> list, String key, RegistryKey<Registry<V>> registry, DynamicRegistries registryAccess)
+    {
+        CompoundNBT tag = new CompoundNBT();
+        ListNBT ListNBT = new ListNBT();
+
+        Registry<V> reg = registryAccess.registryOrThrow(registry);
+        for (V value : list)
+        {
+            ResourceLocation id = reg.getKey(value);
+            if (id == null)
+            {   ColdSweat.LOGGER.error("Error serializing {} for {}: found unregistered element", reg.key(), key);
+                continue;
+            }
+            ListNBT.add(StringNBT.valueOf(id.toString()));
+        }
+        tag.put(key, ListNBT);
+        return tag;
+    }
+
+    public static <V> List<V> deserializeRegistryList(CompoundNBT tag, String key, RegistryKey<Registry<V>> registry, DynamicRegistries registryAccess)
+    {
+        List<V> list = new ArrayList<>();
+        ListNBT ListNBT = tag.getList(key, 8); // 8 is the type for StringNBT
+
+        Registry<V> reg = registryAccess.registryOrThrow(registry);
+        for (INBT entry : ListNBT)
+        {
+            ResourceLocation id = new ResourceLocation(entry.getAsString());
+            V value = reg.get(id);
+            if (value == null)
+            {   ColdSweat.LOGGER.error("Error deserializing {} for {}: \"{}\" does not exist", reg.key(), key, entry.getAsString());
+                continue;
+            }
+            list.add(value);
+        }
+        return list;
     }
 
     public static <K, V extends ConfigData> CompoundNBT serializeRegistry(Map<K, V> map, String key,
@@ -357,11 +421,11 @@ public class ConfigHelper
         {
             ResourceLocation elementId = keyGetter.apply(entry.getKey());
             if (elementId == null)
-            {   ColdSweat.LOGGER.error("Error serializing {}: \"{}\" does not exist", gameRegistry.location(), entry.getKey());
+            {   ColdSweat.LOGGER.error("Error serializing {} for {}: \"{}\" does not exist", gameRegistry.location(), key, entry.getKey());
                 continue;
             }
             codec.encode(entry.getValue(), encoderOps, encoderOps.empty())
-            .resultOrPartial(e -> ColdSweat.LOGGER.error("Error serializing {} {}: {}", modRegistry.key().location(), entry.getValue(), e))
+            .resultOrPartial(e -> ColdSweat.LOGGER.error("Error serializing {} {} for {}: {}", modRegistry.key().location(), entry.getValue(), key, e))
             .ifPresent(encoded ->
             {
                 ((CompoundNBT) encoded).putUUID("UUID", entry.getValue().uuid());
@@ -403,7 +467,7 @@ public class ConfigHelper
         {
             CompoundNBT entryData = mapTag.getCompound(entryKey);
             codec.decode(decoderOps, entryData)
-            .resultOrPartial(e -> ColdSweat.LOGGER.error("Error deserializing {}: {}", modRegistry.key().location(), e))
+            .resultOrPartial(e -> ColdSweat.LOGGER.error("Error deserializing {} for {}: {}", modRegistry.key().location(), key, e))
             .map(Pair::getFirst)
             .ifPresent(value ->
             {
@@ -446,14 +510,14 @@ public class ConfigHelper
         {
             ResourceLocation elementId = keyGetter.apply(entry.getKey());
             if (elementId == null)
-            {   ColdSweat.LOGGER.error("Error serializing {}: \"{}\" does not exist", gameRegistry.location(), entry.getKey());
+            {   ColdSweat.LOGGER.error("Error serializing {} for {}: \"{}\" does not exist", gameRegistry.location(), key, entry.getKey());
                 continue;
             }
             ListNBT valuesTag = new ListNBT();
             for (V value : entry.getValue())
             {
                 codec.encode(value, NBTDynamicOps.INSTANCE, NBTDynamicOps.INSTANCE.empty())
-                .resultOrPartial(e -> ColdSweat.LOGGER.error("Error serializing {} \"{}\": {}", modRegistry.key().location(), elementId, e))
+                .resultOrPartial(e -> ColdSweat.LOGGER.error("Error serializing {} {} for {}: {}", modRegistry.key().location(), entry.getValue(), key, e))
                 .ifPresent(encoded ->
                 {
                     ((CompoundNBT) encoded).putUUID("UUID", value.uuid());
@@ -497,7 +561,7 @@ public class ConfigHelper
             ListNBT entryData = mapTag.getList(entryKey, 10);
             K object = keyGetter.apply(new ResourceLocation(entryKey));
             if (object == null)
-            {   ColdSweat.LOGGER.error("Error deserializing: \"{}\" does not exist in registry", entryKey);
+            {   ColdSweat.LOGGER.error("Error deserializing {} for {}: \"{}\" does not exist", modRegistry.key().location(), key, entryKey);
                 continue;
             }
             for (INBT valueTag : entryData)
@@ -512,38 +576,6 @@ public class ConfigHelper
             }
         }
         return map;
-    }
-
-    public static <T> void writeRegistryMap(Map<Item, T> map, Function<T, List<String>> keyWriter,
-                                            Function<T, List<?>> valueWriter, Consumer<List<? extends List<?>>> saver)
-    {   writeRegistryMapLike(Either.left(map), keyWriter, valueWriter, saver);
-    }
-
-    public static <K, V> void writeRegistryMultimap(Multimap<K, V> map, Function<V, List<String>> keyWriter,
-                                                    Function<V, List<?>> valueWriter, Consumer<List<? extends List<?>>> saver)
-    {   writeRegistryMapLike(Either.right(map), keyWriter, valueWriter, saver);
-    }
-
-    private static <K, V> void writeRegistryMapLike(Either<Map<K, V>, Multimap<K, V>> map, Function<V, List<String>> keyWriter,
-                                                    Function<V, List<?>> valueWriter, Consumer<List<? extends List<?>>> saver)
-    {
-        List<List<?>> list = new ArrayList<>();
-        for (Map.Entry<K, V> entry : map.map(Map::entrySet, Multimap::entries))
-        {
-            V value = entry.getValue();
-
-            List<Object> itemData = new ArrayList<>();
-            List<String> keySet = keyWriter.apply(value);
-
-            itemData.add(concatStringList(keySet));
-
-            List<?> args = valueWriter.apply(value);
-            if (args == null) continue;
-
-            itemData.addAll(args);
-            list.add(itemData);
-        }
-        saver.accept(list);
     }
 
     public static <T extends IForgeRegistryEntry<T>> Codec<Either<ITag<T>, T>> tagOrBuiltinCodec(RegistryKey<Registry<T>> vanillaRegistry, Registry<T> forgeRegistry)
