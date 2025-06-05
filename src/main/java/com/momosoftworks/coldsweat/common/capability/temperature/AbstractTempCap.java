@@ -372,7 +372,7 @@ public class AbstractTempCap implements ITemperatureCap
                 newValue = value;
             }
         }
-        if (!DoubleMath.fuzzyEquals(newValue, baseValue, 0.001))
+        if (!DoubleMath.fuzzyEquals(newValue, this.getTrait(trait), 0.001))
         {
             // Fire temperature change event
             NeoForge.EVENT_BUS.post(new TemperatureChangedEvent(entity, trait, getTrait(trait), newValue));
