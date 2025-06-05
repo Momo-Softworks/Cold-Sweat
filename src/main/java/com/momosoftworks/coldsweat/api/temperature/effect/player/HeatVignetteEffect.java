@@ -18,10 +18,8 @@ import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
-import org.joml.Matrix4f;
 
 import static com.momosoftworks.coldsweat.common.event.HandleTempEffects.Client.HOT_IMMUNITY;
-import static com.momosoftworks.coldsweat.common.event.HandleTempEffects.Client.COLD_IMMUNITY;
 
 public class HeatVignetteEffect extends TempEffect
 {
@@ -48,12 +46,11 @@ public class HeatVignetteEffect extends TempEffect
 
         float blendTemp = (float) Overlays.BLEND_BODY_TEMP;
 
-        if (event.getName() == VanillaGuiLayers.CAMERA_OVERLAYS
-        && ((blendTemp > 0 && HOT_IMMUNITY < 1) || (blendTemp < 0 && COLD_IMMUNITY < 1)))
+        if (event.getName() == VanillaGuiLayers.CAMERA_OVERLAYS && blendTemp > 0 && HOT_IMMUNITY < 1)
         {
             // Setup calculations
-            float resistance = (float) CSMath.blend(1, 0, blendTemp > 0 ? HOT_IMMUNITY : COLD_IMMUNITY, 0, 1);
-            float opacity = CSMath.blend(0f, 1f, Math.abs(blendTemp), this.bounds().min(), this.bounds().max()) * resistance;
+            float resistance = (float) CSMath.blend(1, 0, HOT_IMMUNITY, 0, 1);
+            float opacity = CSMath.blend(0f, 1f, blendTemp, this.bounds().min(), this.bounds().max()) * resistance;
             float tickTime = player.tickCount + event.getPartialTick().getGameTimeDeltaPartialTick(true);
             if (opacity == 0) return;
             float width = Minecraft.getInstance().getWindow().getWidth();
