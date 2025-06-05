@@ -4,9 +4,6 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.Objects;
 
@@ -19,12 +16,9 @@ public abstract class TempEffect
     {
         this.entity = entity;
         this.bounds = range;
-        if (FMLEnvironment.dist == Dist.CLIENT || !this.isClient())
-        {   NeoForge.EVENT_BUS.register(this);
-        }
     }
 
-    protected abstract boolean isClient();
+    public abstract boolean isClient();
 
     protected LivingEntity entity()
     {   return this.entity;

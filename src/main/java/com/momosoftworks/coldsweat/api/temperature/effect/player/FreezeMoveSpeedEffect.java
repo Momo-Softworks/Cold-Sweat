@@ -49,7 +49,7 @@ public class FreezeMoveSpeedEffect extends TempEffect
     }
 
     @Override
-    protected boolean isClient()
+    public boolean isClient()
     {   return false;
     }
 }

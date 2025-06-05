@@ -38,7 +38,7 @@ public class FreezeKnockbackEffect extends TempEffect
     }
 
     @Override
-    protected boolean isClient()
+    public boolean isClient()
     {   return false;
     }
 }

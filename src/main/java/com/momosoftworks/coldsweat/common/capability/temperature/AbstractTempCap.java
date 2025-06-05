@@ -32,6 +32,8 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.NeoForge;
 
 import java.util.*;
@@ -195,7 +197,14 @@ public class AbstractTempCap implements ITemperatureCap
 
     @Override
     public void addTempEffect(TempEffect effect)
-    {   tempEffects.add(effect);
+    {
+        // Add temp effect
+        if (tempEffects.add(effect))
+        {   // Register the effect to the event bus
+            if (FMLEnvironment.dist == Dist.CLIENT || !effect.isClient())
+            {   NeoForge.EVENT_BUS.register(this);
+            }
+        }
     }
 
     @Override
