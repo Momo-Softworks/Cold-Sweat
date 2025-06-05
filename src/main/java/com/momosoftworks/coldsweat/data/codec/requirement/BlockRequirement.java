@@ -69,7 +69,8 @@ public record BlockRequirement(NegatableList<Either<TagKey<Block>, Block>> block
     }
 
     public boolean test(Level level, BlockPos pos)
-    {   return this.test(level, pos, level.getBlockState(pos));
+    {   if (!level.isLoaded(pos)) return true;
+        return this.test(level, pos, level.getBlockState(pos));
     }
 
     @Override
