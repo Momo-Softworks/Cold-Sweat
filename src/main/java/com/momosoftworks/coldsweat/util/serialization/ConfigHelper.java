@@ -13,7 +13,6 @@ import com.momosoftworks.coldsweat.config.ConfigLoadingHandler;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.configuration.FuelData;
-import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.math.FastMultiMap;
@@ -21,10 +20,7 @@ import com.momosoftworks.coldsweat.util.math.RegistryMultiMap;
 import net.minecraft.core.*;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.*;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -250,11 +246,78 @@ public class ConfigHelper
         }
     }
 
-    public static CompoundTag serializeNbtString(String value, String key)
+    public static <V> CompoundTag serializeBuiltinRegistryList(Collection<V> list, String key, Registry<V> registry)
     {
         CompoundTag tag = new CompoundTag();
-        tag.putString(key, value);
+        ListTag listTag = new ListTag();
+
+        for (V value : list)
+        {
+            ResourceLocation id = registry.getKey(value);
+            if (id == null)
+            {   ColdSweat.LOGGER.error("Error serializing {} for {}: found unregistered element", registry.key().location(), key);
+                continue;
+            }
+            listTag.add(StringTag.valueOf(id.toString()));
+        }
+        tag.put(key, listTag);
         return tag;
+    }
+
+    public static <V> List<V> deserializeBuiltinRegistryList(CompoundTag tag, String key, Registry<V> registry)
+    {
+        List<V> list = new ArrayList<>();
+        ListTag listTag = tag.getList(key, 8); // 8 is the type for StringTag
+
+        for (Tag entry : listTag)
+        {
+            ResourceLocation id = ResourceLocation.parse(entry.getAsString());
+            V value = registry.get(id);
+            if (value == null)
+            {   ColdSweat.LOGGER.error("Error deserializing {} for {}: \"{}\" does not exist", registry.key().location(), key, entry.getAsString());
+                continue;
+            }
+            list.add(value);
+        }
+        return list;
+    }
+
+    public static <V> CompoundTag serializeRegistryList(Collection<V> list, String key, ResourceKey<Registry<V>> registry, RegistryAccess registryAccess)
+    {
+        CompoundTag tag = new CompoundTag();
+        ListTag listTag = new ListTag();
+
+        Registry<V> reg = registryAccess.registryOrThrow(registry);
+        for (V value : list)
+        {
+            ResourceLocation id = reg.getKey(value);
+            if (id == null)
+            {   ColdSweat.LOGGER.error("Error serializing {} for {}: found unregistered element", reg.key(), key);
+                continue;
+            }
+            listTag.add(StringTag.valueOf(id.toString()));
+        }
+        tag.put(key, listTag);
+        return tag;
+    }
+
+    public static <V> List<V> deserializeRegistryList(CompoundTag tag, String key, ResourceKey<Registry<V>> registry, RegistryAccess registryAccess)
+    {
+        List<V> list = new ArrayList<>();
+        ListTag listTag = tag.getList(key, 8); // 8 is the type for StringTag
+
+        Registry<V> reg = registryAccess.registryOrThrow(registry);
+        for (Tag entry : listTag)
+        {
+            ResourceLocation id = ResourceLocation.parse(entry.getAsString());
+            V value = reg.get(id);
+            if (value == null)
+            {   ColdSweat.LOGGER.error("Error deserializing {} for {}: \"{}\" does not exist", reg.key(), key, entry.getAsString());
+                continue;
+            }
+            list.add(value);
+        }
+        return list;
     }
 
     public static <K, V extends ConfigData> CompoundTag serializeRegistry(Map<K, V> map, String key,
@@ -287,11 +350,11 @@ public class ConfigHelper
         {
             ResourceLocation elementId = keyGetter.apply(entry.getKey());
             if (elementId == null)
-            {   ColdSweat.LOGGER.error("Error serializing {}: \"{}\" does not exist", gameRegistry.location(), entry.getKey());
+            {   ColdSweat.LOGGER.error("Error serializing {} for {}: \"{}\" does not exist", gameRegistry.location(), key, entry.getKey());
                 continue;
             }
             codec.encode(entry.getValue(), encoderOps, encoderOps.empty())
-            .resultOrPartial(e -> ColdSweat.LOGGER.error("Error serializing {} {}: {}", modRegistry.location(), entry.getValue(), e))
+            .resultOrPartial(e -> ColdSweat.LOGGER.error("Error serializing {} {} for {}: {}", modRegistry.location(), entry.getValue(), key, e))
             .ifPresent(encoded ->
             {
                 ((CompoundTag) encoded).putUUID("UUID", entry.getValue().uuid());
@@ -334,7 +397,7 @@ public class ConfigHelper
         {
             CompoundTag entryData = mapTag.getCompound(entryKey);
             codec.decode(decoderOps, entryData)
-            .resultOrPartial(e -> ColdSweat.LOGGER.error("Error deserializing {}: {}", modRegistry.location(), e))
+            .resultOrPartial(e -> ColdSweat.LOGGER.error("Error deserializing {} for {}: {}", modRegistry.location(), key, e))
             .map(Pair::getFirst)
             .ifPresent(value ->
             {
@@ -380,14 +443,14 @@ public class ConfigHelper
         {
             ResourceLocation elementId = keyGetter.apply(entry.getKey());
             if (elementId == null)
-            {   ColdSweat.LOGGER.error("Error serializing {}: \"{}\" does not exist", gameRegistry.location(), entry.getKey());
+            {   ColdSweat.LOGGER.error("Error serializing {} for {}: \"{}\" does not exist", gameRegistry.location(), key, entry.getKey());
                 continue;
             }
             ListTag valuesTag = new ListTag();
             for (V value : entry.getValue())
             {
                 codec.encode(value, encoderOps, encoderOps.empty())
-                .resultOrPartial(e -> ColdSweat.LOGGER.error("Error serializing {} {}: {}", modRegistry.location(), entry.getValue(), e))
+                .resultOrPartial(e -> ColdSweat.LOGGER.error("Error serializing {} {} for {}: {}", modRegistry.location(), entry.getValue(), key, e))
                 .ifPresent(encoded ->
                 {
                     ((CompoundTag) encoded).putUUID("UUID", value.uuid());
@@ -434,7 +497,7 @@ public class ConfigHelper
             ListTag entryData = mapTag.getList(entryKey, 10);
             K object = keyGetter.apply(ResourceLocation.parse(entryKey));
             if (object == null)
-            {   ColdSweat.LOGGER.error("Error deserializing: \"{}\" does not exist in registry", entryKey);
+            {   ColdSweat.LOGGER.error("Error deserializing {} for {}: \"{}\" does not exist", modRegistry.location(), key, entryKey);
                 continue;
             }
             for (Tag valueTag : entryData)
@@ -449,38 +512,6 @@ public class ConfigHelper
             }
         }
         return map;
-    }
-
-    public static <T> void writeRegistryMap(Map<Item, T> map, Function<T, List<String>> keyWriter,
-                                            Function<T, List<?>> valueWriter, Consumer<List<? extends List<?>>> saver)
-    {   writeRegistryMapLike(Either.left(map), keyWriter, valueWriter, saver);
-    }
-
-    public static <K, V> void writeRegistryMultimap(Multimap<K, V> map, Function<V, List<String>> keyWriter,
-                                                    Function<V, List<?>> valueWriter, Consumer<List<? extends List<?>>> saver)
-    {   writeRegistryMapLike(Either.right(map), keyWriter, valueWriter, saver);
-    }
-
-    private static <K, V> void writeRegistryMapLike(Either<Map<K, V>, Multimap<K, V>> map, Function<V, List<String>> keyWriter,
-                                                    Function<V, List<?>> valueWriter, Consumer<List<? extends List<?>>> saver)
-    {
-        List<List<?>> list = new ArrayList<>();
-        for (Map.Entry<K, V> entry : map.map(Map::entrySet, Multimap::entries))
-        {
-            V value = entry.getValue();
-
-            List<Object> itemData = new ArrayList<>();
-            List<String> keySet = keyWriter.apply(value);
-
-            itemData.add(concatStringList(keySet));
-
-            List<?> args = valueWriter.apply(value);
-            if (args == null) continue;
-
-            itemData.addAll(args);
-            list.add(itemData);
-        }
-        saver.accept(list);
     }
 
     public static <T> Codec<Either<TagKey<T>, T>> tagOrBuiltinCodec(ResourceKey<Registry<T>> vanillaRegistry, DefaultedRegistry<T> forgeRegistry)
