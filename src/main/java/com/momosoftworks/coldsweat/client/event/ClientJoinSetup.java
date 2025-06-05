@@ -7,9 +7,11 @@ import com.momosoftworks.coldsweat.core.init.TempModifierInit;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.ClientConfigAskMessage;
 import com.momosoftworks.coldsweat.core.network.message.SyncPreferredUnitsMessage;
+import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -21,9 +23,16 @@ public class ClientJoinSetup
     {
         // Get configs
         ColdSweatPacketHandler.INSTANCE.sendToServer(new ClientConfigAskMessage());
-        ColdSweatPacketHandler.INSTANCE.sendToServer(new SyncPreferredUnitsMessage(ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F));
         // Rebuild TempModifier registries
         TempModifierInit.buildModifierRegistries();
         MinecraftForge.EVENT_BUS.post(new EdiblesRegisterEvent());
+    }
+
+    @SubscribeEvent
+    public static void onEverySpawn(EntityJoinLevelEvent event)
+    {
+        if (event.getEntity() == Minecraft.getInstance().player)
+        {   ColdSweatPacketHandler.INSTANCE.sendToServer(new SyncPreferredUnitsMessage(ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F));
+        }
     }
 }
