@@ -5,15 +5,13 @@ import com.momosoftworks.coldsweat.api.event.core.registry.TempModifierRegisterE
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.core.init.TempModifierInit;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.common.MinecraftForge;
 
 import static com.momosoftworks.coldsweat.api.util.Temperature.Trait;
 
-import java.util.EnumMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -31,9 +29,9 @@ public abstract class TempModifier
     private int expireTicks = -1;
     private int ticksExisted = 0;
     private int tickRate = 1;
-    private final Map<Trait, Double> lastInput = new EnumMap<>(Trait.class);
-    private final Map<Trait, Double> lastOutput = new EnumMap<>(Trait.class);
-    private final Map<Trait, Function<Double, Double>> function = new EnumMap<>(Trait.class);
+    private final Double[] lastInput = new Double[Trait.values().length];
+    private final Double[] lastOutput = new Double[Trait.values().length];
+    private final Function<Double, Double>[] function = new Function[Trait.values().length];
     private boolean changed = false;
 
     /**
@@ -94,14 +92,14 @@ public abstract class TempModifier
         MinecraftForge.EVENT_BUS.post(pre);
         if (pre.isCanceled())
         {
-            this.function.put(trait, pre.getFunction());
+            this.setFunction(trait, pre.getFunction());
             return this.apply(trait, pre.getTemperature());
         }
 
         TempModifierEvent.Calculate.Post post = new TempModifierEvent.Calculate.Post(this, entity, pre.getTemperature(), this.calculate(entity, trait), trait);
         MinecraftForge.EVENT_BUS.post(post);
 
-        this.function.put(trait, post.getFunction());
+        this.setFunction(trait, post.getFunction());
 
         return this.apply(trait, post.getTemperature());
     }
@@ -112,9 +110,9 @@ public abstract class TempModifier
      */
     public double apply(Trait trait, double temp)
     {
-        lastInput.put(trait, temp);
+        this.setLastInput(trait, temp);
         double output = this.getFunction(trait).apply(temp);
-        lastOutput.put(trait, output);
+        this.setLastOutput(trait, output);
         return output;
     }
 
@@ -139,21 +137,38 @@ public abstract class TempModifier
      * Returns a default (no-op) function if one hasn't been calculated for the given trait.
      */
     public final Function<Double, Double> getFunction(Trait trait)
-    {   return function.computeIfAbsent(trait, t -> (temp -> temp));
+    {
+        Function<Double, Double> func = function[trait.ordinal()];
+        if (func == null)
+        {   this.setFunction(trait, func = temp -> temp);
+        }
+        return func;
+    }
+
+    protected final void setFunction(Trait trait, Function<Double, Double> func)
+    {   function[trait.ordinal()] = func;
     }
 
     /**
      * @return The Temperature this TempModifier was last given
      */
     public final double getLastInput(Trait trait)
-    {   return lastInput.getOrDefault(trait, 0.0);
+    {   return CSMath.orElse(lastInput[trait.ordinal()], 0.0);
+    }
+
+    protected final void setLastInput(Trait trait, double temp)
+    {   lastInput[trait.ordinal()] = temp;
     }
 
     /**
      * @return The Temperature this TempModifier's function last returned
      */
     public final double getLastOutput(Trait trait)
-    {   return lastOutput.getOrDefault(trait, 0.0);
+    {   return CSMath.orElse(lastOutput[trait.ordinal()], 0.0);
+    }
+
+    protected final void setLastOutput(Trait trait, double temp)
+    {   lastOutput[trait.ordinal()] = temp;
     }
 
     public final CompoundTag getNBT()
