@@ -100,7 +100,8 @@ public class BlockRequirement
     }
 
     public boolean test(World level, BlockPos pos)
-    {   return this.test(level, pos, level.getBlockState(pos));
+    {   if (!level.isLoaded(pos)) return true;
+        return this.test(level, pos, level.getBlockState(pos));
     }
 
     @Override
