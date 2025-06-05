@@ -537,11 +537,15 @@ public class ConfigSettings
 
         CHECK_SLEEP_CONDITIONS = addSetting("check_sleep_conditions", () -> true, holder -> holder.set(WorldSettingsConfig.SHOULD_CHECK_SLEEP.get()));
 
-        SLEEP_CHECK_IGNORE_BLOCKS = addSetting("sleep_check_override_blocks", ArrayList::new, holder ->
+        SLEEP_CHECK_IGNORE_BLOCKS = addSyncedSetting("sleep_check_override_blocks", ArrayList::new, holder ->
         {
             var blocks = ConfigHelper.getBlocks(WorldSettingsConfig.SLEEPING_OVERRIDE_BLOCKS.get().toArray(new String[0]));
             holder.get().addAll(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.BLOCKS, blocks));
-        });
+        },
+        (encoder) -> ConfigHelper.serializeBuiltinRegistryList(encoder, "SleepCheckOverrideBlocks", ForgeRegistries.BLOCKS),
+        (decoder) -> ConfigHelper.deserializeBuiltinRegistryList(decoder, "SleepCheckOverrideBlocks", ForgeRegistries.BLOCKS),
+        (saver) -> {},
+        SyncType.ONE_WAY);
 
         USE_CUSTOM_WATER_FREEZE_BEHAVIOR = addSetting("custom_freeze_check", () -> true, holder -> holder.set(WorldSettingsConfig.CUSTOM_WATER_FREEZE_BEHAVIOR.get()));
 
@@ -726,25 +730,9 @@ public class ConfigSettings
             var blocks = ConfigHelper.getBlocks(WorldSettingsConfig.SOURCE_SPREAD_WHITELIST.get().toArray(new String[0]));
             holder.get().addAll(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.BLOCKS, blocks));
         },
-        (encoder) ->
-        {
-            CompoundTag tag = new CompoundTag();
-            ListTag list = new ListTag();
-            for (Block entry : encoder)
-            {   list.add(StringTag.valueOf(ForgeRegistries.BLOCKS.getKey(entry).toString()));
-            }
-            tag.put("HearthWhitelist", list);
-            return tag;
-        },
-        (decoder) ->
-        {
-            List<Block> list = new ArrayList<>();
-            for (Tag entry : decoder.getList("HearthWhitelist", 8))
-            {   list.add(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(entry.getAsString())));
-            }
-            return list;
-        },
-        saver -> WorldSettingsConfig.setSourceSpreadWhitelist(saver.stream().map(ForgeRegistries.BLOCKS::getKey).toList()),
+        (encoder) -> ConfigHelper.serializeBuiltinRegistryList(encoder, "HearthWhitelist", ForgeRegistries.BLOCKS),
+        (decoder) -> ConfigHelper.deserializeBuiltinRegistryList(decoder, "HearthWhitelist", ForgeRegistries.BLOCKS),
+        saver -> {},
         SyncType.ONE_WAY);
 
         THERMAL_SOURCE_SPREAD_BLACKLIST = addSyncedSetting("hearth_spread_blacklist", ArrayList::new, holder ->
@@ -752,25 +740,9 @@ public class ConfigSettings
             var blocks = ConfigHelper.getBlocks(WorldSettingsConfig.SOURCE_SPREAD_BLACKLIST.get().toArray(new String[0]));
             holder.get().addAll(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.BLOCKS, blocks));
         },
-        (encoder) ->
-        {
-            CompoundTag tag = new CompoundTag();
-            ListTag list = new ListTag();
-            for (Block entry : encoder)
-            {   list.add(StringTag.valueOf(ForgeRegistries.BLOCKS.getKey(entry).toString()));
-            }
-            tag.put("HearthBlacklist", list);
-            return tag;
-        },
-        (decoder) ->
-        {
-            List<Block> list = new ArrayList<>();
-            for (Tag entry : decoder.getList("HearthBlacklist", 8))
-            {   list.add(ForgeRegistries.BLOCKS.getValue(new ResourceLocation(entry.getAsString())));
-            }
-            return list;
-        },
-        saver -> WorldSettingsConfig.setSourceSpreadBlacklist(saver.stream().map(ForgeRegistries.BLOCKS::getKey).toList()),
+        (encoder) -> ConfigHelper.serializeBuiltinRegistryList(encoder, "HearthBlacklist", ForgeRegistries.BLOCKS),
+        (decoder) -> ConfigHelper.deserializeBuiltinRegistryList(decoder, "HearthBlacklist", ForgeRegistries.BLOCKS),
+        saver -> {},
         SyncType.ONE_WAY);
 
         THERMAL_SOURCE_STRENGTH = addSetting("hearth_effect", () -> 0.75, holder -> holder.set(WorldSettingsConfig.SOURCE_EFFECT_STRENGTH.get()));
