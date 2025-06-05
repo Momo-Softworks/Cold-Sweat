@@ -89,7 +89,7 @@ public class FreezeHeartsEffect extends TempEffect
     }
 
     @Override
-    protected boolean isClient()
+    public boolean isClient()
     {   return true;
     }
 }

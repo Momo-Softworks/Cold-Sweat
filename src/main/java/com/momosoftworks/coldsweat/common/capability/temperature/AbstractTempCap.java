@@ -28,7 +28,9 @@ import net.minecraft.nbt.StringNBT;
 import net.minecraft.potion.Effects;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
@@ -193,7 +195,14 @@ public class AbstractTempCap implements ITemperatureCap
 
     @Override
     public void addTempEffect(TempEffect effect)
-    {   tempEffects.add(effect);
+    {
+        // Add temp effect
+        if (tempEffects.add(effect))
+        {   // Register the effect to the event bus
+            if (FMLEnvironment.dist == Dist.CLIENT || !effect.isClient())
+            {   MinecraftForge.EVENT_BUS.register(this);
+            }
+        }
     }
 
     @Override

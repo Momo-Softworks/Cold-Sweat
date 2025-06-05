@@ -80,7 +80,7 @@ public class HeatVignetteEffect extends TempEffect
     }
 
     @Override
-    protected boolean isClient()
+    public boolean isClient()
     {   return true;
     }
 }

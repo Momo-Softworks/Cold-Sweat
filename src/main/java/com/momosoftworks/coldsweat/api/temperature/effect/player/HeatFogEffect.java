@@ -57,7 +57,7 @@ public class HeatFogEffect extends TempEffect
     }
 
     @Override
-    protected boolean isClient()
+    public boolean isClient()
     {   return true;
     }
 }
