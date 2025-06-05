@@ -169,7 +169,7 @@ public class DepthTempData extends ConfigData
                 case CONSTANT : return pos.getY() <= bottomHeight ? bottomTemp : topTemp;
                 case LINEAR : return CSMath.blend(bottomTemp, topTemp, pos.getY(), bottomHeight, topHeight);
                 case EXPONENTIAL : return CSMath.blendExp(bottomTemp, topTemp, pos.getY(), bottomHeight, topHeight);
-                case LOGARITHMIC : return CSMath.blendLog(bottomTemp, topTemp, pos.getY(), bottomHeight, topHeight);
+                case LOGARITHMIC : return CSMath.blendLog(bottomTemp, topTemp, pos.getY(), bottomHeight, topHeight, 1);
             }
             return topTemp;
         }
