@@ -4,43 +4,40 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.init.ModEffects;
 import com.momosoftworks.coldsweat.data.codec.configuration.TempEffectsData;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
-import glitchcore.event.TickEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
-import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
+import net.neoforged.neoforge.event.tick.EntityTickEvent;
 
 @EventBusSubscriber
 public class HandleTempEffects
 {
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void addTempEffects(EntityJoinLevelEvent event)
+    @SubscribeEvent
+    public static void addTempEffects(EntityTickEvent.Pre event)
     {
-        TaskScheduler.schedule(() ->
+        if (event.getEntity() instanceof LivingEntity living && living.tickCount > 5 && living.tickCount % 20 == 0)
         {
-            if (event.getEntity() instanceof LivingEntity living)
+            EntityTempManager.getTemperatureCap(living).ifPresent(cap ->
             {
+                cap.clearTempEffects();
+
                 TempEffectsData effectsData = ConfigHelper.getFirstOrNull(ConfigSettings.ENTITY_TEMP_EFFECTS, living.getType(), data -> data.test(living));
                 if (effectsData == null) return;
-                EntityTempManager.getTemperatureCap(living).ifPresent(cap ->
-                {
-                    effectsData.effects().forEach(holder ->
-                    {   cap.addTempEffect(holder.effect().create(living, holder.range()));
-                    });
+
+                effectsData.effects().forEach(holder ->
+                {   cap.addTempEffect(holder.effect().create(living, holder.range()));
                 });
-            }
-        }, 1);
+            });
+        }
     }
 
     @SubscribeEvent
