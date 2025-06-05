@@ -9,7 +9,6 @@ import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.LivingEntity;
@@ -18,11 +17,9 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.gui.ForgeIngameGui;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import static com.momosoftworks.coldsweat.common.event.HandleTempEffects.Client.HOT_IMMUNITY;
-import static com.momosoftworks.coldsweat.common.event.HandleTempEffects.Client.COLD_IMMUNITY;
 
 public class HeatVignetteEffect extends TempEffect
 {
@@ -49,12 +46,11 @@ public class HeatVignetteEffect extends TempEffect
 
         float blendTemp = (float) Overlays.BLEND_BODY_TEMP;
 
-        if (event.getType() == RenderGameOverlayEvent.ElementType.HOTBAR
-        && ((blendTemp > 0 && HOT_IMMUNITY < 1) || (blendTemp < 0 && COLD_IMMUNITY < 1)))
+        if (event.getType() == RenderGameOverlayEvent.ElementType.VIGNETTE && blendTemp > 0 && HOT_IMMUNITY < 1)
         {
             // Setup calculations
-            float resistance = (float) CSMath.blend(1, 0, blendTemp > 0 ? HOT_IMMUNITY : COLD_IMMUNITY, 0, 1);
-            float opacity = CSMath.blend(0f, 1f, Math.abs(blendTemp), this.bounds().min(), this.bounds().max()) * resistance;
+            float resistance = (float) CSMath.blend(1, 0, HOT_IMMUNITY, 0, 1);
+            float opacity = CSMath.blend(0f, 1f, blendTemp, this.bounds().min(), this.bounds().max()) * resistance;
             float tickTime = player.tickCount + event.getPartialTicks();
             if (opacity == 0) return;
             double width = event.getWindow().getWidth();

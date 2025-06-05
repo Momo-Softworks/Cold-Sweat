@@ -56,8 +56,8 @@ public class HeatSwayEffect extends TempEffect
                     if (TIME_SINCE_NEW_SWAY > 100 || X_SWAY_SPEED == 0 || Y_SWAY_SPEED == 0)
                     {
                         TIME_SINCE_NEW_SWAY = 0;
-                        X_SWAY_SPEED = (float) ((Math.random() * 0.001f + 0.0015f) * ConfigSettings.HEATSTROKE_SWAY_SPEED.get());
-                        Y_SWAY_SPEED = (float) ((Math.random() * 0.001f + 0.0015f) * ConfigSettings.HEATSTROKE_SWAY_SPEED.get());
+                        X_SWAY_SPEED = (float) ((Math.random() * 0.001f + 0.0025f) * ConfigSettings.HEATSTROKE_SWAY_SPEED.get());
+                        Y_SWAY_SPEED = (float) ((Math.random() * 0.001f + 0.0025f) * ConfigSettings.HEATSTROKE_SWAY_SPEED.get());
                     }
                     TIME_SINCE_NEW_SWAY += frameTime;
 
