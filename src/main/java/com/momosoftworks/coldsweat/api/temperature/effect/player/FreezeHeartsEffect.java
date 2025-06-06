@@ -67,13 +67,18 @@ public class FreezeHeartsEffect extends TempEffect
         // Render frozen hearts
         if (heartIndex <= frozenHearts)
         {
+            int oldTexture = RenderSystem.getShaderTexture(0);
             RenderSystem.setShaderTexture(0, HEART_TEXTURE);
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
             if (heartType == Gui.HeartType.CONTAINER)
             {   AbstractContainerScreen.blit(event.getPoseStack(), x + 1, y + 1, 14, v, 7, 7, 21, 28);
             }
             else
             {  AbstractContainerScreen.blit(event.getPoseStack(), x + 1, y + 1, u, v, 7, 7, 21, 28);
             }
+            RenderSystem.disableBlend();
+            RenderSystem.setShaderTexture(0, oldTexture);
         }
     }
 
