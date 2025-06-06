@@ -69,6 +69,7 @@ public class ColdSweat
         ModArmorMaterials.ARMOR_MATERIALS.register(bus);
         ModAdvancementTriggers.TRIGGERS.register(bus);
         ModItemComponents.DATA_COMPONENTS.register(bus);
+        ModTempEffects.TEMP_EFFECTS.register(bus);
 
         ModUpdater.updateFileNames();
 

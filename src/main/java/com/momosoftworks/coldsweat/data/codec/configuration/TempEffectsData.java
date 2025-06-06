@@ -5,7 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.temperature.effect.TempEffect;
 import com.momosoftworks.coldsweat.api.temperature.effect.TempEffectType;
-import com.momosoftworks.coldsweat.core.init.TempEffectInit;
+import com.momosoftworks.coldsweat.core.init.ModTempEffects;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.impl.RequirementHolder;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
@@ -73,7 +73,7 @@ public class TempEffectsData extends ConfigData implements RequirementHolder
         private final IntegerBounds range;
 
         private static final Codec<TempEffectType<?>> EFFECT_CODEC = ResourceLocation.CODEC.xmap(
-                rl -> CSMath.getIfNotNull(TempEffectInit.TEMP_EFFECTS_REGISTRY, reg ->
+                rl -> CSMath.getIfNotNull(ModTempEffects.REGISTRY, reg ->
                 {
                     TempEffectType<?> effectType = reg.get(rl);
                     if (effectType == null)
@@ -81,7 +81,7 @@ public class TempEffectsData extends ConfigData implements RequirementHolder
                     }
                     return effectType;
                 }, null),
-                effect -> CSMath.getIfNotNull(TempEffectInit.TEMP_EFFECTS_REGISTRY, reg -> reg.getKey(effect), null));
+                effect -> CSMath.getIfNotNull(ModTempEffects.REGISTRY, reg -> reg.getKey(effect), null));
 
         public static final Codec<TempEffectHolder> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 EFFECT_CODEC.fieldOf("effect").forGetter(TempEffectHolder::effect),
