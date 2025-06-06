@@ -11,15 +11,20 @@ public abstract class TempEffect
 {
     private final LivingEntity entity;
     private final IntegerBounds bounds;
+    private final TempEffectType<?> type;
 
-    public TempEffect(LivingEntity entity, IntegerBounds range)
+    public TempEffect(TempEffectType<?> type, LivingEntity entity, IntegerBounds range)
     {
+        this.type = type;
         this.entity = entity;
         this.bounds = range;
     }
 
     public abstract boolean isClient();
 
+    public TempEffectType<?> type()
+    {   return this.type;
+    }
     protected LivingEntity entity()
     {   return this.entity;
     }

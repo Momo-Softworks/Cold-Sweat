@@ -4,6 +4,7 @@ import com.google.common.math.DoubleMath;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.common.temperautre.TemperatureChangedEvent;
 import com.momosoftworks.coldsweat.api.temperature.effect.TempEffect;
+import com.momosoftworks.coldsweat.api.temperature.effect.TempEffectType;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.api.util.Temperature.Trait;
@@ -60,7 +61,7 @@ public class AbstractTempCap implements ITemperatureCap
     private final EnumMap<Trait, ModifiableAttributeInstance> attributes = new EnumMap<>(Trait.class);
     private final Map<ModifiableAttributeInstance, Map<AttributeModifier.Operation, Set<AttributeModifier>>> attributeModifiers = new HashMap<>();
 
-    private final Set<TempEffect> tempEffects = new HashSet<>();
+    private final HashMap<TempEffectType<?>, TempEffect> tempEffects = new HashMap<>();
 
     public boolean showBodyTemp;
     public boolean showWorldTemp;
@@ -194,22 +195,37 @@ public class AbstractTempCap implements ITemperatureCap
     }
 
     @Override
+    public HashMap<TempEffectType<?>, TempEffect> getTempEffects()
+    {   return tempEffects;
+    }
+
+    @Override
     public void addTempEffect(TempEffect effect)
     {
-        // Add temp effect
-        if (tempEffects.add(effect))
-        {   // Register the effect to the event bus
+        if (!tempEffects.containsKey(effect.type()))
+        {
+            // Add temp effect
+            tempEffects.put(effect.type(), effect);
+            // Register the effect to the event bus
             if (FMLEnvironment.dist == Dist.CLIENT || !effect.isClient())
-            {   MinecraftForge.EVENT_BUS.register(this);
+            {   MinecraftForge.EVENT_BUS.register(effect);
             }
         }
     }
 
     @Override
-    public void clearTempEffects()
+    public void removeTempEffect(TempEffectType<?> effect)
     {
-        this.tempEffects.forEach(MinecraftForge.EVENT_BUS::unregister);
-        tempEffects.clear();
+        this.tempEffects.computeIfPresent(effect, (type, e) ->
+        {
+            MinecraftForge.EVENT_BUS.unregister(e);
+            return null;
+        });
+    }
+
+    @Override
+    public void clearTempEffects()
+    {   this.tempEffects.keySet().forEach(this::removeTempEffect);
     }
 
     /* See Temperature class for more temperature-related methods */

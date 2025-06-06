@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.api.temperature.effect.player;
 
 import com.momosoftworks.coldsweat.api.event.vanilla.RenderLevelEvent;
 import com.momosoftworks.coldsweat.api.temperature.effect.TempEffect;
+import com.momosoftworks.coldsweat.api.temperature.effect.TempEffectType;
 import com.momosoftworks.coldsweat.client.gui.Overlays;
 import com.momosoftworks.coldsweat.client.renderer.PostProcessShaderManager;
 import com.momosoftworks.coldsweat.common.event.HandleTempEffects;
@@ -20,8 +21,8 @@ import static com.momosoftworks.coldsweat.common.event.HandleTempEffects.Client.
 
 public class HeatBlurEffect extends TempEffect
 {
-    public HeatBlurEffect(LivingEntity entity, IntegerBounds bounds)
-    {   super(entity, bounds);
+    public HeatBlurEffect(TempEffectType<?> type, LivingEntity entity, IntegerBounds bounds)
+    {   super(type, entity, bounds);
     }
 
     @OnlyIn(Dist.CLIENT)
