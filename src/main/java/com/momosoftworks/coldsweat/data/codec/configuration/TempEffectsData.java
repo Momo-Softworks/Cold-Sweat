@@ -73,7 +73,7 @@ public class TempEffectsData extends ConfigData implements RequirementHolder
         private final IntegerBounds range;
 
         private static final Codec<TempEffectType<?>> EFFECT_CODEC = ResourceLocation.CODEC.xmap(
-                rl -> CSMath.getIfNotNull(TempEffectInit.TEMP_EFFECTS_REGISTRY.get(), reg ->
+                rl -> CSMath.getIfNotNull(TempEffectInit.REGISTRY.get(), reg ->
                 {
                     TempEffectType<?> effectType = reg.getValue(rl);
                     if (effectType == null)
@@ -81,7 +81,7 @@ public class TempEffectsData extends ConfigData implements RequirementHolder
                     }
                     return effectType;
                 }, null),
-                effect -> CSMath.getIfNotNull(TempEffectInit.TEMP_EFFECTS_REGISTRY.get(), reg -> reg.getKey(effect), null));
+                effect -> CSMath.getIfNotNull(TempEffectInit.REGISTRY.get(), reg -> reg.getKey(effect), null));
 
         public static final Codec<TempEffectHolder> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 EFFECT_CODEC.fieldOf("effect").forGetter(TempEffectHolder::effect),

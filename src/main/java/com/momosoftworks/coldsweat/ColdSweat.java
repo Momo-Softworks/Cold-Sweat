@@ -63,6 +63,7 @@ public class ColdSweat
         CreativeTabInit.ITEM_GROUPS.register(bus);
         AttributeInit.ATTRIBUTES.register(bus);
         CommandInit.ARGUMENTS.register(bus);
+        TempEffectInit.TEMP_EFFECTS.register(bus);
 
         ModUpdater.updateFileNames();
 
