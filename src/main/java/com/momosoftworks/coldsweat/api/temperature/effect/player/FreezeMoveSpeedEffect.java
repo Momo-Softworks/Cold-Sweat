@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.api.temperature.effect.player;
 
 import com.momosoftworks.coldsweat.api.temperature.effect.TempEffect;
+import com.momosoftworks.coldsweat.api.temperature.effect.TempEffectType;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -13,8 +14,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class FreezeMoveSpeedEffect extends TempEffect
 {
-    public FreezeMoveSpeedEffect(LivingEntity entity, IntegerBounds bounds)
-    {   super(entity, bounds);
+    public FreezeMoveSpeedEffect(TempEffectType<?> type, LivingEntity entity, IntegerBounds bounds)
+    {   super(type, entity, bounds);
     }
 
     @SubscribeEvent

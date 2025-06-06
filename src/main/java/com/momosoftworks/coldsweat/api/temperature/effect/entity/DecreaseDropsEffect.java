@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.api.temperature.effect.entity;
 
 import com.momosoftworks.coldsweat.api.temperature.effect.TempEffect;
+import com.momosoftworks.coldsweat.api.temperature.effect.TempEffectType;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.world.entity.LivingEntity;
@@ -12,8 +13,8 @@ import java.util.Collection;
 
 public class DecreaseDropsEffect extends TempEffect
 {
-    public DecreaseDropsEffect(LivingEntity entity, IntegerBounds range)
-    {   super(entity, range);
+    public DecreaseDropsEffect(TempEffectType<?> type, LivingEntity entity, IntegerBounds bounds)
+    {   super(type, entity, bounds);
     }
 
     @SubscribeEvent
