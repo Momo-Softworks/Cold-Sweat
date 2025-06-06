@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.common.capability.temperature;
 
 import com.momosoftworks.coldsweat.api.temperature.effect.TempEffect;
+import com.momosoftworks.coldsweat.api.temperature.effect.TempEffectType;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import net.minecraft.nbt.CompoundTag;
@@ -10,6 +11,7 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
 public interface ITemperatureCap
 {
@@ -28,7 +30,9 @@ public interface ITemperatureCap
     Collection<Attribute> getPersistentAttributes();
 
     void addTempEffect(TempEffect effect);
+    void removeTempEffect(TempEffectType<?> effect);
     void clearTempEffects();
+    Map<TempEffectType<?>, TempEffect> getTempEffects();
 
     void tick(LivingEntity entity);
     void tickDummy(LivingEntity entity);

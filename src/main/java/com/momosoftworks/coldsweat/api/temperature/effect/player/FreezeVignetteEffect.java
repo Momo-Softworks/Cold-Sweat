@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.api.temperature.effect.player;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.momosoftworks.coldsweat.api.temperature.effect.TempEffect;
+import com.momosoftworks.coldsweat.api.temperature.effect.TempEffectType;
 import com.momosoftworks.coldsweat.client.gui.Overlays;
 import com.momosoftworks.coldsweat.common.event.HandleTempEffects;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
@@ -22,8 +23,8 @@ import static com.momosoftworks.coldsweat.common.event.HandleTempEffects.Client.
 
 public class FreezeVignetteEffect extends TempEffect
 {
-    public FreezeVignetteEffect(LivingEntity entity, IntegerBounds range)
-    {   super(entity, range);
+    public FreezeVignetteEffect(TempEffectType<?> type, LivingEntity entity, IntegerBounds bounds)
+    {   super(type, entity, bounds);
     }
 
     static final ResourceLocation TEXTURE = ResourceLocation.withDefaultNamespace("textures/misc/powder_snow_outline.png");

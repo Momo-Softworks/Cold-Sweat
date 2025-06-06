@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.api.temperature.effect.player;
 
 import com.momosoftworks.coldsweat.api.temperature.effect.TempEffect;
+import com.momosoftworks.coldsweat.api.temperature.effect.TempEffectType;
 import com.momosoftworks.coldsweat.client.gui.Overlays;
 import com.momosoftworks.coldsweat.common.event.HandleTempEffects;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -18,8 +19,8 @@ import static com.momosoftworks.coldsweat.common.event.HandleTempEffects.Client.
 
 public class FreezeShiverEffect extends TempEffect
 {
-    public FreezeShiverEffect(LivingEntity entity, IntegerBounds bounds)
-    {   super(entity, bounds);
+    public FreezeShiverEffect(TempEffectType<?> type, LivingEntity entity, IntegerBounds bounds)
+    {   super(type, entity, bounds);
     }
 
     @OnlyIn(Dist.CLIENT)

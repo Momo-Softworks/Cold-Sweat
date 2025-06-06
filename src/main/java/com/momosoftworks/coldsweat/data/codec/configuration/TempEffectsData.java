@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.data.codec.configuration;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.api.temperature.effect.TempEffect;
 import com.momosoftworks.coldsweat.api.temperature.effect.TempEffectType;
 import com.momosoftworks.coldsweat.core.init.TempEffectInit;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
@@ -66,9 +67,9 @@ public class TempEffectsData extends ConfigData implements RequirementHolder
             && effects.equals(that.effects);
     }
 
-    public static class TempEffectHolder
+    public static class TempEffectHolder<T extends TempEffect>
     {
-        private final TempEffectType<?> effect;
+        private final TempEffectType<T> effect;
         private final IntegerBounds range;
 
         private static final Codec<TempEffectType<?>> EFFECT_CODEC = ResourceLocation.CODEC.xmap(
@@ -87,12 +88,12 @@ public class TempEffectsData extends ConfigData implements RequirementHolder
                 IntegerBounds.CODEC.optionalFieldOf("range", IntegerBounds.NONE).forGetter(TempEffectHolder::range)
         ).apply(instance, TempEffectHolder::new));
 
-        public TempEffectHolder(TempEffectType<?> effect, IntegerBounds range)
+        public TempEffectHolder(TempEffectType<T> effect, IntegerBounds range)
         {   this.effect = effect;
             this.range = range;
         }
 
-        public TempEffectType<?> effect()
+        public TempEffectType<T> effect()
         {   return effect;
         }
 
