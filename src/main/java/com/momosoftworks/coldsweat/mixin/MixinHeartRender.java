@@ -9,9 +9,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/**
- * A needlessly complex mixin to render frozen hearts when the player's temp falls below -50
- */
 @Mixin(Gui.class)
 public class MixinHeartRender
 {
