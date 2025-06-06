@@ -5,50 +5,32 @@ import com.momosoftworks.coldsweat.api.temperature.effect.TempEffectType;
 import com.momosoftworks.coldsweat.api.temperature.effect.entity.DecreaseDropsEffect;
 import com.momosoftworks.coldsweat.api.temperature.effect.entity.PreventBreedingEffect;
 import com.momosoftworks.coldsweat.api.temperature.effect.player.*;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.*;
 
-import java.util.Objects;
 import java.util.function.Supplier;
 
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class TempEffectInit
 {
-    public static Supplier<IForgeRegistry<TempEffectType<?>>> TEMP_EFFECTS_REGISTRY;
+    public static final DeferredRegister<TempEffectType<?>> TEMP_EFFECTS = DeferredRegister.create(new ResourceLocation(ColdSweat.MOD_ID, "temp_effect"), ColdSweat.MOD_ID);
+    public static final Supplier<IForgeRegistry<TempEffectType<?>>> REGISTRY = TEMP_EFFECTS.makeRegistry(RegistryBuilder::new);
 
-    @SubscribeEvent
-    public static void onNewRegistry(NewRegistryEvent event)
+    static
     {
-        RegistryBuilder<TempEffectType<?>> registryBuilder = new RegistryBuilder<TempEffectType<?>>().setName(new ResourceLocation(ColdSweat.MOD_ID, "temp_effect"));
-        TEMP_EFFECTS_REGISTRY = event.create(registryBuilder);
-    }
+        TEMP_EFFECTS.register("freeze_healing", () -> new TempEffectType<>(FreezeHealingEffect::new));
+        TEMP_EFFECTS.register("freeze_hearts", () -> new TempEffectType<>(FreezeHeartsEffect::new));
+        TEMP_EFFECTS.register("freeze_knockback", () -> new TempEffectType<>(FreezeKnockbackEffect::new));
+        TEMP_EFFECTS.register("freeze_mining_speed", () -> new TempEffectType<>(FreezeMineSpeedEffect::new));
+        TEMP_EFFECTS.register("freeze_movement_speed", () -> new TempEffectType<>(FreezeMoveSpeedEffect::new));
+        TEMP_EFFECTS.register("freeze_shiver", () -> new TempEffectType<>(FreezeShiverEffect::new));
+        TEMP_EFFECTS.register("freeze_overlay", () -> new TempEffectType<>(FreezeVignetteEffect::new));
 
-    @SubscribeEvent
-    public static void onRegistration(RegisterEvent event)
-    {
-        if (Objects.equals(event.getForgeRegistry(), TEMP_EFFECTS_REGISTRY.get()))
-        {
-            event.register((ResourceKey) event.getRegistryKey(), helper ->
-            {
-                helper.register(new ResourceLocation(ColdSweat.MOD_ID, "freeze_healing"), new TempEffectType<>(FreezeHealingEffect::new));
-                helper.register(new ResourceLocation(ColdSweat.MOD_ID, "freeze_hearts"), new TempEffectType<>(FreezeHeartsEffect::new));
-                helper.register(new ResourceLocation(ColdSweat.MOD_ID, "freeze_knockback"), new TempEffectType<>(FreezeKnockbackEffect::new));
-                helper.register(new ResourceLocation(ColdSweat.MOD_ID, "freeze_mining_speed"), new TempEffectType<>(FreezeMineSpeedEffect::new));
-                helper.register(new ResourceLocation(ColdSweat.MOD_ID, "freeze_movement_speed"), new TempEffectType<>(FreezeMoveSpeedEffect::new));
-                helper.register(new ResourceLocation(ColdSweat.MOD_ID, "freeze_shiver"), new TempEffectType<>(FreezeShiverEffect::new));
-                helper.register(new ResourceLocation(ColdSweat.MOD_ID, "freeze_overlay"), new TempEffectType<>(FreezeVignetteEffect::new));
+        TEMP_EFFECTS.register("heat_blur", () -> new TempEffectType<>(HeatBlurEffect::new));
+        TEMP_EFFECTS.register("heat_fog", () -> new TempEffectType<>(HeatFogEffect::new));
+        TEMP_EFFECTS.register("heat_sway", () -> new TempEffectType<>(HeatSwayEffect::new));
+        TEMP_EFFECTS.register("heat_vignette", () -> new TempEffectType<>(HeatVignetteEffect::new));
 
-                helper.register(new ResourceLocation(ColdSweat.MOD_ID, "heat_blur"), new TempEffectType<>(HeatBlurEffect::new));
-                helper.register(new ResourceLocation(ColdSweat.MOD_ID, "heat_fog"), new TempEffectType<>(HeatFogEffect::new));
-                helper.register(new ResourceLocation(ColdSweat.MOD_ID, "heat_sway"), new TempEffectType<>(HeatSwayEffect::new));
-                helper.register(new ResourceLocation(ColdSweat.MOD_ID, "heat_vignette"), new TempEffectType<>(HeatVignetteEffect::new));
-
-                helper.register(new ResourceLocation(ColdSweat.MOD_ID, "prevent_breeding"), new TempEffectType<>(PreventBreedingEffect::new));
-                helper.register(new ResourceLocation(ColdSweat.MOD_ID, "decrease_drops"), new TempEffectType<>(DecreaseDropsEffect::new));
-            });
-        }
+        TEMP_EFFECTS.register("prevent_breeding", () -> new TempEffectType<>(PreventBreedingEffect::new));
+        TEMP_EFFECTS.register("decrease_drops", () -> new TempEffectType<>(DecreaseDropsEffect::new));
     }
 }

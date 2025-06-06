@@ -70,6 +70,7 @@ public class ColdSweat
         BiomeCodecInit.BIOME_MODIFIER_SERIALIZERS.register(bus);
         AttributeInit.ATTRIBUTES.register(bus);
         CommandInit.ARGUMENTS.register(bus);
+        TempEffectInit.TEMP_EFFECTS.register(bus);
 
         ModUpdater.updateFileNames();
 
