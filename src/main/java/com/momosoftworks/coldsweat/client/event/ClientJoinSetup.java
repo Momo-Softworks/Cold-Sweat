@@ -11,7 +11,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -29,7 +29,7 @@ public class ClientJoinSetup
     }
 
     @SubscribeEvent
-    public static void onEverySpawn(EntityJoinLevelEvent event)
+    public static void onEverySpawn(EntityJoinWorldEvent event)
     {
         if (event.getEntity() == Minecraft.getInstance().player)
         {   ColdSweatPacketHandler.INSTANCE.sendToServer(new SyncPreferredUnitsMessage(ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F));
