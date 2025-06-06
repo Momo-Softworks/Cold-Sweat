@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.common.event;
 
+import com.momosoftworks.coldsweat.api.temperature.effect.TempEffectType;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
@@ -18,6 +19,9 @@ import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Mod.EventBusSubscriber
 public class HandleTempEffects
 {
@@ -29,14 +33,23 @@ public class HandleTempEffects
         {
             EntityTempManager.getTemperatureCap(living).ifPresent(cap ->
             {
-                cap.clearTempEffects();
-
                 TempEffectsData effectsData = ConfigHelper.getFirstOrNull(ConfigSettings.ENTITY_TEMP_EFFECTS, living.getType(), data -> data.test(living));
                 if (effectsData == null) return;
 
+                List<TempEffectType<?>> addedEffects = new ArrayList<>();
+                // Add temp effects
                 effectsData.effects().forEach(holder ->
-                {   cap.addTempEffect(holder.effect().create(living, holder.range()));
+                {
+                    TempEffectType effectType = holder.effect();
+                    // Add effect if not present
+                    if (!cap.getTempEffects().containsKey(effectType))
+                    {   cap.addTempEffect(effectType.create(effectType, living, holder.range()));
+                    }
+                    // Mark effect as added
+                    addedEffects.add(effectType);
                 });
+                // Remove effects that are not applicable to the entity
+                cap.getTempEffects().keySet().stream().filter(type -> !addedEffects.contains(type)).forEach(cap::removeTempEffect);
             });
         }
     }
