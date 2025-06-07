@@ -3122,3 +3122,46 @@ Technical Changes:
       - The "more accurate" system is the old system, which is generally still less precise and more performant than getTemperatureAt()
 - Block requirements now accept a list of enum properties when checking block state (i.e. "type": ["top", "bottom"])
 - Added convert() method to KubeJS (mirror of the method from the Temperature class)
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.4-b03b
+- The icon of the input slot in the sewing table now switches between leather and shears to indicate that shears can be used
+- Added custom temperatures to biomes from Regions Unexplored
+      ! This only applies to freshly-generated configs, so world.toml might need to be deleted
+* Insulating armor items that don't grant any insulation will now accept insulation
+      - i.e. the Create netherite diving set, which only gives attribute modifiers
+- The attribute modifiers for the Create netherite diving set have been removed from the helmet, leggings, and boots
+      - The backtank now gives the full effect (+100% heat dampening, +50% cold dampening)
+
+Fixes:
+- (1.21) Fixed the effect ID for frigidness still being "cold_sweat:chill"
+* Fixed crash when calculating player/entity temperature attributes in some cases
+- Fixed potential crash when managing entity temperature caches internally
+- Fixed log spam when loading new entities into the world
+- Fixed water drip effects appearing when emerging from water in spectator mode
+- Fixed HUD elements rendering above other UI elements that they shouldn't
+- Fixed "matches" field in registry removals not accepting a list of values
+- Fixed "fuel" argument in KubeJS fuel configs being mistakenly named "temperature"
+- Fixed the thermometer showing Fahrenheit units when right-clicked, even if units are set to Celsius
+- Fixed TemperatureChangedEvent firing at incorrect times
+- Fixed mixin conflict with mods that modify smithing recipes (like Sortilege)
+
+Technical Changes:
+* Temperature effects are now a modular system
+      - Added a new TempEffect Forge (Java-based) registry
+      - Each individual temperature effect (freezing health, screen blur, etc.) is now registered as a TempEffect
+      - TempEffects are assigned to entities via JSON, and apply to certain temperature ranges
+            - i.e. health freezes over if the player's temperature is between -50 and -100
+      - This system will be expanded upon and more thoroughly documented in the future
+- Registry removals now support removing JSON registries by ID (i.e. "cold_sweat:entity/entity_temp/on_fire") via the "entries" field
+      - This does not work for TOML or KubeJS configs, as they do not have registry IDs
+- KubeJS configs are now passed through the normal config pipeline
+      - They are now present in CreateRegistriesEvent
+      - They can now be targeted by registry removals
+- The "matches" field in registry removals now uses NBT requirements instead of normal NBT
+      - This means that Cold Sweat's special NBT functions (cs:any_of, etc.) can now be used
+- Registry removals can now choose which config types to target via the "config_type" field
+      - Accepts a list of strings ("toml", "json", or "kubejs")
+- Added dedicated addRegistry() and addRegistries() methods to CreateRegistriesEvent
+- Create backtank pressure now drains if the player has any insulator equipped that is part of the #drains_backtank tag and passes its requirements
