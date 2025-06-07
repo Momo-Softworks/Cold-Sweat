@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(UpgradeRecipe.class)
+@Mixin(value = UpgradeRecipe.class, priority = 2000)
 public class MixinSmithingRecipe
 {
     @Inject(method = "assemble", at = @At("RETURN"), cancellable = true)
@@ -19,10 +19,7 @@ public class MixinSmithingRecipe
         ItemStack base = container.getItem(1);
         result.getCapability(ModCapabilities.ITEM_INSULATION).ifPresent(resultCap ->
         {
-            base.getCapability(ModCapabilities.ITEM_INSULATION).ifPresent(baseCap ->
-            {
-                resultCap.copy(baseCap);
-            });
+            base.getCapability(ModCapabilities.ITEM_INSULATION).ifPresent(resultCap::copy);
         });
         cir.setReturnValue(result);
     }
