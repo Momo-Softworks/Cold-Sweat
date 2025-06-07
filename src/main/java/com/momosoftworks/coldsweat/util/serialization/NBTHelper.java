@@ -28,7 +28,6 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 @EventBusSubscriber
 public class NBTHelper
@@ -223,13 +222,13 @@ public class NBTHelper
         {   if (obj instanceof Tag tg)
             {   tag.add(tg);
             }
-            else tag.add(writeValue(obj));
+            else tag.add(serialize(obj));
         }
         return tag;
     }
 
     @Nullable
-    public static Object getValue(Tag tag)
+    public static Object deserialize(Tag tag)
     {
         return switch (tag)
         {
@@ -243,50 +242,61 @@ public class NBTHelper
             case IntArrayTag intArray -> intArray.getAsIntArray();
             case LongArrayTag longArray -> longArray.getAsLongArray();
             case StringTag string -> string.getAsString();
-            case null, default -> null;
+            case CompoundTag compound ->
+            {
+                // Attempt to read an enum from the compound tag
+                if (compound.contains("value") && compound.contains("class"))
+                {   yield tryReadEnum(compound);
+                }
+                yield null;
+            }
+            case ListTag list -> list.stream().map(NBTHelper::deserialize).toList();
+            default -> null;
         };
     }
 
     @Nullable
-    public static Tag writeValue(Object obj)
+    private static <T extends Enum<T>> Enum<T> tryReadEnum(CompoundTag tag)
+    {
+        try
+        {
+            Class<?> clazz = Class.forName(tag.getString("class"));
+            return Enum.valueOf((Class<T>) clazz, tag.getString("value"));
+        }
+        catch (ClassNotFoundException e)
+        {   ColdSweat.LOGGER.error("Failed to read enum from compound tag: {}", e.getMessage());
+        }
+        return null;
+    }
+
+    @Nullable
+    public static Tag serialize(Object obj)
     {
         return switch (obj)
         {
             case Integer integer -> IntTag.valueOf(integer);
-            case Float floating -> FloatTag.valueOf(floating);
+            case Float floating ->  FloatTag.valueOf(floating);
             case Double doubleTag -> DoubleTag.valueOf(doubleTag);
             case Long longTag -> LongTag.valueOf(longTag);
             case Short shortTag -> ShortTag.valueOf(shortTag);
             case Byte byteTag -> ByteTag.valueOf(byteTag);
             case String string -> StringTag.valueOf(string);
-            case null, default -> null;
+            case List<?> list ->
+            {
+                ListTag tag = new ListTag();
+                for (Object item : list)
+                {
+                    Tag itemTag = serialize(item);
+                    if (itemTag != null) tag.add(itemTag);
+                }
+                yield tag;
+            }
+            case Enum<?> enm -> new CompoundTag()
+                {{
+                    putString("value", enm.name());
+                    putString("class", enm.getClass().getName());
+                }};
+            default -> null;
         };
-    }
-
-    public static class ItemMutator
-    {
-        private final ItemStack stack;
-
-        public ItemMutator(ItemStack stack)
-        {   this.stack = stack;
-        }
-
-        public void put(String key, Object value)
-        {
-            if (stack.has(DataComponents.CUSTOM_DATA))
-            {   Tag tagValue = writeValue(value);
-                if (tagValue == null) throw new IllegalArgumentException("Invalid value type for NBT: " + value.getClass().getName());
-                stack.set(DataComponents.CUSTOM_DATA, stack.get(DataComponents.CUSTOM_DATA).update(tag -> tag.put(key, tagValue)));
-            }
-        }
-
-        public <T> T get(String key)
-        {
-            if (stack.has(DataComponents.CUSTOM_DATA))
-            {   Tag tag = stack.get(DataComponents.CUSTOM_DATA).copyTag().get(key);
-                if (tag != null) return (T) getValue(tag);
-            }
-            return null;
-        }
     }
 }

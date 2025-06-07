@@ -169,16 +169,6 @@ public class AbstractTempCap implements ITemperatureCap
     {   getModifiers(trait).clear();
     }
 
-    @Override
-    public Temperature.Units getPreferredUnits()
-    {   return preferredUnits;
-    }
-
-    @Override
-    public void setPreferredUnits(Temperature.Units units)
-    {   preferredUnits = units;
-    }
-
     public boolean shouldShowBodyTemp()
     {   return showBodyTemp;
     }
@@ -477,9 +467,6 @@ public class AbstractTempCap implements ITemperatureCap
         // Copy persistent attributes
         this.persistentAttributes.clear();
         this.persistentAttributes.addAll(cap.getPersistentAttributes());
-
-        // Copy preferred units
-        this.setPreferredUnits(cap.getPreferredUnits());
     }
 
     @Override

@@ -1,19 +1,15 @@
 package com.momosoftworks.coldsweat.client.gui.config;
 
-import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.event.TooltipHandler;
 import com.momosoftworks.coldsweat.client.gui.config.pages.*;
 import com.momosoftworks.coldsweat.config.spec.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.core.network.message.SyncConfigSettingsMessage;
-import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.core.network.message.SyncPreferredUnitsMessage;
+import com.momosoftworks.coldsweat.core.network.message.SyncPreferencesMessage;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import com.momosoftworks.coldsweat.core.network.ModPacketHandlers;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.server.packs.repository.Pack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -60,7 +56,7 @@ public class ConfigScreen
         if (Minecraft.getInstance().player != null)
         {
             PacketDistributor.sendToServer(new SyncConfigSettingsMessage(registryAccess));
-            PacketDistributor.sendToServer(new SyncPreferredUnitsMessage(ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F));
+            PacketDistributor.sendToServer(SyncPreferencesMessage.create());
         }
         ClientSettingsConfig.writeAndSave();
     }

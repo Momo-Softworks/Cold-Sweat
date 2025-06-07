@@ -26,7 +26,7 @@ public class ModPacketHandlers
         registrar.playBidirectional(SyncConfigSettingsMessage.TYPE, SyncConfigSettingsMessage.CODEC, SyncConfigSettingsMessage::handle);
         registrar.playToClient(SyncContainerSlotMessage.TYPE, SyncContainerSlotMessage.CODEC, SyncContainerSlotMessage::handle);
         registrar.playToClient(SyncForgeDataMessage.TYPE, SyncForgeDataMessage.CODEC, SyncForgeDataMessage::handle);
-        registrar.playToServer(SyncPreferredUnitsMessage.TYPE, SyncPreferredUnitsMessage.CODEC, SyncPreferredUnitsMessage::handle);
+        registrar.playToServer(SyncPreferencesMessage.TYPE, SyncPreferencesMessage.CODEC, SyncPreferencesMessage::handle);
         registrar.playToClient(SyncShearableDataMessage.TYPE, SyncShearableDataMessage.CODEC, SyncShearableDataMessage::handle);
         registrar.playToClient(SyncTemperatureMessage.TYPE, SyncTemperatureMessage.CODEC, SyncTemperatureMessage::handle);
         registrar.playToClient(SyncTempModifiersMessage.TYPE, SyncTempModifiersMessage.CODEC, SyncTempModifiersMessage::handle);
