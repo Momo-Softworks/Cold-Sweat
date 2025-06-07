@@ -10,6 +10,7 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.slot.ScalingFormula;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.common.entity.data.Preference;
 import com.momosoftworks.coldsweat.config.spec.*;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
@@ -219,6 +220,9 @@ public class ConfigSettings
     public static final DynamicHolder<IntegerBounds> WATER_DROPLET_SCALE;
 
     public static final DynamicHolder<Boolean> ANIMATED_SOULSPRING_LAMP_MODEL;
+
+    public static final DynamicHolder<Preference.WaterskinAction> WATERSKIN_USE_PRIMARY;
+    public static final DynamicHolder<Preference.WaterskinAction> WATERSKIN_USE_SECONDARY;
 
 
     // Makes the settings instantiation collapsible & easier to read
@@ -955,6 +959,11 @@ public class ConfigSettings
         HEATSTROKE_SWAY_SPEED = addClientSetting("heatstroke_sway_speed", () -> 1.0, holder -> holder.set(ClientSettingsConfig.HEATSTROKE_SWAY_SPEED.get()));
 
         ANIMATED_SOULSPRING_LAMP_MODEL = addClientSetting("animated_soulspring_lamp_model", () -> true, holder -> holder.set(ClientSettingsConfig.ANIMATED_SOUL_SPRING_LAMP.get()));
+
+        WATERSKIN_USE_PRIMARY = addClientSetting("waterskin_primary_action", () -> Preference.WaterskinAction.POUR,
+            holder -> holder.set(Preference.WaterskinAction.byName(ClientSettingsConfig.WATERSKIN_DRINK_PRIMARY.get())));
+        WATERSKIN_USE_SECONDARY = addClientSetting("waterskin_secondary_action", () -> Preference.WaterskinAction.DRINK,
+            holder -> holder.set(Preference.WaterskinAction.byName(ClientSettingsConfig.WATERSKIN_DRINK_SECONDARY.get())));
 
         boolean seasonsModLoaded = !CompatManager.getSeasonsMods().isEmpty();
         SUMMER_TEMPS = addSetting("summer_temps", SeasonalTempData::new, holder -> holder.set(seasonsModLoaded ? SeasonalTempData.fromToml(WorldSettingsConfig.getSummerTemps()) : new SeasonalTempData()));

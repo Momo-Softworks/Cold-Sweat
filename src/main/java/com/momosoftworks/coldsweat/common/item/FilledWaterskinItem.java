@@ -4,6 +4,7 @@ import com.momosoftworks.coldsweat.api.temperature.modifier.WaterskinTempModifie
 import com.momosoftworks.coldsweat.api.util.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.event.TooltipHandler;
+import com.momosoftworks.coldsweat.common.entity.data.Preference;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.init.ItemInit;
@@ -40,6 +41,7 @@ import net.minecraft.world.level.block.LayeredCauldronBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -91,13 +93,13 @@ public class FilledWaterskinItem extends Item
         }
 
         consumeWaterskin(stack, player, hand);
-        player.swing(hand);
+        player.swing(hand, true);
 
         // spawn falling water particles
         Random rand = new Random();
         for (int i = 0; i < 6; i++)
         {
-            TaskScheduler.scheduleClient(() ->
+            TaskScheduler.scheduleServer(() ->
             {
                 ParticleBatchMessage particleBatch = new ParticleBatchMessage(2);
                 for (int p = 0; p < 10; p++)
@@ -139,10 +141,39 @@ public class FilledWaterskinItem extends Item
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand)
     {
         if (player.isCrouching())
-        {   return ItemUtils.startUsingInstantly(level, player, hand);
+        {   return performAction(Preference.getOrDefault(player, Preference.WATERSKIN_SECONDARY, Preference.WaterskinAction.DRINK), level, player, hand);
         }
-        else if (performPourAction(player.getItemInHand(hand), player, hand))
-        {   return InteractionResultHolder.consume(player.getItemInHand(hand));
+        else
+        {   return performAction(Preference.getOrDefault(player, Preference.WATERSKIN_PRIMARY, Preference.WaterskinAction.POUR), level, player, hand);
+        }
+    }
+
+    @Override
+    public void onUseTick(Level level, LivingEntity entity, ItemStack stack, int remainingTicks)
+    {
+        super.onUseTick(level, entity, stack, remainingTicks);
+        if (remainingTicks % 5 == 0 && remainingTicks < this.getUseDuration(stack) - 5)
+        {
+            Vec3 playerPos = entity.position().add(0, entity.getBbHeight() / 2, 0);
+            Vec3 lookVec = new Vec3(entity.getLookAngle().x, 0, entity.getLookAngle().z).normalize();
+            Vec3 particlePos = playerPos.add(lookVec.scale(0.3));
+            WorldHelper.spawnParticleBatch(level, ParticleTypes.SPLASH, particlePos.x, particlePos.y, particlePos.z, 0.2, 0.2, 0.2, 4, 0);
+        }
+    }
+
+    private static InteractionResultHolder<ItemStack> performAction(Preference.WaterskinAction action, Level level, Player player, InteractionHand hand)
+    {
+        switch (action)
+        {
+            case DRINK ->
+            {   return ItemUtils.startUsingInstantly(level, player, hand);
+            }
+            case POUR ->
+            {   if (performPourAction(player.getItemInHand(hand), player, hand))
+                {   return InteractionResultHolder.consume(player.getItemInHand(hand));
+                }
+            }
+            case NONE -> {}
         }
         return InteractionResultHolder.pass(player.getItemInHand(hand));
     }
