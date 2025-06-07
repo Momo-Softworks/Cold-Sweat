@@ -28,7 +28,7 @@ public class FuelBuilderJS
         return this;
     }
 
-    public FuelBuilderJS temperature(double temperature)
+    public FuelBuilderJS fuel(double temperature)
     {
         this.fuel = temperature;
         return this;
