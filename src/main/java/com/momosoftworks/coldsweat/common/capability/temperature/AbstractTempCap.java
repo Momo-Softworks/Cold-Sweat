@@ -227,7 +227,7 @@ public class AbstractTempCap implements ITemperatureCap
 
     @Override
     public void clearTempEffects()
-    {   this.tempEffects.values().forEach(MinecraftForge.EVENT_BUS::unregister);
+    {   this.tempEffects.values().forEach(NeoForge.EVENT_BUS::unregister);
         this.tempEffects.clear();
     }
 
