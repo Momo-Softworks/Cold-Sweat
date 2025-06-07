@@ -58,12 +58,12 @@ public class ClientSettingsConfig
 
     public static final ForgeConfigSpec.BooleanValue ANIMATED_SOUL_SPRING_LAMP;
 
-    static 
+    public static final ForgeConfigSpec.ConfigValue<String> WATERSKIN_DRINK_PRIMARY;
+    public static final ForgeConfigSpec.ConfigValue<String> WATERSKIN_DRINK_SECONDARY;
+
+    static
     {
-        /*
-         Temperature Display Preferences
-         */
-        BUILDER.push("Visual Preferences");
+        BUILDER.push("Preferences");
             USE_CELSIUS = BUILDER
                     .comment("Sets all temperatures to be displayed in Celsius")
                     .define("Celsius", false);
@@ -81,6 +81,14 @@ public class ClientSettingsConfig
             WATER_DROPLET_SCALE = BUILDER
                     .comment("The scale of the water droplets on-screen, in scaled \"pixels\"")
                     .defineList("Water Droplet Scale", Arrays.asList(40, 48), it -> it instanceof Integer);
+            WATERSKIN_DRINK_PRIMARY = BUILDER
+                    .comment("Defines the primary (right-click) action for the waterskin",
+                             "Can be one of \"drink\", \"pour\", or \"none\"")
+                    .define("Waterskin Primary Action", "pour");
+            WATERSKIN_DRINK_SECONDARY = BUILDER
+                    .comment("Defines the secondary (sneak-right-click) action for the waterskin",
+                             "Can be one of \"drink\", \"pour\", or \"none\"")
+                    .define("Waterskin Secondary Action", "drink");
         BUILDER.pop();
 
         BUILDER.push("UI Options");
@@ -113,6 +121,14 @@ public class ClientSettingsConfig
             SHOW_WORLD_TEMP_GAUGE = BUILDER
                     .comment("Enables the world temperature gauge")
                     .define("Show World Temperature Gauge", true);
+
+            SHOW_CONFIG_BUTTON = BUILDER
+                    .comment("Show the config menu button in the Options menu")
+                    .define("Enable In-Game Config", true);
+            CONFIG_BUTTON_POS = BUILDER
+                    .comment("The position (offset) of the config button on the screen")
+                    .defineList("Config Button Position", Arrays.asList(0, 0),
+                                it -> it instanceof Integer);
         BUILDER.pop();
 
         BUILDER.push("Accessibility");
@@ -137,13 +153,6 @@ public class ClientSettingsConfig
         BUILDER.pop();
 
         BUILDER.push("Misc");
-            SHOW_CONFIG_BUTTON = BUILDER
-                    .comment("Show the config menu button in the Options menu")
-                    .define("Enable In-Game Config", true);
-            CONFIG_BUTTON_POS = BUILDER
-                    .comment("The position (offset) of the config button on the screen")
-                    .defineList("Config Button Position", Arrays.asList(0, 0),
-                                it -> it instanceof Integer);
             ENABLE_CREATIVE_WARNING = BUILDER
                     .comment("Warns the player about a bug that clears armor insulation when in creative mode")
                     .define("Enable Creative Mode Warning", true);

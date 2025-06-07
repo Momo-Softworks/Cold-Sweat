@@ -37,9 +37,6 @@ public interface ITemperatureCap
     void tick(LivingEntity entity);
     void tickDummy(LivingEntity entity);
 
-    Temperature.Units getPreferredUnits();
-    void setPreferredUnits(Temperature.Units units);
-
     void copy(ITemperatureCap cap);
     void syncValues(LivingEntity entity);
 

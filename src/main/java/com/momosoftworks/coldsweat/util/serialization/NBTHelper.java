@@ -198,13 +198,13 @@ public class NBTHelper
         {   if (obj instanceof INBT)
             {   tag.add(((INBT) obj));
             }
-            else tag.add(writeValue(obj));
+            else tag.add(serialize(obj));
         }
         return tag;
     }
 
     @Nullable
-    public static Object getValue(INBT tag)
+    public static Object deserialize(INBT tag)
     {
         if (tag instanceof IntNBT)
         {   return ((IntNBT) tag).getAsInt();
@@ -236,11 +236,36 @@ public class NBTHelper
         else if (tag instanceof StringNBT)
         {   return ((StringNBT) tag).getAsString();
         }
+        else if (tag instanceof CompoundNBT)
+        {
+            CompoundNBT compound = (CompoundNBT) tag;
+            // Attempt to read an enum from the compound tag
+            if (compound.contains("value") && compound.contains("class"))
+            {   return tryReadEnum(compound);
+            }
+        }
+        else if (tag instanceof ListNBT)
+        {   return ((ListNBT)tag).stream().map(NBTHelper::deserialize).collect(Collectors.toList());
+        }
         return null;
     }
 
     @Nullable
-    public static INBT writeValue(Object obj)
+    private static <T extends Enum<T>> Enum<T> tryReadEnum(CompoundNBT tag)
+    {
+        try
+        {
+            Class<?> clazz = Class.forName(tag.getString("class"));
+            return Enum.valueOf((Class<T>) clazz, tag.getString("value"));
+        }
+        catch (ClassNotFoundException e)
+        {   ColdSweat.LOGGER.error("Failed to read enum from compound tag: {}", e.getMessage());
+        }
+        return null;
+    }
+
+    @Nullable
+    public static INBT serialize(Object obj)
     {
         if (obj instanceof Integer)
         {   return IntNBT.valueOf((Integer) obj);
@@ -262,6 +287,24 @@ public class NBTHelper
         }
         else if (obj instanceof String)
         {   return StringNBT.valueOf((String) obj);
+        }
+        else if (obj instanceof List<?>)
+        {
+            List<?> list = (List<?>) obj;
+            ListNBT tag = new ListNBT();
+            for (Object item : list)
+            {   INBT itemTag = serialize(item);
+                if (itemTag != null) tag.add(itemTag);
+            }
+            return tag;
+        }
+        else if (obj instanceof Enum<?>)
+        {
+            Enum<?> enm = (Enum<?>) obj;
+            return new CompoundNBT()
+            {{  putString("value", enm.name());
+                putString("class", enm.getClass().getName());
+            }};
         }
         return null;
     }

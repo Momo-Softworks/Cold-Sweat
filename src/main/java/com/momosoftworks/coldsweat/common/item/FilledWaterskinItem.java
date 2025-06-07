@@ -4,6 +4,7 @@ import com.momosoftworks.coldsweat.api.temperature.modifier.WaterskinTempModifie
 import com.momosoftworks.coldsweat.api.util.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.event.TooltipHandler;
+import com.momosoftworks.coldsweat.common.entity.data.Preference;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.init.ItemInit;
@@ -29,6 +30,7 @@ import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.*;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.IChunk;
@@ -86,13 +88,13 @@ public class FilledWaterskinItem extends Item
         }
 
         consumeWaterskin(stack, player, hand);
-        player.swing(hand);
+        player.swing(hand, true);
 
         // spawn falling water particles
         Random rand = new Random();
         for (int i = 0; i < 6; i++)
         {
-            TaskScheduler.scheduleClient(() ->
+            TaskScheduler.scheduleServer(() ->
             {
                 ParticleBatchMessage particleBatch = new ParticleBatchMessage(2);
                 for (int p = 0; p < 10; p++)
@@ -134,10 +136,40 @@ public class FilledWaterskinItem extends Item
     public ActionResult<ItemStack> use(World level, PlayerEntity player, Hand hand)
     {
         if (player.isCrouching())
-        {   return DrinkHelper.useDrink(level, player, hand);
+        {   return performAction(Preference.getOrDefault(player, Preference.WATERSKIN_SECONDARY, Preference.WaterskinAction.DRINK), level, player, hand);
         }
-        else if (performPourAction(player.getItemInHand(hand), player, hand))
-        {   return ActionResult.consume(player.getItemInHand(hand));
+        else
+        {   return performAction(Preference.getOrDefault(player, Preference.WATERSKIN_PRIMARY, Preference.WaterskinAction.POUR), level, player, hand);
+        }
+    }
+
+    @Override
+    public void onUseTick(World level, LivingEntity entity, ItemStack stack, int remainingTicks)
+    {
+        super.onUseTick(level, entity, stack, remainingTicks);
+        if (remainingTicks % 5 == 0 && remainingTicks < this.getUseDuration(stack) - 5)
+        {
+            Vector3d playerPos = entity.position().add(0, entity.getBbHeight() / 2, 0);
+            Vector3d lookVec = new Vector3d(entity.getLookAngle().x, 0, entity.getLookAngle().z).normalize();
+            Vector3d particlePos = playerPos.add(lookVec.scale(0.3));
+            WorldHelper.spawnParticleBatch(level, ParticleTypes.SPLASH, particlePos.x, particlePos.y, particlePos.z, 0.2, 0.2, 0.2, 4, 0);
+        }
+    }
+
+    private static ActionResult<ItemStack> performAction(Preference.WaterskinAction action, World level, PlayerEntity player, Hand hand)
+    {
+        switch (action)
+        {
+            case DRINK :
+            {   return DrinkHelper.useDrink(level, player, hand);
+            }
+            case POUR :
+            {   if (performPourAction(player.getItemInHand(hand), player, hand))
+                {   return ActionResult.consume(player.getItemInHand(hand));
+                }
+                break;
+            }
+            case NONE : break;
         }
         return ActionResult.pass(player.getItemInHand(hand));
     }
@@ -221,7 +253,7 @@ public class FilledWaterskinItem extends Item
             tooltip.add(new StringTextComponent(""));
             tooltip.add(new TranslationTextComponent("tooltip.cold_sweat.hotbar").withStyle(TextFormatting.GRAY));
             double effectRate = EFFECT_RATE * ConfigSettings.WATERSKIN_HOTBAR_STRENGTH.get();
-            IFormattableTextComponent tempEffectText = 
+            IFormattableTextComponent tempEffectText =
                                        (temp > 0  ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + CSMath.round(effectRate, 2)).withStyle(TooltipHandler.HOT) :
                                         temp == 0 ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+0").withStyle(TextFormatting.WHITE)
                                                   : new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "-" + CSMath.round(effectRate, 2)).withStyle(TooltipHandler.COLD))
@@ -229,7 +261,7 @@ public class FilledWaterskinItem extends Item
             tooltip.add(tempEffectText);
 
             // Info tooltip for drinking/pouring functionality
-            IFormattableTextComponent tempText = 
+            IFormattableTextComponent tempText =
                                  temp > 0  ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp)).withStyle(TooltipHandler.HOT) :
                                  temp == 0 ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp)).withStyle(TextFormatting.WHITE)
                                            : new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", CSMath.formatDoubleOrInt(temp)).withStyle(TooltipHandler.COLD);

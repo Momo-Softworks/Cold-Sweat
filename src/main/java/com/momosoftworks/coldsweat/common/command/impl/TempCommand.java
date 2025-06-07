@@ -10,10 +10,10 @@ import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
-import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
 import com.momosoftworks.coldsweat.common.command.BaseCommand;
 import com.momosoftworks.coldsweat.common.command.argument.*;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
+import com.momosoftworks.coldsweat.common.entity.data.Preference;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
@@ -85,7 +85,7 @@ public class TempCommand extends BaseCommand
                         .then(Commands.argument("pos", BlockPosArgument.blockPos())
                                 .executes(source ->
                                           {   BlockPos pos = BlockPosArgument.getLoadedBlockPos(source, "pos");
-                                              return executeGetWorldTemp(source.getSource(), pos.getX(), pos.getY(), pos.getZ(), source.getSource().getLevel());
+                                              return executeGetWorldTemp(source.getSource(), pos.getX(), pos.getY(), pos.getZ(), null);
                                           }
                                 )
                                 .then(Commands.argument("dimension", DimensionArgument.dimension())
@@ -283,9 +283,7 @@ public class TempCommand extends BaseCommand
             }
         }
 
-        Temperature.Units preferredUnits = CSMath.getIfNotNull(source.getEntity(),
-                                                               player -> EntityTempManager.getTemperatureCap(player).map(ITemperatureCap::getPreferredUnits).orElse(Temperature.Units.F),
-                                                               Temperature.Units.F);
+        Temperature.Units preferredUnits = source.getEntity() instanceof PlayerEntity ? Preference.getOrDefault((PlayerEntity)source.getEntity(), Preference.UNITS, Temperature.Units.F) : Temperature.Units.F;
         String unitsName = trait.isForWorld() ? " " + preferredUnits.getFormattedName() : "";
         double convertedTemp = Temperature.convertIfNeeded(temp, trait, preferredUnits);
 
@@ -308,9 +306,8 @@ public class TempCommand extends BaseCommand
         {   source.sendFailure(new TranslationTextComponent("commands.cold_sweat.temperature.invalid"));
             return 0;
         }
-        Temperature.Units preferredUnits = CSMath.getIfNotNull(source.getEntity(),
-                                                               player -> EntityTempManager.getTemperatureCap(player).map(ITemperatureCap::getPreferredUnits).orElse(Temperature.Units.F),
-                                                               Temperature.Units.F);
+        Temperature.Units preferredUnits = source.getEntity() instanceof PlayerEntity ? Preference.getOrDefault((PlayerEntity)source.getEntity(), Preference.UNITS, Temperature.Units.F) : Temperature.Units.F;
+
         for (Entity target : entities.stream().sorted(Comparator.comparing(player -> player.getName().getString())).collect(Collectors.toList()))
         {   //Compose & send message
             double temp = CSMath.truncate(Temperature.convertIfNeeded(Temperature.get((LivingEntity) target, trait), trait, preferredUnits), 2);
@@ -323,10 +320,10 @@ public class TempCommand extends BaseCommand
     }
 
     private int executeGetWorldTemp(CommandSource source, int x , int y, int z, ServerWorld level)
-    {   //Compose & send message
-        Temperature.Units units = CSMath.getIfNotNull(source.getEntity(), ent -> EntityTempManager.getTemperatureCap(ent).map(ITemperatureCap::getPreferredUnits).orElse(Temperature.Units.F), Temperature.Units.F);
-        int worldTemp = (int) Temperature.convert(WorldHelper.getTemperatureAt(level != null ? level : source.getLevel(),
-                                                                                   new BlockPos(x, y, z)),
+    {
+        //Compose & send message
+        Temperature.Units units = source.getEntity() instanceof PlayerEntity ? Preference.getOrDefault((PlayerEntity)source.getEntity(), Preference.UNITS, Temperature.Units.F) : Temperature.Units.F;
+        int worldTemp = (int) Temperature.convert(WorldHelper.getTemperatureAt(level != null ? level : source.getLevel(), new BlockPos(x, y, z)),
                                                        Temperature.Units.MC, units, true);
         source.sendSuccess(new TranslationTextComponent("commands.cold_sweat.temperature.get.world.result", x, y, z, worldTemp, units.getFormattedName()), true);
         return Command.SINGLE_SUCCESS;
@@ -435,7 +432,7 @@ public class TempCommand extends BaseCommand
         ModifiableAttributeInstance attribute = trait.isForAttributes()
                                                 ? EntityTempManager.getAttribute(trait, living)
                                                 : null;
-        Temperature.Units preferredUnits = EntityTempManager.getTemperatureCap(entity).map(ITemperatureCap::getPreferredUnits).orElse(Temperature.Units.F);
+        Temperature.Units preferredUnits = source.getEntity() instanceof PlayerEntity ? Preference.getOrDefault((PlayerEntity)source.getEntity(), Preference.UNITS, Temperature.Units.F) : Temperature.Units.F;
         double lastValue = trait == Temperature.Trait.BURNING_POINT ? ConfigSettings.MAX_TEMP.get()
                          : trait == Temperature.Trait.FREEZING_POINT ? ConfigSettings.MIN_TEMP.get()
                          : 0;

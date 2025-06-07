@@ -1,12 +1,10 @@
 package com.momosoftworks.coldsweat.client.event;
 
 import com.momosoftworks.coldsweat.api.event.core.registry.EdiblesRegisterEvent;
-import com.momosoftworks.coldsweat.api.util.Temperature;
-import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.TempModifierInit;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.ClientConfigAskMessage;
-import com.momosoftworks.coldsweat.core.network.message.SyncPreferredUnitsMessage;
+import com.momosoftworks.coldsweat.core.network.message.SyncPreferencesMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
@@ -32,7 +30,7 @@ public class ClientJoinSetup
     public static void onEverySpawn(EntityJoinWorldEvent event)
     {
         if (event.getEntity() == Minecraft.getInstance().player)
-        {   ColdSweatPacketHandler.INSTANCE.sendToServer(new SyncPreferredUnitsMessage(ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F));
+        {   ColdSweatPacketHandler.INSTANCE.sendToServer(SyncPreferencesMessage.create());
         }
     }
 }
