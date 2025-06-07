@@ -92,6 +92,7 @@ public class MixinItemTooltip
     @ModifyVariable(method = "getTooltipLines", at = @At(value = "STORE", ordinal = 0), ordinal = 0)
     private Multimap<Attribute, AttributeModifier> modifyAttributeModifiers(Multimap<Attribute, AttributeModifier> original, PlayerEntity player, ITooltipFlag advanced)
     {
+        if (player == null) return original;
         INSULATION_MODIFIERS.clear();
         UNMET_MODIFIERS.clear();
         Multimap<Attribute, AttributeModifier> modifiers = MultimapBuilder.linkedHashKeys().arrayListValues().build(original);
