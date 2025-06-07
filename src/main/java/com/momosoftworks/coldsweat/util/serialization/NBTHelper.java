@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 @Mod.EventBusSubscriber
 public class NBTHelper
@@ -200,13 +199,13 @@ public class NBTHelper
         {   if (obj instanceof Tag tg)
             {   tag.add(tg);
             }
-            else tag.add(writeValue(obj));
+            else tag.add(serialize(obj));
         }
         return tag;
     }
 
     @Nullable
-    public static Object getValue(Tag tag)
+    public static Object deserialize(Tag tag)
     {
         if (tag instanceof IntTag integer)
         {   return integer.getAsInt();
@@ -238,11 +237,35 @@ public class NBTHelper
         else if (tag instanceof StringTag string)
         {   return string.getAsString();
         }
+        else if (tag instanceof CompoundTag compound)
+        {
+            // Attempt to read an enum from the compound tag
+            if (compound.contains("value") && compound.contains("class"))
+            {   return tryReadEnum(compound);
+            }
+        }
+        else if (tag instanceof ListTag list)
+        {   return list.stream().map(NBTHelper::deserialize).toList();
+        }
         return null;
     }
 
     @Nullable
-    public static Tag writeValue(Object obj)
+    private static <T extends Enum<T>> Enum<T> tryReadEnum(CompoundTag tag)
+    {
+        try
+        {
+            Class<?> clazz = Class.forName(tag.getString("class"));
+            return Enum.valueOf((Class<T>) clazz, tag.getString("value"));
+        }
+        catch (ClassNotFoundException e)
+        {   ColdSweat.LOGGER.error("Failed to read enum from compound tag: {}", e.getMessage());
+        }
+        return null;
+    }
+
+    @Nullable
+    public static Tag serialize(Object obj)
     {
         if (obj instanceof Integer integer)
         {   return IntTag.valueOf(integer);
@@ -264,6 +287,22 @@ public class NBTHelper
         }
         else if (obj instanceof String string)
         {   return StringTag.valueOf(string);
+        }
+        else if (obj instanceof List<?> list)
+        {
+            ListTag tag = new ListTag();
+            for (Object item : list)
+            {   Tag itemTag = serialize(item);
+                if (itemTag != null) tag.add(itemTag);
+            }
+            return tag;
+        }
+        else if (obj instanceof Enum<?> enm)
+        {
+            return new CompoundTag()
+            {{  putString("value", enm.name());
+                putString("class", enm.getClass().getName());
+            }};
         }
         return null;
     }

@@ -1,12 +1,10 @@
 package com.momosoftworks.coldsweat.client.gui.config;
 
-import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.event.TooltipHandler;
 import com.momosoftworks.coldsweat.client.gui.config.pages.*;
 import com.momosoftworks.coldsweat.config.spec.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.core.network.message.SyncConfigSettingsMessage;
-import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.core.network.message.SyncPreferredUnitsMessage;
+import com.momosoftworks.coldsweat.core.network.message.SyncPreferencesMessage;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.client.Minecraft;
@@ -58,7 +56,7 @@ public class ConfigScreen
         if (Minecraft.getInstance().player != null)
         {
             ColdSweatPacketHandler.INSTANCE.sendToServer(new SyncConfigSettingsMessage(registryAccess));
-            ColdSweatPacketHandler.INSTANCE.sendToServer(new SyncPreferredUnitsMessage(ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F));
+            ColdSweatPacketHandler.INSTANCE.sendToServer(SyncPreferencesMessage.create());
         }
         ClientSettingsConfig.writeAndSave();
     }
