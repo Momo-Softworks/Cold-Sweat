@@ -276,7 +276,7 @@ public class ItemSettingsConfig
                          "Format: [[\"item_id\", slot_count, *\"nbt\"], [\"item_id\", slot_count, *\"nbt\"], ...etc]")
                 .defineListAllowEmpty(List.of("Insulation Slot Overrides"), () -> List.of(
                 ),
-                it -> it instanceof List<?> list && list.size() == 2
+                it -> it instanceof List<?> list
                         && list.get(0) instanceof String
                         && list.get(1) instanceof Number
                         && (list.size() < 3 || list.get(2) instanceof String));

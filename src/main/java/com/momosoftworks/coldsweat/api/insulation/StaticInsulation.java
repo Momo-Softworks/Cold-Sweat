@@ -66,7 +66,7 @@ public class StaticInsulation extends Insulation
 
         // Neutral insulation
         for (int i = 0; i < CSMath.ceil(Math.abs(neutral)); i++)
-        {   double neutralInsul = CSMath.minAbs(CSMath.shrink(neutral, i), 1 * CSMath.sign(neutral));
+        {   double neutralInsul = CSMath.minAbs(CSMath.shrink(neutral, i), CSMath.sign(neutral));
             insulation.add(new StaticInsulation(neutralInsul, neutralInsul));
         }
 
@@ -95,18 +95,5 @@ public class StaticInsulation extends Insulation
         return obj instanceof StaticInsulation insul
             && cold == insul.cold
             && heat == insul.heat;
-    }
-
-    @Override
-    public CompoundTag serialize()
-    {
-        CompoundTag tag = new CompoundTag();
-        tag.putDouble("cold", cold);
-        tag.putDouble("heat", heat);
-        return tag;
-    }
-
-    public static StaticInsulation deserialize(CompoundTag tag)
-    {   return new StaticInsulation(tag.getDouble("cold"), tag.getDouble("heat"));
     }
 }

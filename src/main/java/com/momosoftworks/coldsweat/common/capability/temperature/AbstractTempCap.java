@@ -49,7 +49,6 @@ public class AbstractTempCap implements ITemperatureCap
 {
     boolean changed = true;
     int syncTimer = 0;
-    Temperature.Units preferredUnits = Temperature.Units.F;
 
     private final Set<Attribute> persistentAttributes = new HashSet<>();
 

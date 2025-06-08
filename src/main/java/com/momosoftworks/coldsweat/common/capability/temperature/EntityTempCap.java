@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.common.capability.temperature;
 
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 

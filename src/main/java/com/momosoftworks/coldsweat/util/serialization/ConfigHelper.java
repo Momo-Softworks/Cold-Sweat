@@ -241,7 +241,7 @@ public class ConfigHelper
             return Pair.of(left.apply(leftTag), right.apply(rightTag));
         }
         catch (ClassCastException e)
-        {   throw ColdSweat.LOGGER.throwing(new ClassCastException(String.format("Error deserializing config setting {}: Wrong object type.", tag)));
+        {   throw ColdSweat.LOGGER.throwing(new ClassCastException(String.format("Error deserializing config setting %s: Wrong object type.", tag)));
         }
     }
 

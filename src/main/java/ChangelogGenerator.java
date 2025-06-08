@@ -1,6 +1,5 @@
 import java.io.*;
 import java.util.*;
-import java.util.regex.*;
 
 public class ChangelogGenerator {
     private static final String COMMON_STYLE = """

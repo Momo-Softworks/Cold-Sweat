@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.client.event;
 
 import com.mojang.datafixers.util.Pair;
-import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.client.renderer.block.IceboxBlockEntityRenderer;
 import com.momosoftworks.coldsweat.client.renderer.entity.ChameleonEntityRenderer;
 import com.momosoftworks.coldsweat.client.renderer.item.SoulSpringLampRenderer;
@@ -11,15 +10,12 @@ import com.momosoftworks.coldsweat.client.renderer.model.entity.ChameleonModel;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.EntityInit;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
-import net.minecraft.client.renderer.ItemModelShaper;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.client.resources.model.SimpleBakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -31,10 +27,8 @@ import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.ModelEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.Supplier;
 

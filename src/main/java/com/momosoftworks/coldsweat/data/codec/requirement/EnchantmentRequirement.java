@@ -12,7 +12,6 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Map;
-import java.util.Optional;
 
 public record EnchantmentRequirement(Either<TagKey<Enchantment>, Enchantment> enchantment, IntegerBounds level)
 {

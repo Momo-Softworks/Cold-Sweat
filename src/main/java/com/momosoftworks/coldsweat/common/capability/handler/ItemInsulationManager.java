@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.common.capability.handler;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
@@ -12,7 +11,6 @@ import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCa
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.data.codec.configuration.ItemInsulationSlotsData;
-import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;

@@ -6,7 +6,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.util.INBTSerializable;
 
-import java.util.Collection;
 import java.util.List;
 
 public interface IInsulatableCap extends INBTSerializable<CompoundTag>

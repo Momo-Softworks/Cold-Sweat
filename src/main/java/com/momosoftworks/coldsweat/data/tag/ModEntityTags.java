@@ -4,7 +4,6 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
 
 public class ModEntityTags

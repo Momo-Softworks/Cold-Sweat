@@ -29,7 +29,6 @@ import oshi.util.tuples.Triplet;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class WetnessRenderer

@@ -38,7 +38,7 @@ public record EntityRequirement(NegatableList<Either<TagKey<EntityType<?>>, Enti
                              NegatableList<String> team, Optional<EntityRequirement> vehicle, Optional<EntityRequirement> passenger,
                              Optional<EntityRequirement> target, Map<Temperature.Trait, DoubleBounds> temperature)
     {
-        this(entities, location, steppingOn, effects, nbt, flags, equipment, typeSpecificData, team, vehicle, passenger, target, temperature, Optional.empty());;
+        this(entities, location, steppingOn, effects, nbt, flags, equipment, typeSpecificData, team, vehicle, passenger, target, temperature, Optional.empty());
     }
 
     public EntityRequirement(List<Either<TagKey<EntityType<?>>, EntityType<?>>> entities)

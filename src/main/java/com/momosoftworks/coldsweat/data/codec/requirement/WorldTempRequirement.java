@@ -17,10 +17,10 @@ public record WorldTempRequirement(Either<Double, String> temperature)
             "temperate", () -> CSMath.average(ConfigSettings.MIN_TEMP.get(), ConfigSettings.MAX_TEMP.get()),
             "warm", () -> CSMath.blend(ConfigSettings.MIN_TEMP.get(), ConfigSettings.MAX_TEMP.get(), 0.67, 0, 1),
             "hot", () -> CSMath.blend(ConfigSettings.MIN_TEMP.get(), ConfigSettings.MAX_TEMP.get(), 0.83, 0, 1),
-            "burning", ConfigSettings.MAX_TEMP::get,
+            "burning", ConfigSettings.MAX_TEMP,
             "cool", () -> CSMath.blend(ConfigSettings.MIN_TEMP.get(), ConfigSettings.MAX_TEMP.get(), 0.33, 0, 1),
             "cold", () -> CSMath.blend(ConfigSettings.MIN_TEMP.get(), ConfigSettings.MAX_TEMP.get(), 0.17, 0, 1),
-            "freezing", ConfigSettings.MIN_TEMP::get);
+            "freezing", ConfigSettings.MIN_TEMP);
 
     public static final Codec<WorldTempRequirement> CODEC = Codec.either(Codec.DOUBLE, Codec.STRING)
             .xmap(either -> {

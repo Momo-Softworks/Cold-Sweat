@@ -26,10 +26,6 @@ public class FetchSeasonsModsEvent extends Event
     {   return ImmutableList.copyOf(seasonsMods);
     }
 
-    /**
-     *
-     * @param mod
-     */
     public void addSeasonsMod(String mod)
     {   seasonsMods.add(mod);
     }

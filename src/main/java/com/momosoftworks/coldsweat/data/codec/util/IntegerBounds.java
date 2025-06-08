@@ -4,7 +4,6 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import net.minecraft.nbt.CompoundTag;
 
 import java.util.Objects;
 

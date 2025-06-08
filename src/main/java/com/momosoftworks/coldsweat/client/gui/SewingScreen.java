@@ -1,8 +1,6 @@
 package com.momosoftworks.coldsweat.client.gui;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.momosoftworks.coldsweat.client.gui.util.CyclingSlotBackground;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;

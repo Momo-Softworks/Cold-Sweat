@@ -7,8 +7,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 
-import java.util.Optional;
-
 public record EquipmentRequirement(ItemRequirement head, ItemRequirement chest,
                                    ItemRequirement legs, ItemRequirement feet,
                                    ItemRequirement mainHand, ItemRequirement offHand)

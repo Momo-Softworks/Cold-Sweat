@@ -14,7 +14,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
 
-public class AttributeModifierMap implements NbtSerializable
+public class AttributeModifierMap
 {
     public static final Codec<AttributeModifierMap> CODEC = Codec.unboundedMap(AttributeCodecs.ATTRIBUTE_CODEC, AttributeCodecs.MODIFIER_CODEC.listOf())
             .xmap(AttributeModifierMap::new,
@@ -73,32 +73,6 @@ public class AttributeModifierMap implements NbtSerializable
 
     public void clear()
     {   map.clear();
-    }
-
-    @Override
-    public CompoundTag serialize()
-    {
-        CompoundTag tag = new CompoundTag();
-        map.asMap().forEach((attribute, modifier) ->
-        {   String key = ForgeRegistries.ATTRIBUTES.getKey(attribute).toString();
-            ListTag list = new ListTag();
-            modifier.forEach(mod -> list.add(mod.save()));
-            tag.put(key, list);
-        });
-        return tag;
-    }
-
-    public static AttributeModifierMap deserialize(CompoundTag tag)
-    {
-        if (tag.isEmpty()) return new AttributeModifierMap();
-
-        Multimap<Attribute, AttributeModifier> map = HashMultimap.create();
-        tag.getAllKeys().forEach(key ->
-        {   Attribute attribute = ForgeRegistries.ATTRIBUTES.getValue(new ResourceLocation(key));
-            ListTag list = tag.getList(key, 10);
-            list.forEach(mod -> map.put(attribute, AttributeModifier.load(((CompoundTag) mod))));
-        });
-        return new AttributeModifierMap(map);
     }
 
     @Override

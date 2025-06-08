@@ -1,20 +1,14 @@
 package com.momosoftworks.coldsweat.compat.kubejs;
 
-import com.google.common.collect.Multimap;
 import com.momosoftworks.coldsweat.api.event.common.insulation.InsulateItemEvent;
 import com.momosoftworks.coldsweat.api.event.common.temperautre.TempModifierEvent;
 import com.momosoftworks.coldsweat.api.event.common.temperautre.TemperatureChangedEvent;
 import com.momosoftworks.coldsweat.api.event.core.init.DefaultTempModifiersEvent;
 import com.momosoftworks.coldsweat.api.event.core.registry.CreateRegistriesEvent;
 import com.momosoftworks.coldsweat.compat.kubejs.event.*;
-import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import dev.architectury.event.EventResult;
 import dev.latvian.mods.kubejs.event.EventGroup;
 import dev.latvian.mods.kubejs.event.EventHandler;
-import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceKey;
 
 
 public class KubeEventHandlers

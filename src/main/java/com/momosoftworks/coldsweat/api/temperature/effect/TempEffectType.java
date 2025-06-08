@@ -2,9 +2,6 @@ package com.momosoftworks.coldsweat.api.temperature.effect;
 
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import net.minecraft.world.entity.LivingEntity;
-import org.apache.commons.lang3.function.TriFunction;
-
-import java.util.function.BiFunction;
 
 public class TempEffectType<T extends TempEffect>
 {

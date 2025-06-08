@@ -276,9 +276,9 @@ public abstract class AbstractConfigPage extends Screen
 
         // Mark this space as used
         if (side == Side.LEFT)
-            this.leftSideLength += ConfigScreen.OPTION_SIZE * 1;
+            this.leftSideLength += ConfigScreen.OPTION_SIZE;
         else
-            this.rightSideLength += ConfigScreen.OPTION_SIZE * 1;
+            this.rightSideLength += ConfigScreen.OPTION_SIZE;
     }
 
     /**

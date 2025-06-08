@@ -13,7 +13,7 @@ public class SyncContainerSlotMessage
 {
     int slot;
     ItemStack stack;
-    int containerId = -1;
+    int containerId;
 
     public SyncContainerSlotMessage(int slot, ItemStack stack, int containerId)
     {   this.slot = slot;

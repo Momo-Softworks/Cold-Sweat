@@ -199,10 +199,6 @@ public class SewingContainer extends ItemCombinerMenu
 
     /**
      * Tries to apply the given insulator to the armor item.<br>
-     * Fails if the
-     * @param armorItem
-     * @param insulatorItem
-     * @return
      */
     private boolean insulateArmorItem(ItemStack armorItem, ItemStack insulatorItem)
     {

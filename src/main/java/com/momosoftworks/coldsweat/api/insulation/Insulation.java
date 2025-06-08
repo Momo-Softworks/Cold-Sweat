@@ -4,16 +4,14 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.StringRepresentable;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
-public abstract class Insulation implements NbtSerializable
+public abstract class Insulation
 {
     public static Codec<Insulation> getCodec()
     {

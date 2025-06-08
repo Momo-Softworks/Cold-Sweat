@@ -85,7 +85,7 @@ public class TriggerHelper
         return values;
     }
 
-    record TempCondition(Temperature.Trait trait, double below, double above)
+    public record TempCondition(Temperature.Trait trait, double below, double above)
     {
         public boolean matches(double value)
         {   return below > above

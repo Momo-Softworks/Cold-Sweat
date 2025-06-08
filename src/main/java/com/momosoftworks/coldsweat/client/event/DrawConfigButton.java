@@ -37,7 +37,7 @@ public class DrawConfigButton
         if (event.getScreen() instanceof OptionsScreen && ConfigSettings.SHOW_CONFIG_BUTTON.get())
         {
             // The offset from the config
-            Supplier<Vector2i> buttonPos = () -> ConfigSettings.CONFIG_BUTTON_POS.get();
+            Supplier<Vector2i> buttonPos = ConfigSettings.CONFIG_BUTTON_POS;
             AtomicInteger xOffset = new AtomicInteger(buttonPos.get().x());
             AtomicInteger yOffset = new AtomicInteger(buttonPos.get().y());
             int buttonX = event.getScreen().width / 2 - 183;
