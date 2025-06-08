@@ -393,7 +393,7 @@ public class TooltipHandler
                 List<Insulation> insulation = new ArrayList<>();
                 List<Insulation> unmetInsulation = new ArrayList<>();
                 for (InsulatorData insulator : ConfigSettings.INSULATION_ITEMS.get().get(item))
-                {   validateInsulator(insulator, insulation, insulator.hideIfUnmet() ? new ArrayList<>() : unmetArmorInsulation);
+                {   validateInsulator(insulator, insulation, insulator.hideIfUnmet() ? new ArrayList<>() : unmetInsulation);
                 }
                 if (!insulation.isEmpty() && !insulation.equals(Insulation.splitList(armorInsulation)))
                 {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(insulation, Insulation.Slot.ITEM, stack, false)));
