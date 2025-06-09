@@ -101,9 +101,41 @@ public class SoulStalkBlock extends Block
     {   return new Random().nextInt(2, 4);
     }
 
+    protected void ensureProperState(LevelAccessor level, BlockPos pos)
+    {
+            BlockState aboveState = level.getBlockState(pos.above());
+            BlockState belowState = level.getBlockState(pos.below());
+            if (aboveState.is(this))
+            {
+                if (belowState.is(this))
+                {   this.ensureSectionAt(level, pos, getRandomMidsection());
+                }
+                else
+                {   this.ensureSectionAt(level, pos, Section.BASE);
+                }
+            }
+            else if (belowState.is(this))
+            {   this.ensureSectionAt(level, pos, Section.TOP);
+            }
+            else
+            {   this.ensureSectionAt(level, pos, Section.BUD);
+            }
+    }
+
+    private void ensureSectionAt(LevelAccessor level, BlockPos pos, Section section)
+    {
+        BlockState oldState = level.getBlockState(pos);
+        if (!oldState.is(this)) return;
+        Section oldSection = oldState.getValue(SECTION);
+        if (section.isMiddle() ? !oldSection.isMiddle() : oldSection != section)
+        {   level.setBlock(pos, oldState.setValue(SECTION, section), 3);
+        }
+    }
+
     @Override
     public void randomTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource rand)
     {
+        this.ensureProperState(level, pos);
         if (level.isEmptyBlock(pos.above()))
         {
             // Get the height of the plant
@@ -251,6 +283,7 @@ public class SoulStalkBlock extends Block
                 }
             }
         }
+        this.ensureProperState(level, pos);
         return state;
     }
 
@@ -273,22 +306,23 @@ public class SoulStalkBlock extends Block
 
     public enum Section implements StringRepresentable
     {
-        BASE("base", false),
-        MIDDLE("middle", false),
-        MIDDLE_SPROUT("middle_sprout", true),
-        TOP("top", true),
-        BUD("bud", true);
+        BASE("base"),
+        MIDDLE("middle"),
+        MIDDLE_SPROUT("middle_sprout"),
+        TOP("top"),
+        BUD("bud");
 
         private final String name;
-        private final boolean hasSprout;
 
-        Section(String name, boolean hasSprout)
+        Section(String name)
         {   this.name = name;
-            this.hasSprout = hasSprout;
         }
 
         public boolean hasFruit()
-        {   return hasSprout;
+        {   return this == TOP || this == MIDDLE_SPROUT || this == BUD;
+        }
+        public boolean isMiddle()
+        {   return this == MIDDLE || this == MIDDLE_SPROUT;
         }
 
         @Override
