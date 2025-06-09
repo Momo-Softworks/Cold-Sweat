@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.common.world.feature;
 import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.common.block.SoulStalkBlock;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -34,11 +35,6 @@ public class SoulStalkFeature extends Feature<SoulStalkFeatureConfig>
         IWorld level = world;
         BlockPos.Mutable pos = blockPos.mutable();
 
-        int diskWidth = config.diskWidth;
-        int diskHeight = config.diskHeight;
-        BlockStateProvider diskProvider = config.diskStateProvider;
-        ITag<Block> diskReplacer = config.replaceBlocks;
-
         int successes = 0;
         for (int t = 0; t < config.tries; t++)
         {   pos.set(blockPos).move(rand.nextInt(config.spreadXZ) - config.spreadXZ / 2,
@@ -55,7 +51,7 @@ public class SoulStalkFeature extends Feature<SoulStalkFeatureConfig>
                 pos.setY(startY + i);
                 if (pos.getY() < minHeight) continue;
                 if (pos.getY() > maxHeight) break;
-                if (level.getBlockState(pos).isAir())
+                if (level.getBlockState(pos).isAir() && level.getBlockState(pos.below()).isCollisionShapeFullBlock(level, pos.below()))
                 {
                     BlockState below = level.getBlockState(pos.below());
                     if (below.is(ModBlockTags.SOUL_SAND_REPLACEABLE) || below.is(ModBlockTags.SOUL_STALK_PLACEABLE_ON))
@@ -71,11 +67,11 @@ public class SoulStalkFeature extends Feature<SoulStalkFeatureConfig>
             if (level.getBlockState(pos.above()).isAir())
             {
                 // Spawn a disk of soul sand under the soul stalk if needed
-                if (!level.getBlockState(pos.below()).is(ModBlockTags.SOUL_STALK_PLACEABLE_ON) && diskWidth > 0 && diskHeight > 0)
-                {   placeDisk(level, pos.below(diskHeight), diskWidth, diskHeight, diskWidth, diskProvider, diskReplacer);
+                if (!level.getBlockState(pos.below()).is(ModBlockTags.SOUL_STALK_PLACEABLE_ON))
+                {   placeDisk(level, pos, config);
                 }
 
-                level.setBlock(pos, ModBlocks.SOUL_STALK.defaultBlockState(), 2);
+                level.setBlock(pos, ModBlocks.SOUL_STALK.defaultBlockState().setValue(SoulStalkBlock.SECTION, SoulStalkBlock.Section.BASE), 2);
                 int height = new Random().nextInt(5) + 2;
                 for (int i = 0; i < height && isAirOrLeaves(level, pos.above()); i++)
                 {   pos.move(0, 1, 0);
@@ -95,18 +91,31 @@ public class SoulStalkFeature extends Feature<SoulStalkFeatureConfig>
         return successes > 0;
     }
 
-    private static void placeDisk(IWorld level, BlockPos pos, int radiusX, int radiusY, int radiusZ, BlockStateProvider diskProvider, ITag<Block> diskReplacer)
+    private static void placeDisk(IWorld level, BlockPos pos, SoulStalkFeatureConfig config)
     {
-        for (int x = -radiusX; x <= radiusX; x++)
+        int diskWidth = config.diskWidth;
+        int diskHeight = config.diskHeight;
+        double diskDecay = config.diskDecay;
+        BlockStateProvider diskProvider = config.diskStateProvider;
+        ITag<Block> diskReplacer = config.replaceBlocks;
+
+        if (diskWidth <= 0 || diskHeight <= 0 || diskProvider == null || diskReplacer == null)
+        {   return;
+        }
+        for (int x = -diskWidth; x <= diskWidth; x++)
         {
-            for (int y = -radiusY; y <= radiusY; y++)
+            for (int y = -diskHeight; y <= diskHeight; y++)
             {
-                for (int z = -radiusZ; z <= radiusZ; z++)
+                for (int z = -diskWidth; z <= diskWidth; z++)
                 {
-                    if (Math.pow((double) x / radiusX, 2) + Math.pow((double) y / radiusY, 2) + Math.pow((double) z / radiusZ, 2) < 1)
+                    if (Math.pow((double) x / diskWidth, 2) + Math.pow((double) y / diskHeight, 2) + Math.pow((double) z / diskWidth, 2) < 1)
                     {
                         BlockPos diskPos = pos.offset(x, y, z);
-                        if (level.getBlockState(diskPos).is(diskReplacer))
+                        double distance = Math.sqrt(diskPos.distSqr(pos));
+                        double distFactor = CSMath.blend(level.getRandom().nextDouble(), 0, distance, 0, diskWidth);
+                        // Place block
+                        if (diskDecay > 0.0 && distFactor > diskDecay
+                        && level.getBlockState(diskPos).is(diskReplacer))
                         {   level.setBlock(diskPos, diskProvider.getState(level.getRandom(), diskPos), 2);
                         }
                     }

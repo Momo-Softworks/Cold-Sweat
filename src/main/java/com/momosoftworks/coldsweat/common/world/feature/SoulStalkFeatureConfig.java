@@ -20,10 +20,11 @@ public class SoulStalkFeatureConfig implements IFeatureConfig
     int spreadY;
     int diskWidth;
     int diskHeight;
+    double diskDecay;
     BlockStateProvider diskStateProvider;
     ITag<Block> replaceBlocks;
 
-    public SoulStalkFeatureConfig(int tries, int minCount, int maxCount, int spreadXZ, int spreadY, int diskWidth, int diskHeight, BlockStateProvider diskStateProvider, ITag<Block> replaceBlocks)
+    public SoulStalkFeatureConfig(int tries, int minCount, int maxCount, int spreadXZ, int spreadY, int diskWidth, int diskHeight, double diskDecay, BlockStateProvider diskStateProvider, ITag<Block> replaceBlocks)
     {   this.tries = tries;
         this.minCount = minCount;
         this.maxCount = maxCount;
@@ -31,6 +32,7 @@ public class SoulStalkFeatureConfig implements IFeatureConfig
         this.spreadY = spreadY;
         this.diskWidth = diskWidth;
         this.diskHeight = diskHeight;
+        this.diskDecay = diskDecay;
         this.diskStateProvider = diskStateProvider;
         this.replaceBlocks = replaceBlocks;
     }
@@ -46,12 +48,12 @@ public class SoulStalkFeatureConfig implements IFeatureConfig
                 // Optional fields
                 Codec.INT.fieldOf("disk_width").orElse(0).forGetter(config -> config.diskWidth),
                 Codec.INT.fieldOf("disk_height").orElse(0).forGetter(config -> config.diskHeight),
+                Codec.DOUBLE.fieldOf("disk_decay").orElse(0.0).forGetter(config -> config.diskDecay),
                 BlockStateProvider.CODEC.fieldOf("disk_state_provider").orElse(new SimpleBlockStateProvider(Blocks.AIR.defaultBlockState())).forGetter(config -> config.diskStateProvider),
-                ITag.codec(() -> TagCollectionManager.getInstance().getBlocks()).fieldOf("replace_blocks").orElseGet(() -> BlockTags.SAND).forGetter(config -> config.replaceBlocks)
-                
+                ITag.codec(() -> TagCollectionManager.getInstance().getBlocks()).fieldOf("disk_replace_target").orElseGet(() -> BlockTags.SAND).forGetter(config -> config.replaceBlocks)
         ).apply(instance, SoulStalkFeatureConfig::new);
     });
-        
+
     public int getTries()
     {   return tries;
     }
