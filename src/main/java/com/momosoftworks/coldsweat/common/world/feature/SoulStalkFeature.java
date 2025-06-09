@@ -103,7 +103,7 @@ public class SoulStalkFeature extends Feature<SoulStalkFeatureConfig>
                         double distance = Math.sqrt(diskPos.distSqr(pos));
                         double distFactor = CSMath.blend(level.getRandom().nextDouble(), 0, distance, 0, diskWidth);
                         // Place block
-                        if (diskDecay > 0.0 && distFactor > diskDecay
+                        if ((diskPos.equals(pos.below()) || diskDecay > 0.0 && distFactor > diskDecay)
                         && level.getBlockState(diskPos).is(diskReplacer))
                         {   level.setBlock(diskPos, diskProvider.getState(level.getRandom(), diskPos), 2);
                         }
