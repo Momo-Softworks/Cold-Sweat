@@ -44,33 +44,22 @@ public class SoulStalkFeature extends Feature<SoulStalkFeatureConfig>
             int startY = pos.getY();
             int minHeight = 0;
             int maxHeight = level.getMaxBuildHeight();
-            // scan down 10 blocks, then up 10 blocks, to find valid ground
-            boolean found = false;
-            for (int i = 0; Math.abs(i) < 20; i = i >= 0 ? -i - 1 : -i)
-            {
-                pos.setY(startY + i);
+            for (int i = -10; i < 10; i++)
+            {   pos.setY(startY + i);
                 if (pos.getY() < minHeight) continue;
                 if (pos.getY() > maxHeight) break;
                 if (level.getBlockState(pos).isAir() && level.getBlockState(pos.below()).isCollisionShapeFullBlock(level, pos.below()))
-                {
-                    BlockState below = level.getBlockState(pos.below());
-                    if (below.is(ModBlockTags.SOUL_SAND_REPLACEABLE) || below.is(ModBlockTags.SOUL_STALK_PLACEABLE_ON))
-                    {   found = true;
-                        break;
-                    }
+                {   break;
                 }
             }
-            // Valid ground wasn't found; abort
-            if (!found) return false;
+            // Spawn a disk of soul sand under the soul stalk if needed
+            if (!level.getBlockState(pos.below()).is(ModBlockTags.SOUL_STALK_PLACEABLE_ON))
+            {   placeDisk(level, pos, config);
+            }
 
             // Place the soul stalk
             if (level.getBlockState(pos.above()).isAir())
             {
-                // Spawn a disk of soul sand under the soul stalk if needed
-                if (!level.getBlockState(pos.below()).is(ModBlockTags.SOUL_STALK_PLACEABLE_ON))
-                {   placeDisk(level, pos, config);
-                }
-
                 level.setBlock(pos, ModBlocks.SOUL_STALK.defaultBlockState().setValue(SoulStalkBlock.SECTION, SoulStalkBlock.Section.BASE), 2);
                 int height = new Random().nextInt(5) + 2;
                 for (int i = 0; i < height && isAirOrLeaves(level, pos.above()); i++)

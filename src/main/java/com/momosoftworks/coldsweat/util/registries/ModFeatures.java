@@ -17,11 +17,19 @@ import net.minecraft.world.gen.placement.TopSolidRangeConfig;
  */
 public class ModFeatures
 {
-    public static final ConfiguredFeature<?, ?> SOUL_STALK_CONFIG = Registry.register(WorldGenRegistries.CONFIGURED_FEATURE, "soul_stalk_config",
+    public static final ConfiguredFeature<?, ?> SOUL_STALK_CONFIG = Registry.register(WorldGenRegistries.CONFIGURED_FEATURE, "soul_stalk",
                                                                                       FeatureInit.SOUL_STALK_FEATURE.get().configured(new SoulStalkFeatureConfig(
                                                                                                       20, 2, 6, 12, 8, 4, 2, 0.2,
                                                                                                       new SimpleBlockStateProvider(Blocks.SOUL_SAND.defaultBlockState()),
-                                                                                                      ModBlockTags.SOUL_SAND_REPLACEABLE)).squared().count(1).chance(16)
+                                                                                                      ModBlockTags.SOUL_SAND_REPLACEABLE)).squared().count(1).chance(10)
+                                                                                              .decorated(Features.Placements.HEIGHTMAP_DOUBLE)
+                                                                                              .decorated(Placement.RANGE.configured(new TopSolidRangeConfig(10, 10, 256))));
+
+    public static final ConfiguredFeature<?, ?> SOUL_STALK_COMMON_CONFIG = Registry.register(WorldGenRegistries.CONFIGURED_FEATURE, "soul_stalk_common",
+                                                                                      FeatureInit.SOUL_STALK_FEATURE.get().configured(new SoulStalkFeatureConfig(
+                                                                                                      20, 2, 6, 12, 8, 4, 2, 0.2,
+                                                                                                      new SimpleBlockStateProvider(Blocks.SOUL_SAND.defaultBlockState()),
+                                                                                                      ModBlockTags.SOUL_SAND_REPLACEABLE)).squared().count(1).chance(4)
                                                                                               .decorated(Features.Placements.HEIGHTMAP_DOUBLE)
                                                                                               .decorated(Placement.RANGE.configured(new TopSolidRangeConfig(10, 10, 256))));
 }
