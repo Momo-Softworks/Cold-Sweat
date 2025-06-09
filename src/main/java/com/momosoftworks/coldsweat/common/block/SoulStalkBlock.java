@@ -94,7 +94,7 @@ public class SoulStalkBlock extends Block implements IPlantable
     {   return new Random().nextInt(2) + 2;
     }
 
-    protected void ensureProperState(LevelAccessor level, BlockPos pos)
+    protected void ensureProperState(IWorld level, BlockPos pos)
     {
             BlockState aboveState = level.getBlockState(pos.above());
             BlockState belowState = level.getBlockState(pos.below());
@@ -115,7 +115,7 @@ public class SoulStalkBlock extends Block implements IPlantable
             }
     }
 
-    private void ensureSectionAt(LevelAccessor level, BlockPos pos, Section section)
+    private void ensureSectionAt(IWorld level, BlockPos pos, Section section)
     {
         BlockState oldState = level.getBlockState(pos);
         if (!oldState.is(this)) return;
