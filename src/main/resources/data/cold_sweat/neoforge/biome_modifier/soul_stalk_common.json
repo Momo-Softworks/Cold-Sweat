@@ -1,0 +1,6 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#cold_sweat:increased_soul_stalk",
+  "features": "cold_sweat:soul_stalk_common",
+  "step": "vegetal_decoration"
+}
