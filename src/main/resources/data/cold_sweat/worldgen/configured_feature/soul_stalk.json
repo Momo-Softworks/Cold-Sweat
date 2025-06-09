@@ -8,6 +8,7 @@
     "spread_y": 8,
     "disk_width": 4,
     "disk_height": 2,
+    "disk_decay": 0.2,
     "disk_state_provider": {
       "fallback": {
         "type": "minecraft:simple_state_provider",
