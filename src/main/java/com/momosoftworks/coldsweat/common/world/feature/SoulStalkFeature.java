@@ -8,7 +8,6 @@ import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.WorldGenLevel;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
@@ -102,7 +101,7 @@ public class SoulStalkFeature extends Feature<SoulStalkFeatureConfig>
                         double distance = Math.sqrt(diskPos.distSqr(pos));
                         double distFactor = CSMath.blend(level.getRandom().nextDouble(), 0, distance, 0, diskWidth);
                         // Place block
-                        if (diskDecay > 0.0 && distFactor > diskDecay
+                        if ((diskPos.equals(pos.below()) || diskDecay > 0.0 && distFactor > diskDecay)
                         && diskReplacer.test(level, diskPos))
                         {   level.setBlock(diskPos, diskProvider.getState(level.getRandom(), diskPos), 2);
                         }
