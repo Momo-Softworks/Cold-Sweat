@@ -7,7 +7,9 @@ import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 import net.minecraft.world.level.levelgen.feature.stateproviders.BlockStateProvider;
 
-public record SoulStalkFeatureConfig(int tries, int minCount, int maxCount, int spreadXZ, int spreadY, int diskWidth, int diskHeight, BlockStateProvider diskStateProvider, BlockPredicate replaceBlocks) implements FeatureConfiguration
+import java.util.List;
+
+public record SoulStalkFeatureConfig(int tries, int minCount, int maxCount, int spreadXZ, int spreadY, int diskWidth, int diskHeight, double diskDecay, BlockStateProvider diskStateProvider, BlockPredicate replaceBlocks) implements FeatureConfiguration
 {
     public static final Codec<SoulStalkFeatureConfig> CODEC = RecordCodecBuilder.create((instance) -> {
         return instance.group(
@@ -20,6 +22,7 @@ public record SoulStalkFeatureConfig(int tries, int minCount, int maxCount, int 
                 // Optional fields
                 Codec.INT.fieldOf("disk_width").orElse(0).forGetter(config -> config.diskWidth),
                 Codec.INT.fieldOf("disk_height").orElse(0).forGetter(config -> config.diskHeight),
+                Codec.DOUBLE.fieldOf("disk_decay").orElse(0.0).forGetter(config -> config.diskDecay),
                 BlockStateProvider.CODEC.fieldOf("disk_state_provider").orElse(BlockStateProvider.simple(Blocks.AIR)).forGetter(config -> config.diskStateProvider),
                 BlockPredicate.CODEC.fieldOf("disk_replace_target").orElse(BlockPredicate.not(BlockPredicate.alwaysTrue())).forGetter(config -> config.replaceBlocks)
         ).apply(instance, SoulStalkFeatureConfig::new);
