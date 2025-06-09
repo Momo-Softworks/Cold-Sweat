@@ -25,4 +25,8 @@ public class ModFeatures
     public static final Holder<PlacedFeature> SOUL_STALK_PLACEMENT = PlacementUtils.register("soul_stalk_placement", SOUL_STALK_CONFIG,
                                                                                              RarityFilter.onAverageOnceEvery(16), InSquarePlacement.spread(),
                                                                                              PlacementUtils.RANGE_10_10, BiomeFilter.biome(), CountPlacement.of(1));
+
+    public static final Holder<PlacedFeature> SOUL_STALK_COMMON_PLACEMENT = PlacementUtils.register("soul_stalk_placement", SOUL_STALK_CONFIG,
+                                                                                             RarityFilter.onAverageOnceEvery(8), InSquarePlacement.spread(),
+                                                                                             PlacementUtils.RANGE_10_10, BiomeFilter.biome(), CountPlacement.of(1));
 }
