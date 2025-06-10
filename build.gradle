@@ -165,6 +165,7 @@ dependencies {
     implementation fg.deobf("curse.maven:serene-seasons-291874:5790653")
     implementation fg.deobf("curse.maven:spoiled-364918:4803042")
     compileOnly fg.deobf("curse.maven:tfc-cold-sweat-1130934:6378984")
+    compileOnly fg.deobf("curse.maven:primal-winter-393321:4575861")
 
     // Valkyrien Skies (compat)
     compileOnly         ("org.valkyrienskies.core:api:${valk_skies_api_version}")
