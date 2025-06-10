@@ -35,6 +35,7 @@ public class HeatFogEffect extends TempEffect
     {   renderHeatFog(event);
     }
 
+    @OnlyIn(Dist.CLIENT)
     private void renderHeatFog(ViewportEvent event)
     {
         Player player = Minecraft.getInstance().player;
