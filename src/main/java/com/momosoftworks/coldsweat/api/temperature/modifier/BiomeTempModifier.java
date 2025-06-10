@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.api.temperature.modifier;
 
+import com.alcatrazescapee.primalwinter.ForgePrimalWinter;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -9,7 +10,6 @@ import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.tags.BiomeTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
@@ -61,9 +61,17 @@ public class BiomeTempModifier extends TempModifier
             {
                 // Biome temp with time of day
                 double biomeTemp = WorldHelper.getBiomeTemperature(level, holder);
-                if (CompatManager.isPrimalWinterLoaded() && holder.is(BiomeTags.IS_OVERWORLD))
-                {   biomeTemp = Math.min(biomeTemp, biomeTemp / 2) - Math.max(biomeTemp / 2, 0);
+                // Primal Winter compat
+                if (CompatManager.isPrimalWinterLoaded() && ConfigSettings.PRIMAL_WINTER_TEMPS.get()
+                && ConfigSettings.BIOME_TEMPS.get(level.registryAccess()).get(holder) != null)
+                {
+                    boolean isWinterBiome = ForgePrimalWinter.CONFIG.isWinterBiome(holder.unwrapKey().get());
+                    boolean isWinterDimension = ForgePrimalWinter.CONFIG.isWinterDimension(level.dimension());
+                    if (isWinterBiome && isWinterDimension)
+                    {   biomeTemp = Math.min(biomeTemp, biomeTemp / 2);
+                    }
                 }
+                // Add biome temperature
                 worldTemp += biomeTemp;
             }
             // If dimension has ceiling (don't use time)
@@ -76,7 +84,7 @@ public class BiomeTempModifier extends TempModifier
         if (!level.dimensionType().hasCeiling() && level.isRaining())
         {
             long time = level.getDayTime();
-            double overcastTemp = ConfigSettings.OVERCAST_TEMP_OFFSET.get();
+            double overcastTemp = ConfigSettings.OVERCAST_TEMP_OFFSET.get() * level.getRainLevel(1);
             worldTemp += CSMath.blend(0, overcastTemp, Math.abs(6000 - time), 6000, 0);
         }
 

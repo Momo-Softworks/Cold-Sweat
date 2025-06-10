@@ -155,6 +155,7 @@ dependencies {
     implementation "curse.maven:iceberg-520110:6423863"
     implementation "curse.maven:create-328085:6247669"
     compileOnly("net.createmod.ponder:Ponder-NeoForge-1.21.1:1.0.39")
+    implementation "curse.maven:primal-winter-393321:5811975"
 
     implementation "dev.latvian.mods:kubejs-neoforge:${kubejs_version}"
     implementation "dev.latvian.apps:tiny-java-server:${tiny_server_version}"
