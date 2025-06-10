@@ -1,5 +1,7 @@
 package com.momosoftworks.coldsweat.api.temperature.modifier;
 
+import com.alcatrazescapee.primalwinter.PrimalWinter;
+import com.alcatrazescapee.primalwinter.util.Config;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -60,9 +62,17 @@ public class BiomeTempModifier extends TempModifier
             {
                 // Biome temp with time of day
                 double biomeTemp = WorldHelper.getBiomeTemperature(level, holder);
-                if (CompatManager.isPrimalWinterLoaded() && holder.is(Tags.Biomes.IS_OVERWORLD))
-                {   biomeTemp = Math.min(biomeTemp, biomeTemp / 2) - Math.max(biomeTemp / 2, 0);
+                // Primal Winter compat
+                if (CompatManager.isPrimalWinterLoaded() && ConfigSettings.PRIMAL_WINTER_TEMPS.get()
+                && ConfigSettings.BIOME_TEMPS.get(level.registryAccess()).get(holder) != null)
+                {
+                    boolean isWinterBiome = Config.INSTANCE.isWinterBiome(holder.unwrapKey().get().location());
+                    boolean isWinterDimension = Config.INSTANCE.isWinterDimension(level.dimension());
+                    if (isWinterBiome && isWinterDimension)
+                    {   biomeTemp = Math.min(biomeTemp, biomeTemp / 2);
+                    }
                 }
+                // Add biome temperature
                 worldTemp += biomeTemp;
             }
             // If dimension has ceiling (don't use time)
@@ -75,7 +85,7 @@ public class BiomeTempModifier extends TempModifier
         if (!level.dimensionType().hasCeiling() && level.isRaining())
         {
             long time = level.getDayTime();
-            double overcastTemp = ConfigSettings.OVERCAST_TEMP_OFFSET.get();
+            double overcastTemp = ConfigSettings.OVERCAST_TEMP_OFFSET.get() * level.getRainLevel(1);
             worldTemp += CSMath.blend(0, overcastTemp, Math.abs(6000 - time), 6000, 0);
         }
 
