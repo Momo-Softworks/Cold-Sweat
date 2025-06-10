@@ -98,6 +98,7 @@ public class ConfigSettings
     public static final DynamicHolder<SeasonalTempData> WINTER_TEMPS;
     public static final DynamicHolder<SeasonalTempData> SPRING_TEMPS;
     public static final DynamicHolder<Double> OVERCAST_TEMP_OFFSET;
+    public static final DynamicHolder<Boolean> PRIMAL_WINTER_TEMPS;
 
     // Block settings
     public static final DynamicHolder<Integer> BLOCK_RANGE;
@@ -970,6 +971,7 @@ public class ConfigSettings
         AUTUMN_TEMPS = addSetting("autumn_temps", SeasonalTempData::new, holder -> holder.set(seasonsModLoaded ? SeasonalTempData.fromToml(WorldSettingsConfig.getAutumnTemps()) : new SeasonalTempData()));
         WINTER_TEMPS = addSetting("winter_temps", SeasonalTempData::new, holder -> holder.set(seasonsModLoaded ? SeasonalTempData.fromToml(WorldSettingsConfig.getWinterTemps()) : new SeasonalTempData()));
         SPRING_TEMPS = addSetting("spring_temps", SeasonalTempData::new, holder -> holder.set(seasonsModLoaded ? SeasonalTempData.fromToml(WorldSettingsConfig.getSpringTemps()) : new SeasonalTempData()));
+        PRIMAL_WINTER_TEMPS = addSetting("primal_winter_temps", () -> false, holder -> holder.set(CompatManager.isPrimalWinterLoaded() ? WorldSettingsConfig.PRIMAL_WINTER_TEMPS.get() : false));
     }
 
     public static String getKey(DynamicHolder<?> setting)

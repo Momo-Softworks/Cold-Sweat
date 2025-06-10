@@ -36,6 +36,7 @@ public class WorldSettingsConfig
     public static ForgeConfigSpec.ConfigValue<List<?>> AUTUMN_TEMPERATURES;
     public static ForgeConfigSpec.ConfigValue<List<?>> WINTER_TEMPERATURES;
     public static ForgeConfigSpec.ConfigValue<List<?>> SPRING_TEMPERATURES;
+    public static ForgeConfigSpec.BooleanValue PRIMAL_WINTER_TEMPS;
 
     public static final ForgeConfigSpec.ConfigValue<Boolean> ENABLE_SMART_HEARTH;
     public static final ForgeConfigSpec.ConfigValue<Boolean> ENABLE_SMART_BOILER;
@@ -748,14 +749,16 @@ public class WorldSettingsConfig
         BUILDER.pop();
 
 
+        BUILDER.push("Compatibility");
         /* Seasons config */
         if (!CompatManager.getSeasonsMods().isEmpty())
         {
+            BUILDER.push("Serene Seasons");
+
             BUILDER.comment("Format: [season-start, season-mid, season-end, *units]",
                             "First 3 parameters: The temperature offset at the start, middle, and end of the season",
                             "units: (Optional) The unit of temperature (C, F, or MC)",
-                            "Applied as an offset to the world's temperature")
-                   .push("Season Temperatures");
+                            "Applied as an offset to the world's temperature");
 
             SUMMER_TEMPERATURES = BUILDER
                     .defineList("Summer", Arrays.asList(
@@ -779,6 +782,15 @@ public class WorldSettingsConfig
 
             BUILDER.pop();
         }
+        if (CompatManager.isPrimalWinterLoaded())
+        {
+            BUILDER.push("Primal Winter");
+            PRIMAL_WINTER_TEMPS = BUILDER
+                    .comment("When Primal Winter is loaded, divides all configured biome temperature by 2 to make them colder")
+                    .define("Decrease Biome Temps", true);
+            BUILDER.pop();
+        }
+        BUILDER.pop();
 
         SPEC = BUILDER.build();
     }
