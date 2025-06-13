@@ -186,7 +186,7 @@ public class ModRegistriesEventJS extends StartupEventJS
     public void addBiomeTemperature(double minTemp, double maxTemp, String units, String... biomes)
     {
         this.addRegistryConfig(Registries.BIOME, ModRegistries.BIOME_TEMP_DATA, biomes,
-                parsedBiomes -> new BiomeTempData(new NegatableList<>(parsedBiomes), minTemp, maxTemp, Temperature.Units.fromID(units), false));
+                parsedBiomes -> new BiomeTempData(new NegatableList<>(parsedBiomes), minTemp, maxTemp, Temperature.Units.fromID(units), false, false));
     }
     public void addBiomeTemperature(double minTemp, double maxTemp, String... biomes)
     {   addBiomeTemperature(minTemp, maxTemp, "mc", biomes);
@@ -195,7 +195,7 @@ public class ModRegistriesEventJS extends StartupEventJS
     public void addBiomeOffset(double minTemp, double maxTemp, String units, String... biomes)
     {
         this.addRegistryConfig(Registries.BIOME, ModRegistries.BIOME_TEMP_DATA, biomes,
-                parsedBiomes -> new BiomeTempData(new NegatableList<>(parsedBiomes), minTemp, maxTemp, Temperature.Units.fromID(units), true));
+                parsedBiomes -> new BiomeTempData(new NegatableList<>(parsedBiomes), minTemp, maxTemp, Temperature.Units.fromID(units), true, false));
     }
     public void addBiomeOffset(double minTemp, double maxTemp, String... biomes)
     {   addBiomeOffset(minTemp, maxTemp, "mc", biomes);
