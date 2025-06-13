@@ -235,15 +235,13 @@ public class WorldSettingsConfig
                     .addIf(CompatManager.isEnvironmentalLoaded(),
                             () -> Arrays.asList("environmental:marsh", 60, 80, "F")
                     ).build(),
-                it ->
-                {
-                    if (!(it instanceof List<?>)) return false;
-                    List<?> list = (List<?>) it;
-                    return list.get(0) instanceof String
-                        && list.get(1) instanceof Number
-                        && list.get(2) instanceof Number
-                        && (list.size() < 4 || list.get(3) instanceof String);
-                });
+                it -> it instanceof List<?>
+                      && ((List<?>) it).get(0) instanceof String
+                      && (((List<?>) it).get(1) instanceof String && ((List<?>) it).get(1).equals("disable")
+                      || (((List<?>) it).get(1) instanceof Number
+                      && ((List<?>) it).get(2) instanceof Number
+                      && (((List<?>) it).size() < 4 || ((List<?>) it).get(3) instanceof String)))
+                );
 
         BUILDER.pop();
 

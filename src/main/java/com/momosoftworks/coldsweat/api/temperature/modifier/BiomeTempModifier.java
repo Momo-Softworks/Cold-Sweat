@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.compat.CompatManager;
+import com.momosoftworks.coldsweat.data.codec.configuration.BiomeTempData;
 import com.momosoftworks.coldsweat.data.codec.configuration.StructureTempData;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
@@ -48,12 +49,12 @@ public class BiomeTempModifier extends TempModifier
                 // Get the holder for the biome
                 Biome biome = level.getBiomeManager().getBiome(blockPos);
 
-            // Tally number of biomes
-            biomeCount++;
-
             DimensionType dimension = level.dimensionType();
             if (!dimension.hasCeiling())
             {
+                if (CSMath.getIfNotNull(ConfigSettings.BIOME_TEMPS.get(level.registryAccess()).get(biome), BiomeTempData::isDisabled, false))
+                {   continue;
+                }
                 // Biome temp with time of day
                 double biomeTemp = WorldHelper.getBiomeTemperature(level, biome);
                 if (CompatManager.isPrimalWinterLoaded())
@@ -63,6 +64,9 @@ public class BiomeTempModifier extends TempModifier
             }
             // If dimension has ceiling (don't use time)
             else worldTemp += CSMath.averagePair(WorldHelper.getBiomeTemperatureRange(level, biome));
+
+            // Tally number of biomes
+            biomeCount++;
         }
 
         worldTemp /= Math.max(1, biomeCount);

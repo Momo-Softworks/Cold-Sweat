@@ -23,9 +23,10 @@ public class BiomeTempData extends ConfigData
     final double max;
     final Temperature.Units units;
     final boolean isOffset;
+    final boolean isDisabled;
 
     public BiomeTempData(NegatableList<Biome> biomes, double min, double max,
-                         Temperature.Units units, boolean isOffset, NegatableList<String> requiredMods)
+                         Temperature.Units units, boolean isOffset, boolean isDisabled, NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.biomes = biomes;
@@ -33,16 +34,17 @@ public class BiomeTempData extends ConfigData
         this.max = max;
         this.units = units;
         this.isOffset = isOffset;
+        this.isDisabled = isDisabled;
     }
 
     public BiomeTempData(NegatableList<Biome> biomes, double min, double max,
-                         Temperature.Units units, boolean isOffset)
+                         Temperature.Units units, boolean isOffset, boolean isDisabled)
     {
-        this(biomes, min, max, units, isOffset, new NegatableList<>());
+        this(biomes, min, max, units, isOffset, isDisabled, new NegatableList<>());
     }
 
-    public BiomeTempData(Biome biome, double min, double max, Temperature.Units units, boolean isOffset)
-    {   this(new NegatableList<>(biome), min, max, units, isOffset);
+    public BiomeTempData(Biome biome, double min, double max, Temperature.Units units, boolean isOffset, boolean isDisabled)
+    {   this(new NegatableList<>(biome), min, max, units, isOffset, isDisabled);
     }
 
     public static final Codec<BiomeTempData> CODEC = createCodec(RecordCodecBuilder.create(instance -> instance.group(
@@ -54,7 +56,8 @@ public class BiomeTempData extends ConfigData
             Codec.mapEither(Codec.DOUBLE.fieldOf("temperature"), Codec.DOUBLE.fieldOf("max_temp")).xmap(
                 either -> either.map(left -> left, right -> right), Either::right).forGetter(BiomeTempData::max),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(BiomeTempData::units),
-            Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(BiomeTempData::isOffset)
+            Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(BiomeTempData::isOffset),
+            Codec.BOOL.optionalFieldOf("disable", false).forGetter(BiomeTempData::isDisabled)
     ).apply(instance, BiomeTempData::new)));
 
     public NegatableList<Biome> biomes()
@@ -72,6 +75,9 @@ public class BiomeTempData extends ConfigData
     public boolean isOffset()
     {   return isOffset;
     }
+    public boolean isDisabled()
+    {   return isDisabled;
+    }
 
     public double minTemp()
     {   return Temperature.convert(min, units, Temperature.Units.MC, !this.isOffset);
@@ -83,20 +89,34 @@ public class BiomeTempData extends ConfigData
     @Nullable
     public static BiomeTempData fromToml(List<?> entry, boolean isOffset, DynamicRegistries registryAccess)
     {
-        if (entry.size() < 3)
+        if (!(entry.size() == 2 && entry.get(1) instanceof String || entry.size() >= 3))
         {   ColdSweat.LOGGER.error("Error parsing biome config: not enough arguments");
             return null;
         }
         List<Biome> biomes = ConfigHelper.parseRegistryItems(Registry.BIOME_REGISTRY, registryAccess, (String) entry.get(0));
         if (biomes.isEmpty()) return null;
 
-        // The config defines a min and max value, with optional unit conversion
-        Temperature.Units units = entry.size() == 4 ? Temperature.Units.valueOf(((String) entry.get(3)).toUpperCase()) : Temperature.Units.MC;
-        double min = ((Number) entry.get(1)).doubleValue();
-        double max = ((Number) entry.get(2)).doubleValue();
+        Temperature.Units units;
+        double min;
+        double max;
+        boolean isDisabled;
+        // Disabled
+        if (entry.get(1) instanceof String && entry.get(1).equals("disable"))
+        {   units = Temperature.Units.MC;
+            min = 0;
+            max = 0;
+            isDisabled = true;
+        }
+        // Normal
+        else
+        {   units = entry.size() == 4 ? Temperature.Units.valueOf(((String) entry.get(3)).toUpperCase()) : Temperature.Units.MC;
+            min = ((Number) entry.get(1)).doubleValue();
+            max = ((Number) entry.get(2)).doubleValue();
+            isDisabled = false;
+        }
 
         // Maps the biome ID to the temperature (and variance if present)
-        return new BiomeTempData(new NegatableList<>(biomes), min, max, units, isOffset);
+        return new BiomeTempData(new NegatableList<>(biomes), min, max, units, isOffset, isDisabled);
     }
 
     @Override
