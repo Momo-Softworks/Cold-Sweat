@@ -5,6 +5,7 @@ import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.compat.CompatManager;
+import com.momosoftworks.coldsweat.data.codec.configuration.BiomeTempData;
 import com.momosoftworks.coldsweat.data.codec.configuration.StructureTempData;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
@@ -53,14 +54,15 @@ public class BiomeTempModifier extends TempModifier
             if (holder.is(Tags.Biomes.IS_UNDERGROUND)) continue;
             if (holder.unwrapKey().isEmpty()) continue;
 
-            // Tally number of biomes
-            biomeCount++;
-
             DimensionType dimension = level.dimensionType();
             if (!dimension.hasCeiling() && !level.dimensionType().hasFixedTime())
             {
+                if (CSMath.getIfNotNull(ConfigSettings.BIOME_TEMPS.get(level.registryAccess()).get(holder), BiomeTempData::isDisabled, false))
+                {   continue;
+                }
                 // Biome temp with time of day
                 double biomeTemp = WorldHelper.getBiomeTemperature(level, holder);
+
                 // Primal Winter compat
                 if (CompatManager.isPrimalWinterLoaded() && ConfigSettings.PRIMAL_WINTER_TEMPS.get()
                 && ConfigSettings.BIOME_TEMPS.get(level.registryAccess()).get(holder) != null)
@@ -76,6 +78,9 @@ public class BiomeTempModifier extends TempModifier
             }
             // If dimension has ceiling (don't use time)
             else worldTemp += CSMath.averagePair(WorldHelper.getBiomeTemperatureRange(level, holder));
+
+            // Tally number of biomes
+            biomeCount++;
         }
 
         worldTemp /= Math.max(1, biomeCount);

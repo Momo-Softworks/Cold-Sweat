@@ -1,6 +1,9 @@
 package com.momosoftworks.coldsweat.api.temperature.modifier;
 
+import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.data.codec.configuration.BiomeTempData;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
@@ -12,13 +15,13 @@ import net.neoforged.neoforge.common.Tags;
 
 import java.util.function.Function;
 
-public class DepthBiomeTempModifier extends TempModifier
+public class CaveBiomeTempModifier extends TempModifier
 {
-    public DepthBiomeTempModifier()
+    public CaveBiomeTempModifier()
     {   this(6);
     }
 
-    public DepthBiomeTempModifier(int samples)
+    public CaveBiomeTempModifier(int samples)
     {   this.getNBT().putInt("SampleRoot", samples);
     }
 
@@ -35,14 +38,18 @@ public class DepthBiomeTempModifier extends TempModifier
         for (BlockPos pos : WorldHelper.getPositionCube(entity.blockPosition(), sampleRoot, 6))
         {
             if (!level.isInWorldBounds(pos)) continue;
-
             if (WorldHelper.getHeight(pos, level) <= entity.getY()) continue;
 
             // Get temperature of underground biomes
             Holder<Biome> biome = level.getBiomeManager().getBiome(pos);
             if (biome.is(Tags.Biomes.IS_UNDERGROUND))
             {
-                double biomeTemp = CSMath.averagePair(WorldHelper.getBiomeTemperatureRange(level, biome));
+                if (CSMath.getIfNotNull(ConfigSettings.BIOME_TEMPS.get(level.registryAccess()).get(biome), BiomeTempData::isDisabled, false))
+                {   continue;
+                }
+                Pair<Double, Double> biomeTempRange = WorldHelper.getBiomeTemperatureRange(level, biome);
+
+                double biomeTemp = CSMath.averagePair(biomeTempRange);
 
                 biomeTempTotal += biomeTemp;
                 caveBiomeCount++;
