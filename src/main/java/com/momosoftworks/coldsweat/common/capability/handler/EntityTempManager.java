@@ -197,7 +197,7 @@ public class EntityTempManager
         event.addModifier(Trait.WORLD, new ElevationTempModifier(isPlayer ? 49 : isTempSensitive ? 16 : 1).tickRate(mediumTickRate),
                           Placement.Duplicates.BY_CLASS, Placement.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof BiomeTempModifier));
 
-        event.addModifier(Trait.WORLD, new DepthBiomeTempModifier(isPlayer ? 6 : isTempSensitive ? 5 : 3).tickRate(mediumTickRate),
+        event.addModifier(Trait.WORLD, new CaveBiomeTempModifier(isPlayer ? 6 : isTempSensitive ? 5 : 3).tickRate(mediumTickRate),
                           Placement.Duplicates.BY_CLASS, Placement.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof ElevationTempModifier));
 
         event.addModifier(Trait.WORLD, new BlockTempModifier(isPlayer ? -1 : 4).tickRate(fastTickRate),

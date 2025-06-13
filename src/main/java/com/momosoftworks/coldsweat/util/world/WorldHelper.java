@@ -627,9 +627,12 @@ public abstract class WorldHelper
         double baseTemp = biome.value().getBaseTemperature();
 
         BiomeTempData biomeTemp = ConfigSettings.BIOME_TEMPS.get(registryAccess)
-                                  .getOrDefault(biome, new BiomeTempData(biome, baseTemp - variance, baseTemp + variance, Temperature.Units.MC, true));
+                                  .getOrDefault(biome, new BiomeTempData(biome, baseTemp - variance, baseTemp + variance, Temperature.Units.MC, true, false));
+        if (biomeTemp.isDisabled())
+        {   return Pair.of(0.0, 0.0);
+        }
         BiomeTempData configOffset = ConfigSettings.BIOME_OFFSETS.get(registryAccess)
-                                     .getOrDefault(biome, new BiomeTempData(biome, 0d, 0d, Temperature.Units.MC, false));
+                                     .getOrDefault(biome, new BiomeTempData(biome, 0d, 0d, Temperature.Units.MC, false, false));
         return CSMath.addPairs(Pair.of(biomeTemp.minTemp(), biomeTemp.maxTemp()),
                                Pair.of(configOffset.minTemp(), configOffset.maxTemp()));
     }
