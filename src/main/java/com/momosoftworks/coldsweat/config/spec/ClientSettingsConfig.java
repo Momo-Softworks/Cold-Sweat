@@ -50,7 +50,10 @@ public class ClientSettingsConfig
     public static final ForgeConfigSpec.IntValue WATER_EFFECT_SETTING;
     public static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> WATER_DROPLET_SCALE;
 
+    public static final ForgeConfigSpec.BooleanValue SHOW_FROZEN_HEALTH;
+    public static final ForgeConfigSpec.DoubleValue FREEZING_OVERLAY_OPACITY;
     public static final ForgeConfigSpec.DoubleValue SHIVER_INTENSITY;
+    public static final ForgeConfigSpec.DoubleValue HEATSTROKE_BORDER_OPACITY;
     public static final ForgeConfigSpec.DoubleValue HEATSTROKE_BLUR;
     public static final ForgeConfigSpec.DoubleValue HEATSTROKE_SWAY_AMOUNT;
     public static final ForgeConfigSpec.DoubleValue HEATSTROKE_SWAY_SPEED;
@@ -137,9 +140,19 @@ public class ClientSettingsConfig
             HIGH_CONTRAST_MODE = BUILDER
                     .comment("Enables high contrast mode for UI elements")
                     .define("High Contrast", false);
+            SHOW_FROZEN_HEALTH = BUILDER
+                    .comment("Shows a frozen texture over the player's health bar when they are freezing")
+                    .define("Show Frozen Health", true);
+            FREEZING_OVERLAY_OPACITY = BUILDER
+                    .comment("The opacity of the icy overlay when the player is freezing",
+                             "Does not affect Vanilla's powder snow overlay")
+                    .defineInRange("Freezing Overlay Opacity", 1.0, 0.0, 1.0);
             SHIVER_INTENSITY = BUILDER
                     .comment("The intensity of the shivering effect when the player is too cold")
                     .defineInRange("Shiver Intensity", 1.0, 0.0, 2.0);
+            HEATSTROKE_BORDER_OPACITY = BUILDER
+                    .comment("The opacity of the pulsing red border around the screen when the player is too hot")
+                    .defineInRange("Heatstroke Border Opacity", 1.0, 0.0, 1.0);
             HEATSTROKE_BLUR = BUILDER
                     .comment("The amount of blur applied to the screen when the player is too hot")
                     .defineInRange("Heatstroke Blur Strength", 1.0, 0.0, 1.0);

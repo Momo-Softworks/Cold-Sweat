@@ -34,6 +34,31 @@ public class ConfigPageTempEffects extends AbstractConfigPage
     {
         super.init();
 
+        // Show Frozen Health
+        this.addButton("show_frozen_health", Side.LEFT,
+                       () -> getToggleButtonText(new TranslatableComponent("cold_sweat.config.show_frozen_health.name"), ConfigSettings.SHOW_FROZEN_HEALTH.get()),
+                       (button) -> ConfigSettings.SHOW_FROZEN_HEALTH.set(!ConfigSettings.SHOW_FROZEN_HEALTH.get()),
+                       false, false, true,
+                       new TranslatableComponent("cold_sweat.config.show_frozen_health.desc"));
+
+        // Freezing Overlay Opacity
+        this.addSliderButton("freezing_overlay_opacity", Side.LEFT,
+                             () -> getSliderPercentageText(new TranslatableComponent("cold_sweat.config.freeze_overlay_opacity.name"), ConfigSettings.FREEZING_OVERLAY_OPACITY.get(), 0),
+                             0, 1,
+                             (value, button) -> ConfigSettings.FREEZING_OVERLAY_OPACITY.set(value),
+                             (button) -> button.setValue(ConfigSettings.FREEZING_OVERLAY_OPACITY.get()),
+                             true, true,
+                             new TranslatableComponent("cold_sweat.config.freeze_overlay_opacity.desc"));
+
+        // Shiver Intensity (0 to 2.0)
+        this.addSliderButton("shiver_intensity", Side.LEFT,
+                             () -> getSliderPercentageText(new TranslatableComponent("cold_sweat.config.shiver_intensity.name"), ConfigSettings.SHIVER_INTENSITY.get(), 0),
+                             0, 2.0,
+                             (value, button) -> ConfigSettings.SHIVER_INTENSITY.set(value),
+                             (button) -> button.setValue(ConfigSettings.SHIVER_INTENSITY.get() / 2),
+                             false, true,
+                             new TranslatableComponent("cold_sweat.config.shiver_intensity.desc"));
+
         // Freezing Hearts Percentage
         this.addSliderButton("freezing_hearts", Side.LEFT,
                              () -> getSliderPercentageText(new TranslatableComponent("cold_sweat.config.cold_freezing_hearts.name"), ConfigSettings.HEARTS_FREEZING_PERCENTAGE.get(), 0),
@@ -70,15 +95,14 @@ public class ConfigPageTempEffects extends AbstractConfigPage
                              true, false,
                              new TranslatableComponent("cold_sweat.config.cold_knockback_reduction.desc"));
 
-        // Shiver Intensity (0 to 2.0)
-        this.addSliderButton("shiver_intensity", Side.LEFT,
-                             () -> getSliderPercentageText(new TranslatableComponent("cold_sweat.config.shiver_intensity.name"), ConfigSettings.SHIVER_INTENSITY.get(), 0),
-                             0, 2.0,
-                             (value, button) -> ConfigSettings.SHIVER_INTENSITY.set(value),
-                             (button) -> button.setValue(ConfigSettings.SHIVER_INTENSITY.get() / 2),
+        // Heat Border Opacity
+        this.addSliderButton("heat_border_opacity", Side.RIGHT,
+                             () -> getSliderPercentageText(new TranslatableComponent("cold_sweat.config.heat_border_opacity.name"), ConfigSettings.HEATSTROKE_BORDER_OPACITY.get(), 0),
+                             0, 1,
+                             (value, button) -> ConfigSettings.HEATSTROKE_BORDER_OPACITY.set(value),
+                             (button) -> button.setValue(ConfigSettings.HEATSTROKE_BORDER_OPACITY.get()),
                              false, true,
-                             new TranslatableComponent("cold_sweat.config.shiver_intensity.desc"));
-
+                             new TranslatableComponent("cold_sweat.config.heat_border_opacity.desc"));
 
         // Heat Blur Amount
         this.addSliderButton("heat_blur_amount", Side.RIGHT,
@@ -115,11 +139,5 @@ public class ConfigPageTempEffects extends AbstractConfigPage
                              (button) -> button.setValue(ConfigSettings.HEATSTROKE_FOG_DISTANCE.get() / 64),
                              true, false,
                              new TranslatableComponent("cold_sweat.config.heat_fog_distance.desc"));
-    }
-
-    @Override
-    public void onClose()
-    {   super.onClose();
-        ConfigScreen.saveConfig();
     }
 }
