@@ -78,11 +78,7 @@ public class ConfigSettings
     public static final DynamicHolder<Double> COLD_MINING_IMPAIRMENT;
     public static final DynamicHolder<Double> COLD_MOVEMENT_SLOWDOWN;
     public static final DynamicHolder<Double> COLD_KNOCKBACK_REDUCTION;
-    public static final DynamicHolder<Double> SHIVER_INTENSITY;
     public static final DynamicHolder<Double> HEATSTROKE_FOG_DISTANCE;
-    public static final DynamicHolder<Double> HEATSTROKE_BLUR_AMOUNT;
-    public static final DynamicHolder<Double> HEATSTROKE_SWAY_AMOUNT;
-    public static final DynamicHolder<Double> HEATSTROKE_SWAY_SPEED;
 
     // World Settings
     public static final DynamicHolder<Map<Holder<Biome>, BiomeTempData>> BIOME_TEMPS;
@@ -224,6 +220,14 @@ public class ConfigSettings
 
     public static final DynamicHolder<Preference.WaterskinAction> WATERSKIN_USE_PRIMARY;
     public static final DynamicHolder<Preference.WaterskinAction> WATERSKIN_USE_SECONDARY;
+
+    public static final DynamicHolder<Boolean> SHOW_FROZEN_HEALTH;
+    public static final DynamicHolder<Double> FREEZING_OVERLAY_OPACITY;
+    public static final DynamicHolder<Double> SHIVER_INTENSITY;
+    public static final DynamicHolder<Double> HEATSTROKE_BORDER_OPACITY;
+    public static final DynamicHolder<Double> HEATSTROKE_BLUR_AMOUNT;
+    public static final DynamicHolder<Double> HEATSTROKE_SWAY_AMOUNT;
+    public static final DynamicHolder<Double> HEATSTROKE_SWAY_SPEED;
 
 
     // Makes the settings instantiation collapsible & easier to read
@@ -954,7 +958,10 @@ public class ConfigSettings
         WATER_EFFECT_SETTING = addClientSetting("show_water_effect", () -> WaterEffectSetting.ALL, holder -> holder.set(WaterEffectSetting.values()[ClientSettingsConfig.WATER_EFFECT_SETTING.get()]));
         WATER_DROPLET_SCALE = addClientSetting("water_droplet_scale", () -> new IntegerBounds(40, 48), holder -> holder.set(new IntegerBounds(ClientSettingsConfig.WATER_DROPLET_SCALE.get().toArray(Integer[]::new))));
 
+        SHOW_FROZEN_HEALTH = addClientSetting("show_frozen_health", () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_FROZEN_HEALTH.get()));
+        FREEZING_OVERLAY_OPACITY = addClientSetting("freezing_overlay_opacity", () -> 0.5, holder -> holder.set(ClientSettingsConfig.FREEZING_OVERLAY_OPACITY.get()));
         SHIVER_INTENSITY = addClientSetting("shiver_intensity", () -> 1.0, holder -> holder.set(ClientSettingsConfig.SHIVER_INTENSITY.get()));
+        HEATSTROKE_BORDER_OPACITY = addClientSetting("heatstroke_border_opacity", () -> 0.5, holder -> holder.set(ClientSettingsConfig.HEATSTROKE_BORDER_OPACITY.get()));
         HEATSTROKE_BLUR_AMOUNT = addClientSetting("heatstroke_blur_amount", () -> 1.0, holder -> holder.set(ClientSettingsConfig.HEATSTROKE_BLUR.get()));
         HEATSTROKE_SWAY_AMOUNT = addClientSetting("heatstroke_sway_amount", () -> 1.0, holder -> holder.set(ClientSettingsConfig.HEATSTROKE_SWAY_AMOUNT.get()));
         HEATSTROKE_SWAY_SPEED = addClientSetting("heatstroke_sway_speed", () -> 1.0, holder -> holder.set(ClientSettingsConfig.HEATSTROKE_SWAY_SPEED.get()));

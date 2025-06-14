@@ -36,6 +36,7 @@ public class FreezeHeartsEffect extends TempEffect
     public void onRenderHeart(RenderHeartEvent event)
     {
         if (!this.test(Minecraft.getInstance().player)) return;
+        if (!ConfigSettings.SHOW_FROZEN_HEALTH.get()) return;
 
         Gui.HeartType heartType = event.getHeartType();
         boolean halfHeart = event.isHalfHeart();
