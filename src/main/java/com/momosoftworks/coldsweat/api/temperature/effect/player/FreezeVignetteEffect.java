@@ -5,6 +5,7 @@ import com.momosoftworks.coldsweat.api.temperature.effect.TempEffect;
 import com.momosoftworks.coldsweat.api.temperature.effect.TempEffectType;
 import com.momosoftworks.coldsweat.client.gui.Overlays;
 import com.momosoftworks.coldsweat.common.event.HandleTempEffects;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
@@ -50,6 +51,7 @@ public class FreezeVignetteEffect extends TempEffect
             // Setup calculations
             float resistance = (float) CSMath.blend(1, 0, COLD_IMMUNITY, 0, 1);
             float opacity = CSMath.blend(0f, 1f, blendTemp, this.bounds().min(), this.bounds().max()) * resistance;
+            opacity *= ConfigSettings.FREEZING_OVERLAY_OPACITY.get();
             if (opacity == 0) return;
             double width = event.getWindow().getWidth();
             double height = event.getWindow().getHeight();

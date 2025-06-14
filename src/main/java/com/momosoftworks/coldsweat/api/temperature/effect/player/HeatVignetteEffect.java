@@ -6,6 +6,7 @@ import com.momosoftworks.coldsweat.api.temperature.effect.TempEffect;
 import com.momosoftworks.coldsweat.api.temperature.effect.TempEffectType;
 import com.momosoftworks.coldsweat.client.gui.Overlays;
 import com.momosoftworks.coldsweat.common.event.HandleTempEffects;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
@@ -45,6 +46,7 @@ public class HeatVignetteEffect extends TempEffect
         if (!this.test(player)) return;
         if (HandleTempEffects.isPlayerImmune(player)) return;
 
+        float tickTime = player.tickCount + event.getPartialTicks();
         float blendTemp = (float) Overlays.BLEND_BODY_TEMP;
 
         if (event.getType() == RenderGameOverlayEvent.ElementType.VIGNETTE && blendTemp > 0 && HOT_IMMUNITY < 1)
@@ -52,7 +54,7 @@ public class HeatVignetteEffect extends TempEffect
             // Setup calculations
             float resistance = (float) CSMath.blend(1, 0, HOT_IMMUNITY, 0, 1);
             float opacity = CSMath.blend(0f, 1f, blendTemp, this.bounds().min(), this.bounds().max()) * resistance;
-            float tickTime = player.tickCount + event.getPartialTicks();
+            opacity *= ConfigSettings.HEATSTROKE_BORDER_OPACITY.get();
             if (opacity == 0) return;
             double width = event.getWindow().getWidth();
             double height = event.getWindow().getHeight();
