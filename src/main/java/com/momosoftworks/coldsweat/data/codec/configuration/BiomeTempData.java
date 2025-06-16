@@ -52,10 +52,14 @@ public class BiomeTempData extends ConfigData implements IForgeRegistryEntry<Bio
 
     public static final Codec<BiomeTempData> CODEC = createCodec(RecordCodecBuilder.create(instance -> instance.group(
             NegatableList.listCodec(ConfigHelper.tagOrHolderCodec(Registry.BIOME_REGISTRY, Biome.CODEC)).fieldOf("biomes").forGetter(BiomeTempData::biomes),
-            Codec.mapEither(Codec.DOUBLE.fieldOf("temperature"), Codec.DOUBLE.fieldOf("min_temp")).xmap(
-                either -> either.map(left -> left, right -> right), Either::right).forGetter(BiomeTempData::min),
-            Codec.mapEither(Codec.DOUBLE.fieldOf("temperature"), Codec.DOUBLE.fieldOf("max_temp")).xmap(
-                either -> either.map(left -> left, right -> right), Either::right).forGetter(BiomeTempData::max),
+            Codec.mapEither(Codec.DOUBLE.optionalFieldOf("temperature", 0d),
+                            Codec.DOUBLE.optionalFieldOf("min_temp", 0d))
+                 .xmap(either -> either.map(left -> left, right -> right), Either::right)
+                 .forGetter(BiomeTempData::min),
+            Codec.mapEither(Codec.DOUBLE.optionalFieldOf("temperature", 0d),
+                            Codec.DOUBLE.optionalFieldOf("max_temp", 0d))
+                 .xmap(either -> either.map(left -> left, right -> right), Either::right)
+                 .forGetter(BiomeTempData::max),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(BiomeTempData::units),
             Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(BiomeTempData::isOffset),
             Codec.BOOL.optionalFieldOf("disable", false).forGetter(BiomeTempData::isDisabled)
