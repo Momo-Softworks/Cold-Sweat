@@ -68,10 +68,10 @@ public class ColdSweat
         ModUpdater.updateFileNames();
 
         // Setup configs
-        WorldSettingsConfig.setup();
-        ItemSettingsConfig.setup();
         MainSettingsConfig.setup();
         ClientSettingsConfig.setup();
+        WorldSettingsConfig.setup();
+        ItemSettingsConfig.setup();
         EntitySettingsConfig.setup();
 
         // Setup compat
