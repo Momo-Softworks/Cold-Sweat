@@ -16,7 +16,6 @@ import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.registries.ModEntities;
 import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.common.MinecraftForge;
@@ -88,7 +87,7 @@ public class ColdSweat
         bus.addListener((NewRegistryEvent event) ->
         {
             for (ModRegistries.RegistryHolder<?> holder : ModRegistries.getRegistries().values())
-            {   event.create(new RegistryBuilder<>().setName(holder.registry().location()).dataPackRegistry((Codec) holder.codec()));
+            {   event.create(new RegistryBuilder<>().setName(holder.registry().location()).dataPackRegistry((Codec) holder.codec(), (Codec) holder.codec()));
             }
         });
     }
