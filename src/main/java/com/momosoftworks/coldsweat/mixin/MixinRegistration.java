@@ -68,19 +68,28 @@ public class MixinRegistration
                 {
                     JsonObject condition = new JsonObject();
                     condition.addProperty("type", "forge:mod_loaded");
-                    condition.addProperty("modid", requiredMod.getAsString());
-                    conditions.add(condition);
+                    // If required mod isn't loaded by CS standards, add an impossible condition
+                    if (!CompatManager.modLoaded(requiredMod.getAsString()))
+                    {   condition.addProperty("modid", "cs_impossible");
+                        conditions.add(condition);
+                        return;
+                    }
+                    // Require mod as normal
+                    else
+                    {   condition.addProperty("modid", requiredMod.getAsString());
+                        conditions.add(condition);
+                    }
                 }
                 // Add excluded mods as an impossible forge condition
                 for (JsonElement excludedMod : excludedMods)
                 {
-                    if (!CompatManager.modLoaded(excludedMod.getAsString()))
+                    if (CompatManager.modLoaded(excludedMod.getAsString()))
                     {
                         JsonObject condition = new JsonObject();
                         condition.addProperty("type", "forge:mod_loaded");
                         condition.addProperty("modid", "cs_impossible");
                         conditions.add(condition);
-                        break;
+                        return;
                     }
                 }
             }
