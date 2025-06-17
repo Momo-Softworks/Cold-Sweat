@@ -6,59 +6,6 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:stick",
-          "functions": [
-            {
-              "function": "minecraft:set_count",
-              "count": 1,
-              "conditions": [
-                {
-                  "condition": "minecraft:random_chance",
-                  "chance": 0.3
-                }
-              ]
-            }
-          ],
-          "conditions": [
-            {
-              "condition": "minecraft:inverted",
-              "term": {
-                "condition": "minecraft:block_state_property",
-                "block": "cold_sweat:soul_stalk",
-                "properties": {
-                  "section": "base"
-                }
-              }
-            },
-            {
-              "condition": "minecraft:inverted",
-              "term": {
-                "condition": "minecraft:block_state_property",
-                "block": "cold_sweat:soul_stalk",
-                "properties": {
-                  "section": "top"
-                }
-              }
-            },
-            {
-              "condition": "minecraft:inverted",
-              "term": {
-                "condition": "minecraft:block_state_property",
-                "block": "cold_sweat:soul_stalk",
-                "properties": {
-                  "section": "bud"
-                }
-              }
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "rolls": 1,
-      "entries": [
-        {
-          "type": "minecraft:item",
           "name": "cold_sweat:soul_sprout",
           "conditions": [
             {
