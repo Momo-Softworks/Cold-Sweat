@@ -28,11 +28,7 @@ public class MainSettingsConfig
     public static final ForgeConfigSpec.ConfigValue<Double> TEMP_RATE_MULTIPLIER;
     public static final ForgeConfigSpec.ConfigValue<Double> TEMP_DAMAGE;
 
-    public static final ForgeConfigSpec.ConfigValue<Boolean> FIRE_RESISTANCE_BLOCKS_OVERHEATING;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> ICE_RESISTANCE_BLOCKS_FREEZING;
-
     public static final ForgeConfigSpec.ConfigValue<Boolean> NULLIFY_IN_PEACEFUL;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> REQUIRE_THERMOMETER;
 
     public static final ForgeConfigSpec.ConfigValue<Integer> GRACE_PERIOD_LENGTH;
     public static final ForgeConfigSpec.ConfigValue<Boolean> ENABLE_GRACE_PERIOD;
@@ -71,9 +67,6 @@ public class MainSettingsConfig
 
         BUILDER.pop();
 
-        /*
-         Details about how the player is affected by temperature
-         */
         BUILDER.push("Difficulty");
 
         MIN_HABITABLE_TEMPERATURE = BUILDER
@@ -99,27 +92,6 @@ public class MainSettingsConfig
                 .define("Damage Scaling", defaultDiff.getOrDefault("damage_scaling", true));
 
         BUILDER.pop();
-
-
-        /*
-         Potion effects affecting the player's temperature
-         */
-        BUILDER.push("Items");
-
-        FIRE_RESISTANCE_BLOCKS_OVERHEATING = BUILDER
-                .comment("Allow fire resistance to block overheating damage")
-                .define("Fire Resistance Immunity", defaultDiff.getOrDefault(ConfigSettings.FIRE_RESISTANCE_ENABLED, true));
-
-        ICE_RESISTANCE_BLOCKS_FREEZING = BUILDER
-                .comment("Allow ice resistance to block freezing damage")
-                .define("Ice Resistance Immunity", defaultDiff.getOrDefault(ConfigSettings.ICE_RESISTANCE_ENABLED, true));
-
-        REQUIRE_THERMOMETER = BUILDER
-            .comment("Thermometer item is required to see detailed world temperature")
-            .define("Require Thermometer", defaultDiff.getOrDefault(ConfigSettings.REQUIRE_THERMOMETER, true));
-
-        BUILDER.pop();
-
 
         /*
          Temperature effects
