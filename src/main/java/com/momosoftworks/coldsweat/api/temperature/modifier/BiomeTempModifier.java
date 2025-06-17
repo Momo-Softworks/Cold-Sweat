@@ -64,8 +64,7 @@ public class BiomeTempModifier extends TempModifier
                 double biomeTemp = WorldHelper.getBiomeTemperature(level, holder);
 
                 // Primal Winter compat
-                if (CompatManager.isPrimalWinterLoaded() && ConfigSettings.PRIMAL_WINTER_TEMPS.get()
-                && ConfigSettings.BIOME_TEMPS.get(level.registryAccess()).get(holder) != null)
+                if (CompatManager.isPrimalWinterLoaded() && ConfigSettings.BIOME_TEMPS.get(level.registryAccess()).get(holder) != null)
                 {
                     boolean isWinterBiome = Config.INSTANCE.isWinterBiome(holder.unwrapKey().get().location());
                     boolean isWinterDimension = Config.INSTANCE.isWinterDimension(level.dimension());
