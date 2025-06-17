@@ -40,7 +40,7 @@ public class IceboxContainer extends AbstractContainerMenu
             {
                 @Override
                 public boolean mayPlace(ItemStack stack)
-                {   return stack.is(ModItemTags.ICEBOX_VALID) || (CompatManager.isSpoiledLoaded() && stack.isEdible());
+                {   return stack.is(ModItemTags.ICEBOX_VALID);
                 }
             });
         }
