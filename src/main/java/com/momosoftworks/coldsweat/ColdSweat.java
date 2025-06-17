@@ -14,9 +14,7 @@ import com.momosoftworks.coldsweat.core.itemgroup.InsulationItemsGroup;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.compat.CompatManager;
-import com.momosoftworks.coldsweat.data.codec.configuration.DimensionTempData;
 import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.commands.synchronization.ArgumentTypes;
@@ -87,7 +85,7 @@ public class ColdSweat
         bus.addListener((NewRegistryEvent event) ->
         {
             for (ModRegistries.RegistryHolder<?> holder : ModRegistries.getRegistries().values())
-            {   event.create(new RegistryBuilder<>().setType((Class) holder.type()).setName(holder.registry().location()).dataPackRegistry(holder.codec()));
+            {   event.create(new RegistryBuilder<>().setType((Class) holder.type()).setName(holder.registry().location()).dataPackRegistry(holder.codec(), (Codec) holder.codec()));
             }
         });
     }
