@@ -157,6 +157,7 @@ dependencies {
     compileOnly fg.deobf("curse.maven:vampirism-233029:4640398")
     compileOnly fg.deobf("curse.maven:werewolves-417851:4662189")
     compileOnly fg.deobf("curse.maven:environmental-388992:3561534")
+    compileOnly fg.deobf("curse.maven:primal-winter-393321:3444949")
 }
 
 publishing {

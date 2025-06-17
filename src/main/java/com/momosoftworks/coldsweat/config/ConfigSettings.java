@@ -38,15 +38,17 @@ import net.minecraft.world.DimensionType;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.feature.StructureFeature;
 import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.common.thread.EffectiveSide;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.apache.logging.log4j.util.TriConsumer;
 
+import java.io.*;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -185,6 +187,7 @@ public class ConfigSettings
     public static final DynamicHolder<Double> ACCLIMATION_SPEED;
     public static final DynamicHolder<Pair<Double, Double>> MIN_ACCLIMATION_RANGE;
     public static final DynamicHolder<Pair<Double, Double>> MAX_ACCLIMATION_RANGE;
+    public static final DynamicHolder<List<String>> DISABLED_MOD_COMPAT;
 
     // Client Settings
     /* NULL ON THE SERVER */
@@ -267,16 +270,16 @@ public class ConfigSettings
         (saver) -> MainSettingsConfig.TEMP_DAMAGE.set(saver),
         SyncType.BOTH_WAYS);
 
-        FIRE_RESISTANCE_ENABLED = addSyncedSetting("fire_resistance_enabled", () -> true, holder -> holder.set(MainSettingsConfig.FIRE_RESISTANCE_BLOCKS_OVERHEATING.get()),
+        FIRE_RESISTANCE_ENABLED = addSyncedSetting("fire_resistance_enabled", () -> true, holder -> holder.set(ItemSettingsConfig.FIRE_RESISTANCE_BLOCKS_OVERHEATING.get()),
         (encoder) -> ConfigHelper.serializeNbtBool(encoder, "FireResistanceEnabled"),
         (decoder) -> decoder.getBoolean("FireResistanceEnabled"),
-        (saver) -> MainSettingsConfig.FIRE_RESISTANCE_BLOCKS_OVERHEATING.set(saver),
+        (saver) -> ItemSettingsConfig.FIRE_RESISTANCE_BLOCKS_OVERHEATING.set(saver),
         SyncType.BOTH_WAYS);
 
-        ICE_RESISTANCE_ENABLED = addSyncedSetting("ice_resistance_enabled", () -> true, holder -> holder.set(MainSettingsConfig.ICE_RESISTANCE_BLOCKS_FREEZING.get()),
+        ICE_RESISTANCE_ENABLED = addSyncedSetting("ice_resistance_enabled", () -> true, holder -> holder.set(ItemSettingsConfig.ICE_RESISTANCE_BLOCKS_FREEZING.get()),
         (encoder) -> ConfigHelper.serializeNbtBool(encoder, "IceResistanceEnabled"),
         (decoder) -> decoder.getBoolean("IceResistanceEnabled"),
-        (saver) -> MainSettingsConfig.ICE_RESISTANCE_BLOCKS_FREEZING.set(saver),
+        (saver) -> ItemSettingsConfig.ICE_RESISTANCE_BLOCKS_FREEZING.set(saver),
         SyncType.BOTH_WAYS);
 
         USE_PEACEFUL_MODE = addSyncedSetting("use_peaceful", () -> true, holder -> holder.set(MainSettingsConfig.NULLIFY_IN_PEACEFUL.get()),
@@ -285,10 +288,10 @@ public class ConfigSettings
         (saver) -> MainSettingsConfig.NULLIFY_IN_PEACEFUL.set(saver),
         SyncType.BOTH_WAYS);
 
-        REQUIRE_THERMOMETER = addSyncedSetting("require_thermometer", () -> true, holder -> holder.set(MainSettingsConfig.REQUIRE_THERMOMETER.get()),
+        REQUIRE_THERMOMETER = addSyncedSetting("require_thermometer", () -> true, holder -> holder.set(ItemSettingsConfig.REQUIRE_THERMOMETER.get()),
         (encoder) -> ConfigHelper.serializeNbtBool(encoder, "RequireThermometer"),
         (decoder) -> decoder.getBoolean("RequireThermometer"),
-        (saver) -> MainSettingsConfig.REQUIRE_THERMOMETER.set(saver),
+        (saver) -> ItemSettingsConfig.REQUIRE_THERMOMETER.set(saver),
         SyncType.BOTH_WAYS);
 
         GRACE_LENGTH = addSyncedSetting("grace_length", () -> 6000, holder -> holder.set(MainSettingsConfig.GRACE_PERIOD_LENGTH.get()),
@@ -915,6 +918,50 @@ public class ConfigSettings
         (saver) -> MainSettingsConfig.MAX_ACCLIMATION_RANGE.set(Arrays.asList(saver.getFirst(), saver.getSecond())),
         SyncType.BOTH_WAYS);
 
+        DISABLED_MOD_COMPAT = addSyncedSetting("disabled_mod_compat", ArrayList::new, holder ->
+        {
+            File disabledModsFile = FMLPaths.CONFIGDIR.get().resolve("coldsweat").resolve("disabled_mods.txt").toFile();
+            // Create file if it doesn't exist
+            if (!disabledModsFile.exists())
+            {
+                try
+                {   Files.createDirectories(disabledModsFile.getParentFile().toPath());
+                    Files.createFile(disabledModsFile.toPath());
+
+                    try (BufferedWriter writer = new BufferedWriter(new FileWriter(disabledModsFile)))
+                    {   writer.write("# Cold Sweat will not enable extra compatibility features for mods listed here.");
+                        writer.write("# List one mod ID per line, no spaces or punctuation (including quotes).");
+                    }
+                }
+                catch (IOException e)
+                {   ColdSweat.LOGGER.error("Failed to create disabled mods file", e);
+                }
+            }
+            // Read disabled mods from file
+            try (BufferedReader reader = new BufferedReader(new FileReader(disabledModsFile)))
+            {
+                String line;
+                while ((line = reader.readLine()) != null)
+                {   if (!line.trim().isEmpty() && !line.startsWith("#"))
+                    {   holder.get().add(line.trim());
+                    }
+                }
+            }
+            catch (IOException e)
+            {   ColdSweat.LOGGER.error("Failed to read disabled mods file", e);
+            }
+        },
+        (encoder) -> new CompoundNBT(){{
+            put("DisabledModCompat", new ListNBT(){{
+                for (String modId : encoder)
+                {   add(StringNBT.valueOf(modId));
+                }
+            }});
+        }},
+        (decoder) -> decoder.getList("DisabledModCompat", 8).stream().map(INBT::getAsString).collect(Collectors.toList()),
+        (saver) -> {},
+        SyncType.ONE_WAY);
+
 
         // Client
 
@@ -970,11 +1017,10 @@ public class ConfigSettings
         WATERSKIN_USE_SECONDARY = addClientSetting("waterskin_secondary_action", () -> Preference.WaterskinAction.DRINK,
             holder -> holder.set(Preference.WaterskinAction.byName(ClientSettingsConfig.WATERSKIN_DRINK_SECONDARY.get())));
 
-        boolean seasonsModLoaded = !CompatManager.getSeasonsMods().isEmpty();
-        SUMMER_TEMPS = addSetting("summer_temps", SeasonalTempData::new, holder -> holder.set(seasonsModLoaded ? SeasonalTempData.fromToml(WorldSettingsConfig.getSummerTemps()) : new SeasonalTempData()));
-        AUTUMN_TEMPS = addSetting("autumn_temps", SeasonalTempData::new, holder -> holder.set(seasonsModLoaded ? SeasonalTempData.fromToml(WorldSettingsConfig.getAutumnTemps()) : new SeasonalTempData()));
-        WINTER_TEMPS = addSetting("winter_temps", SeasonalTempData::new, holder -> holder.set(seasonsModLoaded ? SeasonalTempData.fromToml(WorldSettingsConfig.getWinterTemps()) : new SeasonalTempData()));
-        SPRING_TEMPS = addSetting("spring_temps", SeasonalTempData::new, holder -> holder.set(seasonsModLoaded ? SeasonalTempData.fromToml(WorldSettingsConfig.getSpringTemps()) : new SeasonalTempData()));
+        SUMMER_TEMPS = addSetting("summer_temps", SeasonalTempData::new, holder -> holder.set(!CompatManager.getSeasonsMods().isEmpty() ? SeasonalTempData.fromToml(WorldSettingsConfig.getSummerTemps()) : new SeasonalTempData()));
+        AUTUMN_TEMPS = addSetting("autumn_temps", SeasonalTempData::new, holder -> holder.set(!CompatManager.getSeasonsMods().isEmpty() ? SeasonalTempData.fromToml(WorldSettingsConfig.getAutumnTemps()) : new SeasonalTempData()));
+        WINTER_TEMPS = addSetting("winter_temps", SeasonalTempData::new, holder -> holder.set(!CompatManager.getSeasonsMods().isEmpty() ? SeasonalTempData.fromToml(WorldSettingsConfig.getWinterTemps()) : new SeasonalTempData()));
+        SPRING_TEMPS = addSetting("spring_temps", SeasonalTempData::new, holder -> holder.set(!CompatManager.getSeasonsMods().isEmpty() ? SeasonalTempData.fromToml(WorldSettingsConfig.getSpringTemps()) : new SeasonalTempData()));
     }
 
     public static String getKey(DynamicHolder<?> setting)

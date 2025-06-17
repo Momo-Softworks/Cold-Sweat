@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.api.temperature.modifier;
 
+import com.alcatrazescapee.primalwinter.Config;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -45,9 +46,9 @@ public class BiomeTempModifier extends TempModifier
 
         int biomeCount = 0;
         for (BlockPos blockPos : WorldHelper.getPositionGrid(entPos, samples, 10))
-            {
-                // Get the holder for the biome
-                Biome biome = level.getBiomeManager().getBiome(blockPos);
+        {
+            // Get the holder for the biome
+            Biome biome = level.getBiomeManager().getBiome(blockPos);
 
             DimensionType dimension = level.dimensionType();
             if (!dimension.hasCeiling())
@@ -57,8 +58,15 @@ public class BiomeTempModifier extends TempModifier
                 }
                 // Biome temp with time of day
                 double biomeTemp = WorldHelper.getBiomeTemperature(level, biome);
-                if (CompatManager.isPrimalWinterLoaded())
-                {   biomeTemp = Math.min(biomeTemp, biomeTemp / 2) - Math.max(biomeTemp / 2, 0);
+
+                // Primal Winter compat
+                if (CompatManager.isPrimalWinterLoaded() && ConfigSettings.BIOME_TEMPS.get(level.registryAccess()).get(biome) != null)
+                {
+                    boolean isWinterBiome = Config.COMMON.isWinterBiome(biome.getRegistryName());
+                    boolean isWinterDimension = Config.COMMON.isWinterDimension(level.dimension().getRegistryName());
+                    if (isWinterBiome && isWinterDimension)
+                    {   biomeTemp = Math.min(biomeTemp, biomeTemp / 2);
+                    }
                 }
                 worldTemp += biomeTemp;
             }

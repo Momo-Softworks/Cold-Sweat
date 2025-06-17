@@ -61,10 +61,14 @@ public class CompatManager
     private static final boolean TWILIGHT_FOREST_LOADED = modLoaded("twilightforest");
     private static final boolean AETHER_LOADED = modLoaded("aether");
 
-    private static final List<String> SEASONS_MODS = fetchSeasonsMods();
+    private static List<String> SEASONS_MODS = new ArrayList<>();
 
     public static boolean modLoaded(String modID, String minVersion, String maxVersion)
     {
+        List<String> disabledMods = ConfigSettings.DISABLED_MOD_COMPAT.get();
+        if (disabledMods.contains(modID))
+        {   return false;
+        }
         ModFileInfo mod = FMLLoader.getLoadingModList().getModFileById(modID);
         if (mod == null)
         {   return false;
@@ -94,16 +98,20 @@ public class CompatManager
 
     private static List<String> fetchSeasonsMods()
     {
-        FetchSeasonsModsEvent event = new FetchSeasonsModsEvent();
-        if (SERENE_SEASONS_LOADED)
-        {   event.addSeasonsMod("sereneseasons");
+        if (SEASONS_MODS.isEmpty())
+        {
+            FetchSeasonsModsEvent event = new FetchSeasonsModsEvent();
+            if (SERENE_SEASONS_LOADED)
+            {   event.addSeasonsMod("sereneseasons");
+            }
+            MinecraftForge.EVENT_BUS.post(event);
+            SEASONS_MODS.addAll(event.getSeasonsMods());
         }
-        MinecraftForge.EVENT_BUS.post(event);
-        return event.getSeasonsMods();
+        return SEASONS_MODS;
     }
 
     public static List<String> getSeasonsMods()
-    {   return SEASONS_MODS;
+    {   return fetchSeasonsMods();
     }
 
     public static boolean isBiomesOPlentyLoaded()

@@ -479,6 +479,8 @@ public class WorldSettingsConfig
         /* Seasons config */
         if (!CompatManager.getSeasonsMods().isEmpty())
         {
+            BUILDER.push("Seasons");
+
             BUILDER.comment("Format: [season-start, season-mid, season-end, *units]",
                             "First 3 parameters: The temperature offset at the start, middle, and end of the season",
                             "units: (Optional) The unit of temperature (C, F, or MC)",
@@ -507,6 +509,7 @@ public class WorldSettingsConfig
 
             BUILDER.pop();
         }
+        BUILDER.pop();
 
         SPEC = BUILDER.build();
     }
