@@ -931,7 +931,7 @@ public class ConfigSettings
         (saver) -> MainSettingsConfig.MAX_ACCLIMATION_RANGE.set(List.of(saver.getFirst(), saver.getSecond())),
         SyncType.BOTH_WAYS);
 
-        DISABLED_MOD_COMPAT = addSyncedSetting("disabled_mod_compat", ArrayList::new, holder ->
+        DISABLED_MOD_COMPAT = addSetting("disabled_mod_compat", ArrayList::new, holder ->
         {
             File disabledModsFile = FMLPaths.CONFIGDIR.get().resolve("coldsweat").resolve("disabled_mods.txt").toFile();
             // Create file if it doesn't exist
@@ -964,17 +964,7 @@ public class ConfigSettings
             catch (IOException e)
             {   ColdSweat.LOGGER.error("Failed to read disabled mods file", e);
             }
-        },
-        (encoder) -> new CompoundTag(){{
-            put("DisabledModCompat", new ListTag(){{
-                for (String modId : encoder)
-                {   add(StringTag.valueOf(modId));
-                }
-            }});
-        }},
-        (decoder) -> decoder.getList("DisabledModCompat", Tag.TAG_STRING).stream().map(Tag::getAsString).toList(),
-        (saver) -> {},
-        SyncType.ONE_WAY);
+        });
 
 
         // Client
