@@ -373,7 +373,6 @@ public class CompatManager
         if (!CompatManager.isCreateLoaded()) return;
         ItemStack backTank = player.getItemBySlot(EquipmentSlot.CHEST);
 
-        // Somehow this makes the indicator render. I have no idea
         if (USING_BACKTANK && player.level.isClientSide)
         {   player.getPersistentData().putInt("VisualBacktankAir", Math.round(BacktankUtil.getAir(backTank)) - 1);
         }
@@ -391,7 +390,8 @@ public class CompatManager
         && (ConfigSettings.HEAT_DRAINS_BACKTANK.get() && worldTemp > burningPoint || ConfigSettings.COLD_DRAINS_BACKTANK.get() && worldTemp < freezingPoint))
         {
             // Ensure player is wearing a full set of fire-resistant armor
-            List<InsulatorData> drainingInsulators = ConfigHelper.getTaggedConfigsFor(backTank.getItem(), ModInsulatorTags.DRAINS_BACKTANK, ConfigSettings.INSULATING_ARMORS.get());
+            List<InsulatorData> drainingInsulators = ConfigHelper.getTaggedConfigsFor(backTank.getItem(), ModInsulatorTags.DRAINS_BACKTANK,
+                                                                                      ConfigSettings.INSULATING_ARMORS.get(), player.level.registryAccess());
             if (drainingInsulators.stream().noneMatch(insulator -> insulator.test(player, backTank)))
             {   return;
             }

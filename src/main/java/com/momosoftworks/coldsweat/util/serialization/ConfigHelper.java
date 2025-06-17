@@ -651,9 +651,8 @@ public class ConfigHelper
         return builder.toString();
     }
 
-    public static <K, T extends ConfigData> List<T> getTaggedConfigsFor(K object, TagKey<T> tag, Multimap<K, T> config)
+    public static <K, T extends ConfigData> List<T> getTaggedConfigsFor(K object, TagKey<T> tag, Multimap<K, T> config, RegistryAccess registryAccess)
     {
-        RegistryAccess registryAccess = RegistryHelper.getRegistryAccess();
         Registry<T> registry = registryAccess.registryOrThrow(tag.registry());
 
         List<T> results = new ArrayList<>();
