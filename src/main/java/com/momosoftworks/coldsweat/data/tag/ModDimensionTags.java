@@ -1,25 +1,13 @@
 package com.momosoftworks.coldsweat.data.tag;
 
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.api.event.vanilla.ServerConfigsLoadedEvent;
-import com.momosoftworks.coldsweat.util.serialization.ListBuilder;
-import net.minecraft.core.Holder;
-import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
+import com.momosoftworks.coldsweat.api.event.core.init.InitDynamicTagsEvent;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.util.ObfuscationReflectionHelper;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.function.Predicate;
 
 @EventBusSubscriber
 public class ModDimensionTags
@@ -46,69 +34,25 @@ public class ModDimensionTags
     {   return TagKey.create(Registries.DIMENSION_TYPE, ResourceLocation.fromNamespaceAndPath("c", name));
     }
 
-    private static final Field CONTENTS = ObfuscationReflectionHelper.findField(HolderSet.Named.class, "contents");
-    private static final Method BIND = ObfuscationReflectionHelper.findMethod(HolderSet.Named.class, "bind", List.class);
-    private static final Method BIND_TAGS = ObfuscationReflectionHelper.findMethod(Holder.Reference.class, "bindTags", Collection.class);
-    static
-    {
-        CONTENTS.setAccessible(true);
-        BIND.setAccessible(true);
-        BIND_TAGS.setAccessible(true);
-    }
-
-    /**
-     * Scans through the registry for dimensions and assigns them to the appropriate vanilla tags.
-     */
-    public static void initDynamicTags(RegistryAccess registryAccess)
-    {
-        fillTag(HAS_CEILING, DimensionType::hasCeiling, registryAccess);
-        fillTag(HAS_SKY, dimensionType -> !dimensionType.hasCeiling(), registryAccess);
-        fillTag(NATURAL, DimensionType::natural, registryAccess);
-        fillTag(UNNATURAL, dimensionType -> !dimensionType.natural(), registryAccess);
-        fillTag(ULTRAWARM, DimensionType::ultraWarm, registryAccess);
-        fillTag(BED_WORKS, DimensionType::bedWorks, registryAccess);
-        fillTag(RESPAWN_ANCHOR_WORKS, DimensionType::respawnAnchorWorks, registryAccess);
-        fillTag(PIGLIN_SAFE, DimensionType::piglinSafe, registryAccess);
-        fillTag(HAS_SKYLIGHT, DimensionType::hasSkyLight, registryAccess);
-        fillTag(HAS_RAIDS, DimensionType::hasRaids, registryAccess);
-        fillTag(OVERWORLD_LIKE, dimensionType -> !dimensionType.hasCeiling()
-                                              && dimensionType.natural()
-                                              && dimensionType.hasSkyLight()
-                                              && !dimensionType.ultraWarm(), registryAccess);
-    }
-
-    private static void fillTag(TagKey<DimensionType> tag, Predicate<DimensionType> predicate, RegistryAccess registryAccess)
-    {
-        Registry<DimensionType> dimensionRegistry = registryAccess.registryOrThrow(Registries.DIMENSION_TYPE);
-        HolderSet.Named<DimensionType> holderSet = dimensionRegistry.getTag(tag).get();
-        Set<Holder<DimensionType>> entries;
-        try
-        {
-            entries = new HashSet<>((List<Holder<DimensionType>>) CONTENTS.get(holderSet));
-            dimensionRegistry.holders().forEach(dimensionType ->
-            {
-                if (predicate.test(dimensionType.value()))
-                {
-                    entries.add(dimensionType);
-                    try
-                    {   BIND_TAGS.invoke(dimensionType, ListBuilder.begin(dimensionType.tags().toList()).add(tag).build());
-                    }
-                    catch (Exception e)
-                    {   throw new RuntimeException(e);
-                    }
-                }
-            });
-            BIND.invoke(holderSet, new ArrayList<>(entries));
-        }
-        catch (Exception e)
-        {   throw new RuntimeException(e);
-        }
-    }
 
     @SubscribeEvent
-    public static void onServerStart(ServerConfigsLoadedEvent event)
+    public static void initDynamicTags(InitDynamicTagsEvent event)
     {
-        // Initialize custom vanilla tags for dimension types
-        ModDimensionTags.initDynamicTags(event.getServer().registryAccess());
+        event.fillTag(HAS_CEILING, DimensionType::hasCeiling, Registries.DIMENSION_TYPE);
+        event.fillTag(HAS_SKY, dimensionType -> !dimensionType.hasCeiling(), Registries.DIMENSION_TYPE);
+        event.fillTag(NATURAL, DimensionType::natural, Registries.DIMENSION_TYPE);
+        event.fillTag(UNNATURAL, dimensionType -> !dimensionType.natural(), Registries.DIMENSION_TYPE);
+        event.fillTag(ULTRAWARM, DimensionType::ultraWarm, Registries.DIMENSION_TYPE);
+        event.fillTag(BED_WORKS, DimensionType::bedWorks, Registries.DIMENSION_TYPE);
+        event.fillTag(RESPAWN_ANCHOR_WORKS, DimensionType::respawnAnchorWorks, Registries.DIMENSION_TYPE);
+        event.fillTag(PIGLIN_SAFE, DimensionType::piglinSafe, Registries.DIMENSION_TYPE);
+        event.fillTag(HAS_SKYLIGHT, DimensionType::hasSkyLight, Registries.DIMENSION_TYPE);
+        event.fillTag(HAS_RAIDS, DimensionType::hasRaids, Registries.DIMENSION_TYPE);
+        event.fillTag(OVERWORLD_LIKE,
+                      dimensionType -> !dimensionType.hasCeiling()
+                                    && dimensionType.natural()
+                                    && dimensionType.hasSkyLight()
+                                    && !dimensionType.ultraWarm(),
+                      Registries.DIMENSION_TYPE);
     }
 }
