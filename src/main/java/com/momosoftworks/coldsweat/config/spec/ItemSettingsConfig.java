@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.config.spec;
 
 import com.momosoftworks.coldsweat.compat.CompatManager;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.ListBuilder;
 import net.neoforged.fml.ModContainer;
@@ -41,6 +42,10 @@ public class ItemSettingsConfig
     public static final ModConfigSpec.DoubleValue WATERSKIN_NEUTRALIZE_SPEED;
     public static final ModConfigSpec.DoubleValue SOULSPRING_LAMP_STRENGTH;
 
+    public static final ModConfigSpec.ConfigValue<Boolean> FIRE_RESISTANCE_BLOCKS_OVERHEATING;
+    public static final ModConfigSpec.ConfigValue<Boolean> ICE_RESISTANCE_BLOCKS_FREEZING;
+    public static final ModConfigSpec.ConfigValue<Boolean> REQUIRE_THERMOMETER;
+
     public static final ModConfigSpec.ConfigValue<List<? extends List<?>>> DRYING_ITEMS;
 
     // Compat settings
@@ -50,13 +55,12 @@ public class ItemSettingsConfig
 
     static
     {
-        /*
-          Fuel Items
-         */
+        ConfigSettings.Difficulty defaultDiff = ConfigSettings.DEFAULT_DIFFICULTY;
+
         BUILDER.push("Fuel Items")
                 .comment("Defines items that can be used as fuel",
                          "Format: [[\"item-id-1\", amount-1], [\"item-id-2\", amount-2], ...etc]");
-        BOILER_FUELS = BUILDER
+            BOILER_FUELS = BUILDER
                 .defineListAllowEmpty(List.of("Boiler"), () -> ListBuilder.begin(
                                 List.of("#minecraft:planks",         10),
                                 List.of("#minecraft:coals",          37),
@@ -67,7 +71,7 @@ public class ItemSettingsConfig
                         ).build(),
                         it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number);
 
-        ICEBOX_FUELS = BUILDER
+            ICEBOX_FUELS = BUILDER
                 .defineListAllowEmpty(List.of("Icebox"), () -> ListBuilder.begin(
                                 List.of("minecraft:snowball",           10),
                                 List.of("minecraft:clay_ball",          37),
@@ -80,7 +84,7 @@ public class ItemSettingsConfig
                         ).build(),
                         it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number);
 
-        HEARTH_FUELS = BUILDER
+            HEARTH_FUELS = BUILDER
                 .comment("Negative values indicate cold fuel")
                 .defineListAllowEmpty(List.of("Hearth"), () -> ListBuilder.begin(
                                 // Hot
@@ -100,7 +104,7 @@ public class ItemSettingsConfig
                                 List.of("minecraft:packed_ice",         -1000)
                         ).build(),
                         it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number);
-        HEARTH_POTION_BLACKLIST = BUILDER
+         HEARTH_POTION_BLACKLIST = BUILDER
                 .comment("Potions containing any of these effects will not be allowed in the hearth",
                          "Format: [\"effect_id\", \"effect_id\", ...etc]")
                 .defineListAllowEmpty(List.of("Blacklisted Hearth Potions"), () -> ListBuilder.begin(
@@ -112,7 +116,7 @@ public class ItemSettingsConfig
                                 "minecraft:slowness"
                         ).build(),
                         it -> it instanceof String);
-        ALLOW_POTIONS_IN_HEARTH = BUILDER
+           ALLOW_POTIONS_IN_HEARTH = BUILDER
                 .comment("If true, potions can be used as fuel in the hearth",
                          "This gives all players in range the potion effect")
                 .define("Allow Potions in Hearth", true);
@@ -122,7 +126,7 @@ public class ItemSettingsConfig
           Soulspring Lamp Items
          */
         BUILDER.push("Soulspring Lamp");
-        SOULSPRING_LAMP_FUELS = BUILDER
+            SOULSPRING_LAMP_FUELS = BUILDER
                 .comment("Defines items that the Soulspring Lamp can use as fuel",
                         "Format: [[\"item-id-1\", amount-1], [\"item-id-2\", amount-2], ...etc]")
                 .defineListAllowEmpty(List.of("Fuel Items"), () -> ListBuilder.<List<?>>begin(
@@ -130,7 +134,7 @@ public class ItemSettingsConfig
                         ).build(),
                         it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number);
 
-        SOULSPRING_LAMP_DIMENSIONS = BUILDER
+            SOULSPRING_LAMP_DIMENSIONS = BUILDER
                 .comment("Defines the dimensions that the Soulspring Lamp can be used in",
                         "Format: [\"dimension-id-1\", \"dimension-id-2\", ...etc]")
                 .defineListAllowEmpty(List.of("Valid Dimensions"), () -> ListBuilder.begin(
@@ -143,7 +147,7 @@ public class ItemSettingsConfig
          Insulation
          */
         BUILDER.push("Insulation");
-        INSULATION_ITEMS = BUILDER
+            INSULATION_ITEMS = BUILDER
                 .comment("Defines the items that can be used for insulating armor in the Sewing Table",
                          "Format: [[\"item_id\", cold, hot, *\"static\", *\"nbt\", *fil_slots], [\"item_id\", amount, adapt-speed, \"adaptive\", *\"nbt\", *fill_slots], ...etc]",
                          "(* = Optional)",
@@ -203,7 +207,7 @@ public class ItemSettingsConfig
                                 && (list.size() < 5 || list.get(4) instanceof String)
                                 && (list.size() < 6 || list.get(5) instanceof Boolean));
 
-        INSULATING_ARMOR = BUILDER
+            INSULATING_ARMOR = BUILDER
                 .comment("Defines the items that provide insulation when worn",
                         "See Insulation Ingredients for formatting. This setting does not have a \"fill_slots\" option")
                 .defineListAllowEmpty(List.of("Insulating Armor"), () -> ListBuilder.<List<?>>begin(
@@ -246,24 +250,24 @@ public class ItemSettingsConfig
                                 && (list.size() < 5 || list.get(5) instanceof String)
                                 && list.size() < 6);
 
-        if (CompatManager.isCuriosLoaded())
-        {
-            INSULATING_CURIOS = BUILDER
-                    .comment("Defines the items that provide insulation when worn in a curio slot",
-                             "See Insulation Ingredients for formatting. This setting does not have a \"fill_slots\" option")
-                    .defineListAllowEmpty(List.of("Insulating Curios"), () -> List.of(
-                            // Nothing defined
-                        ),
-                        it -> it instanceof List<?> list && list.size() >= 3
-                                && list.get(0) instanceof String
-                                && list.get(1) instanceof Number
-                                && list.get(2) instanceof Number
-                                && (list.size() < 4 || list.get(3) instanceof String)
-                                && (list.size() < 5 || list.get(4) instanceof String));
-        }
-        else INSULATING_CURIOS = null;
+            if (CompatManager.isCuriosLoaded())
+            {
+                INSULATING_CURIOS = BUILDER
+                        .comment("Defines the items that provide insulation when worn in a curio slot",
+                                 "See Insulation Ingredients for formatting. This setting does not have a \"fill_slots\" option")
+                        .defineListAllowEmpty(List.of("Insulating Curios"), () -> List.of(
+                                // Nothing defined
+                            ),
+                            it -> it instanceof List<?> list && list.size() >= 3
+                                    && list.get(0) instanceof String
+                                    && list.get(1) instanceof Number
+                                    && list.get(2) instanceof Number
+                                    && (list.size() < 4 || list.get(3) instanceof String)
+                                    && (list.size() < 5 || list.get(4) instanceof String));
+            }
+            else INSULATING_CURIOS = null;
 
-        INSULATION_SLOTS = BUILDER
+            INSULATION_SLOTS = BUILDER
                 .comment("Defines how many insulation slots armor pieces have",
                          "There are 4 modes for this setting:",
                          "Static: Each armor slot (head, body, legs, feet) has a fixed number of insulation slots",
@@ -276,7 +280,7 @@ public class ItemSettingsConfig
                 .defineList("Insulation Slots", List.of("static", 4, 6, 5, 4),
                         it -> it instanceof Number || it instanceof String);
 
-        INSULATION_SLOT_OVERRIDES = BUILDER
+            INSULATION_SLOT_OVERRIDES = BUILDER
                 .comment("Allows for overriding the number of insulation slots for specific items",
                          "Format: [[\"item_id\", slot_count, *\"nbt\"], [\"item_id\", slot_count, *\"nbt\"], ...etc]")
                 .defineListAllowEmpty(List.of("Insulation Slot Overrides"), () -> List.of(
@@ -286,11 +290,11 @@ public class ItemSettingsConfig
                         && list.get(1) instanceof Number
                         && (list.size() < 3 || list.get(2) instanceof String));
 
-        INSULATION_STRENGTH = BUILDER
+            INSULATION_STRENGTH = BUILDER
                 .comment("Defines the effectiveness of insulating items in protecting against temperature")
                 .defineInRange("Insulation Strength", 1.0, 0, Double.POSITIVE_INFINITY);
 
-        INSULATION_BLACKLIST = BUILDER
+            INSULATION_BLACKLIST = BUILDER
                 .comment("Defines wearable items that cannot be insulated",
                         "Format: [\"item_id\", \"item_id\", ...etc]")
                 .defineListAllowEmpty(List.of("Insulation Blacklist"), () -> List.of(
@@ -304,7 +308,7 @@ public class ItemSettingsConfig
          */
         BUILDER.push("Consumables");
 
-        FOOD_TEMPERATURES = BUILDER
+            FOOD_TEMPERATURES = BUILDER
                 .comment("Defines items that affect the player's temperature when consumed",
                         "Format: [[\"item_id\", amount, *\"nbt\", *duration], [\"item_id\", amount, *\"nbt\", *duration], ...etc]",
                         "Negative values are cold foods, positive values are hot foods",
@@ -319,24 +323,24 @@ public class ItemSettingsConfig
                         && (list.size() < 3 || list.get(2) instanceof String)
                         && (list.size() < 4 || list.get(3) instanceof Number));
 
-        WATERSKIN_CONSUME_STRENGTH = BUILDER
+            WATERSKIN_CONSUME_STRENGTH = BUILDER
                 .comment("Defines how much a waterskin will change the player's body temperature when used")
                 .defineInRange("Waterskin Strength", 50, 0, Integer.MAX_VALUE);
 
-        WATERSKIN_HOTBAR_STRENGTH = BUILDER
+            WATERSKIN_HOTBAR_STRENGTH = BUILDER
                 .comment("A multiplier for how effective a waterskin's over-time effect is, when held in the player's hotbar")
                 .defineInRange("Waterskin Hotbar Strength", 1.0, 0, Double.POSITIVE_INFINITY);
 
-        WATERSKIN_NEUTRALIZE_SPEED = BUILDER
+            WATERSKIN_NEUTRALIZE_SPEED = BUILDER
                 .comment("A multiplier for how quickly a waterskin will return to its neutral temperature when being used in the hotbar")
                 .defineInRange("Waterskin Neutralize Speed", 1.0, 0, Double.POSITIVE_INFINITY);
 
-        SOULSPRING_LAMP_STRENGTH = BUILDER
+            SOULSPRING_LAMP_STRENGTH = BUILDER
                 .comment("Determines the strength of the Soulspring Lamp's effect before it is overwhelmed",
                          "A value of 1 means it will never be overwhelmed")
                 .defineInRange("Soulspring Lamp Strength", 0.6, 0, 1);
 
-        DRYING_ITEMS = BUILDER
+            DRYING_ITEMS = BUILDER
                 .comment("Defines items that can be used to dry the player",
                         "Format: [[\"item_id\", \"turns_into\"], [\"item_id\", \"turns_into\"], ...etc]")
                 .defineListAllowEmpty(List.of("Drying Items"), () -> List.of(
@@ -354,7 +358,7 @@ public class ItemSettingsConfig
          */
         BUILDER.push("Misc");
 
-        CARRIED_ITEM_TEMPERATURES = BUILDER
+            CARRIED_ITEM_TEMPERATURES = BUILDER
                 .comment("Defines items that affect the player's temperature when in the inventory",
                          "Format: [[\"item_id\", temperature, \"slot_range\", \"trait\", *\"nbt\", *max_effect], [\"item_id\", temperature, \"slot_range\", \"trait\", *\"nbt\", *max_effect], ...etc]",
                          "temperature: The temperature change the item will apply to the entity. For core temperature, this is applied every tick",
@@ -372,6 +376,20 @@ public class ItemSettingsConfig
                         && (list.size() < 5 || list.get(4) instanceof String)
                         && (list.size() < 6 || list.get(5) instanceof Number));
 
+        BUILDER.pop();
+
+        BUILDER.push("Item Functions");
+            FIRE_RESISTANCE_BLOCKS_OVERHEATING = BUILDER
+                .comment("Allow fire resistance to block overheating damage")
+                .define("Fire Resistance Immunity", defaultDiff.getOrDefault(ConfigSettings.FIRE_RESISTANCE_ENABLED, true));
+
+            ICE_RESISTANCE_BLOCKS_FREEZING = BUILDER
+                .comment("Allow ice resistance to block freezing damage")
+                .define("Ice Resistance Immunity", defaultDiff.getOrDefault(ConfigSettings.ICE_RESISTANCE_ENABLED, true));
+
+            REQUIRE_THERMOMETER = BUILDER
+                .comment("Thermometer item is required to see detailed world temperature")
+                .define("Require Thermometer", defaultDiff.getOrDefault(ConfigSettings.REQUIRE_THERMOMETER, true));
         BUILDER.pop();
 
         if (CompatManager.isCreateLoaded())
