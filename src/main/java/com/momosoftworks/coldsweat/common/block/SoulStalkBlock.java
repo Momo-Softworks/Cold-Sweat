@@ -97,7 +97,7 @@ public class SoulStalkBlock extends Block implements IPlantable
     }
 
     public static int getRandomGrowth()
-    {   return new Random().nextInt(2, 4);
+    {   return new Random().nextInt(1, 4);
     }
 
     protected void ensureProperState(LevelAccessor level, BlockPos pos)
