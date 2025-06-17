@@ -87,7 +87,7 @@ public class ColdSweat
         bus.addListener((DataPackRegistryEvent.NewRegistry event) ->
         {
             for (ModRegistries.RegistryHolder<?> holder : ModRegistries.getRegistries().values())
-            {   event.dataPackRegistry((ResourceKey) holder.registry(), (Codec) holder.codec());
+            {   event.dataPackRegistry((ResourceKey) holder.registry(), (Codec) holder.codec(), (Codec) holder.codec());
             }
         });
     }
