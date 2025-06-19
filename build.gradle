@@ -21,7 +21,7 @@ neoForge {
     version = project.neo_version
 
     accessTransformers {
-        file("src/main/resources/META-INF/coldsweat_at.cfg")
+        file("src/main/resources/META-INF/accesstransformer.cfg")
     }
 
     // Default run configurations.
