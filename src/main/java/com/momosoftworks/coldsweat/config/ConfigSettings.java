@@ -6,6 +6,7 @@ import com.google.common.collect.Multimap;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.slot.ScalingFormula;
@@ -16,6 +17,7 @@ import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
+import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.math.RegistryMultiMap;
@@ -45,6 +47,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistry;
 import org.apache.logging.log4j.util.TriConsumer;
 
+import javax.annotation.Nullable;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.*;
@@ -58,8 +61,8 @@ import static com.momosoftworks.coldsweat.util.serialization.DynamicHolder.SyncT
  */
 public class ConfigSettings
 {
-    public static final BiMap<String, DynamicHolder<?>> CONFIG_SETTINGS = HashBiMap.create();
-    public static final BiMap<String, DynamicHolder<?>> CLIENT_SETTINGS = HashBiMap.create();
+    public static final BiMap<ResourceLocation, DynamicHolder<?>> CONFIG_SETTINGS = HashBiMap.create();
+    public static final BiMap<ResourceLocation, DynamicHolder<?>> CLIENT_SETTINGS = HashBiMap.create();
 
     public static Difficulty DEFAULT_DIFFICULTY = Difficulty.NORMAL;
 
@@ -236,104 +239,88 @@ public class ConfigSettings
     // Makes the settings instantiation collapsible & easier to read
     static
     {
-        DIFFICULTY = addSyncedSetting("difficulty", () -> Difficulty.NORMAL, holder -> holder.set(Difficulty.byId(MainSettingsConfig.DIFFICULTY.get())),
-        (encoder) -> ConfigHelper.serializeNbtInt(encoder.getId(), "Difficulty"),
-        (decoder) -> Difficulty.byId(decoder.getInt("Difficulty")),
-        (saver) -> MainSettingsConfig.DIFFICULTY.set(saver.getId()),
+        DIFFICULTY = addSyncedSetting(ColdSweat.createKey("difficulty"), () -> Difficulty.NORMAL, holder -> holder.set(Difficulty.byId(MainSettingsConfig.DIFFICULTY.get())),
+        Difficulty.CODEC,
+        (difficulty) -> MainSettingsConfig.DIFFICULTY.set(difficulty.getId()),
         SyncType.BOTH_WAYS);
 
-        MAX_TEMP = addSyncedSetting("max_temp", () -> 1.7, holder -> holder.set(MainSettingsConfig.MAX_HABITABLE_TEMPERATURE.get()),
-        (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "MaxTemp"),
-        (decoder) -> decoder.getDouble("MaxTemp"),
-        (saver) -> MainSettingsConfig.MAX_HABITABLE_TEMPERATURE.set(saver),
+        MAX_TEMP = addSyncedSetting(ColdSweat.createKey("max_temp"), () -> 1.7, holder -> holder.set(MainSettingsConfig.MAX_HABITABLE_TEMPERATURE.get()),
+        Codec.DOUBLE,
+        (temp) -> MainSettingsConfig.MAX_HABITABLE_TEMPERATURE.set(temp),
         SyncType.BOTH_WAYS);
 
-        MIN_TEMP = addSyncedSetting("min_temp", () -> 0.5, holder -> holder.set(MainSettingsConfig.MIN_HABITABLE_TEMPERATURE.get()),
-        (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "MinTemp"),
-        (decoder) -> decoder.getDouble("MinTemp"),
-        (saver) -> MainSettingsConfig.MIN_HABITABLE_TEMPERATURE.set(saver),
+        MIN_TEMP = addSyncedSetting(ColdSweat.createKey("min_temp"), () -> 0.5, holder -> holder.set(MainSettingsConfig.MIN_HABITABLE_TEMPERATURE.get()),
+        Codec.DOUBLE,
+        (temp) -> MainSettingsConfig.MIN_HABITABLE_TEMPERATURE.set(temp),
         SyncType.BOTH_WAYS);
 
-        TEMP_RATE = addSyncedSetting("temp_rate", () -> 1d, holder -> holder.set(MainSettingsConfig.TEMP_RATE_MULTIPLIER.get()),
-        (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "TempRate"),
-        (decoder) -> decoder.getDouble("TempRate"),
-        (saver) -> MainSettingsConfig.TEMP_RATE_MULTIPLIER.set(saver),
+        TEMP_RATE = addSyncedSetting(ColdSweat.createKey("temp_rate"), () -> 1d, holder -> holder.set(MainSettingsConfig.TEMP_RATE_MULTIPLIER.get()),
+        Codec.DOUBLE,
+        (rate) -> MainSettingsConfig.TEMP_RATE_MULTIPLIER.set(rate),
         SyncType.BOTH_WAYS);
 
-        TEMP_DAMAGE = addSyncedSetting("temp_damage", () -> 2d, holder -> holder.set(MainSettingsConfig.TEMP_DAMAGE.get()),
-        (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "TempDamage"),
-        (decoder) -> decoder.getDouble("TempDamage"),
-        (saver) -> MainSettingsConfig.TEMP_DAMAGE.set(saver),
+        TEMP_DAMAGE = addSyncedSetting(ColdSweat.createKey("temp_damage"), () -> 2d, holder -> holder.set(MainSettingsConfig.TEMP_DAMAGE.get()),
+        Codec.DOUBLE,
+        (damage) -> MainSettingsConfig.TEMP_DAMAGE.set(damage),
         SyncType.BOTH_WAYS);
 
-        FIRE_RESISTANCE_ENABLED = addSyncedSetting("fire_resistance_enabled", () -> true, holder -> holder.set(ItemSettingsConfig.FIRE_RESISTANCE_BLOCKS_OVERHEATING.get()),
-        (encoder) -> ConfigHelper.serializeNbtBool(encoder, "FireResistanceEnabled"),
-        (decoder) -> decoder.getBoolean("FireResistanceEnabled"),
-        (saver) -> ItemSettingsConfig.FIRE_RESISTANCE_BLOCKS_OVERHEATING.set(saver),
+        FIRE_RESISTANCE_ENABLED = addSyncedSetting(ColdSweat.createKey("fire_resistance_enabled"), () -> true, holder -> holder.set(ItemSettingsConfig.FIRE_RESISTANCE_BLOCKS_OVERHEATING.get()),
+        Codec.BOOL,
+        (enabled) -> ItemSettingsConfig.FIRE_RESISTANCE_BLOCKS_OVERHEATING.set(enabled),
         SyncType.BOTH_WAYS);
 
-        ICE_RESISTANCE_ENABLED = addSyncedSetting("ice_resistance_enabled", () -> true, holder -> holder.set(ItemSettingsConfig.ICE_RESISTANCE_BLOCKS_FREEZING.get()),
-        (encoder) -> ConfigHelper.serializeNbtBool(encoder, "IceResistanceEnabled"),
-        (decoder) -> decoder.getBoolean("IceResistanceEnabled"),
-        (saver) -> ItemSettingsConfig.ICE_RESISTANCE_BLOCKS_FREEZING.set(saver),
+        ICE_RESISTANCE_ENABLED = addSyncedSetting(ColdSweat.createKey("ice_resistance_enabled"), () -> true, holder -> holder.set(ItemSettingsConfig.ICE_RESISTANCE_BLOCKS_FREEZING.get()),
+        Codec.BOOL,
+        (enabled) -> ItemSettingsConfig.ICE_RESISTANCE_BLOCKS_FREEZING.set(enabled),
         SyncType.BOTH_WAYS);
 
-        USE_PEACEFUL_MODE = addSyncedSetting("use_peaceful", () -> true, holder -> holder.set(MainSettingsConfig.NULLIFY_IN_PEACEFUL.get()),
-        (encoder) -> ConfigHelper.serializeNbtBool(encoder, "UsePeaceful"),
-        (decoder) -> decoder.getBoolean("UsePeaceful"),
-        (saver) -> MainSettingsConfig.NULLIFY_IN_PEACEFUL.set(saver),
+        USE_PEACEFUL_MODE = addSyncedSetting(ColdSweat.createKey("use_peaceful"), () -> true, holder -> holder.set(MainSettingsConfig.NULLIFY_IN_PEACEFUL.get()),
+        Codec.BOOL,
+        (usePeaceful) -> MainSettingsConfig.NULLIFY_IN_PEACEFUL.set(usePeaceful),
         SyncType.BOTH_WAYS);
 
-        REQUIRE_THERMOMETER = addSyncedSetting("require_thermometer", () -> true, holder -> holder.set(ItemSettingsConfig.REQUIRE_THERMOMETER.get()),
-        (encoder) -> ConfigHelper.serializeNbtBool(encoder, "RequireThermometer"),
-        (decoder) -> decoder.getBoolean("RequireThermometer"),
-        (saver) -> ItemSettingsConfig.REQUIRE_THERMOMETER.set(saver),
+        REQUIRE_THERMOMETER = addSyncedSetting(ColdSweat.createKey("require_thermometer"), () -> true, holder -> holder.set(ItemSettingsConfig.REQUIRE_THERMOMETER.get()),
+        Codec.BOOL,
+        (requireThermometer) -> ItemSettingsConfig.REQUIRE_THERMOMETER.set(requireThermometer),
         SyncType.BOTH_WAYS);
 
-        GRACE_LENGTH = addSyncedSetting("grace_length", () -> 6000, holder -> holder.set(MainSettingsConfig.GRACE_PERIOD_LENGTH.get()),
-        (encoder) -> ConfigHelper.serializeNbtInt(encoder, "GraceLength"),
-        (decoder) -> decoder.getInt("GraceLength"),
-        (saver) -> MainSettingsConfig.GRACE_PERIOD_LENGTH.set(saver),
+        GRACE_LENGTH = addSyncedSetting(ColdSweat.createKey("grace_length"), () -> 6000, holder -> holder.set(MainSettingsConfig.GRACE_PERIOD_LENGTH.get()),
+        Codec.INT,
+        (length) -> MainSettingsConfig.GRACE_PERIOD_LENGTH.set(length),
         SyncType.BOTH_WAYS);
 
-        GRACE_ENABLED = addSyncedSetting("grace_enabled", () -> true, holder -> holder.set(MainSettingsConfig.ENABLE_GRACE_PERIOD.get()),
-        (encoder) -> ConfigHelper.serializeNbtBool(encoder, "GraceEnabled"),
-        (decoder) -> decoder.getBoolean("GraceEnabled"),
-        (saver) -> MainSettingsConfig.ENABLE_GRACE_PERIOD.set(saver),
+        GRACE_ENABLED = addSyncedSetting(ColdSweat.createKey("grace_enabled"), () -> true, holder -> holder.set(MainSettingsConfig.ENABLE_GRACE_PERIOD.get()),
+        Codec.BOOL,
+        (enabled) -> MainSettingsConfig.ENABLE_GRACE_PERIOD.set(enabled),
         SyncType.BOTH_WAYS);
 
 
-        HEARTS_FREEZING_PERCENTAGE = addSyncedSetting("hearts_freezing_percentage", () -> 0.5, holder -> holder.set(MainSettingsConfig.FREEZING_HEARTS.get()),
-        (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "HeartsFreezingPercentage"),
-        (decoder) -> decoder.getDouble("HeartsFreezingPercentage"),
-        (saver) -> MainSettingsConfig.FREEZING_HEARTS.set(saver),
+        HEARTS_FREEZING_PERCENTAGE = addSyncedSetting(ColdSweat.createKey("hearts_freezing_percentage"), () -> 0.5, holder -> holder.set(MainSettingsConfig.FREEZING_HEARTS.get()),
+        Codec.DOUBLE,
+        (percentage) -> MainSettingsConfig.FREEZING_HEARTS.set(percentage),
         SyncType.BOTH_WAYS);
 
-        COLD_MINING_IMPAIRMENT = addSyncedSetting("cold_mining_slowdown", () -> 0.5, holder -> holder.set(MainSettingsConfig.COLD_MINING.get()),
-        (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "ColdMiningImpairment"),
-        (decoder) -> decoder.getDouble("ColdMiningImpairment"),
-        (saver) -> MainSettingsConfig.COLD_MINING.set(saver),
+        COLD_MINING_IMPAIRMENT = addSyncedSetting(ColdSweat.createKey("cold_mining_slowdown"), () -> 0.5, holder -> holder.set(MainSettingsConfig.COLD_MINING.get()),
+        Codec.DOUBLE,
+        (slowdown) -> MainSettingsConfig.COLD_MINING.set(slowdown),
         SyncType.BOTH_WAYS);
 
-        COLD_MOVEMENT_SLOWDOWN = addSyncedSetting("cold_movement_slowdown", () -> 0.5, holder -> holder.set(MainSettingsConfig.COLD_MOVEMENT.get()),
-        (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "ColdMovementSlowdown"),
-        (decoder) -> decoder.getDouble("ColdMovementSlowdown"),
-        (saver) -> MainSettingsConfig.COLD_MOVEMENT.set(saver),
+        COLD_MOVEMENT_SLOWDOWN = addSyncedSetting(ColdSweat.createKey("cold_movement_slowdown"), () -> 0.5, holder -> holder.set(MainSettingsConfig.COLD_MOVEMENT.get()),
+        Codec.DOUBLE,
+        (slowdown) -> MainSettingsConfig.COLD_MOVEMENT.set(slowdown),
         SyncType.BOTH_WAYS);
 
-        COLD_KNOCKBACK_REDUCTION = addSyncedSetting("cold_knockback_reduction", () -> 0.5, holder -> holder.set(MainSettingsConfig.COLD_KNOCKBACK.get()),
-        (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "ColdKnockbackReduction"),
-        (decoder) -> decoder.getDouble("ColdKnockbackReduction"),
-        (saver) -> MainSettingsConfig.COLD_KNOCKBACK.set(saver),
+        COLD_KNOCKBACK_REDUCTION = addSyncedSetting(ColdSweat.createKey("cold_knockback_reduction"), () -> 0.5, holder -> holder.set(MainSettingsConfig.COLD_KNOCKBACK.get()),
+        Codec.DOUBLE,
+        (reduction) -> MainSettingsConfig.COLD_KNOCKBACK.set(reduction),
         SyncType.BOTH_WAYS);
 
-        HEATSTROKE_FOG_DISTANCE = addSyncedSetting("heatstroke_fog_distance", () -> 6d, holder -> holder.set(MainSettingsConfig.HEATSTROKE_FOG.get()),
-        (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "HeatstrokeFogDistance"),
-        (decoder) -> decoder.getDouble("HeatstrokeFogDistance"),
-        (saver) -> MainSettingsConfig.HEATSTROKE_FOG.set(saver),
+        HEATSTROKE_FOG_DISTANCE = addSyncedSetting(ColdSweat.createKey("heatstroke_fog_distance"), () -> 6d, holder -> holder.set(MainSettingsConfig.HEATSTROKE_FOG.get()),
+        Codec.DOUBLE,
+        (distance) -> MainSettingsConfig.HEATSTROKE_FOG.set(distance),
         SyncType.BOTH_WAYS);
 
-        BIOME_TEMPS = addSyncedSettingWithRegistries("biome_temps", FastMap::new, (holder, registryAccess) ->
+        BIOME_TEMPS = addSyncedSettingWithRegistries(ColdSweat.createKey("biome_temps"), HashMap::new, (holder, registryAccess) ->
         {
             Map<Holder<Biome>, BiomeTempData> dataMap = ConfigHelper.getRegistryMap(WorldSettingsConfig.BIOME_TEMPERATURES.get(), registryAccess, Registry.BIOME_REGISTRY,
                                                                                     toml -> BiomeTempData.fromToml(toml, false, registryAccess),
@@ -342,12 +329,11 @@ public class ConfigSettings
 
             holder.get(registryAccess).putAll(dataMap);
         },
-        (encoder, registryAccess) -> ConfigHelper.serializeHolderRegistry(encoder, "BiomeTemps", Registry.BIOME_REGISTRY, ModRegistries.BIOME_TEMP_DATA, registryAccess),
-        (decoder, registryAccess) -> ConfigHelper.deserializeHolderRegistry(decoder, "BiomeTemps", Registry.BIOME_REGISTRY, ModRegistries.BIOME_TEMP_DATA, registryAccess),
+        ExtraCodecs.registryMapCodec(Registry.BIOME_REGISTRY, BiomeTempData.CODEC),
         (saver, registryAccess) -> {},
         SyncType.ONE_WAY);
 
-        BIOME_OFFSETS = addSyncedSettingWithRegistries("biome_offsets", FastMap::new, (holder, registryAccess) ->
+        BIOME_OFFSETS = addSyncedSettingWithRegistries(ColdSweat.createKey("biome_offsets"), FastMap::new, (holder, registryAccess) ->
         {
             Map<Holder<Biome>, BiomeTempData> dataMap = ConfigHelper.getRegistryMap(WorldSettingsConfig.BIOME_TEMP_OFFSETS.get(), registryAccess, Registry.BIOME_REGISTRY,
                                                                                     toml -> BiomeTempData.fromToml(toml, true, registryAccess),
@@ -356,12 +342,11 @@ public class ConfigSettings
 
             holder.get(registryAccess).putAll(dataMap);
         },
-        (encoder, registryAccess) -> ConfigHelper.serializeHolderRegistry(encoder, "BiomeOffsets", Registry.BIOME_REGISTRY, ModRegistries.BIOME_TEMP_DATA, registryAccess),
-        (decoder, registryAccess) -> ConfigHelper.deserializeHolderRegistry(decoder, "BiomeOffsets", Registry.BIOME_REGISTRY, ModRegistries.BIOME_TEMP_DATA, registryAccess),
+        ExtraCodecs.registryMapCodec(Registry.BIOME_REGISTRY, BiomeTempData.CODEC),
         (saver, registryAccess) -> {},
         SyncType.ONE_WAY);
 
-        DIMENSION_TEMPS = addSyncedSettingWithRegistries("dimension_temps", FastMap::new, (holder, registryAccess) ->
+        DIMENSION_TEMPS = addSyncedSettingWithRegistries(ColdSweat.createKey("dimension_temps"), FastMap::new, (holder, registryAccess) ->
         {
             Map<Holder<DimensionType>, DimensionTempData> dataMap = ConfigHelper.getRegistryMap(WorldSettingsConfig.DIMENSION_TEMPERATURES.get(), registryAccess, Registry.DIMENSION_TYPE_REGISTRY,
                                                                                                 toml -> DimensionTempData.fromToml(toml, false, registryAccess),
@@ -370,12 +355,11 @@ public class ConfigSettings
 
             holder.get(registryAccess).putAll(dataMap);
         },
-        (encoder, registryAccess) -> ConfigHelper.serializeHolderRegistry(encoder, "DimensionTemps", Registry.DIMENSION_TYPE_REGISTRY, ModRegistries.DIMENSION_TEMP_DATA, registryAccess),
-        (decoder, registryAccess) -> ConfigHelper.deserializeHolderRegistry(decoder, "DimensionTemps", Registry.DIMENSION_TYPE_REGISTRY, ModRegistries.DIMENSION_TEMP_DATA, registryAccess),
+        ExtraCodecs.registryMapCodec(Registry.DIMENSION_TYPE_REGISTRY, DimensionTempData.CODEC),
         (saver, registryAccess) -> {},
         SyncType.ONE_WAY);
 
-        DIMENSION_OFFSETS = addSyncedSettingWithRegistries("dimension_offsets", FastMap::new, (holder, registryAccess) ->
+        DIMENSION_OFFSETS = addSyncedSettingWithRegistries(ColdSweat.createKey("dimension_offsets"), FastMap::new, (holder, registryAccess) ->
         {
             Map<Holder<DimensionType>, DimensionTempData> dataMap = ConfigHelper.getRegistryMap(WorldSettingsConfig.DIMENSION_TEMP_OFFSETS.get(), registryAccess, Registry.DIMENSION_TYPE_REGISTRY,
                                                                                                 toml -> DimensionTempData.fromToml(toml, true, registryAccess),
@@ -384,12 +368,11 @@ public class ConfigSettings
 
             holder.get(registryAccess).putAll(dataMap);
         },
-        (encoder, registryAccess) -> ConfigHelper.serializeHolderRegistry(encoder, "DimensionOffsets", Registry.DIMENSION_TYPE_REGISTRY, ModRegistries.DIMENSION_TEMP_DATA, registryAccess),
-        (decoder, registryAccess) -> ConfigHelper.deserializeHolderRegistry(decoder, "DimensionOffsets", Registry.DIMENSION_TYPE_REGISTRY, ModRegistries.DIMENSION_TEMP_DATA, registryAccess),
+        ExtraCodecs.registryMapCodec(Registry.DIMENSION_TYPE_REGISTRY, DimensionTempData.CODEC),
         (saver, registryAccess) -> {},
         SyncType.ONE_WAY);
 
-        STRUCTURE_TEMPS = addSettingWithRegistries("structure_temperatures", FastMap::new, (holder, registryAccess) ->
+        STRUCTURE_TEMPS = addSettingWithRegistries(ColdSweat.createKey("structure_temperatures"), FastMap::new, (holder, registryAccess) ->
         {
             Map<Holder<Structure>, StructureTempData> dataMap = ConfigHelper.getRegistryMap(WorldSettingsConfig.STRUCTURE_TEMPERATURES.get(), registryAccess, Registry.STRUCTURE_REGISTRY,
                                                                                             toml -> StructureTempData.fromToml(toml, false, registryAccess),
@@ -399,7 +382,7 @@ public class ConfigSettings
             holder.get(registryAccess).putAll(dataMap);
         });
 
-        STRUCTURE_OFFSETS = addSettingWithRegistries("structure_offsets", FastMap::new, (holder, registryAccess) ->
+        STRUCTURE_OFFSETS = addSettingWithRegistries(ColdSweat.createKey("structure_offsets"), FastMap::new, (holder, registryAccess) ->
         {
             Map<Holder<Structure>, StructureTempData> dataMap = ConfigHelper.getRegistryMap(WorldSettingsConfig.STRUCTURE_TEMP_OFFSETS.get(), registryAccess, Registry.STRUCTURE_REGISTRY,
                                                                                             toml -> StructureTempData.fromToml(toml, true, registryAccess),
@@ -409,7 +392,7 @@ public class ConfigSettings
             holder.get(registryAccess).putAll(dataMap);
         });
 
-        OVERCAST_TEMP_OFFSET = addSetting("overcast_temp_offset", () -> 0.35, holder ->
+        OVERCAST_TEMP_OFFSET = addSetting(ColdSweat.createKey("overcast_temp_offset"), () -> 0.35, holder ->
         {
             List<?> setting = WorldSettingsConfig.OVERCAST_TEMP_OFFSET.get();
             double temperature = ((Number) setting.get(0)).doubleValue();
@@ -419,7 +402,7 @@ public class ConfigSettings
             holder.set(Temperature.convert(temperature, units, Temperature.Units.MC, false));
         });
 
-        DEPTH_REGIONS = addSetting("depth_regions", ArrayList::new, holder -> {});
+        DEPTH_REGIONS = addSetting(ColdSweat.createKey("depth_regions"), ArrayList::new, holder -> {});
 
         TriConsumer<FuelData.FuelType, ForgeConfigSpec.ConfigValue<List<? extends List<?>>>, DynamicHolder<Multimap<Item, FuelData>>> fuelAdder =
         (fuelType, config, holder) ->
@@ -429,18 +412,17 @@ public class ConfigSettings
                                                                               ForgeRegistries.ITEMS, ModRegistries.FUEL_DATA);
             holder.get().putAll(dataMap);
         };
-        BOILER_FUEL = addSetting("boiler_fuel_items", RegistryMultiMap::new, holder -> fuelAdder.accept(FuelData.FuelType.BOILER, ItemSettingsConfig.BOILER_FUELS, holder));
-        ICEBOX_FUEL = addSetting("icebox_fuel_items", RegistryMultiMap::new, holder -> fuelAdder.accept(FuelData.FuelType.ICEBOX, ItemSettingsConfig.ICEBOX_FUELS, holder));
-        HEARTH_FUEL = addSetting("hearth_fuel_items", RegistryMultiMap::new, holder -> fuelAdder.accept(FuelData.FuelType.HEARTH, ItemSettingsConfig.HEARTH_FUELS, holder));
+        BOILER_FUEL = addSetting(ColdSweat.createKey("boiler_fuel_items"), RegistryMultiMap::new, holder -> fuelAdder.accept(FuelData.FuelType.BOILER, ItemSettingsConfig.BOILER_FUELS, holder));
+        ICEBOX_FUEL = addSetting(ColdSweat.createKey("icebox_fuel_items"), RegistryMultiMap::new, holder -> fuelAdder.accept(FuelData.FuelType.ICEBOX, ItemSettingsConfig.ICEBOX_FUELS, holder));
+        HEARTH_FUEL = addSetting(ColdSweat.createKey("hearth_fuel_items"), RegistryMultiMap::new, holder -> fuelAdder.accept(FuelData.FuelType.HEARTH, ItemSettingsConfig.HEARTH_FUELS, holder));
 
-        SOULSPRING_LAMP_FUEL = addSyncedSetting("lamp_fuel_items", RegistryMultiMap::new, holder -> fuelAdder.accept(FuelData.FuelType.SOUL_LAMP, ItemSettingsConfig.SOULSPRING_LAMP_FUELS, holder),
-        (encoder) -> ConfigHelper.serializeMultimapRegistry(encoder, "LampFuelItems", Registry.ITEM_REGISTRY, ModRegistries.FUEL_DATA, ForgeRegistries.ITEMS::getKey),
-        (decoder) -> ConfigHelper.deserializeMultimapRegistry(decoder, "LampFuelItems", ModRegistries.FUEL_DATA, ForgeRegistries.ITEMS::getValue),
+        SOULSPRING_LAMP_FUEL = addSyncedSetting(ColdSweat.createKey("lamp_fuel_items"), RegistryMultiMap::new, holder -> fuelAdder.accept(FuelData.FuelType.SOUL_LAMP, ItemSettingsConfig.SOULSPRING_LAMP_FUELS, holder),
+        ExtraCodecs.builtinMultimapCodec(ForgeRegistries.ITEMS, FuelData.CODEC),
         (saver) -> {},
         SyncType.ONE_WAY);
 
-        HEARTH_POTIONS_ENABLED = addSetting("hearth_potions_enabled", () -> true, holder -> holder.set(ItemSettingsConfig.ALLOW_POTIONS_IN_HEARTH.get()));
-        HEARTH_POTION_BLACKLIST = addSetting("hearth_potion_blacklist", ArrayList::new,
+        HEARTH_POTIONS_ENABLED = addSetting(ColdSweat.createKey("hearth_potions_enabled"), () -> true, holder -> holder.set(ItemSettingsConfig.ALLOW_POTIONS_IN_HEARTH.get()));
+        HEARTH_POTION_BLACKLIST = addSetting(ColdSweat.createKey("hearth_potion_blacklist"), ArrayList::new,
                                              holder -> holder.get().addAll(ItemSettingsConfig.HEARTH_POTION_BLACKLIST.get()
                                                        .stream()
                                                        .map(entry -> ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation(entry)))
@@ -454,30 +436,27 @@ public class ConfigSettings
                                                                                    ForgeRegistries.ITEMS, ModRegistries.INSULATOR_DATA);
             holder.get().putAll(dataMap);
         };
-        INSULATION_ITEMS = addSyncedSetting("insulation_items", RegistryMultiMap::new, holder -> insulatorAdder.accept(ItemSettingsConfig.INSULATION_ITEMS, holder, Insulation.Slot.ITEM),
-        (encoder) -> ConfigHelper.serializeMultimapRegistry(encoder, "InsulationItems", Registry.ITEM_REGISTRY, ModRegistries.INSULATOR_DATA, item -> ForgeRegistries.ITEMS.getKey(item)),
-        (decoder) -> ConfigHelper.deserializeMultimapRegistry(decoder, "InsulationItems", ModRegistries.INSULATOR_DATA, rl -> ForgeRegistries.ITEMS.getValue(rl)),
+        INSULATION_ITEMS = addSyncedSetting(ColdSweat.createKey("insulation_items"), RegistryMultiMap::new, holder -> insulatorAdder.accept(ItemSettingsConfig.INSULATION_ITEMS, holder, Insulation.Slot.ITEM),
+        ExtraCodecs.builtinMultimapCodec(ForgeRegistries.ITEMS, InsulatorData.CODEC),
         (saver) -> {},
         SyncType.ONE_WAY);
 
-        INSULATING_ARMORS = addSyncedSetting("insulating_armors", RegistryMultiMap::new, holder -> insulatorAdder.accept(ItemSettingsConfig.INSULATING_ARMOR, holder, Insulation.Slot.ARMOR),
-        (encoder) -> ConfigHelper.serializeMultimapRegistry(encoder, "InsulatingArmors", Registry.ITEM_REGISTRY, ModRegistries.INSULATOR_DATA, item -> ForgeRegistries.ITEMS.getKey(item)),
-        (decoder) -> ConfigHelper.deserializeMultimapRegistry(decoder, "InsulatingArmors", ModRegistries.INSULATOR_DATA, rl -> ForgeRegistries.ITEMS.getValue(rl)),
+        INSULATING_ARMORS = addSyncedSetting(ColdSweat.createKey("insulating_armors"), RegistryMultiMap::new, holder -> insulatorAdder.accept(ItemSettingsConfig.INSULATING_ARMOR, holder, Insulation.Slot.ARMOR),
+        ExtraCodecs.builtinMultimapCodec(ForgeRegistries.ITEMS, InsulatorData.CODEC),
         (saver) -> {},
         SyncType.ONE_WAY);
 
-        INSULATING_CURIOS = addSyncedSetting("insulating_curios", RegistryMultiMap::new, holder ->
+        INSULATING_CURIOS = addSyncedSetting(ColdSweat.createKey("insulating_curios"), RegistryMultiMap::new, holder ->
         {
             if (CompatManager.isCuriosLoaded())
             {   insulatorAdder.accept(ItemSettingsConfig.INSULATING_CURIOS, holder, Insulation.Slot.CURIO);
             }
         },
-        (encoder) -> ConfigHelper.serializeMultimapRegistry(encoder, "InsulatingCurios", Registry.ITEM_REGISTRY, ModRegistries.INSULATOR_DATA, item -> ForgeRegistries.ITEMS.getKey(item)),
-        (decoder) -> ConfigHelper.deserializeMultimapRegistry(decoder, "InsulatingCurios", ModRegistries.INSULATOR_DATA, rl -> ForgeRegistries.ITEMS.getValue(rl)),
+        ExtraCodecs.builtinMultimapCodec(ForgeRegistries.ITEMS, InsulatorData.CODEC),
         (saver) -> {},
         SyncType.ONE_WAY);
 
-        INSULATION_SLOTS = addSyncedSetting("insulation_slots", () -> new ScalingFormula.Static(0, 0, 0, 0), holder ->
+        INSULATION_SLOTS = addSyncedSetting(ColdSweat.createKey("insulation_slots"), () -> new ScalingFormula.Static(0, 0, 0, 0), holder ->
         {
             List<?> list = ItemSettingsConfig.INSULATION_SLOTS.get();
             String mode = ((String) list.get(0));
@@ -494,8 +473,7 @@ public class ConfigSettings
                                                                    values.get(0).doubleValue(),
                                                                    values.size() > 2 ? values.get(2).doubleValue() : Double.POSITIVE_INFINITY));
         },
-        (encoder) -> encoder.serialize(),
-        (decoder) -> ScalingFormula.deserialize(decoder),
+        ScalingFormula.getCodec(),
         (saver) ->
         {
             List<?> list = ListBuilder.begin(saver.getType().getSerializedName())
@@ -505,7 +483,7 @@ public class ConfigSettings
         },
         SyncType.BOTH_WAYS);
 
-        INSULATION_SLOT_OVERRIDES = addSyncedSetting("insulation_slot_overrides", RegistryMultiMap::new, holder ->
+        INSULATION_SLOT_OVERRIDES = addSyncedSetting(ColdSweat.createKey("insulation_slot_overrides"), RegistryMultiMap::new, holder ->
         {
             Multimap<Item, ItemInsulationSlotsData> dataMap = ConfigHelper.parseTomlRegistry(ItemSettingsConfig.INSULATION_SLOT_OVERRIDES,
                                                                                              ItemInsulationSlotsData::fromToml,
@@ -513,18 +491,17 @@ public class ConfigSettings
                                                                                              ForgeRegistries.ITEMS, ModRegistries.INSULATION_SLOTS_DATA);
             holder.get().putAll(dataMap);
         },
-        (encoder) -> ConfigHelper.serializeMultimapRegistry(encoder, "InsulationSlotOverrides", Registry.ITEM_REGISTRY, ModRegistries.INSULATION_SLOTS_DATA, item -> ForgeRegistries.ITEMS.getKey(item)),
-        (decoder) -> ConfigHelper.deserializeMultimapRegistry(decoder, "InsulationSlotOverrides", ModRegistries.INSULATION_SLOTS_DATA, rl -> ForgeRegistries.ITEMS.getValue(rl)),
+        ExtraCodecs.builtinMultimapCodec(ForgeRegistries.ITEMS, ItemInsulationSlotsData.CODEC),
         (saver) -> {},
         SyncType.ONE_WAY);
 
-        INSULATION_BLACKLIST = addSetting("insulation_blacklist", ArrayList::new,
+        INSULATION_BLACKLIST = addSetting(ColdSweat.createKey("insulation_blacklist"), ArrayList::new,
                                           holder -> holder.get().addAll(ItemSettingsConfig.INSULATION_BLACKLIST.get()
                                                     .stream()
                                                     .map(entry -> ForgeRegistries.ITEMS.getValue(new ResourceLocation(entry)))
                                                     .collect(ArrayList::new, List::add, List::addAll)));
 
-        DRYING_ITEMS = addSyncedSetting("drying_items", RegistryMultiMap::new, holder ->
+        DRYING_ITEMS = addSyncedSetting(ColdSweat.createKey("drying_items"), RegistryMultiMap::new, holder ->
         {
             Multimap<Item, DryingItemData> dataMap = ConfigHelper.parseTomlRegistry(ItemSettingsConfig.DRYING_ITEMS,
                                                                                     DryingItemData::fromToml,
@@ -532,28 +509,26 @@ public class ConfigSettings
                                                                                     ForgeRegistries.ITEMS, ModRegistries.DRYING_ITEM_DATA);
             holder.get().putAll(dataMap);
         },
-        (encoder) -> ConfigHelper.serializeMultimapRegistry(encoder, "DryingItems", Registry.ITEM_REGISTRY, ModRegistries.DRYING_ITEM_DATA, ForgeRegistries.ITEMS::getKey),
-        (decoder) -> ConfigHelper.deserializeMultimapRegistry(decoder, "DryingItems", ModRegistries.DRYING_ITEM_DATA, rl -> ForgeRegistries.ITEMS.getValue(rl)),
+        ExtraCodecs.builtinMultimapCodec(ForgeRegistries.ITEMS, DryingItemData.CODEC),
         (saver) -> {},
         SyncType.ONE_WAY);
 
-        CHECK_SLEEP_CONDITIONS = addSetting("check_sleep_conditions", () -> true, holder -> holder.set(WorldSettingsConfig.SHOULD_CHECK_SLEEP.get()));
+        CHECK_SLEEP_CONDITIONS = addSetting(ColdSweat.createKey("check_sleep_conditions"), () -> true, holder -> holder.set(WorldSettingsConfig.SHOULD_CHECK_SLEEP.get()));
 
-        SLEEP_CHECK_IGNORE_BLOCKS = addSyncedSetting("sleep_check_override_blocks", ArrayList::new, holder ->
+        SLEEP_CHECK_IGNORE_BLOCKS = addSyncedSetting(ColdSweat.createKey("sleep_check_override_blocks"), ArrayList::new, holder ->
         {
             var blocks = ConfigHelper.getBlocks(WorldSettingsConfig.SLEEPING_OVERRIDE_BLOCKS.get().toArray(new String[0]));
             holder.get().addAll(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.BLOCKS, blocks));
         },
-        (encoder) -> ConfigHelper.serializeBuiltinRegistryList(encoder, "SleepCheckOverrideBlocks", ForgeRegistries.BLOCKS),
-        (decoder) -> ConfigHelper.deserializeBuiltinRegistryList(decoder, "SleepCheckOverrideBlocks", ForgeRegistries.BLOCKS),
+        ForgeRegistries.BLOCKS.getCodec().listOf(),
         (saver) -> {},
         SyncType.ONE_WAY);
 
-        USE_CUSTOM_WATER_FREEZE_BEHAVIOR = addSetting("custom_freeze_check", () -> true, holder -> holder.set(WorldSettingsConfig.CUSTOM_WATER_FREEZE_BEHAVIOR.get()));
+        USE_CUSTOM_WATER_FREEZE_BEHAVIOR = addSetting(ColdSweat.createKey("custom_freeze_check"), () -> true, holder -> holder.set(WorldSettingsConfig.CUSTOM_WATER_FREEZE_BEHAVIOR.get()));
 
-        USE_CUSTOM_ICE_DROPS = addSetting("custom_ice_drops", () -> true, holder -> holder.set(WorldSettingsConfig.CUSTOM_ICE_DROPS.get()));
+        USE_CUSTOM_ICE_DROPS = addSetting(ColdSweat.createKey("custom_ice_drops"), () -> true, holder -> holder.set(WorldSettingsConfig.CUSTOM_ICE_DROPS.get()));
 
-        FOOD_TEMPERATURES = addSyncedSetting("food_temperatures", RegistryMultiMap::new, holder ->
+        FOOD_TEMPERATURES = addSyncedSetting(ColdSweat.createKey("food_temperatures"), RegistryMultiMap::new, holder ->
         {
             Multimap<Item, FoodData> dataMap = ConfigHelper.parseTomlRegistry(ItemSettingsConfig.FOOD_TEMPERATURES,
                                                                               FoodData::fromToml,
@@ -561,12 +536,11 @@ public class ConfigSettings
                                                                               ForgeRegistries.ITEMS, ModRegistries.FOOD_DATA);
             holder.get().putAll(dataMap);
         },
-        (encoder) -> ConfigHelper.serializeMultimapRegistry(encoder, "FoodTemperatures", Registry.ITEM_REGISTRY, ModRegistries.FOOD_DATA, item -> ForgeRegistries.ITEMS.getKey(item)),
-        (decoder) -> ConfigHelper.deserializeMultimapRegistry(decoder, "FoodTemperatures", ModRegistries.FOOD_DATA, rl -> ForgeRegistries.ITEMS.getValue(rl)),
+        ExtraCodecs.builtinMultimapCodec(ForgeRegistries.ITEMS, FoodData.CODEC),
         (saver) -> {},
         SyncType.ONE_WAY);
 
-        CARRIED_ITEM_TEMPERATURES = addSyncedSetting("carried_item_temps", RegistryMultiMap::new, holder ->
+        CARRIED_ITEM_TEMPERATURES = addSyncedSetting(ColdSweat.createKey("carried_item_temps"), RegistryMultiMap::new, holder ->
         {
             Multimap<Item, ItemCarryTempData> dataMap = ConfigHelper.parseTomlRegistry(ItemSettingsConfig.CARRIED_ITEM_TEMPERATURES,
                                                                                        ItemCarryTempData::fromToml,
@@ -574,55 +548,45 @@ public class ConfigSettings
                                                                                        ForgeRegistries.ITEMS, ModRegistries.CARRY_TEMP_DATA);
             holder.get().putAll(dataMap);
         },
-        (encoder) -> ConfigHelper.serializeMultimapRegistry(encoder, "CarriedItemTemps", Registry.ITEM_REGISTRY, ModRegistries.CARRY_TEMP_DATA, item -> ForgeRegistries.ITEMS.getKey(item)),
-        (decoder) -> ConfigHelper.deserializeMultimapRegistry(decoder, "CarriedItemTemps", ModRegistries.CARRY_TEMP_DATA, rl -> ForgeRegistries.ITEMS.getValue(rl)),
+        ExtraCodecs.builtinMultimapCodec(ForgeRegistries.ITEMS, ItemCarryTempData.CODEC),
         (saver) -> {},
         SyncType.ONE_WAY);
 
-        WATERSKIN_CONSUME_STRENGTH = addSyncedSetting("waterskin_consume_strength", () -> 50, holder -> holder.set(ItemSettingsConfig.WATERSKIN_CONSUME_STRENGTH.get()),
-        (encoder) -> ConfigHelper.serializeNbtInt(encoder, "WaterskinConsumeStrength"),
-        (decoder) -> decoder.getInt("WaterskinConsumeStrength"),
+        WATERSKIN_CONSUME_STRENGTH = addSyncedSetting(ColdSweat.createKey("waterskin_consume_strength"), () -> 50, holder -> holder.set(ItemSettingsConfig.WATERSKIN_CONSUME_STRENGTH.get()),
+        Codec.INT,
         (saver) -> ItemSettingsConfig.WATERSKIN_CONSUME_STRENGTH.set(saver),
         SyncType.BOTH_WAYS);
 
-        WATERSKIN_HOTBAR_STRENGTH = addSyncedSetting("waterskin_hotbar_strength", () -> 1.0, holder -> holder.set(ItemSettingsConfig.WATERSKIN_HOTBAR_STRENGTH.get()),
-        (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "WaterskinHotbarStrength"),
-        (decoder) -> decoder.getDouble("WaterskinHotbarStrength"),
+        WATERSKIN_HOTBAR_STRENGTH = addSyncedSetting(ColdSweat.createKey("waterskin_hotbar_strength"), () -> 1.0, holder -> holder.set(ItemSettingsConfig.WATERSKIN_HOTBAR_STRENGTH.get()),
+        Codec.DOUBLE,
         (saver) -> ItemSettingsConfig.WATERSKIN_HOTBAR_STRENGTH.set(saver),
         SyncType.BOTH_WAYS);
 
-        WATERSKIN_NEUTRALIZE_SPEED = addSyncedSetting("waterskin_neutralize_speed", () -> 1.0, holder -> holder.set(ItemSettingsConfig.WATERSKIN_NEUTRALIZE_SPEED.get()),
-        (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "WaterskinNeutralizeSpeed"),
-        (decoder) -> decoder.getDouble("WaterskinNeutralizeSpeed"),
+        WATERSKIN_NEUTRALIZE_SPEED = addSyncedSetting(ColdSweat.createKey("waterskin_neutralize_speed"), () -> 1.0, holder -> holder.set(ItemSettingsConfig.WATERSKIN_NEUTRALIZE_SPEED.get()),
+        Codec.DOUBLE,
         (saver) -> ItemSettingsConfig.WATERSKIN_NEUTRALIZE_SPEED.set(saver),
         SyncType.BOTH_WAYS);
 
-        SOULSPRING_LAMP_STRENGTH = addSetting("soulspring_lamp_strength", () -> 0.6d, holder -> holder.set(ItemSettingsConfig.SOULSPRING_LAMP_STRENGTH.get()));
+        SOULSPRING_LAMP_STRENGTH = addSetting(ColdSweat.createKey("soulspring_lamp_strength"), () -> 0.6d, holder -> holder.set(ItemSettingsConfig.SOULSPRING_LAMP_STRENGTH.get()));
 
-        LAMP_DIMENSIONS = addSettingWithRegistries("valid_lamp_dimensions", ArrayList::new,
+        LAMP_DIMENSIONS = addSettingWithRegistries(ColdSweat.createKey("valid_lamp_dimensions"), ArrayList::new,
                                                    (holder, registryAccess) -> holder.get(registryAccess).addAll(new ArrayList<>(ItemSettingsConfig.SOULSPRING_LAMP_DIMENSIONS.get()
                                                                            .stream()
                                                                            .map(entry -> registryAccess.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get(new ResourceLocation(entry)))
                                                                            .collect(ArrayList::new, List::add, List::addAll))));
 
-        HEAT_DRAINS_BACKTANK = addSetting("heat_drains_backtank", () -> true, holder ->
+        HEAT_DRAINS_BACKTANK = addSetting(ColdSweat.createKey("heat_drains_backtank"), () -> true, holder ->
         {   if (CompatManager.isCreateLoaded()) holder.set(ItemSettingsConfig.HEAT_DRAINS_BACKTANK.get());
         });
-        COLD_DRAINS_BACKTANK = addSetting("cold_drains_backtank", () -> false, holder ->
+        COLD_DRAINS_BACKTANK = addSetting(ColdSweat.createKey("cold_drains_backtank"), () -> false, holder ->
         {   if (CompatManager.isCreateLoaded()) holder.set(ItemSettingsConfig.COLD_DRAINS_BACKTANK.get());
         });
 
-        FUR_TIMINGS = addSyncedSetting("fur_timings", () -> new EntityDropData(0, 0, 0d), holder ->
+        FUR_TIMINGS = addSyncedSetting(ColdSweat.createKey("fur_timings"), () -> new EntityDropData(0, 0, 0d), holder ->
         {   List<?> entry = EntitySettingsConfig.GOAT_FUR_GROWTH_STATS.get();
             holder.set(new EntityDropData(((Number) entry.get(0)).intValue(), ((Number) entry.get(1)).intValue(), ((Number) entry.get(2)).doubleValue()));
         },
-        (encoder) ->
-        {
-            CompoundTag tag = new CompoundTag();
-            tag.put("FurTimings", encoder.serialize());
-            return tag;
-        },
-        (decoder) -> EntityDropData.deserialize(decoder.getCompound("FurTimings")),
+        EntityDropData.CODEC,
         (saver) ->
         {   List<Number> list = new ArrayList<>();
             list.add(saver.interval());
@@ -632,18 +596,12 @@ public class ConfigSettings
         },
         SyncType.BOTH_WAYS);
 
-        SHED_TIMINGS = addSyncedSetting("shed_timings", () -> new EntityDropData(0, 0, 0d), holder ->
+        SHED_TIMINGS = addSyncedSetting(ColdSweat.createKey("shed_timings"), () -> new EntityDropData(0, 0, 0d), holder ->
         {
             List<?> entry = EntitySettingsConfig.CHAMELEON_SHED_STATS.get();
             holder.set(new EntityDropData(((Number) entry.get(0)).intValue(), ((Number) entry.get(1)).intValue(), ((Number) entry.get(2)).doubleValue()));
         },
-        (encoder) ->
-        {
-            CompoundTag tag = new CompoundTag();
-            tag.put("ShedTimings", encoder.serialize());
-            return tag;
-        },
-        (decoder) -> EntityDropData.deserialize(decoder.getCompound("ShedTimings")),
+        EntityDropData.CODEC,
         (saver) ->
         {   List<Number> list = new ArrayList<>();
             list.add(saver.interval());
@@ -653,7 +611,7 @@ public class ConfigSettings
         },
         SyncType.BOTH_WAYS);
 
-        ENTITY_SPAWN_BIOMES = addSettingWithRegistries("entity_spawn_biomes", RegistryMultiMap::new, (holder, registryAccess) ->
+        ENTITY_SPAWN_BIOMES = addSettingWithRegistries(ColdSweat.createKey("entity_spawn_biomes"), RegistryMultiMap::new, (holder, registryAccess) ->
         {
             // Function to read biomes from configs and put them in the config settings
             BiConsumer<List<? extends List<?>>, EntityType<?>> configReader = (configBiomes, entityType) ->
@@ -670,7 +628,7 @@ public class ConfigSettings
             configReader.accept(EntitySettingsConfig.GOAT_SPAWN_BIOMES.get(), EntityType.GOAT);
         });
 
-        INSULATED_MOUNTS = addSetting("insulated_entities", RegistryMultiMap::new, holder ->
+        INSULATED_MOUNTS = addSetting(ColdSweat.createKey("insulated_entities"), RegistryMultiMap::new, holder ->
         {
             Multimap<EntityType<?>, MountData> dataMap = ConfigHelper.parseTomlRegistry(EntitySettingsConfig.INSULATED_MOUNTS,
                                                                                         MountData::fromToml,
@@ -679,7 +637,7 @@ public class ConfigSettings
             holder.get().putAll(dataMap);
         });
 
-        ENTITY_TEMPERATURES = addSetting("entity_temperatures", RegistryMultiMap::new, holder ->
+        ENTITY_TEMPERATURES = addSetting(ColdSweat.createKey("entity_temperatures"), RegistryMultiMap::new, holder ->
         {
             Multimap<EntityType<?>, EntityTempData> dataMap = ConfigHelper.parseTomlRegistry(EntitySettingsConfig.ENTITY_TEMPERATURES,
                                                                                              EntityTempData::fromToml,
@@ -688,7 +646,7 @@ public class ConfigSettings
             holder.get().putAll(dataMap);
         });
 
-        ENTITY_CLIMATES = addSyncedSetting("entity_climates", RegistryMultiMap::new, holder ->
+        ENTITY_CLIMATES = addSyncedSetting(ColdSweat.createKey("entity_climates"), RegistryMultiMap::new, holder ->
         {
             Multimap<EntityType<?>, EntityClimateData> dataMap = ConfigHelper.parseTomlRegistry(EntitySettingsConfig.ENTITY_CLIMATES,
                                                                                                  EntityClimateData::fromToml,
@@ -696,232 +654,198 @@ public class ConfigSettings
                                                                                                  ForgeRegistries.ENTITY_TYPES, ModRegistries.ENTITY_CLIMATE_DATA);
             holder.get().putAll(dataMap);
         },
-        (encoder) -> ConfigHelper.serializeMultimapRegistry(encoder, "TempAffectedEntities", Registry.ENTITY_TYPE_REGISTRY, ModRegistries.ENTITY_CLIMATE_DATA, item -> ForgeRegistries.ENTITY_TYPES.getKey(item)),
-        (decoder) -> ConfigHelper.deserializeMultimapRegistry(decoder, "TempAffectedEntities", ModRegistries.ENTITY_CLIMATE_DATA, rl -> ForgeRegistries.ENTITY_TYPES.getValue(rl)),
+        ExtraCodecs.builtinMultimapCodec(ForgeRegistries.ENTITY_TYPES, EntityClimateData.CODEC),
         (saver) -> {},
         SyncType.ONE_WAY);
 
-        ENTITY_TEMP_EFFECTS = addSyncedSetting("temp_effects", RegistryMultiMap::new, holder -> {},
-        (encoder) -> ConfigHelper.serializeMultimapRegistry(encoder, "TempEffects", Registry.ENTITY_TYPE_REGISTRY, ModRegistries.TEMP_EFFECTS_DATA, item -> ForgeRegistries.ENTITY_TYPES.getKey(item)),
-        (decoder) -> ConfigHelper.deserializeMultimapRegistry(decoder, "TempEffects", ModRegistries.TEMP_EFFECTS_DATA, rl -> ForgeRegistries.ENTITY_TYPES.getValue(rl)),
+        ENTITY_TEMP_EFFECTS = addSyncedSetting(ColdSweat.createKey("temp_effects"), RegistryMultiMap::new, holder -> {},
+        ExtraCodecs.builtinMultimapCodec(ForgeRegistries.ENTITY_TYPES, TempEffectsData.CODEC),
         (saver) -> {},
         SyncType.ONE_WAY);
 
-        ENABLE_ENTITY_CLIMATES = addSyncedSetting("enable_entity_climates", () -> true, holder -> holder.set(EntitySettingsConfig.ENABLE_ENTITY_CLIMATES.get()),
-        (encoder) -> ConfigHelper.serializeNbtBool(encoder, "EnableEntityClimates"),
-        (decoder) -> decoder.getBoolean("EnableEntityClimates"),
-        (saver) -> EntitySettingsConfig.ENABLE_ENTITY_CLIMATES.set(saver),
+        ENABLE_ENTITY_CLIMATES = addSyncedSetting(ColdSweat.createKey("enable_entity_climates"), () -> true, holder -> holder.set(EntitySettingsConfig.ENABLE_ENTITY_CLIMATES.get()),
+        Codec.BOOL,
+        (enabled) -> EntitySettingsConfig.ENABLE_ENTITY_CLIMATES.set(enabled),
         SyncType.BOTH_WAYS);
 
-        ADVANCED_ENTITY_TEMPERATURE = addSyncedSetting("advanced_entity_temperature", () -> true, holder -> holder.set(EntitySettingsConfig.ADVANCED_ENTITY_TEMPERATURE.get()),
-        (encoder) -> ConfigHelper.serializeNbtBool(encoder, "AdvancedEntityTemperature"),
-        (decoder) -> decoder.getBoolean("AdvancedEntityTemperature"),
-        (saver) -> EntitySettingsConfig.ADVANCED_ENTITY_TEMPERATURE.set(saver),
+        ADVANCED_ENTITY_TEMPERATURE = addSyncedSetting(ColdSweat.createKey("advanced_entity_temperature"), () -> true, holder -> holder.set(EntitySettingsConfig.ADVANCED_ENTITY_TEMPERATURE.get()),
+        Codec.BOOL,
+        (enabled) -> EntitySettingsConfig.ADVANCED_ENTITY_TEMPERATURE.set(enabled),
         SyncType.BOTH_WAYS);
 
-        BLOCK_RANGE = addSyncedSetting("block_range", () -> 7, holder -> holder.set(WorldSettingsConfig.MAX_BLOCK_TEMP_RANGE.get()),
-        (encoder) -> ConfigHelper.serializeNbtInt(encoder, "BlockRange"),
-        (decoder) -> decoder.getInt("BlockRange"),
-        (saver) -> WorldSettingsConfig.MAX_BLOCK_TEMP_RANGE.set(saver),
+        BLOCK_RANGE = addSyncedSetting(ColdSweat.createKey("block_range"), () -> 7, holder -> holder.set(WorldSettingsConfig.MAX_BLOCK_TEMP_RANGE.get()),
+        Codec.INT,
+        (range) -> WorldSettingsConfig.MAX_BLOCK_TEMP_RANGE.set(range),
         SyncType.BOTH_WAYS);
 
-        COLD_SOUL_FIRE = addSetting("cold_soul_fire", () -> true, holder -> holder.set(WorldSettingsConfig.IS_SOUL_FIRE_COLD.get()));
+        COLD_SOUL_FIRE = addSetting(ColdSweat.createKey("cold_soul_fire"), () -> true, holder -> holder.set(WorldSettingsConfig.IS_SOUL_FIRE_COLD.get()));
 
-        THERMAL_SOURCE_SPREAD_WHITELIST = addSyncedSetting("hearth_spread_whitelist", ArrayList::new, holder ->
+        THERMAL_SOURCE_SPREAD_WHITELIST = addSyncedSetting(ColdSweat.createKey("hearth_spread_whitelist"), ArrayList::new, holder ->
         {
             var blocks = ConfigHelper.getBlocks(WorldSettingsConfig.SOURCE_SPREAD_WHITELIST.get().toArray(new String[0]));
             holder.get().addAll(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.BLOCKS, blocks));
         },
-        (encoder) -> ConfigHelper.serializeBuiltinRegistryList(encoder, "HearthWhitelist", ForgeRegistries.BLOCKS),
-        (decoder) -> ConfigHelper.deserializeBuiltinRegistryList(decoder, "HearthWhitelist", ForgeRegistries.BLOCKS),
+        ForgeRegistries.BLOCKS.getCodec().listOf(),
         saver -> {},
         SyncType.ONE_WAY);
 
-        THERMAL_SOURCE_SPREAD_BLACKLIST = addSyncedSetting("hearth_spread_blacklist", ArrayList::new, holder ->
+        THERMAL_SOURCE_SPREAD_BLACKLIST = addSyncedSetting(ColdSweat.createKey("hearth_spread_blacklist"), ArrayList::new, holder ->
         {
             var blocks = ConfigHelper.getBlocks(WorldSettingsConfig.SOURCE_SPREAD_BLACKLIST.get().toArray(new String[0]));
             holder.get().addAll(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.BLOCKS, blocks));
         },
-        (encoder) -> ConfigHelper.serializeBuiltinRegistryList(encoder, "HearthBlacklist", ForgeRegistries.BLOCKS),
-        (decoder) -> ConfigHelper.deserializeBuiltinRegistryList(decoder, "HearthBlacklist", ForgeRegistries.BLOCKS),
+        ForgeRegistries.BLOCKS.getCodec().listOf(),
         saver -> {},
         SyncType.ONE_WAY);
 
-        THERMAL_SOURCE_STRENGTH = addSetting("hearth_effect", () -> 0.75, holder -> holder.set(WorldSettingsConfig.SOURCE_EFFECT_STRENGTH.get()));
+        THERMAL_SOURCE_STRENGTH = addSetting(ColdSweat.createKey("hearth_effect"), () -> 0.75, holder -> holder.set(WorldSettingsConfig.SOURCE_EFFECT_STRENGTH.get()));
 
-        SMART_HEARTH = addSyncedSetting("smart_hearth", () -> false, holder -> holder.set(WorldSettingsConfig.ENABLE_SMART_HEARTH.get()),
-        (encoder) -> ConfigHelper.serializeNbtBool(encoder, "SmartHearth"),
-        (decoder) -> decoder.getBoolean("SmartHearth"),
+        SMART_HEARTH = addSyncedSetting(ColdSweat.createKey("smart_hearth"), () -> false, holder -> holder.set(WorldSettingsConfig.ENABLE_SMART_HEARTH.get()),
+        Codec.BOOL,
         (saver) -> WorldSettingsConfig.ENABLE_SMART_HEARTH.set(saver),
         SyncType.BOTH_WAYS);
 
-        SMART_BOILER = addSyncedSetting("smart_boiler", () -> false, holder -> holder.set(WorldSettingsConfig.ENABLE_SMART_BOILER.get()),
-        (encoder) -> ConfigHelper.serializeNbtBool(encoder, "SmartBoiler"),
-        (decoder) -> decoder.getBoolean("SmartBoiler"),
+        SMART_BOILER = addSyncedSetting(ColdSweat.createKey("smart_boiler"), () -> false, holder -> holder.set(WorldSettingsConfig.ENABLE_SMART_BOILER.get()),
+        Codec.BOOL,
         (saver) -> WorldSettingsConfig.ENABLE_SMART_BOILER.set(saver),
         SyncType.BOTH_WAYS);
 
-        SMART_ICEBOX = addSyncedSetting("smart_icebox", () -> false, holder -> holder.set(WorldSettingsConfig.ENABLE_SMART_ICEBOX.get()),
-        (encoder) -> ConfigHelper.serializeNbtBool(encoder, "SmartIcebox"),
-        (decoder) -> decoder.getBoolean("SmartIcebox"),
+        SMART_ICEBOX = addSyncedSetting(ColdSweat.createKey("smart_icebox"), () -> false, holder -> holder.set(WorldSettingsConfig.ENABLE_SMART_ICEBOX.get()),
+        Codec.BOOL,
         (saver) -> WorldSettingsConfig.ENABLE_SMART_ICEBOX.set(saver),
         SyncType.BOTH_WAYS);
 
-        HEARTH_MAX_RANGE = addSyncedSetting("hearth_max_range", () -> 16, holder -> holder.set(WorldSettingsConfig.HEARTH_MAX_RANGE.get()),
-        (encoder) -> ConfigHelper.serializeNbtInt(encoder, "HearthMaxRange"),
-        (decoder) -> decoder.getInt("HearthMaxRange"),
+        HEARTH_MAX_RANGE = addSyncedSetting(ColdSweat.createKey("hearth_max_range"), () -> 16, holder -> holder.set(WorldSettingsConfig.HEARTH_MAX_RANGE.get()),
+        Codec.INT,
         (saver) -> WorldSettingsConfig.HEARTH_MAX_RANGE.set(saver),
         SyncType.BOTH_WAYS);
 
-        HEARTH_RANGE = addSyncedSetting("hearth_range", () -> 8, holder -> holder.set(WorldSettingsConfig.HEARTH_RANGE.get()),
-        (encoder) -> ConfigHelper.serializeNbtInt(encoder, "HearthRange"),
-        (decoder) -> decoder.getInt("HearthRange"),
+        HEARTH_RANGE = addSyncedSetting(ColdSweat.createKey("hearth_range"), () -> 8, holder -> holder.set(WorldSettingsConfig.HEARTH_RANGE.get()),
+        Codec.INT,
         (saver) -> WorldSettingsConfig.HEARTH_RANGE.set(saver),
         SyncType.BOTH_WAYS);
 
-        HEARTH_MAX_VOLUME = addSyncedSetting("hearth_max_volume", () -> 1000, holder -> holder.set(WorldSettingsConfig.HEARTH_MAX_VOLUME.get()),
-        (encoder) -> ConfigHelper.serializeNbtInt(encoder, "HearthMaxVolume"),
-        (decoder) -> decoder.getInt("HearthMaxVolume"),
+        HEARTH_MAX_VOLUME = addSyncedSetting(ColdSweat.createKey("hearth_max_volume"), () -> 1000, holder -> holder.set(WorldSettingsConfig.HEARTH_MAX_VOLUME.get()),
+        Codec.INT,
         (saver) -> WorldSettingsConfig.HEARTH_MAX_VOLUME.set(saver),
         SyncType.BOTH_WAYS);
 
-        HEARTH_WARM_UP_TIME = addSyncedSetting("hearth_warm_up_time", () -> 20, holder -> holder.set(WorldSettingsConfig.HEARTH_WARM_UP_TIME.get()),
-        (encoder) -> ConfigHelper.serializeNbtInt(encoder, "HearthWarmUpTime"),
-        (decoder) -> decoder.getInt("HearthWarmUpTime"),
+        HEARTH_WARM_UP_TIME = addSyncedSetting(ColdSweat.createKey("hearth_warm_up_time"), () -> 20, holder -> holder.set(WorldSettingsConfig.HEARTH_WARM_UP_TIME.get()),
+        Codec.INT,
         (saver) -> WorldSettingsConfig.HEARTH_WARM_UP_TIME.set(saver),
         SyncType.BOTH_WAYS);
 
-        HEARTH_MAX_INSULATION = addSyncedSetting("hearth_max_insulation", () -> 1, holder -> holder.set(WorldSettingsConfig.HEARTH_MAX_INSULATION.get()),
-        (encoder) -> ConfigHelper.serializeNbtInt(encoder, "HearthMaxInsulation"),
-        (decoder) -> decoder.getInt("HearthMaxInsulation"),
+        HEARTH_MAX_INSULATION = addSyncedSetting(ColdSweat.createKey("hearth_max_insulation"), () -> 1, holder -> holder.set(WorldSettingsConfig.HEARTH_MAX_INSULATION.get()),
+        Codec.INT,
         (saver) -> WorldSettingsConfig.HEARTH_MAX_INSULATION.set(saver),
         SyncType.BOTH_WAYS);
 
-        HEARTH_FUEL_INTERVAL = addSyncedSetting("hearth_fuel_rate", () -> 1, holder -> holder.set(WorldSettingsConfig.HEARTH_FUEL_INTERVAL.get()),
-        (encoder) -> ConfigHelper.serializeNbtInt(encoder, "HearthFuelRate"),
-        (decoder) -> decoder.getInt("HearthFuelRate"),
+        HEARTH_FUEL_INTERVAL = addSyncedSetting(ColdSweat.createKey("hearth_fuel_rate"), () -> 1, holder -> holder.set(WorldSettingsConfig.HEARTH_FUEL_INTERVAL.get()),
+        Codec.INT,
         (saver) -> WorldSettingsConfig.HEARTH_FUEL_INTERVAL.set(saver),
         SyncType.BOTH_WAYS);
 
-        BOILER_MAX_RANGE = addSyncedSetting("boiler_max_range", () -> 16, holder -> holder.set(WorldSettingsConfig.BOILER_MAX_RANGE.get()),
-        (encoder) -> ConfigHelper.serializeNbtInt(encoder, "BoilerMaxRange"),
-        (decoder) -> decoder.getInt("BoilerMaxRange"),
+        BOILER_MAX_RANGE = addSyncedSetting(ColdSweat.createKey("boiler_max_range"), () -> 16, holder -> holder.set(WorldSettingsConfig.BOILER_MAX_RANGE.get()),
+        Codec.INT,
         (saver) -> WorldSettingsConfig.BOILER_MAX_RANGE.set(saver),
         SyncType.BOTH_WAYS);
 
-        BOILER_RANGE = addSyncedSetting("boiler_range", () -> 8, holder -> holder.set(WorldSettingsConfig.BOILER_RANGE.get()),
-        (encoder) -> ConfigHelper.serializeNbtInt(encoder, "BoilerRange"),
-        (decoder) -> decoder.getInt("BoilerRange"),
+        BOILER_RANGE = addSyncedSetting(ColdSweat.createKey("boiler_range"), () -> 8, holder -> holder.set(WorldSettingsConfig.BOILER_RANGE.get()),
+        Codec.INT,
         (saver) -> WorldSettingsConfig.BOILER_RANGE.set(saver),
         SyncType.BOTH_WAYS);
 
-        BOILER_MAX_VOLUME = addSyncedSetting("boiler_max_volume", () -> 1000, holder -> holder.set(WorldSettingsConfig.BOILER_MAX_VOLUME.get()),
-        (encoder) -> ConfigHelper.serializeNbtInt(encoder, "BoilerMaxVolume"),
-        (decoder) -> decoder.getInt("BoilerMaxVolume"),
+        BOILER_MAX_VOLUME = addSyncedSetting(ColdSweat.createKey("boiler_max_volume"), () -> 1000, holder -> holder.set(WorldSettingsConfig.BOILER_MAX_VOLUME.get()),
+        Codec.INT,
         (saver) -> WorldSettingsConfig.BOILER_MAX_VOLUME.set(saver),
         SyncType.BOTH_WAYS);
 
-        BOILER_WARM_UP_TIME = addSyncedSetting("boiler_warm_up_time", () -> 20, holder -> holder.set(WorldSettingsConfig.BOILER_WARM_UP_TIME.get()),
-        (encoder) -> ConfigHelper.serializeNbtInt(encoder, "BoilerWarmUpTime"),
-        (decoder) -> decoder.getInt("BoilerWarmUpTime"),
+        BOILER_WARM_UP_TIME = addSyncedSetting(ColdSweat.createKey("boiler_warm_up_time"), () -> 20, holder -> holder.set(WorldSettingsConfig.BOILER_WARM_UP_TIME.get()),
+        Codec.INT,
         (saver) -> WorldSettingsConfig.BOILER_WARM_UP_TIME.set(saver),
         SyncType.BOTH_WAYS);
 
-        BOILER_MAX_INSULATION = addSyncedSetting("boiler_max_insulation", () -> 1, holder -> holder.set(WorldSettingsConfig.BOILER_MAX_INSULATION.get()),
-        (encoder) -> ConfigHelper.serializeNbtInt(encoder, "BoilerMaxInsulation"),
-        (decoder) -> decoder.getInt("BoilerMaxInsulation"),
+        BOILER_MAX_INSULATION = addSyncedSetting(ColdSweat.createKey("boiler_max_insulation"), () -> 1, holder -> holder.set(WorldSettingsConfig.BOILER_MAX_INSULATION.get()),
+        Codec.INT,
         (saver) -> WorldSettingsConfig.BOILER_MAX_INSULATION.set(saver),
         SyncType.BOTH_WAYS);
 
-        BOILER_FUEL_INTERVAL = addSyncedSetting("boiler_fuel_rate", () -> 1, holder -> holder.set(WorldSettingsConfig.BOILER_FUEL_INTERVAL.get()),
-        (encoder) -> ConfigHelper.serializeNbtInt(encoder, "BoilerFuelRate"),
-        (decoder) -> decoder.getInt("BoilerFuelRate"),
+        BOILER_FUEL_INTERVAL = addSyncedSetting(ColdSweat.createKey("boiler_fuel_rate"), () -> 1, holder -> holder.set(WorldSettingsConfig.BOILER_FUEL_INTERVAL.get()),
+        Codec.INT,
         (saver) -> WorldSettingsConfig.BOILER_FUEL_INTERVAL.set(saver),
         SyncType.BOTH_WAYS);
 
-        ICEBOX_MAX_RANGE = addSyncedSetting("icebox_max_range", () -> 16, holder -> holder.set(WorldSettingsConfig.ICEBOX_MAX_RANGE.get()),
-        (encoder) -> ConfigHelper.serializeNbtInt(encoder, "IceboxMaxRange"),
-        (decoder) -> decoder.getInt("IceboxMaxRange"),
+        ICEBOX_MAX_RANGE = addSyncedSetting(ColdSweat.createKey("icebox_max_range"), () -> 16, holder -> holder.set(WorldSettingsConfig.ICEBOX_MAX_RANGE.get()),
+        Codec.INT,
         (saver) -> WorldSettingsConfig.ICEBOX_MAX_RANGE.set(saver),
         SyncType.BOTH_WAYS);
 
-        ICEBOX_RANGE = addSyncedSetting("icebox_range", () -> 8, holder -> holder.set(WorldSettingsConfig.ICEBOX_RANGE.get()),
-        (encoder) -> ConfigHelper.serializeNbtInt(encoder, "IceboxRange"),
-        (decoder) -> decoder.getInt("IceboxRange"),
+        ICEBOX_RANGE = addSyncedSetting(ColdSweat.createKey("icebox_range"), () -> 8, holder -> holder.set(WorldSettingsConfig.ICEBOX_RANGE.get()),
+        Codec.INT,
         (saver) -> WorldSettingsConfig.ICEBOX_RANGE.set(saver),
         SyncType.BOTH_WAYS);
 
-        ICEBOX_MAX_VOLUME = addSyncedSetting("icebox_max_volume", () -> 1000, holder -> holder.set(WorldSettingsConfig.ICEBOX_MAX_VOLUME.get()),
-        (encoder) -> ConfigHelper.serializeNbtInt(encoder, "IceboxMaxVolume"),
-        (decoder) -> decoder.getInt("IceboxMaxVolume"),
+        ICEBOX_MAX_VOLUME = addSyncedSetting(ColdSweat.createKey("icebox_max_volume"), () -> 1000, holder -> holder.set(WorldSettingsConfig.ICEBOX_MAX_VOLUME.get()),
+        Codec.INT,
         (saver) -> WorldSettingsConfig.ICEBOX_MAX_VOLUME.set(saver),
         SyncType.BOTH_WAYS);
 
-        ICEBOX_WARM_UP_TIME = addSyncedSetting("icebox_warm_up_time", () -> 20, holder -> holder.set(WorldSettingsConfig.ICEBOX_WARM_UP_TIME.get()),
-        (encoder) -> ConfigHelper.serializeNbtInt(encoder, "IceboxWarmUpTime"),
-        (decoder) -> decoder.getInt("IceboxWarmUpTime"),
+        ICEBOX_WARM_UP_TIME = addSyncedSetting(ColdSweat.createKey("icebox_warm_up_time"), () -> 20, holder -> holder.set(WorldSettingsConfig.ICEBOX_WARM_UP_TIME.get()),
+        Codec.INT,
         (saver) -> WorldSettingsConfig.ICEBOX_WARM_UP_TIME.set(saver),
         SyncType.BOTH_WAYS);
 
-        ICEBOX_MAX_INSULATION = addSyncedSetting("icebox_max_insulation", () -> 1, holder -> holder.set(WorldSettingsConfig.ICEBOX_MAX_INSULATION.get()),
-        (encoder) -> ConfigHelper.serializeNbtInt(encoder, "IceboxMaxInsulation"),
-        (decoder) -> decoder.getInt("IceboxMaxInsulation"),
+        ICEBOX_MAX_INSULATION = addSyncedSetting(ColdSweat.createKey("icebox_max_insulation"), () -> 1, holder -> holder.set(WorldSettingsConfig.ICEBOX_MAX_INSULATION.get()),
+        Codec.INT,
         (saver) -> WorldSettingsConfig.ICEBOX_MAX_INSULATION.set(saver),
         SyncType.BOTH_WAYS);
 
-        ICEBOX_FUEL_INTERVAL = addSyncedSetting("icebox_fuel_rate", () -> 1, holder -> holder.set(WorldSettingsConfig.ICEBOX_FUEL_INTERVAL.get()),
-        (encoder) -> ConfigHelper.serializeNbtInt(encoder, "IceboxFuelRate"),
-        (decoder) -> decoder.getInt("IceboxFuelRate"),
+        ICEBOX_FUEL_INTERVAL = addSyncedSetting(ColdSweat.createKey("icebox_fuel_rate"), () -> 1, holder -> holder.set(WorldSettingsConfig.ICEBOX_FUEL_INTERVAL.get()),
+        Codec.INT,
         (saver) -> WorldSettingsConfig.ICEBOX_FUEL_INTERVAL.set(saver),
         SyncType.BOTH_WAYS);
 
-        INSULATION_STRENGTH = addSyncedSetting("insulation_strength", () -> 1d, holder -> holder.set(ItemSettingsConfig.INSULATION_STRENGTH.get()),
-        (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "InsulationStrength"),
-        (decoder) -> decoder.getDouble("InsulationStrength"),
+        INSULATION_STRENGTH = addSyncedSetting(ColdSweat.createKey("insulation_strength"), () -> 1d, holder -> holder.set(ItemSettingsConfig.INSULATION_STRENGTH.get()),
+        Codec.DOUBLE,
         (saver) -> ItemSettingsConfig.INSULATION_STRENGTH.set(saver),
         SyncType.BOTH_WAYS);
 
-        DISABLED_MODIFIERS = addSetting("disabled_modifiers", ArrayList::new, holder -> holder.get().addAll(MainSettingsConfig.DISABLED_TEMP_MODIFIERS.get().stream().map(ResourceLocation::new).toList()));
+        DISABLED_MODIFIERS = addSetting(ColdSweat.createKey("disabled_modifiers"), ArrayList::new, holder -> holder.get().addAll(MainSettingsConfig.DISABLED_TEMP_MODIFIERS.get().stream().map(ResourceLocation::new).toList()));
 
-        MODIFIER_TICK_RATE = addSyncedSetting("modifier_tick_rate", () -> 1.0, holder -> holder.set(MainSettingsConfig.MODIFIER_TICK_RATE.get()),
-        (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "ModifierTickRate"),
-        (decoder) -> decoder.getDouble("ModifierTickRate"),
+        MODIFIER_TICK_RATE = addSyncedSetting(ColdSweat.createKey("modifier_tick_rate"), () -> 1.0, holder -> holder.set(MainSettingsConfig.MODIFIER_TICK_RATE.get()),
+        Codec.DOUBLE,
         (saver) -> MainSettingsConfig.MODIFIER_TICK_RATE.set(saver),
         SyncType.BOTH_WAYS);
 
-        DRYOFF_SPEED = addSyncedSetting("dryoff_speed", () -> 1.0, holder -> holder.set(MainSettingsConfig.DRYOFF_SPEED.get()),
-        (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "DryoffSpeed"),
-        (decoder) -> decoder.getDouble("DryoffSpeed"),
+        DRYOFF_SPEED = addSyncedSetting(ColdSweat.createKey("dryoff_speed"), () -> 1.0, holder -> holder.set(MainSettingsConfig.DRYOFF_SPEED.get()),
+        Codec.DOUBLE,
         (saver) -> MainSettingsConfig.DRYOFF_SPEED.set(saver),
         SyncType.BOTH_WAYS);
 
-        ACCLIMATION_SPEED = addSyncedSetting("acclimation_speed", () -> 1.0, holder -> holder.set(MainSettingsConfig.ACCLIMATION_SPEED.get()),
-        (encoder) -> ConfigHelper.serializeNbtDouble(encoder, "AcclimationSpeed"),
-        (decoder) -> decoder.getDouble("AcclimationSpeed"),
+        ACCLIMATION_SPEED = addSyncedSetting(ColdSweat.createKey("acclimation_speed"), () -> 1.0, holder -> holder.set(MainSettingsConfig.ACCLIMATION_SPEED.get()),
+        Codec.DOUBLE,
         (saver) -> MainSettingsConfig.ACCLIMATION_SPEED.set(saver),
         SyncType.BOTH_WAYS);
 
-        MIN_ACCLIMATION_RANGE = addSyncedSetting("min_acclimation_range", () -> Pair.of(0.0, 0.0), holder ->
+        MIN_ACCLIMATION_RANGE = addSyncedSetting(ColdSweat.createKey("min_acclimation_range"), () -> Pair.of(0.0, 0.0), holder ->
         {
             List<? extends Number> range = MainSettingsConfig.MIN_ACCLIMATION_RANGE.get();
             holder.set(Pair.of(range.get(0).doubleValue(), range.get(1).doubleValue()));
         },
-        (encoder) -> ConfigHelper.serializeNbtPair(encoder, DoubleTag::valueOf, DoubleTag::valueOf, "MinAcclimationRange"),
-        (decoder) -> ConfigHelper.deserializeNbtPair(decoder, DoubleTag::getAsDouble, DoubleTag::getAsDouble, "MinAcclimationRange"),
-        (saver) -> MainSettingsConfig.MIN_ACCLIMATION_RANGE.set(List.of(saver.getFirst(), saver.getSecond())),
-        SyncType.BOTH_WAYS);
+                                                 ExtraCodecs.pair(Codec.DOUBLE, Codec.DOUBLE),
+                                                 (saver) -> MainSettingsConfig.MIN_ACCLIMATION_RANGE.set(List.of(saver.getFirst(), saver.getSecond())),
+                                                 SyncType.BOTH_WAYS);
 
-        MAX_ACCLIMATION_RANGE = addSyncedSetting("max_acclimation_range", () -> Pair.of(0.0, 0.0), holder ->
+        MAX_ACCLIMATION_RANGE = addSyncedSetting(ColdSweat.createKey("max_acclimation_range"), () -> Pair.of(0.0, 0.0), holder ->
         {
             List<? extends Number> range = MainSettingsConfig.MAX_ACCLIMATION_RANGE.get();
             holder.set(Pair.of(range.get(0).doubleValue(), range.get(1).doubleValue()));
         },
-        (encoder) -> ConfigHelper.serializeNbtPair(encoder, DoubleTag::valueOf, DoubleTag::valueOf, "MaxAcclimationRange"),
-        (decoder) -> ConfigHelper.deserializeNbtPair(decoder, DoubleTag::getAsDouble, DoubleTag::getAsDouble, "MaxAcclimationRange"),
-        (saver) -> MainSettingsConfig.MAX_ACCLIMATION_RANGE.set(List.of(saver.getFirst(), saver.getSecond())),
-        SyncType.BOTH_WAYS);
+                                                 ExtraCodecs.pair(Codec.DOUBLE, Codec.DOUBLE),
+                                                 (saver) -> MainSettingsConfig.MAX_ACCLIMATION_RANGE.set(List.of(saver.getFirst(), saver.getSecond())),
+                                                 SyncType.BOTH_WAYS);
 
-        DISABLED_MOD_COMPAT = addSetting("disabled_mod_compat", ArrayList::new, holder ->
+        DISABLED_MOD_COMPAT = addSetting(ColdSweat.createKey("disabled_mod_compat"), ArrayList::new, holder ->
         {
             File disabledModsFile = FMLPaths.CONFIGDIR.get().resolve("coldsweat").resolve("disabled_mods.txt").toFile();
             // Create file if it doesn't exist
@@ -959,75 +883,75 @@ public class ConfigSettings
 
         // Client
 
-        CELSIUS = addClientSetting("celsius", () -> false, holder -> holder.set(ClientSettingsConfig.USE_CELSIUS.get()));
+        CELSIUS = addClientSetting(ColdSweat.createKey("celsius"), () -> false, holder -> holder.set(ClientSettingsConfig.USE_CELSIUS.get()));
 
-        TEMP_OFFSET = addClientSetting("temp_offset", () -> 0, holder -> holder.set(ClientSettingsConfig.TEMPERATURE_OFFSET.get()));
+        TEMP_OFFSET = addClientSetting(ColdSweat.createKey("temp_offset"), () -> 0, holder -> holder.set(ClientSettingsConfig.TEMPERATURE_OFFSET.get()));
 
-        TEMP_SMOOTHING = addClientSetting("temp_smoothing", () -> 10d, holder -> holder.set(ClientSettingsConfig.TEMPERATURE_SMOOTHING.get()));
+        TEMP_SMOOTHING = addClientSetting(ColdSweat.createKey("temp_smoothing"), () -> 10d, holder -> holder.set(ClientSettingsConfig.TEMPERATURE_SMOOTHING.get()));
 
-        BODY_ICON_POS = addClientSetting("body_icon_pos", Vec2i::new, holder -> holder.set(ClientSettingsConfig.getBodyIconPos()));
-        BODY_ICON_ENABLED = addClientSetting("body_icon_enabled", () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_BODY_TEMP_ICON.get()));
+        BODY_ICON_POS = addClientSetting(ColdSweat.createKey("body_icon_pos"), Vec2i::new, holder -> holder.set(ClientSettingsConfig.getBodyIconPos()));
+        BODY_ICON_ENABLED = addClientSetting(ColdSweat.createKey("body_icon_enabled"), () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_BODY_TEMP_ICON.get()));
 
-        MOVE_BODY_ICON_WHEN_ADVANCED = addClientSetting("move_body_icon_for_advanced", () -> true, holder -> holder.set(ClientSettingsConfig.MOVE_BODY_TEMP_ICON_ADVANCED.get()));
+        MOVE_BODY_ICON_WHEN_ADVANCED = addClientSetting(ColdSweat.createKey("move_body_icon_for_advanced"), () -> true, holder -> holder.set(ClientSettingsConfig.MOVE_BODY_TEMP_ICON_ADVANCED.get()));
 
-        BODY_READOUT_POS = addClientSetting("body_readout_pos", Vec2i::new, holder -> holder.set(ClientSettingsConfig.getBodyReadoutPos()));
-        BODY_READOUT_ENABLED = addClientSetting("body_readout_enabled", () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_BODY_TEMP_READOUT.get()));
+        BODY_READOUT_POS = addClientSetting(ColdSweat.createKey("body_readout_pos"), Vec2i::new, holder -> holder.set(ClientSettingsConfig.getBodyReadoutPos()));
+        BODY_READOUT_ENABLED = addClientSetting(ColdSweat.createKey("body_readout_enabled"), () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_BODY_TEMP_READOUT.get()));
 
-        WORLD_GAUGE_POS = addClientSetting("world_gauge_pos", Vec2i::new, holder -> holder.set(ClientSettingsConfig.getWorldGaugePos()));
-        WORLD_GAUGE_ENABLED = addClientSetting("world_gauge_enabled", () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_WORLD_TEMP_GAUGE.get()));
+        WORLD_GAUGE_POS = addClientSetting(ColdSweat.createKey("world_gauge_pos"), Vec2i::new, holder -> holder.set(ClientSettingsConfig.getWorldGaugePos()));
+        WORLD_GAUGE_ENABLED = addClientSetting(ColdSweat.createKey("world_gauge_enabled"), () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_WORLD_TEMP_GAUGE.get()));
 
-        CUSTOM_HOTBAR_LAYOUT = addClientSetting("custom_hotbar_layout", () -> true, holder -> holder.set(ClientSettingsConfig.USE_CUSTOM_HOTBAR_LAYOUT.get()));
-        ICON_BOBBING = addClientSetting("icon_bobbing", () -> true, holder -> holder.set(ClientSettingsConfig.ENABLE_ICON_BOBBING.get()));
+        CUSTOM_HOTBAR_LAYOUT = addClientSetting(ColdSweat.createKey("custom_hotbar_layout"), () -> true, holder -> holder.set(ClientSettingsConfig.USE_CUSTOM_HOTBAR_LAYOUT.get()));
+        ICON_BOBBING = addClientSetting(ColdSweat.createKey("icon_bobbing"), () -> true, holder -> holder.set(ClientSettingsConfig.ENABLE_ICON_BOBBING.get()));
 
-        HEARTH_DEBUG = addClientSetting("hearth_debug", () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_HEARTH_DEBUG_VISUALS.get()));
+        HEARTH_DEBUG = addClientSetting(ColdSweat.createKey("hearth_debug"), () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_HEARTH_DEBUG_VISUALS.get()));
 
-        SHOW_CONFIG_BUTTON = addClientSetting("show_config_button", () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_CONFIG_BUTTON.get()));
-        CONFIG_BUTTON_POS = addClientSetting("config_button_pos", Vec2i::new, holder -> holder.set(ClientSettingsConfig.getConfigButtonPos()));
+        SHOW_CONFIG_BUTTON = addClientSetting(ColdSweat.createKey("show_config_button"), () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_CONFIG_BUTTON.get()));
+        CONFIG_BUTTON_POS = addClientSetting(ColdSweat.createKey("config_button_pos"), Vec2i::new, holder -> holder.set(ClientSettingsConfig.getConfigButtonPos()));
 
-        DISTORTION_EFFECTS = addClientSetting("distortion_effects", () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_SCREEN_DISTORTIONS.get()));
+        DISTORTION_EFFECTS = addClientSetting(ColdSweat.createKey("distortion_effects"), () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_SCREEN_DISTORTIONS.get()));
 
-        HIGH_CONTRAST = addClientSetting("high_contrast", () -> false, holder -> holder.set(ClientSettingsConfig.HIGH_CONTRAST_MODE.get()));
+        HIGH_CONTRAST = addClientSetting(ColdSweat.createKey("high_contrast"), () -> false, holder -> holder.set(ClientSettingsConfig.HIGH_CONTRAST_MODE.get()));
 
-        SHOW_CREATIVE_WARNING = addClientSetting("show_creative_warning", () -> true, holder -> holder.set(ClientSettingsConfig.ENABLE_CREATIVE_WARNING.get()));
+        SHOW_CREATIVE_WARNING = addClientSetting(ColdSweat.createKey("show_creative_warning"), () -> true, holder -> holder.set(ClientSettingsConfig.ENABLE_CREATIVE_WARNING.get()));
 
-        HIDE_TOOLTIPS = addClientSetting("hide_tooltips", () -> false, holder -> holder.set(ClientSettingsConfig.HIDE_INSULATION_TOOLTIPS.get()));
-        EXPAND_TOOLTIPS = addClientSetting("expand_tooltips", () -> true, holder -> holder.set(ClientSettingsConfig.EXPAND_TOOLTIPS.get()));
+        HIDE_TOOLTIPS = addClientSetting(ColdSweat.createKey("hide_tooltips"), () -> false, holder -> holder.set(ClientSettingsConfig.HIDE_INSULATION_TOOLTIPS.get()));
+        EXPAND_TOOLTIPS = addClientSetting(ColdSweat.createKey("expand_tooltips"), () -> true, holder -> holder.set(ClientSettingsConfig.EXPAND_TOOLTIPS.get()));
 
-        WATER_EFFECT_SETTING = addClientSetting("show_water_effect", () -> WaterEffectSetting.ALL, holder -> holder.set(WaterEffectSetting.values()[ClientSettingsConfig.WATER_EFFECT_SETTING.get()]));
-        WATER_DROPLET_SCALE = addClientSetting("water_droplet_scale", () -> new IntegerBounds(40, 48), holder -> holder.set(new IntegerBounds(ClientSettingsConfig.WATER_DROPLET_SCALE.get().toArray(Integer[]::new))));
+        WATER_EFFECT_SETTING = addClientSetting(ColdSweat.createKey("show_water_effect"), () -> WaterEffectSetting.ALL, holder -> holder.set(WaterEffectSetting.values()[ClientSettingsConfig.WATER_EFFECT_SETTING.get()]));
+        WATER_DROPLET_SCALE = addClientSetting(ColdSweat.createKey("water_droplet_scale"), () -> new IntegerBounds(40, 48), holder -> holder.set(new IntegerBounds(ClientSettingsConfig.WATER_DROPLET_SCALE.get().toArray(Integer[]::new))));
 
-        SHOW_FROZEN_HEALTH = addClientSetting("show_frozen_health", () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_FROZEN_HEALTH.get()));
-        FREEZING_OVERLAY_OPACITY = addClientSetting("freezing_overlay_opacity", () -> 0.5, holder -> holder.set(ClientSettingsConfig.FREEZING_OVERLAY_OPACITY.get()));
-        SHIVER_INTENSITY = addClientSetting("shiver_intensity", () -> 1.0, holder -> holder.set(ClientSettingsConfig.SHIVER_INTENSITY.get()));
-        HEATSTROKE_BORDER_OPACITY = addClientSetting("heatstroke_border_opacity", () -> 0.5, holder -> holder.set(ClientSettingsConfig.HEATSTROKE_BORDER_OPACITY.get()));
-        HEATSTROKE_BLUR_AMOUNT = addClientSetting("heatstroke_blur_amount", () -> 1.0, holder -> holder.set(ClientSettingsConfig.HEATSTROKE_BLUR.get()));
-        HEATSTROKE_SWAY_AMOUNT = addClientSetting("heatstroke_sway_amount", () -> 1.0, holder -> holder.set(ClientSettingsConfig.HEATSTROKE_SWAY_AMOUNT.get()));
-        HEATSTROKE_SWAY_SPEED = addClientSetting("heatstroke_sway_speed", () -> 1.0, holder -> holder.set(ClientSettingsConfig.HEATSTROKE_SWAY_SPEED.get()));
+        SHOW_FROZEN_HEALTH = addClientSetting(ColdSweat.createKey("show_frozen_health"), () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_FROZEN_HEALTH.get()));
+        FREEZING_OVERLAY_OPACITY = addClientSetting(ColdSweat.createKey("freezing_overlay_opacity"), () -> 0.5, holder -> holder.set(ClientSettingsConfig.FREEZING_OVERLAY_OPACITY.get()));
+        SHIVER_INTENSITY = addClientSetting(ColdSweat.createKey("shiver_intensity"), () -> 1.0, holder -> holder.set(ClientSettingsConfig.SHIVER_INTENSITY.get()));
+        HEATSTROKE_BORDER_OPACITY = addClientSetting(ColdSweat.createKey("heatstroke_border_opacity"), () -> 0.5, holder -> holder.set(ClientSettingsConfig.HEATSTROKE_BORDER_OPACITY.get()));
+        HEATSTROKE_BLUR_AMOUNT = addClientSetting(ColdSweat.createKey("heatstroke_blur_amount"), () -> 1.0, holder -> holder.set(ClientSettingsConfig.HEATSTROKE_BLUR.get()));
+        HEATSTROKE_SWAY_AMOUNT = addClientSetting(ColdSweat.createKey("heatstroke_sway_amount"), () -> 1.0, holder -> holder.set(ClientSettingsConfig.HEATSTROKE_SWAY_AMOUNT.get()));
+        HEATSTROKE_SWAY_SPEED = addClientSetting(ColdSweat.createKey("heatstroke_sway_speed"), () -> 1.0, holder -> holder.set(ClientSettingsConfig.HEATSTROKE_SWAY_SPEED.get()));
 
-        ANIMATED_SOULSPRING_LAMP_MODEL = addClientSetting("animated_soulspring_lamp_model", () -> true, holder -> holder.set(ClientSettingsConfig.ANIMATED_SOUL_SPRING_LAMP.get()));
+        ANIMATED_SOULSPRING_LAMP_MODEL = addClientSetting(ColdSweat.createKey("animated_soulspring_lamp_model"), () -> true, holder -> holder.set(ClientSettingsConfig.ANIMATED_SOUL_SPRING_LAMP.get()));
 
-        WATERSKIN_USE_PRIMARY = addClientSetting("waterskin_primary_action", () -> Preference.WaterskinAction.POUR,
+        WATERSKIN_USE_PRIMARY = addClientSetting(ColdSweat.createKey("waterskin_primary_action"), () -> Preference.WaterskinAction.POUR,
             holder -> holder.set(Preference.WaterskinAction.byName(ClientSettingsConfig.WATERSKIN_DRINK_PRIMARY.get())));
-        WATERSKIN_USE_SECONDARY = addClientSetting("waterskin_secondary_action", () -> Preference.WaterskinAction.DRINK,
+        WATERSKIN_USE_SECONDARY = addClientSetting(ColdSweat.createKey("waterskin_secondary_action"), () -> Preference.WaterskinAction.DRINK,
             holder -> holder.set(Preference.WaterskinAction.byName(ClientSettingsConfig.WATERSKIN_DRINK_SECONDARY.get())));
 
-        SUMMER_TEMPS = addSetting("summer_temps", SeasonalTempData::new, holder -> holder.set(!CompatManager.getSeasonsMods().isEmpty() ? SeasonalTempData.fromToml(WorldSettingsConfig.getSummerTemps()) : new SeasonalTempData()));
-        AUTUMN_TEMPS = addSetting("autumn_temps", SeasonalTempData::new, holder -> holder.set(!CompatManager.getSeasonsMods().isEmpty() ? SeasonalTempData.fromToml(WorldSettingsConfig.getAutumnTemps()) : new SeasonalTempData()));
-        WINTER_TEMPS = addSetting("winter_temps", SeasonalTempData::new, holder -> holder.set(!CompatManager.getSeasonsMods().isEmpty() ? SeasonalTempData.fromToml(WorldSettingsConfig.getWinterTemps()) : new SeasonalTempData()));
-        SPRING_TEMPS = addSetting("spring_temps", SeasonalTempData::new, holder -> holder.set(!CompatManager.getSeasonsMods().isEmpty() ? SeasonalTempData.fromToml(WorldSettingsConfig.getSpringTemps()) : new SeasonalTempData()));
+        SUMMER_TEMPS = addSetting(ColdSweat.createKey("summer_temps"), SeasonalTempData::new, holder -> holder.set(!CompatManager.getSeasonsMods().isEmpty() ? SeasonalTempData.fromToml(WorldSettingsConfig.getSummerTemps()) : new SeasonalTempData()));
+        AUTUMN_TEMPS = addSetting(ColdSweat.createKey("autumn_temps"), SeasonalTempData::new, holder -> holder.set(!CompatManager.getSeasonsMods().isEmpty() ? SeasonalTempData.fromToml(WorldSettingsConfig.getAutumnTemps()) : new SeasonalTempData()));
+        WINTER_TEMPS = addSetting(ColdSweat.createKey("winter_temps"), SeasonalTempData::new, holder -> holder.set(!CompatManager.getSeasonsMods().isEmpty() ? SeasonalTempData.fromToml(WorldSettingsConfig.getWinterTemps()) : new SeasonalTempData()));
+        SPRING_TEMPS = addSetting(ColdSweat.createKey("spring_temps"), SeasonalTempData::new, holder -> holder.set(!CompatManager.getSeasonsMods().isEmpty() ? SeasonalTempData.fromToml(WorldSettingsConfig.getSpringTemps()) : new SeasonalTempData()));
     }
 
-    public static String getKey(DynamicHolder<?> setting)
+    public static ResourceLocation getKey(DynamicHolder<?> setting)
     {   return CONFIG_SETTINGS.inverse().get(setting);
     }
 
-    public static DynamicHolder<?> getSetting(String key)
+    public static DynamicHolder<?> getSetting(ResourceLocation key)
     {   return CONFIG_SETTINGS.get(key);
     }
 
-    public enum Difficulty
+    public enum Difficulty implements StringRepresentable
     {
-        SUPER_EASY(() -> Map.of(
+        SUPER_EASY("super_easy", () -> Map.of(
             getKey(MIN_TEMP), () -> Temperature.convert(40, Temperature.Units.F, Temperature.Units.MC, true),
             getKey(MAX_TEMP), () -> Temperature.convert(120, Temperature.Units.F, Temperature.Units.MC, true),
             getKey(TEMP_RATE), () -> 0.5,
@@ -1036,7 +960,7 @@ public class ConfigSettings
             getKey(ICE_RESISTANCE_ENABLED), () -> true
         )),
 
-        EASY(() -> Map.of(
+        EASY("easy", () -> Map.of(
             getKey(MIN_TEMP), () -> Temperature.convert(45, Temperature.Units.F, Temperature.Units.MC, true),
             getKey(MAX_TEMP), () -> Temperature.convert(110, Temperature.Units.F, Temperature.Units.MC, true),
             getKey(TEMP_RATE), () -> 0.75,
@@ -1045,7 +969,7 @@ public class ConfigSettings
             getKey(ICE_RESISTANCE_ENABLED), () -> true
         )),
 
-        NORMAL(() -> Map.of(
+        NORMAL("normal", () -> Map.of(
             getKey(MIN_TEMP), () -> Temperature.convert(50, Temperature.Units.F, Temperature.Units.MC, true),
             getKey(MAX_TEMP), () -> Temperature.convert(100, Temperature.Units.F, Temperature.Units.MC, true),
             getKey(TEMP_RATE), () -> 1.0,
@@ -1054,7 +978,7 @@ public class ConfigSettings
             getKey(ICE_RESISTANCE_ENABLED), () -> true
         )),
 
-        HARD(() -> Map.of(
+        HARD("hard", () -> Map.of(
             getKey(MIN_TEMP), () -> Temperature.convert(55, Temperature.Units.F, Temperature.Units.MC, true),
             getKey(MAX_TEMP), () -> Temperature.convert(90, Temperature.Units.F, Temperature.Units.MC, true),
             getKey(TEMP_RATE), () -> 1.25,
@@ -1063,20 +987,24 @@ public class ConfigSettings
             getKey(ICE_RESISTANCE_ENABLED), () -> false
         )),
 
-        CUSTOM(() -> Map.of());
+        CUSTOM("custom", () -> Map.of());
 
-        private final Supplier<Map<String, Supplier<?>>> settingsSupplier;
-        private Map<String, Supplier<?>> settings;
+        public static final Codec<Difficulty> CODEC = StringRepresentable.fromEnum(Difficulty::values);
 
-        Difficulty(Supplier<Map<String, Supplier<?>>> settings)
+        private final Supplier<Map<ResourceLocation, Supplier<?>>> settingsSupplier;
+        private Map<ResourceLocation, Supplier<?>> settings;
+        String name;
+
+        Difficulty(String name, Supplier<Map<ResourceLocation, Supplier<?>>> settings)
         {   this.settingsSupplier = settings;
+            this.name = name;
         }
 
         private void ensureSettingsGenerated()
         {   if (settings == null) settings = settingsSupplier.get();
         }
 
-        public <T> T getSetting(String id)
+        public <T> T getSetting(ResourceLocation id)
         {
             this.ensureSettingsGenerated();
             return (T) settings.get(id).get();
@@ -1088,7 +1016,7 @@ public class ConfigSettings
             return (T) settings.get(getKey(config)).get();
         }
 
-        public <T> T getOrDefault(String id, T defaultValue)
+        public <T> T getOrDefault(ResourceLocation id, T defaultValue)
         {
             this.ensureSettingsGenerated();
             return (T) settings.getOrDefault(id, () -> defaultValue).get();
@@ -1106,12 +1034,24 @@ public class ConfigSettings
             settings.forEach((id, loader) -> ConfigSettings.getSetting(id).setUnsafe(loader.get()));
         }
 
-        public int getId()
-        {   return this.ordinal();
+        public String getId()
+        {   return this.name;
         }
 
-        public static Difficulty byId(int id)
-        {   return values()[id];
+        @Nullable
+        public static Difficulty byId(String id)
+        {
+            for (Difficulty difficulty : values())
+            {   if (difficulty.name.equals(id))
+                {   return difficulty;
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public String getSerializedName()
+        {   return name;
         }
 
         public static Component getFormattedName(Difficulty difficulty)
@@ -1126,41 +1066,40 @@ public class ConfigSettings
         }
     }
 
-    public static <T> DynamicHolder<T> addSetting(String id, Supplier<T> defaultVal, Consumer<DynamicHolder<T>> loader)
-    {   DynamicHolder<T> holder = DynamicHolder.create(defaultVal, loader);
+    public static <T> DynamicHolder<T> addSetting(ResourceLocation id, Supplier<T> defaultVal, Consumer<DynamicHolder<T>> loader)
+    {   DynamicHolder<T> holder = DynamicHolder.create(id, defaultVal, loader);
         CONFIG_SETTINGS.put(id, holder);
         return holder;
     }
 
-    public static <T> DynamicHolder<T> addSettingWithRegistries(String id, Supplier<T> defaultVal, DynamicHolder.Loader<T> loader)
-    {   DynamicHolder<T> holder = DynamicHolder.createWithRegistries(defaultVal, loader);
+    public static <T> DynamicHolder<T> addSettingWithRegistries(ResourceLocation id, Supplier<T> defaultVal, DynamicHolder.Loader<T> loader)
+    {   DynamicHolder<T> holder = DynamicHolder.createWithRegistries(id, defaultVal, loader);
         CONFIG_SETTINGS.put(id, holder);
         return holder;
     }
 
-    public static <T> DynamicHolder<T> addSyncedSetting(String id, Supplier<T> defaultVal, Consumer<DynamicHolder<T>> loader, Function<T, CompoundTag> writer, Function<CompoundTag, T> reader,
-                                                        Consumer<T> saver, SyncType syncType)
-    {   DynamicHolder<T> holder = DynamicHolder.createSynced(defaultVal, loader, writer, reader, saver, syncType);
+    public static <T> DynamicHolder<T> addSyncedSetting(ResourceLocation id, Supplier<T> defaultVal, Consumer<DynamicHolder<T>> loader, Codec<T> codec, Consumer<T> saver, SyncType syncType)
+    {   DynamicHolder<T> holder = DynamicHolder.createSynced(id, defaultVal, loader, codec, saver, syncType);
         CONFIG_SETTINGS.put(id, holder);
         return holder;
     }
 
-    public static <T> DynamicHolder<T> addSyncedSettingWithRegistries(String id, Supplier<T> defaultVal, DynamicHolder.Loader<T> loader, DynamicHolder.Writer<T> writer, DynamicHolder.Reader<T> reader,
+    public static <T> DynamicHolder<T> addSyncedSettingWithRegistries(ResourceLocation id, Supplier<T> defaultVal, DynamicHolder.Loader<T> loader, Codec<T> codec,
                                                                       DynamicHolder.Saver<T> saver, SyncType syncType)
-    {   DynamicHolder<T> holder = DynamicHolder.createSyncedWithRegistries(defaultVal, loader, writer, reader, saver, syncType);
+    {   DynamicHolder<T> holder = DynamicHolder.createSyncedWithRegistries(id, defaultVal, loader, codec, saver, syncType);
         CONFIG_SETTINGS.put(id, holder);
         return holder;
     }
 
-    public static <T> DynamicHolder<T> addClientSetting(String id, Supplier<T> defaultVal, Consumer<DynamicHolder<T>> loader)
+    public static <T> DynamicHolder<T> addClientSetting(ResourceLocation id, Supplier<T> defaultVal, Consumer<DynamicHolder<T>> loader)
     {
         if (EffectiveSide.get().isClient())
         {
-            DynamicHolder<T> holder = DynamicHolder.create(defaultVal, loader);
+            DynamicHolder<T> holder = DynamicHolder.create(id, defaultVal, loader);
             CLIENT_SETTINGS.put(id, holder);
             return holder;
         }
-        else return DynamicHolder.create(() -> null, (value) -> {});
+        else return DynamicHolder.create(id, () -> null, (value) -> {});
     }
 
     public static CompoundTag encode(RegistryAccess registryAccess)
@@ -1214,7 +1153,7 @@ public class ConfigSettings
 
     public static void clear()
     {
-        for (Map.Entry<String, DynamicHolder<?>> entry : CONFIG_SETTINGS.entrySet())
+        for (Map.Entry<ResourceLocation, DynamicHolder<?>> entry : CONFIG_SETTINGS.entrySet())
         {   entry.getValue().reset();
         }
     }

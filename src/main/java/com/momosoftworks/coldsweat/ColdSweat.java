@@ -16,6 +16,7 @@ import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.registries.ModEntities;
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.common.MinecraftForge;
@@ -90,6 +91,10 @@ public class ColdSweat
             {   event.create(new RegistryBuilder<>().setName(holder.registry().location()).dataPackRegistry((Codec) holder.codec(), (Codec) holder.codec()));
             }
         });
+    }
+
+    public static ResourceLocation createKey(String path)
+    {   return new ResourceLocation(MOD_ID, path);
     }
 
     public static String getVersion()

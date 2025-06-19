@@ -18,7 +18,7 @@ public class MainSettingsConfig
     private static final ForgeConfigSpec SPEC;
     private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
-    public static final ForgeConfigSpec.ConfigValue<Integer> DIFFICULTY;
+    public static final ForgeConfigSpec.ConfigValue<String> DIFFICULTY;
     public static final ForgeConfigSpec.ConfigValue<String> VERSION;
     public static final ForgeConfigSpec.ConfigValue<Boolean> AUTO_UPDATE;
 
@@ -54,11 +54,13 @@ public class MainSettingsConfig
 
         DIFFICULTY = BUILDER
                 .comment("DO NOT CHANGE THIS SETTING")
-                .defineInRange("Difficulty", defaultDiff.ordinal(), 0, ConfigSettings.Difficulty.values().length - 1);
+                .define(List.of("Difficulty"), () -> defaultDiff.getId(),
+                        obj -> obj instanceof String && ConfigSettings.Difficulty.byId((String) obj) != null,
+                        String.class);
 
         VERSION = BUILDER
                 .comment("The current version of Cold Sweat. This is used by the auto-updater")
-                .define("Version", ColdSweat.getVersion());
+                .define(List.of("Version"), () -> ColdSweat.getVersion(), obj -> obj instanceof String, String.class);
 
         AUTO_UPDATE = BUILDER
                 .comment("Allows Cold Sweat's configs to be automatically updated with new additions & formatting changes")
@@ -87,8 +89,8 @@ public class MainSettingsConfig
                 .defineInRange("Temperature Damage", defaultDiff.getOrDefault(ConfigSettings.TEMP_DAMAGE, 2d), 0d, Double.POSITIVE_INFINITY);
 
         NULLIFY_IN_PEACEFUL = BUILDER
-                .comment("Sets whether damage scales with difficulty")
-                .define("Damage Scaling", defaultDiff.getOrDefault("damage_scaling", true));
+                .comment("Nullifies temperature damage and effects when the difficulty is set to peaceful")
+                .define("Damage Scaling", defaultDiff.getOrDefault(ConfigSettings.USE_PEACEFUL_MODE, true));
 
         BUILDER.pop();
 
