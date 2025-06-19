@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.client.gui.config.pages;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.gui.config.ConfigScreen;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -63,11 +64,11 @@ public class ConfigPageDifficulty extends Screen
     private static List<Component> generateDescription(ConfigSettings.Difficulty difficulty)
     {
         return List.of(
-                Component.translatable("cold_sweat.config.difficulty.description.min_temp", getTemperatureString(difficulty.getSetting("min_temp"), BLUE)),
-                Component.translatable("cold_sweat.config.difficulty.description.max_temp", getTemperatureString(difficulty.getSetting("max_temp"), RED)),
+                Component.translatable("cold_sweat.config.difficulty.description.min_temp", getTemperatureString(difficulty.getSetting(ColdSweat.createKey("min_temp")), BLUE)),
+                Component.translatable("cold_sweat.config.difficulty.description.max_temp", getTemperatureString(difficulty.getSetting(ColdSweat.createKey("max_temp")), RED)),
                 getRateComponent(difficulty),
-                Component.translatable("cold_sweat.config.difficulty.description.world_temp_" + (difficulty.getSetting("require_thermometer") ? "off" : "on"), BOLD + U_LINE, CLEAR),
-                Component.translatable("cold_sweat.config.difficulty.description.potions_" + (difficulty.getSetting("ice_resistance_enabled") ? "on" : "off"), BOLD + U_LINE, CLEAR));
+                Component.translatable("cold_sweat.config.difficulty.description.world_temp_" + (difficulty.getSetting(ColdSweat.createKey("require_thermometer")) ? "off" : "on"), BOLD + U_LINE, CLEAR),
+                Component.translatable("cold_sweat.config.difficulty.description.potions_" + (difficulty.getSetting(ColdSweat.createKey("ice_resistance_enabled")) ? "on" : "off"), BOLD + U_LINE, CLEAR));
     }
 
     private static String getTemperatureString(double temp, String color)
@@ -79,7 +80,7 @@ public class ConfigPageDifficulty extends Screen
 
     private static Component getRateComponent(ConfigSettings.Difficulty difficulty)
     {
-        double rate = difficulty.getSetting("temp_rate");
+        double rate = difficulty.getSetting(ColdSweat.createKey("temp_rate"));
         String key = rate < 1  ? "cold_sweat.config.difficulty.description.rate.decrease"
                    : rate == 1 ? "cold_sweat.config.difficulty.description.rate.normal"
                    : "cold_sweat.config.difficulty.description.rate.increase";
@@ -165,7 +166,7 @@ public class ConfigPageDifficulty extends Screen
                 isMouseOverSlider(mouseX, mouseY) ? 134 : 128, 152, 6);
 
         // Draw Slider Head
-        graphics.blit(CONFIG_BUTTONS_LOCATION, this.width / 2 - 78 + (difficulty.getId() * 37), this.height / 2 - 58,
+        graphics.blit(CONFIG_BUTTONS_LOCATION, this.width / 2 - 78 + (difficulty.ordinal() * 37), this.height / 2 - 58,
                 isMouseOverSlider(mouseX, mouseY) ? 0 : 6, 128, 6, 16);
 
         // Draw Difficulty Title
@@ -199,7 +200,7 @@ public class ConfigPageDifficulty extends Screen
         double y = ConfigScreen.MOUSE_Y;
         if (ConfigScreen.IS_MOUSE_DOWN && isMouseOverSlider(x, y))
         {
-            ConfigSettings.Difficulty newDifficulty = ConfigSettings.Difficulty.byId((int) Math.round(CSMath.blend(0, 4, x, this.width / 2.0 - 76, this.width / 2.0 + 76)));
+            ConfigSettings.Difficulty newDifficulty = ConfigSettings.Difficulty.values()[((int) Math.round(CSMath.blend(0, 4, x, this.width / 2.0 - 76, this.width / 2.0 + 76)))];
 
             if (newDifficulty != ConfigSettings.DIFFICULTY.get())
             {   ConfigScreen.MC.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvent.createFixedRangeEvent(new ResourceLocation("minecraft:block.note_block.hat"), 1.8f), 0.5f));

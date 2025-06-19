@@ -96,7 +96,7 @@ public class CompatManager
     private static final boolean AETHER_LOADED = modLoaded("aether");
     private static final boolean REGIONS_UNEXPLORED_LOADED = modLoaded("regions_unexplored");
 
-    private static List<String> SEASONS_MODS = new ArrayList<>();
+    private static final List<String> SEASONS_MODS = new ArrayList<>();
 
     public static boolean modLoaded(String modID, String minVersion, String maxVersion)
     {
@@ -479,13 +479,7 @@ public class CompatManager
         {   return;
         }
 
-        double worldTemp = Temperature.get(player, Temperature.Trait.WORLD);
-        double freezingPoint = Temperature.get(player, Temperature.Trait.FREEZING_POINT);
-        double burningPoint = Temperature.get(player, Temperature.Trait.BURNING_POINT);
-
-        if (!player.isCreative() && !player.isInLava()
-        && backTank.getItem() instanceof BacktankItem
-        && (ConfigSettings.HEAT_DRAINS_BACKTANK.get() && worldTemp > burningPoint || ConfigSettings.COLD_DRAINS_BACKTANK.get() && worldTemp < freezingPoint))
+        if (!player.isCreative() && !player.isInLava() && backTank.getItem() instanceof BacktankItem)
         {
             // Ensure player is wearing a full set of fire-resistant armor
             List<InsulatorData> drainingInsulators = ConfigHelper.getTaggedConfigsFor(backTank.getItem(), ModInsulatorTags.DRAINS_BACKTANK,
