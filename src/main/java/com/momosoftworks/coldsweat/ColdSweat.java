@@ -15,6 +15,7 @@ import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.commands.synchronization.ArgumentTypes;
@@ -88,6 +89,10 @@ public class ColdSweat
             {   event.create(new RegistryBuilder<>().setType((Class) holder.type()).setName(holder.registry().location()).dataPackRegistry(holder.codec(), (Codec) holder.codec()));
             }
         });
+    }
+
+    public static ResourceLocation createKey(String path)
+    {   return new ResourceLocation(MOD_ID, path);
     }
 
     public static String getVersion()
