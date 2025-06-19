@@ -27,6 +27,13 @@ public class RegistryMultiMap<K, V> implements Multimap<K, V>
         }
     }
 
+    public RegistryMultiMap(Map<K, Collection<V>> map)
+    {
+        for (Map.Entry<K, Collection<V>> entry : map.entrySet())
+        {   putAll(entry.getKey(), entry.getValue());
+        }
+    }
+
     private final FastMap<K, LinkedHashSet<V>> internal = new FastMap<>();
     private int totalSize = 0;
 

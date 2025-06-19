@@ -1,19 +1,25 @@
 package com.momosoftworks.coldsweat.api.insulation.slot;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
-import net.minecraft.nbt.CompoundNBT;
 import com.momosoftworks.coldsweat.util.serialization.StringRepresentable;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
-public abstract class ScalingFormula implements NbtSerializable
+public abstract class ScalingFormula
 {
+    public static Codec<ScalingFormula> getCodec()
+    {
+        return Codec.either(Static.CODEC, Dynamic.CODEC)
+                    .xmap(either -> either.map(left -> left, right -> right),
+                          scaling -> scaling instanceof Static ? Either.left((Static) scaling) : Either.right((Dynamic) scaling));
+    }
+
     Type scaling;
 
     protected ScalingFormula(Type scaling)
@@ -27,26 +33,15 @@ public abstract class ScalingFormula implements NbtSerializable
     {   return scaling;
     }
 
-    @Override
-    public CompoundNBT serialize()
-    {
-        CompoundNBT tag = new CompoundNBT();
-        tag.putString("scaling", scaling.getSerializedName());
-        return tag;
-    }
-
-    public static ScalingFormula deserialize(CompoundNBT nbt)
-    {
-        Type scaling = Type.byName(nbt.getString("scaling"));
-        switch (scaling)
-        {
-            case STATIC : return Static.deserialize(nbt);
-            default : return Dynamic.deserialize(nbt);
-        }
-    }
-
     public static class Static extends ScalingFormula
     {
+        public static final Codec<Static> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                Codec.INT.fieldOf("head").forGetter(s -> s.slots.getOrDefault(EquipmentSlotType.HEAD, 0)),
+                Codec.INT.fieldOf("body").forGetter(s -> s.slots.getOrDefault(EquipmentSlotType.CHEST, 0)),
+                Codec.INT.fieldOf("legs").forGetter(s -> s.slots.getOrDefault(EquipmentSlotType.LEGS, 0)),
+                Codec.INT.fieldOf("feet").forGetter(s -> s.slots.getOrDefault(EquipmentSlotType.FEET, 0))
+        ).apply(instance, Static::new));
+
         Map<EquipmentSlotType, Integer> slots = new EnumMap<>(EquipmentSlotType.class);
 
         public Static(int head, int body, int legs, int feet)
@@ -56,10 +51,6 @@ public abstract class ScalingFormula implements NbtSerializable
             slots.put(EquipmentSlotType.CHEST, body);
             slots.put(EquipmentSlotType.LEGS, legs);
             slots.put(EquipmentSlotType.FEET, feet);
-        }
-
-        private Static()
-        {   super(Type.STATIC);
         }
 
         @Override
@@ -75,31 +66,16 @@ public abstract class ScalingFormula implements NbtSerializable
                                  slots.get(EquipmentSlotType.LEGS),
                                  slots.get(EquipmentSlotType.FEET));
         }
-
-        public static Static deserialize(CompoundNBT nbt)
-        {
-            Static instance = new Static();
-            for (EquipmentSlotType slot : EquipmentSlotType.values())
-            {   if (slot.getType() == EquipmentSlotType.Group.ARMOR)
-                {   instance.slots.put(slot, nbt.getInt(slot.getName()));
-                }
-            }
-            return instance;
-        }
-
-        @Override
-        public CompoundNBT serialize()
-        {
-            CompoundNBT tag = super.serialize();
-            for (Map.Entry<EquipmentSlotType, Integer> entry : slots.entrySet())
-            {   tag.putInt(entry.getKey().getName(), entry.getValue());
-            }
-            return tag;
-        }
     }
 
     public static class Dynamic extends ScalingFormula
     {
+        public static final Codec<Dynamic> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                Type.CODEC.fieldOf("scaling").forGetter(Dynamic::getType),
+                Codec.DOUBLE.fieldOf("factor").forGetter(s -> s.factor),
+                Codec.DOUBLE.fieldOf("max").forGetter(s -> s.max)
+        ).apply(instance, Dynamic::new));
+
         double factor;
         double max;
 
@@ -125,19 +101,6 @@ public abstract class ScalingFormula implements NbtSerializable
         @Override
         public List<? extends Number> getValues()
         {   return Arrays.asList(factor, max);
-        }
-
-        public static Dynamic deserialize(CompoundNBT nbt)
-        {   return new Dynamic(Type.byName(nbt.getString("scaling")), nbt.getDouble("factor"), nbt.getDouble("max"));
-        }
-
-        @Override
-        public CompoundNBT serialize()
-        {
-            CompoundNBT tag = super.serialize();
-            tag.putDouble("factor", factor);
-            tag.putDouble("max", max);
-            return tag;
         }
     }
 

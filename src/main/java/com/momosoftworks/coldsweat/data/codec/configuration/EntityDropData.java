@@ -1,13 +1,9 @@
 package com.momosoftworks.coldsweat.data.codec.configuration;
 
-import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.NBTDynamicOps;
 
-public class EntityDropData implements NbtSerializable
+public class EntityDropData
 {
     private final int interval;
     private final int cooldown;
@@ -33,13 +29,5 @@ public class EntityDropData implements NbtSerializable
     }
     public double chance()
     {   return chance;
-    }
-
-    public CompoundNBT serialize()
-    {   return (CompoundNBT) CODEC.encodeStart(NBTDynamicOps.INSTANCE, this).result().orElse(new CompoundNBT());
-    }
-
-    public static EntityDropData deserialize(CompoundNBT nbt)
-    {   return CODEC.decode(NBTDynamicOps.INSTANCE, nbt).result().map(Pair::getFirst).orElseThrow(() -> new IllegalArgumentException("Could not deserialize EntityDropData"));
     }
 }

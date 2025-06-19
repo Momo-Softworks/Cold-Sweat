@@ -23,6 +23,7 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.command.arguments.ArgumentTypes;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -87,6 +88,10 @@ public class ColdSweat
 
         // Setup compat
         CompatManager.registerEventHandlers();
+    }
+
+    public static ResourceLocation createKey(String path)
+    {   return new ResourceLocation(MOD_ID, path);
     }
 
     public static String getVersion()

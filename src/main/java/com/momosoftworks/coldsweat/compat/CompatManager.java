@@ -6,6 +6,7 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.core.init.FetchSeasonsModsEvent;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.capability.handler.ShearableFurManager;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.simibubi.create.content.contraptions.fluids.pipes.EncasedPipeBlock;
 import com.simibubi.create.content.contraptions.fluids.pipes.FluidPipeBlock;
 import com.simibubi.create.content.contraptions.fluids.pipes.GlassFluidPipeBlock;
@@ -61,7 +62,7 @@ public class CompatManager
     private static final boolean TWILIGHT_FOREST_LOADED = modLoaded("twilightforest");
     private static final boolean AETHER_LOADED = modLoaded("aether");
 
-    private static List<String> SEASONS_MODS = new ArrayList<>();
+    private static final List<String> SEASONS_MODS = new ArrayList<>();
 
     public static boolean modLoaded(String modID, String minVersion, String maxVersion)
     {

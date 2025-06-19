@@ -24,7 +24,7 @@ import javax.annotation.Nullable;
 public class KubeBindings
 {
     public static DynamicHolder<?> getConfigSetting(String id)
-    {   return ConfigSettings.getSetting(id);
+    {   return ConfigSettings.getSetting(new ResourceLocation(id));
     }
 
     public static DynamicRegistries getRegistryAccess()
