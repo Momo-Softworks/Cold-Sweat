@@ -16,6 +16,7 @@ import com.momosoftworks.coldsweat.compat.CompatManager;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.SpawnPlacementTypes;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -90,6 +91,10 @@ public class ColdSweat
             {   event.dataPackRegistry((ResourceKey) holder.registry(), (Codec) holder.codec(), (Codec) holder.codec());
             }
         });
+    }
+
+    public static ResourceLocation createKey(String path)
+    {   return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
     }
 
     public static String getVersion()

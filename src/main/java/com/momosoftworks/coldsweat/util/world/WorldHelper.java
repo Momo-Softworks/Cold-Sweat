@@ -320,9 +320,8 @@ public abstract class WorldHelper
     }
 
     public static boolean isRainingAt(Level level, BlockPos pos)
-    {   DynamicHolder<Biome> biome = DynamicHolder.create(() -> null, h -> h.set(level.getBiomeManager().getBiome(pos).value()));
-
-        return (level.isRaining() && biome.get().getPrecipitationAt(pos) == Biome.Precipitation.RAIN || CompatManager.Weather2.isRainstormAt(level, pos))
+    {
+        return (level.isRaining() && level.getBiomeManager().getBiome(pos).value().getPrecipitationAt(pos) == Biome.Precipitation.RAIN || CompatManager.Weather2.isRainstormAt(level, pos))
             && canSeeSky(level, pos.above(), level.getMaxBuildHeight())
             && !CompatManager.SereneSeasons.isColdEnoughToSnow(level, pos);
     }
@@ -755,7 +754,7 @@ public abstract class WorldHelper
             if (surroundedByBlock(levelReader, pos, Blocks.ICE))
             {   return true;
             }
-            DynamicHolder<Boolean> freezingTemp = DynamicHolder.create(() -> getRoughTemperatureAt(serverLevel, pos) < 0f);
+            DynamicHolder<Boolean> freezingTemp = DynamicHolder.create(null, () -> getRoughTemperatureAt(serverLevel, pos) < 0f);
 
             if (!mustBeAtEdge)
             {   return freezingTemp.get();

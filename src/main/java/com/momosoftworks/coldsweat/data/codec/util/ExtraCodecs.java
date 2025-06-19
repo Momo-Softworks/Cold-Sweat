@@ -1,15 +1,24 @@
 package com.momosoftworks.coldsweat.data.codec.util;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
-import net.minecraft.world.entity.EquipmentSlot;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+
+import java.util.*;
 
 public class ExtraCodecs
 {
-    public static final Codec<EquipmentSlot> EQUIPMENT_SLOT = Codec.STRING.xmap(EquipmentSlot::byName, EquipmentSlot::getName);
-
     public static Codec<Object> anyOf(Codec<?>... codecs)
     {
         return new Codec<>()
@@ -47,5 +56,126 @@ public class ExtraCodecs
                 return DataResult.error(() -> "No codecs could decode input " + input);
             }
         };
+    }
+
+    public static <F, S> Codec<Pair<F, S>> pair(Codec<F> firstCodec, Codec<S> secondCodec)
+    {
+        return RecordCodecBuilder.create(instance -> instance.group(
+                firstCodec.fieldOf("first").forGetter(Pair::getFirst),
+                secondCodec.fieldOf("second").forGetter(Pair::getSecond)
+        ).apply(instance, Pair::of));
+    }
+
+    public static <K, V> Codec<Map<K, V>> builtinMapCodec(Registry<K> keyRegistry, Codec<V> valueCodec)
+    {
+        return new Codec<>() {
+            @Override
+            public <T> DataResult<Pair<Map<K, V>, T>> decode(DynamicOps<T> ops, T input)
+            {
+                // Decode data
+                DynamicOps<T> decoderOps = RegistryOps.create(ops, RegistryHelper.getRegistryAccess());
+                Optional<Pair<Map<String, V>, T>> keyMapResult = Codec.unboundedMap(Codec.STRING, valueCodec).decode(decoderOps, input).result();
+                Map<String, V> keyMap = keyMapResult.orElseThrow().getFirst();
+                // Get registry
+                Map<K, V> holderMap = new HashMap<>();
+                // Put keys
+                for (Map.Entry<String, V> entry : keyMap.entrySet())
+                {   ResourceLocation id = ResourceLocation.parse(entry.getKey());
+                    K key = keyRegistry.get(id);
+                    if (key != null)
+                    {   holderMap.put(key, entry.getValue());
+                    }
+                }
+                return DataResult.success(Pair.of(holderMap, keyMapResult.map(Pair::getSecond).orElseThrow()));
+            }
+
+            @Override
+            public <T> DataResult<T> encode(Map<K, V> input, DynamicOps<T> ops, T prefix)
+            {
+                DynamicOps<T> encoderOps = RegistryOps.create(ops, RegistryHelper.getRegistryAccess());
+                Map<String, V> keyMap = new HashMap<>();
+                // Put keys
+                for (Map.Entry<K, V> entry : input.entrySet())
+                {   keyMap.put(keyRegistry.getKey(entry.getKey()).toString(), entry.getValue());
+                }
+                return Codec.unboundedMap(Codec.STRING, valueCodec).encode(keyMap, encoderOps, prefix);
+            }
+        };
+    }
+
+    public static <K, V> Codec<Multimap<K, V>> builtinMultimapCodec(Registry<K> keyRegistry, Codec<V> valueCodec)
+    {
+        return builtinMapCodec(keyRegistry, valueCodec.listOf()).xmap(
+                map -> {
+                    Multimap<K, V> multimap = HashMultimap.create();
+                    for (Map.Entry<K, List<V>> entry : map.entrySet())
+                    {   multimap.putAll(entry.getKey(), entry.getValue());
+                    }
+                    return multimap;
+                },
+                multimap -> {
+                    Map<K, List<V>> fastMultiMap = new HashMap<>();
+                    for (Map.Entry<K, Collection<V>> entry : multimap.asMap().entrySet())
+                    {   fastMultiMap.put(entry.getKey(), new ArrayList<>(entry.getValue()));
+                    }
+                    return fastMultiMap;
+                }
+        );
+    }
+
+    public static <K, V> Codec<Map<Holder<K>, V>> registryMapCodec(ResourceKey<Registry<K>> keyRegistry, Codec<V> valueCodec)
+    {
+        return new Codec<>() {
+            @Override
+            public <T> DataResult<Pair<Map<Holder<K>, V>, T>> decode(DynamicOps<T> ops, T input)
+            {
+                // Get registry
+                RegistryAccess registryAccess = RegistryHelper.getRegistryAccess();
+                Registry<K> reg = registryAccess.registryOrThrow(keyRegistry);
+                // Decode data
+                DynamicOps<T> decoderOps = registryAccess.createSerializationContext(ops);
+                Optional<Pair<Map<String, V>, T>> keyMapResult = Codec.unboundedMap(Codec.STRING, valueCodec).decode(decoderOps, input).result();
+                Map<String, V> keyMap = keyMapResult.orElseThrow().getFirst();
+                // Put keys
+                Map<Holder<K>, V> holderMap = new HashMap<>();
+                for (Map.Entry<String, V> entry : keyMap.entrySet())
+                {   ResourceKey<K> key = ResourceKey.create(keyRegistry, ResourceLocation.parse(entry.getKey()));
+                    reg.getHolder(key).ifPresent(k -> holderMap.put(k, entry.getValue()));
+                }
+                return DataResult.success(Pair.of(holderMap, keyMapResult.map(Pair::getSecond).orElseThrow()));
+            }
+
+            @Override
+            public <T> DataResult<T> encode(Map<Holder<K>, V> input, DynamicOps<T> ops, T prefix)
+            {
+                RegistryOps<T> encoderOps = RegistryHelper.getRegistryAccess().createSerializationContext(ops);
+                Map<String, V> keyMap = new HashMap<>();
+                // Put keys
+                for (Map.Entry<Holder<K>, V> entry : input.entrySet())
+                {   entry.getKey().unwrapKey().ifPresent(k -> keyMap.put(k.location().toString(), entry.getValue()));
+                }
+                return Codec.unboundedMap(Codec.STRING, valueCodec).encode(keyMap, encoderOps, prefix);
+            }
+        };
+    }
+
+    public static <K, V> Codec<Multimap<Holder<K>, V>> registryMultimapCodec(ResourceKey<Registry<K>> keyRegistry, Codec<V> valueCodec)
+    {
+        return registryMapCodec(keyRegistry, valueCodec.listOf()).xmap(
+                map -> {
+                    Multimap<Holder<K>, V> multimap = HashMultimap.create();
+                    for (Map.Entry<Holder<K>, List<V>> entry : map.entrySet())
+                    {   multimap.putAll(entry.getKey(), entry.getValue());
+                    }
+                    return multimap;
+                },
+                multimap -> {
+                    Map<Holder<K>, List<V>> fastMultiMap = new HashMap<>();
+                    for (Map.Entry<Holder<K>, Collection<V>> entry : multimap.asMap().entrySet())
+                    {   fastMultiMap.put(entry.getKey(), new ArrayList<>(entry.getValue()));
+                    }
+                    return fastMultiMap;
+                }
+        );
     }
 }

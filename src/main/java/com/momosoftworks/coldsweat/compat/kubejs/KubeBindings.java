@@ -23,7 +23,7 @@ import javax.annotation.Nullable;
 public class KubeBindings
 {
     public static DynamicHolder<?> getConfigSetting(String id)
-    {   return ConfigSettings.getSetting(id);
+    {   return ConfigSettings.getSetting(ResourceLocation.parse(id));
     }
 
     public static RegistryAccess getRegistryAccess()
