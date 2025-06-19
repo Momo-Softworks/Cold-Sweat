@@ -254,21 +254,35 @@ public class SoulStalkBlock extends Block implements IPlantable
     @Override
     public BlockState updateShape(BlockState state, Direction direction, BlockState otherState, IWorld level, BlockPos pos, BlockPos otherPos)
     {
+        if (level.isClientSide()) return state;
         if (!this.canSurvive(state, level, pos))
         {   return Blocks.AIR.defaultBlockState();
         }
 
         if (direction == Direction.UP)
         {
-            if (otherState.getBlock() != this)
-            {   return Blocks.AIR.defaultBlockState();
-            }
-            else
+            boolean isUnderSelf = otherState.getBlock() == this;
+            Section section = state.getValue(SECTION);
+
+            switch (section)
             {
-                switch (state.getValue(SECTION))
+                case TOP :
                 {
-                    case TOP : return state.setValue(SECTION, getRandomMidsection());
-                    case BUD : return state.setValue(SECTION, Section.BASE);
+                    return isUnderSelf
+                           ? state.setValue(SECTION, getRandomMidsection())
+                           : state;
+                }
+                case BUD :
+                {
+                    return isUnderSelf
+                           ? state.setValue(SECTION, Section.BASE)
+                           : state;
+                }
+                default :
+                {
+                    if (!isUnderSelf)
+                    {   return Blocks.AIR.defaultBlockState();
+                    }
                 }
             }
         }
