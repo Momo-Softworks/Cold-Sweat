@@ -63,14 +63,15 @@ public class BiomeTempModifier extends TempModifier
 
             if (!dimension.hasCeiling())
             {
-                if (CSMath.getIfNotNull(ConfigSettings.BIOME_TEMPS.get(level.registryAccess()).get(biome), BiomeTempData::isDisabled, false))
+                BiomeTempData biomeTempData = ConfigSettings.BIOME_TEMPS.get(level.registryAccess()).get(biome);
+                if (CSMath.getIfNotNull(biomeTempData, BiomeTempData::isDisabled, false))
                 {   continue;
                 }
                 // Biome temp with time of day
                 double biomeTemp = WorldHelper.getBiomeTemperature(level, biome);
 
                 // Primal Winter compat
-                if (CompatManager.isPrimalWinterLoaded() && ConfigSettings.BIOME_TEMPS.get(level.registryAccess()).get(biome) != null)
+                if (CompatManager.isPrimalWinterLoaded() && biomeTempData != null)
                 {
                     boolean isWinterBiome = Config.COMMON.isWinterBiome(biome.getRegistryName());
                     boolean isWinterDimension = Config.COMMON.isWinterDimension(level.dimension().getRegistryName());
