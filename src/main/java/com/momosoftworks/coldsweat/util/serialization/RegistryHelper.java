@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.util.serialization;
 
 import com.mojang.datafixers.util.Either;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
@@ -45,7 +46,10 @@ public class RegistryHelper
     {
         @SubscribeEvent
         public static void onClientLoading(ClientPlayerNetworkEvent.LoggedInEvent event)
-        {   REGISTRY_ACCESS = event.getPlayer().connection.registryAccess();
+        {
+            if (!Minecraft.getInstance().hasSingleplayerServer())
+            {   REGISTRY_ACCESS = event.getPlayer().connection.registryAccess();
+            }
         }
     }
 
