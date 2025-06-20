@@ -128,7 +128,6 @@ public class SoulStalkBlock extends Block implements IPlantable
     @Override
     public void randomTick(BlockState state, ServerWorld level, BlockPos pos, Random rand)
     {
-        this.ensureProperState(level, pos);
         if (level.isEmptyBlock(pos.above()))
         {
             // Get the height of the plant
