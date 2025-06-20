@@ -6,6 +6,7 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.data.codec.configuration.BiomeTempData;
+import com.momosoftworks.coldsweat.data.codec.configuration.DimensionTempData;
 import com.momosoftworks.coldsweat.data.codec.configuration.StructureTempData;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
@@ -38,6 +39,7 @@ public class BiomeTempModifier extends TempModifier
         int samples = this.getNBT().getInt("Samples");
         double worldTemp = 0;
         Level level = entity.level;
+        DimensionType dimension = level.dimensionType();
         BlockPos entPos = entity.blockPosition();
 
         // If a structure temperature override is defined, return
@@ -46,15 +48,23 @@ public class BiomeTempModifier extends TempModifier
         {   return temp -> structureTemp.getFirst();
         }
 
+        // If the dimension temperature is overridden, return
+        DimensionTempData dimTempOverride = ConfigSettings.DIMENSION_TEMPS.get(level.registryAccess()).get(level.dimensionTypeRegistration());
+        if (dimTempOverride != null)
+        {   return temp -> temp + dimTempOverride.getTemperature();
+        }
+
+        DimensionTempData dimTempOffset = ConfigSettings.DIMENSION_OFFSETS.get(level.registryAccess()).get(level.dimensionTypeRegistration());
+        double dimOffset = dimTempOffset != null ? dimTempOffset.getTemperature() : 0;
+
         int biomeCount = 0;
-        for (BlockPos blockPos : level.dimensionType().hasCeiling() ? WorldHelper.getPositionCube(entPos, (int) Math.sqrt(samples), 10) : WorldHelper.getPositionGrid(entPos, samples, 10))
+        for (BlockPos blockPos : dimension.hasCeiling() ? WorldHelper.getPositionCube(entPos, (int) Math.sqrt(samples), 10) : WorldHelper.getPositionGrid(entPos, samples, 10))
         {
             // Get the holder for the biome
             Holder<Biome> holder = level.getBiomeManager().getBiome(blockPos);
             if (holder.is(Tags.Biomes.IS_UNDERGROUND)) continue;
             if (holder.unwrapKey().isEmpty()) continue;
 
-            DimensionType dimension = level.dimensionType();
             if (!dimension.hasCeiling())
             {
                 if (CSMath.getIfNotNull(ConfigSettings.BIOME_TEMPS.get(level.registryAccess()).get(holder), BiomeTempData::isDisabled, false))
@@ -85,7 +95,7 @@ public class BiomeTempModifier extends TempModifier
         worldTemp /= Math.max(1, biomeCount);
 
         // Slightly decrease temperature if overcast
-        if (!level.dimensionType().hasCeiling() && level.isRaining())
+        if (!dimension.hasCeiling() && level.isRaining())
         {
             long time = level.getDayTime();
             double overcastTemp = ConfigSettings.OVERCAST_TEMP_OFFSET.get() * level.getRainLevel(1);
@@ -96,7 +106,7 @@ public class BiomeTempModifier extends TempModifier
         worldTemp += structureTemp.getSecond();
 
         double finalWorldTemp = worldTemp;
-        return temp -> temp + finalWorldTemp;
+        return temp -> temp + finalWorldTemp + dimOffset;
     }
 
     public static Pair<Double, Double> getStructureTemp(Level level, BlockPos pos)
