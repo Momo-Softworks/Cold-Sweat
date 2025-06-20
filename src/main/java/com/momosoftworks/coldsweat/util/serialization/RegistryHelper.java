@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Either;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import net.minecraft.client.Minecraft;
 import net.minecraft.tags.ITag;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
@@ -45,7 +46,10 @@ public class RegistryHelper
     {
         @SubscribeEvent(priority = EventPriority.HIGHEST)
         public static void onClientLoading(ClientPlayerNetworkEvent.LoggedInEvent event)
-        {   REGISTRY_ACCESS = event.getPlayer().connection.registryAccess();
+        {
+            if (!Minecraft.getInstance().hasSingleplayerServer())
+            {   REGISTRY_ACCESS = event.getPlayer().connection.registryAccess();
+            }
         }
     }
 
