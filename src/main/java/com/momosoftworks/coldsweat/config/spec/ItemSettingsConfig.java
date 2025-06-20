@@ -16,9 +16,6 @@ import java.util.List;
 
 public class ItemSettingsConfig
 {
-    public static final ForgeConfigSpec.ConfigValue<Boolean> FIRE_RESISTANCE_BLOCKS_OVERHEATING;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> ICE_RESISTANCE_BLOCKS_FREEZING;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> REQUIRE_THERMOMETER;
     private static final ForgeConfigSpec SPEC;
     private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
@@ -43,6 +40,10 @@ public class ItemSettingsConfig
     public static final ForgeConfigSpec.DoubleValue WATERSKIN_HOTBAR_STRENGTH;
     public static final ForgeConfigSpec.DoubleValue WATERSKIN_NEUTRALIZE_SPEED;
     public static final ForgeConfigSpec.DoubleValue SOULSPRING_LAMP_STRENGTH;
+
+    public static final ForgeConfigSpec.ConfigValue<Boolean> FIRE_RESISTANCE_BLOCKS_OVERHEATING;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> ICE_RESISTANCE_BLOCKS_FREEZING;
+    public static final ForgeConfigSpec.ConfigValue<Boolean> REQUIRE_THERMOMETER;
 
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> DRYING_ITEMS;
 
