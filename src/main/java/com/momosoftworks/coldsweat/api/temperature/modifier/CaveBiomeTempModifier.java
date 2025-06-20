@@ -44,7 +44,8 @@ public class CaveBiomeTempModifier extends TempModifier
             Holder<Biome> biome = level.getBiomeManager().getBiome(pos);
             if (biome.is(Tags.Biomes.IS_UNDERGROUND))
             {
-                if (CSMath.getIfNotNull(ConfigSettings.BIOME_TEMPS.get(level.registryAccess()).get(biome), BiomeTempData::isDisabled, false))
+                BiomeTempData biomeTempData = ConfigSettings.BIOME_TEMPS.get(level.registryAccess()).get(biome);
+                if (CSMath.getIfNotNull(biomeTempData, BiomeTempData::isDisabled, false))
                 {   continue;
                 }
                 Pair<Double, Double> biomeTempRange = WorldHelper.getBiomeTemperatureRange(level, biome);
