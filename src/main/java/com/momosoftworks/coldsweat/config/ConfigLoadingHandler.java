@@ -137,14 +137,14 @@ public class ConfigLoadingHandler
         {
             try
             {
-                ResourceLocation registryPath = new ResourceLocation(ColdSweat.MOD_ID, "config/" + registry.key().location().getPath());
-                for (ResourceLocation resourceLocation : ModRegistries.getResourceManager().listResources(registryPath.getPath(), file -> file.endsWith(".json")))
+                String registryPath = "config/" + registry.key().location().getPath();
+                for (ResourceLocation resourceLocation : ModRegistries.getResourceManager().listResources(registryPath, file -> file.endsWith(".json")))
                 {
                     IResource resource = ModRegistries.getResourceManager().getResource(resourceLocation);
                     try (InputStream inputStream = resource.getInputStream())
                     {
                         JsonObject json = JSONUtils.parse(new InputStreamReader(inputStream));
-                        String relativePath = resourceLocation.getPath().replace(registryPath.getPath(), "");
+                        String relativePath = resourceLocation.getPath().replace(registryPath, "");
                         relativePath = relativePath.substring(1, relativePath.length() - 5);
                         ResourceLocation registryId = new ResourceLocation(resourceLocation.getNamespace(), relativePath);
                         // Create a reader from the input stream
