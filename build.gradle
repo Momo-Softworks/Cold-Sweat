@@ -144,7 +144,7 @@ repositories {
 
 dependencies {
     implementation 'com.github.t9t.minecraft-rcon-client:minecraft-rcon-client:1.0.0'
-    minecraft 'net.minecraftforge:forge:1.20.1-47.4.0'
+    minecraft 'net.minecraftforge:forge:1.20.1-47.4.2'
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
     // Compat mods
