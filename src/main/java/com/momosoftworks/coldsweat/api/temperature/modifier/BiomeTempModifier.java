@@ -6,6 +6,7 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.data.codec.configuration.BiomeTempData;
+import com.momosoftworks.coldsweat.data.codec.configuration.DimensionTempData;
 import com.momosoftworks.coldsweat.data.codec.configuration.StructureTempData;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
@@ -36,6 +37,7 @@ public class BiomeTempModifier extends TempModifier
         int samples = this.getNBT().getInt("Samples");
         double worldTemp = 0;
         World level = entity.level;
+        DimensionType dimension = level.dimensionType();
         BlockPos entPos = entity.blockPosition();
 
         // If a structure temperature override is defined, return
@@ -44,13 +46,21 @@ public class BiomeTempModifier extends TempModifier
         {   return temp -> structureTemp.getFirst();
         }
 
+        // If the dimension temperature is overridden, return
+        DimensionTempData dimTempOverride = ConfigSettings.DIMENSION_TEMPS.get(level.registryAccess()).get(level.dimensionType());
+        if (dimTempOverride != null)
+        {   return temp -> temp + dimTempOverride.getTemperature();
+        }
+
+        DimensionTempData dimTempOffset = ConfigSettings.DIMENSION_OFFSETS.get(level.registryAccess()).get(level.dimensionType());
+        double dimOffset = dimTempOffset != null ? dimTempOffset.getTemperature() : 0;
+
         int biomeCount = 0;
         for (BlockPos blockPos : WorldHelper.getPositionGrid(entPos, samples, 10))
         {
             // Get the holder for the biome
             Biome biome = level.getBiomeManager().getBiome(blockPos);
 
-            DimensionType dimension = level.dimensionType();
             if (!dimension.hasCeiling())
             {
                 if (CSMath.getIfNotNull(ConfigSettings.BIOME_TEMPS.get(level.registryAccess()).get(biome), BiomeTempData::isDisabled, false))
@@ -80,7 +90,7 @@ public class BiomeTempModifier extends TempModifier
         worldTemp /= Math.max(1, biomeCount);
 
         // Slightly decrease temperature if overcast
-        if (!level.dimensionType().hasCeiling() && level.isRaining())
+        if (!dimension.hasCeiling() && level.isRaining())
         {
             long time = level.getDayTime();
             double overcastTemp = ConfigSettings.OVERCAST_TEMP_OFFSET.get();
@@ -91,7 +101,7 @@ public class BiomeTempModifier extends TempModifier
         worldTemp += structureTemp.getSecond();
 
         double finalWorldTemp = worldTemp;
-        return temp -> temp + finalWorldTemp;
+        return temp -> temp + finalWorldTemp + dimOffset;
     }
 
     public static Pair<Double, Double> getStructureTemp(World level, BlockPos pos)

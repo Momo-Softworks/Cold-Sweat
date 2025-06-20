@@ -35,7 +35,7 @@ public class ElevationTempModifier extends TempModifier
         // If a dimension temperature override is defined, return
         DimensionTempData dimTempOverride = ConfigSettings.DIMENSION_TEMPS.get(entity.level.registryAccess()).get(level.dimensionType());
         if (dimTempOverride != null)
-        {   return temp -> temp + dimTempOverride.getTemperature();
+        {   return temp -> temp;
         }
         // Don't calculate elevation for roofed dimensions
         if (level.dimensionType().hasCeiling()) return temp -> temp;
@@ -78,9 +78,6 @@ public class ElevationTempModifier extends TempModifier
         }
         double midTemp = Temperature.getNeutralWorldTemp(entity);
 
-        DimensionTempData dimTempOffsetConf = ConfigSettings.DIMENSION_OFFSETS.get(entity.level.registryAccess()).get(level.dimensionType());
-        double dimOffset = dimTempOffsetConf != null ? dimTempOffsetConf.getTemperature() : 0;
-
         return temp ->
         {
             List<Pair<Double, Double>> depthTemps = new ArrayList<>();
@@ -108,10 +105,10 @@ public class ElevationTempModifier extends TempModifier
                 }
             }
             if (depthTemps.isEmpty())
-            {   return temp + dimOffset;
+            {   return temp;
             }
             // Calculate the weighted average of the depth temperatures
-            return CSMath.weightedAverage(depthTemps) + dimOffset;
+            return CSMath.weightedAverage(depthTemps);
         };
     }
 
