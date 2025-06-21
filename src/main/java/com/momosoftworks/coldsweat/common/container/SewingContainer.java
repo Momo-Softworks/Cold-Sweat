@@ -225,19 +225,22 @@ public class SewingContainer extends ItemCombinerMenu
         cap = cap.addInsulationItem(insulator);
 
         // Transfer enchantments
-        if (armorItem.has(DataComponents.ENCHANTMENTS) && insulator.has(DataComponents.ENCHANTMENTS))
+        if (armorItem.isEnchantable())
         {
-            ItemEnchantments.Mutable insulatorEnch = new ItemEnchantments.Mutable(ItemStackHelper.getOrCreateComponent(insulator, DataComponents.ENCHANTMENTS, () -> ItemEnchantments.EMPTY));
-            insulatorEnch.removeIf(ench ->
+            if (armorItem.has(DataComponents.ENCHANTMENTS) && insulator.has(DataComponents.ENCHANTMENTS))
             {
-                if (ench == null) return false;
+                ItemEnchantments.Mutable insulatorEnch = new ItemEnchantments.Mutable(ItemStackHelper.getOrCreateComponent(insulator, DataComponents.ENCHANTMENTS, () -> ItemEnchantments.EMPTY));
+                insulatorEnch.removeIf(ench ->
+                {
+                    if (ench == null) return false;
 
-                if (armorItem.supportsEnchantment(ench) && ItemStackHelper.canApplyEnchantment(armorItem, ench))
-                {   armorItem.enchant(ench, insulatorEnch.getLevel(ench));
-                    return true;
-                }
-                return false;
-            });
+                    if (armorItem.supportsEnchantment(ench) && ItemStackHelper.canApplyEnchantment(armorItem, ench))
+                    {   armorItem.enchant(ench, insulatorEnch.getLevel(ench));
+                        return true;
+                    }
+                    return false;
+                });
+            }
         }
 
         armorItem.set(ModItemComponents.ARMOR_INSULATION, cap);
