@@ -249,20 +249,23 @@ public class SewingContainer extends ItemCombinerMenu
         insulCap.addInsulationItem(insulator);
 
         // Transfer enchantments
-        Map<Enchantment, Integer> armorEnch = EnchantmentHelper.getEnchantments(armorItem);
-        insulator.getEnchantmentTags().removeIf(nbt ->
+        if (armorItem.isEnchantable())
         {
-            CompoundTag enchantTag = ((CompoundTag) nbt);
-            Enchantment ench = ForgeRegistries.ENCHANTMENTS.getValue(new ResourceLocation(enchantTag.getString("id")));
-            if (ench == null) return false;
-
-            if (ench.canEnchant(armorItem) && armorEnch.keySet().stream().allMatch(ench2 -> ench2.isCompatibleWith(ench)))
+            Map<Enchantment, Integer> armorEnch = EnchantmentHelper.getEnchantments(armorItem);
+            insulator.getEnchantmentTags().removeIf(nbt ->
             {
-                armorItem.enchant(ench, enchantTag.getInt("lvl"));
-                return true;
-            }
-            return false;
-        });
+                CompoundTag enchantTag = ((CompoundTag) nbt);
+                Enchantment ench = ForgeRegistries.ENCHANTMENTS.getValue(new ResourceLocation(enchantTag.getString("id")));
+                if (ench == null) return false;
+
+                if (ench.canEnchant(armorItem) && armorEnch.keySet().stream().allMatch(ench2 -> ench2.isCompatibleWith(ench)))
+                {
+                    armorItem.enchant(ench, enchantTag.getInt("lvl"));
+                    return true;
+                }
+                return false;
+            });
+        }
         return true;
     }
 
