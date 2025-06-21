@@ -3102,14 +3102,20 @@ Technical Changes:
       ! This only applies to freshly-generated configs, so world.toml might need to be deleted
 * Insulating armor items that don't grant any insulation will now accept insulation
       - i.e. the Create netherite diving set, which only gives attribute modifiers
+- Soul stalk now generates more commonly in the soul sand valley biome
 - The attribute modifiers for the Create netherite diving set have been removed from the helmet, leggings, and boots
       - The backtank now gives the full effect (+100% heat dampening, +50% cold dampening)
+- The primary (right-click) and secondary (sneak-right-click) actions for the waterskin are now configurable:
+      - Both can now be set to either drink or pour, so they can be swapped around or disabled
+      - These settings are in client.toml and are player-specific
 
 Fixes:
 - (1.21) Fixed the effect ID for frigidness still being "cold_sweat:chill"
 * Fixed crash when calculating player/entity temperature attributes in some cases
 - Fixed potential crash when managing entity temperature caches internally
 - Fixed log spam when loading new entities into the world
+- Fixed soul stalks generating with an incorrect bottom block
+- Fixed all soul block segments turning into buds when upgrading an older world
 - Fixed water drip effects appearing when emerging from water in spectator mode
 - Fixed HUD elements rendering above other UI elements that they shouldn't
 - Fixed "matches" field in registry removals not accepting a list of values
@@ -3136,3 +3142,23 @@ Technical Changes:
       - Accepts a list of strings ("toml", "json", or "kubejs")
 - Added dedicated addRegistry() and addRegistries() methods to CreateRegistriesEvent
 - Create backtank pressure now drains if the player has any insulator equipped that is part of the #drains_backtank tag and passes its requirements
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.4-b03c
+* Soul sprouts can now be planted with dispensers
+* Soul stalks that became glitched after updating to b03a will now correct themselves upon receiving a block update
+- Slightly decreased the effectiveness of growing items on soul stalk (now takes 2-3 items instead of always 2)
+* Removed sticks from the loot table for soul stalk
+* Mod compat for specific mods can now be disabled by using the "disabled_mods" file in the CS config folder
+      - These mods will still work, but special integration features will not be applied
+- The "Require Thermometer" and "Fire/Ice Resistance Immunity" settings have been moved to item.toml
+- Improved Primal Winter support:
+      - Now respects disabled biomes/dimensions in Primal Winter's config
+      - Only decreases the temperature for configured biomes, since Primal Winter already changes default biome temperatures
+
+Fixes:
+- (1.21) Fixed crash during server startup
+- Fixed crash due to Cold Sweat registries not being synced to the client
+- Fixed un-enchantable armor items inheriting enchantments from insulators
+
