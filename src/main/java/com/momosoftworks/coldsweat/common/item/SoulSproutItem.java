@@ -1,8 +1,12 @@
 package com.momosoftworks.coldsweat.common.item;
 
+import com.momosoftworks.coldsweat.common.block.SoulStalkBlock;
 import com.momosoftworks.coldsweat.core.init.ModBlocks;
+import com.momosoftworks.coldsweat.core.init.ModItems;
+import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
 import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
@@ -16,11 +20,14 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class SoulSproutItem extends ItemNameBlockItem
 {
     public SoulSproutItem(Block block, Properties properties)
     {   super(block, properties);
+        DispenserBlock.registerBehavior(this, DISPENSE_BEHAVIOR);
     }
 
     @Override
@@ -45,4 +52,31 @@ public class SoulSproutItem extends ItemNameBlockItem
     {   entity.clearFire();
         return super.finishUsingItem(stack, level, entity);
     }
+
+    public static final DispenseItemBehavior DISPENSE_BEHAVIOR = new DefaultDispenseItemBehavior()
+    {
+        @Override
+        protected ItemStack execute(BlockSource source, ItemStack stack)
+        {
+            if (stack.is(ModItems.SOUL_SPROUT))
+            {
+                Level level = source.level();
+                Direction direction = source.state().getValue(DispenserBlock.FACING);
+                BlockPos frontPos = BlockPos.containing(DispenserBlock.getDispensePosition(source));
+                BlockState frontState = level.getBlockState(frontPos);
+                BlockState groundState = level.getBlockState(frontPos.below());
+
+                if (frontState.canBeReplaced() && frontState.getFluidState().isEmpty()
+                && groundState.is(ModBlockTags.SOUL_STALK_PLACEABLE_ON))
+                {
+                    level.setBlock(frontPos, ModBlocks.SOUL_STALK.value().defaultBlockState().setValue(SoulStalkBlock.SECTION, SoulStalkBlock.Section.BUD), 3);
+                    this.playAnimation(source, direction);
+                    this.playSound(source);
+                    stack.shrink(1);
+                    return stack;
+                }
+            }
+            return super.execute(source, stack);
+        }
+    };
 }
