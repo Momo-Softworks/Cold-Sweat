@@ -15,7 +15,6 @@ import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.container.AbstractRepairContainer;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.inventory.container.Slot;
@@ -247,20 +246,23 @@ public class SewingContainer extends AbstractRepairContainer
         insulCap.addInsulationItem(insulator);
 
         // Transfer enchantments
-        Map<Enchantment, Integer> armorEnch = EnchantmentHelper.getEnchantments(armorItem);
-        insulator.getEnchantmentTags().removeIf(nbt ->
+        if (armorItem.isEnchantable())
         {
-            CompoundNBT enchantTag = ((CompoundNBT) nbt);
-            Enchantment ench = ForgeRegistries.ENCHANTMENTS.getValue(new ResourceLocation(enchantTag.getString("id")));
-            if (ench == null) return false;
-
-            if (ench.canEnchant(armorItem) && armorEnch.keySet().stream().allMatch(ench2 -> ench2.isCompatibleWith(ench)))
+            Map<Enchantment, Integer> armorEnch = EnchantmentHelper.getEnchantments(armorItem);
+            insulator.getEnchantmentTags().removeIf(nbt ->
             {
-                armorItem.enchant(ench, enchantTag.getInt("lvl"));
-                return true;
-            }
-            return false;
-        });
+                CompoundNBT enchantTag = ((CompoundNBT) nbt);
+                Enchantment ench = ForgeRegistries.ENCHANTMENTS.getValue(new ResourceLocation(enchantTag.getString("id")));
+                if (ench == null) return false;
+
+                if (ench.canEnchant(armorItem) && armorEnch.keySet().stream().allMatch(ench2 -> ench2.isCompatibleWith(ench)))
+                {
+                    armorItem.enchant(ench, enchantTag.getInt("lvl"));
+                    return true;
+                }
+                return false;
+            });
+        }
         return true;
     }
 
