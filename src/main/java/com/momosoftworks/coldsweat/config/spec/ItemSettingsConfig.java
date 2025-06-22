@@ -190,36 +190,7 @@ public class ItemSettingsConfig
                                 Arrays.asList("cold_sweat:hoglin_hide",       0,  2),
                                 Arrays.asList("cold_sweat:goat_fur",          2,  0),
                                 Arrays.asList("#minecraft:wool",              1.5, 0),
-                                Arrays.asList("minecraft:rabbit_hide",        0,  1.5),
-
-                                Arrays.asList("minecraft:leather_helmet",     4, 4, "static", "", true),
-                                Arrays.asList("minecraft:leather_chestplate", 6, 6, "static", "", true),
-                                Arrays.asList("minecraft:leather_leggings",   5, 5, "static", "", true),
-                                Arrays.asList("minecraft:leather_boots",      4, 4, "static", "", true),
-
-                                Arrays.asList("cold_sweat:hoglin_headpiece",  0,  8, "static", "", true),
-                                Arrays.asList("cold_sweat:hoglin_tunic",      0, 12, "static", "", true),
-                                Arrays.asList("cold_sweat:hoglin_trousers",   0, 10, "static", "", true),
-                                Arrays.asList("cold_sweat:hoglin_hooves",     0,  8, "static", "", true),
-
-                                Arrays.asList("cold_sweat:goat_fur_cap",      8,  0, "static", "", true),
-                                Arrays.asList("cold_sweat:goat_fur_parka",    12, 0, "static", "", true),
-                                Arrays.asList("cold_sweat:goat_fur_pants",    10, 0, "static", "", true),
-                                Arrays.asList("cold_sweat:goat_fur_boots",    8,  0, "static", "", true),
-
-                                Arrays.asList("cold_sweat:chameleon_scale_helmet", 8, 0.0085, "adaptive", "", true),
-                                Arrays.asList("cold_sweat:chameleon_scale_chestplate", 12, 0.0085, "adaptive", "", true),
-                                Arrays.asList("cold_sweat:chameleon_scale_leggings", 10, 0.0085, "adaptive", "", true),
-                                Arrays.asList("cold_sweat:chameleon_scale_boots", 8, 0.0085, "adaptive", "", true))
-                            .addIf(CompatManager.isToughAsNailsLoaded(),
-                                () -> Arrays.asList("toughasnails:leaf_helmet",     0, Arrays.asList(1, 1, 1, 1), "static", "", true),
-                                () -> Arrays.asList("toughasnails:leaf_chestplate", 0, Arrays.asList(1, 1, 1, 1, 1, 1), "static", "", true),
-                                () -> Arrays.asList("toughasnails:leaf_leggings",   0, Arrays.asList(1, 1, 1, 1, 1), "static", "", true),
-                                () -> Arrays.asList("toughasnails:leaf_boots",      0, Arrays.asList(1, 1, 1, 1),  "static", "", true),
-                                () -> Arrays.asList("toughasnails:wool_helmet",     Arrays.asList(1.5, 1.5, 1.5, 1.5), 0, "static", "", true),
-                                () -> Arrays.asList("toughasnails:wool_chestplate", Arrays.asList(1.5, 1.5, 1.5, 1.5, 1.5, 1.5), 0, "static", "", true),
-                                () -> Arrays.asList("toughasnails:wool_leggings",   Arrays.asList(1.5, 1.5, 1.5, 1.5, 1.5), 0, "static", "", true),
-                                () -> Arrays.asList("toughasnails:wool_boots",      Arrays.asList(1.5, 1.5, 1.5, 1.5), 0,  "static", "", true))
+                                Arrays.asList("minecraft:rabbit_hide",        0,  1.5))
                             .build(),
                         it ->
                         {
@@ -241,34 +212,34 @@ public class ItemSettingsConfig
                 .comment("Defines the items that provide insulation when worn",
                         "See Insulation Ingredients for formatting. This setting does not have a \"fill_slots\" option")
                 .defineListAllowEmpty(Arrays.asList("Insulating Armor"), () -> ListBuilder.<List<?>>begin(
-                                Arrays.asList("minecraft:leather_helmet",      4,  4),
-                                Arrays.asList("minecraft:leather_chestplate",  6,  6),
-                                Arrays.asList("minecraft:leather_leggings",    5,  5),
-                                Arrays.asList("minecraft:leather_boots",       4,  4),
+                                Arrays.asList("minecraft:leather_helmet",      5,  5),
+                                Arrays.asList("minecraft:leather_chestplate",  7,  7),
+                                Arrays.asList("minecraft:leather_leggings",    6,  6),
+                                Arrays.asList("minecraft:leather_boots",       5,  5),
 
-                                Arrays.asList("cold_sweat:hoglin_headpiece",   0,   8),
-                                Arrays.asList("cold_sweat:hoglin_tunic",       0,  12),
-                                Arrays.asList("cold_sweat:hoglin_trousers",    0,  10),
-                                Arrays.asList("cold_sweat:hoglin_hooves",      0,   8),
+                                Arrays.asList("cold_sweat:hoglin_headpiece",   0,  10),
+                                Arrays.asList("cold_sweat:hoglin_tunic",       0,  14),
+                                Arrays.asList("cold_sweat:hoglin_trousers",    0,  12),
+                                Arrays.asList("cold_sweat:hoglin_hooves",      0,  10),
 
-                                Arrays.asList("cold_sweat:goat_fur_cap",       8,  0),
-                                Arrays.asList("cold_sweat:goat_fur_parka",     12, 0),
-                                Arrays.asList("cold_sweat:goat_fur_pants",     10, 0),
-                                Arrays.asList("cold_sweat:goat_fur_boots",     8,  0),
+                                Arrays.asList("cold_sweat:goat_fur_cap",       10, 0),
+                                Arrays.asList("cold_sweat:goat_fur_parka",     14, 0),
+                                Arrays.asList("cold_sweat:goat_fur_pants",     12, 0),
+                                Arrays.asList("cold_sweat:goat_fur_boots",     10, 0),
 
-                                Arrays.asList("cold_sweat:chameleon_scale_helmet", 8, 0.0085, "adaptive"),
-                                Arrays.asList("cold_sweat:chameleon_scale_chestplate", 12, 0.0085, "adaptive"),
-                                Arrays.asList("cold_sweat:chameleon_scale_leggings", 10, 0.0085, "adaptive"),
-                                Arrays.asList("cold_sweat:chameleon_scale_boots", 8, 0.0085, "adaptive"))
+                                Arrays.asList("cold_sweat:chameleon_scale_helmet",     10, 0.0085, "adaptive"),
+                                Arrays.asList("cold_sweat:chameleon_scale_chestplate", 14, 0.0085, "adaptive"),
+                                Arrays.asList("cold_sweat:chameleon_scale_leggings",   12, 0.0085, "adaptive"),
+                                Arrays.asList("cold_sweat:chameleon_scale_boots",      10, 0.0085, "adaptive"))
                             .addIf(CompatManager.isToughAsNailsLoaded(),
-                                () -> Arrays.asList("toughasnails:leaf_helmet",     0, Arrays.asList(1, 1, 1, 1)),
-                                () -> Arrays.asList("toughasnails:leaf_chestplate", 0, Arrays.asList(1, 1, 1, 1, 1, 1)),
-                                () -> Arrays.asList("toughasnails:leaf_leggings",   0, Arrays.asList(1, 1, 1, 1, 1)),
-                                () -> Arrays.asList("toughasnails:leaf_boots",      0, Arrays.asList(1, 1, 1, 1)),
-                                () -> Arrays.asList("toughasnails:wool_helmet",     Arrays.asList(1.5, 1.5, 1.5, 1.5), 0),
-                                () -> Arrays.asList("toughasnails:wool_chestplate", Arrays.asList(1.5, 1.5, 1.5, 1.5, 1.5, 1.5), 0),
-                                () -> Arrays.asList("toughasnails:wool_leggings",   Arrays.asList(1.5, 1.5, 1.5, 1.5, 1.5), 0),
-                                () -> Arrays.asList("toughasnails:wool_boots",      Arrays.asList(1.5, 1.5, 1.5, 1.5), 0))
+                                () -> Arrays.asList("toughasnails:leaf_helmet",     0, Arrays.asList(1, 1, 1, 1, 1)),
+                                () -> Arrays.asList("toughasnails:leaf_chestplate", 0, Arrays.asList(1, 1, 1, 1, 1, 1, 1)),
+                                () -> Arrays.asList("toughasnails:leaf_leggings",   0, Arrays.asList(1, 1, 1, 1, 1, 1)),
+                                () -> Arrays.asList("toughasnails:leaf_boots",      0, Arrays.asList(1, 1, 1, 1, 1)),
+                                () -> Arrays.asList("toughasnails:wool_helmet",     Arrays.asList(1.5, 1.5, 1.5, 1.5, 1.5), 0),
+                                () -> Arrays.asList("toughasnails:wool_chestplate", Arrays.asList(1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5), 0),
+                                () -> Arrays.asList("toughasnails:wool_leggings",   Arrays.asList(1.5, 1.5, 1.5, 1.5, 1.5, 1.5), 0),
+                                () -> Arrays.asList("toughasnails:wool_boots",      Arrays.asList(1.5, 1.5, 1.5, 1.5, 1.5), 0))
                             .build(),
                         it ->
                         {
