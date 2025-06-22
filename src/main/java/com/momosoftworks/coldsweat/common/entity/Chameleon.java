@@ -13,6 +13,7 @@ import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.ChameleonEatMessage;
 import com.momosoftworks.coldsweat.core.network.message.EntityMountMessage;
 import com.momosoftworks.coldsweat.data.loot.ModLootTables;
+import com.momosoftworks.coldsweat.data.tag.ModEntityTags;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
@@ -114,7 +115,7 @@ public class Chameleon extends Animal
     {   this.goalSelector.addGoal(0, new FloatGoal(this));
         this.goalSelector.addGoal(1, new PanicGoal(this, 1.6));
         this.goalSelector.addGoal(2, new BreedGoal(this, 1.0D));
-        this.goalSelector.addGoal(3, new EatObjectsGoal(this, List.of(EntityType.SILVERFISH)));
+        this.goalSelector.addGoal(3, new EatObjectsGoal(this, ModEntityTags.CHAMELEON_EATS));
         this.goalSelector.addGoal(4, new TemptGoal(this, 1.25, Ingredient.fromValues(ChameleonEdibles.EDIBLES
                                                                                      .stream()
                                                                                      .map(edible -> new Ingredient.TagValue(edible.associatedItems()))
