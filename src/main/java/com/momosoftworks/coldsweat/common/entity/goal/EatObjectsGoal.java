@@ -5,7 +5,6 @@ import com.momosoftworks.coldsweat.common.entity.data.edible.ChameleonEdibles;
 import com.momosoftworks.coldsweat.common.entity.data.edible.Edible;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
-import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -17,6 +16,7 @@ import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.pathfinding.Path;
 import net.minecraft.pathfinding.PathNavigator;
+import net.minecraft.tags.ITag;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.vector.Vector3d;
 
@@ -26,13 +26,13 @@ import java.util.UUID;
 
 public class EatObjectsGoal extends Goal
 {
-    List<EntityType<?>> wantedEntities;
+    ITag<EntityType<?>> wantedEntities;
     ChameleonEntity entity;
     Entity target;
     boolean stoppedTasks;
     Vector3d lookPos = null;
 
-    public EatObjectsGoal(ChameleonEntity chameleon, List<EntityType<?>> wantedEntities)
+    public EatObjectsGoal(ChameleonEntity chameleon, ITag<EntityType<?>> wantedEntities)
     {   this.wantedEntities = wantedEntities;
         this.entity = chameleon;
     }
@@ -70,7 +70,7 @@ public class EatObjectsGoal extends Goal
                     }
                 }
             }
-            else if (this.wantedEntities.contains(ent.getType()))
+            else if (ent.getType().is(this.wantedEntities))
             {
                 this.target = ent;
                 this.lookPos = ent.position();
