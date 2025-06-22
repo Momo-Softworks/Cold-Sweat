@@ -7,6 +7,7 @@ import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -26,13 +27,13 @@ import java.util.UUID;
 
 public class EatObjectsGoal extends Goal
 {
-    List<EntityType<?>> wantedEntities;
+    TagKey<EntityType<?>> wantedEntities;
     Chameleon entity;
     Entity target;
     boolean stoppedTasks;
     Vec3 lookPos = null;
 
-    public EatObjectsGoal(Chameleon chameleon, List<EntityType<?>> wantedEntities)
+    public EatObjectsGoal(Chameleon chameleon, TagKey<EntityType<?>> wantedEntities)
     {
         this.wantedEntities = wantedEntities;
         this.entity = chameleon;
@@ -71,7 +72,7 @@ public class EatObjectsGoal extends Goal
                     }
                 }
             }
-            else if (this.wantedEntities.contains(ent.getType()))
+            else if (ent.getType().is(this.wantedEntities))
             {
                 this.target = ent;
                 this.lookPos = ent.position();

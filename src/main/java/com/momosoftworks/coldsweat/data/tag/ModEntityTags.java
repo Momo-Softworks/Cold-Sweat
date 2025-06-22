@@ -10,6 +10,7 @@ public class ModEntityTags
 {
     // Entities in this tag need more accurate temperature information
     public static final TagKey<EntityType<?>> TEMPERATURE_SENSITIVE = createTag("temperature_sensitive");
+    public static final TagKey<EntityType<?>> CHAMELEON_EATS = createTag("chameleon_eats");
 
     private static TagKey<EntityType<?>> createTag(String name)
     {   return TagKey.create(Registry.ENTITY_TYPE_REGISTRY, new ResourceLocation(ColdSweat.MOD_ID, name));
