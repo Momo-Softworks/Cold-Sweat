@@ -165,36 +165,7 @@ public class ItemSettingsConfig
                                 List.of("cold_sweat:hoglin_hide",       0,  2),
                                 List.of("cold_sweat:goat_fur",          2,  0),
                                 List.of("#minecraft:wool",              1.5, 0),
-                                List.of("minecraft:rabbit_hide",        0,  1.5),
-
-                                List.of("minecraft:leather_helmet",     4, 4, "static", "", true),
-                                List.of("minecraft:leather_chestplate", 6, 6, "static", "", true),
-                                List.of("minecraft:leather_leggings",   5, 5, "static", "", true),
-                                List.of("minecraft:leather_boots",      4, 4, "static", "", true),
-
-                                List.of("cold_sweat:hoglin_headpiece",  0,  8, "static", "", true),
-                                List.of("cold_sweat:hoglin_tunic",      0, 12, "static", "", true),
-                                List.of("cold_sweat:hoglin_trousers",   0, 10, "static", "", true),
-                                List.of("cold_sweat:hoglin_hooves",     0,  8, "static", "", true),
-
-                                List.of("cold_sweat:goat_fur_cap",      8,  0, "static", "", true),
-                                List.of("cold_sweat:goat_fur_parka",    12, 0, "static", "", true),
-                                List.of("cold_sweat:goat_fur_pants",    10, 0, "static", "", true),
-                                List.of("cold_sweat:goat_fur_boots",    8,  0, "static", "", true),
-
-                                List.of("cold_sweat:chameleon_scale_helmet", 8, 0.0085, "adaptive", "", true),
-                                List.of("cold_sweat:chameleon_scale_chestplate", 12, 0.0085, "adaptive", "", true),
-                                List.of("cold_sweat:chameleon_scale_leggings", 10, 0.0085, "adaptive", "", true),
-                                List.of("cold_sweat:chameleon_scale_boots", 8, 0.0085, "adaptive", "", true))
-                            .addIf(CompatManager.isToughAsNailsLoaded(),
-                                () -> List.of("toughasnails:leaf_helmet",     0, List.of(1, 1, 1, 1), "static", "", true),
-                                () -> List.of("toughasnails:leaf_chestplate", 0, List.of(1, 1, 1, 1, 1, 1), "static", "", true),
-                                () -> List.of("toughasnails:leaf_leggings",   0, List.of(1, 1, 1, 1, 1), "static", "", true),
-                                () -> List.of("toughasnails:leaf_boots",      0, List.of(1, 1, 1, 1),  "static", "", true),
-                                () -> List.of("toughasnails:wool_helmet",     List.of(1.5, 1.5, 1.5, 1.5), 0, "static", "", true),
-                                () -> List.of("toughasnails:wool_chestplate", List.of(1.5, 1.5, 1.5, 1.5, 1.5, 1.5), 0, "static", "", true),
-                                () -> List.of("toughasnails:wool_leggings",   List.of(1.5, 1.5, 1.5, 1.5, 1.5), 0, "static", "", true),
-                                () -> List.of("toughasnails:wool_boots",      List.of(1.5, 1.5, 1.5, 1.5), 0,  "static", "", true))
+                                List.of("minecraft:rabbit_hide",        0,  1.5))
                             .build(),
                         it -> it instanceof List<?> list && list.size() >= 3
                                 && list.get(0) instanceof String
@@ -208,34 +179,34 @@ public class ItemSettingsConfig
                 .comment("Defines the items that provide insulation when worn",
                         "See Insulation Ingredients for formatting. This setting does not have a \"fill_slots\" option")
                 .defineListAllowEmpty(List.of("Insulating Armor"), () -> ListBuilder.<List<?>>begin(
-                                List.of("minecraft:leather_helmet",      4,  4),
-                                List.of("minecraft:leather_chestplate",  6,  6),
-                                List.of("minecraft:leather_leggings",    5,  5),
-                                List.of("minecraft:leather_boots",       4,  4),
+                                List.of("minecraft:leather_helmet",      5,  5),
+                                List.of("minecraft:leather_chestplate",  7,  7),
+                                List.of("minecraft:leather_leggings",    6,  6),
+                                List.of("minecraft:leather_boots",       5,  5),
 
-                                List.of("cold_sweat:hoglin_headpiece",   0,   8),
-                                List.of("cold_sweat:hoglin_tunic",       0,  12),
-                                List.of("cold_sweat:hoglin_trousers",    0,  10),
-                                List.of("cold_sweat:hoglin_hooves",      0,   8),
+                                List.of("cold_sweat:hoglin_headpiece",   0,  10),
+                                List.of("cold_sweat:hoglin_tunic",       0,  14),
+                                List.of("cold_sweat:hoglin_trousers",    0,  12),
+                                List.of("cold_sweat:hoglin_hooves",      0,  10),
 
-                                List.of("cold_sweat:goat_fur_cap",       8,  0),
-                                List.of("cold_sweat:goat_fur_parka",     12, 0),
-                                List.of("cold_sweat:goat_fur_pants",     10, 0),
-                                List.of("cold_sweat:goat_fur_boots",     8,  0),
+                                List.of("cold_sweat:goat_fur_cap",       10, 0),
+                                List.of("cold_sweat:goat_fur_parka",     14, 0),
+                                List.of("cold_sweat:goat_fur_pants",     12, 0),
+                                List.of("cold_sweat:goat_fur_boots",     10, 0),
 
-                                List.of("cold_sweat:chameleon_scale_helmet", 8, 0.0085, "adaptive"),
-                                List.of("cold_sweat:chameleon_scale_chestplate", 12, 0.0085, "adaptive"),
-                                List.of("cold_sweat:chameleon_scale_leggings", 10, 0.0085, "adaptive"),
-                                List.of("cold_sweat:chameleon_scale_boots", 8, 0.0085, "adaptive"))
+                                List.of("cold_sweat:chameleon_scale_helmet",     10, 0.0085, "adaptive"),
+                                List.of("cold_sweat:chameleon_scale_chestplate", 14, 0.0085, "adaptive"),
+                                List.of("cold_sweat:chameleon_scale_leggings",   12, 0.0085, "adaptive"),
+                                List.of("cold_sweat:chameleon_scale_boots",      10, 0.0085, "adaptive"))
                             .addIf(CompatManager.isToughAsNailsLoaded(),
-                                () -> List.of("toughasnails:leaf_helmet",     0, List.of(1, 1, 1, 1)),
-                                () -> List.of("toughasnails:leaf_chestplate", 0, List.of(1, 1, 1, 1, 1, 1)),
-                                () -> List.of("toughasnails:leaf_leggings",   0, List.of(1, 1, 1, 1, 1)),
-                                () -> List.of("toughasnails:leaf_boots",      0, List.of(1, 1, 1, 1)),
-                                () -> List.of("toughasnails:wool_helmet",     List.of(1.5, 1.5, 1.5, 1.5), 0),
-                                () -> List.of("toughasnails:wool_chestplate", List.of(1.5, 1.5, 1.5, 1.5, 1.5, 1.5), 0),
-                                () -> List.of("toughasnails:wool_leggings",   List.of(1.5, 1.5, 1.5, 1.5, 1.5), 0),
-                                () -> List.of("toughasnails:wool_boots",      List.of(1.5, 1.5, 1.5, 1.5), 0))
+                                () -> List.of("toughasnails:leaf_helmet",     0, List.of(1, 1, 1, 1, 1)),
+                                () -> List.of("toughasnails:leaf_chestplate", 0, List.of(1, 1, 1, 1, 1, 1, 1)),
+                                () -> List.of("toughasnails:leaf_leggings",   0, List.of(1, 1, 1, 1, 1, 1)),
+                                () -> List.of("toughasnails:leaf_boots",      0, List.of(1, 1, 1, 1, 1)),
+                                () -> List.of("toughasnails:wool_helmet",     List.of(1.5, 1.5, 1.5, 1.5, 1.5), 0),
+                                () -> List.of("toughasnails:wool_chestplate", List.of(1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5), 0),
+                                () -> List.of("toughasnails:wool_leggings",   List.of(1.5, 1.5, 1.5, 1.5, 1.5, 1.5), 0),
+                                () -> List.of("toughasnails:wool_boots",      List.of(1.5, 1.5, 1.5, 1.5, 1.5), 0))
                             .build(),
                         it -> it instanceof List<?> list && list.size() >= 3
                                 && list.get(0) instanceof String
