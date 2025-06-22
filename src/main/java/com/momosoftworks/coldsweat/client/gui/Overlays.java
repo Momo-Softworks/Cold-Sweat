@@ -253,9 +253,9 @@ public class Overlays
     @SubscribeEvent
     public static void registerOverlays(RegisterGuiLayersEvent event)
     {
-        event.registerAbove(VanillaGuiLayers.HOTBAR, ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "world_temp"), WORLD_TEMP_OVERLAY);
-        event.registerAbove(VanillaGuiLayers.HOTBAR, ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "body_temp"), BODY_TEMP_OVERLAY);
         event.registerAbove(VanillaGuiLayers.HOTBAR, ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "vague_temp"), VAGUE_TEMP_OVERLAY);
+        event.registerAbove(VanillaGuiLayers.HOTBAR, ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "body_temp"), BODY_TEMP_OVERLAY);
+        event.registerAbove(VanillaGuiLayers.HOTBAR, ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "world_temp"), WORLD_TEMP_OVERLAY);
     }
 
     @EventBusSubscriber(value = Dist.CLIENT)
