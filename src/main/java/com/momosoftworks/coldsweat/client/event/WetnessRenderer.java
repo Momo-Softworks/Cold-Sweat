@@ -38,6 +38,8 @@ public class WetnessRenderer
     private static final List<Droplet> WATER_DROPS = new ArrayList<>();
     private static final List<Triplet<Vector2i, Float, Integer>> TRAILS = new ArrayList<>();
     private static boolean WAS_SUBMERGED = false;
+    private static int LEFT_DROPLETS = 0;
+    private static int RIGHT_DROPLETS = 0;
 
     @SubscribeEvent
     public static void updateSkyBrightness(TickEvent.ClientTickEvent event)
@@ -202,13 +204,13 @@ public class WetnessRenderer
                 }
                 // Remove drops that fall off the bottom of the screen
                 if (pos.y > screenHeight)
-                {   WATER_DROPS.remove(drop);
+                {   removeDrop(drop);
                     i--;
                 }
             }
             // Remove drops that have faded out
             else
-            {   WATER_DROPS.remove(drop);
+            {   removeDrop(drop);
                 i--;
             }
         }
@@ -251,8 +253,33 @@ public class WetnessRenderer
     {
         IntegerBounds dropSize = ConfigSettings.WATER_DROPLET_SCALE.get();
         int size = dropSize.getRandom();
-        int x = (int) (Math.random() < 0.5 ? (Math.random() * screenWidth / 4) : (screenWidth - Math.random() * screenWidth / 4));
-        return new Droplet(new Vector2f(x, -size), 1f, size);
+        int xOffset = (int) (Math.random() * screenWidth / 4);
+        Droplet.Side side = Math.random() < 0.5 ? Droplet.Side.LEFT : Droplet.Side.RIGHT;
+        int x = side == Droplet.Side.LEFT ? xOffset : screenWidth - xOffset;
+        // Ensure balance of droplets on each side
+        if (getDropletsOnSide(side) >= 3)
+        {   side = side.opposite();
+        }
+        // Increment count of droplets on the side
+        if (side == Droplet.Side.LEFT)
+            LEFT_DROPLETS++;
+        else
+            RIGHT_DROPLETS++;
+        // Create droplet
+        return new Droplet(new Vector2f(x, -size), 1f, size, side);
+    }
+
+    private static void removeDrop(Droplet droplet)
+    {
+        if (droplet.side == Droplet.Side.LEFT)
+            LEFT_DROPLETS--;
+        else
+            RIGHT_DROPLETS--;
+        WATER_DROPS.remove(droplet);
+    }
+
+    private static int getDropletsOnSide(Droplet.Side side)
+    {   return side == Droplet.Side.LEFT ? LEFT_DROPLETS : RIGHT_DROPLETS;
     }
 
     private static void renderQuad(GuiGraphics graphics, BufferBuilder bufferBuilder, int x, int y,
@@ -271,17 +298,28 @@ public class WetnessRenderer
         public Vector2f position;
         public float alpha;
         public int size;
-        public float yMotion = (float) Math.random() * 0.05f + 0.05f;
+        public float yMotion = getRandomVelocity(Minecraft.getInstance().getFrameTime() / 5);
         public float xMotion = (float) Math.random() * 0.02f - 0.01f;
         public float xVelocity = 0;
         public float yMotionUpdateCooldown = (float) Math.random() * 16f + 8f;
         public float XMotionUpdateCooldown = 16;
+        public Side side;
 
-        public Droplet(Vector2f position, float alpha, int size)
+        public Droplet(Vector2f position, float alpha, int size, Side side)
         {
             this.position = position;
             this.alpha = alpha;
             this.size = size;
+            this.side = side;
+        }
+
+        public enum Side
+        {
+            LEFT, RIGHT;
+
+            public Side opposite()
+            {   return this == LEFT ? RIGHT : LEFT;
+            }
         }
     }
 }
