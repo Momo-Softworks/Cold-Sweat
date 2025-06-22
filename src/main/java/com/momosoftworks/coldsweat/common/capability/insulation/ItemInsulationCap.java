@@ -104,15 +104,10 @@ public class ItemInsulationCap implements IInsulatableCap
         }
 
         int appliedInsulators = 0;
-        for (InsulatorData data : CSMath.append(insulation, this.getInsulators()))
-        {
-            // Add all slots from multi-slot insulation
-            if (data.fillSlots())
-            {   appliedInsulators += Insulation.splitList(data.insulation()).size();
-            }
-            // Single-slot insulators only count as one
-            else appliedInsulators++;
-        }
+        // Include builtin armor insulation as "applied" insulation
+        appliedInsulators += ItemInsulationManager.getSlotsFilled(ConfigSettings.INSULATING_ARMORS.get().get(armorItem.getItem()));
+        // Count applied insulation on the armor item
+        appliedInsulators += ItemInsulationManager.getSlotsFilled(CSMath.append(insulation, this.getInsulators()));
         appliedInsulators = Math.max(1, appliedInsulators);
         return appliedInsulators <= ItemInsulationManager.getInsulationSlots(armorItem);
     }
