@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 @EventBusSubscriber
 public class ItemInsulationManager
@@ -75,19 +74,34 @@ public class ItemInsulationManager
     {
         return stack.getItem() instanceof Equipable
             && !ConfigSettings.INSULATION_BLACKLIST.get().contains(stack.getItem())
-            && getBuiltinInsulation(stack).isEmpty();
+            && getInsulatorInsulation(stack).isEmpty();
+    }
+
+    public static int getSlotsFilled(Collection<InsulatorData> insulators)
+    {
+        int slots = 0;
+        for (InsulatorData data : insulators)
+        {
+            if (data.fillSlots())
+            {   slots += Insulation.splitList(data.insulation()).size();
+            }
+            else slots++;
+        }
+        return slots;
     }
 
     /**
      * Gives a collection of all insulation that is built-in to the item (not applied via sewing)
      * @return an IMMUTABLE list of insulation the item has.
      */
-    public static List<Insulation> getBuiltinInsulation(ItemStack stack)
+    public static List<Insulation> getInsulatorInsulation(ItemStack stack)
     {
-        return Stream.of(ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()),
-                         ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem()),
-                         ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem()))
-               .flatMap(Collection::stream).map(InsulatorData::insulation)
+        if (!ConfigSettings.INSULATION_ITEMS.get().containsKey(stack.getItem()))
+        {   return ImmutableList.of();
+        }
+
+        return ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()).stream()
+               .map(InsulatorData::insulation)
                .flatMap(List::stream)
                .filter(ins -> !ins.isEmpty()).toList();
     }
