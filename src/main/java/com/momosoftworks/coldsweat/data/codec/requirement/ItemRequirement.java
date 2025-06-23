@@ -4,7 +4,6 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.momosoftworks.coldsweat.data.codec.util.StreamCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
@@ -23,7 +22,8 @@ import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 public record ItemRequirement(NegatableList<Either<TagKey<Item>, Item>> items,
@@ -53,9 +53,9 @@ public record ItemRequirement(NegatableList<Either<TagKey<Item>, Item>> items,
         this(items, count, durability, enchantments, potion, components, Optional.empty());
     }
 
-    public ItemRequirement(List<Either<TagKey<Item>, Item>> items, ItemComponentsRequirement components)
+    public ItemRequirement(NegatableList<Either<TagKey<Item>, Item>> items, ItemComponentsRequirement components)
     {
-        this(new NegatableList<>(items), IntegerBounds.NONE, IntegerBounds.NONE, new NegatableList<>(), Optional.empty(), components);
+        this(items, IntegerBounds.NONE, IntegerBounds.NONE, new NegatableList<>(), Optional.empty(), components);
     }
 
     public ItemRequirement(Collection<Item> items, @Nullable Predicate<ItemStack> predicate)

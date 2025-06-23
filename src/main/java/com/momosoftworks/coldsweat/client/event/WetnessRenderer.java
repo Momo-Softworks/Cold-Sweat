@@ -304,7 +304,7 @@ public class WetnessRenderer
         public Vector2f position;
         public float alpha;
         public int size;
-        public float yMotion = getRandomVelocity(Minecraft.getInstance().getFrameTime() / 5);
+        public float yMotion = getRandomVelocity(Minecraft.getInstance().getTimer().getRealtimeDeltaTicks() / 5);
         public float xMotion = (float) Math.random() * 0.02f - 0.01f;
         public float xVelocity = 0;
         public float yMotionUpdateCooldown = (float) Math.random() * 16f + 8f;

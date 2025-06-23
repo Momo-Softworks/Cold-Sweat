@@ -7,12 +7,11 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.config.ConfigLoadingHandler;
 import com.momosoftworks.coldsweat.compat.CompatManager;
-import com.momosoftworks.coldsweat.data.ModRegistries;
+import com.momosoftworks.coldsweat.config.ConfigLoadingHandler;
 import com.momosoftworks.coldsweat.data.codec.configuration.FuelData;
-import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.math.FastMultiMap;
 import com.momosoftworks.coldsweat.util.math.RegistryMultiMap;
@@ -37,7 +36,6 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -46,51 +44,55 @@ public class ConfigHelper
 {
     private ConfigHelper() {}
 
-    public static <T> List<Either<TagKey<T>, Holder<T>>> parseRegistryItems(ResourceKey<Registry<T>> registry, RegistryAccess registryAccess, String objects)
+    public static <T> NegatableList<Either<TagKey<T>, Holder<T>>> parseRegistryItems(ResourceKey<Registry<T>> registry, RegistryAccess registryAccess, String objects)
     {   return parseRegistryItems(registry, registryAccess, objects.split(","));
     }
 
-    public static <T> List<Either<TagKey<T>, Holder<T>>> parseRegistryItems(ResourceKey<Registry<T>> registry, RegistryAccess registryAccess, String[] objects)
+    public static <T> NegatableList<Either<TagKey<T>, Holder<T>>> parseRegistryItems(ResourceKey<Registry<T>> registry, RegistryAccess registryAccess, String[] objects)
     {
-        List<Either<TagKey<T>, Holder<T>>> registryList = new ArrayList<>();
+        NegatableList<Either<TagKey<T>, Holder<T>>> registryList = new NegatableList<>();
         Registry<T> reg = registryAccess.registryOrThrow(registry);
 
         for (String objString : objects)
         {
+            boolean negate = objString.startsWith("!");
+            if (negate) objString = objString.substring(1);
             if (objString.startsWith("#"))
             {
                 final String tagID = objString.replace("#", "");
-                registryList.add(Either.left(TagKey.create(registry, ResourceLocation.parse(tagID))));
+                registryList.add(Either.left(TagKey.create(registry, ResourceLocation.parse(tagID))), negate);
             }
             else
             {
                 ResourceLocation id = ResourceLocation.parse(objString);
-                Optional<Holder.Reference<T>> obj = reg.getHolder(net.minecraft.resources.ResourceKey.create(registry, id));
+                Optional<Holder.Reference<T>> obj = reg.getHolder(ResourceKey.create(registry, id));
                 if (!reg.containsKey(id) || obj.isEmpty())
                 {
                     ColdSweat.LOGGER.error("Error parsing config: {} \"{}\" does not exist", registry.location().getPath(), objString);
                     continue;
                 }
-                registryList.add(Either.right(obj.get()));
+                registryList.add(Either.right(obj.get()), negate);
             }
         }
         return registryList;
     }
 
-    public static <T> List<Either<TagKey<T>, T>> parseBuiltinItems(ResourceKey<Registry<T>> registryKey, Registry<T> registry, String objects)
+    public static <T> NegatableList<Either<TagKey<T>, T>> parseBuiltinItems(ResourceKey<Registry<T>> registryKey, Registry<T> registry, String objects)
     {   return parseBuiltinItems(registryKey, registry, objects.split(","));
     }
 
-    public static <T> List<Either<TagKey<T>, T>> parseBuiltinItems(ResourceKey<Registry<T>> registryKey, Registry<T> registry, String[] objects)
+    public static <T> NegatableList<Either<TagKey<T>, T>> parseBuiltinItems(ResourceKey<Registry<T>> registryKey, Registry<T> registry, String[] objects)
     {
-        List<Either<TagKey<T>, T>> registryList = new ArrayList<>();
+        NegatableList<Either<TagKey<T>, T>> registryList = new NegatableList<>();
 
         for (String objString : objects)
         {
+            boolean negate = objString.startsWith("!");
+            if (negate) objString = objString.substring(1);
             if (objString.startsWith("#"))
             {
                 final String tagID = objString.replace("#", "");
-                registryList.add(Either.left(TagKey.create(registryKey, ResourceLocation.parse(tagID))));
+                registryList.add(Either.left(TagKey.create(registryKey, ResourceLocation.parse(tagID))), negate);
             }
             else
             {
@@ -101,30 +103,30 @@ public class ConfigHelper
                     continue;
                 }
                 T obj = registry.get(id);
-                registryList.add(Either.right(obj));
+                registryList.add(Either.right(obj), negate);
             }
         }
         return registryList;
     }
 
-    public static List<Either<TagKey<Block>, Block>> getBlocks(String blocks)
+    public static NegatableList<Either<TagKey<Block>, Block>> getBlocks(String blocks)
     {   return getBlocks(blocks.split(","));
     }
-    public static List<Either<TagKey<Block>, Block>> getBlocks(String[] blocks)
+    public static NegatableList<Either<TagKey<Block>, Block>> getBlocks(String[] blocks)
     {   return parseBuiltinItems(Registries.BLOCK, BuiltInRegistries.BLOCK, blocks);
     }
 
-    public static List<Either<TagKey<Item>, Item>> getItems(String items)
+    public static NegatableList<Either<TagKey<Item>, Item>> getItems(String items)
     {   return getItems(items.split(","));
     }
-    public static List<Either<TagKey<Item>, Item>> getItems(String[] items)
+    public static NegatableList<Either<TagKey<Item>, Item>> getItems(String[] items)
     {   return parseBuiltinItems(Registries.ITEM, BuiltInRegistries.ITEM, items);
     }
 
-    public static List<Either<TagKey<EntityType<?>>, EntityType<?>>> getEntityTypes(String entities)
+    public static NegatableList<Either<TagKey<EntityType<?>>, EntityType<?>>> getEntityTypes(String entities)
     {   return getEntityTypes(entities.split(","));
     }
-    public static List<Either<TagKey<EntityType<?>>, EntityType<?>>> getEntityTypes(String[] entities)
+    public static NegatableList<Either<TagKey<EntityType<?>>, EntityType<?>>> getEntityTypes(String[] entities)
     {   return parseBuiltinItems(Registries.ENTITY_TYPE, BuiltInRegistries.ENTITY_TYPE, entities);
     }
 

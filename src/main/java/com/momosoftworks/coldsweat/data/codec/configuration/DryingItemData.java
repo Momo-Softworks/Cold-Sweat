@@ -72,7 +72,7 @@ public class DryingItemData extends ConfigData implements RequirementHolder
         {   ColdSweat.LOGGER.error("Error parsing drying item config: not enough arguments");
             return null;
         }
-        List<Either<TagKey<Item>, Item>> items = ConfigHelper.getItems((String) entry.get(0));
+        NegatableList<Either<TagKey<Item>, Item>> items = ConfigHelper.getItems((String) entry.get(0));
         if (items.isEmpty()) return null;
         Item result = BuiltInRegistries.ITEM.get(ResourceLocation.parse((String) entry.get(1)));
         if (result == null) return null;

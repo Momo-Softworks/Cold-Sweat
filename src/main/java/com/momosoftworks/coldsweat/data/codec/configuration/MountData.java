@@ -75,7 +75,7 @@ public class MountData extends ConfigData implements RequirementHolder
         {   ColdSweat.LOGGER.error("Error parsing insulating mount config: not enough arguments");
             return null;
         }
-        List<Either<TagKey<EntityType<?>>, EntityType<?>>> entities = ConfigHelper.getEntityTypes((String) entry.get(0));
+        NegatableList<Either<TagKey<EntityType<?>>, EntityType<?>>> entities = ConfigHelper.getEntityTypes((String) entry.get(0));
         if (entities.isEmpty()) return null;
 
         double coldInsul = ((Number) entry.get(1)).doubleValue();

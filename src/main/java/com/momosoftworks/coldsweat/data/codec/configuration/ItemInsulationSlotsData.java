@@ -60,7 +60,7 @@ public class ItemInsulationSlotsData extends ConfigData implements RequirementHo
         {   ColdSweat.LOGGER.error("Error parsing insulation slot override config: not enough arguments");
             return null;
         }
-        List<Either<TagKey<Item>, Item>> items = ConfigHelper.getItems((String) entry.get(0));
+        NegatableList<Either<TagKey<Item>, Item>> items = ConfigHelper.getItems((String) entry.get(0));
         if (items.isEmpty()) return null;
         int slots = ((Number) entry.get(1)).intValue();
         ItemComponentsRequirement componentsRequirement = entry.size() > 2

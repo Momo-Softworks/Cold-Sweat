@@ -103,7 +103,12 @@ public record ItemInsulationCap(List<Pair<ItemStack, List<InsulatorData>>> insul
 
         int appliedInsulators = 0;
         // Include builtin armor insulation as "applied" insulation
-        appliedInsulators += ItemInsulationManager.getSlotsFilled(ConfigSettings.INSULATING_ARMORS.get().get(armorItem.getItem()));
+        for (InsulatorData data : ConfigSettings.INSULATING_ARMORS.get().get(armorItem.getItem()))
+        {
+            if (data.fillSlots())
+            {   appliedInsulators += Insulation.splitList(data.insulation()).size();
+            }
+        }
         // Count applied insulation on the armor item
         appliedInsulators += ItemInsulationManager.getSlotsFilled(CSMath.append(insulation, this.getInsulators()));
         appliedInsulators = Math.max(1, appliedInsulators);

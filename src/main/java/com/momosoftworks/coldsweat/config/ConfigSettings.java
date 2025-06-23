@@ -3,7 +3,6 @@ package com.momosoftworks.coldsweat.config;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Multimap;
-
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
@@ -12,6 +11,7 @@ import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.slot.ScalingFormula;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.entity.data.Preference;
+import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.config.spec.*;
 import com.momosoftworks.coldsweat.core.init.ModEntities;
 import com.momosoftworks.coldsweat.data.ModRegistries;
@@ -22,14 +22,16 @@ import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.math.RegistryMultiMap;
-import com.momosoftworks.coldsweat.util.serialization.*;
-import com.momosoftworks.coldsweat.compat.CompatManager;
+import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
+import com.momosoftworks.coldsweat.util.serialization.DynamicHolder;
+import com.momosoftworks.coldsweat.util.serialization.ListBuilder;
+import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.*;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -50,8 +52,13 @@ import org.joml.Vector2i;
 import javax.annotation.Nullable;
 import java.io.*;
 import java.nio.file.Files;
-import java.util.*;
-import java.util.function.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import static com.momosoftworks.coldsweat.util.serialization.DynamicHolder.SyncType;
 
@@ -524,7 +531,7 @@ public class ConfigSettings
         SLEEP_CHECK_IGNORE_BLOCKS = addSyncedSetting(ColdSweat.createKey("sleep_check_override_blocks"), ArrayList::new, holder ->
         {
             var blocks = ConfigHelper.getBlocks(WorldSettingsConfig.SLEEPING_OVERRIDE_BLOCKS.get().toArray(new String[0]));
-            holder.get().addAll(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.BLOCK, blocks));
+            holder.get().addAll(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.BLOCK, blocks.flatten()));
         },
         BuiltInRegistries.BLOCK.byNameCodec().listOf(),
         (saver) -> {},
@@ -623,7 +630,7 @@ public class ConfigSettings
             BiConsumer<List<? extends List<?>>, EntityType<?>> configReader = (configBiomes, entityType) ->
             {
                 Multimap<Holder<Biome>, SpawnBiomeData> dataMap = ConfigHelper.getRegistryMultimap(configBiomes, registryAccess, Registries.BIOME,
-                                                                                                   toml -> SpawnBiomeData.fromToml(toml, entityType, registryAccess), SpawnBiomeData::biomes);
+                                                                                                   toml -> SpawnBiomeData.fromToml(toml, entityType, registryAccess), data -> data.biomes().flatten());
                 ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.ENTITY_SPAWN_BIOME_DATA);
 
                 holder.get(registryAccess).putAll(dataMap);
@@ -689,7 +696,7 @@ public class ConfigSettings
         THERMAL_SOURCE_SPREAD_WHITELIST = addSyncedSetting(ColdSweat.createKey("hearth_spread_whitelist"), ArrayList::new, holder ->
         {
             var blocks = ConfigHelper.getBlocks(WorldSettingsConfig.SOURCE_SPREAD_WHITELIST.get().toArray(new String[0]));
-            holder.get().addAll(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.BLOCK, blocks));
+            holder.get().addAll(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.BLOCK, blocks.flatten()));
         },
         BuiltInRegistries.BLOCK.byNameCodec().listOf(),
         saver -> {},
@@ -698,7 +705,7 @@ public class ConfigSettings
         THERMAL_SOURCE_SPREAD_BLACKLIST = addSyncedSetting(ColdSweat.createKey("hearth_spread_blacklist"), ArrayList::new, holder ->
         {
             var blocks = ConfigHelper.getBlocks(WorldSettingsConfig.SOURCE_SPREAD_BLACKLIST.get().toArray(new String[0]));
-            holder.get().addAll(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.BLOCK, blocks));
+            holder.get().addAll(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.BLOCK, blocks.flatten()));
         },
         BuiltInRegistries.BLOCK.byNameCodec().listOf(),
         saver -> {},
@@ -794,7 +801,7 @@ public class ConfigSettings
         ICEBOX_MAX_VOLUME = addSyncedSetting(ColdSweat.createKey("icebox_max_volume"), () -> 1000, holder -> holder.set(WorldSettingsConfig.ICEBOX_MAX_VOLUME.get()),
         Codec.INT,
         (saver) -> WorldSettingsConfig.ICEBOX_MAX_VOLUME.set(saver),
-        SyncType.BOTH_WAYS);
+         SyncType.BOTH_WAYS);
 
         ICEBOX_WARM_UP_TIME = addSyncedSetting(ColdSweat.createKey("icebox_warm_up_time"), () -> 20, holder -> holder.set(WorldSettingsConfig.ICEBOX_WARM_UP_TIME.get()),
         Codec.INT,

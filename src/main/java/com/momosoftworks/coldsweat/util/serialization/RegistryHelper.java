@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.util.serialization;
 
 import com.mojang.datafixers.util.Either;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Holder;
@@ -56,12 +57,12 @@ public class RegistryHelper
     {   return REGISTRY_ACCESS;
     }
 
-    public static <T> List<T> mapBuiltinRegistryTagList(Registry<T> registry, List<Either<TagKey<T>, T>> eitherList)
+    public static <T> List<T> mapBuiltinRegistryTagList(Registry<T> registry, NegatableList<Either<TagKey<T>, T>> eitherList)
     {
         List<T> list = new ArrayList<>();
         if (registry == null) return list;
 
-        for (Either<TagKey<T>, T> either : eitherList)
+        for (Either<TagKey<T>, T> either : eitherList.requirements())
         {
             either.ifLeft(tagKey ->
                           {
@@ -70,16 +71,25 @@ public class RegistryHelper
                           });
             either.ifRight(list::add);
         }
+        for (Either<TagKey<T>, T> either : eitherList.exclusions())
+        {
+            either.ifLeft(tagKey -> list.removeAll(registry.getTag(tagKey).orElse(null).stream().toList()));
+            either.ifRight(object -> list.remove(object));
+        }
         return list;
     }
 
-    public static <T> List<Holder<T>> mapRegistryTagList(ResourceKey<Registry<T>> registry, List<Either<TagKey<T>, Holder<T>>> eitherList, @Nullable RegistryAccess registryAccess)
+    public static <T> List<T> mapBuiltinRegistryTagList(Registry<T> registry, List<Either<TagKey<T>, T>> eitherList)
+    {   return mapBuiltinRegistryTagList(registry, new NegatableList<>(eitherList));
+    }
+
+    public static <T> List<Holder<T>> mapRegistryTagList(ResourceKey<Registry<T>> registry, NegatableList<Either<TagKey<T>, Holder<T>>> eitherList, @Nullable RegistryAccess registryAccess)
     {
         Registry<T> reg = registryAccess != null ? registryAccess.registryOrThrow(registry) : getRegistry(registry);
         List<Holder<T>> list = new ArrayList<>();
         if (reg == null) return list;
 
-        for (Either<TagKey<T>, Holder<T>> either : eitherList)
+        for (Either<TagKey<T>, Holder<T>> either : eitherList.requirements())
         {
             either.ifLeft(tagKey ->
             {
@@ -88,7 +98,20 @@ public class RegistryHelper
             });
             either.ifRight(list::add);
         }
+        for (Either<TagKey<T>, Holder<T>> either : eitherList.exclusions())
+        {
+            either.ifLeft(tagKey ->
+            {
+                Optional<HolderSet.Named<T>> tag = reg.getTag(tagKey);
+                tag.ifPresent(tag1 -> list.removeAll(tag1.stream().toList()));
+            });
+            either.ifRight(list::remove);
+        }
         return list;
+    }
+
+    public static <T> List<Holder<T>> mapRegistryTagList(ResourceKey<Registry<T>> registry, List<Either<TagKey<T>, Holder<T>>> eitherList, @Nullable RegistryAccess registryAccess)
+    {   return mapRegistryTagList(registry, new NegatableList<>(eitherList), registryAccess);
     }
 
     public static <T> Optional<T> getVanillaRegistryValue(ResourceKey<Registry<T>> registry, ResourceLocation id)

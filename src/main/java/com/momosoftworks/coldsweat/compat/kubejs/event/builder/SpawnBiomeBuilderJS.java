@@ -20,7 +20,6 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -43,8 +42,8 @@ public class SpawnBiomeBuilderJS
         {   ColdSweat.LOGGER.error("Could not parse biomes for addSpawnBiomes(), as registries are not built yet.");
             return this;
         }
-        List<Either<TagKey<Biome>, Holder<Biome>>> biomesList = ConfigHelper.parseRegistryItems(Registries.BIOME, registryAccess, biomes);
-        this.biomes.addAll(RegistryHelper.mapRegistryTagList(Registries.BIOME, biomesList, registryAccess));
+        NegatableList<Either<TagKey<Biome>, Holder<Biome>>> biomesList = ConfigHelper.parseRegistryItems(Registries.BIOME, registryAccess, biomes);
+        this.biomes.addAll(RegistryHelper.mapRegistryTagList(Registries.BIOME, biomesList.flatten(), registryAccess));
         return this;
     }
 
