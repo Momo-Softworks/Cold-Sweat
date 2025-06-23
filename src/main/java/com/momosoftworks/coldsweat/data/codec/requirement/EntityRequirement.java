@@ -41,9 +41,9 @@ public record EntityRequirement(NegatableList<Either<TagKey<EntityType<?>>, Enti
         this(entities, location, steppingOn, effects, nbt, flags, equipment, typeSpecificData, team, vehicle, passenger, target, temperature, Optional.empty());;
     }
 
-    public EntityRequirement(List<Either<TagKey<EntityType<?>>, EntityType<?>>> entities)
+    public EntityRequirement(NegatableList<Either<TagKey<EntityType<?>>, EntityType<?>>> entities)
     {
-        this(new NegatableList<>(entities), LocationRequirement.NONE, LocationRequirement.NONE, Optional.empty(),
+        this(entities, LocationRequirement.NONE, LocationRequirement.NONE, Optional.empty(),
              NbtRequirement.NONE, Optional.empty(), EquipmentRequirement.NONE,
              Optional.empty(), new NegatableList<>(), Optional.empty(), Optional.empty(), Optional.empty(), new HashMap<>());
     }

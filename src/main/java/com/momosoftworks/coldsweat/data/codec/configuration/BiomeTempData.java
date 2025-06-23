@@ -98,7 +98,7 @@ public class BiomeTempData extends ConfigData implements IForgeRegistryEntry<Bio
         {   ColdSweat.LOGGER.error("Error parsing biome config: not enough arguments");
             return null;
         }
-        List<Either<TagKey<Biome>, Holder<Biome>>> biomes = ConfigHelper.parseRegistryItems(Registry.BIOME_REGISTRY, registryAccess, (String) entry.get(0));
+        NegatableList<Either<TagKey<Biome>, Holder<Biome>>> biomes = ConfigHelper.parseRegistryItems(Registry.BIOME_REGISTRY, registryAccess, (String) entry.get(0));
         if (biomes.isEmpty()) return null;
 
         Temperature.Units units;
@@ -121,7 +121,7 @@ public class BiomeTempData extends ConfigData implements IForgeRegistryEntry<Bio
         }
 
         // Maps the biome ID to the temperature (and variance if present)
-        return new BiomeTempData(new NegatableList<>(biomes), min, max, units, isOffset, isDisabled);
+        return new BiomeTempData(biomes, min, max, units, isOffset, isDisabled);
     }
 
     @Override

@@ -83,7 +83,7 @@ public class FoodData extends ConfigData implements RequirementHolder, IForgeReg
         {   ColdSweat.LOGGER.error("Error parsing food config: not enough arguments");
             return null;
         }
-        List<Either<TagKey<Item>, Item>> items = ConfigHelper.getItems((String) entry.get(0));
+        NegatableList<Either<TagKey<Item>, Item>> items = ConfigHelper.getItems((String) entry.get(0));
         if (items.isEmpty()) return null;
         double temperature = ((Number) entry.get(1)).doubleValue();
         NbtRequirement nbtRequirement = entry.size() > 2

@@ -79,12 +79,12 @@ public class StructureTempData extends ConfigData implements IForgeRegistryEntry
         {   ColdSweat.LOGGER.error("Error parsing structure config: {} does not have enough arguments", entry);
             return null;
         }
-        List<Either<TagKey<ConfiguredStructureFeature<?, ?>>, Holder<ConfiguredStructureFeature<?, ?>>>> structures = ConfigHelper.parseRegistryItems(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, registryAccess, (String) entry.get(0));
+        NegatableList<Either<TagKey<ConfiguredStructureFeature<?, ?>>, Holder<ConfiguredStructureFeature<?, ?>>>> structures = ConfigHelper.parseRegistryItems(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, registryAccess, (String) entry.get(0));
         if (structures.isEmpty()) return null;
         double temp = ((Number) entry.get(1)).doubleValue();
         Temperature.Units units = entry.size() == 3 ? Temperature.Units.valueOf(((String) entry.get(2)).toUpperCase()) : Temperature.Units.MC;
 
-        return new StructureTempData(new NegatableList<>(structures), temp, units, isOffset);
+        return new StructureTempData(structures, temp, units, isOffset);
     }
 
     @Override

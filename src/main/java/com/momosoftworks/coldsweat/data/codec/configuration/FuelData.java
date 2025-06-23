@@ -68,7 +68,7 @@ public class FuelData extends ConfigData implements RequirementHolder, IForgeReg
         {   ColdSweat.LOGGER.error("Error parsing fuel config: not enough arguments");
             return null;
         }
-        List<Either<TagKey<Item>, Item>> items = ConfigHelper.getItems((String) entry.get(0));
+        NegatableList<Either<TagKey<Item>, Item>> items = ConfigHelper.getItems((String) entry.get(0));
         if (items.isEmpty()) return null;
 
         double fuel = ((Number) entry.get(1)).doubleValue();
