@@ -165,9 +165,9 @@ public class ModRegistriesEventJS extends StartupEventJS
     private <K, V extends ConfigData> void addRegistryConfig(ResourceKey<Registry<K>> keyRegistry,
                                                              ResourceKey<Registry<V>> modRegistry,
                                                              String[] rawKeys,
-                                                             Function<List<Either<TagKey<K>, Holder<K>>>, V> constructor)
+                                                             Function<NegatableList<Either<TagKey<K>, Holder<K>>>, V> constructor)
     {
-        List<Either<TagKey<K>, Holder<K>>> parsed = ConfigHelper.parseRegistryItems(keyRegistry, this.event.getRegistryAccess(), rawKeys);
+        NegatableList<Either<TagKey<K>, Holder<K>>> parsed = ConfigHelper.parseRegistryItems(keyRegistry, this.event.getRegistryAccess(), rawKeys);
         if (parsed.isEmpty())
         {   ColdSweat.LOGGER.error("Failed to find any {} in: {}", keyRegistry.location().getPath(), Arrays.toString(rawKeys));
             return;
@@ -186,7 +186,7 @@ public class ModRegistriesEventJS extends StartupEventJS
     public void addBiomeTemperature(double minTemp, double maxTemp, String units, String... biomes)
     {
         this.addRegistryConfig(Registries.BIOME, ModRegistries.BIOME_TEMP_DATA, biomes,
-                parsedBiomes -> new BiomeTempData(new NegatableList<>(parsedBiomes), minTemp, maxTemp, Temperature.Units.fromID(units), false, false));
+                parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), false, false));
     }
     public void addBiomeTemperature(double minTemp, double maxTemp, String... biomes)
     {   addBiomeTemperature(minTemp, maxTemp, "mc", biomes);
@@ -195,7 +195,7 @@ public class ModRegistriesEventJS extends StartupEventJS
     public void addBiomeOffset(double minTemp, double maxTemp, String units, String... biomes)
     {
         this.addRegistryConfig(Registries.BIOME, ModRegistries.BIOME_TEMP_DATA, biomes,
-                parsedBiomes -> new BiomeTempData(new NegatableList<>(parsedBiomes), minTemp, maxTemp, Temperature.Units.fromID(units), true, false));
+                parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), true, false));
     }
     public void addBiomeOffset(double minTemp, double maxTemp, String... biomes)
     {   addBiomeOffset(minTemp, maxTemp, "mc", biomes);
@@ -208,7 +208,7 @@ public class ModRegistriesEventJS extends StartupEventJS
     public void addDimensionTemperature(double temperature, String units, String... dimensions)
     {
         this.addRegistryConfig(Registries.DIMENSION_TYPE, ModRegistries.DIMENSION_TEMP_DATA, dimensions,
-                parsedDimensions -> new DimensionTempData(new NegatableList<>(parsedDimensions), temperature, Temperature.Units.fromID(units), false));
+                parsedDimensions -> new DimensionTempData(parsedDimensions, temperature, Temperature.Units.fromID(units), false));
     }
     public void addDimensionTemperature(double temperature, String... dimensions)
     {   addDimensionTemperature(temperature, "mc", dimensions);
@@ -217,7 +217,7 @@ public class ModRegistriesEventJS extends StartupEventJS
     public void addDimensionOffset(double temperature, String units, String... dimensions)
     {
         this.addRegistryConfig(Registries.DIMENSION_TYPE, ModRegistries.DIMENSION_TEMP_DATA, dimensions,
-                parsedDimensions -> new DimensionTempData(new NegatableList<>(parsedDimensions), temperature, Temperature.Units.fromID(units), true));
+                parsedDimensions -> new DimensionTempData(parsedDimensions, temperature, Temperature.Units.fromID(units), true));
     }
     public void addDimensionOffset(double temperature, String... dimensions)
     {   addDimensionOffset(temperature, "mc", dimensions);
@@ -230,7 +230,7 @@ public class ModRegistriesEventJS extends StartupEventJS
     public void addStructureTemperature(double temperature, String units, String... structures)
     {
         this.addRegistryConfig(Registries.STRUCTURE, ModRegistries.STRUCTURE_TEMP_DATA, structures,
-                parsedStructures -> new StructureTempData(new NegatableList<>(parsedStructures), temperature, Temperature.Units.fromID(units), false));
+                parsedStructures -> new StructureTempData(parsedStructures, temperature, Temperature.Units.fromID(units), false));
     }
     public void addStructureTemperature(double temperature, String... structures)
     {   addStructureTemperature(temperature, "mc", structures);
@@ -239,7 +239,7 @@ public class ModRegistriesEventJS extends StartupEventJS
     public void addStructureOffset(double temperature, String units, String... structures)
     {
         this.addRegistryConfig(Registries.STRUCTURE, ModRegistries.STRUCTURE_TEMP_DATA, structures,
-                parsedStructures -> new StructureTempData(new NegatableList<>(parsedStructures), temperature, Temperature.Units.fromID(units), true));
+                parsedStructures -> new StructureTempData(parsedStructures, temperature, Temperature.Units.fromID(units), true));
     }
     public void addStructureOffset(double temperature, String... structures)
     {   addStructureOffset(temperature, "mc", structures);

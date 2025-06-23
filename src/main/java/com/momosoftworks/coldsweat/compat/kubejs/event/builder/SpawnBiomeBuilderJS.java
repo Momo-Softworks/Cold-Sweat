@@ -43,8 +43,8 @@ public class SpawnBiomeBuilderJS
         {   ColdSweat.LOGGER.error("Could not parse biomes for addSpawnBiomes(), as registries are not built yet.");
             return this;
         }
-        List<Either<TagKey<Biome>, Holder<Biome>>> biomesList = ConfigHelper.parseRegistryItems(Registries.BIOME, registryAccess, biomes);
-        this.biomes.addAll(RegistryHelper.mapVanillaRegistryTagList(Registries.BIOME, biomesList, registryAccess));
+        NegatableList<Either<TagKey<Biome>, Holder<Biome>>> biomesList = ConfigHelper.parseRegistryItems(Registries.BIOME, registryAccess, biomes);
+        this.biomes.addAll(RegistryHelper.mapVanillaRegistryTagList(Registries.BIOME, biomesList.flatten(), registryAccess));
         return this;
     }
 

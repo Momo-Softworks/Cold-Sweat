@@ -524,7 +524,7 @@ public class ConfigSettings
         SLEEP_CHECK_IGNORE_BLOCKS = addSyncedSetting(ColdSweat.createKey("sleep_check_override_blocks"), ArrayList::new, holder ->
         {
             var blocks = ConfigHelper.getBlocks(WorldSettingsConfig.SLEEPING_OVERRIDE_BLOCKS.get().toArray(new String[0]));
-            holder.get().addAll(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.BLOCKS, blocks));
+            holder.get().addAll(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.BLOCKS, blocks.flatten()));
         },
         ForgeRegistries.BLOCKS.getCodec().listOf(),
         (saver) -> {},
@@ -623,7 +623,7 @@ public class ConfigSettings
             BiConsumer<List<? extends List<?>>, EntityType<?>> configReader = (configBiomes, entityType) ->
             {
                 Multimap<Holder<Biome>, SpawnBiomeData> dataMap = ConfigHelper.getRegistryMultimap(configBiomes, registryAccess, Registries.BIOME,
-                                                                                                   toml -> SpawnBiomeData.fromToml(toml, entityType, registryAccess), SpawnBiomeData::biomes);
+                                                                                                   toml -> SpawnBiomeData.fromToml(toml, entityType, registryAccess), data -> data.biomes().flatten());
                 ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.ENTITY_SPAWN_BIOME_DATA);
 
                 holder.get(registryAccess).putAll(dataMap);
@@ -689,7 +689,7 @@ public class ConfigSettings
         THERMAL_SOURCE_SPREAD_WHITELIST = addSyncedSetting(ColdSweat.createKey("hearth_spread_whitelist"), ArrayList::new, holder ->
         {
             var blocks = ConfigHelper.getBlocks(WorldSettingsConfig.SOURCE_SPREAD_WHITELIST.get().toArray(new String[0]));
-            holder.get().addAll(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.BLOCKS, blocks));
+            holder.get().addAll(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.BLOCKS, blocks.flatten()));
         },
         ForgeRegistries.BLOCKS.getCodec().listOf(),
         saver -> {},
@@ -698,7 +698,7 @@ public class ConfigSettings
         THERMAL_SOURCE_SPREAD_BLACKLIST = addSyncedSetting(ColdSweat.createKey("hearth_spread_blacklist"), ArrayList::new, holder ->
         {
             var blocks = ConfigHelper.getBlocks(WorldSettingsConfig.SOURCE_SPREAD_BLACKLIST.get().toArray(new String[0]));
-            holder.get().addAll(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.BLOCKS, blocks));
+            holder.get().addAll(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.BLOCKS, blocks.flatten()));
         },
         ForgeRegistries.BLOCKS.getCodec().listOf(),
         saver -> {},
@@ -794,7 +794,7 @@ public class ConfigSettings
         ICEBOX_MAX_VOLUME = addSyncedSetting(ColdSweat.createKey("icebox_max_volume"), () -> 1000, holder -> holder.set(WorldSettingsConfig.ICEBOX_MAX_VOLUME.get()),
         Codec.INT,
         (saver) -> WorldSettingsConfig.ICEBOX_MAX_VOLUME.set(saver),
-        SyncType.BOTH_WAYS);
+         SyncType.BOTH_WAYS);
 
         ICEBOX_WARM_UP_TIME = addSyncedSetting(ColdSweat.createKey("icebox_warm_up_time"), () -> 20, holder -> holder.set(WorldSettingsConfig.ICEBOX_WARM_UP_TIME.get()),
         Codec.INT,

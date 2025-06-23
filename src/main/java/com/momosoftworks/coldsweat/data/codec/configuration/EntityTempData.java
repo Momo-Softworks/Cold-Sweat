@@ -95,7 +95,7 @@ public class EntityTempData extends ConfigData implements RequirementHolder
         {   ColdSweat.LOGGER.error("Error parsing entity temp config: not enough arguments");
             return null;
         }
-        List<Either<TagKey<EntityType<?>>, EntityType<?>>> entities = ConfigHelper.getEntityTypes((String) entry.get(0));
+        NegatableList<Either<TagKey<EntityType<?>>, EntityType<?>>> entities = ConfigHelper.getEntityTypes((String) entry.get(0));
         if (entities.isEmpty()) return null;
 
         double temp = ((Number) entry.get(1)).doubleValue();

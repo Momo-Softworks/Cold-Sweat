@@ -608,7 +608,7 @@ public class ConfigLoadingHandler
         {
             SpawnBiomeData spawnBiomeData = holder.get();
 
-            for (Holder<Biome> biome : RegistryHelper.mapVanillaRegistryTagList(Registries.BIOME, spawnBiomeData.biomes(), registryAccess))
+            for (Holder<Biome> biome : RegistryHelper.mapVanillaRegistryTagList(Registries.BIOME, spawnBiomeData.biomes().flatten(), registryAccess))
             {   ConfigSettings.ENTITY_SPAWN_BIOMES.get(registryAccess).put(biome, spawnBiomeData);
             }
         });
