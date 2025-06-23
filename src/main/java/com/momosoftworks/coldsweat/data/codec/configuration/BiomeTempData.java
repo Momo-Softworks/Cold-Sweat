@@ -95,7 +95,7 @@ public class BiomeTempData extends ConfigData
         {   ColdSweat.LOGGER.error("Error parsing biome config: not enough arguments");
             return null;
         }
-        List<Biome> biomes = ConfigHelper.parseRegistryItems(Registry.BIOME_REGISTRY, registryAccess, (String) entry.get(0));
+        NegatableList<Biome> biomes = ConfigHelper.parseRegistryItems(Registry.BIOME_REGISTRY, registryAccess, (String) entry.get(0));
         if (biomes.isEmpty()) return null;
 
         Temperature.Units units;
@@ -118,7 +118,7 @@ public class BiomeTempData extends ConfigData
         }
 
         // Maps the biome ID to the temperature (and variance if present)
-        return new BiomeTempData(new NegatableList<>(biomes), min, max, units, isOffset, isDisabled);
+        return new BiomeTempData(biomes, min, max, units, isOffset, isDisabled);
     }
 
     @Override

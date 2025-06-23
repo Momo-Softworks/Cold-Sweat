@@ -6,10 +6,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.*;
 import java.util.stream.Collectors;
 
@@ -93,7 +90,7 @@ public class NegatableList<T>
         this.excludeAll = false;
     }
 
-    public NegatableList(List<T> requirements, boolean requireAll, boolean excludeAll)
+    public NegatableList(Collection<T> requirements, boolean requireAll, boolean excludeAll)
     {
         this.requirements = new ArrayList<>(requirements);
         this.exclusions = new ArrayList<>();
@@ -101,11 +98,11 @@ public class NegatableList<T>
         this.requireAll = requireAll;
         this.excludeAll = excludeAll;
     }
-    public NegatableList(List<T> requirements)
+    public NegatableList(Collection<T> requirements)
     {   this(requirements, false, false);
     }
 
-    public NegatableList(List<T> requirements, List<T> exclusions, boolean requireAll, boolean excludeAll)
+    public NegatableList(Collection<T> requirements, Collection<T> exclusions, boolean requireAll, boolean excludeAll)
     {
         this.requirements = new ArrayList<>(requirements);
         this.exclusions = new ArrayList<>(exclusions);
@@ -113,7 +110,7 @@ public class NegatableList<T>
         this.requireAll = requireAll;
         this.excludeAll = excludeAll;
     }
-    public NegatableList(List<T> requirements, List<T> exclusions)
+    public NegatableList(Collection<T> requirements, Collection<T> exclusions)
     {   this(requirements, exclusions, false, false);
     }
 

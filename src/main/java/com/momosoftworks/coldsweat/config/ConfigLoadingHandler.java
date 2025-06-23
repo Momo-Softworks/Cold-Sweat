@@ -566,7 +566,7 @@ public class ConfigLoadingHandler
     {
         spawnBiomes.forEach(spawnBiomeData ->
         {
-            for (Biome biome : spawnBiomeData.biomes())
+            for (Biome biome : spawnBiomeData.biomes().flatten())
             {   ConfigSettings.ENTITY_SPAWN_BIOMES.get(registryAccess).put(biome, spawnBiomeData);
             }
         });

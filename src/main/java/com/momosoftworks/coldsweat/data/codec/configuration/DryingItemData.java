@@ -20,7 +20,6 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.SoundEvents;
 import net.minecraftforge.registries.ForgeRegistries;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class DryingItemData extends ConfigData implements RequirementHolder
@@ -71,7 +70,7 @@ public class DryingItemData extends ConfigData implements RequirementHolder
         {   ColdSweat.LOGGER.error("Error parsing drying item config: not enough arguments");
             return null;
         }
-        List<Either<ITag<Item>, Item>> items = ConfigHelper.getItems((String) entry.get(0));
+        NegatableList<Either<ITag<Item>, Item>> items = ConfigHelper.getItems((String) entry.get(0));
         if (items.isEmpty()) return null;
         Item result = ForgeRegistries.ITEMS.getValue(new ResourceLocation((String) entry.get(1)));
         if (result == null) return null;

@@ -17,7 +17,6 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tags.ITag;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
 import java.util.List;
 
 public class ItemInsulationSlotsData extends ConfigData implements RequirementHolder
@@ -60,7 +59,7 @@ public class ItemInsulationSlotsData extends ConfigData implements RequirementHo
         {   ColdSweat.LOGGER.error("Error parsing insulation slot override config: not enough arguments");
             return null;
         }
-        List<Either<ITag<Item>, Item>> items = ConfigHelper.getItems((String) entry.get(0));
+        NegatableList<Either<ITag<Item>, Item>> items = ConfigHelper.getItems((String) entry.get(0));
         if (items.isEmpty()) return null;
         int slots = ((Number) entry.get(1)).intValue();
         NbtRequirement nbtRequirement = entry.size() > 2

@@ -65,9 +65,9 @@ public class ItemRequirement
         this(items, count, durability, enchantments, potion, nbt, Optional.empty());
     }
 
-    public ItemRequirement(List<Either<ITag<Item>, Item>> items, NbtRequirement nbt)
+    public ItemRequirement(NegatableList<Either<ITag<Item>, Item>> items, NbtRequirement nbt)
     {
-        this(new NegatableList<>(items), IntegerBounds.NONE, IntegerBounds.NONE, new NegatableList<>(), Optional.empty(), nbt);
+        this(items, IntegerBounds.NONE, IntegerBounds.NONE, new NegatableList<>(), Optional.empty(), nbt);
     }
 
     public ItemRequirement(Collection<Item> items, Predicate<ItemStack> predicate)

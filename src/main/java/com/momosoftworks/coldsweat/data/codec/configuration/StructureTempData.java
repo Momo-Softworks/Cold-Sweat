@@ -10,10 +10,8 @@ import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.gen.feature.StructureFeature;
-import net.minecraft.world.gen.feature.structure.Structure;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
 import java.util.List;
 
 public class StructureTempData extends ConfigData
@@ -76,12 +74,12 @@ public class StructureTempData extends ConfigData
         {   ColdSweat.LOGGER.error("Error parsing structure config: {} does not have enough arguments", entry);
             return null;
         }
-        List<StructureFeature<?, ?>> structures = ConfigHelper.parseRegistryItems(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, registryAccess, (String) entry.get(0));
+        NegatableList<StructureFeature<?, ?>> structures = ConfigHelper.parseRegistryItems(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, registryAccess, (String) entry.get(0));
         if (structures.isEmpty()) return null;
         double temp = ((Number) entry.get(1)).doubleValue();
         Temperature.Units units = entry.size() == 3 ? Temperature.Units.valueOf(((String) entry.get(2)).toUpperCase()) : Temperature.Units.MC;
 
-        return new StructureTempData(new NegatableList<>(structures), temp, units, isOffset);
+        return new StructureTempData(structures, temp, units, isOffset);
     }
 
     @Override

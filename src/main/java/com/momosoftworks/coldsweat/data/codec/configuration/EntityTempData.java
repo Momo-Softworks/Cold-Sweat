@@ -14,10 +14,8 @@ import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.tags.ITag;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
 import java.util.List;
 
 public class EntityTempData extends ConfigData implements RequirementHolder
@@ -97,7 +95,7 @@ public class EntityTempData extends ConfigData implements RequirementHolder
         {   ColdSweat.LOGGER.error("Error parsing entity temp config: not enough arguments");
             return null;
         }
-        List<Either<ITag<EntityType<?>>, EntityType<?>>> entities = ConfigHelper.getEntityTypes((String) entry.get(0));
+        NegatableList<Either<ITag<EntityType<?>>, EntityType<?>>> entities = ConfigHelper.getEntityTypes((String) entry.get(0));
         if (entities.isEmpty()) return null;
 
         double temp = ((Number) entry.get(1)).doubleValue();

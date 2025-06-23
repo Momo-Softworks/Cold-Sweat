@@ -14,8 +14,6 @@ import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.block.Block;
 import net.minecraft.tags.ITag;
-import net.minecraft.util.registry.Registry;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -144,7 +142,7 @@ public class BlockTempData extends ConfigData
         {   ColdSweat.LOGGER.error("Error parsing block config: not enough arguments");
             return null;
         }
-        List<Either<ITag<Block>, Block>> blocks = ConfigHelper.getBlocks((String) entry.get(0));
+        NegatableList<Either<ITag<Block>, Block>> blocks = ConfigHelper.getBlocks((String) entry.get(0));
         if (blocks.isEmpty()) return null;
 
         // Parse block IDs into blocks
@@ -186,7 +184,7 @@ public class BlockTempData extends ConfigData
         double maxTemperature = blockTemp > 0 ? tempLimit : Double.POSITIVE_INFINITY;
         double minTemperature = blockTemp < 0 ? tempLimit : Double.NEGATIVE_INFINITY;
 
-        BlockRequirement blockRequirement = new BlockRequirement(new NegatableList<>(blocks), blockPredicates, nbtRequirement, Arrays.asList(), Optional.empty());
+        BlockRequirement blockRequirement = new BlockRequirement(blocks, blockPredicates, nbtRequirement, Arrays.asList(), Optional.empty());
 
         return new BlockTempData(new NegatableList<>(blockRequirement), blockTemp, blockRange, maxEffect, true,
                                  new WorldTempRequirement(maxTemperature), new WorldTempRequirement(minTemperature),

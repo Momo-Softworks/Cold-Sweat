@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.util.serialization;
 import com.mojang.datafixers.util.Either;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.tags.ITag;
@@ -58,27 +59,28 @@ public class RegistryHelper
     {   return REGISTRY_ACCESS;
     }
 
-    public static <T> List<T> mapTaggableList(List<Either<ITag<T>, T>> eitherList)
+    public static <T> List<T> mapTaggableList(NegatableList<Either<ITag<T>, T>> eitherList)
     {
         List<T> list = new ArrayList<>();
-        for (Either<ITag<T>, T> either : eitherList)
+        for (Either<ITag<T>, T> either : eitherList.requirements())
         {
             either.ifLeft(tag ->
             {   if (tag != null) list.addAll(tag.getValues());
             });
             either.ifRight(list::add);
         }
+        for (Either<ITag<T>, T> either : eitherList.exclusions())
+        {
+            either.ifLeft(tag ->
+            {   if (tag != null) list.removeAll(tag.getValues());
+            });
+            either.ifRight(list::remove);
+        }
         return list;
     }
 
-    public static <T> Optional<T> getVanillaRegistryValue(RegistryKey<Registry<T>> registry, ResourceLocation id)
-    {
-        try
-        {   return Optional.ofNullable(getRegistry(registry)).map(reg -> reg.get(id));
-        }
-        catch (Exception e)
-        {   return Optional.empty();
-        }
+    public static <T> List<T> mapTaggableList(List<Either<ITag<T>, T>> eitherList)
+    {   return mapTaggableList(new NegatableList<>(eitherList));
     }
 
     public static ResourceLocation getKey(ConfigData object)

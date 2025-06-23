@@ -1,6 +1,5 @@
 package com.momosoftworks.coldsweat.compat.kubejs.event.builder;
 
-import com.mojang.datafixers.util.Either;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.data.codec.configuration.SpawnBiomeData;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
@@ -15,11 +14,8 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.biome.Biome;
-import net.minecraftforge.registries.ForgeRegistries;
 
-import javax.xml.ws.Holder;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -42,8 +38,8 @@ public class SpawnBiomeBuilderJS
         {   ColdSweat.LOGGER.error("Could not parse biomes for addSpawnBiomes(), as registries are not built yet.");
             return this;
         }
-        List<Biome> biomesList = ConfigHelper.parseRegistryItems(Registry.BIOME_REGISTRY, registryAccess, biomes);
-        this.biomes.addAll(biomesList);
+        NegatableList<Biome> biomesList = ConfigHelper.parseRegistryItems(Registry.BIOME_REGISTRY, registryAccess, biomes);
+        this.biomes.addAll(biomesList.flatten());
         return this;
     }
 

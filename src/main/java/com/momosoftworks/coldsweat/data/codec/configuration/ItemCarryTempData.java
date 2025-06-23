@@ -155,7 +155,7 @@ public class ItemCarryTempData extends ConfigData implements RequirementHolder
         {   ColdSweat.LOGGER.error("Error parsing carried item temp config: not enough arguments");
             return null;
         }
-        List<Either<ITag<Item>, Item>> items = ConfigHelper.getItems((String) entry.get(0));
+        NegatableList<Either<ITag<Item>, Item>> items = ConfigHelper.getItems((String) entry.get(0));
         if (items.isEmpty())
         {   return null;
         }

@@ -17,23 +17,21 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.biome.Biome;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class SpawnBiomeData extends ConfigData
 {
-    final List<Biome> biomes;
-    final List<Either<ITag<EntityType<?>>, EntityType<?>>> entities;
+    final NegatableList<Biome> biomes;
+    final NegatableList<Either<ITag<EntityType<?>>, EntityType<?>>> entities;
     final EntityClassification category;
     final int weight;
     final IntegerBounds count;
     final NegatableList<LocationRequirement> location;
 
-    public SpawnBiomeData(List<Biome> biomes,
-                          List<Either<ITag<EntityType<?>>, EntityType<?>>> entities,
+    public SpawnBiomeData(NegatableList<Biome> biomes,
+                          NegatableList<Either<ITag<EntityType<?>>, EntityType<?>>> entities,
                           EntityClassification category, int weight, IntegerBounds count, NegatableList<LocationRequirement> location,
                           NegatableList<String> requiredMods)
     {
@@ -46,7 +44,7 @@ public class SpawnBiomeData extends ConfigData
         this.location = location;
     }
 
-    public SpawnBiomeData(List<Biome> biomes, List<Either<ITag<EntityType<?>>, EntityType<?>>> entities,
+    public SpawnBiomeData(NegatableList<Biome> biomes, NegatableList<Either<ITag<EntityType<?>>, EntityType<?>>> entities,
                           EntityClassification category, int weight, IntegerBounds count, NegatableList<LocationRequirement> location)
     {
         this(biomes, entities, category, weight, count, location, new NegatableList<>());
@@ -56,21 +54,21 @@ public class SpawnBiomeData extends ConfigData
                           int weight, Collection<EntityType<?>> entities,
                           IntegerBounds count, NegatableList<LocationRequirement> location)
     {
-        this(new ArrayList<>(biomes),
-             entities.stream().map(Either::<ITag<EntityType<?>>, EntityType<?>>right).collect(Collectors.toList()),
+        this(new NegatableList<>(biomes),
+             new NegatableList<>(entities.stream().map(Either::<ITag<EntityType<?>>, EntityType<?>>right).collect(Collectors.toList())),
              category, weight, count, location);
     }
 
     public static final Codec<SpawnBiomeData> CODEC = createCodec(RecordCodecBuilder.create(instance -> instance.group(
-            ConfigHelper.dynamicCodec(Registry.BIOME_REGISTRY).listOf().fieldOf("biomes").forGetter(SpawnBiomeData::biomes),
-            ConfigHelper.tagOrBuiltinCodec(Registry.ENTITY_TYPE_REGISTRY, Registry.ENTITY_TYPE).listOf().fieldOf("entities").forGetter(SpawnBiomeData::entities),
+            NegatableList.listCodec(ConfigHelper.dynamicCodec(Registry.BIOME_REGISTRY)).fieldOf("biomes").forGetter(SpawnBiomeData::biomes),
+            NegatableList.listCodec(ConfigHelper.tagOrBuiltinCodec(Registry.ENTITY_TYPE_REGISTRY, Registry.ENTITY_TYPE)).fieldOf("entities").forGetter(SpawnBiomeData::entities),
             EntityClassification.CODEC.fieldOf("category").forGetter(SpawnBiomeData::category),
             Codec.INT.fieldOf("weight").forGetter(SpawnBiomeData::weight),
             IntegerBounds.CODEC.optionalFieldOf("count", IntegerBounds.NONE).forGetter(SpawnBiomeData::count),
             NegatableList.codec(LocationRequirement.CODEC).optionalFieldOf("location", new NegatableList<>()).forGetter(SpawnBiomeData::location)
     ).apply(instance, SpawnBiomeData::new)));
 
-    public List<Biome> biomes()
+    public NegatableList<Biome> biomes()
     {   return biomes;
     }
     public EntityClassification category()
@@ -79,7 +77,7 @@ public class SpawnBiomeData extends ConfigData
     public int weight()
     {   return weight;
     }
-    public List<Either<ITag<EntityType<?>>, EntityType<?>>> entities()
+    public NegatableList<Either<ITag<EntityType<?>>, EntityType<?>>> entities()
     {   return entities;
     }
     public IntegerBounds count()
@@ -96,9 +94,9 @@ public class SpawnBiomeData extends ConfigData
         {   ColdSweat.LOGGER.error("Error parsing entity spawn biome config: not enough arguments");
             return null;
         }
-        List<Biome> biomes = ConfigHelper.parseRegistryItems(Registry.BIOME_REGISTRY, registryAccess, (String) entry.get(0));
+        NegatableList<Biome> biomes = ConfigHelper.parseRegistryItems(Registry.BIOME_REGISTRY, registryAccess, (String) entry.get(0));
         if (biomes.isEmpty()) return null;
-        return new SpawnBiomeData(biomes, Arrays.asList(Either.right(entityType)),
+        return new SpawnBiomeData(biomes, new NegatableList<>(Either.right(entityType)),
                                   EntityClassification.CREATURE, ((Number) entry.get(1)).intValue(),
                                   new IntegerBounds(1, 1), new NegatableList<>());
     }

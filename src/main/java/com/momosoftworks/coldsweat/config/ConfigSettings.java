@@ -19,6 +19,7 @@ import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.math.RegistryMultiMap;
@@ -518,7 +519,7 @@ public class ConfigSettings
 
         SLEEP_CHECK_IGNORE_BLOCKS = addSyncedSetting(ColdSweat.createKey("sleep_check_override_blocks"), ArrayList::new, holder ->
         {
-            List<Either<ITag<Block>, Block>> blocks = ConfigHelper.getBlocks(WorldSettingsConfig.SLEEPING_OVERRIDE_BLOCKS.get().toArray(new String[0]));
+            NegatableList<Either<ITag<Block>, Block>> blocks = ConfigHelper.getBlocks(WorldSettingsConfig.SLEEPING_OVERRIDE_BLOCKS.get().toArray(new String[0]));
             holder.get().addAll(RegistryHelper.mapTaggableList(blocks));
         },
         Registry.BLOCK.listOf(),
@@ -611,7 +612,7 @@ public class ConfigSettings
             BiConsumer<EntityType<?>, List<? extends List<?>>> configReader = (entityType, configBiomes) ->
             {
                 Multimap<Biome, SpawnBiomeData> dataMap = ConfigHelper.getRegistryMultimap(configBiomes, Registry.BIOME_REGISTRY,
-                                                                                                   toml -> SpawnBiomeData.fromToml(toml, entityType, registryAccess), SpawnBiomeData::biomes);
+                                                                                                   toml -> SpawnBiomeData.fromToml(toml, entityType, registryAccess), data -> data.biomes().flatten());
                 ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.ENTITY_SPAWN_BIOME_DATA);
 
                 holder.get(registryAccess).putAll(dataMap);
@@ -676,7 +677,7 @@ public class ConfigSettings
 
         THERMAL_SOURCE_SPREAD_WHITELIST = addSyncedSetting(ColdSweat.createKey("hearth_spread_whitelist"), ArrayList::new, holder ->
         {
-            List<Either<ITag<Block>, Block>> blocks = ConfigHelper.getBlocks(WorldSettingsConfig.SOURCE_SPREAD_WHITELIST.get().toArray(new String[0]));
+            NegatableList<Either<ITag<Block>, Block>> blocks = ConfigHelper.getBlocks(WorldSettingsConfig.SOURCE_SPREAD_WHITELIST.get().toArray(new String[0]));
             holder.get().addAll(RegistryHelper.mapTaggableList(blocks));
         },
         Registry.BLOCK.listOf(),
@@ -685,7 +686,7 @@ public class ConfigSettings
 
         THERMAL_SOURCE_SPREAD_BLACKLIST = addSyncedSetting(ColdSweat.createKey("hearth_spread_blacklist"), ArrayList::new, holder ->
         {
-            List<Either<ITag<Block>, Block>> blocks = ConfigHelper.getBlocks(WorldSettingsConfig.SOURCE_SPREAD_BLACKLIST.get().toArray(new String[0]));
+            NegatableList<Either<ITag<Block>, Block>> blocks = ConfigHelper.getBlocks(WorldSettingsConfig.SOURCE_SPREAD_BLACKLIST.get().toArray(new String[0]));
             holder.get().addAll(RegistryHelper.mapTaggableList(blocks));
         },
         Registry.BLOCK.listOf(),
@@ -782,7 +783,7 @@ public class ConfigSettings
         ICEBOX_MAX_VOLUME = addSyncedSetting(ColdSweat.createKey("icebox_max_volume"), () -> 1000, holder -> holder.set(WorldSettingsConfig.ICEBOX_MAX_VOLUME.get()),
         Codec.INT,
         (saver) -> WorldSettingsConfig.ICEBOX_MAX_VOLUME.set(saver),
-        SyncType.BOTH_WAYS);
+         SyncType.BOTH_WAYS);
 
         ICEBOX_WARM_UP_TIME = addSyncedSetting(ColdSweat.createKey("icebox_warm_up_time"), () -> 20, holder -> holder.set(WorldSettingsConfig.ICEBOX_WARM_UP_TIME.get()),
         Codec.INT,

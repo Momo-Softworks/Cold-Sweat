@@ -126,7 +126,7 @@ public class InsulatorData extends ConfigData implements RequirementHolder
         {   ColdSweat.LOGGER.error("Error parsing {} insulator config: not enough arguments", slot.getSerializedName());
             return null;
         }
-        List<Either<ITag<Item>, Item>> items = ConfigHelper.getItems((String) entry.get(0));
+        NegatableList<Either<ITag<Item>, Item>> items = ConfigHelper.getItems((String) entry.get(0));
         if (items.isEmpty())
         {   return null;
         }
@@ -158,11 +158,11 @@ public class InsulatorData extends ConfigData implements RequirementHolder
         }
 
         CompoundNBT tag = entry.size() > 4 ? NBTHelper.parseCompoundNbt((String) entry.get(4)) : new CompoundNBT();
-        boolean multiSlot = entry.size() > 5 && (Boolean) entry.get(5);
+        boolean fillSlots = entry.size() > 5 && (Boolean) entry.get(5);
 
         ItemRequirement itemRequirement = new ItemRequirement(items, new NbtRequirement(tag));
 
-        return new InsulatorData(new NegatableList<>(itemRequirement), slot, insulation, new NegatableList<>(), new AttributeModifierMap(), new HashMap<>(), multiSlot, false);
+        return new InsulatorData(new NegatableList<>(itemRequirement), slot, insulation, new NegatableList<>(), new AttributeModifierMap(), new HashMap<>(), fillSlots, false);
     }
 
     public InsulatorData copy()

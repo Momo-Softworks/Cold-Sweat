@@ -15,7 +15,6 @@ import net.minecraft.tags.ITag;
 import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,7 +75,7 @@ public class MountData extends ConfigData implements RequirementHolder
         {   ColdSweat.LOGGER.error("Error parsing insulating mount config: not enough arguments");
             return null;
         }
-        List<Either<ITag<EntityType<?>>, EntityType<?>>> entities = ConfigHelper.getEntityTypes((String) entry.get(0));
+        NegatableList<Either<ITag<EntityType<?>>, EntityType<?>>> entities = ConfigHelper.getEntityTypes((String) entry.get(0));
         if (entities.isEmpty()) return null;
 
         double coldInsul = ((Number) entry.get(1)).doubleValue();

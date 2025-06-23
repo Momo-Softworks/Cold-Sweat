@@ -18,7 +18,6 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tags.ITag;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
 import java.util.List;
 
 public class FuelData extends ConfigData implements RequirementHolder
@@ -67,7 +66,7 @@ public class FuelData extends ConfigData implements RequirementHolder
         {   ColdSweat.LOGGER.error("Error parsing fuel config: not enough arguments");
             return null;
         }
-        List<Either<ITag<Item>, Item>> items = ConfigHelper.getItems((String) entry.get(0));
+        NegatableList<Either<ITag<Item>, Item>> items = ConfigHelper.getItems((String) entry.get(0));
         if (items.isEmpty()) return null;
 
         double fuel = ((Number) entry.get(1)).doubleValue();
