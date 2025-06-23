@@ -92,7 +92,7 @@ public class TempModifierInit
 
         event.register(new FurnaceBlockTemp());
         event.register(new NetherPortalBlockTemp());
-        event.registerFirst(new SoulFireBlockTemp());
+        event.register(new SoulFireBlockTemp());
         ColdSweat.LOGGER.debug("Registered BlockTemps in {}ms", System.currentTimeMillis() - startMS);
     }
 
