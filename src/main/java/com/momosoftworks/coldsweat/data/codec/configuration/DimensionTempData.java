@@ -76,11 +76,11 @@ public class DimensionTempData extends ConfigData
         {   ColdSweat.LOGGER.error("Error parsing dimension config: not enough arguments");
             return null;
         }
-        List<Either<TagKey<DimensionType>, Holder<DimensionType>>> dimensions = ConfigHelper.parseRegistryItems(Registry.DIMENSION_TYPE_REGISTRY, registryAccess, (String) entry.get(0));
+        NegatableList<Either<TagKey<DimensionType>, Holder<DimensionType>>> dimensions = ConfigHelper.parseRegistryItems(Registry.DIMENSION_TYPE_REGISTRY, registryAccess, (String) entry.get(0));
         if (dimensions.isEmpty()) return null;
         double temp = ((Number) entry.get(1)).doubleValue();
         Temperature.Units units = entry.size() == 3 ? Temperature.Units.valueOf(((String) entry.get(2)).toUpperCase()) : Temperature.Units.MC;
-        return new DimensionTempData(new NegatableList<>(dimensions), temp, units, isOffset);
+        return new DimensionTempData(dimensions, temp, units, isOffset);
     }
 
     @Override

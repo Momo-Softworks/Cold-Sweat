@@ -142,7 +142,7 @@ public class BlockTempData extends ConfigData
         {   ColdSweat.LOGGER.error("Error parsing block config: not enough arguments");
             return null;
         }
-        List<Either<TagKey<Block>, Block>> blocks = ConfigHelper.getBlocks((String) entry.get(0));
+        NegatableList<Either<TagKey<Block>, Block>> blocks = ConfigHelper.getBlocks((String) entry.get(0));
         if (blocks.isEmpty()) return null;
 
         // Parse block IDs into blocks
@@ -184,7 +184,7 @@ public class BlockTempData extends ConfigData
         double maxTemperature = blockTemp > 0 ? tempLimit : Double.POSITIVE_INFINITY;
         double minTemperature = blockTemp < 0 ? tempLimit : Double.NEGATIVE_INFINITY;
 
-        BlockRequirement blockRequirement = new BlockRequirement(new NegatableList<>(blocks), blockPredicates, nbtRequirement, List.of(), Optional.empty());
+        BlockRequirement blockRequirement = new BlockRequirement(blocks, blockPredicates, nbtRequirement, List.of(), Optional.empty());
 
         return new BlockTempData(new NegatableList<>(blockRequirement), blockTemp, blockRange, maxEffect, true,
                                  new WorldTempRequirement(maxTemperature), new WorldTempRequirement(minTemperature),
