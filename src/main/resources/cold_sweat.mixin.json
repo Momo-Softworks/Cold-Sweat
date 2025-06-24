@@ -27,6 +27,7 @@
     "MixinBlockUpdate$Server",
     "MixinCampfire",
     "MixinEntityRiding",
+    "MixinForgeConfigSpec",
     "MixinFreezingWater",
     "MixinFreezingWater$IceMelt",
     "MixinIce$AddDrops",

@@ -48,35 +48,37 @@ public class ColdSweat
     public static final Logger LOGGER = LogManager.getLogger("Cold Sweat");
 
     public static final String MOD_ID = "cold_sweat";
+    public static IEventBus MOD_BUS;
 
     public ColdSweat()
     {
+        MOD_BUS = FMLJavaModLoadingContext.get().getModEventBus();
         MinecraftForge.EVENT_BUS.register(this);
-        IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
 
-        bus.addListener(this::commonSetup);
-        bus.addListener(this::clientSetup);
-        bus.addListener(this::registerCaps);
-        bus.addListener(this::updateConfigs);
-        if (CompatManager.isCuriosLoaded()) bus.addListener(this::registerCurioSlots);
+        MOD_BUS.addListener(this::commonSetup);
+        MOD_BUS.addListener(this::clientSetup);
+        MOD_BUS.addListener(this::registerCaps);
+        MOD_BUS.addListener(this::updateConfigs);
+        if (CompatManager.isCuriosLoaded()) MOD_BUS.addListener(this::registerCurioSlots);
 
         // Register stuff
-        BlockInit.BLOCKS.register(bus);
-        ItemInit.ITEMS.register(bus);
-        EntityInit.ENTITY_TYPES.register(bus);
-        BlockEntityInit.BLOCK_ENTITY_TYPES.register(bus);
-        ContainerInit.MENU_TYPES.register(bus);
-        EffectInit.EFFECTS.register(bus);
-        ParticleTypesInit.PARTICLES.register(bus);
-        PotionInit.POTIONS.register(bus);
-        SoundInit.SOUNDS.register(bus);
-        FeatureInit.FEATURES.register(bus);
-        AttributeInit.ATTRIBUTES.register(bus);
-        ActivityInit.ACTIVITIES.register(bus);
-        SensorTypeInit.SENSORS.register(bus);
-        MemoryInit.MEMORIES.register(bus);
-        TempEffectInit.REGISTRY_REGISTER.register(bus);
+        BlockInit.BLOCKS.register(MOD_BUS);
+        ItemInit.ITEMS.register(MOD_BUS);
+        EntityInit.ENTITY_TYPES.register(MOD_BUS);
+        BlockEntityInit.BLOCK_ENTITY_TYPES.register(MOD_BUS);
+        ContainerInit.MENU_TYPES.register(MOD_BUS);
+        EffectInit.EFFECTS.register(MOD_BUS);
+        ParticleTypesInit.PARTICLES.register(MOD_BUS);
+        PotionInit.POTIONS.register(MOD_BUS);
+        SoundInit.SOUNDS.register(MOD_BUS);
+        FeatureInit.FEATURES.register(MOD_BUS);
+        AttributeInit.ATTRIBUTES.register(MOD_BUS);
+        ActivityInit.ACTIVITIES.register(MOD_BUS);
+        SensorTypeInit.SENSORS.register(MOD_BUS);
+        MemoryInit.MEMORIES.register(MOD_BUS);
+        TempEffectInit.TEMP_EFFECTS.register(MOD_BUS);
 
+        // Handle config updates
         ModUpdater.updateFileNames();
 
         // Setup configs

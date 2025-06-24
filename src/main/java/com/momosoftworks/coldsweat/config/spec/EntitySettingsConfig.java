@@ -33,14 +33,26 @@ public class EntitySettingsConfig
 
     static
     {
+        BUILDER.comment("─────────────────────────────────────────────────────────────────────────",
+                        " Anywhere that uses entity IDs also supports:",
+                        " • Tags (e.g. \"#minecraft:skeletons\")",
+                        " • Comma-separated lists (e.g. \"minecraft:zombie,#minecraft:skeletons\")",
+                        "   Applies the setting to all listed IDs. Can use tags, regular IDs, and negation interchangeably",
+                        " • Negation (e.g. \"!minecraft:evoker\")",
+                        "   Useful with lists/tags. Excludes the listed IDs from the setting",
+                        "   i.e. \"#minecraft:raiders,!minecraft:evoker\" (all raid mobs EXCEPT evokers)",
+                        "─────────────────────────────────────────────────────────────────────────");
+
         /*
          Insulated Entities
          */
         BUILDER.push("Entity Temperature");
         INSULATED_MOUNTS = BUILDER
-                .comment("List of entities that will insulate the player when riding them",
-                         "A value of 0 provides no insulation; 1 provides full insulation",
-                         "Format: [[\"entity_id\", coldResistance, hotResistance], [\"entity_id\", coldResistance, hotResistance], etc...]")
+                .comment("─────────────────────────────────────────────────────────────────────────//drill_down",
+                         " List of entities that will insulate the player when riding them",
+                         " A value of 0 provides no insulation; 1 provides full insulation",
+                         " └── Format: [[\"entity_id\", coldResistance, heatResistance], [\"entity_id\", coldResistance, heatResistance], etc...]",
+                         " ⌄ ")
                 .defineListAllowEmpty(Arrays.asList("Insulated Mounts"), () -> Arrays.asList(
                 ),
                 it ->
@@ -56,11 +68,14 @@ public class EntitySettingsConfig
                 });
 
         ENTITY_TEMPERATURES = BUILDER
-                .comment("Defines temperature-emitting properties for entities",
-                         "Format: [[\"entity_id\", temperature, range, *units], [\"entity_id\", temperature, range, *units], etc...]",
-                         "temperature: The temperature emitted by the entity",
-                         "range: The range of the effect, in blocks",
-                         "units: (Optional) The units of the temperature value (MC, F, or C). Defaults to MC")
+                .comment("─────────────────────────────────────────────────────────────────────────//drill_down",
+                         " Defines temperature-emitting properties for entities",
+                         " ├── Format: [[\"entity_id\", temperature, range, *units], [\"entity_id\", temperature, range, *units], etc...]",
+                         " └── [* = optional]",
+                         " • temperature: The temperature emitted by the entity",
+                         " • range: The range of the effect, in blocks",
+                         " • units: (Optional) The units of the temperature value (MC, F, or C). Defaults to MC",
+                         " ⌄ ")
                 .defineListAllowEmpty(Arrays.asList("Entity Temperatures"), () -> Arrays.asList(),
                 it ->
                 {
@@ -77,12 +92,15 @@ public class EntitySettingsConfig
                 });
 
         ENTITY_CLIMATES = BUILDER
-                .comment("Defines entities that are affected by temperature and the climates they can live in",
-                         "Format: [[\"entity_id\", min_temp, max_temp, *rate, *units], [\"entity_id\", min_temp, max_temp, *rate, *units], etc...]",
-                         "min_temp: The minimum livable temperature, as an offset to the minimum temperature for players",
-                         "max_temp: The maximum livable temperature, as an offset to the maximum temperature for players",
-                         "rate: (Optional) A multiplier to the rate at which the entity overheats or freezes, based on players' rate",
-                         "units: (Optional) The units used for the min/max temperature values (MC, F, or C). Defaults to MC")
+                .comment("─────────────────────────────────────────────────────────────────────────//drill_down",
+                         " Defines entities that are affected by temperature and the climates they can live in",
+                         " ├── Format: [[\"entity_id\", minTemp, maxTemp, *rate, *units], [\"entity_id\", minTemp, maxTemp, *rate, *units], etc...]",
+                         " └── [* = optional]",
+                         " • min_temp: The minimum livable temperature, as an offset to the minimum temperature for players",
+                         " • max_temp: The maximum livable temperature, as an offset to the maximum temperature for players",
+                         " • *rate: A multiplier to the rate at which the entity overheats or freezes, based on players' rate",
+                         " • *units: The units used for the min/max temperature values (MC, F, or C). Defaults to MC",
+                         " ⌄ ")
                 .defineListAllowEmpty(Arrays.asList("Entity Climate Settings"), () -> Arrays.asList(
                         Arrays.asList("minecraft:chicken", 10, 10, 0.6, "F"),
                         Arrays.asList("minecraft:pig", 0, 0, 0.5, "F"),
@@ -104,13 +122,17 @@ public class EntitySettingsConfig
                       && (((List<?>) it).size() < 5 || ((List<?>) it).get(4) instanceof String));
 
         ENABLE_ENTITY_CLIMATES = BUILDER
-                .comment("Enables the temperature system for entities",
-                         "If disabled, entities will not be harmed by temperature")
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " Enables the temperature system for entities",
+                         " If disabled, entities will not be harmed by temperature",
+                         " ⌄ ")
                 .define("Enable Entity Climates", false);
 
         ADVANCED_ENTITY_TEMPERATURE = BUILDER
-                .comment("Enables more precise temperature calculations for entities",
-                         "This option might cause performance issues for large amounts of entities")
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " Enables more precise temperature calculations for entities",
+                         " This option might cause performance issues for large amounts of entities",
+                         " ⌄ ")
                 .define("Use Advanced Entity Climates", false);
 
         BUILDER.pop();
@@ -118,16 +140,20 @@ public class EntitySettingsConfig
         BUILDER.push("Fur Growth & Shedding");
 
         GOAT_FUR_GROWTH_STATS = BUILDER
-                .comment("Defines how often a goat will try to grow its fur, the growth cooldown after shearing, and the chance of it succeeding",
-                        "Format: [interval, cooldown, chance]")
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " Defines how often a goat will try to grow its fur, the growth cooldown after shearing, and the chance of it succeeding",
+                         " └── Format: [interval, cooldown, chance]",
+                         " ⌄ ")
                 .defineList("Goat Fur Growth Timings", Arrays.asList(
                         1200, 2400, 0.20
                 ),
                 it -> it instanceof Number);
 
         CHAMELEON_SHED_STATS = BUILDER
-                .comment("Defines how often a chameleon will try to shed its skin, the cooldown after shedding, and the chance of it succeeding",
-                        "Format: [interval, cooldown, chance]")
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " Defines how often a chameleon will try to shed its skin, the cooldown after shedding, and the chance of it succeeding",
+                         " Format: [interval, cooldown, chance]",
+                         " ⌄ ")
                 .defineList("Chameleon Shedding Timings", Arrays.asList(
                         400, 36000, 0.10
                 ),
@@ -137,8 +163,12 @@ public class EntitySettingsConfig
 
         BUILDER.push("Mob Spawning");
         CHAMELEON_SPAWN_BIOMES = BUILDER
-                .comment("Defines the biomes that Chameleons can spawn in",
-                         "Format: [[\"biome_id\", weight], [\"biome_id\", weight], etc...]")
+                .comment("─────────────────────────────────────────────────────────────────────────//drill_down",
+                         " Defines the biomes that Chameleons can spawn in",
+                         " └── Format: [[\"biome_id\", weight], [\"biome_id\", weight], etc...]",
+                         " • biome_id: The ID of the biome, e.g. \"minecraft:jungle\"",
+                         " • weight: The likelihood for the entity to spawn compared to other entities, higher values mean more common spawns",
+                         " ⌄ ")
                 .defineListAllowEmpty(Arrays.asList("Chameleon Spawn Biomes"), () -> ListBuilder.begin(
                                 Arrays.asList("minecraft:bamboo_jungle", 80),
                                 Arrays.asList("minecraft:jungle", 80),
@@ -184,8 +214,12 @@ public class EntitySettingsConfig
                         });
 
         GOAT_SPAWN_BIOMES = BUILDER
-                .comment("Defines additional biomes that goats can spawn in",
-                         "Format: [[\"biome_id\", weight], [\"biome_id\", weight], etc...]")
+                .comment("─────────────────────────────────────────────────────────────────────────//drill_down",
+                         " Defines the biomes that Chameleons can spawn in",
+                         " └── Format: [[\"biome_id\", weight], [\"biome_id\", weight], etc...]",
+                         " • biome_id: The ID of the biome, e.g. \"minecraft:jungle\"",
+                         " • weight: The likelihood for the entity to spawn compared to other entities, higher values mean more common spawns",
+                         " ⌄ ")
                 .defineListAllowEmpty(Arrays.asList("Goat Spawn Biomes"), () -> ListBuilder.begin(
                                 Arrays.asList("minecraft:mountains", 10),
                                 Arrays.asList("minecraft:mountains_edge", 5),

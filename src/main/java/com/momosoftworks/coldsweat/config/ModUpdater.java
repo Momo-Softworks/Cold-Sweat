@@ -3,7 +3,6 @@ package com.momosoftworks.coldsweat.config;
 import com.google.common.io.Files;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.temperature.modifier.InventoryItemsTempModifier;
-import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.config.spec.ItemSettingsConfig;
@@ -384,7 +383,7 @@ public class ModUpdater
     }
 
     public static boolean replaceConfigSetting(ForgeConfigSpec.ConfigValue<List<? extends List<?>>> config, String key,
-                                            Consumer<List<Object>> modifier)
+                                               Consumer<List<Object>> modifier)
     {
         List<List<?>> setting = new ArrayList<>(config.get());
         for (int i = 0; i < setting.size(); i++)
