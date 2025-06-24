@@ -8,6 +8,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.config.ConfigLoadingHandler;
+import com.momosoftworks.coldsweat.config.spec.CSConfigSpec;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
@@ -18,7 +19,6 @@ import com.momosoftworks.coldsweat.util.math.RegistryMultiMap;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.*;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -132,7 +132,7 @@ public class ConfigHelper
     {   return parseBuiltinItems(Registry.ENTITY_TYPE_REGISTRY, ForgeRegistries.ENTITIES, entities);
     }
 
-    public static <K extends IForgeRegistryEntry<K>, V extends ConfigData> Multimap<K, V> parseTomlRegistry(ForgeConfigSpec.ConfigValue<List<? extends List<?>>> config, Function<List<?>, V> tomlParser,
+    public static <K extends IForgeRegistryEntry<K>, V extends ConfigData> Multimap<K, V> parseTomlRegistry(CSConfigSpec.ConfigValue<List<? extends List<?>>> config, Function<List<?>, V> tomlParser,
                                                                                                             Function<V, List<Either<TagKey<K>, K>>> keyListGetter,
                                                                                                             IForgeRegistry<K> keyRegistry, ResourceKey<Registry<V>> valueRegistry)
     {

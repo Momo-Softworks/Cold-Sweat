@@ -4,7 +4,6 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.serialization.ListBuilder;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
@@ -17,86 +16,108 @@ import java.util.stream.Collectors;
 
 public class WorldSettingsConfig
 {
-    private static final ForgeConfigSpec SPEC;
-    private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
+    private static final CSConfigSpec SPEC;
+    private static final CSConfigSpec.Builder BUILDER = new CSConfigSpec.Builder();
 
-    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> BIOME_TEMP_OFFSETS;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> BIOME_TEMPERATURES;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> DIMENSION_TEMP_OFFSETS;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> DIMENSION_TEMPERATURES;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> STRUCTURE_TEMP_OFFSETS;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> STRUCTURE_TEMPERATURES;
+    public static final CSConfigSpec.ConfigValue<List<? extends List<?>>> BIOME_TEMP_OFFSETS;
+    public static final CSConfigSpec.ConfigValue<List<? extends List<?>>> BIOME_TEMPERATURES;
+    public static final CSConfigSpec.ConfigValue<List<? extends List<?>>> DIMENSION_TEMP_OFFSETS;
+    public static final CSConfigSpec.ConfigValue<List<? extends List<?>>> DIMENSION_TEMPERATURES;
+    public static final CSConfigSpec.ConfigValue<List<? extends List<?>>> STRUCTURE_TEMP_OFFSETS;
+    public static final CSConfigSpec.ConfigValue<List<? extends List<?>>> STRUCTURE_TEMPERATURES;
 
-    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> BLOCK_TEMPERATURES;
-    public static final ForgeConfigSpec.IntValue MAX_BLOCK_TEMP_RANGE;
+    public static final CSConfigSpec.ConfigValue<List<? extends List<?>>> BLOCK_TEMPERATURES;
+    public static final CSConfigSpec.IntValue MAX_BLOCK_TEMP_RANGE;
 
-    public static final ForgeConfigSpec.ConfigValue<Boolean> IS_SOUL_FIRE_COLD;
+    public static final CSConfigSpec.ConfigValue<Boolean> IS_SOUL_FIRE_COLD;
 
-    public static ForgeConfigSpec.ConfigValue<List<?>> SUMMER_TEMPERATURES;
-    public static ForgeConfigSpec.ConfigValue<List<?>> AUTUMN_TEMPERATURES;
-    public static ForgeConfigSpec.ConfigValue<List<?>> WINTER_TEMPERATURES;
-    public static ForgeConfigSpec.ConfigValue<List<?>> SPRING_TEMPERATURES;
+    public static CSConfigSpec.ConfigValue<List<?>> SUMMER_TEMPERATURES;
+    public static CSConfigSpec.ConfigValue<List<?>> AUTUMN_TEMPERATURES;
+    public static CSConfigSpec.ConfigValue<List<?>> WINTER_TEMPERATURES;
+    public static CSConfigSpec.ConfigValue<List<?>> SPRING_TEMPERATURES;
 
-    public static final ForgeConfigSpec.ConfigValue<Boolean> ENABLE_SMART_HEARTH;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> ENABLE_SMART_BOILER;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> ENABLE_SMART_ICEBOX;
-    public static final ForgeConfigSpec.ConfigValue<Double> SOURCE_EFFECT_STRENGTH;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> SOURCE_SPREAD_WHITELIST;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> SOURCE_SPREAD_BLACKLIST;
+    public static final CSConfigSpec.ConfigValue<Boolean> ENABLE_SMART_HEARTH;
+    public static final CSConfigSpec.ConfigValue<Boolean> ENABLE_SMART_BOILER;
+    public static final CSConfigSpec.ConfigValue<Boolean> ENABLE_SMART_ICEBOX;
+    public static final CSConfigSpec.ConfigValue<Double> SOURCE_EFFECT_STRENGTH;
+    public static final CSConfigSpec.ConfigValue<List<? extends String>> SOURCE_SPREAD_WHITELIST;
+    public static final CSConfigSpec.ConfigValue<List<? extends String>> SOURCE_SPREAD_BLACKLIST;
 
-    public static final ForgeConfigSpec.ConfigValue<Integer> HEARTH_RANGE;
-    public static final ForgeConfigSpec.ConfigValue<Integer> HEARTH_MAX_RANGE;
-    public static final ForgeConfigSpec.ConfigValue<Integer> HEARTH_MAX_VOLUME;
-    public static final ForgeConfigSpec.ConfigValue<Integer> HEARTH_WARM_UP_TIME;
-    public static final ForgeConfigSpec.ConfigValue<Integer> HEARTH_MAX_INSULATION;
-    public static final ForgeConfigSpec.ConfigValue<Integer> HEARTH_FUEL_INTERVAL;
+    public static final CSConfigSpec.ConfigValue<Integer> HEARTH_RANGE;
+    public static final CSConfigSpec.ConfigValue<Integer> HEARTH_MAX_RANGE;
+    public static final CSConfigSpec.ConfigValue<Integer> HEARTH_MAX_VOLUME;
+    public static final CSConfigSpec.ConfigValue<Integer> HEARTH_WARM_UP_TIME;
+    public static final CSConfigSpec.ConfigValue<Integer> HEARTH_MAX_INSULATION;
+    public static final CSConfigSpec.ConfigValue<Integer> HEARTH_FUEL_INTERVAL;
 
-    public static final ForgeConfigSpec.ConfigValue<Integer> BOILER_RANGE;
-    public static final ForgeConfigSpec.ConfigValue<Integer> BOILER_MAX_RANGE;
-    public static final ForgeConfigSpec.ConfigValue<Integer> BOILER_MAX_VOLUME;
-    public static final ForgeConfigSpec.ConfigValue<Integer> BOILER_WARM_UP_TIME;
-    public static final ForgeConfigSpec.ConfigValue<Integer> BOILER_MAX_INSULATION;
-    public static final ForgeConfigSpec.ConfigValue<Integer> BOILER_FUEL_INTERVAL;
+    public static final CSConfigSpec.ConfigValue<Integer> BOILER_RANGE;
+    public static final CSConfigSpec.ConfigValue<Integer> BOILER_MAX_RANGE;
+    public static final CSConfigSpec.ConfigValue<Integer> BOILER_MAX_VOLUME;
+    public static final CSConfigSpec.ConfigValue<Integer> BOILER_WARM_UP_TIME;
+    public static final CSConfigSpec.ConfigValue<Integer> BOILER_MAX_INSULATION;
+    public static final CSConfigSpec.ConfigValue<Integer> BOILER_FUEL_INTERVAL;
 
-    public static final ForgeConfigSpec.ConfigValue<Integer> ICEBOX_RANGE;
-    public static final ForgeConfigSpec.ConfigValue<Integer> ICEBOX_MAX_RANGE;
-    public static final ForgeConfigSpec.ConfigValue<Integer> ICEBOX_MAX_VOLUME;
-    public static final ForgeConfigSpec.ConfigValue<Integer> ICEBOX_WARM_UP_TIME;
-    public static final ForgeConfigSpec.ConfigValue<Integer> ICEBOX_MAX_INSULATION;
-    public static final ForgeConfigSpec.ConfigValue<Integer> ICEBOX_FUEL_INTERVAL;
+    public static final CSConfigSpec.ConfigValue<Integer> ICEBOX_RANGE;
+    public static final CSConfigSpec.ConfigValue<Integer> ICEBOX_MAX_RANGE;
+    public static final CSConfigSpec.ConfigValue<Integer> ICEBOX_MAX_VOLUME;
+    public static final CSConfigSpec.ConfigValue<Integer> ICEBOX_WARM_UP_TIME;
+    public static final CSConfigSpec.ConfigValue<Integer> ICEBOX_MAX_INSULATION;
+    public static final CSConfigSpec.ConfigValue<Integer> ICEBOX_FUEL_INTERVAL;
 
-    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> SLEEPING_OVERRIDE_BLOCKS;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> SHOULD_CHECK_SLEEP;
+    public static final CSConfigSpec.ConfigValue<List<? extends String>> SLEEPING_OVERRIDE_BLOCKS;
+    public static final CSConfigSpec.ConfigValue<Boolean> SHOULD_CHECK_SLEEP;
 
-    public static final ForgeConfigSpec.ConfigValue<Boolean> CUSTOM_WATER_FREEZE_BEHAVIOR;
-    public static final ForgeConfigSpec.ConfigValue<Boolean> CUSTOM_ICE_DROPS;
+    public static final CSConfigSpec.ConfigValue<Boolean> CUSTOM_WATER_FREEZE_BEHAVIOR;
+    public static final CSConfigSpec.ConfigValue<Boolean> CUSTOM_ICE_DROPS;
 
-    public static final ForgeConfigSpec.ConfigValue<List<?>> OVERCAST_TEMP_OFFSET;
+    public static final CSConfigSpec.ConfigValue<List<?>> OVERCAST_TEMP_OFFSET;
 
     static
     {
+        BUILDER.comment("─────────────────────────────────────────────────────────────────────────",
+                        " Anywhere that uses IDs, such as blocks, biomes, dimensions, and structures, also supports:",
+                        " • Tags (e.g. \"#minecraft:is_underground\")",
+                        " • Comma-separated lists (e.g. \"minecraft:desert,#minecraft:is_badlands\")",
+                        "   Applies the setting to all listed IDs. Can use tags, regular IDs, and negation interchangeably",
+                        " • Negation (e.g. \"!minecraft:jungle_leaves\")",
+                        "   Useful with lists/tags. Excludes the listed IDs from the setting",
+                        "   i.e. \"#minecraft:leaves,!minecraft:jungle_leaves\" (all leaves EXCEPT jungle leaves)",
+                        "─────────────────────────────────────────────────────────────────────────");
+
         /*
          Dimensions
          */
-        BUILDER.comment("Format: [[\"dimension_1\", temperature1, *units], [\"dimension_2\", temperature2, *units]... etc]",
-                        "Common dimension IDs: minecraft:overworld, minecraft:the_nether, minecraft:the_end")
-               .push("Dimensions");
+        BUILDER.push("Dimensions");
 
-        DIMENSION_TEMP_OFFSETS = BUILDER
-                .comment("Applies an offset to the world's temperature across an entire dimension")
+            DIMENSION_TEMP_OFFSETS = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────//drill_down",
+                         " Applies an offset to the world's temperature across an entire dimension",
+                         " ├── Format: [[\"dimension_id\", temperature1, *units], [\"dimension_id\", temperature2, *units]... etc]",
+                         " └── [* = optional]",
+                         " • dimension_id: The ID of the dimension (e.g. \"minecraft:the_nether\")",
+                         " • temperature: The temperature offset to apply to the dimension",
+                         " • *units: The units of the temperature (\"f\", \"c\", or \"mc\"). Defaults to Minecraft units (mc))",
+                         " ⌄ ")
             .defineListAllowEmpty(List.of("Dimension Temperature Offsets"), () -> ListBuilder.begin(
-                        List.of("minecraft:the_nether", 0.7),
-                        List.of("minecraft:the_end", -0.1))
-                .addIf(CompatManager.isTwilightForestLoaded(), () -> List.of("twilightforest:twilight_forest_type", 0.2))
-                .addIf(CompatManager.isAetherLoaded(), () -> List.of("aether:the_aether", 0.7))
+                    List.of("minecraft:the_nether", 32, "f"),
+                    List.of("minecraft:the_end", -5, "f"))
+                .addIf(CompatManager.isTwilightForestLoaded(), () -> List.of("twilightforest:twilight_forest_type", 10, "f"))
+                .addIf(CompatManager.isAetherLoaded(), () -> List.of("aether:the_aether", 32, "f"))
                 .build(),
             it -> it instanceof List<?> list
                     && list.get(0) instanceof String
                     && list.get(1) instanceof Number
                     && (list.size() < 3 || list.get(2) instanceof String));
 
-        DIMENSION_TEMPERATURES = BUILDER
-            .comment("Defines the temperature of a dimension, overriding all other biome and dimension temperatures/settings")
+            DIMENSION_TEMPERATURES = BUILDER
+            .comment("─────────────────────────────────────────────────────────────────────────//drill_down",
+                     " Defines the temperature of a dimension, overriding biome and elevation temperature",
+                     " ├── Format: [[\"dimension_id\", temperature, *units], [\"dimension_id\", temperature, *units]... etc]",
+                     " └── [* = optional]",
+                     " • dimension_id: The ID of the dimension (e.g. \"minecraft:the_nether\")",
+                     " • temperature: The temperature of the dimension",
+                     " • *units: The units of the temperature (\"f\", \"c\", or \"mc\"). Defaults to Minecraft units (mc))",
+                     " ⌄ ")
             .defineListAllowEmpty(List.of("Dimension Temperatures"), () -> List.of(
                     // No default values
             ),
@@ -110,14 +131,18 @@ public class WorldSettingsConfig
         /*
          Biomes
          */
-        BUILDER.comment("Format: [[\"biome_1\", <low-temp>, <high-temp>, <*units>], [\"biome_2\", <low-temp>, <high-temp>, <*units>]... etc]",
-                       "low-temp: The temperature of the biome at midnight",
-                       "high-temp: The temperature of the biome at noon",
-                       "units: Optional. The units of the temperature (\"C\" or \"F\". Defaults to MC units)")
-               .push("Biomes");
+        BUILDER.push("Biomes");
 
         BIOME_TEMP_OFFSETS = BUILDER
-            .comment("Applies an offset to the temperature of a biome")
+            .comment("─────────────────────────────────────────────────────────────────────────//drill_down",
+                     " Applies an offset to the temperature of a biome",
+                     " ├── Format: [[\"biome_id\", <lowTemp>, <highTemp>, <*units>], [\"biome_id\", <lowTemp>, <highTemp>, <*units>]... etc]",
+                     " └── [* = optional]",
+                     " • biome_id: The ID of the biome (e.g. \"minecraft:desert\")",
+                     " • lowTemp: The temperature offset at midnight",
+                     " • highTemp: The temperature offset at noon",
+                     " • *units: The units of the temperature (\"f\", \"c\", or \"mc\"). Defaults to Minecraft units (mc))",
+                     " ⌄ ")
             .defineListAllowEmpty(List.of("Biome Temperature Offsets"), () -> List.of(),
                 it -> it instanceof List<?> list
                       && list.get(0) instanceof String
@@ -126,9 +151,16 @@ public class WorldSettingsConfig
                       && (list.size() < 4 || list.get(3) instanceof String)
                 );
 
-
         BIOME_TEMPERATURES = BUILDER
-            .comment("Defines the temperature of a biome, overriding the biome's default temperature")
+            .comment("─────────────────────────────────────────────────────────────────────────//drill_down",
+                     " Defines the temperature of a biome, overriding the biome's default temperature",
+                     " ├── Format: [[\"biome_id\", <low-temp>, <high-temp>, <*units>], [\"biome_id\", <low-temp>, <high-temp>, <*units>]... etc]",
+                     " └── [* = optional]",
+                     " • biome_id: The ID of the biome (e.g. \"minecraft:desert\")",
+                     " • lowTemp: The temperature of the biome at midnight",
+                     " • highTemp: The temperature of the biome at noon",
+                     " • *units: The units of the temperature (\"f\", \"c\", or \"mc\"). Defaults to Minecraft units (mc))",
+                     " ⌄ ")
             .defineListAllowEmpty(List.of("Biome Temperatures"), () -> ListBuilder.begin(
                             List.of("minecraft:soul_sand_valley", 53, 53, "F"),
                             List.of("minecraft:old_growth_birch_forest", 58, 72, "F"),
@@ -529,21 +561,21 @@ public class WorldSettingsConfig
 
         BUILDER.push("Blocks");
 
-        BLOCK_TEMPERATURES = BUILDER
-                .comment(" Format:",
-                         " [[\"block-ids\", <temperature>, <range>, <*units>, <*max effect>, <*predicates>, <*\"nbt\">, <*temperature-limit>], [etc...], [etc...]]",
-                         " * = Optional",
-                         " ",
-                         " Arguments:",
-                         " block-ids: Multiple IDs can be used by separating them with commas (i.e: \"minecraft:torch,minecraft:wall_torch\")",
-                         " temperature: The temperature of the block, in Minecraft units",
-                         " units: \"f\" (Fahrenheit), \"c\" (Celsius), \"mc\" (Minecraft units)",
-                         " *max effect: The maximum cumulative temperature change this block can cause to a player (even with multiple blocks)",
-                         " *predicates: The state that the block has to be in for the temperature to be applied (i.e. lit=true).",
-                         " - (Multiple predicates can be used by separating them with commas [i.e. \"lit=true,waterlogged=false\"])",
-                         " *nbt: The NBT data that the block must have for the temperature to be applied.",
-                         " *temperature-limit: The maximum world temperature at which this block temp will be effective.",
-                         " - (Represents the minimum temp if the block temp is negative)")
+            BLOCK_TEMPERATURES = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────//drill_down",
+                         " Applies temperature-emitting properties to blocks",
+                         " ├── Format: [[\"block_id\", <temperature>, <range>, <*units>, <*maxEffect>, <*predicates>, <*\"{nbt}\">, <*temperatureLimit>], [etc...], [etc...]]",
+                         " └── [* = optional]",
+                         " • block_id: The ID of the block (i.e. \"minecraft:lava\")",
+                         " • temperature: The temperature of the block, in Minecraft units",
+                         " • range: The radius of the block's temperature effect, in blocks",
+                         " • *units: The units of the temperature (\"f\", \"c\", or \"mc\"). Defaults to Minecraft units (mc))",
+                         " • *maxEffect: The maximum cumulative temperature change this block can cause to a player (even with multiple blocks)",
+                         " • *predicates: The state that the block has to be in for the temperature to be applied (i.e. lit=true).",
+                         "   (Multiple predicates can be used by separating them with commas [i.e. \"lit=true,waterlogged=false\"])",
+                         " • *nbt: The NBT data that the block must have for the temperature to be applied.",
+                         " • *temperatureLimit: The maximum world temperature at which this block temp will have any effect.",
+                         "   (Represents the minimum temp if the block temp is negative)")
                 .defineListAllowEmpty(List.of("Block Temperatures"), () -> List.of(
                                             List.of("cold_sweat:boiler",       0.27, 7, "mc", 0.88, "lit=true", "", 4),
                                             List.of("cold_sweat:icebox",      -0.27, 7, "mc", 0.88, "frosted=true", "", 0),
@@ -568,36 +600,40 @@ public class WorldSettingsConfig
                                     && (list.size() < 7 || list.get(6) instanceof String)
                                     && (list.size() < 8 || list.get(7) instanceof Number));
 
-        MAX_BLOCK_TEMP_RANGE = BUILDER
-                .comment("The maximum range of blocks' area of effect",
-                         "Note: This will not change anything unless blocks are configured to utilize the expanded range",
-                          "This value is capped at 16 for performance reasons")
+            MAX_BLOCK_TEMP_RANGE = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " The maximum range of blocks' area of effect",
+                         " - Note: This will not change anything unless blocks are configured to utilize the expanded range",
+                         " - This value is limited to 16 for performance reasons",
+                         " ⌄ ")
                 .defineInRange("Block Range", 7, 1, 16);
 
-        CUSTOM_WATER_FREEZE_BEHAVIOR = BUILDER
-                .comment("When set to true, uses Cold Sweat's temperature system to determine water freezing behavior")
+            CUSTOM_WATER_FREEZE_BEHAVIOR = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " When set to true, uses Cold Sweat's temperature system to determine water freezing behavior",
+                         " ⌄ ")
                 .define("Custom Freezing Behavior", true);
 
-        CUSTOM_ICE_DROPS = BUILDER
-                .comment("When set to true, modifies ice blocks to be harvestable with a pickaxe")
+            CUSTOM_ICE_DROPS = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " When set to true, modifies ice blocks to be harvestable with a pickaxe",
+                         " ⌄ ")
                 .define("Custom Ice Drops", true);
 
         BUILDER.pop();
 
 
-        BUILDER.push("Misc");
+        BUILDER.push("Structures");
 
-        OVERCAST_TEMP_OFFSET = BUILDER
-                .comment("A temperature offset applied when the sky is overcast",
-                         "Format: [offset, *units]")
-                .defineList("Overcast Temperature Offset",
-                            List.of(-0.35, "mc"),
-                            it -> it instanceof Number || it instanceof String);
-
-        STRUCTURE_TEMPERATURES = BUILDER
-                .comment("Overrides the world temperature when the player is within this structure",
-                         "Format: [[\"structure_1\", temperature1, *units], [\"structure_2\", temperature2, *units]... etc]",
-                         "(* = optional)")
+            STRUCTURE_TEMPERATURES = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " Overrides the world temperature when the player is within this structure",
+                         " ├── Format: [[\"structure_id\", temperature, *units], [\"structure_id\", temperature, *units]... etc]",
+                         " └── [* = optional]",
+                         " • structure_id: The ID of the structure (i.e. \"minecraft:stronghold\")",
+                         " • temperature: The temperature of the structure, in Minecraft units",
+                         " • *units: The units of the temperature (\"f\" for Fahrenheit, \"c\" for Celsius, \"mc\" for Minecraft units)",
+                         " ⌄ ")
                 .defineListAllowEmpty(List.of("Structure Temperatures"), () -> List.of(
                         // empty
                 ), it -> it instanceof List<?> list
@@ -605,10 +641,15 @@ public class WorldSettingsConfig
                         && list.get(1) instanceof Number
                         && (list.size() < 3 || list.get(2) instanceof String));
 
-        STRUCTURE_TEMP_OFFSETS = BUILDER
-                .comment("Offsets the world temperature when the player is within this structure",
-                         "Format: [[\"structure_1\", offset1, *units], [\"structure_2\", offset2, *units]... etc]",
-                         "(* = optional)")
+            STRUCTURE_TEMP_OFFSETS = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " Offsets the world temperature when the player is within this structure",
+                         " ├── Format: [[\"structure_id\", offset, *units], [\"structure_id\", offset, *units]... etc]",
+                         " └── [* = optional]",
+                         " • structure_id: The ID of the structure (i.e. \"minecraft:stronghold\")",
+                         " • offset: The temperature offset of the structure, in Minecraft units",
+                         " • *units: The units of the temperature (\"f\" for Fahrenheit, \"c\" for Celsius, \"mc\" for Minecraft units)",
+                         " ⌄ ")
                 .defineListAllowEmpty(List.of("Structure Temperature Offsets"), () -> List.of(
                         // empty
                 ), it -> it instanceof List<?> list
@@ -616,37 +657,61 @@ public class WorldSettingsConfig
                         && list.get(1) instanceof Number
                         && (list.size() < 3 || list.get(2) instanceof String));
 
-        SLEEPING_OVERRIDE_BLOCKS = BUILDER
-                .comment("List of blocks that will allow the player to sleep on them, regardless of the \"Prevent Sleep When in Danger\" setting",
-                         "Use this list if the player is not getting the temperature effect from sleeping on particular blocks")
+        BUILDER.pop();
+
+
+        BUILDER.push("Misc");
+
+            OVERCAST_TEMP_OFFSET = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " A temperature offset applied when the sky is overcast",
+                         " └── Format: [offset, *units]",
+                         " ⌄ ")
+                .defineList("Overcast Temperature Offset",
+                            List.of(-0.35, "mc"),
+                            it -> it instanceof Number || it instanceof String);
+
+            SLEEPING_OVERRIDE_BLOCKS = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " List of blocks that will allow the player to sleep on them, regardless of the \"Prevent Sleep When in Danger\" setting",
+                         " Use this list if the player is not getting the temperature effect from sleeping on particular blocks",
+                         " ⌄ ")
                 .defineListAllowEmpty(List.of("Sleep Check Override Blocks"), () -> ListBuilder.<String>begin()
                         .addIf(CompatManager.modLoaded("comforts"),
                                 () -> "#comforts:sleeping_bags")
                         .build(),
                 it -> it instanceof String);
 
-        SHOULD_CHECK_SLEEP = BUILDER
-                .comment("When set to true, players cannot sleep if they are cold or hot enough to die")
+            SHOULD_CHECK_SLEEP = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " When set to true, players cannot sleep if they are cold or hot enough to die",
+                         " ⌄ ")
                 .define("Check Sleeping Conditions", true);
 
-        IS_SOUL_FIRE_COLD = BUILDER
-                .comment("Converts damage dealt by Soul Fire to cold damage (default: true)",
-                         "Does not affect the block's temperature")
+            IS_SOUL_FIRE_COLD = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " Converts damage dealt by Soul Fire to cold damage (default: true)",
+                         " Does not affect the block's temperature",
+                         " ⌄ ")
                 .define("Cold Soul Fire", true);
 
         BUILDER.pop();
 
 
-        BUILDER.comment("\"Thermal sources\" are blocks that have a smokestack and emit frigidness/warmth, like the hearth, boiler, and iceobx")
+        BUILDER.comment("\"Thermal sources\" are blocks that have a smokestack and give frigidness/warmth, like the hearth, boiler, and iceobx")
                .push("Thermal Sources");
 
-        SOURCE_EFFECT_STRENGTH = BUILDER
-                .comment("How effective thermal sources are at normalizing temperature")
+            SOURCE_EFFECT_STRENGTH = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " How effective thermal sources are at normalizing temperature",
+                         " ⌄ ")
                 .defineInRange("Thermal Source Strength", 0.75, 0, 1.0);
 
-        SOURCE_SPREAD_WHITELIST = BUILDER
-                .comment("List of additional blocks that thermal sources can spread through",
-                         "Use this list if thermal sources aren't spreading through particular blocks that they should")
+            SOURCE_SPREAD_WHITELIST = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " List of additional blocks that thermal sources can spread through",
+                         " Use this list if thermal sources aren't spreading through particular blocks that they should",
+                         " ⌄ ")
                 .defineListAllowEmpty(List.of("Thermal Source Spread Whitelist"), () -> ListBuilder.begin(
                                               "minecraft:iron_bars",
                                               "#minecraft:leaves")
@@ -655,93 +720,137 @@ public class WorldSettingsConfig
                                           .build(),
                                       o -> o instanceof String);
 
-        SOURCE_SPREAD_BLACKLIST = BUILDER
-                .comment("List of additional blocks that thermal sources spread through",
-                         "Use this list if thermal sources are spreading through particular blocks that they shouldn't")
+            SOURCE_SPREAD_BLACKLIST = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " List of additional blocks that thermal sources spread through",
+                         " Use this list if thermal sources are spreading through particular blocks that they shouldn't",
+                         " ⌄ ")
                 .defineListAllowEmpty(List.of("Thermal Source Spread Blacklist"), () -> List.of(
                                             "minecraft:water"
                 ), o -> o instanceof String);
 
         BUILDER.push("Hearth");
 
-        ENABLE_SMART_HEARTH = BUILDER
-                .comment("Allows the hearth to automatically turn on/off based on nearby players' temperature",
-                         "If false, it turns on/off by redstone signal instead")
+            ENABLE_SMART_HEARTH = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " Allows the hearth to automatically turn on/off based on nearby players' temperature",
+                         " If false, it turns on/off by redstone signal instead",
+                         " ⌄ ")
                 .define("Automatic Hearth", false);
-        HEARTH_RANGE = BUILDER
-                .comment("The distance the hearth's air will travel from a source, like the hearth itself or the end of a pipe")
+            HEARTH_RANGE = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " The distance the hearth's air will travel from a source, like the hearth itself or the end of a pipe",
+                         " ⌄ ")
                 .defineInRange("Hearth Range", 20, 0, Integer.MAX_VALUE);
-        HEARTH_MAX_RANGE = BUILDER
-                .comment("The maximum distance that air can be piped away from the hearth")
+            HEARTH_MAX_RANGE = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " The maximum distance that air can be piped away from the hearth",
+                         " ⌄ ")
                 .defineInRange("Max Hearth Range", 96, 0, Integer.MAX_VALUE);
-        HEARTH_MAX_VOLUME = BUILDER
-                .comment("The maximum volume of the hearth's area of effect")
+            HEARTH_MAX_VOLUME = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " The maximum volume of the hearth's area of effect",
+                         " ⌄ ")
                 .defineInRange("Hearth Volume", 12000, 1, Integer.MAX_VALUE);
-        HEARTH_WARM_UP_TIME = BUILDER
-                .comment("The time it takes for the hearth to be fully functional after being placed")
+            HEARTH_WARM_UP_TIME = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " The time it takes for the hearth to be fully functional after being placed",
+                         " ⌄ ")
                 .defineInRange("Hearth Warm-Up Time", 1200, 0, Integer.MAX_VALUE);
-        HEARTH_MAX_INSULATION = BUILDER
-                .comment("The maximum amount of insulation that the hearth can provide")
+            HEARTH_MAX_INSULATION = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " The maximum amount of insulation that the hearth can provide",
+                         " ⌄ ")
                 .defineInRange("Hearth Effect Strength", 10, 0, 10);
-        HEARTH_FUEL_INTERVAL = BUILDER
-                .comment("How often the hearth consumes fuel (in ticks)",
-                         "Lower numbers mean fuel is consumed faster. Setting to 0 disables fuel consumption")
+            HEARTH_FUEL_INTERVAL = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " How often the hearth consumes fuel (in ticks)",
+                         " Lower numbers cause fuel to be consumed faster. Setting to 0 disables fuel consumption",
+                         " ⌄ ")
                 .defineInRange("Hearth Fuel Consumption Interval", 40, 0, Integer.MAX_VALUE);
 
         BUILDER.pop();
 
         BUILDER.push("Boiler");
 
-        ENABLE_SMART_BOILER = BUILDER
-                .comment("Allows the boiler to automatically turn on/off based on nearby players' temperature",
-                         "If false, it turns on/off by redstone signal instead")
+            ENABLE_SMART_BOILER = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " Allows the boiler to automatically turn on/off based on nearby players' temperature",
+                         " If false, it turns on/off by redstone signal instead",
+                         " ⌄ ")
                 .define("Automatic Boiler", false);
-        BOILER_RANGE = BUILDER
-                .comment("The distance the boiler's air will travel from a source, like the boiler itself or the end of a pipe")
+            BOILER_RANGE = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " The distance the boiler's air will travel from a source, like the boiler itself or the end of a pipe",
+                         " ⌄ ")
                 .defineInRange("Boiler Range", 16, 0, Integer.MAX_VALUE);
-        BOILER_MAX_RANGE = BUILDER
-                .comment("The maximum distance that air can be piped away from the boiler")
+            BOILER_MAX_RANGE = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " The maximum distance that air can be piped away from the boiler",
+                         " ⌄ ")
                 .defineInRange("Max Boiler Range", 96, 0, Integer.MAX_VALUE);
-        BOILER_MAX_VOLUME = BUILDER
-                .comment("The maximum volume of the boiler's area of effect")
+            BOILER_MAX_VOLUME = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " The maximum volume of the boiler's area of effect",
+                         " ⌄ ")
                 .defineInRange("Boiler Volume", 2000, 1, Integer.MAX_VALUE);
-        BOILER_WARM_UP_TIME = BUILDER
-                .comment("The time it takes for the boiler to be fully functional after being placed")
+            BOILER_WARM_UP_TIME = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " The time it takes for the boiler to be fully functional after being placed",
+                         " ⌄ ")
                 .defineInRange("Boiler Warm-Up Time", 1200, 0, Integer.MAX_VALUE);
-        BOILER_MAX_INSULATION = BUILDER
-                .comment("The maximum amount of insulation that the boiler can provide")
+            BOILER_MAX_INSULATION = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " The maximum amount of insulation that the boiler can provide",
+                         " ⌄ ")
                 .defineInRange("Boiler Warmth Strength", 5, 0, 10);
-        BOILER_FUEL_INTERVAL = BUILDER
-                .comment("How often the boiler consumes fuel (in ticks)",
-                         "Lower numbers mean fuel is consumed faster. Setting to 0 disables fuel consumption")
+            BOILER_FUEL_INTERVAL = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " How often the boiler consumes fuel (in ticks)",
+                         " Lower numbers cause fuel to be consumed faster. Setting to 0 disables fuel consumption",
+                         " ⌄ ")
                 .defineInRange("Boiler Fuel Consumption Interval", 40, 0, Integer.MAX_VALUE);
 
         BUILDER.pop();
 
         BUILDER.push("Icebox");
 
-        ENABLE_SMART_ICEBOX = BUILDER
-                .comment("Allows the icebox to automatically turn on/off based on nearby players' temperature",
-                         "If false, it turns on/off by redstone signal instead")
+            ENABLE_SMART_ICEBOX = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " Allows the icebox to automatically turn on/off based on nearby players' temperature",
+                         " If false, it turns on/off by redstone signal instead",
+                         " ⌄ ")
                 .define("Automatic Icebox", false);
-        ICEBOX_RANGE = BUILDER
-                .comment("The distance the icebox's air will travel from a source, like the icebox itself or the end of a pipe")
+            ICEBOX_RANGE = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " The distance the icebox's air will travel from a source, like the icebox itself or the end of a pipe",
+                         " ⌄ ")
                 .defineInRange("Icebox Range", 16, 0, Integer.MAX_VALUE);
-        ICEBOX_MAX_RANGE = BUILDER
-                .comment("The maximum distance that air can be piped away from the icebox")
+            ICEBOX_MAX_RANGE = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " The maximum distance that air can be piped away from the icebox",
+                         " ⌄ ")
                 .defineInRange("Max Icebox Range", 96, 0, Integer.MAX_VALUE);
-        ICEBOX_MAX_VOLUME = BUILDER
-                .comment("The maximum volume of the icebox's area of effect")
+            ICEBOX_MAX_VOLUME = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " The maximum volume of the icebox's area of effect",
+                         " ⌄ ")
                 .defineInRange("Icebox Volume", 2000, 1, Integer.MAX_VALUE);
-        ICEBOX_WARM_UP_TIME = BUILDER
-                .comment("The time it takes for the icebox to be fully functional after being placed")
+            ICEBOX_WARM_UP_TIME = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " The time it takes for the icebox to be fully functional after being placed",
+                         " ⌄ ")
                 .defineInRange("Icebox Warm-Up Time", 1200, 0, Integer.MAX_VALUE);
-        ICEBOX_MAX_INSULATION = BUILDER
-                .comment("The maximum amount of insulation that the icebox can provide")
+            ICEBOX_MAX_INSULATION = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " The maximum amount of insulation that the icebox can provide",
+                         " ⌄ ")
                 .defineInRange("Icebox Chill Strength", 5, 0, 10);
-        ICEBOX_FUEL_INTERVAL = BUILDER
-                .comment("How often the icebox consumes fuel (in ticks)",
-                         "Lower numbers mean fuel is consumed faster. Setting to 0 disables fuel consumption")
+            ICEBOX_FUEL_INTERVAL = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " How often the icebox consumes fuel (in ticks)",
+                         " Lower numbers cause fuel to be consumed faster. Setting to 0 disables fuel consumption",
+                         " ⌄ ")
                 .defineInRange("Icebox Fuel Consumption Interval", 40, 0, Integer.MAX_VALUE);
 
         BUILDER.pop();
@@ -755,27 +864,30 @@ public class WorldSettingsConfig
         {
             BUILDER.push("Seasons");
 
-            BUILDER.comment("Format: [season-start, season-mid, season-end, *units]",
-                            "First 3 parameters: The temperature offset at the start, middle, and end of the season",
-                            "units: (Optional) The unit of temperature (C, F, or MC)",
-                            "Applied as an offset to the world's temperature");
+            BUILDER.comment("─────────────────────────────────────────────────────────────────────────",
+                            " Defines the temperature changes caused by each season",
+                            " ├── Format: [seasonStart, seasonMid, seasonEnd, *units]",
+                            " └── [* = optional]",
+                            " • seasonStart/Mid/End: The temperature offset at the start, middle, and end of the season",
+                            " • *units: The unit of temperature (C, F, or MC)",
+                            " ⌄ ");
 
-            SUMMER_TEMPERATURES = BUILDER
+                SUMMER_TEMPERATURES = BUILDER
                     .defineList("Summer", Arrays.asList(
                             0.4, 0.6, 0.4
                     ), it -> it instanceof Number || it instanceof String);
 
-            AUTUMN_TEMPERATURES = BUILDER
+                AUTUMN_TEMPERATURES = BUILDER
                     .defineList("Autumn", Arrays.asList(
                             0.2, 0, -0.2
                     ), it -> it instanceof Number || it instanceof String);
 
-            WINTER_TEMPERATURES = BUILDER
+                WINTER_TEMPERATURES = BUILDER
                     .defineList("Winter", Arrays.asList(
                             -0.4, -0.6, -0.4
                     ), it -> it instanceof Number || it instanceof String);
 
-            SPRING_TEMPERATURES = BUILDER
+                SPRING_TEMPERATURES = BUILDER
                     .defineList("Spring", Arrays.asList(
                             -0.2, 0, 0.2
                     ), it -> it instanceof Number || it instanceof String);
@@ -817,7 +929,7 @@ public class WorldSettingsConfig
     public static List<?> getSpringTemps()
     {   return getSeasonalTemperature(SPRING_TEMPERATURES);
     }
-    private static List<?> getSeasonalTemperature(ForgeConfigSpec.ConfigValue<List<?>> setting)
+    private static List<?> getSeasonalTemperature(CSConfigSpec.ConfigValue<List<?>> setting)
     {
         return setting.get().stream().map(o ->
         {
