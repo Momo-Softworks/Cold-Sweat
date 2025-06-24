@@ -42,36 +42,38 @@ public class ColdSweat
     public static final Logger LOGGER = LogManager.getLogger("Cold Sweat");
 
     public static final String MOD_ID = "cold_sweat";
+    public static IEventBus MOD_BUS = null;
 
     public ColdSweat(IEventBus bus, ModContainer modContainer)
     {
-        //NeoForge.EVENT_BUS.register(this);
+        MOD_BUS = bus;
 
-        bus.addListener(this::commonSetup);
-        bus.addListener(this::spawnPlacements);
-        bus.addListener(this::registerCaps);
-        bus.addListener(this::updateConfigs);
+        MOD_BUS.addListener(this::commonSetup);
+        MOD_BUS.addListener(this::spawnPlacements);
+        MOD_BUS.addListener(this::registerCaps);
+        MOD_BUS.addListener(this::updateConfigs);
 
         // Register stuff
-        ModBlocks.BLOCKS.register(bus);
-        ModItems.ITEMS.register(bus);
-        ModEntities.ENTITY_TYPES.register(bus);
-        ModBlockEntities.BLOCK_ENTITY_TYPES.register(bus);
-        ModMenus.MENU_TYPES.register(bus);
-        ModEffects.EFFECTS.register(bus);
-        ModParticleTypes.PARTICLES.register(bus);
-        ModPotions.POTIONS.register(bus);
-        ModSounds.SOUNDS.register(bus);
-        ModFeatures.FEATURES.register(bus);
-        ModBiomeModifiers.BIOME_MODIFIER_SERIALIZERS.register(bus);
-        ModCreativeTabs.ITEM_GROUPS.register(bus);
-        ModAttributes.ATTRIBUTES.register(bus);
-        ModCommands.ARGUMENTS.register(bus);
+        ModBlocks.BLOCKS.register(MOD_BUS);
+        ModItems.ITEMS.register(MOD_BUS);
+        ModEntities.ENTITY_TYPES.register(MOD_BUS);
+        ModBlockEntities.BLOCK_ENTITY_TYPES.register(MOD_BUS);
+        ModMenus.MENU_TYPES.register(MOD_BUS);
+        ModEffects.EFFECTS.register(MOD_BUS);
+        ModParticleTypes.PARTICLES.register(MOD_BUS);
+        ModPotions.POTIONS.register(MOD_BUS);
+        ModSounds.SOUNDS.register(MOD_BUS);
+        ModFeatures.FEATURES.register(MOD_BUS);
+        ModBiomeModifiers.BIOME_MODIFIER_SERIALIZERS.register(MOD_BUS);
+        ModCreativeTabs.ITEM_GROUPS.register(MOD_BUS);
+        ModAttributes.ATTRIBUTES.register(MOD_BUS);
+        ModCommands.ARGUMENTS.register(MOD_BUS);
         ModArmorMaterials.ARMOR_MATERIALS.register(bus);
         ModAdvancementTriggers.TRIGGERS.register(bus);
         ModItemComponents.DATA_COMPONENTS.register(bus);
-        ModTempEffects.TEMP_EFFECTS.register(bus);
+        ModTempEffects.TEMP_EFFECTS.register(MOD_BUS);
 
+        // Handle config updates
         ModUpdater.updateFileNames();
 
         // Setup configs
@@ -85,7 +87,7 @@ public class ColdSweat
         CompatManager.registerEventHandlers();
 
         // Setup JSON data-driven handlers
-        bus.addListener((DataPackRegistryEvent.NewRegistry event) ->
+        MOD_BUS.addListener((DataPackRegistryEvent.NewRegistry event) ->
         {
             for (ModRegistries.RegistryHolder<?> holder : ModRegistries.getRegistries().values())
             {   event.dataPackRegistry((ResourceKey) holder.registry(), (Codec) holder.codec(), (Codec) holder.codec());

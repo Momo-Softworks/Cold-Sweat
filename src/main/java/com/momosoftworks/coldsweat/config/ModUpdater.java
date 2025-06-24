@@ -3,16 +3,15 @@ package com.momosoftworks.coldsweat.config;
 import com.google.common.io.Files;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.temperature.modifier.InventoryItemsTempModifier;
-import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.compat.CompatManager;
+import com.momosoftworks.coldsweat.config.spec.CSConfigSpec;
 import com.momosoftworks.coldsweat.config.spec.ItemSettingsConfig;
 import com.momosoftworks.coldsweat.config.spec.MainSettingsConfig;
 import com.momosoftworks.coldsweat.config.spec.WorldSettingsConfig;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.fml.loading.FMLPaths;
-import net.neoforged.neoforge.common.ModConfigSpec;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -369,8 +368,8 @@ public class ModUpdater
         return Integer.compare(parts1.length, parts2.length);
     }
 
-    public static boolean replaceConfigSetting(ModConfigSpec.ConfigValue<List<? extends List<?>>> config, String key,
-                                            Consumer<List<Object>> modifier)
+    public static boolean replaceConfigSetting(CSConfigSpec.ConfigValue<List<? extends List<?>>> config, String key,
+                                               Consumer<List<Object>> modifier)
     {
         List<List<?>> setting = new ArrayList<>(config.get());
         for (int i = 0; i < setting.size(); i++)
@@ -394,7 +393,7 @@ public class ModUpdater
         return false;
     }
 
-    public static void addConfigSetting(ModConfigSpec.ConfigValue<List<? extends List<?>>> config, List<?> newSetting)
+    public static void addConfigSetting(CSConfigSpec.ConfigValue<List<? extends List<?>>> config, List<?> newSetting)
     {
         List<List<? extends Object>> setting = new ArrayList<>(config.get());
         if (setting.stream().noneMatch(entry -> !entry.isEmpty() && entry.get(0).equals(newSetting.get(0))))
@@ -405,7 +404,7 @@ public class ModUpdater
         }
     }
 
-    public static void removeConfigSetting(ModConfigSpec.ConfigValue<List<? extends List<? extends Object>>> config, String key)
+    public static void removeConfigSetting(CSConfigSpec.ConfigValue<List<? extends List<? extends Object>>> config, String key)
     {
         List<? extends List<? extends Object>> setting = new ArrayList<>(config.get());
         setting.removeIf(entry -> !entry.isEmpty() && entry.get(0).equals(key));
