@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.client.gui.tooltip;
 
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
+import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.ItemStack;
 
@@ -8,12 +9,12 @@ import java.util.List;
 
 public class InsulationTooltip implements TooltipComponent
 {
-    List<Insulation> insulation;
+    List<InsulatorData> insulation;
     Insulation.Slot slot;
     ItemStack stack;
     boolean strikethrough;
 
-    public InsulationTooltip(List<Insulation> insulation, Insulation.Slot slot, ItemStack stack, boolean strikethrough)
+    public InsulationTooltip(List<InsulatorData> insulation, Insulation.Slot slot, ItemStack stack, boolean strikethrough)
     {
         this.insulation = insulation;
         this.slot = slot;
@@ -21,7 +22,7 @@ public class InsulationTooltip implements TooltipComponent
         this.strikethrough = strikethrough;
     }
 
-    public List<Insulation> getInsulation()
+    public List<InsulatorData> getInsulation()
     {   return insulation;
     }
 
