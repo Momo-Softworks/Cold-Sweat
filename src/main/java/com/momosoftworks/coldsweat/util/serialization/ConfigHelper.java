@@ -8,6 +8,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.config.ConfigLoadingHandler;
+import com.momosoftworks.coldsweat.config.spec.CSConfigSpec;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
@@ -130,7 +131,7 @@ public class ConfigHelper
     {   return parseBuiltinItems(Registries.ENTITY_TYPE, ForgeRegistries.ENTITY_TYPES, entities);
     }
 
-    public static <K, V extends ConfigData> Multimap<K, V> parseTomlRegistry(ForgeConfigSpec.ConfigValue<List<? extends List<?>>> config, Function<List<?>, V> tomlParser, Function<V, List<Either<TagKey<K>, K>>> keyListGetter,
+    public static <K, V extends ConfigData> Multimap<K, V> parseTomlRegistry(CSConfigSpec.ConfigValue<List<? extends List<?>>> config, Function<List<?>, V> tomlParser, Function<V, List<Either<TagKey<K>, K>>> keyListGetter,
                                                                              IForgeRegistry<K> keyRegistry, ResourceKey<Registry<V>> valueRegistry)
     {
         Multimap<K, V> dataMap = new RegistryMultiMap<>();
