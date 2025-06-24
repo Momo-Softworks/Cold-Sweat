@@ -404,7 +404,7 @@ public class ConfigSettings
 
         DEPTH_REGIONS = addSetting(ColdSweat.createKey("depth_regions"), ArrayList::new, holder -> {});
 
-        TriConsumer<FuelData.FuelType, ForgeConfigSpec.ConfigValue<List<? extends List<?>>>, DynamicHolder<Multimap<Item, FuelData>>> fuelAdder =
+        TriConsumer<FuelData.FuelType, CSConfigSpec.ConfigValue<List<? extends List<?>>>, DynamicHolder<Multimap<Item, FuelData>>> fuelAdder =
         (fuelType, config, holder) ->
         {
             Multimap<Item, FuelData> dataMap = ConfigHelper.parseTomlRegistry(config, list -> FuelData.fromToml(list, fuelType),
@@ -428,7 +428,7 @@ public class ConfigSettings
                                                        .map(entry -> ForgeRegistries.MOB_EFFECTS.getValue(new ResourceLocation(entry)))
                                                        .collect(ArrayList::new, List::add, List::addAll)));
 
-        TriConsumer<ForgeConfigSpec.ConfigValue<List<? extends List<?>>>, DynamicHolder<Multimap<Item, InsulatorData>>, Insulation.Slot> insulatorAdder =
+        TriConsumer<CSConfigSpec.ConfigValue<List<? extends List<?>>>, DynamicHolder<Multimap<Item, InsulatorData>>, Insulation.Slot> insulatorAdder =
         (config, holder, slot) ->
         {
             Multimap<Item, InsulatorData> dataMap = ConfigHelper.parseTomlRegistry(config, list -> InsulatorData.fromToml(list, slot),
