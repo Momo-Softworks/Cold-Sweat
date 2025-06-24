@@ -158,7 +158,7 @@ public class InsulatorData extends ConfigData implements RequirementHolder
         }
 
         CompoundNBT tag = entry.size() > 4 ? NBTHelper.parseCompoundNbt((String) entry.get(4)) : new CompoundNBT();
-        boolean fillSlots = entry.size() > 5 && (Boolean) entry.get(5);
+        boolean fillSlots = entry.size() <= 5 || (Boolean) entry.get(5);
 
         ItemRequirement itemRequirement = new ItemRequirement(items, new NbtRequirement(tag));
 

@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
@@ -35,7 +36,7 @@ public class ClientInsulationTooltip extends Tooltip
                                                                             : TOOLTIP;
     private static final Minecraft MC = Minecraft.getInstance();
 
-    List<Insulation> insulation;
+    List<InsulatorData> insulation;
     Insulation.Slot slot;
     int width = 0;
     ItemStack stack;
@@ -62,10 +63,8 @@ public class ClientInsulationTooltip extends Tooltip
     }
 
 
-    public ClientInsulationTooltip(List<Insulation> insulation, Insulation.Slot slot, ItemStack stack, boolean strikethrough)
-    {if (slot != Insulation.Slot.ITEM)
-        {   insulation = Insulation.splitList(insulation);
-        }
+    public ClientInsulationTooltip(List<InsulatorData> insulation, Insulation.Slot slot, ItemStack stack, boolean strikethrough)
+    {
         this.insulation = insulation;
         this.slot = slot;
         this.stack = stack;
@@ -89,45 +88,53 @@ public class ClientInsulationTooltip extends Tooltip
         Minecraft.getInstance().textureManager.bind(TOOLTIP_LOCATION.get());
 
         List<Insulation> posInsulation = new ArrayList<>();
+        int extraInsulations = 0;
         List<Insulation> negInsulation = new ArrayList<>();
 
         // Separate insulation into negative & positive
-        for (Insulation ins : insulation)
+        for (InsulatorData data : insulation)
         {
-            if (ins instanceof StaticInsulation)
+            List<Insulation> insulations = data.fillSlots() ? Insulation.splitList(data.insulation()) : data.insulation();
+            if (!data.fillSlots() && data.slot() == Insulation.Slot.ARMOR)
+            {   extraInsulations += insulations.size();
+            }
+            for (Insulation ins : insulations)
+            {
+                if (ins instanceof StaticInsulation)
             {
                 StaticInsulation insul = (StaticInsulation) ins;
-                double cold = insul.getCold();
-                double hot = insul.getHeat();
+                    double cold = insul.getCold();
+                    double hot = insul.getHeat();
 
-                if (CSMath.sign(cold) == CSMath.sign(hot))
-                {
-                    switch (CSMath.sign(cold))
-                    {   case -1 : negInsulation.add(ins); break;
-                        case 1 : posInsulation.add(ins); break;
+                    if (CSMath.sign(cold) == CSMath.sign(hot))
+                    {
+                        switch (CSMath.sign(cold))
+                        {   case -1 : negInsulation.add(ins); break;
+                            case 1 : posInsulation.add(ins); break;
+                        }
+                    }
+                    else
+                    {
+                        switch (CSMath.sign(cold))
+                        {   case -1 : negInsulation.add(new StaticInsulation(-cold, 0)); break;
+                            case 1 : posInsulation.add(new StaticInsulation(cold, 0)); break;
+                        }
+                        switch (CSMath.sign(hot))
+                        {   case -1 : negInsulation.add(new StaticInsulation(0, hot)); break;
+                            case 1 : posInsulation.add(new StaticInsulation(0, hot)); break;
+                        }
                     }
                 }
-                else
+                else if (ins instanceof AdaptiveInsulation)
                 {
-                    switch (CSMath.sign(cold))
-                    {   case -1 : negInsulation.add(new StaticInsulation(-cold, 0)); break;
-                        case 1 : posInsulation.add(new StaticInsulation(cold, 0)); break;
-                    }
-                    switch (CSMath.sign(hot))
-                    {   case -1 : negInsulation.add(new StaticInsulation(0, hot)); break;
-                        case 1 : posInsulation.add(new StaticInsulation(0, hot)); break;
-                    }
-                }
-            }
-            else if (ins instanceof AdaptiveInsulation)
-            {
                 AdaptiveInsulation adaptive = (AdaptiveInsulation) ins;
-                double value = adaptive.getInsulation();
-                if (value < 0)
-                {   negInsulation.add(ins);
-                }
-                else
-                {   posInsulation.add(ins);
+                    double value = adaptive.getInsulation();
+                    if (value < 0)
+                    {   negInsulation.add(ins);
+                    }
+                    else
+                    {   posInsulation.add(ins);
+                    }
                 }
             }
         }
@@ -140,13 +147,13 @@ public class ClientInsulationTooltip extends Tooltip
         if (!posInsulation.isEmpty())
         {
             BarType barType = negInsulation.isEmpty() ? BarType.NONE : BarType.POSITIVE;
-            width += renderBar(poseStack, x + width, y, posInsulation, slot, stack, barType);
+            width += renderBar(poseStack, x + width, y, posInsulation, extraInsulations, slot, stack, barType);
         }
         // Negative insulation bar
         if (!negInsulation.isEmpty())
         {
             if (!posInsulation.isEmpty()) width += 4;
-            width += renderBar(poseStack, x + width, y, negInsulation, slot, stack, BarType.NEGATIVE);
+            width += renderBar(poseStack, x + width, y, negInsulation, 0, slot, stack, BarType.NEGATIVE);
         }
         poseStack.popPose();
         // Render strikethrough
@@ -231,8 +238,9 @@ public class ClientInsulationTooltip extends Tooltip
         }
     }
 
-    static int renderBar(MatrixStack poseStack, int x, int y, List<Insulation> insulations, Insulation.Slot slot, ItemStack stack, BarType type)
+    static int renderBar(MatrixStack poseStack, int x, int y, List<Insulation> insulations, int extraSlots, Insulation.Slot slot, ItemStack stack, BarType type)
     {
+        extraSlots = Math.min(ItemInsulationManager.getInsulationSlots(stack), extraSlots);
         MC.textureManager.bind(TOOLTIP_LOCATION.get());
         List<Insulation> sortedInsulation = Insulation.sort(insulations);
         setAdaptations(sortedInsulation, stack);
@@ -258,10 +266,10 @@ public class ClientInsulationTooltip extends Tooltip
         {   finalWidth = renderOverflowBar(poseStack, x + 8, y, sortedInsulation, slots);
         }
         else if (mode == Mode.COMPOUND)
-        {   finalWidth = renderCompoundBar(poseStack, x + 7, y, sortedInsulation, slots);
+        {   finalWidth = renderCompoundBar(poseStack, x + 7, y, sortedInsulation, extraSlots, slots);
         }
         else
-        {   finalWidth = renderNormalBar(poseStack, x + 7, y, sortedInsulation, slots);
+        {   finalWidth = renderNormalBar(poseStack, x + 7, y, sortedInsulation, slots + extraSlots);
         }
         poseStack.popPose();
         renderIcon(poseStack, x, y, slot, type);
@@ -293,7 +301,7 @@ public class ClientInsulationTooltip extends Tooltip
         return Math.max(insulations.size(), slots) * 6;
     }
 
-    static int renderCompoundBar(MatrixStack poseStack, int x, int y, List<Insulation> insulations, int slots)
+    static int renderCompoundBar(MatrixStack poseStack, int x, int y, List<Insulation> insulations, int extraSlots, int slots)
     {
         int cellX = 0;
         int compoundCount = 0;
@@ -320,11 +328,7 @@ public class ClientInsulationTooltip extends Tooltip
                 }
                 // Render divider
                 if (i < slots - 1)
-                {   cellX += 1;
-                    if (i < insulations.size() - 1 && insulations.get(i + 1).split().size() > 1)
-                    {   renderCellBorder(poseStack, x + cellX, y + 2, BorderSegment.TAIL, BorderType.DIVIDER);
-                    }
-                    cellX += 1;
+                {   cellX += 3;
                 }
             }
             else // Insulation is small enough to represent traditionally
@@ -346,22 +350,23 @@ public class ClientInsulationTooltip extends Tooltip
             }
         }
         // Render empty cells
-        int emptySlots = slots - insulations.size();
+        int emptySlots = slots - insulations.size() + extraSlots;
         for (int i = 0; i < emptySlots; i++)
         {
             // Render background
             BorderSegment segment = getBorderSegment(emptySlots, i);
-            if (segment == BorderSegment.SINGLE) segment = BorderSegment.TAIL;
+            if (segment == BorderSegment.SINGLE)
+            {   segment = BorderSegment.TAIL;
+            }
             BorderType borderType = segment == BorderSegment.TAIL ? BorderType.NORMAL : BorderType.SEGMENT;
             renderCellBackground(poseStack, x + cellX, y + 2);
             // Render border
             renderCellBorder(poseStack, x + cellX, y + 2, segment, borderType);
-            cellX += 6;
-            // Render divider
-            if (i < emptySlots - 1)
-            {   renderCellBorder(poseStack, x + cellX, y + 2, BorderSegment.TAIL, BorderType.EMPTY_DIVIDER);
-                cellX += 1;
+            // Render extra left-side border if there's only one empty slot
+            if (emptySlots == 1 && segment == BorderSegment.TAIL)
+            {   renderCellBorder(poseStack, x + cellX - 1, y + 2, BorderSegment.TAIL, BorderType.DIVIDER);
             }
+            cellX += 6;
         }
         return cellX;
     }
