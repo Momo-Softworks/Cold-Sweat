@@ -365,8 +365,8 @@ public class TooltipHandler
         if (!hideTooltips && !stack.isEmpty())
         {
             // Insulating armor
-            List<Insulation> armorInsulation = new ArrayList<>();
-            List<Insulation> unmetArmorInsulation = new ArrayList<>();
+            List<InsulatorData> armorInsulation = new ArrayList<>();
+            List<InsulatorData> unmetArmorInsulation = new ArrayList<>();
             {
                 for (InsulatorData insulator : ConfigSettings.INSULATING_ARMORS.get().get(item))
                 {   validateInsulator(insulator, armorInsulation, insulator.hideIfUnmet() ? new ArrayList<>() : unmetArmorInsulation);
@@ -395,15 +395,15 @@ public class TooltipHandler
 
             // Insulation ingredient
             {
-                List<Insulation> insulation = new ArrayList<>();
-                List<Insulation> unmetInsulation = new ArrayList<>();
+                List<InsulatorData> insulation = new ArrayList<>();
+                List<InsulatorData> unmetInsulation = new ArrayList<>();
                 for (InsulatorData insulator : ConfigSettings.INSULATION_ITEMS.get().get(item))
                 {   validateInsulator(insulator, insulation, insulator.hideIfUnmet() ? new ArrayList<>() : unmetInsulation);
                 }
-                if (!insulation.isEmpty() && !insulation.equals(Insulation.splitList(armorInsulation)))
+                if (!insulation.isEmpty() && !insulation.stream().map(InsulatorData::insulation).toList().equals(armorInsulation.stream().map(InsulatorData::insulation).toList()))
                 {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(insulation, Insulation.Slot.ITEM, stack, false)));
                 }
-                if (!unmetInsulation.isEmpty() && !unmetInsulation.equals(Insulation.splitList(unmetArmorInsulation)))
+                if (!unmetInsulation.isEmpty() && !unmetInsulation.stream().map(InsulatorData::insulation).toList().equals(unmetArmorInsulation.stream().map(InsulatorData::insulation).toList()))
                 {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(unmetInsulation, Insulation.Slot.ITEM, stack, true)));
                 }
             }
@@ -411,8 +411,8 @@ public class TooltipHandler
             // Insulating curio
             if (CompatManager.isCuriosLoaded())
             {
-                List<Insulation> insulation = new ArrayList<>();
-                List<Insulation> unmetInsulation = new ArrayList<>();
+                List<InsulatorData> insulation = new ArrayList<>();
+                List<InsulatorData> unmetInsulation = new ArrayList<>();
                 for (InsulatorData insulator : ConfigSettings.INSULATING_CURIOS.get().get(item))
                 {   validateInsulator(insulator, insulation, unmetInsulation);
                 }
@@ -460,16 +460,14 @@ public class TooltipHandler
         }
     }
 
-    private static void validateInsulator(InsulatorData insulator, List<Insulation> insulation, List<Insulation> unmetInsulation)
+    private static void validateInsulator(InsulatorData insulator, List<InsulatorData> insulation, List<InsulatorData> unmetInsulation)
     {
-        boolean multiSlot = insulator.fillSlots();
         if (!insulator.insulation().isEmpty())
         {
-            List<Insulation> insulList = multiSlot ? Insulation.splitList(insulator.insulation()) : insulator.insulation();
             if (passesRequirement(insulator))
-            {   insulation.addAll(insulList);
+            {   insulation.add(insulator);
             }
-            else unmetInsulation.addAll(insulList);
+            else unmetInsulation.add(insulator);
         }
     }
 
