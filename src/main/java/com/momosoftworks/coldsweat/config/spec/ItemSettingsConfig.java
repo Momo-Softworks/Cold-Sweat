@@ -65,15 +65,15 @@ public class ItemSettingsConfig
                         "   i.e. \"#minecraft:dye,!minecraft:black_dye\" (all dyes EXCEPT black dye)",
                         "─────────────────────────────────────────────────────────────────────────");
 
-        BUILDER.push("Fuel Items")
-                .comment("─────────────────────────────────────────────────────────────────────────",
-                         " Defines items that can be used as fuel",
-                         " └── Format: [[\"item_id\", amount], [\"item_id\", amount], ...etc]",
-                         " • item_id: The item's ID (i.e. \"minecraft:coal\").",
-                         " • amount: The amount of fuel the item provides. Higher values mean the item burns longer",
-                         " ⌄ ");
-        BOILER_FUELS = BUILDER
-                .comment("//drill_down")
+        BUILDER.comment("─────────────────────────────────────────────────────────────────────────",
+                        " Defines items that can be used as fuel",
+                        " └── Format: [[\"item_id\", amount], [\"item_id\", amount], ...etc]",
+                        " • item_id: The item's ID (i.e. \"minecraft:coal\").",
+                        " • amount: The amount of fuel the item provides. Higher values mean the item burns longer",
+                        " ⌄ ")
+        .push("Fuel Items");
+            BOILER_FUELS = BUILDER
+                .comment("─────────────────────────────────//v")
                 .defineListAllowEmpty(Arrays.asList("Boiler"), () -> ListBuilder.begin(
                                 Arrays.asList("#minecraft:planks",         10),
                                 Arrays.asList("#minecraft:coals",          37),
@@ -92,7 +92,7 @@ public class ItemSettingsConfig
                         });
 
         ICEBOX_FUELS = BUILDER
-                .comment("//drill_down")
+                .comment("─────────────────────────────────//v")
                 .defineListAllowEmpty(Arrays.asList("Icebox"), () -> ListBuilder.begin(
                                 Arrays.asList("minecraft:snowball",           10),
                                 Arrays.asList("minecraft:clay_ball",          37),
@@ -112,8 +112,8 @@ public class ItemSettingsConfig
                         });
 
             HEARTH_FUELS = BUILDER
-                .comment("//drill_down",
-                         " (Negative values indicate cold fuel)")
+                .comment("─────────────────────────────────//v",
+                         " (Negative values indicate cold fuel")
                 .defineListAllowEmpty(Collections.singletonList("Hearth"), () -> ListBuilder.begin(
                                 // Hot
                                 Arrays.asList("#minecraft:planks",         10),
@@ -145,7 +145,7 @@ public class ItemSettingsConfig
         BUILDER.push("Hearth Extras");
 
             HEARTH_POTION_BLACKLIST = BUILDER
-                .comment("─────────────────────────────────────────────────────────────────────────//drill_down",
+                .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Potions containing any of these effects will not be allowed in the hearth",
                          " └── Format: [\"effect_id\", \"effect_id\", ...etc]",
                          " ⌄ ")
@@ -169,7 +169,7 @@ public class ItemSettingsConfig
 
         BUILDER.push("Soulspring Lamp");
             SOULSPRING_LAMP_FUELS = BUILDER
-                .comment("─────────────────────────────────────────────────────────────────────────//drill_down",
+                .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Defines items that the Soulspring Lamp can use as fuel",
                          " └── Format: [[\"item_id\", amount], [\"item_id\", amount], ...etc]",
                          " • item_id: The item's ID (i.e. \"cold_sweat:soul_sprout\").",
@@ -188,7 +188,7 @@ public class ItemSettingsConfig
                         });
 
             SOULSPRING_LAMP_DIMENSIONS = BUILDER
-                .comment("─────────────────────────────────────────────────────────────────────────//drill_down",
+                .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Defines the dimensions that the Soulspring Lamp can be used in",
                          " └── Format: [\"dimension_id\", \"dimension_id\", ...etc]",
                          " ⌄ ")
@@ -203,7 +203,7 @@ public class ItemSettingsConfig
          */
         BUILDER.push("Insulation");
             INSULATION_ITEMS = BUILDER
-                .comment("─────────────────────────────────────────────────────────────────────────//drill_down",
+                .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Defines the items that can be used for insulating armor in the Sewing Table",
                          " ├── Format: [[\"item_id\", cold, hot, *\"static\", *\"{nbt}\", *fillSlots], [\"item_id\", amount, adaptSpeed, \"adaptive\", *\"{nbt}\", *fillSlots], ...etc]",
                          " └── [* = optional]",
@@ -241,7 +241,7 @@ public class ItemSettingsConfig
                         });
 
             INSULATING_ARMOR = BUILDER
-                .comment("─────────────────────────────────────────────────────────────────────────//drill_down",
+                .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Defines the items that provide insulation when worn",
                          " ** See Insulation Ingredients for formatting.",
                          " Enabling \"fillSlots\" will cause the armor's built-in insulation to consume the available insulation slots",
@@ -296,7 +296,7 @@ public class ItemSettingsConfig
         if (CompatManager.isCuriosLoaded())
         {
             INSULATING_CURIOS = BUILDER
-                    .comment("─────────────────────────────────────────────────────────────────────────//drill_down",
+                    .comment("─────────────────────────────────────────────────────────────────────────//v",
                                  " Defines the items that provide insulation when worn in a curio slot",
                              " See Insulation Ingredients for formatting. This setting does not have a \"fillSlots\" option",
                                  " ⌄ ")
@@ -338,7 +338,7 @@ public class ItemSettingsConfig
                         it -> it instanceof Number || it instanceof String);
 
             INSULATION_SLOT_OVERRIDES = BUILDER
-                .comment("─────────────────────────────────────────────────────────────────────────//drill_down",
+                .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Allows for overriding the number of insulation slots for specific items",
                          " └── Format: [[\"item_id\", slotCount, *\"{nbt}\"], [\"item_id\", slotCount, *\"{nbt}\"], ...etc]",
                          " • item_id: The item's ID (i.e. \"minecraft:iron_helmet\").",
@@ -359,7 +359,7 @@ public class ItemSettingsConfig
                 .defineInRange("Insulation Strength", 1.0, 0, Double.POSITIVE_INFINITY);
 
             INSULATION_BLACKLIST = BUILDER
-                .comment("─────────────────────────────────────────────────────────────────────────//drill_down",
+                .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Defines wearable items that cannot be insulated",
                          " └── Format: [\"item_id\", \"item_id\", ...etc]",
                          " ⌄ ")
@@ -375,7 +375,7 @@ public class ItemSettingsConfig
         BUILDER.push("Consumables");
 
             FOOD_TEMPERATURES = BUILDER
-                .comment("─────────────────────────────────────────────────────────────────────────//drill_down",
+                .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Defines items that affect the player's temperature when consumed",
                          " ├── Format: [[\"item_id\", amount, *\"{nbt}\", *duration], [\"item_id\", amount, *\"{nbt}\", *duration], ...etc]",
                          " └── [* = optional]",
@@ -426,7 +426,7 @@ public class ItemSettingsConfig
                 .defineInRange("Soulspring Lamp Strength", 0.6, 0, 1);
 
             DRYING_ITEMS = BUILDER
-                .comment("─────────────────────────────────────────────────────────────────────────//drill_down",
+                .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Defines items that can be used to dry the player",
                          " └── Format: [[\"item_id\", \"turns_into\"], [\"item_id\", \"turns_into\"], ...etc]",
                          " • item_id: The item's ID (i.e. \"minecraft:sponge\").",
@@ -448,7 +448,7 @@ public class ItemSettingsConfig
         BUILDER.push("Misc");
 
             CARRIED_ITEM_TEMPERATURES = BUILDER
-                .comment("─────────────────────────────────────────────────────────────────────────//drill_down",
+                .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Defines items that affect the player's temperature when in the inventory",
                          " ├── Format: [[\"item_id\", temperature, \"slotRange\", \"trait\", *\"{nbt}\", *maxEffect], [\"item_id\", temperature, \"slotRange\", \"trait\", *\"{nbt}\", *maxEffect], ...etc]",
                          " └── [* = optional]",

@@ -146,32 +146,44 @@ public class MixinForgeConfigSpec
     }
 
     /**
-     * Checks if a comment change is just formatting (removing //drill_down or similar)
+     * Checks if a comment change is just formatting (removing //v or similar)
      * Returns true if this is a formatting change that should be allowed
      */
     private boolean isCommentFormattingChange(String oldComment, String newComment)
     {
-        // Normalize both comments by removing drill_down directives
-        String normalizedOld = normalizeComment(oldComment);
-        String normalizedNew = normalizeComment(newComment);
+        // Check if either comment contains //v directive
+        boolean oldHasDirective = oldComment != null && oldComment.contains("//v");
+        boolean newHasDirective = newComment != null && newComment.contains("//v");
 
-        // If they're the same after normalization, this is just a formatting change
-        return stringsMatchIgnoringNewlines(normalizedOld, normalizedNew);
+        // If only one has the directive, this could be a formatting change
+        if (oldHasDirective != newHasDirective)
+        {
+            // Normalize both comments by removing drill_down directives for comparison
+            String normalizedOld = normalizeCommentForComparison(oldComment);
+            String normalizedNew = normalizeCommentForComparison(newComment);
+
+            // If they're the same after normalization, this is just a formatting change
+            return stringsMatchIgnoringNewlines(normalizedOld, normalizedNew);
+        }
+
+        // If both have or both don't have directives, use standard comparison
+        return stringsMatchIgnoringNewlines(oldComment, newComment);
     }
 
     /**
-     * Normalizes a comment by removing drill_down directives and extra whitespace
+     * Normalizes a comment by removing drill_down directives for comparison purposes only
+     * This preserves the structure but allows comparison of semantic content
      */
-    private String normalizeComment(String comment)
+    private String normalizeCommentForComparison(String comment)
     {
         if (comment == null)
         {   return "";
         }
 
-        // Remove //drill_down directive and clean up
-        String normalized = comment.replace("//drill_down", "").trim();
+        // Remove //v directive and clean up whitespace for comparison
+        String normalized = comment.replace("//v", "").trim();
 
-        // If the comment becomes empty or just a #, return empty string
+        // Handle the case where comment was only "# //v" or similar
         if (normalized.equals("#") || normalized.isEmpty())
         {   return "";
         }

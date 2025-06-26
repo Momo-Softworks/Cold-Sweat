@@ -48,7 +48,7 @@ public class EntitySettingsConfig
          */
         BUILDER.push("Entity Temperature");
         INSULATED_MOUNTS = BUILDER
-                .comment("─────────────────────────────────────────────────────────────────────────//drill_down",
+                .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " List of entities that will insulate the player when riding them",
                          " A value of 0 provides no insulation; 1 provides full insulation",
                          " └── Format: [[\"entity_id\", coldResistance, heatResistance], [\"entity_id\", coldResistance, heatResistance], etc...]",
@@ -68,7 +68,7 @@ public class EntitySettingsConfig
                 });
 
         ENTITY_TEMPERATURES = BUILDER
-                .comment("─────────────────────────────────────────────────────────────────────────//drill_down",
+                .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Defines temperature-emitting properties for entities",
                          " ├── Format: [[\"entity_id\", temperature, range, *units], [\"entity_id\", temperature, range, *units], etc...]",
                          " └── [* = optional]",
@@ -92,7 +92,7 @@ public class EntitySettingsConfig
                 });
 
         ENTITY_CLIMATES = BUILDER
-                .comment("─────────────────────────────────────────────────────────────────────────//drill_down",
+                .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Defines entities that are affected by temperature and the climates they can live in",
                          " ├── Format: [[\"entity_id\", minTemp, maxTemp, *rate, *units], [\"entity_id\", minTemp, maxTemp, *rate, *units], etc...]",
                          " └── [* = optional]",
@@ -163,7 +163,7 @@ public class EntitySettingsConfig
 
         BUILDER.push("Mob Spawning");
         CHAMELEON_SPAWN_BIOMES = BUILDER
-                .comment("─────────────────────────────────────────────────────────────────────────//drill_down",
+                .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Defines the biomes that Chameleons can spawn in",
                          " └── Format: [[\"biome_id\", weight], [\"biome_id\", weight], etc...]",
                          " • biome_id: The ID of the biome, e.g. \"minecraft:jungle\"",
@@ -214,7 +214,7 @@ public class EntitySettingsConfig
                         });
 
         GOAT_SPAWN_BIOMES = BUILDER
-                .comment("─────────────────────────────────────────────────────────────────────────//drill_down",
+                .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Defines the biomes that Chameleons can spawn in",
                          " └── Format: [[\"biome_id\", weight], [\"biome_id\", weight], etc...]",
                          " • biome_id: The ID of the biome, e.g. \"minecraft:jungle\"",
