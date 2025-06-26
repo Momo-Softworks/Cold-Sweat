@@ -198,7 +198,7 @@ public class CSConfigSpec implements IConfigSpec
                 String oldComment = config.getComment(key);
                 String expectedComment = valueSpec.getComment();
 
-                // CUSTOM: Allow drill_down comment formatting changes
+                // CUSTOM: Allow //v comment formatting changes
                 if (!isCommentFormattingChange(oldComment, expectedComment)) {
                     if (!stringsMatchIgnoringNewlines(oldComment, expectedComment)) {
                         if (commentListener != null)
@@ -235,30 +235,42 @@ public class CSConfigSpec implements IConfigSpec
     }
 
     /**
-     * Checks if a comment change is just formatting (removing //drill_down or similar)
+     * Checks if a comment change is just formatting (removing //v or similar)
      * Returns true if this is a formatting change that should be allowed
      */
     private boolean isCommentFormattingChange(String oldComment, String newComment) {
-        // Normalize both comments by removing drill_down directives
-        String normalizedOld = normalizeComment(oldComment);
-        String normalizedNew = normalizeComment(newComment);
+        // Check if either comment contains //v directive
+        boolean oldHasDirective = oldComment != null && oldComment.contains("//v");
+        boolean newHasDirective = newComment != null && newComment.contains("//v");
 
-        // If they're the same after normalization, this is just a formatting change
-        return stringsMatchIgnoringNewlines(normalizedOld, normalizedNew);
+        // If only one has the directive, this could be a formatting change
+        if (oldHasDirective != newHasDirective)
+        {
+            // Normalize both comments by removing drill_down directives for comparison
+            String normalizedOld = normalizeCommentForComparison(oldComment);
+            String normalizedNew = normalizeCommentForComparison(newComment);
+
+            // If they're the same after normalization, this is just a formatting change
+            return stringsMatchIgnoringNewlines(normalizedOld, normalizedNew);
+        }
+
+        // If both have or both don't have directives, use standard comparison
+        return stringsMatchIgnoringNewlines(oldComment, newComment);
     }
 
     /**
-     * Normalizes a comment by removing drill_down directives and extra whitespace
+     * Normalizes a comment by removing drill_down directives for comparison purposes only
+     * This preserves the structure but allows comparison of semantic content
      */
-    private String normalizeComment(String comment) {
+    private String normalizeCommentForComparison(String comment) {
         if (comment == null) {
             return "";
         }
 
-        // Remove //drill_down directive and clean up
-        String normalized = comment.replace("//drill_down", "").trim();
+        // Remove //v directive and clean up whitespace for comparison
+        String normalized = comment.replace("//v", "").trim();
 
-        // If the comment becomes empty or just a #, return empty string
+        // Handle the case where comment was only "# //v" or similar
         if (normalized.equals("#") || normalized.isEmpty()) {
             return "";
         }
@@ -395,7 +407,7 @@ public class CSConfigSpec implements IConfigSpec
             Range<V> range = new Range<>(clazz, min, max);
             context.setRange(range);
             comment(" Default: " + defaultSupplier.get());
-            comment(" Range: " + range.toString());
+            comment(" Range: " + range);
             return define(path, defaultSupplier, range);
         }
 
@@ -831,8 +843,7 @@ public class CSConfigSpec implements IConfigSpec
         public V getMin() { return min; }
         public V getMax() { return max; }
 
-        private boolean isNumber(@Nullable Object other) {
-            return Number.class.isAssignableFrom(clazz) && other instanceof Number;
+        private boolean isNumber(@Nullable Object other) {   return Number.class.isAssignableFrom(clazz) && other instanceof Number;
         }
 
         @Override
@@ -941,8 +952,7 @@ public class CSConfigSpec implements IConfigSpec
         private @Nullable T cachedValue = null;
         private @Nullable CSConfigSpec spec;
 
-        ConfigValue(Builder parent, List<String> path, Supplier<T> defaultSupplier) {
-            this.parent = parent;
+        ConfigValue(Builder parent, List<String> path, Supplier<T> defaultSupplier) {   this.parent = parent;
             this.path = path;
             this.defaultSupplier = defaultSupplier;
             this.parent.values.add(this);
@@ -967,16 +977,13 @@ public class CSConfigSpec implements IConfigSpec
             return getRaw(loadedConfig.config(), path, defaultSupplier);
         }
 
-        public T getRaw(Config config, List<String> path, Supplier<T> defaultSupplier) {
-            return config.getOrElse(path, defaultSupplier);
+        public T getRaw(Config config, List<String> path, Supplier<T> defaultSupplier) {   return config.getOrElse(path, defaultSupplier);
         }
 
-        public T getDefault() {
-            return defaultSupplier.get();
+        public T getDefault() {   return defaultSupplier.get();
         }
 
-        public Builder next() {
-            return parent;
+        public Builder next() {   return parent;
         }
 
         public void save() {
@@ -999,14 +1006,13 @@ public class CSConfigSpec implements IConfigSpec
             return (ValueSpec) parent.spec.get(path);
         }
 
-        public void clearCache() {
-            this.cachedValue = null;
+        public void clearCache()
+        {   this.cachedValue = null;
         }
     }
 
     public static class BooleanValue extends ConfigValue<Boolean> implements BooleanSupplier {
-        BooleanValue(Builder parent, List<String> path, Supplier<Boolean> defaultSupplier) {
-            super(parent, path, defaultSupplier);
+        BooleanValue(Builder parent, List<String> path, Supplier<Boolean> defaultSupplier) {   super(parent, path, defaultSupplier);
         }
 
         @Override
@@ -1024,13 +1030,11 @@ public class CSConfigSpec implements IConfigSpec
     }
 
     public static class IntValue extends ConfigValue<Integer> implements IntSupplier {
-        IntValue(Builder parent, List<String> path, Supplier<Integer> defaultSupplier) {
-            super(parent, path, defaultSupplier);
+        IntValue(Builder parent, List<String> path, Supplier<Integer> defaultSupplier) {   super(parent, path, defaultSupplier);
         }
 
         @Override
-        public Integer getRaw(Config config, List<String> path, Supplier<Integer> defaultSupplier) {
-            return config.getIntOrElse(path, () -> defaultSupplier.get());
+        public Integer getRaw(Config config, List<String> path, Supplier<Integer> defaultSupplier) {   return config.getIntOrElse(path, () -> defaultSupplier.get());
         }
 
         @Override
@@ -1040,13 +1044,11 @@ public class CSConfigSpec implements IConfigSpec
     }
 
     public static class LongValue extends ConfigValue<Long> implements LongSupplier {
-        LongValue(Builder parent, List<String> path, Supplier<Long> defaultSupplier) {
-            super(parent, path, defaultSupplier);
+        LongValue(Builder parent, List<String> path, Supplier<Long> defaultSupplier) {   super(parent, path, defaultSupplier);
         }
 
         @Override
-        public Long getRaw(Config config, List<String> path, Supplier<Long> defaultSupplier) {
-            return config.getLongOrElse(path, () -> defaultSupplier.get());
+        public Long getRaw(Config config, List<String> path, Supplier<Long> defaultSupplier) {   return config.getLongOrElse(path, () -> defaultSupplier.get());
         }
 
         @Override
@@ -1056,13 +1058,11 @@ public class CSConfigSpec implements IConfigSpec
     }
 
     public static class DoubleValue extends ConfigValue<Double> implements DoubleSupplier {
-        DoubleValue(Builder parent, List<String> path, Supplier<Double> defaultSupplier) {
-            super(parent, path, defaultSupplier);
+        DoubleValue(Builder parent, List<String> path, Supplier<Double> defaultSupplier) {   super(parent, path, defaultSupplier);
         }
 
         @Override
-        public Double getRaw(Config config, List<String> path, Supplier<Double> defaultSupplier) {
-            Number n = config.get(path);
+        public Double getRaw(Config config, List<String> path, Supplier<Double> defaultSupplier) {   Number n = config.get(path);
             return n == null ? defaultSupplier.get() : n.doubleValue();
         }
 
@@ -1076,15 +1076,13 @@ public class CSConfigSpec implements IConfigSpec
         private final EnumGetMethod converter;
         private final Class<T> clazz;
 
-        EnumValue(Builder parent, List<String> path, Supplier<T> defaultSupplier, EnumGetMethod converter, Class<T> clazz) {
-            super(parent, path, defaultSupplier);
+        EnumValue(Builder parent, List<String> path, Supplier<T> defaultSupplier, EnumGetMethod converter, Class<T> clazz) {   super(parent, path, defaultSupplier);
             this.converter = converter;
             this.clazz = clazz;
         }
 
         @Override
-        public T getRaw(Config config, List<String> path, Supplier<T> defaultSupplier) {
-            return config.getEnumOrElse(path, clazz, converter, defaultSupplier);
+        public T getRaw(Config config, List<String> path, Supplier<T> defaultSupplier) {   return config.getEnumOrElse(path, clazz, converter, defaultSupplier);
         }
     }
 
