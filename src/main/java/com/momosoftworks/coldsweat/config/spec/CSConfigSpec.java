@@ -214,7 +214,7 @@ public class CSConfigSpec extends UnmodifiableConfigWrapper<UnmodifiableConfig> 
                 String oldComment = config.getComment(key);
                 String expectedComment = valueSpec.getComment();
 
-                // CUSTOM: Allow drill_down comment formatting changes
+                // CUSTOM: Allow //v comment formatting changes
                 if (!isCommentFormattingChange(oldComment, expectedComment))
                 {
                     if (!stringsMatchIgnoringNewlines(oldComment, expectedComment))
@@ -253,32 +253,44 @@ public class CSConfigSpec extends UnmodifiableConfigWrapper<UnmodifiableConfig> 
     }
 
     /**
-     * Checks if a comment change is just formatting (removing //drill_down or similar)
+     * Checks if a comment change is just formatting (removing //v or similar)
      * Returns true if this is a formatting change that should be allowed
      */
     private boolean isCommentFormattingChange(String oldComment, String newComment)
     {
-        // Normalize both comments by removing drill_down directives
-        String normalizedOld = normalizeComment(oldComment);
-        String normalizedNew = normalizeComment(newComment);
+        // Check if either comment contains //v directive
+        boolean oldHasDirective = oldComment != null && oldComment.contains("//v");
+        boolean newHasDirective = newComment != null && newComment.contains("//v");
 
-        // If they're the same after normalization, this is just a formatting change
-        return stringsMatchIgnoringNewlines(normalizedOld, normalizedNew);
+        // If only one has the directive, this could be a formatting change
+        if (oldHasDirective != newHasDirective)
+        {
+            // Normalize both comments by removing drill_down directives for comparison
+            String normalizedOld = normalizeCommentForComparison(oldComment);
+            String normalizedNew = normalizeCommentForComparison(newComment);
+
+            // If they're the same after normalization, this is just a formatting change
+            return stringsMatchIgnoringNewlines(normalizedOld, normalizedNew);
+        }
+
+        // If both have or both don't have directives, use standard comparison
+        return stringsMatchIgnoringNewlines(oldComment, newComment);
     }
 
     /**
-     * Normalizes a comment by removing drill_down directives and extra whitespace
+     * Normalizes a comment by removing drill_down directives for comparison purposes only
+     * This preserves the structure but allows comparison of semantic content
      */
-    private String normalizeComment(String comment)
+    private String normalizeCommentForComparison(String comment)
     {
         if (comment == null)
         {   return "";
         }
 
-        // Remove //drill_down directive and clean up
-        String normalized = comment.replace("//drill_down", "").trim();
+        // Remove //v directive and clean up whitespace for comparison
+        String normalized = comment.replace("//v", "").trim();
 
-        // If the comment becomes empty or just a #, return empty string
+        // Handle the case where comment was only "# //v" or similar
         if (normalized.equals("#") || normalized.isEmpty())
         {   return "";
         }
@@ -414,7 +426,7 @@ public class CSConfigSpec extends UnmodifiableConfigWrapper<UnmodifiableConfig> 
         public <V extends Comparable<? super V>> CSConfigSpec.ConfigValue<V> defineInRange(List<String> path, Supplier<V> defaultSupplier, V min, V max, Class<V> clazz) {
             CSConfigSpec.Range<V> range = new CSConfigSpec.Range<>(clazz, min, max);
             context.setRange(range);
-            comment("Range: " + range.toString());
+            comment("Range: " + range);
             if (min.compareTo(max) > 0)
                 throw new IllegalArgumentException("Range min most be less then max.");
             return define(path, defaultSupplier, range);
@@ -796,8 +808,7 @@ public class CSConfigSpec extends UnmodifiableConfigWrapper<UnmodifiableConfig> 
         public V getMax() { return max; }
 
         private boolean isNumber(Object other)
-        {
-            return Number.class.isAssignableFrom(clazz) && other instanceof Number;
+        {   return Number.class.isAssignableFrom(clazz) && other instanceof Number;
         }
 
         @Override
@@ -807,9 +818,8 @@ public class CSConfigSpec extends UnmodifiableConfigWrapper<UnmodifiableConfig> 
             {
                 Number n = (Number) t;
                 boolean result = ((Number)min).doubleValue() <= n.doubleValue() && n.doubleValue() <= ((Number)max).doubleValue();
-                if(!result)
-                {
-                    LOGGER.debug(Logging.CORE, "Range value {} is not within its bounds {}-{}", n.doubleValue(), ((Number)min).doubleValue(), ((Number)max).doubleValue());
+                if (!result)
+                {   LOGGER.debug(Logging.CORE, "Range value {} is not within its bounds {}-{}", n.doubleValue(), ((Number)min).doubleValue(), ((Number)max).doubleValue());
                 }
                 return result;
             }
@@ -817,9 +827,8 @@ public class CSConfigSpec extends UnmodifiableConfigWrapper<UnmodifiableConfig> 
             V c = clazz.cast(t);
 
             boolean result = c.compareTo(min) >= 0 && c.compareTo(max) <= 0;
-            if(!result)
-            {
-                LOGGER.debug(Logging.CORE, "Range value {} is not within its bounds {}-{}", c, min, max);
+            if (!result)
+            {   LOGGER.debug(Logging.CORE, "Range value {} is not within its bounds {}-{}", c, min, max);
             }
             return result;
         }
@@ -899,16 +908,14 @@ public class CSConfigSpec extends UnmodifiableConfigWrapper<UnmodifiableConfig> 
         private CSConfigSpec spec;
 
         ConfigValue(CSConfigSpec.Builder parent, List<String> path, Supplier<T> defaultSupplier)
-        {
-            this.parent = parent;
+        {   this.parent = parent;
             this.path = path;
             this.defaultSupplier = defaultSupplier;
             this.parent.values.add(this);
         }
 
         public List<String> getPath()
-        {
-            return new ArrayList<>(path);
+        {   return new ArrayList<>(path);
         }
 
         /**
@@ -923,114 +930,94 @@ public class CSConfigSpec extends UnmodifiableConfigWrapper<UnmodifiableConfig> 
         public T get()
         {
             Preconditions.checkNotNull(spec, "Cannot get config value before spec is built");
-            // TODO: Remove this dev-time check so this errors out on both production and dev
-            // This is dev-time-only in 1.19.x, to avoid breaking already published mods while forcing devs to fix their errors
-            if (!FMLEnvironment.production)
-            {
-                // When the above if-check is removed, change message to "Cannot get config value before config is loaded"
-                Preconditions.checkState(spec.childConfig != null, """
-                        Cannot get config value before config is loaded.
-                        This error is currently only thrown in the development environment, to avoid breaking published mods.
-                        In a future version, this will also throw in the production environment.
-                        """);
-            }
 
             if (spec.childConfig == null)
-                return defaultSupplier.get();
+            {   return defaultSupplier.get();
+            }
 
             if (USE_CACHES && cachedValue == null)
-                cachedValue = getRaw(spec.childConfig, path, defaultSupplier);
+            {   cachedValue = getRaw(spec.childConfig, path, defaultSupplier);
+            }
             else if (!USE_CACHES)
-                return getRaw(spec.childConfig, path, defaultSupplier);
+            {   return getRaw(spec.childConfig, path, defaultSupplier);
+            }
 
             return cachedValue;
         }
 
         protected T getRaw(Config config, List<String> path, Supplier<T> defaultSupplier)
-        {
-            return config.getOrElse(path, defaultSupplier);
+        {   return config.getOrElse(path, defaultSupplier);
         }
 
         /**
          * {@return the default value for the configuration setting}
          */
         public T getDefault()
-        {
-            return defaultSupplier.get();
+        {   return defaultSupplier.get();
         }
 
         public CSConfigSpec.Builder next()
-        {
-            return parent;
+        {   return parent;
         }
 
         public void save()
-        {
-            Preconditions.checkNotNull(spec, "Cannot save config value before spec is built");
+        {   Preconditions.checkNotNull(spec, "Cannot save config value before spec is built");
             Preconditions.checkNotNull(spec.childConfig, "Cannot save config value without assigned Config object present");
             spec.save();
         }
 
         public void set(T value)
-        {
-            Preconditions.checkNotNull(spec, "Cannot set config value before spec is built");
+        {   Preconditions.checkNotNull(spec, "Cannot set config value before spec is built");
             Preconditions.checkNotNull(spec.childConfig, "Cannot set config value without assigned Config object present");
             spec.childConfig.set(path, value);
             this.cachedValue = value;
         }
 
-        public void clearCache() {
-            this.cachedValue = null;
+        public void clearCache()
+        {   this.cachedValue = null;
         }
     }
 
     public static class BooleanValue extends CSConfigSpec.ConfigValue<Boolean>
     {
         BooleanValue(CSConfigSpec.Builder parent, List<String> path, Supplier<Boolean> defaultSupplier)
-        {
-            super(parent, path, defaultSupplier);
+        {   super(parent, path, defaultSupplier);
         }
     }
 
     public static class IntValue extends CSConfigSpec.ConfigValue<Integer>
     {
         IntValue(CSConfigSpec.Builder parent, List<String> path, Supplier<Integer> defaultSupplier)
-        {
-            super(parent, path, defaultSupplier);
+        {   super(parent, path, defaultSupplier);
         }
 
         @Override
         protected Integer getRaw(Config config, List<String> path, Supplier<Integer> defaultSupplier)
-        {
-            return config.getIntOrElse(path, () -> defaultSupplier.get());
+        {   return config.getIntOrElse(path, () -> defaultSupplier.get());
         }
     }
 
     public static class LongValue extends CSConfigSpec.ConfigValue<Long>
     {
         LongValue(CSConfigSpec.Builder parent, List<String> path, Supplier<Long> defaultSupplier)
-        {
-            super(parent, path, defaultSupplier);
+        {   super(parent, path, defaultSupplier);
         }
 
         @Override
         protected Long getRaw(Config config, List<String> path, Supplier<Long> defaultSupplier)
-        {
-            return config.getLongOrElse(path, () -> defaultSupplier.get());
+        {   return config.getLongOrElse(path, () -> defaultSupplier.get());
         }
     }
 
     public static class DoubleValue extends CSConfigSpec.ConfigValue<Double>
     {
         DoubleValue(CSConfigSpec.Builder parent, List<String> path, Supplier<Double> defaultSupplier)
-        {
-            super(parent, path, defaultSupplier);
+        {   super(parent, path, defaultSupplier);
         }
 
         @Override
         protected Double getRaw(Config config, List<String> path, Supplier<Double> defaultSupplier)
-        {
-            Number n = config.<Number>get(path);
+        {   Number n = config.get(path);
             return n == null ? defaultSupplier.get() : n.doubleValue();
         }
     }
@@ -1041,24 +1028,22 @@ public class CSConfigSpec extends UnmodifiableConfigWrapper<UnmodifiableConfig> 
         private final Class<T> clazz;
 
         EnumValue(CSConfigSpec.Builder parent, List<String> path, Supplier<T> defaultSupplier, EnumGetMethod converter, Class<T> clazz)
-        {
-            super(parent, path, defaultSupplier);
+        {   super(parent, path, defaultSupplier);
             this.converter = converter;
             this.clazz = clazz;
         }
 
         @Override
         protected T getRaw(Config config, List<String> path, Supplier<T> defaultSupplier)
-        {
-            return config.getEnumOrElse(path, clazz, converter, defaultSupplier);
+        {   return config.getEnumOrElse(path, clazz, converter, defaultSupplier);
         }
     }
 
     private static final Joiner LINE_JOINER = Joiner.on("\n");
     private static final Joiner DOT_JOINER = Joiner.on(".");
     private static final Splitter DOT_SPLITTER = Splitter.on(".");
+
     private static List<String> split(String path)
-    {
-        return Lists.newArrayList(DOT_SPLITTER.split(path));
+    {   return Lists.newArrayList(DOT_SPLITTER.split(path));
     }
 }
