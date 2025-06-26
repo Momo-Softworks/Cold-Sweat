@@ -199,7 +199,7 @@ public class MainSettingsConfig
         BUILDER.push("Misc");
 
         DISABLED_TEMP_MODIFIERS = BUILDER
-                .comment("─────────────────────────────────────────────────────────────────────────//drill_down",
+                .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Add TempModifier IDs to this list to disable them",
                          " Allows for more granular control of Cold Sweat's features",
                          " Run \"/temp debug @s <trait>\" to see IDs of all modifiers affecting the player",

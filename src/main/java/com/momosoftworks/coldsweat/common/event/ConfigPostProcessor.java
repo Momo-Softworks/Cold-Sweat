@@ -1,8 +1,8 @@
 package com.momosoftworks.coldsweat.common.event;
 
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.api.event.vanilla.ServerConfigsLoadedEvent;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
-import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
@@ -35,26 +35,34 @@ public class ConfigPostProcessor
         }
     }
 
+    @SubscribeEvent
+    public static void onConfigUnload(ModConfigEvent.Unloading event)
+    {
+        if (event.getConfig().getModId().equals(ColdSweat.MOD_ID))
+        {   formatConfig(event.getConfig().getFullPath(), 10);
+        }
+    }
+
     @Mod.EventBusSubscriber
     public static class CommonEvents
     {
         @SubscribeEvent
-        public static void onServerStarted(ServerStartedEvent event)
+        public static void onServerStarted(ServerConfigsLoadedEvent event)
         {   // Format all configs after server starts
             TaskScheduler.schedule(() ->
-            {
-                try
-                {   Path configDir = FMLPaths.CONFIGDIR.get().resolve("coldsweat");
-                    if (Files.exists(configDir))
-                    {   Files.walk(configDir)
-                            .filter(path -> path.toString().endsWith(".toml"))
-                            .forEach(ConfigPostProcessor::formatConfigIfNeeded);
-                    }
-                }
-                catch (IOException e)
-                {   ColdSweat.LOGGER.error("Failed to format configs", e);
-                }
-            }, 20);
+                                   {
+                                       try
+                                       {   Path configDir = FMLPaths.CONFIGDIR.get().resolve("coldsweat");
+                                           if (Files.exists(configDir))
+                                           {   Files.walk(configDir)
+                                                   .filter(path -> path.toString().endsWith(".toml"))
+                                                   .forEach(ConfigPostProcessor::formatConfigIfNeeded);
+                                           }
+                                       }
+                                       catch (IOException e)
+                                       {   ColdSweat.LOGGER.error("Failed to format configs", e);
+                                       }
+                                   }, 20);
         }
     }
 
@@ -73,13 +81,15 @@ public class ConfigPostProcessor
         }
 
         try
-        {   // Quick check: does this file contain drill_down directives?
+        {   // Check if this file needs processing
             List<String> lines = Files.readAllLines(configFile);
             boolean containsDrillDown = lines.stream()
-                    .anyMatch(line -> line.trim().startsWith("#") && line.contains("//drill_down"));
+                    .anyMatch(line -> line.trim().startsWith("#") && line.contains("//v"));
 
-            if (containsDrillDown)
-            {   processDrillDownComments(configFile);
+            boolean containsVerticalArrays = containsVerticallyFormattedArrays(lines);
+
+            if (containsDrillDown || containsVerticalArrays)
+            {   processConfigFormatting(configFile);
             }
         }
         catch (IOException e)
@@ -87,7 +97,29 @@ public class ConfigPostProcessor
         }
     }
 
-    private static void processDrillDownComments(Path configFile)
+    private static boolean containsVerticallyFormattedArrays(List<String> lines)
+    {
+        for (int i = 0; i < lines.size() - 2; i++)
+        {
+            String line = lines.get(i).trim();
+            // Look for pattern: key = [
+            if (line.contains("=") && line.trim().endsWith("= ["))
+            {
+                // Check if next lines are indented (indicating vertical format)
+                if (i + 1 < lines.size())
+                {
+                    String nextLine = lines.get(i + 1);
+                    if (nextLine.startsWith("    ") || nextLine.startsWith("\t"))
+                    {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private static void processConfigFormatting(Path configFile)
     {
         String filePath = configFile.toAbsolutePath().toString();
 
@@ -106,24 +138,14 @@ public class ConfigPostProcessor
                 String trimmed = line.trim();
 
                 // Check for drill_down comment
-                if (trimmed.startsWith("#") && trimmed.contains("//drill_down"))
+                if (trimmed.startsWith("#") && trimmed.contains("//v"))
                 {   nextArrayShouldDrillDown = true;
-                    fileModified = true;
-
-                    // Remove "//drill_down" from the comment while preserving indentation
-                    String originalIndent = getIndentation(line);
-                    String commentContent = line.substring(originalIndent.length());
-                    String cleanedContent = commentContent.replace("//drill_down", "").trim();
-
-                    // Only add the comment if there's still content after removing //drill_down
-                    if (!cleanedContent.equals("#") && !cleanedContent.isEmpty())
-                    {   processedLines.add(originalIndent + cleanedContent);
-                    }
+                    processedLines.add(line);
                     continue;
                 }
 
                 // Skip empty lines and other comments
-                if (trimmed.isEmpty() || (trimmed.startsWith("#") && !trimmed.contains("//drill_down")))
+                if (trimmed.isEmpty() || (trimmed.startsWith("#") && !trimmed.contains("//v")))
                 {   processedLines.add(line);
                     continue;
                 }
@@ -147,6 +169,23 @@ public class ConfigPostProcessor
                         nextArrayShouldDrillDown = false;
                     }
                 }
+                // Check if this line starts a vertical array without //v directive (only if not in drill-down mode)
+                else if (line.contains("=") && line.trim().endsWith("= ["))
+                {
+                    VerticalArrayParseResult verticalResult = parseVerticalArray(lines, i);
+                    if (verticalResult.isVerticalArray)
+                    {
+                        // Convert to horizontal format since no //v directive preceded it
+                        String horizontalFormat = formatArrayHorizontally(verticalResult.keyPart, verticalResult.elements, getIndentation(line));
+                        processedLines.add(horizontalFormat);
+                        i = verticalResult.endIndex;
+                        fileModified = true;
+                    }
+                    else
+                    {
+                        processedLines.add(line);
+                    }
+                }
                 else
                 {   processedLines.add(line);
                 }
@@ -161,6 +200,84 @@ public class ConfigPostProcessor
         catch (IOException e)
         {   ColdSweat.LOGGER.error("Failed to process config file: {}", configFile, e);
         }
+    }
+
+    private static class VerticalArrayParseResult
+    {
+        boolean isVerticalArray;
+        String keyPart;
+        List<String> elements;
+        int endIndex;
+
+        VerticalArrayParseResult(boolean isVerticalArray, String keyPart, List<String> elements, int endIndex)
+        {   this.isVerticalArray = isVerticalArray;
+            this.keyPart = keyPart;
+            this.elements = elements;
+            this.endIndex = endIndex;
+        }
+    }
+
+    private static VerticalArrayParseResult parseVerticalArray(List<String> lines, int startIndex)
+    {
+        String firstLine = lines.get(startIndex);
+        if (!firstLine.trim().endsWith("= ["))
+        {
+            return new VerticalArrayParseResult(false, "", new ArrayList<>(), startIndex);
+        }
+
+        String keyPart = firstLine.substring(0, firstLine.lastIndexOf("= [")).trim() + " =";
+        List<String> elements = new ArrayList<>();
+        int currentIndex = startIndex + 1;
+
+        // Parse elements until we find the closing bracket
+        while (currentIndex < lines.size())
+        {
+            String line = lines.get(currentIndex);
+            String trimmed = line.trim();
+
+            if (trimmed.equals("]"))
+            {
+                // Found the end
+                return new VerticalArrayParseResult(true, keyPart, elements, currentIndex);
+            }
+            else if (line.startsWith("    ") || line.startsWith("\t"))
+            {
+                // This is an indented element
+                String element = trimmed;
+                if (element.endsWith(","))
+                {
+                    element = element.substring(0, element.length() - 1);
+                }
+                elements.add(element);
+            }
+            else
+            {
+                // Not a vertical array format
+                return new VerticalArrayParseResult(false, "", new ArrayList<>(), startIndex);
+            }
+
+            currentIndex++;
+        }
+
+        return new VerticalArrayParseResult(false, "", new ArrayList<>(), startIndex);
+    }
+
+    private static String formatArrayHorizontally(String keyPart, List<String> elements, String indentation)
+    {
+        StringBuilder result = new StringBuilder();
+        result.append(indentation).append(keyPart).append(" [");
+
+        for (int i = 0; i < elements.size(); i++)
+        {
+            result.append(elements.get(i));
+            if (i < elements.size() - 1)
+            {
+                result.append(", ");
+            }
+        }
+
+        result.append("]");
+        return result.toString();
     }
 
     private static class ArrayParseResult
@@ -218,7 +335,7 @@ public class ConfigPostProcessor
             }
             if (!inString)
             {   if (c == '[') bracketCount++;
-                else if (c == ']') bracketCount--;
+            else if (c == ']') bracketCount--;
             }
         }
 
