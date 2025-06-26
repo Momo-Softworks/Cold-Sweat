@@ -93,7 +93,7 @@ public class WorldSettingsConfig
         BUILDER.push("Dimensions");
 
             DIMENSION_TEMP_OFFSETS = BUILDER
-                .comment("─────────────────────────────────────────────────────────────────────────//drill_down",
+                .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Applies an offset to the world's temperature across an entire dimension",
                          " ├── Format: [[\"dimension_id\", temperature1, *units], [\"dimension_id\", temperature2, *units]... etc]",
                          " └── [* = optional]",
@@ -113,7 +113,7 @@ public class WorldSettingsConfig
                     && (list.size() < 3 || list.get(2) instanceof String));
 
             DIMENSION_TEMPERATURES = BUILDER
-            .comment("─────────────────────────────────────────────────────────────────────────//drill_down",
+            .comment("─────────────────────────────────────────────────────────────────────────//v",
                      " Defines the temperature of a dimension, overriding biome and elevation temperature",
                      " ├── Format: [[\"dimension_id\", temperature, *units], [\"dimension_id\", temperature, *units]... etc]",
                      " └── [* = optional]",
@@ -137,7 +137,7 @@ public class WorldSettingsConfig
         BUILDER.push("Biomes");
 
         BIOME_TEMP_OFFSETS = BUILDER
-            .comment("─────────────────────────────────────────────────────────────────────────//drill_down",
+            .comment("─────────────────────────────────────────────────────────────────────────//v",
                      " Applies an offset to the temperature of a biome",
                      " ├── Format: [[\"biome_id\", <lowTemp>, <highTemp>, <*units>], [\"biome_id\", <lowTemp>, <highTemp>, <*units>]... etc]",
                      " └── [* = optional]",
@@ -155,7 +155,7 @@ public class WorldSettingsConfig
                 );
 
         BIOME_TEMPERATURES = BUILDER
-            .comment("─────────────────────────────────────────────────────────────────────────//drill_down",
+            .comment("─────────────────────────────────────────────────────────────────────────//v",
                      " Defines the temperature of a biome, overriding the biome's default temperature",
                      " ├── Format: [[\"biome_id\", <low-temp>, <high-temp>, <*units>], [\"biome_id\", <low-temp>, <high-temp>, <*units>]... etc]",
                      " └── [* = optional]",
@@ -606,7 +606,7 @@ public class WorldSettingsConfig
         BUILDER.push("Blocks");
 
             BLOCK_TEMPERATURES = BUILDER
-                .comment("─────────────────────────────────────────────────────────────────────────//drill_down",
+                .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Applies temperature-emitting properties to blocks",
                          " ├── Format: [[\"block_id\", <temperature>, <range>, <*units>, <*maxEffect>, <*predicates>, <*\"{nbt}\">, <*temperatureLimit>], [etc...], [etc...]]",
                          " └── [* = optional]",
