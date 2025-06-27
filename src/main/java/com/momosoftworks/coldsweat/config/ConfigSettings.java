@@ -4,7 +4,6 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Multimap;
 
-import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.ColdSweat;
@@ -12,6 +11,8 @@ import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.slot.ScalingFormula;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.entity.data.Preference;
+import com.momosoftworks.coldsweat.config.enums.InsulationVisibility;
+import com.momosoftworks.coldsweat.config.enums.WaterEffectSetting;
 import com.momosoftworks.coldsweat.config.spec.*;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
@@ -31,7 +32,6 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
@@ -40,11 +40,9 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.structure.Structure;
-import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.util.thread.EffectiveSide;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.IForgeRegistry;
 import org.apache.logging.log4j.util.TriConsumer;
 
 import javax.annotation.Nullable;
@@ -216,7 +214,7 @@ public class ConfigSettings
     public static final DynamicHolder<Boolean> HIGH_CONTRAST;
 
     public static final DynamicHolder<Boolean> SHOW_CREATIVE_WARNING;
-    public static final DynamicHolder<Boolean> HIDE_TOOLTIPS;
+    public static final DynamicHolder<InsulationVisibility> INSULATION_VISIBILITY;
     public static final DynamicHolder<Boolean> EXPAND_TOOLTIPS;
 
     public static final DynamicHolder<WaterEffectSetting> WATER_EFFECT_SETTING;
@@ -914,10 +912,10 @@ public class ConfigSettings
 
         SHOW_CREATIVE_WARNING = addClientSetting(ColdSweat.createKey("show_creative_warning"), () -> true, holder -> holder.set(ClientSettingsConfig.ENABLE_CREATIVE_WARNING.get()));
 
-        HIDE_TOOLTIPS = addClientSetting(ColdSweat.createKey("hide_tooltips"), () -> false, holder -> holder.set(ClientSettingsConfig.HIDE_INSULATION_TOOLTIPS.get()));
+        INSULATION_VISIBILITY = addClientSetting(ColdSweat.createKey("insulation_visibility"), () -> InsulationVisibility.IF_PRESENT, holder -> holder.set(InsulationVisibility.byName(ClientSettingsConfig.INSULATION_VISIBILITY.get())));
         EXPAND_TOOLTIPS = addClientSetting(ColdSweat.createKey("expand_tooltips"), () -> true, holder -> holder.set(ClientSettingsConfig.EXPAND_TOOLTIPS.get()));
 
-        WATER_EFFECT_SETTING = addClientSetting(ColdSweat.createKey("show_water_effect"), () -> WaterEffectSetting.ALL, holder -> holder.set(WaterEffectSetting.values()[ClientSettingsConfig.WATER_EFFECT_SETTING.get()]));
+        WATER_EFFECT_SETTING = addClientSetting(ColdSweat.createKey("water_effect_setting"), () -> WaterEffectSetting.ALL, holder -> holder.set(WaterEffectSetting.values()[ClientSettingsConfig.WATER_EFFECT_SETTING.get()]));
         WATER_DROPLET_SCALE = addClientSetting(ColdSweat.createKey("water_droplet_scale"), () -> new IntegerBounds(40, 48), holder -> holder.set(new IntegerBounds(ClientSettingsConfig.WATER_DROPLET_SCALE.get().toArray(Integer[]::new))));
 
         SHOW_FROZEN_HEALTH = addClientSetting(ColdSweat.createKey("show_frozen_health"), () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_FROZEN_HEALTH.get()));
@@ -1155,42 +1153,6 @@ public class ConfigSettings
     {
         for (Map.Entry<ResourceLocation, DynamicHolder<?>> entry : CONFIG_SETTINGS.entrySet())
         {   entry.getValue().reset();
-        }
-    }
-
-    private static <K, V> void putRegistryEntries(Multimap<K, V> map, IForgeRegistry<K> registry, List<Either<TagKey<K>, K>> list, V data)
-    {
-        RegistryHelper.mapForgeRegistryTagList(registry, list).forEach(entry -> map.put(entry, data));
-    }
-
-    public enum WaterEffectSetting implements StringRepresentable
-    {
-        OFF("options.off", false, false),
-        PARTICLES("cold_sweat.config.show_water_effect.particles", true, false),
-        SCREEN("cold_sweat.config.show_water_effect.screen", false, true),
-        ALL("cold_sweat.config.show_water_effect.all", true, true);
-
-        private final String translationKey;
-        private final boolean showParticles;
-        private final boolean showGui;
-
-        WaterEffectSetting(String translationKey, boolean showParticles, boolean showGui)
-        {   this.translationKey = translationKey;
-            this.showParticles = showParticles;
-            this.showGui = showGui;
-        }
-
-        @Override
-        public String getSerializedName()
-        {   return this.translationKey;
-        }
-
-        public boolean showParticles()
-        {   return this.showParticles;
-        }
-
-        public boolean showGui()
-        {   return this.showGui;
         }
     }
 }
