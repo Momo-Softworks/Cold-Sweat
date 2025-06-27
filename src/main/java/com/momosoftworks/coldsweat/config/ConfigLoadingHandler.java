@@ -90,7 +90,7 @@ public class ConfigLoadingHandler
         TempModifierInit.buildBlockRegistries();
     }
 
-    @EventBusSubscriber(value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
+    @EventBusSubscriber(value = Dist.CLIENT)
     public static final class ClientConfigs
     {
         @SubscribeEvent

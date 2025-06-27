@@ -507,7 +507,7 @@ public class CompatManager
         }
     }
 
-    @EventBusSubscriber(modid = ColdSweat.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
+    @EventBusSubscriber(modid = ColdSweat.MOD_ID)
     public static class ModEvents
     {
         @SubscribeEvent

@@ -30,7 +30,7 @@ import net.neoforged.fml.util.ObfuscationReflectionHelper;
 import java.lang.reflect.Field;
 import java.util.Map;
 
-@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@EventBusSubscriber(value = Dist.CLIENT)
 public class RegisterItemOverrides
 {
     public static final ItemPropertyFunction SOULSPRING_LAMP_PROPERTIES = (stack, level, entity, id) ->

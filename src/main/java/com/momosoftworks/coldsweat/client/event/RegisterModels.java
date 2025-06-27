@@ -38,7 +38,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.Supplier;
 
-@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@EventBusSubscriber(value = Dist.CLIENT)
 public class RegisterModels
 {
     public static HoglinHeadpieceModel<?> HOGLIN_HEADPIECE_MODEL = null;

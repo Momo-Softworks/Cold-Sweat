@@ -26,7 +26,7 @@ import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
 import java.util.function.Supplier;
 
-@EventBusSubscriber(value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
+@EventBusSubscriber(value = Dist.CLIENT)
 public class Overlays
 {
     public static final ResourceLocation BODY_TEMP_GAUGE = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/body_temp_gauge.png");
