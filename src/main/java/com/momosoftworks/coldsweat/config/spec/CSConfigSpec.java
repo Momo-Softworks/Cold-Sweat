@@ -7,7 +7,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
-import com.momosoftworks.coldsweat.common.event.ConfigPostProcessor;
+import net.minecraft.util.StringRepresentable;
 import net.minecraftforge.fml.Logging;
 import net.minecraftforge.fml.config.IConfigSpec;
 import net.minecraftforge.fml.loading.FMLEnvironment;
