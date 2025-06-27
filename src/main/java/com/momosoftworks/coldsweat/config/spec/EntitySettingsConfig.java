@@ -37,10 +37,11 @@ public class EntitySettingsConfig
                         " Anywhere that uses entity IDs also supports:",
                         " • Tags (e.g. \"#minecraft:skeletons\")",
                         " • Comma-separated lists (e.g. \"minecraft:zombie,#minecraft:skeletons\")",
-                        "   Applies the setting to all listed IDs. Can use tags, regular IDs, and negation interchangeably",
+                        "     Applies the setting to all listed IDs. Can use tags, regular IDs, and negation interchangeably",
                         " • Negation (e.g. \"!minecraft:evoker\")",
-                        "   Useful with lists/tags. Excludes the listed IDs from the setting",
-                        "   i.e. \"#minecraft:raiders,!minecraft:evoker\" (all raid mobs EXCEPT evokers)",
+                        "     Useful with lists/tags. Excludes the listed IDs from the setting",
+                        "     i.e. \"#minecraft:raiders,!minecraft:evoker\" (all raid mobs EXCEPT evokers)",
+                        " Settings with \"//v\" will list elements vertically. Removing \"//v\" will list elements in one line",
                         "─────────────────────────────────────────────────────────────────────────");
 
         /*

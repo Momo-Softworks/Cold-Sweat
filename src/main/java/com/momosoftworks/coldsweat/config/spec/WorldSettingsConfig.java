@@ -79,10 +79,11 @@ public class WorldSettingsConfig
                         " Anywhere that uses IDs, such as blocks, biomes, dimensions, and structures, also supports:",
                         " • Tags (e.g. \"#minecraft:is_underground\")",
                         " • Comma-separated lists (e.g. \"minecraft:desert,#minecraft:is_badlands\")",
-                        "   Applies the setting to all listed IDs. Can use tags, regular IDs, and negation interchangeably",
+                        "     Applies the setting to all listed IDs. Can use tags, regular IDs, and negation interchangeably",
                         " • Negation (e.g. \"!minecraft:jungle_leaves\")",
-                        "   Useful with lists/tags. Excludes the listed IDs from the setting",
-                        "   i.e. \"#minecraft:leaves,!minecraft:jungle_leaves\" (all leaves EXCEPT jungle leaves)",
+                        "     Useful with lists/tags. Excludes the listed IDs from the setting",
+                        "     i.e. \"#minecraft:leaves,!minecraft:jungle_leaves\" (all leaves EXCEPT jungle leaves)",
+                        " Settings with \"//v\" will list elements vertically. Removing \"//v\" will list elements in one line",
                         "─────────────────────────────────────────────────────────────────────────");
 
         /*
