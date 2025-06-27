@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.config.spec;
 
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import net.minecraftforge.common.ForgeConfigSpec;
+import com.momosoftworks.coldsweat.config.enums.InsulationVisibility;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
@@ -14,54 +14,54 @@ import java.util.List;
 
 public class ClientSettingsConfig
 {
-    private static final ForgeConfigSpec SPEC;
-    private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
+    private static final CSConfigSpec SPEC;
+    private static final CSConfigSpec.Builder BUILDER = new CSConfigSpec.Builder();
 
-    public static final ForgeConfigSpec.BooleanValue USE_CELSIUS;
-    public static final ForgeConfigSpec.IntValue TEMPERATURE_OFFSET;
-    public static final ForgeConfigSpec.DoubleValue TEMPERATURE_SMOOTHING;
+    public static final CSConfigSpec.BooleanValue USE_CELSIUS;
+    public static final CSConfigSpec.IntValue TEMPERATURE_OFFSET;
+    public static final CSConfigSpec.DoubleValue TEMPERATURE_SMOOTHING;
 
-    public static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> BODY_TEMP_ICON_POS;
-    public static final ForgeConfigSpec.BooleanValue SHOW_BODY_TEMP_ICON;
-    public static final ForgeConfigSpec.BooleanValue MOVE_BODY_TEMP_ICON_ADVANCED;
+    public static final CSConfigSpec.ConfigValue<List<? extends Integer>> BODY_TEMP_ICON_POS;
+    public static final CSConfigSpec.BooleanValue SHOW_BODY_TEMP_ICON;
+    public static final CSConfigSpec.BooleanValue MOVE_BODY_TEMP_ICON_ADVANCED;
 
-    public static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> BODY_TEMP_READOUT_POS;
-    public static final ForgeConfigSpec.BooleanValue SHOW_BODY_TEMP_READOUT;
+    public static final CSConfigSpec.ConfigValue<List<? extends Integer>> BODY_TEMP_READOUT_POS;
+    public static final CSConfigSpec.BooleanValue SHOW_BODY_TEMP_READOUT;
 
-    public static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> WORLD_TEMP_GAUGE_POS;
-    public static final ForgeConfigSpec.BooleanValue SHOW_WORLD_TEMP_GAUGE;
+    public static final CSConfigSpec.ConfigValue<List<? extends Integer>> WORLD_TEMP_GAUGE_POS;
+    public static final CSConfigSpec.BooleanValue SHOW_WORLD_TEMP_GAUGE;
 
-    public static final ForgeConfigSpec.BooleanValue USE_CUSTOM_HOTBAR_LAYOUT;
-    public static final ForgeConfigSpec.BooleanValue ENABLE_ICON_BOBBING;
+    public static final CSConfigSpec.BooleanValue USE_CUSTOM_HOTBAR_LAYOUT;
+    public static final CSConfigSpec.BooleanValue ENABLE_ICON_BOBBING;
 
-    public static final ForgeConfigSpec.BooleanValue SHOW_HEARTH_DEBUG_VISUALS;
+    public static final CSConfigSpec.BooleanValue SHOW_HEARTH_DEBUG_VISUALS;
 
-    public static final ForgeConfigSpec.BooleanValue SHOW_CONFIG_BUTTON;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> CONFIG_BUTTON_POS;
-    public static final ForgeConfigSpec.BooleanValue SHOW_SCREEN_DISTORTIONS;
+    public static final CSConfigSpec.BooleanValue SHOW_CONFIG_BUTTON;
+    public static final CSConfigSpec.ConfigValue<List<? extends Integer>> CONFIG_BUTTON_POS;
+    public static final CSConfigSpec.BooleanValue SHOW_SCREEN_DISTORTIONS;
 
-    public static final ForgeConfigSpec.BooleanValue HIGH_CONTRAST_MODE;
+    public static final CSConfigSpec.BooleanValue HIGH_CONTRAST_MODE;
 
-    public static final ForgeConfigSpec.BooleanValue ENABLE_CREATIVE_WARNING;
+    public static final CSConfigSpec.BooleanValue ENABLE_CREATIVE_WARNING;
 
-    public static final ForgeConfigSpec.BooleanValue HIDE_INSULATION_TOOLTIPS;
-    public static final ForgeConfigSpec.BooleanValue EXPAND_TOOLTIPS;
+    public static final CSConfigSpec.ConfigValue<String> INSULATION_VISIBILITY;
+    public static final CSConfigSpec.BooleanValue EXPAND_TOOLTIPS;
 
-    public static final ForgeConfigSpec.IntValue WATER_EFFECT_SETTING;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> WATER_DROPLET_SCALE;
+    public static final CSConfigSpec.IntValue WATER_EFFECT_SETTING;
+    public static final CSConfigSpec.ConfigValue<List<? extends Integer>> WATER_DROPLET_SCALE;
 
-    public static final ForgeConfigSpec.BooleanValue SHOW_FROZEN_HEALTH;
-    public static final ForgeConfigSpec.DoubleValue FREEZING_OVERLAY_OPACITY;
-    public static final ForgeConfigSpec.DoubleValue SHIVER_INTENSITY;
-    public static final ForgeConfigSpec.DoubleValue HEATSTROKE_BORDER_OPACITY;
-    public static final ForgeConfigSpec.DoubleValue HEATSTROKE_BLUR;
-    public static final ForgeConfigSpec.DoubleValue HEATSTROKE_SWAY_AMOUNT;
-    public static final ForgeConfigSpec.DoubleValue HEATSTROKE_SWAY_SPEED;
+    public static final CSConfigSpec.BooleanValue SHOW_FROZEN_HEALTH;
+    public static final CSConfigSpec.DoubleValue FREEZING_OVERLAY_OPACITY;
+    public static final CSConfigSpec.DoubleValue SHIVER_INTENSITY;
+    public static final CSConfigSpec.DoubleValue HEATSTROKE_BORDER_OPACITY;
+    public static final CSConfigSpec.DoubleValue HEATSTROKE_BLUR;
+    public static final CSConfigSpec.DoubleValue HEATSTROKE_SWAY_AMOUNT;
+    public static final CSConfigSpec.DoubleValue HEATSTROKE_SWAY_SPEED;
 
-    public static final ForgeConfigSpec.BooleanValue ANIMATED_SOUL_SPRING_LAMP;
+    public static final CSConfigSpec.BooleanValue ANIMATED_SOUL_SPRING_LAMP;
 
-    public static final ForgeConfigSpec.ConfigValue<String> WATERSKIN_DRINK_PRIMARY;
-    public static final ForgeConfigSpec.ConfigValue<String> WATERSKIN_DRINK_SECONDARY;
+    public static final CSConfigSpec.ConfigValue<String> WATERSKIN_DRINK_PRIMARY;
+    public static final CSConfigSpec.ConfigValue<String> WATERSKIN_DRINK_SECONDARY;
 
     static 
     {
@@ -230,11 +230,17 @@ public class ClientSettingsConfig
                              " Displays areas that the Hearth is affecting when the F3 debug menu is open",
                              " ⌄ ")
                     .define("Hearth Debug", true);
-            HIDE_INSULATION_TOOLTIPS = BUILDER
+            INSULATION_VISIBILITY = BUILDER
                     .comment("─────────────────────────────────────────────────────────────────────────",
-                             " Hides insulation tooltips for items, armor, and curios unless SHIFT is held",
+                             " Determines when armor insulation tooltips should show",
+                             " One of:",
+                             " • \"always\": Always show insulation tooltip",
+                             " • \"if_present\": Show insulation tooltip only if the item has insulation (default)",
+                             " • \"on_shift\": Show insulation tooltip if shift is held",
+                             " • \"shift_and_present\": Show insulation if shift is held AND the armor has any",
+                             " • \"never\": Never show insulation tooltips",
                              " ⌄ ")
-                    .define("Hide Tooltips", false);
+                    .define("Insulation Tooltip Visibility", "if_present", o -> o instanceof String string && InsulationVisibility.byName(string) != null);
             EXPAND_TOOLTIPS = BUILDER
                     .comment("─────────────────────────────────────────────────────────────────────────",
                              " Automatically expands all collapsible tooltips",
