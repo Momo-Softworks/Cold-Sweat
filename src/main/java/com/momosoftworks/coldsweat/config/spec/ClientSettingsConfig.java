@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.config.spec;
 
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.Vec2i;
+import com.momosoftworks.coldsweat.config.enums.InsulationVisibility;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
@@ -45,7 +46,7 @@ public class ClientSettingsConfig
 
     public static final ForgeConfigSpec.BooleanValue ENABLE_CREATIVE_WARNING;
 
-    public static final ForgeConfigSpec.BooleanValue HIDE_INSULATION_TOOLTIPS;
+    public static final ForgeConfigSpec.ConfigValue<String> INSULATION_VISIBILITY;
     public static final ForgeConfigSpec.BooleanValue EXPAND_TOOLTIPS;
 
     public static final ForgeConfigSpec.IntValue WATER_EFFECT_SETTING;
@@ -231,11 +232,17 @@ public class ClientSettingsConfig
                              " Displays areas that the Hearth is affecting when the F3 debug menu is open",
                              " ⌄ ")
                     .define("Hearth Debug", true);
-            HIDE_INSULATION_TOOLTIPS = BUILDER
+            INSULATION_VISIBILITY = BUILDER
                     .comment("─────────────────────────────────────────────────────────────────────────",
-                             " Hides insulation tooltips for items, armor, and curios unless SHIFT is held",
+                             " Determines when armor insulation tooltips should show",
+                             " One of:",
+                             " • \"always\": Always show insulation tooltip",
+                             " • \"if_present\": Show insulation tooltip only if the item has insulation (default)",
+                             " • \"on_shift\": Show insulation tooltip if shift is held",
+                             " • \"shift_and_present\": Show insulation if shift is held AND the armor has any",
+                             " • \"never\": Never show insulation tooltips",
                              " ⌄ ")
-                    .define("Hide Tooltips", false);
+                    .define("Insulation Tooltip Visibility", "if_present", o -> o instanceof String && InsulationVisibility.byName((String) o) != null);
             EXPAND_TOOLTIPS = BUILDER
                     .comment("─────────────────────────────────────────────────────────────────────────",
                              " Automatically expands all collapsible tooltips",

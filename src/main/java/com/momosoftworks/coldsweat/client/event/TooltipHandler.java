@@ -15,6 +15,7 @@ import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManag
 import com.momosoftworks.coldsweat.common.item.SoulspringLampItem;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.config.enums.InsulationVisibility;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.SyncItemPredicatesMessage;
 import com.momosoftworks.coldsweat.data.codec.configuration.FoodData;
@@ -315,7 +316,7 @@ public class TooltipHandler
         ItemStack stack = event.getItemStack();
         Item item = stack.getItem();
         List<ITextComponent> elements = event.getToolTip();
-        boolean hideTooltips = ConfigSettings.HIDE_TOOLTIPS.get() && !isShiftDown();
+        InsulationVisibility insulationVisibility = ConfigSettings.INSULATION_VISIBILITY.get();
         if (stack.isEmpty()) return;
 
         TOOLTIP_INSERTIONS.clear();
@@ -387,34 +388,35 @@ public class TooltipHandler
         /*
          Tooltips for insulation
          */
-        if (!hideTooltips && !stack.isEmpty())
+        if (insulationVisibility.shouldShow(stack) && !stack.isEmpty())
         {
             // Insulating armor
             List<InsulatorData> armorInsulation = new ArrayList<>();
             List<InsulatorData> unmetArmorInsulation = new ArrayList<>();
+            for (InsulatorData insulator : ConfigSettings.INSULATING_ARMORS.get().get(item))
+            {   validateInsulator(insulator, armorInsulation, insulator.hideIfUnmet() ? new ArrayList<>() : unmetArmorInsulation);
+            }
+
+            ItemInsulationManager.getInsulationCap(stack).ifPresent(cap ->
             {
-                for (InsulatorData insulator : ConfigSettings.INSULATING_ARMORS.get().get(item))
-                {   validateInsulator(insulator, armorInsulation, insulator.hideIfUnmet() ? new ArrayList<>() : unmetArmorInsulation);
+                if (cap.getInsulation().isEmpty())
+                {   cap.deserializeNBT(stack.getOrCreateTag());
                 }
 
-                ItemInsulationManager.getInsulationCap(stack).ifPresent(cap ->
+                List<Pair<ItemStack, List<InsulatorData>>> insulatorPairs = cap.getInsulation();
+
+                for (int i = 0; i < insulatorPairs.size(); i++)
                 {
-                    if (cap.getInsulation().isEmpty())
-                    {   cap.deserializeNBT(stack.getOrCreateTag());
+                    Pair<ItemStack, List<InsulatorData>> pair = insulatorPairs.get(i);
+                    for (InsulatorData insulator : pair.getSecond())
+                    {   validateInsulator(insulator, armorInsulation, insulator.hideIfUnmet() ? new ArrayList<>() : unmetArmorInsulation);
                     }
+                }
+            });
 
-                    List<Pair<ItemStack, List<InsulatorData>>> insulatorPairs = cap.getInsulation();
-
-                    for (int i = 0; i < insulatorPairs.size(); i++)
-                    {
-                        Pair<ItemStack, List<InsulatorData>> pair = insulatorPairs.get(i);
-                        for (InsulatorData insulator : pair.getSecond())
-                        {   validateInsulator(insulator, armorInsulation, insulator.hideIfUnmet() ? new ArrayList<>() : unmetArmorInsulation);
-                        }
-                    }
-                });
-
-                if (!armorInsulation.isEmpty())
+            if (ItemInsulationManager.isInsulatable(stack))
+            {
+                if (!armorInsulation.isEmpty() || insulationVisibility.showsIfEmpty())
                 {   addTooltip(tooltipStartIndex, new ClientInsulationTooltip(armorInsulation, Insulation.Slot.ARMOR, stack, false), elements);
                 }
                 if (!unmetArmorInsulation.isEmpty())

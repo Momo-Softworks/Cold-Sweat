@@ -144,7 +144,7 @@ public class ClientInsulationTooltip extends Tooltip
         width = 0;
 
         // Positive insulation bar
-        if (!posInsulation.isEmpty())
+        if (!posInsulation.isEmpty() || ConfigSettings.INSULATION_VISIBILITY.get().showsIfEmpty())
         {
             BarType barType = negInsulation.isEmpty() ? BarType.NONE : BarType.POSITIVE;
             width += renderBar(poseStack, x + width, y, posInsulation, extraInsulations, slot, stack, barType);

@@ -12,6 +12,8 @@ import com.momosoftworks.coldsweat.api.insulation.slot.ScalingFormula;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.common.entity.data.Preference;
+import com.momosoftworks.coldsweat.config.enums.InsulationVisibility;
+import com.momosoftworks.coldsweat.config.enums.WaterEffectSetting;
 import com.momosoftworks.coldsweat.config.spec.*;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
@@ -218,7 +220,7 @@ public class ConfigSettings
     public static final DynamicHolder<Boolean> HIGH_CONTRAST;
 
     public static final DynamicHolder<Boolean> SHOW_CREATIVE_WARNING;
-    public static final DynamicHolder<Boolean> HIDE_TOOLTIPS;
+    public static final DynamicHolder<InsulationVisibility> INSULATION_VISIBILITY;
     public static final DynamicHolder<Boolean> EXPAND_TOOLTIPS;
 
     public static final DynamicHolder<WaterEffectSetting> WATER_EFFECT_SETTING;
@@ -908,10 +910,10 @@ public class ConfigSettings
 
         SHOW_CREATIVE_WARNING = addClientSetting(ColdSweat.createKey("show_creative_warning"), () -> true, holder -> holder.set(ClientSettingsConfig.ENABLE_CREATIVE_WARNING.get()));
 
-        HIDE_TOOLTIPS = addClientSetting(ColdSweat.createKey("hide_tooltips"), () -> false, holder -> holder.set(ClientSettingsConfig.HIDE_INSULATION_TOOLTIPS.get()));
+        INSULATION_VISIBILITY = addClientSetting(ColdSweat.createKey("insulation_visibility"), () -> InsulationVisibility.IF_PRESENT, holder -> holder.set(InsulationVisibility.byName(ClientSettingsConfig.INSULATION_VISIBILITY.get())));
         EXPAND_TOOLTIPS = addClientSetting(ColdSweat.createKey("expand_tooltips"), () -> true, holder -> holder.set(ClientSettingsConfig.EXPAND_TOOLTIPS.get()));
 
-        WATER_EFFECT_SETTING = addClientSetting(ColdSweat.createKey("show_water_effect"), () -> WaterEffectSetting.ALL, holder -> holder.set(WaterEffectSetting.values()[ClientSettingsConfig.WATER_EFFECT_SETTING.get()]));
+        WATER_EFFECT_SETTING = addClientSetting(ColdSweat.createKey("water_effect_setting"), () -> WaterEffectSetting.ALL, holder -> holder.set(WaterEffectSetting.values()[ClientSettingsConfig.WATER_EFFECT_SETTING.get()]));
         WATER_DROPLET_SCALE = addClientSetting(ColdSweat.createKey("water_droplet_scale"), () -> new IntegerBounds(40, 48), holder -> holder.set(new IntegerBounds(ClientSettingsConfig.WATER_DROPLET_SCALE.get().toArray(new Integer[0]))));
 
         SHOW_FROZEN_HEALTH = addClientSetting(ColdSweat.createKey("show_frozen_health"), () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_FROZEN_HEALTH.get()));
@@ -1149,42 +1151,6 @@ public class ConfigSettings
     {
         for (Map.Entry<ResourceLocation, DynamicHolder<?>> entry : CONFIG_SETTINGS.entrySet())
         {   entry.getValue().reset();
-        }
-    }
-
-    private static <K extends IForgeRegistryEntry<K>, V> void putRegistryEntries(Multimap<K, V> map, IForgeRegistry<K> registry, List<Either<ITag<K>, K>> list, V data)
-    {
-        RegistryHelper.mapTaggableList(list).forEach(entry -> map.put(entry, data));
-    }
-
-    public enum WaterEffectSetting implements StringRepresentable
-    {
-        OFF("options.off", false, false),
-        PARTICLES("cold_sweat.config.show_water_effect.particles", true, false),
-        SCREEN("cold_sweat.config.show_water_effect.screen", false, true),
-        ALL("cold_sweat.config.show_water_effect.all", true, true);
-
-        private final String translationKey;
-        private final boolean showParticles;
-        private final boolean showGui;
-
-        WaterEffectSetting(String translationKey, boolean showParticles, boolean showGui)
-        {   this.translationKey = translationKey;
-            this.showParticles = showParticles;
-            this.showGui = showGui;
-        }
-
-        @Override
-        public String getSerializedName()
-        {   return this.translationKey;
-        }
-
-        public boolean showParticles()
-        {   return this.showParticles;
-        }
-
-        public boolean showGui()
-        {   return this.showGui;
         }
     }
 }
