@@ -60,10 +60,11 @@ public class ItemSettingsConfig
                         " Anywhere that uses item IDs also supports:",
                         " • Tags (e.g. \"#minecraft:planks\")",
                         " • Comma-separated lists (e.g. \"minecraft:blaze_powder,#forge:rods/blaze\")",
-                        "   Applies the setting to all listed IDs. Can use tags, regular IDs, and negation interchangeably",
+                        "     Applies the setting to all listed IDs. Can use tags, regular IDs, and negation interchangeably",
                         " • Negation (e.g. \"!minecraft:black_dye\")",
-                        "   Useful with lists/tags. Excludes the listed IDs from the setting",
-                        "   i.e. \"#minecraft:dye,!minecraft:black_dye\" (all dyes EXCEPT black dye)",
+                        "     Useful with lists/tags. Excludes the listed IDs from the setting",
+                        "     i.e. \"#forge:dyes,!minecraft:black_dye\" (all dyes EXCEPT black dye)",
+                        " Settings with \"//v\" will list elements vertically. Removing \"//v\" will list elements in one line",
                         "─────────────────────────────────────────────────────────────────────────");
 
         BUILDER.comment("─────────────────────────────────────────────────────────────────────────",
