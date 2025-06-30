@@ -47,6 +47,7 @@ import net.minecraftforge.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Mod.EventBusSubscriber
 public class ShearableFurManager
@@ -121,10 +122,10 @@ public class ShearableFurManager
 
                 // Use shears
                 player.swing(event.getHand(), true);
-                stack.hurtAndBreak(1, event.getPlayer(), (p) -> p.broadcastBreakEvent(event.getHand()));
-
-                // Spawn item(s)
-                shear(living, stack, player);
+                shear(living, player);
+                if (!player.getAbilities().instabuild)
+                {   stack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(player.getUsedItemHand()));
+                }
 
                 // Random chance to ram the player when sheared
                 if (living instanceof Goat goat && !player.getAbilities().instabuild && goat.level.getDifficulty() != Difficulty.PEACEFUL
@@ -212,12 +213,14 @@ public class ShearableFurManager
         }
     }
 
-    public static void shear(LivingEntity entity, ItemStack shears, @Nullable Player player)
+    public static boolean shear(LivingEntity entity, @Nullable Player player)
     {
+        AtomicBoolean success = new AtomicBoolean(false);
         getFurCap(entity).ifPresent(cap ->
         {
             if (!cap.isSheared())
             {
+                success.set(true);
                 // Set sheared flag & cooldown
                 cap.setSheared(true);
                 cap.setFurGrowthCooldown(ConfigSettings.FUR_TIMINGS.get().cooldown());
@@ -227,17 +230,11 @@ public class ShearableFurManager
                 }
                 // Play sound
                 entity.level.playSound(null, entity, SoundEvents.SHEEP_SHEAR, SoundSource.NEUTRAL, 1.0F, 1.0F);
-                // Damage shears
-                if (player == null || !player.getAbilities().instabuild)
-                {
-                    shears.hurtAndBreak(1, entity, (p) -> {
-                        if (player != null) p.broadcastBreakEvent(player.getUsedItemHand());
-                    });
-                }
                 // Sync shear data
                 syncData(entity, null);
             }
         });
+        return success.get();
     }
 
     public static void syncData(LivingEntity entity, ServerPlayer player)
