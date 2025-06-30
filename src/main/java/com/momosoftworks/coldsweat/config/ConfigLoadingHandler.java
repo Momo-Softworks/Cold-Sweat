@@ -383,7 +383,7 @@ public class ConfigLoadingHandler
             InsulatorData insulator = holder.get();
 
             // Add listed items as insulators
-            List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, insulator.item().nestedFlatMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, insulator.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -411,7 +411,7 @@ public class ConfigLoadingHandler
         {
             FuelData fuelData = holder.get();
 
-            List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, fuelData.item().nestedFlatMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, fuelData.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -435,7 +435,7 @@ public class ConfigLoadingHandler
         {
             FoodData foodData = holder.get();
 
-            List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, foodData.item().nestedFlatMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, foodData.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -452,7 +452,7 @@ public class ConfigLoadingHandler
         {
             ItemCarryTempData carryTempData = holder.get();
 
-            List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, carryTempData.item().nestedFlatMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, carryTempData.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -469,7 +469,7 @@ public class ConfigLoadingHandler
         {
             DryingItemData dryingItemData = holder.get();
 
-            List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, dryingItemData.item().nestedFlatMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, dryingItemData.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -486,7 +486,7 @@ public class ConfigLoadingHandler
         {
             ItemInsulationSlotsData insulationSlotData = holder.get();
 
-            List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, insulationSlotData.item().nestedFlatMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, insulationSlotData.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -530,7 +530,7 @@ public class ConfigLoadingHandler
         {
             BiomeTempData biomeTempData = holder.get();
 
-            for (Holder<Biome> biome : RegistryHelper.mapVanillaRegistryTagList(Registry.BIOME_REGISTRY, biomeTempData.biomes().flatten(), registryAccess))
+            for (Holder<Biome> biome : RegistryHelper.mapVanillaRegistryTagList(Registry.BIOME_REGISTRY, biomeTempData.biomes(), registryAccess))
             {
                 if (biomeTempData.isOffset())
                 {   ConfigSettings.BIOME_OFFSETS.get(registryAccess).put(biome, biomeTempData);
@@ -548,7 +548,7 @@ public class ConfigLoadingHandler
         {
             DimensionTempData dimensionTempData = holder.get();
 
-            for (Holder<DimensionType> dimension : RegistryHelper.mapVanillaRegistryTagList(Registry.DIMENSION_TYPE_REGISTRY, dimensionTempData.dimensions().flatten(), registryAccess))
+            for (Holder<DimensionType> dimension : RegistryHelper.mapVanillaRegistryTagList(Registry.DIMENSION_TYPE_REGISTRY, dimensionTempData.dimensions(), registryAccess))
             {
                 if (dimensionTempData.isOffset())
                 {   ConfigSettings.DIMENSION_OFFSETS.get(registryAccess).put(dimension, dimensionTempData);
@@ -566,7 +566,7 @@ public class ConfigLoadingHandler
         {
             StructureTempData structureTempData = holder.get();
 
-            for (Holder<Structure> structure : RegistryHelper.mapVanillaRegistryTagList(Registry.STRUCTURE_REGISTRY, structureTempData.structures().flatten(), registryAccess))
+            for (Holder<Structure> structure : RegistryHelper.mapVanillaRegistryTagList(Registry.STRUCTURE_REGISTRY, structureTempData.structures(), registryAccess))
             {
                 if (structureTempData.isOffset())
                 {   ConfigSettings.STRUCTURE_OFFSETS.get(registryAccess).put(structure, structureTempData);
@@ -592,7 +592,7 @@ public class ConfigLoadingHandler
         {
             MountData mountData = holder.get();
 
-            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITY_TYPES, mountData.entity().nestedFlatMap(EntityRequirement::entities)));
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITY_TYPES, mountData.entity().flatten(EntityRequirement::entities)));
             if (entities.isEmpty())
             {   entities.add(null);
             }
@@ -608,7 +608,7 @@ public class ConfigLoadingHandler
         {
             SpawnBiomeData spawnBiomeData = holder.get();
 
-            for (Holder<Biome> biome : RegistryHelper.mapVanillaRegistryTagList(Registry.BIOME_REGISTRY, spawnBiomeData.biomes().flatten(), registryAccess))
+            for (Holder<Biome> biome : RegistryHelper.mapVanillaRegistryTagList(Registry.BIOME_REGISTRY, spawnBiomeData.biomes(), registryAccess))
             {   ConfigSettings.ENTITY_SPAWN_BIOMES.get(registryAccess).put(biome, spawnBiomeData);
             }
         });
@@ -620,7 +620,7 @@ public class ConfigLoadingHandler
         {
             EntityTempData entityTempData = holder.get();
 
-            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITY_TYPES, entityTempData.entity().nestedFlatMap(EntityRequirement::entities)));
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITY_TYPES, entityTempData.entity().flatten(EntityRequirement::entities)));
             if (entities.isEmpty())
             {   entities.add(null);
             }
@@ -636,7 +636,7 @@ public class ConfigLoadingHandler
         {
             EntityClimateData entityTempData = holder.get();
 
-            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITY_TYPES, entityTempData.entity().nestedFlatMap(EntityRequirement::entities)));
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITY_TYPES, entityTempData.entity().flatten(EntityRequirement::entities)));
             if (entities.isEmpty())
             {   entities.add(null);
             }
@@ -652,7 +652,7 @@ public class ConfigLoadingHandler
         {
             TempEffectsData tempEffectsData = holder.get();
 
-            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITY_TYPES, tempEffectsData.entity().nestedFlatMap(EntityRequirement::entities)));
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITY_TYPES, tempEffectsData.entity().flatten(EntityRequirement::entities)));
             if (entities.isEmpty())
             {   entities.add(null);
             }
