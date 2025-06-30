@@ -1,13 +1,11 @@
 package com.momosoftworks.coldsweat.common.event;
 
+import com.electronwill.nightconfig.core.file.FileWatcher;
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.api.event.vanilla.ServerConfigsLoadedEvent;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
-import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,70 +21,50 @@ public class ConfigPostProcessor
     @SubscribeEvent
     public static void onConfigLoad(ModConfig.Loading event)
     {
-        if (event.getConfig().getModId().equals(ColdSweat.MOD_ID))
-        {   formatConfig(event.getConfig().getFullPath(), 10);
+        ModConfig config = event.getConfig();
+        if (config.getModId().equals(ColdSweat.MOD_ID))
+        {   formatConfig(config, 10);
+            disableUpdates(config);
         }
     }
 
     @SubscribeEvent
     public static void onConfigReload(ModConfig.Reloading event)
     {
-        if (event.getConfig().getModId().equals(ColdSweat.MOD_ID))
-        {   formatConfig(event.getConfig().getFullPath(), 10);
+        ModConfig config = event.getConfig();
+        if (config.getModId().equals(ColdSweat.MOD_ID))
+        {   formatConfig(config, 10);
+            disableUpdates(config);
         }
     }
 
-    @Mod.EventBusSubscriber
-    public static class CommonEvents
-    {
-        @SubscribeEvent
-        public static void onServerStarted(ServerConfigsLoadedEvent event)
-        {   // Format all configs after server starts
-            TaskScheduler.schedule(() ->
-            {
-                try
-                {   Path configDir = FMLPaths.CONFIGDIR.get().resolve("coldsweat");
-                    if (Files.exists(configDir))
-                    {   Files.walk(configDir)
-                            .filter(path -> path.toString().endsWith(".toml"))
-                            .forEach(ConfigPostProcessor::formatConfigIfNeeded);
-                    }
-                }
-                catch (IOException e)
-                {   ColdSweat.LOGGER.error("Failed to format configs", e);
-                }
-            }, 20);
-        }
+    public static void formatConfig(ModConfig config, int delay)
+    {   TaskScheduler.schedule(() -> formatConfigIfNeeded(config), delay);
     }
 
-    public static void formatConfig(Path configPath, int delay)
+    public static void formatConfigIfNeeded(ModConfig config)
     {
-        TaskScheduler.schedule(() -> formatConfigIfNeeded(configPath), delay);
-    }
-
-    public static void formatConfigIfNeeded(Path configFile)
-    {
-        String filePath = configFile.toAbsolutePath().toString();
+        Path filePath = config.getFullPath().toAbsolutePath();
 
         // Prevent concurrent processing
-        if (WRITING_CONFIGS.contains(filePath))
+        if (WRITING_CONFIGS.contains(filePath.toString()))
         {   return;
         }
 
         try
         {   // Check if this file needs processing
-            List<String> lines = Files.readAllLines(configFile);
+            List<String> lines = Files.readAllLines(filePath);
             boolean containsDrillDown = lines.stream()
                     .anyMatch(line -> line.trim().startsWith("#") && line.contains("//v"));
 
             boolean containsVerticalArrays = containsVerticallyFormattedArrays(lines);
 
             if (containsDrillDown || containsVerticalArrays)
-            {   processConfigFormatting(configFile);
+            {   processConfigFormatting(config);
             }
         }
         catch (IOException e)
-        {   ColdSweat.LOGGER.error("Failed to check config file: {}", configFile, e);
+        {   ColdSweat.LOGGER.error("Failed to check config file: {}/{}", config.getModId(), config.getFileName(), e);
         }
     }
 
@@ -112,16 +90,16 @@ public class ConfigPostProcessor
         return false;
     }
 
-    private static void processConfigFormatting(Path configFile)
+    private static void processConfigFormatting(ModConfig config)
     {
-        String filePath = configFile.toAbsolutePath().toString();
+        Path filePath = config.getFullPath().toAbsolutePath();
 
         // Mark as being processed to prevent saves
-        WRITING_CONFIGS.add(filePath);
-        TaskScheduler.schedule(() -> WRITING_CONFIGS.remove(filePath), 10);
+        markWriting(config);
+        TaskScheduler.schedule(() -> unmarkWriting(config), 10);
 
         try
-        {   List<String> lines = Files.readAllLines(configFile);
+        {   List<String> lines = Files.readAllLines(config.getFullPath());
             List<String> processedLines = new ArrayList<>();
             boolean nextArrayShouldDrillDown = false;
             boolean fileModified = false;
@@ -155,7 +133,9 @@ public class ConfigPostProcessor
                         // Skip the lines we just processed
                         i = result.endIndex;
                         nextArrayShouldDrillDown = false;
-                        fileModified = true;
+                        if (lines.get(i).endsWith("]"))
+                        {   fileModified = true;
+                        }
                     }
                     else
                     {   processedLines.add(line);
@@ -186,13 +166,25 @@ public class ConfigPostProcessor
 
             // Only write the file if we made modifications
             if (fileModified)
-            {   Files.write(configFile, processedLines);
-                ColdSweat.LOGGER.debug("Formatted config file: {}", configFile.getFileName());
+            {   Files.write(filePath, processedLines);
+                ColdSweat.LOGGER.debug("Formatted config file: {}", config.getFileName());
             }
         }
         catch (IOException e)
-        {   ColdSweat.LOGGER.error("Failed to process config file: {}", configFile, e);
+        {   ColdSweat.LOGGER.error("Failed to process config file: {}", filePath, e);
         }
+    }
+
+    public static void markWriting(ModConfig config)
+    {   WRITING_CONFIGS.add(config.getFullPath().toString());
+    }
+
+    public static void unmarkWriting(ModConfig config)
+    {   WRITING_CONFIGS.remove(config.getFullPath().toString());
+    }
+
+    public static void disableUpdates(ModConfig config)
+    {   FileWatcher.defaultInstance().removeWatch(config.getFullPath());
     }
 
     private static class VerticalArrayParseResult
