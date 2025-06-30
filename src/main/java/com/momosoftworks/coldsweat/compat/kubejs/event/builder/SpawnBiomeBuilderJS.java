@@ -44,7 +44,7 @@ public class SpawnBiomeBuilderJS
             return this;
         }
         NegatableList<Either<TagKey<Biome>, Holder<Biome>>> biomesList = ConfigHelper.parseRegistryItems(Registry.BIOME_REGISTRY, registryAccess, biomes);
-        this.biomes.addAll(RegistryHelper.mapVanillaRegistryTagList(Registry.BIOME_REGISTRY, biomesList.flatten(), registryAccess));
+        this.biomes.addAll(RegistryHelper.mapVanillaRegistryTagList(Registry.BIOME_REGISTRY, biomesList, registryAccess));
         return this;
     }
 
