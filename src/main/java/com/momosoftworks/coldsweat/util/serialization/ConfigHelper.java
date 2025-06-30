@@ -131,7 +131,7 @@ public class ConfigHelper
     {   return parseBuiltinItems(Registries.ENTITY_TYPE, ForgeRegistries.ENTITY_TYPES, entities);
     }
 
-    public static <K, V extends ConfigData> Multimap<K, V> parseTomlRegistry(CSConfigSpec.ConfigValue<List<? extends List<?>>> config, Function<List<?>, V> tomlParser, Function<V, List<Either<TagKey<K>, K>>> keyListGetter,
+    public static <K, V extends ConfigData> Multimap<K, V> parseTomlRegistry(CSConfigSpec.ConfigValue<List<? extends List<?>>> config, Function<List<?>, V> tomlParser, Function<V, NegatableList<Either<TagKey<K>, K>>> keyListGetter,
                                                                              IForgeRegistry<K> keyRegistry, ResourceKey<Registry<V>> valueRegistry)
     {
         Multimap<K, V> dataMap = new RegistryMultiMap<>();
@@ -173,19 +173,19 @@ public class ConfigHelper
     }
 
     public static <K, V extends ConfigData> Map<Holder<K>, V> getRegistryMap(List<? extends List<?>> source, RegistryAccess registryAccess, ResourceKey<Registry<K>> keyRegistry,
-                                                                             Function<List<?>, V> valueCreator, Function<V, List<Either<TagKey<K>, Holder<K>>>> taggedListGetter)
+                                                                             Function<List<?>, V> valueCreator, Function<V, NegatableList<Either<TagKey<K>, Holder<K>>>> taggedListGetter)
     {
         return getRegistryMapLike(source, registryAccess, keyRegistry, valueCreator, taggedListGetter, FastMap::new, FastMap::put);
     }
 
     public static <K, V extends ConfigData> Multimap<Holder<K>, V> getRegistryMultimap(List<? extends List<?>> source, RegistryAccess registryAccess, ResourceKey<Registry<K>> keyRegistry,
-                                                                                       Function<List<?>, V> valueCreator, Function<V, List<Either<TagKey<K>, Holder<K>>>> taggedListGetter)
+                                                                                       Function<List<?>, V> valueCreator, Function<V, NegatableList<Either<TagKey<K>, Holder<K>>>> taggedListGetter)
     {
         return getRegistryMapLike(source, registryAccess, keyRegistry, valueCreator, taggedListGetter, FastMultiMap::new, FastMultiMap::put);
     }
 
     private static <K, V extends ConfigData, M> M getRegistryMapLike(List<? extends List<?>> source, RegistryAccess registryAccess, ResourceKey<Registry<K>> keyRegistry,
-                                                                     Function<List<?>, V> valueCreator, Function<V, List<Either<TagKey<K>, Holder<K>>>> taggedListGetter,
+                                                                     Function<List<?>, V> valueCreator, Function<V, NegatableList<Either<TagKey<K>, Holder<K>>>> taggedListGetter,
                                                                      Supplier<M> mapSupplier, TriConsumer<M, Holder<K>, V> mapAdder)
     {
         M map = mapSupplier.get();

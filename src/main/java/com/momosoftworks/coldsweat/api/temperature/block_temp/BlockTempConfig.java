@@ -30,7 +30,7 @@ public abstract class BlockTempConfig extends BlockTemp
               data.range(),
               data.fade(),
               data.logarithmic(),
-              RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.BLOCKS, data.block().nestedFlatMap(BlockRequirement::blocks)).toArray(new Block[0]));
+              RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.BLOCKS, data.block().flatten(BlockRequirement::blocks)).toArray(new Block[0]));
         this.predicates = data.block();
     }
 

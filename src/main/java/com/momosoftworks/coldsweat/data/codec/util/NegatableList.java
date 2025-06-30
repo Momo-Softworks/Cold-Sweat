@@ -4,9 +4,9 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.momosoftworks.coldsweat.util.math.CSMath;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.*;
@@ -91,7 +91,7 @@ public class NegatableList<T>
         this.excludeAll = false;
     }
 
-    public NegatableList(List<T> requirements, boolean requireAll, boolean excludeAll)
+    public NegatableList(Collection<T> requirements, boolean requireAll, boolean excludeAll)
     {
         this.requirements = new ArrayList<>(requirements);
         this.exclusions = new ArrayList<>();
@@ -99,11 +99,11 @@ public class NegatableList<T>
         this.requireAll = requireAll;
         this.excludeAll = excludeAll;
     }
-    public NegatableList(List<T> requirements)
+    public NegatableList(Collection<T> requirements)
     {   this(requirements, false, false);
     }
 
-    public NegatableList(List<T> requirements, List<T> exclusions, boolean requireAll, boolean excludeAll)
+    public NegatableList(Collection<T> requirements, Collection<T> exclusions, boolean requireAll, boolean excludeAll)
     {
         this.requirements = new ArrayList<>(requirements);
         this.exclusions = new ArrayList<>(exclusions);
@@ -111,7 +111,7 @@ public class NegatableList<T>
         this.requireAll = requireAll;
         this.excludeAll = excludeAll;
     }
-    public NegatableList(List<T> requirements, List<T> exclusions)
+    public NegatableList(Collection<T> requirements, Collection<T> exclusions)
     {   this(requirements, exclusions, false, false);
     }
 
@@ -140,36 +140,27 @@ public class NegatableList<T>
         Optional<N> requiredResult = this.requirements.stream()
                 .map(mapper)
                 .reduce(reducer);
-
         // Then map and reduce the exclusions
         Optional<N> exclusionResult = this.exclusions.stream()
                 .map(mapper)
                 .reduce(reducer);
-
         if (requiredResult.isPresent() && exclusionResult.isPresent())
         {   remover.accept(requiredResult.get(), exclusionResult.get());
         }
         return requiredResult;
     }
 
-    public <N> Optional<N> flatMap(Function<T, N> mapper, BinaryOperator<N> reducer)
-    {   return this.flatMap(mapper, reducer, (a, b) -> {});
-    }
-
-    public <N> List<N> listMap(Function<T, N> mapper)
-    {   return this.flatMap(mapper.andThen(p -> CSMath.mutable(List.of(p))), CSMath::append, List::removeAll).orElse(List.of());
-    }
-
-    public List<T> flatten()
-    {   return this.listMap(p -> p);
-    }
-
-    public <N> List<N> flatListMap(Function<T, List<N>> mapper)
-    {   return listMap(mapper).stream().flatMap(List::stream).toList();
-    }
-
-    public <N> List<N> nestedFlatMap(Function<T, NegatableList<N>> mapper)
-    {   return listMap(mapper).stream().map(NegatableList::flatten).flatMap(List::stream).toList();
+    public <N> NegatableList<N> flatten(Function<T, NegatableList<N>> mapper)
+    {
+        List<N> requirements = this.requirements.stream()
+                .map(mapper)
+                .flatMap(list -> list.requirements.stream())
+                .toList();
+        List<N> exclusions = this.exclusions.stream()
+                .map(mapper)
+                .flatMap(list -> list.exclusions.stream())
+                .toList();
+        return new NegatableList<>(requirements, exclusions, this.requireAll, this.excludeAll);
     }
 
     public boolean test(Predicate<T> test)
