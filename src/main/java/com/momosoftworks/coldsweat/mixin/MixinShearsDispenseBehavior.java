@@ -16,11 +16,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ShearsDispenseItemBehavior.class)
 public class MixinShearsDispenseBehavior
 {
-    @Inject(method = "tryShearLivingEntity", at = @At("TAIL"))
+    @Inject(method = "tryShearLivingEntity", at = @At("TAIL"), cancellable = true)
     private static void tryShearFurCapability(ServerLevel level, BlockPos pos, ItemStack stack, CallbackInfoReturnable<Boolean> cir)
     {
+        boolean success = false;
         for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(pos), EntitySelector.NO_SPECTATORS))
-        {   ShearableFurManager.shear(living, stack, null);
+        {   success |= ShearableFurManager.shear(living, null);
         }
+        if (success) cir.setReturnValue(true);
     }
 }
