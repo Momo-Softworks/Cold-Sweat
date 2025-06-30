@@ -37,6 +37,7 @@ import net.minecraftforge.fml.network.PacketDistributor;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Mod.EventBusSubscriber
 public class ShearableFurManager
@@ -108,12 +109,10 @@ public class ShearableFurManager
 
                 // Use shears
                 player.swing(event.getHand(), true);
-                stack.hurtAndBreak(1, event.getPlayer(), (p) -> p.broadcastBreakEvent(event.getHand()));
-                // Play sound
-                entity.level.playSound(null, entity, SoundEvents.SHEEP_SHEAR, SoundCategory.NEUTRAL, 1.0F, 1.0F);
-
-                // Spawn item(s)
-                shear((LivingEntity) entity, stack, player);
+                shear((LivingEntity) entity, player);
+                if (!player.abilities.instabuild)
+                {   stack.hurtAndBreak(1, player, (p) -> p.broadcastBreakEvent(player.getUsedItemHand()));
+                }
 
                 // Set sheared
                 cap.setSheared(true);
@@ -165,12 +164,14 @@ public class ShearableFurManager
         }
     }
 
-    public static void shear(LivingEntity entity, ItemStack shears, @Nullable PlayerEntity player)
+    public static boolean shear(LivingEntity entity, @Nullable PlayerEntity player)
     {
+        AtomicBoolean success = new AtomicBoolean(false);
         getFurCap(entity).ifPresent(cap ->
         {
             if (!cap.isSheared())
             {
+                success.set(true);
                 // Set sheared flag & cooldown
                 cap.setSheared(true);
                 cap.setFurGrowthCooldown(ConfigSettings.FUR_TIMINGS.get().cooldown());
@@ -180,17 +181,11 @@ public class ShearableFurManager
                 }
                 // Play sound
                 entity.level.playSound(null, entity, SoundEvents.SHEEP_SHEAR, SoundCategory.NEUTRAL, 1.0F, 1.0F);
-                // Damage shears
-                if (player == null || !player.abilities.instabuild)
-                {
-                    shears.hurtAndBreak(1, entity, (p) -> {
-                        if (player != null) p.broadcastBreakEvent(player.getUsedItemHand());
-                    });
-                }
                 // Sync shear data
                 syncData(entity, null);
             }
         });
+        return success.get();
     }
 
     public static void syncData(LivingEntity entity, ServerPlayerEntity player)
