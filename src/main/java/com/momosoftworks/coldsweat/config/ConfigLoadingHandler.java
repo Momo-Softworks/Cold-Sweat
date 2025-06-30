@@ -380,7 +380,7 @@ public class ConfigLoadingHandler
             InsulatorData insulator = holder.value();
 
             // Add listed items as insulators
-            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, insulator.item().nestedFlatMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, insulator.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -408,7 +408,7 @@ public class ConfigLoadingHandler
         {
             FuelData fuelData = holder.value();
 
-            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, fuelData.item().nestedFlatMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, fuelData.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -432,7 +432,7 @@ public class ConfigLoadingHandler
         {
             FoodData foodData = holder.value();
 
-            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, foodData.item().nestedFlatMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, foodData.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -449,7 +449,7 @@ public class ConfigLoadingHandler
         {
             ItemCarryTempData carryTempData = holder.value();
 
-            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, carryTempData.item().nestedFlatMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, carryTempData.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -466,7 +466,7 @@ public class ConfigLoadingHandler
         {
             DryingItemData dryingItemData = holder.value();
 
-            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, dryingItemData.item().nestedFlatMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, dryingItemData.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -483,7 +483,7 @@ public class ConfigLoadingHandler
         {
             ItemInsulationSlotsData insulationSlotData = holder.value();
 
-            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, insulationSlotData.item().nestedFlatMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, insulationSlotData.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -526,7 +526,7 @@ public class ConfigLoadingHandler
         {
             BiomeTempData biomeTempData = holder.value();
 
-            for (Holder<Biome> biome : RegistryHelper.mapRegistryTagList(Registries.BIOME, biomeTempData.biomes().flatten(), registryAccess))
+            for (Holder<Biome> biome : RegistryHelper.mapRegistryTagList(Registries.BIOME, biomeTempData.biomes(), registryAccess))
             {
                 if (biomeTempData.isOffset())
                 {   ConfigSettings.BIOME_OFFSETS.get(registryAccess).put(biome, biomeTempData);
@@ -544,7 +544,7 @@ public class ConfigLoadingHandler
         {
             DimensionTempData dimensionTempData = holder.value();
 
-            for (Holder<DimensionType> dimension : RegistryHelper.mapRegistryTagList(Registries.DIMENSION_TYPE, dimensionTempData.dimensions().flatten(), registryAccess))
+            for (Holder<DimensionType> dimension : RegistryHelper.mapRegistryTagList(Registries.DIMENSION_TYPE, dimensionTempData.dimensions(), registryAccess))
             {
                 if (dimensionTempData.isOffset())
                 {   ConfigSettings.DIMENSION_OFFSETS.get(registryAccess).put(dimension, dimensionTempData);
@@ -562,7 +562,7 @@ public class ConfigLoadingHandler
         {
             StructureTempData structureTempData = holder.value();
 
-            for (Holder<Structure> structure : RegistryHelper.mapRegistryTagList(Registries.STRUCTURE, structureTempData.structures().flatten(), registryAccess))
+            for (Holder<Structure> structure : RegistryHelper.mapRegistryTagList(Registries.STRUCTURE, structureTempData.structures(), registryAccess))
             {
                 if (structureTempData.isOffset())
                 {   ConfigSettings.STRUCTURE_OFFSETS.get(registryAccess).put(structure, structureTempData);
@@ -588,7 +588,7 @@ public class ConfigLoadingHandler
         {
             MountData mountData = holder.value();
 
-            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, mountData.entity().nestedFlatMap(EntityRequirement::entities)));
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, mountData.entity().flatten(EntityRequirement::entities)));
             if (entities.isEmpty())
             {   entities.add(null);
             }
@@ -604,7 +604,7 @@ public class ConfigLoadingHandler
         {
             SpawnBiomeData spawnBiomeData = holder.value();
 
-            for (Holder<Biome> biome : RegistryHelper.mapRegistryTagList(Registries.BIOME, spawnBiomeData.biomes().flatten(), registryAccess))
+            for (Holder<Biome> biome : RegistryHelper.mapRegistryTagList(Registries.BIOME, spawnBiomeData.biomes(), registryAccess))
             {   ConfigSettings.ENTITY_SPAWN_BIOMES.get(registryAccess).put(biome, spawnBiomeData);
             }
         });
@@ -616,7 +616,7 @@ public class ConfigLoadingHandler
         {
             EntityTempData entityTempData = holder.value();
 
-            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, entityTempData.entity().nestedFlatMap(EntityRequirement::entities)));
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, entityTempData.entity().flatten(EntityRequirement::entities)));
             if (entities.isEmpty())
             {   entities.add(null);
             }
@@ -632,7 +632,7 @@ public class ConfigLoadingHandler
         {
             EntityClimateData entityTempData = holder.value();
 
-            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, entityTempData.entity().nestedFlatMap(EntityRequirement::entities)));
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, entityTempData.entity().flatten(EntityRequirement::entities)));
             if (entities.isEmpty())
             {   entities.add(null);
             }
@@ -648,7 +648,7 @@ public class ConfigLoadingHandler
         {
             TempEffectsData tempEffectsData = holder.value();
 
-            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, tempEffectsData.entity().nestedFlatMap(EntityRequirement::entities)));
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, tempEffectsData.entity().flatten(EntityRequirement::entities)));
             if (entities.isEmpty())
             {   entities.add(null);
             }
