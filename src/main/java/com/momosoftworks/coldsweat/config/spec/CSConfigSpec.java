@@ -854,7 +854,7 @@ public class CSConfigSpec extends UnmodifiableConfigWrapper<UnmodifiableConfig> 
                 } else if (min.equals(Integer.MIN_VALUE)) {
                     return "< " + max;
                 }
-            } // TODO add more special cases?
+            }
             return min + " ~ " + max;
         }
     }

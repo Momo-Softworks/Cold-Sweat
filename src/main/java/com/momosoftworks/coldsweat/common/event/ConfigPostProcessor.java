@@ -35,14 +35,6 @@ public class ConfigPostProcessor
         }
     }
 
-    @SubscribeEvent
-    public static void onConfigUnload(ModConfigEvent.Unloading event)
-    {
-        if (event.getConfig().getModId().equals(ColdSweat.MOD_ID))
-        {   formatConfig(event.getConfig().getFullPath(), 10);
-        }
-    }
-
     @Mod.EventBusSubscriber
     public static class CommonEvents
     {
@@ -50,19 +42,19 @@ public class ConfigPostProcessor
         public static void onServerStarted(ServerConfigsLoadedEvent event)
         {   // Format all configs after server starts
             TaskScheduler.schedule(() ->
-                                   {
-                                       try
-                                       {   Path configDir = FMLPaths.CONFIGDIR.get().resolve("coldsweat");
-                                           if (Files.exists(configDir))
-                                           {   Files.walk(configDir)
-                                                   .filter(path -> path.toString().endsWith(".toml"))
-                                                   .forEach(ConfigPostProcessor::formatConfigIfNeeded);
-                                           }
-                                       }
-                                       catch (IOException e)
-                                       {   ColdSweat.LOGGER.error("Failed to format configs", e);
-                                       }
-                                   }, 20);
+            {
+                try
+                {   Path configDir = FMLPaths.CONFIGDIR.get().resolve("coldsweat");
+                    if (Files.exists(configDir))
+                    {   Files.walk(configDir)
+                            .filter(path -> path.toString().endsWith(".toml"))
+                            .forEach(ConfigPostProcessor::formatConfigIfNeeded);
+                    }
+                }
+                catch (IOException e)
+                {   ColdSweat.LOGGER.error("Failed to format configs", e);
+                }
+            }, 20);
         }
     }
 
