@@ -193,7 +193,7 @@ public class ConfigHelper
     }
 
     public static <K extends IForgeRegistryEntry<K>, V extends ConfigData> Multimap<K, V> parseTomlRegistry(ForgeConfigSpec.ConfigValue<List<? extends List<?>>> config, Function<List<?>, V> tomlParser,
-                                                                                                            Function<V, List<Either<ITag<K>, K>>> keyListGetter,
+                                                                                                            Function<V, NegatableList<Either<ITag<K>, K>>> keyListGetter,
                                                                                                             IForgeRegistry<K> keyRegistry, ModRegistries.ConfigRegistry<V> valueRegistry)
     {
         Multimap<K, V> dataMap = new RegistryMultiMap<>();
@@ -236,33 +236,33 @@ public class ConfigHelper
     }
 
     public static <K, V extends ConfigData> Map<K, V> getRegistryMap(List<? extends List<?>> source, DynamicRegistries dynamicRegistries, RegistryKey<Registry<K>> keyRegistry,
-                                                                             Function<List<?>, V> valueCreator, Function<V, List<Either<ITag<K>, K>>> taggedListGetter)
+                                                                             Function<List<?>, V> valueCreator, Function<V, NegatableList<Either<ITag<K>, K>>> taggedListGetter)
     {
         return getRegistryMapLike(source, dynamicRegistries, keyRegistry, valueCreator, taggedListGetter, FastMap::new, FastMap::put);
     }
     public static <K, V extends ConfigData> Map<K, V> getRegistryMap(List<? extends List<?>> source, RegistryKey<Registry<K>> keyRegistry,
-                                                  Function<List<?>, V> valueCreator, Function<V, List<K>> taggedListGetter)
+                                                                     Function<List<?>, V> valueCreator, Function<V, NegatableList<K>> taggedListGetter)
     {
         return getRegistryMapLike(source, null, keyRegistry, valueCreator,
-                                  v -> taggedListGetter.apply(v).stream().map(Either::<ITag<K>, K>right).collect(Collectors.toList()),
+                                  v -> new NegatableList<>(taggedListGetter.apply(v).flatList().stream().map(Either::<ITag<K>, K>right).collect(Collectors.toList())),
                                   FastMap::new, FastMap::put);
     }
 
     public static <K, V extends ConfigData> Multimap<K, V> getRegistryMultimap(List<? extends List<?>> source, DynamicRegistries dynamicRegistries, RegistryKey<Registry<K>> keyRegistry,
-                                                                                       Function<List<?>, V> valueCreator, Function<V, List<Either<ITag<K>, K>>> taggedListGetter)
+                                                                               Function<List<?>, V> valueCreator, Function<V, NegatableList<Either<ITag<K>, K>>> taggedListGetter)
     {
         return getRegistryMapLike(source, dynamicRegistries, keyRegistry, valueCreator, taggedListGetter, FastMultiMap::new, FastMultiMap::put);
     }
     public static <K, V extends ConfigData> Multimap<K, V> getRegistryMultimap(List<? extends List<?>> source, RegistryKey<Registry<K>> keyRegistry,
-                                                            Function<List<?>, V> valueCreator, Function<V, List<K>> taggedListGetter)
+                                                                               Function<List<?>, V> valueCreator, Function<V, NegatableList<K>> taggedListGetter)
     {
         return getRegistryMapLike(source, null, keyRegistry, valueCreator,
-                                  v -> taggedListGetter.apply(v).stream().map(Either::<ITag<K>, K>right).collect(Collectors.toList()),
+                                  v -> new NegatableList<>(taggedListGetter.apply(v).flatList().stream().map(Either::<ITag<K>, K>right).collect(Collectors.toList())),
                                   FastMultiMap::new, FastMultiMap::put);
     }
 
     private static <K, V extends ConfigData, M> M getRegistryMapLike(List<? extends List<?>> source, DynamicRegistries dynamicRegistries, RegistryKey<Registry<K>> keyRegistry,
-                                                                     Function<List<?>, V> valueCreator, Function<V, List<Either<ITag<K>, K>>> listGetter,
+                                                                     Function<List<?>, V> valueCreator, Function<V, NegatableList<Either<ITag<K>, K>>> listGetter,
                                                                      Supplier<M> mapSupplier, TriConsumer<M, K, V> mapAdder)
     {
         M map = mapSupplier.get();

@@ -362,7 +362,7 @@ public class ConfigLoadingHandler
         insulators.forEach(insulator ->
         {
             // Add listed items as insulators
-            List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(insulator.item().nestedFlatMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(insulator.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -389,7 +389,7 @@ public class ConfigLoadingHandler
     {
         fuels.forEach(fuelData ->
         {
-            List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(fuelData.item().nestedFlatMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(fuelData.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -411,7 +411,7 @@ public class ConfigLoadingHandler
     {
         foods.forEach(foodData ->
         {
-            List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(foodData.item().nestedFlatMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(foodData.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -426,7 +426,7 @@ public class ConfigLoadingHandler
     {
         carryTemps.forEach(carryTempData ->
         {
-            List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(carryTempData.item().nestedFlatMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(carryTempData.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -441,7 +441,7 @@ public class ConfigLoadingHandler
     {
         dryingItems.forEach(dryingItemData ->
         {
-            List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(dryingItemData.item().nestedFlatMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(dryingItemData.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -456,7 +456,7 @@ public class ConfigLoadingHandler
     {
         insulationSlots.forEach(insulationSlotData ->
         {
-            List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(insulationSlotData.item().nestedFlatMap(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(insulationSlotData.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
@@ -496,7 +496,7 @@ public class ConfigLoadingHandler
     {
         biomeTemps.forEach(biomeTempData ->
         {
-            for (Biome biome : biomeTempData.biomes().flatten())
+            for (Biome biome : biomeTempData.biomes().flatList())
             {
                 if (biomeTempData.isOffset())
                 {   ConfigSettings.BIOME_OFFSETS.get(registryAccess).put(biome, biomeTempData);
@@ -512,7 +512,7 @@ public class ConfigLoadingHandler
     {
         dimensionTemps.forEach(dimensionTempData ->
         {
-            for (DimensionType dimension : dimensionTempData.dimensions().flatten())
+            for (DimensionType dimension : dimensionTempData.dimensions().flatList())
             {
                 if (dimensionTempData.isOffset())
                 {   ConfigSettings.DIMENSION_OFFSETS.get(registryAccess).put(dimension, dimensionTempData);
@@ -528,7 +528,7 @@ public class ConfigLoadingHandler
     {
         structureTemps.forEach(structureTempData ->
         {
-            for (StructureFeature<?, ?> structure : structureTempData.structures().flatten())
+            for (StructureFeature<?, ?> structure : structureTempData.structures().flatList())
             {
                 if (structureTempData.isOffset())
                 {   ConfigSettings.STRUCTURE_OFFSETS.get(registryAccess).put(structure, structureTempData);
@@ -552,7 +552,7 @@ public class ConfigLoadingHandler
     {
         mounts.forEach(mountData ->
         {
-            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapTaggableList(mountData.entity().nestedFlatMap(EntityRequirement::entities)));
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapTaggableList(mountData.entity().flatten(EntityRequirement::entities)));
             if (entities.isEmpty())
             {   entities.add(null);
             }
@@ -566,7 +566,7 @@ public class ConfigLoadingHandler
     {
         spawnBiomes.forEach(spawnBiomeData ->
         {
-            for (Biome biome : spawnBiomeData.biomes().flatten())
+            for (Biome biome : spawnBiomeData.biomes().flatList())
             {   ConfigSettings.ENTITY_SPAWN_BIOMES.get(registryAccess).put(biome, spawnBiomeData);
             }
         });
@@ -576,7 +576,7 @@ public class ConfigLoadingHandler
     {
         entityTemps.forEach(entityTempData ->
         {
-            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapTaggableList(entityTempData.entity().nestedFlatMap(EntityRequirement::entities)));
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapTaggableList(entityTempData.entity().flatten(EntityRequirement::entities)));
             if (entities.isEmpty())
             {   entities.add(null);
             }
@@ -590,7 +590,7 @@ public class ConfigLoadingHandler
     {
         entityTemps.forEach(entityTempData ->
         {
-            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapTaggableList(entityTempData.entity().nestedFlatMap(EntityRequirement::entities)));
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapTaggableList(entityTempData.entity().flatten(EntityRequirement::entities)));
             if (entities.isEmpty())
             {   entities.add(null);
             }
@@ -604,7 +604,7 @@ public class ConfigLoadingHandler
     {
         tempEffects.forEach(tempEffectsData ->
         {
-            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapTaggableList(tempEffectsData.entity().nestedFlatMap(EntityRequirement::entities)));
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapTaggableList(tempEffectsData.entity().flatten(EntityRequirement::entities)));
             if (entities.isEmpty())
             {   entities.add(null);
             }

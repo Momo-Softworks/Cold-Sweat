@@ -64,7 +64,7 @@ public class ClientSoulspringTooltip extends Tooltip
                 for (FuelData fuelData : ConfigSettings.SOULSPRING_LAMP_FUEL.get().get(item))
                 {
                     // Compile item NBT
-                    CompoundNBT nbt = fuelData.item().flatMap(req -> req.nbt().tag(), CompoundNBT::merge).orElse(new CompoundNBT());
+                    CompoundNBT nbt = fuelData.item().flatMap(req -> req.nbt().tag(), CompoundNBT::merge, (a, b) -> {}).orElse(new CompoundNBT());
                     // Render item
                     itemRenderer.renderGuiItem(new ItemStack(item, 1, nbt),
                                                x + ((i * 16) % 96), y + 12 + CSMath.floor(i / 6d) * 16);

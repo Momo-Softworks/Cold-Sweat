@@ -4,7 +4,6 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.momosoftworks.coldsweat.util.math.CSMath;
 
 import java.util.*;
 import java.util.function.*;
@@ -139,36 +138,34 @@ public class NegatableList<T>
         Optional<N> requiredResult = this.requirements.stream()
                 .map(mapper)
                 .reduce(reducer);
-
         // Then map and reduce the exclusions
         Optional<N> exclusionResult = this.exclusions.stream()
                 .map(mapper)
                 .reduce(reducer);
-
         if (requiredResult.isPresent() && exclusionResult.isPresent())
         {   remover.accept(requiredResult.get(), exclusionResult.get());
         }
         return requiredResult;
     }
 
-    public <N> Optional<N> flatMap(Function<T, N> mapper, BinaryOperator<N> reducer)
-    {   return this.flatMap(mapper, reducer, (a, b) -> {});
+    public <N> NegatableList<N> flatten(Function<T, NegatableList<N>> mapper)
+    {
+        List<N> requirements = this.requirements.stream()
+                .map(mapper)
+                .flatMap(list -> list.requirements.stream())
+                .collect(Collectors.toList());
+        List<N> exclusions = this.exclusions.stream()
+                .map(mapper)
+                .flatMap(list -> list.exclusions.stream())
+                .collect(Collectors.toList());
+        return new NegatableList<>(requirements, exclusions, this.requireAll, this.excludeAll);
     }
 
-    public <N> List<N> listMap(Function<T, N> mapper)
-    {   return this.flatMap(mapper.andThen(p -> CSMath.mutable(Arrays.asList(p))), CSMath::append, List::removeAll).orElse(Arrays.asList());
-    }
-
-    public List<T> flatten()
-    {   return this.listMap(p -> p);
-    }
-
-    public <N> List<N> flatListMap(Function<T, List<N>> mapper)
-    {   return listMap(mapper).stream().flatMap(List::stream).collect(Collectors.toList());
-    }
-
-    public <N> List<N> nestedFlatMap(Function<T, NegatableList<N>> mapper)
-    {   return listMap(mapper).stream().map(NegatableList::flatten).flatMap(List::stream).collect(Collectors.toList());
+    public List<T> flatList()
+    {
+        List<T> flatList = new ArrayList<>(this.requirements);
+        flatList.removeAll(this.exclusions);
+        return flatList;
     }
 
     public boolean test(Predicate<T> test)

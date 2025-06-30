@@ -77,7 +77,7 @@ public class InsulationItemsGroup extends ItemGroup
         return event.getItems().stream().map(entry ->
         {
             ItemStack stack = new ItemStack(entry.getKey());
-            CompoundNBT nbt = entry.getValue().item().flatMap(it -> it.nbt().tag(), CompoundNBT::merge).orElse(new CompoundNBT());
+            CompoundNBT nbt = entry.getValue().item().flatMap(it -> it.nbt().tag(), CompoundNBT::merge, (a, b) -> {}).orElse(new CompoundNBT());
             if (!nbt.isEmpty())
             {   stack.getOrCreateTag().merge(nbt);
             }
