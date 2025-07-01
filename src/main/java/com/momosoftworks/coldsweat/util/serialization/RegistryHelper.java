@@ -99,7 +99,7 @@ public class RegistryHelper
             either.ifLeft(tagKey ->
             {
                 Optional<HolderSet.Named<T>> tag = reg.getTag(tagKey);
-                tag.ifPresent(tag1 -> list.removeAll(tag1.stream().toList()));
+                tag.ifPresent(tag1 -> list.removeAll(tag1.stream().map(OptionalHolder::ofHolder).toList()));
             });
             either.ifRight(list::remove);
         }
