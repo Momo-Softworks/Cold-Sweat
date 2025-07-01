@@ -5,10 +5,13 @@ import com.momosoftworks.coldsweat.api.event.core.registry.FillOptionalHoldersEv
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.common.Mod;
 
 import java.util.Optional;
 
@@ -20,6 +23,7 @@ public class OptionalHolder<T>
     public OptionalHolder(ResourceKey<T> key)
     {   this.key = key;
         MinecraftForge.EVENT_BUS.register(this);
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> MinecraftForge.EVENT_BUS.register(new ClientHandler()));
     }
 
     public static <T> Codec<OptionalHolder<T>> getCodec(ResourceKey<Registry<T>> key)
@@ -67,12 +71,17 @@ public class OptionalHolder<T>
         MinecraftForge.EVENT_BUS.unregister(this);
     }
 
-    @SubscribeEvent
-    public void onClosed(ClientPlayerNetworkEvent.LoggedOutEvent event)
+    @Mod.EventBusSubscriber(Dist.CLIENT)
+    public class ClientHandler
     {
-        if (event.getPlayer() == null) return;
-        this.value = null;
-        MinecraftForge.EVENT_BUS.unregister(this);
+        @SubscribeEvent
+        public void onClosed(ClientPlayerNetworkEvent.LoggedOutEvent event)
+        {
+            if (event.getPlayer() == null) return;
+            OptionalHolder.this.value = null;
+            MinecraftForge.EVENT_BUS.unregister(OptionalHolder.this);
+            MinecraftForge.EVENT_BUS.unregister(this);
+        }
     }
 
     @Override
