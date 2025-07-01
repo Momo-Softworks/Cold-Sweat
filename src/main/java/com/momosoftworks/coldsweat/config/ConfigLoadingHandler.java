@@ -8,6 +8,7 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.core.registry.CreateRegistriesEvent;
+import com.momosoftworks.coldsweat.api.event.core.registry.FillOptionalHoldersEvent;
 import com.momosoftworks.coldsweat.api.event.vanilla.ServerConfigsLoadedEvent;
 import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
@@ -72,7 +73,7 @@ public class ConfigLoadingHandler
         RegistryAccess registryAccess = event.getServer().registryAccess();
         Multimap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries = new RegistryMultiMap<>();
 
-        ModRegistries.fillOptionalHolders(registryAccess);
+        MinecraftForge.EVENT_BUS.post(new FillOptionalHoldersEvent(registryAccess));
 
         // User JSON configs (config folder)
         ColdSweat.LOGGER.info("Loading registries from configs...");
