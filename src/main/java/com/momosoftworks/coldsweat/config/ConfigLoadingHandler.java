@@ -71,7 +71,7 @@ public class ConfigLoadingHandler
         RegistryAccess registryAccess = event.getServer().registryAccess();
         RegistryMultiMap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries = new RegistryMultiMap<>();
 
-        MinecraftForge.EVENT_BUS.post(new FillOptionalHoldersEvent(registryAccess));
+        NeoForge.EVENT_BUS.post(new FillOptionalHoldersEvent(registryAccess));
 
         // User JSON configs (config folder)
         ColdSweat.LOGGER.info("Loading registries from configs...");

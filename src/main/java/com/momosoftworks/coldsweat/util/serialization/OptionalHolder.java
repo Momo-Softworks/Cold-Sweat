@@ -5,10 +5,12 @@ import com.momosoftworks.coldsweat.api.event.core.registry.FillOptionalHoldersEv
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.server.ServerStoppedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 
 import java.util.Optional;
 
@@ -19,7 +21,9 @@ public class OptionalHolder<T>
 
     public OptionalHolder(ResourceKey<T> key)
     {   this.key = key;
-        MinecraftForge.EVENT_BUS.register(this);
+        NeoForge.EVENT_BUS.register(this);
+        Runnable clientRegister = () -> NeoForge.EVENT_BUS.register(new ClientHandler());
+        if (FMLLoader.getDist() == Dist.CLIENT) clientRegister.run();
     }
 
     public static <T> Codec<OptionalHolder<T>> getCodec(ResourceKey<Registry<T>> key)
@@ -64,15 +68,19 @@ public class OptionalHolder<T>
     @SubscribeEvent
     public void onClosed(ServerStoppedEvent event)
     {   this.value = null;
-        MinecraftForge.EVENT_BUS.unregister(this);
+        NeoForge.EVENT_BUS.unregister(this);
     }
 
-    @SubscribeEvent
-    public void onClosed(ClientPlayerNetworkEvent.LoggingOut event)
+    public class ClientHandler
     {
-        if (event.getPlayer() == null) return;
-        this.value = null;
-        MinecraftForge.EVENT_BUS.unregister(this);
+        @SubscribeEvent
+        public void onClosed(ClientPlayerNetworkEvent.LoggingOut event)
+        {
+            if (event.getPlayer() == null) return;
+            OptionalHolder.this.value = null;
+            NeoForge.EVENT_BUS.unregister(OptionalHolder.this);
+            NeoForge.EVENT_BUS.unregister(this);
+        }
     }
 
     @Override

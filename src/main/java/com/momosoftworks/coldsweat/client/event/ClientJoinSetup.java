@@ -22,7 +22,7 @@ public class ClientJoinSetup
     public static void onJoin(ClientPlayerNetworkEvent.LoggingIn event)
     {
         // Build holders
-        MinecraftForge.EVENT_BUS.post(new FillOptionalHoldersEvent(event.getPlayer().connection.registryAccess()));
+        NeoForge.EVENT_BUS.post(new FillOptionalHoldersEvent(event.getPlayer().connection.registryAccess()));
         // Get configs
         PacketDistributor.sendToServer(new ClientConfigAskMessage());
         // Rebuild TempModifier registries

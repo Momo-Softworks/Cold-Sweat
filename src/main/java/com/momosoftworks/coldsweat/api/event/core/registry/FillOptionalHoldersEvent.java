@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.api.event.core.registry;
 
 import net.minecraft.core.RegistryAccess;
-import net.minecraftforge.eventbus.api.Event;
+import net.neoforged.bus.api.Event;
 
 public class FillOptionalHoldersEvent extends Event
 {
