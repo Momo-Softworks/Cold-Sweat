@@ -83,22 +83,22 @@ public class RegistryHelper
     {   return mapBuiltinRegistryTagList(registry, new NegatableList<>(eitherList));
     }
 
-    public static <T> List<Holder<T>> mapRegistryTagList(ResourceKey<Registry<T>> registry, NegatableList<Either<TagKey<T>, Holder<T>>> eitherList, @Nullable RegistryAccess registryAccess)
+    public static <T> List<OptionalHolder<T>> mapRegistryTagList(ResourceKey<Registry<T>> registry, NegatableList<Either<TagKey<T>, OptionalHolder<T>>> eitherList, @Nullable RegistryAccess registryAccess)
     {
         Registry<T> reg = registryAccess != null ? registryAccess.registryOrThrow(registry) : getRegistry(registry);
-        List<Holder<T>> list = new ArrayList<>();
+        List<OptionalHolder<T>> list = new ArrayList<>();
         if (reg == null) return list;
 
-        for (Either<TagKey<T>, Holder<T>> either : eitherList.requirements())
+        for (Either<TagKey<T>, OptionalHolder<T>> either : eitherList.requirements())
         {
             either.ifLeft(tagKey ->
             {
                 Optional<HolderSet.Named<T>> tag = reg.getTag(tagKey);
-                tag.ifPresent(tag1 -> list.addAll(tag1.stream().toList()));
+                tag.ifPresent(tag1 -> list.addAll(tag1.stream().map(OptionalHolder::ofHolder).toList()));
             });
             either.ifRight(list::add);
         }
-        for (Either<TagKey<T>, Holder<T>> either : eitherList.exclusions())
+        for (Either<TagKey<T>, OptionalHolder<T>> either : eitherList.exclusions())
         {
             either.ifLeft(tagKey ->
             {
@@ -110,7 +110,7 @@ public class RegistryHelper
         return list;
     }
 
-    public static <T> List<Holder<T>> mapRegistryTagList(ResourceKey<Registry<T>> registry, List<Either<TagKey<T>, Holder<T>>> eitherList, @Nullable RegistryAccess registryAccess)
+    public static <T> List<OptionalHolder<T>> mapRegistryTagList(ResourceKey<Registry<T>> registry, List<Either<TagKey<T>, OptionalHolder<T>>> eitherList, @Nullable RegistryAccess registryAccess)
     {   return mapRegistryTagList(registry, new NegatableList<>(eitherList), registryAccess);
     }
 

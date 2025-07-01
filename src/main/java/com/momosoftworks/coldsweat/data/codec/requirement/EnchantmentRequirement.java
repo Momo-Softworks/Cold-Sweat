@@ -6,6 +6,7 @@ import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
+import com.momosoftworks.coldsweat.util.serialization.OptionalHolder;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
@@ -17,7 +18,7 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 
 
-public record EnchantmentRequirement(Either<TagKey<Enchantment>, Holder<Enchantment>> enchantment, IntegerBounds level)
+public record EnchantmentRequirement(Either<TagKey<Enchantment>, OptionalHolder<Enchantment>> enchantment, IntegerBounds level)
 {
     public static final Codec<EnchantmentRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ConfigHelper.tagOrHolderCodec(Registries.ENCHANTMENT).fieldOf("enchantment").forGetter(requirement -> requirement.enchantment),
@@ -29,7 +30,7 @@ public record EnchantmentRequirement(Either<TagKey<Enchantment>, Holder<Enchantm
     public boolean test(Holder<Enchantment> enchantment, int level)
     {
         return this.enchantment.map(tag -> enchantment.is(tag),
-                                    enchantment::equals)
+                                    opt -> opt.is(enchantment))
             && this.level.test(level);
     }
 

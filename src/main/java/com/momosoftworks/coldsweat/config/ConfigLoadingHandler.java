@@ -26,6 +26,7 @@ import com.momosoftworks.coldsweat.data.tag.ModDimensionTags;
 import com.momosoftworks.coldsweat.data.tag.ModEffectTags;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.math.RegistryMultiMap;
+import com.momosoftworks.coldsweat.util.serialization.OptionalHolder;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.core.*;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -68,6 +69,8 @@ public class ConfigLoadingHandler
 
         RegistryAccess registryAccess = event.getServer().registryAccess();
         RegistryMultiMap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries = new RegistryMultiMap<>();
+
+        ModRegistries.fillOptionalHolders(registryAccess);
 
         // User JSON configs (config folder)
         ColdSweat.LOGGER.info("Loading registries from configs...");
@@ -264,7 +267,7 @@ public class ConfigLoadingHandler
         logRegistryLoaded(String.format("Loaded %s structure temperatures", structureTemps.size()), structureTemps);
         // depth temperatures
         Collection<Holder<DepthTempData>> depthTemps = event.getRegistry(ModRegistries.DEPTH_TEMP_DATA);
-        addDepthTempConfigs(depthTemps);
+        addDepthTempConfigs(depthTemps, registryAccess);
         logRegistryLoaded(String.format("Loaded %s depth temperatures", depthTemps.size()), depthTemps);
 
         // mounts
@@ -526,13 +529,13 @@ public class ConfigLoadingHandler
         {
             BiomeTempData biomeTempData = holder.value();
 
-            for (Holder<Biome> biome : RegistryHelper.mapRegistryTagList(Registries.BIOME, biomeTempData.biomes(), registryAccess))
+            for (OptionalHolder<Biome> biome : RegistryHelper.mapRegistryTagList(Registries.BIOME, biomeTempData.biomes(), registryAccess))
             {
                 if (biomeTempData.isOffset())
-                {   ConfigSettings.BIOME_OFFSETS.get(registryAccess).put(biome, biomeTempData);
+                {   ConfigSettings.BIOME_OFFSETS.get(registryAccess).put(biome.get(), biomeTempData);
                 }
                 else
-                {   ConfigSettings.BIOME_TEMPS.get(registryAccess).put(biome, biomeTempData);
+                {   ConfigSettings.BIOME_TEMPS.get(registryAccess).put(biome.get(), biomeTempData);
                 }
             }
         });
@@ -544,13 +547,13 @@ public class ConfigLoadingHandler
         {
             DimensionTempData dimensionTempData = holder.value();
 
-            for (Holder<DimensionType> dimension : RegistryHelper.mapRegistryTagList(Registries.DIMENSION_TYPE, dimensionTempData.dimensions(), registryAccess))
+            for (OptionalHolder<DimensionType> dimension : RegistryHelper.mapRegistryTagList(Registries.DIMENSION_TYPE, dimensionTempData.dimensions(), registryAccess))
             {
                 if (dimensionTempData.isOffset())
-                {   ConfigSettings.DIMENSION_OFFSETS.get(registryAccess).put(dimension, dimensionTempData);
+                {   ConfigSettings.DIMENSION_OFFSETS.get(registryAccess).put(dimension.get(), dimensionTempData);
                 }
                 else
-                {   ConfigSettings.DIMENSION_TEMPS.get(registryAccess).put(dimension, dimensionTempData);
+                {   ConfigSettings.DIMENSION_TEMPS.get(registryAccess).put(dimension.get(), dimensionTempData);
                 }
             }
         });
@@ -562,23 +565,27 @@ public class ConfigLoadingHandler
         {
             StructureTempData structureTempData = holder.value();
 
-            for (Holder<Structure> structure : RegistryHelper.mapRegistryTagList(Registries.STRUCTURE, structureTempData.structures(), registryAccess))
+            for (OptionalHolder<Structure> structure : RegistryHelper.mapRegistryTagList(Registries.STRUCTURE, structureTempData.structures(), registryAccess))
             {
                 if (structureTempData.isOffset())
-                {   ConfigSettings.STRUCTURE_OFFSETS.get(registryAccess).put(structure, structureTempData);
+                {   ConfigSettings.STRUCTURE_OFFSETS.get(registryAccess).put(structure.get(), structureTempData);
                 }
                 else
-                {   ConfigSettings.STRUCTURE_TEMPS.get(registryAccess).put(structure, structureTempData);
+                {   ConfigSettings.STRUCTURE_TEMPS.get(registryAccess).put(structure.get(), structureTempData);
                 }
             }
         });
     }
 
-    private static void addDepthTempConfigs(Collection<Holder<DepthTempData>> depthTemps)
+    private static void addDepthTempConfigs(Collection<Holder<DepthTempData>> depthTemps, RegistryAccess registryAccess)
     {
         // Add the depth temps to the config
         for (Holder<DepthTempData> holder : depthTemps)
-        {   ConfigSettings.DEPTH_REGIONS.get().add(holder.value());
+        {
+            DepthTempData depthTempData = holder.value();
+            for (OptionalHolder<DimensionType> dimension : RegistryHelper.mapRegistryTagList(Registries.DIMENSION_TYPE, depthTempData.dimensions(), registryAccess))
+            {   ConfigSettings.DEPTH_REGIONS.get().put(dimension.get().value(), depthTempData);
+            }
         }
     }
 
@@ -604,8 +611,8 @@ public class ConfigLoadingHandler
         {
             SpawnBiomeData spawnBiomeData = holder.value();
 
-            for (Holder<Biome> biome : RegistryHelper.mapRegistryTagList(Registries.BIOME, spawnBiomeData.biomes(), registryAccess))
-            {   ConfigSettings.ENTITY_SPAWN_BIOMES.get(registryAccess).put(biome, spawnBiomeData);
+            for (OptionalHolder<Biome> biome : RegistryHelper.mapRegistryTagList(Registries.BIOME, spawnBiomeData.biomes(), registryAccess))
+            {   ConfigSettings.ENTITY_SPAWN_BIOMES.get(registryAccess).put(biome.get(), spawnBiomeData);
             }
         });
     }

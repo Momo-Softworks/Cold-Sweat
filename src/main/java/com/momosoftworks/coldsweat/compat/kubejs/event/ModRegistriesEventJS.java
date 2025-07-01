@@ -17,22 +17,18 @@ import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
+import com.momosoftworks.coldsweat.util.serialization.OptionalHolder;
 import dev.latvian.mods.kubejs.event.KubeStartupEvent;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.biome.Biome;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -169,9 +165,9 @@ public class ModRegistriesEventJS implements KubeStartupEvent
     private <K, V extends ConfigData> void addRegistryConfig(ResourceKey<Registry<K>> keyRegistry,
                                                              ResourceKey<Registry<V>> modRegistry,
                                                              String[] rawKeys,
-                                                             Function<NegatableList<Either<TagKey<K>, Holder<K>>>, V> constructor)
+                                                             Function<NegatableList<Either<TagKey<K>, OptionalHolder<K>>>, V> constructor)
     {
-        NegatableList<Either<TagKey<K>, Holder<K>>> parsed = ConfigHelper.parseRegistryItems(keyRegistry, this.event.getRegistryAccess(), rawKeys);
+        NegatableList<Either<TagKey<K>, OptionalHolder<K>>> parsed = ConfigHelper.parseRegistryItems(keyRegistry, this.event.getRegistryAccess(), rawKeys);
         if (parsed.isEmpty())
         {   ColdSweat.LOGGER.error("Failed to find any {} in: {}", keyRegistry.location().getPath(), Arrays.toString(rawKeys));
             return;

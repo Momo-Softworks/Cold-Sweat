@@ -20,6 +20,7 @@ import com.momosoftworks.coldsweat.core.network.message.SyncForgeDataMessage;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.serialization.OptionalHolder;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.*;
 import net.minecraft.core.particles.ParticleOptions;
@@ -573,12 +574,12 @@ public abstract class WorldHelper
         double baseTemp = biome.value().getBaseTemperature();
 
         BiomeTempData biomeTemp = ConfigSettings.BIOME_TEMPS.get(registryAccess)
-                                  .getOrDefault(biome, new BiomeTempData(biome, baseTemp - variance, baseTemp + variance, Temperature.Units.MC, true, false));
+                                  .getOrDefault(biome, new BiomeTempData(OptionalHolder.ofHolder(biome), baseTemp - variance, baseTemp + variance, Temperature.Units.MC, true, false));
         if (biomeTemp.isDisabled())
         {   return Pair.of(0.0, 0.0);
         }
         BiomeTempData configOffset = ConfigSettings.BIOME_OFFSETS.get(registryAccess)
-                                     .getOrDefault(biome, new BiomeTempData(biome, 0d, 0d, Temperature.Units.MC, false, false));
+                                     .getOrDefault(biome, new BiomeTempData(OptionalHolder.ofHolder(biome), 0d, 0d, Temperature.Units.MC, false, false));
         return CSMath.addPairs(Pair.of(biomeTemp.minTemp(), biomeTemp.maxTemp()),
                                Pair.of(configOffset.minTemp(), configOffset.maxTemp()));
     }

@@ -3,8 +3,10 @@ package com.momosoftworks.coldsweat.util.serialization;
 import com.google.common.collect.Multimap;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Either;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.compat.CompatManager;
@@ -45,13 +47,13 @@ public class ConfigHelper
 {
     private ConfigHelper() {}
 
-    public static <T> NegatableList<Either<TagKey<T>, Holder<T>>> parseRegistryItems(ResourceKey<Registry<T>> registry, RegistryAccess registryAccess, String objects)
+    public static <T> NegatableList<Either<TagKey<T>, OptionalHolder<T>>> parseRegistryItems(ResourceKey<Registry<T>> registry, RegistryAccess registryAccess, String objects)
     {   return parseRegistryItems(registry, registryAccess, objects.split(","));
     }
 
-    public static <T> NegatableList<Either<TagKey<T>, Holder<T>>> parseRegistryItems(ResourceKey<Registry<T>> registry, RegistryAccess registryAccess, String[] objects)
+    public static <T> NegatableList<Either<TagKey<T>, OptionalHolder<T>>> parseRegistryItems(ResourceKey<Registry<T>> registry, RegistryAccess registryAccess, String[] objects)
     {
-        NegatableList<Either<TagKey<T>, Holder<T>>> registryList = new NegatableList<>();
+        NegatableList<Either<TagKey<T>, OptionalHolder<T>>> registryList = new NegatableList<>();
         Registry<T> reg = registryAccess.registryOrThrow(registry);
 
         for (String objString : objects)
@@ -72,7 +74,7 @@ public class ConfigHelper
                     ColdSweat.LOGGER.error("Error parsing config: {} \"{}\" does not exist", registry.location().getPath(), objString);
                     continue;
                 }
-                registryList.add(Either.right(obj.get()), negate);
+                registryList.add(Either.right(OptionalHolder.ofHolder(obj.get())), negate);
             }
         }
         return registryList;
@@ -173,19 +175,19 @@ public class ConfigHelper
     }
 
     public static <K, V extends ConfigData> Map<Holder<K>, V> getRegistryMap(List<? extends List<?>> source, RegistryAccess registryAccess, ResourceKey<Registry<K>> keyRegistry,
-                                                                             Function<List<?>, V> valueCreator, Function<V, NegatableList<Either<TagKey<K>, Holder<K>>>> taggedListGetter)
+                                                                             Function<List<?>, V> valueCreator, Function<V, NegatableList<Either<TagKey<K>, OptionalHolder<K>>>> taggedListGetter)
     {
         return getRegistryMapLike(source, registryAccess, keyRegistry, valueCreator, taggedListGetter, FastMap::new, FastMap::put);
     }
 
     public static <K, V extends ConfigData> Multimap<Holder<K>, V> getRegistryMultimap(List<? extends List<?>> source, RegistryAccess registryAccess, ResourceKey<Registry<K>> keyRegistry,
-                                                                                       Function<List<?>, V> valueCreator, Function<V, NegatableList<Either<TagKey<K>, Holder<K>>>> taggedListGetter)
+                                                                                       Function<List<?>, V> valueCreator, Function<V, NegatableList<Either<TagKey<K>, OptionalHolder<K>>>> taggedListGetter)
     {
         return getRegistryMapLike(source, registryAccess, keyRegistry, valueCreator, taggedListGetter, FastMultiMap::new, FastMultiMap::put);
     }
 
     private static <K, V extends ConfigData, M> M getRegistryMapLike(List<? extends List<?>> source, RegistryAccess registryAccess, ResourceKey<Registry<K>> keyRegistry,
-                                                                     Function<List<?>, V> valueCreator, Function<V, NegatableList<Either<TagKey<K>, Holder<K>>>> taggedListGetter,
+                                                                     Function<List<?>, V> valueCreator, Function<V, NegatableList<Either<TagKey<K>, OptionalHolder<K>>>> taggedListGetter,
                                                                      Supplier<M> mapSupplier, TriConsumer<M, Holder<K>, V> mapAdder)
     {
         M map = mapSupplier.get();
@@ -195,8 +197,8 @@ public class ConfigHelper
             if (data != null)
             {
                 data.setRegistryType(ConfigData.Type.TOML);
-                for (Holder<K> key : RegistryHelper.mapRegistryTagList(keyRegistry, taggedListGetter.apply(data), registryAccess))
-                {   mapAdder.accept(map, key, data);
+                for (OptionalHolder<K> key : RegistryHelper.mapRegistryTagList(keyRegistry, taggedListGetter.apply(data), registryAccess))
+                {   mapAdder.accept(map, key.get(), data);
                 }
             }
             else ColdSweat.LOGGER.error("Error parsing {} config \"{}\"", keyRegistry.location(), entry.toString());
@@ -237,58 +239,6 @@ public class ConfigHelper
                                                       }));
     }
 
-    public static <T> Codec<Either<TagKey<T>, Holder<T>>> tagOrHolderCodec(ResourceKey<Registry<T>> vanillaRegistry)
-    {
-        return Codec.either(Codec.STRING.comapFlatMap(str ->
-                                                      {
-                                                          if (!str.startsWith("#"))
-                                                          {   return DataResult.error(() -> String.format("Not a tag key for dynamic holder registry %s: %s", vanillaRegistry.location(), str));
-                                                          }
-                                                          ResourceLocation itemLocation = ResourceLocation.parse(str.replace("#", ""));
-                                                          return DataResult.success(TagKey.create(vanillaRegistry, itemLocation));
-                                                      },
-                                                      key -> "#" + key.location()),
-                            Codec.STRING.comapFlatMap(str ->
-                                                      {
-                                                          RegistryAccess registryAccess = RegistryHelper.getRegistryAccess();
-                                                          if (registryAccess == null)
-                                                          {   ColdSweat.LOGGER.error("Error deserializing config: registry access is null");
-                                                              return DataResult.error(() -> "Registry access is null");
-                                                          }
-                                                          ResourceLocation itemLocation = ResourceLocation.parse(str);
-                                                          Registry<T> registry = registryAccess.registry(vanillaRegistry).orElse(null);
-                                                          if (registry == null)
-                                                          {   ColdSweat.LOGGER.error("Error deserializing config: registry \"{}\" does not exist", vanillaRegistry.location());
-                                                              return DataResult.error(() -> "Registry does not exist");
-                                                          }
-                                                          Optional<Holder.Reference<T>> holder = registry.getHolder(itemLocation);
-                                                          if (holder.isEmpty())
-                                                          {
-                                                              if (CompatManager.modLoaded(itemLocation.getNamespace()))
-                                                              {
-                                                                  ColdSweat.LOGGER.error("Error deserializing config: object \"{}\" does not exist", str);
-                                                                  return DataResult.error(() -> "Object does not exist");
-                                                              }
-                                                              else return DataResult.success(Holder.Reference.createIntrusive(new HolderOwner<>(){}, registry.stream().findFirst().get()));
-                                                          }
-                                                          return DataResult.success(holder.get());
-                                                      },
-                                                      holder ->
-                                                      {
-                                                          RegistryAccess registryAccess = RegistryHelper.getRegistryAccess();
-                                                          if (registryAccess == null)
-                                                          {   ColdSweat.LOGGER.error("Error serializing config: registry access is null");
-                                                              return "null";
-                                                          }
-                                                          Registry<T> registry = registryAccess.registry(vanillaRegistry).orElse(null);
-                                                          if (registry == null)
-                                                          {   ColdSweat.LOGGER.error("Error serializing config: registry \"{}\" does not exist", vanillaRegistry.location());
-                                                              return "null";
-                                                          }
-                                                          return registry.getKey(holder.value()).toString();
-                                                      }));
-    }
-
     public static <T> Codec<Either<TagKey<T>, Holder<T>>> tagOrBuiltinHolderCodec(ResourceKey<Registry<T>> vanillaRegistry, Registry<T> registry)
     {
         return Codec.either(Codec.STRING.comapFlatMap(str ->
@@ -322,18 +272,47 @@ public class ConfigHelper
                                                       }));
     }
 
-    public static <T> Codec<Either<TagKey<T>, Holder<T>>> tagOrHolderCodec(ResourceKey<Registry<T>> vanillaRegistry, Codec<Holder<T>> codec)
+    public static <T> Codec<Either<TagKey<T>, OptionalHolder<T>>> tagOrHolderCodec(ResourceKey<Registry<T>> vanillaRegistry)
     {
-        return Codec.either(Codec.STRING.comapFlatMap(str ->
-                                                      {
-                                                          if (!str.startsWith("#"))
-                                                          {   return DataResult.error(() -> "Not a tag key: " + str);
-                                                          }
-                                                          ResourceLocation itemLocation = ResourceLocation.parse(str.replace("#", ""));
-                                                          return DataResult.success(TagKey.create(vanillaRegistry, itemLocation));
-                                                      },
-                                                      key -> "#" + key.location()),
-                            codec);
+        return new Codec<>()
+        {
+            @Override
+            public <S> DataResult<Pair<Either<TagKey<T>, OptionalHolder<T>>, S>> decode(DynamicOps<S> ops, S input)
+            {
+                DataResult<String> result = Codec.STRING.parse(ops, input);
+                if (result.error().isPresent())
+                {   return DataResult.error(() -> result.error().get().message());
+                }
+                String str = result.result().orElse("");
+                // Decode tag key
+                if (str.startsWith("#"))
+                {
+                    ResourceLocation tagId = ResourceLocation.parse(str.replace("#", ""));
+                    return DataResult.success(Pair.of(Either.left(TagKey.create(vanillaRegistry, tagId)), input));
+                }
+                // Decode holder
+                else
+                {
+                    ResourceLocation itemLocation = ResourceLocation.parse(str);
+                    ResourceKey<T> key = ResourceKey.create(vanillaRegistry, itemLocation);
+                    return DataResult.success(Pair.of(Either.right(new OptionalHolder<>(key)), input));
+                }
+            }
+
+            @Override
+            public <S> DataResult<S> encode(Either<TagKey<T>, OptionalHolder<T>> either, DynamicOps<S> ops, S prefix)
+            {
+                if (either.left().isPresent())
+                {   return Codec.STRING.encode("#" + either.left().get().location(), ops, prefix);
+                }
+                else if (either.right().isPresent())
+                {   OptionalHolder<T> holder = either.right().get();
+                    ResourceKey<T> key = holder.key();
+                    return Codec.STRING.encode(key.location().toString(), ops, prefix);
+                }
+                return DataResult.error(() -> "Either is empty");
+            }
+        };
     }
 
     public static <T> Codec<Either<TagKey<T>, ResourceKey<T>>> tagOrResourceKeyCodec(ResourceKey<Registry<T>> vanillaRegistry)

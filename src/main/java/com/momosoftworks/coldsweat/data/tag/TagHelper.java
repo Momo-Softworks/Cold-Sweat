@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.data.tag;
 
 import com.momosoftworks.coldsweat.api.event.core.init.InitDynamicTagsEvent;
-import com.momosoftworks.coldsweat.api.event.vanilla.ServerConfigsLoadedEvent;
 import com.momosoftworks.coldsweat.util.serialization.ListBuilder;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
@@ -13,6 +12,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -58,7 +58,7 @@ public class TagHelper
     }
 
     @SubscribeEvent
-    public static void onServerStart(ServerConfigsLoadedEvent event)
+    public static void onServerStart(ServerStartedEvent event)
     {
         InitDynamicTagsEvent tagsEvent = new InitDynamicTagsEvent(event.getServer().registryAccess());
         NeoForge.EVENT_BUS.post(tagsEvent);

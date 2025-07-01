@@ -62,7 +62,7 @@ public class SyncConfigSettingsMessage implements CustomPacketPayload
             {
                 if (context.player().hasPermissions(2))
                 {
-                    ConfigSettings.decode(message.configValues, registryAccess);
+                    ConfigSettings.decode(message.configValues);
                     ConfigSettings.saveValues(registryAccess);
                     MainSettingsConfig.save();
                     WorldSettingsConfig.save();
@@ -74,7 +74,7 @@ public class SyncConfigSettingsMessage implements CustomPacketPayload
             else
             {
                 try
-                {   ConfigSettings.decode(message.configValues, registryAccess);
+                {   ConfigSettings.decode(message.configValues);
                 }
                 catch (Exception e)
                 {   ColdSweat.LOGGER.error("Failed to decode config settings from server: ", e);
