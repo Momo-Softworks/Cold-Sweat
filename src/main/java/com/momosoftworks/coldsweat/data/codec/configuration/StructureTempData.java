@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
+import com.momosoftworks.coldsweat.util.serialization.OptionalHolder;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.Registry;
@@ -19,12 +20,12 @@ import java.util.List;
 
 public class StructureTempData extends ConfigData
 {
-    NegatableList<Either<TagKey<Structure>, Holder<Structure>>> structures;
+    NegatableList<Either<TagKey<Structure>, OptionalHolder<Structure>>> structures;
     double temperature;
     Temperature.Units units;
     boolean isOffset;
 
-    public StructureTempData(NegatableList<Either<TagKey<Structure>, Holder<Structure>>> structures, double temperature,
+    public StructureTempData(NegatableList<Either<TagKey<Structure>, OptionalHolder<Structure>>> structures, double temperature,
                              Temperature.Units units, boolean isOffset, NegatableList<String> requiredMods)
     {
         super(requiredMods);
@@ -34,26 +35,26 @@ public class StructureTempData extends ConfigData
         this.isOffset = isOffset;
     }
 
-    public StructureTempData(NegatableList<Either<TagKey<Structure>, Holder<Structure>>> structures, double temperature,
+    public StructureTempData(NegatableList<Either<TagKey<Structure>, OptionalHolder<Structure>>> structures, double temperature,
                              Temperature.Units units, boolean isOffset)
     {
         this(structures, temperature, units, isOffset, new NegatableList<>());
     }
 
-    public StructureTempData(Holder<Structure> structure, double temperature,
+    public StructureTempData(OptionalHolder<Structure> structure, double temperature,
                              Temperature.Units units, boolean isOffset)
     {
         this(new NegatableList<>(Either.right(structure)), temperature, units, isOffset);
     }
 
     public static final Codec<StructureTempData> CODEC = createCodec(RecordCodecBuilder.create(instance -> instance.group(
-            NegatableList.listCodec(ConfigHelper.tagOrHolderCodec(Registry.STRUCTURE_REGISTRY, Structure.CODEC)).fieldOf("structures").forGetter(StructureTempData::structures),
+            NegatableList.listCodec(ConfigHelper.tagOrHolderCodec(Registry.STRUCTURE_REGISTRY)).fieldOf("structures").forGetter(StructureTempData::structures),
             Codec.DOUBLE.fieldOf("temperature").forGetter(StructureTempData::temperature),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(StructureTempData::units),
             Codec.BOOL.optionalFieldOf("offset", false).forGetter(StructureTempData::isOffset)
     ).apply(instance, StructureTempData::new)));
 
-    public NegatableList<Either<TagKey<Structure>, Holder<Structure>>> structures()
+    public NegatableList<Either<TagKey<Structure>, OptionalHolder<Structure>>> structures()
     {   return structures;
     }
     public double temperature()
@@ -77,7 +78,7 @@ public class StructureTempData extends ConfigData
         {   ColdSweat.LOGGER.error("Error parsing structure config: {} does not have enough arguments", entry);
             return null;
         }
-        NegatableList<Either<TagKey<Structure>, Holder<Structure>>> structures = ConfigHelper.parseRegistryItems(Registry.STRUCTURE_REGISTRY, registryAccess, (String) entry.get(0));
+        NegatableList<Either<TagKey<Structure>, OptionalHolder<Structure>>> structures = ConfigHelper.parseRegistryItems(Registry.STRUCTURE_REGISTRY, registryAccess, (String) entry.get(0));
         if (structures.isEmpty()) return null;
         double temp = ((Number) entry.get(1)).doubleValue();
         Temperature.Units units = entry.size() == 3 ? Temperature.Units.valueOf(((String) entry.get(2)).toUpperCase()) : Temperature.Units.MC;

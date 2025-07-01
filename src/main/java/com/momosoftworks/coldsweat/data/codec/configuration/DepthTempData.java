@@ -11,6 +11,7 @@ import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
+import com.momosoftworks.coldsweat.util.serialization.OptionalHolder;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -26,10 +27,10 @@ import java.util.List;
 public class DepthTempData extends ConfigData
 {
     final List<TempRegion> temperatures;
-    final NegatableList<Either<TagKey<DimensionType>, Holder<DimensionType>>> dimensions;
+    final NegatableList<Either<TagKey<DimensionType>, OptionalHolder<DimensionType>>> dimensions;
 
     public DepthTempData(List<TempRegion> temperatures,
-                         NegatableList<Either<TagKey<DimensionType>, Holder<DimensionType>>> dimensions,
+                         NegatableList<Either<TagKey<DimensionType>, OptionalHolder<DimensionType>>> dimensions,
                          NegatableList<String> requiredMods)
     {
         super(requiredMods);
@@ -38,20 +39,20 @@ public class DepthTempData extends ConfigData
     }
 
     public DepthTempData(List<TempRegion> temperatures,
-                         NegatableList<Either<TagKey<DimensionType>, Holder<DimensionType>>> dimensions)
+                         NegatableList<Either<TagKey<DimensionType>, OptionalHolder<DimensionType>>> dimensions)
     {
         this(temperatures, dimensions, new NegatableList<>());
     }
 
     public static final Codec<DepthTempData> CODEC = createCodec(RecordCodecBuilder.create(instance -> instance.group(
             TempRegion.CODEC.listOf().fieldOf("regions").forGetter(DepthTempData::temperatures),
-            NegatableList.listCodec(ConfigHelper.tagOrHolderCodec(Registry.DIMENSION_TYPE_REGISTRY, DimensionType.CODEC)).fieldOf("dimensions").forGetter(DepthTempData::dimensions)
+            NegatableList.listCodec(ConfigHelper.tagOrHolderCodec(Registry.DIMENSION_TYPE_REGISTRY)).fieldOf("dimensions").forGetter(DepthTempData::dimensions)
     ).apply(instance, DepthTempData::new)));
 
     public List<TempRegion> temperatures()
     {   return temperatures;
     }
-    public NegatableList<Either<TagKey<DimensionType>, Holder<DimensionType>>> dimensions()
+    public NegatableList<Either<TagKey<DimensionType>, OptionalHolder<DimensionType>>> dimensions()
     {   return dimensions;
     }
 
@@ -63,7 +64,7 @@ public class DepthTempData extends ConfigData
     public TempRegion getRegion(Level level, BlockPos pos)
     {
         Holder<DimensionType> dim = level.dimensionTypeRegistration();
-        if (!this.dimensions.test(either -> either.map(dim::is, dim::equals)))
+        if (!this.dimensions.test(either -> either.map(dim::is, h -> h.is(dim))))
         {   return null;
         }
         for (TempRegion region : temperatures)
