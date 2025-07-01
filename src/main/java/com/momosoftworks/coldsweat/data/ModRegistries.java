@@ -84,17 +84,6 @@ public class ModRegistries
                .orElseThrow(() -> ColdSweat.LOGGER.throwing(new IllegalArgumentException("Unknown Cold Sweat registry: " + registry.location().getPath())));
     }
 
-    public static void fillOptionalHolders(RegistryAccess registryAccess)
-    {
-        for (OptionalHolder holder : OPTIONAL_HOLDERS)
-        {
-            Registry<?> registry = registryAccess.registryOrThrow(ResourceKey.createRegistryKey(holder.key().registry()));
-            if (registry != null)
-            {   registry.getHolder(holder.key()).ifPresent(h -> holder.setValue((Holder.Reference) h));
-            }
-        }
-    }
-
     public record RegistryHolder<V extends ConfigData>(ResourceKey<Registry<V>> registry, Codec<V> codec, Class<V> type)
     {}
 }
