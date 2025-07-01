@@ -5,25 +5,34 @@ import com.momosoftworks.coldsweat.core.init.TempModifierInit;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.ClientConfigAskMessage;
 import com.momosoftworks.coldsweat.core.network.message.SyncPreferencesMessage;
+import com.momosoftworks.coldsweat.data.ModRegistries;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class ClientJoinSetup
 {
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onJoin(ClientPlayerNetworkEvent.LoggingIn event)
     {
+        // Build holders
+        ModRegistries.fillOptionalHolders(event.getPlayer().connection.registryAccess());
         // Get configs
         ColdSweatPacketHandler.INSTANCE.sendToServer(new ClientConfigAskMessage());
         // Rebuild TempModifier registries
         TempModifierInit.buildModifierRegistries();
         MinecraftForge.EVENT_BUS.post(new EdiblesRegisterEvent());
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public static void onLeave(ClientPlayerNetworkEvent.LoggingOut event)
+    {   ModRegistries.OPTIONAL_HOLDERS.clear();
     }
 
     @SubscribeEvent

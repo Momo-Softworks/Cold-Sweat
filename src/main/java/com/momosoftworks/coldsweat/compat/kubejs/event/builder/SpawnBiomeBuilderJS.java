@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.data.codec.requirement.LocationRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
+import com.momosoftworks.coldsweat.util.serialization.OptionalHolder;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
@@ -26,7 +27,7 @@ import java.util.function.Predicate;
 
 public class SpawnBiomeBuilderJS
 {
-    public final Set<Holder<Biome>> biomes = new HashSet<>();
+    public final Set<OptionalHolder<Biome>> biomes = new HashSet<>();
     public MobCategory category;
     public int weight;
     public final Set<EntityType<?>> entities = new HashSet<>();
@@ -43,7 +44,7 @@ public class SpawnBiomeBuilderJS
         {   ColdSweat.LOGGER.error("Could not parse biomes for addSpawnBiomes(), as registries are not built yet.");
             return this;
         }
-        NegatableList<Either<TagKey<Biome>, Holder<Biome>>> biomesList = ConfigHelper.parseRegistryItems(Registries.BIOME, registryAccess, biomes);
+        NegatableList<Either<TagKey<Biome>, OptionalHolder<Biome>>> biomesList = ConfigHelper.parseRegistryItems(Registries.BIOME, registryAccess, biomes);
         this.biomes.addAll(RegistryHelper.mapVanillaRegistryTagList(Registries.BIOME, biomesList, registryAccess));
         return this;
     }

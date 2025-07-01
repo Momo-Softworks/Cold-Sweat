@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
+import com.momosoftworks.coldsweat.util.serialization.OptionalHolder;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
@@ -19,12 +20,12 @@ import java.util.List;
 
 public class DimensionTempData extends ConfigData
 {
-    final NegatableList<Either<TagKey<DimensionType>, Holder<DimensionType>>> dimensions;
+    final NegatableList<Either<TagKey<DimensionType>, OptionalHolder<DimensionType>>> dimensions;
     final double temperature;
     final Temperature.Units units;
     final boolean isOffset;
 
-    public DimensionTempData(NegatableList<Either<TagKey<DimensionType>, Holder<DimensionType>>> dimensions,
+    public DimensionTempData(NegatableList<Either<TagKey<DimensionType>, OptionalHolder<DimensionType>>> dimensions,
                              double temperature, Temperature.Units units, boolean isOffset,
                              NegatableList<String> requiredMods)
     {
@@ -35,24 +36,24 @@ public class DimensionTempData extends ConfigData
         this.isOffset = isOffset;
     }
 
-    public DimensionTempData(NegatableList<Either<TagKey<DimensionType>, Holder<DimensionType>>> dimensions,
+    public DimensionTempData(NegatableList<Either<TagKey<DimensionType>, OptionalHolder<DimensionType>>> dimensions,
                              double temperature, Temperature.Units units, boolean isOffset)
     {
         this(dimensions, temperature, units, isOffset, new NegatableList<>());
     }
 
     public DimensionTempData(Holder<DimensionType> dimension, double temperature, Temperature.Units units, boolean isOffset)
-    {   this(new NegatableList<>(Either.right(dimension)), temperature, units, isOffset);
+    {   this(new NegatableList<>(Either.right(OptionalHolder.ofHolder(dimension))), temperature, units, isOffset);
     }
 
     public static final Codec<DimensionTempData> CODEC = createCodec(RecordCodecBuilder.create(instance -> instance.group(
-            NegatableList.listCodec(ConfigHelper.tagOrHolderCodec(Registries.DIMENSION_TYPE, DimensionType.CODEC)).fieldOf("dimensions").forGetter(DimensionTempData::dimensions),
+            NegatableList.listCodec(ConfigHelper.tagOrHolderCodec(Registries.DIMENSION_TYPE)).fieldOf("dimensions").forGetter(DimensionTempData::dimensions),
             Codec.DOUBLE.fieldOf("temperature").forGetter(DimensionTempData::temperature),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(DimensionTempData::units),
             Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(DimensionTempData::isOffset)
     ).apply(instance, DimensionTempData::new)));
 
-    public NegatableList<Either<TagKey<DimensionType>, Holder<DimensionType>>> dimensions()
+    public NegatableList<Either<TagKey<DimensionType>, OptionalHolder<DimensionType>>> dimensions()
     {   return dimensions;
     }
     public double temperature()
@@ -76,7 +77,7 @@ public class DimensionTempData extends ConfigData
         {   ColdSweat.LOGGER.error("Error parsing dimension config: not enough arguments");
             return null;
         }
-        NegatableList<Either<TagKey<DimensionType>, Holder<DimensionType>>> dimensions = ConfigHelper.parseRegistryItems(Registries.DIMENSION_TYPE, registryAccess, (String) entry.get(0));
+        NegatableList<Either<TagKey<DimensionType>, OptionalHolder<DimensionType>>> dimensions = ConfigHelper.parseRegistryItems(Registries.DIMENSION_TYPE, registryAccess, (String) entry.get(0));
         if (dimensions.isEmpty()) return null;
 
         double temp = ((Number) entry.get(1)).doubleValue();
