@@ -148,6 +148,8 @@ dependencies {
     implementation fg.deobf("curse.maven:spoiled-364918:3776531")
     implementation fg.deobf("curse.maven:ob-aquamirae-536254:4420334")
     implementation fg.deobf("curse.maven:obscure-api-638417:4420298")
+    implementation fg.deobf("curse.maven:valkyrien-skies-258371:4174267")
+    implementation fg.deobf("curse.maven:eureka-ships-654384:4275649")
 
     implementation fg.deobf("dev.latvian.mods:kubejs-forge:${kubejs_version}")
     implementation fg.deobf("dev.latvian.mods:rhino-forge:${rhino_version}")

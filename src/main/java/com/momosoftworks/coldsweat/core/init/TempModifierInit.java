@@ -129,6 +129,7 @@ public class TempModifierInit
         String betterWeather = compatPath + "BetterWeatherTempModifier";
         String weatherStorms = compatPath + "StormTempModifier";
         String curios = compatPath + "CuriosTempModifier";
+        String valkyrienSkies = compatPath + "ValkShipBlockTempModifier";
 
         if (CompatManager.isSereneSeasonsLoaded())
         {   event.registerByClassName(new ResourceLocation("sereneseasons", "season"), sereneSeasons);
@@ -141,6 +142,9 @@ public class TempModifierInit
         }
         if (CompatManager.isBetterWeatherLoaded())
         {   event.registerByClassName(new ResourceLocation("betterweather", "season"), betterWeather);
+        }
+        if (CompatManager.isValkyrienSkiesLoaded())
+        {   event.registerByClassName(new ResourceLocation("valkyrienskies", "ship_blocks"), valkyrienSkies);
         }
 
         ColdSweat.LOGGER.debug("Registered TempModifiers in {}ms", System.currentTimeMillis() - startMS);

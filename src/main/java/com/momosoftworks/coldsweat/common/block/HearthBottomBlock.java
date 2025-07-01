@@ -173,7 +173,7 @@ public class HearthBottomBlock extends Block
     {
         super.neighborChanged(state, level, pos, neighborBlock, fromPos, isMoving);
         if (level.getBlockState(pos.above()).getBlock() != ModBlocks.HEARTH_TOP)
-        {   this.destroy(level, pos, state);
+        {   level.destroyBlock(pos, false);
         }
         else
         {   // Check for redstone power to this block
@@ -186,21 +186,17 @@ public class HearthBottomBlock extends Block
 
     @SuppressWarnings("deprecation")
     @Override
-    public void onRemove(BlockState state, World world, BlockPos pos, BlockState newState, boolean isMoving)
+    public void onRemove(BlockState state, World level, BlockPos pos, BlockState newState, boolean isMoving)
     {
-        if (state.getBlock() != newState.getBlock())
+        if (state.getBlock() != newState.getBlock() && !isMoving)
         {
-            if (world.getBlockState(pos.above()).getBlock() == ModBlocks.HEARTH_TOP)
-            {   world.destroyBlock(pos.above(), false);
-            }
-
-            TileEntity tileentity = world.getBlockEntity(pos);
+            TileEntity tileentity = level.getBlockEntity(pos);
             if (tileentity instanceof HearthBlockEntity)
-            {   InventoryHelper.dropContents(world, pos, (HearthBlockEntity) tileentity);
-                world.updateNeighborsAt(pos, this);
+            {   InventoryHelper.dropContents(level, pos, (HearthBlockEntity) tileentity);
+                level.updateNeighborsAt(pos, this);
             }
         }
-        super.onRemove(state, world, pos, newState, isMoving);
+        super.onRemove(state, level, pos, newState, isMoving);
     }
 
     @Override

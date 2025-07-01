@@ -311,6 +311,9 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
             for (Entity entity : this.level.getEntities((Entity) null, searchArea, EntityTempManager::isTemperatureEnabled))
             {
                 if (!(entity instanceof LivingEntity)) continue;
+                if (CompatManager.isValkyrienSkiesLoaded())
+                {   searchArea = CompatManager.Valkyrien.transformIfShipPos(level, searchArea);
+                }
                 this.entities.add((LivingEntity) entity);
                 this.isEntityNearby = true;
             }
@@ -399,8 +402,10 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
                         if (entity == null || entity instanceof DummyPlayer) continue;
                         AxisAlignedBB playerBB = entity.getBoundingBox();
                         // Ensure height is at least 2 blocks tall
-                        playerBB = new AxisAlignedBB(playerBB.minX, playerBB.minY, playerBB.minZ,
-                                                     playerBB.maxX, Math.max(playerBB.maxY, playerBB.minY + 2), playerBB.maxZ);
+                        playerBB = new AxisAlignedBB(playerBB.minX, playerBB.minY, playerBB.minZ, playerBB.maxX, Math.max(playerBB.maxY, playerBB.minY + 2), playerBB.maxZ);
+                        if (CompatManager.isValkyrienSkiesLoaded())
+                        {   playerBB = CompatManager.Valkyrien.transformIfShipPos(level, playerBB);
+                        }
                         if (this.isAffectingPos(WorldHelper.getOccupiedPositions(playerBB))
                         && !WorldHelper.canSeeSky(level, new BlockPos(playerBB.getCenter()), 64))
                         {   this.insulateEntity(entity);

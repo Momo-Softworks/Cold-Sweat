@@ -17,7 +17,9 @@ import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -26,6 +28,10 @@ import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.joml.primitives.AABBd;
+import org.valkyrienskies.core.api.Ship;
+import org.valkyrienskies.mod.common.VSGameUtilsKt;
+import org.valkyrienskies.mod.common.util.VectorConversionsMCKt;
 import sereneseasons.season.SeasonHooks;
 import top.theillusivec4.curios.api.CuriosCapability;
 import top.theillusivec4.curios.api.event.CurioChangeEvent;
@@ -33,7 +39,9 @@ import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Mod.EventBusSubscriber
 public class CompatManager
@@ -58,6 +66,7 @@ public class CompatManager
     private static final boolean ICEBERG_LOADED = modLoaded("iceberg");
     private static final boolean SPOILED_LOADED = modLoaded("spoiled");
     private static final boolean SUPPLEMENTARIES_LOADED = modLoaded("supplementaries");
+    private static final boolean VALKYRIEN_SKIES_LOADED = modLoaded("valkyrienskies");
     private static final boolean TOUGH_AS_NAILS_LOADED = modLoaded("toughasnails");
     private static final boolean TWILIGHT_FOREST_LOADED = modLoaded("twilightforest");
     private static final boolean AETHER_LOADED = modLoaded("aether");
@@ -175,6 +184,9 @@ public class CompatManager
     public static boolean isSupplementariesLoaded()
     {   return SUPPLEMENTARIES_LOADED;
     }
+    public static boolean isValkyrienSkiesLoaded()
+    {   return VALKYRIEN_SKIES_LOADED;
+    }
     public static boolean isToughAsNailsLoaded()
     {   return TOUGH_AS_NAILS_LOADED;
     }
@@ -224,6 +236,40 @@ public class CompatManager
         public static boolean isColdEnoughToSnow(World level, BlockPos pos)
         {
             return SERENE_SEASONS_LOADED && SeasonHooks.getBiomeTemperature(level, level.getBiome(pos), pos) < 0.15f;
+        }
+    }
+
+    public static abstract class Valkyrien
+    {
+        public static Vector3d translateToShipCoords(Vector3d pos, Ship ship)
+        {
+            if (ship != null)
+            {
+                org.joml.Vector3d posVec = VectorConversionsMCKt.toJOML(pos);
+                ship.getWorldToShip().transformPosition(posVec);
+                return VectorConversionsMCKt.toMinecraft(posVec);
+            }
+            return pos;
+        }
+
+        public static AxisAlignedBB transformIfShipPos(World level, AxisAlignedBB aabb)
+        {
+            AtomicReference<AxisAlignedBB> translated = new AtomicReference<>(aabb);
+            StreamSupport.stream(VSGameUtilsKt.getShipsIntersecting(level, aabb).spliterator(), false).findFirst().ifPresent(ship ->
+                translated.set(VectorConversionsMCKt.toMinecraft(VectorConversionsMCKt.set(new AABBd(), aabb).transform(ship.getWorldToShip()))));
+            return translated.get();
+        }
+
+        public static BlockPos transformIfShipPos(World level, BlockPos pos)
+        {
+            if (VALKYRIEN_SKIES_LOADED)
+            {
+                List<org.joml.Vector3d> shipTransforms = VSGameUtilsKt.transformToNearbyShipsAndWorld(level, pos.getX(), pos.getY(), pos.getZ(), 1);
+                if (shipTransforms.isEmpty()) return pos;
+                org.joml.Vector3d shipCoords = shipTransforms.get(0);
+                return new BlockPos(VectorConversionsMCKt.toMinecraft(shipCoords));
+            }
+            return pos;
         }
     }
 
