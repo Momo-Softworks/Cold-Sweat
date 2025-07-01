@@ -2,7 +2,6 @@ package com.momosoftworks.coldsweat.compat;
 
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.core.init.FetchSeasonsModsEvent;
-import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.compat.create.ColdSweatDisplayBehaviors;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -62,6 +61,7 @@ import weather2.weathersystem.storm.WeatherObject;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 @Mod.EventBusSubscriber
 public class CompatManager
@@ -345,30 +345,11 @@ public class CompatManager
             return pos;
         }
 
-        /**
-         * If any ship is managing the given position, translate the position to the corresponding coordinates in the shipyard
-         */
-        public static Vec3 transformIfShipPos(Level level, Vec3 pos)
-        {
-            if (VALKYRIEN_SKIES_LOADED)
-            {
-                List<Vector3d> shipTransforms = VSGameUtilsKt.transformToNearbyShipsAndWorld(level, pos.x, pos.y, pos.z, 1);
-                if (shipTransforms.isEmpty()) return pos;
-                Vector3d shipCoords = shipTransforms.get(0);
-                return VectorConversionsMCKt.toMinecraft(shipCoords);
-            }
-            return pos;
-        }
-
         public static AABB transformIfShipPos(Level level, AABB aabb)
         {
-            if (VALKYRIEN_SKIES_LOADED)
-            {
-                Vec3 min = transformIfShipPos(level, new Vec3(aabb.minX, aabb.minY, aabb.minZ));
-                Vec3 max = transformIfShipPos(level, new Vec3(aabb.maxX, aabb.maxY, aabb.maxZ));
-                return new AABB(min, max);
-            }
-            return aabb;
+            AtomicReference<AABB> translated = new AtomicReference<>(aabb);
+            VSGameUtilsKt.transformFromWorldToNearbyShipsAndWorld(level, aabb, translated::set);
+            return translated.get();
         }
 
         public static BlockPos transformIfShipPos(Level level, BlockPos pos)
