@@ -10,6 +10,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.server.ServerStartedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
@@ -50,7 +51,7 @@ public class TagHelper
     }
 
     @SubscribeEvent
-    public static void onServerStart(ServerConfigsLoadedEvent event)
+    public static void onServerStart(ServerStartedEvent event)
     {
         InitDynamicTagsEvent tagsEvent = new InitDynamicTagsEvent(event.getServer().registryAccess());
         MinecraftForge.EVENT_BUS.post(tagsEvent);

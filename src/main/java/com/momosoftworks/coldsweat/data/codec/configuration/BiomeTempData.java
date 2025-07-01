@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
+import com.momosoftworks.coldsweat.util.serialization.OptionalHolder;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.Registry;
@@ -21,14 +22,14 @@ import java.util.List;
 
 public class BiomeTempData extends ConfigData implements IForgeRegistryEntry<BiomeTempData>
 {
-    final NegatableList<Either<TagKey<Biome>, Holder<Biome>>> biomes;
+    final NegatableList<Either<TagKey<Biome>, OptionalHolder<Biome>>> biomes;
     final double min;
     final double max;
     final Temperature.Units units;
     final boolean isOffset;
     final boolean isDisabled;
 
-    public BiomeTempData(NegatableList<Either<TagKey<Biome>, Holder<Biome>>> biomes, double min, double max,
+    public BiomeTempData(NegatableList<Either<TagKey<Biome>, OptionalHolder<Biome>>> biomes, double min, double max,
                          Temperature.Units units, boolean isOffset, boolean isDisabled, NegatableList<String> requiredMods)
     {
         super(requiredMods);
@@ -40,18 +41,18 @@ public class BiomeTempData extends ConfigData implements IForgeRegistryEntry<Bio
         this.isDisabled = isDisabled;
     }
 
-    public BiomeTempData(NegatableList<Either<TagKey<Biome>, Holder<Biome>>> biomes, double min, double max,
+    public BiomeTempData(NegatableList<Either<TagKey<Biome>, OptionalHolder<Biome>>> biomes, double min, double max,
                          Temperature.Units units, boolean isOffset, boolean isDisabled)
     {
         this(biomes, min, max, units, isOffset, isDisabled, new NegatableList<>());
     }
 
-    public BiomeTempData(Holder<Biome> biome, double min, double max, Temperature.Units units, boolean isOffset, boolean isDisabled)
+    public BiomeTempData(OptionalHolder<Biome> biome, double min, double max, Temperature.Units units, boolean isOffset, boolean isDisabled)
     {   this(new NegatableList<>(Either.right(biome)), min, max, units, isOffset, isDisabled);
     }
 
     public static final Codec<BiomeTempData> CODEC = createCodec(RecordCodecBuilder.create(instance -> instance.group(
-            NegatableList.listCodec(ConfigHelper.tagOrHolderCodec(Registry.BIOME_REGISTRY, Biome.CODEC)).fieldOf("biomes").forGetter(BiomeTempData::biomes),
+            NegatableList.listCodec(ConfigHelper.tagOrHolderCodec(Registry.BIOME_REGISTRY)).fieldOf("biomes").forGetter(BiomeTempData::biomes),
             Codec.mapEither(Codec.DOUBLE.optionalFieldOf("temperature", 0d),
                             Codec.DOUBLE.optionalFieldOf("min_temp", 0d))
                  .xmap(either -> either.map(left -> left, right -> right), Either::right)
@@ -65,7 +66,7 @@ public class BiomeTempData extends ConfigData implements IForgeRegistryEntry<Bio
             Codec.BOOL.optionalFieldOf("disable", false).forGetter(BiomeTempData::isDisabled)
     ).apply(instance, BiomeTempData::new)));
 
-    public NegatableList<Either<TagKey<Biome>, Holder<Biome>>> biomes()
+    public NegatableList<Either<TagKey<Biome>, OptionalHolder<Biome>>> biomes()
     {   return biomes;
     }
     public double min()
@@ -98,7 +99,7 @@ public class BiomeTempData extends ConfigData implements IForgeRegistryEntry<Bio
         {   ColdSweat.LOGGER.error("Error parsing biome config: not enough arguments");
             return null;
         }
-        NegatableList<Either<TagKey<Biome>, Holder<Biome>>> biomes = ConfigHelper.parseRegistryItems(Registry.BIOME_REGISTRY, registryAccess, (String) entry.get(0));
+        NegatableList<Either<TagKey<Biome>, OptionalHolder<Biome>>> biomes = ConfigHelper.parseRegistryItems(Registry.BIOME_REGISTRY, registryAccess, (String) entry.get(0));
         if (biomes.isEmpty()) return null;
 
         Temperature.Units units;

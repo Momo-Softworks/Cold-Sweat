@@ -96,6 +96,10 @@ public class DynamicHolder<T> implements Supplier<T>
         return holder;
     }
 
+    public ResourceLocation getName()
+    {   return name;
+    }
+
     @Override
     public T get()
     {
@@ -142,37 +146,32 @@ public class DynamicHolder<T> implements Supplier<T>
         this.loader.load(this, registryAccess);
     }
 
-    public CompoundTag encode(RegistryAccess registryAccess)
+    public Tag encode(RegistryAccess registryAccess)
     {
         if (!isSynced())
         {  throw ColdSweat.LOGGER.throwing(SerializationException.serialize(this.value, "Tried to encode non-synced DynamicHolder", null));
         }
         try
         {
-            CompoundTag compound = new CompoundTag();
             DataResult<Tag> holder = this.codec.encodeStart(NbtOps.INSTANCE, this.get(registryAccess));
-            Tag encoded = holder.result().orElseThrow();
-            compound.put(this.name.toString(), encoded);
-            return compound;
+            return holder.result().orElseThrow();
         }
         catch (Exception e)
         {   throw ColdSweat.LOGGER.throwing(SerializationException.serialize(this.value, "Failed to encode DynamicHolder for type " + this.value.getClass().getSimpleName(), e));
         }
     }
 
-    public void decode(CompoundTag tag, RegistryAccess registryAccess)
+    public void decode(Tag tag)
     {
         if (!isSynced())
         {  throw ColdSweat.LOGGER.throwing(new SerializationException("Tried to decode non-synced DynamicHolder"));
         }
         try
         {
-            Tag encoded = tag.get(this.name.toString());
-            if (encoded == null)
+            if (tag == null)
             {   throw ColdSweat.LOGGER.throwing(new SerializationException("No value found for DynamicHolder with name " + this.name));
             }
-            this.value = this.codec.parse(NbtOps.INSTANCE, encoded).result().orElseThrow();
-            this.saver.save(this.value, registryAccess);
+            this.value = this.codec.parse(NbtOps.INSTANCE, tag).result().orElseThrow();
         }
         catch (Exception e)
         {   throw ColdSweat.LOGGER.throwing(new SerializationException("Failed to decode DynamicHolder", e));

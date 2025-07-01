@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.config;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
@@ -102,7 +103,7 @@ public class ConfigSettings
     public static final DynamicHolder<Map<Holder<DimensionType>, DimensionTempData>> DIMENSION_OFFSETS;
     public static final DynamicHolder<Map<Holder<ConfiguredStructureFeature<?,?>>, StructureTempData>> STRUCTURE_TEMPS;
     public static final DynamicHolder<Map<Holder<ConfiguredStructureFeature<?,?>>, StructureTempData>> STRUCTURE_OFFSETS;
-    public static final DynamicHolder<List<DepthTempData>> DEPTH_REGIONS;
+    public static final DynamicHolder<Multimap<DimensionType, DepthTempData>> DEPTH_REGIONS;
     public static final DynamicHolder<Boolean> CHECK_SLEEP_CONDITIONS;
     public static final DynamicHolder<SeasonalTempData> SUMMER_TEMPS;
     public static final DynamicHolder<SeasonalTempData> AUTUMN_TEMPS;
@@ -411,7 +412,7 @@ public class ConfigSettings
             holder.set(Temperature.convert(temperature, units, Temperature.Units.MC, false));
         });
 
-        DEPTH_REGIONS = addSetting(ColdSweat.createKey("depth_regions"), ArrayList::new, holder -> {});
+        DEPTH_REGIONS = addSetting(ColdSweat.createKey("depth_regions"), HashMultimap::create, holder -> {});
 
         TriConsumer<FuelData.FuelType, CSConfigSpec.ConfigValue<List<? extends List<?>>>, DynamicHolder<Multimap<Item, FuelData>>> fuelAdder =
         (fuelType, config, holder) ->
@@ -841,18 +842,18 @@ public class ConfigSettings
             List<? extends Number> range = MainSettingsConfig.MIN_ACCLIMATION_RANGE.get();
             holder.set(Pair.of(range.get(0).doubleValue(), range.get(1).doubleValue()));
         },
-                                                 ExtraCodecs.pair(Codec.DOUBLE, Codec.DOUBLE),
-                                                 (saver) -> MainSettingsConfig.MIN_ACCLIMATION_RANGE.set(List.of(saver.getFirst(), saver.getSecond())),
-                                                 SyncType.BOTH_WAYS);
+        ExtraCodecs.pair(Codec.DOUBLE, Codec.DOUBLE),
+        (saver) -> MainSettingsConfig.MIN_ACCLIMATION_RANGE.set(List.of(saver.getFirst(), saver.getSecond())),
+        SyncType.BOTH_WAYS);
 
         MAX_ACCLIMATION_RANGE = addSyncedSetting(ColdSweat.createKey("max_acclimation_range"), () -> Pair.of(0.0, 0.0), holder ->
         {
             List<? extends Number> range = MainSettingsConfig.MAX_ACCLIMATION_RANGE.get();
             holder.set(Pair.of(range.get(0).doubleValue(), range.get(1).doubleValue()));
         },
-                                                 ExtraCodecs.pair(Codec.DOUBLE, Codec.DOUBLE),
-                                                 (saver) -> MainSettingsConfig.MAX_ACCLIMATION_RANGE.set(List.of(saver.getFirst(), saver.getSecond())),
-                                                 SyncType.BOTH_WAYS);
+        ExtraCodecs.pair(Codec.DOUBLE, Codec.DOUBLE),
+        (saver) -> MainSettingsConfig.MAX_ACCLIMATION_RANGE.set(List.of(saver.getFirst(), saver.getSecond())),
+        SyncType.BOTH_WAYS);
 
         DISABLED_MOD_COMPAT = addSetting(ColdSweat.createKey("disabled_mod_compat"), ArrayList::new, holder ->
         {
@@ -1117,19 +1118,22 @@ public class ConfigSettings
         CONFIG_SETTINGS.forEach((key, value) ->
         {
             if (value.getSyncType().canSend())
-            {   CompoundTag encoded = value.encode(registryAccess);
-                map.merge(encoded);
+            {   Tag encoded = value.encode(registryAccess);
+                map.put(value.getName().toString(), encoded);
             }
         });
         return map;
     }
 
-    public static void decode(CompoundTag tag, RegistryAccess registryAccess)
+    public static void decode(CompoundTag tag)
     {
         for (DynamicHolder<?> config : CONFIG_SETTINGS.values())
         {
             if (config.getSyncType().canReceive())
-            {   config.decode(tag, registryAccess);
+            {
+                Tag encoded = tag.get(config.getName().toString());
+                if (encoded == null) continue;
+                config.decode(encoded);
             }
         }
     }

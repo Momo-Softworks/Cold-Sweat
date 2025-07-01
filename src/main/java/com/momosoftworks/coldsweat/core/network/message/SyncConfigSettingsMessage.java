@@ -60,7 +60,7 @@ public class SyncConfigSettingsMessage
             {
                 if (context.getSender() != null && context.getSender().hasPermissions(2))
                 {
-                    ConfigSettings.decode(message.configValues, registryAccess);
+                    ConfigSettings.decode(message.configValues);
                     ConfigSettings.saveValues(registryAccess);
                     MainSettingsConfig.save();
                     WorldSettingsConfig.save();
@@ -72,7 +72,7 @@ public class SyncConfigSettingsMessage
             else if (context.getDirection().getReceptionSide().isClient())
             {
                 try
-                {   ConfigSettings.decode(message.configValues, registryAccess);
+                {   ConfigSettings.decode(message.configValues);
                 }
                 catch (Exception e)
                 {   ColdSweat.LOGGER.error("Failed to decode config settings from server: ", e);
