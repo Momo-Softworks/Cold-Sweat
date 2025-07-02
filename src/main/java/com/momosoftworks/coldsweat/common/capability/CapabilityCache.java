@@ -29,9 +29,9 @@ public class CapabilityCache<C, K extends ICapabilityProvider>
 
     public LazyOptional<C> get(K key)
     {
-        this.cleanExpiredEntries();
         return cache.computeIfAbsent(key, e ->
         {
+            this.cleanExpiredEntries();
             LazyOptional<C> cap = e.getCapability(capability);
             cap.addListener((opt) -> cache.remove(e));
             return cap;
