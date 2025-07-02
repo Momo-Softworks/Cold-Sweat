@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.api.temperature.effect;
 
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 
@@ -33,7 +34,7 @@ public abstract class TempEffect
     }
 
     protected boolean test(Entity entity)
-    {   return Objects.equals(this.entity, entity) && this.bounds().test((int) this.getTemperature());
+    {   return Objects.equals(this.entity, entity) && this.bounds().test((int) CSMath.clamp(this.getTemperature(), -100, 100));
     }
 
     protected double getTemperature()
