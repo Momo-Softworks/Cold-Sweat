@@ -4,6 +4,7 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -49,6 +50,9 @@ public class PreventPlayerSleep
             // Prevent sleep with message
             player.displayClientMessage(Component.translatable("cold_sweat.message.sleep.world." + (worldTemp > maxTemp ? "hot" : "cold")), true);
             event.setProblem(Player.BedSleepingProblem.OTHER_PROBLEM);
+        }
+        if (player instanceof ServerPlayer serverPlayer && !player.isSleeping() && player.isAlive())
+        {   serverPlayer.setRespawnPosition(serverPlayer.level().dimension(), event.getPos(), serverPlayer.getYRot(), false, true);
         }
     }
 }
