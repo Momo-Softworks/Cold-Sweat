@@ -1,5 +1,5 @@
 {
-  "type": "minecraft:smelting",
+  "type": "minecraft:campfire_cooking",
   "conditions": [
     {
       "type": "neoforge:mod_loaded",
@@ -8,7 +8,7 @@
   ],
   "ingredient": [
     {
-      "item": "cold_sweat:filled_waterskin",
+      "items": "cold_sweat:filled_waterskin",
       "type": "neoforge:components",
       "components": {
         "thirst:purity": 1
