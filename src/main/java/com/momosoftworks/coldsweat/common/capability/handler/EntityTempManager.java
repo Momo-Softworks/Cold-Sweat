@@ -14,7 +14,7 @@ import com.momosoftworks.coldsweat.api.util.Placement;
 import com.momosoftworks.coldsweat.api.util.Placement.Mode;
 import com.momosoftworks.coldsweat.api.util.Placement.Order;
 import com.momosoftworks.coldsweat.api.util.Temperature;
-import com.momosoftworks.coldsweat.common.capability.ModCapabilities;
+import com.momosoftworks.coldsweat.common.capability.SidedCapabilityCache;
 import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -55,6 +55,7 @@ import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
+import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
 import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
@@ -86,16 +87,11 @@ public class EntityTempManager
 
     public static final Set<EntityType<? extends LivingEntity>> TEMPERATURE_ENABLED_ENTITIES = new HashSet<>(ImmutableSet.<EntityType<? extends LivingEntity>>builder().add(EntityType.PLAYER).build());
 
-    public static final Map<Entity, ITemperatureCap> SERVER_CAP_CACHE = new HashMap<>();
-    public static final Map<Entity, ITemperatureCap> CLIENT_CAP_CACHE = new HashMap<>();
+    public static SidedCapabilityCache<ITemperatureCap, Entity> CAP_CACHE = new SidedCapabilityCache<>(ModDataAttachments.ENTITY_TEMPERATURE, Entity::isRemoved);
     public static final Map<Entity, Map<ResourceLocation, Double>> TEMP_MODIFIER_IMMUNITIES = new WeakHashMap<>();
 
     public static Optional<ITemperatureCap> getTemperatureCap(Entity entity)
-    {
-        Map<Entity, ITemperatureCap> cache = entity.level().isClientSide ? CLIENT_CAP_CACHE : SERVER_CAP_CACHE;
-        return Optional.ofNullable(cache.computeIfAbsent(entity, e -> e.getCapability(entity instanceof Player
-                                                                                      ? ModCapabilities.PLAYER_TEMPERATURE
-                                                                                      : ModCapabilities.ENTITY_TEMPERATURE)));
+    {   return isTemperatureEnabled(entity) ? Optional.ofNullable(CAP_CACHE.get(entity)) : Optional.empty();
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -229,17 +225,9 @@ public class EntityTempManager
     {
         if (isTemperatureEnabled(event.getEntity()))
         {
-            Predicate<Map.Entry<Entity, ?>> removal = e -> e.getKey().isRemoved();
-            synchronized (SERVER_CAP_CACHE)
-            {   SERVER_CAP_CACHE.entrySet().removeIf(removal);
-            }
-            synchronized (CLIENT_CAP_CACHE)
-            {   CLIENT_CAP_CACHE.entrySet().removeIf(removal);
-            }
             synchronized (TEMP_MODIFIER_IMMUNITIES)
-            {   TEMP_MODIFIER_IMMUNITIES.entrySet().removeIf(removal);
+            {   TEMP_MODIFIER_IMMUNITIES.entrySet().removeIf(e -> e.getKey().isRemoved());
             }
-            writeData(event.getEntity());
         }
     }
 
@@ -310,6 +298,7 @@ public class EntityTempManager
                     }
                 }
             }
+            entity.setData(ModDataAttachments.ENTITY_TEMPERATURE, cap);
         });
     }
 
@@ -942,24 +931,5 @@ public class EntityTempManager
                      .map(trait -> getAttribute(trait, entity))
                      .filter(Objects::nonNull)
                      .toList();
-    }
-
-    public static List<TempModifier> getAllModifiers(LivingEntity entity)
-    {
-        List<TempModifier> allModifiers = new ArrayList<>();
-        getTemperatureCap(entity).ifPresent(cap ->
-        {
-            for (Trait trait : VALID_MODIFIER_TRAITS)
-            {   allModifiers.addAll(cap.getModifiers(trait));
-            }
-        });
-        return allModifiers;
-    }
-
-    public static void writeData(Entity entity)
-    {
-        getTemperatureCap(entity).ifPresent(cap ->
-        {   entity.getPersistentData().put("Temperature", cap.serializeNBT());
-        });
     }
 }

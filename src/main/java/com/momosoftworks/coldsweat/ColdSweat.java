@@ -48,7 +48,6 @@ public class ColdSweat
     {
         MOD_BUS = bus;
 
-        MOD_BUS.addListener(this::commonSetup);
         MOD_BUS.addListener(this::spawnPlacements);
         MOD_BUS.addListener(this::registerCaps);
         MOD_BUS.addListener(this::updateConfigs);
@@ -68,10 +67,11 @@ public class ColdSweat
         ModCreativeTabs.ITEM_GROUPS.register(MOD_BUS);
         ModAttributes.ATTRIBUTES.register(MOD_BUS);
         ModCommands.ARGUMENTS.register(MOD_BUS);
-        ModArmorMaterials.ARMOR_MATERIALS.register(bus);
-        ModAdvancementTriggers.TRIGGERS.register(bus);
-        ModItemComponents.DATA_COMPONENTS.register(bus);
+        ModArmorMaterials.ARMOR_MATERIALS.register(MOD_BUS);
+        ModAdvancementTriggers.TRIGGERS.register(MOD_BUS);
+        ModItemComponents.DATA_COMPONENTS.register(MOD_BUS);
         ModTempEffects.TEMP_EFFECTS.register(MOD_BUS);
+        ModDataAttachments.DATA_ATTACHMENTS.register(MOD_BUS);
 
         // Handle config updates
         ModUpdater.updateFileNames();
@@ -103,12 +103,6 @@ public class ColdSweat
     {   return FMLLoader.getLoadingModList().getModFileById(ColdSweat.MOD_ID).versionString();
     }
 
-    public void commonSetup(final FMLCommonSetupEvent event)
-    {
-        // Load configs to memory
-        //ConfigSettings.load(null);
-    }
-
     public void spawnPlacements(RegisterSpawnPlacementsEvent event)
     {
         event.register(ModEntities.CHAMELEON.value(), SpawnPlacementTypes.ON_GROUND,
@@ -117,26 +111,6 @@ public class ColdSweat
 
     public void registerCaps(RegisterCapabilitiesEvent event)
     {
-        // Register temperature for temperature-enabled entities
-        event.registerEntity(ModCapabilities.PLAYER_TEMPERATURE, EntityType.PLAYER, (entity, context) ->
-        {   return new PlayerTempCap(entity);
-        });
-        for (EntityType<?> type : BuiltInRegistries.ENTITY_TYPE)
-        {
-            event.registerEntity(ModCapabilities.ENTITY_TEMPERATURE, type, (entity, context) ->
-            {
-                if (EntityTempManager.isTemperatureEnabled(entity) && entity instanceof LivingEntity living)
-                {   return new EntityTempCap(living);
-                }
-                return null;
-            });
-        }
-
-        // Register shearable fur for goats
-        event.registerEntity(ModCapabilities.SHEARABLE_FUR, EntityType.GOAT, (entity, context) ->
-        {   return new ShearableFurCap(entity);
-        });
-
         for (BlockEntityType<? extends HearthBlockEntity> blockEntityType : List.of(ModBlockEntities.HEARTH.value(), ModBlockEntities.BOILER.value(), ModBlockEntities.ICEBOX.value()))
         {
             // Register fluid handlers for hearth-like blocks

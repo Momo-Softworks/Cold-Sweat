@@ -17,6 +17,7 @@ import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModDamageSources;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -36,6 +37,7 @@ import net.minecraft.world.entity.player.Player;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.common.util.INBTSerializable;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -46,7 +48,7 @@ import static com.momosoftworks.coldsweat.common.capability.handler.EntityTempMa
 /**
  * Holds all the information regarding the entity's temperature. This should very rarely be used directly.
  */
-public class AbstractTempCap implements ITemperatureCap
+public class AbstractTempCap implements ITemperatureCap, INBTSerializable<CompoundTag>
 {
     boolean changed = true;
     int syncTimer = 0;
@@ -62,16 +64,11 @@ public class AbstractTempCap implements ITemperatureCap
 
     // Store entity's attribute data for faster access
     private final EnumMap<Trait, AttributeInstance> attributes = new EnumMap<>(Trait.class);
-    private final Map<AttributeInstance, Map<AttributeModifier.Operation, Set<AttributeModifier>>> attributeModifiers = new HashMap<>();
 
     private final HashMap<TempEffectType<?>, TempEffect> tempEffects = new HashMap<>();
 
     public boolean showBodyTemp;
     public boolean showWorldTemp;
-
-    public AbstractTempCap(LivingEntity entity)
-    {   this.deserializeNBT(entity.getPersistentData().getCompound("Temperature"));
-    }
 
     public AbstractTempCap()
     {}
@@ -470,7 +467,7 @@ public class AbstractTempCap implements ITemperatureCap
     }
 
     @Override
-    public CompoundTag serializeNBT()
+    public CompoundTag serializeNBT(HolderLookup.Provider provider)
     {
         CompoundTag nbt = new CompoundTag();
         // Save the player's temperatures
@@ -517,7 +514,7 @@ public class AbstractTempCap implements ITemperatureCap
     }
 
     @Override
-    public void deserializeNBT(CompoundTag nbt)
+    public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt)
     {   // Load the player's temperatures
         deserializeTraits(nbt.getCompound("Traits"));
         // Load the player's modifiers

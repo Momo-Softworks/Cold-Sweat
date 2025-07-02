@@ -1,10 +1,10 @@
 package com.momosoftworks.coldsweat.common.capability.handler;
 
-import com.momosoftworks.coldsweat.common.capability.ModCapabilities;
+import com.momosoftworks.coldsweat.common.capability.SidedCapabilityCache;
 import com.momosoftworks.coldsweat.common.capability.shearing.IShearableCap;
-import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
+import com.momosoftworks.coldsweat.core.init.ModDataAttachments;
 import com.momosoftworks.coldsweat.core.network.message.SyncShearableDataMessage;
 import com.momosoftworks.coldsweat.data.codec.configuration.EntityDropData;
 import com.momosoftworks.coldsweat.data.loot.ModLootTables;
@@ -38,33 +38,20 @@ import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @EventBusSubscriber
 public class ShearableFurManager
 {
-    public static final Map<Entity, IShearableCap> CAP_CACHE = new HashMap<>();
+    public static SidedCapabilityCache<IShearableCap, Entity> CAP_CACHE = new SidedCapabilityCache<>(ModDataAttachments.SHEARABLE_FUR, Entity::isRemoved);
 
     public static boolean isShearable(Entity entity)
     {   return entity instanceof Goat;
     }
 
     public static Optional<IShearableCap> getFurCap(Entity entity)
-    {
-        return isShearable(entity) ? Optional.ofNullable(CAP_CACHE.computeIfAbsent(entity, e -> e.getCapability(ModCapabilities.SHEARABLE_FUR)))
-                                   : Optional.empty();
-    }
-
-    @SubscribeEvent
-    public static void cleanRemovedEntities(EntityLeaveLevelEvent event)
-    {
-        if (isShearable(event.getEntity()))
-        {   CAP_CACHE.entrySet().removeIf(e -> e.getKey().isRemoved());
-            writeData(event.getEntity());
-        }
+    {   return isShearable(entity) ? Optional.ofNullable(CAP_CACHE.get(entity)) : Optional.empty();
     }
 
     @SubscribeEvent
@@ -171,6 +158,7 @@ public class ShearableFurManager
                 cap.setSheared(false);
                 syncData(living, null);
             }
+            entity.setData(ModDataAttachments.SHEARABLE_FUR.get(), cap);
         });
     }
 
@@ -213,20 +201,12 @@ public class ShearableFurManager
             getFurCap(entity).ifPresent(cap ->
             {
                 if (player != null)
-                {   PacketDistributor.sendToPlayer(player, new SyncShearableDataMessage(entity.getId(), cap.serializeNBT()));
+                {   PacketDistributor.sendToPlayer(player, new SyncShearableDataMessage(entity.getId(), cap.serializeNBT(entity.level().registryAccess())));
                 }
                 else
-                {   PacketDistributor.sendToPlayersTrackingEntity(entity, new SyncShearableDataMessage(entity.getId(), cap.serializeNBT()));
+                {   PacketDistributor.sendToPlayersTrackingEntity(entity, new SyncShearableDataMessage(entity.getId(), cap.serializeNBT(entity.level().registryAccess())));
                 }
-                writeData(entity);
             });
         }
-    }
-
-    public static void writeData(Entity entity)
-    {
-        getFurCap(entity).ifPresent(cap ->
-        {   entity.getPersistentData().put("FurData", cap.serializeNBT());
-        });
     }
 }

@@ -15,10 +15,6 @@ public class EntityTempCap extends AbstractTempCap
     {   super();
     }
 
-    public EntityTempCap(LivingEntity entity)
-    {   super(entity);
-    }
-
     @Override
     public int getHurtInterval(LivingEntity entity)
     {   return EntityTempManager.hasClimateData(entity) ? 200 : -1;

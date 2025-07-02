@@ -1,8 +1,9 @@
 package com.momosoftworks.coldsweat.common.capability.shearing;
 
 import net.minecraft.nbt.CompoundTag;
+import net.neoforged.neoforge.common.util.INBTSerializable;
 
-public interface IShearableCap
+public interface IShearableCap extends INBTSerializable<CompoundTag>
 {
     boolean isSheared();
     void setSheared(boolean sheared);
@@ -12,8 +13,4 @@ public interface IShearableCap
 
     int age();
     void setAge(int ticks);
-
-    CompoundTag serializeNBT();
-
-    void deserializeNBT(CompoundTag nbt);
 }

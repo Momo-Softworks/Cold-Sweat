@@ -7,13 +7,14 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.neoforged.neoforge.common.util.INBTSerializable;
 
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-public interface ITemperatureCap
+public interface ITemperatureCap extends INBTSerializable<CompoundTag>
 {
     double getTrait(Temperature.Trait trait);
     EnumMap<Temperature.Trait, Double> getTraits();
@@ -40,10 +41,8 @@ public interface ITemperatureCap
     void copy(ITemperatureCap cap);
     void syncValues(LivingEntity entity);
 
-    CompoundTag serializeNBT();
     CompoundTag serializeModifiers();
     CompoundTag serializeTraits();
-    void deserializeNBT(CompoundTag tag);
     void deserializeModifiers(CompoundTag tag);
     void deserializeTraits(CompoundTag tag);
 }

@@ -16,10 +16,6 @@ public class PlayerTempCap extends AbstractTempCap
     {   super();
     }
 
-    public PlayerTempCap(LivingEntity entity)
-    {   super(entity);
-    }
-
     @Override
     public void tickHurting(LivingEntity entity)
     {
