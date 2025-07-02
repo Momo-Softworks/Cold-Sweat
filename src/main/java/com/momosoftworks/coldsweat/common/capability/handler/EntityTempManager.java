@@ -93,7 +93,7 @@ public class EntityTempManager
 
     public static final Set<EntityType<? extends LivingEntity>> TEMPERATURE_ENABLED_ENTITIES = new HashSet<>(List.of(EntityType.PLAYER));
 
-    public static SidedCapabilityCache<ITemperatureCap, Entity> CAP_CACHE = new SidedCapabilityCache<>(ModCapabilities.ENTITY_TEMPERATURE);
+    public static SidedCapabilityCache<ITemperatureCap, Entity> CAP_CACHE = new SidedCapabilityCache<>(ModCapabilities.ENTITY_TEMPERATURE, Entity::isRemoved);
     public static Map<Entity, Map<ResourceLocation, Double>> TEMP_MODIFIER_IMMUNITIES = new WeakHashMap<>();
 
     public static LazyOptional<ITemperatureCap> getTemperatureCap(Entity entity)
@@ -273,8 +273,7 @@ public class EntityTempManager
     public static synchronized void cleanRemovedEntities(EntityLeaveWorldEvent event)
     {
         if (isTemperatureEnabled(event.getEntity()))
-        {   CAP_CACHE.removeIf(Entity::isRemoved);
-            TEMP_MODIFIER_IMMUNITIES.keySet().removeIf(Entity::isRemoved);
+        {   TEMP_MODIFIER_IMMUNITIES.keySet().removeIf(Entity::isRemoved);
         }
     }
 
