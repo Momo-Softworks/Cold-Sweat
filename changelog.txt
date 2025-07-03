@@ -3191,6 +3191,9 @@ Fixes:
       - "never": Never show the insulation tooltip for any items
 * Leather, hoglin hide, goat fur, and chameleon scale armor can no longer be sewn into other armor by default
 * Increased the amount of insulation provided by leather, hoglin hide, goat fur, and chameleon scale armor when worn
+* Increased ice resistance potion durations:
+      - Normal length: 90 seconds -> 3 minutes
+      - Extended length: 3 minutes -> 6 minutes
 - (1.16) Added Valkyrien Skies support
 
 Fixes:
