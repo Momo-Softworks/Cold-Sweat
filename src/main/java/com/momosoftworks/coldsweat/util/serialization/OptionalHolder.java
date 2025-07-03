@@ -71,7 +71,6 @@ public class OptionalHolder<T>
         MinecraftForge.EVENT_BUS.unregister(this);
     }
 
-    @Mod.EventBusSubscriber(Dist.CLIENT)
     public class ClientHandler
     {
         @SubscribeEvent
