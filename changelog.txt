@@ -3173,6 +3173,44 @@ Technical Changes:
 
 Fixes:
 - (1.21) Fixed crash during server startup
+- Fixed crash when rendering frozen health
 - Fixed crash due to Cold Sweat registries not being synced to the client
 - Fixed un-enchantable armor items inheriting enchantments from insulators
 
+
+------------------------------------------------------------------------------------------------------------------------
+2.4-b03d
+* Big improvements to config files:
+      - Improved the formatting and wording of comments, making them more readable and clear
+      - Improved the spacing between config settings and comments, making it easier to locate specific settings
+      - List-based configs are now formatted vertically with one element per line, rather than all elements on one line
+            - This behavior is indicated by the "//v" tag at the top of the config's comment. Removing the tag reverts this behavior
+            - Formatting changes take effect upon restarting the game
+      ! Existing configs should be updated automatically, but backing up is recommended
+      - TOML configs that take in IDs, like blocks, items, entities, biomes, etc. now support negation (i.e. "!minecraft:stone")
+            - Most useful when used in lists. Excludes the given ID from having the setting applied to it
+            - Also supports negating tags ("!#minecraft:leaves")
+            - i.e. "#forge:dyes,!minecraft:black_dye" applies to all dyes EXCEPT black dye
+- Armor items that provide built-in insulation can now accept insulation themselves
+      - Built-in armor insulation can also be configured to either take up the item's available insulation slots, or not
+- Insulation tooltips can now be configured to show under specific circumstances:
+      - "always": Always show the tooltip (even for armor items with no insulation)
+      - "if_present": The default behavior. Shows the tooltip only if the item gives or has insulation
+      - "on_shift": Show the insulation tooltip if SHIFT is held (even for armor items with no insulation)
+      - "shift_and_present": Show the tooltip if SHIFT is held AND the item gives or has insulation
+      - "never": Never show the insulation tooltip for any items
+* Leather, hoglin hide, goat fur, and chameleon scale armor can no longer be sewn into other armor by default
+* Increased the amount of insulation provided by leather, hoglin hide, goat fur, and chameleon scale armor when worn
+- (1.16) Added Valkyrien Skies support
+
+Fixes:
+* Fixed crashing and/or disconnection when loading Cold Sweat datapacks that include dimensions, structures, or biomes
+* Fixed crash when using a hearth, boiler, or icebox in a Valkyrien Skies ship
+* (1.21) Fixed strange temperature behavior when an entity with temperature is killed or leaves the world
+* Fixed temperature effects being removed when the player's body temperature is above 100 or below -100
+- Fixed the player's spawn point not being set at a bed if it is sweltering or freezing
+- Fixed water droplets sometimes spawning in lopsided patterns on the screen
+- Fixed shears consuming double durability when used to shear goats
+
+Technical Changes:
+- Chameleons will now target and eat any entities in the #cold_sweat:chameleon_eats tag
