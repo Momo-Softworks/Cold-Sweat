@@ -25,7 +25,7 @@ public class PotionRecipes
     {
         ItemStack awkward = createPotion(Potions.AWKWARD);
         ItemStack icePotion = createPotion(PotionInit.ICE_RESISTANCE.get());
-        ItemStack longIcePotion = createPotion(PotionInit.ICE_RESISTANCE_LONG.get());
+        ItemStack longIcePotion = createPotion(PotionInit.LONG_ICE_RESISTANCE.get());
 
         BrewingRecipeRegistry.addRecipe(new WorkingBrewingRecipe(Ingredient.of(awkward), Ingredient.of(ModItems.SOUL_SPROUT), icePotion));
         BrewingRecipeRegistry.addRecipe(new WorkingBrewingRecipe(Ingredient.of(icePotion), Ingredient.of(Items.REDSTONE), longIcePotion));
