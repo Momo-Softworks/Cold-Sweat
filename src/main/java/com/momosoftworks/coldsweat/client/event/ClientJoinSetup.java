@@ -40,7 +40,6 @@ public class ClientJoinSetup
 
     @SubscribeEvent
     public static void onLogout(ClientPlayerNetworkEvent.LoggingOut event)
-    {
-
+    {   ConfigLoadingHandler.destroyOptionalHolders();
     }
 }
