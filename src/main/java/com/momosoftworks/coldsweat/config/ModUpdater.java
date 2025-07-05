@@ -51,133 +51,6 @@ public class ModUpdater
         }
 
         /*
-         2.3
-         */
-        if (isBehind(configVersion, "2.3"))
-        {
-            // Update magma block temperature
-            replaceConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, "minecraft:magma_block", blockTemp -> {
-                blockTemp.clear();
-                blockTemp.addAll(Arrays.asList("minecraft:magma_block", 0.25, 3, "mc", 1.0));
-            });
-
-            // Update ice fuel value
-            replaceConfigSetting(ItemSettingsConfig.ICEBOX_FUELS, "minecraft:ice", iceFuel -> {
-                iceFuel.set(1, 250);
-            });
-            replaceConfigSetting(ItemSettingsConfig.HEARTH_FUELS, "minecraft:ice", iceFuel -> {
-                iceFuel.set(1, -250);
-            });
-
-            // Update snow fuel value
-            replaceConfigSetting(ItemSettingsConfig.ICEBOX_FUELS, "minecraft:snow_block", snowFuel -> {
-                snowFuel.set(1, 100);
-            });
-            replaceConfigSetting(ItemSettingsConfig.HEARTH_FUELS, "minecraft:snow_block", snowFuel -> {
-                snowFuel.set(1, -100);
-            });
-
-            // Update powder snow fuel value
-            replaceConfigSetting(ItemSettingsConfig.ICEBOX_FUELS, "minecraft:powder_snow_bucket", powderSnowFuel -> {
-                powderSnowFuel.set(1, 100);
-            });
-            replaceConfigSetting(ItemSettingsConfig.HEARTH_FUELS, "minecraft:powder_snow_bucket", powderSnowFuel -> {
-                powderSnowFuel.set(1, -100);
-            });
-
-            // Update snowball fuel value
-            replaceConfigSetting(ItemSettingsConfig.ICEBOX_FUELS, "minecraft:snowball", snowballFuel -> {
-                snowballFuel.set(1, 10);
-            });
-            replaceConfigSetting(ItemSettingsConfig.HEARTH_FUELS, "minecraft:snowball", snowballFuel -> {
-                snowballFuel.set(1, -10);
-            });
-        }
-
-        /*
-         2.3.1
-         */
-        if (isBehind(configVersion, "2.3.1"))
-        {
-            removeConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, "minecraft:ice");
-            removeConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, "minecraft:packed_ice");
-            removeConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, "minecraft:blue_ice");
-        }
-
-        /*
-         2.3.2
-         */
-        if (isBehind(configVersion, "2.3.2"))
-        {
-            // Goat fur insulation value
-            replaceConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "cold_sweat:fur", insulator ->
-            {   insulator.set(0, "cold_sweat:goat_fur");
-            });
-
-            // Goat fur armor insulation values
-            replaceConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "cold_sweat:fur_cap", insulator ->
-            {   insulator.set(0, "cold_sweat:goat_fur_cap");
-            });
-            replaceConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "cold_sweat:fur_parka", insulator ->
-            {   insulator.set(0, "cold_sweat:goat_fur_parka");
-            });
-            replaceConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "cold_sweat:fur_pants", insulator ->
-            {   insulator.set(0, "cold_sweat:goat_fur_pants");
-            });
-            replaceConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "cold_sweat:fur_boots", insulator ->
-            {   insulator.set(0, "cold_sweat:goat_fur_boots");
-            });
-
-            // Goat fur armor worn insulation value
-            replaceConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, "cold_sweat:fur_cap", insulator ->
-            {   insulator.set(0, "cold_sweat:goat_fur_cap");
-            });
-            replaceConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, "cold_sweat:fur_parka", insulator ->
-            {   insulator.set(0, "cold_sweat:goat_fur_parka");
-            });
-            replaceConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, "cold_sweat:fur_pants", insulator ->
-            {   insulator.set(0, "cold_sweat:goat_fur_pants");
-            });
-            replaceConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, "cold_sweat:fur_boots", insulator ->
-            {   insulator.set(0, "cold_sweat:goat_fur_boots");
-            });
-        }
-
-        /*
-         2.3.4
-         */
-        if (isBehind(configVersion, "2.3.4"))
-        {
-            removeConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, "minecraft:soul_fire");
-            removeConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, "minecraft:soul_campfire");
-            // Add block temperatures converted from Java
-            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, Arrays.asList("cold_sweat:boiler", 0.27, 7, "mc", 0.88, "lit=true", "{}", 4));
-            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, Arrays.asList("cold_sweat:icebox", -0.27, 7, "mc", 0.88, "frosted=true", "{}", 0));
-            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, Arrays.asList("minecraft:ice", -0.15, 4, "mc", 0.6, "", "{}", -0.7));
-            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, Arrays.asList("minecraft:packed_ice", -0.25, 4, "mc", 1.0, "", "{}", -0.7));
-            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, Arrays.asList("minecraft:blue_ice", -0.35, 4, "mc", 1.4, "", "{}", -0.7));
-            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, Arrays.asList("#minecraft:ice", -0.15, 4, "mc", 0.6, "", "{}", -0.7));
-            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, Arrays.asList("#minecraft:campfires", 0.476, 7, "mc", 0.9, "lit=true", " ", 8));
-        }
-
-        /*
-         2.3.10
-         */
-        if (isBehind(configVersion, "2.3.10"))
-        {
-            List blockTemps = new ArrayList<>(WorldSettingsConfig.BLOCK_TEMPERATURES.get());
-            for (int i = 0; i < blockTemps.size(); i++)
-            {
-                List blockTemp = new ArrayList<>((List) blockTemps.get(i));
-                if (blockTemp.size() > 3 && !(blockTemp.get(3) instanceof String))
-                {   blockTemp.add(3, "mc");
-                    blockTemps.set(i, blockTemp);
-                }
-            }
-            WorldSettingsConfig.BLOCK_TEMPERATURES.set(blockTemps);
-        }
-
-        /*
          2.4-b02a
          */
         if (isBehind(configVersion, "2.4-b02a"))
@@ -242,6 +115,99 @@ public class ModUpdater
             removeConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, "cold_sweat:soul_stalk");
         }
 
+        /*
+         2.4-b04a
+         */
+        if (isBehind(configVersion, "2.4-b04a"))
+        {
+            removeConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "minecraft:leather_helmet");
+            removeConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "minecraft:leather_chestplate");
+            removeConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "minecraft:leather_leggings");
+            removeConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "minecraft:leather_boots");
+
+            removeConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "cold_sweat:hoglin_headpiece");
+            removeConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "cold_sweat:hoglin_tunic");
+            removeConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "cold_sweat:hoglin_trousers");
+            removeConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "cold_sweat:hoglin_hooves");
+
+            removeConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "cold_sweat:goat_fur_cap");
+            removeConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "cold_sweat:goat_fur_parka");
+            removeConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "cold_sweat:goat_fur_pants");
+            removeConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "cold_sweat:goat_fur_boots");
+
+            removeConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "cold_sweat:chameleon_scale_helmet");
+            removeConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "cold_sweat:chameleon_scale_chestplate");
+            removeConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "cold_sweat:chameleon_scale_leggings");
+            removeConfigSetting(ItemSettingsConfig.INSULATION_ITEMS, "cold_sweat:chameleon_scale_boots");
+
+            replaceConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, "minecraft:leather_helmet", list ->
+            {   list.clear();
+                list.addAll(Arrays.asList("minecraft:leather_helmet",      5,  5));
+            });
+            replaceConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, "minecraft:leather_chestplate", list ->
+            {   list.clear();
+                list.addAll(Arrays.asList("minecraft:leather_chestplate", 7,  7));
+            });
+            replaceConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, "minecraft:leather_leggings", list ->
+            {   list.clear();
+                list.addAll(Arrays.asList("minecraft:leather_leggings",    6,  6));
+            });
+            replaceConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, "minecraft:leather_boots", list ->
+            {   list.clear();
+                list.addAll(Arrays.asList("minecraft:leather_boots",      5,  5));
+            });
+
+            replaceConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, "cold_sweat:hoglin_headpiece", list ->
+            {   list.clear();
+                list.addAll(Arrays.asList("cold_sweat:hoglin_headpiece",  0, 10));
+            });
+            replaceConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, "cold_sweat:hoglin_tunic", list ->
+            {   list.clear();
+                list.addAll(Arrays.asList("cold_sweat:hoglin_tunic",      0, 14));
+            });
+            replaceConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, "cold_sweat:hoglin_trousers", list ->
+            {   list.clear();
+                list.addAll(Arrays.asList("cold_sweat:hoglin_trousers",   0, 12));
+            });
+            replaceConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, "cold_sweat:hoglin_hooves", list ->
+            {   list.clear();
+                list.addAll(Arrays.asList("cold_sweat:hoglin_hooves",     0, 10));
+            });
+
+            replaceConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, "cold_sweat:goat_fur_cap", list ->
+            {   list.clear();
+                list.addAll(Arrays.asList("cold_sweat:goat_fur_cap",      10, 0));
+            });
+            replaceConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, "cold_sweat:goat_fur_parka", list ->
+            {   list.clear();
+                list.addAll(Arrays.asList("cold_sweat:goat_fur_parka",    14, 0));
+            });
+            replaceConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, "cold_sweat:goat_fur_pants", list ->
+            {   list.clear();
+                list.addAll(Arrays.asList("cold_sweat:goat_fur_pants",    12, 0));
+            });
+            replaceConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, "cold_sweat:goat_fur_boots", list ->
+            {   list.clear();
+                list.addAll(Arrays.asList("cold_sweat:goat_fur_boots",    10, 0));
+            });
+
+            replaceConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, "cold_sweat:chameleon_scale_helmet", list ->
+            {   list.clear();
+                list.addAll(Arrays.asList("cold_sweat:chameleon_scale_helmet", 10, 0.0085, "adaptive"));
+            });
+            replaceConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, "cold_sweat:chameleon_scale_chestplate", list ->
+            {   list.clear();
+                list.addAll(Arrays.asList("cold_sweat:chameleon_scale_chestplate", 14, 0.0085, "adaptive"));
+            });
+            replaceConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, "cold_sweat:chameleon_scale_leggings", list ->
+            {   list.clear();
+                list.addAll(Arrays.asList("cold_sweat:chameleon_scale_leggings", 12, 0.0085, "adaptive"));
+            });
+            replaceConfigSetting(ItemSettingsConfig.INSULATING_ARMOR, "cold_sweat:chameleon_scale_boots", list ->
+            {   list.clear();
+                list.addAll(Arrays.asList("cold_sweat:chameleon_scale_boots", 10, 0.0085, "adaptive"));
+            });
+        }
         // Update config version
         MainSettingsConfig.VERSION.set(version);
 
@@ -291,7 +257,7 @@ public class ModUpdater
     {
         boolean isBehind = compareVersions(version, comparedTo) < 0;
         if (isBehind)
-        {   ColdSweat.LOGGER.warn("Last launched version {} is less than {}. Updating config settings...", version, comparedTo);
+        {   ColdSweat.LOGGER.info("Last launched version {} is less than {}. Updating config settings...", version, comparedTo);
         }
         return isBehind;
     }
