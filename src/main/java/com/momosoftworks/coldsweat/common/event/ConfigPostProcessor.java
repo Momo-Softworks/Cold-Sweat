@@ -184,7 +184,11 @@ public class ConfigPostProcessor
     }
 
     public static void disableUpdates(ModConfig config)
-    {   FileWatcher.defaultInstance().removeWatch(config.getFullPath());
+    {
+        try
+        {   FileWatcher.defaultInstance().setWatch(config.getFullPath(), () -> {});
+        }
+        catch (Exception ignored) {}
     }
 
     private static class VerticalArrayParseResult
