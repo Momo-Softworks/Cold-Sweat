@@ -94,7 +94,7 @@ public class WorldSettingsConfig
             DIMENSION_TEMP_OFFSETS = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Applies an offset to the world's temperature across an entire dimension",
-                         " ├── Format: [[\"dimension_id\", temperature1, *units], [\"dimension_id\", temperature2, *units]... etc]",
+                         " ├── Format: [[\"dimension_id\", temperature, *units], [\"dimension_id\", temperature, *units]... etc]",
                          " └── [* = optional]",
                          " • dimension_id: The ID of the dimension (e.g. \"minecraft:the_nether\")",
                          " • temperature: The temperature offset to apply to the dimension",
@@ -146,7 +146,7 @@ public class WorldSettingsConfig
         BIOME_TEMP_OFFSETS = BUILDER
             .comment("─────────────────────────────────────────────────────────────────────────//v",
                      " Applies an offset to the temperature of a biome",
-                     " ├── Format: [[\"biome_id\", <lowTemp>, <highTemp>, <*units>], [\"biome_id\", <lowTemp>, <highTemp>, <*units>]... etc]",
+                     " ├── Format: [[\"biome_id\", lowTemp, highTemp, *units], [\"biome_id\", lowTemp, highTemp, *units]... etc]",
                      " └── [* = optional]",
                      " • biome_id: The ID of the biome (e.g. \"minecraft:desert\")",
                      " • lowTemp: The temperature offset at midnight",
@@ -167,7 +167,7 @@ public class WorldSettingsConfig
         BIOME_TEMPERATURES = BUILDER
             .comment("─────────────────────────────────────────────────────────────────────────//v",
                      " Defines the temperature of a biome, overriding the biome's default temperature",
-                     " ├── Format: [[\"biome_id\", <low-temp>, <high-temp>, <*units>], [\"biome_id\", <low-temp>, <high-temp>, <*units>]... etc]",
+                     " ├── Format: [[\"biome_id\", low-temp, high-temp, *units], [\"biome_id\", low-temp, high-temp, *units]... etc]",
                      " └── [* = optional]",
                      " • biome_id: The ID of the biome (e.g. \"minecraft:desert\")",
                      " • lowTemp: The temperature of the biome at midnight",
