@@ -1,17 +1,10 @@
 package com.momosoftworks.coldsweat.util.serialization;
 
-import com.mojang.serialization.Codec;
-import com.momosoftworks.coldsweat.api.event.core.registry.FillOptionalHoldersEvent;
+import com.momosoftworks.coldsweat.config.ConfigLoadingHandler;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.loading.FMLLoader;
-import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public class OptionalHolder<T>
@@ -21,13 +14,7 @@ public class OptionalHolder<T>
 
     public OptionalHolder(ResourceKey<T> key)
     {   this.key = key;
-        NeoForge.EVENT_BUS.register(this);
-        Runnable clientRegister = () -> NeoForge.EVENT_BUS.register(new ClientHandler());
-        if (FMLLoader.getDist() == Dist.CLIENT) clientRegister.run();
-    }
-
-    public static <T> Codec<OptionalHolder<T>> getCodec(ResourceKey<Registry<T>> key)
-    {   return ResourceKey.codec(key).xmap(OptionalHolder::new, OptionalHolder::key);
+        ConfigLoadingHandler.addOptionalHolder(this);
     }
 
     public ResourceKey<T> key()
@@ -54,33 +41,7 @@ public class OptionalHolder<T>
     }
 
     public boolean is(Holder<T> holder)
-    {   return value != null && value.equals(holder);
-    }
-
-    @SubscribeEvent
-    public void onRegistriesLoaded(FillOptionalHoldersEvent event)
-    {
-        event.registryAccess().<T>registry(ResourceKey.createRegistryKey(this.key().registry())).ifPresent(registry ->
-        {   registry.getHolder(this.key()).ifPresent(this::setValue);
-        });
-    }
-
-    @SubscribeEvent
-    public void onClosed(ServerStoppedEvent event)
-    {   this.value = null;
-        NeoForge.EVENT_BUS.unregister(this);
-    }
-
-    public class ClientHandler
-    {
-        @SubscribeEvent
-        public void onClosed(ClientPlayerNetworkEvent.LoggingOut event)
-        {
-            if (event.getPlayer() == null) return;
-            OptionalHolder.this.value = null;
-            NeoForge.EVENT_BUS.unregister(OptionalHolder.this);
-            NeoForge.EVENT_BUS.unregister(this);
-        }
+    {   return Objects.equals(this.value, holder);
     }
 
     @Override

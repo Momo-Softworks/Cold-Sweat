@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.client.event;
 
 import com.momosoftworks.coldsweat.api.event.core.registry.EdiblesRegisterEvent;
-import com.momosoftworks.coldsweat.api.event.core.registry.FillOptionalHoldersEvent;
+import com.momosoftworks.coldsweat.config.ConfigLoadingHandler;
 import com.momosoftworks.coldsweat.core.init.TempModifierInit;
 import com.momosoftworks.coldsweat.core.network.message.ClientConfigAskMessage;
 import com.momosoftworks.coldsweat.core.network.message.SyncPreferencesMessage;
@@ -22,7 +22,7 @@ public class ClientJoinSetup
     public static void onJoin(ClientPlayerNetworkEvent.LoggingIn event)
     {
         // Build holders
-        NeoForge.EVENT_BUS.post(new FillOptionalHoldersEvent(event.getPlayer().connection.registryAccess()));
+        ConfigLoadingHandler.fillOptionalHolders(event.getPlayer().connection.registryAccess());
         // Get configs
         PacketDistributor.sendToServer(new ClientConfigAskMessage());
         // Rebuild TempModifier registries
@@ -36,5 +36,11 @@ public class ClientJoinSetup
         if (event.getEntity() == Minecraft.getInstance().player)
         {   PacketDistributor.sendToServer(SyncPreferencesMessage.create());
         }
+    }
+
+    @SubscribeEvent
+    public static void onLogout(ClientPlayerNetworkEvent.LoggingOut event)
+    {
+
     }
 }
