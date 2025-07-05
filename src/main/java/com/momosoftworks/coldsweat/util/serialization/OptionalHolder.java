@@ -1,18 +1,10 @@
 package com.momosoftworks.coldsweat.util.serialization;
 
-import com.mojang.serialization.Codec;
-import com.momosoftworks.coldsweat.api.event.core.registry.FillOptionalHoldersEvent;
+import com.momosoftworks.coldsweat.config.ConfigLoadingHandler;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.server.ServerStoppedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.common.Mod;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public class OptionalHolder<T>
@@ -22,12 +14,7 @@ public class OptionalHolder<T>
 
     public OptionalHolder(ResourceKey<T> key)
     {   this.key = key;
-        MinecraftForge.EVENT_BUS.register(this);
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> MinecraftForge.EVENT_BUS.register(new ClientHandler()));
-    }
-
-    public static <T> Codec<OptionalHolder<T>> getCodec(ResourceKey<Registry<T>> key)
-    {   return ResourceKey.codec(key).xmap(OptionalHolder::new, OptionalHolder::key);
+        ConfigLoadingHandler.addOptionalHolder(this);
     }
 
     public ResourceKey<T> key()
@@ -54,33 +41,7 @@ public class OptionalHolder<T>
     }
 
     public boolean is(Holder<T> holder)
-    {   return value != null && value.equals(holder);
-    }
-
-    @SubscribeEvent
-    public void onRegistriesLoaded(FillOptionalHoldersEvent event)
-    {
-        event.registryAccess().<T>registry(ResourceKey.createRegistryKey(this.key().registry())).ifPresent(registry ->
-        {   registry.getHolder(this.key()).ifPresent(this::setValue);
-        });
-    }
-
-    @SubscribeEvent
-    public void onClosed(ServerStoppedEvent event)
-    {   this.value = null;
-        MinecraftForge.EVENT_BUS.unregister(this);
-    }
-
-    public class ClientHandler
-    {
-        @SubscribeEvent
-        public void onClosed(ClientPlayerNetworkEvent.LoggedOutEvent event)
-        {
-            if (event.getPlayer() == null) return;
-            OptionalHolder.this.value = null;
-            MinecraftForge.EVENT_BUS.unregister(OptionalHolder.this);
-            MinecraftForge.EVENT_BUS.unregister(this);
-        }
+    {   return Objects.equals(this.value, holder);
     }
 
     @Override

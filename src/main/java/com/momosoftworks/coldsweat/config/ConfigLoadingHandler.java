@@ -8,7 +8,6 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.core.registry.CreateRegistriesEvent;
-import com.momosoftworks.coldsweat.api.event.core.registry.FillOptionalHoldersEvent;
 import com.momosoftworks.coldsweat.api.event.vanilla.ServerConfigsLoadedEvent;
 import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
@@ -63,6 +62,7 @@ import java.util.stream.Collectors;
 public class ConfigLoadingHandler
 {
     public static final Multimap<ResourceKey<Registry<? extends ConfigData>>, RemoveRegistryData<?>> REMOVED_REGISTRIES = new RegistryMultiMap<>();
+    private static final List<OptionalHolder<?>> OPTIONAL_HOLDERS = new ArrayList<>();
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void loadConfigs(ServerConfigsLoadedEvent event)
@@ -73,7 +73,7 @@ public class ConfigLoadingHandler
         RegistryAccess registryAccess = event.getServer().registryAccess();
         Multimap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries = new RegistryMultiMap<>();
 
-        MinecraftForge.EVENT_BUS.post(new FillOptionalHoldersEvent(registryAccess));
+        fillOptionalHolders(registryAccess);
 
         // User JSON configs (config folder)
         ColdSweat.LOGGER.info("Loading registries from configs...");
@@ -377,6 +377,26 @@ public class ConfigLoadingHandler
     public static <T extends ConfigData> boolean isRemoved(T entry, ResourceKey<Registry<T>> registryName)
     {
         return REMOVED_REGISTRIES.get((ResourceKey) registryName).stream().anyMatch(data -> ((RemoveRegistryData<T>) data).matches(entry));
+    }
+
+    public static void addOptionalHolder(OptionalHolder<?> holder)
+    {   OPTIONAL_HOLDERS.add(holder);
+    }
+
+    public static void fillOptionalHolders(RegistryAccess registryAccess)
+    {
+        Map<ResourceKey<?>, Registry<?>> registries = new HashMap<>();
+        for (int i = 0; i < OPTIONAL_HOLDERS.size(); i++)
+        {
+            OptionalHolder<?> holder = OPTIONAL_HOLDERS.get(i);
+            Registry<?> registry = registries.computeIfAbsent(holder.key(), key -> registryAccess.registry(ResourceKey.createRegistryKey(holder.key().registry())).orElse(null));
+            if (registry == null) continue;
+            registry.getHolder((ResourceKey) holder.key()).ifPresent(h -> holder.setValue((Holder) h));
+        }
+    }
+
+    public static void destroyOptionalHolders()
+    {   OPTIONAL_HOLDERS.clear();
     }
 
     private static void addInsulatorConfigs(Collection<Holder<InsulatorData>> insulators)
