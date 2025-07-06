@@ -494,6 +494,7 @@ public class TooltipHandler
                     int slotY = screen.getSlotUnderMouse().y + screen.getGuiTop();
 
                     PoseStack ps = event.getPoseStack();
+                    ps.pushPose();
                     if (event.getMouseY() < slotY + 8)
                     {   ps.translate(0, 32, 0);
                     }
@@ -515,6 +516,7 @@ public class TooltipHandler
                     // Render fuel
                     RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1f);
                     GuiComponent.blit(ps, slotX - 7, slotY - 11, 401, 0, 16, (int) (fuel / 2.1333f), 8, 30, 34);
+                    ps.popPose();
                 }
             }
         }
