@@ -11,16 +11,14 @@ import com.momosoftworks.coldsweat.api.event.core.registry.CreateRegistriesEvent
 import com.momosoftworks.coldsweat.api.event.vanilla.ServerConfigsLoadedEvent;
 import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
-import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTempConfig;
+import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.core.init.TempModifierInit;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
-import com.momosoftworks.coldsweat.data.codec.requirement.LocationRequirement;
-import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.data.tag.ModDimensionTags;
 import com.momosoftworks.coldsweat.data.tag.ModEffectTags;
@@ -28,18 +26,17 @@ import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.math.RegistryMultiMap;
 import com.momosoftworks.coldsweat.util.serialization.OptionalHolder;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
-import net.minecraft.core.*;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.neoforged.api.distmarker.Dist;
@@ -99,7 +96,8 @@ public class ConfigLoadingHandler
     {
         @SubscribeEvent
         public static void loadClientConfigs(FMLLoadCompleteEvent event)
-        {   ConfigSettings.CLIENT_SETTINGS.forEach((id, holder) -> holder.load(true));
+        {
+            ConfigSettings.CLIENT_SETTINGS.forEach((id, holder) -> holder.load(true));
         }
     }
 
@@ -109,7 +107,8 @@ public class ConfigLoadingHandler
     public static Multimap<ResourceKey<Registry<? extends ConfigData>>, Holder<? extends ConfigData>> collectDataRegistries(RegistryAccess registryAccess)
     {
         if (registryAccess == null)
-        {   ColdSweat.LOGGER.error("Failed to load registries from null RegistryAccess");
+        {
+            ColdSweat.LOGGER.error("Failed to load registries from null RegistryAccess");
             return new RegistryMultiMap<>();
         }
         /*
@@ -117,52 +116,57 @@ public class ConfigLoadingHandler
          */
         ConfigSettings.THERMAL_SOURCE_SPREAD_WHITELIST.get()
                 .addAll(registryAccess.registryOrThrow(Registries.BLOCK)
-                        .getTag(ModBlockTags.HEARTH_SPREAD_WHITELIST).orElseThrow()
-                        .stream().map(holder ->
-                        {   ColdSweat.LOGGER.info("Adding block {} to hearth spread whitelist", holder.value());
-                            return holder.value();
-                        }).toList());
+                                .getTag(ModBlockTags.HEARTH_SPREAD_WHITELIST).orElseThrow()
+                                .stream().map(holder ->
+                                              {
+                                                  ColdSweat.LOGGER.info("Adding block {} to hearth spread whitelist", holder.value());
+                                                  return holder.value();
+                                              }).toList());
 
         ConfigSettings.THERMAL_SOURCE_SPREAD_BLACKLIST.get().
                 addAll(registryAccess.registryOrThrow(Registries.BLOCK)
-                       .getTag(ModBlockTags.HEARTH_SPREAD_BLACKLIST).orElseThrow()
-                       .stream().map(holder ->
-                       {
-                           ColdSweat.LOGGER.info("Adding block {} to hearth spread blacklist", holder.value());
-                           return holder.value();
-                       }).toList());
+                               .getTag(ModBlockTags.HEARTH_SPREAD_BLACKLIST).orElseThrow()
+                               .stream().map(holder ->
+                                             {
+                                                 ColdSweat.LOGGER.info("Adding block {} to hearth spread blacklist", holder.value());
+                                                 return holder.value();
+                                             }).toList());
 
         ConfigSettings.SLEEP_CHECK_IGNORE_BLOCKS.get()
                 .addAll(registryAccess.registryOrThrow(Registries.BLOCK)
-                        .getTag(ModBlockTags.IGNORE_SLEEP_CHECK).orElseThrow()
-                        .stream().map(holder ->
-                        {   ColdSweat.LOGGER.info("Disabling sleeping conditions check for block {}", holder.value());
-                            return holder.value();
-                        }).toList());
+                                .getTag(ModBlockTags.IGNORE_SLEEP_CHECK).orElseThrow()
+                                .stream().map(holder ->
+                                              {
+                                                  ColdSweat.LOGGER.info("Disabling sleeping conditions check for block {}", holder.value());
+                                                  return holder.value();
+                                              }).toList());
 
         ConfigSettings.LAMP_DIMENSIONS.get(registryAccess)
                 .addAll(registryAccess.registryOrThrow(Registries.DIMENSION_TYPE)
-                        .getTag(ModDimensionTags.SOUL_LAMP_VALID).orElseThrow()
-                        .stream().map(holder ->
-                        {   ColdSweat.LOGGER.info("Enabling dimension {} for soulspring lamp", holder.value());
-                            return holder.value();
-                        }).toList());
+                                .getTag(ModDimensionTags.SOUL_LAMP_VALID).orElseThrow()
+                                .stream().map(holder ->
+                                              {
+                                                  ColdSweat.LOGGER.info("Enabling dimension {} for soulspring lamp", holder.value());
+                                                  return holder.value();
+                                              }).toList());
 
         ConfigSettings.INSULATION_BLACKLIST.get()
                 .addAll(registryAccess.registryOrThrow(Registries.ITEM)
-                        .getTag(ModItemTags.NOT_INSULATABLE).orElseThrow()
-                        .stream().map(holder ->
-                        {   ColdSweat.LOGGER.info("Adding item {} to insulation blacklist", holder.value());
-                            return holder.value();
-                        }).toList());
+                                .getTag(ModItemTags.NOT_INSULATABLE).orElseThrow()
+                                .stream().map(holder ->
+                                              {
+                                                  ColdSweat.LOGGER.info("Adding item {} to insulation blacklist", holder.value());
+                                                  return holder.value();
+                                              }).toList());
 
         ConfigSettings.HEARTH_POTION_BLACKLIST.get()
                 .addAll(registryAccess.registryOrThrow(Registries.MOB_EFFECT)
-                        .getTag(ModEffectTags.HEARTH_BLACKLISTED).orElseThrow()
-                        .stream().map(holder ->
-                        {   ColdSweat.LOGGER.info("Adding effect {} to hearth potion blacklist", holder.value());
-                            return holder.value();
-                        }).toList());
+                                .getTag(ModEffectTags.HEARTH_BLACKLISTED).orElseThrow()
+                                .stream().map(holder ->
+                                              {
+                                                  ColdSweat.LOGGER.info("Adding effect {} to hearth potion blacklist", holder.value());
+                                                  return holder.value();
+                                              }).toList());
 
         /*
          Fetch JSON registries
@@ -182,7 +186,8 @@ public class ConfigLoadingHandler
     public static Multimap<ResourceKey<Registry<? extends ConfigData>>, Holder<? extends ConfigData>> collectUserRegistries(RegistryAccess registryAccess)
     {
         if (registryAccess == null)
-        {   ColdSweat.LOGGER.error("Failed to load registries from null RegistryAccess");
+        {
+            ColdSweat.LOGGER.error("Failed to load registries from null RegistryAccess");
             return new RegistryMultiMap<>();
         }
 
@@ -209,7 +214,8 @@ public class ConfigLoadingHandler
 
         // Mark holders as "JSON"
         for (Holder<? extends ConfigData> holder : registries.values())
-        {   holder.value().setRegistryType(ConfigData.Type.JSON);
+        {
+            holder.value().setRegistryType(ConfigData.Type.JSON);
         }
 
         // Fire registry creation event
@@ -299,20 +305,24 @@ public class ConfigLoadingHandler
     private static void logRegistryLoaded(String message, Collection<?> registry)
     {
         if (registry.isEmpty())
-        {   message += ".";
+        {
+            message += ".";
         }
         else message += ":";
         ColdSweat.LOGGER.info(message, registry.size());
         if (registry.isEmpty())
-        {   return;
+        {
+            return;
         }
         for (Object entry : registry)
         {
             if (entry instanceof Holder<?> holder)
-            {   ColdSweat.LOGGER.info("{}", holder.value());
+            {
+                ColdSweat.LOGGER.info("{}", holder.value());
             }
             else
-            {   ColdSweat.LOGGER.info("{}", entry);
+            {
+                ColdSweat.LOGGER.info("{}", entry);
             }
         }
     }
@@ -323,8 +333,11 @@ public class ConfigLoadingHandler
         {
             List<Holder<? extends ConfigData>> sortedHolders = new ArrayList<>(registries.get(key));
             sortedHolders.sort(Comparator.comparing(holder ->
-            {   return holder.unwrapKey().map(k -> k.location().getPath().startsWith("default") ? 1 : 0).orElse(0);
-            }));
+                                                    {
+                                                        return holder.unwrapKey().map(k -> k.location().getPath().startsWith("default")
+                                                                                           ? 1
+                                                                                           : 0).orElse(0);
+                                                    }));
             registries.replaceValues(key, sortedHolders);
         }
     }
@@ -337,11 +350,11 @@ public class ConfigLoadingHandler
         Set<Holder<RemoveRegistryData<?>>> removals = registryAccess.registryOrThrow(ModRegistries.REMOVE_REGISTRY_DATA).holders().collect(Collectors.toSet());
         removals.addAll(parseConfigData(ModRegistries.REMOVE_REGISTRY_DATA, RemoveRegistryData.CODEC, registryAccess));
         removals.forEach(holder ->
-        {
-            RemoveRegistryData<?> data = holder.value();
-            ResourceKey<Registry<? extends ConfigData>> key = (ResourceKey) data.registry();
-            REMOVED_REGISTRIES.put(key, data);
-        });
+                         {
+                             RemoveRegistryData<?> data = holder.value();
+                             ResourceKey<Registry<? extends ConfigData>> key = (ResourceKey) data.registry();
+                             REMOVED_REGISTRIES.put(key, data);
+                         });
     }
 
     private static void removeRegistries(Multimap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries)
@@ -356,19 +369,21 @@ public class ConfigLoadingHandler
     private static <T extends ConfigData> void removeEntries(Collection<RemoveRegistryData<T>> removals, Collection<Holder<T>> registry)
     {
         for (RemoveRegistryData<T> data : removals)
-        {   registry.removeIf(data::matches);
+        {
+            registry.removeIf(data::matches);
         }
     }
 
     public static <T extends ConfigData> Collection<T> removeEntries(Collection<T> registries, ResourceKey<Registry<T>> registryName)
     {
         REMOVED_REGISTRIES.get((ResourceKey) registryName).forEach(data ->
-        {
-            RemoveRegistryData<T> removeData = ((RemoveRegistryData<T>) data);
-            if (removeData.registry() == registryName)
-            {   registries.removeIf(removeData::matches);
-            }
-        });
+                                                                   {
+                                                                       RemoveRegistryData<T> removeData = ((RemoveRegistryData<T>) data);
+                                                                       if (removeData.registry() == registryName)
+                                                                       {
+                                                                           registries.removeIf(removeData::matches);
+                                                                       }
+                                                                   });
         return registries;
     }
 
@@ -378,7 +393,8 @@ public class ConfigLoadingHandler
     }
 
     public static void addOptionalHolder(OptionalHolder<?> holder)
-    {   OPTIONAL_HOLDERS.add(holder);
+    {
+        OPTIONAL_HOLDERS.add(holder);
     }
 
     public static void fillOptionalHolders(RegistryAccess registryAccess)
@@ -394,208 +410,210 @@ public class ConfigLoadingHandler
     }
 
     public static void destroyOptionalHolders()
-    {   OPTIONAL_HOLDERS.clear();
+    {
+        OPTIONAL_HOLDERS.clear();
     }
 
     private static void addInsulatorConfigs(Collection<Holder<InsulatorData>> insulators)
     {
         insulators.forEach(holder ->
-        {
-            InsulatorData insulator = holder.value();
+                           {
+                               InsulatorData insulator = holder.value();
 
-            // Add listed items as insulators
-            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, insulator.item().flatten(ItemRequirement::items)));
-            if (items.isEmpty())
-            {   items.add(null);
-            }
+                               // Add listed items as insulators
+                               List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, insulator.item().flatten(ItemRequirement::items)));
+                               if (items.isEmpty())
+                               {
+                                   items.add(null);
+                               }
 
-            for (Item item : items)
-            {
-                switch (insulator.slot())
-                {
-                    case ITEM -> ConfigSettings.INSULATION_ITEMS.get().put(item, insulator);
-                    case ARMOR -> ConfigSettings.INSULATING_ARMORS.get().put(item, insulator);
-                    case CURIO ->
-                    {
-                        if (CompatManager.isCuriosLoaded())
-                        {   ConfigSettings.INSULATING_CURIOS.get().put(item, insulator);
-                        }
-                    }
-                }
-            }
-        });
+                               for (Item item : items)
+                               {
+                                   switch (insulator.slot())
+                                   {
+                                       case ITEM -> ConfigSettings.INSULATION_ITEMS.get().put(item, insulator);
+                                       case ARMOR -> ConfigSettings.INSULATING_ARMORS.get().put(item, insulator);
+                                       case CURIO ->
+                                       {
+                                           if (CompatManager.isCuriosLoaded())
+                                           {
+                                               ConfigSettings.INSULATING_CURIOS.get().put(item, insulator);
+                                           }
+                                       }
+                                   }
+                               }
+                           });
     }
 
     private static void addFuelConfigs(Collection<Holder<FuelData>> fuels)
     {
         fuels.forEach(holder ->
-        {
-            FuelData fuelData = holder.value();
+                      {
+                          FuelData fuelData = holder.value();
 
-            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, fuelData.item().flatten(ItemRequirement::items)));
-            if (items.isEmpty())
-            {   items.add(null);
-            }
+                          List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, fuelData.item().flatten(ItemRequirement::items)));
+                          if (items.isEmpty())
+                          {
+                              items.add(null);
+                          }
 
-            for (Item item : items)
-            {
-                switch (fuelData.fuelType())
-                {
-                    case BOILER -> ConfigSettings.BOILER_FUEL.get().put(item, fuelData);
-                    case ICEBOX -> ConfigSettings.ICEBOX_FUEL.get().put(item, fuelData);
-                    case HEARTH -> ConfigSettings.HEARTH_FUEL.get().put(item, fuelData);
-                    case SOUL_LAMP -> ConfigSettings.SOULSPRING_LAMP_FUEL.get().put(item, fuelData);
-                }
-            }
-        });
+                          for (Item item : items)
+                          {
+                              switch (fuelData.fuelType())
+                              {
+                                  case BOILER -> ConfigSettings.BOILER_FUEL.get().put(item, fuelData);
+                                  case ICEBOX -> ConfigSettings.ICEBOX_FUEL.get().put(item, fuelData);
+                                  case HEARTH -> ConfigSettings.HEARTH_FUEL.get().put(item, fuelData);
+                                  case SOUL_LAMP -> ConfigSettings.SOULSPRING_LAMP_FUEL.get().put(item, fuelData);
+                              }
+                          }
+                      });
     }
 
     private static void addFoodConfigs(Collection<Holder<FoodData>> foods)
     {
         foods.forEach(holder ->
-        {
-            FoodData foodData = holder.value();
+                      {
+                          FoodData foodData = holder.value();
 
-            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, foodData.item().flatten(ItemRequirement::items)));
-            if (items.isEmpty())
-            {   items.add(null);
-            }
+                          List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, foodData.item().flatten(ItemRequirement::items)));
+                          if (items.isEmpty())
+                          {
+                              items.add(null);
+                          }
 
-            for (Item item : items)
-            {   ConfigSettings.FOOD_TEMPERATURES.get().put(item, foodData);
-            }
-        });
+                          for (Item item : items)
+                          {
+                              ConfigSettings.FOOD_TEMPERATURES.get().put(item, foodData);
+                          }
+                      });
     }
 
     private static void addCarryTempConfigs(Collection<Holder<ItemCarryTempData>> carryTemps)
     {
         carryTemps.forEach(holder ->
-        {
-            ItemCarryTempData carryTempData = holder.value();
+                           {
+                               ItemCarryTempData carryTempData = holder.value();
 
-            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, carryTempData.item().flatten(ItemRequirement::items)));
-            if (items.isEmpty())
-            {   items.add(null);
-            }
+                               List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, carryTempData.item().flatten(ItemRequirement::items)));
+                               if (items.isEmpty())
+                               {
+                                   items.add(null);
+                               }
 
-            for (Item item : items)
-            {   ConfigSettings.CARRIED_ITEM_TEMPERATURES.get().put(item, carryTempData);
-            }
-        });
+                               for (Item item : items)
+                               {
+                                   ConfigSettings.CARRIED_ITEM_TEMPERATURES.get().put(item, carryTempData);
+                               }
+                           });
     }
 
     private static void addDryingItemConfigs(Collection<Holder<DryingItemData>> dryingItems)
     {
         dryingItems.forEach(holder ->
-        {
-            DryingItemData dryingItemData = holder.value();
+                            {
+                                DryingItemData dryingItemData = holder.value();
 
-            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, dryingItemData.item().flatten(ItemRequirement::items)));
-            if (items.isEmpty())
-            {   items.add(null);
-            }
+                                List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, dryingItemData.item().flatten(ItemRequirement::items)));
+                                if (items.isEmpty())
+                                {
+                                    items.add(null);
+                                }
 
-            for (Item item : items)
-            {   ConfigSettings.DRYING_ITEMS.get().put(item, dryingItemData);
-            }
-        });
+                                for (Item item : items)
+                                {
+                                    ConfigSettings.DRYING_ITEMS.get().put(item, dryingItemData);
+                                }
+                            });
     }
 
     private static void addInsulationSlotConfigs(Collection<Holder<ItemInsulationSlotsData>> insulationSlots)
     {
         insulationSlots.forEach(holder ->
-        {
-            ItemInsulationSlotsData insulationSlotData = holder.value();
+                                {
+                                    ItemInsulationSlotsData insulationSlotData = holder.value();
 
-            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, insulationSlotData.item().flatten(ItemRequirement::items)));
-            if (items.isEmpty())
-            {   items.add(null);
-            }
+                                    List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, insulationSlotData.item().flatten(ItemRequirement::items)));
+                                    if (items.isEmpty())
+                                    {
+                                        items.add(null);
+                                    }
 
-            for (Item item : items)
-            {   ConfigSettings.INSULATION_SLOT_OVERRIDES.get().put(item, insulationSlotData);
-            }
-        });
+                                    for (Item item : items)
+                                    {
+                                        ConfigSettings.INSULATION_SLOT_OVERRIDES.get().put(item, insulationSlotData);
+                                    }
+                                });
     }
 
     private static void addBlockTempConfigs(Collection<Holder<BlockTempData>> blockTemps)
     {
         blockTemps.forEach(holder ->
-        {
-            BlockTempData blockTempData = holder.value();
-            BlockTemp blockTemp = new BlockTempConfig(blockTempData)
-            {
-                final double temperature = blockTempData.getTemperature();
-                final NegatableList<LocationRequirement> locationRequirement = blockTempData.location();
-                final NegatableList<EntityRequirement> entityRequirement = blockTempData.entity();
-
-                @Override
-                public double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
-                {
-                    if (locationRequirement.test(req -> req.test(level, pos))
-                    && entityRequirement.test(req -> req.test(entity)))
-                    {   return temperature;
-                    }
-                    return 0;
-                }
-            };
-
-            BlockTempRegistry.register(blockTemp);
-        });
+                           {
+                               BlockTempData blockTempData = holder.value();
+                               BlockTemp blockTemp = new BlockTempConfig(blockTempData);
+                               BlockTempRegistry.register(blockTemp);
+                           });
     }
 
     private static void addBiomeTempConfigs(Collection<Holder<BiomeTempData>> biomeTemps, RegistryAccess registryAccess)
     {
         biomeTemps.forEach(holder ->
-        {
-            BiomeTempData biomeTempData = holder.value();
+                           {
+                               BiomeTempData biomeTempData = holder.value();
 
-            for (OptionalHolder<Biome> biome : RegistryHelper.mapRegistryTagList(Registries.BIOME, biomeTempData.biomes(), registryAccess))
-            {
-                if (biomeTempData.isOffset())
-                {   ConfigSettings.BIOME_OFFSETS.get(registryAccess).put(biome.get(), biomeTempData);
-                }
-                else
-                {   ConfigSettings.BIOME_TEMPS.get(registryAccess).put(biome.get(), biomeTempData);
-                }
-            }
-        });
+                               for (OptionalHolder<Biome> biome : RegistryHelper.mapRegistryTagList(Registries.BIOME, biomeTempData.biomes(), registryAccess))
+                               {
+                                   if (biomeTempData.isOffset())
+                                   {
+                                       ConfigSettings.BIOME_OFFSETS.get(registryAccess).put(biome.get(), biomeTempData);
+                                   }
+                                   else
+                                   {
+                                       ConfigSettings.BIOME_TEMPS.get(registryAccess).put(biome.get(), biomeTempData);
+                                   }
+                               }
+                           });
     }
 
     private static void addDimensionTempConfigs(Collection<Holder<DimensionTempData>> dimensionTemps, RegistryAccess registryAccess)
     {
         dimensionTemps.forEach(holder ->
-        {
-            DimensionTempData dimensionTempData = holder.value();
+                               {
+                                   DimensionTempData dimensionTempData = holder.value();
 
-            for (OptionalHolder<DimensionType> dimension : RegistryHelper.mapRegistryTagList(Registries.DIMENSION_TYPE, dimensionTempData.dimensions(), registryAccess))
-            {
-                if (dimensionTempData.isOffset())
-                {   ConfigSettings.DIMENSION_OFFSETS.get(registryAccess).put(dimension.get(), dimensionTempData);
-                }
-                else
-                {   ConfigSettings.DIMENSION_TEMPS.get(registryAccess).put(dimension.get(), dimensionTempData);
-                }
-            }
-        });
+                                   for (OptionalHolder<DimensionType> dimension : RegistryHelper.mapRegistryTagList(Registries.DIMENSION_TYPE, dimensionTempData.dimensions(), registryAccess))
+                                   {
+                                       if (dimensionTempData.isOffset())
+                                       {
+                                           ConfigSettings.DIMENSION_OFFSETS.get(registryAccess).put(dimension.get(), dimensionTempData);
+                                       }
+                                       else
+                                       {
+                                           ConfigSettings.DIMENSION_TEMPS.get(registryAccess).put(dimension.get(), dimensionTempData);
+                                       }
+                                   }
+                               });
     }
 
     private static void addStructureTempConfigs(Collection<Holder<StructureTempData>> structureTemps, RegistryAccess registryAccess)
     {
         structureTemps.forEach(holder ->
-        {
-            StructureTempData structureTempData = holder.value();
+                               {
+                                   StructureTempData structureTempData = holder.value();
 
-            for (OptionalHolder<Structure> structure : RegistryHelper.mapRegistryTagList(Registries.STRUCTURE, structureTempData.structures(), registryAccess))
-            {
-                if (structureTempData.isOffset())
-                {   ConfigSettings.STRUCTURE_OFFSETS.get(registryAccess).put(structure.get(), structureTempData);
-                }
-                else
-                {   ConfigSettings.STRUCTURE_TEMPS.get(registryAccess).put(structure.get(), structureTempData);
-                }
-            }
-        });
+                                   for (OptionalHolder<Structure> structure : RegistryHelper.mapRegistryTagList(Registries.STRUCTURE, structureTempData.structures(), registryAccess))
+                                   {
+                                       if (structureTempData.isOffset())
+                                       {
+                                           ConfigSettings.STRUCTURE_OFFSETS.get(registryAccess).put(structure.get(), structureTempData);
+                                       }
+                                       else
+                                       {
+                                           ConfigSettings.STRUCTURE_TEMPS.get(registryAccess).put(structure.get(), structureTempData);
+                                       }
+                                   }
+                               });
     }
 
     private static void addDepthTempConfigs(Collection<Holder<DepthTempData>> depthTemps, RegistryAccess registryAccess)
@@ -605,7 +623,8 @@ public class ConfigLoadingHandler
         {
             DepthTempData depthTempData = holder.value();
             for (OptionalHolder<DimensionType> dimension : RegistryHelper.mapRegistryTagList(Registries.DIMENSION_TYPE, depthTempData.dimensions(), registryAccess))
-            {   ConfigSettings.DEPTH_REGIONS.get().put(dimension.get().value(), depthTempData);
+            {
+                ConfigSettings.DEPTH_REGIONS.get().put(dimension.get().value(), depthTempData);
             }
         }
     }
@@ -613,77 +632,86 @@ public class ConfigLoadingHandler
     private static void addMountConfigs(Collection<Holder<MountData>> mounts)
     {
         mounts.forEach(holder ->
-        {
-            MountData mountData = holder.value();
+                       {
+                           MountData mountData = holder.value();
 
-            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, mountData.entity().flatten(EntityRequirement::entities)));
-            if (entities.isEmpty())
-            {   entities.add(null);
-            }
-            for (EntityType<?> entity : entities)
-            {   ConfigSettings.INSULATED_MOUNTS.get().put(entity, mountData);
-            }
-        });
+                           List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, mountData.entity().flatten(EntityRequirement::entities)));
+                           if (entities.isEmpty())
+                           {
+                               entities.add(null);
+                           }
+                           for (EntityType<?> entity : entities)
+                           {
+                               ConfigSettings.INSULATED_MOUNTS.get().put(entity, mountData);
+                           }
+                       });
     }
 
     private static void addSpawnBiomeConfigs(Collection<Holder<SpawnBiomeData>> spawnBiomes, RegistryAccess registryAccess)
     {
         spawnBiomes.forEach(holder ->
-        {
-            SpawnBiomeData spawnBiomeData = holder.value();
+                            {
+                                SpawnBiomeData spawnBiomeData = holder.value();
 
-            for (OptionalHolder<Biome> biome : RegistryHelper.mapRegistryTagList(Registries.BIOME, spawnBiomeData.biomes(), registryAccess))
-            {   ConfigSettings.ENTITY_SPAWN_BIOMES.get(registryAccess).put(biome.get(), spawnBiomeData);
-            }
-        });
+                                for (OptionalHolder<Biome> biome : RegistryHelper.mapRegistryTagList(Registries.BIOME, spawnBiomeData.biomes(), registryAccess))
+                                {
+                                    ConfigSettings.ENTITY_SPAWN_BIOMES.get(registryAccess).put(biome.get(), spawnBiomeData);
+                                }
+                            });
     }
 
     private static void addEntityTempConfigs(Collection<Holder<EntityTempData>> entityTemps)
     {
         entityTemps.forEach(holder ->
-        {
-            EntityTempData entityTempData = holder.value();
+                            {
+                                EntityTempData entityTempData = holder.value();
 
-            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, entityTempData.entity().flatten(EntityRequirement::entities)));
-            if (entities.isEmpty())
-            {   entities.add(null);
-            }
-            for (EntityType<?> entity : entities)
-            {   ConfigSettings.ENTITY_TEMPERATURES.get().put(entity, entityTempData);
-            }
-        });
+                                List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, entityTempData.entity().flatten(EntityRequirement::entities)));
+                                if (entities.isEmpty())
+                                {
+                                    entities.add(null);
+                                }
+                                for (EntityType<?> entity : entities)
+                                {
+                                    ConfigSettings.ENTITY_TEMPERATURES.get().put(entity, entityTempData);
+                                }
+                            });
     }
 
     private static void addEntityClimateConfigs(Collection<Holder<EntityClimateData>> entityTemps)
     {
         entityTemps.forEach(holder ->
-        {
-            EntityClimateData entityTempData = holder.value();
+                            {
+                                EntityClimateData entityTempData = holder.value();
 
-            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, entityTempData.entity().flatten(EntityRequirement::entities)));
-            if (entities.isEmpty())
-            {   entities.add(null);
-            }
-            for (EntityType<?> entity : entities)
-            {   ConfigSettings.ENTITY_CLIMATES.get().put(entity, entityTempData);
-            }
-        });
+                                List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, entityTempData.entity().flatten(EntityRequirement::entities)));
+                                if (entities.isEmpty())
+                                {
+                                    entities.add(null);
+                                }
+                                for (EntityType<?> entity : entities)
+                                {
+                                    ConfigSettings.ENTITY_CLIMATES.get().put(entity, entityTempData);
+                                }
+                            });
     }
 
     private static void addTempEffectsConfigs(Collection<Holder<TempEffectsData>> tempEffects)
     {
         tempEffects.forEach(holder ->
-        {
-            TempEffectsData tempEffectsData = holder.value();
+                            {
+                                TempEffectsData tempEffectsData = holder.value();
 
-            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, tempEffectsData.entity().flatten(EntityRequirement::entities)));
-            if (entities.isEmpty())
-            {   entities.add(null);
-            }
-            for (EntityType<?> entity : entities)
-            {   ConfigSettings.ENTITY_TEMP_EFFECTS.get().put(entity, tempEffectsData);
-            }
-        });
+                                List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, tempEffectsData.entity().flatten(EntityRequirement::entities)));
+                                if (entities.isEmpty())
+                                {
+                                    entities.add(null);
+                                }
+                                for (EntityType<?> entity : entities)
+                                {
+                                    ConfigSettings.ENTITY_TEMP_EFFECTS.get().put(entity, tempEffectsData);
+                                }
+                            });
     }
 
     private static <T extends ConfigData> List<Holder<T>> parseConfigData(ResourceKey<Registry<T>> registry, Codec<T> codec, RegistryAccess registryAccess)
@@ -696,7 +724,8 @@ public class ConfigLoadingHandler
         File jsonDirectory = coldSweatDataPath.toFile();
 
         if (!jsonDirectory.exists())
-        {   return output;
+        {
+            return output;
         }
         else for (File file : findFilesRecursive(jsonDirectory))
         {
@@ -708,9 +737,9 @@ public class ConfigLoadingHandler
                             .resultOrPartial(ColdSweat.LOGGER::error)
                             .map(Pair::getFirst)
                             .ifPresent(configData -> output.add(Holder.direct(configData)));
-                }
-                catch (Exception e)
-                {   ColdSweat.LOGGER.error("Failed to parse JSON config setting in {}: {}", registry.location(), file.getName(), e);
+                } catch (Exception e)
+                {
+                    ColdSweat.LOGGER.error("Failed to parse JSON config setting in {}: {}", registry.location(), file.getName(), e);
                 }
             }
         }
@@ -722,15 +751,18 @@ public class ConfigLoadingHandler
         List<File> files = new ArrayList<>();
         File[] filesInDirectory = directory.listFiles();
         if (filesInDirectory == null)
-        {   return files;
+        {
+            return files;
         }
         for (File file : filesInDirectory)
         {
             if (file.isDirectory())
-            {   files.addAll(findFilesRecursive(file));
+            {
+                files.addAll(findFilesRecursive(file));
             }
             else
-            {   files.add(file);
+            {
+                files.add(file);
             }
         }
         return files;
