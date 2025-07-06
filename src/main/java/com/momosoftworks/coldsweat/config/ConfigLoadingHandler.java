@@ -527,23 +527,7 @@ public class ConfigLoadingHandler
         {
             BlockTempData blockTempData = holder.get();
 
-            BlockTemp blockTemp = new BlockTempConfig(blockTempData)
-            {
-                final double temperature = blockTempData.getTemperature();
-                final NegatableList<LocationRequirement> locationRequirement = blockTempData.location();
-                final NegatableList<EntityRequirement> entityRequirement = blockTempData.entity();
-
-                @Override
-                public double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
-                {
-                    if (locationRequirement.test(req -> req.test(level, pos))
-                    && entityRequirement.test(req -> req.test(entity)))
-                    {   return temperature;
-                    }
-                    return 0;
-                }
-            };
-
+            BlockTemp blockTemp = new BlockTempConfig(blockTempData);
             BlockTempRegistry.register(blockTemp);
         });
     }
