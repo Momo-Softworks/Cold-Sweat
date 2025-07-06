@@ -2,7 +2,6 @@ package com.momosoftworks.coldsweat.core.event;
 
 import com.google.common.collect.Maps;
 import com.momosoftworks.coldsweat.api.event.core.init.EnableTemperatureEvent;
-import com.momosoftworks.coldsweat.api.event.vanilla.ServerConfigsLoadedEvent;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -22,6 +21,7 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.lang.reflect.Field;
@@ -87,7 +87,7 @@ public class AddTempAttributes
     }
 
     @SubscribeEvent
-    public static void onEntitiesCreated(ServerConfigsLoadedEvent event)
+    public static void onEntitiesCreated(FMLServerAboutToStartEvent event)
     {
         for (EntityType<?> entityType : ForgeRegistries.ENTITIES.getValues())
         {
