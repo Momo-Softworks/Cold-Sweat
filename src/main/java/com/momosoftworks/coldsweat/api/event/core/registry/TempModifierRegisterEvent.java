@@ -9,6 +9,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Event;
 
 import java.lang.reflect.Constructor;
+import java.util.Arrays;
 import java.util.function.Supplier;
 
 /**
@@ -36,16 +37,17 @@ public class TempModifierRegisterEvent extends Event
      * The class must have a no-arg constructor for this to work.
      * @param id The ID of the TempModifier. Should use your mod ID as the namespace
      * @param classPath The path to the TempModifier class, e.g. "com.examplemod.TempModifier"
+     * @param initArgs Arguments to pass to the TempModifier's constructor.
      */
-    public void registerByClassName(ResourceLocation id, String classPath)
+    public void registerByClassName(ResourceLocation id, String classPath, Object... initArgs)
     {
         try
         {
-            Constructor<?> clazz = Class.forName(classPath).getConstructor();
+            Constructor<?> clazz = Class.forName(classPath).getConstructor(Arrays.stream(initArgs).map(Object::getClass).toArray(Class[]::new));
             this.register(id, () ->
             {
                 try
-                {   return (TempModifier) clazz.newInstance();
+                {   return (TempModifier) clazz.newInstance(initArgs);
                 }
                 catch (Exception e)
                 {   throw ColdSweat.LOGGER.throwing(new RegistryFailureException(id, "TempModifier", "Failed to instantiate class " + classPath, e));
