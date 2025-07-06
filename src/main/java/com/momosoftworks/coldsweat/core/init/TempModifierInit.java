@@ -72,14 +72,7 @@ public class TempModifierInit
 
         for (BlockTempData blockConfig : blockTemps)
         {
-            BlockTemp blockTemp = new BlockTempConfig(blockConfig)
-            {
-                @Override
-                public double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
-                {   return blockConfig.getTemperature();
-                }
-            };
-
+            BlockTemp blockTemp = new BlockTempConfig(blockConfig);
             BlockTempRegistry.register(blockTemp);
         }
     }

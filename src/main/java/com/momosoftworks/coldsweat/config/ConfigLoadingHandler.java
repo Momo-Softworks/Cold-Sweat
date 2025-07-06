@@ -19,8 +19,6 @@ import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
-import com.momosoftworks.coldsweat.data.codec.requirement.LocationRequirement;
-import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.data.tag.ModDimensionTags;
 import com.momosoftworks.coldsweat.data.tag.ModEffectTags;
@@ -28,7 +26,6 @@ import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.math.RegistryMultiMap;
 import com.momosoftworks.coldsweat.util.serialization.OptionalHolder;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
@@ -36,11 +33,8 @@ import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraftforge.api.distmarker.Dist;
@@ -525,23 +519,7 @@ public class ConfigLoadingHandler
         blockTemps.forEach(holder ->
         {
             BlockTempData blockTempData = holder.value();
-            BlockTemp blockTemp = new BlockTempConfig(blockTempData)
-            {
-                final double temperature = blockTempData.getTemperature();
-                final NegatableList<LocationRequirement> locationRequirement = blockTempData.location();
-                final NegatableList<EntityRequirement> entityRequirement = blockTempData.entity();
-
-                @Override
-                public double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
-                {
-                    if (locationRequirement.test(req -> req.test(level, pos))
-                    && entityRequirement.test(req -> req.test(entity)))
-                    {   return temperature;
-                    }
-                    return 0;
-                }
-            };
-
+            BlockTemp blockTemp = new BlockTempConfig(blockTempData);
             BlockTempRegistry.register(blockTemp);
         });
     }
