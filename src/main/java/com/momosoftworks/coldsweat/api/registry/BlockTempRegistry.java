@@ -40,23 +40,15 @@ public class BlockTempRegistry
         blockTemp.getAffectedBlocks().forEach(block ->
         {
             Collection<BlockTemp> blockTemps = MAPPED_BLOCKS.get(block);
-            if (!blockTemps.isEmpty())
+            if (!blockTemps.isEmpty() && blockTemp instanceof BlockTempConfig)
             {
-                if (blockTemp instanceof BlockTempConfig)
+                BlockTempConfig cfg = (BlockTempConfig) blockTemp;
+                for (BlockTemp temp : blockTemps)
                 {
-                    BlockTempConfig cfg = (BlockTempConfig) blockTemp;
-                    for (BlockTemp temp : blockTemps)
-                    {
-                        if (temp instanceof BlockTempConfig)
-                        {
-                            BlockTempConfig cfg2 = (BlockTempConfig) temp;
-                            if (cfg2.comparePredicates(cfg))
-                            {
-                                ColdSweat.LOGGER.error("Skipping duplicate BlockTemp for \"{}\" as it already has one with the same predicates: \n{}",
-                                                       ForgeRegistries.BLOCKS.getKey(block).toString(), cfg2.getPredicates());
-                                return;
-                            }
-                        }
+                    if (temp instanceof BlockTempConfig && cfg.equals(temp))
+                    {   ColdSweat.LOGGER.error("Skipping duplicate BlockTemp for \"{}\" as an identical one is already registered", block);
+                        ColdSweat.LOGGER.debug("{}", cfg);
+                        return;
                     }
                 }
             }

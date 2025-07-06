@@ -19,8 +19,6 @@ import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
-import com.momosoftworks.coldsweat.data.codec.requirement.LocationRequirement;
-import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -471,23 +469,7 @@ public class ConfigLoadingHandler
     {
         blockTemps.forEach(blockTempData ->
         {
-            BlockTemp blockTemp = new BlockTempConfig(blockTempData)
-            {
-                final double temperature = blockTempData.getTemperature();
-                final NegatableList<LocationRequirement> locationRequirement = blockTempData.location();
-                final NegatableList<EntityRequirement> entityRequirement = blockTempData.entity();
-
-                @Override
-                public double getTemperature(World level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
-                {
-                    if (locationRequirement.test(req -> req.test(level, pos))
-                    && entityRequirement.test(req -> req.test(entity)))
-                    {   return temperature;
-                    }
-                    return 0;
-                }
-            };
-
+            BlockTemp blockTemp = new BlockTempConfig(blockTempData);
             BlockTempRegistry.register(blockTemp);
         });
     }

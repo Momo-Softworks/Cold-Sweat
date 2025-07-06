@@ -2,26 +2,23 @@ package com.momosoftworks.coldsweat.api.temperature.block_temp;
 
 import com.momosoftworks.coldsweat.data.codec.configuration.BlockTempData;
 import com.momosoftworks.coldsweat.data.codec.requirement.BlockRequirement;
-import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.tags.ITag;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.List;
 
-public abstract class BlockTempConfig extends BlockTemp
+/**
+ * Wrapper BlockTemp for {@link BlockTempData} configurations.
+ */
+public class BlockTempConfig extends BlockTemp
 {
-    private final NegatableList<BlockRequirement> predicates;
-
-    public BlockTempConfig(double minEffect, double maxEffect, double minTemp, double maxTemp, double range, boolean fade, boolean logarithmic,
-                           NegatableList<BlockRequirement> predicates, Block... blocks)
-    {
-        super(minEffect, maxEffect, minTemp, maxTemp, range, fade, logarithmic, blocks);
-        this.predicates = predicates;
-    }
+    private final BlockTempData data;
 
     public BlockTempConfig(BlockTempData data)
     {
@@ -33,20 +30,38 @@ public abstract class BlockTempConfig extends BlockTemp
               data.fade(),
               data.logarithmic(),
               RegistryHelper.mapTaggableList(data.block().flatten(BlockRequirement::blocks)).toArray(new Block[0]));
-        this.predicates = data.block();
+        this.data = data;
     }
 
     @Override
     public boolean isValid(World level, BlockPos pos, BlockState state)
+    {   return this.data.block().test(req -> req.test(level, pos, state));
+    }
+
+    @Override
+    public double getTemperature(World level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
     {
-        return this.predicates.test(req -> req.test(level, pos, state));
+        if (data.location().test(req -> req.test(level, pos))
+        && data.entity().test(req -> req.test(entity)))
+        {   return data.getTemperature();
+        }
+        return 0;
     }
 
-    public boolean comparePredicates(BlockTempConfig other)
-    {   return predicates.equals(other.predicates);
+    public BlockTempData getData()
+    {   return this.data;
     }
 
-    public NegatableList<BlockRequirement> getPredicates()
-    {   return predicates;
+    public boolean isInGroup(List<ResourceLocation> group)
+    {   return this.data.effectGroup().map(list -> list.stream().anyMatch(group::contains)).orElse(false);
+    }
+
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (this == obj) return true;
+        if (!(obj instanceof BlockTempConfig)) return false;
+        BlockTempConfig that = (BlockTempConfig) obj;
+        return this.data.equals(that.data);
     }
 }

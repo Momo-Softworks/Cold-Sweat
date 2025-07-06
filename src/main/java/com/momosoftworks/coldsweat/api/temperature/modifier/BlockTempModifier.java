@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.api.temperature.modifier;
 
 import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
+import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTempConfig;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
@@ -13,6 +14,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.Direction;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.vector.Vector3d;
@@ -34,14 +36,14 @@ public class BlockTempModifier extends TempModifier
     }
 
     Map<ChunkPos, IChunk> chunks = new HashMap<>(16);
-    Map<BlockTemp, Double> blockTempEffects = new HashMap<>(128);
+    Map<BlockTemp, Double> blockTempTotals = new HashMap<>(128);
     Map<BlockPos, BlockState> stateCache = new HashMap<>(4096);
     List<Triplet<BlockPos, BlockTemp, Double>> triggers = new ArrayList<>(128);
 
     @Override
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
-        blockTempEffects.clear();
+        blockTempTotals.clear();
         stateCache.clear();
         triggers.clear();
 
@@ -87,11 +89,9 @@ public class BlockTempModifier extends TempModifier
 
                         if (blockTemps.isEmpty() || (blockTemps.size() == 1 && blockTemps.contains(BlockTempRegistry.DEFAULT_BLOCK_TEMP))) continue;
 
-                        // Get the amount that this block has affected the entity so far
-
                         // Are any of the block temps able to affect the entity?
                         // This check prevents costly calculations if the block can't affect the entity anyway
-                        if (areAnyBlockTempsInRange(blockTempEffects, blockTemps))
+                        if (this.areAnyBlockTempsInRange(blockTemps))
                         {
                             // Get Vector positions of the centers of the source block and player
                             Vector3d pos = Vector3d.atCenterOf(blockpos);
@@ -123,7 +123,10 @@ public class BlockTempModifier extends TempModifier
                                                    ? CSMath.blend(temperature, 0, distance, 0.5, blockTemp.range())
                                                    : temperature;
 
-                                double blockTempTotal = blockTempEffects.getOrDefault(blockTemp, 0d);
+                                double blockTempTotal = blockTempTotals.getOrDefault(blockTemp, 0d);
+                                double blockGroupTotal = this.getGroupTotal(blockTemp);
+                                double blockGroupDelta = blockGroupTotal - blockTempTotal;
+
                                 if (blockTemp.logarithmic())
                                 {   // Calculate amount of increase
                                     double newTotal = Math.pow(Math.pow(blockTempTotal, 1/LOG_FACTOR) + tempToAdd, LOG_FACTOR);
@@ -131,14 +134,18 @@ public class BlockTempModifier extends TempModifier
                                     // Dampen the effect with each block between the player and the source
                                     delta /= (blocks[0] + 1);
                                     // Store this block type's total effect on the player
-                                    blockTempEffects.put(blockTemp, CSMath.clamp(blockTempTotal + delta, blockTemp.minEffect(), blockTemp.maxEffect()));
+                                    blockTempTotals.put(blockTemp, CSMath.clamp(blockTempTotal + delta,
+                                                                                blockTemp.minEffect() + blockGroupDelta,
+                                                                                blockTemp.maxEffect() - blockGroupDelta));
                                 }
                                 else
                                 {   // Dampen the effect with each block between the player and the source
                                     tempToAdd /= (blocks[0] + 1);
                                     // Store this block type's total effect on the player
                                     double newTotal = blockTempTotal + tempToAdd;
-                                    blockTempEffects.put(blockTemp, CSMath.clamp(newTotal, blockTemp.minEffect(), blockTemp.maxEffect()));
+                                    blockTempTotals.put(blockTemp, CSMath.clamp(newTotal,
+                                                                                blockTemp.minEffect() + blockGroupDelta,
+                                                                                blockTemp.maxEffect() - blockGroupDelta));
                                 }
                                 // Used to trigger advancements
                                 if (shouldTickAdvancements)
@@ -154,7 +161,7 @@ public class BlockTempModifier extends TempModifier
         if (entity instanceof ServerPlayerEntity && shouldTickAdvancements)
         {
             for (Triplet<BlockPos, BlockTemp, Double> trigger : triggers)
-            {   ModAdvancementTriggers.BLOCK_AFFECTS_TEMP.trigger(((ServerPlayerEntity) entity), trigger.getA(), trigger.getC(), blockTempEffects.get(trigger.getB()));
+            {   ModAdvancementTriggers.BLOCK_AFFECTS_TEMP.trigger(((ServerPlayerEntity) entity), trigger.getA(), trigger.getC(), blockTempTotals.get(trigger.getB()));
             }
         }
 
@@ -166,34 +173,53 @@ public class BlockTempModifier extends TempModifier
         // Add the effects of all the blocks together and return the result
         return temp ->
         {
-            for (Map.Entry<BlockTemp, Double> effect : blockTempEffects.entrySet())
+            for (Map.Entry<BlockTemp, Double> entry : blockTempTotals.entrySet())
             {
-                BlockTemp be = effect.getKey();
-                double min = be.minTemperature();
-                double max = be.maxTemperature();
+                BlockTemp blockTemp = entry.getKey();
+                double min = blockTemp.minTemperature();
+                double max = blockTemp.maxTemperature();
                 if (!CSMath.betweenInclusive(temp, min, max)) continue;
-                double effectValue = effect.getValue();
+                double effectValue = entry.getValue();
                 temp = CSMath.clamp(temp + effectValue, min, max);
             }
             return temp;
         };
     }
 
-    private static boolean areAnyBlockTempsInRange(Map<BlockTemp, Double> blockTempEffects, Collection<BlockTemp> blockTemps)
+    private boolean areAnyBlockTempsInRange(Collection<BlockTemp> blockTemps)
     {
-        boolean isInTempRange = blockTempEffects.isEmpty();
-        if (!isInTempRange)
+        for (BlockTemp blockTemp : blockTemps)
         {
-            for (Map.Entry<BlockTemp, Double> entry : blockTempEffects.entrySet())
-            {   BlockTemp key = entry.getKey();
-                Double value = entry.getValue();
-
-                if (!blockTemps.contains(key) || CSMath.betweenInclusive(value, key.minEffect(), key.maxEffect()))
-                {   isInTempRange = true;
-                    break;
-                }
+            if (!blockTempTotals.containsKey(blockTemp))
+            {   return true;
+            }
+            double effectTotal = getGroupTotal(blockTemp);
+            if (CSMath.betweenInclusive(effectTotal, blockTemp.minEffect(), blockTemp.maxEffect()))
+            {   return true;
             }
         }
-        return isInTempRange;
+        return false;
+    }
+
+    private double getGroupTotal(BlockTemp blockTemp)
+    {
+        if (!(blockTemp instanceof BlockTempConfig))
+        {   return this.blockTempTotals.getOrDefault(blockTemp, 0d);
+        }
+        BlockTempConfig config = (BlockTempConfig) blockTemp;
+        double total = 0;
+
+        List<ResourceLocation> group = config.getData().effectGroup().orElse(null);
+        if (group == null) return this.blockTempTotals.getOrDefault(blockTemp, 0d);
+
+        if (!group.contains(config.getData().registryId().get()))
+        {   total += this.blockTempTotals.getOrDefault(blockTemp, 0d);
+        }
+
+        total += this.blockTempTotals.keySet().stream()
+                 .filter(bt -> bt instanceof BlockTempConfig && ((BlockTempConfig) bt).isInGroup(group))
+                 .map(bt -> (BlockTempConfig) bt).mapToDouble(b -> this.blockTempTotals.getOrDefault(b, 0d))
+                 .sum();
+        return total;
     }
 }
