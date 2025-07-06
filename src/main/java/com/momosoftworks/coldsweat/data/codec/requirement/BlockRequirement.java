@@ -131,7 +131,7 @@ public class BlockRequirement
         {   this.properties = properties;
         }
 
-        public static final Codec<StateRequirement> CODEC = Codec.unboundedMap(Codec.STRING, ExtraCodecs.anyOf(IntegerBounds.CODEC, Codec.BOOL, Codec.STRING, Codec.STRING.listOf()))
+        public static final Codec<StateRequirement> CODEC = Codec.unboundedMap(Codec.STRING, ExtraCodecs.anyOf(Codec.BOOL, IntegerBounds.CODEC, Codec.STRING, Codec.STRING.listOf()))
                                                                  .xmap(StateRequirement::new, req -> req.properties);
 
         public static final StateRequirement NONE = new StateRequirement(new HashMap<>());
