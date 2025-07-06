@@ -556,7 +556,7 @@ public class TooltipHandler
                     int slotY = inventoryScreen.getSlotUnderMouse().y + ((ContainerScreen<?>) event.getGui()).getGuiTop();
 
                     MatrixStack ms = event.getMatrixStack();
-
+                    ms.pushPose();
                     // If the mouse is above the slot, move the box to the bottom
                     if (event.getMouseY() < slotY + 8)
                         ms.translate(0, 32, 0);
@@ -578,6 +578,7 @@ public class TooltipHandler
                     // Render current fuel
                     RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1f);
                     AbstractGui.blit(ms, slotX - 7, slotY - 12, 401, 0, 16, (int) (fuel / 2.1333f), 8, 34, 30);
+                    ms.popPose();
                 }
             }
         }
