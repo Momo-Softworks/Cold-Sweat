@@ -45,6 +45,16 @@ public class OptionalHolder<T>
     }
 
     @Override
+    public boolean equals(Object obj)
+    {
+        if (this == obj) return true;
+        if (!(obj instanceof OptionalHolder)) return false;
+        OptionalHolder<?> that = (OptionalHolder<?>) obj;
+        return Objects.equals(this.key, that.key)
+            && Objects.equals(this.value, that.value);
+    }
+
+    @Override
     public String toString()
     {
         return "OptionalHolder{" +
