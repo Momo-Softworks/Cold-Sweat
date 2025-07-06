@@ -3177,6 +3177,9 @@ Fixes:
             - Most useful when used in lists. Excludes the given ID from having the setting applied to it
             - Also supports negating tags ("!#minecraft:leaves")
             - i.e. "#forge:dyes,!minecraft:black_dye" applies to all dyes EXCEPT black dye
+      ! Some config settings have been moved:
+            - "Require Thermometer": main.toml -> item.toml
+            - "Fire/Ice Resistance Immunity" main.toml -> item.toml
 - Armor items that provide built-in insulation can now accept insulation themselves
       - Built-in armor insulation can also be configured to either take up the item's available insulation slots, or not
 - Insulation tooltips can now be configured to show under specific circumstances:
@@ -3203,3 +3206,24 @@ Fixes:
 
 Technical Changes:
 - Chameleons will now target and eat any entities in the #cold_sweat:chameleon_eats tag
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.4-b04a
+
+Fixes:
+* Fixed gradually decreasing server performance due to registry leaks
+* Fixed long freeze when exiting a world or server
+* Fixed crash when loading TOML configs in some cases
+- Fixed boolean block state values in JSON not being read properly
+
+Technical Changes:
+- Block temperature JSON configs can now be added to "effect groups"
+      - Block temperatures in an effect group will count towards each other's max effect limits
+      - i.e. if redstone lamps and copper bulbs are part of the same group, redstone lamps will count towards the max number of copper bulbs and vice-versa
+      - Implemented via the "effect_group" field in block temperature JSON configs
+            - This field takes in a tag ID containing block temps (i.e. "yourpack:yourtag" [no #hashtag])
+            - Add your block temp tag to data/<yourpack>/tags/cold_sweat/block/block_temp/<yourtag>.json
+            - Include the IDs of the block temps in the tag (i.e. "yourpack:your_block_temp")
+- registerByClassName() in TempModifierRegisterEvent now accepts constructor arguments as its last parameter (varargs)
+      - These arguments will be passed to the constructor of the modifier class upon creation
