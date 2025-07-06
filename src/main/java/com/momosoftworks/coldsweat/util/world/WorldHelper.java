@@ -577,15 +577,16 @@ public abstract class WorldHelper
         double variance = 1 / Math.max(1, 2 + biome.value().getModifiedClimateSettings().downfall() * 2);
         double baseTemp = biome.value().getBaseTemperature();
 
-        BiomeTempData biomeTemp = ConfigSettings.BIOME_TEMPS.get(registryAccess)
-                                  .getOrDefault(biome, new BiomeTempData(OptionalHolder.ofHolder(biome), baseTemp - variance, baseTemp + variance, Temperature.Units.MC, true, false));
-        if (biomeTemp.isDisabled())
-        {   return Pair.of(0.0, 0.0);
-        }
-        BiomeTempData configOffset = ConfigSettings.BIOME_OFFSETS.get(registryAccess)
-                                     .getOrDefault(biome, new BiomeTempData(OptionalHolder.ofHolder(biome), 0d, 0d, Temperature.Units.MC, false, false));
-        return CSMath.addPairs(Pair.of(biomeTemp.minTemp(), biomeTemp.maxTemp()),
-                               Pair.of(configOffset.minTemp(), configOffset.maxTemp()));
+        Pair<Double, Double> biomeTemp = Optional.ofNullable(ConfigSettings.BIOME_TEMPS.get(registryAccess).get(biome))
+                                                 .filter(data -> !data.isDisabled())
+                                                 .map(data -> Pair.of(data.minTemp(), data.maxTemp()))
+                                                 .orElse(Pair.of(baseTemp - variance, baseTemp + variance));
+        Pair<Double, Double> configOffset = Optional.ofNullable(ConfigSettings.BIOME_OFFSETS.get(registryAccess).get(biome))
+                                                    .filter(data -> !data.isDisabled())
+                                                    .map(data -> Pair.of(data.minTemp(), data.maxTemp()))
+                                                    .orElse(Pair.of(0d, 0d));
+        return CSMath.addPairs(Pair.of(biomeTemp.getFirst(), biomeTemp.getSecond()),
+                               Pair.of(configOffset.getFirst(), configOffset.getSecond()));
     }
 
     /**
