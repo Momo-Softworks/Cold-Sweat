@@ -108,7 +108,7 @@ public class EntitySettingsConfig
                         Arrays.asList("minecraft:cow", 0, 20, 0.2, "F"),
                         Arrays.asList("minecraft:mooshroom", 0, 20, 0.2, "F"),
                         Arrays.asList("minecraft:sheep", -20, -10, 0.3, "F"),
-                        Arrays.asList("minecraft:goat", -40, -15, 0.4, "F"),
+                        Arrays.asList("cold_sweat:goat", -40, -15, 0.4, "F"),
                         Arrays.asList("minecraft:horse", -5, 10, 0.3, "F"),
                         Arrays.asList("minecraft:donkey", -5, 10, 0.3, "F"),
                         Arrays.asList("minecraft:mule", -5, 10, 0.3, "F"),
@@ -173,7 +173,6 @@ public class EntitySettingsConfig
                 .defineListAllowEmpty(Arrays.asList("Chameleon Spawn Biomes"), () -> ListBuilder.begin(
                                 Arrays.asList("minecraft:bamboo_jungle", 80),
                                 Arrays.asList("minecraft:jungle", 80),
-                                Arrays.asList("minecraft:sparse_jungle", 35),
                                 Arrays.asList("minecraft:desert", 1))
                             .addIf(CompatManager.isBiomesOPlentyLoaded(),
                                 () -> Arrays.asList("biomesoplenty:lush_desert", 3),
@@ -223,7 +222,6 @@ public class EntitySettingsConfig
                          " ⌄ ")
                 .defineListAllowEmpty(Arrays.asList("Goat Spawn Biomes"), () -> ListBuilder.begin(
                                 Arrays.asList("minecraft:mountains", 10),
-                                Arrays.asList("minecraft:mountains_edge", 5),
                                 Arrays.asList("minecraft:wooded_mountains", 12),
                                 Arrays.asList("minecraft:snowy_taiga_mountains", 12),
                                 Arrays.asList("minecraft:taiga_mountains", 10),

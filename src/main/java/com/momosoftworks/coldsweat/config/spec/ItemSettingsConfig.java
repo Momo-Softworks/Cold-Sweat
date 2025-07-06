@@ -100,7 +100,6 @@ public class ItemSettingsConfig
                                 Arrays.asList("minecraft:snow_block",         100),
                                 Arrays.asList("minecraft:ice",                250),
                                 Arrays.asList("minecraft:clay",               333),
-                                Arrays.asList("minecraft:powder_snow_bucket", 100),
                                 Arrays.asList("minecraft:packed_ice",         1000)
                         ).build(),
                         it ->
@@ -129,7 +128,6 @@ public class ItemSettingsConfig
                                 Arrays.asList("minecraft:snow_block",         -100),
                                 Arrays.asList("minecraft:ice",                -250),
                                 Arrays.asList("minecraft:clay",               -333),
-                                Arrays.asList("minecraft:powder_snow_bucket", -100),
                                 Arrays.asList("minecraft:packed_ice",         -1000)
                         ).build(),
                         it ->
