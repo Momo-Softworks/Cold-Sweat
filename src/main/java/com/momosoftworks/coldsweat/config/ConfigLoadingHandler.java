@@ -135,7 +135,7 @@ public class ConfigLoadingHandler
         {
             try
             {
-                String registryPath = "config/" + registry.key().location().getPath();
+                String registryPath = String.format("%s/%s", ColdSweat.MOD_ID, registry.key().location().getPath());
                 for (ResourceLocation resourceLocation : ModRegistries.getResourceManager().listResources(registryPath, file -> file.endsWith(".json")))
                 {
                     IResource resource = ModRegistries.getResourceManager().getResource(resourceLocation);

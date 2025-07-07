@@ -14,12 +14,15 @@ import net.minecraft.resources.ResourcePackType;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.packs.ModFileResourcePack;
 
 import java.util.*;
 
-
+@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ModRegistries
 {
     private static final FallbackResourceManager RESOURCE_MANAGER = new FallbackResourceManager(ResourcePackType.SERVER_DATA, ColdSweat.MOD_ID);
@@ -29,8 +32,16 @@ public class ModRegistries
     {   return RESOURCE_MANAGER;
     }
 
-    static
-    {   RESOURCE_MANAGER.add(new ModFileResourcePack(ModList.get().getModFileById(ColdSweat.MOD_ID).getFile()));
+
+    @SubscribeEvent
+    public static void gatherResources(FMLCommonSetupEvent event)
+    {
+        ModList.get().getModFiles().forEach(modFile ->
+        {
+            //if (modFile.getMods().get(0).getModId().equals(ColdSweat.MOD_ID)) return;
+            RESOURCE_MANAGER.add(new ModFileResourcePack(modFile.getFile()));
+        });
+        //RESOURCE_MANAGER.add(new ModFileResourcePack(ModList.get().getModFileById(ColdSweat.MOD_ID).getFile()));
     }
 
     // Item Registries
