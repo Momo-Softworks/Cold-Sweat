@@ -51,7 +51,9 @@ public class ElevationTempModifier extends TempModifier
         BlockPos translatedPos = CompatManager.isValkyrienSkiesLoaded()
                                  ? CompatManager.Valkyrien.transformIfShipPos(level, entity.blockPosition())
                                  : entity.blockPosition();
-        int skylight = entity.level.getBrightness(LightLayer.SKY, translatedPos);
+        int normalSkylight = entity.level.getBrightness(LightLayer.SKY, entity.blockPosition());
+        int translatedSkylight = entity.level.getBrightness(LightLayer.SKY, translatedPos);
+        int skylight = Math.min(normalSkylight, translatedSkylight);
 
         List<Pair<Elevation, RegionEntry>> depthRegions = new ArrayList<>(depthTable.size());
 
