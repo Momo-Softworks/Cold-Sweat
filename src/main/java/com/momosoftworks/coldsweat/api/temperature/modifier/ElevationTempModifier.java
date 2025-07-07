@@ -4,7 +4,6 @@ import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.data.codec.configuration.BiomeTempData;
 import com.momosoftworks.coldsweat.data.codec.configuration.DepthTempData;
 import com.momosoftworks.coldsweat.data.codec.configuration.DimensionTempData;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -52,7 +51,9 @@ public class ElevationTempModifier extends TempModifier
         BlockPos translatedPos = CompatManager.isValkyrienSkiesLoaded()
                                  ? CompatManager.Valkyrien.transformIfShipPos(level, entity.blockPosition())
                                  : entity.blockPosition();
-        int skylight = entity.level.getBrightness(LightLayer.SKY, translatedPos);
+        int normalSkylight = entity.level.getBrightness(LightLayer.SKY, entity.blockPosition());
+        int translatedSkylight = entity.level.getBrightness(LightLayer.SKY, translatedPos);
+        int skylight = Math.min(normalSkylight, translatedSkylight);
 
         List<Pair<Elevation, RegionEntry>> depthRegions = new ArrayList<>(depthTable.size());
 
