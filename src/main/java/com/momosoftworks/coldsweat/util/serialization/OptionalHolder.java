@@ -22,7 +22,7 @@ public class OptionalHolder<T>
     }
 
     public Holder<T> get()
-    {   return Optional.ofNullable(value).orElseThrow();
+    {   return Optional.ofNullable(value).orElseThrow(() -> new RuntimeException("Optional holder value is not set for key: " + key));
     }
 
     public Optional<Holder<T>> value()
