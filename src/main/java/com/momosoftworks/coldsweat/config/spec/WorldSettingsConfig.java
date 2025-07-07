@@ -578,8 +578,6 @@ public class WorldSettingsConfig
 
         BUILDER.pop();
 
-        BUILDER.pop();
-
 
         /* Seasons config */
         if (!CompatManager.getSeasonsMods().isEmpty())
