@@ -31,7 +31,7 @@ public class ModItemTags
     @SubscribeEvent
     public static void initDynamicTags(InitDynamicTagsEvent event)
     {
-        event.fillTag(FOOD, Item::isEdible, Registries.ITEM);
+        event.fillTag(FOOD, Item::isEdible);
     }
 
     private static TagKey<Item> createTag(String name)

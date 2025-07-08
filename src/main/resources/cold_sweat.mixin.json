@@ -39,6 +39,7 @@
     "MixinSmithingRecipe",
     "MixinSoulCampfire",
     "MixinSoulFire",
+    "MixinTagLoading",
     "MixinTridentRiptide",
     "compat.MixinCreateConnect",
     "compat.MixinSereneIceMelt",
