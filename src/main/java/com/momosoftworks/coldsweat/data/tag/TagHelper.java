@@ -1,26 +1,22 @@
 package com.momosoftworks.coldsweat.data.tag;
 
-import com.momosoftworks.coldsweat.api.event.core.init.InitDynamicTagsEvent;
-import com.momosoftworks.coldsweat.api.event.vanilla.ServerConfigsLoadedEvent;
-import com.momosoftworks.coldsweat.util.serialization.ListBuilder;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.ReloadableServerResources;
 import net.minecraft.tags.TagKey;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.server.ServerStartedEvent;
+import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.event.AddReloadListenerEvent;
+import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Predicate;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @Mod.EventBusSubscriber
 public class TagHelper
@@ -28,32 +24,31 @@ public class TagHelper
     private static final Field CONTENTS = ObfuscationReflectionHelper.findField(HolderSet.Named.class, "f_205830_");
     static { CONTENTS.setAccessible(true); }
 
-    public static <T> void fillTag(TagKey<T> tag, Predicate<T> predicate, ResourceKey<Registry<T>> registry,  RegistryAccess registryAccess)
+    public static ReloadableServerResources SERVER_RESOURCES = null;
+    public static Map<TagKey<?>, Collection<Holder<?>>> EVENT_TAGS = new HashMap<>();
+
+    public static Collection<Holder<?>> getTagValues(ResourceLocation registry, ResourceLocation tag)
     {
-        Registry<T> reg = registryAccess.registryOrThrow(registry);
-        HolderSet.Named<T> holderSet = reg.getTag(tag).get();
-        Set<Holder<T>> entries;
-        try
-        {   entries = new HashSet<>((List<Holder<T>>) CONTENTS.get(holderSet));
-        }
-        catch (IllegalAccessException e)
-        {   throw new RuntimeException(e);
-        }
-        reg.holders().forEach(dimensionType ->
+        for (TagKey<?> tagKey : EVENT_TAGS.keySet())
         {
-            if (predicate.test(dimensionType.value()))
-            {
-                entries.add(dimensionType);
-                dimensionType.bindTags(ListBuilder.begin(dimensionType.tags().toList()).add(tag).build());
+            if (tagKey.registry().location().equals(registry) && tagKey.location().equals(tag))
+            {   return EVENT_TAGS.get(tagKey);
             }
-        });
-        holderSet.bind(new ArrayList<>(entries));
+        }
+        return Collections.emptyList();
     }
 
     @SubscribeEvent
-    public static void onServerStart(ServerStartedEvent event)
+    public static void onResourceReload(AddReloadListenerEvent event)
+    {   SERVER_RESOURCES = event.getServerResources();
+    }
+
+    @SubscribeEvent
+    public static void onServerStopped(EntityLeaveWorldEvent event)
     {
-        InitDynamicTagsEvent tagsEvent = new InitDynamicTagsEvent(event.getServer().registryAccess());
-        MinecraftForge.EVENT_BUS.post(tagsEvent);
+        if (event.getEntity() instanceof Player)
+        {   SERVER_RESOURCES = null;
+            EVENT_TAGS.clear();
+        }
     }
 }
