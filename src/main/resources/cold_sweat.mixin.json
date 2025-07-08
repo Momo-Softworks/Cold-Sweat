@@ -42,6 +42,7 @@
     "MixinSoulCampfire",
     "MixinSoulFire",
     "MixinTagLoading",
+    "MixinTagLoading$Manager",
     "MixinTridentRiptide",
     "compat.MixinCreateConnect",
     "compat.MixinSereneIceMelt",
