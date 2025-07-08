@@ -38,21 +38,16 @@ public class ModDimensionTags
     @SubscribeEvent
     public static void initDynamicTags(InitDynamicTagsEvent event)
     {
-        event.fillTag(HAS_CEILING, DimensionType::hasCeiling, Registries.DIMENSION_TYPE);
-        event.fillTag(HAS_SKY, dimensionType -> !dimensionType.hasCeiling(), Registries.DIMENSION_TYPE);
-        event.fillTag(NATURAL, DimensionType::natural, Registries.DIMENSION_TYPE);
-        event.fillTag(UNNATURAL, dimensionType -> !dimensionType.natural(), Registries.DIMENSION_TYPE);
-        event.fillTag(ULTRAWARM, DimensionType::ultraWarm, Registries.DIMENSION_TYPE);
-        event.fillTag(BED_WORKS, DimensionType::bedWorks, Registries.DIMENSION_TYPE);
-        event.fillTag(RESPAWN_ANCHOR_WORKS, DimensionType::respawnAnchorWorks, Registries.DIMENSION_TYPE);
-        event.fillTag(PIGLIN_SAFE, DimensionType::piglinSafe, Registries.DIMENSION_TYPE);
-        event.fillTag(HAS_SKYLIGHT, DimensionType::hasSkyLight, Registries.DIMENSION_TYPE);
-        event.fillTag(HAS_RAIDS, DimensionType::hasRaids, Registries.DIMENSION_TYPE);
-        event.fillTag(OVERWORLD_LIKE,
-                      dimensionType -> !dimensionType.hasCeiling()
-                                    && dimensionType.natural()
-                                    && dimensionType.hasSkyLight()
-                                    && !dimensionType.ultraWarm(),
-                      Registries.DIMENSION_TYPE);
+        event.fillTag(HAS_CEILING, DimensionType::hasCeiling);
+        event.fillTag(HAS_SKY, dim -> !dim.hasCeiling());
+        event.fillTag(NATURAL, DimensionType::natural);
+        event.fillTag(UNNATURAL, dim -> !dim.natural());
+        event.fillTag(ULTRAWARM, DimensionType::ultraWarm);
+        event.fillTag(BED_WORKS, DimensionType::bedWorks);
+        event.fillTag(RESPAWN_ANCHOR_WORKS, DimensionType::respawnAnchorWorks);
+        event.fillTag(PIGLIN_SAFE, DimensionType::piglinSafe);
+        event.fillTag(HAS_SKYLIGHT, DimensionType::hasSkyLight);
+        event.fillTag(HAS_RAIDS, DimensionType::hasRaids);
+        event.fillTag(OVERWORLD_LIKE, dim -> !dim.hasCeiling() && dim.natural() && dim.hasSkyLight() && !dim.ultraWarm());
     }
 }

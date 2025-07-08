@@ -1,66 +1,43 @@
 package com.momosoftworks.coldsweat.data.tag;
 
-import com.momosoftworks.coldsweat.api.event.core.init.InitDynamicTagsEvent;
-import com.momosoftworks.coldsweat.util.serialization.ListBuilder;
 import net.minecraft.core.Holder;
-import net.minecraft.core.HolderSet;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.util.ObfuscationReflectionHelper;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.server.ServerStartedEvent;
+import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.function.Predicate;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @EventBusSubscriber
 public class TagHelper
 {
-    private static final Field CONTENTS = ObfuscationReflectionHelper.findField(HolderSet.Named.class, "contents");
-    private static final Method BIND = ObfuscationReflectionHelper.findMethod(HolderSet.Named.class, "bind", List.class);
-    private static final Method BIND_TAGS = ObfuscationReflectionHelper.findMethod(Holder.Reference.class, "bindTags", Collection.class);
-    static
-    {   CONTENTS.setAccessible(true);
-        BIND.setAccessible(true);
-        BIND_TAGS.setAccessible(true);
-    }
+    public static RegistryAccess REGISTRY_ACCESS = null;
+    public static Map<TagKey<?>, Collection<Holder<?>>> EVENT_TAGS = new HashMap<>();
 
-    public static <T> void fillTag(TagKey<T> tag, Predicate<T> predicate, ResourceKey<Registry<T>> registry,  RegistryAccess registryAccess)
+    public static Collection<Holder<?>> getTagValues(ResourceLocation registry, ResourceLocation tag)
     {
-        Registry<T> reg = registryAccess.registryOrThrow(registry);
-        HolderSet.Named<T> holderSet = reg.getTag(tag).get();
-        Set<Holder<T>> entries;
-        try
-        {   entries = new HashSet<>((List<Holder<T>>) CONTENTS.get(holderSet));
-        }
-        catch (IllegalAccessException e)
-        {   throw new RuntimeException(e);
-        }
-        reg.holders().forEach(dimensionType ->
+        for (TagKey<?> tagKey : EVENT_TAGS.keySet())
         {
-            if (predicate.test(dimensionType.value()))
-            {
-                entries.add(dimensionType);
-                try
-                {   BIND_TAGS.invoke(dimensionType, ListBuilder.begin(dimensionType.tags().toList()).add(tag).build());
-                } catch (Exception ignored) {}
+            if (tagKey.registry().location().equals(registry) && tagKey.location().equals(tag))
+            {   return EVENT_TAGS.get(tagKey);
             }
-        });
-        try
-        {   BIND.invoke(holderSet, new ArrayList<>(entries));
-        } catch (Exception ignored) {}
+        }
+        return Collections.emptyList();
     }
 
     @SubscribeEvent
-    public static void onServerStart(ServerStartedEvent event)
+    public static void onServerStopped(EntityLeaveLevelEvent event)
     {
-        InitDynamicTagsEvent tagsEvent = new InitDynamicTagsEvent(event.getServer().registryAccess());
-        NeoForge.EVENT_BUS.post(tagsEvent);
+        if (event.getEntity() instanceof Player)
+        {   EVENT_TAGS.clear();
+        }
     }
 }
