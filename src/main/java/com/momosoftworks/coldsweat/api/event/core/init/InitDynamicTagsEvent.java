@@ -4,11 +4,8 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.tags.TagKey;
-import net.minecraft.tags.TagManager;
 import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -27,9 +24,6 @@ public class InitDynamicTagsEvent extends Event
     public Map<TagKey<?>, Collection<Holder<?>>> getTags()
     {   return this.tags;
     }
-
-    private static final Field MANAGER_ACCESS = ObfuscationReflectionHelper.findField(TagManager.class, "f_144569_");
-    static { MANAGER_ACCESS.setAccessible(true); }
 
     public <T> void fillTag(TagKey<T> tag, Predicate<T> predicate)
     {
