@@ -1,28 +1,17 @@
 package com.momosoftworks.coldsweat.data;
 
-import com.alcatrazescapee.primalwinter.platform.RegistryHolder;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.api.temperature.effect.TempEffect;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.util.math.FastMap;
-import com.momosoftworks.coldsweat.util.serialization.OptionalHolder;
-import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.RegistryManager;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 public class ModRegistries
 {
@@ -52,8 +41,6 @@ public class ModRegistries
 
     // Special registries
     public static final ResourceKey<Registry<RemoveRegistryData<?>>> REMOVE_REGISTRY_DATA = createRegistry(ResourceKey.createRegistryKey(new ResourceLocation(ColdSweat.MOD_ID, "remove")), RemoveRegistryData.CODEC, (Class) RemoveRegistryData.class);
-
-    public static final Set<OptionalHolder<?>> OPTIONAL_HOLDERS = new HashSet<>();
 
     public static <V extends ConfigData> ResourceKey<Registry<V>> createRegistry(ResourceKey<Registry<V>> registry, Codec<V> codec, Class<V> type)
     {

@@ -39,6 +39,8 @@ import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotTypeMessage;
 import top.theillusivec4.curios.api.SlotTypePreset;
 
+import java.lang.reflect.Method;
+
 @Mod(ColdSweat.MOD_ID)
 public class ColdSweat
 {
@@ -56,6 +58,7 @@ public class ColdSweat
         MOD_BUS.addListener(this::registerCaps);
         MOD_BUS.addListener(this::updateConfigs);
         if (CompatManager.isCuriosLoaded()) MOD_BUS.addListener(this::registerCurioSlots);
+        MOD_BUS.addListener(this::createRegistries);
 
         // Register stuff
         BlockInit.BLOCKS.register(MOD_BUS);
@@ -83,14 +86,6 @@ public class ColdSweat
 
         // Setup compat
         CompatManager.registerEventHandlers();
-
-        // Setup JSON data-driven handlers
-        MOD_BUS.addListener((NewRegistryEvent event) ->
-        {
-            for (ModRegistries.RegistryHolder<?> holder : ModRegistries.getRegistries().values())
-            {   event.create(new RegistryBuilder<>().setType((Class) holder.type()).setName(holder.registry().location()).dataPackRegistry(holder.codec(), (Codec) holder.codec()));
-            }
-        });
     }
 
     public static ResourceLocation createKey(String path)
@@ -99,6 +94,21 @@ public class ColdSweat
 
     public static String getVersion()
     {   return FMLLoader.getLoadingModList().getModFileById(ColdSweat.MOD_ID).versionString();
+    }
+
+    public void createRegistries(FMLLoadCompleteEvent event)
+    {
+        NewRegistryEvent dummyEvent = new NewRegistryEvent();
+        for (ModRegistries.RegistryHolder<?> holder : ModRegistries.getRegistries().values())
+        {   dummyEvent.create(new RegistryBuilder<>().setType((Class) holder.type()).setName(holder.registry().location()).dataPackRegistry(holder.codec(), (Codec) holder.codec()));
+        }
+        try
+        {
+            Method process = NewRegistryEvent.class.getDeclaredMethod("process");
+            process.setAccessible(true);
+            process.invoke(dummyEvent);
+        }
+        catch (Exception ignored) {}
     }
 
     public void commonSetup(final FMLCommonSetupEvent event)
