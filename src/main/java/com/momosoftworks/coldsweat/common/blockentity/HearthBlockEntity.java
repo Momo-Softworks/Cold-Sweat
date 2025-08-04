@@ -5,7 +5,6 @@ import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.vanilla.BlockStateChangedEvent;
-import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.temperature.modifier.ThermalSourceTempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.event.HearthDebugRenderer;
@@ -61,6 +60,7 @@ import net.minecraft.potion.Effects;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.LockableLootTileEntity;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -77,6 +77,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.event.world.ChunkEvent;
+import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
@@ -173,16 +175,42 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     {
         BlockPos pos = event.getPosition();
         World level = event.getWorld();
+        BlockState oldState = event.getOldState();
+        BlockState newState = event.getNewState();
 
         if (level == this.level
         && this.pathLookup.containsKey(pos)
-        && !event.getOldState().getCollisionShape(level, pos).equals(event.getNewState().getCollisionShape(level, pos)))
+        && (oldState == null || !oldState.getCollisionShape(level, pos).equals(newState.getCollisionShape(level, pos))))
         {
             if (!level.isClientSide())
             {   this.sendBlockUpdate(pos);
             }
             if (isTransferPipe(event.getOldState()) || isTransferPipe(event.getNewState()))
             {   this.searchForPipeEnds(this.getBlockPos().above(), Direction.UP);
+            }
+        }
+    }
+
+    @SubscribeEvent
+    public void onLevelUnloaded(WorldEvent.Unload event)
+    {
+        if (event.getWorld().equals(this.level))
+        {   this.cleanup();
+        }
+    }
+
+    @SubscribeEvent
+    public static void onChunkUnloaded(ChunkEvent.Unload event)
+    {
+        IChunk chunk = event.getChunk();
+        // Remove all paths in this chunk
+        if (chunk instanceof Chunk)
+        {
+            for (TileEntity te : ((Chunk) chunk).getBlockEntities().values())
+            {
+                if (te instanceof HearthBlockEntity)
+                {   ((HearthBlockEntity) te).cleanup();
+                }
             }
         }
     }
@@ -1282,15 +1310,13 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         this.sendBlockUpdate(this.getBlockPos());
     }
 
-    @Override
-    public void setRemoved()
+    protected void cleanup()
     {
-        super.setRemoved();
         HearthSaveDataHandler.HEARTH_POSITIONS.remove(Pair.of(this.getBlockPos(), this.getLevel().dimension().location()));
+        MinecraftForge.EVENT_BUS.unregister(this);
         if (this.level.isClientSide)
         {   ClientOnlyHelper.removeHearthPosition(this.getBlockPos());
         }
-        MinecraftForge.EVENT_BUS.unregister(this);
     }
 
     public Multimap<BlockPos, Direction> getPathLookup()
