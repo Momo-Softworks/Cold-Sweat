@@ -354,7 +354,7 @@ public class TooltipHandler
         /*
          Tooltips for insulation
          */
-        if (insulationVisibility.shouldShow(stack) && !stack.isEmpty())
+        if (insulationVisibility.canShow() && !stack.isEmpty())
         {
             // Insulating armor
             List<InsulatorData> armorInsulation = new ArrayList<>();
@@ -380,14 +380,11 @@ public class TooltipHandler
                 }
             });
 
-            if (ItemInsulationManager.isInsulatable(stack))
-            {
-                if (!armorInsulation.isEmpty() || insulationVisibility.showsIfEmpty())
-                {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(armorInsulation, Insulation.Slot.ARMOR, stack, false)));
-                }
-                if (!unmetArmorInsulation.isEmpty())
-                {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(unmetArmorInsulation, Insulation.Slot.ARMOR, stack, true)));
-                }
+            if (!armorInsulation.isEmpty() || insulationVisibility.showsIfEmpty())
+            {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(armorInsulation, Insulation.Slot.ARMOR, stack, false)));
+            }
+            if (!unmetArmorInsulation.isEmpty())
+            {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(unmetArmorInsulation, Insulation.Slot.ARMOR, stack, true)));
             }
 
             // Insulation ingredient
