@@ -121,25 +121,8 @@ public class ProcessEquipmentInsulation
                             ItemInsulationCap cap = ((ItemInsulationCap) iCap.resolve().get());
                             // Calculate adaptive insulation adaptation state
                             cap.calcAdaptiveInsulation(worldTemp, minTemp, maxTemp);
-
                             // Remove insulation items if the player has too many
-                            List<Pair<ItemStack, List<InsulatorData>>> totalInsulation = cap.getInsulation();
-                            int filledInsulationSlots = totalInsulation.size();
-                            if (filledInsulationSlots > ItemInsulationManager.getInsulationSlots(armorStack))
-                            {   WorldHelper.playEntitySound(SoundEvents.ITEM_FRAME_REMOVE_ITEM, player, SoundCategory.PLAYERS, 1.0F, 1.0F);
-                            }
-                            while (filledInsulationSlots > ItemInsulationManager.getInsulationSlots(armorStack))
-                            {
-                                ItemStack removedItem = cap.removeInsulationItem(totalInsulation.get(totalInsulation.size() - 1).getFirst());
-                                ItemEntity droppedInsulation = new ItemEntity(player.level, player.getX(), player.getY() + player.getBbHeight() / 2, player.getZ(), removedItem);
-                                droppedInsulation.setPickUpDelay(8);
-                                droppedInsulation.setDeltaMovement(new Vector3d(player.getRandom().nextGaussian() * 0.05,
-                                                                                player.getRandom().nextGaussian() * 0.05 + 0.2,
-                                                                                player.getRandom().nextGaussian() * 0.05));
-                                player.level.addFreshEntity(droppedInsulation);
-
-                                filledInsulationSlots--;
-                            }
+                            popExtraInsulation(cap, armorStack, player);
                         }
                     }
 
@@ -196,6 +179,27 @@ public class ProcessEquipmentInsulation
     private static void mapAdd(Map<String, Double> map, String key, double value)
     {
         map.put(key, map.getOrDefault(key, 0d) + value);
+    }
+
+    private static void popExtraInsulation(ItemInsulationCap cap, ItemStack armorStack, PlayerEntity player)
+    {
+        List<Pair<ItemStack, List<InsulatorData>>> totalInsulation = cap.getInsulation();
+        int filledInsulationSlots = totalInsulation.size();
+        if (filledInsulationSlots > ItemInsulationManager.getInsulationSlots(armorStack))
+        {   WorldHelper.playEntitySound(SoundEvents.ITEM_FRAME_REMOVE_ITEM, player, SoundCategory.PLAYERS, 1.0F, 1.0F);
+        }
+        while (filledInsulationSlots > ItemInsulationManager.getInsulationSlots(armorStack))
+        {
+            ItemStack removedItem = cap.removeInsulationItem(totalInsulation.get(totalInsulation.size() - 1).getFirst());
+            ItemEntity droppedInsulation = new ItemEntity(player.level, player.getX(), player.getY() + player.getBbHeight() / 2, player.getZ(), removedItem);
+            droppedInsulation.setPickUpDelay(8);
+            droppedInsulation.setDeltaMovement(new Vector3d(player.getRandom().nextGaussian() * 0.05,
+                                                            player.getRandom().nextGaussian() * 0.05 + 0.2,
+                                                            player.getRandom().nextGaussian() * 0.05));
+            player.level.addFreshEntity(droppedInsulation);
+
+            filledInsulationSlots--;
+        }
     }
 
     /**
