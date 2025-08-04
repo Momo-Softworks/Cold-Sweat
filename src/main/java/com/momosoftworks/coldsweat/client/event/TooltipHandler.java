@@ -369,18 +369,18 @@ public class TooltipHandler
             List<InsulatorData> armorInsulation = new ArrayList<>();
             List<InsulatorData> unmetArmorInsulation = new ArrayList<>();
             for (InsulatorData insulator : ConfigSettings.INSULATING_ARMORS.get().get(item))
-            {   validateInsulator(insulator, armorInsulation, insulator.hideIfUnmet() ? new ArrayList<>() : unmetArmorInsulation);
+            {   validateInsulator(insulator, armorInsulation, unmetArmorInsulation);
             }
 
-                ItemInsulationManager.getInsulationCap(stack).ifPresent(cap ->
-                {
-                    List<Pair<ItemStack, List<InsulatorData>>> insulatorPairs = cap.getInsulation();
+            ItemInsulationManager.getInsulationCap(stack).ifPresent(cap ->
+            {
+                List<Pair<ItemStack, List<InsulatorData>>> insulatorPairs = cap.getInsulation();
 
                 for (int i = 0; i < insulatorPairs.size(); i++)
                 {
                     Pair<ItemStack, List<InsulatorData>> pair = insulatorPairs.get(i);
                     for (InsulatorData insulator : pair.getSecond())
-                    {   validateInsulator(insulator, armorInsulation, insulator.hideIfUnmet() ? new ArrayList<>() : unmetArmorInsulation);
+                    {   validateInsulator(insulator, armorInsulation, unmetArmorInsulation);
                     }
                 }
             });
@@ -469,7 +469,9 @@ public class TooltipHandler
             if (passesRequirement(insulator))
             {   insulation.add(insulator);
             }
-            else unmetInsulation.add(insulator);
+            else if (!insulator.hideIfUnmet())
+            {   unmetInsulation.add(insulator);
+            }
         }
     }
 
