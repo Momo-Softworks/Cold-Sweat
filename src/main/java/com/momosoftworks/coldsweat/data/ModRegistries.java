@@ -1,6 +1,5 @@
 package com.momosoftworks.coldsweat.data;
 
-import com.alcatrazescapee.primalwinter.platform.RegistryHolder;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.ColdSweat;
@@ -8,9 +7,7 @@ import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.serialization.OptionalHolder;
-import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 
