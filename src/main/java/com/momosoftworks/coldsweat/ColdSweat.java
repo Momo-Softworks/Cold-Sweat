@@ -25,6 +25,7 @@ import net.neoforged.neoforge.registries.DataPackRegistryEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.lang.reflect.Method;
 import java.util.List;
 
 @Mod(ColdSweat.MOD_ID)
@@ -42,6 +43,7 @@ public class ColdSweat
         MOD_BUS.addListener(this::spawnPlacements);
         MOD_BUS.addListener(this::registerCaps);
         MOD_BUS.addListener(this::updateConfigs);
+        MOD_BUS.addListener(this::createRegistries);
 
         // Register stuff
         ModBlocks.BLOCKS.register(MOD_BUS);
@@ -76,14 +78,6 @@ public class ColdSweat
 
         // Setup compat
         CompatManager.registerEventHandlers();
-
-        // Setup JSON data-driven handlers
-        MOD_BUS.addListener((DataPackRegistryEvent.NewRegistry event) ->
-        {
-            for (ModRegistries.RegistryHolder<?> holder : ModRegistries.getRegistries().values())
-            {   event.dataPackRegistry((ResourceKey) holder.registry(), (Codec) holder.codec(), (Codec) holder.codec());
-            }
-        });
     }
 
     public static ResourceLocation createKey(String path)
@@ -92,6 +86,21 @@ public class ColdSweat
 
     public static String getVersion()
     {   return FMLLoader.getLoadingModList().getModFileById(ColdSweat.MOD_ID).versionString();
+    }
+
+    public void createRegistries(FMLLoadCompleteEvent event)
+    {
+        DataPackRegistryEvent.NewRegistry dummyEvent = new DataPackRegistryEvent.NewRegistry();
+        for (ModRegistries.RegistryHolder<?> holder : ModRegistries.getRegistries().values())
+        {   dummyEvent.dataPackRegistry((ResourceKey) holder.registry(), (Codec) holder.codec(), (Codec) holder.codec());
+        }
+        try
+        {
+            Method process = DataPackRegistryEvent.NewRegistry.class.getDeclaredMethod("process");
+            process.setAccessible(true);
+            process.invoke(dummyEvent);
+        }
+        catch (Exception ignored) {}
     }
 
     public void spawnPlacements(RegisterSpawnPlacementsEvent event)
