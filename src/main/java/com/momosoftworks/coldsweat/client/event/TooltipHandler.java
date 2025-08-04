@@ -1,6 +1,5 @@
 package com.momosoftworks.coldsweat.client.event;
 
-import com.google.common.collect.Multimap;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.datafixers.util.Pair;
@@ -388,7 +387,7 @@ public class TooltipHandler
         /*
          Tooltips for insulation
          */
-        if (insulationVisibility.shouldShow(stack) && !stack.isEmpty())
+        if (insulationVisibility.canShow() && !stack.isEmpty())
         {
             // Insulating armor
             List<InsulatorData> armorInsulation = new ArrayList<>();
@@ -414,14 +413,11 @@ public class TooltipHandler
                 }
             });
 
-            if (ItemInsulationManager.isInsulatable(stack))
-            {
-                if (!armorInsulation.isEmpty() || insulationVisibility.showsIfEmpty())
-                {   addTooltip(tooltipStartIndex, new ClientInsulationTooltip(armorInsulation, Insulation.Slot.ARMOR, stack, false), elements);
-                }
-                if (!unmetArmorInsulation.isEmpty())
-                {   addTooltip(tooltipStartIndex, new ClientInsulationTooltip(unmetArmorInsulation, Insulation.Slot.ARMOR, stack, true), elements);
-                }
+            if (!armorInsulation.isEmpty() || insulationVisibility.showsIfEmpty())
+            {   addTooltip(tooltipStartIndex, new ClientInsulationTooltip(armorInsulation, Insulation.Slot.ARMOR, stack, false), elements);
+            }
+            if (!unmetArmorInsulation.isEmpty())
+            {   addTooltip(tooltipStartIndex, new ClientInsulationTooltip(unmetArmorInsulation, Insulation.Slot.ARMOR, stack, true), elements);
             }
 
             // Insulation ingredient

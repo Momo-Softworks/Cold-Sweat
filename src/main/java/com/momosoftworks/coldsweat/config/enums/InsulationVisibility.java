@@ -37,15 +37,14 @@ public enum InsulationVisibility implements StringRepresentable
         return null;
     }
 
-    public boolean shouldShow(ItemStack item)
+    public boolean canShow()
     {
-        boolean hasInsulation = !ItemInsulationManager.getAllInsulatorsForStack(item).isEmpty();
         switch (this)
         {
             case ALWAYS : return true;
-            case IF_PRESENT : return hasInsulation;
+            case IF_PRESENT : return true;
             case ON_SHIFT : return Screen.hasShiftDown();
-            case SHIFT_AND_PRESENT : return Screen.hasShiftDown() && hasInsulation;
+            case SHIFT_AND_PRESENT : return Screen.hasShiftDown();
             case NEVER : return false;
         }
         return false;
