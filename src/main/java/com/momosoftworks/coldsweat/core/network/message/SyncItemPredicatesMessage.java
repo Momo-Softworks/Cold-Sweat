@@ -148,7 +148,7 @@ public class SyncItemPredicatesMessage
                 for (Pair<ItemStack, List<InsulatorData>> pair : cap.getInsulation())
                 {
                     for (InsulatorData insulatorData : pair.getSecond())
-                    {   this.predicateMap.put(insulatorData.uuid(), insulatorData.test(entity, stack));
+                    {   this.predicateMap.put(insulatorData.uuid(), insulatorData.test(entity, pair.getFirst()));
                     }
                 }
             });
