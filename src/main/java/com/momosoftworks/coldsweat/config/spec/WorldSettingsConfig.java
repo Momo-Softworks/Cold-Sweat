@@ -297,7 +297,7 @@ public class WorldSettingsConfig
                                             Arrays.asList("cold_sweat:icebox",      -0.27, 7, "mc", 0.88, "frosted=true", "", 0),
                                             Arrays.asList("minecraft:lava",           0.3, 7, "mc", 6, "", "", 21.5, true),
                                             Arrays.asList("minecraft:fire",         0.476, 7, "mc", 0.9, "", "", 8),
-                                            Arrays.asList("#minecraft:campfires,!minecraft:soul_campfire", 0.476, 7, "mc", 0.9, "lit=true", " ", 8),
+                                            Arrays.asList("#minecraft:campfires,!#forge:soul_campfires", 0.476, 7, "mc", 0.9, "lit=true", " ", 8),
                                             Arrays.asList("minecraft:magma_block",   0.25, 3, "mc", 1.0),
                                             Arrays.asList("minecraft:ice",          -0.15, 4, "mc", 0.3, "", "", 0.05),
                                             Arrays.asList("minecraft:packed_ice",   -0.25, 4, "mc", 1.0, "", "", -0.3),
