@@ -16,7 +16,7 @@ https://mikul.gitbook.io/cold-sweat/
 config="cold_sweat.mixin.json"
 
 [[accessTransformers]]
-   file="META-INF/coldsweat_at.cfg"
+   file="META-INF/accesstransformer.cfg"
 
 [[dependencies.cold_sweat]]
    modId="neoforge"
