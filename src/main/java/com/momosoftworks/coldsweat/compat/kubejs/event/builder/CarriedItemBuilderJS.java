@@ -30,7 +30,7 @@ public class CarriedItemBuilderJS
 {
     public final Set<Either<IntegerBounds, ItemCarryTempData.SlotType>> slots = new HashSet<>();
     public double temperature = 0;
-    public double maxEffect = 0;
+    public double maxEffect = Double.MAX_VALUE;
     public Temperature.Trait trait = Temperature.Trait.WORLD;
     public NegatableList<ItemRequirement> itemPredicate = new NegatableList<>();
     public NegatableList<EntityRequirement> entityPredicate = new NegatableList<>();
