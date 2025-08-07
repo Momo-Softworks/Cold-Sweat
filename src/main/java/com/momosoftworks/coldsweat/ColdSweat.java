@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat;
 
+import com.momosoftworks.coldsweat.api.event.core.registry.AddRegistriesEvent;
 import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.common.entity.Chameleon;
@@ -8,6 +9,7 @@ import com.momosoftworks.coldsweat.config.spec.*;
 import com.momosoftworks.coldsweat.core.init.*;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.compat.CompatManager;
+import com.momosoftworks.coldsweat.data.RegistryHolder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.SpawnPlacementTypes;
@@ -20,6 +22,7 @@ import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
 import net.neoforged.neoforge.registries.DataPackRegistryEvent;
 import org.apache.logging.log4j.LogManager;
@@ -90,9 +93,13 @@ public class ColdSweat
 
     public void createRegistries(FMLLoadCompleteEvent event)
     {
+        // Gather modded registries
+        AddRegistriesEvent addRegistriesEvent = new AddRegistriesEvent();
+        NeoForge.EVENT_BUS.post(addRegistriesEvent);
+        // Add registries via dummy NewRegistry event
         DataPackRegistryEvent.NewRegistry dummyEvent = new DataPackRegistryEvent.NewRegistry();
-        for (ModRegistries.RegistryHolder<?> holder : ModRegistries.getRegistries().values())
-        {   dummyEvent.dataPackRegistry((ResourceKey) holder.registry(), (Codec) holder.codec(), (Codec) holder.codec());
+        for (RegistryHolder<?> holder : ModRegistries.getRegistries().values())
+        {   dummyEvent.dataPackRegistry((ResourceKey) holder.key(), (Codec) holder.codec(), (Codec) holder.codec());
         }
         try
         {

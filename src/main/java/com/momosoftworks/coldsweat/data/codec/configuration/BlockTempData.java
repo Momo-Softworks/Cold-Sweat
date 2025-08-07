@@ -9,6 +9,7 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.*;
+import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -90,7 +91,7 @@ public class BlockTempData extends ConfigData
             NegatableList.codec(LocationRequirement.CODEC).optionalFieldOf("location", new NegatableList<>()).forGetter(BlockTempData::location),
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(BlockTempData::entity),
             Codec.BOOL.optionalFieldOf("logarithmic", false).forGetter(BlockTempData::logarithmic),
-            TagKey.codec(ModRegistries.BLOCK_TEMP_DATA).optionalFieldOf("effect_group").forGetter(BlockTempData::effectGroup)
+            ExtraCodecs.deferred(() -> TagKey.codec(ModRegistries.BLOCK_TEMP_DATA.key())).optionalFieldOf("effect_group").forGetter(BlockTempData::effectGroup)
     ).apply(instance, BlockTempData::new)));
 
     public NegatableList<BlockRequirement> block()

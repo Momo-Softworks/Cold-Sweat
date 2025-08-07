@@ -16,6 +16,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 public class ExtraCodecs
 {
@@ -64,6 +65,21 @@ public class ExtraCodecs
                 firstCodec.fieldOf("first").forGetter(Pair::getFirst),
                 secondCodec.fieldOf("second").forGetter(Pair::getSecond)
         ).apply(instance, Pair::of));
+    }
+
+    public static <T> Codec<T> deferred(Supplier<Codec<T>> codecSupplier)
+    {
+        return new Codec<>() {
+            @Override
+            public <U> DataResult<Pair<T, U>> decode(DynamicOps<U> ops, U input)
+            {   return codecSupplier.get().decode(ops, input);
+            }
+
+            @Override
+            public <U> DataResult<U> encode(T input, DynamicOps<U> ops, U prefix)
+            {   return codecSupplier.get().encode(input, ops, prefix);
+            }
+        };
     }
 
     public static <K, V> Codec<Map<K, V>> builtinMapCodec(Registry<K> keyRegistry, Codec<V> valueCodec)

@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.api.event.core.registry;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import com.momosoftworks.coldsweat.data.RegistryHolder;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.util.math.RegistryMultiMap;
@@ -20,12 +21,12 @@ import java.util.*;
  * <br>
  * This is not an {@link net.neoforged.bus.api.ICancellableEvent}.
  */
-public abstract class CreateRegistriesEvent extends Event
+public abstract class LoadRegistriesEvent extends Event
 {
     RegistryAccess registryAccess;
     RegistryMultiMap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries;
 
-    public CreateRegistriesEvent(RegistryAccess registryAccess, RegistryMultiMap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries)
+    public LoadRegistriesEvent(RegistryAccess registryAccess, RegistryMultiMap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries)
     {
         this.registryAccess = registryAccess;
         this.registries = registries;
@@ -39,15 +40,15 @@ public abstract class CreateRegistriesEvent extends Event
     {   return registries;
     }
 
-    public <T extends ConfigData> Collection<Holder<T>> getRegistry(ResourceKey<? extends Registry<T>> key)
-    {   return (Collection) registries.get(key);
+    public <T extends ConfigData> Collection<Holder<T>> getRegistry(RegistryHolder<T> registry)
+    {   return (Collection) registries.get(registry.key());
     }
 
-    public <T extends ConfigData> void addRegistry(ResourceKey<? extends Registry<T>> key, Holder<T> value)
-    {   registries.asMap().computeIfAbsent(key, k -> new LinkedHashSet<>()).add(value);
+    public <T extends ConfigData> void addRegistryEntry(RegistryHolder<T> key, Holder<T> value)
+    {   registries.asMap().computeIfAbsent(key.key(), k -> new LinkedHashSet<>()).add(value);
     }
 
-    public <T extends ConfigData> void addRegistries(ResourceKey<? extends Registry<T>> key, Collection<Holder<T>> values)
+    public <T extends ConfigData> void addRegistryEntries(ResourceKey<? extends Registry<T>> key, Collection<Holder<T>> values)
     {   registries.asMap().computeIfAbsent(key, k -> new LinkedHashSet<>()).addAll(values);
     }
 
@@ -56,7 +57,7 @@ public abstract class CreateRegistriesEvent extends Event
      * <br>
      * Registry entries can be modified during this event, and they will be committed to Cold Sweat's runtime configs.
      */
-    public static class Pre extends CreateRegistriesEvent
+    public static class Pre extends LoadRegistriesEvent
     {
         private Multimap<ResourceKey<Registry<? extends ConfigData>>, RemoveRegistryData<?>> removals;
 
@@ -81,7 +82,7 @@ public abstract class CreateRegistriesEvent extends Event
      * <br>
      * <b>Use this event to commit your custom registries.</b>
      */
-    public static class Post extends CreateRegistriesEvent
+    public static class Post extends LoadRegistriesEvent
     {
         public Post(RegistryAccess registryAccess, RegistryMultiMap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries)
         {   super(registryAccess, registries);

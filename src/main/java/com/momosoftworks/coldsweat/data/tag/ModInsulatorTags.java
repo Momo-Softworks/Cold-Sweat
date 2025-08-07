@@ -11,7 +11,6 @@ public class ModInsulatorTags
     public static final TagKey<InsulatorData> DRAINS_BACKTANK = createTag("drains_backtank");
 
     private static TagKey<InsulatorData> createTag(String name)
-    {   TagKey<InsulatorData> tag = TagKey.create(ModRegistries.INSULATOR_DATA, ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, name));
-        return tag;
+    {   return TagKey.create(ModRegistries.INSULATOR_DATA.key(), ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, name));
     }
 }
