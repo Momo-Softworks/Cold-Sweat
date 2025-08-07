@@ -4,14 +4,13 @@ import com.momosoftworks.coldsweat.api.event.common.insulation.InsulateItemEvent
 import com.momosoftworks.coldsweat.api.event.common.temperautre.TempModifierEvent;
 import com.momosoftworks.coldsweat.api.event.common.temperautre.TemperatureChangedEvent;
 import com.momosoftworks.coldsweat.api.event.core.init.DefaultTempModifiersEvent;
-import com.momosoftworks.coldsweat.api.event.core.registry.CreateRegistriesEvent;
+import com.momosoftworks.coldsweat.api.event.core.registry.LoadRegistriesEvent;
 import dev.latvian.kubejs.KubeJSPlugin;
 import dev.latvian.kubejs.script.BindingsEvent;
 import me.shedaniel.architectury.event.EventResult;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 
 public class KubePlugin extends KubeJSPlugin
 {
@@ -28,7 +27,7 @@ public class KubePlugin extends KubeJSPlugin
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void fireRegistries(CreateRegistriesEvent.Pre event)
+    public static void fireRegistries(LoadRegistriesEvent.Pre event)
     {   KubeEventSignatures.REGISTRIES.invoker().buildRegistries(event);
     }
 

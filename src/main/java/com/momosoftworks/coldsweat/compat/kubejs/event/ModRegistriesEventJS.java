@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.compat.kubejs.event;
 
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.api.event.core.registry.CreateRegistriesEvent;
+import com.momosoftworks.coldsweat.api.event.core.registry.LoadRegistriesEvent;
 import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
@@ -30,9 +30,9 @@ import java.util.function.Function;
 
 public class ModRegistriesEventJS extends StartupEventJS
 {
-    private final CreateRegistriesEvent.Pre event;
+    private final LoadRegistriesEvent.Pre event;
 
-    public ModRegistriesEventJS(CreateRegistriesEvent.Pre event)
+    public ModRegistriesEventJS(LoadRegistriesEvent.Pre event)
     {   this.event = event;
     }
 
@@ -70,7 +70,7 @@ public class ModRegistriesEventJS extends StartupEventJS
         if (insulatorJS.itemPredicate.isEmpty())
         {   insulatorJS.itemPredicate.add(new ItemRequirement(Collections.singleton(null), null), false);
         }
-        this.event.addRegistry(ModRegistries.INSULATOR_DATA, insulator);
+        this.event.addRegistryEntry(ModRegistries.INSULATOR_DATA, insulator);
     }
 
     /*
@@ -87,7 +87,7 @@ public class ModRegistriesEventJS extends StartupEventJS
         if (foodJS.itemPredicate.isEmpty())
         {   foodJS.itemPredicate.add(new ItemRequirement(Collections.singleton(null), null), false);
         }
-        this.event.addRegistry(ModRegistries.FOOD_DATA, foodData);
+        this.event.addRegistryEntry(ModRegistries.FOOD_DATA, foodData);
     }
 
     /*
@@ -104,7 +104,7 @@ public class ModRegistriesEventJS extends StartupEventJS
         if (fuelJS.itemPredicate.isEmpty())
         {   fuelJS.itemPredicate.add(new ItemRequirement(Collections.singleton(null), null), false);
         }
-        this.event.addRegistry(ModRegistries.FUEL_DATA, fuelData);
+        this.event.addRegistryEntry(ModRegistries.FUEL_DATA, fuelData);
     }
 
     public void addHearthFuel(Consumer<FuelBuilderJS> builder)
@@ -137,7 +137,7 @@ public class ModRegistriesEventJS extends StartupEventJS
         if (carriedItemJS.itemPredicate.isEmpty())
         {   carriedItemJS.itemPredicate.add(new ItemRequirement(Collections.singleton(null), null), false);
         }
-        this.event.addRegistry(ModRegistries.CARRY_TEMP_DATA, carryData);
+        this.event.addRegistryEntry(ModRegistries.CARRY_TEMP_DATA, carryData);
     }
 
     /*
@@ -154,7 +154,7 @@ public class ModRegistriesEventJS extends StartupEventJS
         if (dryingItemJS.itemPredicate.isEmpty())
         {   dryingItemJS.itemPredicate.add(new ItemRequirement(Collections.singleton(null), null), false);
         }
-        this.event.addRegistry(ModRegistries.DRYING_ITEM_DATA, dryingData);
+        this.event.addRegistryEntry(ModRegistries.DRYING_ITEM_DATA, dryingData);
     }
 
     private <K, V extends ConfigData> void addRegistryConfig(RegistryKey<Registry<K>> keyRegistry,
@@ -171,7 +171,7 @@ public class ModRegistriesEventJS extends StartupEventJS
         configData.setRegistryType(ConfigData.Type.KUBEJS);
         if (!configData.areRequiredModsLoaded()) return;
 
-        this.event.addRegistry(modRegistry, configData);
+        this.event.addRegistryEntry(modRegistry, configData);
     }
 
     /*
@@ -254,7 +254,7 @@ public class ModRegistriesEventJS extends StartupEventJS
         if (entityTempJS.entityPredicate.isEmpty())
         {   entityTempJS.entityPredicate.add(new EntityRequirement(Collections.singleton(null), null), false);
         }
-        this.event.addRegistry(ModRegistries.ENTITY_TEMP_DATA, entityTempData);
+        this.event.addRegistryEntry(ModRegistries.ENTITY_TEMP_DATA, entityTempData);
     }
 
     /*
@@ -271,7 +271,7 @@ public class ModRegistriesEventJS extends StartupEventJS
         if (entityClimateJS.entityPredicate.isEmpty())
         {   entityClimateJS.entityPredicate.add(new EntityRequirement(Collections.singleton(null), null), false);
         }
-        this.event.addRegistry(ModRegistries.ENTITY_CLIMATE_DATA, entityClimateData);
+        this.event.addRegistryEntry(ModRegistries.ENTITY_CLIMATE_DATA, entityClimateData);
     }
 
     /*
@@ -288,7 +288,7 @@ public class ModRegistriesEventJS extends StartupEventJS
         if (insulatingMountJS.entityPredicate.isEmpty())
         {   insulatingMountJS.entityPredicate.add(new EntityRequirement(Collections.singleton(null), null), false);
         }
-        this.event.addRegistry(ModRegistries.MOUNT_DATA, mountData);
+        this.event.addRegistryEntry(ModRegistries.MOUNT_DATA, mountData);
     }
 
     /*
@@ -305,7 +305,7 @@ public class ModRegistriesEventJS extends StartupEventJS
         if (spawnBiomeJS.biomes.isEmpty())
         {   spawnBiomeJS.biomes.add(null);
         }
-        this.event.addRegistry(ModRegistries.ENTITY_SPAWN_BIOME_DATA, spawnBiomeData);
+        this.event.addRegistryEntry(ModRegistries.ENTITY_SPAWN_BIOME_DATA, spawnBiomeData);
     }
 
     /*

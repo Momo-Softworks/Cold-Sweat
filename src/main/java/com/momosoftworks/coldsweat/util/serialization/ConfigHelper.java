@@ -9,6 +9,7 @@ import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.config.ConfigLoadingHandler;
 import com.momosoftworks.coldsweat.data.RegistryHolder;
+import com.momosoftworks.coldsweat.data.RegistryHolder;
 import com.momosoftworks.coldsweat.data.codec.configuration.FuelData;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;

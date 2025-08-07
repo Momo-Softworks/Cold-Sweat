@@ -8,7 +8,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.api.event.core.registry.CreateRegistriesEvent;
+import com.momosoftworks.coldsweat.api.event.core.registry.LoadRegistriesEvent;
 import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTempConfig;
@@ -126,8 +126,9 @@ public class ConfigLoadingHandler
          Fetch JSON registries
         */
         Multimap<RegistryKey<Registry<? extends ConfigData>>, ? extends ConfigData> registries = new RegistryMultiMap<>();
-        for (RegistryHolder<?> registry : ModRegistries.getRegistries().values())
+        for (Map.Entry<ResourceLocation, RegistryHolder<?>> entry : ModRegistries.getRegistries().entrySet())
         {
+            RegistryHolder<?> registry = entry.getValue();
             try
             {
                 String registryPath = String.format("%s/%s", ColdSweat.MOD_ID, registry.key().location().getPath());
@@ -170,7 +171,7 @@ public class ConfigLoadingHandler
          Parse user-defined JSON data from the configs folder
         */
         Multimap<RegistryKey<Registry<? extends ConfigData>>, ? extends ConfigData> registries = new RegistryMultiMap<>();
-        for (Map.Entry<String, RegistryHolder<?>> entry : ModRegistries.getRegistries().entrySet())
+        for (Map.Entry<ResourceLocation, RegistryHolder<?>> entry : ModRegistries.getRegistries().entrySet())
         {
             RegistryHolder<? extends ConfigData> registry = entry.getValue();
             RegistryKey key = registry.key();
@@ -193,7 +194,7 @@ public class ConfigLoadingHandler
         }
 
         // Fire registry creation event
-        CreateRegistriesEvent.Pre event = new CreateRegistriesEvent.Pre(registryAccess, registries, REMOVED_REGISTRIES);
+        LoadRegistriesEvent.Pre event = new LoadRegistriesEvent.Pre(registryAccess, registries, REMOVED_REGISTRIES);
         MinecraftForge.EVENT_BUS.post(event);
 
         // Remove registries that don't have required loaded mods
@@ -272,7 +273,7 @@ public class ConfigLoadingHandler
         addTempEffectsConfigs(tempEffects);
         logRegistryLoaded(String.format("Loaded %s temp effects", tempEffects.size()), tempEffects);
 
-        CreateRegistriesEvent.Post postEvent = new CreateRegistriesEvent.Post(registryAccess, event.getRegistries());
+        LoadRegistriesEvent.Post postEvent = new LoadRegistriesEvent.Post(registryAccess, event.getRegistries());
         MinecraftForge.EVENT_BUS.post(postEvent);
     }
 

@@ -26,35 +26,29 @@ public class RegistryHolder<V extends ConfigData>
     }
 
     public RegistryKey<Registry<V>> key()
-    {
-        return key;
+    {   return key;
     }
 
     public Codec<V> codec()
-    {
-        return codec;
+    {   return codec;
     }
 
     public Class<V> type()
-    {
-        return type;
+    {   return type;
     }
 
     public Map<ResourceLocation, V> data()
-    {
-        return data;
+    {   return data;
     }
 
     public void register(ResourceLocation id, V data)
     {
         if (this.data.put(id, data) != null)
-        {
-            throw ColdSweat.LOGGER.throwing(new RegistryFailureException(data, key.location().toString(), "Duplicate entry", null));
+        {   throw ColdSweat.LOGGER.throwing(new RegistryFailureException(data, key.location().toString(), "Duplicate entry", null));
         }
     }
 
     public void flush()
-    {
-        data.clear();
+    {   data.clear();
     }
 }
