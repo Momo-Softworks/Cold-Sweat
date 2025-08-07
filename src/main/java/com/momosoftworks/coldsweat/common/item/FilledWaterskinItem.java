@@ -245,7 +245,16 @@ public class FilledWaterskinItem extends Item
         if (TooltipHandler.isShiftDown())
         {
             String crouchKey = Minecraft.getInstance().options.keyShift.getKey().getDisplayName().getString();
-            tooltip.add(new TranslationTextComponent("tooltip.cold_sweat.waterskin.drink", new StringTextComponent(crouchKey).withStyle(TextFormatting.WHITE)).withStyle(TextFormatting.GRAY));
+            String crouchAction;
+            switch (Preference.getOrDefault(Minecraft.getInstance().player, Preference.WATERSKIN_SECONDARY, Preference.WaterskinAction.POUR))
+            {
+                case DRINK : crouchAction = "tooltip.cold_sweat.waterskin.drink"; break;
+                case POUR : crouchAction = "tooltip.cold_sweat.waterskin.pour"; break;
+                default : crouchAction = "";
+            }
+            if (!crouchAction.isEmpty())
+            {   tooltip.add(new TranslationTextComponent(crouchAction, new StringTextComponent(crouchKey).withStyle(TextFormatting.WHITE)).withStyle(TextFormatting.GRAY));
+            }
 
             // Info tooltip for hotbar functionality
             String perSecond = new TranslationTextComponent("tooltip.cold_sweat.per_second").getString();
