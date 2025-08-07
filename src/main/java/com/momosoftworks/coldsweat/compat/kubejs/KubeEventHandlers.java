@@ -5,7 +5,7 @@ import com.momosoftworks.coldsweat.api.event.common.insulation.InsulateItemEvent
 import com.momosoftworks.coldsweat.api.event.common.temperautre.TempModifierEvent;
 import com.momosoftworks.coldsweat.api.event.common.temperautre.TemperatureChangedEvent;
 import com.momosoftworks.coldsweat.api.event.core.init.DefaultTempModifiersEvent;
-import com.momosoftworks.coldsweat.api.event.core.registry.CreateRegistriesEvent;
+import com.momosoftworks.coldsweat.api.event.core.registry.LoadRegistriesEvent;
 import com.momosoftworks.coldsweat.compat.kubejs.event.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import dev.architectury.event.EventResult;
@@ -39,7 +39,7 @@ public class KubeEventHandlers
         KubeEventSignatures.ADD_MODIFIER.register(KubeEventHandlers::onTempModifierAdd);
     }
 
-    private static void buildRegistries(CreateRegistriesEvent.Pre event)
+    private static void buildRegistries(LoadRegistriesEvent.Pre event)
     {
         if (REGISTER.hasListeners())
         {   REGISTER.post(new ModRegistriesEventJS(event));

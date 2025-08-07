@@ -11,6 +11,7 @@ import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.config.ConfigLoadingHandler;
 import com.momosoftworks.coldsweat.config.spec.CSConfigSpec;
+import com.momosoftworks.coldsweat.data.RegistryHolder;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
@@ -135,7 +136,7 @@ public class ConfigHelper
     }
 
     public static <K, V extends ConfigData> Multimap<K, V> parseTomlRegistry(CSConfigSpec.ConfigValue<List<? extends List<?>>> config, Function<List<?>, V> tomlParser, Function<V, NegatableList<Either<TagKey<K>, K>>> keyListGetter,
-                                                                             IForgeRegistry<K> keyRegistry, ResourceKey<Registry<V>> valueRegistry)
+                                                                             IForgeRegistry<K> keyRegistry, RegistryHolder<V> valueRegistry)
     {
         Multimap<K, V> dataMap = new RegistryMultiMap<>();
         for (List<?> entry : config.get())
@@ -153,7 +154,7 @@ public class ConfigHelper
     }
 
     public static <K, V extends ConfigData> Map<K, V> parseTomlRegistryUnique(ForgeConfigSpec.ConfigValue<List<? extends List<?>>> config, Function<List<?>, V> tomlParser, Function<V, List<Either<TagKey<K>, K>>> keyListGetter,
-                                                                              IForgeRegistry<K> keyRegistry, ResourceKey<Registry<V>> valueRegistry)
+                                                                              IForgeRegistry<K> keyRegistry, RegistryHolder<V> valueRegistry)
     {
         Map<K, V> dataMap = new HashMap<>();
         for (List<?> entry : config.get())
