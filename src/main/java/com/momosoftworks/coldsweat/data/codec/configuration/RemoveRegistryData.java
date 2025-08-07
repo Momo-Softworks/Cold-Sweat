@@ -40,7 +40,7 @@ public class RemoveRegistryData<T extends ConfigData> extends ConfigData impleme
                                                                           .xmap(either -> either.map(List::of, r -> r), Either::right);
 
     public static final Codec<RemoveRegistryData<?>> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.STRING.xmap(s -> (ResourceKey)ModRegistries.getRegistry(s), key -> ModRegistries.getRegistryName(key)).fieldOf("registry").forGetter(data -> data.registry()),
+            ResourceLocation.CODEC.xmap(s -> (ResourceKey)ModRegistries.getRegistry(s), key -> key.location()).fieldOf("registry").forGetter(data -> data.registry()),
             NegatableList.listCodec(NbtRequirement.CODEC).optionalFieldOf("matches", new NegatableList<>()).forGetter(RemoveRegistryData::matches),
             ResourceLocation.CODEC.listOf().optionalFieldOf("entries", List.of()).forGetter(RemoveRegistryData::entries),
             CONFIG_TYPE_CODEC.optionalFieldOf("config_type", List.of()).forGetter(RemoveRegistryData::configTypes)

@@ -1,12 +1,12 @@
 package com.momosoftworks.coldsweat;
 
 import com.mojang.serialization.Codec;
+import com.momosoftworks.coldsweat.api.event.core.registry.AddRegistriesEvent;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
 import com.momosoftworks.coldsweat.common.capability.shearing.ShearableFurCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.EntityTempCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
 import com.momosoftworks.coldsweat.common.command.argument.*;
-import com.momosoftworks.coldsweat.common.event.ConfigPostProcessor;
 import com.momosoftworks.coldsweat.config.*;
 import com.momosoftworks.coldsweat.config.spec.*;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
@@ -15,6 +15,8 @@ import com.momosoftworks.coldsweat.core.itemgroup.InsulationItemsGroup;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.compat.CompatManager;
+import com.momosoftworks.coldsweat.data.RegistryHolder;
+import com.momosoftworks.coldsweat.util.registries.ModEntities;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
@@ -98,9 +100,13 @@ public class ColdSweat
 
     public void createRegistries(FMLLoadCompleteEvent event)
     {
+        // Gather modded registries
+        AddRegistriesEvent addRegistriesEvent = new AddRegistriesEvent();
+        MinecraftForge.EVENT_BUS.post(addRegistriesEvent);
+        // Add registries via dummy NewRegistry event
         NewRegistryEvent dummyEvent = new NewRegistryEvent();
-        for (ModRegistries.RegistryHolder<?> holder : ModRegistries.getRegistries().values())
-        {   dummyEvent.create(new RegistryBuilder<>().setType((Class) holder.type()).setName(holder.registry().location()).dataPackRegistry(holder.codec(), (Codec) holder.codec()));
+        for (RegistryHolder<?> holder : ModRegistries.getRegistries().values())
+        {   dummyEvent.create(new RegistryBuilder<>().setType((Class) holder.type()).setName(holder.key().location()).dataPackRegistry(holder.codec(), (Codec) holder.codec()));
         }
         try
         {

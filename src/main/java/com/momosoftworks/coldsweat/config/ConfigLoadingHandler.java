@@ -7,7 +7,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.api.event.core.registry.CreateRegistriesEvent;
+import com.momosoftworks.coldsweat.api.event.core.registry.LoadRegistriesEvent;
 import com.momosoftworks.coldsweat.api.event.vanilla.ServerConfigsLoadedEvent;
 import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
@@ -15,6 +15,7 @@ import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTempConfig;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.core.init.TempModifierInit;
 import com.momosoftworks.coldsweat.data.ModRegistries;
+import com.momosoftworks.coldsweat.data.RegistryHolder;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
@@ -31,6 +32,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -164,9 +166,9 @@ public class ConfigLoadingHandler
          Fetch JSON registries
         */
         Multimap<ResourceKey<Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries = new RegistryMultiMap<>();
-        for (Map.Entry<String, ModRegistries.RegistryHolder<?>> entry : ModRegistries.getRegistries().entrySet())
+        for (Map.Entry<ResourceLocation, RegistryHolder<?>> entry : ModRegistries.getRegistries().entrySet())
         {
-            ResourceKey<Registry<? extends ConfigData>> key = (ResourceKey) entry.getValue().registry();
+            ResourceKey<Registry<? extends ConfigData>> key = (ResourceKey) entry.getValue().key();
             registries.putAll(key, registryAccess.registryOrThrow(key).holders().toList());
         }
         return registries;
@@ -186,11 +188,12 @@ public class ConfigLoadingHandler
          Parse user-defined JSON data from the configs folder
         */
         Multimap<ResourceKey<Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries = new RegistryMultiMap<>();
-        for (Map.Entry<String, ModRegistries.RegistryHolder<?>> entry : ModRegistries.getRegistries().entrySet())
+        for (Map.Entry<ResourceLocation, RegistryHolder<?>> entry : ModRegistries.getRegistries().entrySet())
         {
-            ResourceKey<Registry<? extends ConfigData>> key = (ResourceKey) entry.getValue().registry();
-            Codec<?> codec = entry.getValue().codec();
-            registries.putAll(key, parseConfigData((ResourceKey) key, (Codec) codec, registryAccess));
+            RegistryHolder<?> registry = entry.getValue();
+            ResourceKey<Registry<? extends ConfigData>> key = (ResourceKey) registry.key();
+            Codec<?> codec = registry.codec();
+            registries.putAll(key, parseConfigData(registry, (Codec) codec, registryAccess));
         }
         return registries;
     }
@@ -209,7 +212,7 @@ public class ConfigLoadingHandler
         }
 
         // Fire registry creation event
-        CreateRegistriesEvent.Pre event = new CreateRegistriesEvent.Pre(registryAccess, registries, REMOVED_REGISTRIES);
+        LoadRegistriesEvent.Pre event = new LoadRegistriesEvent.Pre(registryAccess, registries, REMOVED_REGISTRIES);
         MinecraftForge.EVENT_BUS.post(event);
 
         // Remove registries that don't have required loaded mods
@@ -288,7 +291,7 @@ public class ConfigLoadingHandler
         addTempEffectsConfigs(tempEffects);
         logRegistryLoaded(String.format("Loaded %s temp effects", tempEffects.size()), tempEffects);
 
-        CreateRegistriesEvent.Post postEvent = new CreateRegistriesEvent.Post(registryAccess, event.getRegistries());
+        LoadRegistriesEvent.Post postEvent = new LoadRegistriesEvent.Post(registryAccess, event.getRegistries());
         MinecraftForge.EVENT_BUS.post(postEvent);
     }
 
@@ -330,7 +333,7 @@ public class ConfigLoadingHandler
         // Clear the static map
         REMOVED_REGISTRIES.clear();
         // Gather registry removals & add them to the static map
-        Set<Holder<RemoveRegistryData<?>>> removals = registryAccess.registryOrThrow(ModRegistries.REMOVE_REGISTRY_DATA).holders().collect(Collectors.toSet());
+        Set<Holder<RemoveRegistryData<?>>> removals = registryAccess.registryOrThrow(ModRegistries.REMOVE_REGISTRY_DATA.key()).holders().collect(Collectors.toSet());
         removals.addAll(parseConfigData(ModRegistries.REMOVE_REGISTRY_DATA, RemoveRegistryData.CODEC, registryAccess));
         removals.forEach(holder ->
         {
@@ -356,21 +359,21 @@ public class ConfigLoadingHandler
         }
     }
 
-    public static <T extends ConfigData> Collection<T> removeEntries(Collection<T> registries, ResourceKey<Registry<T>> registryName)
+    public static <T extends ConfigData> Collection<T> removeEntries(Collection<T> registries, RegistryHolder<T> registry)
     {
-        REMOVED_REGISTRIES.get((ResourceKey) registryName).forEach(data ->
+        REMOVED_REGISTRIES.get((ResourceKey) registry.key()).forEach(data ->
         {
             RemoveRegistryData<T> removeData = ((RemoveRegistryData<T>) data);
-            if (removeData.registry() == registryName)
+            if (removeData.registry() == registry.key())
             {   registries.removeIf(removeData::matches);
             }
         });
         return registries;
     }
 
-    public static <T extends ConfigData> boolean isRemoved(T entry, ResourceKey<Registry<T>> registryName)
+    public static <T extends ConfigData> boolean isRemoved(T entry, RegistryHolder<T> registry)
     {
-        return REMOVED_REGISTRIES.get((ResourceKey) registryName).stream().anyMatch(data -> ((RemoveRegistryData<T>) data).matches(entry));
+        return REMOVED_REGISTRIES.get((ResourceKey) registry.key()).stream().anyMatch(data -> ((RemoveRegistryData<T>) data).matches(entry));
     }
 
     public static void addOptionalHolder(OptionalHolder<?> holder)
@@ -664,13 +667,14 @@ public class ConfigLoadingHandler
         });
     }
 
-    private static <T extends ConfigData> List<Holder<T>> parseConfigData(ResourceKey<Registry<T>> registry, Codec<T> codec, RegistryAccess registryAccess)
+    private static <T extends ConfigData> List<Holder<T>> parseConfigData(RegistryHolder<T> registry, Codec<T> codec, RegistryAccess registryAccess)
     {
+        ResourceKey<Registry<T>> registryKey = registry.key();
         List<Holder<T>> output = new ArrayList<>();
         DynamicOps<JsonElement> registryOps = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
 
-        String configFolder = registry.location().getNamespace().replace("_", "");
-        Path coldSweatDataPath = FMLPaths.CONFIGDIR.get().resolve(configFolder + "/data").resolve(registry.location().getPath());
+        String configFolder = registryKey.location().getNamespace().replace("_", "");
+        Path coldSweatDataPath = FMLPaths.CONFIGDIR.get().resolve(configFolder + "/data").resolve(registryKey.location().getPath());
         File jsonDirectory = coldSweatDataPath.toFile();
 
         if (!jsonDirectory.exists())
@@ -688,7 +692,7 @@ public class ConfigLoadingHandler
                             .ifPresent(configData -> output.add(Holder.direct(configData)));
                 }
                 catch (Exception e)
-                {   ColdSweat.LOGGER.error("Failed to parse JSON config setting in {}: {}", registry.location(), file.getName(), e);
+                {   ColdSweat.LOGGER.error("Failed to parse JSON config setting in {}: {}", registryKey.location(), file.getName(), e);
                 }
             }
         }
