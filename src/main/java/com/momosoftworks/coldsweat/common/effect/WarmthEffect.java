@@ -10,13 +10,4 @@ public class WarmthEffect extends Effect
     public WarmthEffect()
     {   super(EffectType.BENEFICIAL, 7355178);
     }
-
-    @Nonnull
-    public String getName()
-    {   return "effect.warmth";
-    }
-
-    public boolean isInstant()
-    {   return false;
-    }
 }

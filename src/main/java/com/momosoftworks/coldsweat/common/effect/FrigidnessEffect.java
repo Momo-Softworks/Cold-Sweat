@@ -10,13 +10,4 @@ public class FrigidnessEffect extends Effect
     public FrigidnessEffect()
     {   super(EffectType.BENEFICIAL, 8961252);
     }
-
-    @Nonnull
-    public String getName()
-    {   return "effect.frigidness";
-    }
-
-    public boolean isInstant()
-    {   return false;
-    }
 }
