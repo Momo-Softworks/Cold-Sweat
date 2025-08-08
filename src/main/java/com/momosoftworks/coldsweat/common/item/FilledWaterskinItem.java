@@ -255,16 +255,19 @@ public class FilledWaterskinItem extends Item
         double temp = CSMath.round(stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE), 2);
         if (TooltipHandler.isShiftDown())
         {
-            String crouchKey = Minecraft.getInstance().options.keyShift.getKey().getDisplayName().getString();
-            String crouchAction;
-            switch (Preference.getOrDefault(Minecraft.getInstance().player, Preference.WATERSKIN_SECONDARY, Preference.WaterskinAction.POUR))
+            if (ConfigSettings.ENABLE_HINTS.get())
             {
-                case DRINK -> crouchAction = "tooltip.cold_sweat.waterskin.drink";
-                case POUR -> crouchAction = "tooltip.cold_sweat.waterskin.pour";
-                default -> crouchAction = "";
-            }
-            if (!crouchAction.isEmpty())
-            {   tooltip.add(new TranslatableComponent(crouchAction, new TextComponent(crouchKey).withStyle(ChatFormatting.WHITE)).withStyle(ChatFormatting.GRAY));
+                String crouchKey = Minecraft.getInstance().options.keyShift.getKey().getDisplayName().getString();
+                String crouchAction;
+                switch (Preference.getOrDefault(Minecraft.getInstance().player, Preference.WATERSKIN_SECONDARY, Preference.WaterskinAction.POUR))
+                {
+                    case DRINK -> crouchAction = "tooltip.cold_sweat.waterskin.drink";
+                    case POUR -> crouchAction = "tooltip.cold_sweat.waterskin.pour";
+                    default -> crouchAction = "";
+                }
+                if (!crouchAction.isEmpty())
+                {   tooltip.add(new TranslatableComponent(crouchAction, new TextComponent(crouchKey).withStyle(ChatFormatting.WHITE)).withStyle(ChatFormatting.GRAY));
+                }
             }
 
             // Info tooltip for hotbar functionality
@@ -287,7 +290,7 @@ public class FilledWaterskinItem extends Item
             tooltip.add(new TranslatableComponent("tooltip.cold_sweat.consumed").withStyle(ChatFormatting.GRAY));
             tooltip.add(tempText);
         }
-        else
+        else if (ConfigSettings.ENABLE_HINTS.get())
         {   tooltip.add(TooltipHandler.EXPAND_TOOLTIP);
         }
 

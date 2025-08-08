@@ -46,6 +46,7 @@ public class ClientSettingsConfig
 
     public static final CSConfigSpec.ConfigValue<String> INSULATION_VISIBILITY;
     public static final CSConfigSpec.BooleanValue EXPAND_TOOLTIPS;
+    public static final CSConfigSpec.BooleanValue ENABLE_HINTS;
 
     public static final CSConfigSpec.IntValue WATER_EFFECT_SETTING;
     public static final CSConfigSpec.ConfigValue<List<? extends Integer>> WATER_DROPLET_SCALE;
@@ -68,7 +69,7 @@ public class ClientSettingsConfig
         BUILDER.push("Preferences");
             USE_CELSIUS = BUILDER
                     .comment("─────────────────────────────────────────────────────────────────────────",
-                             " Sets all temperatures to be displayed in Celsius",
+                             " Displays temperature in Celsius instead of Fahrenheit",
                              " ⌄ ")
                     .define("Celsius", false);
             TEMPERATURE_OFFSET = BUILDER
@@ -107,7 +108,7 @@ public class ClientSettingsConfig
                     .define("Waterskin Secondary Action", "drink");
         BUILDER.pop();
 
-        BUILDER.push("UI Options");
+        BUILDER.push("HUD");
             USE_CUSTOM_HOTBAR_LAYOUT = BUILDER
                     .comment("─────────────────────────────────────────────────────────────────────────",
                              " Tweaks the layout of the hotbar to make foom for Cold Sweat UI elements",
@@ -156,18 +157,6 @@ public class ClientSettingsConfig
                              " Enables the world temperature gauge",
                              " ⌄ ")
                     .define("Show World Temperature Gauge", true);
-
-            SHOW_CONFIG_BUTTON = BUILDER
-                    .comment("─────────────────────────────────────────────────────────────────────────",
-                             " Show the config menu button in the Options menu",
-                             " ⌄ ")
-                    .define("Enable In-Game Config", true);
-            CONFIG_BUTTON_POS = BUILDER
-                    .comment("─────────────────────────────────────────────────────────────────────────",
-                             " The position (offset) of the config button on the screen",
-                             " ⌄ ")
-                    .defineList("Config Button Position", List.of(0, 0),
-                                it -> it instanceof Integer);
         BUILDER.pop();
 
         BUILDER.push("Accessibility");
@@ -219,17 +208,7 @@ public class ClientSettingsConfig
                     .defineInRange("Heatstroke Sway Speed", 1.0, 0.0, 2.0);
         BUILDER.pop();
 
-        BUILDER.push("Misc");
-            ENABLE_CREATIVE_WARNING = BUILDER
-                    .comment("─────────────────────────────────────────────────────────────────────────",
-                             " Warns the player about a bug that clears armor insulation when in creative mode",
-                             " ⌄ ")
-                    .define("Enable Creative Mode Warning", true);
-            SHOW_HEARTH_DEBUG_VISUALS = BUILDER
-                    .comment("─────────────────────────────────────────────────────────────────────────",
-                             " Displays areas that the Hearth is affecting when the F3 debug menu is open",
-                             " ⌄ ")
-                    .define("Hearth Debug", true);
+        BUILDER.push("Tooltips");
             INSULATION_VISIBILITY = BUILDER
                     .comment("─────────────────────────────────────────────────────────────────────────",
                              " Determines when armor insulation tooltips should show",
@@ -243,9 +222,38 @@ public class ClientSettingsConfig
                     .define("Insulation Tooltip Visibility", "if_present", o -> o instanceof String string && InsulationVisibility.byName(string) != null);
             EXPAND_TOOLTIPS = BUILDER
                     .comment("─────────────────────────────────────────────────────────────────────────",
-                             " Automatically expands all collapsible tooltips",
+                             " Always expand collapsible tooltips",
                              " ⌄ ")
                     .define("Expand Tooltips", false);
+            ENABLE_HINTS = BUILDER
+                    .comment("─────────────────────────────────────────────────────────────────────────",
+                             " Show keybind hints in tooltips, i.e. \"Hold [Shift]\"",
+                             " ⌄ ")
+                    .define("Enable Hints", true);
+        BUILDER.pop();
+
+        BUILDER.push("Misc");
+            SHOW_CONFIG_BUTTON = BUILDER
+                    .comment("─────────────────────────────────────────────────────────────────────────",
+                             " Show the config menu button in the Options menu",
+                             " ⌄ ")
+                    .define("Enable In-Game Config", true);
+            CONFIG_BUTTON_POS = BUILDER
+                    .comment("─────────────────────────────────────────────────────────────────────────",
+                             " The position (offset) of the config button on the screen",
+                             " ⌄ ")
+                    .defineList("Config Button Position", List.of(0, 0),
+                                it -> it instanceof Integer);
+            ENABLE_CREATIVE_WARNING = BUILDER
+                    .comment("─────────────────────────────────────────────────────────────────────────",
+                             " Warns the player about a bug that clears armor insulation when in creative mode",
+                             " ⌄ ")
+                    .define("Enable Creative Mode Warning", true);
+            SHOW_HEARTH_DEBUG_VISUALS = BUILDER
+                    .comment("─────────────────────────────────────────────────────────────────────────",
+                             " Displays areas that the Hearth is affecting when the F3 debug menu is open",
+                             " ⌄ ")
+                    .define("Hearth Debug", true);
             ANIMATED_SOUL_SPRING_LAMP = BUILDER
                     .comment("─────────────────────────────────────────────────────────────────────────",
                              " Enables the animated soul spring lamp model",

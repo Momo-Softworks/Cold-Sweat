@@ -300,7 +300,8 @@ public class TooltipHandler
          Tooltips for soulspring lamp
          */
         if (stack.getItem() instanceof SoulspringLampItem)
-        {   if (!isShiftDown())
+        {
+            if (!isShiftDown() && ConfigSettings.ENABLE_HINTS.get())
             {   elements.add(tooltipStartIndex, Either.left(EXPAND_TOOLTIP));
             }
             elements.add(tooltipStartIndex, Either.right(new SoulspringTooltip(stack.getOrCreateTag().getDouble("Fuel"))));
