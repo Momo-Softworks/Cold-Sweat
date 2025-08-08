@@ -217,6 +217,7 @@ public class ConfigSettings
     public static final DynamicHolder<Boolean> SHOW_CREATIVE_WARNING;
     public static final DynamicHolder<InsulationVisibility> INSULATION_VISIBILITY;
     public static final DynamicHolder<Boolean> EXPAND_TOOLTIPS;
+    public static final DynamicHolder<Boolean> ENABLE_HINTS;
 
     public static final DynamicHolder<WaterEffectSetting> WATER_EFFECT_SETTING;
     public static final DynamicHolder<IntegerBounds> WATER_DROPLET_SCALE;
@@ -400,6 +401,11 @@ public class ConfigSettings
                                       : Temperature.Units.MC;
             holder.set(Temperature.convert(temperature, units, Temperature.Units.MC, false));
         });
+
+        SUMMER_TEMPS = addSetting(ColdSweat.createKey("summer_temps"), SeasonalTempData::new, holder -> holder.set(!CompatManager.getSeasonsMods().isEmpty() ? SeasonalTempData.fromToml(WorldSettingsConfig.getSummerTemps()) : new SeasonalTempData()));
+        AUTUMN_TEMPS = addSetting(ColdSweat.createKey("autumn_temps"), SeasonalTempData::new, holder -> holder.set(!CompatManager.getSeasonsMods().isEmpty() ? SeasonalTempData.fromToml(WorldSettingsConfig.getAutumnTemps()) : new SeasonalTempData()));
+        WINTER_TEMPS = addSetting(ColdSweat.createKey("winter_temps"), SeasonalTempData::new, holder -> holder.set(!CompatManager.getSeasonsMods().isEmpty() ? SeasonalTempData.fromToml(WorldSettingsConfig.getWinterTemps()) : new SeasonalTempData()));
+        SPRING_TEMPS = addSetting(ColdSweat.createKey("spring_temps"), SeasonalTempData::new, holder -> holder.set(!CompatManager.getSeasonsMods().isEmpty() ? SeasonalTempData.fromToml(WorldSettingsConfig.getSpringTemps()) : new SeasonalTempData()));
 
         DEPTH_REGIONS = addSetting(ColdSweat.createKey("depth_regions"), HashMultimap::create, holder -> {});
 
@@ -915,6 +921,7 @@ public class ConfigSettings
 
         INSULATION_VISIBILITY = addClientSetting(ColdSweat.createKey("insulation_visibility"), () -> InsulationVisibility.IF_PRESENT, holder -> holder.set(InsulationVisibility.byName(ClientSettingsConfig.INSULATION_VISIBILITY.get())));
         EXPAND_TOOLTIPS = addClientSetting(ColdSweat.createKey("expand_tooltips"), () -> true, holder -> holder.set(ClientSettingsConfig.EXPAND_TOOLTIPS.get()));
+        ENABLE_HINTS = addClientSetting(ColdSweat.createKey("enable_hints"), () -> true, holder -> holder.set(ClientSettingsConfig.ENABLE_HINTS.get()));
 
         WATER_EFFECT_SETTING = addClientSetting(ColdSweat.createKey("water_effect_setting"), () -> WaterEffectSetting.ALL, holder -> holder.set(WaterEffectSetting.values()[ClientSettingsConfig.WATER_EFFECT_SETTING.get()]));
         WATER_DROPLET_SCALE = addClientSetting(ColdSweat.createKey("water_droplet_scale"), () -> new IntegerBounds(40, 48), holder -> holder.set(new IntegerBounds(ClientSettingsConfig.WATER_DROPLET_SCALE.get().toArray(Integer[]::new))));
@@ -933,11 +940,6 @@ public class ConfigSettings
             holder -> holder.set(Preference.WaterskinAction.byName(ClientSettingsConfig.WATERSKIN_DRINK_PRIMARY.get())));
         WATERSKIN_USE_SECONDARY = addClientSetting(ColdSweat.createKey("waterskin_secondary_action"), () -> Preference.WaterskinAction.DRINK,
             holder -> holder.set(Preference.WaterskinAction.byName(ClientSettingsConfig.WATERSKIN_DRINK_SECONDARY.get())));
-
-        SUMMER_TEMPS = addSetting(ColdSweat.createKey("summer_temps"), SeasonalTempData::new, holder -> holder.set(!CompatManager.getSeasonsMods().isEmpty() ? SeasonalTempData.fromToml(WorldSettingsConfig.getSummerTemps()) : new SeasonalTempData()));
-        AUTUMN_TEMPS = addSetting(ColdSweat.createKey("autumn_temps"), SeasonalTempData::new, holder -> holder.set(!CompatManager.getSeasonsMods().isEmpty() ? SeasonalTempData.fromToml(WorldSettingsConfig.getAutumnTemps()) : new SeasonalTempData()));
-        WINTER_TEMPS = addSetting(ColdSweat.createKey("winter_temps"), SeasonalTempData::new, holder -> holder.set(!CompatManager.getSeasonsMods().isEmpty() ? SeasonalTempData.fromToml(WorldSettingsConfig.getWinterTemps()) : new SeasonalTempData()));
-        SPRING_TEMPS = addSetting(ColdSweat.createKey("spring_temps"), SeasonalTempData::new, holder -> holder.set(!CompatManager.getSeasonsMods().isEmpty() ? SeasonalTempData.fromToml(WorldSettingsConfig.getSpringTemps()) : new SeasonalTempData()));
     }
 
     public static ResourceLocation getKey(DynamicHolder<?> setting)
