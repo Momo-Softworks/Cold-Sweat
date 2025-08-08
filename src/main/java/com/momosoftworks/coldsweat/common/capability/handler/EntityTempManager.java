@@ -809,10 +809,9 @@ public class EntityTempManager
                                                     : new FoodTempModifier(temperature);
                     // Store the duration of the TempModifier
                     foodModifier.getNBT().putString("item", ForgeRegistries.ITEMS.getKey(item.getItem()).toString());
-                    foodModifier.getNBT().putDouble("temperature", temperature);
                     foodModifier.getNBT().putInt("duration", duration);
                     // Add the TempModifier
-                    Temperature.addOrReplaceModifier(player, foodModifier.expires(duration), trait, Placement.Duplicates.EXACT);
+                    Temperature.addOrReplaceModifier(player, foodModifier.expires(duration).tickRate(duration), trait, Placement.Duplicates.EXACT);
                 }
             }
         }
