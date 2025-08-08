@@ -10,13 +10,4 @@ public class WarmthEffect extends MobEffect
     public WarmthEffect()
     {   super(MobEffectCategory.BENEFICIAL, 7355178);
     }
-
-    @Nonnull
-    public String getName()
-    {   return "effect.warmth";
-    }
-
-    public boolean isInstant()
-    {   return false;
-    }
 }

@@ -10,13 +10,4 @@ public class FrigidnessEffect extends MobEffect
     public FrigidnessEffect()
     {   super(MobEffectCategory.BENEFICIAL, 8961252);
     }
-
-    @Nonnull
-    public String getName()
-    {   return "effect.frigidness";
-    }
-
-    public boolean isInstant()
-    {   return false;
-    }
 }
