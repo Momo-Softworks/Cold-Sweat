@@ -286,7 +286,7 @@ public class Temperature
             if (predicate.test(modifierAt))
             {
                 if (isReplacing)
-                {   changed = !modifierAt.equals(modifier);
+                {   changed = modifierAt.getExpireTime() != -1 || modifier.getExpireTime() != -1 || !modifierAt.equals(modifier);
                     modifiers.set(i, modifier);
                 }
                 else
