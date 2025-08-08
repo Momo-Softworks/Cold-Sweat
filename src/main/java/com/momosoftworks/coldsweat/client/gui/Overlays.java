@@ -3,19 +3,28 @@ package com.momosoftworks.coldsweat.client.gui;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.api.temperature.modifier.FoodTempModifier;
+import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.client.event.TooltipHandler;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.LayeredDraw;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.StringUtil;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.GameType;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -23,7 +32,9 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
+import org.joml.Vector2i;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 @EventBusSubscriber(value = Dist.CLIENT)
@@ -250,12 +261,67 @@ public class Overlays
         }
     };
 
+    public static LayeredDraw.Layer FOOD_EFFECTS_OVERLAY = (graphics, deltaTracker) ->
+    {
+        if (!ConfigSettings.FOOD_EFFECTS_ENABLED.get()) return;
+
+        Minecraft mc = Minecraft.getInstance();
+        Player player = mc.player;
+        int width = graphics.guiWidth();
+        int height = graphics.guiHeight();
+        float partialTick = deltaTracker.getGameTimeDeltaPartialTick(true);
+
+        graphics.pose().pushPose();
+        Vector2i pos = ConfigSettings.FOOD_EFFECTS_POS.get();
+        graphics.pose().translate(pos.x, pos.y, 0);
+        int y = 0;
+        for (List<TempModifier> modifierList : Temperature.getModifiers(player).values())
+        {
+            for (TempModifier modifier : modifierList)
+            {
+                if (modifier instanceof FoodTempModifier)
+                {
+                    int x = width - 10;
+                    if (modifier.getNBT().getDouble("duration") == 0) continue;
+                    int timeLeft = modifier.getExpireTime() - modifier.getTicksExisted();
+                    double temp = modifier.getNBT().getDouble("temperature");
+
+                    String sign = temp > 0 ? "↑" : "↓";
+                    Style style = temp > 0 ? TooltipHandler.HOT : temp < 0 ? TooltipHandler.COLD : Style.EMPTY;
+                    String tempString = CSMath.formatDoubleOrInt(CSMath.round(temp, 2));
+                    if (temp < 0) tempString = tempString.substring(1);
+                    Component tempText = Component.literal(sign + tempString).withStyle(style);
+
+                    RenderSystem.enableBlend();
+                    if (timeLeft < 200)
+                    {
+                        float alpha = (float) CSMath.blend(1, Math.sin((modifier.getTicksExisted()+partialTick) / 1.5) / 2 + 0.5, timeLeft, 200, 0);
+                        RenderSystem.setShaderColor(1, 1, 1, alpha);
+                    }
+                    graphics.drawString(mc.font, tempText, x - mc.font.width(tempText), height - 18 - y * 20, tempText.getStyle().getColor().getValue(), true);
+                    x -= mc.font.width(tempText) + 17;
+
+                    Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(modifier.getNBT().getString("item")));
+                    if (item == null) continue;
+                    graphics.renderItem(item.getDefaultInstance(), x, height - 22 - y * 20);
+                    x -= 1;
+
+                    String timer = StringUtil.formatTickDuration(timeLeft, player.level().tickRateManager().tickrate());
+                    graphics.drawString(mc.font, timer, x - mc.font.width(timer), height - 18 - y * 20, ChatFormatting.WHITE.getColor(), true);
+                    y++;
+                }
+            }
+        }
+        graphics.pose().popPose();
+    };
+
     @SubscribeEvent
     public static void registerOverlays(RegisterGuiLayersEvent event)
     {
         event.registerAbove(VanillaGuiLayers.HOTBAR, ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "vague_temp"), VAGUE_TEMP_OVERLAY);
         event.registerAbove(VanillaGuiLayers.HOTBAR, ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "body_temp"), BODY_TEMP_OVERLAY);
         event.registerAbove(VanillaGuiLayers.HOTBAR, ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "world_temp"), WORLD_TEMP_OVERLAY);
+        event.registerBelow(VanillaGuiLayers.HOTBAR, ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "food_effects"), FOOD_EFFECTS_OVERLAY);
     }
 
     @EventBusSubscriber(value = Dist.CLIENT)

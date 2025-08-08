@@ -215,6 +215,9 @@ public class ConfigSettings
     public static final DynamicHolder<Vector2i> WORLD_GAUGE_POS;
     public static final DynamicHolder<Boolean> WORLD_GAUGE_ENABLED;
 
+    public static final DynamicHolder<Vector2i> FOOD_EFFECTS_POS;
+    public static final DynamicHolder<Boolean> FOOD_EFFECTS_ENABLED;
+
     public static final DynamicHolder<Boolean> CUSTOM_HOTBAR_LAYOUT;
     public static final DynamicHolder<Boolean> ICON_BOBBING;
 
@@ -933,6 +936,9 @@ public class ConfigSettings
 
         WORLD_GAUGE_POS = addClientSetting(ColdSweat.createKey("world_gauge_pos"), Vector2i::new, holder -> holder.set(ClientSettingsConfig.getWorldGaugePos()));
         WORLD_GAUGE_ENABLED = addClientSetting(ColdSweat.createKey("world_gauge_enabled"), () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_WORLD_TEMP_GAUGE.get()));
+
+        FOOD_EFFECTS_POS = addClientSetting(ColdSweat.createKey("food_effects_pos"), Vector2i::new, holder -> holder.set(ClientSettingsConfig.getFoodEffectsPos()));
+        FOOD_EFFECTS_ENABLED = addClientSetting(ColdSweat.createKey("food_effects_enabled"), () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_FOOD_EFFECTS.get()));
 
         CUSTOM_HOTBAR_LAYOUT = addClientSetting(ColdSweat.createKey("custom_hotbar_layout"), () -> true, holder -> holder.set(ClientSettingsConfig.USE_CUSTOM_HOTBAR_LAYOUT.get()));
         ICON_BOBBING = addClientSetting(ColdSweat.createKey("icon_bobbing"), () -> true, holder -> holder.set(ClientSettingsConfig.ENABLE_ICON_BOBBING.get()));

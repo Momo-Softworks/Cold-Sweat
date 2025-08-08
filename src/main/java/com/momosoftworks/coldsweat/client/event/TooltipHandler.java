@@ -44,6 +44,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
@@ -295,10 +296,13 @@ public class TooltipHandler
     public static void addCustomTooltips(RenderTooltipEvent.GatherComponents event)
     {
         ItemStack stack = event.getItemStack();
+        if (stack.isEmpty()) return;
+
         Item item = stack.getItem();
         var elements = event.getTooltipElements();
         InsulationVisibility insulationVisibility = ConfigSettings.INSULATION_VISIBILITY.get();
-        if (stack.isEmpty()) return;
+        Player player = Minecraft.getInstance().player;
+        float tickRate = player != null ? player.level().tickRateManager().tickrate() : 20;
 
         // Get the index at which the tooltip should be inserted
         int tooltipStartIndex = getTooltipTitleIndex(elements, stack);
@@ -347,7 +351,7 @@ public class TooltipHandler
                                                   Component.translatable("tooltip.cold_sweat.temperature_effect", CSMath.formatDoubleOrInt(temp)).withStyle(COLD);
                 // Add a duration to the tooltip if it exists
                 if (duration > 0)
-                {   consumeEffects.append(" (" + StringUtil.formatTickDuration(duration, 20) + ")");
+                {   consumeEffects.append(" (" + StringUtil.formatTickDuration(duration, tickRate) + ")");
                 }
                 // Add the effect to the tooltip
                 elements.add(index, Either.left(consumeEffects));
