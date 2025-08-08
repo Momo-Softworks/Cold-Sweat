@@ -120,6 +120,14 @@ public class AbstractTempCap implements ITemperatureCap
     }
 
     @Override
+    public void removeModifier(TempModifier modifier, Trait trait)
+    {
+        if (!trait.isForModifiers())
+            throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("Invalid modifier trait: " + trait));
+        this.getModifiers(trait).remove(modifier);
+    }
+
+    @Override
     public EnumMap<Trait, List<TempModifier>> getModifiers()
     {   return modifiers;
     }
@@ -131,6 +139,17 @@ public class AbstractTempCap implements ITemperatureCap
         if (!trait.isForModifiers())
             throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("Invalid modifier trait: " + trait));
         return modifiers.computeIfAbsent(trait, t -> new ArrayList<>());
+    }
+
+    @Override
+    public void clearModifiers()
+    {   this.modifiers.clear();
+    }
+
+    @Override
+    public void setModifiers(Map<Trait, List<TempModifier>> modifiers)
+    {   this.clearModifiers();
+        this.modifiers.putAll(modifiers);
     }
 
     @Override
