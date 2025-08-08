@@ -244,16 +244,19 @@ public class FilledWaterskinItem extends Item
         double temp = CSMath.round(stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE), 2);
         if (TooltipHandler.isShiftDown())
         {
-            String crouchKey = Minecraft.getInstance().options.keyShift.getKey().getDisplayName().getString();
-            String crouchAction;
-            switch (Preference.getOrDefault(Minecraft.getInstance().player, Preference.WATERSKIN_SECONDARY, Preference.WaterskinAction.POUR))
+            if (ConfigSettings.ENABLE_HINTS.get())
             {
-                case DRINK : crouchAction = "tooltip.cold_sweat.waterskin.drink"; break;
-                case POUR : crouchAction = "tooltip.cold_sweat.waterskin.pour"; break;
-                default : crouchAction = "";
-            }
-            if (!crouchAction.isEmpty())
-            {   tooltip.add(new TranslationTextComponent(crouchAction, new StringTextComponent(crouchKey).withStyle(TextFormatting.WHITE)).withStyle(TextFormatting.GRAY));
+                String crouchKey = Minecraft.getInstance().options.keyShift.getKey().getDisplayName().getString();
+                String crouchAction;
+                switch (Preference.getOrDefault(Minecraft.getInstance().player, Preference.WATERSKIN_SECONDARY, Preference.WaterskinAction.POUR))
+                {
+                    case DRINK : crouchAction = "tooltip.cold_sweat.waterskin.drink"; break;
+                    case POUR : crouchAction = "tooltip.cold_sweat.waterskin.pour"; break;
+                    default : crouchAction = "";
+                }
+                if (!crouchAction.isEmpty())
+                {   tooltip.add(new TranslationTextComponent(crouchAction, new StringTextComponent(crouchKey).withStyle(TextFormatting.WHITE)).withStyle(TextFormatting.GRAY));
+                }
             }
 
             // Info tooltip for hotbar functionality
@@ -278,7 +281,7 @@ public class FilledWaterskinItem extends Item
             tooltip.add(new TranslationTextComponent("tooltip.cold_sweat.consumed").withStyle(TextFormatting.GRAY));
             tooltip.add(tempText);
         }
-        else
+        else if (ConfigSettings.ENABLE_HINTS.get())
         {   tooltip.add(TooltipHandler.EXPAND_TOOLTIP);
         }
 
