@@ -116,6 +116,26 @@ public abstract class TempModifier
         return output;
     }
 
+    /**
+     * Called when this TempModifier is added to the entity.<br>
+     */
+    public void onAdded(LivingEntity entity, Trait trait) {}
+
+    /**
+     * Called when this TempModifier is removed from the entity.<br>
+     */
+    public void onRemoved(LivingEntity entity, Trait trait) {}
+
+    /**
+     * Called when a TempModifier is added to the same trait as this one.<br>
+     */
+    public void onSiblingAdded(LivingEntity entity, Trait trait, TempModifier sibling) {}
+
+    /**
+     * Called when a TempModifier is removed from the same trait as this one.<br>
+     */
+    public void onSiblingRemoved(LivingEntity entity, Trait trait, TempModifier sibling) {}
+
     public final int getExpireTime()
     {   return expireTicks;
     }

@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.api.util;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
+import com.momosoftworks.coldsweat.api.annotation.Internal;
 import com.momosoftworks.coldsweat.api.event.common.temperautre.TempModifierEvent;
 import com.momosoftworks.coldsweat.api.event.common.temperautre.TemperatureChangedEvent;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
@@ -24,6 +25,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * General helper class for temperature-related actions. (Previously TempHelper)<br>
@@ -165,19 +167,12 @@ public class Temperature
     {   return (Optional<T>) cap.getModifiers(trait).stream().filter(modClass::isInstance).findFirst();
     }
 
-    /**
-     * @return The first modifier applied to the player that fits the predicate.
-     */
-    @Nullable
-    public static TempModifier getModifier(LivingEntity entity, Trait trait, Predicate<TempModifier> condition)
-    {
-        for (TempModifier modifier : EntityTempManager.getTemperatureCap(entity).map(cap -> cap.getModifiers(trait)).orElse(Arrays.asList()))
-        {
-            if (condition.test(modifier))
-            {   return modifier;
-            }
-        }
-        return null;
+    public static List<TempModifier> getModifiers(LivingEntity entity, Trait trait, Predicate<TempModifier> condition)
+    {   return getModifiers(entity, trait).stream().filter(condition).collect(Collectors.toList());
+    }
+
+    public static Optional<TempModifier> getModifier(LivingEntity entity, Trait trait, Predicate<TempModifier> condition)
+    {   return getModifiers(entity, trait).stream().filter(condition).findFirst();
     }
 
     /**
@@ -226,8 +221,11 @@ public class Temperature
             if (optCap.resolve().isPresent())
             {
                 ITemperatureCap cap = optCap.resolve().get();
-                if (addModifier(cap.getModifiers(trait), event.getModifier(), duplicates, maxCount, placement))
+                List<TempModifier> modifiers = cap.getModifiers(trait);
+                if (addModifier(modifiers, event.getModifier(), duplicates, maxCount, placement))
                 {
+                    modifier.onAdded(entity, trait);
+                    updateSiblingsAdd(modifiers, entity, trait, modifier);
                     updateModifiers(entity, cap);
                     return true;
                 }
@@ -237,6 +235,35 @@ public class Temperature
         return false;
     }
 
+    @Internal
+    public static void updateSiblingsAdd(List<TempModifier> modifiers, LivingEntity entity, Trait trait, TempModifier modifier)
+    {
+        modifiers.forEach(mod ->
+        {
+            if (mod == modifier) return;
+            mod.onSiblingAdded(entity, trait, modifier);
+        });
+    }
+
+    @Internal
+    public static void updateSiblingsRemove(List<TempModifier> modifiers, LivingEntity entity, Trait trait, TempModifier modifier)
+    {
+        modifiers.forEach(mod ->
+        {
+            if (mod == modifier) return;
+            mod.onSiblingRemoved(entity, trait, modifier);
+        });
+    }
+
+    /**
+     * This method is mainly for internal use. {@link Temperature#addModifier(LivingEntity, TempModifier, Trait, Placement.Duplicates, int, Placement)} should be used instead.<br>
+     * <br>
+     * Be warned that it does call update methods or events, including:<br>
+     * - {@link TempModifierEvent.Add}<br>
+     * - {@link TempModifier#onAdded(LivingEntity, Trait)}<br>
+     * - {@link TempModifier#onSiblingAdded(LivingEntity, Trait, TempModifier)}<br>
+     */
+    @Internal
     public static boolean addModifier(List<TempModifier> modifiers, TempModifier modifier, Placement.Duplicates duplicatePolicy, int maxCount, Placement placement)
     {
         boolean changed = false;
@@ -329,12 +356,13 @@ public class Temperature
                         MinecraftForge.EVENT_BUS.post(event);
                         if (!event.isCanceled())
                         {
-                            removed++;
-                            modifiers.remove(i);
+                            cap.removeModifier(modifier, trait);
+                            modifier.onRemoved(entity, trait);
+                            updateSiblingsRemove(modifiers, entity, trait, modifier);
                             i += forwardOrder ? -1 : 1;
+                            removed++;
                         }
                     }
-
                 }
                 else break;
             }
