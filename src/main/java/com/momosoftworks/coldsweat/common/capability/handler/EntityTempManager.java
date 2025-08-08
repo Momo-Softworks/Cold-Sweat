@@ -242,8 +242,8 @@ public class EntityTempManager
             {
                 // Add default modifiers every time the entity joins the world
                 Map<Trait, List<TempModifier>> modifiers = gatherTempModifiers(living);
-                cap.getModifiers().clear();
-                cap.getModifiers().putAll(modifiers);
+                cap.clearModifiers();
+                cap.setModifiers(modifiers);
                 TaskScheduler.scheduleServer(() ->
                 {   cap.tick(living);
                     Temperature.updateTemperature(living, cap, true);
@@ -304,8 +304,10 @@ public class EntityTempManager
             AtomicBoolean sync = new AtomicBoolean(false);
             for (Trait trait : VALID_MODIFIER_TRAITS)
             {
-                cap.getModifiers(trait).removeIf(modifier ->
+                List<TempModifier> modifiers = cap.getModifiers(trait);
+                for (int i = 0; i < modifiers.size(); i++)
                 {
+                    TempModifier modifier = modifiers.get(i);
                     // Tick modifier
                     modifier.tick(entity);
                     // Sync if the modifier is dirty
@@ -315,8 +317,14 @@ public class EntityTempManager
                     }
                     // Remove expired modifiers
                     int expireTime = modifier.getExpireTime();
-                    return (modifier.setTicksExisted(modifier.getTicksExisted() + 1) > expireTime && expireTime != -1);
-                });
+                    boolean expired = (modifier.setTicksExisted(modifier.getTicksExisted() + 1) > expireTime && expireTime != -1);
+                    if (expired)
+                    {   cap.removeModifier(modifier, trait);
+                        modifier.onRemoved(entity, trait);
+                        Temperature.updateSiblingsRemove(modifiers, entity, trait, modifier);
+                        i--;
+                    }
+                }
             }
             if (sync.get())
             {   Temperature.updateModifiers(entity, cap);
