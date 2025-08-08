@@ -33,6 +33,9 @@ public class ClientSettingsConfig
     public static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> WORLD_TEMP_GAUGE_POS;
     public static final ForgeConfigSpec.BooleanValue SHOW_WORLD_TEMP_GAUGE;
 
+    public static final ForgeConfigSpec.ConfigValue<List<? extends Integer>> FOOD_EFFECTS_POS;
+    public static final ForgeConfigSpec.BooleanValue SHOW_FOOD_EFFECTS;
+
     public static final ForgeConfigSpec.BooleanValue USE_CUSTOM_HOTBAR_LAYOUT;
     public static final ForgeConfigSpec.BooleanValue ENABLE_ICON_BOBBING;
 
@@ -159,6 +162,17 @@ public class ClientSettingsConfig
                              " Enables the world temperature gauge",
                              " ⌄ ")
                     .define("Show World Temperature Gauge", true);
+
+            FOOD_EFFECTS_POS = BUILDER
+                    .comment("─────────────────────────────────────────────────────────────────────────",
+                             " The position of the food effects panel relative to default",
+                             " ⌄ ")
+                    .defineList("Food Effects UI Offset", Arrays.asList(0, 0), it -> it instanceof Integer);
+            SHOW_FOOD_EFFECTS = BUILDER
+                    .comment("─────────────────────────────────────────────────────────────────────────",
+                             " Enables the food effects panel",
+                             " ⌄ ")
+                    .define("Show Food Effects", true);
         BUILDER.pop();
 
         BUILDER.push("Accessibility");
@@ -291,6 +305,10 @@ public class ClientSettingsConfig
 
     public static Vec2i getWorldGaugePos()
     {   return new Vec2i(WORLD_TEMP_GAUGE_POS.get().get(0), WORLD_TEMP_GAUGE_POS.get().get(1));
+    }
+
+    public static Vec2i getFoodEffectsPos()
+    {   return new Vec2i(FOOD_EFFECTS_POS.get().get(0), FOOD_EFFECTS_POS.get().get(1));
     }
 
     public static Vec2i getConfigButtonPos()

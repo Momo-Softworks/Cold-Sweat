@@ -2,24 +2,33 @@ package com.momosoftworks.coldsweat.client.gui;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.momosoftworks.coldsweat.api.temperature.modifier.FoodTempModifier;
+import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.client.event.TooltipHandler;
 import com.momosoftworks.coldsweat.common.capability.temperature.PlayerTempCap;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.math.Vec2i;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.StringUtils;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.GameType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.ForgeRegistries;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT)
@@ -56,25 +65,15 @@ public class Overlays
     static int ICON_BOB = 0;
     static double BODY_TEMP_SEVERITY = 0;
 
-    @SubscribeEvent
-    public static void onRenderHUD(RenderGameOverlayEvent.Post event)
+    public static void renderWorldTemperature(MatrixStack poseStack, float partialTick, int width, int height)
     {
-        if (event.getType() == RenderGameOverlayEvent.ElementType.HOTBAR)
+        Minecraft mc = Minecraft.getInstance();
+        PlayerEntity player = mc.player;
+
+        if (player != null && (ADVANCED_WORLD_TEMP && Minecraft.getInstance().gameMode.getPlayerMode() != GameType.SPECTATOR
+        && !Minecraft.getInstance().options.hideGui && ConfigSettings.WORLD_GAUGE_ENABLED.get()
+        || player.isCreative()))
         {
-            Minecraft mc = Minecraft.getInstance();
-            PlayerEntity player = mc.player;
-            MatrixStack poseStack = event.getMatrixStack();
-            int width = event.getWindow().getGuiScaledWidth();
-            int height = event.getWindow().getGuiScaledHeight();
-
-            /*
-             World Temperature
-             */
-
-            if (player != null && (ADVANCED_WORLD_TEMP && Minecraft.getInstance().gameMode.getPlayerMode() != GameType.SPECTATOR
-            && !Minecraft.getInstance().options.hideGui && ConfigSettings.WORLD_GAUGE_ENABLED.get()
-            || player.isCreative()))
-            {
 
             // Get player world temperature
             double temp = Temperature.convert(WORLD_TEMP, ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
@@ -113,141 +112,212 @@ public class Overlays
             // Render text
             int blendedTemp = (int) CSMath.blend(PREV_WORLD_TEMP, WORLD_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
 
-                Minecraft.getInstance().font.draw(poseStack, (blendedTemp + ConfigSettings.TEMP_OFFSET.get())+"",
-                        /* X */ width / 2 + 106 + (Integer.toString(blendedTemp + ConfigSettings.TEMP_OFFSET.get()).length() * -3) + ConfigSettings.WORLD_GAUGE_POS.get().x(),
-                        /* Y */ height - 15 - bob + ConfigSettings.WORLD_GAUGE_POS.get().y(), color);
-                poseStack.popPose();
-            }
+            Minecraft.getInstance().font.draw(poseStack, (blendedTemp + ConfigSettings.TEMP_OFFSET.get())+"",
+                    /* X */ width / 2 + 106 + (Integer.toString(blendedTemp + ConfigSettings.TEMP_OFFSET.get()).length() * -3) + ConfigSettings.WORLD_GAUGE_POS.get().x(),
+                    /* Y */ height - 15 - bob + ConfigSettings.WORLD_GAUGE_POS.get().y(), color);
+            poseStack.popPose();
+        }
+    }
 
-            /*
-             Body Temperature
-             */
+    public static void renderBodyTemperature(MatrixStack poseStack, float partialTick, int width, int height)
+    {
+        Minecraft mc = Minecraft.getInstance();
 
-            // Blend body temperature (per frame)
-            BLEND_BODY_TEMP = CSMath.blend(PREV_BODY_TEMP, BODY_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
-            double bodyTempInt = CSMath.roundNearest(BLEND_BODY_TEMP, 1);
+        // Blend body temperature (per frame)
+        BLEND_BODY_TEMP = CSMath.blend(PREV_BODY_TEMP, BODY_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
+        double bodyTempInt = CSMath.roundNearest(BLEND_BODY_TEMP, 1);
 
-            if (mc.gameMode.canHurtPlayer() && mc.getCameraEntity() instanceof PlayerEntity && !Minecraft.getInstance().options.hideGui)
-            {
-                // Get text color
-                int color = bodyTempInt > 0 ? 16744509
-                          : bodyTempInt < 0 ? 4233468
-                          : 11513775;
+        if (mc.gameMode.canHurtPlayer() && mc.getCameraEntity() instanceof PlayerEntity && !Minecraft.getInstance().options.hideGui)
+        {
+            // Get text color
+            int color = bodyTempInt > 0 ? 16744509
+                      : bodyTempInt < 0 ? 4233468
+                      : 11513775;
 
-                    // Get the outer border color when readout is > 100
-                    int colorBG = bodyTempInt < 0 ? 1122643
-                                : bodyTempInt > 0 ? 5376516
-                                : 0;
-
-                    int bobLevel = Math.min(Math.abs(((int) BODY_TEMP_SEVERITY)), 3);
-                    int threatOffset = !ConfigSettings.ICON_BOBBING.get()
-                                       ? 0
-                                       : bobLevel == 2 ? ICON_BOB
-                                       : bobLevel == 3 ? Minecraft.getInstance().cameraEntity.tickCount % 2
-                                       : 0;
-
-                    RenderSystem.enableBlend();
-                    RenderSystem.defaultBlendFunc();
-                    Minecraft.getInstance().textureManager.bind(BODY_TEMP_GAUGE_LOCATION.get());
-
-                if (ConfigSettings.BODY_ICON_ENABLED.get())
-                {
-                    int icon = Math.abs(bodyTempInt) < 100 ?  CSMath.floor(BODY_TEMP_SEVERITY) : 4 * CSMath.sign(BODY_TEMP_SEVERITY);
-                    int iconX = (width / 2) - 5 + ConfigSettings.BODY_ICON_POS.get().x();
-                    int iconYOffset = ADVANCED_WORLD_TEMP && ConfigSettings.MOVE_BODY_ICON_WHEN_ADVANCED.get()
-                                      ? 54
-                                      : 47;
-                    int iconY = height - iconYOffset - threatOffset + ConfigSettings.BODY_ICON_POS.get().y();
-                    // Render icon
-                    AbstractGui.blit(poseStack, iconX, iconY, 0, 40 - icon * 10, 10, 10, 10, 90);
-
-                    // Render new icon if temperature changing
-                    if (CSMath.betweenExclusive(Math.abs(bodyTempInt), 0, 100))
-                    {
-                        // Map current temp severity to filling up the icon
-                        double blend = CSMath.blend(1, 9, Math.abs(BODY_TEMP_SEVERITY), Math.abs(CSMath.floor(BODY_TEMP_SEVERITY)), Math.abs(CSMath.ceil(BODY_TEMP_SEVERITY)));
-                        AbstractGui.blit(poseStack, iconX, iconY + 10 - CSMath.ceil(blend), 0,
-                                         // UV Y-coordinate for the icon in this stage
-                                         40 - CSMath.grow(icon, bodyTempInt > 0 ? 0 : 2) * 10 - CSMath.ceil(blend),
-                                         10, CSMath.ceil(blend), 10, 90);
-                    }
-                }
-
-                // Render Readout
-                if (ConfigSettings.BODY_READOUT_ENABLED.get() && ADVANCED_WORLD_TEMP)
-                {
-                    FontRenderer font = mc.font;
-                    int scaledWidth = mc.getWindow().getGuiScaledWidth();
-                    int scaledHeight = mc.getWindow().getGuiScaledHeight();
-
-                    String s = "" + (int) Math.min(Math.abs(bodyTempInt), 100);
-                    int x = (scaledWidth - font.width(s)) / 2 + ConfigSettings.BODY_READOUT_POS.get().x();
-                    int y = scaledHeight - 31 - 10 + ConfigSettings.BODY_READOUT_POS.get().y();
-
-                    // Draw the outline
-                    font.draw(poseStack, s, x + 1, y, colorBG);
-                    font.draw(poseStack, s, x - 1, y, colorBG);
-                    font.draw(poseStack, s, x, y + 1, colorBG);
-                    font.draw(poseStack, s, x, y - 1, colorBG);
-
-                    // Draw the readout
-                    font.draw(poseStack, s, x, y, color);
-
-                    // Render white overlay if temp is > 100
-                    if (Math.abs(bodyTempInt) > 100)
-                    {
-                        // Calculate the height of the white overlay
-                        int textHeight = font.wordWrapHeight(s, 100);
-                        int overlayHeight = (int) CSMath.roundUpNearest(CSMath.blend(2, textHeight, Math.abs(bodyTempInt), 100, 150), 1);
-                        // Overlay color
-                        int overlayColor = overlayHeight > 3 ? bodyTempInt > 0 ? 16777132 : 11599871
-                                         : bodyTempInt > 0 ? 16771975 : 8713471;
-                        int overlayColor2 = bodyTempInt > 0 ? 16759634 : 7528447;
-
-                        ClientOnlyHelper.renderVerticalCropText(s, x, y, Math.min(textHeight, overlayHeight + 1), overlayColor2, poseStack);
-                        ClientOnlyHelper.renderVerticalCropText(s, x, y, overlayHeight, overlayColor, poseStack);
-                    }
-                }
-            }
-
-            /*
-             Vague Temperature
-             */
-
-            if (player != null && !ADVANCED_WORLD_TEMP && mc.gameMode.getPlayerMode() != GameType.SPECTATOR
-            && !mc.options.hideGui && ConfigSettings.WORLD_GAUGE_ENABLED.get() && Minecraft.getInstance().gameMode.canHurtPlayer())
-            {
-                // Get player world temperature
-                double temp = Temperature.convert(WORLD_TEMP, ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
-                // Get the temperature severity
-                int severity = getGaugeSeverity(temp, PLAYER_MIN_TEMP, PLAYER_MAX_TEMP);
-                int renderOffset = CSMath.clamp(severity, -1, 1) * 2;
-
-                poseStack.pushPose();
-                RenderSystem.defaultBlendFunc();
-                RenderSystem.enableBlend();
-                RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+                // Get the outer border color when readout is > 100
+                int colorBG = bodyTempInt < 0 ? 1122643
+                            : bodyTempInt > 0 ? 5376516
+                            : 0;
 
                 int bobLevel = Math.min(Math.abs(((int) BODY_TEMP_SEVERITY)), 3);
                 int threatOffset = !ConfigSettings.ICON_BOBBING.get()
                                    ? 0
-                                   : bobLevel == 2
-                                     ? ICON_BOB
-                                     : bobLevel == 3
-                                       ? Minecraft.getInstance().cameraEntity.tickCount % 2
-                                       : 0;
+                                   : bobLevel == 2 ? ICON_BOB
+                                   : bobLevel == 3 ? Minecraft.getInstance().cameraEntity.tickCount % 2
+                                   : 0;
 
-                // Set gauge texture
-                mc.textureManager.bind(VAGUE_TEMP_GAUGE_LOCATION.get());
+                RenderSystem.enableBlend();
+                RenderSystem.defaultBlendFunc();
+                Minecraft.getInstance().textureManager.bind(BODY_TEMP_GAUGE_LOCATION.get());
 
-                // Render frame
-                AbstractGui.blit(poseStack,
-                                 (width / 2) - 8 + ConfigSettings.BODY_ICON_POS.get().x(),
-                                 height - 50 + ConfigSettings.BODY_ICON_POS.get().y() - renderOffset - threatOffset,
-                                 0, 64 - severity * 16, 16, 16, 16, 144);
+            if (ConfigSettings.BODY_ICON_ENABLED.get())
+            {
+                int icon = Math.abs(bodyTempInt) < 100 ?  CSMath.floor(BODY_TEMP_SEVERITY) : 4 * CSMath.sign(BODY_TEMP_SEVERITY);
+                int iconX = (width / 2) - 5 + ConfigSettings.BODY_ICON_POS.get().x();
+                int iconYOffset = ADVANCED_WORLD_TEMP && ConfigSettings.MOVE_BODY_ICON_WHEN_ADVANCED.get()
+                                  ? 54
+                                  : 47;
+                int iconY = height - iconYOffset - threatOffset + ConfigSettings.BODY_ICON_POS.get().y();
+                // Render icon
+                AbstractGui.blit(poseStack, iconX, iconY, 0, 40 - icon * 10, 10, 10, 10, 90);
 
-                poseStack.popPose();
+                // Render new icon if temperature changing
+                if (CSMath.betweenExclusive(Math.abs(bodyTempInt), 0, 100))
+                {
+                    // Map current temp severity to filling up the icon
+                    double blend = CSMath.blend(1, 9, Math.abs(BODY_TEMP_SEVERITY), Math.abs(CSMath.floor(BODY_TEMP_SEVERITY)), Math.abs(CSMath.ceil(BODY_TEMP_SEVERITY)));
+                    AbstractGui.blit(poseStack, iconX, iconY + 10 - CSMath.ceil(blend), 0,
+                                     // UV Y-coordinate for the icon in this stage
+                                     40 - CSMath.grow(icon, bodyTempInt > 0 ? 0 : 2) * 10 - CSMath.ceil(blend),
+                                     10, CSMath.ceil(blend), 10, 90);
+                }
             }
+
+            // Render Readout
+            if (ConfigSettings.BODY_READOUT_ENABLED.get() && ADVANCED_WORLD_TEMP)
+            {
+                FontRenderer font = mc.font;
+                int scaledWidth = mc.getWindow().getGuiScaledWidth();
+                int scaledHeight = mc.getWindow().getGuiScaledHeight();
+
+                String s = "" + (int) Math.min(Math.abs(bodyTempInt), 100);
+                int x = (scaledWidth - font.width(s)) / 2 + ConfigSettings.BODY_READOUT_POS.get().x();
+                int y = scaledHeight - 31 - 10 + ConfigSettings.BODY_READOUT_POS.get().y();
+
+                // Draw the outline
+                font.draw(poseStack, s, x + 1, y, colorBG);
+                font.draw(poseStack, s, x - 1, y, colorBG);
+                font.draw(poseStack, s, x, y + 1, colorBG);
+                font.draw(poseStack, s, x, y - 1, colorBG);
+
+                // Draw the readout
+                font.draw(poseStack, s, x, y, color);
+
+                // Render white overlay if temp is > 100
+                if (Math.abs(bodyTempInt) > 100)
+                {
+                    // Calculate the height of the white overlay
+                    int textHeight = font.wordWrapHeight(s, 100);
+                    int overlayHeight = (int) CSMath.roundUpNearest(CSMath.blend(2, textHeight, Math.abs(bodyTempInt), 100, 150), 1);
+                    // Overlay color
+                    int overlayColor = overlayHeight > 3 ? bodyTempInt > 0 ? 16777132 : 11599871
+                                     : bodyTempInt > 0 ? 16771975 : 8713471;
+                    int overlayColor2 = bodyTempInt > 0 ? 16759634 : 7528447;
+
+                    ClientOnlyHelper.renderVerticalCropText(s, x, y, Math.min(textHeight, overlayHeight + 1), overlayColor2, poseStack);
+                    ClientOnlyHelper.renderVerticalCropText(s, x, y, overlayHeight, overlayColor, poseStack);
+                }
+            }
+        }
+    }
+
+    public static void renderVagueTemperature(MatrixStack poseStack, float partialTick, int width, int height)
+    {
+        Minecraft mc = Minecraft.getInstance();
+        PlayerEntity player = mc.player;
+
+        if (player != null && !ADVANCED_WORLD_TEMP && mc.gameMode.getPlayerMode() != GameType.SPECTATOR
+        && !mc.options.hideGui && ConfigSettings.WORLD_GAUGE_ENABLED.get() && Minecraft.getInstance().gameMode.canHurtPlayer())
+        {
+            // Get player world temperature
+            double temp = Temperature.convert(WORLD_TEMP, ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
+            // Get the temperature severity
+            int severity = getGaugeSeverity(temp, PLAYER_MIN_TEMP, PLAYER_MAX_TEMP);
+            int renderOffset = CSMath.clamp(severity, -1, 1) * 2;
+
+            poseStack.pushPose();
+            RenderSystem.defaultBlendFunc();
+            RenderSystem.enableBlend();
+            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+
+            int bobLevel = Math.min(Math.abs(((int) BODY_TEMP_SEVERITY)), 3);
+            int threatOffset = !ConfigSettings.ICON_BOBBING.get()
+                               ? 0
+                               : bobLevel == 2
+                                 ? ICON_BOB
+                                 : bobLevel == 3
+                                   ? Minecraft.getInstance().cameraEntity.tickCount % 2
+                                   : 0;
+
+            // Set gauge texture
+            mc.textureManager.bind(VAGUE_TEMP_GAUGE_LOCATION.get());
+
+            // Render frame
+            AbstractGui.blit(poseStack,
+                             (width / 2) - 8 + ConfigSettings.BODY_ICON_POS.get().x(),
+                             height - 50 + ConfigSettings.BODY_ICON_POS.get().y() - renderOffset - threatOffset,
+                             0, 64 - severity * 16, 16, 16, 16, 144);
+
+            poseStack.popPose();
+        }
+    }
+
+    public static void renderFoodEffects(MatrixStack poseStack, float partialTick, int width, int height)
+    {
+        if (!ConfigSettings.FOOD_EFFECTS_ENABLED.get()) return;
+
+        Minecraft mc = Minecraft.getInstance();
+        PlayerEntity player = mc.player;
+
+        poseStack.pushPose();
+        Vec2i pos = ConfigSettings.FOOD_EFFECTS_POS.get();
+        poseStack.translate(pos.x, pos.y, 0);
+        int y = 0;
+        for (List<TempModifier> modifierList : Temperature.getModifiers(player).values())
+        {
+            for (TempModifier modifier : modifierList)
+            {
+                if (modifier instanceof FoodTempModifier)
+                {
+                    int x = width - 10;
+                    if (modifier.getNBT().getDouble("duration") == 0) continue;
+                    int timeLeft = modifier.getExpireTime() - modifier.getTicksExisted();
+                    double temp = modifier.getNBT().getDouble("temperature");
+
+                    String sign = temp > 0 ? "↑" : "↓";
+                    int color = temp > 0 ? TooltipHandler.HOT.getColor().getValue()
+                              : temp < 0 ? TooltipHandler.COLD.getColor().getValue()
+                              : TextFormatting.WHITE.getColor();
+                    String tempString = CSMath.formatDoubleOrInt(CSMath.round(temp, 2));
+                    if (temp < 0) tempString = tempString.substring(1);
+
+                    RenderSystem.enableBlend();
+                    if (timeLeft < 200)
+                    {
+                        float alpha = (float) CSMath.blend(1, Math.sin((modifier.getTicksExisted()+partialTick) / 1.5) / 2 + 0.5, timeLeft, 200, 0);
+                        RenderSystem.color4f(1, 1, 1, alpha);
+                    }
+                    mc.font.drawShadow(poseStack, tempString, x - mc.font.width(tempString), height - 18 - y * 20, color, true);
+                    x -= mc.font.width(tempString) + 17;
+
+                    Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(modifier.getNBT().getString("item")));
+                    if (item == null) continue;
+                    mc.getItemRenderer().renderGuiItem(item.getDefaultInstance(), x, height - 22 - y * 20);
+                    x -= 1;
+
+                    String timer = StringUtils.formatTickDuration(timeLeft);
+                    mc.font.drawShadow(poseStack, timer, x - mc.font.width(timer), height - 18 - y * 20, TextFormatting.WHITE.getColor(), true);
+                    y++;
+                }
+            }
+        }
+        poseStack.popPose();
+    }
+
+    @SubscribeEvent
+    public static void onRenderHUD(RenderGameOverlayEvent.Post event)
+    {
+        if (event.getType() == RenderGameOverlayEvent.ElementType.HOTBAR)
+        {
+            MatrixStack poseStack = event.getMatrixStack();
+            int width = event.getWindow().getGuiScaledWidth();
+            int height = event.getWindow().getGuiScaledHeight();
+            float partialTick = Minecraft.getInstance().getFrameTime();
+
+            renderWorldTemperature(poseStack, partialTick, width, height);
+            renderBodyTemperature(poseStack, partialTick, width, height);
+            renderVagueTemperature(poseStack, partialTick, width, height);
+            renderFoodEffects(poseStack, partialTick, width, height);
         }
     }
 
