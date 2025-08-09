@@ -89,7 +89,7 @@ public class CompatManager
     private static final boolean PRIMAL_WINTER_LOADED = modLoaded("primalwinter");
     private static final boolean THIRST_LOADED = modLoaded("thirst", "1.20.1-1.3.14");
     private static final boolean ICEBERG_LOADED = modLoaded("iceberg");
-    private static final boolean SPOILED_LOADED = modLoaded("spoiled");
+    private static final boolean SPOILED_LOADED = modLoaded("spoiled", "2.2.0");
     private static final boolean SUPPLEMENTARIES_LOADED = modLoaded("supplementaries");
     private static final boolean VALKYRIEN_SKIES_LOADED = modLoaded("valkyrienskies");
     private static final boolean TOUGH_AS_NAILS_LOADED = modLoaded("toughasnails");

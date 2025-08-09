@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.properties.ChestType;
 import net.minecraftforge.event.TickEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -26,7 +27,9 @@ public class MixinSpoiledIcebox
     private static BlockEntity BE;
     @Inject(method = "onWorldTick", at = @At(value = "INVOKE", target = "Ljava/util/Map;get(Ljava/lang/Object;)Ljava/lang/Object;"),
             locals = LocalCapture.CAPTURE_FAILHARD, remap = false)
-    private void storeBlockEntity(TickEvent.LevelTickEvent event, CallbackInfo ci, ServerLevel level, List blockEntityPositions, Iterator var4, BlockPos pos, BlockEntity be, ResourceLocation location, double spoilRate)
+    private void storeBlockEntity(TickEvent.LevelTickEvent event, CallbackInfo ci,
+                                  // locals
+                                  ServerLevel level, List blockEntityPositions, Iterator var4, BlockPos pos, BlockEntity be)
     {   BE = be;
     }
 
@@ -46,7 +49,7 @@ public class MixinSpoiledIcebox
     public static class ContainerModifier
     {
         @Inject(method = "generateContainerModifier", at = @At("TAIL"), remap = false)
-        private static void addIceboxConfig(List<? extends String> configValues, CallbackInfo ci)
+        private static void addIceboxConfig(List<? extends String> containerValues, List<? extends String> itemContainerValues, CallbackInfo ci)
         {
             SpoiledConfigCache.containerModifier.put(new ResourceLocation(ColdSweat.MOD_ID, "icebox"), 0.5);
         }
