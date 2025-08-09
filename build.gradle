@@ -150,7 +150,7 @@ dependencies {
     implementation "curse.maven:thirst-was-taken-679270:6532318"
     implementation "curse.maven:serene-seasons-291874:5613014"
     implementation "curse.maven:glitchcore-955399:5645390"
-    implementation "curse.maven:spoiled-364918:5490658"
+    implementation "curse.maven:spoiled-364918:6828999"
     implementation "curse.maven:curios-309927:6529130"
     implementation "curse.maven:iceberg-520110:6423863"
     implementation "curse.maven:create-328085:6247669"

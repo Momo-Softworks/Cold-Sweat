@@ -25,7 +25,9 @@ public class MixinSpoiledIcebox
 {
     private static BlockEntity BE;
     @Inject(method = "onWorldTick", at = @At(value = "INVOKE", target = "Ljava/util/Map;get(Ljava/lang/Object;)Ljava/lang/Object;"), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void storeBlockEntity(LevelTickEvent.Post event, CallbackInfo ci, ServerLevel level, List blockEntityPositions, Iterator var4, BlockPos pos, BlockEntity be, ResourceLocation location, double spoilRate)
+    private void storeBlockEntity(LevelTickEvent.Post event, CallbackInfo ci,
+                                  // locals
+                                  ServerLevel level, List blockEntityPositions, Iterator var4, BlockPos pos, BlockEntity be)
     {   BE = be;
     }
 
@@ -45,7 +47,7 @@ public class MixinSpoiledIcebox
     public static class ContainerModifier
     {
         @Inject(method = "generateContainerModifier", at = @At("TAIL"))
-        private static void addIceboxConfig(List<? extends String> configValues, CallbackInfo ci)
+        private static void addIceboxConfig(List<? extends String> containerValues, List<? extends String> itemContainerValues, CallbackInfo ci)
         {
             SpoiledConfigCache.containerModifier.put(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "icebox"), 0.5);
         }
