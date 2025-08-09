@@ -326,7 +326,7 @@ public class Overlays
 
                     mc.font.drawShadow(poseStack, tempString, x, y - mc.font.lineHeight - 11, color, true);
 
-                    offset += 24;
+                    offset += 25;
                     poseStack.popPose();
                 }
             }
