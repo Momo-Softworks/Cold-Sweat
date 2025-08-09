@@ -46,6 +46,7 @@ public class Overlays
     public static final ResourceLocation WORLD_TEMP_GAUGE_HC = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/world_temp_gauge_hc.png");
     public static final ResourceLocation VAGUE_TEMP_GAUGE = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/vague_temp_gauge.png");
     public static final ResourceLocation VAGUE_TEMP_GAUGE_HC = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/vague_temp_gauge_hc.png");
+    public static final ResourceLocation FOOD_EFFECT = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/food_effect_background.png");
 
     public static final Supplier<ResourceLocation> BODY_TEMP_GAUGE_LOCATION  = () ->
             ConfigSettings.HIGH_CONTRAST.get() ? BODY_TEMP_GAUGE_HC
@@ -265,6 +266,7 @@ public class Overlays
     {
         if (!ConfigSettings.FOOD_EFFECTS_ENABLED.get()) return;
 
+        RenderSystem.enableBlend();
         Minecraft mc = Minecraft.getInstance();
         Player player = mc.player;
         int width = graphics.guiWidth();
@@ -274,7 +276,7 @@ public class Overlays
         graphics.pose().pushPose();
         Vector2i pos = ConfigSettings.FOOD_EFFECTS_POS.get();
         graphics.pose().translate(pos.x, pos.y, 0);
-        int y = 0;
+        int offset = 0;
         for (List<TempModifier> modifierList : Temperature.getModifiers(player).values())
         {
             for (TempModifier modifier : modifierList)
@@ -282,33 +284,51 @@ public class Overlays
                 if (modifier instanceof FoodTempModifier)
                 {
                     int x = width - 10;
+                    int y = height - 10 - offset;
+
                     if (modifier.getNBT().getDouble("duration") == 0) continue;
                     int timeLeft = modifier.getExpireTime() - modifier.getTicksExisted();
                     double temp = modifier.getNBT().getDouble("temperature");
 
+                    // Render background
+                    // background is 76x24
+                    graphics.blit(FOOD_EFFECT, x - 76, y - 24, 0, 0, 76, 24, 76, 24);
+
                     String sign = temp > 0 ? "↑" : "↓";
-                    Style style = temp > 0 ? TooltipHandler.HOT : temp < 0 ? TooltipHandler.COLD : Style.EMPTY;
                     String tempString = CSMath.formatDoubleOrInt(CSMath.round(temp, 2));
                     if (temp < 0) tempString = tempString.substring(1);
-                    Component tempText = Component.literal(sign + tempString).withStyle(style);
+                    tempString = sign + tempString;
+                    String timerString = StringUtil.formatTickDuration(timeLeft, player.level().tickRateManager().tickrate());
+                    int contentWidth = mc.font.width(tempString) + mc.font.width(timerString) + 20;
+                    int contentHeight = 16;
+                    x -= 76;
 
-                    RenderSystem.enableBlend();
+                    graphics.pose().pushPose();
+                    graphics.pose().translate(76/2 - contentWidth / 2, 24/2 - contentHeight / 2, 0);
+
+                    // Draw timer
                     if (timeLeft < 200)
                     {
                         float alpha = (float) CSMath.blend(1, Math.sin((modifier.getTicksExisted()+partialTick) / 1.5) / 2 + 0.5, timeLeft, 200, 0);
                         RenderSystem.setShaderColor(1, 1, 1, alpha);
                     }
-                    graphics.drawString(mc.font, tempText, x - mc.font.width(tempText), height - 18 - y * 20, tempText.getStyle().getColor().getValue(), true);
-                    x -= mc.font.width(tempText) + 17;
+                    graphics.drawString(mc.font, timerString, x, y - mc.font.lineHeight - 11, ChatFormatting.WHITE.getColor(), true);
+                    RenderSystem.setShaderColor(1, 1, 1, 1);
+                    x += mc.font.width(timerString) + 2;
 
+                    // Draw item
                     Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(modifier.getNBT().getString("item")));
-                    if (item == null) continue;
-                    graphics.renderItem(item.getDefaultInstance(), x, height - 22 - y * 20);
-                    x -= 1;
+                    graphics.renderItem(item.getDefaultInstance(), x, y - 24);
+                    x += 16 + 2;
 
-                    String timer = StringUtil.formatTickDuration(timeLeft, player.level().tickRateManager().tickrate());
-                    graphics.drawString(mc.font, timer, x - mc.font.width(timer), height - 18 - y * 20, ChatFormatting.WHITE.getColor(), true);
-                    y++;
+                    // Draw temperature text
+                    Style style = temp > 0 ? TooltipHandler.HOT : temp < 0 ? TooltipHandler.COLD : Style.EMPTY;
+                    Component tempText = Component.literal(tempString).withStyle(style);
+
+                    graphics.drawString(mc.font, tempText, x, y - mc.font.lineHeight - 11, tempText.getStyle().getColor().getValue(), true);
+
+                    offset += 24;
+                    graphics.pose().popPose();
                 }
             }
         }
