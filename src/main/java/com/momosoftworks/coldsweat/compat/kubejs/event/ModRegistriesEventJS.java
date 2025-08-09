@@ -10,6 +10,7 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.compat.kubejs.event.builder.*;
 import com.momosoftworks.coldsweat.compat.kubejs.util.TempModifierDataJS;
 import com.momosoftworks.coldsweat.data.ModRegistries;
+import com.momosoftworks.coldsweat.data.RegistryHolder;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
@@ -157,7 +158,7 @@ public class ModRegistriesEventJS extends StartupEventJS
     }
 
     private <K, V extends ConfigData> void addRegistryConfig(RegistryKey<Registry<K>> keyRegistry,
-                                                             ModRegistries.ConfigRegistry<V> modRegistry,
+                                                             RegistryHolder<V> modRegistry,
                                                              String[] rawKeys,
                                                              Function<NegatableList<K>, V> constructor)
     {

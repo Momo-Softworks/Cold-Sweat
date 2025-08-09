@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.util.serialization;
 
 import com.mojang.datafixers.util.Either;
 import com.momosoftworks.coldsweat.data.ModRegistries;
+import com.momosoftworks.coldsweat.data.RegistryHolder;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -22,7 +23,6 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 public class RegistryHelper
 {
@@ -85,7 +85,7 @@ public class RegistryHelper
 
     public static ResourceLocation getKey(ConfigData object)
     {
-        for (ModRegistries.ConfigRegistry<?> registry : ModRegistries.getRegistries().values())
+        for (RegistryHolder<?> registry : ModRegistries.getRegistries().values())
         {
             if (registry.type().isInstance(object))
             {

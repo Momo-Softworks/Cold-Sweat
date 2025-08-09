@@ -3,7 +3,7 @@ package com.momosoftworks.coldsweat.api.event.core.registry;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.data.ModRegistries;
+import com.momosoftworks.coldsweat.data.RegistryHolder;
 import com.momosoftworks.coldsweat.data.codec.configuration.RemoveRegistryData;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import net.minecraft.util.RegistryKey;
@@ -37,15 +37,15 @@ public abstract class CreateRegistriesEvent extends Event
     {   return registries;
     }
 
-    public <T extends ConfigData> Collection<T> getRegistry(ModRegistries.ConfigRegistry<T> registry)
+    public <T extends ConfigData> Collection<T> getRegistry(RegistryHolder<T> registry)
     {   return (Collection) registries.get(registry.key());
     }
 
-    public <T extends ConfigData> void addRegistry(ModRegistries.ConfigRegistry<T> registry, T value)
+    public <T extends ConfigData> void addRegistry(RegistryHolder<T> registry, T value)
     {   ((Multimap) registries).put(registry.key(), value);
     }
 
-    public <T extends ConfigData> void addRegistries(ModRegistries.ConfigRegistry<T> registry, Collection<T> values)
+    public <T extends ConfigData> void addRegistries(RegistryHolder<T> registry, Collection<T> values)
     {   ((Multimap) registries).putAll(registry.key(), values);
     }
 

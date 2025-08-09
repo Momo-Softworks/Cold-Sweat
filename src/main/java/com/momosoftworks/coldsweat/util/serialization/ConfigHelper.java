@@ -8,7 +8,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.config.ConfigLoadingHandler;
-import com.momosoftworks.coldsweat.data.ModRegistries;
+import com.momosoftworks.coldsweat.data.RegistryHolder;
 import com.momosoftworks.coldsweat.data.codec.configuration.FuelData;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
@@ -194,7 +194,7 @@ public class ConfigHelper
 
     public static <K extends IForgeRegistryEntry<K>, V extends ConfigData> Multimap<K, V> parseTomlRegistry(ForgeConfigSpec.ConfigValue<List<? extends List<?>>> config, Function<List<?>, V> tomlParser,
                                                                                                             Function<V, NegatableList<Either<ITag<K>, K>>> keyListGetter,
-                                                                                                            IForgeRegistry<K> keyRegistry, ModRegistries.ConfigRegistry<V> valueRegistry)
+                                                                                                            IForgeRegistry<K> keyRegistry, RegistryHolder<V> valueRegistry)
     {
         Multimap<K, V> dataMap = new RegistryMultiMap<>();
         for (List<?> entry : config.get())
@@ -213,7 +213,7 @@ public class ConfigHelper
 
     public static <K extends IForgeRegistryEntry<K>, V extends ConfigData> Map<K, V> parseTomlRegistryUnique(ForgeConfigSpec.ConfigValue<List<? extends List<?>>> config, Function<List<?>, V> tomlParser,
                                                                                                              Function<V, List<Either<ITag<K>, K>>> keyListGetter,
-                                                                                                             IForgeRegistry<K> keyRegistry, ModRegistries.ConfigRegistry<V> valueRegistry)
+                                                                                                             IForgeRegistry<K> keyRegistry, RegistryHolder<V> valueRegistry)
     {
         Map<K, V> dataMap = new HashMap<>();
         for (List<?> entry : config.get())
