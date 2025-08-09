@@ -111,7 +111,7 @@ public class ColdSweat
         }
         try
         {
-            Method process = NewRegistryEvent.class.getDeclaredMethod("process");
+            Method process = NewRegistryEvent.class.getDeclaredMethod("fill");
             process.setAccessible(true);
             process.invoke(dummyEvent);
         }
