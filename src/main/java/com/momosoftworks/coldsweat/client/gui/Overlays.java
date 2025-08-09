@@ -325,7 +325,7 @@ public class Overlays
 
                     graphics.drawString(mc.font, tempText, x, y - mc.font.lineHeight - 11, tempText.getStyle().getColor().getValue(), true);
 
-                    offset += 24;
+                    offset += 25;
                     graphics.pose().popPose();
                 }
             }
