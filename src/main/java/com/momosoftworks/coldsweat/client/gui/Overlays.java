@@ -301,21 +301,21 @@ public class Overlays
                         float alpha = (float) CSMath.blend(1, Math.sin((modifier.getTicksExisted()+partialTick) / 1.5) / 2 + 0.5, timeLeft, 200, 0);
                         RenderSystem.color4f(1, 1, 1, alpha);
                     }
-                    mc.font.drawShadow(poseStack, timerString, x, y - mc.font.lineHeight - 11, TextFormatting.WHITE.getColor(), true);
+                    mc.font.drawShadow(poseStack, timerString, x, y - mc.font.lineHeight - 11, TextFormatting.WHITE.getColor());
                     RenderSystem.color4f(1, 1, 1, 1);
                     x += mc.font.width(timerString) + 2;
 
                     // Draw item
                     Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(modifier.getNBT().getString("item")));
                     mc.getItemRenderer().renderGuiItem(item.getDefaultInstance(), x + 8, y - 20);
-                    x += 16 + 2;
+                    x += 16;
 
                     // Draw temperature text
                     int color = temp > 0 ? TooltipHandler.HOT.getColor().getValue()
                               : temp < 0 ? TooltipHandler.COLD.getColor().getValue()
                               : TextFormatting.WHITE.getColor();
 
-                    mc.font.drawShadow(poseStack, tempString, x, y - mc.font.lineHeight - 11, color, true);
+                    mc.font.drawShadow(poseStack, tempString, x, y - mc.font.lineHeight - 11, color);
 
                     offset += 25;
                     poseStack.popPose();
