@@ -3232,6 +3232,10 @@ Fixes:
 - Fixed boolean block state values in JSON not being read properly
 
 Technical Changes:
+* (1.16) The file structure of JSON registries has changed to match that of other versions:
+      - Registries are now located in data/<yourmod>/cold_sweat/* (instead of data/cold_sweat/config/*)
+      - This means that JSON registries registered by other mods will have that mod's namespace in their IDs
+      - Datapacks still do not work. This is only for mod developers
 - Block temperature JSON configs can now be added to "effect groups"
       - Block temperatures in an effect group will count towards each other's max effect limits
       - i.e. if redstone lamps and copper bulbs are part of the same group, redstone lamps will count towards the max number of copper bulbs and vice-versa
@@ -3241,3 +3245,27 @@ Technical Changes:
             - Include the IDs of the block temps in the tag (i.e. "yourpack:your_block_temp")
 - registerByClassName() in TempModifierRegisterEvent now accepts constructor arguments as its last parameter (varargs)
       - These arguments will be passed to the constructor of the modifier class upon creation
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.4-b04b
+- Added UI element displaying food temperature effects
+- Added setting to hide non-essential information in tooltips, such as "Hold [Shift]" prompts
+
+Fixes:
+* (1.21) Fixed armor insulation not working
+* (1.21) Fixed Cold Sweat armor sets not having durability
+- (1.21) Fixed error during startup due to access transformer file name discrepancy
+* Fixed performance degradation due to hearths, boilers, and iceboxes not being properly unloaded
+- Fixed the insulation tooltip not showing for naturally-insulating armor items
+- Fixed waterskin tooltip erroneously saying "Hold [crouch] to drink" when secondary action is set to pour
+
+Technical Changes:
+- Added new methods to TempModifier that fire when they are are added/removed on an entity:
+      - onAdded/onRemoved: Fires on the TempModifier immediately when it is added/removed
+      - onSiblingAdded/onSiblingRemoved: Fires on all other TempModifiers applied to a trait when a new modifier is added/removed
+- Added #forge:soul_campfires tag (#c:soul_campfires in NeoForge), which is now used by the block temperature of soul campfires
+- CreateRegistriesEvent has been broken up into two events:
+      - AddRegistriesEvent: Fires right before Cold Sweat registers its registries to Minecraft's datapack system.
+            - Use this event to make new registries. They will now be properly registered as Minecraft registries
+      - LoadRegistriesEvent: Drop-in replacement for CreateRegistriesEvent. Has Pre/Post sub-classes that fire at the same stages of registry loading
