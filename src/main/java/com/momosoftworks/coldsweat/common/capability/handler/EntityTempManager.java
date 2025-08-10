@@ -248,6 +248,7 @@ public class EntityTempManager
                 TaskScheduler.scheduleServer(() ->
                 {   cap.tick(living);
                     Temperature.updateTemperature(living, cap, true);
+                    Temperature.updateModifiers(living, cap);
                 }, 1);
             });
         }
