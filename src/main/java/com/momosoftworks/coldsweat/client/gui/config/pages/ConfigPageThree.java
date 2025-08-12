@@ -33,12 +33,6 @@ public class ConfigPageThree extends AbstractConfigPage
     {
         super.init();
 
-        // Check sleep conditions
-        this.addButton("check_sleep_conditions", Side.LEFT,
-                       () -> getToggleButtonText(Component.translatable("cold_sweat.config.check_sleep_conditions.name"), ConfigSettings.CHECK_SLEEP_CONDITIONS.get()),
-                       button -> ConfigSettings.CHECK_SLEEP_CONDITIONS.set(!ConfigSettings.CHECK_SLEEP_CONDITIONS.get()),
-                       true, false, false, Component.translatable("cold_sweat.config.check_sleep_conditions.desc"));
-
         // Enable Grace Period
         this.addButton("grace_toggle", Side.LEFT,
                        () -> getToggleButtonText(Component.translatable("cold_sweat.config.grace_period.name"), ConfigSettings.GRACE_ENABLED.get()),
@@ -51,6 +45,14 @@ public class ConfigPageThree extends AbstractConfigPage
                              input -> input.setValue(ConfigSettings.GRACE_LENGTH.get() + ""),
                              true, false, false, Component.translatable("cold_sweat.config.grace_period_length.desc_1"),
                              Component.translatable("cold_sweat.config.grace_period_length.desc_2").withStyle(ChatFormatting.DARK_GRAY));
+
+        this.addEmptySpace(Side.LEFT, 1);
+
+        // Check sleep conditions
+        this.addButton("check_sleep_conditions", Side.LEFT,
+                       () -> getToggleButtonText(Component.translatable("cold_sweat.config.check_sleep_conditions.name"), ConfigSettings.CHECK_SLEEP_CONDITIONS.get()),
+                       button -> ConfigSettings.CHECK_SLEEP_CONDITIONS.set(!ConfigSettings.CHECK_SLEEP_CONDITIONS.get()),
+                       true, false, false, Component.translatable("cold_sweat.config.check_sleep_conditions.desc"));
 
         // Insulation Strength
         this.addDecimalInput("insulation_strength", Side.LEFT, Component.translatable("cold_sweat.config.insulation_strength.name"),
