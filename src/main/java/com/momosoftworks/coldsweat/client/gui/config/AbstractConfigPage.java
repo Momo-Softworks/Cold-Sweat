@@ -102,11 +102,11 @@ public abstract class AbstractConfigPage extends Screen
      * Adds a label with plain text to the list on the given side.
      * @param id The internal id of the label. This widget can be accessed by this id.
      */
-    protected void addLabel(String id, Side side, String text, int color)
+    protected void addLabel(String id, Side side, IFormattableTextComponent text)
     {
         int labelX = side == Side.LEFT ? this.width / 2 - 185 : this.width / 2 + 51;
-        int labelY = this.height / 4 + (side == Side.LEFT ? leftSideLength : rightSideLength);
-        ConfigLabel label = new ConfigLabel(id, text, labelX, labelY, color);
+        int labelY = this.height / 4 - 8 + (side == Side.LEFT ? leftSideLength : rightSideLength);
+        ConfigLabel label = new ConfigLabel(id, text, labelX, labelY);
 
         this.addWidgetBatch(id, Arrays.asList(label), true);
 
@@ -116,10 +116,6 @@ public abstract class AbstractConfigPage extends Screen
         else
         {   this.rightSideLength += font.lineHeight + 4;
         }
-    }
-
-    protected void addLabel(String id, Side side, String text)
-    {   this.addLabel(id, side, text, 16777215);
     }
 
     /**
@@ -246,7 +242,7 @@ public abstract class AbstractConfigPage extends Screen
         textBox.setValue(ConfigScreen.TWO_PLACES.format(Double.parseDouble(textBox.getValue())));
 
         // Make the label
-        ConfigLabel configLabel = new ConfigLabel(id, label.getString(), widgetX - 95, widgetY, shouldBeActive ? 16777215 : 8421504);
+        ConfigLabel configLabel = new ConfigLabel(id, label.withStyle(Style.EMPTY.withColor(Color.fromRgb(shouldBeActive ? 16777215 : 8421504))), widgetX - 95, widgetY);
         // Add the clientside indicator
         if (clientside)
         {   this.createClientsideIcon(id, widgetX - 115, widgetY - 2);
@@ -369,7 +365,7 @@ public abstract class AbstractConfigPage extends Screen
         }
 
         // Add the option text
-        ConfigLabel configLabel = new ConfigLabel(id, label.getString(), widgetX - 79, widgetY, shouldBeActive ? 16777215 : 8421504);
+        ConfigLabel configLabel = new ConfigLabel(id, label.withStyle(Style.EMPTY.withColor(Color.fromRgb(shouldBeActive ? 16777215 : 8421504))), widgetX - 79, widgetY);
         // Add the clientside indicator
         if (clientside)
         {   this.createClientsideIcon(id, widgetX - 96, widgetY - 8 + 5);

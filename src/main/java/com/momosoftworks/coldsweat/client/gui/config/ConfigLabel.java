@@ -1,38 +1,29 @@
 package com.momosoftworks.coldsweat.client.gui.config;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.Widget;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.Color;
+import net.minecraft.util.text.IFormattableTextComponent;
 
 public class ConfigLabel extends Widget
 {
     public final String id;
 
-    private int color;
-
-    public ConfigLabel(String id, String text, int x, int y)
+    public ConfigLabel(String id, IFormattableTextComponent text, int x, int y)
     {
-        this(id, text, x, y, 16777215);
-    }
-
-    public ConfigLabel(String id, String text, int x, int y, int color)
-    {
-        super(x, y, Minecraft.getInstance().font.width(text), Minecraft.getInstance().font.lineHeight, new StringTextComponent(text));
+        super(x, y, Minecraft.getInstance().font.width(text), Minecraft.getInstance().font.lineHeight, text);
         this.id = id;
         this.x = x;
         this.y = y;
-        this.color = color;
-    }
-
-    public void setTextColor(int color)
-    {
-        this.color = color;
     }
 
     @Override
-    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float depth)
-    {   Minecraft.getInstance().font.drawShadow(matrixStack, this.getMessage(), this.x, this.y, color);
+    public void render(MatrixStack poseStack, int mouseX, int mouseY, float depth)
+    {
+        int color = CSMath.getIfNotNull(this.getMessage().getStyle().getColor(), Color::getValue, 0xFFFFFF);
+        Minecraft.getInstance().font.drawShadow(poseStack, this.getMessage(), this.x, this.y, color);
     }
 
     @Override
