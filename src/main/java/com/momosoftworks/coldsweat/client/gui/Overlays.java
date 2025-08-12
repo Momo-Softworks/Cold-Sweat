@@ -22,7 +22,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RegisterGuiOverlaysEvent;
@@ -33,7 +32,9 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
@@ -274,18 +275,31 @@ public class Overlays
         Vec2i pos = ConfigSettings.FOOD_EFFECTS_POS.get();
         poseStack.translate(pos.x, pos.y, 0);
         int offset = 0;
-        for (List<TempModifier> modifierList : Temperature.getModifiers(player).values())
+        for (Map.Entry<Temperature.Trait, List<TempModifier>> entry : Temperature.getModifiers(player).entrySet())
         {
-            for (TempModifier modifier : modifierList)
+            Temperature.Trait trait = entry.getKey();
+            List<TempModifier> modifierList = new ArrayList<>(entry.getValue());
+            List<FoodTempModifier> sortedModifiers = modifierList.stream()
+                                                     .filter(mod -> mod instanceof FoodTempModifier)
+                                                     .map(mod -> (FoodTempModifier) mod)
+                                                     // Sort by absolute value, positive temps first
+                                                     .sorted((m1, m2) -> {
+                                                         int sign1 = CSMath.sign(m1.getNBT().getDouble("temperature"));
+                                                         int sign2 = CSMath.sign(m2.getNBT().getDouble("temperature"));
+                                                         if (sign1 != sign2) return Integer.compare(sign1, sign2);
+                                                         return Double.compare(Math.abs(m1.getNBT().getDouble("temperature")), Math.abs(m2.getNBT().getDouble("temperature")));
+                                                     }).toList();
+            for (TempModifier modifier : sortedModifiers)
             {
-                if (modifier instanceof FoodTempModifier)
+                if (modifier instanceof FoodTempModifier food)
                 {
                     int x = width - 10;
                     int y = height - 10 - offset;
 
-                    if (modifier.getNBT().getDouble("duration") == 0) continue;
-                    int timeLeft = modifier.getExpireTime() - modifier.getTicksExisted();
-                    double temp = modifier.getNBT().getDouble("temperature");
+                    if (food.getNBT().getDouble("duration") == 0) continue;
+                    int timeLeft = food.getExpireTime() - food.getTicksExisted();
+                    double temp = food.getNBT().getDouble("temperature");
+                    boolean overridden = food.isOverridden(trait);
 
                     // Render background
                     // background is 76x24
@@ -303,19 +317,21 @@ public class Overlays
 
                     poseStack.pushPose();
                     poseStack.translate(76/2 - contentWidth / 2, 24/2 - contentHeight / 2, 0);
+                    float brightness = overridden ? 0.35f : 1f;
+                    RenderSystem.setShaderColor(brightness, brightness, brightness, 1);
 
                     // Draw timer
                     if (timeLeft < 200)
                     {
-                        float alpha = (float) CSMath.blend(1, Math.sin((modifier.getTicksExisted()+partialTick) / 1.5) / 2 + 0.5, timeLeft, 200, 0);
-                        RenderSystem.setShaderColor(1, 1, 1, alpha);
+                        float alpha = (float) CSMath.blend(1, Math.sin((food.getTicksExisted()+partialTick) / 1.5) / 2 + 0.5, timeLeft, 200, 0);
+                        RenderSystem.setShaderColor(brightness, brightness, brightness, alpha);
                     }
                     mc.font.drawShadow(poseStack, timerString, x, y - mc.font.lineHeight - 11, ChatFormatting.WHITE.getColor(), true);
-                    RenderSystem.setShaderColor(1, 1, 1, 1);
+                    RenderSystem.setShaderColor(brightness, brightness, brightness, 1);
                     x += mc.font.width(timerString) + 2;
 
                     // Draw item
-                    Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(modifier.getNBT().getString("item")));
+                    Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(food.getNBT().getString("item")));
                     mc.getItemRenderer().renderGuiItem(item.getDefaultInstance(), x + 8, y - 20);
                     x += 16 + 2;
 
@@ -328,6 +344,7 @@ public class Overlays
 
                     offset += 25;
                     poseStack.popPose();
+                    RenderSystem.setShaderColor(1, 1, 1, 1);
                 }
             }
         }

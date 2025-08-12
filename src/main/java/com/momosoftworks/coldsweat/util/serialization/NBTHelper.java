@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import org.checkerframework.checker.units.qual.K;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -85,6 +86,14 @@ public class NBTHelper
         return optional;
     }
 
+    public static void incrementTag(CompoundTag tag, String key, int amount, Predicate<Integer> predicate)
+    {
+        int value = tag.getInt(key);
+        if (predicate.test(value))
+        {   tag.putInt(key, value + amount);
+        }
+    }
+
     public static void incrementTag(Object owner, String key, int amount)
     {   incrementTag(owner, key, amount, (tag) -> true);
     }
@@ -101,13 +110,13 @@ public class NBTHelper
         else if (owner instanceof BlockEntity blockEntity)
         {   tag = blockEntity.getPersistentData();
         }
+        else if (owner instanceof TempModifier modifier)
+        {   tag = modifier.getNBT();
+        }
         else return 0;
 
-        int value = tag.getInt(key);
-        if (predicate.test(value))
-        {   tag.putInt(key, value + amount);
-        }
-        return value + amount;
+        incrementTag(tag, key, amount, predicate);
+        return tag.getInt(key);
     }
 
     /**
