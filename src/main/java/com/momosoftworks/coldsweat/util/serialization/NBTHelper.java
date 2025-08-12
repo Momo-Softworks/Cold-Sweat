@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerContainerEvent;
+import org.checkerframework.checker.units.qual.K;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -90,6 +91,14 @@ public class NBTHelper
         return optional;
     }
 
+    public static void incrementTag(CompoundTag tag, String key, int amount, Predicate<Integer> predicate)
+    {
+        int value = tag.getInt(key);
+        if (predicate.test(value))
+        {   tag.putInt(key, value + amount);
+        }
+    }
+
     public static void incrementTag(Object owner, String key, int amount)
     {   incrementTag(owner, key, amount, (tag) -> true);
     }
@@ -102,6 +111,7 @@ public class NBTHelper
             case Entity entity -> tag = entity.getPersistentData();
             case ItemStack stack -> tag = stack.get(DataComponents.CUSTOM_DATA).copyTag();
             case BlockEntity blockEntity -> tag = blockEntity.getPersistentData();
+            case TempModifier modifier -> tag = modifier.getNBT();
             case null, default ->
             {   return 0;
             }
