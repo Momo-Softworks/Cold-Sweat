@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.client.gui.config;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Widget;
@@ -9,35 +10,24 @@ import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextColor;
 
 public class ConfigLabel extends AbstractWidget implements Widget, GuiEventListener, NarratableEntry
 {
     public final String id;
 
-    private int color;
-
-    public ConfigLabel(String id, String text, int x, int y)
+    public ConfigLabel(String id, Component text, int x, int y)
     {
-        this(id, text, x, y, 16777215);
-    }
-
-    public ConfigLabel(String id, String text, int x, int y, int color)
-    {
-        super(x, y, Minecraft.getInstance().font.width(text), Minecraft.getInstance().font.lineHeight, Component.translatable(text));
+        super(x, y, Minecraft.getInstance().font.width(text), Minecraft.getInstance().font.lineHeight, text);
         this.id = id;
         this.x = x;
         this.y = y;
-        this.color = color;
-    }
-
-    public void setTextColor(int color)
-    {
-        this.color = color;
     }
 
     @Override
     public void render(PoseStack poseStack, int mouseX, int mouseY, float depth)
     {
+        int color = CSMath.getIfNotNull(this.getMessage().getStyle().getColor(), TextColor::getValue, 0xFFFFFF);
         Minecraft.getInstance().font.drawShadow(poseStack, this.getMessage(), this.x, this.y, color);
     }
 
