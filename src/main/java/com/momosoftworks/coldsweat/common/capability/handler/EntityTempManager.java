@@ -224,8 +224,7 @@ public class EntityTempManager
 
         if (isPlayer && !(entity instanceof DummyPlayer))
         {
-            event.addModifier(List.of(Trait.FREEZING_POINT, Trait.BURNING_POINT),
-                              new AcclimationTempModifier().tickRate(20), Placement.Duplicates.BY_CLASS, Placement.AFTER_LAST);
+            event.addModifier(List.of(Trait.FREEZING_POINT, Trait.BURNING_POINT), new AcclimationTempModifier().tickRate(20), Placement.Duplicates.BY_CLASS, Placement.AFTER_LAST);
             event.addModifier(Arrays.asList(VALID_MODIFIER_TRAITS), new InventoryItemsTempModifier().tickRate(5), Placement.Duplicates.BY_CLASS, Placement.AFTER_LAST);
         }
     }
