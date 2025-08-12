@@ -1,0 +1,11 @@
+{
+  "required_mods": [
+    "ad_astra"
+  ],
+  "dimensions": [
+    "ad_astra:glacio"
+  ],
+  "temperature": -65,
+  "units": "f",
+  "is_offset": true
+}

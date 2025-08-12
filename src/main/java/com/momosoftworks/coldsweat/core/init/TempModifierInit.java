@@ -12,11 +12,8 @@ import com.momosoftworks.coldsweat.config.ConfigLoadingHandler;
 import com.momosoftworks.coldsweat.config.spec.WorldSettingsConfig;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.configuration.BlockTempData;
-import net.minecraft.core.BlockPos;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -117,6 +114,7 @@ public class TempModifierInit
         String weatherStorms = compatPath + "StormTempModifier";
         String curios = compatPath + "CuriosTempModifier";
         String valkyrienSkies = compatPath + "ValkShipBlockTempModifier";
+        String adAstra = compatPath + "AdAstraOxygenTempModifier";
 
         if (CompatManager.isSereneSeasonsLoaded())
         {   event.registerByClassName(new ResourceLocation("sereneseasons", "season"), sereneSeasons);
@@ -129,6 +127,10 @@ public class TempModifierInit
         }
         if (CompatManager.isValkyrienSkiesLoaded())
         {   event.registerByClassName(new ResourceLocation("valkyrienskies", "ship_blocks"), valkyrienSkies);
+        }
+        if (CompatManager.isAdAstraLoaded())
+        {   event.registerByClassName(new ResourceLocation("ad_astra", "oxygen"), adAstra);
+            MinecraftForge.EVENT_BUS.register(CSMath.classForName(adAstra));
         }
 
         ColdSweat.LOGGER.debug("Registered TempModifiers in {}ms", System.currentTimeMillis() - startMS);

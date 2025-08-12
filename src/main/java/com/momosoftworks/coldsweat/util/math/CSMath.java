@@ -964,4 +964,14 @@ public class CSMath
             default -> { return Rotation.NONE; }
         }
     }
+
+    public static Class<?> classForName(String className)
+    {
+        try
+        {   return Class.forName(className);
+        }
+        catch (ClassNotFoundException e)
+        {   throw new RuntimeException("Class not found: " + className, e);
+        }
+    }
 }

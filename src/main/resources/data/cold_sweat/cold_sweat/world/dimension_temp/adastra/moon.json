@@ -1,0 +1,12 @@
+{
+  "required_mods": [
+    "ad_astra"
+  ],
+  "dimensions": [
+    "ad_astra:moon"
+  ],
+  "max_temp": 100,
+  "min_temp": -100,
+  "units": "f",
+  "is_offset": true
+}

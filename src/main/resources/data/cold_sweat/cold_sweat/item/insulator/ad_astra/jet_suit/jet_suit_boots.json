@@ -1,0 +1,48 @@
+{
+	"required_mods": ["ad_astra"],
+	"type": "armor",
+	"item": {
+		"items": ["ad_astra:jet_suit_boots"]
+	},
+	"insulation": {
+		"heat": 0,
+		"cold": 0
+	},
+	"entity": {
+		"equipment": {
+			"feet": {
+				"items": ["ad_astra:jet_suit_boots"]
+			},
+			"head": {
+				"items": ["ad_astra:jet_suit_helmet"]
+			},
+			"chest": {
+				"items": ["ad_astra:jet_suit"],
+				"nbt": {
+					"BotariumData": {
+						"StoredFluids": [{ "Amount": "1-4000", "Fluid": "ad_astra:oxygen" }]
+					}
+				}
+			},
+			"legs": {
+				"items": ["ad_astra:jet_suit_pants"]
+			}
+		}
+	},
+	"attributes": {
+		"cold_sweat:heat_dampening": [
+			{
+				"name": "ad_astra:jet_suit_set_bonus",
+				"amount": 0.25,
+				"operation": "addition"
+			}
+		],
+		"cold_sweat:cold_dampening": [
+			{
+				"name": "ad_astra:jet_suit_set_bonus",
+				"amount": 0.25,
+				"operation": "addition"
+			}
+		]
+	}
+}

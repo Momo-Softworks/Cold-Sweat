@@ -96,6 +96,7 @@ public class CompatManager
     private static final boolean TWILIGHT_FOREST_LOADED = modLoaded("twilightforest");
     private static final boolean AETHER_LOADED = modLoaded("aether");
     private static final boolean REGIONS_UNEXPLORED_LOADED = modLoaded("regions_unexplored");
+    private static final boolean AD_ASTRA_LOADED = modLoaded("ad_astra");
 
     private static final List<String> SEASONS_MODS = new ArrayList<>();
 
@@ -221,6 +222,9 @@ public class CompatManager
     }
     public static boolean isRegionsUnexploredLoaded()
     {   return REGIONS_UNEXPLORED_LOADED;
+    }
+    public static boolean isAdAstraLoaded()
+    {   return AD_ASTRA_LOADED;
     }
 
     public static abstract class Curios

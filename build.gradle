@@ -167,6 +167,12 @@ dependencies {
     compileOnly fg.deobf("curse.maven:tfc-cold-sweat-1130934:6378984")
     compileOnly fg.deobf("curse.maven:primal-winter-393321:4575861")
 
+    // Ad Astra (compat)
+    compileOnly fg.deobf("curse.maven:ad-astra-635042:6262032")
+    compileOnly fg.deobf("curse.maven:botarium-704113:5486070")
+    compileOnly fg.deobf("curse.maven:resourceful-config-714059:6231176")
+    compileOnly fg.deobf("curse.maven:resourceful-lib-570073:5659871")
+
     // Valkyrien Skies (compat)
     compileOnly         ("org.valkyrienskies.core:api:${valk_skies_api_version}")
     compileOnly         ("org.valkyrienskies.core:impl:${valk_skies_api_version}")
