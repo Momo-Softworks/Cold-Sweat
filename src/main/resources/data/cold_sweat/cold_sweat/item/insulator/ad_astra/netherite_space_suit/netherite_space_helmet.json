@@ -1,0 +1,48 @@
+{
+	"required_mods": ["ad_astra"],
+	"type": "armor",
+	"item": {
+		"items": ["ad_astra:netherite_space_helmet"]
+	},
+	"insulation": {
+		"heat": 0,
+		"cold": 0
+	},
+	"entity": {
+		"equipment": {
+			"feet": {
+				"items": ["ad_astra:netherite_space_boots"]
+			},
+			"head": {
+				"items": ["ad_astra:netherite_space_helmet"]
+			},
+			"chest": {
+				"items": ["ad_astra:netherite_space_suit"],
+				"nbt": {
+					"BotariumData": {
+						"StoredFluids": [{ "Amount": "1-2000", "Fluid": "ad_astra:oxygen" }]
+					}
+				}
+			},
+			"legs": {
+				"items": ["ad_astra:netherite_space_pants"]
+			}
+		}
+	},
+	"attributes": {
+		"cold_sweat:heat_dampening": [
+			{
+				"name": "ad_astra:netherite_space_suit_set_bonus",
+				"amount": 0.25,
+				"operation": "addition"
+			}
+		],
+		"cold_sweat:cold_dampening": [
+			{
+				"name": "ad_astra:netherite_space_suit_set_bonus",
+				"amount": 0.25,
+				"operation": "addition"
+			}
+		]
+	}
+}

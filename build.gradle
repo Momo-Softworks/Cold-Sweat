@@ -136,6 +136,9 @@ repositories {
             includeGroup "dev.latvian.mods"
         }
     }
+    maven {
+        url = "https://maven.teamresourceful.com/repository/maven-public/"
+    }
     mavenCentral()
 }
 
@@ -157,12 +160,16 @@ dependencies {
     compileOnly fg.deobf("curse.maven:thirst-was-taken-679270:5071552")
     compileOnly fg.deobf("curse.maven:spoiled-364918:4614777")
 
-    implementation         ("org.valkyrienskies.core:api:${valk_skies_api_version}")
-    implementation         ("org.valkyrienskies.core:impl:${valk_skies_api_version}")
-    implementation         ("org.valkyrienskies.core:api-game:${valk_skies_api_version}")
-    implementation         ("org.valkyrienskies.core:util:${valk_skies_api_version}")
-    implementation fg.deobf("org.valkyrienskies:valkyrienskies-119-forge:2.1.2-beta.1+a04911c932")
-    implementation fg.deobf("curse.maven:eureka-ships-654384:5321628")
+    // Ad Astra (compat)
+    compileOnly "earth.terrarium.adastra:ad_astra-forge-1.19.2:1.12.7"
+
+    // Valkyrien Skies (compat)
+    compileOnly         ("org.valkyrienskies.core:api:${valk_skies_api_version}")
+    compileOnly         ("org.valkyrienskies.core:impl:${valk_skies_api_version}")
+    compileOnly         ("org.valkyrienskies.core:api-game:${valk_skies_api_version}")
+    compileOnly         ("org.valkyrienskies.core:util:${valk_skies_api_version}")
+    compileOnly fg.deobf("org.valkyrienskies:valkyrienskies-119-forge:2.1.2-beta.1+a04911c932")
+    compileOnly fg.deobf("curse.maven:eureka-ships-654384:5321628")
 
     compileOnly fg.deobf("dev.latvian.mods:kubejs-forge:${kubejs_version}")
     compileOnly fg.deobf("dev.latvian.mods:rhino-forge:${rhino_version}")

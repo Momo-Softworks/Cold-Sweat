@@ -947,4 +947,26 @@ public class CSMath
             default -> { return Rotation.NONE; }
         }
     }
+
+    public static Rotation rotationToNorth(Direction direction)
+    {
+        switch (direction)
+        {
+            case NORTH -> { return Rotation.NONE; }
+            case EAST -> { return Rotation.COUNTERCLOCKWISE_90; }
+            case SOUTH -> { return Rotation.CLOCKWISE_180; }
+            case WEST -> { return Rotation.CLOCKWISE_90; }
+            default -> { return Rotation.NONE; }
+        }
+    }
+
+    public static Class<?> classForName(String className)
+    {
+        try
+        {   return Class.forName(className);
+        }
+        catch (ClassNotFoundException e)
+        {   throw new RuntimeException("Class not found: " + className, e);
+        }
+    }
 }

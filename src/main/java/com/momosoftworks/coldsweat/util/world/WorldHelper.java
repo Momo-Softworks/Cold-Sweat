@@ -595,7 +595,11 @@ public abstract class WorldHelper
     public static double getBiomeTemperature(LevelAccessor level, Holder<Biome> biome)
     {
         Pair<Double, Double> temps = getBiomeTemperatureRange(level, biome);
-        return CSMath.blend(temps.getFirst(), temps.getSecond(), Math.sin(level.dayTime() / (12000 / Math.PI)), -1, 1);
+        return CSMath.blend(temps.getFirst(), temps.getSecond(), getTimeMultiplier(level), -1, 1);
+    }
+
+    public static double getTimeMultiplier(LevelAccessor level)
+    {   return Math.sin(level.dayTime() / (12000 / Math.PI));
     }
 
     /**
