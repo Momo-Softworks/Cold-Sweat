@@ -199,14 +199,6 @@ public abstract class TempModifier
     {   this.nbt = data;
     }
 
-    public <T> T getField(String key)
-    {
-        if (this.getNBT().contains(key))
-        {   return (T) this.getNBT().get(key);
-        }
-        return null;
-    }
-
     @Override
     public String toString()
     {   return TempModifierRegistry.getKey(this).toString();
