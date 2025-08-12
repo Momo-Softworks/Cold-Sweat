@@ -164,7 +164,7 @@ public class MainSettingsConfig
                 .comment("─────────────────────────────────────────────────────────────────────────",
                          " The speed at which the player acclimates to hot or cold environments",
                          " ⌄ ")
-                .defineInRange("Acclimation Speed", defaultDiff.getOrDefault(ConfigSettings.ACCLIMATION_SPEED, 0.0011), 0, Double.POSITIVE_INFINITY);
+                .defineInRange("Acclimation Speed", defaultDiff.getOrDefault(ConfigSettings.ACCLIMATION_SPEED, 0.0005), 0, Double.POSITIVE_INFINITY);
 
             MIN_ACCLIMATION_RANGE = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────",
