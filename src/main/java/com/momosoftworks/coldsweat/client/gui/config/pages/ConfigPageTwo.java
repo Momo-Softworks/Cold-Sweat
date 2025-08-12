@@ -6,9 +6,9 @@ import com.momosoftworks.coldsweat.client.event.RegisterItemOverrides;
 import com.momosoftworks.coldsweat.client.gui.config.AbstractConfigPage;
 import com.momosoftworks.coldsweat.client.gui.config.ConfigScreen;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.util.math.Vec2i;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.math.Vec2i;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.serialization.DynamicHolder;
 import net.minecraft.ChatFormatting;
@@ -50,12 +50,6 @@ public class ConfigPageTwo extends AbstractConfigPage
                              input -> input.setValue(String.valueOf(ConfigSettings.TEMP_OFFSET.get())),
                              false, false, true, new TranslatableComponent("cold_sweat.config.temp_offset.desc"));
 
-        // Temp Smoothing
-        this.addDecimalInput("temp_smoothing", Side.LEFT, new TranslatableComponent("cold_sweat.config.temp_smoothing.name"),
-                             value -> ConfigSettings.TEMP_SMOOTHING.set(value),
-                             input -> input.setValue(String.valueOf(ConfigSettings.TEMP_SMOOTHING.get())),
-                             false, false, true, new TranslatableComponent("cold_sweat.config.temp_smoothing.desc"));
-
         // Distortion Effects
         this.addButton("distortion_effects", Side.LEFT, () -> getToggleButtonText(new TranslatableComponent("cold_sweat.config.distortion.name"), ConfigSettings.DISTORTION_EFFECTS.get()),
                 button ->
@@ -95,6 +89,15 @@ public class ConfigPageTwo extends AbstractConfigPage
                            else RegisterItemOverrides.unregister(ModItems.SOULSPRING_LAMP);
                        },
                        false, false, true, new TranslatableComponent("cold_sweat.config.animate_soulspring_lamp.desc"));
+
+        // Config Button Repositioning Screen
+        this.addButton("button_position", Side.LEFT, () -> new TranslatableComponent("cold_sweat.config.config_button_pos.name"),
+                       button ->
+                       {
+                           DrawConfigButton.EDIT_MODE = true;
+                           this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options));
+                       },
+                       false, false, true, new TranslatableComponent("cold_sweat.config.config_button_pos.desc"));
 
         // Direction Buttons: Body Temp Icon
         this.addDirectionPanel("icon_directions", Side.RIGHT, new TranslatableComponent("cold_sweat.config.temp_icon_location.name"),
@@ -144,6 +147,22 @@ public class ConfigPageTwo extends AbstractConfigPage
                 false, false, true, true, new TranslatableComponent("cold_sweat.config.world_temp_location.desc"),
                                           new TranslatableComponent("cold_sweat.config.offset_shift.name").withStyle(ChatFormatting.GRAY));
 
+        // Direction Buttons: World Temp Gauge
+        this.addDirectionPanel("food_effects_directions", Side.RIGHT, new TranslatableComponent("cold_sweat.config.food_effects_location.name"),
+                amount -> ConfigSettings.FOOD_EFFECTS_POS.set(new Vec2i(ConfigSettings.FOOD_EFFECTS_POS.get().x() + amount * ConfigScreen.SHIFT_AMOUNT.get(),
+                                                                          ConfigSettings.FOOD_EFFECTS_POS.get().y())),
+                amount -> ConfigSettings.FOOD_EFFECTS_POS.set(new Vec2i(ConfigSettings.FOOD_EFFECTS_POS.get().x(),
+                                                                          ConfigSettings.FOOD_EFFECTS_POS.get().y() + amount * ConfigScreen.SHIFT_AMOUNT.get())),
+                () ->
+                {   ConfigSettings.FOOD_EFFECTS_POS.set(new Vec2i(0, 0));
+                },
+                () ->
+                {   ConfigSettings.FOOD_EFFECTS_ENABLED.set(!ConfigSettings.FOOD_EFFECTS_ENABLED.get());
+                    return ConfigSettings.FOOD_EFFECTS_ENABLED.get();
+                },
+                false, false, true, true, new TranslatableComponent("cold_sweat.config.food_effects_location.desc"),
+                                          new TranslatableComponent("cold_sweat.config.offset_shift.name").withStyle(ChatFormatting.GRAY));
+
         // Custom Hotbar
         this.addButton("custom_hotbar", Side.RIGHT, () -> getToggleButtonText(new TranslatableComponent("cold_sweat.config.custom_hotbar.name"), ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get()),
                 button -> ConfigSettings.CUSTOM_HOTBAR_LAYOUT.set(!ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get()),
@@ -163,15 +182,6 @@ public class ConfigPageTwo extends AbstractConfigPage
         this.addButton("move_body_icon", Side.RIGHT, () -> getToggleButtonText(new TranslatableComponent("cold_sweat.config.move_body_icon.name"), ConfigSettings.MOVE_BODY_ICON_WHEN_ADVANCED.get()),
                 button -> ConfigSettings.MOVE_BODY_ICON_WHEN_ADVANCED.set(!ConfigSettings.MOVE_BODY_ICON_WHEN_ADVANCED.get()),
                 false, false, true, new TranslatableComponent("cold_sweat.config.move_body_icon.desc"));
-
-        // Config Button Repositioning Screen
-        this.addButton("button_position", Side.RIGHT, () -> new TranslatableComponent("cold_sweat.config.config_button_pos.name"),
-                       button ->
-                       {
-                           DrawConfigButton.EDIT_MODE = true;
-                           this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options));
-                       },
-                       false, false, true, new TranslatableComponent("cold_sweat.config.config_button_pos.desc"));
     }
 
     @Override
