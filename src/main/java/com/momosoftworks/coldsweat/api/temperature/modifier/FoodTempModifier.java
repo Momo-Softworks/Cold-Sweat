@@ -76,9 +76,9 @@ public class FoodTempModifier extends TempModifier
         if (obj instanceof TempModifier mod
         && this.getClass().equals(mod.getClass()))
         {
-            CompoundTag thisNBT = this.getNBT();
+            CompoundTag thisNBT = this.getNBT().copy();
             thisNBT.remove("Overridden");
-            CompoundTag otherNBT = mod.getNBT();
+            CompoundTag otherNBT = mod.getNBT().copy();
             otherNBT.remove("Overridden");
             return otherNBT.equals(thisNBT);
         }
