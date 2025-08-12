@@ -192,13 +192,19 @@ public abstract class TempModifier
     }
 
     public final CompoundNBT getNBT()
-    {
-        return nbt;
+    {   return nbt;
     }
 
     public void setNBT(CompoundNBT data)
+    {   this.nbt = data;
+    }
+
+    public <T> T getField(String key)
     {
-        this.nbt = data;
+        if (this.getNBT().contains(key))
+        {   return (T) this.getNBT().get(key);
+        }
+        return null;
     }
 
     @Override

@@ -16,8 +16,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -84,6 +84,14 @@ public class NBTHelper
         return optional;
     }
 
+    public static void incrementTag(CompoundNBT tag, String key, int amount, Predicate<Integer> predicate)
+    {
+        int value = tag.getInt(key);
+        if (predicate.test(value))
+        {   tag.putInt(key, value + amount);
+        }
+    }
+
     public static void incrementTag(Object owner, String key, int amount)
     {   incrementTag(owner, key, amount, (tag) -> true);
     }
@@ -100,13 +108,13 @@ public class NBTHelper
         else if (owner instanceof TileEntity)
         {   tag = ((TileEntity) owner).getTileData();
         }
+        else if (owner instanceof TempModifier)
+        {   tag = ((TempModifier) owner).getNBT();
+        }
         else return 0;
 
-        int value = tag.getInt(key);
-        if (predicate.test(value))
-        {   tag.putInt(key, value + amount);
-        }
-        return value + amount;
+        incrementTag(tag, key, amount, predicate);
+        return tag.getInt(key);
     }
 
     /**

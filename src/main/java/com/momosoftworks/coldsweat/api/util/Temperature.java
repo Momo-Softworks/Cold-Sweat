@@ -235,26 +235,6 @@ public class Temperature
         return false;
     }
 
-    @Internal
-    public static void updateSiblingsAdd(List<TempModifier> modifiers, LivingEntity entity, Trait trait, TempModifier modifier)
-    {
-        modifiers.forEach(mod ->
-        {
-            if (mod == modifier) return;
-            mod.onSiblingAdded(entity, trait, modifier);
-        });
-    }
-
-    @Internal
-    public static void updateSiblingsRemove(List<TempModifier> modifiers, LivingEntity entity, Trait trait, TempModifier modifier)
-    {
-        modifiers.forEach(mod ->
-        {
-            if (mod == modifier) return;
-            mod.onSiblingRemoved(entity, trait, modifier);
-        });
-    }
-
     /**
      * This method is mainly for internal use. {@link Temperature#addModifier(LivingEntity, TempModifier, Trait, Placement.Duplicates, int, Placement)} should be used instead.<br>
      * <br>
@@ -415,6 +395,26 @@ public class Temperature
 
     public static double getNeutralWorldTemp(LivingEntity entity)
     {   return (get(entity, Trait.BURNING_POINT) + get(entity, Trait.FREEZING_POINT)) / 2;
+    }
+
+    @Internal
+    public static void updateSiblingsAdd(List<TempModifier> modifiers, LivingEntity entity, Trait trait, TempModifier modifier)
+    {
+        modifiers.forEach(mod ->
+        {
+            if (mod == modifier) return;
+            mod.onSiblingAdded(entity, trait, modifier);
+        });
+    }
+
+    @Internal
+    public static void updateSiblingsRemove(List<TempModifier> modifiers, LivingEntity entity, Trait trait, TempModifier modifier)
+    {
+        modifiers.forEach(mod ->
+        {
+            if (mod == modifier) return;
+            mod.onSiblingRemoved(entity, trait, modifier);
+        });
     }
 
     public static void updateTemperature(LivingEntity entity, ITemperatureCap cap, boolean instant)
