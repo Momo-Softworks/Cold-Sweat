@@ -220,6 +220,11 @@ public class EntityTempManager
                               mod -> mod.tickRate(mediumTickRate2),
                               Placement.Duplicates.BY_CLASS,
                               Placement.of(Mode.AFTER, Order.FIRST, mod2 -> mod2 instanceof BlockTempModifier));
+        // Ad Astra Compat
+        event.addModifierById(Trait.WORLD, new ResourceLocation("ad_astra:oxygen"),
+                              mod -> mod.tickRate(mediumTickRate2),
+                              Placement.Duplicates.BY_CLASS,
+                              Placement.AFTER_LAST);
 
         if (isPlayer && !(entity instanceof DummyPlayer))
         {
