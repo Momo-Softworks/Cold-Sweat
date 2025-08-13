@@ -73,7 +73,7 @@ public class RegistryHelper
         }
         for (Either<TagKey<T>, T> either : eitherList.exclusions())
         {
-            either.ifLeft(tagKey -> list.removeAll(registry.getTag(tagKey).orElse(null).stream().toList()));
+            either.ifLeft(tagKey -> registry.getTag(tagKey).ifPresent(tag -> list.removeAll(tag.stream().map(Holder::value).toList())));
             either.ifRight(object -> list.remove(object));
         }
         return list;
