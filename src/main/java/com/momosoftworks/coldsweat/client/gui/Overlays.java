@@ -43,6 +43,8 @@ public class Overlays
     public static final ResourceLocation WORLD_TEMP_GAUGE_HC = new ResourceLocation("cold_sweat:textures/gui/overlay/world_temp_gauge_hc.png");
     public static final ResourceLocation VAGUE_TEMP_GAUGE = new ResourceLocation("cold_sweat:textures/gui/overlay/vague_temp_gauge.png");
     public static final ResourceLocation VAGUE_TEMP_GAUGE_HC = new ResourceLocation("cold_sweat:textures/gui/overlay/vague_temp_gauge_hc.png");
+    public static final ResourceLocation VAGUE_TEMP_GAUGE_STANDALONE = new ResourceLocation("cold_sweat:textures/gui/overlay/vague_temp_gauge_standalone.png");
+    public static final ResourceLocation VAGUE_TEMP_GAUGE_STANDALONE_HC = new ResourceLocation("cold_sweat:textures/gui/overlay/vague_temp_gauge_standalone_hc.png");
     public static final ResourceLocation FOOD_EFFECT = new ResourceLocation("cold_sweat:textures/gui/overlay/food_effect_background.png");
 
     public static final Supplier<ResourceLocation> BODY_TEMP_GAUGE_LOCATION  = () ->
@@ -52,8 +54,9 @@ public class Overlays
             ConfigSettings.HIGH_CONTRAST.get() ? WORLD_TEMP_GAUGE_HC
                                                : WORLD_TEMP_GAUGE;
     public static final Supplier<ResourceLocation> VAGUE_TEMP_GAUGE_LOCATION = () ->
-            ConfigSettings.HIGH_CONTRAST.get() ? VAGUE_TEMP_GAUGE_HC
-                                               : VAGUE_TEMP_GAUGE;
+            ConfigSettings.BODY_ICON_ENABLED.get()
+            ? ConfigSettings.HIGH_CONTRAST.get() ? VAGUE_TEMP_GAUGE_HC : VAGUE_TEMP_GAUGE
+            : ConfigSettings.HIGH_CONTRAST.get() ? VAGUE_TEMP_GAUGE_STANDALONE_HC: VAGUE_TEMP_GAUGE_STANDALONE;
 
     // Stuff for world temperature
     static boolean ADVANCED_WORLD_TEMP = false;
