@@ -37,7 +37,9 @@ public class FreezeHealingEffect extends TempEffect
             // Get protection from armor underwear
             float unfrozenHealth = (float) (CSMath.blend(1 - frozenHeartsPercentage, 1d, Temperature.get(this.entity(), Temperature.Trait.COLD_RESISTANCE), 0d, 1d));
             if (unfrozenHealth != 1)
-            {   event.setAmount(CSMath.clamp(healing, 0, CSMath.ceil(this.entity().getMaxHealth() * CSMath.blend(unfrozenHealth, 1f, temp, this.bounds().min(), this.bounds().max())) - this.entity().getHealth()));
+            {
+                float healAmount = CSMath.clamp(healing, 0, this.entity().getMaxHealth() * unfrozenHealth - this.entity().getHealth());
+                event.setAmount(healAmount);
             }
         }
     }
