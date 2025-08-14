@@ -278,7 +278,7 @@ public abstract class AbstractConfigPage extends Screen
      * @param clientside Whether the panel is clientside only (renders the clientside icon).
      * @param tooltip The tooltip of the panel when hovered.
      */
-    protected void addDirectionPanel(String id, Side side, IFormattableTextComponent label, Consumer<Integer> leftRightPressed, Consumer<Integer> upDownPressed, Runnable reset, Supplier<Boolean> hide,
+    protected void addDirectionPanel(String id, Side side, IFormattableTextComponent label, Consumer<Integer> leftRightPressed, Consumer<Integer> upDownPressed, Runnable reset, Supplier<Boolean> visible,
                                      boolean requireOP, boolean setsCustomDifficulty, boolean clientside, boolean canHide, IFormattableTextComponent... tooltip)
     {
         int widgetX = this.width / 2 + (side == Side.LEFT ? -97 : 136);
@@ -356,10 +356,10 @@ public abstract class AbstractConfigPage extends Screen
                 if (setsCustomDifficulty)
                 {   ConfigSettings.DIFFICULTY.set(ConfigSettings.Difficulty.CUSTOM);
                 }
-                setButtonImageX((ImageButton) button, hide.get() ? 68 : 88);
+                setButtonImageX((ImageButton) button, visible.get() ? 68 : 88);
             });
-            hide.get();
-            setButtonImageX(hideButton, hide.get() ? 68 : 88);
+            visible.get();
+            setButtonImageX(hideButton, visible.get() ? 68 : 88);
             hideButton.active = shouldBeActive;
             widgetBatch.add(hideButton);
         }
