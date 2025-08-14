@@ -333,7 +333,7 @@ public abstract class AbstractConfigPage extends Screen
      * @param clientside Whether the panel is clientside only (renders the clientside icon).
      * @param tooltip The tooltip of the panel when hovered.
      */
-    protected void addDirectionPanel(String id, Side side, MutableComponent label, Consumer<Integer> leftRightPressed, Consumer<Integer> upDownPressed, Runnable reset, Supplier<Boolean> hide,
+    protected void addDirectionPanel(String id, Side side, MutableComponent label, Consumer<Integer> leftRightPressed, Consumer<Integer> upDownPressed, Runnable reset, Supplier<Boolean> visible,
                                      boolean requireOP, boolean setsCustomDifficulty, boolean clientside, boolean canHide, Component... tooltip)
     {
         int widgetX = this.width / 2 + (side == Side.LEFT ? -97 : 136);
@@ -413,10 +413,10 @@ public abstract class AbstractConfigPage extends Screen
                 if (setsCustomDifficulty)
                 {   ConfigSettings.DIFFICULTY.set(ConfigSettings.Difficulty.CUSTOM);
                 }
-                setButtonSprites((ImageButton) button, hide.get() ? DIRECTION_VISIBILITY_OFF_SPRITES : DIRECTION_VISIBILITY_ON_SPRITES);
+                setButtonSprites((ImageButton) button, visible.get() ? DIRECTION_VISIBILITY_ON_SPRITES : DIRECTION_VISIBILITY_OFF_SPRITES);
             });
-            hide.get();
-            setButtonSprites(hideButton, hide.get() ? DIRECTION_VISIBILITY_OFF_SPRITES : DIRECTION_VISIBILITY_ON_SPRITES);
+            visible.get();
+            setButtonSprites(hideButton, visible.get() ? DIRECTION_VISIBILITY_ON_SPRITES : DIRECTION_VISIBILITY_OFF_SPRITES);
             hideButton.active = shouldBeActive;
             widgetBatch.add(hideButton);
         }
