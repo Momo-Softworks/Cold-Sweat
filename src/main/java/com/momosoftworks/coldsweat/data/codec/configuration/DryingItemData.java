@@ -55,7 +55,7 @@ public class DryingItemData extends ConfigData implements RequirementHolder
     {   return item;
     }
     public ItemStack result()
-    {   return result;
+    {   return result.copy();
     }
     public NegatableList<EntityRequirement> entity()
     {   return entity;
