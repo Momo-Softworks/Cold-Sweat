@@ -168,7 +168,7 @@ public class BlockTempData extends ConfigData implements IForgeRegistryEntry<Blo
                                          : Temperature.Units.MC;
 
         // Get min/max effect
-        final double maxChange = entry.size() > 4 && entry.get(4) instanceof Number
+        final double maxEffect = entry.size() > 4 && entry.get(4) instanceof Number
                                  ? ((Number) entry.get(4)).doubleValue()
                                  : Double.POSITIVE_INFINITY;
 
@@ -188,8 +188,6 @@ public class BlockTempData extends ConfigData implements IForgeRegistryEntry<Blo
         boolean logarithmic = entry.size() > 8 && entry.get(8) instanceof Boolean
                               ? (Boolean) entry.get(8)
                               : false;
-
-        double maxEffect = blockTemp > 0 ?  maxChange :  Double.POSITIVE_INFINITY;
 
         double maxTemperature = blockTemp > 0 ? tempLimit : Double.POSITIVE_INFINITY;
         double minTemperature = blockTemp < 0 ? tempLimit : Double.NEGATIVE_INFINITY;
