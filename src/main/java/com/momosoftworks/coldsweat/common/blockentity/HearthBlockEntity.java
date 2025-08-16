@@ -182,15 +182,16 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         Level level = event.getLevel();
         BlockState oldState = event.getOldState();
         BlockState newState = event.getNewState();
+        if (oldState == null || newState == null) return;
 
         if (level == this.level
         && this.pathLookup.containsKey(pos)
-        && (oldState == null || !oldState.getCollisionShape(level, pos).equals(newState.getCollisionShape(level, pos))))
+        && !oldState.getCollisionShape(level, pos).equals(newState.getCollisionShape(level, pos)))
         {
             if (!level.isClientSide())
             {   this.sendBlockUpdate(pos);
             }
-            if (isTransferPipe(event.getOldState()) || isTransferPipe(event.getNewState()))
+            if (isTransferPipe(oldState) || isTransferPipe(newState))
             {   this.searchForPipeEnds(this.getBlockPos().above(), Direction.UP);
             }
         }
