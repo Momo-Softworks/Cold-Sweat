@@ -24,6 +24,7 @@ import com.simibubi.create.content.fluids.pipes.GlassFluidPipeBlock;
 import dev.ghen.thirst.content.purity.ContainerWithPurity;
 import dev.ghen.thirst.content.purity.WaterPurity;
 import dev.ghen.thirst.foundation.common.event.RegisterThirstValueEvent;
+import earth.terrarium.adastra.common.config.AdAstraConfig;
 import glitchcore.event.EventManager;
 import net.createmod.ponder.foundation.PonderIndex;
 import net.minecraft.core.BlockPos;
@@ -45,6 +46,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -439,6 +441,17 @@ public class CompatManager
                     });
                 }
             }.registerListener();
+        }
+
+        if (AD_ASTRA_LOADED)
+        {
+            ColdSweat.MOD_BUS.register(new Object()
+            {
+                @SubscribeEvent
+                public void onFetchSeasonsMods(FMLLoadCompleteEvent event)
+                {   AdAstraConfig.disableTemperature = true;
+                }
+            });
         }
     }
 
