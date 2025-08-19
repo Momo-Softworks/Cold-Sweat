@@ -4,8 +4,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
+import net.minecraftforge.event.TagsUpdatedEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -32,10 +31,7 @@ public class TagHelper
     }
 
     @SubscribeEvent
-    public static void onServerStopped(EntityLeaveWorldEvent event)
-    {
-        if (event.getEntity() instanceof Player)
-        {   EVENT_TAGS.clear();
-        }
+    public static void onServerStopped(TagsUpdatedEvent event)
+    {   EVENT_TAGS.clear();
     }
 }
