@@ -29,7 +29,12 @@ public class FoodBuilderJS
     public FoodBuilderJS items(String... items)
     {
         List<Item> itemList = RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, ConfigHelper.getItems(items));
-        itemPredicate.add(new ItemRequirement(itemList, null), false);
+        if (itemList.isEmpty() && items.length != 0)
+        {   this.itemPredicate.add(ItemRequirement.NONE, true);
+        }
+        else
+        {   this.itemPredicate.add(new ItemRequirement(itemList, null), false);
+        }
         return this;
     }
 
