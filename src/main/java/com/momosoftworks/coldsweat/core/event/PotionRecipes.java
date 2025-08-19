@@ -4,15 +4,22 @@ import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.core.init.ModPotions;
 import com.momosoftworks.coldsweat.util.item.PotionUtils;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.component.DataComponentPredicate;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.brewing.BrewingRecipe;
 import net.neoforged.neoforge.common.brewing.IBrewingRecipe;
+import net.neoforged.neoforge.common.crafting.DataComponentIngredient;
 import net.neoforged.neoforge.event.brewing.RegisterBrewingRecipesEvent;
 
 import javax.annotation.Nonnull;
@@ -24,65 +31,21 @@ public class PotionRecipes
     @SubscribeEvent
     public static void register(RegisterBrewingRecipesEvent event)
     {
-        ItemStack awkward = createPotion(Potions.AWKWARD);
-        ItemStack icePotion = createPotion(ModPotions.ICE_RESISTANCE);
-        ItemStack longIcePotion = createPotion(ModPotions.LONG_ICE_RESISTANCE);
+        Ingredient awkward = createPotion(Potions.AWKWARD);
+        Ingredient icePotionIngredient = createPotion(ModPotions.ICE_RESISTANCE);
+        ItemStack icePotion = PotionUtils.setPotion(Items.POTION.getDefaultInstance(), ModPotions.ICE_RESISTANCE);
+        ItemStack longIcePotion = PotionUtils.setPotion(Items.POTION.getDefaultInstance(), ModPotions.LONG_ICE_RESISTANCE);
 
-        event.getBuilder().addRecipe(new WorkingBrewingRecipe(Ingredient.of(awkward), Ingredient.of(ModItems.SOUL_SPROUT), icePotion));
-        event.getBuilder().addRecipe(new WorkingBrewingRecipe(Ingredient.of(icePotion), Ingredient.of(Items.REDSTONE), longIcePotion));
+        event.getBuilder().addRecipe(new BrewingRecipe(awkward, Ingredient.of(ModItems.SOUL_SPROUT), icePotion));
+        event.getBuilder().addRecipe(new BrewingRecipe(icePotionIngredient, Ingredient.of(Items.REDSTONE), longIcePotion));
     }
 
-    private static ItemStack createPotion(Holder<Potion> potion)
-    {   return PotionUtils.setPotion(Items.POTION.getDefaultInstance(), potion);
-    }
-
-    /**
-     * A brewing recipe that actually checks item stack data for ingredients instead of just the item type.
-     */
-    public static class WorkingBrewingRecipe extends BrewingRecipe
+    private static Ingredient createPotion(Holder<Potion> potion)
     {
-        Ingredient potionIn;
-        Ingredient reagent;
-        ItemStack output;
-
-        public WorkingBrewingRecipe(Ingredient potionIn, Ingredient reagent, ItemStack output)
-        {
-            super(potionIn, reagent, output);
-            this.potionIn = potionIn;
-            this.reagent = reagent;
-            this.output = output.copy();
-        }
-
-        @Override
-        public boolean isInput(@Nonnull ItemStack potionIn)
-        {
-            if (potionIn == null)
-            {   return false;
-            }
-
-            ItemStack[] matchingStacks = this.potionIn.getItems();
-
-            if (matchingStacks.length == 0)
-            {   return potionIn.isEmpty();
-            }
-
-            return Arrays.stream(matchingStacks).anyMatch(itemstack -> ItemStack.isSameItemSameComponents(itemstack, potionIn));
-        }
-
-        @Override
-        public boolean isIngredient(ItemStack ingredient)
-        {
-            if (ingredient == null)
-            {   return false;
-            }
-
-            ItemStack[] matchingStacks = this.reagent.getItems();
-
-            if (matchingStacks.length == 0)
-            {   return ingredient.isEmpty();
-            }
-
-            return Arrays.stream(matchingStacks).anyMatch(itemstack -> ItemStack.isSameItemSameComponents(itemstack, ingredient));
-        }
+        DataComponentIngredient ingredientComponents = new DataComponentIngredient(
+                                                          HolderSet.direct(BuiltInRegistries.ITEM.wrapAsHolder(Items.POTION)),
+                                                          DataComponentPredicate.builder().expect(DataComponents.POTION_CONTENTS, new PotionContents(potion)).build(),
+                                                          false);
+        return new Ingredient(ingredientComponents);
     }
 }
