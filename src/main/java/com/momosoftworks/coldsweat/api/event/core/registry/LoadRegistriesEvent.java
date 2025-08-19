@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.api.event.core.registry;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.RegistryHolder;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
@@ -45,8 +46,12 @@ public abstract class LoadRegistriesEvent extends Event
     {   registries.put(key.key(), value);
     }
 
-    public <T extends ConfigData> void addRegistryEntries(ResourceKey<? extends Registry<T>> key, Collection<Holder<T>> values)
-    {   registries.putAll(key, values);
+    public <T extends ConfigData> void addRegistryEntry(RegistryHolder<T> key, T value)
+    {   registries.put(key.key(), Holder.direct(value));
+    }
+
+    public <T extends ConfigData> void addRegistryEntries(RegistryHolder<T> key, Collection<Holder<T>> values)
+    {   registries.putAll(key.key(), values);
     }
 
     /**
