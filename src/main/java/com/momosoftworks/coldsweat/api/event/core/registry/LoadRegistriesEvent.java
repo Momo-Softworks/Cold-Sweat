@@ -5,7 +5,6 @@ import com.google.common.collect.Multimap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.RegistryHolder;
 import com.momosoftworks.coldsweat.data.codec.configuration.RemoveRegistryData;
-import com.momosoftworks.coldsweat.data.RegistryHolder;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import net.minecraft.util.RegistryKey;
@@ -48,8 +47,8 @@ public abstract class LoadRegistriesEvent extends Event
     {   ((Multimap) registries).put(key.key(), value);
     }
 
-    public <T extends ConfigData> void addRegistryEntries(RegistryHolder<T> registry, Collection<T> values)
-    {   ((Multimap) registries).putAll(registry.key(), values);
+    public <T extends ConfigData> void addRegistryEntries(RegistryHolder<T> key, Collection<T> values)
+    {   ((Multimap) registries).putAll(key.key(), values);
     }
 
     /**

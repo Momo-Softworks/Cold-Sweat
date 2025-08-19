@@ -19,13 +19,11 @@ import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class InsulatorBuilderJS
 {
@@ -44,7 +42,12 @@ public class InsulatorBuilderJS
     public InsulatorBuilderJS items(String... items)
     {
         List<Item> itemList = RegistryHelper.mapTaggableList(ConfigHelper.getItems(items));
-        this.itemPredicate.add(new ItemRequirement(itemList, null), false);
+        if (itemList.isEmpty() && items.length != 0)
+        {   this.itemPredicate.add(ItemRequirement.NONE, true);
+        }
+        else
+        {   this.itemPredicate.add(new ItemRequirement(itemList, null), false);
+        }
         return this;
     }
 

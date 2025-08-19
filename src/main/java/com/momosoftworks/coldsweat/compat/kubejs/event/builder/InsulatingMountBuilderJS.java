@@ -28,8 +28,13 @@ public class InsulatingMountBuilderJS
 
     public InsulatingMountBuilderJS entities(String... entities)
     {
-        List<EntityType<?>> entityList = RegistryHelper.mapTaggableList(ConfigHelper.getEntityTypes(entities));
-        this.entityPredicate.add(new EntityRequirement(entityList, null), false);
+        List<EntityType<?>> entList = RegistryHelper.mapTaggableList(ConfigHelper.getEntityTypes(entities));
+        if (entList.isEmpty() && entities.length != 0)
+        {   this.entityPredicate.add(EntityRequirement.NONE, true);
+        }
+        else
+        {   this.entityPredicate.add(new EntityRequirement(entList, null), false);
+        }
         return this;
     }
 
