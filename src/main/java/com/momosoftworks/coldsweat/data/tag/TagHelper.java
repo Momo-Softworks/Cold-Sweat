@@ -1,15 +1,12 @@
 package com.momosoftworks.coldsweat.data.tag;
 
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
+import net.neoforged.neoforge.event.TagsUpdatedEvent;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -34,10 +31,7 @@ public class TagHelper
     }
 
     @SubscribeEvent
-    public static void onServerStopped(EntityLeaveLevelEvent event)
-    {
-        if (event.getEntity() instanceof Player)
-        {   EVENT_TAGS.clear();
-        }
+    public static void onServerStopped(TagsUpdatedEvent event)
+    {   EVENT_TAGS.clear();
     }
 }
