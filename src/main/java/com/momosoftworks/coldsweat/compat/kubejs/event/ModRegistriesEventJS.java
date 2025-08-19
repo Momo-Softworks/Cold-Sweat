@@ -71,12 +71,14 @@ public class ModRegistriesEventJS extends StartupEventJS
     {
         InsulatorBuilderJS insulatorJS = new InsulatorBuilderJS();
         builder.accept(insulatorJS);
-        InsulatorData insulator = insulatorJS.build();
-
         if (insulatorJS.itemPredicate.isEmpty())
         {   insulatorJS.itemPredicate.add(new ItemRequirement(Collections.singleton(null), null), false);
         }
-        this.event.addRegistryEntry(ModRegistries.INSULATOR_DATA, Holder.direct(insulator));
+
+        InsulatorData insulatorDate = insulatorJS.build();
+        if (!insulatorDate.areRequiredModsLoaded()) return;
+
+        this.event.addRegistryEntry(ModRegistries.INSULATOR_DATA, insulatorDate);
     }
 
     /*
@@ -87,13 +89,14 @@ public class ModRegistriesEventJS extends StartupEventJS
     {
         FoodBuilderJS foodJS = new FoodBuilderJS();
         builder.accept(foodJS);
-        FoodData foodData = foodJS.build();
-        if (!foodData.areRequiredModsLoaded()) return;
-
         if (foodJS.itemPredicate.isEmpty())
         {   foodJS.itemPredicate.add(new ItemRequirement(Collections.singleton(null), null), false);
         }
-        this.event.addRegistryEntry(ModRegistries.FOOD_DATA, Holder.direct(foodData));
+
+        FoodData foodData = foodJS.build();
+        if (!foodData.areRequiredModsLoaded()) return;
+
+        this.event.addRegistryEntry(ModRegistries.FOOD_DATA, foodData);
     }
 
     /*
@@ -104,13 +107,14 @@ public class ModRegistriesEventJS extends StartupEventJS
     {
         FuelBuilderJS fuelJS = new FuelBuilderJS();
         builder.accept(fuelJS);
-        FuelData fuelData = fuelJS.build(fuelType);
-        if (!fuelData.areRequiredModsLoaded()) return;
-
         if (fuelJS.itemPredicate.isEmpty())
         {   fuelJS.itemPredicate.add(new ItemRequirement(Collections.singleton(null), null), false);
         }
-        this.event.addRegistryEntry(ModRegistries.FUEL_DATA, Holder.direct(fuelData));
+
+        FuelData fuelData = fuelJS.build(fuelType);
+        if (!fuelData.areRequiredModsLoaded()) return;
+
+        this.event.addRegistryEntry(ModRegistries.FUEL_DATA, fuelData);
     }
 
     public void addHearthFuel(Consumer<FuelBuilderJS> builder)
@@ -137,13 +141,14 @@ public class ModRegistriesEventJS extends StartupEventJS
     {
         CarriedItemBuilderJS carriedItemJS = new CarriedItemBuilderJS();
         builder.accept(carriedItemJS);
-        ItemCarryTempData carryData = carriedItemJS.build();
-        if (!carryData.areRequiredModsLoaded()) return;
-
         if (carriedItemJS.itemPredicate.isEmpty())
         {   carriedItemJS.itemPredicate.add(new ItemRequirement(Collections.singleton(null), null), false);
         }
-        this.event.addRegistryEntry(ModRegistries.CARRY_TEMP_DATA, Holder.direct(carryData));
+
+        ItemCarryTempData carryData = carriedItemJS.build();
+        if (!carryData.areRequiredModsLoaded()) return;
+
+        this.event.addRegistryEntry(ModRegistries.CARRY_TEMP_DATA, carryData);
     }
 
     /*
@@ -154,13 +159,14 @@ public class ModRegistriesEventJS extends StartupEventJS
     {
         DryingItemBuilderJS dryingItemJS = new DryingItemBuilderJS();
         builder.accept(dryingItemJS);
-        DryingItemData dryingData = dryingItemJS.build();
-        if (!dryingData.areRequiredModsLoaded()) return;
-
         if (dryingItemJS.itemPredicate.isEmpty())
         {   dryingItemJS.itemPredicate.add(new ItemRequirement(Collections.singleton(null), null), false);
         }
-        this.event.addRegistryEntry(ModRegistries.DRYING_ITEM_DATA, Holder.direct(dryingData));
+
+        DryingItemData dryingData = dryingItemJS.build();
+        if (!dryingData.areRequiredModsLoaded()) return;
+
+        this.event.addRegistryEntry(ModRegistries.DRYING_ITEM_DATA, dryingData);
     }
 
     private <K, V extends ConfigData> void addRegistryConfig(ResourceKey<Registry<K>> keyRegistry,
@@ -177,7 +183,7 @@ public class ModRegistriesEventJS extends StartupEventJS
         configData.setRegistryType(ConfigData.Type.KUBEJS);
         if (!configData.areRequiredModsLoaded()) return;
 
-        this.event.addRegistryEntry(modRegistry, Holder.direct(configData));
+        this.event.addRegistryEntry(modRegistry, configData);
     }
 
     /*
@@ -254,13 +260,14 @@ public class ModRegistriesEventJS extends StartupEventJS
     {
         EntityTempBuilderJS entityTempJS = new EntityTempBuilderJS();
         builder.accept(entityTempJS);
-        EntityTempData entityTempData = entityTempJS.build();
-        if (!entityTempData.areRequiredModsLoaded()) return;
-
         if (entityTempJS.entityPredicate.isEmpty())
         {   entityTempJS.entityPredicate.add(new EntityRequirement(Collections.singleton(null), null), false);
         }
-        this.event.addRegistryEntry(ModRegistries.ENTITY_TEMP_DATA, Holder.direct(entityTempData));
+
+        EntityTempData entityTempData = entityTempJS.build();
+        if (!entityTempData.areRequiredModsLoaded()) return;
+
+        this.event.addRegistryEntry(ModRegistries.ENTITY_TEMP_DATA, entityTempData);
     }
 
     /*
@@ -271,13 +278,14 @@ public class ModRegistriesEventJS extends StartupEventJS
     {
         EntityClimateBuilderJS entityClimateJS = new EntityClimateBuilderJS();
         builder.accept(entityClimateJS);
-        EntityClimateData entityClimateData = entityClimateJS.build();
-        if (!entityClimateData.areRequiredModsLoaded()) return;
-
         if (entityClimateJS.entityPredicate.isEmpty())
         {   entityClimateJS.entityPredicate.add(new EntityRequirement(Collections.singleton(null), null), false);
         }
-        this.event.addRegistryEntry(ModRegistries.ENTITY_CLIMATE_DATA, Holder.direct(entityClimateData));
+
+        EntityClimateData entityClimateData = entityClimateJS.build();
+        if (!entityClimateData.areRequiredModsLoaded()) return;
+
+        this.event.addRegistryEntry(ModRegistries.ENTITY_CLIMATE_DATA, entityClimateData);
     }
 
     /*
@@ -288,13 +296,14 @@ public class ModRegistriesEventJS extends StartupEventJS
     {
         InsulatingMountBuilderJS insulatingMountJS = new InsulatingMountBuilderJS();
         builder.accept(insulatingMountJS);
-        MountData mountData = insulatingMountJS.build();
-        if (!mountData.areRequiredModsLoaded()) return;
-
         if (insulatingMountJS.entityPredicate.isEmpty())
         {   insulatingMountJS.entityPredicate.add(new EntityRequirement(Collections.singleton(null), null), false);
         }
-        this.event.addRegistryEntry(ModRegistries.MOUNT_DATA, Holder.direct(mountData));
+
+        MountData mountData = insulatingMountJS.build();
+        if (!mountData.areRequiredModsLoaded()) return;
+
+        this.event.addRegistryEntry(ModRegistries.MOUNT_DATA, mountData);
     }
 
     /*
@@ -311,7 +320,7 @@ public class ModRegistriesEventJS extends StartupEventJS
         if (spawnBiomeJS.biomes.isEmpty())
         {   spawnBiomeJS.biomes.add(null);
         }
-        this.event.addRegistryEntry(ModRegistries.ENTITY_SPAWN_BIOME_DATA, Holder.direct(spawnBiomeData));
+        this.event.addRegistryEntry(ModRegistries.ENTITY_SPAWN_BIOME_DATA, spawnBiomeData);
     }
 
     /*

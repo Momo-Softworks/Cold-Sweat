@@ -30,7 +30,12 @@ public class EntityTempBuilderJS
     public EntityTempBuilderJS entities(String... entities)
     {
         Collection<EntityType<?>> entList = RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITY_TYPES, ConfigHelper.getEntityTypes(entities));
-        this.entityPredicate.add(new EntityRequirement(entList, null), false);
+        if (entList.isEmpty() && entities.length != 0)
+        {   this.entityPredicate.add(EntityRequirement.NONE, true);
+        }
+        else
+        {   this.entityPredicate.add(new EntityRequirement(entList, null), false);
+        }
         return this;
     }
 
