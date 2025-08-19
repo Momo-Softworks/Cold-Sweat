@@ -193,7 +193,7 @@ public class NegatableList<T>
             {
                 boolean result = test.test(this.exclusions.get(i));
                 if (this.excludeAll && !result)
-                {   break;
+                {   return true;
                 }
                 if (!this.excludeAll && result)
                 {   return false;
