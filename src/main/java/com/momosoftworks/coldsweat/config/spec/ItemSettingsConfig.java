@@ -40,6 +40,7 @@ public class ItemSettingsConfig
     public static final ForgeConfigSpec.IntValue WATERSKIN_CONSUME_STRENGTH;
     public static final ForgeConfigSpec.DoubleValue WATERSKIN_HOTBAR_STRENGTH;
     public static final ForgeConfigSpec.DoubleValue WATERSKIN_NEUTRALIZE_SPEED;
+    public static final ForgeConfigSpec.IntValue WATERSKIN_USES;
     public static final ForgeConfigSpec.DoubleValue SOULSPRING_LAMP_STRENGTH;
 
     public static final ForgeConfigSpec.ConfigValue<Boolean> FIRE_RESISTANCE_BLOCKS_OVERHEATING;
@@ -416,6 +417,12 @@ public class ItemSettingsConfig
                          " A multiplier for how quickly a waterskin will return to its neutral temperature when being used in the hotbar",
                          " ⌄ ")
                 .defineInRange("Waterskin Neutralize Speed", 1.0, 0, Double.POSITIVE_INFINITY);
+
+            WATERSKIN_USES = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " Defines how many times a waterskin can be used before becoming empty",
+                         " ⌄ ")
+                .defineInRange("Waterskin Uses", 1, 1, Integer.MAX_VALUE);
 
             SOULSPRING_LAMP_STRENGTH = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────",
