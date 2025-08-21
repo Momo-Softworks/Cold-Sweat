@@ -151,6 +151,7 @@ public class ConfigSettings
     public static final DynamicHolder<Integer> WATERSKIN_CONSUME_STRENGTH;
     public static final DynamicHolder<Double> WATERSKIN_HOTBAR_STRENGTH;
     public static final DynamicHolder<Double> WATERSKIN_NEUTRALIZE_SPEED;
+    public static final DynamicHolder<Integer> WATERSKIN_USES;
     public static final DynamicHolder<Double> SOULSPRING_LAMP_STRENGTH;
 
     public static final DynamicHolder<List<DimensionType>> LAMP_DIMENSIONS;
@@ -573,6 +574,11 @@ public class ConfigSettings
         WATERSKIN_NEUTRALIZE_SPEED = addSyncedSetting(ColdSweat.createKey("waterskin_neutralize_speed"), () -> 1.0, holder -> holder.set(ItemSettingsConfig.WATERSKIN_NEUTRALIZE_SPEED.get()),
         Codec.DOUBLE,
         (saver) -> ItemSettingsConfig.WATERSKIN_NEUTRALIZE_SPEED.set(saver),
+        SyncType.BOTH_WAYS);
+
+        WATERSKIN_USES = addSyncedSetting(ColdSweat.createKey("waterskin_uses"), () -> 4, holder -> holder.set(ItemSettingsConfig.WATERSKIN_USES.get()),
+        Codec.INT,
+        (saver) -> ItemSettingsConfig.WATERSKIN_USES.set(saver),
         SyncType.BOTH_WAYS);
 
         SOULSPRING_LAMP_STRENGTH = addSetting(ColdSweat.createKey("soulspring_lamp_strength"), () -> 0.6d, holder -> holder.set(ItemSettingsConfig.SOULSPRING_LAMP_STRENGTH.get()));
