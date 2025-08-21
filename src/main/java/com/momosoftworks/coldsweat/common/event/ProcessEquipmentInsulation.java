@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.common.event;
 
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.event.common.insulation.InsulationTickEvent;
+import com.momosoftworks.coldsweat.api.event.vanilla.ItemBreakEvent;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
@@ -19,6 +20,7 @@ import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.item.ItemEntity;
@@ -191,14 +193,27 @@ public class ProcessEquipmentInsulation
         while (filledInsulationSlots > ItemInsulationManager.getInsulationSlots(armorStack))
         {
             ItemStack removedItem = cap.removeInsulationItem(totalInsulation.get(totalInsulation.size() - 1).getFirst());
-            ItemEntity droppedInsulation = new ItemEntity(player.level, player.getX(), player.getY() + player.getBbHeight() / 2, player.getZ(), removedItem);
-            droppedInsulation.setPickUpDelay(8);
-            droppedInsulation.setDeltaMovement(new Vector3d(player.getRandom().nextGaussian() * 0.05,
-                                                            player.getRandom().nextGaussian() * 0.05 + 0.2,
-                                                            player.getRandom().nextGaussian() * 0.05));
-            player.level.addFreshEntity(droppedInsulation);
+            WorldHelper.entityDropItem(player, removedItem);
 
             filledInsulationSlots--;
+        }
+    }
+
+    @SubscribeEvent
+    public static void onArmorBroken(ItemBreakEvent event)
+    {
+        ItemStack stack = event.getItemStack();
+        LivingEntity entity = event.getEntityLiving();
+        if (ItemInsulationManager.isInsulatable(stack))
+        {
+            ItemInsulationManager.getInsulationCap(stack).ifPresent(cap ->
+            {
+                for (Pair<ItemStack, List<InsulatorData>> insulation : cap.getInsulation())
+                {
+                    ItemEntity itemEntity = WorldHelper.entityDropItem(entity, insulation.getFirst());
+                    itemEntity.setPickUpDelay(8);
+                }
+            });
         }
     }
 

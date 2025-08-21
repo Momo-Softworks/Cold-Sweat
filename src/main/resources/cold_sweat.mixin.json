@@ -24,6 +24,7 @@
   ],
   "mixins": [
     "ItemSwapMixin",
+    "MixinArmorBreak",
     "MixinBlockUpdate$Server",
     "MixinCampfire",
     "MixinEntityRiding",
