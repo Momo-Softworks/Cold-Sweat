@@ -106,12 +106,7 @@ public class FilledWaterskinItem extends Item
         {   WorldHelper.playEntitySound(ModSounds.WATERSKIN_POUR, player, player.getSoundSource(), 2f, (float) ((Math.random() / 5) + 0.9));
         }
 
-        if (getDurability(stack) <= 1)
-        {   consumeWaterskin(stack, player, hand);
-        }
-        else
-        {   stack.setDamageValue(stack.getDamageValue() + 1);
-        }
+        consumeWaterskin(stack, player, hand);
         player.swing(hand, true);
 
         // spawn falling water particles
@@ -245,7 +240,7 @@ public class FilledWaterskinItem extends Item
     @Override
     public ItemStack finishUsingItem(ItemStack stack, World level, LivingEntity entity)
     {   double amount = stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE) * (ConfigSettings.WATERSKIN_CONSUME_STRENGTH.get() / 50d);
-        Temperature.addModifier(entity, new WaterskinTempModifier(amount / 100).expires(100), Temperature.Trait.CORE, Placement.Duplicates.ALLOW);
+        Temperature.addModifier(entity, new WaterskinTempModifier(amount / (100 * stack.getMaxDamage())).expires(100), Temperature.Trait.CORE, Placement.Duplicates.ALLOW);
         if (entity instanceof PlayerEntity && ((PlayerEntity) entity).isCreative())
         {   return stack;
         }
@@ -280,6 +275,21 @@ public class FilledWaterskinItem extends Item
     public void appendHoverText(ItemStack stack, World level, List<ITextComponent> tooltip, ITooltipFlag advanced)
     {
         double temp = CSMath.round(stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE), 2);
+
+        // Display filled state
+        IFormattableTextComponent filledLabel = new TranslationTextComponent("item.cold_sweat.waterskin.filled").withStyle(TextFormatting.GRAY);
+        if (ConfigSettings.ENABLE_HINTS.get() && !TooltipHandler.isShiftDown())
+            filledLabel.append(new StringTextComponent(" ").append(TooltipHandler.EXPAND_TOOLTIP));
+        tooltip.add(filledLabel);
+
+        // Info tooltip for drinking/pouring functionality
+        IFormattableTextComponent tempText = temp > 0  ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + Math.round(temp)).withStyle(TooltipHandler.HOT) :
+                                             temp == 0 ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + Math.round(temp)).withStyle(TextFormatting.WHITE)
+                                                       : new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", Math.round(temp)).withStyle(TooltipHandler.COLD);
+        tooltip.add(new StringTextComponent(""));
+        tooltip.add(new TranslationTextComponent("tooltip.cold_sweat.consumed").withStyle(TextFormatting.GRAY));
+        tooltip.add(tempText);
+
         if (TooltipHandler.isShiftDown())
         {
             if (ConfigSettings.ENABLE_HINTS.get())
@@ -293,7 +303,7 @@ public class FilledWaterskinItem extends Item
                     default : crouchAction = "";
                 }
                 if (!crouchAction.isEmpty())
-                {   tooltip.add(new TranslationTextComponent(crouchAction, new StringTextComponent(crouchKey).withStyle(TextFormatting.WHITE)).withStyle(TextFormatting.GRAY));
+                {   tooltip.add(2, new TranslationTextComponent(crouchAction, new StringTextComponent(crouchKey).withStyle(TextFormatting.WHITE)).withStyle(TextFormatting.GRAY));
                 }
             }
 
@@ -303,38 +313,12 @@ public class FilledWaterskinItem extends Item
             tooltip.add(new StringTextComponent(""));
             tooltip.add(new TranslationTextComponent("tooltip.cold_sweat.hotbar").withStyle(TextFormatting.GRAY));
             double effectRate = EFFECT_RATE * ConfigSettings.WATERSKIN_HOTBAR_STRENGTH.get();
-            IFormattableTextComponent tempEffectText =
-                                       (temp > 0  ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + CSMath.round(effectRate, 2)).withStyle(TooltipHandler.HOT) :
-                                        temp == 0 ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+0").withStyle(TextFormatting.WHITE)
-                                                  : new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "-" + CSMath.round(effectRate, 2)).withStyle(TooltipHandler.COLD))
+            IFormattableTextComponent tempEffectText = (temp > 0  ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + CSMath.round(effectRate, 2)).withStyle(TooltipHandler.HOT) :
+                                                        temp == 0 ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+0").withStyle(TextFormatting.WHITE)
+                                                                  : new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "-" + CSMath.round(effectRate, 2)).withStyle(TooltipHandler.COLD))
                         .append(perSecond);
             tooltip.add(tempEffectText);
-
-            // Info tooltip for drinking/pouring functionality
-            IFormattableTextComponent tempText =
-                                 temp > 0  ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp)).withStyle(TooltipHandler.HOT) :
-                                 temp == 0 ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp)).withStyle(TextFormatting.WHITE)
-                                           : new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", CSMath.formatDoubleOrInt(temp)).withStyle(TooltipHandler.COLD);
-            tooltip.add(new StringTextComponent(""));
-            tooltip.add(new TranslationTextComponent("tooltip.cold_sweat.consumed").withStyle(TextFormatting.GRAY));
-            tooltip.add(tempText);
         }
-        else if (ConfigSettings.ENABLE_HINTS.get())
-        {   tooltip.add(TooltipHandler.EXPAND_TOOLTIP);
-        }
-
-        // Tooltip to display temperature
-        boolean celsius = ConfigSettings.CELSIUS.get();
-        Style color = temp == 0 ? Style.EMPTY : (temp < 0 ? TooltipHandler.COLD : TooltipHandler.HOT);
-        String tempUnits = celsius ? "C" : "F";
-        temp = temp / 2 + 95;
-        if (celsius) temp = Temperature.convert(temp, Temperature.Units.F, Temperature.Units.C, true);
-        temp += ConfigSettings.TEMP_OFFSET.get() / 2.0;
-
-        tooltip.add(1, new TranslationTextComponent("item.cold_sweat.waterskin.filled").withStyle(TextFormatting.GRAY)
-                       .append(" (")
-                       .append(new StringTextComponent((int) temp + " \u00B0" + tempUnits).withStyle(color))
-                       .append(new StringTextComponent(")").withStyle(TextFormatting.GRAY)));
 
         super.appendHoverText(stack, level, tooltip, advanced);
     }
