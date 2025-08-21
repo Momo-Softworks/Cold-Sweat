@@ -20,7 +20,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -111,12 +111,7 @@ public class FilledWaterskinItem extends Item
         {   WorldHelper.playEntitySound(ModSounds.WATERSKIN_POUR, player, player.getSoundSource(), 2f, (float) ((Math.random() / 5) + 0.9));
         }
 
-        if (getDurability(stack) <= 1)
-        {   consumeWaterskin(stack, player, hand);
-        }
-        else
-        {   stack.setDamageValue(stack.getDamageValue() + 1);
-        }
+        consumeWaterskin(stack, player, hand);
         player.swing(hand, true);
 
         // spawn falling water particles
@@ -251,7 +246,7 @@ public class FilledWaterskinItem extends Item
     @Override
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity)
     {   double amount = stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE) * (ConfigSettings.WATERSKIN_CONSUME_STRENGTH.get() / 50d);
-        Temperature.addModifier(entity, new WaterskinTempModifier(amount / 100).expires(100), Temperature.Trait.CORE, Placement.Duplicates.ALLOW);
+        Temperature.addModifier(entity, new WaterskinTempModifier(amount / (100 * stack.getMaxDamage())).expires(100), Temperature.Trait.CORE, Placement.Duplicates.ALLOW);
         if (entity instanceof Player player && player.isCreative())
         {   return stack;
         }
@@ -286,6 +281,21 @@ public class FilledWaterskinItem extends Item
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag advanced)
     {
         double temp = CSMath.round(stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE), 2);
+
+        // Display filled state
+        MutableComponent filledLabel = Component.translatable("item.cold_sweat.waterskin.filled").withStyle(ChatFormatting.GRAY);
+        if (ConfigSettings.ENABLE_HINTS.get() && !TooltipHandler.isShiftDown())
+            filledLabel.append(Component.literal(" ").append(TooltipHandler.EXPAND_TOOLTIP));
+        tooltip.add(filledLabel);
+
+        // Info tooltip for drinking/pouring functionality
+        Component tempText = temp > 0  ? Component.translatable("tooltip.cold_sweat.temperature_effect", "+" + Math.round(temp)).withStyle(TooltipHandler.HOT) :
+                             temp == 0 ? Component.translatable("tooltip.cold_sweat.temperature_effect", "+" + Math.round(temp)).withStyle(ChatFormatting.WHITE)
+                                       : Component.translatable("tooltip.cold_sweat.temperature_effect", Math.round(temp)).withStyle(TooltipHandler.COLD);
+        tooltip.add(Component.empty());
+        tooltip.add(Component.translatable("tooltip.cold_sweat.consumed").withStyle(ChatFormatting.GRAY));
+        tooltip.add(tempText);
+
         if (TooltipHandler.isShiftDown())
         {
             if (ConfigSettings.ENABLE_HINTS.get())
@@ -299,7 +309,7 @@ public class FilledWaterskinItem extends Item
                     default -> crouchAction = "";
                 }
                 if (!crouchAction.isEmpty())
-                {   tooltip.add(Component.translatable(crouchAction, Component.literal(crouchKey).withStyle(ChatFormatting.WHITE)).withStyle(ChatFormatting.GRAY));
+                {   tooltip.add(2, Component.translatable(crouchAction, Component.literal(crouchKey).withStyle(ChatFormatting.WHITE)).withStyle(ChatFormatting.GRAY));
                 }
             }
 
@@ -314,31 +324,7 @@ public class FilledWaterskinItem extends Item
                                                   : Component.translatable("tooltip.cold_sweat.temperature_effect", "-" + CSMath.round(effectRate, 2)).withStyle(TooltipHandler.COLD))
                         .append(perSecond);
             tooltip.add(tempEffectText);
-
-            // Info tooltip for drinking/pouring functionality
-            Component tempText = temp > 0  ? Component.translatable("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp)).withStyle(TooltipHandler.HOT) :
-                                 temp == 0 ? Component.translatable("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp)).withStyle(ChatFormatting.WHITE)
-                                           : Component.translatable("tooltip.cold_sweat.temperature_effect", CSMath.formatDoubleOrInt(temp)).withStyle(TooltipHandler.COLD);
-            tooltip.add(Component.empty());
-            tooltip.add(Component.translatable("tooltip.cold_sweat.consumed").withStyle(ChatFormatting.GRAY));
-            tooltip.add(tempText);
         }
-        else if (ConfigSettings.ENABLE_HINTS.get())
-        {   tooltip.add(TooltipHandler.EXPAND_TOOLTIP);
-        }
-
-        // Tooltip to display temperature
-        boolean celsius = ConfigSettings.CELSIUS.get();
-        Style color = temp == 0 ? Style.EMPTY : (temp < 0 ? TooltipHandler.COLD : TooltipHandler.HOT);
-        String tempUnits = celsius ? "C" : "F";
-        temp = temp / 2 + 95;
-        if (celsius) temp = Temperature.convert(temp, Temperature.Units.F, Temperature.Units.C, true);
-        temp += ConfigSettings.TEMP_OFFSET.get() / 2.0;
-
-        tooltip.add(1, Component.translatable("item.cold_sweat.waterskin.filled").withStyle(ChatFormatting.GRAY)
-                       .append(" (")
-                       .append(Component.literal((int) temp + " \u00B0" + tempUnits).withStyle(color))
-                       .append(Component.literal(")").withStyle(ChatFormatting.GRAY)));
 
         super.appendHoverText(stack, level, tooltip, advanced);
     }
