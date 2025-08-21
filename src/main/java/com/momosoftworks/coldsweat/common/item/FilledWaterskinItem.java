@@ -47,6 +47,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 public class FilledWaterskinItem extends Item
 {
@@ -58,6 +59,25 @@ public class FilledWaterskinItem extends Item
         super(new Properties().stacksTo(1).craftRemainder(ItemInit.WATERSKIN.get()));
 
         DispenserBlock.registerBehavior(this, DISPENSE_BEHAVIOR);
+    }
+
+    @Override
+    public int getMaxDamage(ItemStack stack)
+    {   return ConfigSettings.WATERSKIN_USES.get();
+    }
+
+    @Override
+    public int getBarColor(ItemStack stack)
+    {   return 0x2D5EDE;
+    }
+
+    @Override
+    public boolean isBarVisible(ItemStack stack)
+    {   return getMaxDamage(stack) > 1;
+    }
+
+    private static int getDurability(ItemStack stack)
+    {   return Math.max(0, stack.getMaxDamage() - (stack.getDamageValue()));
     }
 
     @Override
@@ -91,7 +111,12 @@ public class FilledWaterskinItem extends Item
         {   WorldHelper.playEntitySound(ModSounds.WATERSKIN_POUR, player, player.getSoundSource(), 2f, (float) ((Math.random() / 5) + 0.9));
         }
 
-        consumeWaterskin(stack, player, hand);
+        if (getDurability(stack) <= 1)
+        {   consumeWaterskin(stack, player, hand);
+        }
+        else
+        {   stack.setDamageValue(stack.getDamageValue() + 1);
+        }
         player.swing(hand, true);
 
         // spawn falling water particles
@@ -120,19 +145,22 @@ public class FilledWaterskinItem extends Item
         return true;
     }
 
-    public static void consumeWaterskin(ItemStack stack, Player player, InteractionHand usedHand)
+    public static ItemStack consumeWaterskin(ItemStack stack, LivingEntity entity, InteractionHand usedHand)
     {
         // Create empty waterskin item
         ItemStack emptyStack = getEmpty(stack);
         emptyStack.getOrCreateTag().remove("Purity");
+        emptyStack.setDamageValue(0);
 
         // Add the item to the player's inventory
-        if (player.getInventory().contains(emptyStack))
+        if (entity instanceof Player player && player.getInventory().contains(emptyStack))
         {   player.addItem(emptyStack);
             player.setItemInHand(usedHand, ItemStack.EMPTY);
+            return ItemStack.EMPTY;
         }
         else
-        {   player.setItemInHand(usedHand, emptyStack);
+        {   entity.setItemInHand(usedHand, emptyStack);
+            return emptyStack;
         }
     }
 
@@ -224,9 +252,19 @@ public class FilledWaterskinItem extends Item
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity)
     {   double amount = stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE) * (ConfigSettings.WATERSKIN_CONSUME_STRENGTH.get() / 50d);
         Temperature.addModifier(entity, new WaterskinTempModifier(amount / 100).expires(100), Temperature.Trait.CORE, Placement.Duplicates.ALLOW);
-        return entity instanceof Player player && player.isCreative()
-               ? stack
-               : this.getCraftingRemainingItem(stack);
+        if (entity instanceof Player player && player.isCreative())
+        {   return stack;
+        }
+        else
+        {
+            if (getDurability(stack) <= 1)
+            {   return consumeWaterskin(stack, entity, entity.getUsedItemHand());
+            }
+            else
+            {   stack.setDamageValue(stack.getDamageValue() + 1);
+                return stack;
+            }
+        }
     }
 
     public static ItemStack getEmpty(ItemStack stack)
