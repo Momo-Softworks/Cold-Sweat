@@ -21,6 +21,7 @@
     "compat.MixinCreateOverlay"
   ],
   "mixins": [
+    "MixinArmorBreak",
     "MixinBlockUpdate$Server",
     "MixinCampfire",
     "MixinFreezingWater",
