@@ -396,7 +396,7 @@ public class Overlays
 
                     // Blend body temp (per tick)
                     PREV_BODY_TEMP = BODY_TEMP;
-                    BODY_TEMP = BODY_TEMP + (cap.getTrait(Temperature.Trait.BODY) - BODY_TEMP) / 5;
+                    BODY_TEMP = BODY_TEMP + (cap.getTrait(Temperature.Trait.BODY) - BODY_TEMP) / 2;
 
                     // Handle effects for the icon (bobbing, stage, transition)
                     // Get icon bob
