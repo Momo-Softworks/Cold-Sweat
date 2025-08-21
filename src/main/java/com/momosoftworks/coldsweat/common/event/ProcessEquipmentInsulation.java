@@ -3,20 +3,18 @@ package com.momosoftworks.coldsweat.common.event;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.common.insulation.InsulationTickEvent;
+import com.momosoftworks.coldsweat.api.event.vanilla.ItemBreakEvent;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
-import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
 import com.momosoftworks.coldsweat.api.temperature.modifier.ArmorInsulationTempModifier;
 import com.momosoftworks.coldsweat.api.util.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
-import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.core.init.ModItemComponents;
-import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.compat.CompatManager;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
-import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.advancements.AdvancementHolder;
@@ -28,19 +26,22 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.EquipmentSlotGroup;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @EventBusSubscriber
 public class ProcessEquipmentInsulation
@@ -189,16 +190,29 @@ public class ProcessEquipmentInsulation
         {
             ItemStack removedItem = totalInsulation.getLast().getFirst();
             cap = cap.removeInsulationItem(totalInsulation.get(totalInsulation.size() - 1).getFirst());
-            ItemEntity droppedInsulation = new ItemEntity(player.level(), player.getX(), player.getY() + player.getBbHeight() / 2, player.getZ(), removedItem);
-            droppedInsulation.setPickUpDelay(8);
-            droppedInsulation.setDeltaMovement(new Vec3(player.getRandom().nextGaussian() * 0.05,
-                                                        player.getRandom().nextGaussian() * 0.05 + 0.2,
-                                                        player.getRandom().nextGaussian() * 0.05));
-            player.level().addFreshEntity(droppedInsulation);
+            WorldHelper.entityDropItem(player, removedItem);
 
             filledInsulationSlots--;
         }
         return cap;
+    }
+
+    @SubscribeEvent
+    public static void onArmorBroken(ItemBreakEvent event)
+    {
+        ItemStack stack = event.getItemStack();
+        LivingEntity entity = event.getEntity();
+        if (ItemInsulationManager.isInsulatable(stack))
+        {
+            ItemInsulationManager.getInsulationCap(stack).ifPresent(cap ->
+            {
+                for (Pair<ItemStack, List<InsulatorData>> insulation : cap.getInsulation())
+                {
+                    ItemEntity itemEntity = WorldHelper.entityDropItem(entity, insulation.getFirst());
+                    itemEntity.setPickUpDelay(8);
+                }
+            });
+        }
     }
 
     /**
