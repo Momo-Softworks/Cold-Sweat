@@ -294,6 +294,7 @@ public class FilledWaterskinItem extends Item
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag advanced)
     {
         double temp = CSMath.round(stack.get(ModItemComponents.WATER_TEMPERATURE), 2);
+        double multiplier = ConfigSettings.WATERSKIN_CONSUME_STRENGTH.get() / 50d;
 
         // Display filled state
         MutableComponent filledLabel = Component.translatable("item.cold_sweat.waterskin.filled").withStyle(ChatFormatting.GRAY);
@@ -302,9 +303,10 @@ public class FilledWaterskinItem extends Item
         tooltip.add(filledLabel);
 
         // Info tooltip for drinking/pouring functionality
-        Component tempText = temp > 0  ? Component.translatable("tooltip.cold_sweat.temperature_effect", "+" + Math.round(temp)).withStyle(TooltipHandler.HOT) :
-                             temp == 0 ? Component.translatable("tooltip.cold_sweat.temperature_effect", "+" + Math.round(temp)).withStyle(ChatFormatting.WHITE)
-                                       : Component.translatable("tooltip.cold_sweat.temperature_effect", Math.round(temp)).withStyle(TooltipHandler.COLD);
+        double useEffect = Math.round(temp * multiplier);
+        Component tempText = temp > 0  ? Component.translatable("tooltip.cold_sweat.temperature_effect", "+" + useEffect).withStyle(TooltipHandler.HOT) :
+                             temp == 0 ? Component.translatable("tooltip.cold_sweat.temperature_effect", "+" + useEffect).withStyle(ChatFormatting.WHITE)
+                                       : Component.translatable("tooltip.cold_sweat.temperature_effect", useEffect).withStyle(TooltipHandler.COLD);
         tooltip.add(Component.empty());
         tooltip.add(Component.translatable("tooltip.cold_sweat.consumed").withStyle(ChatFormatting.GRAY));
         tooltip.add(tempText);
