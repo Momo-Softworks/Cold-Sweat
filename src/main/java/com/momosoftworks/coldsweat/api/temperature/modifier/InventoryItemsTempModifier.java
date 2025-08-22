@@ -2,8 +2,7 @@ package com.momosoftworks.coldsweat.api.temperature.modifier;
 
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.data.codec.configuration.ItemCarryTempData;
-import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.data.codec.configuration.ItemTempData;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -40,7 +39,7 @@ public class InventoryItemsTempModifier extends TempModifier
     {
         effectsPerTrait.clear();
 
-        Map<ItemCarryTempData, Double> effectsPerCarriedTemp = new HashMap<>();
+        Map<ItemTempData, Double> effectsPerItemTemp = new HashMap<>();
 
         // Get temperature of equipped items
         for (EquipmentSlot slot : EquipmentSlot.values())
@@ -49,9 +48,9 @@ public class InventoryItemsTempModifier extends TempModifier
             if (!stack.isEmpty())
             {
                 Item item = stack.getItem();
-                ConfigSettings.CARRIED_ITEM_TEMPERATURES.get().get(item).forEach(
-                carried ->
-                {   checkAndAddCarriedTemp(entity, stack, null, slot, carried, effectsPerCarriedTemp);
+                ConfigSettings.ITEM_TEMPERATURES.get().get(item).forEach(
+                itemData ->
+                {   checkAndAddItemTemp(entity, stack, null, slot, itemData, effectsPerItemTemp);
                 });
             }
         }
@@ -65,15 +64,15 @@ public class InventoryItemsTempModifier extends TempModifier
                 if (!stack.isEmpty())
                 {
                     Item item = stack.getItem();
-                    ConfigSettings.CARRIED_ITEM_TEMPERATURES.get().get(item).forEach(
-                    carried ->
-                    {   checkAndAddCarriedTemp(entity, stack, slot.index, null, carried, effectsPerCarriedTemp);
+                    ConfigSettings.ITEM_TEMPERATURES.get().get(item).forEach(
+                    itemData ->
+                    {   checkAndAddItemTemp(entity, stack, slot.index, null, itemData, effectsPerItemTemp);
                     });
                 }
             }
         }
 
-        for (Map.Entry<ItemCarryTempData, Double> entry : effectsPerCarriedTemp.entrySet())
+        for (Map.Entry<ItemTempData, Double> entry : effectsPerItemTemp.entrySet())
         {
             Temperature.Trait dataTrait = entry.getKey().trait();
             double temp = entry.getValue();
@@ -82,16 +81,16 @@ public class InventoryItemsTempModifier extends TempModifier
         }
     }
 
-    private static void checkAndAddCarriedTemp(LivingEntity entity, ItemStack stack, Integer slot, EquipmentSlot equipmentSlot,
-                                               ItemCarryTempData carried, Map<ItemCarryTempData, Double> effectsPerCarriedTemp)
+    private static void checkAndAddItemTemp(LivingEntity entity, ItemStack stack, Integer slot, EquipmentSlot equipmentSlot,
+                                            ItemTempData itemData, Map<ItemTempData, Double> effectsPerItemTemp)
     {
-        if (carried.test(entity, stack, slot, equipmentSlot))
+        if (itemData.test(entity, stack, slot, equipmentSlot))
         {
-            double temp = carried.temperature() * stack.getCount();
-            double currentEffect = effectsPerCarriedTemp.getOrDefault(carried, 0.0);
-            double newEffect = temp > 0 ? Math.min(carried.maxEffect(), currentEffect + temp) : Math.max(-carried.maxEffect(), currentEffect + temp);
+            double temp = itemData.temperature() * stack.getCount();
+            double currentEffect = effectsPerItemTemp.getOrDefault(itemData, 0.0);
+            double newEffect = temp > 0 ? Math.min(itemData.maxEffect(), currentEffect + temp) : Math.max(-itemData.maxEffect(), currentEffect + temp);
 
-            effectsPerCarriedTemp.put(carried, newEffect);
+            effectsPerItemTemp.put(itemData, newEffect);
         }
     }
 }
