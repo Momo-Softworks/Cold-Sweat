@@ -6,7 +6,7 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.compat.kubejs.util.KubeHelper;
-import com.momosoftworks.coldsweat.data.codec.configuration.ItemCarryTempData;
+import com.momosoftworks.coldsweat.data.codec.configuration.ItemTempData;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
@@ -26,9 +26,9 @@ import net.minecraftforge.registries.ForgeRegistries;
 import java.util.*;
 import java.util.function.Predicate;
 
-public class CarriedItemBuilderJS
+public class ItemTempBuilderJS
 {
-    public final Set<Either<IntegerBounds, ItemCarryTempData.SlotType>> slots = new HashSet<>();
+    public final Set<Either<IntegerBounds, ItemTempData.SlotType>> slots = new HashSet<>();
     public double temperature = 0;
     public double maxEffect = Double.MAX_VALUE;
     public Temperature.Trait trait = Temperature.Trait.WORLD;
@@ -37,10 +37,10 @@ public class CarriedItemBuilderJS
     public AttributeModifierMap attributes = new AttributeModifierMap();
     public Map<ResourceLocation, Double> immuneTempModifiers = new HashMap<>();
 
-    public CarriedItemBuilderJS()
+    public ItemTempBuilderJS()
     {}
 
-    public CarriedItemBuilderJS items(String... items)
+    public ItemTempBuilderJS items(String... items)
     {
         List<Item> itemList = RegistryHelper.mapTaggableList(ConfigHelper.getItems(items));
         if (itemList.isEmpty() && items.length != 0)
@@ -52,25 +52,25 @@ public class CarriedItemBuilderJS
         return this;
     }
 
-    public CarriedItemBuilderJS temperature(double temperature)
+    public ItemTempBuilderJS temperature(double temperature)
     {
         this.temperature = temperature;
         return this;
     }
 
-    public CarriedItemBuilderJS maxEffect(double maxEffect)
+    public ItemTempBuilderJS maxEffect(double maxEffect)
     {
         this.maxEffect = maxEffect;
         return this;
     }
 
-    public CarriedItemBuilderJS trait(String trait)
+    public ItemTempBuilderJS trait(String trait)
     {
         this.trait = Temperature.Trait.fromID(trait);
         return this;
     }
 
-    public CarriedItemBuilderJS slots(int... slots)
+    public ItemTempBuilderJS slots(int... slots)
     {
         for (int slot : slots)
         {   this.slots.add(Either.left(new IntegerBounds(slot, slot)));
@@ -78,33 +78,33 @@ public class CarriedItemBuilderJS
         return this;
     }
 
-    public CarriedItemBuilderJS slotsInRange(int min, int max)
+    public ItemTempBuilderJS slotsInRange(int min, int max)
     {
         this.slots.add(Either.left(new IntegerBounds(min, max)));
         return this;
     }
 
-    public CarriedItemBuilderJS equipmentSlots(String... slots)
+    public ItemTempBuilderJS equipmentSlots(String... slots)
     {
         for (String slot : slots)
-        {   this.slots.add(Either.right(ItemCarryTempData.SlotType.byName(slot)));
+        {   this.slots.add(Either.right(ItemTempData.SlotType.byName(slot)));
         }
         return this;
     }
 
-    public CarriedItemBuilderJS itemPredicate(Predicate<ItemStack> itemPredicate)
+    public ItemTempBuilderJS itemPredicate(Predicate<ItemStack> itemPredicate)
     {
         this.itemPredicate.add(new ItemRequirement(itemPredicate), false);
         return this;
     }
 
-    public CarriedItemBuilderJS entityPredicate(Predicate<Entity> entityPredicate)
+    public ItemTempBuilderJS entityPredicate(Predicate<Entity> entityPredicate)
     {
         this.entityPredicate.add(new EntityRequirement(entityPredicate), false);
         return this;
     }
 
-    public CarriedItemBuilderJS attribute(String attributeId, double amount, String operation)
+    public ItemTempBuilderJS attribute(String attributeId, double amount, String operation)
     {
         Attribute attribute = ForgeRegistries.ATTRIBUTES.getValue(new ResourceLocation(attributeId));
         if (!KubeHelper.expect(attributeId, attribute, Attribute.class))
@@ -114,7 +114,7 @@ public class CarriedItemBuilderJS
         return this;
     }
 
-    public CarriedItemBuilderJS immuneToModifier(String modifierId, double immunity)
+    public ItemTempBuilderJS immuneToModifier(String modifierId, double immunity)
     {
         ResourceLocation location = new ResourceLocation(modifierId);
         if (!TempModifierRegistry.getEntries().containsKey(location))
@@ -126,11 +126,11 @@ public class CarriedItemBuilderJS
         return this;
     }
 
-    public ItemCarryTempData build()
+    public ItemTempData build()
     {
-        ItemCarryTempData data = new ItemCarryTempData(this.itemPredicate, ImmutableList.copyOf(this.slots),
-                                                       this.temperature, this.trait, maxEffect, this.entityPredicate,
-                                                       this.attributes, this.immuneTempModifiers);
+        ItemTempData data = new ItemTempData(this.itemPredicate, ImmutableList.copyOf(this.slots),
+                                             this.temperature, this.trait, maxEffect, this.entityPredicate,
+                                             this.attributes, this.immuneTempModifiers);
         data.setRegistryType(ConfigData.Type.KUBEJS);
         return data;
     }

@@ -25,14 +25,13 @@ import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.init.ParticleTypesInit;
 import com.momosoftworks.coldsweat.data.codec.configuration.FoodData;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
-import com.momosoftworks.coldsweat.data.codec.configuration.ItemCarryTempData;
+import com.momosoftworks.coldsweat.data.codec.configuration.ItemTempData;
 import com.momosoftworks.coldsweat.data.codec.configuration.MountData;
-import com.momosoftworks.coldsweat.data.codec.configuration.ItemCarryTempData.SlotType;
+import com.momosoftworks.coldsweat.data.codec.configuration.ItemTempData.SlotType;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.data.tag.ModEntityTags;
 import com.momosoftworks.coldsweat.util.entity.DummyPlayer;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.registries.ModAttributes;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
@@ -49,7 +48,6 @@ import net.minecraft.entity.item.minecart.MinecartEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.inventory.container.*;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.TridentItem;
 import net.minecraft.item.UseAction;
@@ -469,14 +467,14 @@ public class EntityTempManager
             {
                 // Get immunities from inventory items
                 PlayerEntity player = (PlayerEntity) entity;
-                for (Map.Entry<ItemStack, Pair<ItemCarryTempData, Either<Integer, ItemCarryTempData.SlotType>>> entry : getInventoryTemperaturesOnEntity(player).entrySet())
+                for (Map.Entry<ItemStack, Pair<ItemTempData, Either<Integer, ItemTempData.SlotType>>> entry : getInventoryTemperaturesOnEntity(player).entrySet())
                 {
-                    ItemCarryTempData invTemp = entry.getValue().getFirst();
+                    ItemTempData itemTemp = entry.getValue().getFirst();
                     ItemStack stack = entry.getKey();
 
-                    if (entry.getValue().getSecond().map(slot -> invTemp.test(player, stack, slot, null),
-                                                         slot -> invTemp.test(entity, stack, slot)))
-                    {   immunities.putAll(invTemp.immuneTempModifiers());
+                    if (entry.getValue().getSecond().map(slot -> itemTemp.test(player, stack, slot, null),
+                                                         slot -> itemTemp.test(entity, stack, slot)))
+                    {   immunities.putAll(itemTemp.immuneTempModifiers());
                     }
                 }
                 // Get immunities from mount
@@ -601,13 +599,13 @@ public class EntityTempManager
 
     private static void updateInventoryTempAttributes(ItemStack oldStack, ItemStack newStack, LivingEntity entity)
     {
-        for (ItemCarryTempData carryTempData : ConfigSettings.CARRIED_ITEM_TEMPERATURES.get().get(oldStack.getItem()))
-        {   entity.getAttributes().removeAttributeModifiers(carryTempData.attributeModifiers().getMap());
+        for (ItemTempData itemTempData : ConfigSettings.ITEM_TEMPERATURES.get().get(oldStack.getItem()))
+        {   entity.getAttributes().removeAttributeModifiers(itemTempData.attributeModifiers().getMap());
         }
-        for (ItemCarryTempData carryTempData : ConfigSettings.CARRIED_ITEM_TEMPERATURES.get().get(newStack.getItem()))
+        for (ItemTempData itemTempData : ConfigSettings.ITEM_TEMPERATURES.get().get(newStack.getItem()))
         {
-            if (carryTempData.test(entity, newStack))
-            {   entity.getAttributes().addTransientAttributeModifiers(carryTempData.attributeModifiers().getMap());
+            if (itemTempData.test(entity, newStack))
+            {   entity.getAttributes().addTransientAttributeModifiers(itemTempData.attributeModifiers().getMap());
             }
         }
     }
@@ -837,9 +835,9 @@ public class EntityTempManager
         return insulators;
     }
 
-    public static Map<ItemStack, Pair<ItemCarryTempData, Either<Integer, SlotType>>> getInventoryTemperaturesOnEntity(PlayerEntity player)
+    public static Map<ItemStack, Pair<ItemTempData, Either<Integer, SlotType>>> getInventoryTemperaturesOnEntity(PlayerEntity player)
     {
-        Map<ItemStack, Pair<ItemCarryTempData, Either<Integer, SlotType>>> tempItems = new HashMap<>();
+        Map<ItemStack, Pair<ItemTempData, Either<Integer, SlotType>>> tempItems = new HashMap<>();
         /*
          Inventory items
          */
@@ -848,7 +846,7 @@ public class EntityTempManager
             ItemStack stack = player.inventory.items.get(i);
             if (stack.isEmpty()) continue;
             int slotIndex = i;
-            ConfigSettings.CARRIED_ITEM_TEMPERATURES.get().get(stack.getItem()).forEach(temp ->
+            ConfigSettings.ITEM_TEMPERATURES.get().get(stack.getItem()).forEach(temp ->
             {   tempItems.put(stack, Pair.of(temp, Either.left(slotIndex)));
             });
         }
@@ -862,7 +860,7 @@ public class EntityTempManager
             if (stack.isEmpty()) continue;
             SlotType slotType = SlotType.fromEquipment(slot);
 
-            ConfigSettings.CARRIED_ITEM_TEMPERATURES.get().get(stack.getItem()).forEach(temp ->
+            ConfigSettings.ITEM_TEMPERATURES.get().get(stack.getItem()).forEach(temp ->
             {   tempItems.put(stack, Pair.of(temp, Either.right(slotType)));
             });
         }
@@ -871,7 +869,7 @@ public class EntityTempManager
          */
         for (ItemStack curio : CompatManager.Curios.getCurios(player))
         {
-            ConfigSettings.CARRIED_ITEM_TEMPERATURES.get().get(curio.getItem()).forEach(temp ->
+            ConfigSettings.ITEM_TEMPERATURES.get().get(curio.getItem()).forEach(temp ->
             {   tempItems.put(curio, Pair.of(temp, Either.right(SlotType.CURIO)));
             });
         }
@@ -881,7 +879,7 @@ public class EntityTempManager
         ItemStack offhand = player.getOffhandItem();
         if (!offhand.isEmpty())
         {
-            ConfigSettings.CARRIED_ITEM_TEMPERATURES.get().get(offhand.getItem()).forEach(temp ->
+            ConfigSettings.ITEM_TEMPERATURES.get().get(offhand.getItem()).forEach(temp ->
             {   tempItems.put(offhand, Pair.of(temp, Either.right(SlotType.HAND)));
             });
         }

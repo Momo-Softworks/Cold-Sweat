@@ -218,10 +218,10 @@ public class ConfigLoadingHandler
         Collection<FoodData> foods = event.getRegistry(ModRegistries.FOOD_DATA);
         addFoodConfigs(foods);
         logRegistryLoaded(String.format("Loaded %s foods", foods.size()), foods);
-        // carry temperatures
-        Collection<ItemCarryTempData> carryTemps = event.getRegistry(ModRegistries.CARRY_TEMP_DATA);
-        addCarryTempConfigs(carryTemps);
-        logRegistryLoaded(String.format("Loaded %s carried item temperatures", carryTemps.size()), carryTemps);
+        // item temperatures
+        Collection<ItemTempData> itemTemps = event.getRegistry(ModRegistries.ITEM_TEMP_DATA);
+        addItemTempConfigs(itemTemps);
+        logRegistryLoaded(String.format("Loaded %s item temperatures", itemTemps.size()), itemTemps);
         // drying items
         Collection<DryingItemData> dryingItems = event.getRegistry(ModRegistries.DRYING_ITEM_DATA);
         addDryingItemConfigs(dryingItems);
@@ -416,17 +416,17 @@ public class ConfigLoadingHandler
         });
     }
 
-    private static void addCarryTempConfigs(Collection<ItemCarryTempData> carryTemps)
+    private static void addItemTempConfigs(Collection<ItemTempData> itemTemps)
     {
-        carryTemps.forEach(carryTempData ->
+        itemTemps.forEach(itemTempData ->
         {
-            List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(carryTempData.item().flatten(ItemRequirement::items)));
+            List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(itemTempData.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
             {   items.add(null);
             }
 
             for (Item item : items)
-            {   ConfigSettings.CARRIED_ITEM_TEMPERATURES.get().put(item, carryTempData);
+            {   ConfigSettings.ITEM_TEMPERATURES.get().put(item, itemTempData);
             }
         });
     }

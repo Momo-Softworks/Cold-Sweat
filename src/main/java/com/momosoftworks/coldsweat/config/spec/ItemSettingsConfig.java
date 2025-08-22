@@ -28,7 +28,7 @@ public class ItemSettingsConfig
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> SOULSPRING_LAMP_FUELS;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> SOULSPRING_LAMP_DIMENSIONS;
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> FOOD_TEMPERATURES;
-    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> CARRIED_ITEM_TEMPERATURES;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> ITEM_TEMPERATURES;
 
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> INSULATION_ITEMS;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> INSULATION_BLACKLIST;
@@ -453,7 +453,7 @@ public class ItemSettingsConfig
          */
         BUILDER.push("Misc");
 
-            CARRIED_ITEM_TEMPERATURES = BUILDER
+            ITEM_TEMPERATURES = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Defines items that affect the player's temperature when in the inventory",
                          " ├── Format: [[\"item_id\", temperature, \"slotRange\", \"trait\", *\"{nbt}\", *maxEffect], [\"item_id\", temperature, \"slotRange\", \"trait\", *\"{nbt}\", *maxEffect], ...etc]",
@@ -465,7 +465,7 @@ public class ItemSettingsConfig
                          " • *nbt: The NBT data the item must have to apply to the entity.",
                          " • *max_effect: The maximum temperature effect the item can apply to the entity.",
                          " ⌄ ")
-                .defineListAllowEmpty(Arrays.asList("Carried Item Temperatures"), () -> Arrays.asList(
+                .defineListAllowEmpty(Arrays.asList("Item Temperatures"), () -> Arrays.asList(
                 ),
                 it ->
                 {
