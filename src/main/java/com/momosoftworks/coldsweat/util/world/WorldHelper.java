@@ -9,6 +9,7 @@ import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.BiomeTempData;
+import com.momosoftworks.coldsweat.data.tag.ModBiomeTags;
 import com.momosoftworks.coldsweat.util.entity.DummyEntity;
 import com.momosoftworks.coldsweat.util.entity.DummyPlayer;
 import com.momosoftworks.coldsweat.util.math.FastMap;
@@ -761,6 +762,9 @@ public abstract class WorldHelper
         if (pos.getY() >= levelReader.getMinBuildHeight() && pos.getY() < levelReader.getMaxBuildHeight()
         && levelReader instanceof ServerLevel serverLevel)
         {
+            Holder<Biome> biome = levelReader.getBiome(pos);
+            if (biome.is(ModBiomeTags.HAS_HOT_WATER)) return false;
+
             if (surroundedByBlock(levelReader, pos, Blocks.ICE))
             {   return true;
             }
@@ -779,6 +783,9 @@ public abstract class WorldHelper
         if (pos.getY() >= levelReader.getMinBuildHeight() && pos.getY() < levelReader.getMaxBuildHeight()
         && levelReader instanceof ServerLevel serverLevel)
         {
+            Holder<Biome> biome = levelReader.getBiome(pos);
+            if (biome.is(ModBiomeTags.HAS_HOT_WATER)) return true;
+
             if (mustBeAtEdge && surroundedByBlock(levelReader, pos, Blocks.ICE))
             {   return false;
             }
