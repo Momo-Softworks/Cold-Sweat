@@ -283,6 +283,7 @@ public class FilledWaterskinItem extends Item
     public void appendHoverText(ItemStack stack, World level, List<ITextComponent> tooltip, ITooltipFlag advanced)
     {
         double temp = CSMath.round(stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE), 2);
+        double multiplier = ConfigSettings.WATERSKIN_CONSUME_STRENGTH.get() / 50d;
 
         // Display filled state
         IFormattableTextComponent filledLabel = new TranslationTextComponent("item.cold_sweat.waterskin.filled").withStyle(TextFormatting.GRAY);
@@ -291,9 +292,10 @@ public class FilledWaterskinItem extends Item
         tooltip.add(filledLabel);
 
         // Info tooltip for drinking/pouring functionality
-        IFormattableTextComponent tempText = temp > 0  ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + Math.round(temp)).withStyle(TooltipHandler.HOT) :
-                                             temp == 0 ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + Math.round(temp)).withStyle(TextFormatting.WHITE)
-                                                       : new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", Math.round(temp)).withStyle(TooltipHandler.COLD);
+        double useEffect = Math.round(temp * multiplier);
+        IFormattableTextComponent tempText = temp > 0  ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + useEffect).withStyle(TooltipHandler.HOT) :
+                                             temp == 0 ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + useEffect).withStyle(TextFormatting.WHITE)
+                                                       : new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", useEffect).withStyle(TooltipHandler.COLD);
         tooltip.add(new StringTextComponent(""));
         tooltip.add(new TranslationTextComponent("tooltip.cold_sweat.consumed").withStyle(TextFormatting.GRAY));
         tooltip.add(tempText);
