@@ -140,11 +140,13 @@ public class WetnessRenderer
         int skyLight = player.level().getLightEngine().getLayerListener(LightLayer.SKY).getLightValue(playerPos);
         int combinedLight = LightTexture.pack(blockLight, skyLight);
 
-        // === RENDER WATER DROPLETS ===
+
+        /* Render Water Drops */
+
         RenderSystem.setShaderTexture(0, WATER_DROP);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-        BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
 
         // Handle rendering & movement of water drops
         for (int i = 0; i < WATER_DROPS.size(); i++)
@@ -230,9 +232,11 @@ public class WetnessRenderer
         {   BufferUploader.drawWithShader(meshData);
         }
 
-        // Render water drop trails
+
+        /* Render Trails */
+
         RenderSystem.setShaderTexture(0, WATER_DROP_TRAIL);
-        bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
 
         for (int i = 0; i < TRAILS.size(); i++)
         {
@@ -308,12 +312,10 @@ public class WetnessRenderer
                                          float alpha, int lightLevel)
     {
         Matrix4f lastPose = poseStack.last().pose();
-        int lightUV1 = lightLevel & '\uffff';
-        int lightUV2 = lightLevel >> 16 & '\uffff';
-        buffer.addVertex(lastPose, x, y, 0).setUv(u, v).setColor(1.0f, 1.0f, 1.0f, alpha).setUv2(lightUV1, lightUV2);
-        buffer.addVertex(lastPose, x, y + height, 0).setUv(u, v + vHeight).setColor(1.0f, 1.0f, 1.0f, alpha).setUv2(lightUV1, lightUV2);
-        buffer.addVertex(lastPose, x + width, y + height, 0).setUv(u + uWidth, v + vHeight).setColor(1.0f, 1.0f, 1.0f, alpha).setUv2(lightUV1, lightUV2);
-        buffer.addVertex(lastPose, x + width, y, 0).setUv(u + uWidth, v).setColor(1.0f, 1.0f, 1.0f, alpha).setUv2(lightUV1, lightUV2);
+        buffer.addVertex(lastPose, x, y, 0).setUv(u, v).setColor(1.0f, 1.0f, 1.0f, alpha).setLight(lightLevel);
+        buffer.addVertex(lastPose, x, y + height, 0).setUv(u, v + vHeight).setColor(1.0f, 1.0f, 1.0f, alpha).setLight(lightLevel);
+        buffer.addVertex(lastPose, x + width, y + height, 0).setUv(u + uWidth, v + vHeight).setColor(1.0f, 1.0f, 1.0f, alpha).setLight(lightLevel);
+        buffer.addVertex(lastPose, x + width, y, 0).setUv(u + uWidth, v).setColor(1.0f, 1.0f, 1.0f, alpha).setLight(lightLevel);
     }
 
     protected static class Droplet
