@@ -13,6 +13,7 @@ import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.core.init.ModSounds;
 import com.momosoftworks.coldsweat.core.network.message.ParticleBatchMessage;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import dev.ghen.thirst.content.registry.ThirstComponent;
 import net.minecraft.ChatFormatting;
@@ -32,6 +33,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -61,6 +63,13 @@ public class FilledWaterskinItem extends Item
         DispenserBlock.registerBehavior(this, DISPENSE_BEHAVIOR);
     }
 
+    public static ItemStack getDisplayStack()
+    {
+        ItemStack stack = new ItemStack(ModItems.FILLED_WATERSKIN.asItem());
+        NBTHelper.ensureTagAndDo(stack, tag -> tag.putBoolean("ForShow", true));
+        return stack;
+    }
+
     @Override
     public int getMaxDamage(ItemStack stack)
     {   return ConfigSettings.WATERSKIN_USES.get();
@@ -73,7 +82,7 @@ public class FilledWaterskinItem extends Item
 
     @Override
     public boolean isBarVisible(ItemStack stack)
-    {   return getMaxDamage(stack) > 1;
+    {   return getMaxDamage(stack) > 1 && !NBTHelper.getTagOrEmpty(stack).getBoolean("ForShow");
     }
 
     private static int getDurability(ItemStack stack)

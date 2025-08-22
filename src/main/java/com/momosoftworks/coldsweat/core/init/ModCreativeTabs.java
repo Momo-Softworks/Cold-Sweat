@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.core.init;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.client.InsulatorTabBuildEvent;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
+import com.momosoftworks.coldsweat.common.item.FilledWaterskinItem;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
@@ -26,7 +27,7 @@ public class ModCreativeTabs
     public static final DeferredRegister<CreativeModeTab> ITEM_GROUPS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, ColdSweat.MOD_ID);
 
     public static DeferredHolder<CreativeModeTab, CreativeModeTab> COLD_SWEAT_TAB = ITEM_GROUPS.register("cold_sweat", () -> CreativeModeTab.builder()
-            .icon(() -> ModItems.FILLED_WATERSKIN.value().getDefaultInstance())
+            .icon(() -> FilledWaterskinItem.getDisplayStack())
             .displayItems((params, list) ->
             {
                 list.acceptAll(List.of(

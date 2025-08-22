@@ -148,9 +148,10 @@ public class NBTHelper
     }
 
     public static void ensureTagAndDo(ItemStack stack, Consumer<CompoundTag> action)
-    {   getOrCreateTag(stack).update(action);
+    {   CustomData nbt = getOrCreateTag(stack);
+        stack.set(DataComponents.CUSTOM_DATA, nbt.update(action));
     }
-    
+
     public static <T extends Tag> T getOrPutTag(LivingEntity entity, String tag, T dfault)
     {
         CompoundTag data = entity.getPersistentData();
