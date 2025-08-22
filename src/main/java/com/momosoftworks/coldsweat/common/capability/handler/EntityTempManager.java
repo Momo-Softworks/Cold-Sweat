@@ -495,7 +495,7 @@ public class EntityTempManager
             {
                 if (!player.isSpectator() && (WorldHelper.isInWater(player) || player.tickCount % 40 == 0
                 && WorldHelper.isRainingAt(player.level(), player.blockPosition())))
-                {   Temperature.addModifier(player, new WaterTempModifier(0.01f).tickRate(5), Trait.WORLD, Placement.Duplicates.BY_CLASS);
+                {   Temperature.addModifier(player, new WaterTempModifier().tickRate(5), Trait.WORLD, Placement.Duplicates.BY_CLASS);
                 }
 
                 if (player.isFreezing())
