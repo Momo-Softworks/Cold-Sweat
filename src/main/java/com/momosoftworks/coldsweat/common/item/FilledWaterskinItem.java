@@ -14,6 +14,7 @@ import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
+import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -50,7 +51,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.Consumer;
 
 public class FilledWaterskinItem extends Item
 {
@@ -62,6 +62,13 @@ public class FilledWaterskinItem extends Item
         super(new Properties().tab(ColdSweatGroup.COLD_SWEAT).stacksTo(1).craftRemainder(ItemInit.WATERSKIN.get()));
 
         DispenserBlock.registerBehavior(this, DISPENSE_BEHAVIOR);
+    }
+
+    public static ItemStack getDisplayStack()
+    {
+        ItemStack stack = new ItemStack(ModItems.FILLED_WATERSKIN);
+        stack.getOrCreateTag().putBoolean("ForShow", true);
+        return stack;
     }
 
     @Override
@@ -76,7 +83,7 @@ public class FilledWaterskinItem extends Item
 
     @Override
     public boolean isBarVisible(ItemStack stack)
-    {   return getMaxDamage(stack) > 1;
+    {   return getMaxDamage(stack) > 1 && !NBTHelper.getTagOrEmpty(stack).getBoolean("ForShow");
     }
 
     private static int getDurability(ItemStack stack)
