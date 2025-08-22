@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.core.itemgroup;
 
+import com.momosoftworks.coldsweat.common.item.FilledWaterskinItem;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.CreativeModeTab;
@@ -16,7 +17,7 @@ public class ColdSweatGroup extends CreativeModeTab
 
     @Override
     public ItemStack makeIcon()
-    {   return new ItemStack(ModItems.FILLED_WATERSKIN);
+    {   return FilledWaterskinItem.getDisplayStack();
     }
 
     @Override
