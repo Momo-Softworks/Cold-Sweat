@@ -88,7 +88,7 @@ public class InventoryItemsTempModifier extends TempModifier
         {
             double temp = carried.temperature() * stack.getCount();
             double currentEffect = effectsPerCarriedTemp.getOrDefault(carried, 0.0);
-            double newEffect = Math.min(carried.maxEffect(), Math.abs(currentEffect + temp)) * CSMath.sign(currentEffect + temp);
+            double newEffect = temp > 0 ? Math.min(carried.maxEffect(), currentEffect + temp) : Math.max(-carried.maxEffect(), currentEffect + temp);
 
             effectsPerCarriedTemp.put(carried, newEffect);
         }
