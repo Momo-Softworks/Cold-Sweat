@@ -20,7 +20,6 @@ import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.OptionalHolder;
 import dev.latvian.mods.kubejs.event.StartupEventJS;
-import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -133,21 +132,21 @@ public class ModRegistriesEventJS extends StartupEventJS
     }
 
     /*
-     Carried Item Temperature
+     Item Temperature
      */
 
-    public void addCarriedItemTemperature(Consumer<CarriedItemBuilderJS> builder)
+    public void addItemTemperature(Consumer<ItemTempBuilderJS> builder)
     {
-        CarriedItemBuilderJS carriedItemJS = new CarriedItemBuilderJS();
-        builder.accept(carriedItemJS);
-        if (carriedItemJS.itemPredicate.isEmpty())
-        {   carriedItemJS.itemPredicate.add(new ItemRequirement(Collections.singleton(null), null), false);
+        ItemTempBuilderJS itemTempJS = new ItemTempBuilderJS();
+        builder.accept(itemTempJS);
+        if (itemTempJS.itemPredicate.isEmpty())
+        {   itemTempJS.itemPredicate.add(new ItemRequirement(Collections.singleton(null), null), false);
         }
 
-        ItemCarryTempData carryData = carriedItemJS.build();
-        if (!carryData.areRequiredModsLoaded()) return;
+        ItemTempData itemData = itemTempJS.build();
+        if (!itemData.areRequiredModsLoaded()) return;
 
-        this.event.addRegistryEntry(ModRegistries.CARRY_TEMP_DATA, carryData);
+        this.event.addRegistryEntry(ModRegistries.ITEM_TEMP_DATA, itemData);
     }
 
     /*
