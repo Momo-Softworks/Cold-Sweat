@@ -71,7 +71,7 @@ public class SyncItemPredicatesMessage implements CustomPacketPayload
         this.checkSoulLampFuel(stack);
 
         this.checkFood(stack, entity);
-        this.checkCarriedTemps(stack, inventorySlot, equipmentSlot, entity);
+        this.checkItemTemps(stack, inventorySlot, equipmentSlot, entity);
         this.checkDryingItems(stack, entity);
     }
 
@@ -175,11 +175,11 @@ public class SyncItemPredicatesMessage implements CustomPacketPayload
     {   this.checkItemRequirement(stack, null, ConfigSettings.SOULSPRING_LAMP_FUEL);
     }
 
-    private void checkCarriedTemps(ItemStack stack, int invSlot, EquipmentSlot equipmentSlot, Entity entity)
+    private void checkItemTemps(ItemStack stack, int invSlot, EquipmentSlot equipmentSlot, Entity entity)
     {
-        if (ConfigSettings.CARRIED_ITEM_TEMPERATURES.get().containsKey(stack.getItem()))
+        if (ConfigSettings.ITEM_TEMPERATURES.get().containsKey(stack.getItem()))
         {
-            Map<UUID, Boolean> insulatorMap = ConfigSettings.CARRIED_ITEM_TEMPERATURES.get().get(stack.getItem())
+            Map<UUID, Boolean> insulatorMap = ConfigSettings.ITEM_TEMPERATURES.get().get(stack.getItem())
                                               .stream()
                                               .map(data ->
                                               {   boolean test = data.test(entity, stack, invSlot, equipmentSlot);

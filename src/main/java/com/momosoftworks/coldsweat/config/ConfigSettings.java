@@ -158,7 +158,7 @@ public class ConfigSettings
 
     public static final DynamicHolder<Multimap<Item, FoodData>> FOOD_TEMPERATURES;
 
-    public static final DynamicHolder<Multimap<Item, ItemCarryTempData>> CARRIED_ITEM_TEMPERATURES;
+    public static final DynamicHolder<Multimap<Item, ItemTempData>> ITEM_TEMPERATURES;
 
     public static final DynamicHolder<Integer> WATERSKIN_CONSUME_STRENGTH;
     public static final DynamicHolder<Double> WATERSKIN_HOTBAR_STRENGTH;
@@ -565,17 +565,17 @@ public class ConfigSettings
         (saver) -> {},
         SyncType.ONE_WAY);
 
-        CARRIED_ITEM_TEMPERATURES = addSyncedSetting(ColdSweat.createKey("carried_item_temps"), RegistryMultiMap::new, holder ->
+        ITEM_TEMPERATURES = addSyncedSetting(ColdSweat.createKey("item_temperatures"), RegistryMultiMap::new, holder ->
         {
-            Multimap<Item, ItemCarryTempData> dataMap = ConfigHelper.parseTomlRegistry(ItemSettingsConfig.CARRIED_ITEM_TEMPERATURES,
-                                                                                       ItemCarryTempData::fromToml,
+            Multimap<Item, ItemTempData> dataMap = ConfigHelper.parseTomlRegistry(ItemSettingsConfig.ITEM_TEMPERATURES,
+                                                                                  ItemTempData::fromToml,
                                                                                        data -> data.item().flatten(ItemRequirement::items),
-                                                                                       BuiltInRegistries.ITEM, ModRegistries.CARRY_TEMP_DATA);
+                                                                                  BuiltInRegistries.ITEM, ModRegistries.ITEM_TEMP_DATA);
             holder.get().putAll(dataMap);
         },
-        ExtraCodecs.builtinMultimapCodec(BuiltInRegistries.ITEM, ItemCarryTempData.CODEC),
-        (saver) -> {},
-        SyncType.ONE_WAY);
+                                             ExtraCodecs.builtinMultimapCodec(BuiltInRegistries.ITEM, ItemTempData.CODEC),
+                                             (saver) -> {},
+                                             SyncType.ONE_WAY);
 
         WATERSKIN_CONSUME_STRENGTH = addSyncedSetting(ColdSweat.createKey("waterskin_consume_strength"), () -> 50, holder -> holder.set(ItemSettingsConfig.WATERSKIN_CONSUME_STRENGTH.get()),
         Codec.INT,

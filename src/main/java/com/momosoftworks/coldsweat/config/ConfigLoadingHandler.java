@@ -246,10 +246,10 @@ public class ConfigLoadingHandler
         Collection<Holder<FoodData>> foods = event.getRegistry(ModRegistries.FOOD_DATA);
         addFoodConfigs(foods);
         logRegistryLoaded(String.format("Loaded %s foods", foods.size()), foods);
-        // carry temperatures
-        Collection<Holder<ItemCarryTempData>> carryTemps = event.getRegistry(ModRegistries.CARRY_TEMP_DATA);
-        addCarryTempConfigs(carryTemps);
-        logRegistryLoaded(String.format("Loaded %s carried item temperatures", carryTemps.size()), carryTemps);
+        // item temperatures
+        Collection<Holder<ItemTempData>> itemTemps = event.getRegistry(ModRegistries.ITEM_TEMP_DATA);
+        addItemTempConfigs(itemTemps);
+        logRegistryLoaded(String.format("Loaded %s item temperatures", itemTemps.size()), itemTemps);
         // drying items
         Collection<Holder<DryingItemData>> dryingItems = event.getRegistry(ModRegistries.DRYING_ITEM_DATA);
         addDryingItemConfigs(dryingItems);
@@ -492,13 +492,13 @@ public class ConfigLoadingHandler
                       });
     }
 
-    private static void addCarryTempConfigs(Collection<Holder<ItemCarryTempData>> carryTemps)
+    private static void addItemTempConfigs(Collection<Holder<ItemTempData>> itemTemps)
     {
-        carryTemps.forEach(holder ->
+        itemTemps.forEach(holder ->
                            {
-                               ItemCarryTempData carryTempData = holder.value();
+                               ItemTempData itemTempData = holder.value();
 
-                               List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, carryTempData.item().flatten(ItemRequirement::items)));
+                               List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, itemTempData.item().flatten(ItemRequirement::items)));
                                if (items.isEmpty())
                                {
                                    items.add(null);
@@ -506,7 +506,7 @@ public class ConfigLoadingHandler
 
                                for (Item item : items)
                                {
-                                   ConfigSettings.CARRIED_ITEM_TEMPERATURES.get().put(item, carryTempData);
+                                   ConfigSettings.ITEM_TEMPERATURES.get().put(item, itemTempData);
                                }
                            });
     }
