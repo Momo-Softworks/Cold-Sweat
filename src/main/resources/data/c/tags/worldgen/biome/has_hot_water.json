@@ -1,6 +1,9 @@
 {
   "replace": false,
   "values": [
-    "biomesoplenty:hot_springs"
+    {
+      "id": "biomesoplenty:hot_springs",
+      "required": false
+    }
   ]
 }
