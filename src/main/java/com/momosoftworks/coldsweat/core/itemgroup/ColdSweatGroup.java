@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.core.itemgroup;
 
+import com.momosoftworks.coldsweat.common.item.FilledWaterskinItem;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -15,7 +16,7 @@ public class ColdSweatGroup extends ItemGroup
 
     @Override
     public ItemStack makeIcon()
-    {   return new ItemStack(ModItems.FILLED_WATERSKIN);
+    {   return FilledWaterskinItem.getDisplayStack();
     }
 
     @Override

@@ -13,6 +13,7 @@ import com.momosoftworks.coldsweat.core.network.message.ParticleBatchMessage;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
+import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -54,6 +55,13 @@ public class FilledWaterskinItem extends Item
         DispenserBlock.registerBehavior(this, DISPENSE_BEHAVIOR);
     }
 
+    public static ItemStack getDisplayStack()
+    {
+        ItemStack stack = new ItemStack(ModItems.FILLED_WATERSKIN);
+        stack.getOrCreateTag().putBoolean("ForShow", true);
+        return stack;
+    }
+
     @Override
     public int getMaxDamage(ItemStack stack)
     {   return ConfigSettings.WATERSKIN_USES.get();
@@ -66,7 +74,7 @@ public class FilledWaterskinItem extends Item
 
     @Override
     public boolean showDurabilityBar(ItemStack stack)
-    {   return getMaxDamage(stack) > 1;
+    {   return getMaxDamage(stack) > 1 && !NBTHelper.getTagOrEmpty(stack).getBoolean("ForShow");
     }
 
     private static int getDurability(ItemStack stack)
