@@ -21,7 +21,7 @@ public class ModRegistries
     public static final RegistryHolder<InsulatorData> INSULATOR_DATA = createRegistry(new ResourceLocation(ColdSweat.MOD_ID, "item/insulator"), InsulatorData.CODEC, InsulatorData.class);
     public static final RegistryHolder<FuelData> FUEL_DATA = createRegistry(new ResourceLocation(ColdSweat.MOD_ID, "item/fuel"), FuelData.CODEC, FuelData.class);
     public static final RegistryHolder<FoodData> FOOD_DATA = createRegistry(new ResourceLocation(ColdSweat.MOD_ID, "item/food"), FoodData.CODEC, FoodData.class);
-    public static final RegistryHolder<ItemCarryTempData> CARRY_TEMP_DATA = createRegistry(new ResourceLocation(ColdSweat.MOD_ID, "item/carried_temp"), ItemCarryTempData.CODEC, ItemCarryTempData.class);
+    public static final RegistryHolder<ItemTempData> ITEM_TEMP_DATA = createRegistry(new ResourceLocation(ColdSweat.MOD_ID, "item/item_temp"), ItemTempData.CODEC, ItemTempData.class);
     public static final RegistryHolder<DryingItemData> DRYING_ITEM_DATA = createRegistry(new ResourceLocation(ColdSweat.MOD_ID, "item/drying_item"), DryingItemData.CODEC, DryingItemData.class);
     public static final RegistryHolder<ItemInsulationSlotsData> INSULATION_SLOTS_DATA = createRegistry(new ResourceLocation(ColdSweat.MOD_ID, "item/insulation_slots"), ItemInsulationSlotsData.CODEC, ItemInsulationSlotsData.class);
 
