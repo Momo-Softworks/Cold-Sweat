@@ -16,19 +16,18 @@ public class WaterTempModifier extends TempModifier
     private static final double DRY_SPEED = 0.0015;
 
     public WaterTempModifier()
-    {
-        this(0.01);
+    {   this(-0.01);
     }
 
-    public WaterTempModifier(double strength)
-    {   this.getNBT().putDouble("Strength", strength);
+    public WaterTempModifier(double temperature)
+    {   this.getNBT().putDouble("Temperature", temperature);
     }
 
-    public double getWetness()
-    {   return this.getNBT().getDouble("Strength");
+    public double getTemperature()
+    {   return this.getNBT().getDouble("Temperature");
     }
 
-    public double getMaxStrength(LivingEntity entity)
+    public double getMaxTemperature(LivingEntity entity)
     {
         double worldTemp = Temperature.get(entity, Temperature.Trait.WORLD);
         double maxTemp = ConfigSettings.MAX_TEMP.get();
@@ -39,30 +38,31 @@ public class WaterTempModifier extends TempModifier
     @Override
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
+        boolean isWarm = this.getTemperature() > 0;
         double worldTemp = Temperature.get(entity, Temperature.Trait.WORLD);
-        double minTemp = ConfigSettings.MIN_TEMP.get();
-        double maxTemp = ConfigSettings.MAX_TEMP.get();
-        double midTemp = CSMath.average(minTemp, maxTemp);
+        double minWorldTemp = ConfigSettings.MIN_TEMP.get();
+        double maxWorldTemp = ConfigSettings.MAX_TEMP.get();
         double configDrySpeed = ConfigSettings.DRYOFF_SPEED.get() * DRY_SPEED;
 
-        double strength = this.getNBT().getDouble("Strength");
+        double temperature = this.getTemperature();
         double addAmount = WorldHelper.isInWater(entity) ? WATER_SOAK_SPEED // In water
                          : WorldHelper.isRainingAt(entity.level, entity.blockPosition()) ? RAIN_SOAK_SPEED // In rain
-                         : -CSMath.blendExp(configDrySpeed, configDrySpeed * 10, worldTemp, minTemp, maxTemp, 100); // Drying off
-        double maxStrength = CSMath.clamp(Math.abs(midTemp - worldTemp) / 2, 0.23d, 0.5d);
+                         : (isWarm ? -1 : 1) * CSMath.blendExp(configDrySpeed, configDrySpeed * 10, worldTemp, minWorldTemp, maxWorldTemp, 100); // Drying off
+        double maxTemp = this.getMaxTemperature(entity);
 
-        double newStrength = CSMath.clamp(strength + addAmount, 0d, maxStrength);
-        this.getNBT().putDouble("Strength", newStrength);
-        if (strength != newStrength)
+        double newTemperature = isWarm ? CSMath.clamp(temperature + addAmount, 0d, maxTemp)
+                                       : CSMath.clamp(temperature + addAmount, -maxTemp, 0d);
+        this.getNBT().putDouble("Temperature", newTemperature);
+        if (temperature != newTemperature)
         {   this.markDirty();
         }
 
         // If the strength is 0, this TempModifier expires
-        if (strength <= 0.0)
+        if (temperature == 0.0)
         {   this.expires(0);
         }
 
-        return temp -> temp - newStrength;
+        return temp -> temp + newTemperature;
     }
 
     @Override
@@ -70,7 +70,7 @@ public class WaterTempModifier extends TempModifier
     {
         if (entity.level.isClientSide() && ConfigSettings.WATER_EFFECT_SETTING.get().showParticles() && !entity.isInWater())
         {
-            if (Math.random() < this.getNBT().getDouble("Strength") * 2)
+            if (Math.random() < Math.abs(this.getNBT().getDouble("Temperature")) * 2)
             {
                 double randX = entity.getBbWidth() * (Math.random() - 0.5);
                 double randY = entity.getBbHeight() * Math.random();
