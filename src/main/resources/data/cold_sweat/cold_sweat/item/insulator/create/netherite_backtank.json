@@ -30,7 +30,7 @@
           "create:netherite_backtank"
         ],
         "components": {
-          "create:banktank_air": "1-9999"
+          "create:banktank_air": "1:"
         }
       },
       "legs": {
