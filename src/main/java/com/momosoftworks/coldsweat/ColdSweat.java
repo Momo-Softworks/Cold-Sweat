@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat;
 
 import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.api.event.core.registry.AddRegistriesEvent;
+import com.momosoftworks.coldsweat.api.event.vanilla.ServerConfigsLoadedEvent;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
 import com.momosoftworks.coldsweat.common.capability.shearing.ShearableFurCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.EntityTempCap;
@@ -32,8 +33,6 @@ import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLLoader;
-import net.minecraftforge.registries.NewRegistryEvent;
-import net.minecraftforge.registries.RegistryBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import top.theillusivec4.curios.api.CuriosApi;
@@ -43,6 +42,7 @@ import top.theillusivec4.curios.api.SlotTypePreset;
 import java.lang.reflect.Method;
 
 @Mod(ColdSweat.MOD_ID)
+@Mod.EventBusSubscriber
 public class ColdSweat
 {
     public static final Logger LOGGER = LogManager.getLogger("Cold Sweat");
@@ -52,14 +52,11 @@ public class ColdSweat
 
     public ColdSweat()
     {
-        MinecraftForge.EVENT_BUS.register(this);
-
         MOD_BUS.addListener(this::commonSetup);
         MOD_BUS.addListener(this::spawnPlacements);
         MOD_BUS.addListener(this::registerCaps);
         MOD_BUS.addListener(this::updateConfigs);
         if (CompatManager.isCuriosLoaded()) MOD_BUS.addListener(this::registerCurioSlots);
-        MOD_BUS.addListener(this::createRegistries);
 
         // Register stuff
         BlockInit.BLOCKS.register(MOD_BUS);
@@ -97,25 +94,6 @@ public class ColdSweat
 
     public static String getVersion()
     {   return FMLLoader.getLoadingModList().getModFileById(ColdSweat.MOD_ID).versionString();
-    }
-
-    public void createRegistries(FMLLoadCompleteEvent event)
-    {
-        // Gather modded registries
-        AddRegistriesEvent addRegistriesEvent = new AddRegistriesEvent();
-        MinecraftForge.EVENT_BUS.post(addRegistriesEvent);
-        // Add registries via dummy NewRegistry event
-        NewRegistryEvent dummyEvent = new NewRegistryEvent();
-        for (RegistryHolder<?> holder : ModRegistries.getRegistries().values())
-        {   dummyEvent.create(new RegistryBuilder<>().setName(holder.key().location()).dataPackRegistry((Codec) holder.codec(), (Codec) holder.codec()));
-        }
-        try
-        {
-            Method process = NewRegistryEvent.class.getDeclaredMethod("fill");
-            process.setAccessible(true);
-            process.invoke(dummyEvent);
-        }
-        catch (Exception ignored) {}
     }
 
     public void commonSetup(final FMLCommonSetupEvent event)

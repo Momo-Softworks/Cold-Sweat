@@ -7,6 +7,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.api.annotation.Internal;
+import com.momosoftworks.coldsweat.api.event.core.registry.AddRegistriesEvent;
 import com.momosoftworks.coldsweat.api.event.core.registry.LoadRegistriesEvent;
 import com.momosoftworks.coldsweat.api.event.vanilla.ServerConfigsLoadedEvent;
 import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
@@ -24,7 +26,6 @@ import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.data.tag.ModDimensionTags;
 import com.momosoftworks.coldsweat.data.tag.ModEffectTags;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
-import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.RegistryMultiMap;
 import com.momosoftworks.coldsweat.util.serialization.OptionalHolder;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
@@ -48,9 +49,12 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.NewRegistryEvent;
+import net.minecraftforge.registries.RegistryBuilder;
 
 import java.io.File;
 import java.io.FileReader;
+import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -100,6 +104,25 @@ public class ConfigLoadingHandler
         public static void loadClientConfigs(FMLLoadCompleteEvent event)
         {   ConfigSettings.CLIENT_SETTINGS.forEach((id, holder) -> holder.load(true));
         }
+    }
+
+    @Internal
+    public static void initRegistries()
+    {
+        AddRegistriesEvent addRegistriesEvent = new AddRegistriesEvent();
+        MinecraftForge.EVENT_BUS.post(addRegistriesEvent);
+        // Add registries via dummy NewRegistry event
+        NewRegistryEvent dummyEvent = new NewRegistryEvent();
+        for (RegistryHolder<?> holder : ModRegistries.getRegistries().values())
+        {   dummyEvent.create(new RegistryBuilder<>().setName(holder.key().location()).dataPackRegistry((Codec) holder.codec(), (Codec) holder.codec()));
+        }
+        try
+        {
+            Method process = NewRegistryEvent.class.getDeclaredMethod("fill");
+            process.setAccessible(true);
+            process.invoke(dummyEvent);
+        }
+        catch (Exception ignored) {}
     }
 
     /**
