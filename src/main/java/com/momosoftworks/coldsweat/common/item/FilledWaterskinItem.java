@@ -302,7 +302,7 @@ public class FilledWaterskinItem extends Item
         tooltip.add(filledLabel);
 
         // Info tooltip for drinking/pouring functionality
-        double useEffect = Math.round(temp * multiplier);
+        int useEffect = (int) Math.round(temp * multiplier);
         Component tempText = temp > 0  ? new TranslatableComponent("tooltip.cold_sweat.temperature_effect", "+" + useEffect).withStyle(TooltipHandler.HOT) :
                              temp == 0 ? new TranslatableComponent("tooltip.cold_sweat.temperature_effect", "+" + useEffect).withStyle(ChatFormatting.WHITE)
                                        : new TranslatableComponent("tooltip.cold_sweat.temperature_effect", useEffect).withStyle(TooltipHandler.COLD);
