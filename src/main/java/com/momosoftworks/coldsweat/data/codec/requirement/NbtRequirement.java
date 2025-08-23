@@ -160,7 +160,7 @@ public record NbtRequirement(CompoundTag tag)
     {
         try
         {
-            String[] parts = rangeTag.getAsString().split("-");
+            String[] parts = rangeTag.getAsString().split(":");
             if (parts.length != 2) return false;
 
             double min = Double.parseDouble(parts[0]);
