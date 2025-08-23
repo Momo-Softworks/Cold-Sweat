@@ -232,6 +232,7 @@ public class WorldSettingsConfig
                             () -> List.of("biomesoplenty:spider_nest", 75, 75, "F"),
                             () -> List.of("biomesoplenty:volcanic_plains", 82, 95, "F"),
                             () -> List.of("biomesoplenty:volcano", 94, 120, "F"),
+                            () -> List.of("biomesoplenty:hot_springs", 62, 40, "F"),
                             () -> List.of("biomesoplenty:wooded_wasteland", 78, 95, "F"))
                     .addIf(CompatManager.isBiomesYoullGoLoaded(),
                             () -> List.of("byg:coniferous_forest", 52, 70, "F"),
