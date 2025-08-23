@@ -4,7 +4,6 @@ import com.momosoftworks.coldsweat.client.renderer.entity.ChameleonEntityRendere
 import com.momosoftworks.coldsweat.client.renderer.entity.GoatEntityRenderer;
 import com.momosoftworks.coldsweat.common.capability.*;
 import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
-import com.momosoftworks.coldsweat.api.event.core.registry.AddRegistriesEvent;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
 import com.momosoftworks.coldsweat.common.capability.shearing.IShearableCap;
 import com.momosoftworks.coldsweat.common.capability.shearing.ShearableFurCap;
@@ -48,6 +47,7 @@ import top.theillusivec4.curios.api.SlotTypePreset;
 import java.lang.reflect.Method;
 
 @Mod(ColdSweat.MOD_ID)
+@Mod.EventBusSubscriber
 public class ColdSweat
 {
     public static final Logger LOGGER = LogManager.getLogger("Cold Sweat");
@@ -65,7 +65,6 @@ public class ColdSweat
         MOD_BUS.addListener(this::registerCaps);
         MOD_BUS.addListener(this::updateConfigs);
         if (CompatManager.isCuriosLoaded()) MOD_BUS.addListener(this::registerCurioSlots);
-        MOD_BUS.addListener(this::createRegistries);
 
         // Register stuff
         BlockInit.BLOCKS.register(MOD_BUS);
@@ -104,13 +103,6 @@ public class ColdSweat
 
     public static String getVersion()
     {   return ModUpdater.getVersionString(ModList.get().getModContainerById(MOD_ID).get().getModInfo().getVersion());
-    }
-
-    public void createRegistries(FMLLoadCompleteEvent event)
-    {
-        // Gather modded registries
-        AddRegistriesEvent addRegistriesEvent = new AddRegistriesEvent();
-        MinecraftForge.EVENT_BUS.post(addRegistriesEvent);
     }
 
     public void commonSetup(final FMLCommonSetupEvent event)

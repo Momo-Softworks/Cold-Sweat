@@ -8,6 +8,8 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.api.annotation.Internal;
+import com.momosoftworks.coldsweat.api.event.core.registry.AddRegistriesEvent;
 import com.momosoftworks.coldsweat.api.event.core.registry.LoadRegistriesEvent;
 import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
@@ -46,6 +48,7 @@ import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.io.*;
+import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -99,6 +102,13 @@ public class ConfigLoadingHandler
         public static void loadClientConfigs(FMLLoadCompleteEvent event)
         {   ConfigSettings.CLIENT_SETTINGS.forEach((id, holder) -> holder.load(true));
         }
+    }
+
+    @Internal
+    public static void initRegistries()
+    {
+        AddRegistriesEvent addRegistriesEvent = new AddRegistriesEvent();
+        MinecraftForge.EVENT_BUS.post(addRegistriesEvent);
     }
 
     /**
