@@ -176,12 +176,17 @@ public class NbtRequirement
     {
         try
         {
-            String[] parts = rangeTag.getAsString().split("-");
-            if (parts.length != 2) return false;
+            String numberString = rangeTag.getAsString();
+            String[] parts = numberString.split(":");
+            int readIndex = 0;
+            if (parts.length == 0 || parts.length > 2) return false;
 
-            double min = Double.parseDouble(parts[0]);
-            double max = Double.parseDouble(parts[1]);
             double value = numberTag.getAsDouble();
+            double min = numberString.startsWith(":") ? -Double.MAX_VALUE : Double.parseDouble(parts[readIndex++]);
+            double max = numberString.endsWith(":") ? Double.MAX_VALUE : Double.parseDouble(parts[readIndex]);
+
+            if (min == -Double.MAX_VALUE) return value <= max;
+            if (max == Double.MAX_VALUE) return value >= min;
 
             return CSMath.betweenInclusive(value, min, max);
         }
