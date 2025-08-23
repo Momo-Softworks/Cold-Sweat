@@ -1,16 +1,11 @@
 package com.momosoftworks.coldsweat;
 
-import com.momosoftworks.coldsweat.api.event.core.registry.AddRegistriesEvent;
 import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
-import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.common.entity.Chameleon;
+import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.config.ModUpdater;
 import com.momosoftworks.coldsweat.config.spec.*;
 import com.momosoftworks.coldsweat.core.init.*;
-import com.momosoftworks.coldsweat.data.ModRegistries;
-import com.momosoftworks.coldsweat.compat.CompatManager;
-import com.momosoftworks.coldsweat.data.RegistryHolder;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.SpawnPlacementTypes;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -22,13 +17,10 @@ import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent;
-import net.neoforged.neoforge.registries.DataPackRegistryEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.lang.reflect.Method;
 import java.util.List;
 
 @Mod(ColdSweat.MOD_ID)
@@ -46,7 +38,6 @@ public class ColdSweat
         MOD_BUS.addListener(this::spawnPlacements);
         MOD_BUS.addListener(this::registerCaps);
         MOD_BUS.addListener(this::updateConfigs);
-        MOD_BUS.addListener(this::createRegistries);
 
         // Register stuff
         ModBlocks.BLOCKS.register(MOD_BUS);
@@ -89,25 +80,6 @@ public class ColdSweat
 
     public static String getVersion()
     {   return FMLLoader.getLoadingModList().getModFileById(ColdSweat.MOD_ID).versionString();
-    }
-
-    public void createRegistries(FMLLoadCompleteEvent event)
-    {
-        // Gather modded registries
-        AddRegistriesEvent addRegistriesEvent = new AddRegistriesEvent();
-        NeoForge.EVENT_BUS.post(addRegistriesEvent);
-        // Add registries via dummy NewRegistry event
-        DataPackRegistryEvent.NewRegistry dummyEvent = new DataPackRegistryEvent.NewRegistry();
-        for (RegistryHolder<?> holder : ModRegistries.getRegistries().values())
-        {   dummyEvent.dataPackRegistry((ResourceKey) holder.key(), (Codec) holder.codec(), (Codec) holder.codec());
-        }
-        try
-        {
-            Method process = DataPackRegistryEvent.NewRegistry.class.getDeclaredMethod("process");
-            process.setAccessible(true);
-            process.invoke(dummyEvent);
-        }
-        catch (Exception ignored) {}
     }
 
     public void spawnPlacements(RegisterSpawnPlacementsEvent event)

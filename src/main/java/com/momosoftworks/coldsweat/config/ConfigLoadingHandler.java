@@ -7,6 +7,8 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.api.annotation.Internal;
+import com.momosoftworks.coldsweat.api.event.core.registry.AddRegistriesEvent;
 import com.momosoftworks.coldsweat.api.event.core.registry.LoadRegistriesEvent;
 import com.momosoftworks.coldsweat.api.event.vanilla.ServerConfigsLoadedEvent;
 import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
@@ -48,9 +50,11 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.registries.DataPackRegistryEvent;
 
 import java.io.File;
 import java.io.FileReader;
+import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -101,6 +105,26 @@ public class ConfigLoadingHandler
         {
             ConfigSettings.CLIENT_SETTINGS.forEach((id, holder) -> holder.load(true));
         }
+    }
+
+    @Internal
+    public static void initRegistries()
+    {
+        ColdSweat.LOGGER.info("Gathering Cold Sweat registries");
+        // Gather modded registries
+        AddRegistriesEvent addRegistriesEvent = new AddRegistriesEvent();
+        NeoForge.EVENT_BUS.post(addRegistriesEvent);
+        // Add registries via dummy NewRegistry event
+        DataPackRegistryEvent.NewRegistry dummyEvent = new DataPackRegistryEvent.NewRegistry();
+        for (RegistryHolder<?> holder : ModRegistries.getRegistries().values())
+        {   dummyEvent.dataPackRegistry((ResourceKey) holder.key(), (Codec) holder.codec(), (Codec) holder.codec());
+        }
+        try
+        {   Method process = DataPackRegistryEvent.NewRegistry.class.getDeclaredMethod("process");
+            process.setAccessible(true);
+            process.invoke(dummyEvent);
+        }
+        catch (Exception ignored) {}
     }
 
     /**
