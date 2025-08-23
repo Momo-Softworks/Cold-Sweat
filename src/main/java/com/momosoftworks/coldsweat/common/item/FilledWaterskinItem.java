@@ -13,13 +13,13 @@ import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.core.init.ModSounds;
 import com.momosoftworks.coldsweat.core.network.message.ParticleBatchMessage;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import dev.ghen.thirst.content.registry.ThirstComponent;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -64,10 +64,7 @@ public class FilledWaterskinItem extends Item
     }
 
     public static ItemStack getDisplayStack()
-    {
-        ItemStack stack = new ItemStack(ModItems.FILLED_WATERSKIN.asItem());
-        NBTHelper.ensureTagAndDo(stack, tag -> tag.putBoolean("ForShow", true));
-        return stack;
+    {   return new ItemStack(ModItems.FILLED_WATERSKIN.asItem());
     }
 
     @Override
@@ -82,7 +79,7 @@ public class FilledWaterskinItem extends Item
 
     @Override
     public boolean isBarVisible(ItemStack stack)
-    {   return getMaxDamage(stack) > 1 && !NBTHelper.getTagOrEmpty(stack).getBoolean("ForShow");
+    {   return stack.getDamageValue() > 0;
     }
 
     private static int getDurability(ItemStack stack)
@@ -152,8 +149,7 @@ public class FilledWaterskinItem extends Item
     public static ItemStack consumeWaterskin(ItemStack stack, LivingEntity entity, InteractionHand usedHand)
     {
         // Create empty waterskin item
-        ItemStack emptyStack = getEmpty(stack);
-        emptyStack.setDamageValue(0);
+        ItemStack emptyStack = stack.getCraftingRemainingItem();
 
         // Add the item to the player's inventory
         if (entity instanceof Player player && player.getInventory().contains(emptyStack))
@@ -271,24 +267,6 @@ public class FilledWaterskinItem extends Item
         }
     }
 
-    public static ItemStack getEmpty(ItemStack stack)
-    {
-        if (stack.getItem() instanceof FilledWaterskinItem)
-        {
-            ItemStack emptyWaterskin = new ItemStack(ModItems.WATERSKIN.value());
-
-            // Preserve NBT (except temperature)
-            emptyWaterskin.applyComponents(stack.getComponents());
-            emptyWaterskin.remove(ModItemComponents.WATER_TEMPERATURE);
-            // TODO: Check if this works w/o thirst
-            if (CompatManager.isThirstLoaded())
-            {   emptyWaterskin.remove(ThirstComponent.PURITY);
-            }
-            return emptyWaterskin;
-        }
-        return stack;
-    }
-
     @Override
     @OnlyIn(Dist.CLIENT)
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag advanced)
@@ -354,8 +332,23 @@ public class FilledWaterskinItem extends Item
     }
 
     @Override
-    public ItemStack getCraftingRemainingItem(ItemStack itemStack)
-    {   return getEmpty(itemStack);
+    public ItemStack getCraftingRemainingItem(ItemStack stack)
+    {
+        if (stack.getItem() instanceof FilledWaterskinItem)
+        {
+            ItemStack emptyWaterskin = new ItemStack(ModItems.WATERSKIN.value());
+
+            // Preserve NBT (except temperature)
+            emptyWaterskin.applyComponents(stack.getComponents());
+            emptyWaterskin.remove(ModItemComponents.WATER_TEMPERATURE);
+            emptyWaterskin.remove(DataComponents.DAMAGE);
+            emptyWaterskin.remove(DataComponents.MAX_DAMAGE);
+            if (CompatManager.isThirstLoaded())
+            {   emptyWaterskin.remove(ThirstComponent.PURITY);
+            }
+            return emptyWaterskin;
+        }
+        return stack;
     }
 
     public String getDescriptionId()
@@ -446,6 +439,6 @@ public class FilledWaterskinItem extends Item
             }
         }.start();
 
-        return getEmpty(stack);
+        return stack.getCraftingRemainingItem();
     };
 }
