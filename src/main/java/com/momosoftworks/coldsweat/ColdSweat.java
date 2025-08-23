@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat;
 
 import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.api.event.core.registry.AddRegistriesEvent;
+import com.momosoftworks.coldsweat.api.event.vanilla.ServerConfigsLoadedEvent;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
 import com.momosoftworks.coldsweat.common.capability.shearing.ShearableFurCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.EntityTempCap;
@@ -25,6 +26,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
@@ -37,6 +39,7 @@ import org.apache.logging.log4j.Logger;
 import java.lang.reflect.Method;
 
 @Mod(ColdSweat.MOD_ID)
+@Mod.EventBusSubscriber
 public class ColdSweat
 {
     public static final Logger LOGGER = LogManager.getLogger("Cold Sweat");
@@ -46,13 +49,10 @@ public class ColdSweat
 
     public ColdSweat()
     {
-        MinecraftForge.EVENT_BUS.register(this);
-
         MOD_BUS.addListener(this::commonSetup);
         MOD_BUS.addListener(this::spawnPlacements);
         MOD_BUS.addListener(this::registerCaps);
         MOD_BUS.addListener(this::updateConfigs);
-        MOD_BUS.addListener(this::createRegistries);
 
         // Register stuff
         BlockInit.BLOCKS.register(MOD_BUS);
@@ -92,25 +92,6 @@ public class ColdSweat
 
     public static String getVersion()
     {   return FMLLoader.getLoadingModList().getModFileById(ColdSweat.MOD_ID).versionString();
-    }
-
-    public void createRegistries(FMLLoadCompleteEvent event)
-    {
-        // Gather modded registries
-        AddRegistriesEvent addRegistriesEvent = new AddRegistriesEvent();
-        MinecraftForge.EVENT_BUS.post(addRegistriesEvent);
-        // Add registries via dummy NewRegistry event
-        DataPackRegistryEvent.NewRegistry dummyEvent = new DataPackRegistryEvent.NewRegistry();
-        for (RegistryHolder<?> holder : ModRegistries.getRegistries().values())
-        {   dummyEvent.dataPackRegistry((ResourceKey) holder.key(), (Codec) holder.codec(), (Codec) holder.codec());
-        }
-        try
-        {
-            Method process = DataPackRegistryEvent.NewRegistry.class.getDeclaredMethod("process");
-            process.setAccessible(true);
-            process.invoke(dummyEvent);
-        }
-        catch (Exception ignored) {}
     }
 
     public void commonSetup(final FMLCommonSetupEvent event)
