@@ -12,7 +12,6 @@ import com.momosoftworks.coldsweat.core.network.message.ParticleBatchMessage;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
-import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -62,10 +61,7 @@ public class FilledWaterskinItem extends Item
     }
 
     public static ItemStack getDisplayStack()
-    {
-        ItemStack stack = new ItemStack(ModItems.FILLED_WATERSKIN);
-        stack.getOrCreateTag().putBoolean("ForShow", true);
-        return stack;
+    {   return new ItemStack(ModItems.FILLED_WATERSKIN);
     }
 
     @Override
@@ -80,7 +76,7 @@ public class FilledWaterskinItem extends Item
 
     @Override
     public boolean isBarVisible(ItemStack stack)
-    {   return getMaxDamage(stack) > 1 && !NBTHelper.getTagOrEmpty(stack).getBoolean("ForShow");
+    {   return stack.getDamageValue() > 0;
     }
 
     private static int getDurability(ItemStack stack)
@@ -150,9 +146,7 @@ public class FilledWaterskinItem extends Item
     public static ItemStack consumeWaterskin(ItemStack stack, LivingEntity entity, InteractionHand usedHand)
     {
         // Create empty waterskin item
-        ItemStack emptyStack = getEmpty(stack);
-        emptyStack.getOrCreateTag().remove("Purity");
-        emptyStack.setDamageValue(0);
+        ItemStack emptyStack = stack.getCraftingRemainingItem();
 
         // Add the item to the player's inventory
         if (entity instanceof Player player && player.getInventory().contains(emptyStack))
@@ -269,20 +263,6 @@ public class FilledWaterskinItem extends Item
         }
     }
 
-    public static ItemStack getEmpty(ItemStack stack)
-    {
-        if (stack.getItem() instanceof FilledWaterskinItem)
-        {
-            ItemStack emptyWaterskin = new ItemStack(ModItems.WATERSKIN);
-
-            // Preserve NBT (except temperature)
-            emptyWaterskin.setTag(stack.getTag());
-            emptyWaterskin.removeTagKey(FilledWaterskinItem.NBT_TEMPERATURE);
-            return emptyWaterskin;
-        }
-        return stack;
-    }
-
     @Override
     @OnlyIn(Dist.CLIENT)
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag advanced)
@@ -349,10 +329,20 @@ public class FilledWaterskinItem extends Item
     }
 
     @Override
-    public ItemStack getCraftingRemainingItem(ItemStack itemStack)
-    {   ItemStack empty = getEmpty(itemStack);
-        empty.getOrCreateTag().remove("Purity");
-        return empty;
+    public ItemStack getCraftingRemainingItem(ItemStack stack)
+    {
+        if (stack.getItem() instanceof FilledWaterskinItem)
+        {
+            ItemStack emptyWaterskin = new ItemStack(ModItems.WATERSKIN);
+
+            // Preserve NBT (except temperature)
+            emptyWaterskin.setTag(stack.getTag());
+            emptyWaterskin.removeTagKey(FilledWaterskinItem.NBT_TEMPERATURE);
+            emptyWaterskin.removeTagKey("Damage");
+            emptyWaterskin.removeTagKey("Purity");
+            return emptyWaterskin;
+        }
+        return stack;
     }
 
     public String getDescriptionId()
@@ -443,6 +433,6 @@ public class FilledWaterskinItem extends Item
             }
         }.start();
 
-        return getEmpty(stack);
+        return stack.getCraftingRemainingItem();
     };
 }
