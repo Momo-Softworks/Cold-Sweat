@@ -20,7 +20,7 @@
 				"items": ["ad_astra:jet_suit"],
 				"nbt": {
 					"BotariumData": {
-						"StoredFluids": [{ "Amount": "1-4000", "Fluid": "ad_astra:oxygen" }]
+						"StoredFluids": [{ "Amount": "1:", "Fluid": "ad_astra:oxygen" }]
 					}
 				}
 			},
