@@ -16,13 +16,13 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Optional;
 
-public record FluidRequirement(NegatableList<Either<TagKey<Fluid>, Fluid>> fluids, NegatableList<BlockRequirement.StateRequirement> state, Optional<Boolean> isSource)
+public record FluidRequirement(NegatableList<Either<TagKey<Fluid>, Fluid>> fluids, BlockRequirement.StateRequirement state, Optional<Boolean> isSource)
 {
-    public static final FluidRequirement NONE = new FluidRequirement(new NegatableList<>(), new NegatableList<>(), Optional.empty());
+    public static final FluidRequirement NONE = new FluidRequirement(new NegatableList<>(), BlockRequirement.StateRequirement.NONE, Optional.empty());
 
     public static final Codec<FluidRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             NegatableList.listCodec(ConfigHelper.tagOrBuiltinCodec(Registries.FLUID, ForgeRegistries.FLUIDS)).optionalFieldOf("fluids", new NegatableList<>()).forGetter(FluidRequirement::fluids),
-            NegatableList.codec(BlockRequirement.StateRequirement.CODEC).optionalFieldOf("state", new NegatableList<>()).forGetter(FluidRequirement::state),
+            BlockRequirement.StateRequirement.CODEC.optionalFieldOf("state", BlockRequirement.StateRequirement.NONE).forGetter(FluidRequirement::state),
             Codec.BOOL.optionalFieldOf("is_source").forGetter(FluidRequirement::isSource)
     ).apply(instance, FluidRequirement::new));
 
@@ -46,7 +46,7 @@ public record FluidRequirement(NegatableList<Either<TagKey<Fluid>, Fluid>> fluid
         {   return false;
         }
         else
-        {   return this.state.test(req -> req.test(state));
+        {   return this.state.test(state);
         }
     }
 
