@@ -4,14 +4,17 @@ import com.anthonyhilyard.iceberg.util.Tooltips;
 import com.mojang.datafixers.util.Either;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.core.init.FetchSeasonsModsEvent;
+import com.momosoftworks.coldsweat.api.event.core.registry.LoadRegistriesEvent;
 import com.momosoftworks.coldsweat.api.temperature.modifier.compat.SereneSeasonsTempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.compat.create.ColdSweatDisplaySources;
 import com.momosoftworks.coldsweat.compat.create.ColdSweatPonderPlugin;
+import com.momosoftworks.coldsweat.compat.curios.EquipableCurio;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.data.tag.ModInsulatorTags;
+import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
@@ -49,6 +52,9 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.RegisterEvent;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.joml.Vector3d;
@@ -59,6 +65,7 @@ import sereneseasons.api.season.SeasonChangedEvent;
 import sereneseasons.season.SeasonHooks;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.CuriosCapability;
+import top.theillusivec4.curios.api.event.CurioAttributeModifierEvent;
 import top.theillusivec4.curios.api.event.CurioChangeEvent;
 import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
 import weather2.ServerTickHandler;
@@ -406,6 +413,19 @@ public class CompatManager
                 public void onCurioChange(CurioChangeEvent event)
                 {
                     EntityTempManager.updateInsulationAttributeModifiers(event.getEntity(), event.getFrom(), event.getTo());
+                }
+            });
+
+            MinecraftForge.EVENT_BUS.register(new Object()
+            {
+                @SubscribeEvent
+                public void registerEquipableCurios(LoadRegistriesEvent.Pre event)
+                {
+                    for (Item item : ForgeRegistries.ITEMS.tags().getTag(ModItemTags.EQUIPABLE_CURIOS))
+                    {
+                        if (CuriosApi.getCurio(item.getDefaultInstance()).isPresent()) continue;
+                        CuriosApi.registerCurio(item, new EquipableCurio());
+                    }
                 }
             });
         }
