@@ -283,9 +283,9 @@ public class FilledWaterskinItem extends Item
 
         // Info tooltip for drinking/pouring functionality
         int useEffect = (int) Math.round(temp * multiplier);
-        Component tempText = temp > 0  ? new TranslatableComponent("tooltip.cold_sweat.temperature_effect", "+" + useEffect).withStyle(TooltipHandler.HOT) :
-                             temp == 0 ? new TranslatableComponent("tooltip.cold_sweat.temperature_effect", "+" + useEffect).withStyle(ChatFormatting.WHITE)
-                                       : new TranslatableComponent("tooltip.cold_sweat.temperature_effect", useEffect).withStyle(TooltipHandler.COLD);
+        Component tempText = useEffect > 0  ? new TranslatableComponent("tooltip.cold_sweat.temperature_effect", "+" + useEffect).withStyle(TooltipHandler.HOT) :
+                             useEffect == 0 ? new TranslatableComponent("tooltip.cold_sweat.temperature_effect", "+" + useEffect).withStyle(ChatFormatting.WHITE)
+                                            : new TranslatableComponent("tooltip.cold_sweat.temperature_effect", useEffect).withStyle(TooltipHandler.COLD);
         tooltip.add(new TextComponent(""));
         tooltip.add(new TranslatableComponent("tooltip.cold_sweat.consumed").withStyle(ChatFormatting.GRAY));
         tooltip.add(tempText);
