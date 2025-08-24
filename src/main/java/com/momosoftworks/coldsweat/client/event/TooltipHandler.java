@@ -68,9 +68,9 @@ public class TooltipHandler
 {
     public static final Style COLD = Style.EMPTY.withColor(3767039);
     public static final Style HOT = Style.EMPTY.withColor(16736574);
-    public static final Component EXPAND_TOOLTIP = Component.literal("[").withStyle(ChatFormatting.GRAY)
-               .append(Component.literal("Shift").withStyle(ChatFormatting.WHITE))
-               .append(Component.literal("]").withStyle(ChatFormatting.GRAY));
+    public static final Component EXPAND_TOOLTIP = Component.literal("[").withStyle(ChatFormatting.DARK_GRAY)
+               .append(Component.literal("Shift").withStyle(ChatFormatting.GRAY))
+               .append(Component.literal("]").withStyle(ChatFormatting.DARK_GRAY));
     public static final DecimalFormat ATTRIBUTE_MODIFIER_FORMAT = Util.make(new DecimalFormat("#.##"), (format) -> {
         format.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.ROOT));
     });
