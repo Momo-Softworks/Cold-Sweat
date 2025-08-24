@@ -6,7 +6,9 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.core.init.FetchSeasonsModsEvent;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.capability.handler.ShearableFurManager;
+import com.momosoftworks.coldsweat.compat.curios.EquipableCurio;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.simibubi.create.content.contraptions.fluids.pipes.EncasedPipeBlock;
 import com.simibubi.create.content.contraptions.fluids.pipes.FluidPipeBlock;
 import com.simibubi.create.content.contraptions.fluids.pipes.GlassFluidPipeBlock;
@@ -22,6 +24,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.loading.FMLLoader;
@@ -36,6 +39,8 @@ import sereneseasons.season.SeasonHooks;
 import top.theillusivec4.curios.api.CuriosCapability;
 import top.theillusivec4.curios.api.event.CurioChangeEvent;
 import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
+import top.theillusivec4.curios.common.capability.CurioItemCapability;
+import top.theillusivec4.curios.common.capability.ItemizedCurioCapability;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -344,6 +349,22 @@ public class CompatManager
                 public void onCurioChange(CurioChangeEvent event)
                 {
                     EntityTempManager.updateInsulationAttributeModifiers(event.getEntityLiving(), event.getFrom(), event.getTo());
+                }
+            });
+
+            MinecraftForge.EVENT_BUS.register(new Object()
+            {
+                @SubscribeEvent
+                public void registerEquipableCurios(AttachCapabilitiesEvent<ItemStack> event)
+                {
+                    ItemStack item = event.getObject();
+                    if (ModItemTags.EQUIPABLE_CURIOS.contains(item.getItem()))
+                    {
+                        if (item.getCapability(CuriosCapability.ITEM) != null) return;
+                        EquipableCurio itemCurio = new EquipableCurio();
+                        ItemizedCurioCapability itemizedCapability = new ItemizedCurioCapability(itemCurio, item);
+                        event.addCapability(CuriosCapability.ID_ITEM, CurioItemCapability.createProvider(itemizedCapability));
+                    }
                 }
             });
         }
