@@ -117,8 +117,8 @@ public record EffectsRequirement(Map<Holder<MobEffect>, Instance> effects)
     public record Instance(IntegerBounds amplifier, IntegerBounds duration, Optional<Boolean> ambient, Optional<Boolean> visible)
     {
         public static final Codec<Instance> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                IntegerBounds.CODEC.fieldOf("amplifier").forGetter(effect -> effect.amplifier),
-                IntegerBounds.CODEC.fieldOf("duration").forGetter(effect -> effect.duration),
+                IntegerBounds.CODEC.optionalFieldOf("amplifier", IntegerBounds.NONE).forGetter(effect -> effect.amplifier),
+                IntegerBounds.CODEC.optionalFieldOf("duration", IntegerBounds.NONE).forGetter(effect -> effect.duration),
                 Codec.BOOL.optionalFieldOf("ambient").forGetter(effect -> effect.ambient),
                 Codec.BOOL.optionalFieldOf("visible").forGetter(effect -> effect.visible)
         ).apply(instance, Instance::new));
