@@ -2,12 +2,15 @@ package com.momosoftworks.coldsweat.compat;
 
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.core.init.FetchSeasonsModsEvent;
+import com.momosoftworks.coldsweat.api.event.core.registry.LoadRegistriesEvent;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.compat.create.ColdSweatDisplayBehaviors;
+import com.momosoftworks.coldsweat.compat.curios.EquipableCurio;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.BlockInit;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.data.tag.ModInsulatorTags;
+import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
@@ -36,6 +39,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -57,6 +61,8 @@ import weather2.ServerTickHandler;
 import weather2.weathersystem.WeatherManagerServer;
 import weather2.weathersystem.storm.StormObject;
 import weather2.weathersystem.storm.WeatherObject;
+import top.theillusivec4.curios.common.capability.CurioItemCapability;
+import top.theillusivec4.curios.common.capability.ItemizedCurioCapability;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -377,6 +383,22 @@ public class CompatManager
                 public void onCurioChange(CurioChangeEvent event)
                 {
                     EntityTempManager.updateInsulationAttributeModifiers(event.getEntityLiving(), event.getFrom(), event.getTo());
+                }
+            });
+
+            MinecraftForge.EVENT_BUS.register(new Object()
+            {
+                @SubscribeEvent
+                public void registerEquipableCurios(AttachCapabilitiesEvent<ItemStack> event)
+                {
+                    ItemStack item = event.getObject();
+                    if (item.is(ModItemTags.EQUIPABLE_CURIOS))
+                    {
+                        if (item.getCapability(CuriosCapability.ITEM) != null) return;
+                        EquipableCurio itemCurio = new EquipableCurio();
+                        ItemizedCurioCapability itemizedCapability = new ItemizedCurioCapability(itemCurio, item);
+                        event.addCapability(CuriosCapability.ID_ITEM, CurioItemCapability.createProvider(itemizedCapability));
+                    }
                 }
             });
         }
