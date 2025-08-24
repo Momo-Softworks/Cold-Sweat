@@ -18,18 +18,18 @@ import java.util.Optional;
 public class FluidRequirement
 {
     private final NegatableList<Either<ITag<Fluid>, Fluid>> fluids;
-    private final BlockRequirement.StateRequirement state;
+    private final NegatableList<BlockRequirement.StateRequirement> state;
     private final Optional<Boolean> isSource;
+
+    public static final FluidRequirement NONE = new FluidRequirement(new NegatableList<>(), new NegatableList<>(), Optional.empty());
 
     public static final Codec<FluidRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             NegatableList.listCodec(ConfigHelper.tagOrBuiltinCodec(Registry.FLUID_REGISTRY, Registry.FLUID)).optionalFieldOf("fluids", new NegatableList<>()).forGetter(FluidRequirement::fluids),
-            BlockRequirement.StateRequirement.CODEC.optionalFieldOf("state", BlockRequirement.StateRequirement.NONE).forGetter(FluidRequirement::state),
+            NegatableList.codec(BlockRequirement.StateRequirement.CODEC).optionalFieldOf("state", new NegatableList<>()).forGetter(FluidRequirement::state),
             Codec.BOOL.optionalFieldOf("is_source").forGetter(FluidRequirement::isSource)
     ).apply(instance, FluidRequirement::new));
 
-    public static final FluidRequirement NONE = new FluidRequirement(new NegatableList<>(), BlockRequirement.StateRequirement.NONE, Optional.empty());
-
-    public FluidRequirement(NegatableList<Either<ITag<Fluid>, Fluid>> fluids, BlockRequirement.StateRequirement state, Optional<Boolean> isSource)
+    public FluidRequirement(NegatableList<Either<ITag<Fluid>, Fluid>> fluids, NegatableList<BlockRequirement.StateRequirement> state, Optional<Boolean> isSource)
     {
         this.fluids = fluids;
         this.state = state;
@@ -39,7 +39,7 @@ public class FluidRequirement
     public NegatableList<Either<ITag<Fluid>, Fluid>> fluids()
     {   return fluids;
     }
-    public BlockRequirement.StateRequirement state()
+    public NegatableList<BlockRequirement.StateRequirement> state()
     {   return state;
     }
     public Optional<Boolean> isSource()
@@ -66,7 +66,7 @@ public class FluidRequirement
         {   return false;
         }
         else
-        {   return this.state.test(state);
+        {   return this.state.test(req -> req.test(state));
         }
     }
 

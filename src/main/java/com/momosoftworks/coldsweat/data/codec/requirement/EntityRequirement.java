@@ -27,31 +27,29 @@ import java.util.stream.Collectors;
 public class EntityRequirement
 {
     private final NegatableList<Either<ITag<EntityType<?>>, EntityType<?>>> entities;
-    private final LocationRequirement location;
-    private final LocationRequirement steppingOn;
-    private final Optional<EffectsRequirement> effects;
+    private final NegatableList<LocationRequirement> location;
+    private final NegatableList<EffectsRequirement> effects;
     private final NbtRequirement nbt;
     private final Optional<EntityFlagsRequirement> flags;
     private final EquipmentRequirement equipment;
-    private final Optional<EntitySubRequirement> typeSpecificData;
+    private final NegatableList<EntitySubRequirement> typeSpecificData;
     private final NegatableList<String> team;
-    private final Optional<EntityRequirement> vehicle;
-    private final Optional<EntityRequirement> passenger;
-    private final Optional<EntityRequirement> target;
+    private final NegatableList<EntityRequirement> vehicle;
+    private final NegatableList<EntityRequirement> passenger;
+    private final NegatableList<EntityRequirement> target;
     private final Map<Temperature.Trait, DoubleBounds> temperature;
     private final Optional<Predicate<Entity>> predicate;
 
     public EntityRequirement(NegatableList<Either<ITag<EntityType<?>>, EntityType<?>>> entities,
-                             LocationRequirement location, LocationRequirement steppingOn,
-                             Optional<EffectsRequirement> effects, NbtRequirement nbt, Optional<EntityFlagsRequirement> flags,
-                             EquipmentRequirement equipment, Optional<EntitySubRequirement> typeSpecificData,
-                             NegatableList<String> team, Optional<EntityRequirement> vehicle, Optional<EntityRequirement> passenger,
-                             Optional<EntityRequirement> target, Map<Temperature.Trait, DoubleBounds> temperature,
+                             NegatableList<LocationRequirement> location,
+                             NegatableList<EffectsRequirement> effects, NbtRequirement nbt, Optional<EntityFlagsRequirement> flags,
+                             EquipmentRequirement equipment, NegatableList<EntitySubRequirement> typeSpecificData,
+                             NegatableList<String> team, NegatableList<EntityRequirement> vehicle, NegatableList<EntityRequirement> passenger,
+                             NegatableList<EntityRequirement> target, Map<Temperature.Trait, DoubleBounds> temperature,
                              Optional<Predicate<Entity>> predicate)
     {
         this.entities = entities;
         this.location = location;
-        this.steppingOn = steppingOn;
         this.effects = effects;
         this.nbt = nbt;
         this.flags = flags;
@@ -66,59 +64,52 @@ public class EntityRequirement
     }
 
     public EntityRequirement(NegatableList<Either<ITag<EntityType<?>>, EntityType<?>>> entities,
-                             LocationRequirement location, LocationRequirement steppingOn,
-                             Optional<EffectsRequirement> effects, NbtRequirement nbt, Optional<EntityFlagsRequirement> flags,
-                             EquipmentRequirement equipment, Optional<EntitySubRequirement> typeSpecificData,
-                             NegatableList<String> team, Optional<EntityRequirement> vehicle, Optional<EntityRequirement> passenger,
-                             Optional<EntityRequirement> target, Map<Temperature.Trait, DoubleBounds> temperature)
+                             NegatableList<LocationRequirement> location,
+                             NegatableList<EffectsRequirement> effects, NbtRequirement nbt, Optional<EntityFlagsRequirement> flags,
+                             EquipmentRequirement equipment, NegatableList<EntitySubRequirement> typeSpecificData,
+                             NegatableList<String> team, NegatableList<EntityRequirement> vehicle, NegatableList<EntityRequirement> passenger,
+                             NegatableList<EntityRequirement> target, Map<Temperature.Trait, DoubleBounds> temperature)
     {
-        this(entities, location, steppingOn, effects, nbt, flags, equipment, typeSpecificData, team, vehicle, passenger, target, temperature, Optional.empty());;
+        this(entities, location, effects, nbt, flags, equipment, typeSpecificData, team, vehicle, passenger, target, temperature, Optional.empty());;
     }
 
     public EntityRequirement(NegatableList<Either<ITag<EntityType<?>>, EntityType<?>>> entities)
     {
-        this(entities, LocationRequirement.NONE, LocationRequirement.NONE, Optional.empty(),
+        this(entities, new NegatableList<>(), new NegatableList<>(),
              NbtRequirement.NONE, Optional.empty(), EquipmentRequirement.NONE,
-             Optional.empty(), new NegatableList<>(), Optional.empty(), Optional.empty(), Optional.empty(), new HashMap<>());
+             new NegatableList<>(), new NegatableList<>(), new NegatableList<>(), new NegatableList<>(), new NegatableList<>(), new HashMap<>());
     }
 
     public EntityRequirement(Collection<EntityType<?>> entities, Predicate<Entity> predicate)
     {
         this(new NegatableList<>(entities.stream().map(Either::<ITag<EntityType<?>>, EntityType<?>>right).collect(Collectors.toList())),
-             LocationRequirement.NONE, LocationRequirement.NONE, Optional.empty(),
+             new NegatableList(LocationRequirement.NONE), new NegatableList<>(),
              NbtRequirement.NONE, Optional.empty(), EquipmentRequirement.NONE,
-             Optional.empty(), new NegatableList<>(), Optional.empty(), Optional.empty(), Optional.empty(), new HashMap<>(),
+             new NegatableList<>(), new NegatableList<>(), new NegatableList<>(), new NegatableList<>(), new NegatableList<>(), new HashMap<>(),
              Optional.ofNullable(predicate));
     }
 
     public EntityRequirement(Predicate<Entity> predicate)
-    {
-        this(new NegatableList<>(), LocationRequirement.NONE, LocationRequirement.NONE, Optional.empty(),
-            NbtRequirement.NONE, Optional.empty(), EquipmentRequirement.NONE,
-            Optional.empty(), new NegatableList<>(),Optional.empty(), Optional.empty(),
-             Optional.empty(), new HashMap<>(),
-             Optional.ofNullable(predicate));
+    {   this(new ArrayList<>(), predicate);
     }
 
-    public static final EntityRequirement NONE = new EntityRequirement(new NegatableList<>(), LocationRequirement.NONE, LocationRequirement.NONE,
-                                                                Optional.empty(), NbtRequirement.NONE, Optional.empty(), EquipmentRequirement.NONE,
-                                                                Optional.empty(), new NegatableList<>(), Optional.empty(),
-                                                                Optional.empty(), Optional.empty(), new HashMap<>(), Optional.empty());
+    public static final EntityRequirement NONE = new EntityRequirement(new NegatableList<>(), new NegatableList<>(),
+                                                                new NegatableList<>(), NbtRequirement.NONE, Optional.empty(), EquipmentRequirement.NONE,
+                                                                 new NegatableList<>(), new NegatableList<>(), new NegatableList<>(), new NegatableList<>(), new NegatableList<>(), new HashMap<>(), Optional.empty());
 
     public static final Codec<EntityRequirement> SIMPLE_CODEC = RecordCodecBuilder.create(instance -> instance.group(
             NegatableList.listCodec(ConfigHelper.tagOrBuiltinCodec(Registry.ENTITY_TYPE_REGISTRY, Registry.ENTITY_TYPE)).optionalFieldOf("entities", new NegatableList<>()).forGetter(requirement -> requirement.entities),
-            LocationRequirement.CODEC.optionalFieldOf("location", LocationRequirement.NONE).forGetter(requirement -> requirement.location),
-            LocationRequirement.CODEC.optionalFieldOf("stepping_on", LocationRequirement.NONE).forGetter(requirement -> requirement.steppingOn),
-            EffectsRequirement.CODEC.optionalFieldOf("effects").forGetter(requirement -> requirement.effects),
+            NegatableList.codec(LocationRequirement.CODEC).optionalFieldOf("location", new NegatableList<>()).forGetter(requirement -> requirement.location),
+            NegatableList.codec(EffectsRequirement.CODEC).optionalFieldOf("effects", new NegatableList<>()).forGetter(requirement -> requirement.effects),
             NbtRequirement.CODEC.optionalFieldOf("nbt", NbtRequirement.NONE).forGetter(requirement -> requirement.nbt),
             EntityFlagsRequirement.CODEC.optionalFieldOf("flags").forGetter(requirement -> requirement.flags),
             EquipmentRequirement.CODEC.optionalFieldOf("equipment", EquipmentRequirement.NONE).forGetter(requirement -> requirement.equipment),
-            EntitySubRequirement.CODEC.optionalFieldOf("type_specific").forGetter(requirement -> requirement.typeSpecificData),
+            NegatableList.codec(EntitySubRequirement.CODEC).optionalFieldOf("type_specific", new NegatableList<>()).forGetter(requirement -> requirement.typeSpecificData),
             NegatableList.codec(Codec.STRING).optionalFieldOf("team", new NegatableList<>()).forGetter(requirement -> requirement.team),
             Codec.unboundedMap(Temperature.Trait.CODEC, DoubleBounds.CODEC).optionalFieldOf("temperature", new HashMap<>()).forGetter(requirement -> requirement.temperature)
-    ).apply(instance, (type, location, standingOn, effects, nbt, flags, equipment, typeData, team, temperature) ->
-            new EntityRequirement(type, location, standingOn, effects, nbt, flags, equipment, typeData, team,
-                                  Optional.empty(), Optional.empty(), Optional.empty(), temperature)));
+    ).apply(instance, (type, location, effects, nbt, flags, equipment, typeData, team, temperature) ->
+            new EntityRequirement(type, location, effects, nbt, flags, equipment, typeData, team,
+                                  new NegatableList<>(), new NegatableList<>(), new NegatableList<>(), temperature)));
 
     private static final List<Codec<EntityRequirement>> REQUIREMENT_CODEC_STACK = new ArrayList<>(Arrays.asList(SIMPLE_CODEC));
     // Allow for up to 16 layers of inner codecs
@@ -136,17 +127,16 @@ public class EntityRequirement
     {
         Codec<EntityRequirement> codec = RecordCodecBuilder.<EntityRequirement>create(instance -> instance.group(
                 NegatableList.listCodec(ConfigHelper.tagOrBuiltinCodec(Registry.ENTITY_TYPE_REGISTRY, Registry.ENTITY_TYPE)).optionalFieldOf("entities", new NegatableList<>()).forGetter(requirement -> requirement.entities),
-                LocationRequirement.CODEC.optionalFieldOf("location", LocationRequirement.NONE).forGetter(requirement -> requirement.location),
-                LocationRequirement.CODEC.optionalFieldOf("stepping_on", LocationRequirement.NONE).forGetter(requirement -> requirement.steppingOn),
-                EffectsRequirement.CODEC.optionalFieldOf("effects").forGetter(requirement -> requirement.effects),
+                NegatableList.codec(LocationRequirement.CODEC).optionalFieldOf("location", new NegatableList<>()).forGetter(requirement -> requirement.location),
+                NegatableList.codec(EffectsRequirement.CODEC).optionalFieldOf("effects", new NegatableList<>()).forGetter(requirement -> requirement.effects),
                 NbtRequirement.CODEC.optionalFieldOf("nbt", NbtRequirement.NONE).forGetter(requirement -> requirement.nbt),
                 EntityFlagsRequirement.CODEC.optionalFieldOf("flags").forGetter(requirement -> requirement.flags),
                 EquipmentRequirement.CODEC.optionalFieldOf("equipment", EquipmentRequirement.NONE).forGetter(requirement -> requirement.equipment),
-                EntitySubRequirement.CODEC.optionalFieldOf("type_specific").forGetter(requirement -> requirement.typeSpecificData),
+                NegatableList.codec(EntitySubRequirement.CODEC).optionalFieldOf("type_specific", new NegatableList<>()).forGetter(requirement -> requirement.typeSpecificData),
                 NegatableList.codec(Codec.STRING).optionalFieldOf("team", new NegatableList<>()).forGetter(requirement -> requirement.team),
-                EntityRequirement.getCodec().optionalFieldOf("vehicle").forGetter(requirement -> requirement.vehicle),
-                EntityRequirement.getCodec().optionalFieldOf("passenger").forGetter(requirement -> requirement.passenger),
-                EntityRequirement.getCodec().optionalFieldOf("target").forGetter(requirement -> requirement.target),
+                NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("vehicle", new NegatableList<>()).forGetter(requirement -> requirement.vehicle),
+                NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("passenger", new NegatableList<>()).forGetter(requirement -> requirement.passenger),
+                NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("target", new NegatableList<>()).forGetter(requirement -> requirement.target),
                 Codec.unboundedMap(Temperature.Trait.CODEC, DoubleBounds.CODEC).optionalFieldOf("temperature", new HashMap<>()).forGetter(requirement -> requirement.temperature)
         ).apply(instance, EntityRequirement::new));
 
@@ -156,13 +146,10 @@ public class EntityRequirement
     public NegatableList<Either<ITag<EntityType<?>>, EntityType<?>>> entities()
     {   return entities;
     }
-    public LocationRequirement location()
+    public NegatableList<LocationRequirement> location()
     {   return location;
     }
-    public LocationRequirement steppingOn()
-    {   return steppingOn;
-    }
-    public Optional<EffectsRequirement> effects()
+    public NegatableList<EffectsRequirement> effects()
     {   return effects;
     }
     public NbtRequirement nbt()
@@ -174,19 +161,19 @@ public class EntityRequirement
     public EquipmentRequirement equipment()
     {   return equipment;
     }
-    public Optional<EntitySubRequirement> typeSpecificData()
+    public NegatableList<EntitySubRequirement> typeSpecificData()
     {   return typeSpecificData;
     }
     public NegatableList<String> team()
     {   return team;
     }
-    public Optional<EntityRequirement> vehicle()
+    public NegatableList<EntityRequirement> vehicle()
     {   return vehicle;
     }
-    public Optional<EntityRequirement> passenger()
+    public NegatableList<EntityRequirement> passenger()
     {   return passenger;
     }
-    public Optional<EntityRequirement> target()
+    public NegatableList<EntityRequirement> target()
     {   return target;
     }
 
@@ -208,13 +195,10 @@ public class EntityRequirement
             {   return false;
             }
         }
-        if (!location.test(entity.level, entity.position()))
+        if (!location.test(req -> req.test(entity.level, entity.position())))
         {   return false;
         }
-        if (!steppingOn.test(entity.level, entity.position().add(0, -0.5, 0)))
-        {   return false;
-        }
-        if (effects.isPresent() && !effects.get().test(entity))
+        if (effects.test(req -> req.test(entity)))
         {   return false;
         }
         if (flags.isPresent() && !flags.get().test(entity))
@@ -223,18 +207,18 @@ public class EntityRequirement
         if (!equipment.test(entity))
         {   return false;
         }
-        if (typeSpecificData.isPresent() && !typeSpecificData.get().test(entity, entity.level, entity.position()))
+        if (typeSpecificData.test(req -> req.test(entity, entity.level, entity.position())))
         {   return false;
         }
-        if (vehicle.isPresent() && !vehicle.get().test(entity.getVehicle()))
+        if (vehicle.test(req -> req.test(entity.getVehicle())))
         {   return false;
         }
-        if (passenger.isPresent() && !passenger.get().test(entity.getPassengers().isEmpty() ? null : entity.getPassengers().get(0)))
+        if (passenger.test(req -> req.test(entity.getPassengers().isEmpty() ? null : entity.getPassengers().get(0))))
         {   return false;
         }
-        if (target.isPresent())
+        if (!target.isEmpty())
         {
-            if (!(entity instanceof MonsterEntity) || !target.get().test(((MonsterEntity) entity).getTarget()))
+            if (!(entity instanceof MonsterEntity) || !target.test(req -> req.test(((MonsterEntity) entity).getTarget())))
             {   return false;
             }
         }
@@ -281,7 +265,6 @@ public class EntityRequirement
         EntityRequirement that = (EntityRequirement) obj;
         return entities.equals(that.entities)
             && location.equals(that.location)
-            && steppingOn.equals(that.steppingOn)
             && effects.equals(that.effects)
             && nbt.equals(that.nbt)
             && flags.equals(that.flags)

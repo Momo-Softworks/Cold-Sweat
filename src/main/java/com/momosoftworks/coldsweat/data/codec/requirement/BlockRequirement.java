@@ -27,13 +27,13 @@ import java.util.*;
 public class BlockRequirement
 {
     private final NegatableList<Either<ITag<Block>, Block>> blocks;
-    private final StateRequirement state;
+    private final NegatableList<StateRequirement> state;
     private final NbtRequirement nbt;
-    private final List<Direction> sturdyFaces;
+    private final NegatableList<Direction> sturdyFaces;
     private final Optional<Boolean> replaceable;
 
-    public BlockRequirement(NegatableList<Either<ITag<Block>, Block>> blocks, StateRequirement state,
-                            NbtRequirement nbt, List<Direction> sturdyFaces,
+    public BlockRequirement(NegatableList<Either<ITag<Block>, Block>> blocks, NegatableList<StateRequirement> state,
+                            NbtRequirement nbt, NegatableList<Direction> sturdyFaces,
                             Optional<Boolean> replaceable)
     {
         this.blocks = blocks;
@@ -44,29 +44,29 @@ public class BlockRequirement
     }
 
     public BlockRequirement(List<Either<ITag<Block>, Block>> blocks)
-    {   this(new NegatableList<>(blocks), StateRequirement.NONE, NbtRequirement.NONE, Arrays.asList(), Optional.empty());
+    {   this(new NegatableList<>(blocks), new NegatableList<>(), NbtRequirement.NONE, new NegatableList<>(), Optional.empty());
     }
 
-    public static final BlockRequirement NONE = new BlockRequirement(new NegatableList<>(), StateRequirement.NONE, NbtRequirement.NONE, Arrays.asList(), Optional.empty());
+    public static final BlockRequirement NONE = new BlockRequirement(new NegatableList<>(), new NegatableList<>(), NbtRequirement.NONE, new NegatableList<>(), Optional.empty());
 
     public static final Codec<BlockRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             NegatableList.listCodec(ConfigHelper.tagOrBuiltinCodec(Registry.BLOCK_REGISTRY, Registry.BLOCK)).optionalFieldOf("blocks", new NegatableList<>()).forGetter(predicate -> predicate.blocks),
-            StateRequirement.CODEC.optionalFieldOf("state", StateRequirement.NONE).forGetter(predicate -> predicate.state),
+            NegatableList.codec(StateRequirement.CODEC).optionalFieldOf("state", new NegatableList<>()).forGetter(predicate -> predicate.state),
             NbtRequirement.CODEC.optionalFieldOf("nbt", NbtRequirement.NONE).forGetter(predicate -> predicate.nbt),
-            Codec.STRING.xmap(Direction::byName, Direction::getName).listOf().optionalFieldOf("sturdy_faces", Arrays.asList()).forGetter(predicate -> predicate.sturdyFaces),
+            NegatableList.listCodec(Codec.STRING.xmap(Direction::byName, Direction::getName)).optionalFieldOf("sturdy_faces", new NegatableList<>()).forGetter(predicate -> predicate.sturdyFaces),
             Codec.BOOL.optionalFieldOf("replaceable").forGetter(predicate -> predicate.replaceable)
     ).apply(instance, BlockRequirement::new));
 
     public NegatableList<Either<ITag<Block>, Block>> blocks()
     {   return blocks;
     }
-    public StateRequirement state()
+    public NegatableList<StateRequirement> state()
     {   return state;
     }
     public NbtRequirement nbt()
     {   return nbt;
     }
-    public List<Direction> sturdyFaces()
+    public NegatableList<Direction> sturdyFaces()
     {   return sturdyFaces;
     }
     public Optional<Boolean> replaceable()
@@ -80,7 +80,7 @@ public class BlockRequirement
         if (!this.blocks.test(either -> either.map(state::is, state::is)))
         {   return false;
         }
-        if (!this.state.test(state))
+        if (!this.state.test(req -> req.test(state)))
         {   return false;
         }
         if (!this.nbt.isEmpty())
@@ -90,7 +90,7 @@ public class BlockRequirement
             {   return false;
             }
         }
-        if (!this.sturdyFaces.isEmpty() && this.sturdyFaces.stream().noneMatch(face -> state.isFaceSturdy(level, pos, face)))
+        if (!this.sturdyFaces.isEmpty() && this.sturdyFaces.test(face -> state.isFaceSturdy(level, pos, face)))
         {   return false;
         }
         if (this.replaceable.isPresent() && !(state.isAir() || state.getMaterial().isReplaceable()))
