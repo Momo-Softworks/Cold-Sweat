@@ -282,7 +282,7 @@ public class FilledWaterskinItem extends Item
                              useEffect == 0 ? Component.translatable("tooltip.cold_sweat.temperature_effect", "+" + useEffect).withStyle(ChatFormatting.WHITE)
                                             : Component.translatable("tooltip.cold_sweat.temperature_effect", useEffect).withStyle(TooltipHandler.COLD);
         tooltip.add(Component.empty());
-        tooltip.add(Component.translatable("tooltip.cold_sweat.consumed").withStyle(ChatFormatting.GRAY));
+        tooltip.add(Component.translatable("tooltip.cold_sweat.used").withStyle(ChatFormatting.GRAY));
         tooltip.add(tempText);
 
         if (TooltipHandler.isShiftDown())
@@ -298,7 +298,7 @@ public class FilledWaterskinItem extends Item
                     default -> crouchAction = "";
                 }
                 if (!crouchAction.isEmpty())
-                {   tooltip.add(2, Component.translatable(crouchAction, Component.literal(crouchKey).withStyle(ChatFormatting.WHITE)).withStyle(ChatFormatting.GRAY));
+                {   tooltip.add(2, Component.translatable(crouchAction, Component.literal(crouchKey).withStyle(ChatFormatting.GRAY)).withStyle(ChatFormatting.DARK_GRAY));
                 }
             }
 
