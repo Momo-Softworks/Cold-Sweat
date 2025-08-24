@@ -63,9 +63,9 @@ public class TooltipHandler
 {
     public static final Style COLD = Style.EMPTY.withColor(Color.fromRgb(3767039));
     public static final Style HOT = Style.EMPTY.withColor(Color.fromRgb(16736574));
-    public static final IFormattableTextComponent EXPAND_TOOLTIP = new StringTextComponent("[").withStyle(TextFormatting.GRAY)
-               .append(new StringTextComponent("Shift").withStyle(TextFormatting.WHITE))
-               .append(new StringTextComponent("]").withStyle(TextFormatting.GRAY));
+    public static final IFormattableTextComponent EXPAND_TOOLTIP = new StringTextComponent("[").withStyle(TextFormatting.DARK_GRAY)
+               .append(new StringTextComponent("Shift").withStyle(TextFormatting.GRAY))
+               .append(new StringTextComponent("]").withStyle(TextFormatting.DARK_GRAY));
 
     private static int TOOLTIP_BACKGROUND_COLOR = 0;
 
