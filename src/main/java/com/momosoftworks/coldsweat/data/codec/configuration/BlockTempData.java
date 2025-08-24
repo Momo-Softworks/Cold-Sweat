@@ -192,7 +192,7 @@ public class BlockTempData extends ConfigData implements IForgeRegistryEntry<Blo
         double maxTemperature = blockTemp > 0 ? tempLimit : Double.POSITIVE_INFINITY;
         double minTemperature = blockTemp < 0 ? tempLimit : Double.NEGATIVE_INFINITY;
 
-        BlockRequirement blockRequirement = new BlockRequirement(blocks, blockPredicates, nbtRequirement, List.of(), Optional.empty());
+        BlockRequirement blockRequirement = new BlockRequirement(blocks, new NegatableList<>(blockPredicates), nbtRequirement, new NegatableList<>(), Optional.empty());
 
         return new BlockTempData(new NegatableList<>(blockRequirement), blockTemp, blockRange, maxEffect, true,
                                  new WorldTempRequirement(maxTemperature), new WorldTempRequirement(minTemperature),
