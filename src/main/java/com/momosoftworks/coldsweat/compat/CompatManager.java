@@ -4,14 +4,17 @@ import com.anthonyhilyard.iceberg.component.TitleBreakComponent;
 import com.mojang.datafixers.util.Either;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.core.init.FetchSeasonsModsEvent;
+import com.momosoftworks.coldsweat.api.event.core.registry.LoadRegistriesEvent;
 import com.momosoftworks.coldsweat.api.temperature.modifier.compat.SereneSeasonsTempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.compat.create.ColdSweatPonderPlugin;
+import com.momosoftworks.coldsweat.compat.curios.EquipableCurio;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.data.tag.ModInsulatorTags;
+import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.simibubi.create.AllDataComponents;
@@ -26,6 +29,9 @@ import dev.ghen.thirst.foundation.common.event.RegisterThirstValueEvent;
 import glitchcore.event.EventManager;
 import net.createmod.ponder.foundation.PonderIndex;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -47,7 +53,9 @@ import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import sereneseasons.api.season.SeasonChangedEvent;
 import sereneseasons.season.SeasonHooks;
+import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.CuriosCapability;
+import top.theillusivec4.curios.api.event.CurioAttributeModifierEvent;
 import top.theillusivec4.curios.api.event.CurioChangeEvent;
 
 import java.util.ArrayList;
@@ -419,6 +427,22 @@ public class CompatManager
                 public void onCurioChange(CurioChangeEvent event)
                 {
                     EntityTempManager.updateInsulationAttributeModifiers(event.getEntity(), event.getFrom(), event.getTo());
+                }
+            });
+
+            NeoForge.EVENT_BUS.register(new Object()
+            {
+                @SubscribeEvent
+                public void registerEquipableCurios(LoadRegistriesEvent.Pre event)
+                {
+                    BuiltInRegistries.ITEM.getTag(ModItemTags.EQUIPABLE_CURIOS).ifPresent(tag ->
+                    {
+                        for (Holder<Item> item : tag)
+                        {
+                            if (CuriosApi.getCurio(item.value().getDefaultInstance()).isPresent()) continue;
+                            CuriosApi.registerCurio(item.value(), new EquipableCurio());
+                        }
+                    });
                 }
             });
         }

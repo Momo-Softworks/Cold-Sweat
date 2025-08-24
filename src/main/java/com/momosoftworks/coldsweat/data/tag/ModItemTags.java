@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.data.tag;
 
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.compat.CompatManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
@@ -21,7 +22,17 @@ public class ModItemTags
     public static final TagKey<Item> ENCASES_SMOKESTACK = createTag("encases_smokestack");
     public static final TagKey<Item> GROWS_SOUL_STALK = createTag("grows_soul_stalk");
 
+    public static final TagKey<Item> EQUIPABLE_CURIOS = createNamespaceTag("curios", "equipable");
+
     private static TagKey<Item> createTag(String name)
     {   return ItemTags.create(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, name));
+    }
+
+    private static TagKey<Item> createNamespaceTag(String namespace, String name)
+    {
+        if (!CompatManager.modLoaded(namespace))
+        {   return null;
+        }
+        return ItemTags.create(ResourceLocation.fromNamespaceAndPath(namespace, name));
     }
 }
