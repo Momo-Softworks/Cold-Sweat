@@ -2,7 +2,6 @@ package com.momosoftworks.coldsweat.data.tag;
 
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.core.init.InitDynamicTagsEvent;
-import com.momosoftworks.coldsweat.compat.CompatManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
@@ -28,8 +27,6 @@ public class ModItemTags
 
     public static final TagKey<Item> FOOD = createForgeTag("food");
 
-    public static final TagKey<Item> EQUIPABLE_CURIOS = createNamespaceTag("curios", "equipable");
-
     @SubscribeEvent
     public static void initDynamicTags(InitDynamicTagsEvent event)
     {
@@ -42,13 +39,5 @@ public class ModItemTags
 
     private static TagKey<Item> createForgeTag(String name)
     {   return ItemTags.create(new ResourceLocation("forge", name));
-    }
-
-    private static TagKey<Item> createNamespaceTag(String namespace, String name)
-    {
-        if (!CompatManager.modLoaded(namespace))
-        {   return null;
-        }
-        return ItemTags.create(new ResourceLocation(namespace, name));
     }
 }
