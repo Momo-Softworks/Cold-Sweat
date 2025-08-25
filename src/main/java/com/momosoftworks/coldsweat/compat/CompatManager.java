@@ -5,6 +5,7 @@ import com.momosoftworks.coldsweat.api.event.core.init.FetchSeasonsModsEvent;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.compat.create.ColdSweatDisplayBehaviors;
+import com.momosoftworks.coldsweat.common.item.ThermometerItem;
 import com.momosoftworks.coldsweat.compat.curios.EquipableCurio;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.BlockInit;
@@ -392,13 +393,11 @@ public class CompatManager
                 public void registerEquipableCurios(AttachCapabilitiesEvent<ItemStack> event)
                 {
                     ItemStack item = event.getObject();
-                    if (item.is(ModItemTags.EQUIPABLE_CURIOS))
-                    {
-                        if (item.getCapability(CuriosCapability.ITEM) != null) return;
-                        EquipableCurio itemCurio = new EquipableCurio();
-                        ItemizedCurioCapability itemizedCapability = new ItemizedCurioCapability(itemCurio, item);
-                        event.addCapability(CuriosCapability.ID_ITEM, CurioItemCapability.createProvider(itemizedCapability));
-                    }
+                    if (!(item.getItem() instanceof ThermometerItem)) return;
+
+                    EquipableCurio itemCurio = new EquipableCurio();
+                    ItemizedCurioCapability itemizedCapability = new ItemizedCurioCapability(itemCurio, item);
+                    event.addCapability(CuriosCapability.ID_ITEM, CurioItemCapability.createProvider(itemizedCapability));
                 }
             });
         }
