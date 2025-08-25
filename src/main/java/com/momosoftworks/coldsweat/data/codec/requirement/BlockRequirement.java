@@ -24,22 +24,23 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
 
-public record BlockRequirement(NegatableList<Either<TagKey<Block>, Block>> blocks, NegatableList<StateRequirement> state,
-                               NbtRequirement nbt, NegatableList<Direction> sturdyFaces,
+public record BlockRequirement(NegatableList<Either<TagKey<Block>, Block>> blocks, StateRequirement state,
+                               NbtRequirement nbt, List<Direction> sturdyFaces,
                                Optional<Boolean> replaceable)
 {
-    public static final BlockRequirement NONE = new BlockRequirement(new NegatableList<>(), new NegatableList<>(), NbtRequirement.NONE, new NegatableList<>(),  Optional.empty());
+    public static final BlockRequirement NONE = new BlockRequirement(new NegatableList<>(), StateRequirement.NONE, NbtRequirement.NONE, List.of(),  Optional.empty());
 
     public static final Codec<BlockRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             NegatableList.listCodec(ConfigHelper.tagOrBuiltinCodec(Registry.BLOCK_REGISTRY, ForgeRegistries.BLOCKS)).optionalFieldOf("blocks", new NegatableList<>()).forGetter(predicate -> predicate.blocks),
-            NegatableList.codec(StateRequirement.CODEC).optionalFieldOf("state", new NegatableList<>()).forGetter(predicate -> predicate.state),
+            StateRequirement.CODEC.optionalFieldOf("state", StateRequirement.NONE).forGetter(predicate -> predicate.state),
             NbtRequirement.CODEC.optionalFieldOf("nbt", NbtRequirement.NONE).forGetter(predicate -> predicate.nbt),
-            NegatableList.listCodec(Direction.CODEC).optionalFieldOf("sturdy_faces", new NegatableList<>()).forGetter(predicate -> predicate.sturdyFaces),
+            Direction.CODEC.listOf().optionalFieldOf("sturdy_faces", List.of()).forGetter(predicate -> predicate.sturdyFaces),
             Codec.BOOL.optionalFieldOf("replaceable").forGetter(predicate -> predicate.replaceable)
     ).apply(instance, BlockRequirement::new));
 
     public BlockRequirement(List<Either<TagKey<Block>, Block>> blocks)
-    {   this(new NegatableList<>(blocks), new NegatableList<>(), NbtRequirement.NONE, new NegatableList<>(), Optional.empty());
+    {
+        this(new NegatableList<>(blocks), StateRequirement.NONE, NbtRequirement.NONE, List.of(), Optional.empty());
     }
 
     public boolean test(Level level, BlockPos pos, BlockState state)
@@ -49,7 +50,7 @@ public record BlockRequirement(NegatableList<Either<TagKey<Block>, Block>> block
         if (!this.blocks.test(either -> either.map(state::is, state::is)))
         {   return false;
         }
-        if (!this.state.test(req -> req.test(state)))
+        if (!this.state.test(state))
         {   return false;
         }
         if (!this.nbt.isEmpty())
@@ -59,7 +60,7 @@ public record BlockRequirement(NegatableList<Either<TagKey<Block>, Block>> block
             {   return false;
             }
         }
-        if (!this.sturdyFaces.isEmpty() && this.sturdyFaces.test(face -> state.isFaceSturdy(level, pos, face)))
+        if (!this.sturdyFaces.isEmpty() && this.sturdyFaces.stream().noneMatch(face -> state.isFaceSturdy(level, pos, face)))
         {   return false;
         }
         if (this.replaceable.isPresent() && !(state.isAir() || state.getMaterial().isReplaceable()))
