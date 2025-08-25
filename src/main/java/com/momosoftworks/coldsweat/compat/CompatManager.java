@@ -391,6 +391,15 @@ public class CompatManager
     {
         Player player = event.player;
         if (!CompatManager.isCreateLoaded()) return;
+
+        double worldTemp = Temperature.get(player, Temperature.Trait.WORLD);
+        double minTemp = Temperature.get(player, Temperature.Trait.FREEZING_POINT);
+        double maxTemp = Temperature.get(player, Temperature.Trait.BURNING_POINT);
+
+        if (CSMath.betweenExclusive(worldTemp, minTemp, maxTemp)) return;
+        if (worldTemp < minTemp && !ConfigSettings.COLD_DRAINS_BACKTANK.get()) return;
+        if (worldTemp > maxTemp && !ConfigSettings.HEAT_DRAINS_BACKTANK.get()) return;
+
         ItemStack backTank = player.getItemBySlot(EquipmentSlot.CHEST);
 
         if (USING_BACKTANK && player.level.isClientSide)
