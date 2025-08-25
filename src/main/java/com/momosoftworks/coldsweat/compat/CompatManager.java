@@ -6,9 +6,11 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.core.init.FetchSeasonsModsEvent;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.capability.handler.ShearableFurManager;
+import com.momosoftworks.coldsweat.common.item.ThermometerItem;
 import com.momosoftworks.coldsweat.compat.curios.EquipableCurio;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
+import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.simibubi.create.content.contraptions.fluids.pipes.EncasedPipeBlock;
 import com.simibubi.create.content.contraptions.fluids.pipes.FluidPipeBlock;
 import com.simibubi.create.content.contraptions.fluids.pipes.GlassFluidPipeBlock;
@@ -358,13 +360,12 @@ public class CompatManager
                 public void registerEquipableCurios(AttachCapabilitiesEvent<ItemStack> event)
                 {
                     ItemStack item = event.getObject();
-                    if (ModItemTags.EQUIPABLE_CURIOS.contains(item.getItem()))
-                    {
-                        if (item.getCapability(CuriosCapability.ITEM) != null) return;
-                        EquipableCurio itemCurio = new EquipableCurio();
-                        ItemizedCurioCapability itemizedCapability = new ItemizedCurioCapability(itemCurio, item);
-                        event.addCapability(CuriosCapability.ID_ITEM, CurioItemCapability.createProvider(itemizedCapability));
-                    }
+                    if (item.getItem() instanceof ThermometerItem) return;
+                    if (item.getCapability(CuriosCapability.ITEM) != null) return;
+
+                    EquipableCurio itemCurio = new EquipableCurio();
+                    ItemizedCurioCapability itemizedCapability = new ItemizedCurioCapability(itemCurio, item);
+                    event.addCapability(CuriosCapability.ID_ITEM, CurioItemCapability.createProvider(itemizedCapability));
                 }
             });
         }

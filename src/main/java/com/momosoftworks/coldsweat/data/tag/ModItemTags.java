@@ -22,17 +22,7 @@ public class ModItemTags
     public static final ITag.INamedTag<Item> ENCASES_SMOKESTACK = createTag("encases_smokestack");
     public static final ITag.INamedTag<Item> GROWS_SOUL_STALK = createTag("grows_soul_stalk");
 
-    public static final ITag.INamedTag<Item> EQUIPABLE_CURIOS = createNamespaceTag("curios", "equipable");
-
     private static ITag.INamedTag<Item> createTag(String name)
     {   return ItemTags.bind(new ResourceLocation(ColdSweat.MOD_ID, name).toString());
-    }
-
-    private static ITag.INamedTag<Item> createNamespaceTag(String namespace, String name)
-    {
-        if (!CompatManager.modLoaded(namespace))
-        {   return null;
-        }
-        return ItemTags.bind(new ResourceLocation(namespace, name).toString());
     }
 }

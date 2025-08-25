@@ -35,8 +35,7 @@ public class InventoryItemsTempModifier extends TempModifier
 
     @Override
     public void tick(LivingEntity entity)
-    {
-        effectsPerTrait.clear();
+    {       effectsPerTrait.clear();
 
         Map<ItemTempData, Double> effectsPerItemTemp = new HashMap<>();
 
