@@ -2,7 +2,7 @@ package com.momosoftworks.coldsweat.compat;
 
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.core.init.FetchSeasonsModsEvent;
-import com.momosoftworks.coldsweat.api.event.core.registry.LoadRegistriesEvent;
+import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.compat.create.ColdSweatDisplayBehaviors;
 import com.momosoftworks.coldsweat.compat.curios.EquipableCurio;
