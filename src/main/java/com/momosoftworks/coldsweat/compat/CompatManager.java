@@ -360,8 +360,7 @@ public class CompatManager
                 public void registerEquipableCurios(AttachCapabilitiesEvent<ItemStack> event)
                 {
                     ItemStack item = event.getObject();
-                    if (item.getItem() instanceof ThermometerItem) return;
-                    if (item.getCapability(CuriosCapability.ITEM) != null) return;
+                    if (!(item.getItem() instanceof ThermometerItem)) return;
 
                     EquipableCurio itemCurio = new EquipableCurio();
                     ItemizedCurioCapability itemizedCapability = new ItemizedCurioCapability(itemCurio, item);
