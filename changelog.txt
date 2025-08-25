@@ -3264,7 +3264,14 @@ Technical Changes:
 
 ------------------------------------------------------------------------------------------------------------------------
 2.4-b04b
-- Added UI element displaying food temperature effects
+* Added support for Ad Astra
+      - This is an updated and fixed port of Mars Popsicle by igalaxy
+* Added UI element displaying food temperature effects
+      - Shows a timer for the effect, and its strength
+      - Has settings for repositioning and toggling like other UI elements
+* When the player has multiple food effects, now only the strongest one will apply
+      - Example: if the player eats chicken (+5 heat), then steak (+10 heat), the steak will override the chicken until it expires
+      - Hot and cold effects are handled independently,
 - Added setting to hide non-essential information in tooltips, such as "Hold [Shift]" prompts
 
 Fixes:
@@ -3284,3 +3291,45 @@ Technical Changes:
       - AddRegistriesEvent: Fires right before Cold Sweat registers its registries to Minecraft's datapack system.
             - Use this event to make new registries. They will now be properly registered as Minecraft registries
       - LoadRegistriesEvent: Drop-in replacement for CreateRegistriesEvent. Has Pre/Post sub-classes that fire at the same stages of registry loading
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.4-b04c
+!! There are breaking changes to some configs in this update. See Technical Changes for details
+* Armor now drops its insulation upon breaking
+- Added option to give filled waterskins more than one use when drinking
+* Adjusted how the tooltip for filled waterskins is displayed:
+      - No longer shows water temperature in real-world units. This looks arbitrary when the player's body temperature ranges from -100 to 100
+      - Instead, shows a "When Used" tooltip showing the actual effect it has on your temperature (between -50 and 50 by default)
+- Increased the responsiveness of body temperature UI elements
+- The thermometer can now be equipped as a curio by right-clicking
+
+Fixes:
+* Fixed crash when creating or loading into a world in some cases
+* Fixed crash when placing some blocks near a hearth
+* (1.21) Fixed Cold Sweat brewing recipes not working
+- (1.21) Fixed visibility toggle options for UI elements appearing inverted
+- (1.21) Fixed KubeJS registry system not working
+- (1.21) Fixed on-screen water droplets not being lit correctly
+* Fixed drying items turning into air instead of the proper result item after first use
+- Fixed frozen hearts still regenerating
+- Fixed Create backtank draining all the time
+- Fixed "maxEffect" parameter not working for cold block temperatures in TOML configs
+
+Technical Changes:
+! Renamed all instances of "carried item temperature" to "item temperature". This includes:
+      - Java: ItemCarryTempData -> ItemTempData
+      - JSON: item/carried_temp -> item/item_temp
+      - KubeJS: addCarriedItemTemperature() -> addItemTemperature()
+      - TOML: "Carried Item Temperatures" -> "Item Temperatures"
+      * TOML configs will be RESET. Please back up TOML configs before updating
+      * JSON configs will not work until they are put in the new directory. No formatting changes are required
+! Formatting changes to numerical ranges in NBT
+      - Now separated by a colon (:) instead of a hyphen (-)
+            - This is to enable the use of negative numbers, which was previously not possible
+            - Example: {"Damage": "5-10"} -> {"Damage": "5:10"}
+      - Now support boundless ranges
+            - Example: {"Damage": "5:"} means 5 or more, {"Damage": ":10"} means 10 or less
+- Added "forge:has_hot_water" biome tag ("c:has_hot_water" in NeoForge)
+      - Water in these biomes will heat up the player, rather than cooling them down
+      - (1.21) the Hot Springs biome from Biomes O' Plenty is now part of this tag by default
