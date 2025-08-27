@@ -260,8 +260,8 @@ public class TooltipHandler
                 Slot hoveredSlot = menu.getSlotUnderMouse();
                 if (hoveredSlot == null) break container;
 
-                slotIndex = hoveredSlot.index;
-                equipmentSlot = EntityHelper.getEquipmentSlot(hoveredSlot.index);
+                slotIndex = hoveredSlot.getSlotIndex();
+                equipmentSlot = EntityHelper.getEquipmentSlot(slotIndex);
             }
 
             if (stack.isEmpty())

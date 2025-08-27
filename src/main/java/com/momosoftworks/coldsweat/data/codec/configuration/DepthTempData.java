@@ -46,7 +46,7 @@ public class DepthTempData extends ConfigData implements IForgeRegistryEntry<Dep
         this(temperatures, dimensions, new NegatableList<>());
     }
 
-    public static final Codec<DepthTempData> CODEC = createCodec(RecordCodecBuilder.create(instance -> instance.group(
+    public static final Codec<DepthTempData> CODEC = createCodec(RecordCodecBuilder.mapCodec(instance -> instance.group(
             TempRegion.CODEC.listOf().fieldOf("regions").forGetter(DepthTempData::temperatures),
             NegatableList.listCodec(ConfigHelper.tagOrHolderCodec(Registry.DIMENSION_TYPE_REGISTRY)).fieldOf("dimensions").forGetter(DepthTempData::dimensions)
     ).apply(instance, DepthTempData::new)));

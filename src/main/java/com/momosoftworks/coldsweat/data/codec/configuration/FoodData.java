@@ -46,7 +46,7 @@ public class FoodData extends ConfigData implements RequirementHolder, IForgeReg
         this(item, temperature, duration, entityRequirement, new NegatableList<>());
     }
 
-    public static final Codec<FoodData> CODEC = createCodec(RecordCodecBuilder.create(instance -> instance.group(
+    public static final Codec<FoodData> CODEC = createCodec(RecordCodecBuilder.mapCodec(instance -> instance.group(
             NegatableList.codec(ItemRequirement.CODEC).optionalFieldOf("item", new NegatableList<>()).forGetter(FoodData::item),
             Codec.DOUBLE.fieldOf("temperature").forGetter(FoodData::temperature),
             Codec.INT.optionalFieldOf("duration", 0).forGetter(FoodData::duration),

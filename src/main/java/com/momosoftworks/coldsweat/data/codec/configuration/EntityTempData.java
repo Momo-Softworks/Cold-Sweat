@@ -52,7 +52,7 @@ public class EntityTempData extends ConfigData implements RequirementHolder, IFo
         this(entity, temperature, range, units, affectedEntity, maxEffect, affectsSelf, new NegatableList<>());
     }
 
-    public static final Codec<EntityTempData> CODEC = createCodec(RecordCodecBuilder.create(instance -> instance.group(
+    public static final Codec<EntityTempData> CODEC = createCodec(RecordCodecBuilder.mapCodec(instance -> instance.group(
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(EntityTempData::entity),
             Codec.DOUBLE.fieldOf("temperature").forGetter(EntityTempData::temperature),
             Codec.DOUBLE.fieldOf("range").forGetter(EntityTempData::range),

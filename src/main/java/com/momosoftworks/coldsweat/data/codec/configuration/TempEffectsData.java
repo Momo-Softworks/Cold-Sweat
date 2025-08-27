@@ -33,7 +33,7 @@ public class TempEffectsData extends ConfigData implements RequirementHolder
     {   this(entity, effects, new NegatableList<>());
     }
 
-    public static final Codec<TempEffectsData> CODEC = createCodec(RecordCodecBuilder.create(instance -> instance.group(
+    public static final Codec<TempEffectsData> CODEC = createCodec(RecordCodecBuilder.mapCodec(instance -> instance.group(
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(TempEffectsData::entity),
             TempEffectHolder.CODEC.listOf().optionalFieldOf("effects", List.of()).forGetter(TempEffectsData::effects)
     ).apply(instance, TempEffectsData::new)));
