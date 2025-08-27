@@ -74,14 +74,6 @@ public class InsulationItemsGroup extends CreativeModeTab
         InsulatorTabBuildEvent event = new InsulatorTabBuildEvent(list);
         MinecraftForge.EVENT_BUS.post(event);
 
-        return event.getItems().stream().map(entry ->
-        {
-            ItemStack stack = new ItemStack(entry.getKey());
-            CompoundTag nbt = entry.getValue().item().flatMap(it -> it.nbt().tag(), CompoundTag::merge, (a, b) -> {}).orElse(new CompoundTag());
-            if (!nbt.isEmpty())
-            {   stack.getOrCreateTag().merge(nbt);
-            }
-            return stack;
-        }).toList();
+        return event.getItems().stream().map(entry -> new ItemStack(entry.getKey())).toList();
     }
 }
