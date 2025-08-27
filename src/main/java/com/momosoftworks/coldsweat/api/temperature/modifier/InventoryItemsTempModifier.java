@@ -65,7 +65,7 @@ public class InventoryItemsTempModifier extends TempModifier
                     Item item = stack.getItem();
                     ConfigSettings.ITEM_TEMPERATURES.get().get(item).forEach(
                     itemData ->
-                    {   checkAndAddItemTemp(entity, stack, slot.index, null, itemData, effectsPerItemTemp);
+                    {   checkAndAddItemTemp(entity, stack, slot.getSlotIndex(), null, itemData, effectsPerItemTemp);
                     });
                 }
             }
