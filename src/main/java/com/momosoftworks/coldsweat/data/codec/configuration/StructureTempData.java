@@ -43,7 +43,7 @@ public class StructureTempData extends ConfigData
         this(new NegatableList<>(structure), temperature, units, isOffset);
     }
 
-    public static final Codec<StructureTempData> CODEC = createCodec(RecordCodecBuilder.create(instance -> instance.group(
+    public static final Codec<StructureTempData> CODEC = createCodec(RecordCodecBuilder.mapCodec(instance -> instance.group(
             NegatableList.listCodec(ConfigHelper.dynamicCodec(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY)).fieldOf("structures").forGetter(StructureTempData::structures),
             Codec.DOUBLE.fieldOf("temperature").forGetter(StructureTempData::temperature),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(StructureTempData::units),

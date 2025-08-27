@@ -59,7 +59,7 @@ public class SpawnBiomeData extends ConfigData
              category, weight, count, location);
     }
 
-    public static final Codec<SpawnBiomeData> CODEC = createCodec(RecordCodecBuilder.create(instance -> instance.group(
+    public static final Codec<SpawnBiomeData> CODEC = createCodec(RecordCodecBuilder.mapCodec(instance -> instance.group(
             NegatableList.listCodec(ConfigHelper.dynamicCodec(Registry.BIOME_REGISTRY)).fieldOf("biomes").forGetter(SpawnBiomeData::biomes),
             NegatableList.listCodec(ConfigHelper.tagOrBuiltinCodec(Registry.ENTITY_TYPE_REGISTRY, Registry.ENTITY_TYPE)).fieldOf("entities").forGetter(SpawnBiomeData::entities),
             EntityClassification.CODEC.fieldOf("category").forGetter(SpawnBiomeData::category),

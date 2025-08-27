@@ -42,7 +42,7 @@ public class DimensionTempData extends ConfigData
     {   this(new NegatableList<>(dimension), temperature, units, isOffset);
     }
 
-    public static final Codec<DimensionTempData> CODEC = createCodec(RecordCodecBuilder.create(instance -> instance.group(
+    public static final Codec<DimensionTempData> CODEC = createCodec(RecordCodecBuilder.mapCodec(instance -> instance.group(
             NegatableList.listCodec(ConfigHelper.dynamicCodec(Registry.DIMENSION_TYPE_REGISTRY)).fieldOf("dimensions").forGetter(DimensionTempData::dimensions),
             Codec.DOUBLE.fieldOf("temperature").forGetter(DimensionTempData::temperature),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(DimensionTempData::units),

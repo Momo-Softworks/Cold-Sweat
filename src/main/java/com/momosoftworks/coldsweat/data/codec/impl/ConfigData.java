@@ -1,11 +1,7 @@
 package com.momosoftworks.coldsweat.data.codec.impl;
 
 import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.DynamicOps;
-import com.mojang.serialization.JsonOps;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.mojang.serialization.*;
 import com.momosoftworks.coldsweat.api.annotation.Internal;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
@@ -18,6 +14,7 @@ import net.minecraft.util.ResourceLocation;
 import java.util.Optional;
 import javax.annotation.Nullable;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 public abstract class ConfigData implements NbtSerializable
 {
@@ -26,11 +23,9 @@ public abstract class ConfigData implements NbtSerializable
     protected NegatableList<String> requiredMods;
     protected ResourceLocation registryId;
 
-    protected static final Codec<Dummy> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            NegatableList.listCodec(Codec.STRING).optionalFieldOf("required_mods", new NegatableList<>()).forGetter(ConfigData::requiredMods),
-            Type.CODEC.optionalFieldOf("config_type", Type.JSON).forGetter(ConfigData::registryType),
-            Codec.STRING.xmap(UUID::fromString, UUID::toString).optionalFieldOf("id", UUID.randomUUID()).forGetter(ConfigData::uuid)
-    ).apply(instance, Dummy::new));
+    protected static final Codec<NegatableList<String>> REQUIRED_MODS_CODEC = NegatableList.listCodec(Codec.STRING);
+    protected static final Codec<UUID> UUID_CODEC = Codec.STRING.xmap(UUID::fromString, UUID::toString);
+    protected static final Codec<Type> TYPE_CODEC = Type.CODEC;
 
     public ConfigData(NegatableList<String> requiredMods, Type configType, UUID id)
     {   this.requiredMods = requiredMods;
@@ -44,33 +39,41 @@ public abstract class ConfigData implements NbtSerializable
 
     public abstract Codec<? extends ConfigData> getCodec();
 
-    protected static <T extends ConfigData> Codec<T> createCodec(Codec<T> child)
+    protected static <T extends ConfigData> Codec<T> createCodec(MapCodec<T> child)
     {
-        return new Codec<T>()
+        return new MapCodec<T>()
         {
             @Override
-            public <T1> DataResult<Pair<T, T1>> decode(DynamicOps<T1> ops, T1 input)
+            public <O> RecordBuilder<O> encode(T input, DynamicOps<O> ops, RecordBuilder<O> prefix)
             {
-                return child.decode(ops, input).map(pair ->
+                return child.encode(input, ops, prefix)
+                        .add("required_mods", input.requiredMods(), REQUIRED_MODS_CODEC)
+                        .add("config_type", input.registryType(), TYPE_CODEC)
+                        .add("id", input.uuid(), UUID_CODEC);
+            }
+
+            @Override
+            public <O> DataResult<T> decode(DynamicOps<O> ops, MapLike<O> input)
+            {
+                return child.decode(ops, input).flatMap(instance ->
                 {
-                    T data = pair.getFirst();
-                    CODEC.decode(ops, input).result().map(Pair::getFirst).ifPresent(dummy ->
-                    {
-                        data.requiredMods = dummy.requiredMods();
-                        data.id = dummy.uuid();
-                        data.registryType = dummy.registryType();
-                    });
-                    return Pair.of(data, input);
+                    instance.requiredMods = decodeFromMap("required_mods", ops, input, REQUIRED_MODS_CODEC, new NegatableList<>());
+                    instance.registryType = decodeFromMap("config_type", ops, input, TYPE_CODEC, Type.JSON);
+                    instance.id = decodeFromMap("id", ops, input, UUID_CODEC, null);
+                    return DataResult.success(instance);
                 });
             }
 
             @Override
-            public <T1> DataResult<T1> encode(T input, DynamicOps<T1> ops, T1 prefix)
-            {
-                Dummy dummy = new Dummy(input.requiredMods(), input.registryType(), input.uuid());
-                return child.encode(input, ops, CODEC.encodeStart(ops, dummy).result().orElse(ops.empty()));
+            public <O> Stream<O> keys(DynamicOps<O> ops)
+            {   return Stream.of("required_mods", "config_type", "id").map(ops::createString);
             }
-        };
+        }.codec();
+    }
+
+    private static <T, O> T decodeFromMap(String key, DynamicOps<O> ops, MapLike<O> input, Codec<T> codec, T defaultValue)
+    {
+        return codec.decode(ops, input.get(key)).result().map(Pair::getFirst).orElse(defaultValue);
     }
 
     public UUID uuid()
@@ -157,18 +160,6 @@ public abstract class ConfigData implements NbtSerializable
                     return type;
             }
             return null;
-        }
-    }
-
-    protected static class Dummy extends ConfigData
-    {
-        public Dummy(NegatableList<String> requiredMods, Type configType, UUID id)
-        {   super(requiredMods, configType, id);
-        }
-
-        @Override
-        public Codec<? extends ConfigData> getCodec()
-        {   return CODEC;
         }
     }
 }
