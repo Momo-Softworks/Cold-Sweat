@@ -37,6 +37,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.*;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.util.StringUtil;
@@ -80,7 +82,12 @@ public class TooltipHandler
     public static HashMap<UUID, Boolean> HOVERED_STACK_PREDICATES = new HashMap<>();
 
     public static <T extends ConfigData> boolean passesRequirement(T element)
-    {   return HOVERED_STACK_PREDICATES.getOrDefault(element.uuid(), true);
+    {   boolean passes = HOVERED_STACK_PREDICATES.getOrDefault(element.uuid(), true);
+        if (element instanceof InsulatorData data)
+        {
+            //System.out.println(InsulatorData.CODEC.encode(data, NbtOps.INSTANCE, NbtOps.INSTANCE.empty()).toString());
+        }
+        return passes;
     }
 
     public static boolean isShiftDown()
@@ -270,8 +277,8 @@ public class TooltipHandler
                 Slot hoveredSlot = menu.getSlotUnderMouse();
                 if (hoveredSlot == null) break container;
 
-                slotIndex = hoveredSlot.index;
-                equipmentSlot = EntityHelper.getEquipmentSlot(hoveredSlot.index);
+                slotIndex = hoveredSlot.getSlotIndex();
+                equipmentSlot = EntityHelper.getEquipmentSlot(slotIndex);
             }
 
             if (stack.isEmpty())

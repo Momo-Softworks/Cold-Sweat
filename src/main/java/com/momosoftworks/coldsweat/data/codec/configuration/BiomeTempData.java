@@ -49,7 +49,7 @@ public class BiomeTempData extends ConfigData
     {   this(new NegatableList<>(Either.right(biome)), min, max, units, isOffset, isDisabled);
     }
 
-    public static final Codec<BiomeTempData> CODEC = createCodec(RecordCodecBuilder.create(instance -> instance.group(
+    public static final Codec<BiomeTempData> CODEC = createCodec(RecordCodecBuilder.mapCodec(instance -> instance.group(
             NegatableList.listCodec(ConfigHelper.tagOrHolderCodec(Registries.BIOME)).fieldOf("biomes").forGetter(BiomeTempData::biomes),
             Codec.mapEither(Codec.DOUBLE.optionalFieldOf("temperature", 0d),
                             Codec.DOUBLE.optionalFieldOf("min_temp", 0d))
