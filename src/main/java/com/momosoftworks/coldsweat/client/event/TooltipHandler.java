@@ -248,32 +248,37 @@ public class TooltipHandler
         return component;
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void updateHoveredItem(ScreenEvent.Render.Pre event)
+    @SubscribeEvent
+    public static void updateHoveredItem(RenderTooltipEvent.Pre event)
     {
-        if (event.getScreen() instanceof AbstractContainerScreen<?> menu)
+        ItemStack stack = event.getItemStack();
+
+        if (!HOVERED_STACK.equals(stack))
         {
-            Slot hoveredSlot = menu.getSlotUnderMouse();
-            if (hoveredSlot == null) return;
+            int slotIndex = -1;
+            EquipmentSlot equipmentSlot = null;
 
-            ItemStack stack = hoveredSlot.getItem();
-
-            EquipmentSlot equipmentSlot = EntityHelper.getEquipmentSlot(hoveredSlot.index);
-            if (!HOVERED_STACK.equals(stack))
+            // If open screen is a container, get equipment slot and slot index
+            container:
+            if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> menu)
             {
-                if (stack.isEmpty())
-                {   HOVERED_STACK = stack;
-                }
-                else
+                Slot hoveredSlot = menu.getSlotUnderMouse();
+                if (hoveredSlot == null) break container;
+
+                slotIndex = hoveredSlot.index;
+                equipmentSlot = EntityHelper.getEquipmentSlot(hoveredSlot.index);
+            }
+
+            if (stack.isEmpty())
+            {   HOVERED_STACK = stack;
+            }
+            else
+            {
+                if (HOVERED_ITEM_UPDATE_COOLDOWN <= 0)
                 {
-                    List<InsulatorData> insulators = ItemInsulationManager.getAllInsulatorsForStack(stack);
-                    if (!insulators.isEmpty()
-                    && (HOVERED_ITEM_UPDATE_COOLDOWN <= 0 || insulators.stream().anyMatch(insulator -> !HOVERED_STACK_PREDICATES.containsKey(insulator.uuid()))))
-                    {
-                        HOVERED_STACK = stack;
-                        HOVERED_ITEM_UPDATE_COOLDOWN = 5;
-                        ColdSweatPacketHandler.INSTANCE.sendToServer(SyncItemPredicatesMessage.fromClient(stack.copy(), hoveredSlot.index, equipmentSlot));
-                    }
+                    HOVERED_STACK = stack;
+                    HOVERED_ITEM_UPDATE_COOLDOWN = 5;
+                    ColdSweatPacketHandler.INSTANCE.sendToServer(SyncItemPredicatesMessage.fromClient(stack.copy(), slotIndex, equipmentSlot));
                 }
             }
         }
