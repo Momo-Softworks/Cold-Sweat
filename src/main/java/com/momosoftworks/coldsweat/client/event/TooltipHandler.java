@@ -82,12 +82,7 @@ public class TooltipHandler
     public static HashMap<UUID, Boolean> HOVERED_STACK_PREDICATES = new HashMap<>();
 
     public static <T extends ConfigData> boolean passesRequirement(T element)
-    {   boolean passes = HOVERED_STACK_PREDICATES.getOrDefault(element.uuid(), true);
-        if (element instanceof InsulatorData data)
-        {
-            //System.out.println(InsulatorData.CODEC.encode(data, NbtOps.INSTANCE, NbtOps.INSTANCE.empty()).toString());
-        }
-        return passes;
+    {   return HOVERED_STACK_PREDICATES.getOrDefault(element.uuid(), true);
     }
 
     public static boolean isShiftDown()
