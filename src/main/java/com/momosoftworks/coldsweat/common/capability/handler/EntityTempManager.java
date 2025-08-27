@@ -313,7 +313,9 @@ public class EntityTempManager
                 {
                     TempModifier modifier = modifiers.get(i);
                     // Tick modifier
-                    modifier.tick(entity);
+                    if (modifier.getTicksExisted() % modifier.getTickRate() == 0)
+                    {   modifier.tick(entity);
+                    }
                     // Sync if the modifier is dirty
                     if (modifier.isDirty())
                     {   sync.set(true);
