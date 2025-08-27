@@ -79,7 +79,7 @@ public class BlockTempData extends ConfigData
              new NegatableList<>(), new NegatableList<>(), blockTemp.logarithmic(), Optional.empty());
     }
 
-    public static final Codec<BlockTempData> CODEC = createCodec(RecordCodecBuilder.create(instance -> instance.group(
+    public static final Codec<BlockTempData> CODEC = createCodec(RecordCodecBuilder.mapCodec(instance -> instance.group(
             NegatableList.codec(BlockRequirement.CODEC).fieldOf("block").forGetter(BlockTempData::block),
             Codec.DOUBLE.fieldOf("temperature").forGetter(BlockTempData::temperature),
             Codec.DOUBLE.optionalFieldOf("range", Double.POSITIVE_INFINITY).forGetter(BlockTempData::range),

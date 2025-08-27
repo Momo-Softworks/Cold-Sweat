@@ -66,7 +66,7 @@ public class InsulatorData extends ConfigData implements RequirementHolder
                                        right -> right.isEmpty() ? List.of() : List.of(right)),
                   list -> list.size() == 1 ? Either.right(list.get(0)) : Either.left(list));
 
-    public static final Codec<InsulatorData> CODEC = createCodec(RecordCodecBuilder.create(instance -> instance.group(
+    public static final Codec<InsulatorData> CODEC = createCodec(RecordCodecBuilder.mapCodec(instance -> instance.group(
             NegatableList.codec(ItemRequirement.CODEC).optionalFieldOf("item", new NegatableList<>()).forGetter(InsulatorData::item),
             Insulation.Slot.CODEC.fieldOf("type").forGetter(InsulatorData::slot),
             INSULATION_CODEC.fieldOf("insulation").forGetter(InsulatorData::insulation),
