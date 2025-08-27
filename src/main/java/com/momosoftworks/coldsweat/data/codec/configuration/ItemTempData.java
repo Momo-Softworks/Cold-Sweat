@@ -64,7 +64,7 @@ public class ItemTempData extends ConfigData implements RequirementHolder
         this(item, slots, temperature, trait, maxEffect, entityRequirement, attributeModifiers, immuneTempModifiers, new NegatableList<>());
     }
 
-    public static final Codec<ItemTempData> CODEC = createCodec(RecordCodecBuilder.create(instance -> instance.group(
+    public static final Codec<ItemTempData> CODEC = createCodec(RecordCodecBuilder.mapCodec(instance -> instance.group(
             NegatableList.codec(ItemRequirement.CODEC).optionalFieldOf("item", new NegatableList<>()).forGetter(ItemTempData::item),
             Codec.either(IntegerBounds.CODEC, SlotType.CODEC).listOf().fieldOf("slots").forGetter(ItemTempData::slots),
             Codec.DOUBLE.fieldOf("temperature").forGetter(ItemTempData::temperature),

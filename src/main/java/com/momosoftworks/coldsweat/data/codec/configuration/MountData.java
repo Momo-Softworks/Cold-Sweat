@@ -44,7 +44,7 @@ public class MountData extends ConfigData implements RequirementHolder
         this(entity, rider, coldInsulation, heatInsulation, modifierImmunities, new NegatableList<>());
     }
 
-    public static Codec<MountData> CODEC = createCodec(RecordCodecBuilder.create(instance -> instance.group(
+    public static Codec<MountData> CODEC = createCodec(RecordCodecBuilder.mapCodec(instance -> instance.group(
             NegatableList.codec(EntityRequirement.getCodec()).fieldOf("entity").forGetter(MountData::entity),
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("rider", new NegatableList<>()).forGetter(MountData::rider),
             Codec.DOUBLE.optionalFieldOf("cold_insulation", 0d).forGetter(MountData::coldInsulation),

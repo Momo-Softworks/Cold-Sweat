@@ -69,10 +69,10 @@ public class MixinTagLoading
         String[] components = directory.split("/");
         ResourceLocation registry;
         if (ModList.get().getModFileById(components[0]) != null)
-        {   registry = ResourceLocation.fromNamespaceAndPath(components[0], directory.substring(directory.indexOf("/") + 1));
+        {   registry = new ResourceLocation(components[0], directory.substring(directory.indexOf("/") + 1));
         }
         else
-        {   registry = ResourceLocation.withDefaultNamespace(directory);
+        {   registry = new ResourceLocation(directory);
         }
         ResourceLocation tag = CURRENT_TAG;
         Collection<T> values = (Collection<T>) TagHelper.getTagValues(registry, tag);
