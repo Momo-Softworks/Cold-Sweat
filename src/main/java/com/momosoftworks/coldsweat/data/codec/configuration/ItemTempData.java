@@ -102,7 +102,7 @@ public class ItemTempData extends ConfigData implements RequirementHolder
     {   return entityRequirement.test(rq -> rq.test(entity));
     }
 
-    public boolean test(Entity entity, ItemStack stack, @Nullable Integer slot, @Nullable EquipmentSlotType equipmentSlot)
+    public boolean test(Entity entity, ItemStack stack, int slot, @Nullable EquipmentSlotType equipmentSlot)
     {   return test(stack, slot, equipmentSlot) && test(entity);
     }
 
@@ -121,26 +121,26 @@ public class ItemTempData extends ConfigData implements RequirementHolder
         return false;
     }
 
-    public boolean test(ItemStack stack, @Nullable Integer slot, @Nullable EquipmentSlotType equipmentSlot)
+    public boolean test(ItemStack stack, int slot, @Nullable EquipmentSlotType equipmentSlot)
     {
         if (!item.test(rq -> rq.test(stack, true)))
         {   return false;
         }
-        if (slot == null && equipmentSlot == null)
-        {   return false;
+        if (slot == -1 && equipmentSlot == null)
+        {   return true;
         }
         for (Either<IntegerBounds, SlotType> either : slots)
         {
             if (either.left().isPresent())
             {
-                if (slot != null && either.left().get().test(slot))
+                if (slot != -1 && either.left().get().test(slot))
                 {   return true;
                 }
             }
             else if (either.right().isPresent())
             {
                 if (equipmentSlot != null && either.right().get().matches(equipmentSlot)
-                || slot != null && either.right().get().matches(slot))
+                || slot != -1 && either.right().get().matches(slot))
                 {   return true;
                 }
             }
