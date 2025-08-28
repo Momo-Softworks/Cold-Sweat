@@ -217,7 +217,7 @@ public class ItemTempData extends ConfigData implements RequirementHolder
         LEGS("legs", Arrays.asList(Either.right(EquipmentSlotType.LEGS))),
         FEET("feet", Arrays.asList(Either.right(EquipmentSlotType.FEET))),
         INVENTORY("inventory", Arrays.asList(Either.left(IntegerBounds.NONE))),
-        HOTBAR("hotbar", Arrays.asList(Either.left(new IntegerBounds(36, 44)))),
+        HOTBAR("hotbar", Arrays.asList(Either.left(new IntegerBounds(0, 8)))),
         CURIO("curio", Arrays.asList()),
         HAND("hand", Arrays.asList(Either.right(EquipmentSlotType.MAINHAND), Either.right(EquipmentSlotType.OFFHAND)));
 
