@@ -3299,6 +3299,7 @@ Fixes:
 * Fixed drying items turning into air instead of the proper result item after first use
 - Fixed frozen hearts still regenerating
 - Fixed Create backtank draining all the time
+- Fixed potential inconsistencies in config synchronization between servers and clients
 - Fixed "maxEffect" parameter not working for cold block temperatures in TOML configs
 
 Technical Changes:
@@ -3318,3 +3319,11 @@ Technical Changes:
 - Added "forge:has_hot_water" biome tag ("c:has_hot_water" in NeoForge)
       - Water in these biomes will heat up the player, rather than cooling them down
       - (1.21) the Hot Springs biome from Biomes O' Plenty is now part of this tag by default
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.4-b04d
+
+Fixes:
+* Fixed potential crash due to duplicate registries
+* Fixed crash when carrying temperature-affecting items
