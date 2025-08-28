@@ -106,7 +106,7 @@ public class WetnessRenderer
             {
                 Droplet newDrop = createDrop(screenWidth);
                 newDrop.yMotion = getRandomVelocity(frametime) / 2 + 0.3f;
-                newDrop.position.y = (float) (Math.sin(i*2 + player.tickCount) / 2 + 0.5) * screenHeight; // arbitrary wave pattern for particle placement
+                newDrop.position.y = (float) (Math.sin(i*4+player.tickCount) / 2 + 0.5) * screenHeight; // arbitrary wave pattern for particle placement
                 newDrop.position.x = (float) (i/10.0) * screenWidth; // even distribution on x axis
                 WATER_DROPS.add(newDrop);
                 int streakLength = (int) (Math.random() * 5) + 5;
@@ -284,7 +284,7 @@ public class WetnessRenderer
         int size = dropSize.getRandom();
         // Ensure balance of droplets on each side
         Droplet.Side side = Math.random() < 0.5 ? Droplet.Side.LEFT : Droplet.Side.RIGHT;
-        if (getDropletsOnSide(side) >= getDropletsOnSide(side.opposite()))
+        if (getDropletsOnSide(side) > getDropletsOnSide(side.opposite()))
         {   side = side.opposite();
         }
         // Set x position
