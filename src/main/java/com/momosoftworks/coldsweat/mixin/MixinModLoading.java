@@ -22,7 +22,7 @@ public class MixinModLoading
     @Mixin(Minecraft.class)
     public static class onClient
     {
-        @Inject(method = "lambda$new$1(Ljava/lang/String;I)V", at = @At("TAIL"), remap = false)
+        @Inject(method = "<init>", at = @At("RETURN"))
         private void beforeClientStart(CallbackInfo ci)
         {   ConfigLoadingHandler.initRegistries();
         }
