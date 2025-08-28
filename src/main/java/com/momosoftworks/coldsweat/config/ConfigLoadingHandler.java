@@ -104,11 +104,18 @@ public class ConfigLoadingHandler
         }
     }
 
+    private static boolean REGISTRIES_INITIALIZED = false;
     @Internal
     public static void initRegistries()
     {
+        if (REGISTRIES_INITIALIZED) return;
+
+        ColdSweat.LOGGER.info("Gathering Cold Sweat registries");
+        // Gather modded registries
         AddRegistriesEvent addRegistriesEvent = new AddRegistriesEvent();
         MinecraftForge.EVENT_BUS.post(addRegistriesEvent);
+
+        REGISTRIES_INITIALIZED = true;
     }
 
     /**
