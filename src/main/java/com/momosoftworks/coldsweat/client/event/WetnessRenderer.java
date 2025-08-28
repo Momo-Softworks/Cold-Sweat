@@ -42,6 +42,7 @@ public class WetnessRenderer
     private static boolean WAS_SUBMERGED = false;
     private static int LEFT_DROPLETS = 0;
     private static int RIGHT_DROPLETS = 0;
+    private static final int MAX_DROPLETS = 5;
 
     @SubscribeEvent
     public static void updateSkyBrightness(TickEvent.ClientTickEvent event)
@@ -106,7 +107,8 @@ public class WetnessRenderer
             {
                 Droplet newDrop = createDrop(screenWidth);
                 newDrop.yMotion = getRandomVelocity(frametime) / 2 + 0.3f;
-                newDrop.position.y = (float) Math.random() * screenHeight;
+                newDrop.position.y = (float) (Math.sin(i*2 + player.tickCount) / 2 + 0.5) * screenHeight; // arbitrary wave pattern for particle placement
+                newDrop.position.x = (float) (i/10.0) * screenWidth; // even distribution on x axis
                 WATER_DROPS.add(newDrop);
                 int streakLength = (int) (Math.random() * 5) + 5;
                 int x = (int)newDrop.position.x;
@@ -123,7 +125,7 @@ public class WetnessRenderer
 
         // Spawn droplets randomly when the player is wet
         if (!paused && !isSubmerged && wetness > 0.01f && ((float) Math.random() * 0.05) < 0.0015f * wetness * (frametime * 2)
-                && WATER_DROPS.size() < 5)
+        && WATER_DROPS.size() < MAX_DROPLETS)
         {
             WATER_DROPS.add(createDrop(screenWidth));
         }
@@ -276,7 +278,7 @@ public class WetnessRenderer
         int size = dropSize.getRandom();
         // Ensure balance of droplets on each side
         Droplet.Side side = Math.random() < 0.5 ? Droplet.Side.LEFT : Droplet.Side.RIGHT;
-        if (getDropletsOnSide(side) >= 3)
+        if (getDropletsOnSide(side) >= MAX_DROPLETS / 2.0)
         {   side = side.opposite();
         }
         // Set x position
