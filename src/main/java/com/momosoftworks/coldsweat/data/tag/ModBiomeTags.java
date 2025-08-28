@@ -11,10 +11,10 @@ public class ModBiomeTags
     public static final TagKey<Biome> HAS_HOT_WATER = createForgeTag("has_hot_water");
 
     private static TagKey<Biome> createTag(String name)
-    {   return TagKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, name));
+    {   return TagKey.create(Registries.BIOME, new ResourceLocation(ColdSweat.MOD_ID, name));
     }
 
     private static TagKey<Biome> createForgeTag(String name)
-    {   return TagKey.create(Registries.BIOME, ResourceLocation.fromNamespaceAndPath("forge", name));
+    {   return TagKey.create(Registries.BIOME, new ResourceLocation("forge", name));
     }
 }
