@@ -50,7 +50,7 @@ public class InventoryItemsTempModifier extends TempModifier
                 Item item = stack.getItem();
                 ConfigSettings.ITEM_TEMPERATURES.get().get(item).forEach(
                 itemData ->
-                {   checkAndAddItemTemp(entity, stack, null, slot, itemData, effectsPerItemTemp);
+                {   checkAndAddItemTemp(entity, stack, -1, slot, itemData, effectsPerItemTemp);
                 });
             }
         }
@@ -81,7 +81,7 @@ public class InventoryItemsTempModifier extends TempModifier
         }
     }
 
-    private static void checkAndAddItemTemp(LivingEntity entity, ItemStack stack, Integer slot, EquipmentSlot equipmentSlot,
+    private static void checkAndAddItemTemp(LivingEntity entity, ItemStack stack, int slot, EquipmentSlot equipmentSlot,
                                             ItemTempData itemData, Map<ItemTempData, Double> effectsPerItemTemp)
     {
         if (itemData.test(entity, stack, slot, equipmentSlot))
