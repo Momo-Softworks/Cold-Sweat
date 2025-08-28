@@ -22,7 +22,7 @@ public class MixinModLoading
     @Mixin(Minecraft.class)
     public static class onClient
     {
-        @Inject(method = "onGameLoadFinished(Lnet/minecraft/client/Minecraft$GameLoadCookie;)V", at = @At("TAIL"))
+        @Inject(method = "<init>", at = @At("RETURN"))
         private void beforeClientStart(CallbackInfo ci)
         {   ConfigLoadingHandler.initRegistries();
         }
