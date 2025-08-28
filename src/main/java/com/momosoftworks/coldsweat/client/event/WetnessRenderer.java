@@ -316,9 +316,9 @@ public class WetnessRenderer
                                          int width, int height, float u, float v, float uWidth, float vHeight,
                                          float alpha, int lightLevel, int waterColor)
     {
-        float red = 1-FastColor.ARGB32.red(waterColor);
-        float green = 1-FastColor.ARGB32.green(waterColor);
-        float blue = 1-FastColor.ARGB32.blue(waterColor);
+        float red = (waterColor >> 16 & 255)/255f;
+        float green = (waterColor >> 8 & 255)/255f;
+        float blue = (waterColor & 255)/255f;
         Matrix4f lastPose = poseStack.last().pose();
         buffer.vertex(lastPose, x, y, 0).uv(u, v).color(red, green, blue, alpha).uv2(lightLevel).endVertex();
         buffer.vertex(lastPose, x, y + height, 0).uv(u, v + vHeight).color(red, green, blue, alpha).uv2(lightLevel).endVertex();

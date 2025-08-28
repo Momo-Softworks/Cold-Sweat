@@ -41,8 +41,7 @@ public class WaterTempModifier extends TempModifier
     @Override
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
-        Holder<Biome> biome = entity.level().getBiome(entity.blockPosition());
-        boolean isWarm = biome.is(ModBiomeTags.HAS_HOT_WATER);
+        boolean isWarm = this.getTemperature() >= 0 && entity.level().getBiome(entity.blockPosition()).is(ModBiomeTags.HAS_HOT_WATER);
         double worldTemp = Temperature.get(entity, Temperature.Trait.WORLD);
         double minWorldTemp = ConfigSettings.MIN_TEMP.get();
         double maxWorldTemp = ConfigSettings.MAX_TEMP.get();
@@ -51,19 +50,20 @@ public class WaterTempModifier extends TempModifier
         double temperature = this.getTemperature();
         double addAmount = WorldHelper.isInWater(entity) ? WATER_SOAK_SPEED // In water
                          : WorldHelper.isRainingAt(entity.level(), entity.blockPosition()) ? RAIN_SOAK_SPEED // In rain
-                         : -CSMath.blendExp(configDrySpeed, configDrySpeed * 10, worldTemp, minWorldTemp, maxWorldTemp, 100); // Drying off
+                         : 0;
+        double dryAmount = CSMath.blendExp(configDrySpeed, configDrySpeed * 10, worldTemp, minWorldTemp, maxWorldTemp, 100);
         double maxTemp = this.getMaxTemperature(entity);
 
-        double newTemperature = isWarm ? CSMath.clamp(temperature + addAmount, 0d, maxTemp)
-                                       : CSMath.clamp(temperature - addAmount, -maxTemp, 0d);
+        // Expire if effect is nullified
+        if (CSMath.sign(temperature + dryAmount) != CSMath.sign(temperature))
+        {   this.expires(0);
+        }
+
+        double newTemperature = isWarm ? Math.min(temperature + addAmount - dryAmount, maxTemp)
+                                       : Math.max(temperature - addAmount + dryAmount, -maxTemp);
         this.getNBT().putDouble("Temperature", newTemperature);
         if (temperature != newTemperature)
         {   this.markDirty();
-        }
-
-        // If the strength is 0, this TempModifier expires
-        if (temperature == 0.0)
-        {   this.expires(0);
         }
 
         return temp -> temp + newTemperature;
