@@ -10,10 +10,12 @@ import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
@@ -70,7 +72,7 @@ public class WetnessRenderer
         Player player = mc.player;
         if (player == null) return;
 
-        BlockPos playerPos = player.blockPosition();
+        BlockPos playerPos = BlockPos.containing(player.getEyePosition());
         float playerYVelocity = (float) (player.position().y - player.yOld);
         boolean isSubmerged = player.getEyeInFluidType() == Fluids.WATER.getFluidType();
 
@@ -104,7 +106,7 @@ public class WetnessRenderer
             {
                 Droplet newDrop = createDrop(screenWidth);
                 newDrop.yMotion = getRandomVelocity(frametime) / 2 + 0.3f;
-                newDrop.position.y = (float) (Math.sin(i*2 + player.tickCount) / 2 + 0.5) * screenHeight; // arbitrary wave pattern for particle placement
+                newDrop.position.y = (float) (Math.sin(i*4+player.tickCount) / 2 + 0.5) * screenHeight; // arbitrary wave pattern for particle placement
                 newDrop.position.x = (float) (i/10.0) * screenWidth; // even distribution on x axis
                 WATER_DROPS.add(newDrop);
                 int streakLength = (int) (Math.random() * 5) + 5;
@@ -126,6 +128,8 @@ public class WetnessRenderer
         {
             WATER_DROPS.add(createDrop(screenWidth));
         }
+
+        int waterColor = BiomeColors.getAverageWaterColor(player.level(), playerPos);
 
         // Setup rendering state
         RenderSystem.enableBlend();
@@ -162,7 +166,8 @@ public class WetnessRenderer
             if (alpha > 0)
             {
                 // Render the water drop with lighting
-                renderQuadDirect(poseStack, bufferBuilder, (int) CSMath.roundNearest(pos.x, 3f/uiScale), (int)pos.y, size, size, 0, 0, 1, 1, alpha, combinedLight);
+                renderQuadDirect(poseStack, bufferBuilder, (int) CSMath.roundNearest(pos.x, 3f/uiScale), (int)pos.y,
+                                 size, size, 0, 0, 1, 1, alpha, combinedLight, waterColor);
 
                 // Update the drop's position and alpha
                 if (!paused)
@@ -250,7 +255,8 @@ public class WetnessRenderer
 
             if (alpha > 0)
             {
-                renderQuadDirect(poseStack, bufferBuilder, (int) CSMath.roundNearest(pos.x, 3f/uiScale * 4), pos.y, size, 1, 0, 0, 1, 1, alpha, combinedLight);
+                renderQuadDirect(poseStack, bufferBuilder, (int) CSMath.roundNearest(pos.x, 3f/uiScale * 4), pos.y,
+                                 size, 1, 0, 0, 1, 1, alpha, combinedLight, waterColor);
                 if (!paused)
                 {   TRAILS.set(i, new Triplet<>(new Vector2i(pos.x, pos.y), alpha - 0.045f * frametime, size));
                 }
@@ -280,7 +286,7 @@ public class WetnessRenderer
         int size = dropSize.getRandom();
         // Ensure balance of droplets on each side
         Droplet.Side side = Math.random() < 0.5 ? Droplet.Side.LEFT : Droplet.Side.RIGHT;
-        if (getDropletsOnSide(side) >= MAX_DROPLETS / 2.0)
+        if (getDropletsOnSide(side) > getDropletsOnSide(side.opposite()))
         {   side = side.opposite();
         }
         // Set x position
@@ -310,13 +316,16 @@ public class WetnessRenderer
 
     private static void renderQuadDirect(PoseStack poseStack, BufferBuilder buffer, int x, int y,
                                          int width, int height, float u, float v, float uWidth, float vHeight,
-                                         float alpha, int lightLevel)
+                                         float alpha, int lightLevel, int waterColor)
     {
+        float red = 1-FastColor.ARGB32.red(waterColor);
+        float green = 1-FastColor.ARGB32.green(waterColor);
+        float blue = 1-FastColor.ARGB32.blue(waterColor);
         Matrix4f lastPose = poseStack.last().pose();
-        buffer.addVertex(lastPose, x, y, 0).setUv(u, v).setColor(1.0f, 1.0f, 1.0f, alpha).setLight(lightLevel);
-        buffer.addVertex(lastPose, x, y + height, 0).setUv(u, v + vHeight).setColor(1.0f, 1.0f, 1.0f, alpha).setLight(lightLevel);
-        buffer.addVertex(lastPose, x + width, y + height, 0).setUv(u + uWidth, v + vHeight).setColor(1.0f, 1.0f, 1.0f, alpha).setLight(lightLevel);
-        buffer.addVertex(lastPose, x + width, y, 0).setUv(u + uWidth, v).setColor(1.0f, 1.0f, 1.0f, alpha).setLight(lightLevel);
+        buffer.addVertex(lastPose, x, y, 0).setUv(u, v).setColor(red, green, blue, alpha).setLight(lightLevel);
+        buffer.addVertex(lastPose, x, y + height, 0).setUv(u, v + vHeight).setColor(red, green, blue, alpha).setLight(lightLevel);
+        buffer.addVertex(lastPose, x + width, y + height, 0).setUv(u + uWidth, v + vHeight).setColor(red, green, blue, alpha).setLight(lightLevel);
+        buffer.addVertex(lastPose, x + width, y, 0).setUv(u + uWidth, v).setColor(red, green, blue, alpha).setLight(lightLevel);
     }
 
     protected static class Droplet
