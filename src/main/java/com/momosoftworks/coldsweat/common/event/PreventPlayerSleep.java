@@ -51,8 +51,5 @@ public class PreventPlayerSleep
             player.displayClientMessage(new TranslationTextComponent("cold_sweat.message.sleep.world." + (worldTemp > maxTemp ? "hot" : "cold")), true);
             event.setResult(PlayerEntity.SleepResult.OTHER_PROBLEM);
         }
-        if (player instanceof ServerPlayerEntity && !player.isSleeping() && player.isAlive())
-        {   ((ServerPlayerEntity) player).setRespawnPosition(player.level.dimension(), event.getPos(), player.getYHeadRot(), false, true);
-        }
     }
 }
