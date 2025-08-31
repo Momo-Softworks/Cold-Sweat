@@ -2,28 +2,31 @@ package com.momosoftworks.coldsweat.mixin;
 
 import com.momosoftworks.coldsweat.config.ConfigLoadingHandler;
 import net.minecraft.client.Minecraft;
-import net.minecraft.server.Main;
+import net.minecraft.server.WorldLoader;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+
+@Mixin(WorldLoader.class)
 public class MixinModLoading
 {
-    @Mixin(Main.class)
-    public static class OnServer
-    {
-        @Inject(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;getSummary()Lnet/minecraft/world/level/storage/LevelSummary;"))
-        private static void beforeServerStart(String[] args, CallbackInfo ci)
-        {   ConfigLoadingHandler.initRegistries();
-        }
+    @Inject(method = "load", at = @At("HEAD"))
+    private static <D, R> void onWorldLoad(WorldLoader.InitConfig initConfig, WorldLoader.WorldDataSupplier<D> worldDate,
+                                           WorldLoader.ResultFactory<D, R> something, Executor somethingElse, Executor anotherThing,
+                                           CallbackInfoReturnable<CompletableFuture<R>> cir)
+    {   ConfigLoadingHandler.initRegistries();
     }
 
     @Mixin(Minecraft.class)
-    public static class onClient
+    public static class Client
     {
         @Inject(method = "clearLevel(Lnet/minecraft/client/gui/screens/Screen;)V", at = @At("HEAD"))
-        private void beforeClientStart(CallbackInfo ci)
+        private void onConnectServer(CallbackInfo ci)
         {   ConfigLoadingHandler.initRegistries();
         }
     }
