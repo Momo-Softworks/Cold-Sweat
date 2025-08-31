@@ -22,7 +22,7 @@ public class MixinModLoading
     @Mixin(Minecraft.class)
     public static class onClient
     {
-        @Inject(method = "<init>", at = @At("RETURN"))
+        @Inject(method = "clearLevel(Lnet/minecraft/client/gui/screens/Screen;)V", at = @At("HEAD"))
         private void beforeClientStart(CallbackInfo ci)
         {   ConfigLoadingHandler.initRegistries();
         }
