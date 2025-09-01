@@ -70,6 +70,7 @@ public class RemoveRegistryData<T extends ConfigData> extends ConfigData impleme
         if (!checkType(object))
         {   return false;
         }
+        if (matches.isEmpty()) return false;
         Optional<Tag> serializedOpt = ModRegistries.getCodec((ResourceKey) registry).encodeStart(NbtOps.INSTANCE, object).result();
         return serializedOpt.map(serialized ->
         {   return matches.test(nbt -> nbt.test((CompoundTag) serialized));
