@@ -97,6 +97,15 @@ mixin {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
+    mavenCentral()
+    maven {
+        name = 'Forge'
+        url = 'https://maven.minecraftforge.net'
+    }
+    maven {
+        name = 'Minecraft libraries'
+        url = 'https://libraries.minecraft.net'
+    }
     maven {
         url 'https://www.cursemaven.com'
         content {
@@ -107,11 +116,6 @@ repositories {
         // location of the maven for Registrate and Flywheel
         name = 'tterrag maven'
         url = 'https://maven.tterrag.com'
-    }
-
-    maven {
-        name = 'MinecraftForge'
-        url = 'https://maven.minecraftforge.net/'
     }
     // Add KFF Maven repository
     maven {
@@ -130,16 +134,21 @@ repositories {
         }
     }
     maven {
-        // saps.dev Maven (KubeJS and Rhino)
-        url = "https://maven.saps.dev/minecraft"
+        url "https://maven.latvian.dev/releases"
         content {
             includeGroup "dev.latvian.mods"
+            includeGroup "dev.latvian.apps"
+        }
+    }
+    maven {
+        url 'https://jitpack.io'
+        content {
+            includeGroup "com.github.rtyley"
         }
     }
     maven {
         url = "https://maven.teamresourceful.com/repository/maven-public/"
     }
-    mavenCentral()
 }
 
 dependencies {
@@ -201,6 +210,8 @@ dependencies {
     runtimeOnly fg.deobf("curse.maven:patchouli-306770:4031402")
     //runtimeOnly fg.deobf("curse.maven:apothic-attributes-898963:5182713")
 }
+
+idea.module { downloadJavadoc = downloadSources = true }
 
 publishing {
     publications {
