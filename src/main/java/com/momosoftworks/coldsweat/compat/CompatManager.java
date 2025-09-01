@@ -56,7 +56,6 @@ public class CompatManager
     private static final boolean BOP_LOADED = modLoaded("biomesoplenty");
     private static final boolean SERENE_SEASONS_LOADED = modLoaded("sereneseasons");
     private static final boolean CURIOS_LOADED = modLoaded("curios");
-    private static final boolean WEREWOLVES_LOADED = modLoaded("werewolves");
     private static final boolean SPIRIT_LOADED = modLoaded("spirit");
     private static final boolean BYG_LOADED = modLoaded("byg");
     private static final boolean CREATE_LOADED = modLoaded("create", "0.5.1");
@@ -139,9 +138,6 @@ public class CompatManager
     }
     public static boolean isCuriosLoaded()
     {   return CURIOS_LOADED;
-    }
-    public static boolean isWerewolvesLoaded()
-    {   return WEREWOLVES_LOADED;
     }
     public static boolean isSpiritLoaded()
     {   return SPIRIT_LOADED;
