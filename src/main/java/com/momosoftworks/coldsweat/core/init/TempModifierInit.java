@@ -115,6 +115,7 @@ public class TempModifierInit
         event.register(new ResourceLocation(ColdSweat.MOD_ID, "entities"), EntitiesTempModifier::new);
         event.register(new ResourceLocation(ColdSweat.MOD_ID, "acclimation"), AcclimationTempModifier::new);
         event.register(new ResourceLocation(ColdSweat.MOD_ID, "climate"), EntityClimateTempModifier::new);
+        event.register(new ResourceLocation(ColdSweat.MOD_ID, "simple"), SimpleTempModifier::new);
 
         // Compat
         String compatPath = "com.momosoftworks.coldsweat.api.temperature.modifier.compat.";
