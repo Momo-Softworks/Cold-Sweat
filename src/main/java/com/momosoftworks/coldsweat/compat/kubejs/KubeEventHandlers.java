@@ -8,7 +8,9 @@ import com.momosoftworks.coldsweat.api.event.core.registry.LoadRegistriesEvent;
 import com.momosoftworks.coldsweat.compat.kubejs.event.*;
 import dev.latvian.mods.kubejs.event.EventGroup;
 import dev.latvian.mods.kubejs.event.EventHandler;
+import dev.latvian.mods.kubejs.script.ScriptType;
 import net.neoforged.bus.api.SubscribeEvent;
+
 
 public class KubeEventHandlers
 {
@@ -20,7 +22,7 @@ public class KubeEventHandlers
     public static final EventHandler TEMP_CHANGED = COLD_SWEAT.common("temperatureChanged", () -> TempChangedEventJS.class);
     public static final EventHandler MODIFIER_ADD = COLD_SWEAT.common("addModifier", () -> AddModifierEventJS.class);
 
-    public static final EventHandler APPLY_INSULATION = COLD_SWEAT.server("applyInsulation", () -> ApplyInsulationEventJS.class);
+    public static final EventHandler APPLY_INSULATION = COLD_SWEAT.common("applyInsulation", () -> ApplyInsulationEventJS.class);
 
     @SubscribeEvent
     public static void buildRegistries(LoadRegistriesEvent.Pre event)
@@ -42,7 +44,8 @@ public class KubeEventHandlers
     public static void onTemperatureChanged(TemperatureChangedEvent event)
     {
         if (TEMP_CHANGED.hasListeners())
-        {   TEMP_CHANGED.post(new TempChangedEventJS(event)).applyCancel(event);
+        {   ScriptType scriptType = event.getEntity().level().isClientSide ? ScriptType.CLIENT : ScriptType.SERVER;
+            TEMP_CHANGED.post(scriptType, new TempChangedEventJS(event)).applyCancel(event);
         }
     }
 
@@ -50,7 +53,8 @@ public class KubeEventHandlers
     public static void onInsulateItem(InsulateItemEvent event)
     {
         if (APPLY_INSULATION.hasListeners())
-        {   APPLY_INSULATION.post(new ApplyInsulationEventJS(event)).applyCancel(event);
+        {   ScriptType scriptType = event.getPlayer().level().isClientSide ? ScriptType.CLIENT : ScriptType.SERVER;
+            APPLY_INSULATION.post(scriptType, new ApplyInsulationEventJS(event)).applyCancel(event);
         }
     }
 
@@ -58,7 +62,8 @@ public class KubeEventHandlers
     public static void onTempModifierAdd(TempModifierEvent.Add event)
     {
         if (MODIFIER_ADD.hasListeners())
-        {   MODIFIER_ADD.post(new AddModifierEventJS(event)).applyCancel(event);
+        {   ScriptType scriptType = event.getEntity().level().isClientSide ? ScriptType.CLIENT : ScriptType.SERVER;
+            MODIFIER_ADD.post(scriptType, new AddModifierEventJS(event)).applyCancel(event);
         }
     }
 }
