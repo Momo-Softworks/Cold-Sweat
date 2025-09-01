@@ -31,8 +31,20 @@ public class ItemRequirement
     private final NbtRequirement nbt;
     private final Optional<Predicate<ItemStack>> predicate;
 
+    public static final Item WILDCARD_ITEM = null;
+
+    private static final Codec<Either<ITag<Item>, Item>> ITEM_CODEC = Codec.either(ConfigHelper.tagOrBuiltinCodec(Registry.ITEM_REGISTRY, Registry.ITEM), Codec.STRING).xmap(
+        itemOrString -> {
+            if (itemOrString.left().isPresent()) return itemOrString.left().get();
+            String itemName = itemOrString.right().get();
+            if (itemName.equals("*")) return Either.right(WILDCARD_ITEM);
+            throw new IllegalArgumentException("Could not find item: " + itemName);
+        },
+        tagOrItem -> tagOrItem.map(left -> Either.left(Either.left(left)),
+                                   right -> right == WILDCARD_ITEM ? Either.right("*") : Either.left(Either.right(right))));
+
     public static final Codec<ItemRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            NegatableList.listCodec(ConfigHelper.tagOrBuiltinCodec(Registry.ITEM_REGISTRY, Registry.ITEM)).optionalFieldOf("items", new NegatableList<>()).forGetter(predicate -> predicate.items),
+            NegatableList.listCodec(ITEM_CODEC).optionalFieldOf("items", new NegatableList<>()).forGetter(predicate -> predicate.items),
             IntegerBounds.CODEC.optionalFieldOf("count", IntegerBounds.NONE).forGetter(predicate -> predicate.count),
             IntegerBounds.CODEC.optionalFieldOf("durability", IntegerBounds.NONE).forGetter(predicate -> predicate.durability),
             NegatableList.listCodec(EnchantmentRequirement.CODEC).optionalFieldOf("enchantments", new NegatableList<>()).forGetter(predicate -> predicate.enchantments),
@@ -109,7 +121,7 @@ public class ItemRequirement
         {   return false;
         }
 
-        if (!items.test(either -> either.map(tag -> tag.contains(stack.getItem()), item -> stack.getItem() == item)))
+        if (!items.test(either -> either.map(tag -> tag.contains(stack.getItem()), right -> right == WILDCARD_ITEM || stack.getItem() == right)))
         {   return false;
         }
         if (this.predicate.isPresent())

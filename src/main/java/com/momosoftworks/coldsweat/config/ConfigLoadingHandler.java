@@ -375,7 +375,7 @@ public class ConfigLoadingHandler
             // Add listed items as insulators
             List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(insulator.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
-            {   items.add(null);
+            {   return;
             }
 
             for (Item item : items)
@@ -402,7 +402,7 @@ public class ConfigLoadingHandler
         {
             List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(fuelData.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
-            {   items.add(null);
+            {   return;
             }
 
             for (Item item : items)
@@ -424,7 +424,7 @@ public class ConfigLoadingHandler
         {
             List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(foodData.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
-            {   items.add(null);
+            {   return;
             }
 
             for (Item item : items)
@@ -439,7 +439,7 @@ public class ConfigLoadingHandler
         {
             List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(itemTempData.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
-            {   items.add(null);
+            {   return;
             }
 
             for (Item item : items)
@@ -454,7 +454,7 @@ public class ConfigLoadingHandler
         {
             List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(dryingItemData.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
-            {   items.add(null);
+            {   return;
             }
 
             for (Item item : items)
@@ -469,7 +469,7 @@ public class ConfigLoadingHandler
         {
             List<Item> items = new ArrayList<>(RegistryHelper.mapTaggableList(insulationSlotData.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
-            {   items.add(null);
+            {   return;
             }
 
             for (Item item : items)
@@ -549,7 +549,7 @@ public class ConfigLoadingHandler
         {
             List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapTaggableList(mountData.entity().flatten(EntityRequirement::entities)));
             if (entities.isEmpty())
-            {   entities.add(null);
+            {   return;
             }
             for (EntityType<?> entity : entities)
             {   ConfigSettings.INSULATED_MOUNTS.get().put(entity, mountData);
@@ -573,7 +573,7 @@ public class ConfigLoadingHandler
         {
             List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapTaggableList(entityTempData.entity().flatten(EntityRequirement::entities)));
             if (entities.isEmpty())
-            {   entities.add(null);
+            {   return;
             }
             for (EntityType<?> entity : entities)
             {   ConfigSettings.ENTITY_TEMPERATURES.get().put(entity, entityTempData);
@@ -587,7 +587,7 @@ public class ConfigLoadingHandler
         {
             List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapTaggableList(entityTempData.entity().flatten(EntityRequirement::entities)));
             if (entities.isEmpty())
-            {   entities.add(null);
+            {   return;
             }
             for (EntityType<?> entity : entities)
             {   ConfigSettings.ENTITY_CLIMATES.get().put(entity, entityTempData);
@@ -601,7 +601,7 @@ public class ConfigLoadingHandler
         {
             List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapTaggableList(tempEffectsData.entity().flatten(EntityRequirement::entities)));
             if (entities.isEmpty())
-            {   entities.add(null);
+            {   return;
             }
             for (EntityType<?> entity : entities)
             {   ConfigSettings.ENTITY_TEMP_EFFECTS.get().put(entity, tempEffectsData);
