@@ -97,6 +97,15 @@ mixin {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
+    mavenCentral()
+    maven {
+        name = 'Forge'
+        url = 'https://maven.minecraftforge.net'
+    }
+    maven {
+        name = 'Minecraft libraries'
+        url = 'https://libraries.minecraft.net'
+    }
     maven {
         url 'https://www.cursemaven.com'
         content {
@@ -118,7 +127,22 @@ repositories {
             includeGroup "dev.ftb.mods"
         }
     }
-    mavenCentral()
+    maven {
+        url "https://maven.latvian.dev/releases"
+        content {
+            includeGroup "dev.latvian.mods"
+            includeGroup "dev.latvian.apps"
+        }
+    }
+    maven {
+        url 'https://jitpack.io'
+        content {
+            includeGroup "com.github.rtyley"
+        }
+    }
+    maven {
+        url = "https://maven.teamresourceful.com/repository/maven-public/"
+    }
 }
 
 dependencies {
@@ -161,6 +185,8 @@ dependencies {
     compileOnly fg.deobf("curse.maven:environmental-388992:3561534")
     compileOnly fg.deobf("curse.maven:primal-winter-393321:3444949")
 }
+
+idea.module { downloadJavadoc = downloadSources = true }
 
 publishing {
     publications {
