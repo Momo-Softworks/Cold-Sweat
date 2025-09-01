@@ -157,8 +157,6 @@ dependencies {
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
     // Compat mods
-    compileOnly fg.deobf("curse.maven:werewolves-become-a-beast-417851:4710810")
-    compileOnly fg.deobf("curse.maven:vampirism-233029:4783000")
     compileOnly fg.deobf("curse.maven:weather-storms-tornadoes-237746:4931290")
     compileOnly fg.deobf("curse.maven:coroutil-237749:4995502")
     compileOnly fg.deobf("curse.maven:iceberg-520110:4953572")
@@ -166,10 +164,10 @@ dependencies {
     //compileOnly fg.deobf("curse.maven:carrots-311327:4382778") // no 1.19.2 version
     compileOnly("com.tterrag.registrate:Registrate:MC1.20-1.3.3")
     compileOnly fg.deobf("curse.maven:tough-as-nails-246391:5815863")
-    implementation fg.deobf("curse.maven:create-328085:6247663")
+    implementation fg.deobf("curse.maven:create-328085:6641603")
     compileOnly("net.createmod.ponder:Ponder-Forge-1.20.1:1.0.37")
     implementation fg.deobf("curse.maven:curios-309927:5367944-sources-5367945")
-    implementation fg.deobf("curse.maven:thirst-was-taken-679270:6328470")
+    compileOnly fg.deobf("curse.maven:thirst-was-taken-679270:6328470")
     implementation fg.deobf("curse.maven:glitchcore-955399:5787839")
     implementation fg.deobf("curse.maven:serene-seasons-291874:5790653")
     implementation fg.deobf("curse.maven:spoiled-364918:6828889")
@@ -191,7 +189,7 @@ dependencies {
     compileOnly fg.deobf("curse.maven:eureka-ships-654384:5321630")
     implementation 'thedarkcolour:kotlinforforge:4.10.0'
 
-    /// KubeJS (Compat)
+    // KubeJS (Compat)
     implementation fg.deobf("dev.latvian.mods:kubejs-forge:${kubejs_version}")
     implementation fg.deobf("dev.latvian.mods:rhino-forge:${rhino_version}")
     implementation fg.deobf("dev.architectury:architectury-forge:${architectury_version}")
