@@ -41,21 +41,21 @@ public class KubeEventHandlers
     }
 
     private static String event(String name)
-    {
-        return COLD_SWEAT + name;
+    {   return COLD_SWEAT + name;
     }
 
     static EventResult onTemperatureChanged(TemperatureChangedEvent event)
-    {
-        boolean isClient = event.getEntity().level.isClientSide();
-        return EventResult.interrupt(!new TempChangedEventJS(event).post(isClient ? ScriptType.CLIENT : ScriptType.SERVER, TEMP_CHANGED));
+    {   ScriptType scriptType = event.getEntity().level.isClientSide ? ScriptType.CLIENT : ScriptType.SERVER;
+        return EventResult.interrupt(!new TempChangedEventJS(event).post(scriptType, TEMP_CHANGED));
     }
 
     private static EventResult onInsulateItem(InsulateItemEvent event)
-    {   return EventResult.interrupt(!new ApplyInsulationEventJS(event).post(ScriptType.SERVER, APPLY_INSULATION));
+    {   ScriptType scriptType = event.getPlayer().level.isClientSide ? ScriptType.CLIENT : ScriptType.SERVER;
+        return EventResult.interrupt(!new ApplyInsulationEventJS(event).post(scriptType, APPLY_INSULATION));
     }
 
     private static EventResult onTempModifierAdd(TempModifierEvent.Add event)
-    {   return EventResult.interrupt(!new AddModifierEventJS(event).post(ScriptType.SERVER, MODIFIER_ADD));
+    {   ScriptType scriptType = event.getEntity().level.isClientSide ? ScriptType.CLIENT : ScriptType.SERVER;
+        return EventResult.interrupt(!new AddModifierEventJS(event).post(scriptType, MODIFIER_ADD));
     }
 }
