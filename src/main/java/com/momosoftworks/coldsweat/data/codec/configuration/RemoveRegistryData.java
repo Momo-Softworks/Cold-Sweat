@@ -71,6 +71,7 @@ public class RemoveRegistryData<T extends ConfigData> extends ConfigData
         if (this.entries().stream().anyMatch(id -> object.registryId().map(rl -> rl.equals(id)).orElse(false)))
         {   return true;
         }
+        if (matches.isEmpty()) return false;
         Optional<INBT> serializedOpt = ModRegistries.getCodec((RegistryKey) registry).encodeStart(NBTDynamicOps.INSTANCE, object).result();
         return serializedOpt.map(serialized ->
         {   return matches.test(nbt -> nbt.test((CompoundNBT) serialized));
