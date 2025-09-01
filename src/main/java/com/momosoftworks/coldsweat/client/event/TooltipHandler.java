@@ -440,6 +440,7 @@ public class TooltipHandler
          Custom tooltips for attributes from insulation
          */
         boolean foundUnmetAttribute = false;
+        int unmetLabelIndex = elements.size();
         for (int i = 0; i < elements.size(); i++)
         {
             Either<FormattedText, TooltipComponent> element = elements.get(i);
@@ -457,14 +458,21 @@ public class TooltipHandler
                     // At the first unmet attribute modifier for each section, insert the "Unmet Requirements" tooltip line
                     if (strikethrough && !foundUnmetAttribute)
                     {
+                        unmetLabelIndex = i;
                         MutableComponent unmetAttributesTooltip = Component.translatable("tooltip.cold_sweat.unmet_attributes").withStyle(ChatFormatting.RED);
-                        elements.add(i, Either.right(new InsulationAttributeTooltip(unmetAttributesTooltip, Minecraft.getInstance().font, false)));
+                        elements.add(unmetLabelIndex, Either.right(new InsulationAttributeTooltip(unmetAttributesTooltip, Minecraft.getInstance().font, false)));
                         foundUnmetAttribute = true;
                         i++;
                     }
                     // If the insulation icon should be shown, convert the tooltip into an InsulationAttributeTooltip
                     if (args.contains("show_icon"))
-                    {   elements.set(i, Either.right(new InsulationAttributeTooltip(component, Minecraft.getInstance().font, strikethrough)));
+                    {
+                        if (!strikethrough && i > unmetLabelIndex)
+                        {
+                            elements.remove(i);
+                            elements.add(unmetLabelIndex, Either.right(new InsulationAttributeTooltip(component, Minecraft.getInstance().font, strikethrough)));
+                        }
+                        else elements.set(i, Either.right(new InsulationAttributeTooltip(component, Minecraft.getInstance().font, strikethrough)));
                     }
                 }
             }
