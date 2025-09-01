@@ -19,8 +19,8 @@ public class TempChangedEventJS extends LivingEntityEventJS
     {   return new LivingEntityJS(this.levelOf(event.getEntity()), event.getEntity());
     }
 
-    public Temperature.Trait getTrait()
-    {   return event.getTrait();
+    public String getTrait()
+    {   return event.getTrait().getSerializedName();
     }
 
     public double getOldTemperature()
