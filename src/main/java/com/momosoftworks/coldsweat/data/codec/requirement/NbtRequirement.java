@@ -7,7 +7,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
-import java.util.stream.IntStream;
+import java.util.*;
 
 import static net.minecraft.advancements.critereon.NbtPredicate.getEntityTagToCompare;
 
@@ -35,7 +35,7 @@ public record NbtRequirement(CompoundTag tag)
         {   return this.tag().isEmpty();
         }
         else
-        {   return compareNbt(this.tag, nbt, true);
+        {   return compareNbt(this.tag, nbt);
         }
     }
 
@@ -46,7 +46,7 @@ public record NbtRequirement(CompoundTag tag)
     /**
      * It is assumed that the first tag is a predicate, and the second tag is the tag to compare.
      */
-    public static boolean compareNbt(@Nullable Tag tag, @Nullable Tag other, boolean compareListTag)
+    public static boolean compareNbt(@Nullable Tag tag, @Nullable Tag other)
     {
         if (tag == other) return true;
         if (tag == null) return true;
@@ -55,12 +55,12 @@ public record NbtRequirement(CompoundTag tag)
 
         // Handle CompoundTag comparison
         if (tag instanceof CompoundTag compoundTag)
-        {   return handleCompoundTagComparison(compoundTag, other, compareListTag);
+        {   return handleCompoundTagComparison(compoundTag, other);
         }
 
         // Handle ListTag comparison
-        if (tag instanceof ListTag && other instanceof ListTag && compareListTag)
-        {   return compareListTags((ListTag) tag, (ListTag) other, compareListTag);
+        if (tag instanceof ListTag && other instanceof ListTag)
+        {   return compareListTags((ListTag) tag, (ListTag) other);
         }
 
         // Handle numeric range comparison
@@ -76,14 +76,14 @@ public record NbtRequirement(CompoundTag tag)
         return false;
     }
 
-    private static boolean handleCompoundTagComparison(CompoundTag compoundTag, Tag other, boolean compareListTag)
+    private static boolean handleCompoundTagComparison(CompoundTag compoundTag, Tag other)
     {
         // Case 1: Compare with another CompoundTag
         if (other instanceof CompoundTag otherCompound)
         {
             for (String key : compoundTag.getAllKeys())
             {
-                if (!compareNbt(compoundTag.get(key), otherCompound.get(key), compareListTag))
+                if (!compareNbt(compoundTag.get(key), otherCompound.get(key)))
                 {   return false;
                 }
             }
@@ -100,7 +100,7 @@ public record NbtRequirement(CompoundTag tag)
             for (int i = 0; i < anyOfValues.size(); i++)
             {
                 Tag value = anyOfValues.get(i);
-                if (compareNbt(value, other, compareListTag))
+                if (compareNbt(value, other))
                 {   return true;
                 }
             }
@@ -116,7 +116,7 @@ public record NbtRequirement(CompoundTag tag)
                 for (int i1 = 0; i1 < otherList.size(); i1++)
                 {
                     Tag otherValue = otherList.get(i1);
-                    if (compareNbt(value, otherValue, compareListTag))
+                    if (compareNbt(value, otherValue))
                     {   return true;
                     }
                 }
@@ -134,7 +134,7 @@ public record NbtRequirement(CompoundTag tag)
                     for (int i1 = 0; i1 < otherList.size(); i1++)
                     {
                         Tag otherValue = otherList.get(i1);
-                        if (compareNbt(value, otherValue, compareListTag))
+                        if (compareNbt(value, otherValue))
                         {   break find;
                         }
                     }
@@ -147,15 +147,22 @@ public record NbtRequirement(CompoundTag tag)
         return false;
     }
 
-    private static boolean compareListTags(ListTag list1, ListTag list2, boolean compareListTag)
+    private static boolean compareListTags(ListTag list1, ListTag list2)
     {
-        if (list1.isEmpty()) return list2.isEmpty();
+        if (list1.size() != list2.size()) return false;
 
-        return list1.stream()
-                .allMatch(element ->
-                                  IntStream.range(0, list2.size())
-                                          .anyMatch(j -> compareNbt(element, list2.get(j), compareListTag))
-                );
+        List<Tag> sortedList1 = new ArrayList<>(list1);
+        List<Tag> sortedList2 = new ArrayList<>(list2);
+        sortedList1.sort(Comparator.comparing(Tag::toString));
+        sortedList2.sort(Comparator.comparing(Tag::toString));
+
+        for (int i = 0; i < sortedList1.size(); i++)
+        {
+            if (!compareNbt(sortedList1.get(i), sortedList2.get(i)))
+            {   return false;
+            }
+        }
+        return true;
     }
 
     private static boolean compareNumericRange(StringTag rangeTag, NumericTag numberTag)
