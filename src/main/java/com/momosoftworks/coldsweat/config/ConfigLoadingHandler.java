@@ -334,28 +334,41 @@ public class ConfigLoadingHandler
         NeoForge.EVENT_BUS.post(postEvent);
     }
 
-    private static void logRegistryLoaded(String message, Collection<?> registry)
+    private static void logRegistryLoaded(String message, Collection<? extends Holder<? extends ConfigData>> registry)
     {
         if (registry.isEmpty())
         {
             message += ".";
         }
-        else message += ":";
-        ColdSweat.LOGGER.info(message, registry.size());
-        if (registry.isEmpty())
+        else message += ": [";
+        // Print comma-separated registry entries
+        StringBuilder messageBuilder = new StringBuilder(message);
+        Iterator<? extends Holder<? extends ConfigData>> iterator = registry.iterator();
+        while (iterator.hasNext())
         {
-            return;
+            Holder<? extends ConfigData> entry = iterator.next();
+            if (entry.unwrapKey().isPresent())
+            messageBuilder.append(entry.unwrapKey().get().location());
+            if (iterator.hasNext())
+        {
+            messageBuilder.append(", ");
+            }
+            else messageBuilder.append("]");
         }
-        for (Object entry : registry)
+        ColdSweat.LOGGER.info(messageBuilder.toString(), registry.size());
+        // Print contents of "nameless" registries
+        messageBuilder = new StringBuilder("Loaded external entries: ");
+        boolean hasNameless = false;
+        for (Holder<? extends ConfigData> holder : registry)
         {
-            if (entry instanceof Holder<?> holder)
-            {
-                ColdSweat.LOGGER.info("{}", holder.value());
+            if (holder.unwrapKey().isEmpty())
+            {   messageBuilder.append("\n- ").append(holder.value());
+                hasNameless = true;
             }
-            else
-            {
-                ColdSweat.LOGGER.info("{}", entry);
-            }
+        }
+        if (hasNameless)
+        {
+                ColdSweat.LOGGER.debug(messageBuilder.toString());
         }
     }
 
