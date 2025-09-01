@@ -20,6 +20,7 @@ import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 public class KubeBindings
 {
@@ -60,6 +61,16 @@ public class KubeBindings
         if (entity instanceof LivingEntity)
         {   Temperature.addModifier(((LivingEntity) entity), modifier, Temperature.Trait.fromID(trait), Placement.Duplicates.ALLOW);
         }
+    }
+
+    public static List<TempModifier> getModifiers(Entity entity, String id, String trait)
+    {
+        if (entity instanceof LivingEntity)
+        {
+            ResourceLocation modifierId = new ResourceLocation(id);
+            return Temperature.getModifiers(((LivingEntity) entity), Temperature.Trait.fromID(trait), mod -> TempModifierRegistry.getKey(mod).equals(modifierId));
+        }
+        return null;
     }
 
     public static Temperature.Trait getTrait(String id)
