@@ -69,8 +69,20 @@ public record EntityRequirement(NegatableList<Either<TagKey<EntityType<?>>, Enti
                                                                        Optional.empty(), NbtRequirement.NONE, Optional.empty(), EquipmentRequirement.NONE,
                                                                        Optional.empty(), new NegatableList<>(), Optional.empty(), Optional.empty(), Optional.empty(), new HashMap<>(), Optional.empty());
 
+    public static final EntityType<?> WILDCARD_ENTITY = null;
+
+    private static final Codec<Either<TagKey<EntityType<?>>, EntityType<?>>> ENTITY_CODEC = Codec.either(ConfigHelper.tagOrBuiltinCodec(Registries.ENTITY_TYPE, ForgeRegistries.ENTITY_TYPES), Codec.STRING).xmap(
+        itemOrString -> {
+            if (itemOrString.left().isPresent()) return itemOrString.left().get();
+            String itemName = itemOrString.right().get();
+            if (itemName.equals("*")) return Either.right(WILDCARD_ENTITY);
+            throw new IllegalArgumentException("Could not find item: " + itemName);
+        },
+        tagOrItem -> tagOrItem.map(left -> Either.left(Either.left(left)),
+                                   right -> right == WILDCARD_ENTITY ? Either.right("*") : Either.left(Either.right(right))));
+
     public static final Codec<EntityRequirement> SIMPLE_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            NegatableList.listCodec(ConfigHelper.tagOrBuiltinCodec(Registries.ENTITY_TYPE, ForgeRegistries.ENTITY_TYPES)).optionalFieldOf("entities", new NegatableList<>()).forGetter(requirement -> requirement.entities),
+            NegatableList.listCodec(ENTITY_CODEC).optionalFieldOf("entities", new NegatableList<>()).forGetter(requirement -> requirement.entities),
             LocationRequirement.CODEC.optionalFieldOf("location", LocationRequirement.NONE).forGetter(requirement -> requirement.location),
             LocationRequirement.CODEC.optionalFieldOf("stepping_on", LocationRequirement.NONE).forGetter(requirement -> requirement.steppingOn),
             EffectsRequirement.CODEC.optionalFieldOf("effects").forGetter(requirement -> requirement.effects),
@@ -99,7 +111,7 @@ public record EntityRequirement(NegatableList<Either<TagKey<EntityType<?>>, Enti
     private static void addCodecStack()
     {
         var codec = RecordCodecBuilder.<EntityRequirement>create(instance -> instance.group(
-                NegatableList.listCodec(ConfigHelper.tagOrBuiltinCodec(Registries.ENTITY_TYPE, ForgeRegistries.ENTITY_TYPES)).optionalFieldOf("entities", new NegatableList<>()).forGetter(requirement -> requirement.entities),
+                NegatableList.listCodec(ENTITY_CODEC).optionalFieldOf("entities", new NegatableList<>()).forGetter(requirement -> requirement.entities),
                 LocationRequirement.CODEC.optionalFieldOf("location", LocationRequirement.NONE).forGetter(requirement -> requirement.location),
                 LocationRequirement.CODEC.optionalFieldOf("stepping_on", LocationRequirement.NONE).forGetter(requirement -> requirement.steppingOn),
                 EffectsRequirement.CODEC.optionalFieldOf("effects").forGetter(requirement -> requirement.effects),

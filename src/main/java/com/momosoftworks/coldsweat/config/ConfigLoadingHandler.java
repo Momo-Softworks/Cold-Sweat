@@ -435,7 +435,7 @@ public class ConfigLoadingHandler
             // Add listed items as insulators
             List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, insulator.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
-            {   items.add(null);
+            {   return;
             }
 
             for (Item item : items)
@@ -463,7 +463,7 @@ public class ConfigLoadingHandler
 
             List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, fuelData.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
-            {   items.add(null);
+            {   return;
             }
 
             for (Item item : items)
@@ -487,7 +487,7 @@ public class ConfigLoadingHandler
 
             List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, foodData.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
-            {   items.add(null);
+            {   return;
             }
 
             for (Item item : items)
@@ -504,7 +504,7 @@ public class ConfigLoadingHandler
 
             List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, itemTempData.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
-            {   items.add(null);
+            {   return;
             }
 
             for (Item item : items)
@@ -521,7 +521,7 @@ public class ConfigLoadingHandler
 
             List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, dryingItemData.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
-            {   items.add(null);
+            {   return;
             }
 
             for (Item item : items)
@@ -538,7 +538,7 @@ public class ConfigLoadingHandler
 
             List<Item> items = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ITEMS, insulationSlotData.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
-            {   items.add(null);
+            {   return;
             }
 
             for (Item item : items)
@@ -632,7 +632,7 @@ public class ConfigLoadingHandler
 
             List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITY_TYPES, mountData.entity().flatten(EntityRequirement::entities)));
             if (entities.isEmpty())
-            {   entities.add(null);
+            {   return;
             }
             for (EntityType<?> entity : entities)
             {   ConfigSettings.INSULATED_MOUNTS.get().put(entity, mountData);
@@ -660,7 +660,7 @@ public class ConfigLoadingHandler
 
             List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITY_TYPES, entityTempData.entity().flatten(EntityRequirement::entities)));
             if (entities.isEmpty())
-            {   entities.add(null);
+            {   return;
             }
             for (EntityType<?> entity : entities)
             {   ConfigSettings.ENTITY_TEMPERATURES.get().put(entity, entityTempData);
@@ -676,7 +676,7 @@ public class ConfigLoadingHandler
 
             List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITY_TYPES, entityTempData.entity().flatten(EntityRequirement::entities)));
             if (entities.isEmpty())
-            {   entities.add(null);
+            {   return;
             }
             for (EntityType<?> entity : entities)
             {   ConfigSettings.ENTITY_CLIMATES.get().put(entity, entityTempData);
@@ -692,7 +692,7 @@ public class ConfigLoadingHandler
 
             List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.ENTITY_TYPES, tempEffectsData.entity().flatten(EntityRequirement::entities)));
             if (entities.isEmpty())
-            {   entities.add(null);
+            {   return;
             }
             for (EntityType<?> entity : entities)
             {   ConfigSettings.ENTITY_TEMP_EFFECTS.get().put(entity, tempEffectsData);
