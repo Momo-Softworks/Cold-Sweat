@@ -81,20 +81,22 @@ public class Temperature
 
     public static void set(LivingEntity entity, Trait trait, double value)
     {
-        if (NeoForge.EVENT_BUS.post(new TemperatureChangedEvent(entity, trait, get(entity, trait), value)).isCanceled())
+        TemperatureChangedEvent event = NeoForge.EVENT_BUS.post(new TemperatureChangedEvent(entity, trait, get(entity, trait), value));
+        if (event.isCanceled())
         {   return;
         }
-        EntityTempManager.getTemperatureCap(entity).ifPresent(cap -> cap.setTrait(trait, value));
+        EntityTempManager.getTemperatureCap(entity).ifPresent(cap -> cap.setTrait(trait, event.getTemperature()));
         updateTemperature(entity);
     }
 
     public static void add(LivingEntity entity, Trait trait, double value)
     {
         double oldTemp = get(entity, trait);
-        if (NeoForge.EVENT_BUS.post(new TemperatureChangedEvent(entity, trait, oldTemp, oldTemp + value)).isCanceled())
+        TemperatureChangedEvent event = NeoForge.EVENT_BUS.post(new TemperatureChangedEvent(entity, trait, oldTemp, oldTemp + value));
+        if (event.isCanceled())
         {   return;
         }
-        EntityTempManager.getTemperatureCap(entity).ifPresent(cap -> cap.setTrait(trait, cap.getTrait(trait) + value));
+        EntityTempManager.getTemperatureCap(entity).ifPresent(cap -> cap.setTrait(trait, event.getTemperature()));
         updateTemperature(entity);
     }
 

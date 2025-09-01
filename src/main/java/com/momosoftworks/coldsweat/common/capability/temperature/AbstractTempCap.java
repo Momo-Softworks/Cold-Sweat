@@ -404,15 +404,20 @@ public class AbstractTempCap implements ITemperatureCap, INBTSerializable<Compou
                 newValue = value;
             }
         }
-        if (!DoubleMath.fuzzyEquals(newValue, this.getTrait(trait), 0.001))
+        double oldValue = this.getTrait(trait);
+        if (!DoubleMath.fuzzyEquals(newValue, oldValue, 0.001))
         {
             // Fire temperature change event
-            NeoForge.EVENT_BUS.post(new TemperatureChangedEvent(entity, trait, getTrait(trait), newValue));
+            TemperatureChangedEvent event = new TemperatureChangedEvent(entity, trait, oldValue, newValue);
+            NeoForge.EVENT_BUS.post(event);
             // Write new value to NBT
-            NBTHelper.getOrPutTag(entity, "Temperature", new CompoundTag()).putDouble(trait.getSerializedName(), newValue);
+            double eventTemp = event.getTemperature();
+            NBTHelper.getOrPutTag(entity, "Temperature", new CompoundTag()).putDouble(trait.getSerializedName(), eventTemp);
+            // Return temperature from event
+            return eventTemp;
         }
         // Return
-        return newValue;
+        return oldValue;
     }
 
     @Override
