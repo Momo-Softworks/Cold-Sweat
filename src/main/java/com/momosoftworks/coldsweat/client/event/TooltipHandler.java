@@ -462,6 +462,7 @@ public class TooltipHandler
          Custom tooltips for attributes from insulation
          */
         boolean foundUnmetAttribute = false;
+        int unmetLabelIndex = elements.size();
         for (int i = 0; i < elements.size(); i++)
         {
             ITextComponent element = elements.get(i);
@@ -479,14 +480,21 @@ public class TooltipHandler
                     // At the first unmet attribute modifier for each section, insert the "Unmet Requirements" tooltip line
                     if (strikethrough && !foundUnmetAttribute)
                     {
+                        unmetLabelIndex = i;
                         IFormattableTextComponent unmetAttributesTooltip = new TranslationTextComponent("tooltip.cold_sweat.unmet_attributes").withStyle(TextFormatting.RED);
-                        addTooltip(i, new ClientInsulationAttributeTooltip(unmetAttributesTooltip, Minecraft.getInstance().font, false), elements);
+                        addTooltip(unmetLabelIndex, new ClientInsulationAttributeTooltip(unmetAttributesTooltip, Minecraft.getInstance().font, false), elements);
                         foundUnmetAttribute = true;
                         i++;
                     }
                     // If the insulation icon should be shown, convert the tooltip into an InsulationAttributeTooltip
                     if (args.contains("show_icon"))
-                    {   setTooltip(i, new ClientInsulationAttributeTooltip(component, Minecraft.getInstance().font, strikethrough), elements);
+                    {
+                        if (!strikethrough && i > unmetLabelIndex)
+                        {
+                            elements.remove(i);
+                            addTooltip(unmetLabelIndex, new ClientInsulationAttributeTooltip(component, Minecraft.getInstance().font, strikethrough), elements);
+                        }
+                        else setTooltip(i, new ClientInsulationAttributeTooltip(component, Minecraft.getInstance().font, strikethrough), elements);
                     }
                 }
             }
