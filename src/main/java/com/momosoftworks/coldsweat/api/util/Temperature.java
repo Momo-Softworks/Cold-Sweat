@@ -20,7 +20,6 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fml.network.PacketDistributor;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -86,20 +85,22 @@ public class Temperature
 
     public static void set(LivingEntity entity, Trait trait, double value)
     {
-        if (MinecraftForge.EVENT_BUS.post(new TemperatureChangedEvent(entity, trait, get(entity, trait), value)))
+        TemperatureChangedEvent event = new TemperatureChangedEvent(entity, trait, get(entity, trait), value);
+        if (MinecraftForge.EVENT_BUS.post(event))
         {   return;
         }
-        EntityTempManager.getTemperatureCap(entity).ifPresent(cap -> cap.setTrait(trait, value));
+        EntityTempManager.getTemperatureCap(entity).ifPresent(cap -> cap.setTrait(trait, event.getTemperature()));
         updateTemperature(entity);
     }
 
     public static void add(LivingEntity entity, Trait trait, double value)
     {
         double oldTemp = get(entity, trait);
-        if (MinecraftForge.EVENT_BUS.post(new TemperatureChangedEvent(entity, trait, oldTemp, oldTemp + value)))
+        TemperatureChangedEvent event = new TemperatureChangedEvent(entity, trait, oldTemp, oldTemp + value);
+        if (MinecraftForge.EVENT_BUS.post(event))
         {   return;
         }
-        EntityTempManager.getTemperatureCap(entity).ifPresent(cap -> cap.setTrait(trait, cap.getTrait(trait) + value));
+        EntityTempManager.getTemperatureCap(entity).ifPresent(cap -> cap.setTrait(trait, event.getTemperature()));
         updateTemperature(entity);
     }
 
