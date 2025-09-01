@@ -294,18 +294,38 @@ public class ConfigLoadingHandler
         MinecraftForge.EVENT_BUS.post(postEvent);
     }
 
-    private static void logRegistryLoaded(String message, Collection<?> registry)
+    private static void logRegistryLoaded(String message, Collection<? extends ConfigData> registry)
     {
         if (registry.isEmpty())
         {   message += ".";
         }
-        else message += ":";
-        ColdSweat.LOGGER.info(message, registry.size());
-        if (registry.isEmpty())
-        {   return;
+        else message += ": [";
+        // Print comma-separated registry entries
+        StringBuilder messageBuilder = new StringBuilder(message);
+        Iterator<? extends ConfigData> iterator = registry.iterator();
+        while (iterator.hasNext())
+        {
+            ConfigData data = iterator.next();
+            if (data.registryId().isPresent())
+            messageBuilder.append(data.registryId().get());
+            if (iterator.hasNext())
+            {   messageBuilder.append(", ");
+            }
+            else messageBuilder.append("]");
         }
-        for (Object entry : registry)
-        {   ColdSweat.LOGGER.info("{}", entry);
+        ColdSweat.LOGGER.info(messageBuilder.toString(), registry.size());
+        // Print contents of "nameless" registries
+        messageBuilder = new StringBuilder("Loaded external entries: ");
+        boolean hasNameless = false;
+        for (ConfigData data : registry)
+        {
+            if (!data.registryId().isPresent())
+            {   messageBuilder.append("\n- ").append(data);
+                hasNameless = true;
+            }
+        }
+        if (hasNameless)
+        {   ColdSweat.LOGGER.debug(messageBuilder.toString());
         }
     }
 
