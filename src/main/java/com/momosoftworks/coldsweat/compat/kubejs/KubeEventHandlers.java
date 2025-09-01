@@ -9,6 +9,7 @@ import com.momosoftworks.coldsweat.compat.kubejs.event.*;
 import dev.architectury.event.EventResult;
 import dev.latvian.mods.kubejs.event.EventGroup;
 import dev.latvian.mods.kubejs.event.EventHandler;
+import dev.latvian.mods.kubejs.script.ScriptType;
 
 
 public class KubeEventHandlers
@@ -21,7 +22,7 @@ public class KubeEventHandlers
     public static final EventHandler TEMP_CHANGED = COLD_SWEAT.common("temperatureChanged", () -> TempChangedEventJS.class);
     public static final EventHandler MODIFIER_ADD = COLD_SWEAT.common("addModifier", () -> AddModifierEventJS.class);
 
-    public static final EventHandler APPLY_INSULATION = COLD_SWEAT.server("applyInsulation", () -> ApplyInsulationEventJS.class);
+    public static final EventHandler APPLY_INSULATION = COLD_SWEAT.common("applyInsulation", () -> ApplyInsulationEventJS.class);
 
 
     public static void init()
@@ -50,7 +51,8 @@ public class KubeEventHandlers
     private static EventResult onTemperatureChanged(TemperatureChangedEvent event)
     {
         if (TEMP_CHANGED.hasListeners())
-        {   return TEMP_CHANGED.post(new TempChangedEventJS(event)).arch();
+        {   ScriptType scriptType = event.getEntity().level().isClientSide ? ScriptType.CLIENT : ScriptType.SERVER;
+            return TEMP_CHANGED.post(scriptType, new TempChangedEventJS(event)).arch();
         }
         return EventResult.pass();
     }
@@ -58,7 +60,8 @@ public class KubeEventHandlers
     private static EventResult onInsulateItem(InsulateItemEvent event)
     {
         if (APPLY_INSULATION.hasListeners())
-        {   return APPLY_INSULATION.post(new ApplyInsulationEventJS(event)).arch();
+        {   ScriptType scriptType = event.getPlayer().level().isClientSide ? ScriptType.CLIENT : ScriptType.SERVER;
+            return APPLY_INSULATION.post(scriptType, new ApplyInsulationEventJS(event)).arch();
         }
         return EventResult.pass();
     }
@@ -66,7 +69,8 @@ public class KubeEventHandlers
     private static EventResult onTempModifierAdd(TempModifierEvent.Add event)
     {
         if (MODIFIER_ADD.hasListeners())
-        {   return MODIFIER_ADD.post(new AddModifierEventJS(event)).arch();
+        {   ScriptType scriptType = event.getEntity().level().isClientSide ? ScriptType.CLIENT : ScriptType.SERVER;
+            return MODIFIER_ADD.post(scriptType, new AddModifierEventJS(event)).arch();
         }
         return EventResult.pass();
     }
