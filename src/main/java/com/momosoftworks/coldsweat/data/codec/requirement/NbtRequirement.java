@@ -7,8 +7,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.stream.IntStream;
+import java.util.*;
 
 import static net.minecraft.advancements.criterion.NBTPredicate.getEntityTagToCompare;
 
@@ -46,7 +45,7 @@ public class NbtRequirement
         {   return this.tag.isEmpty();
         }
         else
-        {   return compareNbt(this.tag, nbt, true);
+        {   return compareNbt(this.tag, nbt);
         }
     }
 
@@ -57,21 +56,21 @@ public class NbtRequirement
     /**
      * It is assumed that the first tag is a predicate, and the second tag is the tag to compare.
      */
-    public static boolean compareNbt(@Nullable INBT tag, @Nullable INBT other, boolean compareListNBT)
+    public static boolean compareNbt(@Nullable INBT tag, @Nullable INBT other)
     {
         if (tag == other) return true;
         if (tag == null) return true;
         if (other == null) return false;
         if (tag.equals(other)) return true;
 
-        // Handle CompoundNBT comparison
+        // Handle CompoundTag comparison
         if (tag instanceof CompoundNBT)
-        {   return handleCompoundNBTComparison((CompoundNBT) tag, other, compareListNBT);
+        {   return handleCompoundTagComparison((CompoundNBT) tag, other);
         }
 
-        // Handle ListNBT comparison
-        if (tag instanceof ListNBT && other instanceof ListNBT && compareListNBT)
-        {   return compareListNBTs((ListNBT) tag, (ListNBT) other, compareListNBT);
+        // Handle ListTag comparison
+        if (tag instanceof ListNBT && other instanceof ListNBT)
+        {   return compareListTags((ListNBT) tag, (ListNBT) other);
         }
 
         // Handle numeric range comparison
@@ -87,7 +86,7 @@ public class NbtRequirement
         return false;
     }
 
-    private static boolean handleCompoundNBTComparison(CompoundNBT compoundTag, INBT other, boolean compareListNBT)
+    private static boolean handleCompoundTagComparison(CompoundNBT compoundTag, INBT other)
     {
         // Case 1: Compare with another CompoundNBT
         if (other instanceof CompoundNBT)
@@ -95,7 +94,7 @@ public class NbtRequirement
             CompoundNBT otherCompound = (CompoundNBT) other;
             for (String key : compoundTag.getAllKeys())
             {
-                if (!compareNbt(compoundTag.get(key), otherCompound.get(key), compareListNBT))
+                if (!compareNbt(compoundTag.get(key), otherCompound.get(key)))
                 {   return false;
                 }
             }
@@ -112,7 +111,7 @@ public class NbtRequirement
             for (int i = 0; i < anyOfValues.size(); i++)
             {
                 INBT value = anyOfValues.get(i);
-                if (compareNbt(value, other, compareListNBT))
+                if (compareNbt(value, other))
                 {   return true;
                 }
             }
@@ -129,7 +128,7 @@ public class NbtRequirement
                 for (int i1 = 0; i1 < otherList.size(); i1++)
                 {
                     INBT otherValue = otherList.get(i1);
-                    if (compareNbt(value, otherValue, compareListNBT))
+                    if (compareNbt(value, otherValue))
                     {   return true;
                     }
                 }
@@ -148,7 +147,7 @@ public class NbtRequirement
                     for (int i1 = 0; i1 < otherList.size(); i1++)
                     {
                         INBT otherValue = otherList.get(i1);
-                        if (compareNbt(value, otherValue, compareListNBT))
+                        if (compareNbt(value, otherValue))
                         {   break find;
                         }
                     }
@@ -161,15 +160,22 @@ public class NbtRequirement
         return false;
     }
 
-    private static boolean compareListNBTs(ListNBT list1, ListNBT list2, boolean compareListNBT)
+    private static boolean compareListTags(ListNBT list1, ListNBT list2)
     {
-        if (list1.isEmpty()) return list2.isEmpty();
+        if (list1.size() != list2.size()) return false;
 
-        return list1.stream()
-                .allMatch(element ->
-                                  IntStream.range(0, list2.size())
-                                          .anyMatch(j -> compareNbt(element, list2.get(j), compareListNBT))
-                );
+        List<INBT> sortedList1 = new ArrayList<>(list1);
+        List<INBT> sortedList2 = new ArrayList<>(list2);
+        sortedList1.sort(Comparator.comparing(INBT::toString));
+        sortedList2.sort(Comparator.comparing(INBT::toString));
+
+        for (int i = 0; i < sortedList1.size(); i++)
+        {
+            if (!compareNbt(sortedList1.get(i), sortedList2.get(i)))
+            {   return false;
+            }
+        }
+        return true;
     }
 
     private static boolean compareNumericRange(StringNBT rangeTag, NumberNBT numberTag)
