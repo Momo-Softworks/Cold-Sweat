@@ -31,7 +31,7 @@ public record ItemComponentsRequirement(CompoundTag components)
     public boolean test(@Nullable DataComponentPatch components)
     {
         CompoundTag serialized = (CompoundTag) DataComponentPatch.CODEC.encodeStart(NbtOps.INSTANCE, components).result().orElse(new CompoundTag());
-        return NbtRequirement.compareNbt(this.components, serialized, true);
+        return NbtRequirement.compareNbt(this.components, serialized);
     }
 
     public static ItemComponentsRequirement parse(String data)
