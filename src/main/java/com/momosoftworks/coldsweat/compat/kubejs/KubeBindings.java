@@ -19,6 +19,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 public class KubeBindings
 {
@@ -59,6 +60,16 @@ public class KubeBindings
         if (entity instanceof LivingEntity living)
         {   Temperature.addModifier(living, modifier, Temperature.Trait.fromID(trait), Placement.Duplicates.ALLOW);
         }
+    }
+
+    public static List<TempModifier> getModifiers(Entity entity, String id, String trait)
+    {
+        if (entity instanceof LivingEntity living)
+        {
+            ResourceLocation modifierId = new ResourceLocation(id);
+            return Temperature.getModifiers(living, Temperature.Trait.fromID(trait), mod -> TempModifierRegistry.getKey(mod).equals(modifierId));
+        }
+        return null;
     }
 
     public static Temperature.Trait getTrait(String id)
