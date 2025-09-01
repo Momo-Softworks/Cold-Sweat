@@ -449,32 +449,31 @@ public class ConfigLoadingHandler
     private static void addInsulatorConfigs(Collection<Holder<InsulatorData>> insulators)
     {
         insulators.forEach(holder ->
-                           {
-                               InsulatorData insulator = holder.value();
+        {
+            InsulatorData insulator = holder.value();
 
-                               // Add listed items as insulators
-                               List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, insulator.item().flatten(ItemRequirement::items)));
-                               if (items.isEmpty())
-                               {
-                                   items.add(null);
-                               }
+            // Add listed items as insulators
+            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, insulator.item().flatten(ItemRequirement::items)));
+            if (items.isEmpty())
+            {   return;
+            }
 
-                               for (Item item : items)
-                               {
-                                   switch (insulator.slot())
-                                   {
-                                       case ITEM -> ConfigSettings.INSULATION_ITEMS.get().put(item, insulator);
-                                       case ARMOR -> ConfigSettings.INSULATING_ARMORS.get().put(item, insulator);
-                                       case CURIO ->
-                                       {
-                                           if (CompatManager.isCuriosLoaded())
-                                           {
-                                               ConfigSettings.INSULATING_CURIOS.get().put(item, insulator);
-                                           }
-                                       }
-                                   }
-                               }
-                           });
+            for (Item item : items)
+            {
+                switch (insulator.slot())
+                {
+                    case ITEM -> ConfigSettings.INSULATION_ITEMS.get().put(item, insulator);
+                    case ARMOR -> ConfigSettings.INSULATING_ARMORS.get().put(item, insulator);
+                    case CURIO ->
+                    {
+                        if (CompatManager.isCuriosLoaded())
+                        {
+                            ConfigSettings.INSULATING_CURIOS.get().put(item, insulator);
+                        }
+                    }
+                }
+            }
+       });
     }
 
     private static void addFuelConfigs(Collection<Holder<FuelData>> fuels)
@@ -483,11 +482,10 @@ public class ConfigLoadingHandler
                       {
                           FuelData fuelData = holder.value();
 
-                          List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, fuelData.item().flatten(ItemRequirement::items)));
-                          if (items.isEmpty())
-                          {
-                              items.add(null);
-                          }
+            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, fuelData.item().flatten(ItemRequirement::items)));
+            if (items.isEmpty())
+            {   return;
+            }
 
                           for (Item item : items)
                           {
@@ -508,11 +506,10 @@ public class ConfigLoadingHandler
                       {
                           FoodData foodData = holder.value();
 
-                          List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, foodData.item().flatten(ItemRequirement::items)));
-                          if (items.isEmpty())
-                          {
-                              items.add(null);
-                          }
+            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, foodData.item().flatten(ItemRequirement::items)));
+            if (items.isEmpty())
+            {   return;
+            }
 
                           for (Item item : items)
                           {
@@ -527,11 +524,10 @@ public class ConfigLoadingHandler
                            {
                                ItemTempData itemTempData = holder.value();
 
-                               List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, itemTempData.item().flatten(ItemRequirement::items)));
-                               if (items.isEmpty())
-                               {
-                                   items.add(null);
-                               }
+            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, itemTempData.item().flatten(ItemRequirement::items)));
+            if (items.isEmpty())
+            {   return;
+            }
 
                                for (Item item : items)
                                {
@@ -546,11 +542,10 @@ public class ConfigLoadingHandler
                             {
                                 DryingItemData dryingItemData = holder.value();
 
-                                List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, dryingItemData.item().flatten(ItemRequirement::items)));
-                                if (items.isEmpty())
-                                {
-                                    items.add(null);
-                                }
+            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, dryingItemData.item().flatten(ItemRequirement::items)));
+            if (items.isEmpty())
+            {   return;
+            }
 
                                 for (Item item : items)
                                 {
@@ -565,11 +560,10 @@ public class ConfigLoadingHandler
                                 {
                                     ItemInsulationSlotsData insulationSlotData = holder.value();
 
-                                    List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, insulationSlotData.item().flatten(ItemRequirement::items)));
-                                    if (items.isEmpty())
-                                    {
-                                        items.add(null);
-                                    }
+            List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, insulationSlotData.item().flatten(ItemRequirement::items)));
+            if (items.isEmpty())
+            {   return;
+            }
 
                                     for (Item item : items)
                                     {
@@ -667,16 +661,14 @@ public class ConfigLoadingHandler
                        {
                            MountData mountData = holder.value();
 
-                           List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, mountData.entity().flatten(EntityRequirement::entities)));
-                           if (entities.isEmpty())
-                           {
-                               entities.add(null);
-                           }
-                           for (EntityType<?> entity : entities)
-                           {
-                               ConfigSettings.INSULATED_MOUNTS.get().put(entity, mountData);
-                           }
-                       });
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, mountData.entity().flatten(EntityRequirement::entities)));
+            if (entities.isEmpty())
+            {   return;
+            }
+            for (EntityType<?> entity : entities)
+            {   ConfigSettings.INSULATED_MOUNTS.get().put(entity, mountData);
+            }
+        });
     }
 
     private static void addSpawnBiomeConfigs(Collection<Holder<SpawnBiomeData>> spawnBiomes, RegistryAccess registryAccess)
@@ -698,16 +690,14 @@ public class ConfigLoadingHandler
                             {
                                 EntityTempData entityTempData = holder.value();
 
-                                List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, entityTempData.entity().flatten(EntityRequirement::entities)));
-                                if (entities.isEmpty())
-                                {
-                                    entities.add(null);
-                                }
-                                for (EntityType<?> entity : entities)
-                                {
-                                    ConfigSettings.ENTITY_TEMPERATURES.get().put(entity, entityTempData);
-                                }
-                            });
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, entityTempData.entity().flatten(EntityRequirement::entities)));
+            if (entities.isEmpty())
+            {   return;
+            }
+            for (EntityType<?> entity : entities)
+            {   ConfigSettings.ENTITY_TEMPERATURES.get().put(entity, entityTempData);
+            }
+        });
     }
 
     private static void addEntityClimateConfigs(Collection<Holder<EntityClimateData>> entityTemps)
@@ -716,16 +706,14 @@ public class ConfigLoadingHandler
                             {
                                 EntityClimateData entityTempData = holder.value();
 
-                                List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, entityTempData.entity().flatten(EntityRequirement::entities)));
-                                if (entities.isEmpty())
-                                {
-                                    entities.add(null);
-                                }
-                                for (EntityType<?> entity : entities)
-                                {
-                                    ConfigSettings.ENTITY_CLIMATES.get().put(entity, entityTempData);
-                                }
-                            });
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, entityTempData.entity().flatten(EntityRequirement::entities)));
+            if (entities.isEmpty())
+            {   return;
+            }
+            for (EntityType<?> entity : entities)
+            {   ConfigSettings.ENTITY_CLIMATES.get().put(entity, entityTempData);
+            }
+        });
     }
 
     private static void addTempEffectsConfigs(Collection<Holder<TempEffectsData>> tempEffects)
@@ -734,16 +722,14 @@ public class ConfigLoadingHandler
                             {
                                 TempEffectsData tempEffectsData = holder.value();
 
-                                List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, tempEffectsData.entity().flatten(EntityRequirement::entities)));
-                                if (entities.isEmpty())
-                                {
-                                    entities.add(null);
-                                }
-                                for (EntityType<?> entity : entities)
-                                {
-                                    ConfigSettings.ENTITY_TEMP_EFFECTS.get().put(entity, tempEffectsData);
-                                }
-                            });
+            List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, tempEffectsData.entity().flatten(EntityRequirement::entities)));
+            if (entities.isEmpty())
+            {   return;
+            }
+            for (EntityType<?> entity : entities)
+            {   ConfigSettings.ENTITY_TEMP_EFFECTS.get().put(entity, tempEffectsData);
+            }
+        });
     }
 
     private static <T extends ConfigData> List<Holder<T>> parseConfigData(RegistryHolder<T> registry, Codec<T> codec, RegistryAccess registryAccess)
