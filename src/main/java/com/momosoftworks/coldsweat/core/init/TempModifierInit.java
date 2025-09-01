@@ -12,11 +12,7 @@ import com.momosoftworks.coldsweat.config.ConfigLoadingHandler;
 import com.momosoftworks.coldsweat.config.spec.WorldSettingsConfig;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.configuration.BlockTempData;
-import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -110,6 +106,7 @@ public class TempModifierInit
         event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "entities"), EntitiesTempModifier::new);
         event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "acclimation"), AcclimationTempModifier::new);
         event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "climate"), EntityClimateTempModifier::new);
+        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "simple"), SimpleTempModifier::new);
 
         // Compat
         String compatPath = "com.momosoftworks.coldsweat.api.temperature.modifier.compat.";
