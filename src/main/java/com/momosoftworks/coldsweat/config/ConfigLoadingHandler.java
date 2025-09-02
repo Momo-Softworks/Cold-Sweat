@@ -149,55 +149,55 @@ public class ConfigLoadingHandler
                 .addAll(registryAccess.registryOrThrow(Registries.BLOCK)
                                 .getTag(ModBlockTags.HEARTH_SPREAD_WHITELIST).orElseThrow()
                                 .stream().map(holder ->
-                                              {
-                                                  ColdSweat.LOGGER.info("Adding block {} to hearth spread whitelist", holder.value());
-                                                  return holder.value();
-                                              }).toList());
+                                {
+                                    ColdSweat.LOGGER.info("Adding block {} to hearth spread whitelist", holder.value());
+                                    return holder.value();
+                                }).toList());
 
         ConfigSettings.THERMAL_SOURCE_SPREAD_BLACKLIST.get().
                 addAll(registryAccess.registryOrThrow(Registries.BLOCK)
                                .getTag(ModBlockTags.HEARTH_SPREAD_BLACKLIST).orElseThrow()
                                .stream().map(holder ->
-                                             {
-                                                 ColdSweat.LOGGER.info("Adding block {} to hearth spread blacklist", holder.value());
-                                                 return holder.value();
-                                             }).toList());
+                               {
+                                   ColdSweat.LOGGER.info("Adding block {} to hearth spread blacklist", holder.value());
+                                   return holder.value();
+                               }).toList());
 
         ConfigSettings.SLEEP_CHECK_IGNORE_BLOCKS.get()
                 .addAll(registryAccess.registryOrThrow(Registries.BLOCK)
                                 .getTag(ModBlockTags.IGNORE_SLEEP_CHECK).orElseThrow()
                                 .stream().map(holder ->
-                                              {
-                                                  ColdSweat.LOGGER.info("Disabling sleeping conditions check for block {}", holder.value());
-                                                  return holder.value();
-                                              }).toList());
+                                {
+                                    ColdSweat.LOGGER.info("Disabling sleeping conditions check for block {}", holder.value());
+                                    return holder.value();
+                                }).toList());
 
         ConfigSettings.LAMP_DIMENSIONS.get(registryAccess)
                 .addAll(registryAccess.registryOrThrow(Registries.DIMENSION_TYPE)
                                 .getTag(ModDimensionTags.SOUL_LAMP_VALID).orElseThrow()
                                 .stream().map(holder ->
-                                              {
-                                                  ColdSweat.LOGGER.info("Enabling dimension {} for soulspring lamp", holder.value());
-                                                  return holder.value();
-                                              }).toList());
+                                {
+                                    ColdSweat.LOGGER.info("Enabling dimension {} for soulspring lamp", holder.value());
+                                    return holder.value();
+                                }).toList());
 
         ConfigSettings.INSULATION_BLACKLIST.get()
                 .addAll(registryAccess.registryOrThrow(Registries.ITEM)
                                 .getTag(ModItemTags.NOT_INSULATABLE).orElseThrow()
                                 .stream().map(holder ->
-                                              {
-                                                  ColdSweat.LOGGER.info("Adding item {} to insulation blacklist", holder.value());
-                                                  return holder.value();
-                                              }).toList());
+                                {
+                                    ColdSweat.LOGGER.info("Adding item {} to insulation blacklist", holder.value());
+                                    return holder.value();
+                                }).toList());
 
         ConfigSettings.HEARTH_POTION_BLACKLIST.get()
                 .addAll(registryAccess.registryOrThrow(Registries.MOB_EFFECT)
                                 .getTag(ModEffectTags.HEARTH_BLACKLISTED).orElseThrow()
                                 .stream().map(holder ->
-                                              {
-                                                  ColdSweat.LOGGER.info("Adding effect {} to hearth potion blacklist", holder.value());
-                                                  return holder.value();
-                                              }).toList());
+                                {
+                                    ColdSweat.LOGGER.info("Adding effect {} to hearth potion blacklist", holder.value());
+                                    return holder.value();
+                                }).toList());
 
         /*
          Fetch JSON registries
@@ -378,11 +378,8 @@ public class ConfigLoadingHandler
         {
             List<Holder<? extends ConfigData>> sortedHolders = new ArrayList<>(registries.get(key));
             sortedHolders.sort(Comparator.comparing(holder ->
-                                                    {
-                                                        return holder.unwrapKey().map(k -> k.location().getPath().startsWith("default")
-                                                                                           ? 1
-                                                                                           : 0).orElse(0);
-                                                    }));
+            {   return holder.unwrapKey().map(k -> k.location().getPath().startsWith("default") ? 1 : 0).orElse(0);
+            }));
             registries.replaceValues(key, sortedHolders);
         }
     }
@@ -395,11 +392,11 @@ public class ConfigLoadingHandler
         Set<Holder<RemoveRegistryData<?>>> removals = registryAccess.registryOrThrow(ModRegistries.REMOVE_REGISTRY_DATA.key()).holders().collect(Collectors.toSet());
         removals.addAll(parseConfigData(ModRegistries.REMOVE_REGISTRY_DATA, RemoveRegistryData.CODEC, registryAccess));
         removals.forEach(holder ->
-                         {
-                             RemoveRegistryData<?> data = holder.value();
-                             ResourceKey<Registry<? extends ConfigData>> key = (ResourceKey) data.registry();
-                             REMOVED_REGISTRIES.put(key, data);
-                         });
+        {
+            RemoveRegistryData<?> data = holder.value();
+            ResourceKey<Registry<? extends ConfigData>> key = (ResourceKey) data.registry();
+            REMOVED_REGISTRIES.put(key, data);
+        });
     }
 
     private static void removeRegistries(Multimap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries)
