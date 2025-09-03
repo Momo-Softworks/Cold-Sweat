@@ -107,34 +107,34 @@ repositories {
         url = 'https://libraries.minecraft.net'
     }
     maven {
+        name = 'CurseForge'
         url 'https://www.cursemaven.com'
         content {
             includeGroup "curse.maven"
         }
     }
     maven {
-        // location of the maven for Registrate and Flywheel
-        name = 'tterrag maven'
+        name = 'Registrate'
         url = 'https://maven.tterrag.com'
     }
     maven {
-        url "https://maven.architectury.dev/"
+        name = 'Kotlin'
+        url = 'https://thedarkcolour.github.io/KotlinForForge/'
     }
     maven {
-        url "https://maven.saps.dev/minecraft"
+        name = "Valkyrien Skies"
+        url = 'https://maven.valkyrienskies.org'
+    }
+    maven {
+        name = 'Architectury'
+        url = "https://maven.architectury.dev"
         content {
             includeGroup "dev.latvian.mods"
             includeGroup "dev.ftb.mods"
         }
     }
     maven {
-        url "https://maven.latvian.dev/releases"
-        content {
-            includeGroup "dev.latvian.mods"
-            includeGroup "dev.latvian.apps"
-        }
-    }
-    maven {
+        name = 'JitPack'
         url 'https://jitpack.io'
         content {
             includeGroup "com.github.rtyley"
@@ -150,35 +150,32 @@ dependencies {
     minecraft 'net.minecraftforge:forge:1.16.5-36.2.42'
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
+    // Runtime Mods
     runtimeOnly fg.deobf("curse.maven:spark-361579:3767277")
     runtimeOnly fg.deobf("curse.maven:jei-238222:4371666")
     runtimeOnly fg.deobf("curse.maven:atmospheric-362393:3553332")
     runtimeOnly fg.deobf("curse.maven:blueprint-382216:3607198")
-    //runtimeOnly fg.deobf("curse.maven:oh-the-biomes-youll-go-247560:4024011")
-    //runtimeOnly fg.deobf("curse.maven:biomes-o-plenty-220318:3913914")
     runtimeOnly fg.deobf("curse.maven:coroutil-237749:3586476")
-    //runtimeOnly fg.deobf("curse.maven:tinkers-construct-74072:3695126")
-    //runtimeOnly fg.deobf("curse.maven:mantle-74924:3631982")
-    implementation fg.deobf("curse.maven:serene-seasons-291874:4537666")
     runtimeOnly fg.deobf("curse.maven:shutup-experimental-settings-407174:3188120")
-    runtimeOnly fg.deobf("curse.maven:cavebiomeapi-441706:3519248")
 
-    compileOnly fg.deobf("curse.maven:caves-and-cliffs-417430:3592876")
+    // Valkyrien Skies (Compat)
+    implementation fg.deobf("curse.maven:valkyrien-skies-258371:4174267")
+    implementation fg.deobf("curse.maven:eureka-ships-654384:4275649")
+
+    // KubeJS (Compat)
+    implementation fg.deobf("curse.maven:kubejs-238086:3647098")
+    implementation fg.deobf("curse.maven:rhino-416294:3525704")
+    implementation fg.deobf("curse.maven:architectury-api-419699:4521290")
+
+    // Mod Compat
+    implementation fg.deobf("curse.maven:serene-seasons-291874:4537666")
     implementation fg.deobf("curse.maven:curios-309927:4419403")
-    implementation fg.deobf("curse.maven:armor-underwear-mod-310383:3232088")
-    implementation fg.deobf("curse.maven:carrots-lib-311327:3231845")
     implementation fg.deobf("curse.maven:create-328085:3536025")
     implementation fg.deobf("curse.maven:flywheel-486392:3535459")
     implementation fg.deobf("curse.maven:spoiled-364918:3776531")
     implementation fg.deobf("curse.maven:ob-aquamirae-536254:4420334")
     implementation fg.deobf("curse.maven:obscure-api-638417:4420298")
-    implementation fg.deobf("curse.maven:valkyrien-skies-258371:4174267")
-    implementation fg.deobf("curse.maven:eureka-ships-654384:4275649")
-
-    implementation fg.deobf("dev.latvian.mods:kubejs-forge:${kubejs_version}")
-    implementation fg.deobf("dev.latvian.mods:rhino-forge:${rhino_version}")
-    implementation fg.deobf("me.shedaniel:architectury-forge:${architectury_version}")
-
+    compileOnly fg.deobf("curse.maven:caves-and-cliffs-417430:3592876")
     compileOnly fg.deobf("curse.maven:better-weather-400714:3420517")
     compileOnly fg.deobf("curse.maven:vampirism-233029:4640398")
     compileOnly fg.deobf("curse.maven:werewolves-417851:4662189")
