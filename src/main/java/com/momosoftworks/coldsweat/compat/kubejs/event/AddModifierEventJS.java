@@ -17,7 +17,7 @@ public class AddModifierEventJS extends LivingEntityEventJS
 
     @Override
     public LivingEntityJS getEntity()
-    {   return new LivingEntityJS(this.levelOf(event.getEntity()), event.getEntity());
+    {   return new LivingEntityJS(event.getEntity());
     }
 
     public Temperature.Trait getTrait()

@@ -27,7 +27,7 @@ public class DefaultModifiersEventJS extends LivingEntityEventJS
 
     @Override
     public LivingEntityJS getEntity()
-    {   return new LivingEntityJS(this.levelOf(this.event.getEntity()), this.event.getEntity());
+    {   return new LivingEntityJS(this.event.getEntity());
     }
 
     public Map<Temperature.Trait, List<TempModifier>> getModifiers()

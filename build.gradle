@@ -167,6 +167,7 @@ dependencies {
 
     // KubeJS (Compat)
     compileOnly fg.deobf("curse.maven:kubejs-238086:4377177")
+    compileOnly fg.deobf("curse.maven:rhino-416294:4069880")
     compileOnly ("dev.architectury:architectury-forge:${architectury_version}")
     compileOnly 'thedarkcolour:kotlinforforge:3.12.0'
 

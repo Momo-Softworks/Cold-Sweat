@@ -16,7 +16,7 @@ public class TempChangedEventJS extends LivingEntityEventJS
 
     @Override
     public EntityJS getEntity()
-    {   return new LivingEntityJS(this.levelOf(event.getEntity()), event.getEntity());
+    {   return new LivingEntityJS(event.getEntity());
     }
 
     public String getTrait()
