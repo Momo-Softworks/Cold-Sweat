@@ -19,7 +19,7 @@ public class WaterTempModifier extends TempModifier
     private static final double DRY_SPEED = 0.0015;
 
     public WaterTempModifier()
-    {   this(-0.01);
+    {   this(0);
     }
 
     public WaterTempModifier(double temperature)
@@ -55,7 +55,7 @@ public class WaterTempModifier extends TempModifier
         double maxTemp = this.getMaxTemperature(entity);
 
         // Expire if effect is nullified
-        if (CSMath.sign(temperature + dryAmount) != CSMath.sign(temperature))
+        if (temperature != 0 && CSMath.sign(temperature + dryAmount) != CSMath.sign(temperature))
         {   this.expires(0);
         }
 

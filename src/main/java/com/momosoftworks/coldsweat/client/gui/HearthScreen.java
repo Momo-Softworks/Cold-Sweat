@@ -32,27 +32,28 @@ public class HearthScreen extends AbstractHearthScreen<HearthContainer>
     {   RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
         graphics.blit(HEARTH_GUI, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
 
-        int hotFuel  = (int) (this.menu.getHotFuel()  / 27.7);
-        int coldFuel = (int) (this.menu.getColdFuel() / 27.7);
+        int maxGaugeHeight = 14;
+        int hotGaugeHeight  = this.menu.getHotFuel() <= 0 ? 0 : Math.round(CSMath.blend(2, 14, this.menu.getHotFuel(), 0, this.menu.te.getMaxFuel()));
+        int coldGaugeHeight = this.menu.getColdFuel() <= 0 ? 0 : Math.round(CSMath.blend(2, 14, this.menu.getColdFuel(), 0, this.menu.te.getMaxFuel()));
 
         // Render hot/cold fuel gauges
-        graphics.blit(HEARTH_GUI, leftPos + 61,  topPos + 66 - hotFuel,  176, 36 - hotFuel,  12, hotFuel, 256, 256);
-        graphics.blit(HEARTH_GUI, leftPos + 103, topPos + 66 - coldFuel, 188, 36 - coldFuel, 12, coldFuel, 256, 256);
+        graphics.blit(HOT_FUEL_GAUGE,  leftPos + 62,  topPos + 49 + (maxGaugeHeight-hotGaugeHeight),  0, maxGaugeHeight - hotGaugeHeight,  14, hotGaugeHeight, 14, 14);
+        graphics.blit(COLD_FUEL_GAUGE, leftPos + 100, topPos + 49 + (maxGaugeHeight-coldGaugeHeight), 0, maxGaugeHeight - coldGaugeHeight, 14, coldGaugeHeight, 14 ,14);
 
         // Render redstone indicators
         if (!ConfigSettings.SMART_HEARTH.get())
         {
-            boolean sidePowered = this.menu.te.isCoolingOn();
-            boolean backPowered = this.menu.te.isHeatingOn();
+            boolean coolingOn = this.menu.te.isCoolingOn();
+            boolean heatingOn = this.menu.te.isHeatingOn();
 
-            graphics.blit(HEARTH_GUI, leftPos + 60, topPos + 21, 176, backPowered ? 60 : 68, 14, 8, 256, 256);
-            graphics.blit(HEARTH_GUI, leftPos + 102, topPos + 21, 190, sidePowered ? 60 : 68, 14, 8, 256, 256);
+            graphics.blitSprite(POWER_INDICATOR_SPRITES.get(heatingOn, false), leftPos + 63,  topPos + 64, 13, 4);
+            graphics.blitSprite(POWER_INDICATOR_SPRITES.get(coolingOn, false), leftPos + 101, topPos + 64, 13, 4);
 
-            if (CSMath.betweenInclusive(mouseX, leftPos + 56, leftPos + 75) && CSMath.betweenInclusive(mouseY, topPos + 17, topPos + 29))
-            {   this.setTooltipForNextRenderPass(Component.translatable(backPowered ? "gui.cold_sweat.hearth.powered" : "gui.cold_sweat.hearth.unpowered"));
+            if (CSMath.betweenInclusive(mouseX, leftPos + 60, leftPos + 76) && CSMath.betweenInclusive(mouseY, topPos + 61, topPos + 67))
+            {   this.setTooltipForNextRenderPass(Component.translatable(heatingOn ? "gui.cold_sweat.hearth.powered" : "gui.cold_sweat.hearth.unpowered"));
             }
-            if (CSMath.betweenInclusive(mouseX, leftPos + 99, leftPos + 117) && CSMath.betweenInclusive(mouseY, topPos + 17, topPos + 29))
-            {   this.setTooltipForNextRenderPass(Component.translatable(sidePowered ? "gui.cold_sweat.hearth.powered" : "gui.cold_sweat.hearth.unpowered"));
+            if (CSMath.betweenInclusive(mouseX, leftPos + 98, leftPos + 114) && CSMath.betweenInclusive(mouseY, topPos + 61, topPos + 67))
+            {   this.setTooltipForNextRenderPass(Component.translatable(coolingOn ? "gui.cold_sweat.hearth.powered" : "gui.cold_sweat.hearth.unpowered"));
             }
         }
     }

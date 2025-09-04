@@ -26,10 +26,14 @@ import java.lang.reflect.Field;
 
 public abstract class AbstractHearthScreen<T extends AbstractContainerMenu> extends EffectRenderingInventoryScreen<T>
 {
-    private static final WidgetSprites PARTICLES_ENABLED_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/hearth_particle_button_on"),
-                                                                                     ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/hearth_particle_button_on_focus"));
-    private static final WidgetSprites PARTICLES_DISABLED_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/hearth_particle_button_off"),
-                                                                                      ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/hearth_particle_button_off_focus"));
+    protected static final WidgetSprites PARTICLES_ENABLED_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/particle_button_on"),
+                                                                                       ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/particle_button_on_focus"));
+    protected static final WidgetSprites PARTICLES_DISABLED_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/particle_button_off"),
+                                                                                        ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/particle_button_off_focus"));
+    protected static final WidgetSprites POWER_INDICATOR_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/power_indicator_off"),
+                                                                                     ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/power_indicator_on"));
+    protected static final ResourceLocation COLD_FUEL_GAUGE = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/sprites/hearth/fuel_gauge_cold.png");
+    protected static final ResourceLocation HOT_FUEL_GAUGE  = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/sprites/hearth/fuel_gauge_hot.png");
 
     ImageButton particleButton = null;
     Pair<BlockPos, ResourceLocation> levelPos = Pair.of(this.getBlockEntity().getBlockPos(), this.getBlockEntity().getLevel().dimension().location());
@@ -48,7 +52,7 @@ public abstract class AbstractHearthScreen<T extends AbstractContainerMenu> exte
     {   super.init();
         if (this.getBlockEntity().hasSmokeStack())
         {
-            particleButton = this.addRenderableWidget(new ImageButton(leftPos + 82, topPos + 68, 12, 12, particleButtonSprites, (button) ->
+            particleButton = this.addRenderableWidget(new ImageButton(leftPos + 160, topPos + 8, 8, 7, particleButtonSprites, (button) ->
             {
                 hideParticles = !hideParticles;
                 // If particles are disabled, add the hearth to the list of disabled hearths
