@@ -281,4 +281,9 @@ public class BoilerBlockEntity extends HearthBlockEntity
             return this.getItemFuel(stack) != 0;
         else return stack.is(ModItemTags.BOILER_VALID) || (CompatManager.isThirstLoaded() && CompatManager.Thirst.hasWaterPurity(stack));
     }
+
+    @Override
+    public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction direction)
+    {   return slot > 0;
+    }
 }

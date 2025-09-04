@@ -325,6 +325,11 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
     }
 
     @Override
+    public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction direction)
+    {   return slot > 0;
+    }
+
+    @Override
     public float getOpenNess(float partialTick)
     {   return this.lidController.getOpenness(partialTick);
     }
