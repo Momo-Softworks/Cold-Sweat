@@ -47,7 +47,7 @@ public abstract class AbstractHearthScreen<T extends Container> extends DisplayE
     {   super.init();
         if (this.getBlockEntity().hasSmokeStack())
         {
-            particleButton = this.addButton(new ImageButton(leftPos + 82, topPos + 68, 12, 12, 176 + (!hideParticles ? 0 : 12), 36, 12, HEARTH_GUI, (button) ->
+            particleButton = this.addButton(new ImageButton(leftPos + 160, topPos + 8, 8, 7, 176 + (!hideParticles ? 0 : 8), 14, 7, HEARTH_GUI, (button) ->
             {
                 hideParticles = !hideParticles;
                 // If particles are disabled, add the hearth to the list of disabled hearths
@@ -64,7 +64,7 @@ public abstract class AbstractHearthScreen<T extends Container> extends DisplayE
                 {   HearthSaveDataHandler.DISABLED_HEARTHS.remove(levelPos);
                 }
 
-                AbstractConfigPage.setButtonImageX(((ImageButton) button), 176 + (!hideParticles ? 0 : 12));
+                AbstractConfigPage.setButtonImageX(((ImageButton) button), 176 + (!hideParticles ? 0 : 8));
             })
             {
                 @Override
