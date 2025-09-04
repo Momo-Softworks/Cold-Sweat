@@ -269,6 +269,11 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
     }
 
     @Override
+    public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction direction)
+    {   return slot > 0;
+    }
+
+    @Override
     public <T> LazyOptional<T> getCapability(Capability<T> capability, Direction face)
     {
         if (!this.remove && face != null && capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
