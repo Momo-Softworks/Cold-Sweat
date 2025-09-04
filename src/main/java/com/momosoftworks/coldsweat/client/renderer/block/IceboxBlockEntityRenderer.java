@@ -61,7 +61,7 @@ public class IceboxBlockEntityRenderer implements BlockEntityRenderer<IceboxBloc
         poseStack.translate(0, -1, 0);
 
         VertexConsumer vertexes = buffer.getBuffer(RenderType.entityCutout(getTexture(blockstate)));
-        if (!blockEntity.hasSmokeStack())
+        if (!blockstate.getValue(IceboxBlock.SMOKESTACK))
         {
             float openness = blockEntity.getOpenNess(partialTick);
             openness = 1.0F - openness;
