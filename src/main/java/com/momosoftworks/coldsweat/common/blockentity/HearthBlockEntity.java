@@ -1364,7 +1364,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
 
     @Override
     public int[] getSlotsForFace(Direction side)
-    {   return new int[0];
+    {   return new int[]{0};
     }
 
     @Override
