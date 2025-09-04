@@ -15,6 +15,7 @@ import net.minecraft.world.entity.player.Inventory;
 public class BoilerScreen extends AbstractHearthScreen<BoilerContainer>
 {
     private static final ResourceLocation BOILER_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/boiler_gui.png");
+    private static final ResourceLocation HEARTH_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/hearth_gui.png");
 
     @Override
     HearthBlockEntity getBlockEntity()
@@ -31,31 +32,24 @@ public class BoilerScreen extends AbstractHearthScreen<BoilerContainer>
     }
 
     @Override
-    public void init()
-    {
-        super.init();
-        if (particleButton != null)
-        {   particleButton.setX(leftPos + 151);
-            particleButton.setY(topPos + 63);
-        }
-    }
-
-    @Override
     protected void renderBg(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY)
     {
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
         graphics.blit(BOILER_GUI, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
 
-        // Draw fuel gauge
-        graphics.blit(BOILER_GUI, leftPos + 109, topPos + 63, 176, 0, (int) (this.menu.getFuel() / 31.25), 14, 256, 256);
+        int maxGaugeHeight = 14;
+        int gaugeHeight  = this.menu.getFuel() <= 0 ? 0 : Math.round(CSMath.blend(2, 14, this.menu.getFuel(), 0, this.menu.te.getMaxFuel()));
+
+        // Render hot/cold fuel gauges
+        graphics.blit(BOILER_GUI, leftPos + 100,  topPos + 63 + (maxGaugeHeight-gaugeHeight),  176, maxGaugeHeight - gaugeHeight,  14, gaugeHeight, 256, 256);
 
         if (!ConfigSettings.SMART_HEARTH.get() && this.menu.te.hasSmokeStack())
         {
             boolean powered = this.menu.te.isHeatingOn();
 
-            graphics.blit(BOILER_GUI, leftPos + 117, topPos + 78, 176, powered ? 14 : 22, 14, 8, 256, 256);
+            graphics.blit(HEARTH_GUI, leftPos + 101, topPos + 78, 176, powered ? 28 : 32, 13, 4, 256, 256);
 
-            if (CSMath.betweenInclusive(mouseX, leftPos + 114, leftPos + 132) && CSMath.betweenInclusive(mouseY, topPos + 78, topPos + 86))
+            if (CSMath.betweenInclusive(mouseX, leftPos + 98, leftPos + 117) && CSMath.betweenInclusive(mouseY, topPos + 75, topPos + 82))
             {   this.setTooltipForNextRenderPass(Component.translatable(powered ? "gui.cold_sweat.hearth.powered" : "gui.cold_sweat.hearth.unpowered"));
             }
         }

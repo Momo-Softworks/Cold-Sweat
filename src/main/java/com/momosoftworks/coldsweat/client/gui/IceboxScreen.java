@@ -15,6 +15,7 @@ import net.minecraft.world.entity.player.Inventory;
 public class IceboxScreen extends AbstractHearthScreen<IceboxContainer>
 {
     private static final ResourceLocation ICEBOX_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/icebox_gui.png");
+    private static final ResourceLocation HEARTH_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/hearth_gui.png");
 
     @Override
     HearthBlockEntity getBlockEntity()
@@ -31,37 +32,24 @@ public class IceboxScreen extends AbstractHearthScreen<IceboxContainer>
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks)
-    {
-        super.render(graphics, mouseX, mouseY, partialTicks);
-    }
-
-    @Override
-    public void init()
-    {
-        super.init();
-        if (particleButton != null)
-        {   particleButton.setX(leftPos + 151);
-            particleButton.setY(topPos + 63);
-        }
-    }
-
-    @Override
     protected void renderBg(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY)
     {
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
         graphics.blit(ICEBOX_GUI, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
 
+        int maxGaugeHeight = 14;
+        int gaugeHeight  = this.menu.getFuel() <= 0 ? 0 : Math.round(CSMath.blend(2, 14, this.menu.getFuel(), 0, this.menu.te.getMaxFuel()));
+
         // Draw fuel gauge
-        graphics.blit(ICEBOX_GUI, leftPos + 109, topPos + 63, 176, 0, (int) (menu.te.getFuel() / 31.25), 14, 256, 256);
+        graphics.blit(ICEBOX_GUI, leftPos + 100,  topPos + 63 + (maxGaugeHeight-gaugeHeight),  176, maxGaugeHeight - gaugeHeight,  14, gaugeHeight, 256, 256);
 
         if (!ConfigSettings.SMART_HEARTH.get() && this.menu.te.hasSmokeStack())
         {
             boolean powered = this.menu.te.isCoolingOn();
 
-            graphics.blit(ICEBOX_GUI, leftPos + 117, topPos + 78, 176, powered ? 14 : 22, 14, 8, 256, 256);
+            graphics.blit(HEARTH_GUI, leftPos + 101, topPos + 78, 176, powered ? 28 : 32, 13, 4, 256, 256);
 
-            if (CSMath.betweenInclusive(mouseX, leftPos + 114, leftPos + 132) && CSMath.betweenInclusive(mouseY, topPos + 78, topPos + 86))
+            if (CSMath.betweenInclusive(mouseX, leftPos + 98, leftPos + 117) && CSMath.betweenInclusive(mouseY, topPos + 75, topPos + 82))
             {   this.setTooltipForNextRenderPass(Component.translatable(powered ? "gui.cold_sweat.hearth.powered" : "gui.cold_sweat.hearth.unpowered"));
             }
         }

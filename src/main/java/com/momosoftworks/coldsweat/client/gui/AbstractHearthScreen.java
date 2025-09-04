@@ -42,7 +42,7 @@ public abstract class AbstractHearthScreen<T extends AbstractContainerMenu> exte
     {   super.init();
         if (this.getBlockEntity().hasSmokeStack())
         {
-            particleButton = this.addRenderableWidget(new ImageButton(leftPos + 82, topPos + 68, 12, 12, 176 + (!hideParticles ? 0 : 12), 36, 12, HEARTH_GUI, (button) ->
+            particleButton = this.addRenderableWidget(new ImageButton(leftPos + 160, topPos + 8, 8, 7, 176 + (!hideParticles ? 0 : 8), 14, 7, HEARTH_GUI, (button) ->
             {
                 hideParticles = !hideParticles;
                 // If particles are disabled, add the hearth to the list of disabled hearths
@@ -62,7 +62,7 @@ public abstract class AbstractHearthScreen<T extends AbstractContainerMenu> exte
                 Field imageX = ObfuscationReflectionHelper.findField(ImageButton.class, "f_94224_");
                 imageX.setAccessible(true);
                 try
-                {   imageX.set(button, 176 + (!hideParticles ? 0 : 12));
+                {   imageX.set(button, 176 + (!hideParticles ? 0 : 8));
                 }
                 catch (Exception ignored) {}
             })
