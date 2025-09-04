@@ -210,8 +210,13 @@ public class IceboxBlock extends Block implements EntityBlock
     }
 
     @Override
-    public BlockState getStateForPlacement(BlockPlaceContext context) {
-        return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
+    public BlockState getStateForPlacement(BlockPlaceContext context)
+    {
+        BlockPos pos = context.getClickedPos();
+        boolean belowSmokestack = context.getLevel().getBlockState(pos.above()).getBlock() instanceof SmokestackBlock;
+        return this.defaultBlockState()
+               .setValue(FACING, context.getHorizontalDirection().getOpposite())
+               .setValue(SMOKESTACK, belowSmokestack);
     }
 
     @Override
