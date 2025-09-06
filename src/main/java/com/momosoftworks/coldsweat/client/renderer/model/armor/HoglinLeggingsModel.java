@@ -9,11 +9,11 @@ import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 
-public class HoglinTrousersModel<T extends LivingEntity> extends HumanoidModel<T>
+public class HoglinLeggingsModel<T extends LivingEntity> extends HumanoidModel<T>
 {
-    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hoglin_trousers"), "main");
+    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hoglin_leggings"), "main");
 
-    public HoglinTrousersModel(ModelPart root)
+    public HoglinLeggingsModel(ModelPart root)
     {   super(root);
     }
 

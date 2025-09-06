@@ -32,31 +32,31 @@ public class ModItems
     static final Item.Properties ARMOR_PROPERTIES = new Item.Properties().stacksTo(1);
 
     // Armor Items
-    public static final DeferredItem<Item> HOGLIN_HEADPIECE = ITEMS.register("hoglin_headpiece", () ->
+    public static final DeferredItem<Item> HOGLIN_HELMET = ITEMS.register("hoglin_helmet", () ->
             new HoglinArmorItem(ModArmorMaterials.HOGLIN, ArmorItem.Type.HELMET, ARMOR_PROPERTIES.durability(ArmorItem.Type.HELMET.getDurability(14))));
-    public static final DeferredItem<Item> HOGLIN_TUNIC = ITEMS.register("hoglin_tunic", () ->
+    public static final DeferredItem<Item> HOGLIN_CHESTPLATE = ITEMS.register("hoglin_chestplate", () ->
             new HoglinArmorItem(ModArmorMaterials.HOGLIN, ArmorItem.Type.CHESTPLATE, ARMOR_PROPERTIES.durability(ArmorItem.Type.CHESTPLATE.getDurability(14))));
-    public static final DeferredItem<Item> HOGLIN_TROUSERS = ITEMS.register("hoglin_trousers", () ->
+    public static final DeferredItem<Item> HOGLIN_LEGGINGS = ITEMS.register("hoglin_leggings", () ->
             new HoglinArmorItem(ModArmorMaterials.HOGLIN, ArmorItem.Type.LEGGINGS, ARMOR_PROPERTIES.durability(ArmorItem.Type.LEGGINGS.getDurability(14))));
-    public static final DeferredItem<Item> HOGLIN_HOOVES = ITEMS.register("hoglin_hooves", () ->
+    public static final DeferredItem<Item> HOGLIN_BOOTS = ITEMS.register("hoglin_boots", () ->
             new HoglinArmorItem(ModArmorMaterials.HOGLIN, ArmorItem.Type.BOOTS, ARMOR_PROPERTIES.durability(ArmorItem.Type.BOOTS.getDurability(14))));
 
-    public static final DeferredItem<Item> GOAT_FUR_CAP = ITEMS.register("goat_fur_cap", () ->
+    public static final DeferredItem<Item> GOAT_FUR_HELMET = ITEMS.register("goat_fur_helmet", () ->
             new GoatArmorItem(ModArmorMaterials.GOAT_FUR, ArmorItem.Type.HELMET, ARMOR_PROPERTIES.durability(ArmorItem.Type.HELMET.getDurability(10))));
-    public static final DeferredItem<Item> GOAT_FUR_PARKA = ITEMS.register("goat_fur_parka", () ->
+    public static final DeferredItem<Item> GOAT_FUR_CHESTPLATE = ITEMS.register("goat_fur_chestplate", () ->
             new GoatArmorItem(ModArmorMaterials.GOAT_FUR, ArmorItem.Type.CHESTPLATE, ARMOR_PROPERTIES.durability(ArmorItem.Type.CHESTPLATE.getDurability(10))));
-    public static final DeferredItem<Item> GOAT_FUR_PANTS = ITEMS.register("goat_fur_pants", () ->
+    public static final DeferredItem<Item> GOAT_FUR_LEGGINGS = ITEMS.register("goat_fur_leggings", () ->
             new GoatArmorItem(ModArmorMaterials.GOAT_FUR, ArmorItem.Type.LEGGINGS, ARMOR_PROPERTIES.durability(ArmorItem.Type.LEGGINGS.getDurability(10))));
     public static final DeferredItem<Item> GOAT_FUR_BOOTS = ITEMS.register("goat_fur_boots", () ->
             new GoatArmorItem(ModArmorMaterials.GOAT_FUR, ArmorItem.Type.BOOTS, ARMOR_PROPERTIES.durability(ArmorItem.Type.BOOTS.getDurability(10))));
 
-    public static final DeferredItem<Item> CHAMELEON_HELMET = ITEMS.register("chameleon_scale_helmet", () ->
+    public static final DeferredItem<Item> CHAMELEON_HELMET = ITEMS.register("chameleon_helmet", () ->
             new ChameleonArmorItem(ModArmorMaterials.CHAMELEON, ArmorItem.Type.HELMET, ARMOR_PROPERTIES.durability(ArmorItem.Type.HELMET.getDurability(12))));
-    public static final DeferredItem<Item> CHAMELEON_CHESTPLATE = ITEMS.register("chameleon_scale_chestplate", () ->
+    public static final DeferredItem<Item> CHAMELEON_CHESTPLATE = ITEMS.register("chameleon_chestplate", () ->
             new ChameleonArmorItem(ModArmorMaterials.CHAMELEON, ArmorItem.Type.CHESTPLATE, ARMOR_PROPERTIES.durability(ArmorItem.Type.CHESTPLATE.getDurability(12))));
-    public static final DeferredItem<Item> CHAMELEON_LEGGINGS = ITEMS.register("chameleon_scale_leggings", () ->
+    public static final DeferredItem<Item> CHAMELEON_LEGGINGS = ITEMS.register("chameleon_leggings", () ->
             new ChameleonArmorItem(ModArmorMaterials.CHAMELEON, ArmorItem.Type.LEGGINGS, ARMOR_PROPERTIES.durability(ArmorItem.Type.LEGGINGS.getDurability(12))));
-    public static final DeferredItem<Item> CHAMELEON_BOOTS = ITEMS.register("chameleon_scale_boots", () ->
+    public static final DeferredItem<Item> CHAMELEON_BOOTS = ITEMS.register("chameleon_boots", () ->
             new ChameleonArmorItem(ModArmorMaterials.CHAMELEON, ArmorItem.Type.BOOTS, ARMOR_PROPERTIES.durability(ArmorItem.Type.BOOTS.getDurability(12))));
 
     // Block Items

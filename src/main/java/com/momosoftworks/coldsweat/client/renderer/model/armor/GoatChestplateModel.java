@@ -9,13 +9,13 @@ import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 
-public class GoatParkaModel<T extends LivingEntity> extends HumanoidModel<T>
+public class GoatChestplateModel<T extends LivingEntity> extends HumanoidModel<T>
 {
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "goat_parka"), "main");
 
     ModelPart fluff;
 
-    public GoatParkaModel(ModelPart root)
+    public GoatChestplateModel(ModelPart root)
     {   super(root);
         this.fluff = root.getChild("body").getChild("fluff");
     }

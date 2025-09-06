@@ -30,7 +30,6 @@
     "MixinIce$NoWaterOnBreak",
     "MixinInventoryOpenServer",
     "MixinLivingLoad",
-    "MixinLoadItemStack",
     "MixinMenuChanged",
     "MixinMinecart",
     "MixinMobSpawning",

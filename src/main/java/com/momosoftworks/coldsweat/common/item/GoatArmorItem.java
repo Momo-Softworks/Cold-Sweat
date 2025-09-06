@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.common.item;
 
 import com.momosoftworks.coldsweat.client.event.RegisterModels;
-import com.momosoftworks.coldsweat.client.renderer.model.armor.GoatParkaModel;
+import com.momosoftworks.coldsweat.client.renderer.model.armor.GoatChestplateModel;
 import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
@@ -34,10 +34,10 @@ public class GoatArmorItem extends ArmorItem
                 RegisterModels.checkForInitModels();
                 return switch (armorSlot)
                 {
-                    case HEAD -> RegisterModels.GOAT_CAP_MODEL;
+                    case HEAD -> RegisterModels.GOAT_HELMET_MODEL;
                     case CHEST ->
                     {
-                        GoatParkaModel<?> model = RegisterModels.GOAT_PARKA_MODEL;
+                        GoatChestplateModel<?> model = RegisterModels.GOAT_CHESTPLATE_MODEL;
                         ModelPart fluff = model.body.getChild("fluff");
                         float headPitch = entityLiving.getViewXRot(Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true));
 
@@ -45,7 +45,7 @@ public class GoatArmorItem extends ArmorItem
                         fluff.x = fluff.zRot * 2;
                         yield model;
                     }
-                    case LEGS -> RegisterModels.GOAT_PANTS_MODEL;
+                    case LEGS -> RegisterModels.GOAT_LEGGINGS_MODEL;
                     case FEET -> RegisterModels.GOAT_BOOTS_MODEL;
                     default -> null;
                 };

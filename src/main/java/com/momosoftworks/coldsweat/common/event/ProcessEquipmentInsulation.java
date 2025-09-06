@@ -222,7 +222,7 @@ public class ProcessEquipmentInsulation
     public static void onDamageTaken(LivingIncomingDamageEvent event)
     {
         DamageSource source = event.getSource();
-        if (source.is(DamageTypes.HOT_FLOOR) && event.getEntity().getItemBySlot(EquipmentSlot.FEET).is(ModItems.HOGLIN_HOOVES))
+        if (source.is(DamageTypes.HOT_FLOOR) && event.getEntity().getItemBySlot(EquipmentSlot.FEET).is(ModItems.HOGLIN_BOOTS))
         {   event.setCanceled(true);
         }
     }

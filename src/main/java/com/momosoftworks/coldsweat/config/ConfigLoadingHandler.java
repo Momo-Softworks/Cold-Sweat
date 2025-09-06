@@ -8,6 +8,7 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.annotation.Internal;
+import com.momosoftworks.coldsweat.api.event.core.MissingMappingsEvent;
 import com.momosoftworks.coldsweat.api.event.core.registry.AddRegistriesEvent;
 import com.momosoftworks.coldsweat.api.event.core.registry.LoadRegistriesEvent;
 import com.momosoftworks.coldsweat.api.event.vanilla.ServerConfigsLoadedEvent;
@@ -128,6 +129,9 @@ public class ConfigLoadingHandler
             process.invoke(dummyEvent);
         }
         catch (Exception ignored) {}
+
+        MissingMappingsEvent missingMappingsEvent = new MissingMappingsEvent();
+        NeoForge.EVENT_BUS.post(missingMappingsEvent);
 
         REGISTRIES_INITIALIZED = true;
     }

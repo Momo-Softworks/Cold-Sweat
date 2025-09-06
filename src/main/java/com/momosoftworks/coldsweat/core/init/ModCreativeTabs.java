@@ -9,9 +9,6 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.util.item.ItemStackHelper;
 import com.momosoftworks.coldsweat.util.serialization.ObjectBuilder;
-import net.minecraft.core.component.DataComponentMap;
-import net.minecraft.core.component.DataComponentPatch;
-import net.minecraft.core.component.PatchedDataComponentMap;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.*;
@@ -56,13 +53,13 @@ public class ModCreativeTabs
                         ModItems.ICEBOX.value().getDefaultInstance(),
                         ModItems.SMOKESTACK.value().getDefaultInstance(),
                         ModItems.SEWING_TABLE.value().getDefaultInstance(),
-                        ModItems.HOGLIN_HEADPIECE.value().getDefaultInstance(),
-                        ModItems.HOGLIN_TUNIC.value().getDefaultInstance(),
-                        ModItems.HOGLIN_TROUSERS.value().getDefaultInstance(),
-                        ModItems.HOGLIN_HOOVES.value().getDefaultInstance(),
-                        ModItems.GOAT_FUR_CAP.value().getDefaultInstance(),
-                        ModItems.GOAT_FUR_PARKA.value().getDefaultInstance(),
-                        ModItems.GOAT_FUR_PANTS.value().getDefaultInstance(),
+                        ModItems.HOGLIN_HELMET.value().getDefaultInstance(),
+                        ModItems.HOGLIN_CHESTPLATE.value().getDefaultInstance(),
+                        ModItems.HOGLIN_LEGGINGS.value().getDefaultInstance(),
+                        ModItems.HOGLIN_BOOTS.value().getDefaultInstance(),
+                        ModItems.GOAT_FUR_HELMET.value().getDefaultInstance(),
+                        ModItems.GOAT_FUR_CHESTPLATE.value().getDefaultInstance(),
+                        ModItems.GOAT_FUR_LEGGINGS.value().getDefaultInstance(),
                         ModItems.GOAT_FUR_BOOTS.value().getDefaultInstance(),
                         ModItems.CHAMELEON_HELMET.value().getDefaultInstance(),
                         ModItems.CHAMELEON_CHESTPLATE.value().getDefaultInstance(),
