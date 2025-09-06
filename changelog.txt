@@ -3338,7 +3338,65 @@ Technical Changes:
 
 ------------------------------------------------------------------------------------------------------------------------
 2.4-b04d
+- Made water droplets more evenly distributed when the player emerges from water
+- Water droplets are now tinted to the biome's water color
+- Waterskins now make the player wet when poured
 
 Fixes:
 * Fixed potential crash due to duplicate registries
 * Fixed crash when carrying temperature-affecting items
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.4-b05a
+* Redesigned some parts of the hearth, boiler, and icebox GUIs
+      - New fuel gauge textures that are more in line with Vanilla
+      - Less prominent particle visibility toggle button
+      - Tweaked the position & design of redstone current indicators
+- Tweaked textures for several items:
+      - Chameleon Molt
+      - Chameleon Scale Armor
+      - Goat Fur Armor
+      - Hoglin Hide Armor
+      - Hearth
+      - Insulated Minecart (very slightly)
+      - These changes are a mix of general design improvements and more closely aligning them with the Vanilla style
+! Changed armor item IDs to follow the normal helmet/chestplate/leggings/boots convention
+      - i.e. cold_sweat:goat_fur_parka is now cold_sweat:goat_fur_chestplate
+      - The word "scale" is now omitted from chameleon armor IDs; i.e. cold_sweat:chameleon_scale_helmet -> cold_sweat:chameleon_helmet
+      - Old configs targeting these IDs will continue to work, but should be updated when possible
+      - Existing items in worlds will be automatically converted to the new IDs
+- The fuel slot of iceboxes/boilers can no longer be taken from by automation (i.e. hoppers)
+      - This makes automation easier and more consistent with Vanilla blocks like furnaces
+
+Fixes:
+- (1.21) Fixed crash when registries are loaded in a certain order; triggered by some mod combinations
+* (1.16) Fixed the top half of a hearth not breaking when the bottom half is broken
+* Fixed crash when common-side KubeJS events are fired
+* Fixed world temperature increasing/decreasing indefinitely after pouring a waterskin
+* Fixed Cold Sweat not compiling from source due to outdated build.gradle dependencies
+- Fixed bed-like blocks setting the player's spawn point when they shouldn't
+- Fixed the resulting temperature of TemperatureChangedEvent not being used
+- Fixed insulation attribute modifiers not being arranged correctly on the tooltip if some of them have unmet requirements
+- Fixed empty "matches" parameter on registry removals returning true for all registries
+- Fixed the hearth not accepting items via automation (i.e. hoppers)
+- Fixed the icebox not using the proper top texture when placed beneath a smokestack
+
+Technical Changes:
+- Added SimpleTempModifier (cold_sweat:simple), a basic TempModifier controlled by NBT
+      - Good for use in commands or simple KubeJS implementations
+      - Parameters:
+            - "Temperature": The value to apply to the entity's temperature
+            - "Operation": Any of: add, subtract, multiply, divide, power, root, set, max, min
+                  - Augment what the modifier does to the entity's temperature
+                  - "set" overrides the entity's temperature with the modifier's value
+                  - "max" ensures the entity's temperature is >= the modifier's value
+                  - "min" ensures the entity's temperature is <= the modifier's value
+      - Changes to the modifier's NBT will be reflected immediately
+      - When modifying the NBT in Java or KubeJS, make sure to call markDirty() so the changes are sent to clients
+- JSON configs now require a wildcard "*" to apply to all objects in a registry
+      - i.e. "items": ["*"] applies to all items
+      - Previously, an empty list applied to all objects, which caused issues when some IDs in a list failed to parse
+- During config loading, the IDs of registered configs will now be logged instead of their contents
+      - "Registered" configs are those which are part of JSON datapacks or added by mods
+      - Other configs will log their full contents as before
