@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.common.item;
 
 import com.momosoftworks.coldsweat.api.temperature.modifier.SoulLampTempModifier;
-import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.event.RegisterModels;
@@ -49,7 +48,7 @@ public class SoulspringLampItem extends Item
 {
     public SoulspringLampItem()
     {
-        super(new Properties().stacksTo(1).fireResistant().rarity(Rarity.UNCOMMON)
+        super(new Properties().stacksTo(1).fireResistant().rarity(Rarity.RARE)
                               .component(ModItemComponents.SOULSPRING_LAMP_LIT, false)
                               .component(ModItemComponents.SOULSPRING_LAMP_FUEL, 0d)
                               .component(DataComponents.CUSTOM_DATA, CustomData.of(new CompoundTag())));
