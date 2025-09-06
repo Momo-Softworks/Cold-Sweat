@@ -29,10 +29,10 @@ public class HoglinArmorItem extends ArmorItem
                 RegisterModels.checkForInitModels();
                 return switch (armorSlot)
                 {
-                    case HEAD -> RegisterModels.HOGLIN_HEADPIECE_MODEL;
-                    case CHEST -> RegisterModels.HOGLIN_TUNIC_MODEL;
-                    case LEGS -> RegisterModels.HOGLIN_TROUSERS_MODEL;
-                    case FEET -> RegisterModels.HOGLIN_HOOVES_MODEL;
+                    case HEAD -> RegisterModels.HOGLIN_HELMET_MODEL;
+                    case CHEST -> RegisterModels.HOGLIN_CHESTPLATE_MODEL;
+                    case LEGS -> RegisterModels.HOGLIN_LEGGINGS_MODEL;
+                    case FEET -> RegisterModels.HOGLIN_BOOTS_MODEL;
                     default -> null;
                 };
             }
@@ -41,6 +41,6 @@ public class HoglinArmorItem extends ArmorItem
 
     @Override
     public boolean makesPiglinsNeutral(ItemStack stack, LivingEntity wearer)
-    {   return stack.is(ModItems.HOGLIN_HEADPIECE);
+    {   return stack.is(ModItems.HOGLIN_HELMET);
     }
 }

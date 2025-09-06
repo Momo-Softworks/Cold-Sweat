@@ -9,12 +9,12 @@ import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 
-public class GoatCapModel<T extends LivingEntity> extends HumanoidModel<T>
+public class GoatHelmetModel<T extends LivingEntity> extends HumanoidModel<T>
 {
     public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(new ResourceLocation(ColdSweat.MOD_ID, "goat_cap"), "main");
 
 
-    public GoatCapModel(ModelPart root)
+    public GoatHelmetModel(ModelPart root)
     {   super(root);
     }
 

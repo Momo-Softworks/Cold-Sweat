@@ -32,7 +32,6 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.TickEvent;
@@ -221,7 +220,7 @@ public class ProcessEquipmentInsulation
     public static void onDamageTaken(LivingAttackEvent event)
     {
         DamageSource source = event.getSource();
-        if (source == DamageSource.HOT_FLOOR && event.getEntityLiving().getItemBySlot(EquipmentSlot.FEET).is(ModItems.HOGLIN_HOOVES))
+        if (source == DamageSource.HOT_FLOOR && event.getEntityLiving().getItemBySlot(EquipmentSlot.FEET).is(ModItems.HOGLIN_BOOTS))
         {   event.setCanceled(true);
         }
     }
