@@ -563,7 +563,7 @@ public class ChameleonEntity extends AnimalEntity
     public double getMyRidingOffset()
     {
         return this.getVehicle() instanceof PlayerEntity
-               ? ((PlayerEntity) this.getVehicle()).getItemBySlot(EquipmentSlotType.HEAD).getItem() == ModItems.HOGLIN_HEADPIECE
+               ? ((PlayerEntity) this.getVehicle()).getItemBySlot(EquipmentSlotType.HEAD).getItem() == ModItems.HOGLIN_HELMET
                     ? 0.65 : 0.5
                : 0;
     }

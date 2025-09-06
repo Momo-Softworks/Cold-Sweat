@@ -7,14 +7,14 @@ import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.entity.LivingEntity;
 
-public class HoglinHeadpieceModel<T extends LivingEntity> extends BipedModel<T>
+public class HoglinHelmetModel<T extends LivingEntity> extends BipedModel<T>
 {
 	private final ModelRenderer headBase;
 	private final ModelRenderer leftEar;
 	private final ModelRenderer rightEar;
 	private final ModelRenderer headpiece;
 
-	public HoglinHeadpieceModel()
+	public HoglinHelmetModel()
 	{
 		super(1f);
 		texWidth = 64;
@@ -66,7 +66,7 @@ public class HoglinHeadpieceModel<T extends LivingEntity> extends BipedModel<T>
 		modelRenderer.zRot = z;
 	}
 
-	public HoglinHeadpieceModel<T> withModelBase(BipedModel<?> modelBase)
+	public HoglinHelmetModel<T> withModelBase(BipedModel<?> modelBase)
 	{
 		this.body = modelBase.body;
 		this.rightArm = modelBase.rightArm;

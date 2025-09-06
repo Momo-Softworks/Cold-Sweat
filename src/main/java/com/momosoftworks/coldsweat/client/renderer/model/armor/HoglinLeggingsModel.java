@@ -1,7 +1,4 @@
-package com.momosoftworks.coldsweat.client.renderer.model.armor;// Made with Blockbench 4.8.1
-// Exported for Minecraft version 1.15 - 1.16 with Mojang mappings
-// Paste this class into your mod and generate all required imports
-
+package com.momosoftworks.coldsweat.client.renderer.model.armor;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
@@ -10,13 +7,13 @@ import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.entity.LivingEntity;
 
-public class HoglinTrousersModel<T extends LivingEntity> extends BipedModel<T>
+public class HoglinLeggingsModel<T extends LivingEntity> extends BipedModel<T>
 {
 	private final ModelRenderer waist;
 	private final ModelRenderer rightLegging;
 	private final ModelRenderer leftLegging;
 
-	public HoglinTrousersModel()
+	public HoglinLeggingsModel()
 	{
 		super(1f);
 		texWidth = 64;
@@ -74,7 +71,7 @@ public class HoglinTrousersModel<T extends LivingEntity> extends BipedModel<T>
 		modelRenderer.zRot = z;
 	}
 
-	public HoglinTrousersModel<T> withModelBase(BipedModel<?> modelBase)
+	public HoglinLeggingsModel<T> withModelBase(BipedModel<?> modelBase)
 	{
 		this.body = modelBase.body;
 		this.rightArm = modelBase.rightArm;

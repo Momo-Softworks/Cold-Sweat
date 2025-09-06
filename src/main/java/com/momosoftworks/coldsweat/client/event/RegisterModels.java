@@ -27,15 +27,15 @@ import java.util.function.Supplier;
 @Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class RegisterModels
 {
-    public static HoglinHeadpieceModel<?> HOGLIN_HEADPIECE_MODEL = new HoglinHeadpieceModel<>();
-    public static HoglinTunicModel<?> HOGLIN_TUNIC_MODEL = new HoglinTunicModel<>();
-    public static HoglinHoovesModel<?> HOGLIN_HOOVES_MODEL = new HoglinHoovesModel<>();
-    public static HoglinTrousersModel<?> HOGLIN_TROUSERS_MODEL = new HoglinTrousersModel<>();
+    public static HoglinHelmetModel<?> HOGLIN_HELMET_MODEL = new HoglinHelmetModel<>();
+    public static HoglinChestplateModel<?> HOGLIN_CHESTPLATE_MODEL = new HoglinChestplateModel<>();
+    public static HoglinLeggingsModel<?> HOGLIN_LEGGINGS_MODEL = new HoglinLeggingsModel<>();
+    public static HoglinBootsModel<?> HOGLIN_BOOTS_MODEL = new HoglinBootsModel<>();
 
-    public static LlamaCapModel<?> LLAMA_CAP_MODEL = new LlamaCapModel<>();
-    public static LlamaParkaModel<?> LLAMA_PARKA_MODEL = new LlamaParkaModel<>();
-    public static LlamaPantsModel<?> LLAMA_PANTS_MODEL = new LlamaPantsModel<>();
-    public static LlamaBootsModel<?> LLAMA_BOOTS_MODEL = new LlamaBootsModel<>();
+    public static GoatHelmetModel<?> GOAT_HELMET_MODEL = new GoatHelmetModel<>();
+    public static GoatChestplateModel<?> GOAT_CHESTPLATE_MODEL = new GoatChestplateModel<>();
+    public static GoatLeggingsModel<?> GOAT_LEGGINGS_MODEL = new GoatLeggingsModel<>();
+    public static GoatBootsModel<?> GOAT_BOOTS_MODEL = new GoatBootsModel<>();
 
     public static ChameleonHelmetModel<?> CHAMELEON_HELMET_MODEL = new ChameleonHelmetModel<>();
     public static ChameleonChestplateModel<?> CHAMELEON_CHESTPLATE_MODEL = new ChameleonChestplateModel<>();

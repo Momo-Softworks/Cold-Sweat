@@ -13,25 +13,25 @@
     "has_helm_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "cold_sweat:hoglin_headpiece"
+        "recipe": "cold_sweat:hoglin_helmet"
       }
     },
     "has_body_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "cold_sweat:hoglin_tunic"
+        "recipe": "cold_sweat:hoglin_chestplate"
       }
     },
     "has_legs_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "cold_sweat:hoglin_trousers"
+        "recipe": "cold_sweat:hoglin_leggings"
       }
     },
     "has_boots_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "cold_sweat:hoglin_hooves"
+        "recipe": "cold_sweat:hoglin_boots"
       }
     }
   },
@@ -46,10 +46,10 @@
   ],
   "rewards": {
     "recipes": [
-      "cold_sweat:hoglin_headpiece",
-      "cold_sweat:hoglin_tunic",
-      "cold_sweat:hoglin_trousers",
-      "cold_sweat:hoglin_hooves"
+      "cold_sweat:hoglin_helmet",
+      "cold_sweat:hoglin_chestplate",
+      "cold_sweat:hoglin_leggings",
+      "cold_sweat:hoglin_boots"
     ]
   }
 }

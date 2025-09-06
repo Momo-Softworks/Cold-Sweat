@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.common.item;
 
 import com.momosoftworks.coldsweat.client.event.RegisterModels;
-import com.momosoftworks.coldsweat.client.renderer.model.armor.LlamaParkaModel;
+import com.momosoftworks.coldsweat.client.renderer.model.armor.GoatChestplateModel;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.model.BipedModel;
@@ -14,9 +14,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-public class FurArmorItem extends ArmorItem
+public class GoatArmorItem extends ArmorItem
 {
-    public FurArmorItem(IArmorMaterial material, EquipmentSlotType slot, Properties properties)
+    public GoatArmorItem(IArmorMaterial material, EquipmentSlotType slot, Properties properties)
     {   super(material, slot, properties);
     }
 
@@ -26,10 +26,10 @@ public class FurArmorItem extends ArmorItem
     {
         switch (armorSlot)
         {
-            case HEAD : return (A) RegisterModels.LLAMA_CAP_MODEL.withModelBase(playerModel);
+            case HEAD : return (A) RegisterModels.GOAT_HELMET_MODEL.withModelBase(playerModel);
             case CHEST :
             {
-                LlamaParkaModel<?> model = RegisterModels.LLAMA_PARKA_MODEL.withModelBase(playerModel);
+                GoatChestplateModel<?> model = RegisterModels.GOAT_CHESTPLATE_MODEL.withModelBase(playerModel);
                 ModelRenderer fluff = model.fluff;
                 float headPitch = entityLiving.getViewXRot(Minecraft.getInstance().getFrameTime());
 
@@ -38,8 +38,8 @@ public class FurArmorItem extends ArmorItem
 
                 return ((A) model);
             }
-            case LEGS : return (A) RegisterModels.LLAMA_PANTS_MODEL.withModelBase(playerModel);
-            case FEET : return (A) RegisterModels.LLAMA_BOOTS_MODEL.withModelBase(playerModel);
+            case LEGS : return (A) RegisterModels.GOAT_LEGGINGS_MODEL.withModelBase(playerModel);
+            case FEET : return (A) RegisterModels.GOAT_BOOTS_MODEL.withModelBase(playerModel);
             default : return null;
         }
     }

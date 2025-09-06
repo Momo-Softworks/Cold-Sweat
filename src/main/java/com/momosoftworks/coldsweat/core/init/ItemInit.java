@@ -35,31 +35,31 @@ public class ItemInit
     // Armor Items
     public static final Item.Properties ARMOR_PROPERTIES = new Item.Properties().stacksTo(1).tab(ColdSweatGroup.COLD_SWEAT);
 
-    public static final RegistryObject<Item> HOGLIN_HEADPIECE = ITEMS.register("hoglin_headpiece", () ->
+    public static final RegistryObject<Item> HOGLIN_HELMET = ITEMS.register("hoglin_helmet", () ->
             new HoglinArmorItem(ModArmorMaterials.HOGLIN, EquipmentSlotType.HEAD, ARMOR_PROPERTIES));
-    public static final RegistryObject<Item> HOGLIN_TUNIC = ITEMS.register("hoglin_tunic", () ->
+    public static final RegistryObject<Item> HOGLIN_CHESTPLATE = ITEMS.register("hoglin_chestplate", () ->
             new HoglinArmorItem(ModArmorMaterials.HOGLIN, EquipmentSlotType.CHEST, ARMOR_PROPERTIES));
-    public static final RegistryObject<Item> HOGLIN_TROUSERS = ITEMS.register("hoglin_trousers", () ->
+    public static final RegistryObject<Item> HOGLIN_LEGGINGS = ITEMS.register("hoglin_leggings", () ->
             new HoglinArmorItem(ModArmorMaterials.HOGLIN, EquipmentSlotType.LEGS, ARMOR_PROPERTIES));
-    public static final RegistryObject<Item> HOGLIN_HOOVES = ITEMS.register("hoglin_hooves", () ->
+    public static final RegistryObject<Item> HOGLIN_BOOTS = ITEMS.register("hoglin_boots", () ->
             new HoglinArmorItem(ModArmorMaterials.HOGLIN, EquipmentSlotType.FEET, ARMOR_PROPERTIES));
 
-    public static final RegistryObject<Item> GOAT_FUR_CAP = ITEMS.register("goat_fur_cap", () ->
-            new FurArmorItem(ModArmorMaterials.GOAT_FUR, EquipmentSlotType.HEAD, ARMOR_PROPERTIES));
-    public static final RegistryObject<Item> GOAT_FUR_PARKA = ITEMS.register("goat_fur_parka", () ->
-            new FurArmorItem(ModArmorMaterials.GOAT_FUR, EquipmentSlotType.CHEST, ARMOR_PROPERTIES));
-    public static final RegistryObject<Item> GOAT_FUR_PANTS = ITEMS.register("goat_fur_pants", () ->
-            new FurArmorItem(ModArmorMaterials.GOAT_FUR, EquipmentSlotType.LEGS, ARMOR_PROPERTIES));
+    public static final RegistryObject<Item> GOAT_FUR_HELMET = ITEMS.register("goat_fur_helmet", () ->
+            new GoatArmorItem(ModArmorMaterials.GOAT_FUR, EquipmentSlotType.HEAD, ARMOR_PROPERTIES));
+    public static final RegistryObject<Item> GOAT_FUR_CHESTPLATE = ITEMS.register("goat_fur_chestplate", () ->
+            new GoatArmorItem(ModArmorMaterials.GOAT_FUR, EquipmentSlotType.CHEST, ARMOR_PROPERTIES));
+    public static final RegistryObject<Item> GOAT_FUR_LEGGINGS = ITEMS.register("goat_fur_leggings", () ->
+            new GoatArmorItem(ModArmorMaterials.GOAT_FUR, EquipmentSlotType.LEGS, ARMOR_PROPERTIES));
     public static final RegistryObject<Item> GOAT_FUR_BOOTS = ITEMS.register("goat_fur_boots", () ->
-            new FurArmorItem(ModArmorMaterials.GOAT_FUR, EquipmentSlotType.FEET, ARMOR_PROPERTIES));
+            new GoatArmorItem(ModArmorMaterials.GOAT_FUR, EquipmentSlotType.FEET, ARMOR_PROPERTIES));
 
-    public static final RegistryObject<Item> CHAMELEON_HELMET = ITEMS.register("chameleon_scale_helmet", () ->
+    public static final RegistryObject<Item> CHAMELEON_HELMET = ITEMS.register("chameleon_helmet", () ->
             new ChameleonArmorItem(ModArmorMaterials.CHAMELEON, EquipmentSlotType.HEAD, ARMOR_PROPERTIES));
-    public static final RegistryObject<Item> CHAMELEON_CHESTPLATE = ITEMS.register("chameleon_scale_chestplate", () ->
+    public static final RegistryObject<Item> CHAMELEON_CHESTPLATE = ITEMS.register("chameleon_chestplate", () ->
             new ChameleonArmorItem(ModArmorMaterials.CHAMELEON, EquipmentSlotType.CHEST, ARMOR_PROPERTIES));
-    public static final RegistryObject<Item> CHAMELEON_LEGGINGS = ITEMS.register("chameleon_scale_leggings", () ->
+    public static final RegistryObject<Item> CHAMELEON_LEGGINGS = ITEMS.register("chameleon_leggings", () ->
             new ChameleonArmorItem(ModArmorMaterials.CHAMELEON, EquipmentSlotType.LEGS, ARMOR_PROPERTIES));
-    public static final RegistryObject<Item> CHAMELEON_BOOTS = ITEMS.register("chameleon_scale_boots", () ->
+    public static final RegistryObject<Item> CHAMELEON_BOOTS = ITEMS.register("chameleon_boots", () ->
             new ChameleonArmorItem(ModArmorMaterials.CHAMELEON, EquipmentSlotType.FEET, ARMOR_PROPERTIES));
 
     // Block Items

@@ -224,7 +224,7 @@ public class ProcessEquipmentInsulation
     public static void onDamageTaken(LivingAttackEvent event)
     {
         DamageSource source = event.getSource();
-        if (source == DamageSource.HOT_FLOOR && event.getEntityLiving().getItemBySlot(EquipmentSlotType.FEET).getItem() == ModItems.HOGLIN_HOOVES)
+        if (source == DamageSource.HOT_FLOOR && event.getEntityLiving().getItemBySlot(EquipmentSlotType.FEET).getItem() == ModItems.HOGLIN_BOOTS)
         {   event.setCanceled(true);
         }
     }

@@ -23,16 +23,16 @@ public class HoglinArmorItem extends ArmorItem
     {
         switch (armorSlot)
         {
-            case HEAD  : return (A) RegisterModels.HOGLIN_HEADPIECE_MODEL.withModelBase((playerModel));
-            case CHEST : return (A) RegisterModels.HOGLIN_TUNIC_MODEL.withModelBase((playerModel));
-            case LEGS  : return (A) RegisterModels.HOGLIN_TROUSERS_MODEL.withModelBase(playerModel);
-            case FEET  : return (A) RegisterModels.HOGLIN_HOOVES_MODEL.withModelBase(playerModel);
+            case HEAD  : return (A) RegisterModels.HOGLIN_HELMET_MODEL.withModelBase((playerModel));
+            case CHEST : return (A) RegisterModels.HOGLIN_CHESTPLATE_MODEL.withModelBase((playerModel));
+            case LEGS  : return (A) RegisterModels.HOGLIN_LEGGINGS_MODEL.withModelBase(playerModel);
+            case FEET  : return (A) RegisterModels.HOGLIN_BOOTS_MODEL.withModelBase(playerModel);
             default: return null;
         }
     }
 
     @Override
     public boolean makesPiglinsNeutral(ItemStack stack, LivingEntity wearer)
-    {   return stack.getItem() == ModItems.HOGLIN_HEADPIECE;
+    {   return stack.getItem() == ModItems.HOGLIN_HELMET;
     }
 }

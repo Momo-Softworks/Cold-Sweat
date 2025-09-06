@@ -1,9 +1,5 @@
 package com.momosoftworks.coldsweat.client.renderer.model.armor;
 
-// Made with Blockbench 4.12.3
-// Exported for Minecraft version 1.15 - 1.16 with Mojang mappings
-// Paste this class into your mod and generate all required imports
-
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.momosoftworks.coldsweat.util.math.CSMath;
