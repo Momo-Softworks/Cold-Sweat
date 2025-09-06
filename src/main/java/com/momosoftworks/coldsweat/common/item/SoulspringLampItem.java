@@ -57,7 +57,7 @@ public class SoulspringLampItem extends Item
     public SoulspringLampItem()
     {
         super(new Properties(){{
-            tab(ColdSweatGroup.COLD_SWEAT).stacksTo(1).fireResistant().rarity(Rarity.UNCOMMON);
+            tab(ColdSweatGroup.COLD_SWEAT).stacksTo(1).fireResistant().rarity(Rarity.RARE);
             if (FMLEnvironment.dist != Dist.DEDICATED_SERVER)
             {   setISTER(SoulSpringLampRenderer::new);
             }
