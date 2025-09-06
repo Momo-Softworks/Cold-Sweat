@@ -258,7 +258,14 @@ public class WetnessRenderer
                 renderQuadDirect(poseStack, bufferBuilder, (int) CSMath.roundNearest(pos.x, 3f/uiScale * 4), pos.y,
                                  size, 1, 0, 0, 1, 1, alpha, combinedLight, waterColor);
                 if (!paused)
-                {   TRAILS.set(i, new Triplet<>(new Vector2i(pos.x, pos.y), alpha - 0.045f * frametime, size));
+                {
+                    if (wetness <= 0)
+                    {   alpha -= 0.08f * frametime;
+                    }
+                    else
+                    {   alpha -= 0.045f * frametime * tempMult;
+                    }
+                    TRAILS.set(i, new Triplet<>(new Vector2i(pos.x, pos.y), alpha, size));
                 }
             }
             else
