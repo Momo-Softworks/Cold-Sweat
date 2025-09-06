@@ -11,7 +11,6 @@ import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.serialization.ObjectBuilder;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.*;
@@ -56,14 +55,14 @@ public class CreativeTabInit
                         ModItems.ICEBOX.getDefaultInstance(),
                         ModItems.SMOKESTACK.getDefaultInstance(),
                         ModItems.SEWING_TABLE.getDefaultInstance(),
-                        ModItems.HOGLIN_HEADPIECE.getDefaultInstance(),
-                        ModItems.HOGLIN_TUNIC.getDefaultInstance(),
-                        ModItems.HOGLIN_TROUSERS.getDefaultInstance(),
-                        ModItems.HOGLIN_HOOVES.getDefaultInstance(),
-                        ModItems.FUR_CAP.getDefaultInstance(),
-                        ModItems.FUR_PARKA.getDefaultInstance(),
-                        ModItems.FUR_PANTS.getDefaultInstance(),
-                        ModItems.FUR_BOOTS.getDefaultInstance(),
+                        ModItems.HOGLIN_HELMET.getDefaultInstance(),
+                        ModItems.HOGLIN_CHESTPLATE.getDefaultInstance(),
+                        ModItems.HOGLIN_LEGGINGS.getDefaultInstance(),
+                        ModItems.HOGLIN_BOOTS.getDefaultInstance(),
+                        ModItems.GOAT_FUR_HELMET.getDefaultInstance(),
+                        ModItems.GOAT_FUR_CHESTPLATE.getDefaultInstance(),
+                        ModItems.GOAT_FUR_LEGGINGS.getDefaultInstance(),
+                        ModItems.GOAT_FUR_BOOTS.getDefaultInstance(),
                         ModItems.CHAMELEON_HELMET.getDefaultInstance(),
                         ModItems.CHAMELEON_CHESTPLATE.getDefaultInstance(),
                         ModItems.CHAMELEON_LEGGINGS.getDefaultInstance(),

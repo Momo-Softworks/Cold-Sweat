@@ -219,20 +219,20 @@ public class ItemSettingsConfig
                                 List.of("minecraft:leather_leggings",    6,  6),
                                 List.of("minecraft:leather_boots",       5,  5),
 
-                                List.of("cold_sweat:hoglin_headpiece",   0,  10),
-                                List.of("cold_sweat:hoglin_tunic",       0,  14),
-                                List.of("cold_sweat:hoglin_trousers",    0,  12),
-                                List.of("cold_sweat:hoglin_hooves",      0,  10),
+                                List.of("cold_sweat:hoglin_helmet",   0,  10),
+                                List.of("cold_sweat:hoglin_chestplate",       0,  14),
+                                List.of("cold_sweat:hoglin_leggings",    0,  12),
+                                List.of("cold_sweat:hoglin_boots",      0,  10),
 
-                                List.of("cold_sweat:goat_fur_cap",       10, 0),
-                                List.of("cold_sweat:goat_fur_parka",     14, 0),
-                                List.of("cold_sweat:goat_fur_pants",     12, 0),
+                                List.of("cold_sweat:goat_fur_helmet",       10, 0),
+                                List.of("cold_sweat:goat_fur_chestplate",     14, 0),
+                                List.of("cold_sweat:goat_fur_leggings",     12, 0),
                                 List.of("cold_sweat:goat_fur_boots",     10, 0),
 
-                                List.of("cold_sweat:chameleon_scale_helmet",     10, 0.0085, "adaptive"),
-                                List.of("cold_sweat:chameleon_scale_chestplate", 14, 0.0085, "adaptive"),
-                                List.of("cold_sweat:chameleon_scale_leggings",   12, 0.0085, "adaptive"),
-                                List.of("cold_sweat:chameleon_scale_boots",      10, 0.0085, "adaptive"))
+                                List.of("cold_sweat:chameleon_helmet",     10, 0.0085, "adaptive"),
+                                List.of("cold_sweat:chameleon_chestplate", 14, 0.0085, "adaptive"),
+                                List.of("cold_sweat:chameleon_leggings",   12, 0.0085, "adaptive"),
+                                List.of("cold_sweat:chameleon_boots",      10, 0.0085, "adaptive"))
                             .addIf(CompatManager.isToughAsNailsLoaded(),
                                 () -> List.of("toughasnails:leaf_helmet",     0, List.of(1, 1, 1, 1, 1)),
                                 () -> List.of("toughasnails:leaf_chestplate", 0, List.of(1, 1, 1, 1, 1, 1, 1)),
