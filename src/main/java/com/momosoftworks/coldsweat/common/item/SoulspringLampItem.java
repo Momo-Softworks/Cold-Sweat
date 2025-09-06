@@ -45,7 +45,7 @@ import java.util.function.Consumer;
 public class SoulspringLampItem extends Item
 {
     public SoulspringLampItem()
-    {   super(new Properties().stacksTo(1).fireResistant().rarity(Rarity.UNCOMMON));
+    {   super(new Properties().stacksTo(1).fireResistant().rarity(Rarity.RARE));
     }
 
     @Override
