@@ -63,7 +63,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -569,7 +568,7 @@ public class Chameleon extends Animal
     public double getMyRidingOffset()
     {
         return this.getVehicle() instanceof Player player
-               ? player.getItemBySlot(EquipmentSlot.HEAD).is(ModItems.HOGLIN_HEADPIECE)
+               ? player.getItemBySlot(EquipmentSlot.HEAD).is(ModItems.HOGLIN_HELMET)
                     ? 0.65 : 0.5
                : 0;
     }
