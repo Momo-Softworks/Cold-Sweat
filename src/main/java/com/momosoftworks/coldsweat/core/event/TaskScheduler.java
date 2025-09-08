@@ -5,7 +5,8 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A utility class that allows for scheduling {@link Runnable} tasks to be executed after a delay.<br>
@@ -14,40 +15,43 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 @Mod.EventBusSubscriber
 public class TaskScheduler
 {
-    static final ConcurrentLinkedQueue<QueueEntry> SERVER_SCHEDULE = new ConcurrentLinkedQueue<>();
-    static final ConcurrentLinkedQueue<QueueEntry> CLIENT_SCHEDULE = new ConcurrentLinkedQueue<>();
+    private static final List<QueueEntry> SERVER_SCHEDULE = new ArrayList<>(32);
+    private static final List<QueueEntry> CLIENT_SCHEDULE = new ArrayList<>(32);
 
     @SubscribeEvent
-    public static void runScheduledTasks(TickEvent event)
+    public static synchronized void runScheduledTasks(TickEvent event)
     {
         if ((event instanceof TickEvent.ServerTickEvent || event instanceof TickEvent.ClientTickEvent) && event.phase == TickEvent.Phase.START)
         {
-            ConcurrentLinkedQueue<QueueEntry> schedule = event.side.isClient() ? CLIENT_SCHEDULE : SERVER_SCHEDULE;
+            List<QueueEntry> schedule = event.side.isClient() ? CLIENT_SCHEDULE : SERVER_SCHEDULE;
 
             // Iterate through all active tasks
             if (!schedule.isEmpty())
-            schedule.removeIf(entry ->
             {
-                int ticks = entry.time;
-
-                // If the task is ready to run, run it and remove it from the schedule
-                if (ticks <= 0)
+                for (int i = 0; i < schedule.size(); i++)
                 {
-                    try
-                    {   entry.task.run();
+                    QueueEntry entry = schedule.get(i);
+                    int ticks = entry.time;
+
+                    // If the task is ready to run, run it and remove it from the schedule
+                    if (ticks <= 0)
+                    {
+                        try
+                        {   entry.task.run();
+                        }
+                        catch (Exception e)
+                        {   ColdSweat.LOGGER.error("Error while running scheduled task", e);
+                            throw e;
+                        }
+                        schedule.remove(i);
+                        i--;
                     }
-                    catch (Exception e)
-                    {   ColdSweat.LOGGER.error("Error while running scheduled task", e);
-                        throw e;
+                    // Otherwise, decrement the task's tick count
+                    else
+                    {   entry.time = ticks - 1;
                     }
-                    return true;
                 }
-                // Otherwise, decrement the task's tick count
-                else
-                {   entry.time = ticks - 1;
-                }
-                return false;
-            });
+            }
         }
     }
 
