@@ -6,7 +6,8 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A utility class that allows for scheduling {@link Runnable} tasks to be executed after a delay.<br>
@@ -15,8 +16,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 @EventBusSubscriber
 public class TaskScheduler
 {
-    static final ConcurrentLinkedQueue<QueueEntry> SERVER_SCHEDULE = new ConcurrentLinkedQueue<>();
-    static final ConcurrentLinkedQueue<QueueEntry> CLIENT_SCHEDULE = new ConcurrentLinkedQueue<>();
+    private static final List<QueueEntry> SERVER_SCHEDULE = new ArrayList<>(32);
+    private static final List<QueueEntry> CLIENT_SCHEDULE = new ArrayList<>(32);
 
     @SubscribeEvent
     public static void tickClient(ClientTickEvent.Pre event)
@@ -28,13 +29,14 @@ public class TaskScheduler
     {   tickScheduledTasks(SERVER_SCHEDULE);
     }
 
-    private static void tickScheduledTasks(ConcurrentLinkedQueue<QueueEntry> schedule)
+    private static void tickScheduledTasks(List<QueueEntry> schedule)
     {
         // Iterate through all active tasks
         if (!schedule.isEmpty())
         {
-            schedule.removeIf(entry ->
+            for (int i = 0; i < schedule.size(); i++)
             {
+                QueueEntry entry = schedule.get(i);
                 int ticks = entry.time;
 
                 // If the task is ready to run, run it and remove it from the schedule
@@ -44,18 +46,17 @@ public class TaskScheduler
                     {   entry.task.run();
                     }
                     catch (Exception e)
-                    {
-                        ColdSweat.LOGGER.error("Error while running scheduled task", e);
+                    {   ColdSweat.LOGGER.error("Error while running scheduled task", e);
                         throw e;
                     }
-                    return true;
+                    schedule.remove(i);
+                    i--;
                 }
                 // Otherwise, decrement the task's tick count
                 else
                 {   entry.time = ticks - 1;
                 }
-                return false;
-            });
+            }
         }
     }
 
