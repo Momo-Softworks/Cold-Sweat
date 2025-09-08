@@ -21,10 +21,11 @@ public class TagHelper
 
     public static Collection<Holder<?>> getTagValues(ResourceLocation registry, ResourceLocation tag)
     {
-        for (TagKey<?> tagKey : EVENT_TAGS.keySet())
+        for (Map.Entry<TagKey<?>, Collection<Holder<?>>> entry : EVENT_TAGS.entrySet())
         {
+            TagKey<?> tagKey = entry.getKey();
             if (tagKey.registry().location().equals(registry) && tagKey.location().equals(tag))
-            {   return EVENT_TAGS.get(tagKey);
+            {   return entry.getValue();
             }
         }
         return Collections.emptyList();
