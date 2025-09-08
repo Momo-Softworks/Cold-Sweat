@@ -117,7 +117,7 @@ public class FilledWaterskinItem extends Item
             double effectAmount = temperature * (ConfigSettings.WATERSKIN_CONSUME_STRENGTH.get() / 50d);
             Temperature.addModifier(player, new WaterskinTempModifier(effectAmount).expires(0), Temperature.Trait.CORE, Placement.Duplicates.ALLOW);
             double wetnessTemp = temperature > 0 ? Math.max(0.5, temperature / 200) : Math.min(-0.5, temperature / 200);
-            Temperature.addModifier(player, new WaterTempModifier(wetnessTemp).tickRate(5), Temperature.Trait.WORLD, Placement.Duplicates.ALLOW);
+            Temperature.addOrReplaceModifier(player, new WaterTempModifier(wetnessTemp).tickRate(5), Temperature.Trait.WORLD, Placement.Duplicates.BY_CLASS);
 
             WorldHelper.playEntitySound(ModSounds.WATERSKIN_POUR, player, player.getSoundSource(), 2f, (float) ((Math.random() / 5) + 0.9));
         }
@@ -437,7 +437,7 @@ public class FilledWaterskinItem extends Item
                         if (!affectedPlayers.contains(player))
                         {   // Apply the effect and store the player
                             Temperature.addModifier(player, new WaterskinTempModifier(effectAmount).expires(0), Temperature.Trait.CORE, Placement.Duplicates.ALLOW);
-                            Temperature.addModifier(player, new WaterTempModifier(wetnessTemp).tickRate(5), Temperature.Trait.WORLD, Placement.Duplicates.ALLOW);
+                            Temperature.addOrReplaceModifier(player, new WaterTempModifier(wetnessTemp).tickRate(5), Temperature.Trait.WORLD, Placement.Duplicates.BY_CLASS);
                             affectedPlayers.add(player);
                         }
                     });
