@@ -198,7 +198,7 @@ dependencies {
     runtimeOnly fg.deobf("curse.maven:spark-361579:4738952")
     runtimeOnly fg.deobf("curse.maven:biomes-o-plenty-220318:4764804")
     runtimeOnly fg.deobf("curse.maven:terrablender-563928:5378180")
-    //runtimeOnly fg.deobf("curse.maven:legendary-tooltips-532127:4662781")
+    runtimeOnly fg.deobf("curse.maven:jei-238222:6600311")
     runtimeOnly fg.deobf("curse.maven:packet-fixer-689467:5416166")
     runtimeOnly fg.deobf("curse.maven:attributefix-280510:4844658")
     runtimeOnly fg.deobf("curse.maven:customskinloader-286924:5497382")
