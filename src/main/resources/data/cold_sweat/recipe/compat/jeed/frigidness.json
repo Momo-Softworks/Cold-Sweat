@@ -1,6 +1,6 @@
 {
   "type": "jeed:effect_provider",
-  "conditions": [
+  "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "jeed"

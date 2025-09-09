@@ -1,6 +1,6 @@
 {
   "type": "toughasnails:water_purifying",
-  "conditions": [
+  "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "toughasnails"

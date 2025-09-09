@@ -1,6 +1,6 @@
 {
   "type": "minecraft:campfire_cooking",
-  "conditions": [
+  "neoforge:conditions": [
     {
       "type": "neoforge:mod_loaded",
       "modid": "thirst"
