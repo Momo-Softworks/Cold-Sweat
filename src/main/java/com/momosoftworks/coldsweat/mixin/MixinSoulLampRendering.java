@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.client.event.HandleSoulLampAnim;
 import com.momosoftworks.coldsweat.client.event.RenderLampHand;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.entity.EntityHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -47,6 +48,8 @@ public class MixinSoulLampRendering
             at = @At("TAIL"))
     public void poseRightArm(LivingEntity entity, CallbackInfo ci)
     {
+        if (!ConfigSettings.POSE_SOULSPRING_LAMP.get()) return;
+
         boolean holdingLamp = EntityHelper.holdingLamp(entity, HumanoidArm.RIGHT);
         Pair<Float, Float> armRot = HandleSoulLampAnim.RIGHT_ARM_ROTATIONS.getOrDefault(entity, Pair.of(0f, 0f));
         float rightArmRot = CSMath.toRadians(CSMath.blend(armRot.getSecond(), armRot.getFirst(), Minecraft.getInstance().getFrameTime(), 0, 1));
@@ -76,6 +79,8 @@ public class MixinSoulLampRendering
             at = @At("TAIL"))
     public void poseLeftArm(LivingEntity entity, CallbackInfo ci)
     {
+        if (!ConfigSettings.POSE_SOULSPRING_LAMP.get()) return;
+
         boolean holdingLamp = EntityHelper.holdingLamp(entity, HumanoidArm.LEFT);
         Pair<Float, Float> armRot = HandleSoulLampAnim.LEFT_ARM_ROTATIONS.getOrDefault(entity, Pair.of(0f, 0f));
         float leftArmRot = CSMath.blend(CSMath.toRadians(armRot.getSecond()), CSMath.toRadians(armRot.getFirst()), Minecraft.getInstance().getFrameTime(), 0, 1);
@@ -120,6 +125,8 @@ public class MixinSoulLampRendering
                                       // locals
                                       boolean isMainArm, ItemStack leftHand, ItemStack rightHand)
         {
+            if (!ConfigSettings.POSE_SOULSPRING_LAMP.get()) return;
+
             if (rightHand.is(ModItems.SOULSPRING_LAMP) && ClientOnlyHelper.isPlayerModelSlim(self))
             {   ms.translate(-0.5/16f, 0, 0);
                 WAS_RIGHT_HAND_ADJUSTED = true;
@@ -138,6 +145,8 @@ public class MixinSoulLampRendering
                                      // locals
                                      boolean isMainArm, ItemStack leftHand, ItemStack rightHand)
         {
+            if (!ConfigSettings.POSE_SOULSPRING_LAMP.get()) return;
+
             // Move the PS back to its original position
             if (WAS_RIGHT_HAND_ADJUSTED)
             {   ms.translate(0.5/16f, 0, 0);
@@ -157,6 +166,8 @@ public class MixinSoulLampRendering
         @Inject(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V", at = @At("TAIL"))
         public void shiftWidePlayerArm(LivingEntity entity, float limbSwing, float limbSwingAmount, float age, float headYaw, float headPitch, CallbackInfo ci)
         {
+            if (!ConfigSettings.POSE_SOULSPRING_LAMP.get()) return;
+
             if (self instanceof PlayerModel playerModel && !ClientOnlyHelper.isPlayerModelSlim(self))
             {
                 if (EntityHelper.holdingLamp(entity, HumanoidArm.RIGHT))
@@ -185,6 +196,8 @@ public class MixinSoulLampRendering
         @Inject(method = "getCurrentItemAttackStrengthDelay", at = @At("HEAD"), cancellable = true)
         public void reduceEquipDelay(CallbackInfoReturnable<Float> cir)
         {
+            if (!ConfigSettings.POSE_SOULSPRING_LAMP.get()) return;
+
             if (((LivingEntity) (Object) this).getItemInHand(InteractionHand.MAIN_HAND).is(ModItems.SOULSPRING_LAMP))
             {   cir.setReturnValue(0f);
             }
