@@ -29,7 +29,6 @@ import com.momosoftworks.coldsweat.util.serialization.DynamicHolder;
 import com.momosoftworks.coldsweat.util.serialization.ListBuilder;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.core.Holder;
-import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -47,7 +46,6 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.fml.util.thread.EffectiveSide;
-import net.neoforged.neoforge.common.ModConfigSpec;
 import org.apache.logging.log4j.util.TriConsumer;
 import org.joml.Vector2i;
 
@@ -239,6 +237,7 @@ public class ConfigSettings
     public static final DynamicHolder<IntegerBounds> WATER_DROPLET_SCALE;
 
     public static final DynamicHolder<Boolean> ANIMATED_SOULSPRING_LAMP_MODEL;
+    public static final DynamicHolder<Boolean> POSE_SOULSPRING_LAMP;
 
     public static final DynamicHolder<Preference.WaterskinAction> WATERSKIN_USE_PRIMARY;
     public static final DynamicHolder<Preference.WaterskinAction> WATERSKIN_USE_SECONDARY;
@@ -975,7 +974,8 @@ public class ConfigSettings
         HEATSTROKE_SWAY_AMOUNT = addClientSetting(ColdSweat.createKey("heatstroke_sway_amount"), () -> 1.0, holder -> holder.set(ClientSettingsConfig.HEATSTROKE_SWAY_AMOUNT.get()));
         HEATSTROKE_SWAY_SPEED = addClientSetting(ColdSweat.createKey("heatstroke_sway_speed"), () -> 1.0, holder -> holder.set(ClientSettingsConfig.HEATSTROKE_SWAY_SPEED.get()));
 
-        ANIMATED_SOULSPRING_LAMP_MODEL = addClientSetting(ColdSweat.createKey("animated_soulspring_lamp_model"), () -> true, holder -> holder.set(ClientSettingsConfig.ANIMATED_SOUL_SPRING_LAMP.get()));
+        ANIMATED_SOULSPRING_LAMP_MODEL = addClientSetting(ColdSweat.createKey("animated_soulspring_lamp_model"), () -> true, holder -> holder.set(ClientSettingsConfig.ANIMATED_SOULSPRING_LAMP.get()));
+        POSE_SOULSPRING_LAMP = addClientSetting(ColdSweat.createKey("pose_soulspring_lamp"), () -> true, holder -> holder.set(ClientSettingsConfig.POSE_SOULSPRING_LAMP.get()));
 
         WATERSKIN_USE_PRIMARY = addClientSetting(ColdSweat.createKey("waterskin_primary_action"), () -> Preference.WaterskinAction.POUR,
             holder -> holder.set(Preference.WaterskinAction.byName(ClientSettingsConfig.WATERSKIN_DRINK_PRIMARY.get())));
