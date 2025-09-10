@@ -17,6 +17,7 @@
     "MixinMultiplayerHack",
     "MixinPickEntity",
     "MixinSoulLampRendering",
+    "MixinSoulLampRendering$EquipAnimation",
     "MixinSoulLampRendering$HeldItem",
     "MixinSoulLampRendering$ShiftWidePlayerArm",
     "MixinWorldRender",
