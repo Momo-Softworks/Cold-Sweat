@@ -241,8 +241,8 @@
 
   "cold_sweat.message.sleep.body.hot":     "You may not rest now; You are overheating.",
   "cold_sweat.message.sleep.body.cold":    "You may not rest now; You are freezing.",
-  "cold_sweat.message.sleep.world.hot":    "You may not rest now; It is sweltering outside.",
-  "cold_sweat.message.sleep.world.cold":   "You may not rest now; It is freezing outside.",
+  "cold_sweat.message.sleep.world.hot":    "You may not rest now; It is sweltering here.",
+  "cold_sweat.message.sleep.world.cold":   "You may not rest now; It is freezing here.",
 
 
   "commands.cold_sweat.temperature.set.single.result":    "Set the %s temperature of %s to %d",
