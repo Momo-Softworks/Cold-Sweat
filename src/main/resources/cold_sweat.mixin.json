@@ -15,6 +15,7 @@
     "MixinModLoading$Client",
     "MixinPickEntity",
     "MixinSoulLampRendering",
+    "MixinSoulLampRendering$EquipAnimation",
     "MixinSoulLampRendering$HeldItem",
     "MixinSoulLampRendering$ShiftWidePlayerArm",
     "MixinXPBar",
