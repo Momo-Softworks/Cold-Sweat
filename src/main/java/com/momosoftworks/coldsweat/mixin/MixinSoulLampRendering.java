@@ -15,6 +15,7 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
@@ -27,6 +28,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(HumanoidModel.class)
@@ -166,6 +168,18 @@ public class MixinSoulLampRendering
                     {   playerModel.leftArm.x += 1;
                     }
                 }
+            }
+        }
+    }
+
+    @Mixin(Player.class)
+    public static class EquipAnimation
+    {
+        @Inject(method = "getCurrentItemAttackStrengthDelay", at = @At("HEAD"), cancellable = true)
+        public void reduceEquipDelay(CallbackInfoReturnable<Float> cir)
+        {
+            if (((LivingEntity) (Object) this).getItemInHand(InteractionHand.MAIN_HAND).is(ModItems.SOULSPRING_LAMP))
+            {   cir.setReturnValue(0f);
             }
         }
     }
