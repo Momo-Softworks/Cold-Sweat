@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.common.event;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -42,6 +43,11 @@ public class PreventPlayerSleep
         // If the player's world temperature is critical
         else if (!CSMath.betweenExclusive(worldTemp, minTemp, maxTemp))
         {
+            // If the bed is habitable, allow sleeping
+            double worldTempAtBed = WorldHelper.getTemperatureAt(player.level, event.getPos());
+            if (CSMath.betweenExclusive(worldTempAtBed, minTemp, maxTemp))
+            {   return;
+            }
             // Let the player sleep if they're resistant to damage
             double tempResistance = Temperature.get(player, worldTemp > maxTemp ? Temperature.Trait.HEAT_RESISTANCE : Temperature.Trait.COLD_RESISTANCE);
             if (tempResistance >= 1)
