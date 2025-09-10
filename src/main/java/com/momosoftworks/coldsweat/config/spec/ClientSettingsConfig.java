@@ -64,7 +64,8 @@ public class ClientSettingsConfig
     public static final ForgeConfigSpec.DoubleValue HEATSTROKE_SWAY_AMOUNT;
     public static final ForgeConfigSpec.DoubleValue HEATSTROKE_SWAY_SPEED;
 
-    public static final ForgeConfigSpec.BooleanValue ANIMATED_SOUL_SPRING_LAMP;
+    public static final ForgeConfigSpec.BooleanValue ANIMATED_SOULSPRING_LAMP;
+    public static final ForgeConfigSpec.BooleanValue POSE_SOULSPRING_LAMP;
 
     public static final ForgeConfigSpec.ConfigValue<String> WATERSKIN_DRINK_PRIMARY;
     public static final ForgeConfigSpec.ConfigValue<String> WATERSKIN_DRINK_SECONDARY;
@@ -270,12 +271,17 @@ public class ClientSettingsConfig
                              " Displays areas that the Hearth is affecting when the F3 debug menu is open",
                              " ⌄ ")
                     .define("Hearth Debug", true);
-            ANIMATED_SOUL_SPRING_LAMP = BUILDER
+            ANIMATED_SOULSPRING_LAMP = BUILDER
                     .comment("─────────────────────────────────────────────────────────────────────────",
                              " Enables the animated soul spring lamp model",
                              " Disable this if there are visual errors like missing textures",
                              " ⌄ ")
-                    .define("Animated Soul Spring Lamp", true);
+                    .define("Animated Soulspring Lamp", true);
+            POSE_SOULSPRING_LAMP = BUILDER
+                    .comment("─────────────────────────────────────────────────────────────────────────",
+                             " Uses custom player arm posing when holding a soulspring lamp",
+                             " ⌄ ")
+                    .define("Pose Soulspring Lamp", true);
         BUILDER.pop();
 
         SPEC = BUILDER.build();

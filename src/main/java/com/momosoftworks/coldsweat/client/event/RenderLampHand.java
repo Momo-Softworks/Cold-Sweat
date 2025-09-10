@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.client.event;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.entity.EntityHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
@@ -34,7 +35,8 @@ public class RenderLampHand
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onHandRender(RenderHandEvent event)
     {
-        if (event.getItemStack().getItem() == ModItems.SOULSPRING_LAMP)
+        if (event.getItemStack().getItem() == ModItems.SOULSPRING_LAMP
+        && ConfigSettings.POSE_SOULSPRING_LAMP.get())
         {
             event.setCanceled(true);
 
