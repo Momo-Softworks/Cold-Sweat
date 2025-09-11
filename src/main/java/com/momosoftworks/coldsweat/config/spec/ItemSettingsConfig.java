@@ -79,6 +79,7 @@ public class ItemSettingsConfig
                 .defineListAllowEmpty(Arrays.asList("Boiler"), () -> ListBuilder.begin(
                                 Arrays.asList("#minecraft:planks",         10),
                                 Arrays.asList("#minecraft:coals",          37),
+                                Arrays.asList("minecraft:dried_kelp_block", 92),
                                 Arrays.asList("#minecraft:logs_that_burn", 37),
                                 Arrays.asList("minecraft:coal_block",      333),
                                 Arrays.asList("minecraft:magma_block",     333),
@@ -120,6 +121,7 @@ public class ItemSettingsConfig
                                 Arrays.asList("#minecraft:planks",         10),
                                 Arrays.asList("#minecraft:coals",          37),
                                 Arrays.asList("#minecraft:logs_that_burn", 37),
+                                Arrays.asList("minecraft:dried_kelp_block", 92),
                                 Arrays.asList("minecraft:coal_block",      333),
                                 Arrays.asList("minecraft:magma_block",     333),
                                 Arrays.asList("minecraft:lava_bucket",     1000),
