@@ -43,11 +43,6 @@ public class PreventPlayerSleep
         // If the player's world temperature is critical
         else if (!CSMath.betweenExclusive(worldTemp, minTemp, maxTemp))
         {
-            // If the bed is habitable, allow sleeping
-            double worldTempAtBed = WorldHelper.getTemperatureAt(player.level, event.getPos());
-            if (CSMath.betweenExclusive(worldTempAtBed, minTemp, maxTemp))
-            {   return;
-            }
             // Let the player sleep if they're resistant to damage
             double tempResistance = Temperature.get(player, worldTemp > maxTemp ? Temperature.Trait.HEAT_RESISTANCE : Temperature.Trait.COLD_RESISTANCE);
             if (tempResistance >= 1)
