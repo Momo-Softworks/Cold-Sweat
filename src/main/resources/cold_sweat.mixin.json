@@ -46,6 +46,7 @@
     "MixinTridentRiptide",
     "compat.MixinCreateConnect",
     "compat.MixinCreateOverlay",
+    "compat.MixinKubeScanner",
     "compat.MixinSereneIceMelt",
     "compat.MixinSpoiledIcebox",
     "compat.MixinSpoiledIcebox$ContainerModifier",
