@@ -207,6 +207,16 @@ public class ModUpdater
                 list.addAll(List.of("cold_sweat:chameleon_scale_boots", 10, 0.0085, "adaptive"));
             });
         }
+
+        /*
+         2.4-b05a
+         */
+        if (isBehind(configVersion, "2.4-b05a"))
+        {
+            addConfigSetting(ItemSettingsConfig.BOILER_FUELS, List.of("minecraft:dried_kelp_block", 92));
+            addConfigSetting(ItemSettingsConfig.HEARTH_FUELS, List.of("minecraft:dried_kelp_block", 92));
+        }
+
         // Update config version
         MainSettingsConfig.VERSION.set(version);
 
