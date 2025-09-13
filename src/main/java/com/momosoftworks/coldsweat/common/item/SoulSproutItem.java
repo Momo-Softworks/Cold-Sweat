@@ -16,7 +16,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemNameBlockItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DispenserBlock;
@@ -30,10 +30,10 @@ public class SoulSproutItem extends ItemNameBlockItem
     }
 
     @Override
-    public InteractionResult useOn(UseOnContext context)
+    protected boolean placeBlock(BlockPlaceContext context, BlockState state)
     {
-        InteractionResult interactionresult = super.useOn(context);
-        if (interactionresult == InteractionResult.CONSUME && context.getPlayer() instanceof ServerPlayer player)
+        boolean placed = super.placeBlock(context, state);
+        if (placed && context.getPlayer() instanceof ServerPlayer player)
         {
             // Grant the player the "A Seedy Place" advancement
             if (player.getServer() != null)
@@ -43,7 +43,7 @@ public class SoulSproutItem extends ItemNameBlockItem
                 }
             }
         }
-        return interactionresult;
+        return placed;
     }
 
     @Override
