@@ -10,7 +10,7 @@ Documentation for 3rd-party integration with Cold Sweat can be found here (WIP, 
 https://mikul.gitbook.io/cold-sweat/  
 The current documentation is designed for the latest beta on Minecraft 1.20, but it should be useable for other Minecraft versions with some adaptation.
 
-## Developing for CS
+## Developing with Cold Sweat
 1. Get [Cursemaven](https://www.cursemaven.com/)
 2. Go to the latest version on [CurseForge](https://legacy.curseforge.com/minecraft/mc-mods/cold-sweat/files) and add the ColdSweat-sources.jar file as a dependency:
 ```
