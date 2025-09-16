@@ -75,8 +75,6 @@ public class ConfigLoadingHandler
         RegistryAccess registryAccess = event.getServer().registryAccess();
         RegistryMultiMap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries = new RegistryMultiMap<>();
 
-        fillOptionalHolders(registryAccess);
-
         // User JSON configs (config folder)
         ColdSweat.LOGGER.info("Loading registries from configs...");
         registries.putAll(collectUserRegistries(registryAccess));
@@ -84,6 +82,8 @@ public class ConfigLoadingHandler
         // JSON configs (data resources)
         ColdSweat.LOGGER.info("Loading registries from data resources...");
         registries.putAll(collectDataRegistries(registryAccess));
+
+        fillOptionalHolders(registryAccess);
 
         // Load JSON data into the config settings
         logAndAddRegistries(registryAccess, registries);
