@@ -119,7 +119,7 @@ public class EntityRequirement
                                    right -> right == WILDCARD_ENTITY ? Either.right("*") : Either.left(Either.right(right))));
 
     public static final Codec<EntityRequirement> SIMPLE_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            NegatableList.listCodec(ENTITY_CODEC).optionalFieldOf("entities", new NegatableList<>()).forGetter(requirement -> requirement.entities),
+            NegatableList.listCodec(ENTITY_CODEC).fieldOf("entities").forGetter(requirement -> requirement.entities),
             LocationRequirement.CODEC.optionalFieldOf("location", LocationRequirement.NONE).forGetter(requirement -> requirement.location),
             LocationRequirement.CODEC.optionalFieldOf("stepping_on", LocationRequirement.NONE).forGetter(requirement -> requirement.steppingOn),
             EffectsRequirement.CODEC.optionalFieldOf("effects").forGetter(requirement -> requirement.effects),
@@ -134,7 +134,7 @@ public class EntityRequirement
                                   Optional.empty(), Optional.empty(), Optional.empty(), temperature)));
 
     private static final List<Codec<EntityRequirement>> REQUIREMENT_CODEC_STACK = new ArrayList<>(Arrays.asList(SIMPLE_CODEC));
-    // Allow for up to 16 layers of inner codecs
+    // Allow for up to 4 layers of inner codecs
     static
     {   for (int i = 0; i < 4; i++)
         {   addCodecStack();
@@ -148,7 +148,7 @@ public class EntityRequirement
     private static void addCodecStack()
     {
         Codec<EntityRequirement> codec = RecordCodecBuilder.create(instance -> instance.group(
-                NegatableList.listCodec(ENTITY_CODEC).optionalFieldOf("entities", new NegatableList<>()).forGetter(requirement -> requirement.entities),
+                NegatableList.listCodec(ENTITY_CODEC).fieldOf("entities").forGetter(requirement -> requirement.entities),
                 LocationRequirement.CODEC.optionalFieldOf("location", LocationRequirement.NONE).forGetter(requirement -> requirement.location),
                 LocationRequirement.CODEC.optionalFieldOf("stepping_on", LocationRequirement.NONE).forGetter(requirement -> requirement.steppingOn),
                 EffectsRequirement.CODEC.optionalFieldOf("effects").forGetter(requirement -> requirement.effects),
