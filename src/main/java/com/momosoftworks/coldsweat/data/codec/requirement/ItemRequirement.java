@@ -40,7 +40,7 @@ public record ItemRequirement(NegatableList<Either<TagKey<Item>, Item>> items,
                                    right -> right == WILDCARD_ITEM ? Either.right("*") : Either.left(Either.right(right))));
 
     public static final Codec<ItemRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            NegatableList.listCodec(ITEM_CODEC).optionalFieldOf("items", new NegatableList<>()).forGetter(predicate -> predicate.items),
+            NegatableList.listCodec(ITEM_CODEC).fieldOf("items").forGetter(predicate -> predicate.items),
             IntegerBounds.CODEC.optionalFieldOf("count", IntegerBounds.NONE).forGetter(predicate -> predicate.count),
             IntegerBounds.CODEC.optionalFieldOf("durability", IntegerBounds.NONE).forGetter(predicate -> predicate.durability),
             NegatableList.listCodec(EnchantmentRequirement.CODEC).optionalFieldOf("enchantments", new NegatableList<>()).forGetter(predicate -> predicate.enchantments),
