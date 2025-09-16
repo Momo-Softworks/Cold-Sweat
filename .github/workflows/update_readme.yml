@@ -1,0 +1,24 @@
+name: Sync README
+on:
+  push:
+    branches: [main]
+    paths: ['README.md']
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Sync README to all branches
+        run: |
+          for branch in $(git branch -r | grep -v HEAD | sed 's/origin\///'); do
+            git checkout $branch
+            git checkout main -- README.md
+            git add README.md
+            git commit -m "Sync README from main" || true
+            git push origin $branch
+          done
