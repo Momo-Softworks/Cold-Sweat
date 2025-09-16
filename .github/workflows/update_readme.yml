@@ -19,8 +19,8 @@ jobs:
         run: |
           for branch in $(git branch -r | grep -v HEAD | sed 's/origin\///'); do
             git checkout $branch
-            git checkout main -- README.md
+            git checkout "1.20.1-FG" -- README.md
             git add README.md
-            git commit -m "Sync README from main" || true
+            git commit -m "Sync README from default branch" || true
             git push origin $branch
           done
