@@ -159,15 +159,14 @@ public class WetnessRenderer
             Droplet drop = WATER_DROPS.get(i);
             Vector2f pos = drop.position;
             float alpha = drop.alpha;
-            int size = drop.size / uiScale * 3;
-
             drop.size = ConfigSettings.WATER_DROPLET_SCALE.get().clamp(drop.size);
+            int scaledSize = drop.size / uiScale * 3;
 
             if (alpha > 0)
             {
                 // Render the water drop with lighting
                 renderQuadDirect(poseStack, buffer, (int) CSMath.roundNearest(pos.x, 3f/uiScale), (int)pos.y,
-                                 size, size, 0, 0, 1, 1, alpha, combinedLight, waterColor);
+                                 scaledSize, scaledSize, 0, 0, 1, 1, alpha, combinedLight, waterColor);
 
                 // Update the drop's position and alpha
                 if (!paused)
@@ -210,7 +209,7 @@ public class WetnessRenderer
                     // Add a trail behind the drop
                     for (int j = 0; j < Math.max(0, (int) (pos.y - oldY)); j++)
                     {
-                        TRAILS.add(new Triplet<>(new Vector2i((int)pos.x, oldY + j), alpha, size));
+                        TRAILS.add(new Triplet<>(new Vector2i((int)pos.x, oldY + j), alpha, drop.size));
                     }
                 }
 
@@ -248,12 +247,10 @@ public class WetnessRenderer
             float alpha = trail.getB();
             int size = trail.getC();
 
-            size = ConfigSettings.WATER_DROPLET_SCALE.get().clamp(size);
-
             if (alpha > 0)
             {
                 renderQuadDirect(poseStack, buffer, (int) CSMath.roundNearest(pos.x, 3f/uiScale * 4), pos.y,
-                                 size, 1, 0, 0, 1, 1, alpha, combinedLight, waterColor);
+                                 size / uiScale * 3, 1, 0, 0, 1, 1, alpha, combinedLight, waterColor);
                 if (!paused)
                 {
                     if (wetness <= 0)
