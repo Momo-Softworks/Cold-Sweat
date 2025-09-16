@@ -15,12 +15,29 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
       - name: Sync README to all branches
         run: |
           for branch in $(git branch -r | grep -v HEAD | sed 's/origin\///'); do
+            # Skip the source branch
+            if [ "$branch" = "1.20.1-FG" ]; then
+              continue
+            fi
+          
+            echo "Syncing to branch: $branch"
             git checkout $branch
             git checkout "1.20.1-FG" -- README.md
-            git add README.md
-            git commit -m "Sync README from default branch" || true
-            git push origin $branch
+          
+            # Only commit if there are changes
+            if git diff --staged --quiet; then
+              echo "No changes to commit for $branch"
+            else
+              git add README.md
+              git commit -m "Sync README from 1.20.1-FG"
+              git push origin $branch
+            fi
           done
