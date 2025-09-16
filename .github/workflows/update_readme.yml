@@ -1,7 +1,7 @@
 name: Sync README
 on:
   push:
-    branches: [main]
+    branches: [1.20-FG]
     paths: ['README.md']
 
 jobs:
