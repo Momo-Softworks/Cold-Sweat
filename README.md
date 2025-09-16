@@ -8,7 +8,7 @@ This does not include mods that use Cold Sweat as a library (i.e. for inter-mod 
 ## Documentation
 Documentation for 3rd-party integration with Cold Sweat can be found here (WIP, but most important things are documented):  
 https://mikul.gitbook.io/cold-sweat/  
-The current documentation is designed for 1.20, but it should be useable for other Minecraft versions with some adaptation.
+The current documentation is designed for the latest beta on Minecraft 1.20, but it should be useable for other Minecraft versions with some adaptation.
 
 ## Developing for CS
 1. Get [Cursemaven](https://www.cursemaven.com/)
