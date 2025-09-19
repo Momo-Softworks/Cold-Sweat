@@ -135,7 +135,7 @@ public class SoulspringLampItem extends Item
                     CustomData itemTag = NBTHelper.getOrCreateTag(stack);
                     // If the conditions are not met, turn off the lamp
                     if (itemTag.copyTag().getInt("stateChangeTimer") <= 0
-                    && CSMath.orElse(stack.get(ModItemComponents.SOULSPRING_LAMP_LIT), false) != shouldBeOn)
+                    && isLit(stack) != shouldBeOn)
                     {
                         stack.set(DataComponents.CUSTOM_DATA, itemTag.update(tag -> tag.putInt("stateChangeTimer", 2)));
                         setLit(stack, shouldBeOn);
