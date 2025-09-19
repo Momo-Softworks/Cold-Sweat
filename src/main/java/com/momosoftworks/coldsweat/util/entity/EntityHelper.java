@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.util.entity;
 
+import com.momosoftworks.coldsweat.common.item.SoulspringLampItem;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.serialization.ObjectBuilder;
@@ -22,6 +23,7 @@ import net.minecraftforge.fml.server.ServerLifecycleHooks;
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.stream.Stream;
 
 public class EntityHelper
 {
@@ -37,6 +39,10 @@ public class EntityHelper
 
     public static boolean holdingLamp(LivingEntity player, HandSide arm)
     {   return getItemInHand(player, arm).getItem() == ModItems.SOULSPRING_LAMP;
+    }
+
+    public static boolean holdingLitLamp(LivingEntity player)
+    {   return Stream.of(HandSide.LEFT, HandSide.RIGHT).anyMatch(arm -> holdingLamp(player, arm) && SoulspringLampItem.isLit(getItemInHand(player, arm)));
     }
 
     public static Vector3d getCenterOf(Entity entity)

@@ -41,6 +41,7 @@
     "MixinMinecart",
     "MixinMobSpawning",
     "MixinModLoading",
+    "MixinPiglinFearPlayers",
     "MixinShearsDispenseBehavior",
     "MixinSmithingRecipe",
     "MixinSoulCampfire",
