@@ -129,7 +129,7 @@ public class SoulspringLampItem extends Item
                     CompoundTag itemTag = stack.getOrCreateTag();
                     // If the conditions are not met, turn off the lamp
                     if (itemTag.getInt("stateChangeTimer") <= 0
-                            && itemTag.getBoolean("Lit") != shouldBeOn)
+                    && isLit(stack) != shouldBeOn)
                     {
                         itemTag.putInt("stateChangeTimer", 2);
                         setLit(stack, shouldBeOn);
