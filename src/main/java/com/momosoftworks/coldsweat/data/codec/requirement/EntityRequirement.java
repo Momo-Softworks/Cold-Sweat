@@ -217,7 +217,7 @@ public class EntityRequirement
         if (!entities.isEmpty())
         {
             EntityType<?> type = entity.getType();
-            if (!this.entities.test(either -> either.map(type::is, type::equals)))
+            if (!this.entities.test(either -> either.map(type::is, t -> t == WILDCARD_ENTITY || t == type)))
             {   return false;
             }
         }
