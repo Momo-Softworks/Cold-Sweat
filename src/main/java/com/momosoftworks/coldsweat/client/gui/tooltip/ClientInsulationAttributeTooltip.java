@@ -52,8 +52,8 @@ public class ClientInsulationAttributeTooltip implements ClientTooltipComponent
         RenderSystem.setShaderTexture(0, TOOLTIP_LOCATION.get());
         Screen.blit(ps, x, y, 0, 28, 8,  8, 8, 36, 28);
         // Text
-        int color = Optional.ofNullable(this.original.getStyle().getColor()).map(TextColor::getValue).orElse(16777215);
-        int xOffs = strikethrough ? 12: 10;
+        int color = Optional.ofNullable(this.original.getStyle().getColor()).map(TextColor::getValue).orElse(0xFFFFFF);
+        int xOffs = !strikethrough && this.original.getString().startsWith("+") ? 10 : 12;
         ps.pushPose();
         ps.translate(0, 0, 400);
         font.drawShadow(ps, this.original, x + xOffs, y + 1, color);

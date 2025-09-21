@@ -1,41 +1,32 @@
 {
-  "required_mods": [
-    "create"
-  ],
+  "required_mods": ["create"],
   "type": "armor",
   "item": {
-    "items": [
-      "create:netherite_backtank"
-    ]
+    "items": ["create:netherite_backtank"]
   },
   "insulation": {
     "heat": 0,
     "cold": 0
   },
   "entity": {
+    "entities": ["*"],
     "equipment": {
-      "feet": {
-        "items": [
-          "create:netherite_diving_boots",
-          "minecraft:netherite_boots"
-        ]
-      },
       "head": {
-        "items": [
-          "create:netherite_diving_helmet"
-        ]
+        "items": ["create:netherite_diving_helmet"]
       },
       "chest": {
-        "items": [
-          "create:netherite_backtank"
-        ],
+        "items": ["create:netherite_backtank"],
         "nbt": {
           "Air": "1:"
         }
       },
       "legs": {
+        "items": ["minecraft:netherite_leggings"]
+      },
+      "feet": {
         "items": [
-          "minecraft:netherite_leggings"
+          "create:netherite_diving_boots",
+          "minecraft:netherite_boots"
         ]
       }
     }
@@ -58,5 +49,8 @@
   },
   "immune_temp_modifiers": {
     "cold_sweat:water": 1.0
+  },
+  "hint": {
+    "key": "tooltip.hint.create_backtank"
   }
 }
