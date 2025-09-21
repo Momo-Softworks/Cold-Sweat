@@ -375,72 +375,95 @@ public class TooltipHandler
         /*
          Tooltips for insulation
          */
+        List<InsulatorData> allUnmetInsulation = new ArrayList<>();
         if (insulationVisibility.canShow() && !stack.isEmpty())
         {
-            // Insulating armor
-            List<InsulatorData> armorInsulation = new ArrayList<>();
-            List<InsulatorData> unmetArmorInsulation = new ArrayList<>();
-            for (InsulatorData insulator : ConfigSettings.INSULATING_ARMORS.get().get(item))
-            {   validateInsulator(insulator, armorInsulation, unmetArmorInsulation);
-            }
+            addInsulationTooltips(elements, tooltipStartIndex, stack, item, insulationVisibility, allUnmetInsulation);
+        }
+
+        // Custom tooltips for attributes from insulation
+        int unmetLabelIndex = convertAndSortUnmetAttributes(elements);
+
+        // Add unmet requirement hints
+        if (ConfigSettings.ENABLE_HINTS.get())
+        {   addUnmetRequirementHints(elements, unmetLabelIndex, allUnmetInsulation);
+        }
+    }
+
+    private static void addInsulationTooltips(List<Either<FormattedText, TooltipComponent>> elements, int tooltipStartIndex,
+                                              ItemStack stack, Item item, InsulationVisibility insulationVisibility,
+                                              List<InsulatorData> allUnmetInsulation)
+    {
+        // Insulating armor
+        List<InsulatorData> armorInsulation = new ArrayList<>();
+        List<InsulatorData> unmetArmorInsulation = new ArrayList<>();
+        for (InsulatorData insulator : ConfigSettings.INSULATING_ARMORS.get().get(item))
+        {   validateInsulator(insulator, armorInsulation, unmetArmorInsulation, allUnmetInsulation);
+        }
 
             ItemInsulationManager.getInsulationCap(stack).ifPresent(cap ->
             {
                 List<Pair<ItemStack, List<InsulatorData>>> insulatorPairs = cap.getInsulation();
 
-                for (int i = 0; i < insulatorPairs.size(); i++)
-                {
-                    Pair<ItemStack, List<InsulatorData>> pair = insulatorPairs.get(i);
-                    for (InsulatorData insulator : pair.getSecond())
-                    {   validateInsulator(insulator, armorInsulation, unmetArmorInsulation);
-                    }
-                }
-            });
-
-            if (!armorInsulation.isEmpty() || insulationVisibility.showsIfEmpty())
-            {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(armorInsulation, Insulation.Slot.ARMOR, stack, false)));
-            }
-            if (!unmetArmorInsulation.isEmpty())
-            {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(unmetArmorInsulation, Insulation.Slot.ARMOR, stack, true)));
-            }
-
-            // Insulation ingredient
+            for (int i = 0; i < insulatorPairs.size(); i++)
             {
-                List<InsulatorData> insulation = new ArrayList<>();
-                List<InsulatorData> unmetInsulation = new ArrayList<>();
-                for (InsulatorData insulator : ConfigSettings.INSULATION_ITEMS.get().get(item))
-                {   validateInsulator(insulator, insulation, insulator.hideIfUnmet() ? new ArrayList<>() : unmetInsulation);
-                }
-                if (!insulation.isEmpty() && !insulation.stream().map(InsulatorData::insulation).toList().equals(armorInsulation.stream().map(InsulatorData::insulation).toList()))
-                {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(insulation, Insulation.Slot.ITEM, stack, false)));
-                }
-                if (!unmetInsulation.isEmpty() && !unmetInsulation.stream().map(InsulatorData::insulation).toList().equals(unmetArmorInsulation.stream().map(InsulatorData::insulation).toList()))
-                {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(unmetInsulation, Insulation.Slot.ITEM, stack, true)));
+                Pair<ItemStack, List<InsulatorData>> pair = insulatorPairs.get(i);
+                for (InsulatorData insulator : pair.getSecond())
+                {   validateInsulator(insulator, armorInsulation, unmetArmorInsulation, allUnmetInsulation);
                 }
             }
+        });
 
-            // Insulating curio
-            if (CompatManager.isCuriosLoaded())
-            {
-                List<InsulatorData> insulation = new ArrayList<>();
-                List<InsulatorData> unmetInsulation = new ArrayList<>();
-                for (InsulatorData insulator : ConfigSettings.INSULATING_CURIOS.get().get(item))
-                {   validateInsulator(insulator, insulation, unmetInsulation);
-                }
-                if (!insulation.isEmpty())
-                {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(insulation, Insulation.Slot.CURIO, stack, false)));
-                }
-                if (!unmetInsulation.isEmpty())
-                {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(unmetInsulation, Insulation.Slot.CURIO, stack, true)));
-                }
+        if (!armorInsulation.isEmpty() || insulationVisibility.showsIfEmpty())
+        {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(armorInsulation, Insulation.Slot.ARMOR, stack, false)));
+        }
+        if (!unmetArmorInsulation.isEmpty())
+        {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(unmetArmorInsulation, Insulation.Slot.ARMOR, stack, true)));
+        }
+
+        // Insulation ingredient
+        {
+            List<InsulatorData> insulation = new ArrayList<>();
+            List<InsulatorData> unmetInsulation = new ArrayList<>();
+            for (InsulatorData insulator : ConfigSettings.INSULATION_ITEMS.get().get(item))
+            {   validateInsulator(insulator, insulation, insulator.hideIfUnmet() ? new ArrayList<>() : unmetInsulation, allUnmetInsulation);
+            }
+            if (!insulation.isEmpty() && !insulation.stream().map(InsulatorData::insulation).toList().equals(armorInsulation.stream().map(InsulatorData::insulation).toList()))
+            {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(insulation, Insulation.Slot.ITEM, stack, false)));
+            }
+            if (!unmetInsulation.isEmpty() && !unmetInsulation.stream().map(InsulatorData::insulation).toList().equals(unmetArmorInsulation.stream().map(InsulatorData::insulation).toList()))
+            {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(unmetInsulation, Insulation.Slot.ITEM, stack, true)));
             }
         }
 
-        /*
-         Custom tooltips for attributes from insulation
-         */
+        // Insulating curio
+        if (CompatManager.isCuriosLoaded())
+        {
+            List<InsulatorData> curioInsulation = new ArrayList<>();
+            List<InsulatorData> unmetCurioInsulation = new ArrayList<>();
+            for (InsulatorData insulator : ConfigSettings.INSULATING_CURIOS.get().get(item))
+            {   validateInsulator(insulator, curioInsulation, unmetCurioInsulation, allUnmetInsulation);
+            }
+            if (!curioInsulation.isEmpty())
+            {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(curioInsulation, Insulation.Slot.CURIO, stack, false)));
+            }
+            if (!unmetCurioInsulation.isEmpty())
+            {   elements.add(tooltipStartIndex, Either.right(new InsulationTooltip(unmetCurioInsulation, Insulation.Slot.CURIO, stack, true)));
+            }
+        }
+    }
+
+    /**
+     * Converts attribute modifier lines with insulation icons into InsulationAttributeTooltips and sorts unmet attributes to the bottom of the section
+     * @return The index at which unmet modifier hints should be displayed
+     */
+    private static int convertAndSortUnmetAttributes(List<Either<FormattedText, TooltipComponent>> elements)
+    {
+        boolean hasAttributes = false;
         boolean foundUnmetAttribute = false;
         int unmetLabelIndex = elements.size();
+        int unmetAttributeIndex = elements.size();
+
         for (int i = 0; i < elements.size(); i++)
         {
             Either<FormattedText, TooltipComponent> element = elements.get(i);
@@ -449,46 +472,78 @@ public class TooltipHandler
                 if (component.getContents() instanceof TranslatableContents translatableContents
                 && translatableContents.getArgs() != null)
                 {
-                    // Indicates the start of a new section; reset the flag
+                    // Start of new attribute modifiers section
                     if (translatableContents.getKey().contains("item.modifiers"))
-                    {   foundUnmetAttribute = false;
+                    {
+                        if (!hasAttributes)
+                        {   hasAttributes = true;
+                            unmetLabelIndex = i;
+                        }
+                        foundUnmetAttribute = false;
                     }
                     List<Object> args = Arrays.asList(translatableContents.getArgs());
-                    boolean strikethrough = args.contains("strikethrough");
-                    // At the first unmet attribute modifier for each section, insert the "Unmet Requirements" tooltip line
-                    if (strikethrough && !foundUnmetAttribute)
-                    {
-                        unmetLabelIndex = i;
-                        MutableComponent unmetAttributesTooltip = Component.translatable("tooltip.cold_sweat.unmet_attributes").withStyle(ChatFormatting.RED);
-                        elements.add(unmetLabelIndex, Either.right(new InsulationAttributeTooltip(unmetAttributesTooltip, Minecraft.getInstance().font, false)));
-                        foundUnmetAttribute = true;
-                        i++;
-                    }
                     // If the insulation icon should be shown, convert the tooltip into an InsulationAttributeTooltip
                     if (args.contains("show_icon"))
                     {
-                        if (!strikethrough && i > unmetLabelIndex)
+                        boolean strikethrough = args.contains("strikethrough");
+                        // Upon the first unmet attribute, set the index at which unmet attributes start
+                        if (strikethrough && !foundUnmetAttribute)
+                        {   unmetAttributeIndex = i;
+                            foundUnmetAttribute = true;
+                        }
+                        // Replace the unmet attribute line with a strikethrough InsulationAttributeTooltip and move it to the unmet attributes section
+                        if (!strikethrough && i > unmetAttributeIndex)
                         {
                             elements.remove(i);
-                            elements.add(unmetLabelIndex, Either.right(new InsulationAttributeTooltip(component, Minecraft.getInstance().font, strikethrough)));
+                            elements.add(unmetAttributeIndex, Either.right(new InsulationAttributeTooltip(component, Minecraft.getInstance().font, strikethrough)));
+                            i--;
                         }
                         else elements.set(i, Either.right(new InsulationAttributeTooltip(component, Minecraft.getInstance().font, strikethrough)));
                     }
                 }
             }
         }
+        return unmetLabelIndex;
     }
 
-    private static void validateInsulator(InsulatorData insulator, List<InsulatorData> insulation, List<InsulatorData> unmetInsulation)
+    private static void addUnmetRequirementHints(List<Either<FormattedText, TooltipComponent>> elements, int unmetLabelIndex, List<InsulatorData> allUnmetInsulation)
     {
-        if (!insulator.insulation().isEmpty())
+        boolean addedUnmetLabel = false;
+        int hintIndex = 0;
+        for (; hintIndex < allUnmetInsulation.size(); hintIndex++)
         {
-            if (passesRequirement(insulator))
-            {   insulation.add(insulator);
+            InsulatorData unmetInsulator = allUnmetInsulation.get(hintIndex);
+            Optional<InsulatorData.HintText> hint = unmetInsulator.hint();
+            if (hint.isPresent())
+            {
+                if (!addedUnmetLabel)
+                {
+                    MutableComponent unmetAttributesTooltip = Component.translatable("tooltip.cold_sweat.unmet_attributes").withStyle(ChatFormatting.RED);
+                    elements.add(unmetLabelIndex, Either.right(new InsulationAttributeTooltip(unmetAttributesTooltip, Minecraft.getInstance().font, false)));
+                    addedUnmetLabel = true;
+                }
+                MutableComponent hintText = hint.get().getText();
+                if (!hintText.getString().isEmpty())
+                {
+                    hintText.setStyle(hintText.getStyle().withColor(7561572));
+                    elements.add(unmetLabelIndex + hintIndex + 1, Either.right(new InsulationAttributeTooltip(hintText, Minecraft.getInstance().font, true)));
+                }
             }
-            else if (!insulator.hideIfUnmet())
-            {   unmetInsulation.add(insulator);
-            }
+        }
+        if (addedUnmetLabel)
+        {   elements.add(unmetLabelIndex + hintIndex + 1, Either.left(Component.empty()));
+        }
+    }
+
+    private static void validateInsulator(InsulatorData insulator, List<InsulatorData> insulation, List<InsulatorData> unmetInsulation, List<InsulatorData> allUnmetInsulation)
+    {
+        boolean isEmpty = insulator.insulation().isEmpty();
+        if (passesRequirement(insulator))
+        {   if (!isEmpty) insulation.add(insulator);
+        }
+        else if (!insulator.hideIfUnmet())
+        {   if (!isEmpty) unmetInsulation.add(insulator);
+            allUnmetInsulation.add(insulator);
         }
     }
 

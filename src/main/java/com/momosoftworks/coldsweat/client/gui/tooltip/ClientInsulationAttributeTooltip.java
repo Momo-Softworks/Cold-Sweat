@@ -48,8 +48,8 @@ public class ClientInsulationAttributeTooltip implements ClientTooltipComponent
         // Icon
         graphics.blit(TOOLTIP_LOCATION.get(), x, y, 0, 28, 8,  8, 8, 36, 28);
         // Text
-        int color = Optional.ofNullable(this.original.getStyle().getColor()).map(TextColor::getValue).orElse(16777215);
-        int xOffs = strikethrough ? 12: 10;
+        int color = Optional.ofNullable(this.original.getStyle().getColor()).map(TextColor::getValue).orElse(0xFFFFFF);
+        int xOffs = !strikethrough && this.original.getString().startsWith("+") ? 10 : 12;
         graphics.drawString(font, this.original, x + xOffs, y + 1, color);
         if (strikethrough)
         {   graphics.fill(x - 2, y + 4, x + 9, y + 5, 401, 0xFFF63232);

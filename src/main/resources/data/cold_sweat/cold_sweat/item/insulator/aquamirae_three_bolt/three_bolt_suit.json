@@ -13,12 +13,8 @@
     "cold": 0
   },
   "entity": {
+    "entities": [ "*" ],
     "equipment": {
-      "feet": {
-        "items": [
-          "aquamirae:three_bolt_boots"
-        ]
-      },
       "head": {
         "items": [
           "aquamirae:three_bolt_helmet"
@@ -32,6 +28,11 @@
       "legs": {
         "items": [
           "aquamirae:three_bolt_leggings"
+        ]
+      },
+      "feet": {
+        "items": [
+          "aquamirae:three_bolt_boots"
         ]
       }
     }
@@ -47,5 +48,8 @@
   },
   "immune_temp_modifiers": {
     "cold_sweat:water": 1.0
+  },
+  "hint": {
+    "key": "tooltip.hint.aqua_three_bolt"
   }
 }
