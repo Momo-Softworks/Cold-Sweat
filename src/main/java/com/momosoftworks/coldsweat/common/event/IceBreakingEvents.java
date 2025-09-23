@@ -7,8 +7,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.IceBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
 import net.minecraftforge.common.ForgeHooks;
@@ -29,15 +33,19 @@ public class IceBreakingEvents
     {
         if (!ConfigSettings.USE_CUSTOM_ICE_DROPS.get()) return;
 
+        Player player = event.getPlayer();
+        ItemStack stack = player.getItemInHand(InteractionHand.MAIN_HAND);
         BlockState state = event.getState();
-        LevelAccessor level = event.getLevel();
+        LevelAccessor ilevel = event.getLevel();
         BlockPos pos = event.getPos();
-        Material belowState = level.getBlockState(pos.below()).getMaterial();
+        Material belowState = ilevel.getBlockState(pos.below()).getMaterial();
 
-        if (state.is(Blocks.ICE) && !ForgeHooks.isCorrectToolForDrops(state, event.getPlayer())
-        && !event.getPlayer().getAbilities().instabuild
-        && (belowState.blocksMotion() || belowState.isLiquid()))
-        {   level.setBlock(pos, Blocks.WATER.defaultBlockState(), 3);
+        if (state.is(Blocks.ICE) && !ForgeHooks.isCorrectToolForDrops(state, player)
+        && stack.getEnchantmentLevel(Enchantments.SILK_TOUCH) == 0
+        && !player.getAbilities().instabuild
+        && (belowState.blocksMotion() || belowState.isLiquid())
+        && !ilevel.dimensionType().ultraWarm())
+        {   ilevel.setBlock(pos, Blocks.WATER.defaultBlockState(), 3);
         }
     }
 
@@ -62,7 +70,7 @@ public class IceBreakingEvents
             {   event.setNewSpeed(speed * 2);
             }
             // Non-pickaxes need a huge speed boost
-            else event.setNewSpeed(speed * 5);
+            else event.setNewSpeed(speed * 3);
         }
         if (state.is(Blocks.PACKED_ICE))
         {   event.setNewSpeed(event.getNewSpeed() / 3);
