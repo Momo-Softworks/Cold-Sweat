@@ -62,6 +62,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+@EventBusSubscriber
 public class CompatManager
 {
     private static final boolean BOP_LOADED = modLoaded("biomesoplenty");
@@ -479,7 +480,6 @@ public class CompatManager
 
     public static boolean USING_BACKTANK = false;
 
-    // TODO: Check if this still works
     @SubscribeEvent
     public static void drainCreateBacktank(PlayerTickEvent.Post event)
     {
