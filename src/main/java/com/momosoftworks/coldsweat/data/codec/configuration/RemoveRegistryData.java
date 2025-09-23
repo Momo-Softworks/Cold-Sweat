@@ -60,7 +60,7 @@ public class RemoveRegistryData<T extends ConfigData> extends ConfigData
     private boolean checkType(T object)
     {
         return this.registryTypes.isEmpty()
-            || this.registryTypes.contains(object.registryType());
+            || this.registryTypes.contains(object.configType());
     }
 
     public boolean matches(T object)

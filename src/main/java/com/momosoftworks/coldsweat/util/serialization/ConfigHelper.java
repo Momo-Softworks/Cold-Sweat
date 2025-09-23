@@ -144,7 +144,7 @@ public class ConfigHelper
             V data = tomlParser.apply(entry);
             if (data == null) continue;
 
-            data.setRegistryType(ConfigData.Type.TOML);
+            data.setConfigType(ConfigData.Type.TOML);
 
             RegistryHelper.mapForgeRegistryTagList(keyRegistry, keyListGetter.apply(data)).forEach(ent -> dataMap.put(ent, data));
         }
@@ -162,7 +162,7 @@ public class ConfigHelper
             V data = tomlParser.apply(entry);
             if (data == null) continue;
 
-            data.setRegistryType(ConfigData.Type.TOML);
+            data.setConfigType(ConfigData.Type.TOML);
 
             RegistryHelper.mapForgeRegistryTagList(keyRegistry, keyListGetter.apply(data)).forEach(ent -> dataMap.put(ent, data));
         }
@@ -198,7 +198,7 @@ public class ConfigHelper
             V data = valueCreator.apply(entry);
             if (data != null)
             {
-                data.setRegistryType(ConfigData.Type.TOML);
+                data.setConfigType(ConfigData.Type.TOML);
                 for (OptionalHolder<K> key : RegistryHelper.mapVanillaRegistryTagList(keyRegistry, taggedListGetter.apply(data), registryAccess))
                 {   mapAdder.accept(map, key.get(), data);
                 }
@@ -331,11 +331,13 @@ public class ConfigHelper
         List<T> results = new ArrayList<>();
         for (T configData : config.get(object))
         {
-            int id = registry.getId(configData);
-            Holder<T> holder = registry.getHolder(id).orElse(null);
-            if (holder != null && holder.is(tag))
-            {   results.add(configData);
-            }
+            Optional.ofNullable(configData.registryKey()).flatMap(k -> registry.getHolder((ResourceKey<T>) (ResourceKey) k))
+            .ifPresent(holder ->
+            {
+                if (holder.is(tag))
+                {   results.add(configData);
+                }
+            });
         }
         return results;
     }
