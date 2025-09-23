@@ -179,7 +179,7 @@ public class ModRegistriesEventJS implements KubeStartupEvent
             return;
         }
         V configData = constructor.apply(parsed);
-        configData.setRegistryType(ConfigData.Type.KUBEJS);
+        configData.setConfigType(ConfigData.Type.KUBEJS);
         if (!configData.areRequiredModsLoaded()) return;
 
         this.event.addRegistryEntry(modRegistry, configData);

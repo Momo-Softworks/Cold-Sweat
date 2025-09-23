@@ -4,7 +4,6 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.data.codec.configuration.EntityTempData;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
-import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
@@ -85,7 +84,7 @@ public class EntityTempBuilderJS
     public EntityTempData build()
     {
         EntityTempData data = new EntityTempData(this.entityPredicate, this.temperature, this.range, this.units, this.otherEntityPredicate, this.maxEffect, this.affectsSelf);
-        data.setRegistryType(ConfigData.Type.KUBEJS);
+        data.setConfigType(ConfigData.Type.KUBEJS);
         return data;
     }
 }

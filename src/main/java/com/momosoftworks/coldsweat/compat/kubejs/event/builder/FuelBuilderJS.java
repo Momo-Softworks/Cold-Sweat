@@ -3,7 +3,6 @@ package com.momosoftworks.coldsweat.compat.kubejs.event.builder;
 import com.momosoftworks.coldsweat.data.codec.configuration.FuelData;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
-import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
@@ -49,7 +48,7 @@ public class FuelBuilderJS
     public FuelData build(FuelData.FuelType fuelType)
     {
         FuelData data = new FuelData(this.itemPredicate, fuelType, this.fuel);
-        data.setRegistryType(ConfigData.Type.KUBEJS);
+        data.setConfigType(ConfigData.Type.KUBEJS);
         return data;
     }
 }

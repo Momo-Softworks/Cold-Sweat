@@ -57,7 +57,7 @@ public class EntityClimateBuilderJS
     public EntityClimateData build()
     {
         EntityClimateData data = new EntityClimateData(entityPredicate, minTemp, maxTemp, rate, units);
-        data.setRegistryType(ConfigData.Type.KUBEJS);
+        data.setConfigType(ConfigData.Type.KUBEJS);
         return data;
     }
 }

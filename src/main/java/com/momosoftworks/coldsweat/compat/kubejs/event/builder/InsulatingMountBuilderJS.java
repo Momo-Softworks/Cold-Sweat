@@ -77,7 +77,7 @@ public class InsulatingMountBuilderJS
     public MountData build()
     {
         MountData data = new MountData(this.entityPredicate, this.riderPredicate, this.coldInsulation, this.heatInsulation, this.modifierImmunities);
-        data.setRegistryType(ConfigData.Type.KUBEJS);
+        data.setConfigType(ConfigData.Type.KUBEJS);
         return data;
     }
 }

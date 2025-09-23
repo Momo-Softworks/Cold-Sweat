@@ -22,7 +22,6 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -134,7 +133,7 @@ public class InsulatorBuilderJS
     {
         InsulatorData data = new InsulatorData(this.itemPredicate, this.slot, this.insulation, this.entityPredicate,
                                                this.attributes, this.immuneTempModifiers, this.fillSlots, this.hideIfUnmet, this.hint);
-        data.setRegistryType(ConfigData.Type.KUBEJS);
+        data.setConfigType(ConfigData.Type.KUBEJS);
         return data;
     }
 }
