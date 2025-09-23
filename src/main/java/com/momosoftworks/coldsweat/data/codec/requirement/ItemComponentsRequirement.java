@@ -2,11 +2,14 @@ package com.momosoftworks.coldsweat.data.codec.requirement;
 
 import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
+import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
@@ -24,13 +27,13 @@ public record ItemComponentsRequirement(CompoundTag components)
     {   this(new CompoundTag());
     }
 
-    public boolean test(ItemStack pStack)
-    {   return this.components().isEmpty() || this.test(pStack.getComponentsPatch());
+    public boolean test(ItemStack stack)
+    {   return this.components().isEmpty() || this.test(stack.getComponentsPatch(), RegistryHelper.getRegistryAccess());
     }
 
-    public boolean test(@Nullable DataComponentPatch components)
+    public boolean test(@Nullable DataComponentPatch components, HolderLookup.Provider registryAccess)
     {
-        CompoundTag serialized = (CompoundTag) DataComponentPatch.CODEC.encodeStart(NbtOps.INSTANCE, components).result().orElse(new CompoundTag());
+        CompoundTag serialized = (CompoundTag) DataComponentPatch.CODEC.encodeStart(RegistryOps.create(NbtOps.INSTANCE, registryAccess), components).result().orElse(new CompoundTag());
         return NbtRequirement.compareNbt(this.components, serialized);
     }
 
