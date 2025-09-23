@@ -4,11 +4,15 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.loot.ModLootTables;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.IceBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -27,16 +31,19 @@ public class IceBreakingEvents
     {
         if (!ConfigSettings.USE_CUSTOM_ICE_DROPS.get()) return;
 
+        Player player = event.getPlayer();
+        ItemStack stack = player.getItemInHand(InteractionHand.MAIN_HAND);
         BlockState state = event.getState();
-        LevelAccessor level = event.getLevel();
+        LevelAccessor ilevel = event.getLevel();
         BlockPos pos = event.getPos();
-        BlockState belowState = level.getBlockState(pos.below());
+        BlockState belowState = ilevel.getBlockState(pos.below());
 
         if (state.is(Blocks.ICE) && !event.getPlayer().getMainHandItem().isCorrectToolForDrops(state)
-        && !event.getPlayer().getAbilities().instabuild
-        && (belowState.blocksMotion() || belowState.liquid()))
-        {
-            level.setBlock(pos, Blocks.WATER.defaultBlockState(), 3);
+        && EnchantmentHelper.hasTag(stack, EnchantmentTags.PREVENTS_ICE_MELTING)
+        && !player.getAbilities().instabuild
+        && (belowState.blocksMotion() || belowState.liquid())
+        && !ilevel.dimensionType().ultraWarm())
+        {   ilevel.setBlock(pos, IceBlock.meltsInto(), 3);
         }
     }
 
@@ -61,7 +68,7 @@ public class IceBreakingEvents
             {   event.setNewSpeed(speed * 2);
             }
             // Non-pickaxes need a huge speed boost
-            else event.setNewSpeed(speed * 5);
+            else event.setNewSpeed(speed * 3);
         }
         if (state.is(Blocks.PACKED_ICE))
         {   event.setNewSpeed(event.getNewSpeed() / 3);
