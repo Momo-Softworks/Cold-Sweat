@@ -84,7 +84,7 @@ public class EntityTempBuilderJS
     public EntityTempData build()
     {
         EntityTempData data = new EntityTempData(this.entityPredicate, this.temperature, this.range, this.units, this.otherEntityPredicate, this.maxEffect, this.affectsSelf);
-        data.setRegistryType(ConfigData.Type.KUBEJS);
+        data.setConfigType(ConfigData.Type.KUBEJS);
         return data;
     }
 }

@@ -87,7 +87,7 @@ public class SpawnBiomeBuilderJS
     public SpawnBiomeData build()
     {
         SpawnBiomeData data = new SpawnBiomeData(biomes, category, weight, entities, count, locationPredicate);
-        data.setRegistryType(ConfigData.Type.KUBEJS);
+        data.setConfigType(ConfigData.Type.KUBEJS);
         return data;
     }
 }

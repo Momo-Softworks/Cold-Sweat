@@ -131,8 +131,8 @@ public class RegistryModifierData<T extends ConfigData> extends ConfigData imple
     }
 
     @Override
-    public Class<RegistryModifierData> getRegistryType()
-    {   return RegistryModifierData.class;
+    public Class<RegistryModifierData<T>> getRegistryType()
+    {   return (Class) RegistryModifierData.class;
     }
 
     public enum Type implements StringRepresentable
