@@ -131,7 +131,7 @@ public class ItemTempBuilderJS
         ItemTempData data = new ItemTempData(this.itemPredicate, ImmutableList.copyOf(this.slots),
                                              this.temperature, this.trait, maxEffect, this.entityPredicate,
                                              this.attributes, this.immuneTempModifiers);
-        data.setRegistryType(ConfigData.Type.KUBEJS);
+        data.setConfigType(ConfigData.Type.KUBEJS);
         return data;
     }
 }

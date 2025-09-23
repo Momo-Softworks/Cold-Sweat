@@ -63,7 +63,7 @@ public class FoodBuilderJS
     public FoodData build()
     {
         FoodData data = new FoodData(this.itemPredicate,this.temperature,  this.duration, this.entityPredicate);
-        data.setRegistryType(ConfigData.Type.KUBEJS);
+        data.setConfigType(ConfigData.Type.KUBEJS);
         return data;
     }
 }

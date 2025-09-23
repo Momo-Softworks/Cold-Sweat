@@ -213,7 +213,7 @@ public class ConfigHelper
             V data = tomlParser.apply(entry);
             if (data == null) continue;
 
-            data.setRegistryType(ConfigData.Type.TOML);
+            data.setConfigType(ConfigData.Type.TOML);
 
             RegistryHelper.mapTaggableList(keyListGetter.apply(data)).forEach(ent -> dataMap.put(ent, data));
         }
@@ -232,7 +232,7 @@ public class ConfigHelper
             V data = tomlParser.apply(entry);
             if (data == null) continue;
 
-            data.setRegistryType(ConfigData.Type.TOML);
+            data.setConfigType(ConfigData.Type.TOML);
 
             RegistryHelper.mapTaggableList(keyListGetter.apply(data)).forEach(ent -> dataMap.put(ent, data));
         }
@@ -282,7 +282,7 @@ public class ConfigHelper
             V data = valueCreator.apply(entry);
             if (data != null)
             {
-                data.setRegistryType(ConfigData.Type.TOML);
+                data.setConfigType(ConfigData.Type.TOML);
                 for (K key : RegistryHelper.mapTaggableList(listGetter.apply(data)))
                 {   mapAdder.accept(map, key, data);
                 }

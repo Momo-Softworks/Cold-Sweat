@@ -163,13 +163,14 @@ public class ConfigLoadingHandler
                         String relativePath = resourceLocation.getPath().replace(registryPath, "");
                         relativePath = relativePath.substring(1, relativePath.length() - 5);
                         ResourceLocation registryId = new ResourceLocation(resourceLocation.getNamespace(), relativePath);
+                        RegistryKey<? extends ConfigData> registryKey = RegistryKey.create(registry.key(), registryId);
                         // Create a reader from the input stream
                         registry.codec().parse(JsonOps.INSTANCE, json)
                                 .resultOrPartial(ColdSweat.LOGGER::error)
                                 .ifPresent(data ->
                                 {
-                                    data.setRegistryType(ConfigData.Type.JSON);
-                                    data.setRegistryId(registryId);
+                                    data.setConfigType(ConfigData.Type.JSON);
+                                    data.setRegistryKey(registryKey);
                                     ((RegistryHolder) registry).register(registryId, data);
                                     ((RegistryMultiMap) registries).put(registry.key(), data);
                                 });
@@ -212,7 +213,7 @@ public class ConfigLoadingHandler
 
         // Mark holders as "JSON"
         for (ConfigData data : registries.values())
-        {   data.setRegistryType(ConfigData.Type.JSON);
+        {   data.setConfigType(ConfigData.Type.JSON);
         }
 
         // Fire pre-registry-loading event
@@ -312,8 +313,8 @@ public class ConfigLoadingHandler
         while (iterator.hasNext())
         {
             ConfigData data = iterator.next();
-            if (data.registryId().isPresent())
-            messageBuilder.append(data.registryId().get());
+            if (data.registryKey().isPresent())
+            messageBuilder.append(data.registryKey().get().location());
             if (iterator.hasNext())
             {   messageBuilder.append(", ");
             }
@@ -325,7 +326,7 @@ public class ConfigLoadingHandler
         boolean hasNameless = false;
         for (ConfigData data : registry)
         {
-            if (!data.registryId().isPresent())
+            if (!data.registryKey().isPresent())
             {   messageBuilder.append("\n- ").append(data);
                 hasNameless = true;
             }
@@ -352,8 +353,8 @@ public class ConfigLoadingHandler
         // Clear the static map
         REGISTRY_MODIFIERS.clear();
         // Gather registry removals & add them to the static map
-        Collection<RegistryModifierData<?>> removals = ModRegistries.REMOVE_REGISTRY_DATA.data().values();
-        removals.addAll(parseConfigData(ModRegistries.REMOVE_REGISTRY_DATA));
+        Collection<RegistryModifierData<?>> removals = ModRegistries.REGISTRY_MODIFIER_DATA.data().values();
+        removals.addAll(parseConfigData(ModRegistries.REGISTRY_MODIFIER_DATA));
         removals.forEach(data ->
         {
             RegistryKey<Registry<? extends ConfigData>> key = (RegistryKey) data.registry();
@@ -413,7 +414,7 @@ public class ConfigLoadingHandler
                             entryRemover.accept(entry);
                             continue;
                         }
-                        entrySetter.accept(Map.entry(entry.getKey(), modified));
+                        entrySetter.accept(new AbstractMap.SimpleEntry<>(entry.getKey(), modified));
                     }
                 }
             }
@@ -423,7 +424,7 @@ public class ConfigLoadingHandler
     public static <T extends ConfigData> void modifyEntries(List<T> registries, RegistryHolder<T> registry)
     {
         AtomicInteger index = new AtomicInteger(0);
-        modifyEntries(registries, registry, list -> list.stream().map(e -> new AbstractMap.Entry<>(index.getAndIncrement(), e)).toList(),
+        modifyEntries(registries, registry, list -> list.stream().map(e -> new AbstractMap.SimpleEntry<>(index.getAndIncrement(), e)).collect(Collectors.toList()),
                       entry -> registries.set(entry.getKey(), entry.getValue()),
                       entry -> registries.remove(entry.getKey().intValue()));
     }
@@ -724,8 +725,8 @@ public class ConfigLoadingHandler
                             .map(Pair::getFirst)
                             .ifPresent(configData ->
                             {
-                                configData.setRegistryType(ConfigData.Type.JSON);
-                                configData.setRegistryId(new ResourceLocation(ColdSweat.MOD_ID, file.getPath()));
+                                configData.setConfigType(ConfigData.Type.JSON);
+                                configData.setRegistryKey(RegistryKey.create(registryKey, new ResourceLocation(ColdSweat.MOD_ID, file.getPath())));
                                 output.add(configData);
                             });
                 }

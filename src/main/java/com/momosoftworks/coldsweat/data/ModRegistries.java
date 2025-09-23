@@ -24,7 +24,7 @@ import java.util.*;
 public class ModRegistries
 {
     private static final FallbackResourceManager RESOURCE_MANAGER = new FallbackResourceManager(ResourcePackType.SERVER_DATA, ColdSweat.MOD_ID);
-    private static final Map<ResourceLocation, RegistryHolder<?>> REGISTRIES = new FastMap<>();
+    private static final Map<ResourceLocation, RegistryHolder<? extends ConfigData>> REGISTRIES = new FastMap<>();
 
     public static IResourceManager getResourceManager()
     {   return RESOURCE_MANAGER;
@@ -65,7 +65,7 @@ public class ModRegistries
     public static final RegistryHolder<TempEffectsData> TEMP_EFFECTS_DATA = createRegistry(new ResourceLocation(ColdSweat.MOD_ID, "entity/temp_effects"), TempEffectsData.CODEC, TempEffectsData.class);
 
     // Special registries
-    public static final RegistryHolder<RegistryModifierData<?>> REGISTRY_MODIFIER_DATA = createRegistry(new ResourceLocation(ColdSweat.MOD_ID, "modifier"), RegistryModifierData.CODEC, (Class) RemoveRegistryData.class);
+    public static final RegistryHolder<RegistryModifierData<?>> REGISTRY_MODIFIER_DATA = createRegistry(new ResourceLocation(ColdSweat.MOD_ID, "modifier"), (Codec) RegistryModifierData.CODEC, RegistryModifierData.class);
 
     public static <V extends ConfigData> RegistryHolder<V> createRegistry(ResourceLocation registry, Codec<V> codec, Class<V> type)
     {
@@ -78,9 +78,9 @@ public class ModRegistries
     {   return ImmutableMap.copyOf(REGISTRIES);
     }
 
-    public static RegistryKey<Registry<? extends ConfigData>> getRegistry(ResourceLocation name)
+    public static RegistryKey<? extends Registry<? extends ConfigData>> getRegistry(ResourceLocation name)
     {
-        return Optional.ofNullable(REGISTRIES.get(name)).map(holder -> (RegistryKey) holder.key())
+        return Optional.ofNullable(REGISTRIES.get(name)).map(RegistryHolder::key)
                .orElseThrow(() -> ColdSweat.LOGGER.throwing(new IllegalArgumentException("Unknown Cold Sweat registry: " + name)));
     }
 

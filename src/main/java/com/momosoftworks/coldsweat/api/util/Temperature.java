@@ -15,6 +15,7 @@ import com.momosoftworks.coldsweat.core.network.message.SyncTemperatureMessage;
 import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.InterruptibleIterator;
+import com.momosoftworks.coldsweat.util.serialization.EnumHelper;
 import com.momosoftworks.coldsweat.util.serialization.StringRepresentable;
 import net.minecraft.entity.LivingEntity;
 import net.minecraftforge.common.MinecraftForge;
