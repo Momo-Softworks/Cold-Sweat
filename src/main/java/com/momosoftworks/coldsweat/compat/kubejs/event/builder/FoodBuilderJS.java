@@ -4,6 +4,7 @@ import com.momosoftworks.coldsweat.data.codec.configuration.FoodData;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
+import net.minecraft.core.registries.BuiltInRegistries;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
@@ -64,7 +65,7 @@ public class FoodBuilderJS
     public FoodData build()
     {
         FoodData data = new FoodData(this.itemPredicate,this.temperature,  this.duration, this.entityPredicate);
-        data.setRegistryType(ConfigData.Type.KUBEJS);
+        data.setConfigType(ConfigData.Type.KUBEJS);
         return data;
     }
 }

@@ -19,7 +19,12 @@ public class AddRegistriesEvent extends Event
     /**
      * Creates a Cold Sweat registry.
      */
+    public <V extends ConfigData> RegistryHolder<V> createRegistry(ResourceLocation registry, Codec<V> codec)
+    {   return ModRegistries.createRegistry(registry, codec);
+    }
+
+    @Deprecated // Class parameter is no longer required
     public <V extends ConfigData> RegistryHolder<V> createRegistry(ResourceLocation registry, Codec<V> codec, Class<V> type)
-    {   return ModRegistries.createRegistry(registry, codec, type);
+    {   return ModRegistries.createRegistry(registry, codec);
     }
 }

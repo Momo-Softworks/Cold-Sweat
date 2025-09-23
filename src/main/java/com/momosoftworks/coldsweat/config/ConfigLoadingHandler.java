@@ -199,7 +199,10 @@ public class ConfigLoadingHandler
         for (Map.Entry<ResourceLocation, RegistryHolder<?>> entry : ModRegistries.getRegistries().entrySet())
         {
             ResourceKey<Registry<? extends ConfigData>> key = (ResourceKey) entry.getValue().key();
-            registries.putAll(key, registryAccess.registryOrThrow(key).holders().toList());
+            registryAccess.registryOrThrow(key).holders().forEach(holder ->
+            {   holder.unwrapKey().ifPresent(holderKey -> holder.value().setRegistryKey(holderKey));
+                registries.put(key, holder);
+            });
         }
         return registries;
     }
@@ -238,7 +241,7 @@ public class ConfigLoadingHandler
 
         // Mark holders as "JSON"
         for (Holder<? extends ConfigData> holder : registries.values())
-        {   holder.value().setRegistryType(ConfigData.Type.JSON);
+        {   holder.value().setConfigType(ConfigData.Type.JSON);
         }
 
         // Fire registry creation event
