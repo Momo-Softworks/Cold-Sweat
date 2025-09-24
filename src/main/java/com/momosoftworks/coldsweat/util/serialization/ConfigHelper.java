@@ -62,12 +62,21 @@ public class ConfigHelper
             if (negate) objString = objString.substring(1);
             if (objString.startsWith("#"))
             {
-                final String tagID = objString.replace("#", "");
-                registryList.add(Either.left(TagKey.create(registry, ResourceLocation.parse(tagID))), negate);
+                final String tagString = objString.replace("#", "");
+                ResourceLocation tagID = ResourceLocation.tryParse(tagString);
+                if (tagID == null)
+                {   ColdSweat.LOGGER.error("Error parsing config: {} \"{}\" is not a valid tag ID", registry.location().getPath(), tagString);
+                    continue;
+                }
+                registryList.add(Either.left(TagKey.create(registry, tagID)), negate);
             }
             else
             {
-                ResourceLocation id = ResourceLocation.parse(objString);
+                ResourceLocation id = ResourceLocation.tryParse(objString);
+                if (id == null)
+                {   ColdSweat.LOGGER.error("Error parsing config: {} \"{}\" is not a valid ID", registry.location().getPath(), objString);
+                    continue;
+                }
                 Optional<Holder.Reference<T>> obj = reg.getHolder(ResourceKey.create(registry, id));
                 if (obj.isEmpty())
                 {
@@ -94,12 +103,21 @@ public class ConfigHelper
             if (negate) objString = objString.substring(1);
             if (objString.startsWith("#"))
             {
-                final String tagID = objString.replace("#", "");
-                registryList.add(Either.left(TagKey.create(registryKey, ResourceLocation.parse(tagID))), negate);
+                final String tagString = objString.replace("#", "");
+                ResourceLocation tagID = ResourceLocation.tryParse(tagString);
+                if (tagID == null)
+                {   ColdSweat.LOGGER.error("Error parsing config: {} \"{}\" is not a valid tag ID", registryKey.location().getPath(), tagString);
+                    continue;
+                }
+                registryList.add(Either.left(TagKey.create(registryKey, tagID)), negate);
             }
             else
             {
-                ResourceLocation id = ResourceLocation.parse(objString);
+                ResourceLocation id = ResourceLocation.tryParse(objString);
+                if (id == null)
+                {   ColdSweat.LOGGER.error("Error parsing config: {} \"{}\" is not a valid ID", registryKey.location().getPath(), objString);
+                    continue;
+                }
                 Optional<T> obj = registry.getOptional(id);
                 if (obj.isEmpty())
                 {   ColdSweat.LOGGER.error("Error parsing config: {} \"{}\" does not exist", registryKey.location().getPath(), objString);
@@ -185,7 +203,7 @@ public class ConfigHelper
         return getRegistryMapLike(source, registryAccess, keyRegistry, valueCreator, taggedListGetter, FastMultiMap::new, FastMultiMap::put);
     }
 
-    private static <K, V extends ConfigData, M> M getRegistryMapLike(List<? extends List<?>> source, RegistryAccess registryAccess, ResourceKey<Registry<K>> keyRegistry,
+    private static <K, V extends ConfigData, M> M getRegistryMapLike(List< ? extends List<?>> source, RegistryAccess registryAccess, ResourceKey<Registry<K>> keyRegistry,
                                                                      Function<List<?>, V> valueCreator, Function<V, NegatableList<Either<TagKey<K>, OptionalHolder<K>>>> taggedListGetter,
                                                                      Supplier<M> mapSupplier, TriConsumer<M, Holder<K>, V> mapAdder)
     {
@@ -211,9 +229,10 @@ public class ConfigHelper
             str ->
             {
                 if (!str.startsWith("#"))
-                {   return DataResult.<TagKey<T>>error(() -> String.format("Not a tag key for builtin registry %s: %s", vanillaRegistry.location(), str));
+                {   return DataResult.error(() -> String.format("Not a tag key for builtin registry %s: %s", vanillaRegistry.location(), str));
                 }
-                ResourceLocation tagID = ResourceLocation.parse(str.replace("#", ""));
+                ResourceLocation tagID = ResourceLocation.tryParse(str.replace("#", ""));
+                if (tagID == null) return DataResult.error(() -> String.format("Invalid tag ID \"%s\"", str));
                 return DataResult.success(TagKey.create(vanillaRegistry, tagID));
             },
             key -> "#" + key.location());
@@ -328,7 +347,8 @@ public class ConfigHelper
                                                           if (!str.startsWith("#"))
                                                           {   return DataResult.error(() -> String.format("Not a tag key for dynamic resource registry %s: %s", vanillaRegistry.location(), str));
                                                           }
-                                                          ResourceLocation itemLocation = ResourceLocation.parse(str.replace("#", ""));
+                                                          ResourceLocation itemLocation = ResourceLocation.tryParse(str.replace("#", ""));
+                                                          if (itemLocation == null) return DataResult.error(() -> String.format("Invalid tag ID \"%s\"", str));
                                                           return DataResult.success(TagKey.create(vanillaRegistry, itemLocation));
                                                       },
                                                       key -> "#" + key.location()),
