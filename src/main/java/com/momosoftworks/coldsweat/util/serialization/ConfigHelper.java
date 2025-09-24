@@ -63,12 +63,21 @@ public class ConfigHelper
             if (negate) objString = objString.substring(1);
             if (objString.startsWith("#"))
             {
-                final String tagID = objString.replace("#", "");
-                registryList.add(Either.left(TagKey.create(registry, new ResourceLocation(tagID))), negate);
+                final String tagString = objString.replace("#", "");
+                ResourceLocation tagID = ResourceLocation.tryParse(tagString);
+                if (tagID == null)
+                {   ColdSweat.LOGGER.error("Error parsing config: {} \"{}\" is not a valid tag ID", registry.location().getPath(), tagString);
+                    continue;
+                }
+                registryList.add(Either.left(TagKey.create(registry, tagID)), negate);
             }
             else
             {
-                ResourceLocation id = new ResourceLocation(objString);
+                ResourceLocation id = ResourceLocation.tryParse(objString);
+                if (id == null)
+                {   ColdSweat.LOGGER.error("Error parsing config: {} \"{}\" is not a valid ID", registry.location().getPath(), objString);
+                    continue;
+                }
                 Optional<Holder.Reference<T>> obj = reg.getHolder(ResourceKey.create(registry, id));
                 if (!reg.containsKey(id) || obj.isEmpty())
                 {
@@ -95,15 +104,23 @@ public class ConfigHelper
             if (negate) objString = objString.substring(1);
             if (objString.startsWith("#"))
             {
-                final String tagID = objString.replace("#", "");
-                registryList.add(Either.left(TagKey.create(registryKey, new ResourceLocation(tagID))), negate);
+                final String tagString = objString.replace("#", "");
+                ResourceLocation tagID = ResourceLocation.tryParse(tagString);
+                if (tagID == null)
+                {   ColdSweat.LOGGER.error("Error parsing config: {} \"{}\" is not a valid tag ID", registryKey.location().getPath(), tagString);
+                    continue;
+                }
+                registryList.add(Either.left(TagKey.create(registryKey, tagID)), negate);
             }
             else
             {
-                ResourceLocation id = new ResourceLocation(objString);
+                ResourceLocation id = ResourceLocation.tryParse(objString);
+                if (id == null)
+                {   ColdSweat.LOGGER.error("Error parsing config: {} \"{}\" is not a valid ID", registryKey.location().getPath(), objString);
+                    continue;
+                }
                 if (!registry.containsKey(id))
-                {
-                    ColdSweat.LOGGER.error("Error parsing config: {} \"{}\" does not exist", registryKey.location().getPath(), objString);
+                {   ColdSweat.LOGGER.error("Error parsing config: {} \"{}\" does not exist", registryKey.location().getPath(), objString);
                     continue;
                 }
                 T obj = registry.getValue(id);
@@ -187,7 +204,7 @@ public class ConfigHelper
         return getRegistryMapLike(source, registryAccess, keyRegistry, valueCreator, taggedListGetter, FastMultiMap::new, FastMultiMap::put);
     }
 
-    private static <K, V extends ConfigData, M> M getRegistryMapLike(List<? extends List<?>> source, RegistryAccess registryAccess, ResourceKey<Registry<K>> keyRegistry,
+    private static <K, V extends ConfigData, M> M getRegistryMapLike(List< ? extends List<?>> source, RegistryAccess registryAccess, ResourceKey<Registry<K>> keyRegistry,
                                                                      Function<List<?>, V> valueCreator, Function<V, NegatableList<Either<TagKey<K>, OptionalHolder<K>>>> taggedListGetter,
                                                                      Supplier<M> mapSupplier, TriConsumer<M, Holder<K>, V> mapAdder)
     {
@@ -214,7 +231,7 @@ public class ConfigHelper
                                                           if (!str.startsWith("#"))
                                                           {   return DataResult.error(() -> "Not a tag key: " + str);
                                                           }
-                                                          ResourceLocation itemLocation = new ResourceLocation(str.replace("#", ""));
+                                                          ResourceLocation itemLocation = ResourceLocation.tryParse(str.replace("#", ""));
                                                           return DataResult.success(TagKey.create(vanillaRegistry, itemLocation));
                                                       },
                                                       key -> "#" + key.location()),
@@ -236,14 +253,16 @@ public class ConfigHelper
                 // Decode tag key
                 if (str.startsWith("#"))
                 {
-                    ResourceLocation tagId = new ResourceLocation(str.replace("#", ""));
-                    return DataResult.success(Pair.of(Either.left(TagKey.create(vanillaRegistry, tagId)), input));
+                    ResourceLocation tagID = ResourceLocation.tryParse(str.replace("#", ""));
+                    if (tagID == null) return DataResult.error(() -> String.format("Invalid tag ID \"%s\"", str));
+                    return DataResult.success(Pair.of(Either.left(TagKey.create(vanillaRegistry, tagID)), input));
                 }
                 // Decode holder
                 else
                 {
-                    ResourceLocation itemLocation = new ResourceLocation(str);
-                    ResourceKey<T> key = ResourceKey.create(vanillaRegistry, itemLocation);
+                    ResourceLocation objectID = ResourceLocation.tryParse(str);
+                    if (objectID == null) return DataResult.error(() -> String.format("Invalid ID \"%s\"", str));
+                    ResourceKey<T> key = ResourceKey.create(vanillaRegistry, objectID);
                     return DataResult.success(Pair.of(Either.right(new OptionalHolder<>(key)), input));
                 }
             }
@@ -271,11 +290,12 @@ public class ConfigHelper
                                                           if (!str.startsWith("#"))
                                                           {   return DataResult.error(() -> "Not a tag key: " + str);
                                                           }
-                                                          ResourceLocation itemLocation = new ResourceLocation(str.replace("#", ""));
+                                                          ResourceLocation itemLocation = ResourceLocation.tryParse(str.replace("#", ""));
+                                                          if (itemLocation == null) return DataResult.error(() -> String.format("Invalid tag ID \"%s\"", str));
                                                           return DataResult.success(TagKey.create(vanillaRegistry, itemLocation));
                                                       },
                                                       key -> "#" + key.location()),
-                            net.minecraft.resources.ResourceKey.codec(vanillaRegistry));
+                            ResourceKey.codec(vanillaRegistry));
     }
 
     public static Optional<FuelData> findFirstFuelMatching(DynamicHolder<Multimap<Item, FuelData>> predicates, ItemStack stack)
