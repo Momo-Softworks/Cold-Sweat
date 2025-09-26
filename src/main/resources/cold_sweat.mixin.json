@@ -9,7 +9,7 @@
     "MixinChatClicked",
     "MixinEffectsScreen",
     "MixinFogRender",
-    "MixinGoatRenderer",
+    "compat.MixinGoatRenderer",
     "MixinHeartRender",
     "MixinInventoryOpenClient",
     "MixinItemTooltip",

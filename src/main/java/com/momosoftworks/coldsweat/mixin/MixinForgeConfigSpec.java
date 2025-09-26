@@ -16,7 +16,7 @@ import java.util.*;
 @Mixin(ForgeConfigSpec.class)
 public class MixinForgeConfigSpec
 {
-    @Shadow private Map<List<String>, String> levelComments;
+    @Shadow(remap = false) private Map<List<String>, String> levelComments;
 
     @Inject(method = "correct(Lcom/electronwill/nightconfig/core/UnmodifiableConfig;Lcom/electronwill/nightconfig/core/CommentedConfig;Ljava/util/LinkedList;Ljava/util/List;Lcom/electronwill/nightconfig/core/ConfigSpec$CorrectionListener;Lcom/electronwill/nightconfig/core/ConfigSpec$CorrectionListener;Z)I",
             at = @At(value = "HEAD"), remap = false, cancellable = true)
