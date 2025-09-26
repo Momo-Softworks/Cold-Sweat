@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.config.spec;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.Vec2i;
 import com.momosoftworks.coldsweat.config.enums.InsulationVisibility;
+import com.momosoftworks.coldsweat.util.serialization.DynamicHolder;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
@@ -304,44 +305,43 @@ public class ClientSettingsConfig
     public static Vec2i getBodyIconPos()
     {   return new Vec2i(BODY_TEMP_ICON_POS.get().get(0), BODY_TEMP_ICON_POS.get().get(1));
     }
+    public static void setBodyIconPos(Vec2i pos)
+    {   BODY_TEMP_ICON_POS.set(Arrays.asList(pos.x, pos.y));
+    }
 
     public static Vec2i getBodyReadoutPos()
     {   return new Vec2i(BODY_TEMP_READOUT_POS.get().get(0), BODY_TEMP_READOUT_POS.get().get(1));
+    }
+    public static void setBodyReadoutPos(Vec2i pos)
+    {   BODY_TEMP_READOUT_POS.set(Arrays.asList(pos.x, pos.y));
     }
 
     public static Vec2i getWorldGaugePos()
     {   return new Vec2i(WORLD_TEMP_GAUGE_POS.get().get(0), WORLD_TEMP_GAUGE_POS.get().get(1));
     }
+    public static void setWorldGaugePos(Vec2i pos)
+    {   WORLD_TEMP_GAUGE_POS.set(Arrays.asList(pos.x, pos.y));
+    }
 
     public static Vec2i getFoodEffectsPos()
     {   return new Vec2i(FOOD_EFFECTS_POS.get().get(0), FOOD_EFFECTS_POS.get().get(1));
+    }
+    public static void setFoodEffectsPos(Vec2i pos)
+    {   FOOD_EFFECTS_POS.set(Arrays.asList(pos.x, pos.y));
     }
 
     public static Vec2i getConfigButtonPos()
     {   return new Vec2i(CONFIG_BUTTON_POS.get().get(0), CONFIG_BUTTON_POS.get().get(1));
     }
+    public static void setConfigButtonPos(Vec2i pos)
+    {   CONFIG_BUTTON_POS.set(Arrays.asList(pos.x, pos.y));
+    }
 
     public static synchronized void writeAndSave()
     {
-        USE_CELSIUS.set(ConfigSettings.CELSIUS.get());
-        TEMPERATURE_OFFSET.set(ConfigSettings.TEMP_OFFSET.get());
-        TEMPERATURE_SMOOTHING.set(ConfigSettings.TEMP_SMOOTHING.get());
-        BODY_TEMP_ICON_POS.set(Arrays.asList(ConfigSettings.BODY_ICON_POS.get().x(), ConfigSettings.BODY_ICON_POS.get().y()));
-        BODY_TEMP_READOUT_POS.set(Arrays.asList(ConfigSettings.BODY_READOUT_POS.get().x(), ConfigSettings.BODY_READOUT_POS.get().y()));
-        WORLD_TEMP_GAUGE_POS.set(Arrays.asList(ConfigSettings.WORLD_GAUGE_POS.get().x(), ConfigSettings.WORLD_GAUGE_POS.get().y()));
-        USE_CUSTOM_HOTBAR_LAYOUT.set(ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get());
-        ENABLE_ICON_BOBBING.set(ConfigSettings.ICON_BOBBING.get());
-        SHOW_HEARTH_DEBUG_VISUALS.set(ConfigSettings.HEARTH_DEBUG.get());
-        ENABLE_CREATIVE_WARNING.set(ConfigSettings.SHOW_CREATIVE_WARNING.get());
-        SHOW_BODY_TEMP_ICON.set(ConfigSettings.BODY_ICON_ENABLED.get());
-        SHOW_BODY_TEMP_READOUT.set(ConfigSettings.BODY_READOUT_ENABLED.get());
-        SHOW_WORLD_TEMP_GAUGE.set(ConfigSettings.WORLD_GAUGE_ENABLED.get());
-        SHOW_SCREEN_DISTORTIONS.set(ConfigSettings.DISTORTION_EFFECTS.get());
-        HIGH_CONTRAST_MODE.set(ConfigSettings.HIGH_CONTRAST.get());
-        CONFIG_BUTTON_POS.set(Arrays.asList(ConfigSettings.CONFIG_BUTTON_POS.get().x(),
-                                        ConfigSettings.CONFIG_BUTTON_POS.get().y()));
-        MOVE_BODY_TEMP_ICON_ADVANCED.set(ConfigSettings.MOVE_BODY_ICON_WHEN_ADVANCED.get());
-        WATER_EFFECT_SETTING.set(ConfigSettings.WATER_EFFECT_SETTING.get().ordinal());
+        for (DynamicHolder<?> holder : ConfigSettings.CLIENT_SETTINGS.values())
+        {   holder.save(null);
+        }
         save();
     }
 
