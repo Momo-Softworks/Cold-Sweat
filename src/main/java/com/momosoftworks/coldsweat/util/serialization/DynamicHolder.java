@@ -55,6 +55,13 @@ public class DynamicHolder<T> implements Supplier<T>
         return holder;
     }
 
+    public static <T> DynamicHolder<T> create(ResourceLocation name, Supplier<T> valueCreator, Consumer<DynamicHolder<T>> loader, Consumer<T> saver)
+    {
+        DynamicHolder<T> holder = new DynamicHolder<>(name, valueCreator, loader);
+        holder.saver = (val, registryAccess) -> saver.accept(val);
+        return holder;
+    }
+
     public static <T> DynamicHolder<T> create(ResourceLocation name, Supplier<T> valueCreator, Consumer<DynamicHolder<T>> loader)
     {   return new DynamicHolder<>(name, valueCreator, loader);
     }
@@ -180,8 +187,8 @@ public class DynamicHolder<T> implements Supplier<T>
 
     public void save(RegistryAccess registryAccess)
     {
-        if (!isSynced())
-        {  throw ColdSweat.LOGGER.throwing(new SerializationException("Tried to save non-synced DynamicHolder"));
+        if (saver == null)
+        {  throw ColdSweat.LOGGER.throwing(new SerializationException("Tried to save non-saving DynamicHolder"));
         }
         try
         {   saver.save(this.get(registryAccess), registryAccess);

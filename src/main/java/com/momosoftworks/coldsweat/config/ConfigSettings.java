@@ -917,62 +917,98 @@ public class ConfigSettings
 
         // Client
 
-        CELSIUS = addClientSetting(ColdSweat.createKey("celsius"), () -> false, holder -> holder.set(ClientSettingsConfig.USE_CELSIUS.get()));
+        CELSIUS = addClientSetting(ColdSweat.createKey("celsius"), () -> false, holder -> holder.set(ClientSettingsConfig.USE_CELSIUS.get()),
+            (saver) -> ClientSettingsConfig.USE_CELSIUS.set(saver));
 
-        TEMP_OFFSET = addClientSetting(ColdSweat.createKey("temp_offset"), () -> 0, holder -> holder.set(ClientSettingsConfig.TEMPERATURE_OFFSET.get()));
+        TEMP_OFFSET = addClientSetting(ColdSweat.createKey("temp_offset"), () -> 0, holder -> holder.set(ClientSettingsConfig.TEMPERATURE_OFFSET.get()),
+            (saver) -> ClientSettingsConfig.TEMPERATURE_OFFSET.set(saver));
 
-        TEMP_SMOOTHING = addClientSetting(ColdSweat.createKey("temp_smoothing"), () -> 10d, holder -> holder.set(ClientSettingsConfig.TEMPERATURE_SMOOTHING.get()));
+        TEMP_SMOOTHING = addClientSetting(ColdSweat.createKey("temp_smoothing"), () -> 10d, holder -> holder.set(ClientSettingsConfig.TEMPERATURE_SMOOTHING.get()),
+            (saver) -> ClientSettingsConfig.TEMPERATURE_SMOOTHING.set(saver));
 
-        BODY_ICON_POS = addClientSetting(ColdSweat.createKey("body_icon_pos"), Vector2i::new, holder -> holder.set(ClientSettingsConfig.getBodyIconPos()));
-        BODY_ICON_ENABLED = addClientSetting(ColdSweat.createKey("body_icon_enabled"), () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_BODY_TEMP_ICON.get()));
+        BODY_ICON_POS = addClientSetting(ColdSweat.createKey("body_icon_pos"), Vector2i::new, holder -> holder.set(ClientSettingsConfig.getBodyIconPos()),
+            (saver) -> ClientSettingsConfig.setBodyIconPos(saver));
+        BODY_ICON_ENABLED = addClientSetting(ColdSweat.createKey("body_icon_enabled"), () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_BODY_TEMP_ICON.get()),
+            (saver) -> ClientSettingsConfig.SHOW_BODY_TEMP_ICON.set(saver));
 
-        MOVE_BODY_ICON_WHEN_ADVANCED = addClientSetting(ColdSweat.createKey("move_body_icon_for_advanced"), () -> true, holder -> holder.set(ClientSettingsConfig.MOVE_BODY_TEMP_ICON_ADVANCED.get()));
+        MOVE_BODY_ICON_WHEN_ADVANCED = addClientSetting(ColdSweat.createKey("move_body_icon_for_advanced"), () -> true, holder -> holder.set(ClientSettingsConfig.MOVE_BODY_TEMP_ICON_ADVANCED.get()),
+            (saver) -> ClientSettingsConfig.MOVE_BODY_TEMP_ICON_ADVANCED.set(saver));
 
-        BODY_READOUT_POS = addClientSetting(ColdSweat.createKey("body_readout_pos"), Vector2i::new, holder -> holder.set(ClientSettingsConfig.getBodyReadoutPos()));
-        BODY_READOUT_ENABLED = addClientSetting(ColdSweat.createKey("body_readout_enabled"), () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_BODY_TEMP_READOUT.get()));
+        BODY_READOUT_POS = addClientSetting(ColdSweat.createKey("body_readout_pos"), Vector2i::new, holder -> holder.set(ClientSettingsConfig.getBodyReadoutPos()),
+            (saver) -> ClientSettingsConfig.setBodyReadoutPos(saver));
+        BODY_READOUT_ENABLED = addClientSetting(ColdSweat.createKey("body_readout_enabled"), () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_BODY_TEMP_READOUT.get()),
+            (saver) -> ClientSettingsConfig.SHOW_BODY_TEMP_READOUT.set(saver));
 
-        WORLD_GAUGE_POS = addClientSetting(ColdSweat.createKey("world_gauge_pos"), Vector2i::new, holder -> holder.set(ClientSettingsConfig.getWorldGaugePos()));
-        WORLD_GAUGE_ENABLED = addClientSetting(ColdSweat.createKey("world_gauge_enabled"), () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_WORLD_TEMP_GAUGE.get()));
+        WORLD_GAUGE_POS = addClientSetting(ColdSweat.createKey("world_gauge_pos"), Vector2i::new, holder -> holder.set(ClientSettingsConfig.getWorldGaugePos()),
+            (saver) -> ClientSettingsConfig.setWorldGaugePos(saver));
+        WORLD_GAUGE_ENABLED = addClientSetting(ColdSweat.createKey("world_gauge_enabled"), () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_WORLD_TEMP_GAUGE.get()),
+            (saver) -> ClientSettingsConfig.SHOW_WORLD_TEMP_GAUGE.set(saver));
 
-        FOOD_EFFECTS_POS = addClientSetting(ColdSweat.createKey("food_effects_pos"), Vector2i::new, holder -> holder.set(ClientSettingsConfig.getFoodEffectsPos()));
-        FOOD_EFFECTS_ENABLED = addClientSetting(ColdSweat.createKey("food_effects_enabled"), () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_FOOD_EFFECTS.get()));
+        FOOD_EFFECTS_POS = addClientSetting(ColdSweat.createKey("food_effects_pos"), Vector2i::new, holder -> holder.set(ClientSettingsConfig.getFoodEffectsPos()),
+            (saver) -> ClientSettingsConfig.setFoodEffectsPos(saver));
+        FOOD_EFFECTS_ENABLED = addClientSetting(ColdSweat.createKey("food_effects_enabled"), () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_FOOD_EFFECTS.get()),
+            (saver) -> ClientSettingsConfig.SHOW_FOOD_EFFECTS.set(saver));
 
-        CUSTOM_HOTBAR_LAYOUT = addClientSetting(ColdSweat.createKey("custom_hotbar_layout"), () -> true, holder -> holder.set(ClientSettingsConfig.USE_CUSTOM_HOTBAR_LAYOUT.get()));
-        ICON_BOBBING = addClientSetting(ColdSweat.createKey("icon_bobbing"), () -> true, holder -> holder.set(ClientSettingsConfig.ENABLE_ICON_BOBBING.get()));
+        CUSTOM_HOTBAR_LAYOUT = addClientSetting(ColdSweat.createKey("custom_hotbar_layout"), () -> true, holder -> holder.set(ClientSettingsConfig.USE_CUSTOM_HOTBAR_LAYOUT.get()),
+            (saver) -> ClientSettingsConfig.USE_CUSTOM_HOTBAR_LAYOUT.set(saver));
+        ICON_BOBBING = addClientSetting(ColdSweat.createKey("icon_bobbing"), () -> true, holder -> holder.set(ClientSettingsConfig.ENABLE_ICON_BOBBING.get()),
+            (saver) -> ClientSettingsConfig.ENABLE_ICON_BOBBING.set(saver));
 
-        HEARTH_DEBUG = addClientSetting(ColdSweat.createKey("hearth_debug"), () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_HEARTH_DEBUG_VISUALS.get()));
+        HEARTH_DEBUG = addClientSetting(ColdSweat.createKey("hearth_debug"), () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_HEARTH_DEBUG_VISUALS.get()),
+            (saver) -> ClientSettingsConfig.SHOW_HEARTH_DEBUG_VISUALS.set(saver));
 
-        SHOW_CONFIG_BUTTON = addClientSetting(ColdSweat.createKey("show_config_button"), () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_CONFIG_BUTTON.get()));
-        CONFIG_BUTTON_POS = addClientSetting(ColdSweat.createKey("config_button_pos"), Vector2i::new, holder -> holder.set(ClientSettingsConfig.getConfigButtonPos()));
+        SHOW_CONFIG_BUTTON = addClientSetting(ColdSweat.createKey("show_config_button"), () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_CONFIG_BUTTON.get()),
+            (saver) -> ClientSettingsConfig.SHOW_CONFIG_BUTTON.set(saver));
+        CONFIG_BUTTON_POS = addClientSetting(ColdSweat.createKey("config_button_pos"), Vector2i::new, holder -> holder.set(ClientSettingsConfig.getConfigButtonPos()),
+            (saver) -> ClientSettingsConfig.setConfigButtonPos(saver));
 
-        DISTORTION_EFFECTS = addClientSetting(ColdSweat.createKey("distortion_effects"), () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_SCREEN_DISTORTIONS.get()));
+        DISTORTION_EFFECTS = addClientSetting(ColdSweat.createKey("distortion_effects"), () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_SCREEN_DISTORTIONS.get()),
+            (saver) -> ClientSettingsConfig.SHOW_SCREEN_DISTORTIONS.set(saver));
 
-        HIGH_CONTRAST = addClientSetting(ColdSweat.createKey("high_contrast"), () -> false, holder -> holder.set(ClientSettingsConfig.HIGH_CONTRAST_MODE.get()));
+        HIGH_CONTRAST = addClientSetting(ColdSweat.createKey("high_contrast"), () -> false, holder -> holder.set(ClientSettingsConfig.HIGH_CONTRAST_MODE.get()),
+            (saver) -> ClientSettingsConfig.HIGH_CONTRAST_MODE.set(saver));
 
-        SHOW_CREATIVE_WARNING = addClientSetting(ColdSweat.createKey("show_creative_warning"), () -> true, holder -> holder.set(ClientSettingsConfig.ENABLE_CREATIVE_WARNING.get()));
+        SHOW_CREATIVE_WARNING = addClientSetting(ColdSweat.createKey("show_creative_warning"), () -> true, holder -> holder.set(ClientSettingsConfig.ENABLE_CREATIVE_WARNING.get()),
+            (saver) -> ClientSettingsConfig.ENABLE_CREATIVE_WARNING.set(saver));
 
-        INSULATION_VISIBILITY = addClientSetting(ColdSweat.createKey("insulation_visibility"), () -> InsulationVisibility.IF_PRESENT, holder -> holder.set(InsulationVisibility.byName(ClientSettingsConfig.INSULATION_VISIBILITY.get())));
-        EXPAND_TOOLTIPS = addClientSetting(ColdSweat.createKey("expand_tooltips"), () -> true, holder -> holder.set(ClientSettingsConfig.EXPAND_TOOLTIPS.get()));
-        ENABLE_HINTS = addClientSetting(ColdSweat.createKey("enable_hints"), () -> true, holder -> holder.set(ClientSettingsConfig.ENABLE_HINTS.get()));
+        INSULATION_VISIBILITY = addClientSetting(ColdSweat.createKey("insulation_visibility"), () -> InsulationVisibility.IF_PRESENT, holder -> holder.set(InsulationVisibility.byName(ClientSettingsConfig.INSULATION_VISIBILITY.get())),
+            (saver) -> ClientSettingsConfig.INSULATION_VISIBILITY.set(saver.getSerializedName()));
+        EXPAND_TOOLTIPS = addClientSetting(ColdSweat.createKey("expand_tooltips"), () -> true, holder -> holder.set(ClientSettingsConfig.EXPAND_TOOLTIPS.get()),
+            (saver) -> ClientSettingsConfig.EXPAND_TOOLTIPS.set(saver));
+        ENABLE_HINTS = addClientSetting(ColdSweat.createKey("enable_hints"), () -> true, holder -> holder.set(ClientSettingsConfig.ENABLE_HINTS.get()),
+            (saver) -> ClientSettingsConfig.ENABLE_HINTS.set(saver));
 
-        WATER_EFFECT_SETTING = addClientSetting(ColdSweat.createKey("water_effect_setting"), () -> WaterEffectSetting.ALL, holder -> holder.set(WaterEffectSetting.values()[ClientSettingsConfig.WATER_EFFECT_SETTING.get()]));
-        WATER_DROPLET_SCALE = addClientSetting(ColdSweat.createKey("water_droplet_scale"), () -> new IntegerBounds(40, 48), holder -> holder.set(new IntegerBounds(ClientSettingsConfig.WATER_DROPLET_SCALE.get().toArray(Integer[]::new))));
+        WATER_EFFECT_SETTING = addClientSetting(ColdSweat.createKey("water_effect_setting"), () -> WaterEffectSetting.ALL, holder -> holder.set(WaterEffectSetting.values()[ClientSettingsConfig.WATER_EFFECT_SETTING.get()]),
+            (saver) -> ClientSettingsConfig.WATER_EFFECT_SETTING.set(saver.ordinal()));
+        WATER_DROPLET_SCALE = addClientSetting(ColdSweat.createKey("water_droplet_scale"), () -> new IntegerBounds(40, 48), holder -> holder.set(new IntegerBounds(ClientSettingsConfig.WATER_DROPLET_SCALE.get().toArray(Integer[]::new))),
+            (saver) -> ClientSettingsConfig.WATER_DROPLET_SCALE.set(List.of(saver.min(), saver.max())));
 
-        SHOW_FROZEN_HEALTH = addClientSetting(ColdSweat.createKey("show_frozen_health"), () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_FROZEN_HEALTH.get()));
-        FREEZING_OVERLAY_OPACITY = addClientSetting(ColdSweat.createKey("freezing_overlay_opacity"), () -> 0.5, holder -> holder.set(ClientSettingsConfig.FREEZING_OVERLAY_OPACITY.get()));
-        SHIVER_INTENSITY = addClientSetting(ColdSweat.createKey("shiver_intensity"), () -> 1.0, holder -> holder.set(ClientSettingsConfig.SHIVER_INTENSITY.get()));
-        HEATSTROKE_BORDER_OPACITY = addClientSetting(ColdSweat.createKey("heatstroke_border_opacity"), () -> 0.5, holder -> holder.set(ClientSettingsConfig.HEATSTROKE_BORDER_OPACITY.get()));
-        HEATSTROKE_BLUR_AMOUNT = addClientSetting(ColdSweat.createKey("heatstroke_blur_amount"), () -> 1.0, holder -> holder.set(ClientSettingsConfig.HEATSTROKE_BLUR.get()));
-        HEATSTROKE_SWAY_AMOUNT = addClientSetting(ColdSweat.createKey("heatstroke_sway_amount"), () -> 1.0, holder -> holder.set(ClientSettingsConfig.HEATSTROKE_SWAY_AMOUNT.get()));
-        HEATSTROKE_SWAY_SPEED = addClientSetting(ColdSweat.createKey("heatstroke_sway_speed"), () -> 1.0, holder -> holder.set(ClientSettingsConfig.HEATSTROKE_SWAY_SPEED.get()));
+        SHOW_FROZEN_HEALTH = addClientSetting(ColdSweat.createKey("show_frozen_health"), () -> true, holder -> holder.set(ClientSettingsConfig.SHOW_FROZEN_HEALTH.get()),
+            (saver) -> ClientSettingsConfig.SHOW_FROZEN_HEALTH.set(saver));
+        FREEZING_OVERLAY_OPACITY = addClientSetting(ColdSweat.createKey("freezing_overlay_opacity"), () -> 0.5, holder -> holder.set(ClientSettingsConfig.FREEZING_OVERLAY_OPACITY.get()),
+            (saver) -> ClientSettingsConfig.FREEZING_OVERLAY_OPACITY.set(saver));
+        SHIVER_INTENSITY = addClientSetting(ColdSweat.createKey("shiver_intensity"), () -> 1.0, holder -> holder.set(ClientSettingsConfig.SHIVER_INTENSITY.get()),
+            (saver) -> ClientSettingsConfig.SHIVER_INTENSITY.set(saver));
+        HEATSTROKE_BORDER_OPACITY = addClientSetting(ColdSweat.createKey("heatstroke_border_opacity"), () -> 0.5, holder -> holder.set(ClientSettingsConfig.HEATSTROKE_BORDER_OPACITY.get()),
+            (saver) -> ClientSettingsConfig.HEATSTROKE_BORDER_OPACITY.set(saver));
+        HEATSTROKE_BLUR_AMOUNT = addClientSetting(ColdSweat.createKey("heatstroke_blur_amount"), () -> 1.0, holder -> holder.set(ClientSettingsConfig.HEATSTROKE_BLUR.get()),
+            (saver) -> ClientSettingsConfig.HEATSTROKE_BLUR.set(saver));
+        HEATSTROKE_SWAY_AMOUNT = addClientSetting(ColdSweat.createKey("heatstroke_sway_amount"), () -> 1.0, holder -> holder.set(ClientSettingsConfig.HEATSTROKE_SWAY_AMOUNT.get()),
+            (saver) -> ClientSettingsConfig.HEATSTROKE_SWAY_AMOUNT.set(saver));
+        HEATSTROKE_SWAY_SPEED = addClientSetting(ColdSweat.createKey("heatstroke_sway_speed"), () -> 1.0, holder -> holder.set(ClientSettingsConfig.HEATSTROKE_SWAY_SPEED.get()),
+            (saver) -> ClientSettingsConfig.HEATSTROKE_SWAY_SPEED.set(saver));
 
-        ANIMATED_SOULSPRING_LAMP_MODEL = addClientSetting(ColdSweat.createKey("animated_soulspring_lamp_model"), () -> true, holder -> holder.set(ClientSettingsConfig.ANIMATED_SOULSPRING_LAMP.get()));
-        POSE_SOULSPRING_LAMP = addClientSetting(ColdSweat.createKey("pose_soulspring_lamp"), () -> true, holder -> holder.set(ClientSettingsConfig.POSE_SOULSPRING_LAMP.get()));
+        ANIMATED_SOULSPRING_LAMP_MODEL = addClientSetting(ColdSweat.createKey("animated_soulspring_lamp_model"), () -> true, holder -> holder.set(ClientSettingsConfig.ANIMATED_SOULSPRING_LAMP.get()),
+            (saver) -> ClientSettingsConfig.ANIMATED_SOULSPRING_LAMP.set(saver));
+        POSE_SOULSPRING_LAMP = addClientSetting(ColdSweat.createKey("pose_soulspring_lamp"), () -> true, holder -> holder.set(ClientSettingsConfig.POSE_SOULSPRING_LAMP.get()),
+            (saver) -> ClientSettingsConfig.POSE_SOULSPRING_LAMP.set(saver));
 
         WATERSKIN_USE_PRIMARY = addClientSetting(ColdSweat.createKey("waterskin_primary_action"), () -> Preference.WaterskinAction.POUR,
-            holder -> holder.set(Preference.WaterskinAction.byName(ClientSettingsConfig.WATERSKIN_DRINK_PRIMARY.get())));
+            (holder) -> holder.set(Preference.WaterskinAction.byName(ClientSettingsConfig.WATERSKIN_DRINK_PRIMARY.get())),
+            (saver) -> ClientSettingsConfig.WATERSKIN_DRINK_PRIMARY.set(saver.getSerializedName()));
         WATERSKIN_USE_SECONDARY = addClientSetting(ColdSweat.createKey("waterskin_secondary_action"), () -> Preference.WaterskinAction.DRINK,
-            holder -> holder.set(Preference.WaterskinAction.byName(ClientSettingsConfig.WATERSKIN_DRINK_SECONDARY.get())));
+            (holder) -> holder.set(Preference.WaterskinAction.byName(ClientSettingsConfig.WATERSKIN_DRINK_SECONDARY.get())),
+            (saver) -> ClientSettingsConfig.WATERSKIN_DRINK_SECONDARY.set(saver.getSerializedName()));
     }
 
     public static ResourceLocation getKey(DynamicHolder<?> setting)
@@ -1125,11 +1161,11 @@ public class ConfigSettings
         return holder;
     }
 
-    public static <T> DynamicHolder<T> addClientSetting(ResourceLocation id, Supplier<T> defaultVal, Consumer<DynamicHolder<T>> loader)
+    public static <T> DynamicHolder<T> addClientSetting(ResourceLocation id, Supplier<T> defaultVal, Consumer<DynamicHolder<T>> loader, Consumer<T> saver)
     {
         if (EffectiveSide.get().isClient())
         {
-            DynamicHolder<T> holder = DynamicHolder.create(id, defaultVal, loader);
+            DynamicHolder<T> holder = DynamicHolder.create(id, defaultVal, loader, saver);
             CLIENT_SETTINGS.put(id, holder);
             return holder;
         }
