@@ -66,6 +66,18 @@ public class TempCommand extends BaseCommand
                                 )
                         )
                 )
+                /* Add temperature */
+                .then(Commands.literal("add")
+                        .then(Commands.argument("entities", EntityArgument.entities())
+                                .then(Commands.argument("amount", IntegerArgumentType.integer())
+                                        .executes(source -> executeAddEntityTemp(source.getSource(),
+                                                                                 EntityArgument.getEntities(source, "entities"),
+                                                                                 IntegerArgumentType.getInteger(source, "amount"),
+                                                                                 Temperature.Trait.BODY)
+                                        )
+                                )
+                        )
+                )
                 /* Get temperature */
                 .then(Commands.literal("get")
                         /* Get from entity */
@@ -296,6 +308,37 @@ public class TempCommand extends BaseCommand
         else
         {   source.sendSuccess(new TranslationTextComponent("commands.cold_sweat.temperature.set.many.result", trait.getSerializedName(), entities.size(),
                                                             CSMath.truncate(convertedTemp, 1) + unitsName), true);
+        }
+        return entities.size();
+    }
+
+    private int executeAddEntityTemp(CommandSource source, Collection<? extends Entity> entities, double temp, Temperature.Trait trait)
+    {
+        if (entities.stream().anyMatch(entity -> !(entity instanceof PlayerEntity || EntityTempManager.isTemperatureEnabled(entity))))
+        {   source.sendFailure(new TranslationTextComponent("commands.cold_sweat.temperature.invalid"));
+            return 0;
+        }
+        // Set the temperature for all affected targets
+        for (Entity entity : entities)
+        {
+            if (entity instanceof LivingEntity)
+            {   Temperature.add((LivingEntity) entity, trait == Temperature.Trait.BODY ? Temperature.Trait.CORE : trait, temp);
+            }
+        }
+
+        Temperature.Units preferredUnits = source.getEntity() instanceof PlayerEntity ? Preference.getOrDefault((PlayerEntity) source.getEntity(), Preference.UNITS, Temperature.Units.F) : Temperature.Units.F;
+        String unitsName = trait.isForWorld() ? " " + preferredUnits.getFormattedName() : "";
+        double convertedTemp = Temperature.convertIfNeeded(temp, trait, preferredUnits);
+
+        //Compose & send message
+        if (entities.size() == 1)
+        {   Entity target = entities.iterator().next();
+            source.sendSuccess(new TranslationTextComponent("commands.cold_sweat.temperature.set.single.result", trait.getSerializedName(), target.getName().getString(),
+                                                         CSMath.truncate(convertedTemp, 1) + unitsName), true);
+        }
+        else
+        {   source.sendSuccess(new TranslationTextComponent("commands.cold_sweat.temperature.set.many.result", trait.getSerializedName(), entities.size(),
+                                                         CSMath.truncate(convertedTemp, 1) + unitsName), true);
         }
         return entities.size();
     }
