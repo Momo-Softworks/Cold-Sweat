@@ -41,7 +41,7 @@ public class ClientInsulationAttributeTooltip extends Tooltip
 
     @Override
     public int getWidth(FontRenderer font)
-    {   return this.font.width(this.original) + 10;
+    {   return this.font.width(this.original) + 16;
     }
 
     @Override
@@ -51,13 +51,13 @@ public class ClientInsulationAttributeTooltip extends Tooltip
         Minecraft.getInstance().textureManager.bind(TOOLTIP_LOCATION.get());
         AbstractGui.blit(ps, x, y, 0, 28, 8,  8, 8, 28, 36);
         // Text
-        int color = Optional.ofNullable(this.original.getStyle().getColor()).map(Color::getValue).orElse(16777215);
-        int xOffs = strikethrough ? 12: 10;
+        int color = Optional.ofNullable(this.original.getStyle().getColor()).map(Color::getValue).orElse(0xFFFFFF);
+        int xOffs = !strikethrough && this.original.getString().startsWith("+") ? 10 : 12;
         ps.pushPose();
-        ps.translate(0, 0, 400);
+        ps.translate(0, 0, pBlitOffset);
         font.drawShadow(ps, this.original, x + xOffs, y + 1, color);
         if (strikethrough)
-        {   ps.translate(0, 0, 401);
+        {   ps.translate(0, 0, 1);
             AbstractGui.fill(ps, x - 2, y + 4, x + 9, y + 5, 0xFFF63232);
             AbstractGui.fill(ps, x - 1, y + 5, x + 10, y + 6, 0xFFF63232);
         }

@@ -354,5 +354,7 @@
   "message.cold_sweat.disable_feedback": "Message disabled.",
   "message.cold_sweat.creative_warning_message": "Due to a Minecraft bug, entering the creative inventory on a server will delete insulation from your armor items!",
 
-  "curios.identifier.equipable": ""
+  "tooltip.hint.create_backtank": "Wearing full netherite diving suit",
+  "tooltip.hint.astra_space_suit": "Wearing full space suit",
+  "tooltip.hint.aqua_three_bolt": "Wearing full three-bolt suit"
 }

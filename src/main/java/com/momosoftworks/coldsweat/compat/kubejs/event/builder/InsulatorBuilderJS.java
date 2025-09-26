@@ -35,6 +35,7 @@ public class InsulatorBuilderJS
     public Map<ResourceLocation, Double> immuneTempModifiers = new HashMap<>();
     public boolean fillSlots = false;
     public boolean hideIfUnmet = false;
+    public Optional<InsulatorData.HintText> hint = Optional.empty();
 
     public InsulatorBuilderJS()
     {}
@@ -115,10 +116,22 @@ public class InsulatorBuilderJS
         return this;
     }
 
+    public InsulatorBuilderJS hintKey(String key)
+    {
+        this.hint = Optional.of(new InsulatorData.HintText(Optional.of(key), Optional.empty()));
+        return this;
+    }
+
+    public InsulatorBuilderJS hintText(String text)
+    {
+        this.hint = Optional.of(new InsulatorData.HintText(Optional.empty(), Optional.of(text)));
+        return this;
+    }
+
     public InsulatorData build()
     {
         InsulatorData data = new InsulatorData(this.itemPredicate, this.slot, this.insulation, this.entityPredicate,
-                                               this.attributes, this.immuneTempModifiers, this.fillSlots, this.hideIfUnmet);
+                                               this.attributes, this.immuneTempModifiers, this.fillSlots, this.hideIfUnmet, this.hint);
         data.setRegistryType(ConfigData.Type.KUBEJS);
         return data;
     }

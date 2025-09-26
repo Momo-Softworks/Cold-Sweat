@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.client.event;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.util.Temperature;
@@ -32,6 +33,7 @@ import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.ListBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.entity.ai.attributes.Attribute;
@@ -255,18 +257,20 @@ public class TooltipHandler
     {   TOOLTIP_BACKGROUND_COLOR = event.getBackground();
     }
 
-    private static final List<Object> TOOLTIP_INSERTIONS = new ArrayList<>();
-
     private static void addTooltip(int index, Tooltip tooltip, List<ITextComponent> elements)
-    {
-        TOOLTIP_INSERTIONS.add(index, tooltip);
-        elements.add(index, getTooltipCode(tooltip.getClass()));
+    {   elements.add(index, getTooltipComponent(tooltip));
     }
 
     private static void setTooltip(int index, Tooltip tooltip, List<ITextComponent> elements)
+    {   elements.set(index, getTooltipComponent(tooltip));
+    }
+
+    private static IFormattableTextComponent getTooltipComponent(Tooltip tooltip)
     {
-        TOOLTIP_INSERTIONS.set(index, tooltip);
-        elements.set(index, getTooltipCode(tooltip.getClass()));
+        FontRenderer font = Minecraft.getInstance().font;
+        int spaceWidth = font.width(" ");
+        String placeholder = org.apache.commons.lang3.StringUtils.repeat(" ", tooltip.getWidth(font) / spaceWidth);
+        return new TranslationTextComponent(placeholder, tooltip);
     }
 
     @SubscribeEvent
@@ -323,9 +327,6 @@ public class TooltipHandler
         InsulationVisibility insulationVisibility = ConfigSettings.INSULATION_VISIBILITY.get();
         if (stack.isEmpty()) return;
 
-        TOOLTIP_INSERTIONS.clear();
-        TOOLTIP_INSERTIONS.addAll(ListBuilder.begin().fill(elements.size(), Object::new).build());
-
         // Get the index at which the tooltip should be inserted
         int tooltipStartIndex = getTooltipTitleIndex(elements, stack);
         // Get the index of the end of the tooltip, before the debug info (if enabled)
@@ -338,6 +339,7 @@ public class TooltipHandler
         {
             if (!isShiftDown() && ConfigSettings.ENABLE_HINTS.get())
             {   elements.add(tooltipStartIndex, EXPAND_TOOLTIP);
+                tooltipStartIndex++;
             }
             else for (int i = 0; i < CSMath.ceil(ConfigSettings.SOULSPRING_LAMP_FUEL.get().size() / 6d) + 1; i++)
             {   elements.add(tooltipStartIndex, new StringTextComponent(""));
@@ -369,17 +371,17 @@ public class TooltipHandler
                 double temp = entry.getValue();
                 int duration = entry.getKey();
 
-                IFormattableTextComponent consumeEffects = temp > 0
+                IFormattableTextComponent consumeEffect = temp > 0
                                                   ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp)).withStyle(HOT) :
                                                   temp == 0
                                                   ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp)) :
                                                   new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", CSMath.formatDoubleOrInt(temp)).withStyle(COLD);
                 // Add a duration to the tooltip if it exists
                 if (duration > 0)
-                {   consumeEffects.append(" (" + StringUtils.formatTickDuration(duration) + ")");
+                {   consumeEffect.append(" (" + StringUtils.formatTickDuration(duration) + ")");
                 }
                 // Add the effect to the tooltip
-                elements.add(index, consumeEffects);
+                elements.add(index, consumeEffect);
             }
 
             // Don't add our own section title if one already exists
@@ -393,76 +395,99 @@ public class TooltipHandler
         /*
          Tooltips for insulation
          */
+        List<InsulatorData> allUnmetInsulation = new ArrayList<>();
         if (insulationVisibility.canShow() && !stack.isEmpty())
         {
-            // Insulating armor
-            List<InsulatorData> armorInsulation = new ArrayList<>();
-            List<InsulatorData> unmetArmorInsulation = new ArrayList<>();
-            for (InsulatorData insulator : ConfigSettings.INSULATING_ARMORS.get().get(item))
-            {   validateInsulator(insulator, armorInsulation, unmetArmorInsulation);
+            addInsulationTooltips(elements, tooltipStartIndex, stack, item, insulationVisibility, allUnmetInsulation);
+        }
+
+        // Custom tooltips for attributes from insulation
+        int unmetLabelIndex = convertAndSortUnmetAttributes(elements);
+
+        // Add unmet requirement hints
+        if (ConfigSettings.ENABLE_HINTS.get())
+        {   addUnmetRequirementHints(elements, unmetLabelIndex, allUnmetInsulation);
+        }
+    }
+
+    private static void addInsulationTooltips(List<ITextComponent> elements, int tooltipStartIndex,
+                                              ItemStack stack, Item item, InsulationVisibility insulationVisibility,
+                                              List<InsulatorData> allUnmetInsulation)
+    {
+        // Insulating armor
+        List<InsulatorData> armorInsulation = new ArrayList<>();
+        List<InsulatorData> unmetArmorInsulation = new ArrayList<>();
+        for (InsulatorData insulator : ConfigSettings.INSULATING_ARMORS.get().get(item))
+        {   validateInsulator(insulator, armorInsulation, unmetArmorInsulation, allUnmetInsulation);
+        }
+
+        ItemInsulationManager.getInsulationCap(stack).ifPresent(cap ->
+        {
+            if (cap.getInsulation().isEmpty())
+            {   cap.deserializeNBT(stack.getOrCreateTag());
             }
 
-            ItemInsulationManager.getInsulationCap(stack).ifPresent(cap ->
+            List<Pair<ItemStack, List<InsulatorData>>> insulatorPairs = cap.getInsulation();
+
+            for (int i = 0; i < insulatorPairs.size(); i++)
             {
-                if (cap.getInsulation().isEmpty())
-                {   cap.deserializeNBT(stack.getOrCreateTag());
-                }
-
-                List<Pair<ItemStack, List<InsulatorData>>> insulatorPairs = cap.getInsulation();
-
-                for (int i = 0; i < insulatorPairs.size(); i++)
-                {
-                    Pair<ItemStack, List<InsulatorData>> pair = insulatorPairs.get(i);
-                    for (InsulatorData insulator : pair.getSecond())
-                    {   validateInsulator(insulator, armorInsulation, unmetArmorInsulation);
-                    }
-                }
-            });
-
-            if (!armorInsulation.isEmpty() || insulationVisibility.showsIfEmpty())
-            {   addTooltip(tooltipStartIndex, new ClientInsulationTooltip(armorInsulation, Insulation.Slot.ARMOR, stack, false), elements);
-            }
-            if (!unmetArmorInsulation.isEmpty())
-            {   addTooltip(tooltipStartIndex, new ClientInsulationTooltip(unmetArmorInsulation, Insulation.Slot.ARMOR, stack, true), elements);
-            }
-
-            // Insulation ingredient
-            {
-                List<InsulatorData> insulation = new ArrayList<>();
-                List<InsulatorData> unmetInsulation = new ArrayList<>();
-                for (InsulatorData insulator : ConfigSettings.INSULATION_ITEMS.get().get(item))
-                {   validateInsulator(insulator, insulation, insulator.hideIfUnmet() ? new ArrayList<>() : unmetInsulation);
-                }
-                if (!insulation.isEmpty() && !insulation.stream().map(InsulatorData::insulation).collect(Collectors.toList()).equals(armorInsulation.stream().map(InsulatorData::insulation).collect(Collectors.toList())))
-                {   addTooltip(tooltipStartIndex, new ClientInsulationTooltip(insulation, Insulation.Slot.ITEM, stack, false), elements);
-                }
-                if (!unmetInsulation.isEmpty() && !unmetInsulation.stream().map(InsulatorData::insulation).collect(Collectors.toList()).equals(unmetArmorInsulation.stream().map(InsulatorData::insulation).collect(Collectors.toList())))
-                {   addTooltip(tooltipStartIndex, new ClientInsulationTooltip(unmetInsulation, Insulation.Slot.ITEM, stack, true), elements);
+                Pair<ItemStack, List<InsulatorData>> pair = insulatorPairs.get(i);
+                for (InsulatorData insulator : pair.getSecond())
+                {   validateInsulator(insulator, armorInsulation, unmetArmorInsulation, allUnmetInsulation);
                 }
             }
+        });
 
-            // Insulating curio
-            if (CompatManager.isCuriosLoaded())
-            {
-                List<InsulatorData> insulation = new ArrayList<>();
-                List<InsulatorData> unmetInsulation = new ArrayList<>();
-                for (InsulatorData insulator : ConfigSettings.INSULATING_CURIOS.get().get(item))
-                {   validateInsulator(insulator, insulation, unmetInsulation);
-                }
-                if (!insulation.isEmpty())
-                {   addTooltip(tooltipStartIndex, new ClientInsulationTooltip(insulation, Insulation.Slot.CURIO, stack, false), elements);
-                }
-                if (!unmetInsulation.isEmpty())
-                {   addTooltip(tooltipStartIndex, new ClientInsulationTooltip(unmetInsulation, Insulation.Slot.CURIO, stack, true), elements);
-                }
+        if (!armorInsulation.isEmpty() || insulationVisibility.showsIfEmpty())
+        {   addTooltip(tooltipStartIndex, new ClientInsulationTooltip(armorInsulation, Insulation.Slot.ARMOR, stack, false), elements);
+        }
+        if (!unmetArmorInsulation.isEmpty())
+        {   addTooltip(tooltipStartIndex, new ClientInsulationTooltip(unmetArmorInsulation, Insulation.Slot.ARMOR, stack, true), elements);
+        }
+
+        // Insulation ingredient
+        {
+            List<InsulatorData> insulation = new ArrayList<>();
+            List<InsulatorData> unmetInsulation = new ArrayList<>();
+            for (InsulatorData insulator : ConfigSettings.INSULATION_ITEMS.get().get(item))
+            {   validateInsulator(insulator, insulation, insulator.hideIfUnmet() ? new ArrayList<>() : unmetInsulation, allUnmetInsulation);
+            }
+            if (!insulation.isEmpty() && !insulation.stream().map(InsulatorData::insulation).collect(Collectors.toList()).equals(armorInsulation.stream().map(InsulatorData::insulation).collect(Collectors.toList())))
+            {   addTooltip(tooltipStartIndex, new ClientInsulationTooltip(insulation, Insulation.Slot.ITEM, stack, false), elements);
+            }
+            if (!unmetInsulation.isEmpty() && !unmetInsulation.stream().map(InsulatorData::insulation).collect(Collectors.toList()).equals(unmetArmorInsulation.stream().map(InsulatorData::insulation).collect(Collectors.toList())))
+            {   addTooltip(tooltipStartIndex, new ClientInsulationTooltip(unmetInsulation, Insulation.Slot.ITEM, stack, true), elements);
             }
         }
 
-        /*
-         Custom tooltips for attributes from insulation
-         */
+        // Insulating curio
+        if (CompatManager.isCuriosLoaded())
+        {
+            List<InsulatorData> curioInsulation = new ArrayList<>();
+            List<InsulatorData> unmetCurioInsulation = new ArrayList<>();
+            for (InsulatorData insulator : ConfigSettings.INSULATING_CURIOS.get().get(item))
+            {   validateInsulator(insulator, curioInsulation, unmetCurioInsulation, allUnmetInsulation);
+            }
+            if (!curioInsulation.isEmpty())
+            {   addTooltip(tooltipStartIndex, new ClientInsulationTooltip(curioInsulation, Insulation.Slot.CURIO, stack, false), elements);
+            }
+            if (!unmetCurioInsulation.isEmpty())
+            {   addTooltip(tooltipStartIndex, new ClientInsulationTooltip(unmetCurioInsulation, Insulation.Slot.CURIO, stack, true), elements);
+            }
+        }
+    }
+
+    /**
+     * Converts attribute modifier lines with insulation icons into InsulationAttributeTooltips and sorts unmet attributes to the bottom of the section
+     * @return The index at which unmet modifier hints should be displayed
+     */
+    private static int convertAndSortUnmetAttributes(List<ITextComponent> elements)
+    {
+        boolean hasAttributes = false;
         boolean foundUnmetAttribute = false;
         int unmetLabelIndex = elements.size();
+        int unmetAttributeIndex = elements.size();
+
         for (int i = 0; i < elements.size(); i++)
         {
             ITextComponent element = elements.get(i);
@@ -471,75 +496,103 @@ public class TooltipHandler
                 TranslationTextComponent component = ((TranslationTextComponent) element);
                 if (component.getArgs() != null)
                 {
-                    // Indicates the start of a new section; reset the flag
+                    // Start of new attribute modifiers section
                     if (component.getKey().contains("item.modifiers"))
-                    {   foundUnmetAttribute = false;
+                    {
+                        if (!hasAttributes)
+                        {   hasAttributes = true;
+                            unmetLabelIndex = i;
+                        }
+                        foundUnmetAttribute = false;
                     }
                     List<Object> args = Arrays.asList(component.getArgs());
-                    boolean strikethrough = args.contains("strikethrough");
-                    // At the first unmet attribute modifier for each section, insert the "Unmet Requirements" tooltip line
-                    if (strikethrough && !foundUnmetAttribute)
-                    {
-                        unmetLabelIndex = i;
-                        IFormattableTextComponent unmetAttributesTooltip = new TranslationTextComponent("tooltip.cold_sweat.unmet_attributes").withStyle(TextFormatting.RED);
-                        addTooltip(unmetLabelIndex, new ClientInsulationAttributeTooltip(unmetAttributesTooltip, Minecraft.getInstance().font, false), elements);
-                        foundUnmetAttribute = true;
-                        i++;
-                    }
                     // If the insulation icon should be shown, convert the tooltip into an InsulationAttributeTooltip
                     if (args.contains("show_icon"))
                     {
-                        if (!strikethrough && i > unmetLabelIndex)
+                        boolean strikethrough = args.contains("strikethrough");
+                        // Upon the first unmet attribute, set the index at which unmet attributes start
+                        if (strikethrough && !foundUnmetAttribute)
+                        {   unmetAttributeIndex = i;
+                            foundUnmetAttribute = true;
+                        }
+                        // Replace the unmet attribute line with a strikethrough InsulationAttributeTooltip and move it to the unmet attributes section
+                        if (!strikethrough && i > unmetAttributeIndex)
                         {
                             elements.remove(i);
-                            addTooltip(unmetLabelIndex, new ClientInsulationAttributeTooltip(component, Minecraft.getInstance().font, strikethrough), elements);
+                            addTooltip(unmetAttributeIndex, new ClientInsulationAttributeTooltip(component, Minecraft.getInstance().font, strikethrough), elements);
+                            i--;
                         }
                         else setTooltip(i, new ClientInsulationAttributeTooltip(component, Minecraft.getInstance().font, strikethrough), elements);
                     }
                 }
             }
         }
+        return unmetLabelIndex;
+    }
+
+    private static void addUnmetRequirementHints(List<ITextComponent> elements, int unmetLabelIndex, List<InsulatorData> allUnmetInsulation)
+    {
+        boolean addedUnmetLabel = false;
+        int hintIndex = 0;
+        for (; hintIndex < allUnmetInsulation.size(); hintIndex++)
+        {
+            InsulatorData unmetInsulator = allUnmetInsulation.get(hintIndex);
+            Optional<InsulatorData.HintText> hint = unmetInsulator.hint();
+            if (hint.isPresent())
+            {
+                if (!addedUnmetLabel)
+                {
+                    IFormattableTextComponent unmetAttributesTooltip = new TranslationTextComponent("tooltip.cold_sweat.unmet_attributes").withStyle(TextFormatting.RED);
+                    addTooltip(unmetLabelIndex, new ClientInsulationAttributeTooltip(unmetAttributesTooltip, Minecraft.getInstance().font, false), elements);
+                    addedUnmetLabel = true;
+                }
+                IFormattableTextComponent hintText = hint.get().getText();
+                if (!hintText.getString().isEmpty())
+                {
+                    hintText.setStyle(hintText.getStyle().withColor(Color.fromRgb(7561572)));
+                    addTooltip(unmetLabelIndex + hintIndex + 1, new ClientInsulationAttributeTooltip(hintText, Minecraft.getInstance().font, true), elements);
+                }
+            }
+        }
+        if (addedUnmetLabel)
+        {   elements.add(unmetLabelIndex + hintIndex + 1, new StringTextComponent(""));
+        }
+    }
+
+    private static void validateInsulator(InsulatorData insulator, List<InsulatorData> insulation, List<InsulatorData> unmetInsulation, List<InsulatorData> allUnmetInsulation)
+    {
+        boolean isEmpty = insulator.insulation().isEmpty();
+        if (passesRequirement(insulator))
+        {   if (!isEmpty) insulation.add(insulator);
+        }
+        else if (!insulator.hideIfUnmet())
+        {   if (!isEmpty) unmetInsulation.add(insulator);
+            allUnmetInsulation.add(insulator);
+        }
     }
 
     @SubscribeEvent
     public static void renderTooltips(RenderTooltipEvent.PostText event)
     {
-        if (TOOLTIP_INSERTIONS.isEmpty()) return;
+        FontRenderer font = Minecraft.getInstance().font;
 
         // Find the empty line that this tooltip should fill
-        int y = event.getY() - 10;
+        int y = event.getY() + 1;
         List<? extends ITextProperties> tooltipLines = event.getLines();
-        for (int i = 0; i < Math.min(tooltipLines.size(), TOOLTIP_INSERTIONS.size()); i++)
+        for (int i = 0; i < tooltipLines.size(); i++)
         {
-            y += 10;
             ITextProperties tooltipLine = tooltipLines.get(i);
-            String line = tooltipLine.getString();
-            if (line.isEmpty()) continue;
-
-            Object nextInsertion = TOOLTIP_INSERTIONS.get(i);
-            if (!(nextInsertion instanceof Tooltip)) continue;
-            Tooltip nextTooltip = (Tooltip) nextInsertion;
-            String tooltipID = TOOLTIPS.get(nextTooltip.getClass());
-
-            if (!line.equals(tooltipID))
-            {   continue;
+            if (tooltipLine instanceof TranslationTextComponent && ((TranslationTextComponent) tooltipLine).getArgs().length > 0)
+            {
+                Object arg = ((TranslationTextComponent) tooltipLine).getArgs()[0];
+                if (arg instanceof Tooltip)
+                {
+                    Tooltip tooltip = (Tooltip) arg;
+                    tooltip.renderImage(font, event.getX(), y, event.getMatrixStack(), Minecraft.getInstance().getItemRenderer(), 400);
+                    tooltip.renderText(font, event.getX(), y, event.getMatrixStack(), Minecraft.getInstance().getItemRenderer(), 400);
+                }
             }
-
-            nextTooltip.renderImage(Minecraft.getInstance().font, event.getX(), y, event.getMatrixStack(), Minecraft.getInstance().getItemRenderer(), 0);
-            nextTooltip.renderText(Minecraft.getInstance().font, event.getX(), y, event.getMatrixStack(), Minecraft.getInstance().getItemRenderer(), 0);
-        }
-    }
-
-    private static void validateInsulator(InsulatorData insulator, List<InsulatorData> insulation, List<InsulatorData> unmetInsulation)
-    {
-        if (!insulator.insulation().isEmpty())
-        {
-            if (passesRequirement(insulator))
-            {   insulation.add(insulator);
-            }
-            else if (!insulator.hideIfUnmet())
-            {   unmetInsulation.add(insulator);
-            }
+            y += font.lineHeight + 1;
         }
     }
 
@@ -602,42 +655,5 @@ public class TooltipHandler
         if (event.phase == TickEvent.Phase.END)
         {   FUEL_FADE_TIMER++;
         }
-    }
-
-    private static final Map<Class<? extends Tooltip>, String> TOOLTIPS = new HashMap<>();
-    private static int TOOLTIP_REGISTRY_SIZE = 0;
-
-    private static void registerTooltip(Class<? extends Tooltip> tooltip)
-    {
-        if (!TOOLTIPS.containsKey(tooltip))
-        {
-            if (TOOLTIP_REGISTRY_SIZE >= 63)
-            {   throw new RuntimeException("Too many tooltips registered!");
-            }
-            String code = Integer.toBinaryString(TOOLTIP_REGISTRY_SIZE);
-            while (code.length() < 5)
-            {   code = "0" + code;
-            }
-            code = code.replace("0", "-");
-            code = code.replace("1", "+");
-            TOOLTIPS.put(tooltip, code);
-            TOOLTIP_REGISTRY_SIZE++;
-        }
-        else
-        {
-            throw new RegistryFailureException(tooltip, "Tooltips", "Tooltip already registered!", null);
-        }
-    }
-
-    private static ITextComponent getTooltipCode(Class<? extends Tooltip> tooltip)
-    {
-        return new StringTextComponent(TOOLTIPS.get(tooltip)).withStyle(Style.EMPTY.withColor(Color.fromRgb(TOOLTIP_BACKGROUND_COLOR)));
-    }
-
-    static
-    {
-        registerTooltip(ClientInsulationTooltip.class);
-        registerTooltip(ClientSoulspringTooltip.class);
-        registerTooltip(ClientInsulationAttributeTooltip.class);
     }
 }
