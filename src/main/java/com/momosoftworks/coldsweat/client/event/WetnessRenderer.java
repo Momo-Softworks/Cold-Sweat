@@ -257,7 +257,7 @@ public class WetnessRenderer
                     {   alpha -= 0.08f * frametime;
                     }
                     else
-                    {   alpha -= 0.045f * frametime * tempMult;
+                    {   alpha -= 0.045f * frametime * tempMult / 2;
                     }
                     TRAILS.set(i, new Triplet<>(new Vec2i(pos.x, pos.y), alpha, size));
                 }
