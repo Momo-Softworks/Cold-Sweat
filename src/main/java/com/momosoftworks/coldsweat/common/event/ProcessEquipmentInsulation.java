@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Mod.EventBusSubscriber
 public class ProcessEquipmentInsulation
@@ -54,7 +55,7 @@ public class ProcessEquipmentInsulation
         if (event.phase == TickEvent.Phase.END && player instanceof ServerPlayer serverPlayer
         && player.tickCount % 20 == 0 && !player.level.isClientSide)
         {
-            int fullyInsulatedSlots = 0;
+            AtomicInteger fullyInsulatedSlots = new AtomicInteger(0);
             Map<String, Double> armorInsulation = new FastMap<>();
 
             double worldTemp = Temperature.get(player, Temperature.Trait.WORLD);
@@ -65,64 +66,10 @@ public class ProcessEquipmentInsulation
             {
                 if (armorStack.getItem() instanceof ArmorItem)
                 {
-                    List<InsulatorData> armorInsulators = new ArrayList<>(ConfigSettings.INSULATING_ARMORS.get().get(armorStack.getItem()));
-                    if (!armorInsulators.isEmpty()) // Add the armor's builtin insulation value (mutually exclusive with sewn insulation)
-                    {
-                        // Adapt builtin armor insulation
-                        Double newFactor = null;
-                        for (InsulatorData armorInsulator : armorInsulators)
-                        {
-                            // Check if the player meets the predicate for the insulation
-                            if (!armorInsulator.test(player, armorStack))
-                            {   continue;
-                            }
-                            List<Insulation> insulations = Insulation.deepCopy(armorInsulator.insulation());
-                            for (Insulation insul : insulations)
-                            {
-                                // Set adaptation to calculated value
-                                if (insul instanceof AdaptiveInsulation adaptive)
-                                {
-                                    if (newFactor == null)
-                                    {   AdaptiveInsulation.readFactorFromArmor(adaptive, armorStack);
-                                        newFactor = AdaptiveInsulation.calculateChange(adaptive, worldTemp, minTemp, maxTemp);
-                                        AdaptiveInsulation.setFactorToArmor(armorStack, newFactor);
-                                    }
-                                    adaptive.setFactor(newFactor);
-                                }
-                                // Store cold/hot insulation values
-                                mapAdd(armorInsulation, "cold_armor", insul.getCold());
-                                mapAdd(armorInsulation, "heat_armor", insul.getHeat());
-                            }
-                        }
-                    }
-                    else // Add the armor's insulation value from the Sewing Table
-                    {
-                        LazyOptional<IInsulatableCap> iCap = ItemInsulationManager.getInsulationCap(armorStack);
-                        List<InsulatorData> insulators = ItemInsulationManager.getEffectiveAppliedInsulation(armorStack, player);
-
-                        // Get the armor's insulation values
-                        for (InsulatorData insulator : insulators)
-                        {
-                            for (Insulation insulation : insulator.insulation())
-                            {
-                                mapAdd(armorInsulation, "cold_insulators", insulation.getCold());
-                                mapAdd(armorInsulation, "heat_insulators", insulation.getHeat());
-                            }
-                        }
-
-                        // Used for tracking "fully_insulated" advancement
-                        if ((armorInsulation.getOrDefault("cold_insulators", 0d) + armorInsulation.getOrDefault("heat_insulators", 0d)) / 2 >= ItemInsulationManager.getInsulationSlots(armorStack))
-                        {   fullyInsulatedSlots++;
-                        }
-
-                        if (iCap.resolve().isPresent() && iCap.resolve().get() instanceof ItemInsulationCap cap)
-                        {
-                            // Calculate adaptive insulation adaptation state
-                            cap.calcAdaptiveInsulation(worldTemp, minTemp, maxTemp);
-                            // Remove insulation items if the player has too many
-                            popExtraInsulation(cap, armorStack, player);
-                        }
-                    }
+                    // Add the armor's built-in insulation value
+                    applyBuiltinArmorInsulation(armorInsulation, armorStack, player, worldTemp, minTemp, maxTemp);
+                    // Add the armor's insulation value from the Sewing Table
+                    applySewnArmorInsulation(armorInsulation, armorStack, player, worldTemp, minTemp, maxTemp, fullyInsulatedSlots);
 
                     // Add the armor's defense value to the insulation value.
                     double armorAmount = armorStack.getAttributeModifiers(LivingEntity.getEquipmentSlotForItem(armorStack)).entries()
@@ -134,8 +81,7 @@ public class ProcessEquipmentInsulation
                 }
             }
 
-            /* Get insulation from curios */
-
+            // Get insulation from curios
             for (ItemStack curio : CompatManager.Curios.getCurios(player))
             {
                 for (InsulatorData insulator : ConfigSettings.INSULATING_CURIOS.get().get(curio.getItem()))
@@ -148,8 +94,10 @@ public class ProcessEquipmentInsulation
                 }
             }
 
+            // Post insulation event
             InsulationTickEvent insulationEvent = new InsulationTickEvent(player, armorInsulation);
             MinecraftForge.EVENT_BUS.post(insulationEvent);
+            // Apply final insulation TempModifier
             if (!insulationEvent.isCanceled())
             {
                 double cold = insulationEvent.getProperty("cold");
@@ -161,7 +109,7 @@ public class ProcessEquipmentInsulation
             }
 
             // Award advancement for full insulation
-            if (fullyInsulatedSlots >= 4)
+            if (fullyInsulatedSlots.get() >= 4)
             {
                 if (serverPlayer.getServer() != null)
                 {
@@ -171,6 +119,69 @@ public class ProcessEquipmentInsulation
                     }
                 }
             }
+        }
+    }
+
+    private static void applyBuiltinArmorInsulation(Map<String, Double> armorInsulation, ItemStack armorStack, Player player, double worldTemp, double minTemp, double maxTemp)
+    {
+        List<InsulatorData> armorInsulators = new ArrayList<>(ConfigSettings.INSULATING_ARMORS.get().get(armorStack.getItem()));
+        if (!armorInsulators.isEmpty()) // Add the armor's builtin insulation value (mutually exclusive with sewn insulation)
+        {
+            // Adapt builtin armor insulation
+            Double newFactor = null;
+            for (InsulatorData armorInsulator : armorInsulators)
+            {
+                // Check if the player meets the predicate for the insulation
+                if (!armorInsulator.test(player, armorStack))
+                {   continue;
+                }
+                List<Insulation> insulations = Insulation.deepCopy(armorInsulator.insulation());
+                for (Insulation insul : insulations)
+                {
+                    // Set adaptation to calculated value
+                    if (insul instanceof AdaptiveInsulation adaptive)
+                    {
+                        if (newFactor == null)
+                        {   AdaptiveInsulation.readFactorFromArmor(adaptive, armorStack);
+                            newFactor = AdaptiveInsulation.calculateChange(adaptive, worldTemp, minTemp, maxTemp);
+                            AdaptiveInsulation.setFactorToArmor(armorStack, newFactor);
+                        }
+                        adaptive.setFactor(newFactor);
+                    }
+                    // Store cold/hot insulation values
+                    mapAdd(armorInsulation, "cold_armor", insul.getCold());
+                    mapAdd(armorInsulation, "heat_armor", insul.getHeat());
+                }
+            }
+        }
+    }
+
+    private static void applySewnArmorInsulation(Map<String, Double> armorInsulation, ItemStack armorStack, Player player, double worldTemp, double minTemp, double maxTemp, AtomicInteger fullyInsulatedSlots)
+    {
+        LazyOptional<IInsulatableCap> iCap = ItemInsulationManager.getInsulationCap(armorStack);
+        List<InsulatorData> insulators = ItemInsulationManager.getEffectiveAppliedInsulation(armorStack, player);
+
+        // Get the armor's insulation values
+        for (InsulatorData insulator : insulators)
+        {
+            for (Insulation insulation : insulator.insulation())
+            {
+                mapAdd(armorInsulation, "cold_insulators", insulation.getCold());
+                mapAdd(armorInsulation, "heat_insulators", insulation.getHeat());
+            }
+        }
+
+        // Used for tracking "fully_insulated" advancement
+        if ((armorInsulation.getOrDefault("cold_insulators", 0d) + armorInsulation.getOrDefault("heat_insulators", 0d)) / 2 >= ItemInsulationManager.getInsulationSlots(armorStack))
+        {   fullyInsulatedSlots.incrementAndGet();
+        }
+
+        if (iCap.resolve().isPresent() && iCap.resolve().get() instanceof ItemInsulationCap cap)
+        {
+            // Calculate adaptive insulation adaptation state
+            cap.calcAdaptiveInsulation(worldTemp, minTemp, maxTemp);
+            // Remove insulation items if the player has too many
+            popExtraInsulation(cap, armorStack, player);
         }
     }
 
