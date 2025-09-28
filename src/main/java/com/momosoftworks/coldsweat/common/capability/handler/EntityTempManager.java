@@ -43,6 +43,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -842,6 +843,22 @@ public class EntityTempManager
 
     public static boolean isPeacefulMode(LivingEntity entity)
     {   return entity.level.getDifficulty() == Difficulty.PEACEFUL && ConfigSettings.USE_PEACEFUL_MODE.get();
+    }
+
+    public static boolean isImmuneToTemperature(LivingEntity player)
+    {   return player == null || !player.isAlive() || isPeacefulMode(player) || player.hasEffect(ModEffects.GRACE);
+    }
+
+    public static double getColdResistance(LivingEntity entity)
+    {   return entity.hasEffect(ModEffects.ICE_RESISTANCE) && ConfigSettings.ICE_RESISTANCE_ENABLED.get() ? 1
+             : Temperature.get(entity, Trait.COLD_RESISTANCE);
+    }
+    public static double getHeatResistance(LivingEntity player)
+    {   return player.hasEffect(MobEffects.FIRE_RESISTANCE) && ConfigSettings.FIRE_RESISTANCE_ENABLED.get() ? 1
+             : Temperature.get(player, Trait.HEAT_RESISTANCE);
+    }
+    public static double getResistance(double temperature, LivingEntity player)
+    {   return temperature < 0 ? getColdResistance(player) : getHeatResistance(player);
     }
 
     public static Map<ItemStack, InsulatorData> getInsulatorsOnEntity(LivingEntity entity)

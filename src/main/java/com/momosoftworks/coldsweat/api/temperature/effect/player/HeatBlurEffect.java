@@ -4,20 +4,16 @@ import com.mojang.blaze3d.shaders.Uniform;
 import com.momosoftworks.coldsweat.api.event.vanilla.RenderLevelEvent;
 import com.momosoftworks.coldsweat.api.temperature.effect.TempEffect;
 import com.momosoftworks.coldsweat.api.temperature.effect.TempEffectType;
-import com.momosoftworks.coldsweat.client.gui.Overlays;
 import com.momosoftworks.coldsweat.client.renderer.PostProcessShaderManager;
-import com.momosoftworks.coldsweat.common.event.HandleTempEffects;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-import static com.momosoftworks.coldsweat.common.event.HandleTempEffects.Client.HOT_IMMUNITY;
 
 public class HeatBlurEffect extends TempEffect
 {
@@ -29,19 +25,16 @@ public class HeatBlurEffect extends TempEffect
     @SubscribeEvent
     public void onRenderBlur(RenderLevelEvent.Post event)
     {
-        Player player = Minecraft.getInstance().player;
-        if (!this.test(player)) return;
-        if (HandleTempEffects.isPlayerImmune(player)) return;
+        if (!this.test(Minecraft.getInstance().player)) return;
 
-        double blurMultiplier = ConfigSettings.HEATSTROKE_BLUR_AMOUNT.get();
+        double effect = this.getEffectFactor();
+        float blurMultiplier = ConfigSettings.HEATSTROKE_BLUR_AMOUNT.get().floatValue();
         if (blurMultiplier == 0) return;
         PostProcessShaderManager shaderManager = PostProcessShaderManager.getInstance();
 
-        if (ConfigSettings.DISTORTION_EFFECTS.get() && Overlays.BLEND_BODY_TEMP >= 50 && HOT_IMMUNITY < 1)
+        if (ConfigSettings.DISTORTION_EFFECTS.get())
         {
-            float blur = (float) CSMath.blend(0, 12, Overlays.BLEND_BODY_TEMP, this.bounds().min(), this.bounds().max());
-            blur = (float) CSMath.blend(blur, 0, HOT_IMMUNITY, 0, 1);
-            blur *= blurMultiplier;
+            float blur = (float) CSMath.blend(0, 12, effect, 0, 1) * blurMultiplier;
             if (!shaderManager.hasEffect("heat_blur"))
             {   shaderManager.loadEffect("heat_blur", PostProcessShaderManager.BLOBS);
             }
@@ -58,7 +51,7 @@ public class HeatBlurEffect extends TempEffect
     }
 
     @Override
-    public boolean isClient()
-    {   return true;
+    public Side getSide()
+    {   return Side.CLIENT;
     }
 }

@@ -29,9 +29,7 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
@@ -208,14 +206,14 @@ public class AbstractTempCap implements ITemperatureCap
     }
 
     @Override
-    public void addTempEffect(TempEffect effect)
+    public void addTempEffect(TempEffect effect, boolean isClient)
     {
         if (!tempEffects.containsKey(effect.type()))
         {
             // Add temp effect
             tempEffects.put(effect.type(), effect);
             // Register the effect to the event bus
-            if (FMLEnvironment.dist == Dist.CLIENT || !effect.isClient())
+            if (effect.getSide().checkSide(isClient))
             {   MinecraftForge.EVENT_BUS.register(effect);
             }
         }
