@@ -33,7 +33,7 @@ public interface ITemperatureCap
     void clearPersistentAttribute(Attribute attribute);
     Collection<Attribute> getPersistentAttributes();
 
-    void addTempEffect(TempEffect effect);
+    void addTempEffect(TempEffect effect, boolean isClient);
     void removeTempEffect(TempEffectType<?> effect);
     void clearTempEffects();
     Map<TempEffectType<?>, TempEffect> getTempEffects();
