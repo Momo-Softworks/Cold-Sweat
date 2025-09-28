@@ -36,6 +36,7 @@
     "MixinMobSpawning",
     "MixinModLoading",
     "MixinPiglinFearPlayers",
+    "MixinEntityMove",
     "MixinPreServerLoad",
     "MixinPreventFreezing",
     "MixinRegistration",

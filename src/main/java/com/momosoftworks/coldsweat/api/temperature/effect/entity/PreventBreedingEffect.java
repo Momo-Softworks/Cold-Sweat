@@ -22,7 +22,7 @@ public class PreventBreedingEffect extends TempEffect
     }
 
     @Override
-    public boolean isClient()
-    {   return false;
+    public Side getSide()
+    {   return Side.SERVER;
     }
 }

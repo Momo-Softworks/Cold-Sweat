@@ -4,8 +4,6 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.vanilla.RenderHeartEvent;
 import com.momosoftworks.coldsweat.api.temperature.effect.TempEffect;
 import com.momosoftworks.coldsweat.api.temperature.effect.TempEffectType;
-import com.momosoftworks.coldsweat.api.util.Temperature;
-import com.momosoftworks.coldsweat.client.gui.Overlays;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ModEffects;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
@@ -44,21 +42,18 @@ public class FreezeHeartsEffect extends TempEffect
         if (heartType == Gui.HeartType.CONTAINER)
         {   heartIndex += 1;
         }
+
+        double effect = this.getEffectFactor();
         double heartsFreezePercentage = ConfigSettings.HEARTS_FREEZING_PERCENTAGE.get();
+        if (heartsFreezePercentage == 0) return;
 
-        if (this.entity() == null) return;
-        if (heartsFreezePercentage == 0 || this.entity().hasEffect(ModEffects.GRACE)) return;
-        if (this.entity().hasEffect(ModEffects.ICE_RESISTANCE)) return;
-
-        double temp = Overlays.BLEND_BODY_TEMP;
         float maxHealth = this.entity().getMaxHealth();
         boolean isHardcore = this.entity().level().getLevelData().isHardcore();
 
-        // Get protection from armor underwear
-        float maxFrozenHealth = (float) CSMath.blend(maxHealth * heartsFreezePercentage, 0, Temperature.get(this.entity(), Temperature.Trait.COLD_RESISTANCE), 0, 1);
+        float maxFrozenHealth = (float) (maxHealth * heartsFreezePercentage);
         if (maxFrozenHealth == 0) return;
 
-        int frozenHealth = (int) Math.round(CSMath.blend(0, maxHealth * heartsFreezePercentage, temp, this.bounds().min(), this.bounds().max()));
+        int frozenHealth = (int) Math.round(CSMath.blend(0, maxHealth * heartsFreezePercentage, effect, 0, 1));
         int frozenHearts = Math.round(frozenHealth / 2f);
         boolean partialFrozen = frozenHealth % 2 == 1 && heartIndex == frozenHearts;
         int u = isHardcore ? 7 : 0;
@@ -82,7 +77,8 @@ public class FreezeHeartsEffect extends TempEffect
     }
 
     @Override
-    public boolean isClient()
-    {   return true;
+    public Side getSide()
+    {   return Side.CLIENT;
     }
+
 }
