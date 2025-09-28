@@ -33,7 +33,7 @@ public class PlayerTempCap extends AbstractTempCap
             if (player.tickCount % 20 == 0)
             {   calculateHudVisibility(player);
             }
-            if (player.isCreative())
+            if (player.isCreative() || player.isSpectator())
             {   this.setTrait(Temperature.Trait.CORE, 0);
             }
         }
