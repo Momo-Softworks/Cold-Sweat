@@ -26,6 +26,8 @@ public class EntitySettingsConfig
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> CHAMELEON_SPAWN_BIOMES;
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> GOAT_SPAWN_BIOMES;
 
+    public static final ForgeConfigSpec.BooleanValue CHAMELEON_SHED_AUTOMATICALLY;
+
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> ENTITY_TEMPERATURES;
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> ENTITY_CLIMATES;
     public static final ForgeConfigSpec.BooleanValue ENABLE_ENTITY_CLIMATES;
@@ -160,6 +162,12 @@ public class EntitySettingsConfig
                 ),
                 it -> it instanceof Number);
 
+        CHAMELEON_SHED_AUTOMATICALLY = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " If true, chameleons will automatically shed their skin over time",
+                         " If false, chameleons will only shed when a player interacts with them",
+                         " ⌄ ")
+                .define("Chameleons Shed Automatically", false);
         BUILDER.pop();
 
         BUILDER.push("Mob Spawning");

@@ -16,6 +16,7 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.server.ServerWorld;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.List;
 
 public class ModLootTables
@@ -29,6 +30,8 @@ public class ModLootTables
 
     public static List<ItemStack> getEntityDropsLootTable(Entity entity, @Nullable PlayerEntity player, ResourceLocation lootTable)
     {
+        if (entity.level.isClientSide()) return Arrays.asList();
+
         LootContext lootContext = new LootContext.Builder(((ServerWorld) entity.level))
             .withParameter(LootParameters.THIS_ENTITY, entity)
             .withParameter(LootParameters.DAMAGE_SOURCE, DamageSource.GENERIC)

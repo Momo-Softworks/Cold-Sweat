@@ -37,6 +37,7 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.particles.ItemParticleData;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
@@ -69,6 +70,7 @@ public class ChameleonEntity extends AnimalEntity
     }
 
     static final DataParameter<Boolean> SHEDDING = EntityDataManager.defineId(ChameleonEntity.class, DataSerializers.BOOLEAN);
+    static final DataParameter<Boolean> CAN_SHED = EntityDataManager.defineId(ChameleonEntity.class, DataSerializers.BOOLEAN);
     static final DataParameter<Integer> LAST_SHED = EntityDataManager.defineId(ChameleonEntity.class, DataSerializers.INT);
     static final DataParameter<Integer> HURT_TIMESTAMP = EntityDataManager.defineId(ChameleonEntity.class, DataSerializers.INT);
     static final DataParameter<CompoundNBT> TRUSTED_PLAYERS = EntityDataManager.defineId(ChameleonEntity.class, DataSerializers.COMPOUND_TAG);
@@ -130,6 +132,7 @@ public class ChameleonEntity extends AnimalEntity
     {
         super.defineSynchedData();
         this.entityData.define(SHEDDING, false);
+        this.entityData.define(CAN_SHED, false);
         this.entityData.define(LAST_SHED, 0);
         this.entityData.define(HURT_TIMESTAMP, 0);
         this.entityData.define(TRUSTED_PLAYERS, new CompoundNBT());
@@ -179,6 +182,12 @@ public class ChameleonEntity extends AnimalEntity
     @Override
     public ActionResultType mobInteract(PlayerEntity player, Hand hand)
     {
+        // Shed chameleon
+        if (!ConfigSettings.CHAMELEON_SHED_AUTOMATICALLY.get() && makeShed(this))
+        {   return ActionResultType.SUCCESS;
+        }
+
+        // Feed edible
         ItemStack stack = player.getItemInHand(hand);
         Edible edible = ChameleonEdibles.getEdible(stack).orElse(null);
 
@@ -216,6 +225,24 @@ public class ChameleonEntity extends AnimalEntity
         }
 
         return ActionResultType.PASS;
+    }
+
+    public static boolean makeShed(LivingEntity entity)
+    {
+        if (entity instanceof ChameleonEntity)
+        {
+            ChameleonEntity chameleon = (ChameleonEntity) entity;
+            if (chameleon.isShedding() && chameleon.canShed())
+            {
+                chameleon.shedItems();
+                chameleon.setLastShed(chameleon.getAgeSecs() * 20);
+                chameleon.setShedding(false);
+                chameleon.entityData.set(CAN_SHED, false);
+                return true;
+            }
+            return false;
+        }
+        return false;
     }
 
     @Override
@@ -387,11 +414,24 @@ public class ChameleonEntity extends AnimalEntity
                 this.setLastShed(this.getAgeSecs() * 20);
             }
 
-            if (shedding && this.getAgeSecs() * 20 - this.getLastShed() > this.getTimeToShed())
+            if (this.getAgeSecs() * 20 - this.getLastShed() > this.getTimeToShed() && !this.canShed())
+            {   this.entityData.set(CAN_SHED, true);
+            }
+
+            if (ConfigSettings.CHAMELEON_SHED_AUTOMATICALLY.get() && shedding && this.canShed())
+            {   makeShed(this);
+            }
+        }
+        if (this.canShed())
+        {
+            // spawn shedding particles
+            if (this.level.isClientSide && this.random.nextDouble() < 0.2)
             {
-                this.shedItems();
-                this.setLastShed(this.getAgeSecs() * 20);
-                this.setShedding(false);
+                WorldHelper.spawnParticle(this.level, new ItemParticleData(ParticleTypes.ITEM, ModItems.CHAMELEON_MOLT.getDefaultInstance()),
+                        this.getX() + (this.random.nextDouble() - 0.5) * this.getBbWidth(),
+                        this.getY() + this.random.nextDouble() * this.getBbHeight(),
+                        this.getZ() + (this.random.nextDouble() - 0.5) * this.getBbWidth(),
+                        0.01, 0.05, 0.01);
             }
         }
 
@@ -597,23 +637,23 @@ public class ChameleonEntity extends AnimalEntity
     }
 
     public float getEatTimer()
-    {
-        return this.eatAnimationTimer;
+    {   return this.eatAnimationTimer;
     }
 
     public boolean isShedding()
-    {
-        return this.entityData.get(SHEDDING);
+    {   return this.entityData.get(SHEDDING);
     }
 
     public void setShedding(boolean shedding)
-    {
-        this.entityData.set(SHEDDING, shedding);
+    {   this.entityData.set(SHEDDING, shedding);
+    }
+
+    public boolean canShed()
+    {   return this.entityData.get(CAN_SHED);
     }
 
     public CompoundNBT getTrustedPlayers()
-    {
-        return this.entityData.get(TRUSTED_PLAYERS);
+    {   return this.entityData.get(TRUSTED_PLAYERS);
     }
 
     public void addTrustedPlayer(UUID player)
