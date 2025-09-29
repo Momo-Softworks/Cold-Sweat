@@ -25,7 +25,10 @@ public class ModLootTables
     public static final ResourceLocation CUSTOM_BLUE_ICE_DROP = new ResourceLocation("cold_sweat", "blocks/special/blue_ice");
 
     public static List<ItemStack> getEntityDropsLootTable(Entity entity, @Nullable Player player, ResourceLocation lootTable)
-    {   LootParams lootContext = new LootParams.Builder(((ServerLevel) entity.level()))
+    {
+        if (entity.level().isClientSide()) return List.of();
+
+        LootParams lootContext = new LootParams.Builder(((ServerLevel) entity.level()))
             .withParameter(LootContextParams.THIS_ENTITY, entity)
             .withParameter(LootContextParams.ORIGIN, entity.position())
             .withParameter(LootContextParams.DAMAGE_SOURCE, player != null ? entity.damageSources().playerAttack(player) : entity.damageSources().generic())
