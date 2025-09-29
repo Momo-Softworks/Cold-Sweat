@@ -43,11 +43,16 @@ public class AdaptiveInsulation extends Insulation
         double adaptSpeed = insulation.getSpeed();
 
         double newFactor;
-        if (CSMath.betweenInclusive(CSMath.blend(-1, 1, worldTemp, minTemp, maxTemp), -0.5, 0.5))
+        double tempFactor = CSMath.blend(-1, 1, worldTemp, minTemp, maxTemp);
+        if (CSMath.betweenInclusive(tempFactor, -0.5, 0.5))
         {   newFactor = CSMath.shrink(factor, adaptSpeed);
         }
         else
-        {   newFactor = CSMath.clamp(factor + CSMath.blend(-adaptSpeed, adaptSpeed, worldTemp, minTemp, maxTemp), -1, 1);
+        {
+            if (CSMath.sign(factor) != CSMath.sign(tempFactor))
+            {   adaptSpeed *= 2;
+            }
+            newFactor = CSMath.clamp(factor + adaptSpeed * CSMath.sign(tempFactor), -1, 1);
         }
         return newFactor;
     }
