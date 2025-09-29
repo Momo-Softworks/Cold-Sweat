@@ -9,6 +9,7 @@ import com.momosoftworks.coldsweat.common.entity.goals.EatObjectsGoal;
 import com.momosoftworks.coldsweat.common.entity.goals.LazyLookGoal;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ModEntities;
+import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.core.init.ModSounds;
 import com.momosoftworks.coldsweat.core.network.message.ChameleonEatMessage;
 import com.momosoftworks.coldsweat.core.network.message.EntityMountMessage;
@@ -19,6 +20,8 @@ import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -48,6 +51,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.phys.Vec2;
@@ -68,6 +72,7 @@ import java.util.UUID;
 public class Chameleon extends Animal
 {
     static final EntityDataAccessor<Boolean> SHEDDING = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.BOOLEAN);
+    static final EntityDataAccessor<Boolean> CAN_SHED = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.BOOLEAN);
     static final EntityDataAccessor<Integer> LAST_SHED = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.INT);
     static final EntityDataAccessor<Integer> HURT_TIMESTAMP = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.INT);
     static final EntityDataAccessor<CompoundTag> TRUSTED_PLAYERS = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.COMPOUND_TAG);
@@ -126,6 +131,7 @@ public class Chameleon extends Animal
     {
         super.defineSynchedData(builder);
         builder.define(SHEDDING, false);
+        builder.define(CAN_SHED, false);
         builder.define(LAST_SHED, 0);
         builder.define(HURT_TIMESTAMP, 0);
         builder.define(TRUSTED_PLAYERS, new CompoundTag());
@@ -175,6 +181,12 @@ public class Chameleon extends Animal
     @Override
     public InteractionResult mobInteract(@NotNull Player player, @NotNull InteractionHand hand)
     {
+        // Shed chameleon
+        if (!ConfigSettings.CHAMELEON_SHED_AUTOMATICALLY.get() && makeShed(this))
+        {   return InteractionResult.SUCCESS;
+        }
+
+        // Feed edible
         ItemStack stack = player.getItemInHand(hand);
         Edible edible = ChameleonEdibles.getEdible(stack).orElse(null);
 
@@ -212,6 +224,19 @@ public class Chameleon extends Animal
         }
 
         return InteractionResult.PASS;
+    }
+
+    public static boolean makeShed(LivingEntity entity)
+    {
+        if (entity instanceof Chameleon chameleon && chameleon.isShedding() && chameleon.canShed())
+        {
+            chameleon.shedItems();
+            chameleon.setLastShed(chameleon.getAgeSecs() * 20);
+            chameleon.setShedding(false);
+            chameleon.entityData.set(CAN_SHED, false);
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -376,11 +401,25 @@ public class Chameleon extends Animal
                 this.setLastShed(this.getAgeSecs() * 20);
             }
 
-            if (shedding && this.getAgeSecs() * 20 - this.getLastShed() > this.getTimeToShed())
+            if (this.getAgeSecs() * 20 - this.getLastShed() > this.getTimeToShed() && !this.canShed())
+            {   this.entityData.set(CAN_SHED, true);
+                this.gameEvent(GameEvent.ENTITY_ACTION);
+            }
+
+            if (ConfigSettings.CHAMELEON_SHED_AUTOMATICALLY.get() && shedding && this.canShed())
+            {   makeShed(this);
+            }
+        }
+        if (this.canShed())
+        {
+            // spawn shedding particles
+            if (this.level().isClientSide && this.random.nextDouble() < 0.2)
             {
-                this.shedItems();
-                this.setLastShed(this.getAgeSecs() * 20);
-                this.setShedding(false);
+                WorldHelper.spawnParticle(this.level(), new ItemParticleOption(ParticleTypes.ITEM, ModItems.CHAMELEON_MOLT.toStack()),
+                        this.getX() + (this.random.nextDouble() - 0.5) * this.getBbWidth(),
+                        this.getY() + this.random.nextDouble() * this.getBbHeight(),
+                        this.getZ() + (this.random.nextDouble() - 0.5) * this.getBbWidth(),
+                        0.01, 0.05, 0.01);
             }
         }
 
@@ -564,23 +603,23 @@ public class Chameleon extends Animal
     }
 
     public float getEatTimer()
-    {
-        return this.eatAnimationTimer;
+    {   return this.eatAnimationTimer;
     }
 
     public boolean isShedding()
-    {
-        return this.entityData.get(SHEDDING);
+    {   return this.entityData.get(SHEDDING);
     }
 
     public void setShedding(boolean shedding)
-    {
-        this.entityData.set(SHEDDING, shedding);
+    {   this.entityData.set(SHEDDING, shedding);
+    }
+
+    public boolean canShed()
+    {   return this.entityData.get(CAN_SHED);
     }
 
     public CompoundTag getTrustedPlayers()
-    {
-        return this.entityData.get(TRUSTED_PLAYERS);
+    {   return this.entityData.get(TRUSTED_PLAYERS);
     }
 
     public void addTrustedPlayer(UUID player)
