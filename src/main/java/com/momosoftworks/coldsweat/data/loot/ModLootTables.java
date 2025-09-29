@@ -28,6 +28,8 @@ public class ModLootTables
 
     public static List<ItemStack> getEntityDropsLootTable(Entity entity, @Nullable Player player, ResourceLocation lootTable)
     {
+        if (entity.level.isClientSide()) return List.of();
+
         LootContext lootContext = new LootContext.Builder(((ServerLevel) entity.level))
             .withParameter(LootContextParams.THIS_ENTITY, entity)
             .withParameter(LootContextParams.DAMAGE_SOURCE, DamageSource.GENERIC)
