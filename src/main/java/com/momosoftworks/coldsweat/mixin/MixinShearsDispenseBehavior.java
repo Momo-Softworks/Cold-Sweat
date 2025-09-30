@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.mixin;
 
 import com.momosoftworks.coldsweat.common.capability.handler.ShearableFurManager;
-import com.momosoftworks.coldsweat.common.entity.Chameleon;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.dispenser.ShearsDispenseItemBehavior;
 import net.minecraft.server.level.ServerLevel;
@@ -22,7 +21,6 @@ public class MixinShearsDispenseBehavior
         boolean success = false;
         for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AABB(pos), EntitySelector.NO_SPECTATORS))
         {   success |= ShearableFurManager.shear(living, null);
-            success |= Chameleon.makeShed(living);
         }
         if (success) cir.setReturnValue(true);
     }
