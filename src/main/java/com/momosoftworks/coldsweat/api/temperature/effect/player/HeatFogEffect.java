@@ -7,6 +7,7 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -32,15 +33,20 @@ public class HeatFogEffect extends TempEffect
     @SubscribeEvent(priority = EventPriority.LOW)
     public void renderHeatFog(ViewportEvent event)
     {
-        if (!this.test(Minecraft.getInstance().player)) return;
-        LivingEntity entity = this.entity();
-        if (EntityTempManager.isImmuneToTemperature(entity)) return;
-
         if (!(event instanceof ViewportEvent.RenderFog || event instanceof ViewportEvent.ComputeFogColor)) return;
 
+        if (!this.test(Minecraft.getInstance().player))
+        {   FOG_FAR_DISTANCE = -1;
+            FOG_NEAR_DISTANCE = -1;
+            FOG_FAR_DISTANCE_TARGET = -1;
+            FOG_NEAR_DISTANCE_TARGET = -1;
+            FOG_RED = -1;
+            FOG_GREEN = -1;
+            FOG_BLUE = -1;
+            return;
+        }
+
         double effect = this.getEffectFactor();
-        double minTemp = this.bounds().min();
-        double maxTemp = this.bounds().max();
 
         float frameTime = Minecraft.getInstance().getDeltaFrameTime();
         float farLerpSpeed = 0.08f * frameTime;
@@ -57,7 +63,7 @@ public class HeatFogEffect extends TempEffect
             if (fog.getNearPlaneDistance() != 0)
                 FOG_NEAR_DISTANCE_TARGET = (float) CSMath.blendLog(fog.getNearPlaneDistance(), fogDistance * 0.3, effect, 0, 1, 4);
 
-            if (FOG_FAR_DISTANCE == -1) {
+            if (FOG_NEAR_DISTANCE <= 0) {
                 FOG_FAR_DISTANCE = FOG_FAR_DISTANCE_TARGET;
                 FOG_NEAR_DISTANCE = FOG_NEAR_DISTANCE_TARGET;
             }

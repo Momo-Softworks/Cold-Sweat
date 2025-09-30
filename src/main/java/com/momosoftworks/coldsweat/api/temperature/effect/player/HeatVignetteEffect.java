@@ -4,6 +4,7 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.temperature.effect.TempEffectType;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
@@ -25,7 +26,7 @@ public class HeatVignetteEffect extends AbstractVignetteEffect
     @Override
     protected Vector4f getColor(float tickTime)
     {
-        float vignetteBrightness = ((float) Math.sin((tickTime + 3) / (Math.PI * 1.0132f)) / 5f - 0.2f);
+        float vignetteBrightness = (float) (Math.sin((tickTime + 3) / Math.PI) / 2 + 0.5f);
         return new Vector4f(0.231f, 0f, 0f, vignetteBrightness);
     }
 
