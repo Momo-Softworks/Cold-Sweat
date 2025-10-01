@@ -17,6 +17,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
+import net.minecraft.world.gen.Heightmap;
 
 import java.util.List;
 
@@ -263,7 +264,7 @@ public class DepthTempData extends ConfigData
                 case CONSTANT : return depth;
                 case WORLD_TOP : return level.getMaxBuildHeight() + depth;
                 case WORLD_BOTTOM : return 0 + depth;
-                case GROUND_LEVEL : return WorldHelper.getHeight(checkPos, level) + depth;
+                case GROUND_LEVEL : return WorldHelper.getAverageHeight(checkPos, level, Heightmap.Type.MOTION_BLOCKING, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES) + depth;
             }
             return 0;
         }
