@@ -12,6 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.levelgen.Heightmap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,9 +60,12 @@ public class ElevationTempModifier extends TempModifier
             BlockPos originalPos = pair.getFirst();
             int originalY = originalPos.getY();
             int minY = level.getMinBuildHeight();
-            int groundLevel = WorldHelper.getHeight(originalPos, level);
+            int groundLevel = WorldHelper.getAverageHeight(originalPos, level, Heightmap.Types.MOTION_BLOCKING, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES);
+                            // If original is between bedrock and ground level, clamp to those bounds
             int adjustedY = CSMath.betweenInclusive(originalY, minY, groundLevel) ? CSMath.clamp(originalY + skylight - 4, minY, groundLevel)
+                            // If original is above ground level, clamp to above ground level and below original
                           : originalY >= groundLevel ? CSMath.clamp(originalY + skylight - 4, groundLevel, originalY)
+                            // If original is below bedrock, clamp to below bedrock and above original
                           : CSMath.clamp(originalY + skylight - 4, originalY, minY);
             BlockPos pos = new BlockPos(originalPos.getX(), adjustedY, originalPos.getZ());
             double distance = pair.getSecond();
