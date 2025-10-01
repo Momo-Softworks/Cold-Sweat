@@ -85,7 +85,7 @@ public abstract class WorldHelper
         TEMPERATURE_CHECKS.clear();
     }
 
-    public static int getHeight(BlockPos pos, Level level)
+    public static int getHeight(BlockPos pos, Level level, Heightmap.Types heightmap)
     {
         int minHeight = level.getMinBuildHeight();
         int maxHeight = level.getMaxBuildHeight();
@@ -100,8 +100,11 @@ public abstract class WorldHelper
         {
             int y = level.getMaxBuildHeight();
             BlockPos.MutableBlockPos mutable = pos.mutable();
+            mutable.setY(CSMath.clamp(mutable.getY(), minHeight, maxHeight));
+
             BlockState state = null;
-            for (; state == null || state.getMaterial().isReplaceable(); y--)
+
+            for (; state == null || !heightmap.isOpaque().test(state); y--)
             {
                 if (!CSMath.betweenInclusive(mutable.getY(), minHeight, maxHeight))
                 {   return seaLevel;
@@ -111,7 +114,20 @@ public abstract class WorldHelper
             }
             return y;
         }
-        else return chunk.getHeight(Heightmap.Types.MOTION_BLOCKING, pos.getX(), pos.getZ());
+        else return chunk.getHeight(heightmap, pos.getX(), pos.getZ());
+    }
+
+    public static int getHeight(BlockPos pos, Level level)
+    {   return getHeight(pos, level, Heightmap.Types.MOTION_BLOCKING);
+    }
+
+    public static int getAverageHeight(BlockPos pos, Level level, Heightmap.Types... heightmaps)
+    {
+        int totalHeight = 0;
+        for (Heightmap.Types heightmap : heightmaps)
+        {   totalHeight += getHeight(pos, level, heightmap);
+        }
+        return totalHeight / heightmaps.length;
     }
 
     /**
