@@ -6,6 +6,7 @@
   },
   "overrides":
   [
+    { "predicate": { "cold_sweat:water_temperature": -999999999 }, "model": "cold_sweat:item/waterskin/filled_waterskin_cold" },
     { "predicate": { "cold_sweat:water_temperature": -50 }, "model": "cold_sweat:item/waterskin/filled_waterskin_cold" },
     { "predicate": { "cold_sweat:water_temperature": -25 }, "model": "cold_sweat:item/filled_waterskin" },
     { "predicate": { "cold_sweat:water_temperature":  25 }, "model": "cold_sweat:item/waterskin/filled_waterskin_hot" }
