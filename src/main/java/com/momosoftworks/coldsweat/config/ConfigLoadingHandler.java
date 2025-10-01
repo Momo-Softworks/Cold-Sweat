@@ -52,6 +52,7 @@ import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.registries.DataPackRegistryEvent;
+import net.neoforged.neoforge.registries.IdMappingEvent;
 
 import java.io.File;
 import java.io.FileReader;
@@ -109,8 +110,8 @@ public class ConfigLoadingHandler
     }
 
     private static boolean REGISTRIES_INITIALIZED = false;
-    @Internal
-    public static void initRegistries()
+    @SubscribeEvent
+    public static void initRegistries(IdMappingEvent event)
     {
         if (REGISTRIES_INITIALIZED) return;
 
