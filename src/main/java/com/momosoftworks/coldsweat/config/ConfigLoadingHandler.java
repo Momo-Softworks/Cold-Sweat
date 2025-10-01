@@ -51,6 +51,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.registries.DataPackRegistryEvent;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.IdMappingEvent;
 
 import java.io.File;
 import java.io.FileReader;
@@ -107,8 +108,8 @@ public class ConfigLoadingHandler
     }
 
     private static boolean REGISTRIES_INITIALIZED = false;
-    @Internal
-    public static void initRegistries()
+    @SubscribeEvent
+    public static void initRegistries(IdMappingEvent event)
     {
         if (REGISTRIES_INITIALIZED) return;
 
