@@ -67,6 +67,10 @@ public class ConfigLoadingHandler
     public static final Multimap<ResourceKey<Registry<? extends ConfigData>>, RemoveRegistryData<?>> REMOVED_REGISTRIES = new RegistryMultiMap<>();
     private static final List<OptionalHolder<?>> OPTIONAL_HOLDERS = new ArrayList<>();
 
+    static {
+        NeoForge.EVENT_BUS.start();
+    }
+
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void loadConfigs(ServerConfigsLoadedEvent event)
     {
