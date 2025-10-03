@@ -43,6 +43,7 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.feature.ConfiguredStructureFeature;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -104,32 +105,6 @@ public class ConfigLoadingHandler
         public static void loadClientConfigs(FMLLoadCompleteEvent event)
         {   ConfigSettings.CLIENT_SETTINGS.forEach((id, holder) -> holder.load(true));
         }
-    }
-
-    private static boolean REGISTRIES_INITIALIZED = false;
-    @Internal
-    public static void initRegistries()
-    {
-        if (REGISTRIES_INITIALIZED) return;
-
-        ColdSweat.LOGGER.info("Gathering Cold Sweat registries");
-        // Gather modded registries
-        AddRegistriesEvent addRegistriesEvent = new AddRegistriesEvent();
-        MinecraftForge.EVENT_BUS.post(addRegistriesEvent);
-        // Add registries via dummy NewRegistry event
-        NewRegistryEvent dummyEvent = new NewRegistryEvent();
-        for (RegistryHolder<?> holder : ModRegistries.getRegistries().values())
-        {   dummyEvent.create(new RegistryBuilder<>().setType((Class) holder.type()).setName(holder.key().location()).dataPackRegistry((Codec) holder.codec(), (Codec) holder.codec()));
-        }
-        try
-        {
-            Method process = NewRegistryEvent.class.getDeclaredMethod("fill");
-            process.setAccessible(true);
-            process.invoke(dummyEvent);
-        }
-        catch (Exception ignored) {}
-
-        REGISTRIES_INITIALIZED = true;
     }
 
     /**

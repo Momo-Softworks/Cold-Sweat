@@ -2,20 +2,16 @@ package com.momosoftworks.coldsweat.api.temperature.effect.player;
 
 import com.momosoftworks.coldsweat.api.temperature.effect.TempEffect;
 import com.momosoftworks.coldsweat.api.temperature.effect.TempEffectType;
-import com.momosoftworks.coldsweat.client.gui.Overlays;
-import com.momosoftworks.coldsweat.common.event.HandleTempEffects;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-
-import static com.momosoftworks.coldsweat.common.event.HandleTempEffects.Client.HOT_IMMUNITY;
 
 public class HeatFogEffect extends TempEffect
 {
@@ -23,40 +19,86 @@ public class HeatFogEffect extends TempEffect
     {   super(type, entity, bounds);
     }
 
+    static float FOG_FAR_DISTANCE = -1;
+    static float FOG_NEAR_DISTANCE = -1;
+    static float FOG_FAR_DISTANCE_TARGET = -1;
+    static float FOG_NEAR_DISTANCE_TARGET = -1;
+    static float FOG_RED = -1;
+    static float FOG_GREEN = -1;
+    static float FOG_BLUE = -1;
+
     @OnlyIn(Dist.CLIENT)
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOW)
     public void renderHeatFog(EntityViewRenderEvent event)
     {
-        Player player = Minecraft.getInstance().player;
-
-        if (!this.test(player)) return;
         if (!(event instanceof EntityViewRenderEvent.RenderFogEvent || event instanceof EntityViewRenderEvent.FogColors)) return;
 
-        if (HandleTempEffects.isPlayerImmune(player)) return;
+        if (!this.test(Minecraft.getInstance().player))
+        {   FOG_FAR_DISTANCE = -1;
+            FOG_NEAR_DISTANCE = -1;
+            FOG_FAR_DISTANCE_TARGET = -1;
+            FOG_NEAR_DISTANCE_TARGET = -1;
+            FOG_RED = -1;
+            FOG_GREEN = -1;
+            FOG_BLUE = -1;
+            return;
+        }
 
-        double fogDistance = ConfigSettings.HEATSTROKE_FOG_DISTANCE.get();
-        if (fogDistance >= 64) return;
-        if (fogDistance < Double.POSITIVE_INFINITY && Overlays.BLEND_BODY_TEMP >= 50 && HOT_IMMUNITY < 1)
+        double effect = this.getEffectFactor();
+
+        float frameTime = Minecraft.getInstance().getDeltaFrameTime();
+        float farLerpSpeed = 0.08f * frameTime;
+        float nearLerpSpeed = 0.08f * frameTime;
+
+        if (event instanceof EntityViewRenderEvent.RenderFogEvent fog)
         {
-            float tempWithResistance = (float) CSMath.blend(Overlays.BLEND_BODY_TEMP, 50, HOT_IMMUNITY, 0, 1);
-            if (event instanceof EntityViewRenderEvent.RenderFogEvent fog)
-            {
-                if (fogDistance > (fog.getFarPlaneDistance())) return;
-                fog.setFarPlaneDistance(CSMath.blend(fog.getFarPlaneDistance(), (float) fogDistance, tempWithResistance, 50f, 90f));
-                fog.setNearPlaneDistance(CSMath.blend(fog.getNearPlaneDistance(), (float) (fogDistance * 0.3), tempWithResistance, 50f, 90f));
-                fog.setCanceled(true);
+            double fogDistance = ConfigSettings.HEATSTROKE_FOG_DISTANCE.get();
+            if (fogDistance >= 64 || Double.isInfinite(fogDistance)) return;
+            if (fogDistance >= fog.getFarPlaneDistance()) return;
+
+            if (fog.getFarPlaneDistance() != 0)
+                FOG_FAR_DISTANCE_TARGET = (float) CSMath.blendLog(fog.getFarPlaneDistance(), fogDistance, effect, 0, 1, 4);
+            if (fog.getNearPlaneDistance() != 0)
+                FOG_NEAR_DISTANCE_TARGET = (float) CSMath.blendLog(fog.getNearPlaneDistance(), fogDistance * 0.3, effect, 0, 1, 4);
+
+            if (FOG_NEAR_DISTANCE <= 0) {
+                FOG_FAR_DISTANCE = FOG_FAR_DISTANCE_TARGET;
+                FOG_NEAR_DISTANCE = FOG_NEAR_DISTANCE_TARGET;
             }
-            else
-            {   EntityViewRenderEvent.FogColors fogColor = (EntityViewRenderEvent.FogColors) event;
-                fogColor.setRed(CSMath.blend(fogColor.getRed(), 0.01f, tempWithResistance, 50, 90));
-                fogColor.setGreen(CSMath.blend(fogColor.getGreen(), 0.01f, tempWithResistance, 50, 90));
-                fogColor.setBlue(CSMath.blend(fogColor.getBlue(), 0.05f, tempWithResistance, 50, 90));
+
+            FOG_FAR_DISTANCE = FOG_FAR_DISTANCE + (FOG_FAR_DISTANCE_TARGET - FOG_FAR_DISTANCE) * farLerpSpeed;
+            FOG_NEAR_DISTANCE = FOG_NEAR_DISTANCE + (FOG_NEAR_DISTANCE_TARGET - FOG_NEAR_DISTANCE) * nearLerpSpeed;
+
+            fog.setFarPlaneDistance(FOG_FAR_DISTANCE);
+            fog.setNearPlaneDistance(FOG_NEAR_DISTANCE);
+            fog.setCanceled(true);
+        }
+        else
+        {
+            EntityViewRenderEvent.FogColors fogColor = (EntityViewRenderEvent.FogColors) event;
+
+            float targetRed = (float) CSMath.blend(fogColor.getRed(), 0.04, effect, 0, 1);
+            float targetGreen = (float) CSMath.blend(fogColor.getGreen(), 0.01, effect, 0, 1);
+            float targetBlue = (float) CSMath.blend(fogColor.getBlue(), 0.02, effect, 0, 1);
+
+            if (FOG_RED < 0) {
+                FOG_RED = targetRed;
+                FOG_GREEN = targetGreen;
+                FOG_BLUE = targetBlue;
             }
+
+            FOG_RED = FOG_RED + (targetRed - FOG_RED) * farLerpSpeed;
+            FOG_GREEN = FOG_GREEN + (targetGreen - FOG_GREEN) * farLerpSpeed;
+            FOG_BLUE = FOG_BLUE + (targetBlue - FOG_BLUE) * farLerpSpeed;
+
+            fogColor.setRed(FOG_RED);
+            fogColor.setGreen(FOG_GREEN);
+            fogColor.setBlue(FOG_BLUE);
         }
     }
 
     @Override
-    public boolean isClient()
-    {   return true;
+    public Side getSide()
+    {   return Side.CLIENT;
     }
 }

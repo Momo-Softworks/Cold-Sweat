@@ -8,6 +8,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.eventbus.api.Event;
 
 /**
+ * <b>!! NOT CALLED IN THIS VERSION !!</b><br>
+ * This event is not called in 1.18 because Forge loads registries extremely early in the mod loading process, long before events can be fired.<br>
+ * <br>
  * Fired when Cold Sweat is building registries. <br>
  * Use this event to add your own registries to Cold Sweat's registry system.
  */

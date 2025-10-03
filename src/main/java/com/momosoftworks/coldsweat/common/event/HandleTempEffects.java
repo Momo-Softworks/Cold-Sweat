@@ -1,19 +1,12 @@
 package com.momosoftworks.coldsweat.common.event;
 
 import com.momosoftworks.coldsweat.api.temperature.effect.TempEffectType;
-import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.TempEffectsData;
-import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
-import net.minecraft.client.Minecraft;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityLeaveWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -29,7 +22,7 @@ public class HandleTempEffects
     public static void addTempEffects(LivingEvent.LivingUpdateEvent event)
     {
         LivingEntity living = event.getEntityLiving();
-        if (living.tickCount > 5 && living.tickCount % 20 == 0)
+        if (living.tickCount % 20 == 0)
         {
             EntityTempManager.getTemperatureCap(living).ifPresent(cap ->
             {
@@ -41,10 +34,8 @@ public class HandleTempEffects
                 effectsData.effects().forEach(holder ->
                 {
                     TempEffectType effectType = holder.effect();
-                    // Add effect if not present
-                    if (!cap.getTempEffects().containsKey(effectType))
-                    {   cap.addTempEffect(effectType.create(effectType, living, holder.range()));
-                    }
+                    // Add effect
+                    cap.addTempEffect(effectType.create(effectType, living, holder.range()), living.level.isClientSide);
                     // Mark effect as added
                     addedEffects.add(effectType);
                 });
@@ -60,40 +51,5 @@ public class HandleTempEffects
         if (event.getEntity() instanceof LivingEntity living)
         {   EntityTempManager.getTemperatureCap(living).ifPresent(ITemperatureCap::clearTempEffects);
         }
-    }
-
-    @Mod.EventBusSubscriber(Dist.CLIENT)
-    public static class Client
-    {
-        public static double COLD_IMMUNITY = 0;
-        public static double HOT_IMMUNITY  = 0;
-
-        @SubscribeEvent
-        public static void onClientTick(TickEvent.ClientTickEvent event)
-        {
-            if (event.phase == TickEvent.Phase.END)
-            {
-                Player player = Minecraft.getInstance().player;
-                if (isPlayerImmune(player)) return;
-                if (player.tickCount % 5 == 0)
-                {
-                    // Set cold immunity
-                    if (player.hasEffect(ModEffects.ICE_RESISTANCE) && ConfigSettings.ICE_RESISTANCE_ENABLED.get())
-                    {   COLD_IMMUNITY = 1;
-                    }
-                    else COLD_IMMUNITY = Temperature.get(player, Temperature.Trait.COLD_RESISTANCE);
-                    // Set heat immunity
-                    if (player.hasEffect(MobEffects.FIRE_RESISTANCE) && ConfigSettings.FIRE_RESISTANCE_ENABLED.get())
-                    {   HOT_IMMUNITY = 1;
-                    }
-                    else HOT_IMMUNITY  = Temperature.get(player, Temperature.Trait.HEAT_RESISTANCE);
-                }
-            }
-        }
-    }
-
-
-    public static boolean isPlayerImmune(Player player)
-    {   return player == null || !player.isAlive() || EntityTempManager.isPeacefulMode(player) || player.hasEffect(ModEffects.GRACE);
     }
 }

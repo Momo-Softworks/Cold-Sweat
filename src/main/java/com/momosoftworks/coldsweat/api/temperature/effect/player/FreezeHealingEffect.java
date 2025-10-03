@@ -2,12 +2,9 @@ package com.momosoftworks.coldsweat.api.temperature.effect.player;
 
 import com.momosoftworks.coldsweat.api.temperature.effect.TempEffect;
 import com.momosoftworks.coldsweat.api.temperature.effect.TempEffectType;
-import com.momosoftworks.coldsweat.api.util.Temperature;
-import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.registries.ModEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -22,30 +19,22 @@ public class FreezeHealingEffect extends TempEffect
     public void onHeal(LivingHealEvent event)
     {
         if (!this.test(event.getEntity())) return;
-        if (EntityTempManager.isPeacefulMode(this.entity())) return;
+        double effect = this.getEffectFactor();
+        double heartsFreezePercentage = ConfigSettings.HEARTS_FREEZING_PERCENTAGE.get();
+        if (heartsFreezePercentage == 0) return;
 
-        double frozenHeartsPercentage = ConfigSettings.HEARTS_FREEZING_PERCENTAGE.get();
+        float maxHealth = this.entity().getMaxHealth();
 
-        if (frozenHeartsPercentage <= 0
-        || this.entity().hasEffect(ModEffects.ICE_RESISTANCE)
-        || this.entity().hasEffect(ModEffects.GRACE)) return;
-
-        float healing = event.getAmount();
-        float temp = (float) this.getTemperature();
-        if (temp < -50)
-        {
-            // Get protection from armor underwear
-            float unfrozenHealth = (float) (CSMath.blend(1 - frozenHeartsPercentage, 1d, Temperature.get(this.entity(), Temperature.Trait.COLD_RESISTANCE), 0d, 1d));
-            if (unfrozenHealth != 1)
-            {
-                float healAmount = CSMath.clamp(healing, 0, this.entity().getMaxHealth() * unfrozenHealth - this.entity().getHealth());
-                event.setAmount(healAmount);
-            }
-        }
+        float maxFrozenHealth = (float) (maxHealth * heartsFreezePercentage);
+        float frozenHealth = Math.round(CSMath.blend(0, maxFrozenHealth, effect, 0, 1));
+        float unfrozenHealth = maxHealth - frozenHealth;
+        // Cap healing to only heal up to the unfrozen health amount
+        float healAmount = CSMath.clamp(event.getAmount(), 0, Math.max(0, unfrozenHealth - this.entity().getHealth()));
+        event.setAmount(healAmount);
     }
 
     @Override
-    public boolean isClient()
-    {   return false;
+    public Side getSide()
+    {   return Side.SERVER;
     }
 }
