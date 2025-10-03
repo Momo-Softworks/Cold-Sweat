@@ -1,28 +1,15 @@
 package com.momosoftworks.coldsweat.api.temperature.effect.player;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.momosoftworks.coldsweat.api.temperature.effect.TempEffect;
+
 import com.momosoftworks.coldsweat.api.temperature.effect.TempEffectType;
-import com.momosoftworks.coldsweat.client.gui.Overlays;
-import com.momosoftworks.coldsweat.common.event.HandleTempEffects;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
-import com.momosoftworks.coldsweat.util.math.CSMath;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraft.util.math.vector.Vector4f;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-import static com.momosoftworks.coldsweat.common.event.HandleTempEffects.Client.COLD_IMMUNITY;
-
-public class FreezeVignetteEffect extends TempEffect
+public class FreezeVignetteEffect extends AbstractVignetteEffect
 {
     public FreezeVignetteEffect(TempEffectType<?> type, LivingEntity entity, IntegerBounds bounds)
     {   super(type, entity, bounds);
@@ -30,57 +17,20 @@ public class FreezeVignetteEffect extends TempEffect
 
     static final ResourceLocation TEXTURE = new ResourceLocation("textures/misc/powder_snow_outline.png");
 
-    protected void setupRender(float opacity)
-    {
-        RenderSystem.color4f(1f, 1f, 1f, opacity);
-        Minecraft.getInstance().textureManager.bind(TEXTURE);
-    }
-
-    @OnlyIn(Dist.CLIENT)
-    @SubscribeEvent
-    public void vignette(RenderGameOverlayEvent.Pre event)
-    {
-        PlayerEntity player = Minecraft.getInstance().player;
-        if (!this.test(player)) return;
-        if (HandleTempEffects.isPlayerImmune(player)) return;
-
-        float blendTemp = (float) Overlays.BLEND_BODY_TEMP;
-
-        if (event.getType() == RenderGameOverlayEvent.ElementType.VIGNETTE && blendTemp < 0 && COLD_IMMUNITY < 1)
-        {
-            // Setup calculations
-            float resistance = (float) CSMath.blend(1, 0, COLD_IMMUNITY, 0, 1);
-            float opacity = CSMath.blend(0f, 1f, blendTemp, this.bounds().min(), this.bounds().max()) * resistance;
-            opacity *= ConfigSettings.FREEZING_OVERLAY_OPACITY.get();
-            if (opacity == 0) return;
-            double width = event.getWindow().getWidth();
-            double height = event.getWindow().getHeight();
-            double scale = event.getWindow().getGuiScale();
-
-            RenderSystem.disableDepthTest();
-            RenderSystem.depthMask(false);
-            RenderSystem.enableBlend();
-            RenderSystem.defaultBlendFunc();
-            // Set up shader and texture
-            this.setupRender(opacity);
-            // Render vignette
-            Tessellator tesselator = Tessellator.getInstance();
-            BufferBuilder bufferbuilder = tesselator.getBuilder();
-            bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
-            bufferbuilder.vertex(0.0D, height / scale, -90.0D).uv(0.0F, 1.0F).endVertex();
-            bufferbuilder.vertex(width / scale, height / scale, -90.0D).uv(1.0F, 1.0F).endVertex();
-            bufferbuilder.vertex(width / scale, 0.0D, -90.0D).uv(1.0F, 0.0F).endVertex();
-            bufferbuilder.vertex(0.0D, 0.0D, -90.0D).uv(0.0F, 0.0F).endVertex();
-            tesselator.end();
-            RenderSystem.depthMask(true);
-            RenderSystem.enableDepthTest();
-            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-            RenderSystem.defaultBlendFunc();
-        }
+    @Override
+    protected ResourceLocation getTexture()
+    {   return TEXTURE;
     }
 
     @Override
-    public boolean isClient()
-    {   return true;
+    protected Vector4f getColor(float tickTime)
+    {   return new Vector4f(1f, 1f, 1f, 1f);
+    }
+
+    @Override
+    protected void render(float opacity, float tickTime, RenderGameOverlayEvent.Pre event)
+    {
+        opacity *= ConfigSettings.FREEZING_OVERLAY_OPACITY.get();
+        super.render(opacity, tickTime, event);
     }
 }

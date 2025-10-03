@@ -42,6 +42,7 @@
     "MixinMobSpawning",
     "MixinModLoading",
     "MixinPiglinFearPlayers",
+    "MixinEntityMove",
     "MixinShearsDispenseBehavior",
     "MixinSmithingRecipe",
     "MixinSoulCampfire",

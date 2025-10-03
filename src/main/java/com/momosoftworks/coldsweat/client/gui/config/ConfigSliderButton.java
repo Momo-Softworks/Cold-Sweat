@@ -8,6 +8,7 @@ public class ConfigSliderButton extends Slider
 {
     public ConfigSliderButton(int xPos, int yPos, ITextComponent displayStr, double minVal, double maxVal, double currentVal, IPressable handler, ISlider par)
     {   super(xPos, yPos, displayStr, minVal, maxVal, currentVal, handler, par);
+        this.setMessage(displayStr);
     }
 
     public void setValue(double value)

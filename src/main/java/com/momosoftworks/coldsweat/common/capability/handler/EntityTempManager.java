@@ -53,6 +53,7 @@ import net.minecraft.item.TridentItem;
 import net.minecraft.item.UseAction;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.potion.EffectInstance;
+import net.minecraft.potion.Effects;
 import net.minecraft.util.Direction;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
@@ -810,6 +811,22 @@ public class EntityTempManager
 
     public static boolean isPeacefulMode(LivingEntity entity)
     {   return entity.level.getDifficulty() == Difficulty.PEACEFUL && ConfigSettings.USE_PEACEFUL_MODE.get();
+    }
+
+    public static boolean isImmuneToTemperature(LivingEntity player)
+    {   return player == null || !player.isAlive() || isPeacefulMode(player) || player.hasEffect(ModEffects.GRACE);
+    }
+
+    public static double getColdResistance(LivingEntity entity)
+    {   return entity.hasEffect(ModEffects.ICE_RESISTANCE) && ConfigSettings.ICE_RESISTANCE_ENABLED.get() ? 1
+             : Temperature.get(entity, Trait.COLD_RESISTANCE);
+    }
+    public static double getHeatResistance(LivingEntity player)
+    {   return player.hasEffect(Effects.FIRE_RESISTANCE) && ConfigSettings.FIRE_RESISTANCE_ENABLED.get() ? 1
+             : Temperature.get(player, Trait.HEAT_RESISTANCE);
+    }
+    public static double getResistance(double temperature, LivingEntity player)
+    {   return temperature < 0 ? getColdResistance(player) : getHeatResistance(player);
     }
 
     public static Map<ItemStack, InsulatorData> getInsulatorsOnEntity(LivingEntity entity)
