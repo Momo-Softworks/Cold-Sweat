@@ -56,14 +56,14 @@ public class ElevationTempModifier extends TempModifier
         int translatedSkylight = entity.level.getBrightness(LightLayer.SKY, translatedPos);
         int skylight = Math.min(normalSkylight, translatedSkylight);
 
-        List<Pair<Elevation, RegionEntry>> depthRegions = new ArrayList<>(depthTable.size());
+        List<Pair<BlockPos, RegionEntry>> depthRegions = new ArrayList<>(depthTable.size());
 
         for (Pair<BlockPos, Double> pair : depthTable)
         {
             BlockPos originalPos = pair.getFirst();
             int originalY = originalPos.getY();
             int minY = level.getMinBuildHeight();
-            int groundLevel = WorldHelper.getAverageHeight(originalPos, level, Heightmap.Types.MOTION_BLOCKING, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES);
+            int groundLevel = WorldHelper.getHeight(originalPos, level, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES);
                             // If original is between bedrock and ground level, clamp to those bounds
             int adjustedY = CSMath.betweenInclusive(originalY, minY, groundLevel) ? CSMath.clamp(originalY + skylight - 4, minY, groundLevel)
                             // If original is above ground level, clamp to above ground level and below original
@@ -80,26 +80,20 @@ public class ElevationTempModifier extends TempModifier
                     if (region == null) continue;
                     int regionMax = region.top().getHeight(pos, level);
                     int regionMin = region.bottom().getHeight(pos, level);
-                    depthRegions.add(Pair.of(new Elevation(pos, originalPos), new RegionEntry(region, distance, regionMin, regionMax)));
+                    depthRegions.add(Pair.of(pos, new RegionEntry(region, distance, regionMin, regionMax)));
                     break findRegion;
                 }
-                depthRegions.add(Pair.of(new Elevation(pos, originalPos), new RegionEntry(null, distance, 0, 0)));
+                depthRegions.add(Pair.of(pos, new RegionEntry(null, distance, 0, 0)));
             }
         }
-        double midTemp = Temperature.getNeutralWorldTemp(entity);
-
         return temp ->
         {
             List<Pair<Double, Double>> depthTemps = new ArrayList<>();
 
-            for (Pair<Elevation, RegionEntry> entry : depthRegions)
+            for (Pair<BlockPos, RegionEntry> entry : depthRegions)
             {
-                Elevation elevation = entry.getFirst();
+                BlockPos pos = entry.getFirst();
                 RegionEntry regionEntry = entry.getSecond();
-                // Only use light for hot environments
-                BlockPos pos = temp >= midTemp
-                               ? elevation.lightPos()
-                               : elevation.pos();
                 // Get the region and distance
                 DepthTempData.TempRegion region = regionEntry.region();
                 if (region != null)
@@ -123,11 +117,5 @@ public class ElevationTempModifier extends TempModifier
     }
 
     private record RegionEntry(DepthTempData.TempRegion region, double distance, int minY, int maxY)
-    {}
-
-    /**
-     * Stores a BlockPos (pos) and the BlockPos after being offset by the light level (lightPos).
-     */
-    private record Elevation(BlockPos lightPos, BlockPos pos)
     {}
 }

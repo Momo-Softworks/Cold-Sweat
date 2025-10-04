@@ -228,7 +228,7 @@ public class DepthTempData extends ConfigData implements IForgeRegistryEntry<Dep
                 case CONSTANT -> depth;
                 case WORLD_TOP -> level.getMaxBuildHeight() + depth;
                 case WORLD_BOTTOM -> level.getMinBuildHeight() + depth;
-                case GROUND_LEVEL -> WorldHelper.getAverageHeight(checkPos, level, Heightmap.Types.MOTION_BLOCKING, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES) + depth;
+                case GROUND_LEVEL -> WorldHelper.getHeight(checkPos, level, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES) + depth;
             };
         }
 

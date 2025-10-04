@@ -95,14 +95,6 @@ public class BiomeTempModifier extends TempModifier
 
         worldTemp /= Math.max(1, biomeCount);
 
-        // Slightly decrease temperature if overcast
-        if (!dimension.hasCeiling() && level.isRaining())
-        {
-            long time = level.getDayTime();
-            double overcastTemp = ConfigSettings.OVERCAST_TEMP_OFFSET.get() * level.getRainLevel(1);
-            worldTemp += CSMath.blend(0, overcastTemp, Math.abs(6000 - time), 6000, 0);
-        }
-
         // Add structure offset, if present
         worldTemp += structureTemp.getSecond();
 
