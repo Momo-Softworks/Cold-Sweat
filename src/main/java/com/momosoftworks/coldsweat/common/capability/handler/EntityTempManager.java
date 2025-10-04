@@ -195,6 +195,9 @@ public class EntityTempManager
         event.addModifier(Trait.WORLD, new ElevationTempModifier(isPlayer ? 49 : isTempSensitive ? 16 : 1).tickRate(mediumTickRate),
                           Placement.Duplicates.BY_CLASS, Placement.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof BiomeTempModifier));
 
+        event.addModifier(Trait.WORLD, new ShadeTempModifier().tickRate(10),
+                          Placement.Duplicates.BY_CLASS, Placement.of(Mode.BEFORE, Order.FIRST, mod -> mod instanceof ElevationTempModifier));
+
         event.addModifier(Trait.WORLD, new CaveBiomeTempModifier(isPlayer ? 6 : isTempSensitive ? 5 : 3).tickRate(mediumTickRate),
                           Placement.Duplicates.BY_CLASS, Placement.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof ElevationTempModifier));
 
@@ -208,12 +211,12 @@ public class EntityTempManager
         event.addModifierById(Trait.WORLD, new ResourceLocation("sereneseasons:season"),
                               mod -> mod.tickRate(slowTickRate),
                               Placement.Duplicates.BY_CLASS,
-                              Placement.of(Mode.BEFORE, Order.FIRST, mod2 -> mod2 instanceof ElevationTempModifier));
+                              Placement.of(Mode.AFTER, Order.FIRST, mod2 -> mod2 instanceof BiomeTempModifier));
         // Weather2 Compat
         event.addModifierById(Trait.WORLD, new ResourceLocation("weather2:storm"),
                               mod -> mod.tickRate(slowTickRate),
                               Placement.Duplicates.BY_CLASS,
-                              Placement.of(Mode.BEFORE, Order.FIRST, mod2 -> mod2 instanceof ElevationTempModifier));
+                              Placement.of(Mode.AFTER, Order.FIRST, mod2 -> mod2 instanceof BiomeTempModifier));
         // Valkyrien Skies Compat
         event.addModifierById(Trait.WORLD, new ResourceLocation("valkyrienskies:ship_blocks"),
                               mod -> mod.tickRate(mediumTickRate2),

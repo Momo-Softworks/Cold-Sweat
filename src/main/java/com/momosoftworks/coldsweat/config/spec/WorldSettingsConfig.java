@@ -70,7 +70,7 @@ public class WorldSettingsConfig
     public static final CSConfigSpec.ConfigValue<Boolean> CUSTOM_WATER_FREEZE_BEHAVIOR;
     public static final CSConfigSpec.ConfigValue<Boolean> CUSTOM_ICE_DROPS;
 
-    public static final CSConfigSpec.ConfigValue<List<?>> OVERCAST_TEMP_OFFSET;
+    public static final CSConfigSpec.ConfigValue<List<?>> SHADE_TEMP_OFFSET;
 
     /* Compat */
     public static final CSConfigSpec.ConfigValue<Integer> THERMOREGULATOR_INSULATION;
@@ -707,13 +707,13 @@ public class WorldSettingsConfig
 
         BUILDER.push("Misc");
 
-            OVERCAST_TEMP_OFFSET = BUILDER
+            SHADE_TEMP_OFFSET = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────",
-                         " A temperature offset applied when the sky is overcast",
+                         " A temperature offset applied when in complete shade or when the sky is overcast",
                          " └── Format: [offset, *units]",
                          " ⌄ ")
-                .defineList("Overcast Temperature Offset",
-                            List.of(-0.35, "mc"),
+                .defineList("Shade Temperature Offset",
+                            List.of(-0.2, "mc"),
                             it -> it instanceof Number || it instanceof String);
 
             SLEEPING_OVERRIDE_BLOCKS = BUILDER

@@ -98,7 +98,7 @@ public class ConfigSettings
     public static final DynamicHolder<SeasonalTempData> AUTUMN_TEMPS;
     public static final DynamicHolder<SeasonalTempData> WINTER_TEMPS;
     public static final DynamicHolder<SeasonalTempData> SPRING_TEMPS;
-    public static final DynamicHolder<Double> OVERCAST_TEMP_OFFSET;
+    public static final DynamicHolder<Double> SHADE_TEMP_OFFSET;
 
     // Block settings
     public static final DynamicHolder<Integer> BLOCK_RANGE;
@@ -400,9 +400,9 @@ public class ConfigSettings
             holder.get(registryAccess).putAll(dataMap);
         });
 
-        OVERCAST_TEMP_OFFSET = addSetting(ColdSweat.createKey("overcast_temp_offset"), () -> 0.35, holder ->
+        SHADE_TEMP_OFFSET = addSetting(ColdSweat.createKey("overcast_temp_offset"), () -> 0.35, holder ->
         {
-            List<?> setting = WorldSettingsConfig.OVERCAST_TEMP_OFFSET.get();
+            List<?> setting = WorldSettingsConfig.SHADE_TEMP_OFFSET.get();
             double temperature = ((Number) setting.get(0)).doubleValue();
             Temperature.Units units = setting.size() > 1
                                       ? Temperature.Units.fromID((String) setting.get(1))
