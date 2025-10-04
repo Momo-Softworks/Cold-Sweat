@@ -71,7 +71,7 @@ public class WorldSettingsConfig
     public static final ForgeConfigSpec.ConfigValue<Boolean> CUSTOM_WATER_FREEZE_BEHAVIOR;
     public static final ForgeConfigSpec.ConfigValue<Boolean> CUSTOM_ICE_DROPS;
 
-    public static final ForgeConfigSpec.ConfigValue<List<?>> OVERCAST_TEMP_OFFSET;
+    public static final ForgeConfigSpec.ConfigValue<List<?>> SHADE_TEMP_OFFSET;
 
     static
     {
@@ -385,13 +385,13 @@ public class WorldSettingsConfig
 
         BUILDER.push("Misc");
 
-            OVERCAST_TEMP_OFFSET = BUILDER
+            SHADE_TEMP_OFFSET = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────",
-                         " A temperature offset applied when the sky is overcast",
+                         " A temperature offset applied when in complete shade or when the sky is overcast",
                          " └── Format: [offset, *units]",
                          " ⌄ ")
-                .defineList("Overcast Temperature Offset",
-                            Arrays.asList(-0.35, "mc"),
+                .defineList("Shade Temperature Offset",
+                            Arrays.asList(-0.2, "mc"),
                             it -> it instanceof Number || it instanceof String);
 
             SLEEPING_OVERRIDE_BLOCKS = BUILDER

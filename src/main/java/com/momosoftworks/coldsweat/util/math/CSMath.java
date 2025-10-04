@@ -399,11 +399,11 @@ public class CSMath
      * @param values The map of values to average (value, weight).
      * @return The average of the values in the given array.
      */
-    public static <A extends Number, B extends Number> double weightedAverage(List<Pair<A, B>> values)
+    public static double weightedAverage(List<? extends Pair<? extends Number, ? extends Number>> values)
     {
         double sum = 0;
         double weightSum = 0;
-        for (Pair<A, B> entry : values)
+        for (Pair<? extends Number, ? extends Number> entry : values)
         {
             double weight = entry.getSecond().doubleValue();
             sum += entry.getFirst().doubleValue() * weight;

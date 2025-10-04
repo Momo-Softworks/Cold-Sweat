@@ -620,6 +620,10 @@ public abstract class WorldHelper
         return CSMath.blend(temps.getFirst(), temps.getSecond(), Math.sin(level.dayTime() / (12000 / Math.PI)), -1, 1);
     }
 
+    public static double getTimeMultiplier(IWorld level)
+    {   return Math.sin(level.dayTime() / (12000 / Math.PI));
+    }
+
     /**
      * Returns a cached temperature value<br>
      * <br>

@@ -264,7 +264,7 @@ public class DepthTempData extends ConfigData
                 case CONSTANT : return depth;
                 case WORLD_TOP : return level.getMaxBuildHeight() + depth;
                 case WORLD_BOTTOM : return 0 + depth;
-                case GROUND_LEVEL : return WorldHelper.getAverageHeight(checkPos, level, Heightmap.Type.MOTION_BLOCKING, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES) + depth;
+                case GROUND_LEVEL : return WorldHelper.getHeight(checkPos, level, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES) + depth;
             }
             return 0;
         }
