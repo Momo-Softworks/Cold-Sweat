@@ -46,6 +46,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -107,30 +108,38 @@ public class ConfigLoadingHandler
         }
     }
 
-    private static boolean REGISTRIES_INITIALIZED = false;
-    @SubscribeEvent
-    public static void initRegistries(IdMappingEvent event)
+    @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
+    public static final class CreateRegistries
     {
-        if (REGISTRIES_INITIALIZED) return;
+        private static boolean REGISTRIES_INITIALIZED = false;
 
-        ColdSweat.LOGGER.info("Gathering Cold Sweat registries");
-        // Gather modded registries
-        AddRegistriesEvent addRegistriesEvent = new AddRegistriesEvent();
-        MinecraftForge.EVENT_BUS.post(addRegistriesEvent);
-        // Add registries via dummy NewRegistry event
-        NewRegistryEvent dummyEvent = new NewRegistryEvent();
-        for (RegistryHolder<?> holder : ModRegistries.getRegistries().values())
-        {   dummyEvent.create(new RegistryBuilder<>().setName(holder.key().location()).dataPackRegistry((Codec) holder.codec(), (Codec) holder.codec()));
+        @SubscribeEvent
+        public static void initRegistries(FMLConstructModEvent event)
+        {
+            event.enqueueWork(() ->
+            {
+                if (REGISTRIES_INITIALIZED) return;
+
+                ColdSweat.LOGGER.info("Gathering Cold Sweat registries");
+                // Gather modded registries
+                AddRegistriesEvent addRegistriesEvent = new AddRegistriesEvent();
+                MinecraftForge.EVENT_BUS.post(addRegistriesEvent);
+                // Add registries via dummy NewRegistry event
+                NewRegistryEvent dummyEvent = new NewRegistryEvent();
+                for (RegistryHolder<?> holder : ModRegistries.getRegistries().values())
+                {   dummyEvent.create(new RegistryBuilder<>().setName(holder.key().location()).dataPackRegistry((Codec) holder.codec(), (Codec) holder.codec()));
         }
         try
         {
             Method process = NewRegistryEvent.class.getDeclaredMethod("fill");
-            process.setAccessible(true);
-            process.invoke(dummyEvent);
-        }
-        catch (Exception ignored) {}
+                    process.setAccessible(true);
+                    process.invoke(dummyEvent);
+                }
+                catch (Exception ignored) {}
 
-        REGISTRIES_INITIALIZED = true;
+                REGISTRIES_INITIALIZED = true;
+            });
+        }
     }
 
     /**
