@@ -21,8 +21,13 @@ public class ModItemTags
 
     public static final ITag.INamedTag<Item> ENCASES_SMOKESTACK = createTag("encases_smokestack");
     public static final ITag.INamedTag<Item> GROWS_SOUL_STALK = createTag("grows_soul_stalk");
+    public static final ITag.INamedTag<Item> SCARES_PIGLINS = createForgeTag("scares_piglins");
 
     private static ITag.INamedTag<Item> createTag(String name)
     {   return ItemTags.bind(new ResourceLocation(ColdSweat.MOD_ID, name).toString());
+    }
+
+    private static ITag.INamedTag<Item> createForgeTag(String name)
+    {   return ItemTags.bind(new ResourceLocation("forge", name).toString());
     }
 }
