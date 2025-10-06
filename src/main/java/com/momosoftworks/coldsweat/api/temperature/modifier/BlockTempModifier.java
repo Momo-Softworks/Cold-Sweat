@@ -2,7 +2,7 @@ package com.momosoftworks.coldsweat.api.temperature.modifier;
 
 import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
-import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTempConfig;
+import com.momosoftworks.coldsweat.api.temperature.block_temp.ConfiguredBlockTemp;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
@@ -200,12 +200,12 @@ public class BlockTempModifier extends TempModifier
 
     private double getGroupTotal(BlockTemp blockTemp)
     {
-        TagKey<BlockTempData> group = blockTemp instanceof BlockTempConfig config ? config.getData().effectGroup().orElse(null) : null;
+        TagKey<BlockTempData> group = blockTemp instanceof ConfiguredBlockTemp config ? config.getData().effectGroup().orElse(null) : null;
         if (group == null) return this.blockTempTotals.getOrDefault(blockTemp, 0d);
 
         return this.blockTempTotals.keySet().stream()
-               .filter(bt -> bt instanceof BlockTempConfig config && config.isInGroup(group))
-               .map(bt -> (BlockTempConfig) bt).mapToDouble(b -> this.blockTempTotals.getOrDefault(b, 0d))
+               .filter(bt -> bt instanceof ConfiguredBlockTemp config && config.isInGroup(group))
+               .map(bt -> (ConfiguredBlockTemp) bt).mapToDouble(b -> this.blockTempTotals.getOrDefault(b, 0d))
                .sum();
     }
 }

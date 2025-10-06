@@ -18,8 +18,13 @@ public class ModBlockTags
     public static final TagKey<Block> CONNECTS_SMOKESTACK = createTag("connects_smokestack");
     public static final TagKey<Block> THERMAL_SOURCE = createTag("thermal_source");
 
+    public static final TagKey<Block> SOUL_FIRE = createForgeTag("soul_fire");
+
     private static TagKey<Block> createTag(String name)
-    {
-        return BlockTags.create(new ResourceLocation(ColdSweat.MOD_ID, name));
+    {   return BlockTags.create(new ResourceLocation(ColdSweat.MOD_ID, name));
+    }
+
+    private static TagKey<Block> createForgeTag(String name)
+    {   return BlockTags.create(new ResourceLocation("forge", name));
     }
 }

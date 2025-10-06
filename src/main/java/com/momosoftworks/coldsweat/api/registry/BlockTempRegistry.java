@@ -4,7 +4,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
-import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTempConfig;
+import com.momosoftworks.coldsweat.api.temperature.block_temp.ConfiguredBlockTemp;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
@@ -38,11 +38,11 @@ public class BlockTempRegistry
         blockTemp.getAffectedBlocks().forEach(block ->
         {
             Collection<BlockTemp> blockTemps = MAPPED_BLOCKS.get(block);
-            if (!blockTemps.isEmpty() && blockTemp instanceof BlockTempConfig cfg)
+            if (!blockTemps.isEmpty() && blockTemp instanceof ConfiguredBlockTemp cfg)
             {
                 for (BlockTemp temp : blockTemps)
                 {
-                    if (temp instanceof BlockTempConfig cfg2 && cfg.equals(cfg2))
+                    if (temp instanceof ConfiguredBlockTemp cfg2 && cfg.equals(cfg2))
                     {   ColdSweat.LOGGER.error("Skipping duplicate BlockTemp for \"{}\" as an identical one is already registered", block);
                         ColdSweat.LOGGER.debug("{}", cfg);
                         return;
