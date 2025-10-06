@@ -65,7 +65,7 @@ public class TempModifierInit
 
         for (BlockTempData blockConfig : blockTemps)
         {
-            BlockTemp blockTemp = new BlockTempConfig(blockConfig);
+            BlockTemp blockTemp = new ConfiguredBlockTemp(blockConfig);
             BlockTempRegistry.register(blockTemp);
         }
     }
