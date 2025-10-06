@@ -30,7 +30,7 @@ public class MixinCampfire
             at = @At(value = "HEAD"))
     private static void onItemCook(Level level, BlockPos pos, BlockState state, CampfireBlockEntity blockEntity, CallbackInfo ci)
     {
-        double waterskinStrength = ConfigSettings.WATERSKIN_CONSUME_STRENGTH.get();
+        double maxStrength = ConfigSettings.WATERSKIN_CONSUME_STRENGTH.get() * 0.6;
         double tempRate = ConfigSettings.TEMP_RATE.get();
 
         for (int i = 0; i < blockEntity.getItems().size(); i++)
@@ -42,16 +42,13 @@ public class MixinCampfire
                 double temperature = tag.getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
 
                 // If the block ID contains "soul", it's a soul campfire
-                if (state.is(BlockTags.CAMPFIRES) && CSMath.getIfNotNull(ForgeRegistries.BLOCKS.getKey(state.getBlock()), ResourceLocation::toString, "").contains("soul")
-                && tag.getDouble(FilledWaterskinItem.NBT_TEMPERATURE) > -waterskinStrength * 0.6)
+                if (state.is(BlockTags.CAMPFIRES) && CSMath.betweenExclusive(tag.getDouble(FilledWaterskinItem.NBT_TEMPERATURE), -maxStrength, maxStrength))
                 {
-                    tag.putDouble(FilledWaterskinItem.NBT_TEMPERATURE,
-                                  temperature + tempRate * 0.1 * (ConfigSettings.COLD_SOUL_FIRE.get() ? -1 : 1));
-                }
-                else if (state.is(BlockTags.CAMPFIRES) && tag.getDouble(FilledWaterskinItem.NBT_TEMPERATURE) < waterskinStrength * 0.6)
-                {
-                    tag.putDouble(FilledWaterskinItem.NBT_TEMPERATURE,
-                                  temperature + tempRate * 0.1);
+                    double delta = tempRate * 0.1;
+                    if (state.is(ModBlockTags.SOUL_FIRE) && ConfigSettings.COLD_SOUL_FIRE.get())
+                    {   delta *= -1;
+                    }
+                    tag.putDouble(FilledWaterskinItem.NBT_TEMPERATURE, temperature + delta);
                 }
             }
         }
@@ -66,19 +63,17 @@ public class MixinCampfire
     {
         if (result.is(ModItems.FILLED_WATERSKIN))
         {
-            double waterskinStrength = ConfigSettings.WATERSKIN_CONSUME_STRENGTH.get();
+            double maxStrength = ConfigSettings.WATERSKIN_CONSUME_STRENGTH.get() * 0.6;
             CompoundTag tag = result.getOrCreateTag();
             BlockState state = level.getBlockState(new BlockPos(x, y, z));
 
-            if (state.is(BlockTags.CAMPFIRES) && CSMath.getIfNotNull(ForgeRegistries.BLOCKS.getKey(state.getBlock()), ResourceLocation::toString, "").contains("soul"))
+            if (state.is(BlockTags.CAMPFIRES))
             {
-                tag.putDouble(FilledWaterskinItem.NBT_TEMPERATURE,
-                              waterskinStrength * 0.6 * (ConfigSettings.COLD_SOUL_FIRE.get() ? -1 : 1));
-            }
-            else if (state.is(BlockTags.CAMPFIRES))
-            {
-                tag.putDouble(FilledWaterskinItem.NBT_TEMPERATURE,
-                              waterskinStrength * 0.6);
+                double newTemp = maxStrength;
+                if (state.is(ModBlockTags.SOUL_FIRE) && ConfigSettings.COLD_SOUL_FIRE.get())
+                {   newTemp *= -1;
+                }
+                tag.putDouble(FilledWaterskinItem.NBT_TEMPERATURE, newTemp);
             }
         }
         return result;
