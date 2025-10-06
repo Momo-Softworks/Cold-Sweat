@@ -13,7 +13,7 @@ import com.momosoftworks.coldsweat.api.event.core.registry.AddRegistriesEvent;
 import com.momosoftworks.coldsweat.api.event.core.registry.LoadRegistriesEvent;
 import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
-import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTempConfig;
+import com.momosoftworks.coldsweat.api.temperature.block_temp.ConfiguredBlockTemp;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.core.init.TempModifierInit;
 import com.momosoftworks.coldsweat.data.ModRegistries;
@@ -503,7 +503,7 @@ public class ConfigLoadingHandler
     {
         blockTemps.forEach(blockTempData ->
         {
-            BlockTemp blockTemp = new BlockTempConfig(blockTempData);
+            BlockTemp blockTemp = new ConfiguredBlockTemp(blockTempData);
             BlockTempRegistry.register(blockTemp);
         });
     }

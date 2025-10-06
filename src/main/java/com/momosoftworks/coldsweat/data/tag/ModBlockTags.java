@@ -20,7 +20,13 @@ public class ModBlockTags
 
     public static final ITag.INamedTag<Block> GOATS_SPAWNABLE_ON = createTag("goats_spawnable_on");
 
+    public static final ITag.INamedTag<Block> SOUL_FIRE = createForgeTag("soul_fire");
+
     private static ITag.INamedTag<Block> createTag(String name)
     {   return BlockTags.bind(new ResourceLocation(ColdSweat.MOD_ID, name).toString());
+    }
+
+    private static ITag.INamedTag<Block> createForgeTag(String name)
+    {   return BlockTags.bind(new ResourceLocation("forge", name).toString());
     }
 }

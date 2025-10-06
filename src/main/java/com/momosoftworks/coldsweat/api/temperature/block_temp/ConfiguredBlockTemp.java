@@ -1,7 +1,9 @@
 package com.momosoftworks.coldsweat.api.temperature.block_temp;
 
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.BlockTempData;
 import com.momosoftworks.coldsweat.data.codec.requirement.BlockRequirement;
+import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -16,11 +18,11 @@ import java.util.List;
 /**
  * Wrapper BlockTemp for {@link BlockTempData} configurations.
  */
-public class BlockTempConfig extends BlockTemp
+public class ConfiguredBlockTemp extends BlockTemp
 {
     private final BlockTempData data;
 
-    public BlockTempConfig(BlockTempData data)
+    public ConfiguredBlockTemp(BlockTempData data)
     {
         super(data.getTemperature() < 0 ? -data.getMaxEffect() : Double.NEGATIVE_INFINITY,
               data.getTemperature() > 0 ? data.getMaxEffect() : Double.POSITIVE_INFINITY,
@@ -43,7 +45,12 @@ public class BlockTempConfig extends BlockTemp
     {
         if (data.location().test(req -> req.test(level, pos))
         && data.entity().test(req -> req.test(entity)))
-        {   return data.getTemperature();
+        {
+            double temp = data.getTemperature();
+            if (ConfigSettings.COLD_SOUL_FIRE.get() && state.is(ModBlockTags.SOUL_FIRE))
+            {   temp *= -1;
+            }
+            return temp;
         }
         return 0;
     }
@@ -60,8 +67,8 @@ public class BlockTempConfig extends BlockTemp
     public boolean equals(Object obj)
     {
         if (this == obj) return true;
-        if (!(obj instanceof BlockTempConfig)) return false;
-        BlockTempConfig that = (BlockTempConfig) obj;
+        if (!(obj instanceof ConfiguredBlockTemp)) return false;
+        ConfiguredBlockTemp that = (ConfiguredBlockTemp) obj;
         return this.data.equals(that.data);
     }
 }
