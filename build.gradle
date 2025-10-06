@@ -151,28 +151,27 @@ dependencies {
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
     // Runtime Mods
-    runtimeOnly fg.deobf("curse.maven:spark-361579:3767277")
-    runtimeOnly fg.deobf("curse.maven:jei-238222:4371666")
-    runtimeOnly fg.deobf("curse.maven:atmospheric-362393:3553332")
-    runtimeOnly fg.deobf("curse.maven:blueprint-382216:3607198")
-    runtimeOnly fg.deobf("curse.maven:coroutil-237749:3586476")
-    runtimeOnly fg.deobf("curse.maven:shutup-experimental-settings-407174:3188120")
+    //runtimeOnly fg.deobf("curse.maven:spark-361579:3767277")
+    //runtimeOnly fg.deobf("curse.maven:jei-238222:4371666")
+    //runtimeOnly fg.deobf("curse.maven:atmospheric-362393:3553332")
+    //runtimeOnly fg.deobf("curse.maven:blueprint-382216:3607198")
+    //runtimeOnly fg.deobf("curse.maven:coroutil-237749:3586476")
+    //runtimeOnly fg.deobf("curse.maven:shutup-experimental-settings-407174:3188120")
 
     // Valkyrien Skies (Compat)
-    implementation fg.deobf("curse.maven:valkyrien-skies-258371:4174267")
-    implementation fg.deobf("curse.maven:eureka-ships-654384:4275649")
+    compileOnly fg.deobf("curse.maven:valkyrien-skies-258371:4174267")
 
     // KubeJS (Compat)
-    implementation fg.deobf("curse.maven:kubejs-238086:3647098")
-    implementation fg.deobf("curse.maven:rhino-416294:3525704")
-    implementation fg.deobf("curse.maven:architectury-api-419699:4521290")
+    compileOnly fg.deobf("curse.maven:kubejs-238086:3647098")
+    compileOnly fg.deobf("curse.maven:rhino-416294:3525704")
+    compileOnly fg.deobf("curse.maven:architectury-api-419699:4521290")
 
     // Mod Compat
     implementation fg.deobf("curse.maven:serene-seasons-291874:4537666")
     implementation fg.deobf("curse.maven:curios-309927:4419403")
     implementation fg.deobf("curse.maven:create-328085:3536025")
     implementation fg.deobf("curse.maven:flywheel-486392:3535459")
-    implementation fg.deobf("curse.maven:spoiled-364918:3776531")
+    compileOnly fg.deobf("curse.maven:spoiled-364918:3776531")
     implementation fg.deobf("curse.maven:ob-aquamirae-536254:4420334")
     implementation fg.deobf("curse.maven:obscure-api-638417:4420298")
     compileOnly fg.deobf("curse.maven:caves-and-cliffs-417430:3592876")
