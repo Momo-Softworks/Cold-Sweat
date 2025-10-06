@@ -48,11 +48,11 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.event.lifecycle.FMLConstructModEvent;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.registries.DataPackRegistryEvent;
-import net.neoforged.neoforge.registries.IdMappingEvent;
 
 import java.io.File;
 import java.io.FileReader;
@@ -66,10 +66,6 @@ public class ConfigLoadingHandler
 {
     public static final Multimap<ResourceKey<Registry<? extends ConfigData>>, RemoveRegistryData<?>> REMOVED_REGISTRIES = new RegistryMultiMap<>();
     private static final List<OptionalHolder<?>> OPTIONAL_HOLDERS = new ArrayList<>();
-
-    static {
-        NeoForge.EVENT_BUS.start();
-    }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void loadConfigs(ServerConfigsLoadedEvent event)
@@ -114,31 +110,35 @@ public class ConfigLoadingHandler
     }
 
     private static boolean REGISTRIES_INITIALIZED = false;
+
     @SubscribeEvent
-    public static void initRegistries(IdMappingEvent event)
+    public static void initRegistries(FMLConstructModEvent event)
     {
-        if (REGISTRIES_INITIALIZED) return;
+        event.enqueueWork(() ->
+        {
+            if (REGISTRIES_INITIALIZED) return;
 
-        ColdSweat.LOGGER.info("Gathering Cold Sweat registries");
-        // Gather modded registries
-        AddRegistriesEvent addRegistriesEvent = new AddRegistriesEvent();
-        NeoForge.EVENT_BUS.post(addRegistriesEvent);
-        // Add registries via dummy NewRegistry event
-        DataPackRegistryEvent.NewRegistry dummyEvent = new DataPackRegistryEvent.NewRegistry();
-        for (RegistryHolder<?> holder : ModRegistries.getRegistries().values())
-        {   dummyEvent.dataPackRegistry((ResourceKey) holder.key(), (Codec) holder.codec(), (Codec) holder.codec());
-        }
-        try
-        {   Method process = DataPackRegistryEvent.NewRegistry.class.getDeclaredMethod("process");
-            process.setAccessible(true);
-            process.invoke(dummyEvent);
-        }
-        catch (Exception ignored) {}
+            ColdSweat.LOGGER.info("Gathering Cold Sweat registries");
+            // Gather modded registries
+            AddRegistriesEvent addRegistriesEvent = new AddRegistriesEvent();
+            NeoForge.EVENT_BUS.post(addRegistriesEvent);
+            // Add registries via dummy NewRegistry event
+            DataPackRegistryEvent.NewRegistry dummyEvent = new DataPackRegistryEvent.NewRegistry();
+            for (RegistryHolder<?> holder : ModRegistries.getRegistries().values())
+            {   dummyEvent.dataPackRegistry((ResourceKey) holder.key(), (Codec) holder.codec(), (Codec) holder.codec());
+            }
+            try
+            {   Method process = DataPackRegistryEvent.NewRegistry.class.getDeclaredMethod("process");
+                process.setAccessible(true);
+                process.invoke(dummyEvent);
+            }
+            catch (Exception ignored) {}
 
-        MissingMappingsEvent missingMappingsEvent = new MissingMappingsEvent();
-        NeoForge.EVENT_BUS.post(missingMappingsEvent);
+            MissingMappingsEvent missingMappingsEvent = new MissingMappingsEvent();
+            NeoForge.EVENT_BUS.post(missingMappingsEvent);
 
-        REGISTRIES_INITIALIZED = true;
+            REGISTRIES_INITIALIZED = true;
+        });
     }
 
     /**
