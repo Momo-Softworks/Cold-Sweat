@@ -180,7 +180,7 @@
   "cold_sweat.config.modifier_tick_rate.name":      "Modifier Tick Rate",
   "cold_sweat.config.check_sleep_conditions.name":  "Check Sleep Conditions",
   "cold_sweat.config.show_frozen_health.name":      "Show Frozen Health",
-  "cold_sweat.config.freeze_overlay_opacity.name":  "Freeze Overlay Opacity",
+  "cold_sweat.config.freeze_overlay_opacity.name":  "Cold Overlay Opacity",
   "cold_sweat.config.cold_freezing_hearts.name":    "Max Frozen Health",
   "cold_sweat.config.cold_mining_impairment.name":  "Mining Slowness",
   "cold_sweat.config.cold_movement_slowdown.name":  "Movement Slowness",
