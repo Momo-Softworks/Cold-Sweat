@@ -16,7 +16,7 @@ public class ShadeTempModifier extends TempModifier
     protected Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
         World level = entity.level;
-        if (level.dimensionType().hasCeiling()) return temp -> temp;
+        if (level.dimensionType().hasCeiling() || !level.dimensionType().hasSkyLight()) return temp -> temp;
 
         double darkness = 1 - (level.getBrightness(LightType.SKY, entity.blockPosition()) / 15.0);
         darkness *= Math.max(0, WorldHelper.getTimeMultiplier(level));
