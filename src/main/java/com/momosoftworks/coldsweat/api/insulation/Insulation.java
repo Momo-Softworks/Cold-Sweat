@@ -2,18 +2,15 @@ package com.momosoftworks.coldsweat.api.insulation;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
-import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
+import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
+import com.momosoftworks.coldsweat.util.serialization.EnumHelper;
 import com.momosoftworks.coldsweat.util.serialization.StringRepresentable;
-import net.minecraft.nbt.CompoundNBT;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 
-public abstract class Insulation implements NbtSerializable
+public abstract class Insulation
 {
     public static Codec<Insulation> getCodec()
     {
@@ -190,22 +187,15 @@ public abstract class Insulation implements NbtSerializable
         {   this.name = name;
         }
 
-        public static final Codec<Slot> CODEC = Codec.STRING.xmap(Slot::byName, Slot::getSerializedName);
+        public static final Codec<Slot> CODEC = ExtraCodecs.enumIgnoreCase(values());
 
         @Override
         public String getSerializedName()
         {   return name;
         }
 
-        @Nullable
         public static Slot byName(String name)
-        {
-            for (Slot type : values())
-            {   if (type.name.equals(name))
-                {   return type;
-                }
-            }
-            return null;
+        {   return EnumHelper.byName(values(), name);
         }
     }
 
@@ -222,7 +212,7 @@ public abstract class Insulation implements NbtSerializable
         {   this.name = name;
         }
 
-        public static final Codec<Type> CODEC = Codec.STRING.xmap(Type::byName, Type::getSerializedName);
+        public static final Codec<Type> CODEC = ExtraCodecs.enumIgnoreCase(values());
 
         @Override
         public String getSerializedName()
@@ -230,12 +220,7 @@ public abstract class Insulation implements NbtSerializable
         }
 
         public static Type byName(String name)
-        {   for (Type type : values())
-            {   if (type.name.equals(name))
-                {   return type;
-                }
-            }
-            throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("Unknown insulation type: " + name));
+        {   return EnumHelper.byName(values(), name);
         }
     }
 }

@@ -3,6 +3,8 @@ package com.momosoftworks.coldsweat.common.block;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
+import com.momosoftworks.coldsweat.util.serialization.EnumHelper;
+import com.momosoftworks.coldsweat.util.serialization.StringRepresentable;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import net.minecraft.block.Block;
@@ -245,7 +247,7 @@ public class SmokestackBlock extends Block implements IWaterLoggable
         else return super.removedByPlayer(state, level, pos, player, willHarvest, fluid);
     }
 
-    public enum Facing implements IStringSerializable
+    public enum Facing implements StringRepresentable
     {
         UP("up"),
         DOWN("down"),
@@ -267,12 +269,7 @@ public class SmokestackBlock extends Block implements IWaterLoggable
         }
 
         public static Facing byName(String name)
-        {   for (Facing facing : values())
-            {   if (facing.name.equals(name))
-                {   return facing;
-                }
-            }
-            return UP;
+        {   return EnumHelper.byName(values(), name);
         }
 
         public static Facing fromDirection(Direction direction)

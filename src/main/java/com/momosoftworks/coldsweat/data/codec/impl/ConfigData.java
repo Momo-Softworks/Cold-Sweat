@@ -4,8 +4,8 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.*;
 import com.momosoftworks.coldsweat.api.annotation.Internal;
 import com.momosoftworks.coldsweat.compat.CompatManager;
+import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
-import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
 import com.momosoftworks.coldsweat.util.serialization.StringRepresentable;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTDynamicOps;
@@ -16,7 +16,7 @@ import javax.annotation.Nullable;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-public abstract class ConfigData implements NbtSerializable
+public abstract class ConfigData
 {
     protected UUID id = UUID.randomUUID();
     protected Type registryType = Type.JSON;
@@ -112,11 +112,6 @@ public abstract class ConfigData implements NbtSerializable
     }
 
     @Override
-    public CompoundNBT serialize()
-    {   return (CompoundNBT) ((Codec<ConfigData>) this.getCodec()).encodeStart(NBTDynamicOps.INSTANCE, this).result().orElse(new CompoundNBT());
-    }
-
-    @Override
     public String toString()
     {   return this.getClass().getSimpleName() + ((Codec) getCodec()).encodeStart(JsonOps.INSTANCE, this).result().map(Object::toString).orElse("");
     }
@@ -138,7 +133,7 @@ public abstract class ConfigData implements NbtSerializable
         JSON("json"),
         KUBEJS("kubejs");
 
-        public static final Codec<Type> CODEC = StringRepresentable.fromEnum(Type::values);
+        public static final Codec<Type> CODEC = ExtraCodecs.enumIgnoreCase(values());
 
         private final String name;
 

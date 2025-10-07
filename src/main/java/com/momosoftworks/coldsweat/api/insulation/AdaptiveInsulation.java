@@ -136,18 +136,4 @@ public class AdaptiveInsulation extends Insulation
         }
         return false;
     }
-
-    @Override
-    public CompoundNBT serialize()
-    {
-        CompoundNBT tag = new CompoundNBT();
-        tag.putDouble("insulation", insulation);
-        tag.putDouble("factor", factor);
-        tag.putDouble("speed", speed);
-        return tag;
-    }
-
-    public static AdaptiveInsulation deserialize(CompoundNBT tag)
-    {   return new AdaptiveInsulation(tag.getDouble("insulation"), tag.getDouble("factor"), tag.getDouble("speed"));
-    }
 }

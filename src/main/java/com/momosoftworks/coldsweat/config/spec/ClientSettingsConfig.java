@@ -237,7 +237,7 @@ public class ClientSettingsConfig
                              " • \"shift_and_present\": Show insulation if shift is held AND the armor has any",
                              " • \"never\": Never show insulation tooltips",
                              " ⌄ ")
-                    .define("Insulation Tooltip Visibility", "if_present", o -> o instanceof String && InsulationVisibility.byName((String) o) != null);
+                    .define("Insulation Tooltip Visibility", "if_present", o -> o instanceof String);
             EXPAND_TOOLTIPS = BUILDER
                     .comment("─────────────────────────────────────────────────────────────────────────",
                              " Always expand collapsible tooltips",

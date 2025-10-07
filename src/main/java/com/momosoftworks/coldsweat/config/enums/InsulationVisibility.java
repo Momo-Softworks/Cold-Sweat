@@ -1,9 +1,9 @@
 package com.momosoftworks.coldsweat.config.enums;
 
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
+import com.momosoftworks.coldsweat.util.serialization.EnumHelper;
 import com.momosoftworks.coldsweat.util.serialization.StringRepresentable;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.item.ItemStack;
 
 import javax.annotation.Nullable;
 
@@ -26,15 +26,8 @@ public enum InsulationVisibility implements StringRepresentable
     {   return this.name;
     }
 
-    @Nullable
     public static InsulationVisibility byName(String name)
-    {
-        for (InsulationVisibility visibility : values())
-        {   if (visibility.name.equals(name))
-            {   return visibility;
-            }
-        }
-        return null;
+    {   return EnumHelper.byName(values(), name);
     }
 
     public boolean canShow()

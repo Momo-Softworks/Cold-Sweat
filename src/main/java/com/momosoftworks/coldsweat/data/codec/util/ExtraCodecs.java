@@ -9,8 +9,8 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.serialization.DynamicHolder;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
+import com.momosoftworks.coldsweat.util.serialization.StringRepresentable;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
@@ -57,15 +57,13 @@ public class ExtraCodecs
                 for (Codec codec : codecs)
                 {
                     try
-                    {
-                        DataResult<T> result = codec.encode(input, ops, prefix);
+                    {   DataResult<T> result = codec.encode(input, ops, prefix);
                         if (result.result().isPresent())
                         {
                             return result;
                         }
-                    } catch (ClassCastException ignored)
-                    {
                     }
+                    catch (ClassCastException ignored) {}
                 }
                 return DataResult.error("No codecs could encode input " + input);
             }
@@ -77,8 +75,7 @@ public class ExtraCodecs
                 {
                     DataResult<Pair<Object, T>> result = codec.decode(ops, input);
                     if (result.result().isPresent())
-                    {
-                        return result;
+                    {   return result;
                     }
                 }
                 return DataResult.error("No codecs could decode input " + input);
@@ -264,6 +261,22 @@ public class ExtraCodecs
                     }
                     return fastMultiMap;
                 }
+        );
+    }
+
+    public static <T extends Enum<T> & StringRepresentable> Codec<T> enumIgnoreCase(T[] values)
+    {
+        return Codec.STRING.xmap(
+            str -> {
+                if (values.length == 0) throw new IllegalArgumentException("Enum has no values");
+                for (T value : values)
+                {   if (value.getSerializedName().equalsIgnoreCase(str))
+                    {   return value;
+                    }
+                }
+                throw new IllegalArgumentException(String.format("Unknown %s value: %s", values[0].getClass().getSimpleName(), str));
+            },
+            T::getSerializedName
         );
     }
 }

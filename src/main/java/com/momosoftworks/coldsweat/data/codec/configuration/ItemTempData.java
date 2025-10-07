@@ -11,10 +11,12 @@ import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
+import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
+import com.momosoftworks.coldsweat.util.serialization.EnumHelper;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.serialization.StringRepresentable;
 import net.minecraft.entity.Entity;
@@ -221,7 +223,7 @@ public class ItemTempData extends ConfigData implements RequirementHolder
         CURIO("curio", Arrays.asList()),
         HAND("hand", Arrays.asList(Either.right(EquipmentSlotType.MAINHAND), Either.right(EquipmentSlotType.OFFHAND)));
 
-        public static final Codec<SlotType> CODEC = StringRepresentable.fromEnum(SlotType::values);
+        public static final Codec<SlotType> CODEC = ExtraCodecs.enumIgnoreCase(values());
 
         private final String name;
         private final List<Either<IntegerBounds, EquipmentSlotType>> slots;
@@ -265,14 +267,7 @@ public class ItemTempData extends ConfigData implements RequirementHolder
         }
 
         public static SlotType byName(String name)
-        {
-            for (SlotType type : values())
-            {
-                if (type.name.equals(name))
-                {   return type;
-                }
-            }
-            return null;
+        {   return EnumHelper.byName(values(), name);
         }
 
         public static SlotType fromEquipment(EquipmentSlotType slot)

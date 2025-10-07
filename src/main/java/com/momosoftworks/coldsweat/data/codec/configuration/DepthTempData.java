@@ -11,6 +11,7 @@ import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
+import com.momosoftworks.coldsweat.util.serialization.EnumHelper;
 import com.momosoftworks.coldsweat.util.serialization.StringRepresentable;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.util.math.BlockPos;
@@ -298,7 +299,7 @@ public class DepthTempData extends ConfigData
             {   this.name = name;
             }
 
-            public static final Codec<ContainerType> CODEC = Codec.STRING.xmap(ContainerType::byName, ContainerType::getSerializedName);
+            public static final Codec<ContainerType> CODEC = ExtraCodecs.enumIgnoreCase(values());
 
             @Override
             public String getSerializedName()
@@ -306,12 +307,7 @@ public class DepthTempData extends ConfigData
             }
 
             public static ContainerType byName(String name)
-            {   for (ContainerType type : values())
-                {   if (type.name.equals(name))
-                    {   return type;
-                    }
-                }
-                throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("Unknown special temperature value: " + name));
+            {   return EnumHelper.byName(values(), name);
             }
         }
 
@@ -347,7 +343,7 @@ public class DepthTempData extends ConfigData
         {   this.name = name;
         }
 
-        public static final Codec<RampType> CODEC = Codec.STRING.xmap(RampType::byName, RampType::getSerializedName);
+        public static final Codec<RampType> CODEC = ExtraCodecs.enumIgnoreCase(values());
 
         @Override
         public String getSerializedName()
@@ -355,12 +351,7 @@ public class DepthTempData extends ConfigData
         }
 
         public static RampType byName(String name)
-        {   for (RampType type : values())
-            {   if (type.name.equals(name))
-                {   return type;
-                }
-            }
-            throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("Unknown ramp type: " + name));
+        {   return EnumHelper.byName(values(), name);
         }
     }
 
@@ -377,7 +368,7 @@ public class DepthTempData extends ConfigData
         {   this.name = name;
         }
 
-        public static final Codec<VerticalAnchor> CODEC = Codec.STRING.xmap(VerticalAnchor::byName, VerticalAnchor::getSerializedName);
+        public static final Codec<VerticalAnchor> CODEC = ExtraCodecs.enumIgnoreCase(values());
 
         @Override
         public String getSerializedName()
@@ -385,12 +376,7 @@ public class DepthTempData extends ConfigData
         }
 
         public static VerticalAnchor byName(String name)
-        {   for (VerticalAnchor type : values())
-            {   if (type.name.equals(name))
-                {   return type;
-                }
-            }
-            throw new IllegalArgumentException("Unknown vertical anchor: " + name);
+        {   return EnumHelper.byName(values(), name);
         }
     }
 }

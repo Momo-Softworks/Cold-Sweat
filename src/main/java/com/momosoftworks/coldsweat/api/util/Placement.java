@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.api.util;
 
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
+import com.momosoftworks.coldsweat.util.serialization.EnumHelper;
 import com.momosoftworks.coldsweat.util.serialization.StringRepresentable;
 
 import java.util.function.Predicate;
@@ -64,14 +65,7 @@ public class Placement
         }
 
         public static Mode byName(String name)
-        {
-            for (Mode mode : values())
-            {
-                if (mode.name.equals(name))
-                {   return mode;
-                }
-            }
-            return BEFORE;
+        {   return EnumHelper.byName(values(), name);
         }
     }
 
@@ -94,14 +88,7 @@ public class Placement
         }
 
         public static Order byName(String name)
-        {
-            for (Order order : values())
-            {
-                if (order.name.equals(name))
-                {   return order;
-                }
-            }
-            return FIRST;
+        {   return EnumHelper.byName(values(), name);
         }
     }
 
@@ -137,14 +124,7 @@ public class Placement
         }
 
         public static Duplicates byName(String name)
-        {
-            for (Duplicates policy : values())
-            {
-                if (policy.name.equals(name))
-                {   return policy;
-                }
-            }
-            return ALLOW;
+        {   return EnumHelper.byName(values(), name);
         }
     }
 }

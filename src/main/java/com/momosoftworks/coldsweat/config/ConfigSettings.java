@@ -1043,7 +1043,7 @@ public class ConfigSettings
 
         CUSTOM("custom", () -> CSMath.mapOf());
 
-        public static final Codec<Difficulty> CODEC = StringRepresentable.fromEnum(Difficulty::values);
+        public static final Codec<Difficulty> CODEC = ExtraCodecs.enumIgnoreCase(values());
 
         private final Supplier<Map<ResourceLocation, Supplier<?>>> settingsSupplier;
         private Map<ResourceLocation, Supplier<?>> settings;

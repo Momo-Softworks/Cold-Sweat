@@ -100,17 +100,4 @@ public class StaticInsulation extends Insulation
         }
         return false;
     }
-
-    @Override
-    public CompoundNBT serialize()
-    {
-        CompoundNBT tag = new CompoundNBT();
-        tag.putDouble("cold", cold);
-        tag.putDouble("heat", heat);
-        return tag;
-    }
-
-    public static StaticInsulation deserialize(CompoundNBT tag)
-    {   return new StaticInsulation(tag.getDouble("cold"), tag.getDouble("heat"));
-    }
 }

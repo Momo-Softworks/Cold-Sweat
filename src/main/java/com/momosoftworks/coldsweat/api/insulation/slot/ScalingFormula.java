@@ -3,7 +3,9 @@ package com.momosoftworks.coldsweat.api.insulation.slot;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.serialization.EnumHelper;
 import com.momosoftworks.coldsweat.util.serialization.StringRepresentable;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -117,7 +119,7 @@ public abstract class ScalingFormula
         {   this.name = name;
         }
 
-        public static final Codec<Type> CODEC = Codec.STRING.xmap(Type::byName, Type::getSerializedName);
+        public static final Codec<Type> CODEC = ExtraCodecs.enumIgnoreCase(values());
 
         @Override
         public String getSerializedName()
@@ -125,12 +127,7 @@ public abstract class ScalingFormula
         }
 
         public static Type byName(String name)
-        {   for (Type type : values())
-            {   if (type.name.equals(name))
-                {   return type;
-                }
-            }
-            throw new IllegalArgumentException("Unknown insulation scaling: " + name);
+        {   return EnumHelper.byName(values(), name);
         }
     }
 }
