@@ -8,8 +8,10 @@ import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.impl.RequirementHolder;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
+import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
+import com.momosoftworks.coldsweat.util.serialization.EnumHelper;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tags.TagKey;
@@ -104,7 +106,7 @@ public class FuelData extends ConfigData implements RequirementHolder, IForgeReg
         HEARTH("hearth"),
         SOUL_LAMP("soulspring_lamp");
 
-        public static Codec<FuelType> CODEC = StringRepresentable.fromEnum(FuelType::values, FuelType::byName);
+        public static Codec<FuelType> CODEC = ExtraCodecs.enumIgnoreCase(values());
 
         private final String name;
 
@@ -118,10 +120,7 @@ public class FuelData extends ConfigData implements RequirementHolder, IForgeReg
         }
 
         public static FuelType byName(String name)
-        {   for (FuelType type : values())
-        {   if (type.name.equals(name)) return type;
-        }
-            return null;
+        {   return EnumHelper.byName(values(), name);
         }
     }
 

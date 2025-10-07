@@ -13,6 +13,7 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.SyncTempModifiersMessage;
 import com.momosoftworks.coldsweat.core.network.message.SyncTemperatureMessage;
+import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.InterruptibleIterator;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
@@ -490,7 +491,7 @@ public class Temperature
         COLD_DAMPENING("cold_dampening", true, true, true),
         HEAT_DAMPENING("heat_dampening", true, true, true);
 
-        public static final Codec<Trait> CODEC = StringRepresentable.fromEnum(Trait::values, Trait::fromID);
+        public static final Codec<Trait> CODEC = ExtraCodecs.enumIgnoreCase(values());
 
         private final String id;
         private final boolean forTemperature;
@@ -547,7 +548,7 @@ public class Temperature
         C("°C", "c"),
         MC("MC", "mc");
 
-        public static final Codec<Units> CODEC = StringRepresentable.fromEnum(Units::values, Units::fromID);
+        public static final Codec<Units> CODEC = ExtraCodecs.enumIgnoreCase(values());
 
         private final String name;
         private final String id;

@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.common.block;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
+import com.momosoftworks.coldsweat.util.serialization.EnumHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -274,12 +275,7 @@ public class SmokestackBlock extends Block implements SimpleWaterloggedBlock
         }
 
         public static Facing byName(String name)
-        {   for (Facing facing : values())
-            {   if (facing.name.equals(name))
-                {   return facing;
-                }
-            }
-            return UP;
+        {   return EnumHelper.byName(values(), name);
         }
 
         public static Facing fromDirection(Direction direction)

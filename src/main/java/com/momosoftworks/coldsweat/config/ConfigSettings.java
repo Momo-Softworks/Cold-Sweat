@@ -1057,7 +1057,7 @@ public class ConfigSettings
 
         CUSTOM("custom", () -> Map.of());
 
-        public static final Codec<Difficulty> CODEC = StringRepresentable.fromEnum(Difficulty::values, Difficulty::byId);
+        public static final Codec<Difficulty> CODEC = ExtraCodecs.enumIgnoreCase(values());
 
         private final Supplier<Map<ResourceLocation, Supplier<?>>> settingsSupplier;
         private Map<ResourceLocation, Supplier<?>> settings;

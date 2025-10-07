@@ -132,18 +132,4 @@ public class AdaptiveInsulation extends Insulation
             && factor == insul.factor
             && speed == insul.speed;
     }
-
-    @Override
-    public CompoundTag serialize()
-    {
-        CompoundTag tag = new CompoundTag();
-        tag.putDouble("insulation", insulation);
-        tag.putDouble("factor", factor);
-        tag.putDouble("speed", speed);
-        return tag;
-    }
-
-    public static AdaptiveInsulation deserialize(CompoundTag tag)
-    {   return new AdaptiveInsulation(tag.getDouble("insulation"), tag.getDouble("factor"), tag.getDouble("speed"));
-    }
 }
