@@ -12,7 +12,8 @@
         "temperature": {
           "value": -273.15,
           "strength": 0.005
-        }
+        },
+        "units": "c"
       }
     },
     {
@@ -24,7 +25,8 @@
         "temperature": {
           "value": -273.15,
           "strength": 0.005
-        }
+        },
+        "units": "c"
       },
       "bottom": {
         "anchor": "ground_level",
