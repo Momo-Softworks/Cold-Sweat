@@ -102,7 +102,7 @@ public class FuelData extends ConfigData implements RequirementHolder
         HEARTH("hearth"),
         SOUL_LAMP("soulspring_lamp");
 
-        public static Codec<FuelType> CODEC = StringRepresentable.fromEnum(FuelType::values);
+        public static Codec<FuelType> CODEC = StringRepresentable.fromEnumWithMapping(FuelType::values, String::toLowerCase);
 
         private final String name;
 

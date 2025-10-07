@@ -16,7 +16,7 @@ import java.util.Locale;
 
 public class TempModifierTraitArgument extends StringRepresentableArgument<Temperature.Trait>
 {
-    private static final Codec<Temperature.Trait> MODIFIERS_CODEC = StringRepresentable.fromEnum(() -> EntityTempManager.VALID_MODIFIER_TRAITS);
+    private static final Codec<Temperature.Trait> MODIFIERS_CODEC = StringRepresentable.fromEnumWithMapping(() -> EntityTempManager.VALID_MODIFIER_TRAITS, String::toLowerCase);
 
     private TempModifierTraitArgument()
     {   super(MODIFIERS_CODEC, () -> EntityTempManager.VALID_MODIFIER_TRAITS);

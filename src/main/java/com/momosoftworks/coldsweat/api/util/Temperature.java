@@ -486,7 +486,7 @@ public class Temperature
         COLD_DAMPENING("cold_dampening", true, true, true),
         HEAT_DAMPENING("heat_dampening", true, true, true);
 
-        public static final Codec<Trait> CODEC = StringRepresentable.fromEnum(Trait::values);
+        public static final Codec<Trait> CODEC = StringRepresentable.fromEnumWithMapping(Trait::values, String::toLowerCase);
 
         private final String id;
         private final boolean forTemperature;
@@ -543,7 +543,7 @@ public class Temperature
         C("°C", "c"),
         MC("MC", "mc");
 
-        public static final Codec<Units> CODEC = StringRepresentable.fromEnum(Units::values);
+        public static final Codec<Units> CODEC = StringRepresentable.fromEnumWithMapping(Units::values, String::toLowerCase);
 
         private final String name;
         private final String id;
