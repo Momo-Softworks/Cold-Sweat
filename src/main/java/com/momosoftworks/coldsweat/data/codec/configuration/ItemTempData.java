@@ -226,7 +226,7 @@ public class ItemTempData extends ConfigData implements RequirementHolder
         CURIO("curio", List.of()),
         HAND("hand", List.of(Either.right(EquipmentSlot.MAINHAND), Either.right(EquipmentSlot.OFFHAND)));
 
-        public static final Codec<SlotType> CODEC = StringRepresentable.fromEnum(SlotType::values);
+        public static final Codec<SlotType> CODEC = StringRepresentable.fromEnumWithMapping(SlotType::values, String::toLowerCase);
 
         private final String name;
         private final List<Either<IntegerBounds, EquipmentSlot>> slots;
