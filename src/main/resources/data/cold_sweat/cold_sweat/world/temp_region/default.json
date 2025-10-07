@@ -10,9 +10,9 @@
         "depth": 1,
         "temperature": {
           "value": -273.15,
-          "units": "C",
           "strength": 0.005
-        }
+        },
+        "units": "c"
       }
     },
     {
@@ -22,9 +22,9 @@
         "depth": 0,
         "temperature": {
           "value": -273.15,
-          "units": "C",
           "strength": 0.005
-        }
+        },
+        "units": "c"
       },
       "bottom": {
         "anchor": "ground_level",
