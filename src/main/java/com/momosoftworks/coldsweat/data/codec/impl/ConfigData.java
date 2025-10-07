@@ -161,7 +161,7 @@ public abstract class ConfigData implements NbtSerializable
         JSON("json"),
         KUBEJS("kubejs");
 
-        public static final Codec<Type> CODEC = StringRepresentable.fromEnum(Type::values);
+        public static final Codec<Type> CODEC = StringRepresentable.fromEnumWithMapping(Type::values, String::toLowerCase);
 
         private final String name;
 
