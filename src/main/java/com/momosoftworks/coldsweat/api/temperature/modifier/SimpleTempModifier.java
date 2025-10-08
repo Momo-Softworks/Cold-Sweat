@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.api.temperature.modifier;
 
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.util.serialization.EnumHelper;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.LivingEntity;
 import org.checkerframework.checker.units.qual.min;
@@ -85,13 +86,7 @@ public class SimpleTempModifier extends TempModifier
         }
 
         public static Operation byName(String name)
-        {
-            for (Operation operation : values())
-            {   if (operation.name.equals(name))
-                {   return operation;
-                }
-            }
-            return ADD;
+        {   return EnumHelper.byName(values(), name);
         }
     }
 }

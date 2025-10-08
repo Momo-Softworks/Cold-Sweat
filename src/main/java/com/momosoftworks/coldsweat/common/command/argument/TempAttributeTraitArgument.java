@@ -5,6 +5,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
+import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.StringRepresentableArgument;
@@ -16,7 +17,7 @@ import java.util.Locale;
 
 public class TempAttributeTraitArgument extends StringRepresentableArgument<Temperature.Trait>
 {
-    private static final Codec<Temperature.Trait> TEMPERATURES_CODEC = StringRepresentable.fromEnumWithMapping(() -> EntityTempManager.VALID_ATTRIBUTE_TRAITS, String::toLowerCase);
+    private static final Codec<Temperature.Trait> TEMPERATURES_CODEC = ExtraCodecs.enumIgnoreCase(EntityTempManager.VALID_ATTRIBUTE_TRAITS);
 
     private TempAttributeTraitArgument()
     {   super(TEMPERATURES_CODEC, () -> EntityTempManager.VALID_ATTRIBUTE_TRAITS);
