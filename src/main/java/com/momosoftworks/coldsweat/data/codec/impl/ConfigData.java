@@ -5,13 +5,11 @@ import com.mojang.serialization.*;
 import com.momosoftworks.coldsweat.api.annotation.Internal;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.data.ModRegistries;
+import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
-import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringRepresentable;
@@ -20,7 +18,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-public abstract class ConfigData implements NbtSerializable
+public abstract class ConfigData
 {
     protected UUID id = UUID.randomUUID();
     protected Type configType = Type.JSON;
@@ -135,11 +133,6 @@ public abstract class ConfigData implements NbtSerializable
     }
 
     @Override
-    public CompoundTag serialize()
-    {   return (CompoundTag) this.getCodec().encodeStart(NbtOps.INSTANCE, this).result().orElse(new CompoundTag());
-    }
-
-    @Override
     public String toString()
     {   return this.getClass().getSimpleName() + this.getCodec().encodeStart(JsonOps.INSTANCE, this).result().map(Object::toString).orElse("");
     }
@@ -161,7 +154,7 @@ public abstract class ConfigData implements NbtSerializable
         JSON("json"),
         KUBEJS("kubejs");
 
-        public static final Codec<Type> CODEC = StringRepresentable.fromEnumWithMapping(Type::values, String::toLowerCase);
+        public static final Codec<Type> CODEC = ExtraCodecs.enumIgnoreCase(values());
 
         private final String name;
 

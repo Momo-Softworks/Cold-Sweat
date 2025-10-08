@@ -102,15 +102,6 @@ public class StaticInsulation extends Insulation
             && heat == insul.heat;
     }
 
-    @Override
-    public CompoundTag serialize()
-    {
-        CompoundTag tag = new CompoundTag();
-        tag.putDouble("cold", cold);
-        tag.putDouble("heat", heat);
-        return tag;
-    }
-
     public static StaticInsulation deserialize(CompoundTag tag)
     {   return new StaticInsulation(tag.getDouble("cold"), tag.getDouble("heat"));
     }

@@ -3,13 +3,9 @@ package com.momosoftworks.coldsweat.data.codec.util;
 import com.google.common.collect.Multimap;
 import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.util.math.FastMultiMap;
-import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
 import net.minecraft.core.Holder;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -18,7 +14,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 
 import java.util.*;
 
-public class AttributeModifierMap implements NbtSerializable
+public class AttributeModifierMap
 {
     public static final Codec<AttributeModifierMap> CODEC = Codec.unboundedMap(Attribute.CODEC, AttributeCodecs.MODIFIER_CODEC.listOf())
             .xmap(AttributeModifierMap::new,
@@ -85,15 +81,8 @@ public class AttributeModifierMap implements NbtSerializable
     {   map.clear();
     }
 
-    @Override
-    public CompoundTag serialize()
-    {
-        return ((CompoundTag) CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElse(new CompoundTag()));
-    }
-
     public static AttributeModifierMap deserialize(CompoundTag tag)
-    {
-        return CODEC.decode(NbtOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize AttributeModifierMap")).getFirst();
+    {   return CODEC.decode(NbtOps.INSTANCE, tag).result().orElseThrow(() -> new IllegalArgumentException("Could not deserialize AttributeModifierMap")).getFirst();
     }
 
     @Override

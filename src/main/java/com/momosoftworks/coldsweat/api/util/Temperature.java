@@ -11,6 +11,7 @@ import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.network.message.SyncTempModifiersMessage;
 import com.momosoftworks.coldsweat.core.network.message.SyncTemperatureMessage;
+import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.InterruptibleIterator;
 import net.minecraft.util.StringRepresentable;
@@ -480,7 +481,7 @@ public class Temperature
         COLD_DAMPENING("cold_dampening", true, true, true),
         HEAT_DAMPENING("heat_dampening", true, true, true);
 
-        public static final Codec<Trait> CODEC = StringRepresentable.fromEnumWithMapping(Trait::values, String::toLowerCase);
+        public static final Codec<Trait> CODEC = ExtraCodecs.enumIgnoreCase(values());
 
         private final String id;
         private final boolean forTemperature;
@@ -537,7 +538,7 @@ public class Temperature
         C("°C", "c"),
         MC("MC", "mc");
 
-        public static final Codec<Units> CODEC = StringRepresentable.fromEnumWithMapping(Units::values, String::toLowerCase);
+        public static final Codec<Units> CODEC = ExtraCodecs.enumIgnoreCase(values());
 
         private final String name;
         private final String id;

@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.common.entity.data;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.serialization.EnumHelper;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.CompoundTag;
@@ -97,12 +98,7 @@ public enum Preference
         }
 
         public static WaterskinAction byName(String name)
-        {   for (WaterskinAction behavior : values())
-            {   if (behavior.name.equals(name))
-                {   return behavior;
-                }
-            }
-            return NONE;
+        {   return EnumHelper.byName(values(), name);
         }
     }
 }
