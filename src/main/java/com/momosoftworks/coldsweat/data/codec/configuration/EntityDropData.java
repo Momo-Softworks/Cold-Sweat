@@ -1,11 +1,7 @@
 package com.momosoftworks.coldsweat.data.codec.configuration;
 
-import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.momosoftworks.coldsweat.util.serialization.NbtSerializable;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
 
 public record EntityDropData(int interval, int cooldown, double chance)
 {
