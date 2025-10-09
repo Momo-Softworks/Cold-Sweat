@@ -150,7 +150,7 @@ dependencies {
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
     // Runtime Mods
-    runtimeOnly fg.deobf("curse.maven:spark-361579:4505375")
+    //runtimeOnly fg.deobf("curse.maven:spark-361579:4505375")
     runtimeOnly fg.deobf("curse.maven:jei-238222:3940240")
     runtimeOnly fg.deobf("curse.maven:byg-247560:4036050")
     runtimeOnly fg.deobf("curse.maven:biomesoplenty-220318:3759236")
