@@ -5,6 +5,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
+import com.momosoftworks.coldsweat.client.gui.config.AbstractConfigPage;
+import com.momosoftworks.coldsweat.client.gui.config.ConfigScreen;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
@@ -12,6 +14,7 @@ import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -209,7 +212,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         setAdaptations(sortedInsulation, stack);
 
         Mode mode;
-        if (sortedInsulation.stream().map(Insulation::split).mapToInt(List::size).sum() > 10)
+        if (Screen.hasShiftDown() || sortedInsulation.stream().map(Insulation::split).mapToInt(List::size).sum() > 10)
         {   mode = Mode.OVERFLOW;
         }
         else if (insulations.stream().anyMatch(insul -> insul.split().size() > 1))
