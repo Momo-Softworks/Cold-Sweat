@@ -246,7 +246,7 @@ public class ClientInsulationTooltip extends Tooltip
         setAdaptations(sortedInsulation, stack);
 
         Mode mode;
-        if (sortedInsulation.stream().map(Insulation::split).mapToInt(List::size).sum() > 10)
+        if (Screen.hasShiftDown() || sortedInsulation.stream().map(Insulation::split).mapToInt(List::size).sum() > 10)
         {   mode = Mode.OVERFLOW;
         }
         else if (insulations.stream().anyMatch(insul -> insul.split().size() > 1))
