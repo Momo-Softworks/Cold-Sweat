@@ -22,8 +22,6 @@ public class ModItemTags
     public static final TagKey<Item> ENCASES_SMOKESTACK = createTag("encases_smokestack");
     public static final TagKey<Item> GROWS_SOUL_STALK = createTag("grows_soul_stalk");
 
-    public static final TagKey<Item> SCARES_PIGLINS = createCommonTag("scares_piglins");
-
     public static final TagKey<Item> EQUIPABLE_CURIOS = createNamespaceTag("curios", "equipable");
 
     private static TagKey<Item> createTag(String name)
