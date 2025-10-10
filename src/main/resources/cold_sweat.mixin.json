@@ -36,7 +36,6 @@
     "MixinMenuChanged",
     "MixinMinecart",
     "MixinMobSpawning",
-    "MixinPiglinFearPlayers",
     "MixinPreServerLoad",
     "MixinPreventFreezing",
     "MixinRegistration",

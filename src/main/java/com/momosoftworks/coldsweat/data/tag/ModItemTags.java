@@ -26,7 +26,6 @@ public class ModItemTags
     public static final TagKey<Item> GROWS_SOUL_STALK = createTag("grows_soul_stalk");
 
     public static final TagKey<Item> FOOD = createForgeTag("food");
-    public static final TagKey<Item> SCARES_PIGLINS = createForgeTag("scares_piglins");
 
     @SubscribeEvent
     public static void initDynamicTags(InitDynamicTagsEvent event)
