@@ -17,7 +17,6 @@ import java.util.List;
 public abstract class Insulation
 {
     private static Codec<Insulation> CODEC = null;
-    private static StreamCodec<FriendlyByteBuf, Insulation> STREAM_CODEC = null;
     public static Codec<Insulation> getCodec()
     {
         if (CODEC == null)
@@ -25,39 +24,6 @@ public abstract class Insulation
                     either -> either.map(stat -> stat, adapt -> adapt),
                     insul -> insul instanceof StaticInsulation ? Either.left((StaticInsulation) insul) : Either.right((AdaptiveInsulation) insul));
         return CODEC;
-    }
-
-    public static StreamCodec<FriendlyByteBuf, Insulation> getNetworkCodec()
-    {
-        if (STREAM_CODEC == null)
-        STREAM_CODEC = StreamCodec.of(
-        (buf, insul) ->
-        {
-            if (insul instanceof StaticInsulation st)
-            {   buf.writeUtf("static");
-                StaticInsulation.STREAM_CODEC.encode(buf, st);
-            }
-            else if (insul instanceof AdaptiveInsulation ad)
-            {   buf.writeUtf("adaptive");
-                AdaptiveInsulation.STREAM_CODEC.encode(buf, ad);
-            }
-            else buf.writeUtf("none");
-        },
-        (buf) ->
-        {
-            String type = buf.readUtf();
-            if (type.equals("static"))
-            {   return StaticInsulation.STREAM_CODEC.decode(buf);
-            }
-            else if (type.equals("adaptive"))
-            {   return AdaptiveInsulation.STREAM_CODEC.decode(buf);
-            }
-            else if (type.equals("none"))
-            {   return new StaticInsulation(0, 0);
-            }
-            return null;
-        });
-        return STREAM_CODEC;
     }
 
     /**
