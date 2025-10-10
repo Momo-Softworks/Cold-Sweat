@@ -1,10 +1,10 @@
 package com.momosoftworks.coldsweat.mixin;
 
-import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.compat.CompatManager;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.util.registries.ModDamageSources;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.block.CampfireBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ItemEntity;
@@ -28,7 +28,7 @@ public class MixinSoulCampfire
     at = @At("HEAD"), cancellable = true)
     public void entityInside(BlockState state, World world, BlockPos pos, Entity entity, CallbackInfo ci)
     {
-        if (state.getBlock() == Blocks.SOUL_CAMPFIRE && state.getValue(CampfireBlock.LIT)
+        if (state.is(ModBlockTags.SOUL_FIRE) && state.getValue(CampfireBlock.LIT)
         && ConfigSettings.COLD_SOUL_FIRE.get() && !(entity instanceof ItemEntity && CompatManager.isSpiritLoaded()))
         {
             entity.hurt(ModDamageSources.COLD, this.fireDamage);
