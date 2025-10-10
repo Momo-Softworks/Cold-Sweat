@@ -27,7 +27,6 @@ public class ModItemTags
     public static final TagKey<Item> GROWS_SOUL_STALK = createTag("grows_soul_stalk");
 
     public static final TagKey<Item> FOOD = createForgeTag("food");
-    public static final TagKey<Item> SCARES_PIGLINS = createForgeTag("scares_piglins");
 
     public static final TagKey<Item> EQUIPABLE_CURIOS = createNamespaceTag("curios", "equipable");
 
