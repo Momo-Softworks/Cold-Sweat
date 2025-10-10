@@ -121,6 +121,7 @@ public class ConfigLoadingHandler
             ColdSweat.LOGGER.info("Gathering Cold Sweat registries");
             // Gather modded registries
             AddRegistriesEvent addRegistriesEvent = new AddRegistriesEvent();
+            NeoForge.EVENT_BUS.start();
             NeoForge.EVENT_BUS.post(addRegistriesEvent);
             // Add registries via dummy NewRegistry event
             DataPackRegistryEvent.NewRegistry dummyEvent = new DataPackRegistryEvent.NewRegistry();
