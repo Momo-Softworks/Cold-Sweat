@@ -38,7 +38,6 @@
     "MixinMinecart",
     "MixinMobSpawning",
     "MixinModLoading",
-    "MixinPiglinFearPlayers",
     "MixinPreServerLoad",
     "MixinPreventFreezing",
     "MixinRegistration",
