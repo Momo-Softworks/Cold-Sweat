@@ -3324,14 +3324,19 @@ Fixes:
       - New fuel gauge textures that are more in line with Vanilla
       - Less prominent particle visibility toggle button
       - Tweaked the position & design of redstone current indicators
-- Tweaked textures for several items:
-      - Chameleon Molt
-      - Chameleon Scale Armor
-      - Goat Fur Armor
-      - Hoglin Hide Armor
-      - Hearth
-      - Insulated Minecart (very slightly)
-      - These changes are a mix of general design improvements and more closely aligning them with the Vanilla style
+- Tweaked textures for several other things:
+      * Items:
+          - Chameleon Molt
+          - Chameleon Scale Armor
+          - Goat Fur Parka
+          - Hoglin Hide Armor
+          - Hearth
+          - Insulated Minecart (very slightly)
+          - These changes are a mix of general design improvements and more closely aligning them with the Vanilla style
+      * Blocks:
+          - Boiler, Icebox
+      * UI:
+          - World temperature gauge (both with and without thermometer)
 ! Changed armor item IDs to follow the normal helmet/chestplate/leggings/boots convention
       - i.e. cold_sweat:goat_fur_parka is now cold_sweat:goat_fur_chestplate
       - The word "scale" is now omitted from chameleon armor IDs; i.e. cold_sweat:chameleon_scale_helmet -> cold_sweat:chameleon_helmet
@@ -3339,13 +3344,18 @@ Fixes:
       - Existing items in worlds will be automatically converted to the new IDs
 - The fuel slot of iceboxes/boilers can no longer be taken from by automation (i.e. hoppers)
       - This makes automation easier and more consistent with Vanilla blocks like furnaces
+- Changed wording of "it is freezing/sweltering outside" messages to "it is freezing/sweltering here" for more clarity
+- Dried kelp blocks can now be used as fuel in hearths and boilers
 
 Fixes:
-- (1.21) Fixed crash when registries are loaded in a certain order; triggered by some mod combinations
+* (1.21) Fixed crash when registries are loaded in a certain order; triggered by some mod combinations
+* (1.21) Fixed potential crash when KubeJS tries to scan Cold Sweat registries
+- (1.21) Fixed recipes that are dependent on other mods trying to load when the mod isn't present
 * (1.16) Fixed the top half of a hearth not breaking when the bottom half is broken
 * Fixed crash when common-side KubeJS events are fired
 * Fixed world temperature increasing/decreasing indefinitely after pouring a waterskin
 * Fixed Cold Sweat not compiling from source due to outdated build.gradle dependencies
+- Fixed soul stalk not generating more commonly in soul sand valley biomes
 - Fixed bed-like blocks setting the player's spawn point when they shouldn't
 - Fixed the resulting temperature of TemperatureChangedEvent not being used
 - Fixed insulation attribute modifiers not being arranged correctly on the tooltip if some of them have unmet requirements
@@ -3371,3 +3381,65 @@ Technical Changes:
 - During config loading, the IDs of registered configs will now be logged instead of their contents
       - "Registered" configs are those which are part of JSON datapacks or added by mods
       - Other configs will log their full contents as before
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.4-b05b
+* Chameleons now require player interaction to shed
+            - This is to inhibit very easy farming by putting a chameleon on top of a hopper
+            - When a chameleon is ready to shed, it will start emitting particles and send a vibration with signal strength 4
+            - When the player right-clicks the chameleon, it will shed chameleon molt as normal
+                - This can also be done with shears in a dispenser
+            - This change can be reverted by enabling "Chameleons Shed Automatically" in entity.toml
+- Insulators that require certain criteria can now display a hint in their tooltip
+      - i.e. the Create netherite backtank now has the requirement "Wearing full netherite diving suit" in its tooltip
+      - JSON: Added a "hint" field that takes two optional arguments:
+            * "text": Display static text
+            * "key": Use a translation key
+            - Usage: "hint": {"text": "Wearing full iron armor", "key": "tooltip.cold_sweat.example"}
+            - Only one of these fields is required
+            - If both fields are defined, "key" will be tried first and "text" will be used as a fallback
+      - KubeJS: Added "hintText" and "hintKey" methods to insulator builders
+- Temperature changes from shade and overcast mechanics are now handled by a single dedicated temperature modifier
+      - This change "upgrades" the shade mechanic from being a side-effect of the depth system to a real feature
+      - In turn, the depth system now does not count leaf blocks as solid ground
+      - The temperature effect of shade/overcast can be configured with the "Shade Temperature Offset" setting, which replaces "Overcast Temperature Offset"
+- Added "/temp add" subcommand, which changes the target's body temperature by the specified amount
+- Adaptive insulation now adapts at a consistent rate instead of slowing down as it reaches its target
+- (1.16) Improved the reliability of tooltip image insertions, especially when other mods are installed
+- Switching to spectator mode now sets your body temperature to 0
+- Decreased the temperatures of some cold biomes that generate ice, so the ice doesn't immediately melt
+- When hovering over an insulation item, holding SHIFT now shows its exact numerical insulation value
+    
+Fixes:
+* Fixed crash when loading user JSON configs (from the configs folder) if they contain modded dynamic registries (modded dimensions, biomes, etc.)
+* Fixed several potential crashes when configs contain invalid IDs
+* Fixed some client-side config settings not persisting when changed in the in-game config menu
+* Fixed components requirements not working for items that have registry data in their components (i.e. enchantments)
+* Fixed jerking/bouncing motions when camera is swaying due to overheating
+* Fixed ice creating water when broken in the Nether
+* Fixed the wildcard type ("*") in JSON configs always returning false
+- Fixed Create backtank not draining pressure when providing heat resistance
+- Fixed temperature decrease due to altitude being calculated incorrectly due to formatting issues
+- Fixed heat fog not moving smoothly as the player's temperature changes
+- Fixed slowness due to freezing also affecting motion from external sources (explosions, knockback, etc.)
+- Fixed client-side temperature effects being applied twice in singleplayer
+- Fixed water droplet trails scaling incorrectly at certain GUI scale settings
+- Fixed filled waterskin having the incorrect item texture when its temperature is below -50
+
+Technical Changes:
+* The "items" field in JSON item requirements, and "entities" field in entity requirements, are now required
+      - This is because configs now do nothing if these fields are empty
+- Enum-type config fields in JSON are now case-insensitive (previously required lower-case)
+      - Examples of field types affected:
+            - Temperature Units (i.e. "f", "C", "Mc")
+            - Temperature Type (i.e. "world", "CORE", "fReEzInG_pOiNt")
+            - Config Type (i.e. "toml", "JSON", "KubeJS")
+            - Slot Type (i.e. "head", "CHEST", "Inventory")
+- The "class" parameter is no longer required when creating custom registries
+! Custom Cold Sweat registries are now officially unsupported in 1.18
+      - This is because 1.18's registry loading system disallows initializing registries outside the standard time during mod loading
+      - Because not all mods have been loaded yet at this stage, there is no guarantee that all registries will load successfully
+- Custom registries are now loaded during startup immediately after mods are loaded, instead of upon joining a world/server
+- Blocks which are affected by the "Cold Soul Fire" setting are now controlled by the "forge:soul_fire" tag ("c:soul_fire" in NeoForge)
+      - Any blocks in this tag will have their temperatures inverted if the setting is enabled
