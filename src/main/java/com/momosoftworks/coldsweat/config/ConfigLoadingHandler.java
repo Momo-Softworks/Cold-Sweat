@@ -114,6 +114,7 @@ public class ConfigLoadingHandler
         ColdSweat.LOGGER.info("Gathering Cold Sweat registries");
         // Gather modded registries
         AddRegistriesEvent addRegistriesEvent = new AddRegistriesEvent();
+        MinecraftForge.EVENT_BUS.start();
         MinecraftForge.EVENT_BUS.post(addRegistriesEvent);
 
         REGISTRIES_INITIALIZED = true;
