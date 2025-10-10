@@ -92,19 +92,10 @@ public class Overlays
 
             // Get player world temperature
             double temp = Temperature.convert(WORLD_TEMP, ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
-
             // Get the temperature severity
             int severity = getGaugeSeverity(temp, PLAYER_MIN_TEMP, PLAYER_MAX_TEMP);
-
             // Set text color
-            int color = switch (severity)
-            {   case  2, 3 -> 16297781;
-                case  4    -> 16728089;
-                case -2,-3 -> 8443135;
-                case -4    -> 4236031;
-                default -> 14737376;
-            };
-
+            int color = getWorldTempColor(temp, PLAYER_MIN_TEMP, PLAYER_MAX_TEMP);
 
             /* Render gauge */
 
@@ -471,5 +462,17 @@ public class Overlays
     public static void setWorldTempInstant(double temp)
     {   WORLD_TEMP = temp;
         PREV_WORLD_TEMP = temp;
+    }
+
+    public static int getWorldTempColor(double temp, double playerMin, double playerMax)
+    {
+        int severity = getGaugeSeverity(temp, playerMin, playerMax);
+        return switch (severity)
+        {   case  2, 3 -> 16297781;
+            case  4    -> 16728089;
+            case -2,-3 -> 8443135;
+            case -4    -> 4236031;
+            default -> 14737376;
+        };
     }
 }

@@ -4,20 +4,17 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.gui.Overlays;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
+import com.momosoftworks.coldsweat.common.entity.data.Preference;
 import com.momosoftworks.coldsweat.common.item.FilledWaterskinItem;
 import com.momosoftworks.coldsweat.common.item.SoulspringLampItem;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ItemInit;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
-import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.client.renderer.item.ItemPropertyFunction;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.api.distmarker.Dist;
@@ -58,44 +55,21 @@ public class RegisterItemOverrides
 
             ItemProperties.register(ItemInit.THERMOMETER.get(), new ResourceLocation(ColdSweat.MOD_ID, "temperature"), (stack, level, livingEntity, id) ->
             {
-                Entity entity = (livingEntity != null ? livingEntity : stack.getEntityRepresentation());
-                if (entity != null)
+                if (livingEntity instanceof Player player)
                 {
-                    double minTemp = livingEntity != null ? Temperature.get(livingEntity, Temperature.Trait.FREEZING_POINT) : ConfigSettings.MIN_TEMP.get();
-                    double maxTemp = livingEntity != null ? Temperature.get(livingEntity, Temperature.Trait.BURNING_POINT)  : ConfigSettings.MAX_TEMP.get();
+                    double minTemp = Temperature.get(player, Temperature.Trait.FREEZING_POINT);
+                    double maxTemp = Temperature.get(player, Temperature.Trait.BURNING_POINT);
 
                     double worldTemp;
-                    if (!entity.getPersistentData().contains("WorldTempTimestamp")
-                    || (entity.tickCount % 20 == 0 || (entity instanceof Player && entity.tickCount % 2 == 0)) && entity.getPersistentData().getInt("WorldTempTimestamp") != entity.tickCount)
+                    if (!player.getPersistentData().contains("WorldTempTimestamp")
+                    || (player.tickCount % 2 == 0 && player.getPersistentData().getInt("WorldTempTimestamp") != player.tickCount))
                     {
-                        worldTemp = entity instanceof LivingEntity living
-                                ? EntityTempManager.getTemperatureCap(living).map(cap -> cap.getTrait(Temperature.Trait.WORLD)).orElse(0.0)
-                                : WorldHelper.getTemperatureAt(entity.level(), entity.blockPosition());
+                        worldTemp = Temperature.convert(Overlays.WORLD_TEMP, Preference.getOrDefault(player, Preference.UNITS, Temperature.Units.F), Temperature.Units.MC, true);
 
-                        entity.getPersistentData().putDouble("WorldTemp", worldTemp);
-                        entity.getPersistentData().putInt("WorldTempTimestamp", entity.tickCount);
+                        player.getPersistentData().putDouble("WorldTemp", worldTemp);
+                        player.getPersistentData().putInt("WorldTempTimestamp", player.tickCount);
                     }
-                    else worldTemp = entity.getPersistentData().getDouble("WorldTemp");
-
-                    if (entity instanceof ItemFrame frame)
-                    {
-                        if (Minecraft.getInstance().getEntityRenderDispatcher().crosshairPickEntity == frame)
-                        {
-                            boolean celsius = ConfigSettings.CELSIUS.get();
-                            ChatFormatting tempColor = switch (Overlays.getGaugeSeverity(worldTemp, minTemp, maxTemp))
-                            {
-                                case 0 -> ChatFormatting.WHITE;
-                                case 2,3 -> ChatFormatting.GOLD;
-                                case 4 -> ChatFormatting.RED;
-                                case -2,-3 -> ChatFormatting.AQUA;
-                                case -4 -> ChatFormatting.BLUE;
-                                default -> ChatFormatting.RESET;
-                            };
-                            int convertedTemp = (int) Temperature.convert(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true) + ConfigSettings.TEMP_OFFSET.get();
-                            frame.getItem().setHoverName(Component.literal(convertedTemp + " " + (celsius ? Temperature.Units.C.getFormattedName()
-                                                                                                          : Temperature.Units.F.getFormattedName())).withStyle(tempColor));
-                        }
-                    }
+                    else worldTemp = player.getPersistentData().getDouble("WorldTemp");
 
                     double worldTempAdjusted = Overlays.getWorldSeverity(worldTemp, minTemp, maxTemp) * 1.01;
                     return (float) worldTempAdjusted;
