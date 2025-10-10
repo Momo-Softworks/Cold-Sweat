@@ -218,6 +218,19 @@ public class ModUpdater
             addConfigSetting(ItemSettingsConfig.HEARTH_FUELS, Arrays.asList("minecraft:dried_kelp_block", 92));
         }
 
+        /*
+         2.4-b05b
+         */
+        if (isBehind(configVersion, "2.4-b05b"))
+        {
+            replaceConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, "minecraft:fire", list ->
+            {   list.set(0, "#minecraft:fire");
+            });
+            replaceConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, "#minecraft:campfires,!#forge:soul_campfires", list ->
+            {   list.set(0, "#minecraft:campfires");
+            });
+        }
+
         // Update config version
         MainSettingsConfig.VERSION.set(version);
 
