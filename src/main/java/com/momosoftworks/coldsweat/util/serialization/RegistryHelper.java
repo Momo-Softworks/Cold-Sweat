@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.util.serialization;
 
 import com.mojang.datafixers.util.Either;
+import com.momosoftworks.coldsweat.api.event.vanilla.ServerConfigsLoadedEvent;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
@@ -13,10 +14,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.util.thread.EffectiveSide;
 import net.minecraftforge.registries.IForgeRegistry;
 
 import javax.annotation.Nullable;
@@ -37,7 +36,7 @@ public class RegistryHelper
     public static class GetAccessServer
     {
         @SubscribeEvent
-        public static void onServerLoading(ServerAboutToStartEvent event)
+        public static void onServerLoading(ServerConfigsLoadedEvent event)
         {   REGISTRY_ACCESS = event.getServer().registryAccess();
         }
     }
