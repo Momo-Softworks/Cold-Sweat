@@ -106,8 +106,8 @@ public class ConfigLoadingHandler
     }
 
     private static boolean REGISTRIES_INITIALIZED = false;
-    @Internal
-    public static void initRegistries()
+    @SubscribeEvent
+    public static void initRegistries(FMLServerAboutToStartEvent event)
     {
         if (REGISTRIES_INITIALIZED) return;
 
