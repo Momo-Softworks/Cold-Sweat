@@ -9,6 +9,7 @@ import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.core.registry.AddRegistriesEvent;
 import com.momosoftworks.coldsweat.api.event.core.registry.LoadRegistriesEvent;
+import com.momosoftworks.coldsweat.api.event.vanilla.ProbeEventBusEvent;
 import com.momosoftworks.coldsweat.api.event.vanilla.ServerConfigsLoadedEvent;
 import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
@@ -121,8 +122,19 @@ public class ConfigLoadingHandler
                 ColdSweat.LOGGER.info("Gathering Cold Sweat registries");
                 // Gather modded registries
                 AddRegistriesEvent addRegistriesEvent = new AddRegistriesEvent();
+
+                // Check if the event bus is closed
+                boolean busWasClosed = !MinecraftForge.EVENT_BUS.post(new ProbeEventBusEvent());
+                // Start the event bus temporarily
                 MinecraftForge.EVENT_BUS.start();
+                // Post AddRegistriesEvent to the event bus
                 MinecraftForge.EVENT_BUS.post(addRegistriesEvent);
+                // Re-close the event bus if it was closed before
+                if (busWasClosed)
+                {   ColdSweat.LOGGER.info("The event bus was started early to gather Cold Sweat registries; it will now be stopped again until the correct loading phase.");
+                    MinecraftForge.EVENT_BUS.shutdown();
+                }
+
                 // Add registries via dummy NewRegistry event
                 DataPackRegistryEvent.NewRegistry dummyEvent = new DataPackRegistryEvent.NewRegistry();
                 for (RegistryHolder<?> holder : ModRegistries.getRegistries().values())
