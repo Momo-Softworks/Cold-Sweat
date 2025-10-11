@@ -11,6 +11,7 @@ import com.momosoftworks.coldsweat.api.annotation.Internal;
 import com.momosoftworks.coldsweat.api.event.core.MissingMappingsEvent;
 import com.momosoftworks.coldsweat.api.event.core.registry.AddRegistriesEvent;
 import com.momosoftworks.coldsweat.api.event.core.registry.LoadRegistriesEvent;
+import com.momosoftworks.coldsweat.api.event.vanilla.ProbeEventBusEvent;
 import com.momosoftworks.coldsweat.api.event.vanilla.ServerConfigsLoadedEvent;
 import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
@@ -56,6 +57,7 @@ import net.neoforged.neoforge.registries.DataPackRegistryEvent;
 
 import java.io.File;
 import java.io.FileReader;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.*;
@@ -121,8 +123,26 @@ public class ConfigLoadingHandler
             ColdSweat.LOGGER.info("Gathering Cold Sweat registries");
             // Gather modded registries
             AddRegistriesEvent addRegistriesEvent = new AddRegistriesEvent();
+
+            // Check if the event bus is closed
+            boolean busWasClosed = !NeoForge.EVENT_BUS.post(new ProbeEventBusEvent()).isBusEnabled();
+            // Start the event bus temporarily
             NeoForge.EVENT_BUS.start();
+            // Post AddRegistriesEvent to the event bus
             NeoForge.EVENT_BUS.post(addRegistriesEvent);
+            // Re-close the event bus if it was closed before
+            if (busWasClosed)
+            {   ColdSweat.LOGGER.info("The event bus was started early to gather Cold Sweat registries; it will now be stopped again until the correct loading phase.");
+                try
+                {   Field shutdown = NeoForge.EVENT_BUS.getClass().getDeclaredField("shutdown");
+                    shutdown.setAccessible(true);
+                    shutdown.set(NeoForge.EVENT_BUS, true);
+                }
+                catch (Exception e)
+                {   ColdSweat.LOGGER.error("Failed to re-close NeoForge event bus after early start", e);
+                }
+            }
+
             // Add registries via dummy NewRegistry event
             DataPackRegistryEvent.NewRegistry dummyEvent = new DataPackRegistryEvent.NewRegistry();
             for (RegistryHolder<?> holder : ModRegistries.getRegistries().values())
