@@ -221,15 +221,15 @@ public class ChangelogGenerator {
         // Format the item based on its prefix
         switch (item.prefix) {
             case "*" -> writer.write(String.format("<li><span style=\"color: #ffffff; font-weight: bold;\">%s</span>", item.content));
-            case "!" -> writer.write(String.format("<li style=\"%s\">! %s", WARNING_STYLE, item.content));
-            case "!!" -> writer.write(String.format("<li style=\"%s\">!! %s", URGENT_STYLE, item.content));
+            case "!" -> writer.write(String.format("<li><span style=\"%s\">! %s</span>", WARNING_STYLE, item.content));
+            case "!!" -> writer.write(String.format("<li><span style=\"%s\">!! %s</span>", URGENT_STYLE, item.content));
             case "-" -> writer.write(String.format("<li>%s", item.content));
             default -> writer.write(String.format("<li>%s", item.content));
         }
 
         // If this item has children, start a new nested list
         if (!item.children.isEmpty()) {
-            writer.write("\n<ul style=\"margin-left: " + (40 + (level * 10)) + "px;\">\n");
+            writer.write("\n<ul style=\"margin-left: " + (10 + (level * 5)) + "px;\">\n");
 
             for (Item child : item.children) {
                 writeItem(writer, child, level + 1);
