@@ -3472,3 +3472,10 @@ Technical Changes:
 - Custom registries are now loaded during startup immediately after mods are loaded, instead of upon joining a world/server
 - Blocks which are affected by the "Cold Soul Fire" setting are now controlled by the "forge:soul_fire" tag ("c:soul_fire" in NeoForge)
       - Any blocks in this tag will have their temperatures inverted if the setting is enabled
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.4-b05c
+
+Fixes:
+* Fixed crash due to failed/incomplete mod initialization in other mods when Cold Sweat is present
