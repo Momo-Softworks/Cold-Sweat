@@ -7,6 +7,8 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 
 public class HeatVignetteEffect extends AbstractVignetteEffect
@@ -29,6 +31,7 @@ public class HeatVignetteEffect extends AbstractVignetteEffect
         return new Vector4f(0.231f, 0f, 0f, vignetteBrightness);
     }
 
+    @OnlyIn(Dist.CLIENT)
     @Override
     protected void render(float opacity, float tickTime, RenderGameOverlayEvent.PreLayer event)
     {

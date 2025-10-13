@@ -36,6 +36,7 @@ public abstract class AbstractVignetteEffect extends TempEffect
         RenderSystem.setShaderTexture(0, this.getTexture());
     }
 
+    @OnlyIn(Dist.CLIENT)
     protected void render(float opacity, float tickTime, RenderGameOverlayEvent.PreLayer event)
     {
         double width = event.getWindow().getWidth();
