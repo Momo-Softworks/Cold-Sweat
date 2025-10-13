@@ -10,6 +10,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import org.joml.Vector4f;
@@ -30,6 +32,7 @@ public abstract class AbstractVignetteEffect extends TempEffect
         RenderSystem.setShaderTexture(0, this.getTexture());
     }
 
+    @OnlyIn(Dist.CLIENT)
     protected void render(float opacity, float tickTime, RenderGuiLayerEvent.Pre event)
     {
         float width = Minecraft.getInstance().getWindow().getWidth();
@@ -57,6 +60,7 @@ public abstract class AbstractVignetteEffect extends TempEffect
         RenderSystem.defaultBlendFunc();
     }
 
+    @OnlyIn(Dist.CLIENT)
     public void vignette(RenderGuiLayerEvent.Pre event)
     {
         if (!this.test(Minecraft.getInstance().player)) return;

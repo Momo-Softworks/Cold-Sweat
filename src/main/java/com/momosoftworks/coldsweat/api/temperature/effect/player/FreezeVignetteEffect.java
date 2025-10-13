@@ -36,6 +36,7 @@ public class FreezeVignetteEffect extends AbstractVignetteEffect
     {   super.vignette(event);
     }
 
+    @OnlyIn(Dist.CLIENT)
     @Override
     protected void render(float opacity, float tickTime, RenderGuiLayerEvent.Pre event)
     {
