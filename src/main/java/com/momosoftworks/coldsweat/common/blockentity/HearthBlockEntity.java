@@ -5,6 +5,7 @@ import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.vanilla.BlockStateChangedEvent;
+import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.temperature.modifier.ThermalSourceTempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.event.HearthDebugRenderer;
@@ -277,6 +278,10 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     {   return true;
     }
 
+    protected boolean isSmartEnabled()
+    {   return ConfigSettings.SMART_HEARTH.get();
+    }
+
     public List<Direction> getHeatingSides()
     {   return Arrays.asList(Direction.EAST, Direction.SOUTH);
     }
@@ -346,15 +351,16 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
             this.isEntityNearby = false;
             entities.clear();
             AABB searchArea = new AABB(pos).inflate(this.getMaxRange());
+            if (CompatManager.isValkyrienSkiesLoaded())
+            {   searchArea = CompatManager.Valkyrien.transformIfShipPos(level, searchArea);
+            }
 
             for (Entity entity : this.level.getEntities((Entity) null, searchArea, EntityTempManager::isTemperatureEnabled))
             {
-                if (!(entity instanceof LivingEntity living)) continue;
-                if (CompatManager.isValkyrienSkiesLoaded())
-                {   searchArea = CompatManager.Valkyrien.transformIfShipPos(level, searchArea);
+                if (entity instanceof LivingEntity living)
+                {   this.entities.add(living);
+                    this.isEntityNearby = true;
                 }
-                this.entities.add(living);
-                this.isEntityNearby = true;
             }
         }
 
@@ -364,7 +370,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         // Determine what types of fuel to use
         boolean wasUsingColdFuel = this.shouldUseColdFuel;
         boolean wasUsingHotFuel = this.shouldUseHotFuel;
-        if (!ConfigSettings.SMART_HEARTH.get())
+        if (!this.isSmartEnabled())
         {
             this.shouldUseColdFuel = this.hasSmokestack && this.isCoolingOn && this.getColdFuel() > 0;
             this.shouldUseHotFuel = this.hasSmokestack && this.isHeatingOn && this.getHotFuel() > 0;
@@ -385,7 +391,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
             {   insulationLevel++;
             }
 
-            if ((this.shouldUseColdFuel || this.shouldUseHotFuel || (ConfigSettings.SMART_HEARTH.get() && this.isEntityNearby)))
+            if ((this.shouldUseColdFuel || this.shouldUseHotFuel || (this.isSmartEnabled() && this.isEntityNearby)))
             {
                 // Determine whether particles are enabled
                 if (this.ticksExisted % 20 == 0)
@@ -428,12 +434,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                 }
 
                 // Give insulation to players
-                if (!isClient && this.ticksExisted % 5 == 0)
+                if (!isClient && this.ticksExisted % 20 == 0)
                 {
-                    // Reset the usage status for cold/hot fuel
-                    if (ConfigSettings.SMART_HEARTH.get())
-                    {   this.resetFuelStatus();
-                    }
+                    boolean isProvidingInsulation = false;
                     // Provide insulation to players & calculate fuel usage
                     for (int i = 0; i < entities.size(); i++)
                     {
@@ -447,10 +450,12 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                         }
                         if (this.isAffectingPos(WorldHelper.getOccupiedPositions(playerBB))
                         && !WorldHelper.canSeeSky(level, new BlockPos(playerBB.getCenter()), 64))
-                        {   this.insulateEntity(entity);
+                        {   isProvidingInsulation |= this.insulateEntity(entity);
                         }
                     }
-                    entities.clear();
+                    if (!isProvidingInsulation)
+                    {   this.clearFuelUsage();
+                    }
                 }
 
                 // Drain fuel
@@ -597,7 +602,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         {
             boolean isHearth = this.getBlockState().is(ModBlocks.HEARTH_BOTTOM);
             // Hide redstone inputs for smart hearths
-            if (ConfigSettings.SMART_HEARTH.get() && isHearth
+            if (this.isSmartEnabled() && isHearth
             && !this.getBlockState().getValue(HearthBottomBlock.SMART))
             {
                 level.setBlock(this.getBlockPos(),
@@ -754,7 +759,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         }
     }
 
-    protected void resetFuelStatus()
+    protected void clearFuelUsage()
     {
         if (this.level == null || !this.level.isClientSide)
         {
@@ -763,19 +768,17 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         }
     }
 
-    void insulateEntity(LivingEntity entity)
+    boolean insulateEntity(LivingEntity entity)
     {
-        for (int i = 0; i < effects.size(); i++)
+        for (int i = 0; i < this.effects.size(); i++)
         {
-            MobEffectInstance effect = effects.get(i);
+            MobEffectInstance effect = this.effects.get(i);
             entity.addEffect(new MobEffectInstance(effect.getEffect(),
-                                                   effect.getEffect() == MobEffects.NIGHT_VISION
-                                                       ? 399
-                                                       : 119,
+                                                   effect.getEffect() == MobEffects.NIGHT_VISION ? 399 : 119,
                                                    effect.getAmplifier(), effect.isAmbient(), effect.isVisible(), effect.showIcon()));
         }
 
-        if (!ConfigSettings.SMART_HEARTH.get() || this.shouldInsulateEntity(entity))
+        if (!this.isSmartEnabled() || this.shouldInsulateEntity(entity))
         {
             int maxEffect = this.getMaxInsulationLevel() - 1;
             int effectLevel = (int) Math.min(maxEffect, (insulationLevel / (double) this.getInsulationTime()) * maxEffect);
@@ -785,20 +788,31 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
             if (shouldUseHotFuel)
             {   entity.addEffect(new MobEffectInstance(ModEffects.WARMTH, 60, effectLevel, false, false, true));
             }
+            return this.shouldUseColdFuel || this.shouldUseHotFuel;
         }
+        return false;
     }
 
     protected boolean shouldInsulateEntity(LivingEntity entity)
     {
         AtomicBoolean shouldInsulate = new AtomicBoolean(false);
-        if (!shouldUseColdFuel || !shouldUseHotFuel)
         EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
         {
-            double temp = CSMath.getIfNotNull(Temperature.getModifier(cap, Temperature.Trait.WORLD, ThermalSourceTempModifier.class).orElse(null),
-                                              mod -> mod.getLastInput(Temperature.Trait.WORLD),
-                                              cap.getTrait(Temperature.Trait.WORLD));
             double min = cap.getTrait(Temperature.Trait.FREEZING_POINT);
             double max = cap.getTrait(Temperature.Trait.BURNING_POINT);
+            double temp = cap.getTrait(Temperature.Trait.WORLD);
+            if (CSMath.betweenInclusive(temp, min, max))
+            {
+                Optional<ThermalSourceTempModifier> existingMod = Temperature.getModifier(cap, Temperature.Trait.WORLD, ThermalSourceTempModifier.class);
+                if (existingMod.isPresent())
+                {
+                    double lastInput = existingMod.get().getLastInput(Temperature.Trait.WORLD);
+                    double lastOutput = existingMod.get().getLastOutput(Temperature.Trait.WORLD);
+                    if (!(lastInput == lastOutput && lastInput == 0))
+                    {   temp = lastInput;
+                    }
+                }
+            }
 
             // Tell the hearth to use hot fuel
             shouldUseHotFuel |= this.getHotFuel() > 0 && temp < min;
@@ -957,12 +971,18 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
 
     public boolean isAffectingPos(List<BlockPos> positions)
     {
+        boolean isSmall = positions.size() <= 1;
+        BlockPos.MutableBlockPos checkerboardPos = new BlockPos.MutableBlockPos();
         for (int i = 0; i < this.paths.size(); i++)
         {
             SpreadPath path = this.paths.get(i);
             for (int j = 0; j < positions.size(); j++)
             {
-                if (path.pos.equals(positions.get(j)))
+                BlockPos pos = positions.get(j);
+                if (pos.equals(path.pos))
+                {   return true;
+                }
+                if (isSmall && pos.equals(checkerboardPos.set(path.pos).offset(1, 1, 1)))
                 {   return true;
                 }
             }
