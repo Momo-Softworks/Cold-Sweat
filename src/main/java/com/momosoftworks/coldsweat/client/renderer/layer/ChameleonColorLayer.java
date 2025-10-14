@@ -60,7 +60,7 @@ public class ChameleonColorLayer<T extends Entity, M extends EntityModel<T>> ext
             if (chameleon.isShedding())
             {
                 VertexConsumer vertexConsumer = bufferSource.getBuffer(CHAMELEON_SHED);
-                float alpha = chameleon.hurtTime > 0 || chameleon.getLastShed() == 0 ? 0 : CSMath.blend(0, 0.7f, chameleon.getAgeSecs() * 20 - chameleon.getLastShed(), 0, chameleon.getTimeToShed());
+                float alpha = chameleon.hurtTime > 0 ? 0 : CSMath.blend(0, 0.7f, chameleon.getShedTime(), 0, chameleon.getTimeToShed());
                 if (alpha > 0)
                     ((ChameleonModel<Chameleon>) this.getParentModel()).renderToBuffer(poseStack, vertexConsumer, light, OverlayTexture.NO_OVERLAY, 1f, 1f, 1f, alpha * chameleon.opacity, true);
             }
