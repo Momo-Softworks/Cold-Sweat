@@ -45,7 +45,7 @@ public abstract class AbstractHearthScreen<T extends Container> extends DisplayE
     @Override
     public void init()
     {   super.init();
-        if (this.getBlockEntity().hasSmokeStack())
+        if (this.getBlockEntity().hasSmokestack())
         {
             particleButton = this.addButton(new ImageButton(leftPos + 160, topPos + 8, 8, 7, 176 + (!hideParticles ? 0 : 8), 14, 7, HEARTH_GUI, (button) ->
             {

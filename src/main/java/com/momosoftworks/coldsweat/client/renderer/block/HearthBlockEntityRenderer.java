@@ -3,7 +3,6 @@ package com.momosoftworks.coldsweat.client.renderer.block;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.client.renderer.model.PartPose;
 import com.momosoftworks.coldsweat.common.block.HearthBottomBlock;
 import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import net.minecraft.block.BlockState;
@@ -60,12 +59,12 @@ public class HearthBlockEntityRenderer extends TileEntityRenderer<HearthBlockEnt
 
         /* Fuel Textures */
         // Lit texture when fuel is burning
-        if (blockEntity.isUsingHotFuel())
+        if (blockstate.getValue(HearthBottomBlock.LIT))
         {   IVertexBuilder litVertexes = buffer.getBuffer(RenderType.entityCutout(TEXTURE_LIT));
             this.grate.render(poseStack, litVertexes, light, overlay);
         }
         // Frost texture when cold fuel is present
-        if (blockEntity.getColdFuel() > 0)
+        if (blockstate.getValue(HearthBottomBlock.FROSTED))
         {   IVertexBuilder frostedVertexes = buffer.getBuffer(RenderType.entityTranslucent(TEXTURE_FROST));
             this.body.render(poseStack, frostedVertexes, light, overlay);
         }
@@ -74,13 +73,13 @@ public class HearthBlockEntityRenderer extends TileEntityRenderer<HearthBlockEnt
         if (!blockstate.getValue(HearthBottomBlock.SMART))
         {
             // Heating
-            if (blockEntity.isHeatingOn())
+            if (blockstate.getValue(HearthBottomBlock.HEATING))
             {   // Redstone power to heat side
                 IVertexBuilder heatingVertexes = buffer.getBuffer(RenderType.entityCutout(TEXTURE_HEAT_ON));
                 this.body.render(poseStack, heatingVertexes, light, overlay);
             }
             // Cooling
-            if (blockEntity.isCoolingOn())
+            if (blockstate.getValue(HearthBottomBlock.COOLING))
             {   // Redstone power to cool side
                 IVertexBuilder coolingVertexes = buffer.getBuffer(RenderType.entityCutout(TEXTURE_COLD_ON));
                 this.body.render(poseStack, coolingVertexes, light, overlay);

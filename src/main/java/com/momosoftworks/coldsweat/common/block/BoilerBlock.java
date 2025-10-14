@@ -37,7 +37,6 @@ import net.minecraftforge.fml.network.NetworkHooks;
 
 import javax.annotation.Nullable;
 import java.util.Random;
-import java.util.function.ToIntFunction;
 
 public class BoilerBlock extends Block
 {
@@ -50,7 +49,7 @@ public class BoilerBlock extends Block
                 .of(Material.STONE)
                 .sound(SoundType.STONE)
                 .strength(2, 10)
-                .lightLevel(getLightValueLit(13))
+                .lightLevel(state -> state.getValue(LIT) ? 13 : 0)
                 .isRedstoneConductor(BoilerBlock::conductsRedstone)
                 .requiresCorrectToolForDrops();
     }
@@ -64,14 +63,9 @@ public class BoilerBlock extends Block
     {
         TileEntity be = level.getBlockEntity(pos);
         if (be instanceof HearthBlockEntity)
-        {   return !((HearthBlockEntity) be).hasSmokeStack();
+        {   return !((HearthBlockEntity) be).hasSmokestack();
         }
         return false;
-    }
-
-    private static ToIntFunction<BlockState> getLightValueLit(int lightValue)
-    {
-        return (state) -> state.getValue(BlockStateProperties.LIT) ? lightValue : 0;
     }
 
     public BoilerBlock(Block.Properties properties)
@@ -127,10 +121,10 @@ public class BoilerBlock extends Block
     public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, IWorld level, BlockPos pos, BlockPos neighborPos)
     {
         TileEntity be = level.getBlockEntity(pos);
-        if (neighborPos.equals(pos.above()) && be instanceof BoilerBlockEntity)
+        if (direction == Direction.UP && be instanceof BoilerBlockEntity)
         {
             BoilerBlockEntity boiler = (BoilerBlockEntity) be;
-            boolean hadSmokestack = boiler.hasSmokeStack();
+            boolean hadSmokestack = boiler.hasSmokestack();
             if (hadSmokestack != boiler.checkForSmokestack())
             {   level.blockUpdated(pos, this);
             }
@@ -143,7 +137,7 @@ public class BoilerBlock extends Block
     {
         super.neighborChanged(state, level, pos, neighborBlock, fromPos, isMoving);
         // Check for redstone power to this block
-        HearthBlockEntity hearth = (HearthBlockEntity) level.getBlockEntity(pos);
+        BoilerBlockEntity hearth = (BoilerBlockEntity) level.getBlockEntity(pos);
         if (hearth != null)
         {   hearth.checkInputSignal();
         }

@@ -90,18 +90,6 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
                         hasWaterskins = true;
                     }
                 }
-                // Drain fuel
-                if (this.hasWaterskins)
-                {   this.setFuel(this.getFuel() - 1);
-                }
-            }
-        }
-        // Update lit state
-        if (!this.level.isClientSide())
-        {
-            boolean shouldBeLit = this.getFuel() > 0 && (this.hasWaterskins || this.shouldUseHotFuel);
-            if (state.getValue(BoilerBlock.LIT) != shouldBeLit)
-            {   level.setBlock(pos, state.setValue(BoilerBlock.LIT, shouldBeLit), 3);
             }
         }
     }
@@ -161,7 +149,7 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
     }
 
     @Override
-    public boolean hasSmokeStack()
+    public boolean hasSmokestack()
     {   return this.hasSmokestack;
     }
 
@@ -179,12 +167,20 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
     }
 
     @Override
-    protected void tickDrainFuel()
+    protected int getFuelDrainInterval()
+    {   return ConfigSettings.BOILER_FUEL_INTERVAL.get();
+    }
+
+    @Override
+    public boolean isUsingHotFuel()
+    {   return super.isUsingHotFuel() || this.hasWaterskins;
+    }
+
+    @Override
+    public void checkForStateChange()
     {
-        int fuelInterval = ConfigSettings.BOILER_FUEL_INTERVAL.get();
-        if (fuelInterval > 0 && this.ticksExisted % fuelInterval == 0)
-        {   this.drainFuel();
-        }
+        super.checkForStateChange();
+        this.ensureState(BoilerBlock.LIT, this.isUsingHotFuel());
     }
 
     @Override
