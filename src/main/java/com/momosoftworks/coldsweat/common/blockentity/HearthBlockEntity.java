@@ -442,7 +442,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
                         {   isProvidingInsulation |= this.insulateEntity(entity);
                         }
                     }
-                    if (!isProvidingInsulation)
+                    if (this.isSmartEnabled() && !isProvidingInsulation)
                     {   this.clearFuelUsage();
                     }
                 }
