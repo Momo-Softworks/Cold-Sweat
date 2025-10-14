@@ -370,7 +370,27 @@ public class AbstractTempCap implements ITemperatureCap
         this.tickHurting(entity);
     }
 
-    private double modifyFromAttribute(LivingEntity entity, Temperature.Trait trait, double baseValue)
+    protected double modifyFromAttribute(LivingEntity entity, Temperature.Trait trait, double baseValue)
+    {
+        double newValue = this.modifyFromAttribute(entity, trait, this.getModifiers(trait), baseValue);
+        double oldValue = this.getTrait(trait);
+        if (!DoubleMath.fuzzyEquals(newValue, oldValue, 0.001))
+        {
+            // Fire temperature change event
+            TemperatureChangedEvent event = new TemperatureChangedEvent(entity, trait, oldValue, newValue);
+            MinecraftForge.EVENT_BUS.post(event);
+            // Write new value to NBT
+            double eventTemp = event.getTemperature();
+            NBTHelper.getOrPutTag(entity, "Temperature", new CompoundNBT()).putDouble(trait.getSerializedName(), eventTemp);
+            // Return temperature from event
+            return eventTemp;
+        }
+        // Return
+        return oldValue;
+    }
+
+    @Override
+    public double modifyFromAttribute(LivingEntity entity, Trait trait, List<TempModifier> modifiers, double baseValue)
     {
         Supplier<Double> defaultSupplier = () -> Temperature.apply(baseValue, entity, trait, this.getModifiers(trait));
         ModifiableAttributeInstance attribute = this.getAttribute(entity, trait);
@@ -402,20 +422,7 @@ public class AbstractTempCap implements ITemperatureCap
                 newValue = value;
             }
         }
-        double oldValue = this.getTrait(trait);
-        if (!DoubleMath.fuzzyEquals(newValue, oldValue, 0.001))
-        {
-            // Fire temperature change event
-            TemperatureChangedEvent event = new TemperatureChangedEvent(entity, trait, oldValue, newValue);
-            MinecraftForge.EVENT_BUS.post(event);
-            // Write new value to NBT
-            double eventTemp = event.getTemperature();
-            NBTHelper.getOrPutTag(entity, "Temperature", new CompoundNBT()).putDouble(trait.getSerializedName(), eventTemp);
-            // Return temperature from event
-            return eventTemp;
-        }
-        // Return
-        return oldValue;
+        return newValue;
     }
 
     @Override

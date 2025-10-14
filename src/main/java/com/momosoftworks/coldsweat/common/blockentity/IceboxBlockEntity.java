@@ -211,6 +211,11 @@ public class IceboxBlockEntity extends HearthBlockEntity implements ITickableTil
     }
 
     @Override
+    protected boolean isSmartEnabled()
+    {   return ConfigSettings.SMART_ICEBOX.get();
+    }
+
+    @Override
     protected void tickPaths(int firstIndex, int lastIndex)
     {
         if (this.hasSmokestack)
