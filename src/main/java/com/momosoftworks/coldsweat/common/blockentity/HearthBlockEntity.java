@@ -472,6 +472,15 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         if (isClient)
         {   this.tickParticles();
         }
+
+        // Update state for smart mode
+        if (!isClient && this.ticksExisted % 20 == 0 && this.getBlockState().is(ModBlocks.HEARTH_BOTTOM))
+        {
+            boolean isSmart = this.getBlockState().getValue(HearthBottomBlock.SMART);
+            if (isSmart != this.isSmartEnabled())
+            {   level.setBlock(this.getBlockPos(), this.getBlockState().setValue(HearthBottomBlock.SMART, this.isSmartEnabled()), 2);
+            }
+        }
     }
 
     IChunk workingChunk = null;
