@@ -715,7 +715,9 @@ public class EntityTempManager
             ThermalSourceTempModifier newMod = (isWarmth ? new WarmthTempModifier(strength) : new FrigidnessTempModifier(strength)).expires(effect.getDuration());
             ThermalSourceTempModifier oldMod = Temperature.getModifier(entity, Trait.WORLD, ThermalSourceTempModifier.class).orElse(null);
             if (oldMod == null || oldMod.getStrength() <= strength)
-            {   Temperature.addOrReplaceModifier(entity, newMod, Trait.WORLD, Placement.Duplicates.BY_CLASS);
+            {
+                Temperature.removeModifiers(entity, Trait.WORLD, newMod.getClass());
+                Temperature.addModifier(entity, newMod, Trait.WORLD, Placement.Duplicates.BY_CLASS);
             }
         }
     }
