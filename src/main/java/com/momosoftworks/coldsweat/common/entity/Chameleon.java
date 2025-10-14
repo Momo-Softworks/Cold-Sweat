@@ -71,8 +71,7 @@ import java.util.UUID;
 @EventBusSubscriber
 public class Chameleon extends Animal
 {
-    static final EntityDataAccessor<Boolean> SHEDDING = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.BOOLEAN);
-    static final EntityDataAccessor<Boolean> CAN_SHED = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.BOOLEAN);
+    static final EntityDataAccessor<Integer> SHED_TIME = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.INT);
     static final EntityDataAccessor<Integer> LAST_SHED = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.INT);
     static final EntityDataAccessor<Integer> HURT_TIMESTAMP = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.INT);
     static final EntityDataAccessor<CompoundTag> TRUSTED_PLAYERS = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.COMPOUND_TAG);
@@ -126,12 +125,13 @@ public class Chameleon extends Animal
                 .add(Attributes.MOVEMENT_SPEED, 0.16D)
                 .add(Attributes.ATTACK_KNOCKBACK, 0.0D)
                 .add(Attributes.ATTACK_DAMAGE, 4.0D);
-    }@Override
+    }
+
+    @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder)
     {
         super.defineSynchedData(builder);
-        builder.define(SHEDDING, false);
-        builder.define(CAN_SHED, false);
+        builder.define(SHED_TIME, 0);
         builder.define(LAST_SHED, 0);
         builder.define(HURT_TIMESTAMP, 0);
         builder.define(TRUSTED_PLAYERS, new CompoundTag());
@@ -231,9 +231,8 @@ public class Chameleon extends Animal
         if (entity instanceof Chameleon chameleon && chameleon.isShedding() && chameleon.canShed())
         {
             chameleon.shedItems();
-            chameleon.setLastShed(chameleon.getAgeSecs() * 20);
-            chameleon.setShedding(false);
-            chameleon.entityData.set(CAN_SHED, false);
+            chameleon.setLastShed(chameleon.getAgeTicks());
+            chameleon.setShedTime(-1);
             return true;
         }
         return false;
@@ -390,37 +389,37 @@ public class Chameleon extends Animal
         // Tick shedding
         if (!this.level().isClientSide)
         {
-            boolean shedding = this.isShedding();
             int shedCheckInterval = ConfigSettings.SHED_TIMINGS.get().interval();
             int shedCooldown = ConfigSettings.SHED_TIMINGS.get().cooldown();
             double shedChance = ConfigSettings.SHED_TIMINGS.get().chance();
-            if (this.tickCount % shedCheckInterval == 0 && !shedding
-            && this.random.nextDouble() < shedChance && this.getAgeSecs() * 20 - this.getLastShed() > shedCooldown)
-            {
-                this.setShedding(true);
-                this.setLastShed(this.getAgeSecs() * 20);
-            }
+            int shedTime = this.getShedTime();
 
-            if (this.getAgeSecs() * 20 - this.getLastShed() > this.getTimeToShed() && !this.canShed())
-            {   this.entityData.set(CAN_SHED, true);
-                this.gameEvent(GameEvent.ENTITY_ACTION);
+            if (this.tickCount % shedCheckInterval == 0 && shedTime < 0
+            && this.random.nextDouble() < shedChance && this.getAgeTicks() - this.getLastShed() > shedCooldown)
+            {   this.setShedTime(0);
             }
-
-            if (ConfigSettings.CHAMELEON_SHED_AUTOMATICALLY.get() && shedding && this.canShed())
+            // Increment shed timer
+            if (shedTime > -1 && shedTime < this.getTimeToShed())
+            {   this.setShedTime(shedTime + 1);
+            }
+            // Trigger shedding event
+            if (shedTime == this.getTimeToShed())
+            {   this.gameEvent(GameEvent.ENTITY_ACTION);
+            }
+            // Shed items automatically if enabled
+            if (ConfigSettings.CHAMELEON_SHED_AUTOMATICALLY.get() && this.canShed())
             {   makeShed(this);
             }
         }
-        if (this.canShed())
+        // Particles
+        else if (this.random.nextDouble() < 0.2 && this.canShed())
         {
             // spawn shedding particles
-            if (this.level().isClientSide && this.random.nextDouble() < 0.2)
-            {
-                WorldHelper.spawnParticle(this.level(), new ItemParticleOption(ParticleTypes.ITEM, ModItems.CHAMELEON_MOLT.toStack()),
-                        this.getX() + (this.random.nextDouble() - 0.5) * this.getBbWidth(),
-                        this.getY() + this.random.nextDouble() * this.getBbHeight(),
-                        this.getZ() + (this.random.nextDouble() - 0.5) * this.getBbWidth(),
-                        0.01, 0.05, 0.01);
-            }
+            WorldHelper.spawnParticle(this.level(), new ItemParticleOption(ParticleTypes.ITEM, ModItems.CHAMELEON_MOLT.toStack()),
+                    this.getX() + (this.random.nextDouble() - 0.5) * this.getBbWidth(),
+                    this.getY() + this.random.nextDouble() * this.getBbHeight(),
+                    this.getZ() + (this.random.nextDouble() - 0.5) * this.getBbWidth(),
+                    0.01, 0.05, 0.01);
         }
 
         // Follow the player's movements when riding
@@ -479,7 +478,7 @@ public class Chameleon extends Animal
 
             if (this.tickCount % 20 == 0)
             {
-                if (this.getAgeSecs() * 20L - this.getEatTimestamp() > 6000)
+                if (this.getAgeTicks() - this.getEatTimestamp() > 6000)
                 {   this.clearTrackingPos();
                 }
                 // Award nearby players the "chameleon_find_biome" advancement
@@ -574,7 +573,7 @@ public class Chameleon extends Animal
                     }
                 });
             }
-            this.setEatTimestamp(this.getAgeSecs() * 20);
+            this.setEatTimestamp(this.getAgeTicks());
         }
     }
 
@@ -606,16 +605,20 @@ public class Chameleon extends Animal
     {   return this.eatAnimationTimer;
     }
 
-    public boolean isShedding()
-    {   return this.entityData.get(SHEDDING);
+    public int getShedTime()
+    {   return this.entityData.get(SHED_TIME);
     }
 
-    public void setShedding(boolean shedding)
-    {   this.entityData.set(SHEDDING, shedding);
+    public void setShedTime(int shedTime)
+    {   this.entityData.set(SHED_TIME, shedTime);
+    }
+
+    public boolean isShedding()
+    {   return this.getShedTime() >= 0;
     }
 
     public boolean canShed()
-    {   return this.entityData.get(CAN_SHED);
+    {   return this.getShedTime() >= this.getTimeToShed();
     }
 
     public CompoundTag getTrustedPlayers()
@@ -643,78 +646,63 @@ public class Chameleon extends Animal
     }
 
     public boolean isPlayerTrusted(Player player)
-    {
-        return this.isPlayerTrusted(player.getUUID());
+    {   return this.isPlayerTrusted(player.getUUID());
     }
 
     public boolean isPlayerTrusted(UUID player)
-    {
-        return this.getTrustedPlayers().getList("Players", 8).contains(StringTag.valueOf(player.toString()));
+    {   return this.getTrustedPlayers().getList("Players", 8).contains(StringTag.valueOf(player.toString()));
     }
 
     public int getLastShed()
-    {
-        return this.entityData.get(LAST_SHED);
+    {   return this.entityData.get(LAST_SHED);
     }
 
     public void setLastShed(int lastShed)
-    {
-        this.entityData.set(LAST_SHED, lastShed);
+    {   this.entityData.set(LAST_SHED, lastShed);
     }
 
     public float getTemperature()
-    {
-        return this.entityData.get(TEMPERATURE);
+    {   return this.entityData.get(TEMPERATURE);
     }
 
     public void setTemperature(float temperature)
-    {
-        this.entityData.set(TEMPERATURE, temperature);
+    {   this.entityData.set(TEMPERATURE, temperature);
     }
 
     public void setSearching(boolean searching)
-    {
-        this.entityData.set(SEARCHING, searching);
+    {   this.entityData.set(SEARCHING, searching);
     }
 
     public boolean isSearching()
-    {
-        return this.entityData.get(SEARCHING);
+    {   return this.entityData.get(SEARCHING);
     }
 
     public int getHurtTimestamp()
-    {
-        return this.entityData.get(HURT_TIMESTAMP);
+    {   return this.entityData.get(HURT_TIMESTAMP);
     }
 
     public void setHurtTimestamp(int hurtTimestamp)
-    {
-        this.entityData.set(HURT_TIMESTAMP, hurtTimestamp);
+    {   this.entityData.set(HURT_TIMESTAMP, hurtTimestamp);
     }
 
     public void setTrackingPos(BlockPos pos)
-    {
-        this.entityData.set(TRACKING_POS, pos);
+    {   this.entityData.set(TRACKING_POS, pos);
     }
 
     public void clearTrackingPos()
-    {
-        this.entityData.set(TRACKING_POS, BlockPos.ZERO);
+    {   this.entityData.set(TRACKING_POS, BlockPos.ZERO);
     }
 
     public BlockPos getTrackingPos()
-    {
-        return this.entityData.get(TRACKING_POS);
+    {   return this.entityData.get(TRACKING_POS);
     }
 
     public boolean isTracking()
-    {
-        return !this.entityData.get(TRACKING_POS).equals(BlockPos.ZERO);
+    {   return !this.entityData.get(TRACKING_POS).equals(BlockPos.ZERO);
     }
 
     public long getEatTimestamp()
-    {
-        return this.entityData.get(EAT_TIMESTAMP);
+    {   return this.entityData.get(EAT_TIMESTAMP);
     }
 
     public void setEatTimestamp(int eatTimestamp)
@@ -740,8 +728,11 @@ public class Chameleon extends Animal
     }
 
     public int getAgeSecs()
-    {
-        return this.entityData.get(AGE_SECS);
+    {   return this.entityData.get(AGE_SECS);
+    }
+
+    public int getAgeTicks()
+    {   return this.getAgeSecs() * 20;
     }
 
     public void setAgeSecs(int ageSecs)
@@ -762,7 +753,7 @@ public class Chameleon extends Animal
 
         tag.put("TrustedPlayers", Objects.requireNonNullElseGet(this.getTrustedPlayers().get("Players"), ListTag::new));
         tag.putInt("LastShed", this.getLastShed());
-        tag.putBoolean("Shedding", this.isShedding());
+        tag.putInt("ShedTime", this.getShedTime());
         tag.putInt("HurtTimestamp", this.getHurtTimestamp());
         tag.putInt("AgeInSeconds", this.getAgeSecs());
         tag.putLong("EatTimestamp", this.getEatTimestamp());
@@ -797,7 +788,7 @@ public class Chameleon extends Animal
         this.entityData.set(TRUSTED_PLAYERS, players, true);
 
         this.setLastShed(nbt.getInt("LastShed"));
-        this.setShedding(nbt.getBoolean("Shedding"));
+        this.setShedTime(nbt.getInt("ShedTime"));
         this.setHurtTimestamp(nbt.getInt("HurtTimestamp"));
         this.setAgeSecs(nbt.getInt("AgeInSeconds"));
         this.setEatTimestamp(nbt.getInt("EatTimestamp"));
