@@ -97,11 +97,8 @@ public class BoilerBlockEntity extends HearthBlockEntity
                         hasWaterskins = true;
                     }
                 }
-                // Drain fuel
-                if (this.hasWaterskins || this.hasDrinkables)
-                {   this.setFuel(this.getFuel() - 1);
-                }
             }
+            // Purify drinkable items
             if (this.ticksExisted % (200 / Math.max(1, ConfigSettings.TEMP_RATE.get())) == 0)
             {
                 this.hasDrinkables = false;
@@ -117,14 +114,6 @@ public class BoilerBlockEntity extends HearthBlockEntity
                 }
             }
         }
-        // Update lit state
-        if (!this.level.isClientSide())
-        {
-            boolean shouldBeLit = this.getFuel() > 0 && (this.hasWaterskins || this.hasDrinkables || this.shouldUseHotFuel);
-            if (state.getValue(BoilerBlock.LIT) != shouldBeLit)
-            {   level.setBlock(pos, state.setValue(BoilerBlock.LIT, shouldBeLit), 3);
-            }
-        }
     }
 
     public void checkForItems()
@@ -134,9 +123,6 @@ public class BoilerBlockEntity extends HearthBlockEntity
 
         for (int i = 1; i < 10; i++)
         {
-            if (this.hasWaterskins && this.hasDrinkables)
-            {   break;
-            }
             ItemStack stack = this.getItem(i);
             CompoundTag tag = NBTHelper.getTagOrEmpty(stack);
             double itemTemp = tag.getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
@@ -189,7 +175,7 @@ public class BoilerBlockEntity extends HearthBlockEntity
     }
 
     @Override
-    public boolean hasSmokeStack()
+    public boolean hasSmokestack()
     {   return this.hasSmokestack;
     }
 
@@ -207,12 +193,20 @@ public class BoilerBlockEntity extends HearthBlockEntity
     }
 
     @Override
-    protected void tickDrainFuel()
+    protected int getFuelDrainInterval()
+    {   return ConfigSettings.BOILER_FUEL_INTERVAL.get();
+    }
+
+    @Override
+    public boolean isUsingHotFuel()
+    {   return super.isUsingHotFuel() || this.hasDrinkables || this.hasWaterskins;
+    }
+
+    @Override
+    public void checkForStateChange()
     {
-        int fuelInterval = ConfigSettings.BOILER_FUEL_INTERVAL.get();
-        if (fuelInterval > 0 && this.ticksExisted % fuelInterval == 0)
-        {   this.drainFuel();
-        }
+        super.checkForStateChange();
+        this.ensureState(BoilerBlock.LIT, this.isUsingHotFuel());
     }
 
     @Override
