@@ -15,7 +15,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class IceboxBlockEntityRenderer implements BlockEntityRenderer<IceboxBlockEntity>
@@ -54,9 +54,9 @@ public class IceboxBlockEntityRenderer implements BlockEntityRenderer<IceboxBloc
     {
         BlockState blockstate = blockEntity.getBlockState();
         poseStack.pushPose();
-        float f = blockstate.getValue(ChestBlock.FACING).toYRot();
+        float rotation = blockstate.getValue(HorizontalDirectionalBlock.FACING).toYRot();
         poseStack.translate(0.5F, 0.5F, 0.5F);
-        poseStack.mulPose(Axis.YP.rotationDegrees(-f));
+        poseStack.mulPose(Axis.YP.rotationDegrees(-rotation));
         poseStack.mulPose(Axis.XP.rotationDegrees(180));
         poseStack.translate(0, -1, 0);
 

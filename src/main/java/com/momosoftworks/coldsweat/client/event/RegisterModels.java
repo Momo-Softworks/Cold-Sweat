@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.client.event;
 
 import com.mojang.datafixers.util.Pair;
-import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.client.renderer.block.HearthBlockEntityRenderer;
 import com.momosoftworks.coldsweat.client.renderer.block.IceboxBlockEntityRenderer;
 import com.momosoftworks.coldsweat.client.renderer.entity.ChameleonEntityRenderer;
 import com.momosoftworks.coldsweat.client.renderer.item.SoulSpringLampRenderer;
@@ -11,11 +11,9 @@ import com.momosoftworks.coldsweat.client.renderer.model.entity.ChameleonModel;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ModEntities;
 import com.momosoftworks.coldsweat.core.init.ModItems;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
-import net.minecraft.client.renderer.ItemModelShaper;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.resources.model.BakedModel;
@@ -110,6 +108,7 @@ public class RegisterModels
         event.registerLayerDefinition(EmptyArmorModel.LAYER_LOCATION, EmptyArmorModel::createArmorLayer);
 
         event.registerLayerDefinition(IceboxBlockEntityRenderer.LAYER_LOCATION, IceboxBlockEntityRenderer::createBodyLayer);
+        event.registerLayerDefinition(HearthBlockEntityRenderer.LAYER_LOCATION, HearthBlockEntityRenderer::createBodyLayer);
         event.registerLayerDefinition(SoulSpringLampRenderer.LAYER_LOCATION, SoulSpringLampRenderer::createBodyLayer);
     }
 

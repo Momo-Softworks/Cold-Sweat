@@ -186,24 +186,30 @@ public class BoilerBlock extends Block implements EntityBlock
     }
 
     @OnlyIn(Dist.CLIENT)
-    public void animateTick(BlockState stateIn, Level level, BlockPos pos, RandomSource rand)
+    @Override
+    public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource rand)
     {
         ParticleStatus status = Minecraft.getInstance().options.particles().get();
-        if (stateIn.getValue(LIT) && status != ParticleStatus.MINIMAL)
-        {
-            double d0 = pos.getX() + 0.5D;
-            double d1 = pos.getY();
-            double d2 = pos.getZ() + 0.5D;
-            Direction direction = stateIn.getValue(FACING);
-            Direction.Axis direction$axis = direction.getAxis();
-
-            double d4 = rand.nextDouble() * 0.6D - 0.3D;
-            double d5 = direction$axis == Direction.Axis.X ? (double)direction.getStepX() * 0.52D : d4;
-            double d6 = rand.nextDouble() * 3.0D / 16.0D + 3 / 16.0;
-            double d7 = direction$axis == Direction.Axis.Z ? (double)direction.getStepZ() * 0.52D : d4;
-            level.addParticle(ParticleTypes.SMOKE, d0 + d5, d1 + d6, d2 + d7, 0.0D, 0.0D, 0.0D);
-            level.addParticle(ParticleTypes.FLAME, d0 + d5, d1 + d6, d2 + d7, 0.0D, 0.0D, 0.0D);
+        if (state.getValue(LIT) && status != ParticleStatus.MINIMAL)
+        {   createFlameParticles(level, pos, state, 0.52, 0);
         }
+    }
+
+    public static void createFlameParticles(Level level, BlockPos pos, BlockState state, double zOffset, double yOffset)
+    {
+        RandomSource rand = level.getRandom();
+        double x = pos.getX() + 0.5D;
+        double y = pos.getY();
+        double z = pos.getZ() + 0.5D;
+        Direction direction = state.getValue(FACING);
+        Direction.Axis direction$axis = direction.getAxis();
+
+        double randH = rand.nextDouble() * 0.6D - 0.3D;
+        double randV = rand.nextDouble() * 3.0D / 16.0D + 3 / 16.0;
+        double randPosX = direction$axis == Direction.Axis.X ? direction.getStepX() * zOffset : randH;
+        double randPosZ = direction$axis == Direction.Axis.Z ? direction.getStepZ() * zOffset : randH;
+        level.addParticle(ParticleTypes.SMOKE, x + randPosX, y + randV + yOffset, z + randPosZ, 0.0D, 0.0D, 0.0D);
+        level.addParticle(ParticleTypes.FLAME, x + randPosX, y + randV + yOffset, z + randPosZ, 0.0D, 0.0D, 0.0D);
     }
 
     @Nullable
