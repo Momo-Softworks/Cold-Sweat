@@ -1008,6 +1008,14 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     {   return this.coldFuel.getAmount();
     }
 
+    public boolean isUsingColdFuel()
+    {   return this.shouldUseColdFuel;
+    }
+
+    public boolean isUsingHotFuel()
+    {   return this.shouldUseHotFuel;
+    }
+
     public void setHotFuel(int amount, boolean update)
     {
         boolean shouldUpdate = update && this.hotFuel.getAmount() != amount;

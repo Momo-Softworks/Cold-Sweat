@@ -1,15 +1,13 @@
 package com.momosoftworks.coldsweat.client.renderer.block;
 
-import com.jozufozu.flywheel.core.model.ModelPart;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.client.renderer.model.PartPose;
 import com.momosoftworks.coldsweat.common.block.IceboxBlock;
 import com.momosoftworks.coldsweat.common.blockentity.IceboxBlockEntity;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;
-import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.block.HorizontalBlock;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.ModelRenderer;
@@ -45,9 +43,9 @@ public class IceboxBlockEntityRenderer extends TileEntityRenderer<IceboxBlockEnt
     {
         BlockState blockstate = blockEntity.getBlockState();
         poseStack.pushPose();
-        float f = blockstate.getValue(ChestBlock.FACING).toYRot();
+        float rotation = blockstate.getValue(HorizontalBlock.FACING).toYRot();
         poseStack.translate(0.5F, 0.5F, 0.5F);
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(-f));
+        poseStack.mulPose(Vector3f.YP.rotationDegrees(-rotation));
         poseStack.mulPose(Vector3f.XP.rotationDegrees(180));
         poseStack.translate(0, -1, 0);
 

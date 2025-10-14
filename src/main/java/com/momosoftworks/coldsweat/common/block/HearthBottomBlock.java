@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -28,6 +29,8 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.network.NetworkHooks;
 
 import javax.annotation.Nullable;
@@ -47,7 +50,8 @@ public class HearthBottomBlock extends Block
                 .sound(SoundType.STONE)
                 .strength(2.0F, 10)
                 .requiresCorrectToolForDrops()
-                .isRedstoneConductor((state, level, pos) -> false);
+                .isRedstoneConductor((state, level, pos) -> false)
+                .noOcclusion();
     }
 
     public static Item.Properties getItemProperties()
@@ -69,6 +73,11 @@ public class HearthBottomBlock extends Block
     {   return true;
     }
 
+    public BlockRenderType getRenderShape(BlockState pState)
+    {   return BlockRenderType.ENTITYBLOCK_ANIMATED;
+    }
+
+    @Nullable
     @Override
     public TileEntity createTileEntity(BlockState state, IBlockReader world)
     {   return BlockEntityInit.HEARTH_BLOCK_ENTITY_TYPE.get().create();
@@ -162,6 +171,20 @@ public class HearthBottomBlock extends Block
         return ActionResultType.SUCCESS;
     }
 
+    @OnlyIn(Dist.CLIENT)
+    @Override
+    public void animateTick(BlockState state, World level, BlockPos pos, Random random)
+    {
+        HearthBlockEntity hearth = (HearthBlockEntity) level.getBlockEntity(pos);
+        if (hearth == null) return;
+        if (hearth.isUsingColdFuel())
+        {   IceboxBlock.createMistParticles(level, pos);
+        }
+        if (hearth.isUsingHotFuel())
+        {   BoilerBlock.createFlameParticles(level, pos, state, 0.6, 0.1);
+        }
+    }
+
     @Override
     public void onPlace(BlockState state, World level, BlockPos pos, BlockState lastState, boolean p_60570_)
     {
@@ -193,7 +216,6 @@ public class HearthBottomBlock extends Block
             TileEntity tileentity = level.getBlockEntity(pos);
             if (tileentity instanceof HearthBlockEntity)
             {   InventoryHelper.dropContents(level, pos, (HearthBlockEntity) tileentity);
-                level.updateNeighborsAt(pos, this);
             }
         }
         super.onRemove(state, level, pos, newState, isMoving);
