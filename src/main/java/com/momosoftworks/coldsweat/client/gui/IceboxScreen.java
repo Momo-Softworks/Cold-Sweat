@@ -46,7 +46,7 @@ public class IceboxScreen extends AbstractHearthScreen<IceboxContainer>
         // Draw fuel gauge
         blit(matrixStack, leftPos + 100,  topPos + 63 + (maxGaugeHeight-gaugeHeight),  176, maxGaugeHeight - gaugeHeight,  14, gaugeHeight, 256, 256);
 
-        if (!ConfigSettings.SMART_HEARTH.get() && this.menu.te.hasSmokeStack())
+        if (!ConfigSettings.SMART_HEARTH.get() && this.menu.te.hasSmokestack())
         {
             boolean powered = this.menu.te.isCoolingOn();
 
