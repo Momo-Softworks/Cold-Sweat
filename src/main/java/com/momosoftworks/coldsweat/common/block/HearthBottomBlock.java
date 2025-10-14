@@ -12,6 +12,7 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -24,10 +25,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.EntityBlock;
-import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -38,6 +36,8 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.network.NetworkHooks;
 
 import javax.annotation.Nullable;
@@ -58,7 +58,8 @@ public class HearthBottomBlock extends Block implements EntityBlock
                 .destroyTime(2.0F)
                 .explosionResistance(10.0F)
                 .requiresCorrectToolForDrops()
-                .isRedstoneConductor((state, level, pos) -> false);
+                .isRedstoneConductor((state, level, pos) -> false)
+                .noOcclusion();
     }
 
     public static Item.Properties getItemProperties()
@@ -78,6 +79,10 @@ public class HearthBottomBlock extends Block implements EntityBlock
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type)
     {   return type == ModBlockEntities.HEARTH ? HearthBlockEntity::tickSelf : null;
+    }
+
+    public RenderShape getRenderShape(BlockState pState)
+    {   return RenderShape.ENTITYBLOCK_ANIMATED;
     }
 
     @Nullable
@@ -173,6 +178,20 @@ public class HearthBottomBlock extends Block implements EntityBlock
         return InteractionResult.SUCCESS;
     }
 
+    @OnlyIn(Dist.CLIENT)
+    @Override
+    public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random)
+    {
+        HearthBlockEntity hearth = (HearthBlockEntity) level.getBlockEntity(pos);
+        if (hearth == null) return;
+        if (hearth.isUsingColdFuel())
+        {   IceboxBlock.createMistParticles(level, pos);
+        }
+        if (hearth.isUsingHotFuel())
+        {   BoilerBlock.createFlameParticles(level, pos, state, 0.6, 0.1);
+        }
+    }
+
     @Override
     public void onPlace(BlockState state, Level level, BlockPos pos, BlockState lastState, boolean p_60570_)
     {
@@ -204,7 +223,6 @@ public class HearthBottomBlock extends Block implements EntityBlock
             BlockEntity tileentity = level.getBlockEntity(pos);
             if (tileentity instanceof HearthBlockEntity)
             {   Containers.dropContents(level, pos, (HearthBlockEntity) tileentity);
-                level.updateNeighborsAt(pos, this);
             }
         }
         super.onRemove(state, level, pos, newState, isMoving);

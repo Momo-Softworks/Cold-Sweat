@@ -50,6 +50,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
     public static int[] WATERSKIN_SLOTS = {1, 2, 3, 4, 5, 6, 7, 8, 9};
     public static int[] FUEL_SLOT = {0};
 
+    private boolean hasItemStacks = false;
     LazyOptional<? extends IItemHandler>[] slotHandlers =
             SidedInvWrapper.create(this, Direction.UP, Direction.DOWN, Direction.NORTH);
 
@@ -144,16 +145,17 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
         {   this.openersCounter.recheckOpeners(this.level, this.getBlockPos(), this.getBlockState());
         }
 
-        if (getFuel() > 0)
+        if (this.getFuel() > 0)
         {
             // Set state to frosted
             if (!state.getValue(IceboxBlock.FROSTED))
-                level.setBlock(pos, state.setValue(IceboxBlock.FROSTED, true), 3);
+            {   level.setBlock(pos, state.setValue(IceboxBlock.FROSTED, true), 3);
+            }
 
             // Cool down waterskins
             if (ticksExisted % (int) (20 / Math.max(1, ConfigSettings.TEMP_RATE.get())) == 0)
             {
-                boolean hasItemStacks = false;
+                this.hasItemStacks = false;
                 for (int i = 1; i < 10; i++)
                 {
                     ItemStack stack = getItem(i);
@@ -161,16 +163,21 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
                     double itemTemp = tag.getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
 
                     if (stack.is(ModItems.FILLED_WATERSKIN) && itemTemp > -50)
-                    {   hasItemStacks = true;
+                    {   this.hasItemStacks = true;
                         tag.putDouble(FilledWaterskinItem.NBT_TEMPERATURE, Math.max(-50, itemTemp - 1));
                     }
                 }
-                if (hasItemStacks) setFuel(getFuel() - 1);
+                if (this.hasItemStacks)
+                {   this.setFuel(this.getFuel() - 1);
+                }
             }
         }
         // if no fuel, set state to unfrosted
-        else if (state.getValue(IceboxBlock.FROSTED))
-        {   level.setBlock(pos, state.setValue(IceboxBlock.FROSTED, false), 3);
+        else
+        {   this.hasItemStacks = false;
+            if (state.getValue(IceboxBlock.FROSTED))
+            {   level.setBlock(pos, state.setValue(IceboxBlock.FROSTED, false), 3);
+            }
         }
     }
 
@@ -224,6 +231,11 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
         if (fuelInterval > 0 && this.ticksExisted % fuelInterval == 0)
         {   this.drainFuel();
         }
+    }
+
+    @Override
+    public boolean isUsingColdFuel()
+    {   return super.isUsingColdFuel() || this.hasItemStacks;
     }
 
     @Override

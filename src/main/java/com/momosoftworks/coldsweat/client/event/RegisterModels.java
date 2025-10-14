@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.client.event;
 
 import com.mojang.datafixers.util.Pair;
+import com.momosoftworks.coldsweat.client.renderer.block.HearthBlockEntityRenderer;
 import com.momosoftworks.coldsweat.client.renderer.block.IceboxBlockEntityRenderer;
 import com.momosoftworks.coldsweat.client.renderer.entity.ChameleonEntityRenderer;
 import com.momosoftworks.coldsweat.client.renderer.item.SoulSpringLampRenderer;
@@ -105,6 +106,7 @@ public class RegisterModels
         event.registerLayerDefinition(EmptyArmorModel.LAYER_LOCATION, EmptyArmorModel::createArmorLayer);
 
         event.registerLayerDefinition(IceboxBlockEntityRenderer.LAYER_LOCATION, IceboxBlockEntityRenderer::createBodyLayer);
+        event.registerLayerDefinition(HearthBlockEntityRenderer.LAYER_LOCATION, HearthBlockEntityRenderer::createBodyLayer);
         event.registerLayerDefinition(SoulSpringLampRenderer.LAYER_LOCATION, SoulSpringLampRenderer::createBodyLayer);
     }
 
