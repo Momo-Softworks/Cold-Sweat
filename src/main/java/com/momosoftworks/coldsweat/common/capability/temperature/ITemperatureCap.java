@@ -41,6 +41,7 @@ public interface ITemperatureCap extends INBTSerializable<CompoundTag>
 
     void tick(LivingEntity entity);
     void tickDummy(LivingEntity entity);
+    double modifyFromAttribute(LivingEntity entity, Temperature.Trait trait, List<TempModifier> modifiers, double baseValue);
 
     void copy(ITemperatureCap cap);
     void syncValues(LivingEntity entity);

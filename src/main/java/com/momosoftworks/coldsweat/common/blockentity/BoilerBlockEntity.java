@@ -180,6 +180,11 @@ public class BoilerBlockEntity extends HearthBlockEntity
     }
 
     @Override
+    protected boolean isSmartEnabled()
+    {   return ConfigSettings.SMART_BOILER.get();
+    }
+
+    @Override
     protected void tickPaths(int firstIndex, int lastIndex)
     {
         if (this.hasSmokestack)
