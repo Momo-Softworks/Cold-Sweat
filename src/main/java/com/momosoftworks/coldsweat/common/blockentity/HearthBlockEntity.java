@@ -453,7 +453,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                         {   isProvidingInsulation |= this.insulateEntity(entity);
                         }
                     }
-                    if (!isProvidingInsulation)
+                    if (this.isSmartEnabled() && !isProvidingInsulation)
                     {   this.clearFuelUsage();
                     }
                 }
