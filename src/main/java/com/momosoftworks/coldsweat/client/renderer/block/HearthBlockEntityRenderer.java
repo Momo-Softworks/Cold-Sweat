@@ -69,12 +69,12 @@ public class HearthBlockEntityRenderer implements BlockEntityRenderer<HearthBloc
 
         /* Fuel Textures */
         // Lit texture when fuel is burning
-        if (blockEntity.isUsingHotFuel())
+        if (blockstate.getValue(HearthBottomBlock.LIT))
         {   VertexConsumer litVertexes = buffer.getBuffer(RenderType.entityCutout(TEXTURE_LIT));
             this.grate.render(poseStack, litVertexes, light, overlay);
         }
         // Frost texture when cold fuel is present
-        if (blockEntity.getColdFuel() > 0)
+        if (blockstate.getValue(HearthBottomBlock.FROSTED))
         {   VertexConsumer frostedVertexes = buffer.getBuffer(RenderType.entityTranslucent(TEXTURE_FROST));
             this.body.render(poseStack, frostedVertexes, light, overlay);
         }
@@ -83,13 +83,13 @@ public class HearthBlockEntityRenderer implements BlockEntityRenderer<HearthBloc
         if (!blockstate.getValue(HearthBottomBlock.SMART))
         {
             // Heating
-            if (blockEntity.isHeatingOn())
+            if (blockstate.getValue(HearthBottomBlock.HEATING))
             {   // Redstone power to heat side
                 VertexConsumer heatingVertexes = buffer.getBuffer(RenderType.entityCutout(TEXTURE_HEAT_ON));
                 this.body.render(poseStack, heatingVertexes, light, overlay);
             }
             // Cooling
-            if (blockEntity.isCoolingOn())
+            if (blockstate.getValue(HearthBottomBlock.COOLING))
             {   // Redstone power to cool side
                 VertexConsumer coolingVertexes = buffer.getBuffer(RenderType.entityCutout(TEXTURE_COLD_ON));
                 this.body.render(poseStack, coolingVertexes, light, overlay);

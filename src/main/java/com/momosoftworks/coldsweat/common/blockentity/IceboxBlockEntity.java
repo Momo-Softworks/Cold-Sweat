@@ -58,14 +58,14 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
     {
         protected void onOpen(Level level, BlockPos pos, BlockState state)
         {
-            if (!IceboxBlockEntity.this.hasSmokeStack())
+            if (!IceboxBlockEntity.this.hasSmokestack())
             {   IceboxBlockEntity.this.level.playSound(null, pos, ModSounds.ICEBOX_OPEN, SoundSource.BLOCKS, 1f, level.random.nextFloat() * 0.2f + 0.9f);
             }
         }
 
         protected void onClose(Level level, BlockPos pos, BlockState state)
         {
-            if (!IceboxBlockEntity.this.hasSmokeStack())
+            if (!IceboxBlockEntity.this.hasSmokestack())
             {   IceboxBlockEntity.this.level.playSound(null, pos, ModSounds.ICEBOX_CLOSE, SoundSource.BLOCKS, 1f, 1f);
             }
         }
@@ -147,11 +147,6 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
 
         if (this.getFuel() > 0)
         {
-            // Set state to frosted
-            if (!state.getValue(IceboxBlock.FROSTED))
-            {   level.setBlock(pos, state.setValue(IceboxBlock.FROSTED, true), 3);
-            }
-
             // Cool down waterskins
             if (ticksExisted % (int) (20 / Math.max(1, ConfigSettings.TEMP_RATE.get())) == 0)
             {
@@ -167,16 +162,6 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
                         tag.putDouble(FilledWaterskinItem.NBT_TEMPERATURE, Math.max(-50, itemTemp - 1));
                     }
                 }
-                if (this.hasItemStacks)
-                {   this.setFuel(this.getFuel() - 1);
-                }
-            }
-        }
-        // if no fuel, set state to unfrosted
-        else
-        {   this.hasItemStacks = false;
-            if (state.getValue(IceboxBlock.FROSTED))
-            {   level.setBlock(pos, state.setValue(IceboxBlock.FROSTED, false), 3);
             }
         }
     }
@@ -212,7 +197,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
     }
 
     @Override
-    public boolean hasSmokeStack()
+    public boolean hasSmokestack()
     {   return this.hasSmokestack;
     }
 
@@ -230,17 +215,20 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
     }
 
     @Override
-    protected void tickDrainFuel()
-    {
-        int fuelInterval = ConfigSettings.ICEBOX_FUEL_INTERVAL.get();
-        if (fuelInterval > 0 && this.ticksExisted % fuelInterval == 0)
-        {   this.drainFuel();
-        }
+    protected int getFuelDrainInterval()
+    {   return ConfigSettings.ICEBOX_FUEL_INTERVAL.get();
     }
 
     @Override
     public boolean isUsingColdFuel()
     {   return super.isUsingColdFuel() || this.hasItemStacks;
+    }
+
+    @Override
+    public void checkForStateChange()
+    {
+        super.checkForStateChange();
+        this.ensureState(IceboxBlock.FROSTED, this.getColdFuel() > 0);
     }
 
     @Override

@@ -44,7 +44,7 @@ import java.util.Random;
 public class IceboxBlock extends Block implements EntityBlock
 {
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
-    public static final BooleanProperty FROSTED = BooleanProperty.create("frosted");
+    public static final BooleanProperty FROSTED = HearthBottomBlock.FROSTED;
     public static final BooleanProperty SMOKESTACK = BooleanProperty.create("smokestack");
 
     public static final VoxelShape SHAPE = Shapes.block();
@@ -69,7 +69,7 @@ public class IceboxBlock extends Block implements EntityBlock
     {
         BlockEntity be = level.getBlockEntity(pos);
         if (be instanceof HearthBlockEntity hearthLike)
-        {   return !hearthLike.hasSmokeStack();
+        {   return !hearthLike.hasSmokestack();
         }
         return false;
     }
@@ -158,7 +158,7 @@ public class IceboxBlock extends Block implements EntityBlock
     {
         if (neighborPos.equals(pos.above()) && level.getBlockEntity(pos) instanceof IceboxBlockEntity icebox)
         {
-            boolean hadSmokestack = icebox.hasSmokeStack();
+            boolean hadSmokestack = icebox.hasSmokestack();
             boolean hasSmokeStack = icebox.checkForSmokestack();
             if (hadSmokestack != hasSmokeStack)
             {
@@ -222,11 +222,12 @@ public class IceboxBlock extends Block implements EntityBlock
     public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource rand)
     {
         ParticleStatus status = Minecraft.getInstance().options.particles().get();
-        if (!state.getValue(FROSTED) || status == ParticleStatus.MINIMAL) return;
-        IceboxBlockEntity icebox = (IceboxBlockEntity) level.getBlockEntity(pos);
-        if (icebox == null || !icebox.isUsingColdFuel()) return;
+        if (status == ParticleStatus.MINIMAL) return;
 
-        createMistParticles(level, pos);
+        IceboxBlockEntity icebox = (IceboxBlockEntity) level.getBlockEntity(pos);
+        if (icebox != null && icebox.isUsingColdFuel())
+        {   createMistParticles(level, pos);
+        }
     }
 
     public static void createMistParticles(Level level, BlockPos pos)
