@@ -4,7 +4,6 @@ import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import com.momosoftworks.coldsweat.common.event.HearthSaveDataHandler;
-import com.momosoftworks.coldsweat.core.network.ModPacketHandlers;
 import com.momosoftworks.coldsweat.core.network.message.DisableHearthParticlesMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -50,7 +49,7 @@ public abstract class AbstractHearthScreen<T extends AbstractContainerMenu> exte
     @Override
     public void init()
     {   super.init();
-        if (this.getBlockEntity().hasSmokeStack())
+        if (this.getBlockEntity().hasSmokestack())
         {
             particleButton = this.addRenderableWidget(new ImageButton(leftPos + 160, topPos + 8, 8, 7, particleButtonSprites, (button) ->
             {
@@ -103,6 +102,10 @@ public abstract class AbstractHearthScreen<T extends AbstractContainerMenu> exte
         if (this.minecraft.player != null && hideParticlesOld != hideParticles)
         {   PacketDistributor.sendToServer(new DisableHearthParticlesMessage(HearthSaveDataHandler.serializeDisabledHearths()));
         }
+    }
+
+    protected static ResourceLocation getPowerIndicatorSprite(boolean powered)
+    {   return POWER_INDICATOR_SPRITES.get(true, powered);
     }
 
     private static void setImageButtonSprites(ImageButton button, WidgetSprites sprites)

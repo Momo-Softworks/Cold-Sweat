@@ -24,7 +24,6 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.SignalGetter;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -40,7 +39,6 @@ import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Random;
-import java.util.function.ToIntFunction;
 
 public class BoilerBlock extends Block implements EntityBlock
 {
@@ -54,7 +52,7 @@ public class BoilerBlock extends Block implements EntityBlock
                 .sound(SoundType.STONE)
                 .destroyTime(2f)
                 .explosionResistance(10f)
-                .lightLevel(getLightValueLit(13))
+                .lightLevel(state -> state.getValue(LIT) ? 13 : 0)
                 .isRedstoneConductor(BoilerBlock::conductsRedstone)
                 .requiresCorrectToolForDrops();
     }
@@ -68,14 +66,9 @@ public class BoilerBlock extends Block implements EntityBlock
     {
         BlockEntity be = level.getBlockEntity(pos);
         if (be instanceof HearthBlockEntity hearthLike)
-        {   return !hearthLike.hasSmokeStack();
+        {   return !hearthLike.hasSmokestack();
         }
         return false;
-    }
-
-    private static ToIntFunction<BlockState> getLightValueLit(int lightValue)
-    {
-        return (state) -> state.getValue(BlockStateProperties.LIT) ? lightValue : 0;
     }
 
     public BoilerBlock(Properties properties)
@@ -134,9 +127,9 @@ public class BoilerBlock extends Block implements EntityBlock
     @Override
     public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos)
     {
-        if (neighborPos.equals(pos.above()) && level.getBlockEntity(pos) instanceof BoilerBlockEntity boiler)
+        if (direction == Direction.UP && level.getBlockEntity(pos) instanceof BoilerBlockEntity boiler)
         {
-            boolean hadSmokestack = boiler.hasSmokeStack();
+            boolean hadSmokestack = boiler.hasSmokestack();
             if (hadSmokestack != boiler.checkForSmokestack())
             {   level.blockUpdated(pos, this);
             }
@@ -149,7 +142,7 @@ public class BoilerBlock extends Block implements EntityBlock
     {
         super.neighborChanged(state, level, pos, neighborBlock, fromPos, isMoving);
         // Check for redstone power to this block
-        HearthBlockEntity hearth = (HearthBlockEntity) level.getBlockEntity(pos);
+        BoilerBlockEntity hearth = (BoilerBlockEntity) level.getBlockEntity(pos);
         if (hearth != null)
         {   hearth.checkInputSignal();
         }

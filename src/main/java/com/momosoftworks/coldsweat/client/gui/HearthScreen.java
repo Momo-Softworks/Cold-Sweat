@@ -46,8 +46,8 @@ public class HearthScreen extends AbstractHearthScreen<HearthContainer>
             boolean coolingOn = this.menu.te.isCoolingOn();
             boolean heatingOn = this.menu.te.isHeatingOn();
 
-            graphics.blitSprite(POWER_INDICATOR_SPRITES.get(heatingOn, false), leftPos + 63,  topPos + 64, 13, 4);
-            graphics.blitSprite(POWER_INDICATOR_SPRITES.get(coolingOn, false), leftPos + 101, topPos + 64, 13, 4);
+            graphics.blitSprite(getPowerIndicatorSprite(heatingOn), leftPos + 63,  topPos + 64, 13, 4);
+            graphics.blitSprite(getPowerIndicatorSprite(coolingOn), leftPos + 101, topPos + 64, 13, 4);
 
             if (CSMath.betweenInclusive(mouseX, leftPos + 60, leftPos + 76) && CSMath.betweenInclusive(mouseY, topPos + 61, topPos + 67))
             {   this.setTooltipForNextRenderPass(Component.translatable(heatingOn ? "gui.cold_sweat.hearth.powered" : "gui.cold_sweat.hearth.unpowered"));

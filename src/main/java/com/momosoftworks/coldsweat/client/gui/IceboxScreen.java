@@ -42,11 +42,11 @@ public class IceboxScreen extends AbstractHearthScreen<IceboxContainer>
         // Draw fuel gauge
         graphics.blit(COLD_FUEL_GAUGE, leftPos + 100, topPos + 63 + (maxGaugeHeight-gaugeHeight), 0, maxGaugeHeight - gaugeHeight, 14, gaugeHeight, 14 ,14);
 
-        if (!ConfigSettings.SMART_HEARTH.get() && this.menu.te.hasSmokeStack())
+        if (!ConfigSettings.SMART_HEARTH.get() && this.menu.te.hasSmokestack())
         {
             boolean powered = this.menu.te.isCoolingOn();
 
-            graphics.blitSprite(POWER_INDICATOR_SPRITES.get(powered, false), leftPos + 101, topPos + 78, 13, 4);
+            graphics.blitSprite(getPowerIndicatorSprite(powered), leftPos + 101, topPos + 78, 13, 4);
 
             if (CSMath.betweenInclusive(mouseX, leftPos + 98, leftPos + 117) && CSMath.betweenInclusive(mouseY, topPos + 75, topPos + 82))
             {   this.setTooltipForNextRenderPass(Component.translatable(powered ? "gui.cold_sweat.hearth.powered" : "gui.cold_sweat.hearth.unpowered"));

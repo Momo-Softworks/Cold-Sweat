@@ -5,9 +5,7 @@ import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.vanilla.BlockStateChangedEvent;
-import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.temperature.modifier.ThermalSourceTempModifier;
-import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.event.HearthDebugRenderer;
 import com.momosoftworks.coldsweat.common.block.HearthBottomBlock;
@@ -72,6 +70,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.Fluids;
@@ -116,8 +115,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     int lastColdFuel = 0;
     boolean isCoolingOn = false;
     boolean isHeatingOn = false;
-    boolean shouldUseHotFuel = false;
-    boolean shouldUseColdFuel = false;
+    boolean usingHotFuel = false;
+    boolean usingColdFuel = false;
     boolean hasHotFuel = false;
     boolean hasColdFuel = false;
     int insulationLevel = 0;
@@ -241,10 +240,10 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     }
 
     public int getCoolingLevel()
-    {   return shouldUseColdFuel ? insulationLevel : 0;
+    {   return usingColdFuel ? insulationLevel : 0;
     }
     public int getHeatingLevel()
-    {   return shouldUseHotFuel ? insulationLevel : 0;
+    {   return usingHotFuel ? insulationLevel : 0;
     }
 
     /**
@@ -257,12 +256,16 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     /**
      * This must be true for the hearth to calculate spreading
      */
-    public boolean hasSmokeStack()
+    public boolean hasSmokestack()
     {   return true;
     }
 
     protected boolean isSmartEnabled()
     {   return ConfigSettings.SMART_HEARTH.get();
+    }
+
+    protected int getFuelDrainInterval()
+    {   return ConfigSettings.HEARTH_FUEL_INTERVAL.get();
     }
 
     public List<Direction> getHeatingSides()
@@ -348,14 +351,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         this.tickPotionEffects();
 
         // Determine what types of fuel to use
-        boolean wasUsingColdFuel = this.shouldUseColdFuel;
-        boolean wasUsingHotFuel = this.shouldUseHotFuel;
-        if (!this.isSmartEnabled())
-        {
-            this.shouldUseColdFuel = this.hasSmokestack && this.isCoolingOn && this.getColdFuel() > 0;
-            this.shouldUseHotFuel = this.hasSmokestack && this.isHeatingOn && this.getHotFuel() > 0;
-        }
-        if (!this.shouldUseColdFuel && !this.shouldUseHotFuel && !this.paths.isEmpty())
+        boolean wasUsingColdFuel = this.usingColdFuel;
+        boolean wasUsingHotFuel = this.usingHotFuel;
+        if (!this.usingColdFuel && !this.usingHotFuel && !this.paths.isEmpty())
         {   this.forceUpdate();
         }
 
@@ -371,7 +369,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
             {   insulationLevel++;
             }
 
-            if ((this.shouldUseColdFuel || this.shouldUseHotFuel || (this.isSmartEnabled() && this.isEntityNearby)))
+            if ((this.usingColdFuel || this.usingHotFuel || (this.isSmartEnabled() && this.isEntityNearby)))
             {
                 // Determine whether particles are enabled
                 if (this.ticksExisted % 20 == 0)
@@ -446,28 +444,40 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                 }
             }
         }
-
+        // Periodically check for fuel input
         if (this.ticksExisted % 40 == 0)
         {   this.checkForFuel();
         }
-
+        // Ensure correct block state
+        if (!isClient)
+        {   this.checkForStateChange();
+        }
         // Update fuel
-        if (!this.level.isClientSide && (this.isFuelChanged() || wasUsingColdFuel != this.shouldUseColdFuel || wasUsingHotFuel != this.shouldUseHotFuel))
+        if (!isClient && this.isFuelChanged())
         {   this.updateFuelState();
         }
-
         // Particles
         if (isClient)
         {   this.tickParticles();
         }
+    }
 
-        // Update state for smart mode
-        if (!isClient && this.ticksExisted % 20 == 0 && this.getBlockState().is(ModBlocks.HEARTH_BOTTOM))
+    protected <T extends Comparable<T>> void ensureState(Property<T> property, T value)
+    {
+        BlockState state = this.getBlockState();
+        if (state.hasProperty(property) && state.getValue(property) != value)
+        {   this.level.setBlock(this.getBlockPos(), state.setValue(property, value), 2);
+        }
+    }
+
+    public void checkForStateChange()
+    {
+        // Update state
+        if (this.getBlockState().is(ModBlocks.HEARTH_BOTTOM))
         {
-            boolean isSmart = this.getBlockState().getValue(HearthBottomBlock.SMART);
-            if (isSmart != this.isSmartEnabled())
-            {   level.setBlock(this.getBlockPos(), this.getBlockState().setValue(HearthBottomBlock.SMART, this.isSmartEnabled()), 2);
-            }
+            this.ensureState(HearthBottomBlock.SMART, this.isSmartEnabled());
+            this.ensureState(HearthBottomBlock.LIT, this.isUsingHotFuel());
+            this.ensureState(HearthBottomBlock.FROSTED, this.getColdFuel() > 0);
         }
     }
 
@@ -591,11 +601,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
             if (this.isSmartEnabled() && isHearth
             && !this.getBlockState().getValue(HearthBottomBlock.SMART))
             {
-                level.setBlock(this.getBlockPos(),
-                               this.getBlockState().setValue(HearthBottomBlock.HEATING, false)
-                                                   .setValue(HearthBottomBlock.COOLING, false)
-                                                   .setValue(HearthBottomBlock.SMART, true),
-                               2);
+                level.setBlock(this.getBlockPos(), this.getBlockState().setValue(HearthBottomBlock.SMART, true), 2);
                 return;
             }
             // Get signals
@@ -612,6 +618,12 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                 if (wasCoolingOn != this.isCoolingOn)
                 {   level.setBlock(this.getBlockPos(), this.getBlockState().setValue(HearthBottomBlock.COOLING, this.isCoolingOn), 3);
                 }
+            }
+            // Calculate fuel usage
+            if (!this.isSmartEnabled())
+            {
+                this.usingColdFuel = this.hasSmokestack && this.isCoolingOn && this.getColdFuel() > 0;
+                this.usingHotFuel = this.hasSmokestack && this.isHeatingOn && this.getHotFuel() > 0;
             }
             // Update signals for client
             this.syncInputSignal(wasHeatingOn, wasCoolingOn);
@@ -731,17 +743,17 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
 
     protected void drainFuel()
     {
-        if (this.shouldUseColdFuel)
+        if (this.isUsingColdFuel())
         {   this.setColdFuel(this.getColdFuel() - 1, true);
         }
-        if (this.shouldUseHotFuel)
+        if (this.isUsingHotFuel())
         {   this.setHotFuel(this.getHotFuel() - 1, true);
         }
     }
 
     protected void tickDrainFuel()
     {
-        int fuelInterval = ConfigSettings.HEARTH_FUEL_INTERVAL.get();
+        int fuelInterval = this.getFuelDrainInterval();
         if (fuelInterval > 0 && this.ticksExisted % fuelInterval == 0)
         {   this.drainFuel();
         }
@@ -751,8 +763,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     {
         if (this.level == null || !this.level.isClientSide)
         {
-            this.shouldUseColdFuel = false;
-            this.shouldUseHotFuel = false;
+            this.usingColdFuel = false;
+            this.usingHotFuel = false;
         }
     }
 
@@ -770,13 +782,13 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         {
             int maxEffect = this.getMaxInsulationLevel() - 1;
             int effectLevel = (int) Math.min(maxEffect, (insulationLevel / (double) this.getInsulationTime()) * maxEffect);
-            if (shouldUseColdFuel)
+            if (usingColdFuel)
             {   entity.addEffect(new MobEffectInstance(ModEffects.FRIGIDNESS, 60, effectLevel, false, false, true));
             }
-            if (shouldUseHotFuel)
+            if (usingHotFuel)
             {   entity.addEffect(new MobEffectInstance(ModEffects.WARMTH, 60, effectLevel, false, false, true));
             }
-            return this.shouldUseColdFuel || this.shouldUseHotFuel;
+            return this.usingColdFuel || this.usingHotFuel;
         }
         return false;
     }
@@ -803,9 +815,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
             }
 
             // Tell the hearth to use hot fuel
-            shouldUseHotFuel |= this.getHotFuel() > 0 && temp < min;
+            usingHotFuel |= this.getHotFuel() > 0 && temp < min;
             // Tell the hearth to use cold fuel
-            shouldUseColdFuel |= this.getColdFuel() > 0 && temp > max;
+            usingColdFuel |= this.getColdFuel() > 0 && temp > max;
             shouldInsulate.set(!CSMath.betweenInclusive(temp, min, max));
         });
         return shouldInsulate.get();
@@ -1024,11 +1036,11 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     }
 
     public boolean isUsingColdFuel()
-    {   return this.shouldUseColdFuel;
+    {   return this.usingColdFuel;
     }
 
     public boolean isUsingHotFuel()
-    {   return this.shouldUseHotFuel;
+    {   return this.usingHotFuel;
     }
 
     public void setHotFuel(int amount, boolean update)
@@ -1146,14 +1158,14 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     protected void tickParticles()
     {
         ParticleStatus status = Minecraft.getInstance().options.particles().get();
-        if (status == ParticleStatus.MINIMAL) return;
+        if (!this.hasSmokestack() || status == ParticleStatus.MINIMAL) return;
 
         RandomSource rand = this.level.random;
         for (Map.Entry<BlockPos, Direction> entry : this.pipeEnds.entrySet())
         {
             BlockPos pos = entry.getKey();
             Direction face = entry.getValue();
-            if (this.shouldUseColdFuel)
+            if (this.usingColdFuel)
             {
                 if (rand.nextDouble() < this.getColdFuel() / 3000d)
                 {   double d0 = pos.getX() + 0.5 + face.getStepX() * 0.35;
@@ -1165,7 +1177,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                     level.addParticle(ModParticleTypes.STEAM.get(), d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.04D, 0.0D);
                 }
             }
-            if (this.shouldUseHotFuel)
+            if (this.usingHotFuel)
             {
                 if (rand.nextDouble() < this.getHotFuel() / 3000d)
                 {   double d0 = pos.getX() + 0.5 + face.getStepX() * 0.35;
@@ -1264,8 +1276,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         CompoundTag tag = super.getUpdateTag(registries);
         tag.putInt("HotFuel",  this.getHotFuel());
         tag.putInt("ColdFuel", this.getColdFuel());
-        tag.putBoolean("ShouldUseColdFuel", this.shouldUseColdFuel);
-        tag.putBoolean("ShouldUseHotFuel", this.shouldUseHotFuel);
+        tag.putBoolean("ShouldUseColdFuel", this.usingColdFuel);
+        tag.putBoolean("ShouldUseHotFuel", this.usingHotFuel);
         tag.putInt("InsulationLevel", insulationLevel);
         tag.putBoolean("IsCooling", this.isCoolingOn);
         tag.putBoolean("IsHeating", this.isHeatingOn);
@@ -1279,8 +1291,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries)
     {   this.setHotFuel(tag.getInt("HotFuel"), false);
         this.setColdFuel(tag.getInt("ColdFuel"), false);
-        this.shouldUseColdFuel = tag.getBoolean("ShouldUseColdFuel");
-        this.shouldUseHotFuel = tag.getBoolean("ShouldUseHotFuel");
+        this.usingColdFuel = tag.getBoolean("ShouldUseColdFuel");
+        this.usingHotFuel = tag.getBoolean("ShouldUseHotFuel");
         this.insulationLevel = tag.getInt("InsulationLevel");
         this.isCoolingOn = tag.getBoolean("IsCooling");
         this.isHeatingOn = tag.getBoolean("IsHeating");

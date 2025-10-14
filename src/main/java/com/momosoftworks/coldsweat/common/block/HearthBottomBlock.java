@@ -48,6 +48,8 @@ public class HearthBottomBlock extends Block implements EntityBlock
     public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty COOLING = BooleanProperty.create("cooling");
     public static final BooleanProperty HEATING = BooleanProperty.create("heating");
+    public static final BooleanProperty LIT = BlockStateProperties.LIT;
+    public static final BooleanProperty FROSTED = BooleanProperty.create("frosted");
     public static final BooleanProperty SMART = BooleanProperty.create("smart");
 
     public static Properties getProperties()
@@ -59,6 +61,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
                 .explosionResistance(10.0F)
                 .requiresCorrectToolForDrops()
                 .isRedstoneConductor((state, level, pos) -> false)
+                .lightLevel(state -> state.getValue(LIT) ? 13 : 0)
                 .noOcclusion();
     }
 
@@ -72,6 +75,8 @@ public class HearthBottomBlock extends Block implements EntityBlock
         this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH)
                                                           .setValue(COOLING, false)
                                                           .setValue(HEATING, false)
+                                                          .setValue(LIT, false)
+                                                          .setValue(FROSTED, false)
                                                           .setValue(SMART, false));
     }
 
@@ -184,12 +189,10 @@ public class HearthBottomBlock extends Block implements EntityBlock
     @Override
     public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random)
     {
-        HearthBlockEntity hearth = (HearthBlockEntity) level.getBlockEntity(pos);
-        if (hearth == null) return;
-        if (hearth.isUsingColdFuel())
+        if (state.getValue(FROSTED))
         {   IceboxBlock.createMistParticles(level, pos);
         }
-        if (hearth.isUsingHotFuel())
+        if (state.getValue(LIT))
         {   BoilerBlock.createFlameParticles(level, pos, state, 0.6, 0.1);
         }
     }
@@ -212,6 +215,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
             HearthBlockEntity hearth = (HearthBlockEntity) level.getBlockEntity(pos);
             if (hearth != null)
             {   hearth.checkInputSignal();
+                hearth.checkForStateChange();
             }
         }
     }
@@ -241,7 +245,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
-    {   builder.add(FACING, COOLING, HEATING, SMART);
+    {   builder.add(FACING, COOLING, HEATING, LIT, FROSTED, SMART);
     }
 
     @Override
