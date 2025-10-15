@@ -597,7 +597,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         && !(Minecraft.getInstance().options.renderDebug && ConfigSettings.HEARTH_DEBUG.get()))
         {
             Random random = this.level.random;
-            int count = this.paths.size() / 100;
+            int count = Math.max(1, this.paths.size() / 100);
             for (int i = 0; i < count; i++)
             {
                 SpreadPath path = this.paths.get(random.nextInt(this.paths.size()));
