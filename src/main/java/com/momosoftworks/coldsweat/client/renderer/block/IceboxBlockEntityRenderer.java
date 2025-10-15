@@ -50,7 +50,7 @@ public class IceboxBlockEntityRenderer extends TileEntityRenderer<IceboxBlockEnt
         poseStack.translate(0, -1, 0);
 
         IVertexBuilder vertexes = buffer.getBuffer(RenderType.entityCutout(getTexture(blockstate)));
-        if (!blockEntity.hasSmokeStack())
+        if (!blockEntity.hasSmokestack())
         {
             float openness = blockEntity.getOpenNess(partialTick);
             openness = 1.0F - openness;
