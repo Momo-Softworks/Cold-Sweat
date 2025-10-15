@@ -155,7 +155,17 @@ public class ConfigHelper
             if (objString.startsWith("#"))
             {
                 final String tagID = objString.replace("#", "");
-                registryList.add(Either.left(getTagsForRegistry(registryKey).getTag(new ResourceLocation(tagID))), negate);
+                ITagCollection<T> tags = getTagsForRegistry(registryKey);
+                if (tags == null)
+                {   ColdSweat.LOGGER.error("Error parsing config: {} does not support tags", registryKey.location().getPath());
+                    continue;
+                }
+                ITag<T> tag = tags.getTag(new ResourceLocation(tagID));
+                if (tag == null)
+                {   ColdSweat.LOGGER.error("Error parsing {} config: tag \"{}\" does not exist", registryKey.location().getPath(), tagID);
+                    continue;
+                }
+                registryList.add(Either.left(tag), negate);
             }
             else
             {
@@ -193,7 +203,7 @@ public class ConfigHelper
     {   return parseBuiltinItems(net.minecraft.util.registry.Registry.ENTITY_TYPE_REGISTRY, ForgeRegistries.ENTITIES, entities);
     }
 
-    public static <K extends IForgeRegistryEntry<K>, V extends ConfigData> Multimap<K, V> parseTomlRegistry(ForgeConfigSpec.ConfigValue<List<? extends List<?>>> config, Function<List<?>, V> tomlParser,
+    public static <K extends IForgeRegistryEntry<K>, V extends ConfigData> Multimap<K, V> parseTomlRegistry(ForgeConfigSpec.ConfigValue<List< ? extends List<?>>> config, Function<List<?>, V> tomlParser,
                                                                                                             Function<V, NegatableList<Either<ITag<K>, K>>> keyListGetter,
                                                                                                             IForgeRegistry<K> keyRegistry, RegistryHolder<V> valueRegistry)
     {
@@ -316,9 +326,9 @@ public class ConfigHelper
                        regObj -> Optional.ofNullable(forgeRegistry.getKey(regObj)).map(ResourceLocation::toString).orElse(""));
     }
 
-    public static <T> String serializeTagOrRegistryObject(RegistryKey<Registry<T>> registry, Either<ITag<T>, T> obj, DynamicRegistries DynamicRegistries)
+    public static <T> String serializeTagOrRegistryObject(RegistryKey<Registry<T>> registry, Either<ITag<T>, T> obj, DynamicRegistries dynamicRegistries)
     {
-        Registry<T> reg = DynamicRegistries.registryOrThrow(registry);
+        Registry<T> reg = dynamicRegistries.registryOrThrow(registry);
         return obj.map(tag -> "#" + ConfigHelper.getTagsForObject(obj).getId((ITag) tag),
                        regObj -> Optional.ofNullable(reg.getKey(regObj)).map(ResourceLocation::toString).orElse(""));
     }
