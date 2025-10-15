@@ -607,7 +607,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         && !(Minecraft.getInstance().options.renderDebug && ConfigSettings.HEARTH_DEBUG.get()))
         {
             RandomSource random = this.level.random;
-            int count = this.paths.size() / 100;
+            int count = Math.max(1, this.paths.size() / 100);
             for (int i = 0; i < count; i++)
             {
                 SpreadPath path = this.paths.get(random.nextInt(this.paths.size()));
