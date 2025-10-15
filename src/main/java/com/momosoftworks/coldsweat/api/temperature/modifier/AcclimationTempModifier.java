@@ -21,7 +21,7 @@ public class AcclimationTempModifier extends TempModifier
         double minTemp = Temperature.get(entity, Temperature.Trait.FREEZING_POINT);
         double maxTemp = Temperature.get(entity, Temperature.Trait.BURNING_POINT);
         double tempFactor = CSMath.blend(-1, 1, Temperature.get(entity, Temperature.Trait.WORLD), minTemp, maxTemp);
-        double acclimateSpeed = (ConfigSettings.ACCLIMATION_SPEED.get() * this.getTickRate()) / 20;
+        double acclimateSpeed = (ConfigSettings.ACCLIMATION_SPEED.get() * this.getTickRate()) / 1200;
 
         switch (trait)
         {

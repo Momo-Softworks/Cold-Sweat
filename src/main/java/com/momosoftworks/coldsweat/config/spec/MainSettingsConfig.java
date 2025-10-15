@@ -161,8 +161,9 @@ public class MainSettingsConfig
             ACCLIMATION_SPEED = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────",
                          " The speed at which the player acclimates to hot or cold environments",
+                         " Represented as MC units per minute, so a value of 0.1 = 2.5C or 4.5F per minute",
                          " ⌄ ")
-                .defineInRange("Acclimation Speed", defaultDiff.getOrDefault(ConfigSettings.ACCLIMATION_SPEED, 0.0005), 0, Double.POSITIVE_INFINITY);
+                .defineInRange("Acclimation Speed", defaultDiff.getOrDefault(ConfigSettings.ACCLIMATION_SPEED, 0.0077), 0, Double.POSITIVE_INFINITY);
 
             MIN_ACCLIMATION_RANGE = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────",
