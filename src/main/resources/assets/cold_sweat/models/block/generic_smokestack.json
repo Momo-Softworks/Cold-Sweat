@@ -1,6 +1,5 @@
 {
 	"texture_size": [64, 64],
-    "ambientocclusion": false,
 	"elements": [
 		{
 			"from": [4, 0, 4],
