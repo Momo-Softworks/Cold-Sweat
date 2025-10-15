@@ -189,7 +189,8 @@ public class HearthBottomBlock extends Block implements EntityBlock
     @Override
     public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random)
     {
-        if (state.getValue(FROSTED))
+        HearthBlockEntity hearth = (HearthBlockEntity) level.getBlockEntity(pos);
+        if (hearth != null && hearth.isUsingColdFuel())
         {   IceboxBlock.createMistParticles(level, pos);
         }
         if (state.getValue(LIT))
