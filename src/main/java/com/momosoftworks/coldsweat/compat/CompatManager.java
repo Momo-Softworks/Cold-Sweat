@@ -5,6 +5,7 @@ import com.mojang.datafixers.util.Either;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.core.init.FetchSeasonsModsEvent;
 import com.momosoftworks.coldsweat.api.event.core.registry.LoadRegistriesEvent;
+import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.temperature.modifier.compat.SereneSeasonsTempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
@@ -55,7 +56,6 @@ import sereneseasons.api.season.SeasonChangedEvent;
 import sereneseasons.season.SeasonHooks;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.CuriosCapability;
-import top.theillusivec4.curios.api.event.CurioAttributeModifierEvent;
 import top.theillusivec4.curios.api.event.CurioChangeEvent;
 
 import java.util.ArrayList;
@@ -423,7 +423,7 @@ public class CompatManager
                 @SubscribeEvent
                 public void onCurioChange(CurioChangeEvent event)
                 {
-                    EntityTempManager.updateInsulationAttributeModifiers(event.getEntity(), event.getFrom(), event.getTo());
+                    EntityTempManager.updateInsulationAttributeModifiers(event.getEntity(), event.getFrom(), event.getTo(), Insulation.Slot.CURIO);
                 }
             });
 

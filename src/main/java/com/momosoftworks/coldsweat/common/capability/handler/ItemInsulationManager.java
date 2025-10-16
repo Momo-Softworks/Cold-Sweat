@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.common.capability.handler;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
@@ -29,24 +30,23 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-@EventBusSubscriber
 public class ItemInsulationManager
 {
-    /**
-     * Gets the insulation component from the item, or creates one if needed.<br>
-     * This will always return {@code null} for non-armor items!
-     */
+    @EventBusSubscriber
+    public static class Events
+    {
+        @SubscribeEvent
+        public static void handleInventoryOpen(PlayerContainerEvent event)
+        {   event.getEntity().getPersistentData().putBoolean("InventoryOpen", event instanceof PlayerContainerEvent.Open);
+        }
+    }
+
     public static Optional<ItemInsulationCap> getInsulationCap(ItemStack stack)
     {
         if (isInsulatable(stack) && !stack.has(ModItemComponents.ARMOR_INSULATION))
         {   stack.set(ModItemComponents.ARMOR_INSULATION, new ItemInsulationCap());
         }
         return Optional.ofNullable(stack.get(ModItemComponents.ARMOR_INSULATION));
-    }
-
-    @SubscribeEvent
-    public static void handleInventoryOpen(PlayerContainerEvent event)
-    {   event.getEntity().getPersistentData().putBoolean("InventoryOpen", event instanceof PlayerContainerEvent.Open);
     }
 
     /**
@@ -90,8 +90,18 @@ public class ItemInsulationManager
         return slots;
     }
 
+    public static Multimap<Item, InsulatorData> getInsulatorsForSlotType(Insulation.Slot slot)
+    {
+        return switch (slot)
+        {
+            case ITEM -> ConfigSettings.INSULATION_ITEMS.get();
+            case ARMOR -> ConfigSettings.INSULATING_ARMORS.get();
+            case CURIO -> ConfigSettings.INSULATING_CURIOS.get();
+        };
+    }
+
     /**
-     * Gives a collection of all insulation that is built-in to the item (not applied via sewing)
+     * Gives a collection of all insulation that the item can grant to armor.
      * @return an IMMUTABLE list of insulation the item has.
      */
     public static List<Insulation> getInsulatorInsulation(ItemStack stack)
@@ -107,26 +117,23 @@ public class ItemInsulationManager
     }
 
     /**
-     * Returns a list of {@link InsulatorData} attached to the item, including both built-in and applied insulation.
+     * Returns a list of {@link InsulatorData} attached to the item, including both built-in and applied insulation.<br>
+     * Use {@link com.momosoftworks.coldsweat.data.codec.impl.RequirementHolder#filterValid(List, ItemStack)} to restrict the results to only active insulators.
      * @return an IMMUTABLE list of insulation the item has.
      */
-    public static List<InsulatorData> getAllInsulatorsForStack(ItemStack stack)
+    public static List<InsulatorData> getInsulatorsForStack(ItemStack stack, Insulation.Slot slot)
     {
         if (stack.isEmpty()) return new ArrayList<>();
 
         List<InsulatorData> insulators = new ArrayList<>();
-        if (isInsulatable(stack))
+        // Get applied armor insulation
+        if (slot == Insulation.Slot.ARMOR && isInsulatable(stack))
         {
             getInsulationCap(stack).ifPresent(cap ->
-            {
-                for (Pair<ItemStack, List<InsulatorData>> pair : cap.getInsulation())
-                {   insulators.addAll(ConfigSettings.INSULATION_ITEMS.get().get(pair.getFirst().getItem()));
-                }
+            {   insulators.addAll(getAppliedArmorInsulators(stack));
             });
         }
-        insulators.addAll(ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()));
-        insulators.addAll(ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem()));
-        insulators.addAll(ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem()));
+        insulators.addAll(getInsulatorsForSlotType(slot).get(stack.getItem()));
 
         return insulators;
     }
@@ -135,27 +142,15 @@ public class ItemInsulationManager
      * Returns a list of all valid insulation applied to the given armor item.<br>
      * Insulation is considered valid if its requirement passes for the given armor and entity.
      * @param armor The armor item from which to get insulation.
-     * @param entity The entity wearing the item. If null, the insulators' entity requirements will always pass.
      * @return an IMMUTABLE list of valid insulation on the armor item
      */
-    public static List<InsulatorData> getEffectiveAppliedInsulation(ItemStack armor, @Nullable LivingEntity entity)
+    public static List<InsulatorData> getAppliedArmorInsulators(ItemStack armor)
     {
         return ItemInsulationManager.getInsulationCap(armor)
                .map(ItemInsulationCap::getInsulation).orElse(new ArrayList<>())
                .stream()
-               .map(pair -> pair.mapSecond(insulators -> insulators.stream().filter(entry -> entry.test(entity, pair.getFirst())).toList()))
-               .map(Pair::getSecond).flatMap(Collection::stream).toList();
-    }
-
-    /**
-     * Gets both applied an intrinsic insulation on the armor item.<br>
-     * See {@link #getEffectiveAppliedInsulation(ItemStack, LivingEntity)} for more information.
-     */
-    public static List<InsulatorData> getAllEffectiveInsulation(ItemStack armor, @Nullable LivingEntity entity)
-    {
-        List<InsulatorData> insulation = new ArrayList<>(getEffectiveAppliedInsulation(armor, entity));
-        insulation.addAll(ConfigSettings.INSULATING_ARMORS.get().get(armor.getItem()).stream().filter(insulator -> insulator.test(entity, armor)).toList());
-        return ImmutableList.copyOf(insulation);
+               .map(Pair::getSecond)
+               .flatMap(Collection::stream).toList();
     }
 
     /**
@@ -163,10 +158,10 @@ public class ItemInsulationManager
      * @param operation Optional. Filters the output to only include modifiers with the given operation.
      * @param owner Optional. The entity wearing the item. This will be used to check the validity of the insulation before its modifiers are added to the list.
      */
-    public static List<AttributeModifier> getAppliedInsulationAttributes(ItemStack stack, Holder<Attribute> attribute, @Nullable AttributeModifier.Operation operation, @Nullable Entity owner)
+    public static List<AttributeModifier> getArmorInsulationAttributes(ItemStack stack, Holder<Attribute> attribute, @Nullable AttributeModifier.Operation operation, @Nullable Entity owner)
     {
         List<AttributeModifier> modifiers = new ArrayList<>();
-        for (InsulatorData insulator : getAllInsulatorsForStack(stack))
+        for (InsulatorData insulator : getInsulatorsForStack(stack, Insulation.Slot.ARMOR))
         {
             if (insulator.test(owner, stack))
             {
@@ -192,7 +187,7 @@ public class ItemInsulationManager
                                                                               .filter(entry -> entry.attribute().equals(Holder.direct(attribute))))
                                                              .map(ItemAttributeModifiers.Entry::modifier)
                                                              .toList());
-        modifiers.addAll(getAppliedInsulationAttributes(stack, attribute, operation, owner));
+        modifiers.addAll(getArmorInsulationAttributes(stack, attribute, operation, owner));
         return modifiers;
     }
 

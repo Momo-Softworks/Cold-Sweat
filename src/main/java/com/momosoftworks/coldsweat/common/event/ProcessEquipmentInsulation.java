@@ -15,9 +15,9 @@ import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
+import com.momosoftworks.coldsweat.data.codec.impl.RequirementHolder;
 import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
-import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -163,7 +163,7 @@ public class ProcessEquipmentInsulation
         {   return;
         }
         ItemInsulationCap cap = icap.get();
-        List<InsulatorData> insulators = ItemInsulationManager.getEffectiveAppliedInsulation(armorStack, player);
+        List<InsulatorData> insulators = RequirementHolder.filterValid(ItemInsulationManager.getAppliedArmorInsulators(armorStack), player);
 
         // Get the armor's insulation values
         for (InsulatorData insulator : insulators)
