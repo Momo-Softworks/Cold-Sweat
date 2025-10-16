@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.util.registries;
 
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.IArmorMaterial;
 import net.minecraft.item.crafting.Ingredient;
@@ -12,11 +13,11 @@ import java.util.function.Supplier;
 public enum ModArmorMaterials implements IArmorMaterial
 {
     HOGLIN("hoglin", 14, new int[]{2, 5, 6, 3}, 25, () -> SoundEvents.ARMOR_EQUIP_LEATHER,
-           1.5F, 0.0F, () -> Ingredient.of(ModItems.HOGLIN_HIDE)),
+           1.5F, 0.0F, () -> Ingredient.of(ModItemTags.HOGLIN_LEATHERS)),
     GOAT_FUR("goat_fur", 10, new int[]{1, 4, 5, 2}, 15, () -> SoundEvents.ARMOR_EQUIP_LEATHER,
-             0F, 0.0F, () -> Ingredient.of(ModItems.FUR)),
+             0F, 0.0F, () -> Ingredient.of(ModItemTags.GOAT_FURS)),
     CHAMELEON("chameleon", 12, new int[]{2, 5, 6, 2}, 15, () -> ModSounds.ARMOR_EQUIP_CHAMELEON,
-                0F, 0.0F, () -> Ingredient.of(ModItems.CHAMELEON_MOLT));
+                0F, 0.0F, () -> Ingredient.of(ModItemTags.CHAMELEON_SCALES));
 
     private static final int[] HEALTH_PER_SLOT = new int[]{13, 15, 16, 11};
     private final String name;

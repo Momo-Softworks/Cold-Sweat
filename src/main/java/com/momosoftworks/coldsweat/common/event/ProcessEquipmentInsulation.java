@@ -229,7 +229,7 @@ public class ProcessEquipmentInsulation
     }
 
     /**
-     * Prevent damage by magma blocks if the player has hoglin hooves
+     * Prevent damage by magma blocks if the player has hoglin.json hooves
      */
     @SubscribeEvent
     public static void onDamageTaken(LivingAttackEvent event)

@@ -24,7 +24,7 @@ public class ColdSweatGroup extends ItemGroup
     {
         ModItems.WATERSKIN.fillItemCategory(this, items);
         ModItems.FILLED_WATERSKIN.fillItemCategory(this, items);
-        ModItems.FUR.fillItemCategory(this, items);
+        ModItems.GOAT_FUR.fillItemCategory(this, items);
         ModItems.HOGLIN_HIDE.fillItemCategory(this, items);
         ModItems.CHAMELEON_MOLT.fillItemCategory(this, items);
         ModItems.MINECART_INSULATION.fillItemCategory(this, items);
