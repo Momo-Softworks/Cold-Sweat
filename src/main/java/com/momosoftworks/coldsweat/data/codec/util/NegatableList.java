@@ -167,6 +167,12 @@ public class NegatableList<T>
     {   return this.requirements.isEmpty() && this.exclusions.isEmpty();
     }
 
+    public void forEach(Consumer<T> requirementAction, Consumer<T> exclusionAction)
+    {
+        this.requirements.forEach(requirementAction);
+        this.exclusions.forEach(exclusionAction);
+    }
+
     public <N> Optional<N> flatMap(Function<T, N> mapper, BinaryOperator<N> reducer, BiConsumer<N, N> remover)
     {
         // First map and reduce the requirements
