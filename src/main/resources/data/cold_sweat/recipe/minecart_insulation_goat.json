@@ -2,19 +2,24 @@
   "type": "minecraft:crafting_shaped",
   "pattern":
   [
-    "F F",
-    "F F"
+    "   ",
+    "W W",
+    "LLL"
   ],
   "key":
   {
-    "F":
+    "W":
     {
       "tag": "c:furs/goat"
+    },
+    "L":
+    {
+      "tag": "c:leathers"
     }
   },
   "result":
   {
-    "id": "cold_sweat:goat_fur_boots",
+    "item": "cold_sweat:minecart_insulation",
     "count": 1
   }
 }

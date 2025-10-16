@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.core.init;
 
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import net.minecraft.Util;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
@@ -24,7 +25,7 @@ public class ModArmorMaterials
                 map.put(ArmorItem.Type.CHESTPLATE, 6);
                 map.put(ArmorItem.Type.LEGGINGS, 5);
                 map.put(ArmorItem.Type.BOOTS, 2);
-            }), 25, SoundEvents.ARMOR_EQUIP_LEATHER, () -> Ingredient.of(ModItems.HOGLIN_HIDE),
+            }), 25, SoundEvents.ARMOR_EQUIP_LEATHER, () -> Ingredient.of(ModItemTags.HOGLIN_LEATHERS),
             List.of(new ArmorMaterial.Layer(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hoglin"))),
             1.5F, 0.0F));
 
@@ -34,7 +35,7 @@ public class ModArmorMaterials
                 map.put(ArmorItem.Type.CHESTPLATE, 5);
                 map.put(ArmorItem.Type.LEGGINGS, 4);
                 map.put(ArmorItem.Type.BOOTS, 1);
-            }), 15, SoundEvents.ARMOR_EQUIP_LEATHER, () -> Ingredient.of(ModItems.GOAT_FUR),
+            }), 15, SoundEvents.ARMOR_EQUIP_LEATHER, () -> Ingredient.of(ModItemTags.GOAT_FURS),
             List.of(new ArmorMaterial.Layer(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "goat_fur"))),
             0.0F, 0.0F));
 
@@ -44,7 +45,7 @@ public class ModArmorMaterials
                 map.put(ArmorItem.Type.CHESTPLATE, 6);
                 map.put(ArmorItem.Type.LEGGINGS, 5);
                 map.put(ArmorItem.Type.BOOTS, 2);
-            }), 15, ModSounds.ARMOR_EQUIP_CHAMELEON, () -> Ingredient.of(ModItems.CHAMELEON_MOLT),
+            }), 15, ModSounds.ARMOR_EQUIP_CHAMELEON, () -> Ingredient.of(ModItemTags.CHAMELEON_SCALES),
             List.of(new ArmorMaterial.Layer(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "chameleon"))),
             0.0F, 0.0F));
 }
