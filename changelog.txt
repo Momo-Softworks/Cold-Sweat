@@ -3450,3 +3450,29 @@ Technical Changes:
 
 Fixes:
 * Fixed crash due to failed/incomplete mod initialization in other mods when Cold Sweat is present
+
+Technical Changes:
+- Registry access in RegistryHelper is now captured before biome modifiers are applied
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.4-b05d
+* Added new block textures to the hearth for when it is burning hot fuel or has cold fuel
+- Increased the time it takes to fully acclimate from 15 minutes to 1 hour
+- Minecart insulation can now be crafted with fur instead of wool
+- Changed the keybind to show the numerical insulation value of an item from SHIFT to CTRL
+
+Fixes:
+* (1.21) Fixed crash on servers due to client-only class being loaded
+* Fixed smart/automatic behavior for the hearth, boiler, and icebox not working properly in many cases
+* Fixed attributes in curio insulators not being applied
+- Fixed chameleon shed state sometimes breaking when the entity is saved
+
+Technical Changes:
+- Improved the reliability of "required_mods" in JSON configs
+! Rearranged/simplified some methods in ItemInsulationManager
+     - Some methods have been removed or renamed. See the code for details
+- Armor crafting and repair materials are now handled by tags:
+     - Hoglin: #forge:leathers/hoglin
+     - Goat Fur: #forge:furs/goat
+     - Chameleon: #forge:scales/chameleon
