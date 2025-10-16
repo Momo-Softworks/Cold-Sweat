@@ -49,28 +49,14 @@ public class MixinRegistration
                 {   json.add("forge:conditions", new JsonArray());
                 }
                 JsonArray conditions = json.getAsJsonArray("forge:conditions");
-                requiredMods.forEach(
-                    req ->
-                    {
-                        JsonObject condition = new JsonObject();
-                        condition.addProperty("type", "forge:mod_loaded");
-                        // If required mod isn't loaded by CS standards, add an impossible condition
-                        if (!CompatManager.modLoaded(req))
-                        {   condition.addProperty("modid", "cs_impossible");
-                            conditions.add(condition);
-                            ColdSweat.LOGGER.info("Skipping registration of {} {}: missing mod \"{}\"", pRegistryKey.location(), resourcelocation, req);
-                        }
-                    },
-                    exc ->
-                    {
-                        if (CompatManager.modLoaded(exc))
-                        {   JsonObject condition = new JsonObject();
-                            condition.addProperty("type", "forge:mod_loaded");
-                            condition.addProperty("modid", "cs_impossible");
-                            conditions.add(condition);
-                            ColdSweat.LOGGER.info("Skipping registration of {} {}: disallowed mod \"{}\" is loaded", pRegistryKey.location(), resourcelocation, exc);
-                        }
-                    });
+                if (!requiredMods.test(CompatManager::modLoaded))
+                {
+                    JsonObject condition = new JsonObject();
+                    condition.addProperty("type", "forge:mod_loaded");
+                    condition.addProperty("modid", "cs_impossible");
+                    conditions.add(condition);
+                    ColdSweat.LOGGER.info("Skipping registration of {} {}: required mods not met", pRegistryKey.location(), resourcelocation);
+                }
             }
         }
     }
