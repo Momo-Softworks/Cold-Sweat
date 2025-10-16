@@ -4,6 +4,7 @@ import com.anthonyhilyard.iceberg.util.Tooltips;
 import com.mojang.datafixers.util.Either;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.core.init.FetchSeasonsModsEvent;
+import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.item.ThermometerItem;
@@ -353,7 +354,7 @@ public class CompatManager
                 @SubscribeEvent
                 public void onCurioChange(CurioChangeEvent event)
                 {
-                    EntityTempManager.updateInsulationAttributeModifiers(event.getEntity(), event.getFrom(), event.getTo());
+                    EntityTempManager.updateInsulationAttributeModifiers(event.getEntity(), event.getFrom(), event.getTo(), Insulation.Slot.CURIO);
                 }
             });
 
