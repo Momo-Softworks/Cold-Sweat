@@ -14,7 +14,7 @@
     },
     "L":
     {
-      "item": "minecraft:leather"
+      "tag": "forge:leathers"
     },
     "M":
     {
