@@ -36,7 +36,7 @@ public class CreativeTabInit
                             stack = CompatManager.Thirst.setWaterPurity(stack, 3);
                             return stack;
                         }),
-                        ModItems.FUR.getDefaultInstance(),
+                        ModItems.GOAT_FUR.getDefaultInstance(),
                         ModItems.HOGLIN_HIDE.getDefaultInstance(),
                         ModItems.CHAMELEON_MOLT.getDefaultInstance(),
                         ModItems.MINECART_INSULATION.getDefaultInstance(),
