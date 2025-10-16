@@ -43,23 +43,11 @@ public class MixinRegistration
             {
                 JsonElement requiredModsField = json.get("required_mods");
                 NegatableList<String> requiredMods = NegatableList.listCodec(Codec.STRING).parse(JsonOps.INSTANCE, requiredModsField).result().orElse(new NegatableList<>());
-                requiredMods.forEach(
-                    req ->
-                    {
-                        if (ci.isCancelled()) return;
-                        if (!CompatManager.modLoaded(req))
-                        {   ColdSweat.LOGGER.info("Skipping registration of {} {}: missing mod \"{}\"", registry.key().location(), elementKey.location(), req);
-                            ci.cancel();
-                        }
-                    },
-                    exc ->
-                    {
-                        if (ci.isCancelled()) return;
-                        if (CompatManager.modLoaded(exc))
-                        {   ColdSweat.LOGGER.info("Skipping registration of {} {}: disallowed mod \"{}\" is loaded", registry.key().location(), elementKey.location(), exc);
-                            ci.cancel();
-                        }
-                    });
+                if (!requiredMods.test(CompatManager::modLoaded))
+                {
+                    ci.cancel();
+                    ColdSweat.LOGGER.info("Skipping registration of {} {}: required mods not met", registry.key().location(), elementKey.location());
+                }
             }
         }
     }
