@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.common.capability.handler;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
@@ -36,100 +37,103 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 
-@Mod.EventBusSubscriber
 public class ItemInsulationManager
 {
     public static SidedCapabilityCache<IInsulatableCap, ItemStack> CAP_CACHE = new SidedCapabilityCache<>(ModCapabilities.ITEM_INSULATION);
 
-    @SubscribeEvent
-    public static void attachCapabilityToItemHandler(AttachCapabilitiesEvent<ItemStack> event)
+    @Mod.EventBusSubscriber
+    public static class Events
     {
-        ItemStack stack = event.getObject();
-        if (isInsulatable(stack))
+        @SubscribeEvent
+        public static void attachCapabilityToItemHandler(AttachCapabilitiesEvent<ItemStack> event)
         {
-            // Make a new capability instance to attach to the item
-            ItemInsulationCap itemInsulationCap = new ItemInsulationCap();
-            // Optional that holds the capability instance
-            final LazyOptional<IInsulatableCap> capOptional = LazyOptional.of(() -> itemInsulationCap);
-            Capability<IInsulatableCap> capability = ModCapabilities.ITEM_INSULATION;
-
-            ICapabilityProvider provider = new ICapabilitySerializable<CompoundTag>()
+            ItemStack stack = event.getObject();
+            if (isInsulatable(stack))
             {
-                @Nonnull
-                @Override
-                public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction direction)
+                // Make a new capability instance to attach to the item
+                ItemInsulationCap itemInsulationCap = new ItemInsulationCap();
+                // Optional that holds the capability instance
+                final LazyOptional<IInsulatableCap> capOptional = LazyOptional.of(() -> itemInsulationCap);
+                Capability<IInsulatableCap> capability = ModCapabilities.ITEM_INSULATION;
+
+                ICapabilityProvider provider = new ICapabilitySerializable<CompoundTag>()
                 {
-                    // If the requested cap is the insulation cap, return the insulation cap
-                    if (cap == capability)
-                    {   return capOptional.cast();
+                    @Nonnull
+                    @Override
+                    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction direction)
+                    {
+                        // If the requested cap is the insulation cap, return the insulation cap
+                        if (cap == capability)
+                        {   return capOptional.cast();
+                        }
+                        return LazyOptional.empty();
                     }
-                    return LazyOptional.empty();
-                }
 
-                @Override
-                public CompoundTag serializeNBT()
-                {   return itemInsulationCap.serializeNBT();
-                }
+                    @Override
+                    public CompoundTag serializeNBT()
+                    {   return itemInsulationCap.serializeNBT();
+                    }
 
-                @Override
-                public void deserializeNBT(CompoundTag nbt)
-                {   itemInsulationCap.deserializeNBT(nbt);
-                }
-            };
+                    @Override
+                    public void deserializeNBT(CompoundTag nbt)
+                    {   itemInsulationCap.deserializeNBT(nbt);
+                    }
+                };
 
-            // Attach the capability to the item
-            event.addCapability(new ResourceLocation(ColdSweat.MOD_ID, "item_insulation"), provider);
+                // Attach the capability to the item
+                event.addCapability(new ResourceLocation(ColdSweat.MOD_ID, "item_insulation"), provider);
+            }
+        }
+
+        @SubscribeEvent
+        public static void handleInventoryOpen(PlayerContainerEvent event)
+        {   event.getEntity().getPersistentData().putBoolean("InventoryOpen", event instanceof PlayerContainerEvent.Open);
+        }
+
+        @SubscribeEvent
+        public static void clearCachePeriodically(TickEvent.LevelTickEvent event)
+        {
+            if (event.phase == TickEvent.Phase.END && event.level.getGameTime() % 200 == 0)
+            {   CAP_CACHE.clear();
+            }
+        }
+
+        static ContainerListener INSULATION_LISTENER = new ContainerListener()
+        {
+            @Override
+            public void slotChanged(AbstractContainerMenu sendingContainer, int slot, ItemStack stack)
+            {
+                ItemStack containerStack = sendingContainer.getSlot(slot).getItem();
+                getInsulationCap(containerStack).ifPresent(cap ->
+                {
+                    // Serialize insulation for syncing to client
+                    containerStack.getOrCreateTag().remove("Insulation");
+                    containerStack.getOrCreateTag().merge(cap.serializeNBT());
+                });
+            }
+
+            @Override
+            public void dataChanged(AbstractContainerMenu sendingContainer, int slot, int value)
+            {
+
+            }
+        };
+
+        @SubscribeEvent
+        public static void onContainerOpen(PlayerContainerEvent.Open event)
+        {
+            event.getContainer().addSlotListener(INSULATION_LISTENER);
+        }
+
+        @SubscribeEvent
+        public static void onContainerClose(PlayerContainerEvent.Close event)
+        {
+            event.getContainer().removeSlotListener(INSULATION_LISTENER);
         }
     }
 
     public static LazyOptional<IInsulatableCap> getInsulationCap(ItemStack stack)
     {   return isInsulatable(stack) ? CAP_CACHE.get(stack) : LazyOptional.empty();
-    }
-
-    @SubscribeEvent
-    public static void handleInventoryOpen(PlayerContainerEvent event)
-    {   event.getEntity().getPersistentData().putBoolean("InventoryOpen", event instanceof PlayerContainerEvent.Open);
-    }
-
-    @SubscribeEvent
-    public static void clearCachePeriodically(TickEvent.LevelTickEvent event)
-    {
-        if (event.phase == TickEvent.Phase.END && event.level.getGameTime() % 200 == 0)
-        {   CAP_CACHE.clear();
-        }
-    }
-
-    static ContainerListener INSULATION_LISTENER = new ContainerListener()
-    {
-        @Override
-        public void slotChanged(AbstractContainerMenu sendingContainer, int slot, ItemStack stack)
-        {
-            ItemStack containerStack = sendingContainer.getSlot(slot).getItem();
-            getInsulationCap(containerStack).ifPresent(cap ->
-            {
-                // Serialize insulation for syncing to client
-                containerStack.getOrCreateTag().remove("Insulation");
-                containerStack.getOrCreateTag().merge(cap.serializeNBT());
-            });
-        }
-
-        @Override
-        public void dataChanged(AbstractContainerMenu sendingContainer, int slot, int value)
-        {
-
-        }
-    };
-
-    @SubscribeEvent
-    public static void onContainerOpen(PlayerContainerEvent.Open event)
-    {
-        event.getContainer().addSlotListener(INSULATION_LISTENER);
-    }
-
-    @SubscribeEvent
-    public static void onContainerClose(PlayerContainerEvent.Close event)
-    {
-        event.getContainer().removeSlotListener(INSULATION_LISTENER);
     }
 
     /**
@@ -173,8 +177,18 @@ public class ItemInsulationManager
         return slots;
     }
 
+    public static Multimap<Item, InsulatorData> getInsulatorsForSlotType(Insulation.Slot slot)
+    {
+        return switch (slot)
+        {
+            case ITEM -> ConfigSettings.INSULATION_ITEMS.get();
+            case ARMOR -> ConfigSettings.INSULATING_ARMORS.get();
+            case CURIO -> ConfigSettings.INSULATING_CURIOS.get();
+        };
+    }
+
     /**
-     * Gives a collection of all insulation that is built-in to the item (not applied via sewing)
+     * Gives a collection of all insulation that the item can grant to armor.
      * @return an IMMUTABLE list of insulation the item has.
      */
     public static List<Insulation> getInsulatorInsulation(ItemStack stack)
@@ -190,26 +204,23 @@ public class ItemInsulationManager
     }
 
     /**
-     * Returns a list of {@link InsulatorData} attached to the item, including both built-in and applied insulation.
+     * Returns a list of {@link InsulatorData} attached to the item, including both built-in and applied insulation.<br>
+     * Use {@link com.momosoftworks.coldsweat.data.codec.impl.RequirementHolder#filterValid(List, ItemStack)} to restrict the results to only active insulators.
      * @return an IMMUTABLE list of insulation the item has.
      */
-    public static List<InsulatorData> getAllInsulatorsForStack(ItemStack stack)
+    public static List<InsulatorData> getInsulatorsForStack(ItemStack stack, Insulation.Slot slot)
     {
         if (stack.isEmpty()) return new ArrayList<>();
 
         List<InsulatorData> insulators = new ArrayList<>();
-        if (isInsulatable(stack))
+        // Get applied armor insulation
+        if (slot == Insulation.Slot.ARMOR && isInsulatable(stack))
         {
             getInsulationCap(stack).ifPresent(cap ->
-            {
-                for (Pair<ItemStack, List<InsulatorData>> pair : cap.getInsulation())
-                {   insulators.addAll(ConfigSettings.INSULATION_ITEMS.get().get(pair.getFirst().getItem()));
-                }
+            {   insulators.addAll(getAppliedArmorInsulators(stack));
             });
         }
-        insulators.addAll(ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()));
-        insulators.addAll(ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem()));
-        insulators.addAll(ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem()));
+        insulators.addAll(getInsulatorsForSlotType(slot).get(stack.getItem()));
 
         return insulators;
     }
@@ -218,27 +229,15 @@ public class ItemInsulationManager
      * Returns a list of all valid insulation applied to the given armor item.<br>
      * Insulation is considered valid if its requirement passes for the given armor and entity.
      * @param armor The armor item from which to get insulation.
-     * @param entity The entity wearing the item. If null, the insulators' entity requirements will always pass.
      * @return an IMMUTABLE list of valid insulation on the armor item
      */
-    public static List<InsulatorData> getEffectiveAppliedInsulation(ItemStack armor, @Nullable LivingEntity entity)
+    public static List<InsulatorData> getAppliedArmorInsulators(ItemStack armor)
     {
         return ItemInsulationManager.getInsulationCap(armor)
                .map(IInsulatableCap::getInsulation).orElse(new ArrayList<>())
                .stream()
-               .map(pair -> pair.mapSecond(insulators -> insulators.stream().filter(entry -> entry.test(entity, pair.getFirst())).toList()))
-               .map(Pair::getSecond).flatMap(Collection::stream).toList();
-    }
-
-    /**
-     * Gets both applied an intrinsic insulation on the armor item.<br>
-     * See {@link #getEffectiveAppliedInsulation(ItemStack, LivingEntity)} for more information.
-     */
-    public static List<InsulatorData> getAllEffectiveInsulation(ItemStack armor, @Nullable LivingEntity entity)
-    {
-        List<InsulatorData> insulation = new ArrayList<>(getEffectiveAppliedInsulation(armor, entity));
-        insulation.addAll(ConfigSettings.INSULATING_ARMORS.get().get(armor.getItem()).stream().filter(insulator -> insulator.test(entity, armor)).toList());
-        return ImmutableList.copyOf(insulation);
+               .map(Pair::getSecond)
+               .flatMap(Collection::stream).toList();
     }
 
     /**
@@ -246,10 +245,10 @@ public class ItemInsulationManager
      * @param operation Optional. Filters the output to only include modifiers with the given operation.
      * @param owner Optional. The entity wearing the item. This will be used to check the validity of the insulation before its modifiers are added to the list.
      */
-    public static List<AttributeModifier> getAppliedInsulationAttributes(ItemStack stack, Attribute attribute, @Nullable AttributeModifier.Operation operation, @Nullable Entity owner)
+    public static List<AttributeModifier> getArmorInsulationAttributes(ItemStack stack, Attribute attribute, @Nullable AttributeModifier.Operation operation, @Nullable Entity owner)
     {
         List<AttributeModifier> modifiers = new ArrayList<>();
-        for (InsulatorData insulator : getAllInsulatorsForStack(stack))
+        for (InsulatorData insulator : getInsulatorsForStack(stack, Insulation.Slot.ARMOR))
         {
             if (insulator.test(owner, stack))
             {
@@ -273,7 +272,7 @@ public class ItemInsulationManager
                                                          .filter(mod -> mod.getOperation() == operation)
                                                          .toList()
                                                   : stack.getAttributeModifiers(slot).get(attribute));
-        modifiers.addAll(getAppliedInsulationAttributes(stack, attribute, operation, owner));
+        modifiers.addAll(getArmorInsulationAttributes(stack, attribute, operation, owner));
         return modifiers;
     }
 
