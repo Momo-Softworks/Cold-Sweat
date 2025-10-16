@@ -4,6 +4,7 @@ import com.blackgear.cavesandcliffs.common.entity.GoatEntity;
 import com.blackgear.cavesandcliffs.core.registries.entity.CCBEntityTypes;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.core.init.FetchSeasonsModsEvent;
+import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.capability.handler.ShearableFurManager;
 import com.momosoftworks.coldsweat.common.item.ThermometerItem;
@@ -346,7 +347,7 @@ public class CompatManager
                 @SubscribeEvent
                 public void onCurioChange(CurioChangeEvent event)
                 {
-                    EntityTempManager.updateInsulationAttributeModifiers(event.getEntityLiving(), event.getFrom(), event.getTo());
+                    EntityTempManager.updateInsulationAttributeModifiers(event.getEntityLiving(), event.getFrom(), event.getTo(), Insulation.Slot.CURIO);
                 }
             });
 

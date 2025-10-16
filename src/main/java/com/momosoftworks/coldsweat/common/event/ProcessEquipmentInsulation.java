@@ -5,7 +5,6 @@ import com.momosoftworks.coldsweat.api.event.common.insulation.InsulationTickEve
 import com.momosoftworks.coldsweat.api.event.vanilla.ItemBreakEvent;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
-import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
 import com.momosoftworks.coldsweat.api.temperature.modifier.ArmorInsulationTempModifier;
 import com.momosoftworks.coldsweat.api.util.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
@@ -15,7 +14,7 @@ import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCa
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
-import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.data.codec.impl.RequirementHolder;
 import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
@@ -33,7 +32,6 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.TickEvent;
@@ -42,7 +40,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -162,7 +159,7 @@ public class ProcessEquipmentInsulation
     private static void applySewnArmorInsulation(Map<String, Double> armorInsulation, ItemStack armorStack, PlayerEntity player, double worldTemp, double minTemp, double maxTemp, AtomicInteger fullyInsulatedSlots)
     {
         LazyOptional<IInsulatableCap> iCap = ItemInsulationManager.getInsulationCap(armorStack);
-        List<InsulatorData> insulators = ItemInsulationManager.getEffectiveAppliedInsulation(armorStack, player);
+        List<InsulatorData> insulators = RequirementHolder.filterValid(ItemInsulationManager.getAppliedArmorInsulators(armorStack), player);
 
         // Get the armor's insulation values
         for (InsulatorData insulator : insulators)
