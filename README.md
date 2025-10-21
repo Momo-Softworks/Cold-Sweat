@@ -2,8 +2,7 @@
 Cold Sweat is a mod for Minecraft that adds a comprehensive temperature system to the game. This is the public repository for the project on CurseForge:  
 https://www.curseforge.com/minecraft/mc-mods/cold-sweat  
   
-This project is completely open for reference and reproduction as per our GNU GPL 3.0 license; HOWEVER, any project that directly uses code, assets, or otherwise from Cold Sweat must also list their project under the GNU General Public License 3.0 and attribute this project (also defined in the license).
-This does not include mods that use Cold Sweat as a library (i.e. for inter-mod compat), so long as they do not directly redistribute any part of the project.
+**PLEASE READ THE LICENSE** as there are important amendments and clarifications regarding derivative works and mods which use the Cold Sweat API.
 
 ---
 
