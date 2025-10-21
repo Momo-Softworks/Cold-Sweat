@@ -1,7 +1,5 @@
 package com.momosoftworks.coldsweat.common.blockentity;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.vanilla.BlockStateChangedEvent;
@@ -106,7 +104,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     // List of SpreadPaths, which determine where the Hearth is affecting and how it spreads through/around blocks
     List<SpreadPath> paths = new ArrayList<>(this.getMaxPaths());
     // Used as a lookup table for detecting duplicate paths (faster than ArrayList#contains())
-    Multimap<BlockPos, Direction> pathLookup = HashMultimap.create(this.getMaxPaths(), 6);
+    Set<BlockPos> pathLookup = new HashSet<>(this.getMaxPaths());
     Map<Pair<Integer, Integer>, Pair<Integer, Boolean>> seeSkyMap = new FastMap<>(this.getMaxPaths());
 
     List<MobEffectInstance> effects = new ArrayList<>();
@@ -186,7 +184,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         if (oldState == null || newState == null) return;
 
         if (level == this.level
-        && this.pathLookup.containsKey(pos)
+        && this.pathLookup.contains(pos)
         && !oldState.getCollisionShape(level, pos).equals(newState.getCollisionShape(level, pos)))
         {
             if (!level.isClientSide())
@@ -402,7 +400,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
 
                 if (paths.isEmpty())
                 {   this.addPath(new SpreadPath(pos.above(1)).setOrigin(pos.above(1)));
-                    pathLookup.put(pos.above(1), Direction.UP);
+                    pathLookup.add(pos.above(1));
                     this.searchForPipeEnds(this.getBlockPos().above(), Direction.UP);
                 }
 
@@ -510,6 +508,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     protected void tickPaths(int firstIndex, int lastIndex)
     {
         int pathCount = paths.size();
+        if (false)
+        Minecraft.getInstance().player.displayClientMessage(Component.literal(this.paths.size() + " " + this.paths.stream().map(p -> p.pos).distinct().count()), true);
         for (int i = firstIndex; i < Math.min(paths.size(), lastIndex); i++)
         {
             // This operation is really fast because it's an ArrayList
@@ -581,7 +581,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                         SpreadPath newPath = new SpreadPath(tryPos, direction).setOrigin(spreadPath.origin);
 
                         // Check if this position hasn't been tried before, and if it's spread-able
-                        if (pathLookup.put(tryPos, direction) && this.canSpread(level, pathPos, tryPos, state, spreadPath.direction, direction, newPath))
+                        if (pathLookup.add(tryPos) && this.canSpread(level, pathPos, tryPos, state, spreadPath.direction, direction, newPath))
                         {   // Add the new path to the list
                             this.addPath(newPath);
                         }
@@ -589,7 +589,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                 }
                 // Remove this path if it has skylight access
                 else
-                {   pathLookup.removeAll(pathPos);
+                {   pathLookup.remove(pathPos);
                     paths.remove(i);
                     i--;
                     continue;
@@ -1377,7 +1377,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         }
     }
 
-    public Multimap<BlockPos, Direction> getPathLookup()
+    public Set<BlockPos> getPathLookup()
     {   return this.pathLookup;
     }
 
