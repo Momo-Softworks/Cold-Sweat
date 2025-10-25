@@ -48,13 +48,13 @@ public class BiomeTempData extends ConfigData
 
     public static final Codec<BiomeTempData> CODEC = createCodec(RecordCodecBuilder.mapCodec(instance -> instance.group(
             NegatableList.listCodec(ConfigHelper.dynamicCodec(Registry.BIOME_REGISTRY)).fieldOf("biomes").forGetter(data -> data.biomes),
-            Codec.mapEither(Codec.DOUBLE.optionalFieldOf("temperature", 0d),
-                            Codec.DOUBLE.optionalFieldOf("min_temp", 0d))
+            Codec.mapEither(Codec.DOUBLE.fieldOf("temperature"),
+                            Codec.DOUBLE.fieldOf("min_temp"))
                     .xmap(either ->
                     either.map(left -> left, right -> right),
                     Either::right).forGetter(data -> data.min),
-            Codec.mapEither(Codec.DOUBLE.optionalFieldOf("temperature", 0d),
-                            Codec.DOUBLE.optionalFieldOf("max_temp", 0d))
+            Codec.mapEither(Codec.DOUBLE.fieldOf("temperature"),
+                            Codec.DOUBLE.fieldOf("max_temp"))
                  .xmap(either -> either.map(left -> left, right -> right), Either::right)
                  .forGetter(BiomeTempData::max),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(BiomeTempData::units),

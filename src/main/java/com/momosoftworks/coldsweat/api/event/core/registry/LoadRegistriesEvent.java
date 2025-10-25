@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.RegistryHolder;
-import com.momosoftworks.coldsweat.data.codec.configuration.RemoveRegistryData;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import net.minecraft.util.RegistryKey;
@@ -12,7 +11,6 @@ import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.registry.Registry;
 import net.minecraftforge.eventbus.api.Event;
 
-import javax.xml.ws.Holder;
 import java.util.Collection;
 
 /**
@@ -58,20 +56,20 @@ public abstract class LoadRegistriesEvent extends Event
      */
     public static class Pre extends LoadRegistriesEvent
     {
-        private Multimap<RegistryKey<Registry<? extends ConfigData>>, RemoveRegistryData<?>> removals;
+        private Multimap<RegistryKey<Registry<? extends ConfigData>>, RegistryModifierData<?>> modifiers;
 
         public Pre(DynamicRegistries registryAccess,
                    Multimap<RegistryKey<? extends Registry<? extends ConfigData>>, ? extends ConfigData> registries,
-                   Multimap<RegistryKey<Registry<? extends ConfigData>>, RemoveRegistryData<?>> removals)
+                   Multimap<RegistryKey<Registry<? extends ConfigData>>, RegistryModifierData<?>> modifiers)
         {
             super(registryAccess, registries);
         }
 
         /**
-         * @return An IMMUTABLE multimap of registry removals.
+         * @return An IMMUTABLE multimap of registry modifiers.
          */
-        public Multimap<RegistryKey<Registry<? extends ConfigData>>, RemoveRegistryData<?>> getRegistryRemovals()
-        {   return ImmutableMultimap.copyOf(removals);
+        public Multimap<RegistryKey<Registry<? extends ConfigData>>, RegistryModifierData<?>> getRegistryModifiers()
+        {   return ImmutableMultimap.copyOf(modifiers);
         }
     }
 

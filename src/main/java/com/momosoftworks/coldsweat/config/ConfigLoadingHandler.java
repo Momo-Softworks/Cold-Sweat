@@ -52,12 +52,15 @@ import java.io.*;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber
 public class ConfigLoadingHandler
 {
-    public static final Multimap<RegistryKey<Registry<? extends ConfigData>>, RemoveRegistryData<?>> REMOVED_REGISTRIES = new RegistryMultiMap<>();
+    public static final Multimap<RegistryKey<Registry<? extends ConfigData>>, RegistryModifierData<?>> REGISTRY_MODIFIERS = new RegistryMultiMap<>();
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void loadConfigs(FMLServerAboutToStartEvent event)
@@ -205,22 +208,22 @@ public class ConfigLoadingHandler
         setDefaultRegistryPriority(registries, registryAccess);
 
         // Load registry removals
-        loadRegistryRemovals();
+        loadRegistryModifiers();
 
         // Mark holders as "JSON"
         for (ConfigData data : registries.values())
         {   data.setRegistryType(ConfigData.Type.JSON);
         }
 
-        // Fire registry creation event
-        LoadRegistriesEvent.Pre event = new LoadRegistriesEvent.Pre(registryAccess, registries, REMOVED_REGISTRIES);
+        // Fire pre-registry-loading event
+        LoadRegistriesEvent.Pre event = new LoadRegistriesEvent.Pre(registryAccess, registries, REGISTRY_MODIFIERS);
         MinecraftForge.EVENT_BUS.post(event);
 
         // Remove registries that don't have required loaded mods
         registries.values().removeIf(data -> !data.areRequiredModsLoaded());
 
         // Remove registry entries that match removal criteria
-        removeRegistries(event.getRegistries());
+        modifyRegistries(event.getRegistries());
 
         /*
          Add JSON data to the config settings
@@ -292,6 +295,7 @@ public class ConfigLoadingHandler
         addTempEffectsConfigs(tempEffects);
         logRegistryLoaded(String.format("Loaded %s temp effects", tempEffects.size()), tempEffects);
 
+        // Fire post-registry-loading event
         LoadRegistriesEvent.Post postEvent = new LoadRegistriesEvent.Post(registryAccess, event.getRegistries());
         MinecraftForge.EVENT_BUS.post(postEvent);
     }
@@ -343,51 +347,112 @@ public class ConfigLoadingHandler
         }
     }
 
-    private static void loadRegistryRemovals()
+    private static void loadRegistryModifiers()
     {
         // Clear the static map
-        REMOVED_REGISTRIES.clear();
+        REGISTRY_MODIFIERS.clear();
         // Gather registry removals & add them to the static map
-        Collection<RemoveRegistryData<?>> removals = ModRegistries.REMOVE_REGISTRY_DATA.data().values();
+        Collection<RegistryModifierData<?>> removals = ModRegistries.REMOVE_REGISTRY_DATA.data().values();
         removals.addAll(parseConfigData(ModRegistries.REMOVE_REGISTRY_DATA));
         removals.forEach(data ->
         {
             RegistryKey<Registry<? extends ConfigData>> key = (RegistryKey) data.registry();
-            REMOVED_REGISTRIES.put(key, data);
+            REGISTRY_MODIFIERS.put(key, data);
         });
     }
 
-    private static void removeRegistries(Multimap<RegistryKey<? extends Registry<? extends ConfigData>>, ? extends ConfigData> registries)
+    private static void modifyRegistries(Multimap<RegistryKey<? extends Registry<? extends ConfigData>>, ? extends ConfigData> registries)
     {
-        ColdSweat.LOGGER.info("Handling registry removals...");
-        for (Map.Entry entry : REMOVED_REGISTRIES.asMap().entrySet())
+        ColdSweat.LOGGER.info("Handling registry modifiers...");
+        for (Map.Entry entry : REGISTRY_MODIFIERS.asMap().entrySet())
         {
-            removeEntries((Collection) entry.getValue(), registries.get((RegistryKey) entry.getKey()));
+            modifyEntries((Collection) entry.getValue(), registries.get((RegistryKey) entry.getKey()));
         }
     }
 
-    private static <T extends ConfigData> void removeEntries(Collection<RemoveRegistryData<T>> removals, Collection<T> registry)
+    private static <T extends ConfigData> void modifyEntries(Collection<RegistryModifierData<T>> modifiers, Collection<T> registries)
     {
-        for (RemoveRegistryData<T> data : removals)
-        {   registry.removeIf(data::matches);
+        List<T> newRegistries = new ArrayList<>(registries);
+        for (RegistryModifierData<T> modifier : modifiers)
+        {
+            for (int i = 0; i < newRegistries.size(); i++)
+            {
+                T entry = newRegistries.get(i);
+                if (modifier.matches(entry))
+                {
+                    T modified = modifier.applyModifications(entry);
+                    if (modified == null)
+                    {
+                        newRegistries.remove(i);
+                        i--;
+                        continue;
+                    }
+                    newRegistries.set(i, modified);
+                }
+            }
         }
+        registries.clear();
+        registries.addAll(newRegistries);
     }
 
-    public static <T extends ConfigData> Collection<T> removeEntries(Collection<T> registries, RegistryHolder<T> registry)
+    public static <C, K, V extends ConfigData> void modifyEntries(C registries, RegistryHolder<V> registry, Function<C, Collection<Map.Entry<K, V>>> entryGetter,
+                                                                  Consumer<Map.Entry<K, V>> entrySetter, Consumer<Map.Entry<K, V>> entryRemover)
     {
-        REMOVED_REGISTRIES.get((RegistryKey) registry.key()).forEach(data ->
+        REGISTRY_MODIFIERS.get((RegistryKey) registry.key()).forEach(data ->
         {
-            RemoveRegistryData<T> removeData = ((RemoveRegistryData<T>) data);
-            if (removeData.registry().equals(registry.key()))
-            {   registries.removeIf(removeData::matches);
+            RegistryModifierData<V> modifier = ((RegistryModifierData<V>) data);
+            if (modifier.registry().equals(registry.key()))
+            {   for (Map.Entry<K, V> entry : entryGetter.apply(registries))
+                {
+                    V value = entry.getValue();
+                    if (modifier.matches(value))
+                    {
+                        V modified = modifier.applyModifications(value);
+                        if (modified == null)
+                        {
+                            entryRemover.accept(entry);
+                            continue;
+                        }
+                        entrySetter.accept(Map.entry(entry.getKey(), modified));
+                    }
+                }
             }
         });
-        return registries;
+    }
+
+    public static <T extends ConfigData> void modifyEntries(List<T> registries, RegistryHolder<T> registry)
+    {
+        AtomicInteger index = new AtomicInteger(0);
+        modifyEntries(registries, registry, list -> list.stream().map(e -> new AbstractMap.Entry<>(index.getAndIncrement(), e)).toList(),
+                      entry -> registries.set(entry.getKey(), entry.getValue()),
+                      entry -> registries.remove(entry.getKey().intValue()));
+    }
+
+    public static <K, T extends ConfigData> void modifyEntries(Map<K, T> registries, RegistryHolder<T> registry)
+    {
+        modifyEntries(registries, registry, Map::entrySet,
+                      entry -> registries.put(entry.getKey(), entry.getValue()),
+                      entry -> registries.remove(entry.getKey()));
+    }
+
+    public static <K, T extends ConfigData> void modifyEntries(Multimap<K, T> registries, RegistryHolder<T> registry)
+    {
+        Map<K, List<T>> tempMap = new HashMap<>();
+        for (K key : registries.keySet())
+        {
+            List<T> modifiedList = new ArrayList<>(registries.get(key));
+            modifyEntries(modifiedList, registry);
+            tempMap.put(key, modifiedList);
+            }
+        registries.clear();
+        for (Map.Entry<K, List<T>> entry : tempMap.entrySet())
+        {   registries.putAll(entry.getKey(), entry.getValue());
+        }
     }
 
     public static <T extends ConfigData> boolean isRemoved(T entry, RegistryHolder<T> registry)
     {
-        return REMOVED_REGISTRIES.get((RegistryKey) registry.key()).stream().anyMatch(data -> ((RemoveRegistryData<T>) data).matches(entry));
+        return REGISTRY_MODIFIERS.get((RegistryKey) registry.key()).stream().anyMatch(data -> ((RegistryModifierData<T>) data).matches(entry));
     }
 
     private static void addInsulatorConfigs(Collection<InsulatorData> insulators)

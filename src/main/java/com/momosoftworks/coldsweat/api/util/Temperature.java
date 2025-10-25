@@ -521,14 +521,8 @@ public class Temperature
         {   return this == WORLD || this == BURNING_POINT || this == FREEZING_POINT;
         }
 
-        public static Trait fromID(String id)
-        {
-            for (Trait trait : values())
-            {
-                if (trait.getSerializedName().equals(id))
-                    return trait;
-            }
-            return null;
+        public static Trait fromID(String name)
+        {   return EnumHelper.byName(values(), name);
         }
 
         @Override
@@ -557,15 +551,8 @@ public class Temperature
             this.id = id;
         }
 
-        public static Units fromID(String id)
-        {
-            String lowercase = id.toLowerCase(Locale.ROOT);
-            for (Units unit : values())
-            {
-                if (unit.getSerializedName().equals(lowercase))
-                    return unit;
-            }
-            throw new IllegalArgumentException("Invalid temperature unit: " + id);
+        public static Units fromID(String name)
+        {   return EnumHelper.byName(values(), name);
         }
 
         public String getFormattedName()
