@@ -277,6 +277,8 @@
   "commands.cold_sweat.temp_modifier.many.add.result":   "Applied modifier %s to %d entities",
   "commands.cold_sweat.temp_modifier.single.remove.result": "Removed modifier %s from %s",
   "commands.cold_sweat.temp_modifier.many.remove.result":   "Removed modifier %s from %d entities",
+  "commands.cold_sweat.dump.success": "Successfully dumped configs to %s",
+  "commands.cold_sweat.dump.failure": "Failed to dump configs: %s",
 
 
   "advancements.cold_sweat.root.title": "Cold Sweat",
@@ -356,5 +358,6 @@
 
   "tooltip.hint.create_backtank": "Wearing full netherite diving suit",
   "tooltip.hint.astra_space_suit": "Wearing full space suit",
-  "tooltip.hint.aqua_three_bolt": "Wearing full three-bolt suit"
+  "tooltip.hint.aqua_three_bolt": "Wearing full three-bolt suit",
+  "tooltip.open_link": "Open link"
 }

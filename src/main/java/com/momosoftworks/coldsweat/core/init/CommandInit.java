@@ -2,11 +2,10 @@ package com.momosoftworks.coldsweat.core.init;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.command.CommandSource;
-import net.minecraft.command.arguments.ArgumentTypes;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import com.momosoftworks.coldsweat.common.command.BaseCommand;
+import com.momosoftworks.coldsweat.common.command.impl.ColdSweatCommand;
 import com.momosoftworks.coldsweat.common.command.impl.TempCommand;
-import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -24,6 +23,7 @@ public class CommandInit
 
         COMMANDS.add(new TempCommand("temperature", 2, true));
         COMMANDS.add(new TempCommand("temp", 2, true));
+        COMMANDS.add(new ColdSweatCommand("coldsweat", 2, true));
 
         COMMANDS.forEach(command ->
         {

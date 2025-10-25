@@ -103,6 +103,14 @@ public class DynamicHolder<T> implements Supplier<T>
         return holder;
     }
 
+    public ResourceLocation getName()
+    {   return name;
+    }
+
+    public Codec<T> getCodec()
+    {   return codec;
+    }
+
     @Override
     public T get()
     {
