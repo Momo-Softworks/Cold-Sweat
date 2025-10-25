@@ -74,6 +74,10 @@ public class WorldSettingsConfig
 
     public static final CSConfigSpec.ConfigValue<List<?>> SHADE_TEMP_OFFSET;
 
+    public static final CSConfigSpec.DoubleValue DRYOFF_SPEED;
+    public static final CSConfigSpec.DoubleValue WATER_SOAK_SPEED;
+    public static final CSConfigSpec.DoubleValue RAIN_SOAK_SPEED;
+
     /* Compat */
     public static final CSConfigSpec.ConfigValue<Integer> THERMOREGULATOR_INSULATION;
 
@@ -669,6 +673,21 @@ public class WorldSettingsConfig
                          " When set to true, modifies ice blocks to be harvestable with a pickaxe",
                          " ⌄ ")
                 .define("Custom Ice Drops", true);
+
+            DRYOFF_SPEED = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " The speed at which wet players dry off")
+                .defineInRange("Dryoff Speed", 0.0015, 0.0, Double.POSITIVE_INFINITY);
+
+            WATER_SOAK_SPEED = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " The speed at which players become soaked when in water")
+                .defineInRange("Water Soak Speed", 0.1, 0.0, Double.POSITIVE_INFINITY);
+
+            RAIN_SOAK_SPEED = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " The speed at which players become soaked when in rain")
+                .defineInRange("Rain Soak Speed", 0.0125, 0.0, Double.POSITIVE_INFINITY);
 
         BUILDER.pop();
 

@@ -14,10 +14,6 @@ import java.util.function.Function;
 
 public class WaterTempModifier extends TempModifier
 {
-    private static final double WATER_SOAK_SPEED = 0.1;
-    private static final double RAIN_SOAK_SPEED = 0.0125;
-    private static final double DRY_SPEED = 0.0015;
-
     public WaterTempModifier()
     {   this(0);
     }
@@ -45,11 +41,11 @@ public class WaterTempModifier extends TempModifier
         double worldTemp = Temperature.get(entity, Temperature.Trait.WORLD);
         double minWorldTemp = ConfigSettings.MIN_TEMP.get();
         double maxWorldTemp = ConfigSettings.MAX_TEMP.get();
-        double configDrySpeed = ConfigSettings.DRYOFF_SPEED.get() * DRY_SPEED;
+        double configDrySpeed = ConfigSettings.DRYOFF_SPEED.get();
 
         double temperature = this.getTemperature();
-        double addAmount = WorldHelper.isInWater(entity) ? WATER_SOAK_SPEED * (isWarm ? 1 : -1) // In water
-                         : WorldHelper.isRainingAt(entity.level(), entity.blockPosition()) ? RAIN_SOAK_SPEED // In rain
+        double addAmount = WorldHelper.isInWater(entity) ? ConfigSettings.WATER_SOAK_SPEED.get() * (isWarm ? 1 : -1) // In water
+                         : WorldHelper.isRainingAt(entity.level(), entity.blockPosition()) ? ConfigSettings.RAIN_SOAK_SPEED.get() // In rain
                          : 0;
         double dryAmount = CSMath.blendExp(configDrySpeed, configDrySpeed * 10, worldTemp, minWorldTemp, maxWorldTemp, 100);
         double maxTemp = this.getMaxTemperature(entity);
