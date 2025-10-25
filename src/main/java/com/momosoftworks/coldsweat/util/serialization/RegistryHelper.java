@@ -5,10 +5,7 @@ import com.momosoftworks.coldsweat.api.event.vanilla.ServerConfigsLoadedEvent;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.Holder;
-import net.minecraft.core.HolderSet;
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.*;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -16,12 +13,13 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.registries.IForgeRegistry;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.*;
 
 public class RegistryHelper
 {
@@ -122,5 +120,31 @@ public class RegistryHelper
     @Nullable
     public static ResourceLocation getKey(Holder<?> holder)
     {   return holder.unwrapKey().map(ResourceKey::location).orElse(null);
+    }
+
+    private static final Field OWNER_FIELD = ObfuscationReflectionHelper.findField(Holder.Reference.class, "f_254697_");
+    private static final Method BIND_KEY = ObfuscationReflectionHelper.findMethod(Holder.Reference.class, "m_246870_", ResourceKey.class);
+    private static final Method BIND_TAGS = ObfuscationReflectionHelper.findMethod(Holder.Reference.class, "m_205769_", Collection.class);
+    static {
+        OWNER_FIELD.setAccessible(true);
+        BIND_KEY.setAccessible(true);
+        BIND_TAGS.setAccessible(true);
+    }
+    public static <T> Holder.Reference<T> modifyHolder(Holder.Reference<T> original, T value)
+    {
+        try
+        {
+            HolderOwner<T> owner = (HolderOwner<T>) OWNER_FIELD.get(original);
+            Holder.Reference<T> newHolder = Holder.Reference.createIntrusive(owner, value);
+            BIND_KEY.invoke(newHolder, original.unwrapKey().orElse(null));
+            BIND_TAGS.invoke(newHolder, original.tags().toList());
+
+            return newHolder;
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+            return original;
+        }
     }
 }

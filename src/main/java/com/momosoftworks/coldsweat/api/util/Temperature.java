@@ -15,6 +15,7 @@ import com.momosoftworks.coldsweat.core.network.message.SyncTemperatureMessage;
 import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.InterruptibleIterator;
+import com.momosoftworks.coldsweat.util.serialization.EnumHelper;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.common.MinecraftForge;
@@ -518,14 +519,8 @@ public class Temperature
         {   return this == WORLD || this == BURNING_POINT || this == FREEZING_POINT;
         }
 
-        public static Trait fromID(String id)
-        {
-            for (Trait trait : values())
-            {
-                if (trait.getSerializedName().equals(id))
-                    return trait;
-            }
-            return null;
+        public static Trait fromID(String name)
+        {   return EnumHelper.byName(values(), name);
         }
 
         @Override
@@ -554,15 +549,8 @@ public class Temperature
             this.id = id;
         }
 
-        public static Units fromID(String id)
-        {
-            String lowercase = id.toLowerCase(Locale.ROOT);
-            for (Units unit : values())
-            {
-                if (unit.getSerializedName().equals(lowercase))
-                    return unit;
-            }
-            throw new IllegalArgumentException("Invalid temperature unit: " + id);
+        public static Units fromID(String name)
+        {   return EnumHelper.byName(values(), name);
         }
 
         public String getFormattedName()
