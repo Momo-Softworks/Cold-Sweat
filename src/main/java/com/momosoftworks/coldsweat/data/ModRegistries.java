@@ -40,7 +40,7 @@ public class ModRegistries
     public static final RegistryHolder<TempEffectsData> TEMP_EFFECTS_DATA = createRegistry(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "entity/temp_effects"), TempEffectsData.CODEC);
 
     // Special registries
-    public static final RegistryHolder<RemoveRegistryData<?>> REMOVE_REGISTRY_DATA = createRegistry(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "remove"), RemoveRegistryData.CODEC);
+    public static final RegistryHolder<RegistryModifierData<?>> REGISTRY_MODIFIER_DATA = createRegistry(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "modifier"), RegistryModifierData.CODEC);
 
     public static <V extends ConfigData> RegistryHolder<V> createRegistry(ResourceLocation registry, Codec<V> codec)
     {

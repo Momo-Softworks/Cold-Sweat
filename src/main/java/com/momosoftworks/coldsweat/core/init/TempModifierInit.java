@@ -61,7 +61,7 @@ public class TempModifierInit
                                          .map(BlockTempData::fromToml)
                                          .filter(Objects::nonNull).collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
         // Handle entries removed by configs
-        ConfigLoadingHandler.removeEntries(blockTemps, ModRegistries.BLOCK_TEMP_DATA);
+        ConfigLoadingHandler.modifyEntries(blockTemps, ModRegistries.BLOCK_TEMP_DATA);
 
         for (BlockTempData blockConfig : blockTemps)
         {

@@ -2,7 +2,6 @@ package com.momosoftworks.coldsweat.api.event.core.registry;
 
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.RegistryHolder;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
@@ -64,20 +63,20 @@ public abstract class LoadRegistriesEvent extends Event
      */
     public static class Pre extends LoadRegistriesEvent
     {
-        private Multimap<ResourceKey<Registry<? extends ConfigData>>, RemoveRegistryData<?>> removals;
+        private Multimap<ResourceKey<Registry<? extends ConfigData>>, RegistryModifierData<?>> modifiers;
 
         public Pre(RegistryAccess registryAccess,
                    RegistryMultiMap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries,
-                   Multimap<ResourceKey<Registry<? extends ConfigData>>, RemoveRegistryData<?>> removals)
+                   Multimap<ResourceKey<Registry<? extends ConfigData>>, RegistryModifierData<?>> modifiers)
         {
             super(registryAccess, registries);
         }
 
         /**
-         * @return An IMMUTABLE multimap of registry removals.
+         * @return An IMMUTABLE multimap of registry modifiers.
          */
-        public Multimap<ResourceKey<Registry<? extends ConfigData>>, RemoveRegistryData<?>> getRegistryRemovals()
-        {   return ImmutableMultimap.copyOf(removals);
+        public Multimap<ResourceKey<Registry<? extends ConfigData>>, RegistryModifierData<?>> getRegistryModifiers()
+        {   return ImmutableMultimap.copyOf(modifiers);
         }
     }
 
