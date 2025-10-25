@@ -344,7 +344,7 @@ public class ConfigSettings
             Map<Holder<Biome>, BiomeTempData> dataMap = ConfigHelper.getRegistryMap(WorldSettingsConfig.BIOME_TEMPERATURES.get(), registryAccess, Registry.BIOME_REGISTRY,
                                                                                     toml -> BiomeTempData.fromToml(toml, false, registryAccess),
                                                                                     data -> data.biomes());
-            ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.BIOME_TEMP_DATA);
+            ConfigLoadingHandler.modifyEntries(dataMap, ModRegistries.BIOME_TEMP_DATA);
 
             holder.get(registryAccess).putAll(dataMap);
         },
@@ -357,7 +357,7 @@ public class ConfigSettings
             Map<Holder<Biome>, BiomeTempData> dataMap = ConfigHelper.getRegistryMap(WorldSettingsConfig.BIOME_TEMP_OFFSETS.get(), registryAccess, Registry.BIOME_REGISTRY,
                                                                                     toml -> BiomeTempData.fromToml(toml, true, registryAccess),
                                                                                     data -> data.biomes());
-            ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.BIOME_TEMP_DATA);
+            ConfigLoadingHandler.modifyEntries(dataMap, ModRegistries.BIOME_TEMP_DATA);
 
             holder.get(registryAccess).putAll(dataMap);
         },
@@ -370,7 +370,7 @@ public class ConfigSettings
             Map<Holder<DimensionType>, DimensionTempData> dataMap = ConfigHelper.getRegistryMap(WorldSettingsConfig.DIMENSION_TEMPERATURES.get(), registryAccess, Registry.DIMENSION_TYPE_REGISTRY,
                                                                                                 toml -> DimensionTempData.fromToml(toml, false, registryAccess),
                                                                                                 data -> data.dimensions());
-            ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.DIMENSION_TEMP_DATA);
+            ConfigLoadingHandler.modifyEntries(dataMap, ModRegistries.DIMENSION_TEMP_DATA);
 
             holder.get(registryAccess).putAll(dataMap);
         },
@@ -383,7 +383,7 @@ public class ConfigSettings
             Map<Holder<DimensionType>, DimensionTempData> dataMap = ConfigHelper.getRegistryMap(WorldSettingsConfig.DIMENSION_TEMP_OFFSETS.get(), registryAccess, Registry.DIMENSION_TYPE_REGISTRY,
                                                                                                 toml -> DimensionTempData.fromToml(toml, true, registryAccess),
                                                                                                 data -> data.dimensions());
-            ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.DIMENSION_TEMP_DATA);
+            ConfigLoadingHandler.modifyEntries(dataMap, ModRegistries.DIMENSION_TEMP_DATA);
 
             holder.get(registryAccess).putAll(dataMap);
         },
@@ -396,7 +396,7 @@ public class ConfigSettings
             Map<Holder<ConfiguredStructureFeature<?, ?>>, StructureTempData> dataMap = ConfigHelper.getRegistryMap(WorldSettingsConfig.STRUCTURE_TEMPERATURES.get(), registryAccess, Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY,
                                                                                             toml -> StructureTempData.fromToml(toml, false, registryAccess),
                                                                                             data -> data.structures());
-            ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.STRUCTURE_TEMP_DATA);
+            ConfigLoadingHandler.modifyEntries(dataMap, ModRegistries.STRUCTURE_TEMP_DATA);
 
             holder.get(registryAccess).putAll(dataMap);
         });
@@ -406,7 +406,7 @@ public class ConfigSettings
             Map<Holder<ConfiguredStructureFeature<?, ?>>, StructureTempData> dataMap = ConfigHelper.getRegistryMap(WorldSettingsConfig.STRUCTURE_TEMP_OFFSETS.get(), registryAccess, Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY,
                                                                                             toml -> StructureTempData.fromToml(toml, true, registryAccess),
                                                                                             data -> data.structures());
-            ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.STRUCTURE_TEMP_DATA);
+            ConfigLoadingHandler.modifyEntries(dataMap, ModRegistries.STRUCTURE_TEMP_DATA);
 
             holder.get(registryAccess).putAll(dataMap);
         });
@@ -652,7 +652,7 @@ public class ConfigSettings
             {
                 Multimap<Holder<Biome>, SpawnBiomeData> dataMap = ConfigHelper.getRegistryMultimap(configBiomes, registryAccess, Registry.BIOME_REGISTRY,
                                                                                                    toml -> SpawnBiomeData.fromToml(toml, entityType, registryAccess), data -> data.biomes());
-                ConfigLoadingHandler.removeEntries(dataMap.values(), ModRegistries.ENTITY_SPAWN_BIOME_DATA);
+                ConfigLoadingHandler.modifyEntries(dataMap, ModRegistries.ENTITY_SPAWN_BIOME_DATA);
 
                 holder.get(registryAccess).putAll(dataMap);
             };

@@ -148,8 +148,8 @@ public class ConfigHelper
 
             RegistryHelper.mapForgeRegistryTagList(keyRegistry, keyListGetter.apply(data)).forEach(ent -> dataMap.put(ent, data));
         }
-        // Handle registry removals
-        ConfigLoadingHandler.removeEntries(dataMap.values(), valueRegistry);
+        // Handle registry modifiers
+        ConfigLoadingHandler.modifyEntries(dataMap, valueRegistry);
         return dataMap;
     }
 
@@ -168,7 +168,7 @@ public class ConfigHelper
             RegistryHelper.mapForgeRegistryTagList(keyRegistry, keyListGetter.apply(data)).forEach(ent -> dataMap.put(ent, data));
         }
         // Handle registry removals
-        ConfigLoadingHandler.removeEntries(dataMap.values(), valueRegistry);
+        ConfigLoadingHandler.modifyEntries(dataMap, valueRegistry);
         return dataMap;
     }
 
