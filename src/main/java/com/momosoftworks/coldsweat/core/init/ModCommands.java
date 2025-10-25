@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.command.BaseCommand;
 import com.momosoftworks.coldsweat.common.command.argument.*;
+import com.momosoftworks.coldsweat.common.command.impl.ColdSweatCommand;
 import com.momosoftworks.coldsweat.common.command.impl.TempCommand;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
@@ -29,6 +30,7 @@ public class ModCommands
 
         COMMANDS.add(new TempCommand("temperature", 2, true));
         COMMANDS.add(new TempCommand("temp", 2, true));
+        COMMANDS.add(new ColdSweatCommand("coldsweat", 2, true));
 
         COMMANDS.forEach(command ->
         {
