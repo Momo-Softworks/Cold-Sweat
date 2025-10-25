@@ -93,7 +93,7 @@ public abstract class Insulation
             }
         }
         combined.addAll(remaining);
-
+        combined.removeIf(Insulation::isEmpty);
         return combined;
     }
 
