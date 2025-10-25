@@ -195,6 +195,8 @@ public class ConfigSettings
     public static final DynamicHolder<List<ResourceLocation>> DISABLED_MODIFIERS;
     public static final DynamicHolder<Double> MODIFIER_TICK_RATE;
     public static final DynamicHolder<Double> DRYOFF_SPEED;
+    public static final DynamicHolder<Double> WATER_SOAK_SPEED;
+    public static final DynamicHolder<Double> RAIN_SOAK_SPEED;
     public static final DynamicHolder<Double> ACCLIMATION_SPEED;
     public static final DynamicHolder<Pair<Double, Double>> MIN_ACCLIMATION_RANGE;
     public static final DynamicHolder<Pair<Double, Double>> MAX_ACCLIMATION_RANGE;
@@ -849,9 +851,19 @@ public class ConfigSettings
         (saver) -> MainSettingsConfig.MODIFIER_TICK_RATE.set(saver),
         SyncType.BOTH_WAYS);
 
-        DRYOFF_SPEED = addSyncedSetting(ColdSweat.createKey("dryoff_speed"), () -> 1.0, holder -> holder.set(MainSettingsConfig.DRYOFF_SPEED.get()),
+        DRYOFF_SPEED = addSyncedSetting(ColdSweat.createKey("dryoff_speed"), () -> 0.0015, holder -> holder.set(WorldSettingsConfig.DRYOFF_SPEED.get()),
         Codec.DOUBLE,
-        (saver) -> MainSettingsConfig.DRYOFF_SPEED.set(saver),
+        (saver) -> WorldSettingsConfig.DRYOFF_SPEED.set(saver),
+        SyncType.BOTH_WAYS);
+
+        WATER_SOAK_SPEED = addSyncedSetting(ColdSweat.createKey("water_soak_speed"), () -> 0.1, holder -> holder.set(WorldSettingsConfig.WATER_SOAK_SPEED.get()),
+        Codec.DOUBLE,
+        (saver) -> WorldSettingsConfig.WATER_SOAK_SPEED.set(saver),
+        SyncType.BOTH_WAYS);
+
+        RAIN_SOAK_SPEED = addSyncedSetting(ColdSweat.createKey("rain_soak_speed"), () -> 0.0125, holder -> holder.set(WorldSettingsConfig.RAIN_SOAK_SPEED.get()),
+        Codec.DOUBLE,
+        (saver) -> WorldSettingsConfig.RAIN_SOAK_SPEED.set(saver),
         SyncType.BOTH_WAYS);
 
         ACCLIMATION_SPEED = addSyncedSetting(ColdSweat.createKey("acclimation_speed"), () -> 1.0, holder -> holder.set(MainSettingsConfig.ACCLIMATION_SPEED.get()),
