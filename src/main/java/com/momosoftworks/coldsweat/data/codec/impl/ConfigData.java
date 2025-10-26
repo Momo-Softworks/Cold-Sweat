@@ -114,7 +114,7 @@ public abstract class ConfigData
     public <D extends ConfigData> Optional<? extends Holder<D>> getHolder(RegistryAccess registryAccess)
     {
         if (registryKey == null) return Optional.empty();
-        ResourceKey<? extends Registry<D>> regKey = (ResourceKey<? extends Registry<D>>) ModRegistries.getRegistry(((ResourceKey<D>) (ResourceKey) registryKey()).registry());
+        ResourceKey<? extends Registry<D>> regKey = (ResourceKey<? extends Registry<D>>) ModRegistries.getRegistryKey(((ResourceKey<D>) (ResourceKey) registryKey()).registry());
         Registry<D> registry = registryAccess.registryOrThrow(regKey);
 
         return registry.getHolder(registryKey());
