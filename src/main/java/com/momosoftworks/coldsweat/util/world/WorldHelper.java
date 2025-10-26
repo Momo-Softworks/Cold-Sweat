@@ -670,6 +670,14 @@ public abstract class WorldHelper
     {   return Math.sin(level.dayTime() / (12000 / Math.PI));
     }
 
+    public static double getWaterTemperatureAt(Level level, BlockPos pos)
+    {
+        Holder<Biome> biome = level.getBiome(pos);
+        BiomeTempData biomeTemp = ConfigSettings.BIOME_TEMPS.get(level.registryAccess()).get(biome);
+        if (biomeTemp == null) return ConfigSettings.DEFAULT_WATER_TEMPERATURE.get();
+        else return biomeTemp.waterTemp();
+    }
+
     /**
      * Returns a cached temperature value<br>
      * <br>
