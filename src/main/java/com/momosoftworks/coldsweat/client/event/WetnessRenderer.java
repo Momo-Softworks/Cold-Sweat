@@ -17,7 +17,6 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
@@ -96,7 +95,7 @@ public class WetnessRenderer
 
         // Get the player's wetness level
         double wetness = Temperature.getModifier(mc.player, Temperature.Trait.WORLD, WaterTempModifier.class).map(mod ->
-                         {  return CSMath.blend(0, 1, Math.abs(mod.getTemperature()), 0, mod.getMaxTemperature(player));
+                         {  return CSMath.blend(0, 1, Math.abs(mod.getTemperature()), 0, mod.getTargetTemperature(player));
                          }).orElse(0d);
 
         // Spawn a bunch of droplets when the player exits the water
