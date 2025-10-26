@@ -24,9 +24,9 @@ import java.util.*;
 public abstract class LoadRegistriesEvent extends Event
 {
     RegistryAccess registryAccess;
-    RegistryMultiMap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries;
+    RegistryMultiMap<RegistryHolder<?>, Holder<? extends ConfigData>> registries;
 
-    public LoadRegistriesEvent(RegistryAccess registryAccess, RegistryMultiMap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries)
+    public LoadRegistriesEvent(RegistryAccess registryAccess, RegistryMultiMap<RegistryHolder<?>, Holder<? extends ConfigData>> registries)
     {
         this.registryAccess = registryAccess;
         this.registries = registries;
@@ -36,24 +36,24 @@ public abstract class LoadRegistriesEvent extends Event
     {   return registryAccess;
     }
 
-    public RegistryMultiMap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> getRegistries()
+    public RegistryMultiMap<RegistryHolder<?>, Holder<? extends ConfigData>> getRegistries()
     {   return registries;
     }
 
     public <T extends ConfigData> Collection<Holder<T>> getRegistry(RegistryHolder<T> registry)
-    {   return (Collection) registries.get(registry.key());
+    {   return (Collection) registries.get(registry);
     }
 
-    public <T extends ConfigData> void addRegistryEntry(RegistryHolder<T> key, Holder<T> value)
-    {   registries.put(key.key(), value);
+    public <T extends ConfigData> void addRegistryEntry(RegistryHolder<T> registry, Holder<T> value)
+    {   registries.put(registry, value);
     }
 
-    public <T extends ConfigData> void addRegistryEntry(RegistryHolder<T> key, T value)
-    {   registries.put(key.key(), Holder.direct(value));
+    public <T extends ConfigData> void addRegistryEntry(RegistryHolder<T> registry, T value)
+    {   registries.put(registry, Holder.direct(value));
     }
 
-    public <T extends ConfigData> void addRegistryEntries(RegistryHolder<T> key, Collection<Holder<T>> values)
-    {   registries.putAll(key.key(), values);
+    public <T extends ConfigData> void addRegistryEntries(RegistryHolder<T> registry, Collection<Holder<T>> values)
+    {   registries.putAll(registry, values);
     }
 
     /**
@@ -66,8 +66,8 @@ public abstract class LoadRegistriesEvent extends Event
         private Multimap<ResourceKey<Registry<? extends ConfigData>>, RegistryModifierData<?>> modifiers;
 
         public Pre(RegistryAccess registryAccess,
-                   RegistryMultiMap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries,
-                   Multimap<ResourceKey<Registry<? extends ConfigData>>, RegistryModifierData<?>> modifiers)
+                   RegistryMultiMap<RegistryHolder<?>, Holder<? extends ConfigData>> registries,
+                   Multimap<RegistryHolder<?>, Holder<RegistryModifierData<?>>> modifiers)
         {
             super(registryAccess, registries);
         }
@@ -88,7 +88,7 @@ public abstract class LoadRegistriesEvent extends Event
      */
     public static class Post extends LoadRegistriesEvent
     {
-        public Post(RegistryAccess registryAccess, RegistryMultiMap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries)
+        public Post(RegistryAccess registryAccess, RegistryMultiMap<RegistryHolder<?>, Holder<? extends ConfigData>> registries)
         {   super(registryAccess, registries);
         }
     }

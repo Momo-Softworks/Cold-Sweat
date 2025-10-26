@@ -53,7 +53,6 @@ import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.registries.DataPackRegistryEvent;
-import org.checkerframework.checker.units.qual.K;
 
 import java.io.File;
 import java.io.FileReader;
@@ -69,7 +68,7 @@ import java.util.stream.Collectors;
 @EventBusSubscriber
 public class ConfigLoadingHandler
 {
-    public static final Multimap<ResourceKey<Registry<? extends ConfigData>>, RegistryModifierData<?>> REGISTRY_MODIFIERS = new RegistryMultiMap<>();
+    public static final Multimap<RegistryHolder<?>, Holder<RegistryModifierData<?>>> REGISTRY_MODIFIERS = new RegistryMultiMap<>();
     private static final List<OptionalHolder<?>> OPTIONAL_HOLDERS = new ArrayList<>();
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -79,7 +78,7 @@ public class ConfigLoadingHandler
         BlockTempRegistry.flush();
 
         RegistryAccess registryAccess = event.getServer().registryAccess();
-        RegistryMultiMap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries = new RegistryMultiMap<>();
+        RegistryMultiMap<RegistryHolder<?>, Holder<? extends ConfigData>> registries = new RegistryMultiMap<>();
 
         // User JSON configs (config folder)
         ColdSweat.LOGGER.info("Loading registries from configs...");
@@ -148,8 +147,8 @@ public class ConfigLoadingHandler
 
             // Add registries via dummy NewRegistry event
             DataPackRegistryEvent.NewRegistry dummyEvent = new DataPackRegistryEvent.NewRegistry();
-            for (RegistryHolder<?> holder : ModRegistries.getRegistries().values())
-            {   dummyEvent.dataPackRegistry((ResourceKey) holder.key(), (Codec) holder.codec(), (Codec) holder.codec());
+            for (RegistryHolder holder : ModRegistries.getRegistries().values())
+            {   dummyEvent.dataPackRegistry(holder.key(), holder.codec(), holder.codec());
             }
             try
             {   Method process = DataPackRegistryEvent.NewRegistry.class.getDeclaredMethod("process");
@@ -168,7 +167,7 @@ public class ConfigLoadingHandler
     /**
      * Loads JSON-based configs from data resources
      */
-    public static Multimap<ResourceKey<Registry<? extends ConfigData>>, Holder<? extends ConfigData>> collectDataRegistries(RegistryAccess registryAccess)
+    public static Multimap<RegistryHolder<?>, Holder<? extends ConfigData>> collectDataRegistries(RegistryAccess registryAccess)
     {
         if (registryAccess == null)
         {
@@ -235,13 +234,13 @@ public class ConfigLoadingHandler
         /*
          Fetch JSON registries
         */
-        Multimap<ResourceKey<Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries = new RegistryMultiMap<>();
+        Multimap<RegistryHolder<?>, Holder<? extends ConfigData>> registries = new RegistryMultiMap<>();
         for (Map.Entry<ResourceLocation, RegistryHolder<?>> entry : ModRegistries.getRegistries().entrySet())
         {
-            ResourceKey<Registry<? extends ConfigData>> key = (ResourceKey) entry.getValue().key();
-            registryAccess.registryOrThrow(key).holders().forEach(holder ->
+            RegistryHolder<?> registry = entry.getValue();
+            registryAccess.registryOrThrow(registry.key()).holders().forEach(holder ->
             {   holder.unwrapKey().ifPresent(holderKey -> holder.value().setRegistryKey(holderKey));
-                registries.put(key, holder);
+                registries.put(registry, holder);
             });
         }
         return registries;
@@ -250,7 +249,7 @@ public class ConfigLoadingHandler
     /**
      * Loads JSON-based configs from the configs folder
      */
-    public static Multimap<ResourceKey<Registry<? extends ConfigData>>, Holder<? extends ConfigData>> collectUserRegistries(RegistryAccess registryAccess)
+    public static Multimap<RegistryHolder<?>, Holder<? extends ConfigData>> collectUserRegistries(RegistryAccess registryAccess)
     {
         if (registryAccess == null)
         {
@@ -261,18 +260,16 @@ public class ConfigLoadingHandler
         /*
          Parse user-defined JSON data from the configs folder
         */
-        Multimap<ResourceKey<Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries = new RegistryMultiMap<>();
+        Multimap<RegistryHolder<?>, Holder<? extends ConfigData>> registries = new RegistryMultiMap<>();
         for (Map.Entry<ResourceLocation, RegistryHolder<?>> entry : ModRegistries.getRegistries().entrySet())
         {
             RegistryHolder<?> registry = entry.getValue();
-            ResourceKey<Registry<? extends ConfigData>> key = (ResourceKey) registry.key();
-            Codec<?> codec = registry.codec();
-            registries.putAll(key, parseConfigData(registry, (Codec) codec, registryAccess));
+            registries.putAll(registry, parseConfigData(registry, (Codec) registry.codec(), registryAccess));
         }
         return registries;
     }
 
-    private static void logAndAddRegistries(RegistryAccess registryAccess, RegistryMultiMap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries)
+    private static void logAndAddRegistries(RegistryAccess registryAccess, RegistryMultiMap<RegistryHolder<?>, Holder<? extends ConfigData>> registries)
     {
         // Ensure default registry entries load last
         setDefaultRegistryPriority(registries);
@@ -373,8 +370,7 @@ public class ConfigLoadingHandler
     private static void logRegistryLoaded(String message, Collection<? extends Holder<? extends ConfigData>> registry)
     {
         if (registry.isEmpty())
-        {
-            message += ".";
+        {   message += ".";
         }
         else message += ": [";
         // Print comma-separated registry entries
@@ -384,10 +380,10 @@ public class ConfigLoadingHandler
         {
             Holder<? extends ConfigData> entry = iterator.next();
             if (entry.unwrapKey().isPresent())
-            messageBuilder.append(entry.unwrapKey().get().location());
+            {   messageBuilder.append(entry.unwrapKey().get().location());
+            }
             if (iterator.hasNext())
-        {
-            messageBuilder.append(", ");
+            {   messageBuilder.append(", ");
             }
             else messageBuilder.append("]");
         }
@@ -403,20 +399,19 @@ public class ConfigLoadingHandler
             }
         }
         if (hasNameless)
-        {
-                ColdSweat.LOGGER.debug(messageBuilder.toString());
+        {   ColdSweat.LOGGER.debug(messageBuilder.toString());
         }
     }
 
-    private static void setDefaultRegistryPriority(Multimap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries)
+    private static void setDefaultRegistryPriority(Multimap<RegistryHolder<?>, ? extends Holder<? extends ConfigData>> registries)
     {
-        for (ResourceKey<? extends Registry<? extends ConfigData>> key : registries.keySet())
+        for (RegistryHolder<?> key : registries.keySet())
         {
-            List<Holder<? extends ConfigData>> sortedHolders = new ArrayList<>(registries.get(key));
+            List<? extends Holder<? extends ConfigData>> sortedHolders = new ArrayList<>(registries.get(key));
             sortedHolders.sort(Comparator.comparing(holder ->
             {   return holder.unwrapKey().map(k -> k.location().getPath().startsWith("default") ? 1 : 0).orElse(0);
             }));
-            registries.replaceValues(key, sortedHolders);
+            registries.replaceValues(key, (List) sortedHolders);
         }
     }
 
@@ -429,13 +424,13 @@ public class ConfigLoadingHandler
         removals.addAll(parseConfigData(ModRegistries.REGISTRY_MODIFIER_DATA, RegistryModifierData.CODEC, registryAccess));
         removals.forEach(holder ->
         {
-            RegistryModifierData<?> data = holder.value();
-            ResourceKey<Registry<? extends ConfigData>> key = (ResourceKey) data.registry();
-            REGISTRY_MODIFIERS.put(key, data);
+            RegistryHolder<?> key = ModRegistries.getRegistry(holder.value().registry());
+            REGISTRY_MODIFIERS.put(key, holder);
         });
+        setDefaultRegistryPriority(REGISTRY_MODIFIERS);
     }
 
-    private static void modifyRegistries(Multimap<ResourceKey<? extends Registry<? extends ConfigData>>, Holder<? extends ConfigData>> registries)
+    private static void modifyRegistries(Multimap<RegistryHolder<?>, Holder<? extends ConfigData>> registries)
     {
         ColdSweat.LOGGER.info("Handling registry modifiers...");
         for (var entry : REGISTRY_MODIFIERS.asMap().entrySet())
@@ -444,24 +439,25 @@ public class ConfigLoadingHandler
         }
     }
 
-    private static <T extends ConfigData> void modifyEntries(Collection<RegistryModifierData<T>> modifiers, Collection<Holder<T>> registries)
+    private static <T extends ConfigData> void modifyEntries(Collection<Holder<RegistryModifierData<T>>> modifiers, Collection<Holder<T>> registries)
     {
         List<Holder<T>> newRegistries = new ArrayList<>(registries);
-        for (RegistryModifierData<T> modifier : modifiers)
+        for (Holder<RegistryModifierData<T>> holder : modifiers)
         {
+            RegistryModifierData<T> modifier = holder.value();
             for (int i = 0; i < newRegistries.size(); i++)
             {
-                Holder<T> holder = newRegistries.get(i);
-                if (modifier.matches(holder))
+                Holder<T> elementHolder = newRegistries.get(i);
+                if (modifier.matches(elementHolder))
                 {
-                    T modified = modifier.applyModifications(holder.value());
+                    T modified = modifier.applyModifications(elementHolder.value());
                     if (modified == null)
                     {
                         newRegistries.remove(i);
                         i--;
                         continue;
                     }
-                    if (holder instanceof Holder.Reference<T> reference)
+                    if (elementHolder instanceof Holder.Reference<T> reference)
                     {   newRegistries.set(i, RegistryHelper.modifyHolder(reference, modified));
                     }
                     else {
@@ -477,9 +473,9 @@ public class ConfigLoadingHandler
     public static <C, K, V extends ConfigData> void modifyEntries(C registries, RegistryHolder<V> registry, Function<C, Collection<Map.Entry<K, V>>> entryGetter,
                                                                   Consumer<Map.Entry<K, V>> entrySetter, Consumer<Map.Entry<K, V>> entryRemover)
     {
-        REGISTRY_MODIFIERS.get((ResourceKey) registry.key()).forEach(data ->
+        getRegistryModifiers(registry).forEach(holder ->
         {
-            RegistryModifierData<V> modifier = ((RegistryModifierData<V>) data);
+            RegistryModifierData<V> modifier = holder.value();
             if (modifier.registry() == registry.key())
             {
                 for (Map.Entry<K, V> entry : entryGetter.apply(registries))
@@ -531,13 +527,15 @@ public class ConfigLoadingHandler
     }
 
     public static <T extends ConfigData> boolean isRemoved(T entry, RegistryHolder<T> registry)
-    {
-        return REGISTRY_MODIFIERS.get((ResourceKey) registry.key()).stream().anyMatch(data -> ((RegistryModifierData<T>) data).matches(entry));
+    {   return getRegistryModifiers(registry).stream().anyMatch(data -> data.value().matches(entry));
+    }
+
+    public static <T extends ConfigData> Collection<Holder<RegistryModifierData<T>>> getRegistryModifiers(RegistryHolder<T> registry)
+    {   return (Collection<Holder<RegistryModifierData<T>>>) (Collection) REGISTRY_MODIFIERS.get(registry);
     }
 
     public static void addOptionalHolder(OptionalHolder<?> holder)
-    {
-        OPTIONAL_HOLDERS.add(holder);
+    {   OPTIONAL_HOLDERS.add(holder);
     }
 
     public static void fillOptionalHolders(RegistryAccess registryAccess)
@@ -590,25 +588,25 @@ public class ConfigLoadingHandler
     private static void addFuelConfigs(Collection<Holder<FuelData>> fuels)
     {
         fuels.forEach(holder ->
-                      {
-                          FuelData fuelData = holder.value();
+        {
+            FuelData fuelData = holder.value();
 
             List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, fuelData.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
             {   return;
             }
 
-                          for (Item item : items)
-                          {
-                              switch (fuelData.fuelType())
-                              {
-                                  case BOILER -> ConfigSettings.BOILER_FUEL.get().put(item, fuelData);
-                                  case ICEBOX -> ConfigSettings.ICEBOX_FUEL.get().put(item, fuelData);
-                                  case HEARTH -> ConfigSettings.HEARTH_FUEL.get().put(item, fuelData);
-                                  case SOUL_LAMP -> ConfigSettings.SOULSPRING_LAMP_FUEL.get().put(item, fuelData);
-                              }
-                          }
-                      });
+            for (Item item : items)
+            {
+                switch (fuelData.fuelType())
+                {
+                    case BOILER -> ConfigSettings.BOILER_FUEL.get().put(item, fuelData);
+                    case ICEBOX -> ConfigSettings.ICEBOX_FUEL.get().put(item, fuelData);
+                    case HEARTH -> ConfigSettings.HEARTH_FUEL.get().put(item, fuelData);
+                    case SOUL_LAMP -> ConfigSettings.SOULSPRING_LAMP_FUEL.get().put(item, fuelData);
+                }
+            }
+        });
     }
 
     private static void addFoodConfigs(Collection<Holder<FoodData>> foods)
@@ -622,135 +620,135 @@ public class ConfigLoadingHandler
             {   return;
             }
 
-                          for (Item item : items)
-                          {
-                              ConfigSettings.FOOD_TEMPERATURES.get().put(item, foodData);
-                          }
-                      });
+          for (Item item : items)
+          {
+              ConfigSettings.FOOD_TEMPERATURES.get().put(item, foodData);
+          }
+      });
     }
 
     private static void addItemTempConfigs(Collection<Holder<ItemTempData>> itemTemps)
     {
         itemTemps.forEach(holder ->
-                           {
-                               ItemTempData itemTempData = holder.value();
+       {
+           ItemTempData itemTempData = holder.value();
 
             List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, itemTempData.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
             {   return;
             }
 
-                               for (Item item : items)
-                               {
-                                   ConfigSettings.ITEM_TEMPERATURES.get().put(item, itemTempData);
-                               }
-                           });
+           for (Item item : items)
+           {
+               ConfigSettings.ITEM_TEMPERATURES.get().put(item, itemTempData);
+           }
+       });
     }
 
     private static void addDryingItemConfigs(Collection<Holder<DryingItemData>> dryingItems)
     {
         dryingItems.forEach(holder ->
-                            {
-                                DryingItemData dryingItemData = holder.value();
+        {
+            DryingItemData dryingItemData = holder.value();
 
             List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, dryingItemData.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
             {   return;
             }
 
-                                for (Item item : items)
-                                {
-                                    ConfigSettings.DRYING_ITEMS.get().put(item, dryingItemData);
-                                }
-                            });
+            for (Item item : items)
+            {
+                ConfigSettings.DRYING_ITEMS.get().put(item, dryingItemData);
+            }
+        });
     }
 
     private static void addInsulationSlotConfigs(Collection<Holder<ItemInsulationSlotsData>> insulationSlots)
     {
         insulationSlots.forEach(holder ->
-                                {
-                                    ItemInsulationSlotsData insulationSlotData = holder.value();
+        {
+            ItemInsulationSlotsData insulationSlotData = holder.value();
 
             List<Item> items = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ITEM, insulationSlotData.item().flatten(ItemRequirement::items)));
             if (items.isEmpty())
             {   return;
             }
 
-                                    for (Item item : items)
-                                    {
-                                        ConfigSettings.INSULATION_SLOT_OVERRIDES.get().put(item, insulationSlotData);
-                                    }
-                                });
+            for (Item item : items)
+            {
+                ConfigSettings.INSULATION_SLOT_OVERRIDES.get().put(item, insulationSlotData);
+            }
+        });
     }
 
     private static void addBlockTempConfigs(Collection<Holder<BlockTempData>> blockTemps)
     {
         blockTemps.forEach(holder ->
-                           {
-                               BlockTempData blockTempData = holder.value();
-                               BlockTemp blockTemp = new ConfiguredBlockTemp(blockTempData);
-                               BlockTempRegistry.register(blockTemp);
-                           });
+        {
+            BlockTempData blockTempData = holder.value();
+            BlockTemp blockTemp = new ConfiguredBlockTemp(blockTempData);
+            BlockTempRegistry.register(blockTemp);
+        });
     }
 
     private static void addBiomeTempConfigs(Collection<Holder<BiomeTempData>> biomeTemps, RegistryAccess registryAccess)
     {
         biomeTemps.forEach(holder ->
-                           {
-                               BiomeTempData biomeTempData = holder.value();
+        {
+            BiomeTempData biomeTempData = holder.value();
 
-                               for (OptionalHolder<Biome> biome : RegistryHelper.mapRegistryTagList(Registries.BIOME, biomeTempData.biomes(), registryAccess))
-                               {
-                                   if (biomeTempData.isOffset())
-                                   {
-                                       ConfigSettings.BIOME_OFFSETS.get(registryAccess).put(biome.get(), biomeTempData);
-                                   }
-                                   else
-                                   {
-                                       ConfigSettings.BIOME_TEMPS.get(registryAccess).put(biome.get(), biomeTempData);
-                                   }
-                               }
-                           });
+            for (OptionalHolder<Biome> biome : RegistryHelper.mapRegistryTagList(Registries.BIOME, biomeTempData.biomes(), registryAccess))
+            {
+                if (biomeTempData.isOffset())
+                {
+                    ConfigSettings.BIOME_OFFSETS.get(registryAccess).put(biome.get(), biomeTempData);
+                }
+                else
+                {
+                    ConfigSettings.BIOME_TEMPS.get(registryAccess).put(biome.get(), biomeTempData);
+                }
+            }
+        });
     }
 
     private static void addDimensionTempConfigs(Collection<Holder<DimensionTempData>> dimensionTemps, RegistryAccess registryAccess)
     {
         dimensionTemps.forEach(holder ->
-                               {
-                                   DimensionTempData dimensionTempData = holder.value();
+        {
+            DimensionTempData dimensionTempData = holder.value();
 
-                                   for (OptionalHolder<DimensionType> dimension : RegistryHelper.mapRegistryTagList(Registries.DIMENSION_TYPE, dimensionTempData.dimensions(), registryAccess))
-                                   {
-                                       if (dimensionTempData.isOffset())
-                                       {
-                                           ConfigSettings.DIMENSION_OFFSETS.get(registryAccess).put(dimension.get(), dimensionTempData);
-                                       }
-                                       else
-                                       {
-                                           ConfigSettings.DIMENSION_TEMPS.get(registryAccess).put(dimension.get(), dimensionTempData);
-                                       }
-                                   }
-                               });
+            for (OptionalHolder<DimensionType> dimension : RegistryHelper.mapRegistryTagList(Registries.DIMENSION_TYPE, dimensionTempData.dimensions(), registryAccess))
+            {
+                if (dimensionTempData.isOffset())
+                {
+                    ConfigSettings.DIMENSION_OFFSETS.get(registryAccess).put(dimension.get(), dimensionTempData);
+                }
+                else
+                {
+                    ConfigSettings.DIMENSION_TEMPS.get(registryAccess).put(dimension.get(), dimensionTempData);
+                }
+            }
+        });
     }
 
     private static void addStructureTempConfigs(Collection<Holder<StructureTempData>> structureTemps, RegistryAccess registryAccess)
     {
         structureTemps.forEach(holder ->
-                               {
-                                   StructureTempData structureTempData = holder.value();
+        {
+            StructureTempData structureTempData = holder.value();
 
-                                   for (OptionalHolder<Structure> structure : RegistryHelper.mapRegistryTagList(Registries.STRUCTURE, structureTempData.structures(), registryAccess))
-                                   {
-                                       if (structureTempData.isOffset())
-                                       {
-                                           ConfigSettings.STRUCTURE_OFFSETS.get(registryAccess).put(structure.get(), structureTempData);
-                                       }
-                                       else
-                                       {
-                                           ConfigSettings.STRUCTURE_TEMPS.get(registryAccess).put(structure.get(), structureTempData);
-                                       }
-                                   }
-                               });
+            for (OptionalHolder<Structure> structure : RegistryHelper.mapRegistryTagList(Registries.STRUCTURE, structureTempData.structures(), registryAccess))
+            {
+                if (structureTempData.isOffset())
+                {
+                    ConfigSettings.STRUCTURE_OFFSETS.get(registryAccess).put(structure.get(), structureTempData);
+                }
+                else
+                {
+                    ConfigSettings.STRUCTURE_TEMPS.get(registryAccess).put(structure.get(), structureTempData);
+                }
+            }
+        });
     }
 
     private static void addDepthTempConfigs(Collection<Holder<DepthTempData>> depthTemps, RegistryAccess registryAccess)
@@ -769,8 +767,8 @@ public class ConfigLoadingHandler
     private static void addMountConfigs(Collection<Holder<MountData>> mounts)
     {
         mounts.forEach(holder ->
-                       {
-                           MountData mountData = holder.value();
+        {
+            MountData mountData = holder.value();
 
             List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, mountData.entity().flatten(EntityRequirement::entities)));
             if (entities.isEmpty())
@@ -785,21 +783,21 @@ public class ConfigLoadingHandler
     private static void addSpawnBiomeConfigs(Collection<Holder<SpawnBiomeData>> spawnBiomes, RegistryAccess registryAccess)
     {
         spawnBiomes.forEach(holder ->
-                            {
-                                SpawnBiomeData spawnBiomeData = holder.value();
+        {
+            SpawnBiomeData spawnBiomeData = holder.value();
 
-                                for (OptionalHolder<Biome> biome : RegistryHelper.mapRegistryTagList(Registries.BIOME, spawnBiomeData.biomes(), registryAccess))
-                                {
-                                    ConfigSettings.ENTITY_SPAWN_BIOMES.get(registryAccess).put(biome.get(), spawnBiomeData);
-                                }
-                            });
+            for (OptionalHolder<Biome> biome : RegistryHelper.mapRegistryTagList(Registries.BIOME, spawnBiomeData.biomes(), registryAccess))
+            {
+                ConfigSettings.ENTITY_SPAWN_BIOMES.get(registryAccess).put(biome.get(), spawnBiomeData);
+            }
+        });
     }
 
     private static void addEntityTempConfigs(Collection<Holder<EntityTempData>> entityTemps)
     {
         entityTemps.forEach(holder ->
-                            {
-                                EntityTempData entityTempData = holder.value();
+        {
+            EntityTempData entityTempData = holder.value();
 
             List<EntityType<?>> entities = new ArrayList<>(RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, entityTempData.entity().flatten(EntityRequirement::entities)));
             if (entities.isEmpty())
