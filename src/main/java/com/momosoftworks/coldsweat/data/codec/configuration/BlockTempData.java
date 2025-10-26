@@ -16,7 +16,7 @@ import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.block.Block;
 import net.minecraft.tags.ITag;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.RegistryKey;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -37,12 +37,12 @@ public class BlockTempData extends ConfigData
     final NegatableList<LocationRequirement> location;
     final NegatableList<EntityRequirement> entity;
     final boolean logarithmic;
-    final Optional<List<ResourceLocation>> effectGroup;
+    final Optional<List<RegistryKey<BlockTempData>>> effectGroup;
 
     public BlockTempData(NegatableList<BlockRequirement> block, double temperature, double range,
                          double maxEffect, boolean fade, WorldTempRequirement maxTemp, WorldTempRequirement minTemp,
                          Temperature.Units units, NegatableList<LocationRequirement> location,
-                         NegatableList<EntityRequirement> entity, boolean logarithmic, Optional<List<ResourceLocation>> effectGroup, NegatableList<String> requiredMods)
+                         NegatableList<EntityRequirement> entity, boolean logarithmic, Optional<List<RegistryKey<BlockTempData>>> effectGroup, NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.block = block;
@@ -62,7 +62,7 @@ public class BlockTempData extends ConfigData
     public BlockTempData(NegatableList<BlockRequirement> block, double temperature, double range,
                          double maxEffect, boolean fade, WorldTempRequirement maxTemp, WorldTempRequirement minTemp,
                          Temperature.Units units, NegatableList<LocationRequirement> location, NegatableList<EntityRequirement> entity,
-                         boolean logarithmic, Optional<List<ResourceLocation>> effectGroup)
+                         boolean logarithmic, Optional<List<RegistryKey<BlockTempData>>> effectGroup)
     {
         this(block, temperature, range, maxEffect, fade, maxTemp, minTemp, units, location, entity, logarithmic, effectGroup, new NegatableList<>());
     }
@@ -92,7 +92,7 @@ public class BlockTempData extends ConfigData
             NegatableList.codec(LocationRequirement.CODEC).optionalFieldOf("location", new NegatableList<>()).forGetter(BlockTempData::location),
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(BlockTempData::entity),
             Codec.BOOL.optionalFieldOf("logarithmic", false).forGetter(BlockTempData::logarithmic),
-            ResourceLocation.CODEC.listOf().optionalFieldOf("effect_group").forGetter(BlockTempData::effectGroup)
+            ExtraCodecs.codec(ModRegistries.BLOCK_TEMP_DATA.key()).listOf().optionalFieldOf("effect_group").forGetter(BlockTempData::effectGroup)
     ).apply(instance, BlockTempData::new)));
 
     public NegatableList<BlockRequirement> block()
@@ -128,7 +128,7 @@ public class BlockTempData extends ConfigData
     public boolean logarithmic()
     {   return logarithmic;
     }
-    public Optional<List<ResourceLocation>> effectGroup()
+    public Optional<List<RegistryKey<BlockTempData>>> effectGroup()
     {   return effectGroup;
     }
 

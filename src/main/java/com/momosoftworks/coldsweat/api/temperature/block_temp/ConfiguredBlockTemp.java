@@ -8,8 +8,7 @@ import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.tags.ITag;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -59,7 +58,7 @@ public class ConfiguredBlockTemp extends BlockTemp
     {   return this.data;
     }
 
-    public boolean isInGroup(List<ResourceLocation> group)
+    public boolean isInGroup(List<RegistryKey<BlockTempData>> group)
     {   return this.data.effectGroup().map(list -> list.stream().anyMatch(group::contains)).orElse(false);
     }
 

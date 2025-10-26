@@ -6,6 +6,7 @@ import com.momosoftworks.coldsweat.api.temperature.block_temp.ConfiguredBlockTem
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
+import com.momosoftworks.coldsweat.data.codec.configuration.BlockTempData;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.Triplet;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
@@ -14,7 +15,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.vector.Vector3d;
@@ -209,10 +210,10 @@ public class BlockTempModifier extends TempModifier
         ConfiguredBlockTemp config = (ConfiguredBlockTemp) blockTemp;
         double total = 0;
 
-        List<ResourceLocation> group = config.getData().effectGroup().orElse(null);
+        List<RegistryKey<BlockTempData>> group = config.getData().effectGroup().orElse(null);
         if (group == null) return this.blockTempTotals.getOrDefault(blockTemp, 0d);
 
-        if (!group.contains(config.getData().registryId().get()))
+        if (config.getData().registryKey().map(key -> !group.contains(key)).orElse(false))
         {   total += this.blockTempTotals.getOrDefault(blockTemp, 0d);
         }
 
