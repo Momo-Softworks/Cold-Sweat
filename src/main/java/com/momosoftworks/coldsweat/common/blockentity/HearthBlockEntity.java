@@ -508,8 +508,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     protected void tickPaths(int firstIndex, int lastIndex)
     {
         int pathCount = paths.size();
-        if (false)
-        Minecraft.getInstance().player.displayClientMessage(Component.literal(this.paths.size() + " " + this.paths.stream().map(p -> p.pos).distinct().count()), true);
         for (int i = firstIndex; i < Math.min(paths.size(), lastIndex); i++)
         {
             // This operation is really fast because it's an ArrayList
