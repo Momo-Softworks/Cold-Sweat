@@ -92,7 +92,7 @@ public class BlockTempData extends ConfigData
             NegatableList.codec(LocationRequirement.CODEC).optionalFieldOf("location", new NegatableList<>()).forGetter(BlockTempData::location),
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(BlockTempData::entity),
             Codec.BOOL.optionalFieldOf("logarithmic", false).forGetter(BlockTempData::logarithmic),
-            ExtraCodecs.codec(ModRegistries.BLOCK_TEMP_DATA.key()).listOf().optionalFieldOf("effect_group").forGetter(BlockTempData::effectGroup)
+            ExtraCodecs.registryCodec(() -> ModRegistries.BLOCK_TEMP_DATA.key()).listOf().optionalFieldOf("effect_group").forGetter(BlockTempData::effectGroup)
     ).apply(instance, BlockTempData::new)));
 
     public NegatableList<BlockRequirement> block()

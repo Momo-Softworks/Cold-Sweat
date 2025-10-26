@@ -19,7 +19,6 @@ import net.minecraft.util.registry.Registry;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
-import javax.xml.ws.Holder;
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.IntFunction;
@@ -32,10 +31,10 @@ public class ExtraCodecs
 
     private static final Map<String, RegistryKey<?>> REGISTRY_VALUES = Collections.synchronizedMap(Maps.newIdentityHashMap());
 
-    public static <T> Codec<RegistryKey<T>> codec(RegistryKey<? extends Registry<T>> p_195967_)
+    public static <T> Codec<RegistryKey<T>> registryCodec(Supplier<RegistryKey<? extends Registry<T>>> registry)
     {
         return ResourceLocation.CODEC.xmap((p_195979_) -> {
-            return create(p_195967_, p_195979_);
+            return create(registry.get(), p_195979_);
         }, RegistryKey::location);
     }
 
