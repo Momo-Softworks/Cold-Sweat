@@ -26,7 +26,7 @@ public class ModItemTags
     public static final TagKey<Item> ENCASES_SMOKESTACK = createTag("encases_smokestack");
     public static final TagKey<Item> GROWS_SOUL_STALK = createTag("grows_soul_stalk");
 
-    public static final TagKey<Item> HOGLIN_LEATHERS = createForgeTag("leathers/hoglin");
+    public static final TagKey<Item> HOGLIN_LEATHERS = createForgeTag("leather/hoglin");
     public static final TagKey<Item> GOAT_FURS = createForgeTag("furs/goat");
     public static final TagKey<Item> CHAMELEON_SCALES = createForgeTag("scales/chameleon");
 
