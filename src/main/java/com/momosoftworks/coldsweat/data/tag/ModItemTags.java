@@ -19,7 +19,7 @@ public class ModItemTags
     public static final ITag.INamedTag<Item> CHAMELEON_COLD = createTag("chameleon/find_cold_biomes");
     public static final ITag.INamedTag<Item> CHAMELEON_HUMID = createTag("chameleon/find_humid_biomes");
 
-    public static final ITag.INamedTag<Item> HOGLIN_LEATHERS = createForgeTag("leathers/hoglin");
+    public static final ITag.INamedTag<Item> HOGLIN_LEATHERS = createForgeTag("leather/hoglin");
     public static final ITag.INamedTag<Item> GOAT_FURS = createForgeTag("furs/goat");
     public static final ITag.INamedTag<Item> CHAMELEON_SCALES = createForgeTag("scales/chameleon");
 
