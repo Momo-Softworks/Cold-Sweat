@@ -10,6 +10,7 @@ import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.compat.kubejs.event.builder.*;
 import com.momosoftworks.coldsweat.compat.kubejs.util.TempModifierDataJS;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.RegistryHolder;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
@@ -189,22 +190,26 @@ public class ModRegistriesEventJS extends StartupEventJS
      Biome Temperature
      */
 
+    public void addBiomeTemperature(double minTemp, double maxTemp, String units, String[] biomes, double waterTemp)
+    {
+        this.addRegistryConfig(Registries.BIOME, ModRegistries.BIOME_TEMP_DATA, biomes,
+                parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), waterTemp, false, false));
+    }
     public void addBiomeTemperature(double minTemp, double maxTemp, String units, String... biomes)
     {
         this.addRegistryConfig(Registries.BIOME, ModRegistries.BIOME_TEMP_DATA, biomes,
-                parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), false, false));
-    }
-    public void addBiomeTemperature(double minTemp, double maxTemp, String... biomes)
-    {   addBiomeTemperature(minTemp, maxTemp, "mc", biomes);
+                               parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), Double.NaN, false, false));
     }
 
+    public void addBiomeOffset(double minTemp, double maxTemp, String units, String[] biomes, double waterTemp)
+    {
+        this.addRegistryConfig(Registries.BIOME, ModRegistries.BIOME_TEMP_DATA, biomes,
+                parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), waterTemp, true, false));
+    }
     public void addBiomeOffset(double minTemp, double maxTemp, String units, String... biomes)
     {
         this.addRegistryConfig(Registries.BIOME, ModRegistries.BIOME_TEMP_DATA, biomes,
-                parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), true, false));
-    }
-    public void addBiomeOffset(double minTemp, double maxTemp, String... biomes)
-    {   addBiomeOffset(minTemp, maxTemp, "mc", biomes);
+                               parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), Double.NaN, true, false));
     }
 
     /*

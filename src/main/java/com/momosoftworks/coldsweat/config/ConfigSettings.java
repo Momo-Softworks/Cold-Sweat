@@ -188,6 +188,9 @@ public class ConfigSettings
     public static final DynamicHolder<Double> DRYOFF_SPEED;
     public static final DynamicHolder<Double> WATER_SOAK_SPEED;
     public static final DynamicHolder<Double> RAIN_SOAK_SPEED;
+    public static final DynamicHolder<Double> DEFAULT_WATER_TEMPERATURE;
+    public static final DynamicHolder<Double> MAX_RAIN_SOAK;
+    private static Temperature.Units DEFAULT_WATER_TEMP_UNITS = Temperature.Units.MC;
     public static final DynamicHolder<Double> ACCLIMATION_SPEED;
     public static final DynamicHolder<Pair<Double, Double>> MIN_ACCLIMATION_RANGE;
     public static final DynamicHolder<Pair<Double, Double>> MAX_ACCLIMATION_RANGE;
@@ -872,6 +875,23 @@ public class ConfigSettings
         RAIN_SOAK_SPEED = addSyncedSetting(ColdSweat.createKey("rain_soak_speed"), () -> 0.0125, holder -> holder.set(WorldSettingsConfig.RAIN_SOAK_SPEED.get()),
         Codec.DOUBLE,
         (saver) -> WorldSettingsConfig.RAIN_SOAK_SPEED.set(saver),
+        SyncType.BOTH_WAYS);
+
+        DEFAULT_WATER_TEMPERATURE = addSyncedSetting(ColdSweat.createKey("default_water_temperature"), () -> -0.2, holder ->
+        {
+            List<?> entry = WorldSettingsConfig.DEFAULT_WATER_TEMP.get();
+            double temp = entry.get(0) instanceof Number ? ((Number) entry.get(0)).doubleValue() : 0.0;
+            Temperature.Units units = (entry.size() > 1 && entry.get(1) instanceof String) ? Temperature.Units.fromID((String) entry.get(1)) : Temperature.Units.MC;
+            DEFAULT_WATER_TEMP_UNITS = units;
+            holder.set(Temperature.convert(temp, units, Temperature.Units.MC, false));
+        },
+        Codec.DOUBLE,
+        (saver) -> WorldSettingsConfig.DEFAULT_WATER_TEMP.set(List.of(saver, DEFAULT_WATER_TEMP_UNITS.getSerializedName())),
+        SyncType.BOTH_WAYS);
+
+        MAX_RAIN_SOAK = addSyncedSetting(ColdSweat.createKey("max_rain_soak"), () -> 1.0, holder -> holder.set(WorldSettingsConfig.MAX_RAIN_SOAK.get()),
+        Codec.DOUBLE,
+        (saver) -> WorldSettingsConfig.MAX_RAIN_SOAK.set(saver),
         SyncType.BOTH_WAYS);
 
         ACCLIMATION_SPEED = addSyncedSetting(ColdSweat.createKey("acclimation_speed"), () -> 1.0, holder -> holder.set(MainSettingsConfig.ACCLIMATION_SPEED.get()),
