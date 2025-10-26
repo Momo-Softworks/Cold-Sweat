@@ -618,10 +618,13 @@ public abstract class WorldHelper
 
     public static double getWaterTemperatureAt(Level level, BlockPos pos)
     {
-        Holder<Biome> biome = level.getBiome(pos);
-        BiomeTempData biomeTemp = ConfigSettings.BIOME_TEMPS.get(level.registryAccess()).get(biome);
-        if (biomeTemp == null) return ConfigSettings.DEFAULT_WATER_TEMPERATURE.get();
-        else return biomeTemp.waterTemp();
+        double defaultWaterTemp = ConfigSettings.DEFAULT_WATER_TEMPERATURE.get();
+        BiomeTempData biomeTemp = ConfigSettings.BIOME_TEMPS.get(level.registryAccess()).get(level.getBiome(pos));
+        if (biomeTemp == null)
+        {   return defaultWaterTemp;
+        }
+        return biomeTemp.isOffset() ? defaultWaterTemp + biomeTemp.waterTemp()
+                                    : biomeTemp.waterTemp();
     }
 
     /**
