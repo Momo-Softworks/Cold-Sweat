@@ -106,27 +106,24 @@ public class BiomeTempData extends ConfigData
         NegatableList<Biome> biomes = ConfigHelper.parseRegistryItems(Registry.BIOME_REGISTRY, registryAccess, (String) entry.get(0));
         if (biomes.isEmpty()) return null;
 
-        Temperature.Units units;
-        double min;
-        double max;
-        boolean isDisabled;
+        Temperature.Units units = Temperature.Units.MC;
+        double min = 0;
+        double max = 0;
+        double waterTemp = Double.NaN;
+        boolean isDisabled = false;
         // Disabled
         if (entry.get(1) instanceof String && entry.get(1).equals("disable"))
-        {   units = Temperature.Units.MC;
-            min = 0;
-            max = 0;
-            isDisabled = true;
+        {   isDisabled = true;
         }
         // Normal
         else
-        {   units = entry.size() == 4 ? Temperature.Units.valueOf(((String) entry.get(3)).toUpperCase()) : Temperature.Units.MC;
+        {
             min = ((Number) entry.get(1)).doubleValue();
             max = ((Number) entry.get(2)).doubleValue();
-            isDisabled = false;
+            if (entry.size() >= 4) units = Temperature.Units.fromID(((String) entry.get(3)).toUpperCase());
+            if (entry.size() >= 5) waterTemp = Temperature.convert(((Number) entry.get(4)).doubleValue(), units, Temperature.Units.MC, true);
         }
-
-        // Maps the biome ID to the temperature (and variance if present)
-        return new BiomeTempData(biomes, min, max, units, Double.NaN, isOffset, isDisabled);
+        return new BiomeTempData(biomes, min, max, units, waterTemp, isOffset, isDisabled);
     }
 
     @Override
