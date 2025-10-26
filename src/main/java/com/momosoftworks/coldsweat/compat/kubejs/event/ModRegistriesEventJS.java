@@ -184,22 +184,26 @@ public class ModRegistriesEventJS extends StartupEventJS
      Biome Temperature
      */
 
+    public void addBiomeTemperature(double minTemp, double maxTemp, String units, String[] biomes, double waterTemp)
+    {
+        this.addRegistryConfig(Registry.BIOME_REGISTRY, ModRegistries.BIOME_TEMP_DATA, biomes,
+                parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), waterTemp, false, false));
+    }
     public void addBiomeTemperature(double minTemp, double maxTemp, String units, String... biomes)
     {
         this.addRegistryConfig(Registry.BIOME_REGISTRY, ModRegistries.BIOME_TEMP_DATA, biomes,
-                parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), false, false));
-    }
-    public void addBiomeTemperature(double minTemp, double maxTemp, String... biomes)
-    {   addBiomeTemperature(minTemp, maxTemp, "mc", biomes);
+                               parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), Double.NaN, false, false));
     }
 
+    public void addBiomeOffset(double minTemp, double maxTemp, String units, String[] biomes, double waterTemp)
+    {
+        this.addRegistryConfig(Registry.BIOME_REGISTRY, ModRegistries.BIOME_TEMP_DATA, biomes,
+                parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), waterTemp, true, false));
+    }
     public void addBiomeOffset(double minTemp, double maxTemp, String units, String... biomes)
     {
         this.addRegistryConfig(Registry.BIOME_REGISTRY, ModRegistries.BIOME_TEMP_DATA, biomes,
-                parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), true, false));
-    }
-    public void addBiomeOffset(double minTemp, double maxTemp, String... biomes)
-    {   addBiomeOffset(minTemp, maxTemp, "mc", biomes);
+                               parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), Double.NaN, true, false));
     }
 
     /*

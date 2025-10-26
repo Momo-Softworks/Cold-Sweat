@@ -600,12 +600,12 @@ public abstract class WorldHelper
         double baseTemp = biome.getBaseTemperature();
 
         BiomeTempData biomeTemp = ConfigSettings.BIOME_TEMPS.get(registryAccess)
-                                  .getOrDefault(biome, new BiomeTempData(biome, baseTemp - variance, baseTemp + variance, Temperature.Units.MC, true, false));
+                                  .getOrDefault(biome, new BiomeTempData(biome, baseTemp - variance, baseTemp + variance, Temperature.Units.MC, Double.NaN, true, false));
         if (biomeTemp.isDisabled())
         {   return Pair.of(0.0, 0.0);
         }
         BiomeTempData configOffset = ConfigSettings.BIOME_OFFSETS.get(registryAccess)
-                                     .getOrDefault(biome, new BiomeTempData(biome, 0d, 0d, Temperature.Units.MC, false, false));
+                                     .getOrDefault(biome, new BiomeTempData(biome, 0d, 0d, Temperature.Units.MC, Double.NaN, false, false));
         return CSMath.addPairs(Pair.of(biomeTemp.minTemp(), biomeTemp.maxTemp()),
                                Pair.of(configOffset.minTemp(), configOffset.maxTemp()));
     }
@@ -622,6 +622,14 @@ public abstract class WorldHelper
 
     public static double getTimeMultiplier(IWorld level)
     {   return Math.sin(level.dayTime() / (12000 / Math.PI));
+    }
+
+    public static double getWaterTemperatureAt(World level, BlockPos pos)
+    {
+        Biome biome = level.getBiome(pos);
+        BiomeTempData biomeTemp = ConfigSettings.BIOME_TEMPS.get(level.registryAccess()).get(biome);
+        if (biomeTemp == null) return ConfigSettings.DEFAULT_WATER_TEMPERATURE.get();
+        else return biomeTemp.waterTemp();
     }
 
     /**
