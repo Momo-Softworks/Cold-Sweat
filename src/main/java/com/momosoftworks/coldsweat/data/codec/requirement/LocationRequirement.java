@@ -17,6 +17,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.gen.feature.structure.StructureStart;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -29,9 +30,9 @@ public class LocationRequirement
     int xOffset;
     int yOffset;
     int zOffset;
-    private final Optional<RegistryKey<Biome>> biome;
-    private final Optional<RegistryKey<Structure<?>>> structure;
-    private final Optional<RegistryKey<World>> dimension;
+    private final NegatableList<RegistryKey<Biome>> biome;
+    private final NegatableList<RegistryKey<Structure<?>>> structure;
+    private final NegatableList<RegistryKey<World>> dimension;
     private final IntegerBounds light;
     private final BlockRequirement block;
     private final FluidRequirement fluid;
@@ -40,8 +41,8 @@ public class LocationRequirement
 
     public LocationRequirement(IntegerBounds x, IntegerBounds y, IntegerBounds z,
                                int xOffset, int yOffset, int zOffset,
-                               Optional<RegistryKey<Biome>> biome, Optional<RegistryKey<Structure<?>>> structure,
-                               Optional<RegistryKey<World>> dimension, IntegerBounds light,
+                               NegatableList<RegistryKey<Biome>> biome, NegatableList<RegistryKey<Structure<?>>> structure,
+                               NegatableList<RegistryKey<World>> dimension, IntegerBounds light,
                                BlockRequirement block, FluidRequirement fluid,
                                WorldTempBounds temperature,
                                Optional<Predicate<BlockInWorld>> predicate)
@@ -69,9 +70,9 @@ public class LocationRequirement
             Codec.INT.optionalFieldOf("x_offset", 0).forGetter(location -> location.xOffset),
             Codec.INT.optionalFieldOf("y_offset", 0).forGetter(location -> location.yOffset),
             Codec.INT.optionalFieldOf("z_offset", 0).forGetter(location -> location.zOffset),
-            ExtraCodecs.codec(Registry.BIOME_REGISTRY).optionalFieldOf("biome").forGetter(location -> location.biome),
-            ExtraCodecs.codec(Registry.STRUCTURE_FEATURE_REGISTRY).optionalFieldOf("structure").forGetter(location -> location.structure),
-            ExtraCodecs.codec(Registry.DIMENSION_REGISTRY).optionalFieldOf("dimension").forGetter(location -> location.dimension),
+            NegatableList.codec(ExtraCodecs.codec(Registry.BIOME_REGISTRY)).optionalFieldOf("biome", new NegatableList<>()).forGetter(location -> location.biome),
+            NegatableList.codec(ExtraCodecs.codec(Registry.STRUCTURE_FEATURE_REGISTRY)).optionalFieldOf("structure", new NegatableList<>()).forGetter(location -> location.structure),
+            NegatableList.codec(ExtraCodecs.codec(Registry.DIMENSION_REGISTRY)).optionalFieldOf("dimension", new NegatableList<>()).forGetter(location -> location.dimension),
             IntegerBounds.CODEC.optionalFieldOf("light", IntegerBounds.NONE).forGetter(location -> location.light),
             BlockRequirement.CODEC.optionalFieldOf("block", BlockRequirement.NONE).forGetter(location -> location.block),
             FluidRequirement.CODEC.optionalFieldOf("fluid", FluidRequirement.NONE).forGetter(location -> location.fluid),
@@ -80,9 +81,9 @@ public class LocationRequirement
 
     public LocationRequirement(IntegerBounds x, IntegerBounds y, IntegerBounds z,
                                int xOffset, int yOffset, int zOffset,
-                               Optional<RegistryKey<Biome>> biome,
-                               Optional<RegistryKey<Structure<?>>> structure,
-                               Optional<RegistryKey<World>> dimension,
+                               NegatableList<RegistryKey<Biome>> biome,
+                               NegatableList<RegistryKey<Structure<?>>> structure,
+                               NegatableList<RegistryKey<World>> dimension,
                                IntegerBounds light, BlockRequirement block,
                                FluidRequirement fluid, WorldTempBounds temperature)
     {
@@ -93,7 +94,7 @@ public class LocationRequirement
     {
         this(IntegerBounds.NONE, IntegerBounds.NONE, IntegerBounds.NONE,
              0, 0, 0,
-             Optional.empty(), Optional.empty(), Optional.empty(),
+             new NegatableList<>(), new NegatableList<>(), new NegatableList<>(),
              IntegerBounds.NONE, BlockRequirement.NONE,
              FluidRequirement.NONE, WorldTempBounds.NONE,
              Optional.of(predicate));
@@ -101,7 +102,7 @@ public class LocationRequirement
 
     public static final LocationRequirement NONE = new LocationRequirement(IntegerBounds.NONE, IntegerBounds.NONE, IntegerBounds.NONE,
                                                                            0, 0, 0,
-                                                                           Optional.empty(), Optional.empty(), Optional.empty(),
+                                                                           new NegatableList<>(), new NegatableList<>(), new NegatableList<>(),
                                                                            IntegerBounds.NONE, BlockRequirement.NONE,
                                                                            FluidRequirement.NONE, WorldTempBounds.NONE);
 
@@ -123,13 +124,13 @@ public class LocationRequirement
     public int zOffset()
     {   return zOffset;
     }
-    public Optional<RegistryKey<Biome>> biome()
+    public NegatableList<RegistryKey<Biome>> biome()
     {   return biome;
     }
-    public Optional<RegistryKey<Structure<?>>> structure()
+    public NegatableList<RegistryKey<Structure<?>>> structure()
     {   return structure;
     }
-    public Optional<RegistryKey<World>> dimension()
+    public NegatableList<RegistryKey<World>> dimension()
     {   return dimension;
     }
     public IntegerBounds light()
@@ -165,16 +166,14 @@ public class LocationRequirement
         if (!this.z.test(pos.getZ()))
             return false;
 
-        if (this.dimension.isPresent()
-        && !level.dimension().equals(this.dimension.get()))
+        if (!this.dimension.test(key -> level.dimension().equals(key)))
         {   return false;
         }
-        if (this.biome.isPresent()
-        && !this.biome.get().location().equals(level.getBiome(pos).getRegistryName()))
+        if (!this.biome.test(key -> ForgeRegistries.BIOMES.getKey(level.getBiomeManager().getNoiseBiomeAtPosition(pos)).equals(key)))
         {   return false;
         }
-        if (this.structure.isPresent()
-        && WorldHelper.getServerLevel(level).structureFeatureManager().getStructureAt(pos, false, level.registryAccess().registryOrThrow(Registry.STRUCTURE_FEATURE_REGISTRY).get(this.structure.get())) == StructureStart.INVALID_START)
+        if (this.structure.test(structure ->
+        WorldHelper.getServerLevel(level).structureFeatureManager().getStructureAt(pos, false, level.registryAccess().registryOrThrow(Registry.STRUCTURE_FEATURE_REGISTRY).get(structure)) == StructureStart.INVALID_START))
         {   return false;
         }
         if (!this.light.test(level.getMaxLocalRawBrightness(pos)))
