@@ -5,11 +5,11 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.OptionalHolder;
-import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
@@ -24,11 +24,12 @@ public class BiomeTempData extends ConfigData
     final double min;
     final double max;
     final Temperature.Units units;
+    final double waterTemp;
     final boolean isOffset;
     final boolean isDisabled;
 
     public BiomeTempData(NegatableList<Either<TagKey<Biome>, OptionalHolder<Biome>>> biomes, double min, double max,
-                         Temperature.Units units, boolean isOffset, boolean isDisabled, NegatableList<String> requiredMods)
+                         Temperature.Units units, double waterTemp, boolean isOffset, boolean isDisabled, NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.biomes = biomes;
@@ -37,16 +38,18 @@ public class BiomeTempData extends ConfigData
         this.units = units;
         this.isOffset = isOffset;
         this.isDisabled = isDisabled;
+        if (Double.isNaN(waterTemp)) waterTemp = isOffset ? 0 : ConfigSettings.DEFAULT_WATER_TEMPERATURE.get();
+        this.waterTemp = waterTemp;
     }
 
     public BiomeTempData(NegatableList<Either<TagKey<Biome>, OptionalHolder<Biome>>> biomes, double min, double max,
-                         Temperature.Units units, boolean isOffset, boolean isDisabled)
+                         Temperature.Units units, double waterTemp, boolean isOffset, boolean isDisabled)
     {
-        this(biomes, min, max, units, isOffset, isDisabled, new NegatableList<>());
+        this(biomes, min, max, units, waterTemp, isOffset, isDisabled, new NegatableList<>());
     }
 
-    public BiomeTempData(OptionalHolder<Biome> biome, double min, double max, Temperature.Units units, boolean isOffset, boolean isDisabled)
-    {   this(new NegatableList<>(Either.right(biome)), min, max, units, isOffset, isDisabled);
+    public BiomeTempData(OptionalHolder<Biome> biome, double min, double max, Temperature.Units units, double waterTemp, boolean isOffset, boolean isDisabled)
+    {   this(new NegatableList<>(Either.right(biome)), min, max, units, waterTemp, isOffset, isDisabled);
     }
 
     public static final Codec<BiomeTempData> CODEC = createCodec(RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -60,6 +63,7 @@ public class BiomeTempData extends ConfigData
                  .xmap(either -> either.map(left -> left, right -> right), Either::right)
                  .forGetter(BiomeTempData::max),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(BiomeTempData::units),
+            Codec.DOUBLE.optionalFieldOf("water_temp", Double.NaN).forGetter(BiomeTempData::waterTemp),
             Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(BiomeTempData::isOffset),
             Codec.BOOL.optionalFieldOf("disable", false).forGetter(BiomeTempData::isDisabled)
     ).apply(instance, BiomeTempData::new)));
@@ -75,6 +79,9 @@ public class BiomeTempData extends ConfigData
     }
     public Temperature.Units units()
     {   return units;
+    }
+    public double waterTemp()
+    {   return waterTemp;
     }
     public boolean isOffset()
     {   return isOffset;
@@ -120,7 +127,7 @@ public class BiomeTempData extends ConfigData
         }
 
         // Maps the biome ID to the temperature (and variance if present)
-        return new BiomeTempData(biomes, min, max, units, isOffset, isDisabled);
+        return new BiomeTempData(biomes, min, max, units, Double.NaN, isOffset, isDisabled);
     }
 
     @Override
