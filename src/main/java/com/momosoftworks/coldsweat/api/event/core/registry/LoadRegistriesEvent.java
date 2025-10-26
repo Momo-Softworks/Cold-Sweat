@@ -21,9 +21,9 @@ import java.util.Collection;
 public abstract class LoadRegistriesEvent extends Event
 {
     DynamicRegistries registryAccess;
-    Multimap<RegistryKey<? extends Registry<? extends ConfigData>>, ? extends ConfigData> registries;
+    Multimap<RegistryHolder<?>, ? extends ConfigData> registries;
 
-    public LoadRegistriesEvent(DynamicRegistries registryAccess, Multimap<RegistryKey<? extends Registry<? extends ConfigData>>, ? extends ConfigData> registries)
+    public LoadRegistriesEvent(DynamicRegistries registryAccess, Multimap<RegistryHolder<?>, ? extends ConfigData> registries)
     {
         this.registryAccess = registryAccess;
         this.registries = registries;
@@ -33,20 +33,20 @@ public abstract class LoadRegistriesEvent extends Event
     {   return registryAccess;
     }
 
-    public Multimap<RegistryKey<? extends Registry<? extends ConfigData>>, ? extends ConfigData> getRegistries()
+    public Multimap<RegistryHolder<?>, ? extends ConfigData> getRegistries()
     {   return registries;
     }
 
     public <T extends ConfigData> Collection<T> getRegistry(RegistryHolder<T> registry)
-    {   return (Collection) registries.get(registry.key());
+    {   return (Collection) registries.get(registry);
     }
 
-    public <T extends ConfigData> void addRegistryEntry(RegistryHolder<T> key, T value)
-    {   ((Multimap) registries).put(key.key(), value);
+    public <T extends ConfigData> void addRegistryEntry(RegistryHolder<T> registry, T value)
+    {   ((Multimap) registries).put(registry, value);
     }
 
-    public <T extends ConfigData> void addRegistryEntries(RegistryHolder<T> key, Collection<T> values)
-    {   ((Multimap) registries).putAll(key.key(), values);
+    public <T extends ConfigData> void addRegistryEntries(RegistryHolder<T> registry, Collection<T> values)
+    {   ((Multimap) registries).putAll(registry, values);
     }
 
     /**
@@ -59,8 +59,8 @@ public abstract class LoadRegistriesEvent extends Event
         private Multimap<RegistryKey<Registry<? extends ConfigData>>, RegistryModifierData<?>> modifiers;
 
         public Pre(DynamicRegistries registryAccess,
-                   Multimap<RegistryKey<? extends Registry<? extends ConfigData>>, ? extends ConfigData> registries,
-                   Multimap<RegistryKey<Registry<? extends ConfigData>>, RegistryModifierData<?>> modifiers)
+                   Multimap<RegistryHolder<?>, ? extends ConfigData> registries,
+                   Multimap<RegistryHolder<?>, RegistryModifierData<?>> modifiers)
         {
             super(registryAccess, registries);
         }
@@ -81,7 +81,7 @@ public abstract class LoadRegistriesEvent extends Event
      */
     public static class Post extends LoadRegistriesEvent
     {
-        public Post(DynamicRegistries registryAccess, Multimap<RegistryKey<? extends Registry<? extends ConfigData>>, ? extends ConfigData> registries)
+        public Post(DynamicRegistries registryAccess, Multimap<RegistryHolder<?>, ? extends ConfigData> registries)
         {   super(registryAccess, registries);
         }
     }

@@ -78,10 +78,16 @@ public class ModRegistries
     {   return ImmutableMap.copyOf(REGISTRIES);
     }
 
-    public static RegistryKey<? extends Registry<? extends ConfigData>> getRegistry(ResourceLocation name)
+    public static RegistryKey<? extends Registry<? extends ConfigData>> getRegistryKey(ResourceLocation name)
     {
         return Optional.ofNullable(REGISTRIES.get(name)).map(RegistryHolder::key)
                .orElseThrow(() -> ColdSweat.LOGGER.throwing(new IllegalArgumentException("Unknown Cold Sweat registry: " + name)));
+    }
+
+    public static <T extends ConfigData> RegistryHolder<T> getRegistry(RegistryKey<Registry<T>> key)
+    {
+        return Optional.ofNullable(REGISTRIES.get(key.location())).map(reg -> (RegistryHolder<T>) reg)
+                .orElseThrow(() -> ColdSweat.LOGGER.throwing(new IllegalArgumentException("Unknown Cold Sweat registry: " + key.location())));
     }
 
     public static <T extends ConfigData> Codec<T> getCodec(RegistryKey<Registry<T>> registry)

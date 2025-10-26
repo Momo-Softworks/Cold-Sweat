@@ -41,7 +41,7 @@ public class RegistryModifierData<T extends ConfigData> extends ConfigData
                                                                           .xmap(either -> either.map(Arrays::asList, r -> r), Either::right);
 
     public static final Codec<RegistryModifierData<?>> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ResourceLocation.CODEC.xmap(s -> (RegistryKey)ModRegistries.getRegistry(s), key -> key.location()).fieldOf("registry").forGetter(data -> data.registry()),
+            ResourceLocation.CODEC.xmap(s -> (RegistryKey)ModRegistries.getRegistryKey(s), key -> key.location()).fieldOf("registry").forGetter(data -> data.registry()),
             CONFIG_TYPE_CODEC.optionalFieldOf("config_type", Arrays.asList()).forGetter(RegistryModifierData::configTypes),
             NegatableList.listCodec(NbtRequirement.CODEC).optionalFieldOf("matches", new NegatableList<>()).forGetter(RegistryModifierData::matches),
             ResourceLocation.CODEC.listOf().optionalFieldOf("entries", Arrays.asList()).forGetter(RegistryModifierData::entries),
