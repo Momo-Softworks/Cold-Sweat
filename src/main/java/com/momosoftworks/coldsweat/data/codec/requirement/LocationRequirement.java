@@ -12,12 +12,12 @@ import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.gen.feature.structure.StructureStart;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -70,9 +70,9 @@ public class LocationRequirement
             Codec.INT.optionalFieldOf("x_offset", 0).forGetter(location -> location.xOffset),
             Codec.INT.optionalFieldOf("y_offset", 0).forGetter(location -> location.yOffset),
             Codec.INT.optionalFieldOf("z_offset", 0).forGetter(location -> location.zOffset),
-            NegatableList.codec(ExtraCodecs.registryCodec(() -> Registry.BIOME_REGISTRY)).optionalFieldOf("biome", new NegatableList<>()).forGetter(location -> location.biome),
-            NegatableList.codec(ExtraCodecs.registryCodec(() -> Registry.STRUCTURE_FEATURE_REGISTRY)).optionalFieldOf("structure", new NegatableList<>()).forGetter(location -> location.structure),
-            NegatableList.codec(ExtraCodecs.registryCodec(() -> Registry.DIMENSION_REGISTRY)).optionalFieldOf("dimension", new NegatableList<>()).forGetter(location -> location.dimension),
+            NegatableList.codec(ExtraCodecs.registry(Registry.BIOME_REGISTRY)).optionalFieldOf("biome", new NegatableList<>()).forGetter(location -> location.biome),
+            NegatableList.codec(ExtraCodecs.registry(Registry.STRUCTURE_FEATURE_REGISTRY)).optionalFieldOf("structure", new NegatableList<>()).forGetter(location -> location.structure),
+            NegatableList.codec(ExtraCodecs.registry(Registry.DIMENSION_REGISTRY)).optionalFieldOf("dimension", new NegatableList<>()).forGetter(location -> location.dimension),
             IntegerBounds.CODEC.optionalFieldOf("light", IntegerBounds.NONE).forGetter(location -> location.light),
             BlockRequirement.CODEC.optionalFieldOf("block", BlockRequirement.NONE).forGetter(location -> location.block),
             FluidRequirement.CODEC.optionalFieldOf("fluid", FluidRequirement.NONE).forGetter(location -> location.fluid),
@@ -166,14 +166,15 @@ public class LocationRequirement
         if (!this.z.test(pos.getZ()))
             return false;
 
+        DynamicRegistries registryAccess = level.registryAccess();
         if (!this.dimension.test(key -> level.dimension().equals(key)))
         {   return false;
         }
-        if (!this.biome.test(key -> ForgeRegistries.BIOMES.getKey(level.getBiomeManager().getNoiseBiomeAtPosition(pos)).equals(key)))
+        if (!this.biome.test(key -> registryAccess.registryOrThrow(Registry.BIOME_REGISTRY).getKey(level.getBiomeManager().getNoiseBiomeAtPosition(pos)).equals(key.location())))
         {   return false;
         }
-        if (this.structure.test(structure ->
-        WorldHelper.getServerLevel(level).structureFeatureManager().getStructureAt(pos, false, level.registryAccess().registryOrThrow(Registry.STRUCTURE_FEATURE_REGISTRY).get(structure)) == StructureStart.INVALID_START))
+        if (!this.structure.test(structure ->
+        WorldHelper.getServerLevel(level).structureFeatureManager().getStructureAt(pos, false, registryAccess.registryOrThrow(Registry.STRUCTURE_FEATURE_REGISTRY).get(structure)) != StructureStart.INVALID_START))
         {   return false;
         }
         if (!this.light.test(level.getMaxLocalRawBrightness(pos)))

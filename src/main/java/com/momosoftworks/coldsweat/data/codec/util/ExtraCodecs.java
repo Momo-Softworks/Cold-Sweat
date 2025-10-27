@@ -31,10 +31,10 @@ public class ExtraCodecs
 
     private static final Map<String, RegistryKey<?>> REGISTRY_VALUES = Collections.synchronizedMap(Maps.newIdentityHashMap());
 
-    public static <T> Codec<RegistryKey<T>> registryCodec(Supplier<RegistryKey<? extends Registry<T>>> registry)
+    public static <T> Codec<RegistryKey<T>> registry(RegistryKey<? extends Registry<T>> registry)
     {
         return ResourceLocation.CODEC.xmap((p_195979_) -> {
-            return create(registry.get(), p_195979_);
+            return create(registry, p_195979_);
         }, RegistryKey::location);
     }
 
