@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.api.temperature.effect.player;
 
 
+import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.temperature.effect.TempEffectType;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
@@ -15,7 +16,7 @@ public class FreezeVignetteEffect extends AbstractVignetteEffect
     {   super(type, entity, bounds);
     }
 
-    static final ResourceLocation TEXTURE = new ResourceLocation("textures/misc/powder_snow_outline.png");
+    static final ResourceLocation TEXTURE = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/overlay/freeze_overlay.png");
 
     @Override
     protected ResourceLocation getTexture()
