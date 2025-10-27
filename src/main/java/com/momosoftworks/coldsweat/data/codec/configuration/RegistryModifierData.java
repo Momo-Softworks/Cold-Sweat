@@ -221,6 +221,7 @@ public class RegistryModifierData<T extends ConfigData> extends ConfigData
                             case "-=" : numberValue -= operand; break;
                             case "*=" : numberValue *= operand; break;
                             case "/=" : numberValue /= operand; break;
+                            case "^=" : numberValue = Math.pow(numberValue, operand); break;
                             case "%=" : numberValue %= operand; break;
                             default   : merged.put(key, toMergeValue);
                         }
