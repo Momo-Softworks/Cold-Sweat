@@ -3490,3 +3490,38 @@ Technical Changes:
      - Hoglin: #forge:leathers/hoglin
      - Goat Fur: #forge:furs/goat
      - Chameleon: #forge:scales/chameleon
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.4-b05e
+* Water temperature is now biome-dependent
+      - Each biome has its own "water_temp" field in JSON
+      - Can also be set in toml by adding a parameter after the "units" parameter
+      - Setting this is optional. If unset, a default water temperature will be used
+- Default water temperature and soak speed are now configurable in world.toml
+      - "Soak speed" controls how fast the player becomes wet
+      - Rain soak speed and water soak speed are individually configurable
+- Removed "un-crafting" recipes for packed ice and blue ice
+      - These recipes were arbitrary and could lead to duplication with some mods
+
+- Fixes:
+* Fixed crash when hearth-like blocks try to spawn particles and the size of their area of effect is zero
+* Fixed hearth-like blocks only expanding to about 1/6 of their maximum volume
+* Fixed recipes that require leather not being craftable
+- Fixed the "biome", "dimension", and "structure" fields in location requirement JSON requiring lists instead of a single element
+
+Technical Changes:
+* Added "/coldsweat dumpconfigs" command, which dumps all loaded config data into the "config/coldsweat/dump" directory
+      - Useful for debugging or when making datapacks
+* Expanded the registry removal system into a new system called "registry modifiers"
+      - Registry modifiers can edit the data of existing configs, or disable them like before
+      - A registry modifier contains a list of operations, which support the following:
+            - "disable": Disables the config (same as before)
+            - "replace": Replaces a field with the given data
+            - "merge": Merges the given data with the existing data, with the new data overwriting the existing data
+                  - If the data contains a list, the new list will be appended to the existing list
+            - "append": Merges the given data without overwriting any existing data
+                  - Does not affect lists
+            - "remove": Removes the specified keys from the config. Also supports removing list elements
+      ! Because this new system introduces formatting changes, existing registry removal configs will need to be updated
+      * See the documentation for formatting guides and examples
