@@ -302,7 +302,7 @@ public class WorldSettingsConfig
                          " • *predicates: The state that the block must have for the temperature to be applied (i.e. \"lit=true\").",
                          "   (Define multiple predicates by separating them with commas [i.e. \"lit=true,waterlogged=false\"])",
                          " • *nbt: The NBT data that the block must have for the temperature to be applied.",
-                         " • *temperatureLimit: The maximum world temperature at which this block temp will have any effect.",
+                         " • *tempLimit: The maximum world temperature at which this block temp will have any effect.",
                          "   (Represents the minimum temp if the block temp is negative)")
                 .defineListAllowEmpty(Arrays.asList("Block Temperatures"), () -> Arrays.asList(
                                             Arrays.asList("cold_sweat:boiler",       0.27, 7, "mc", 0.88, "lit=true", "", 4),
