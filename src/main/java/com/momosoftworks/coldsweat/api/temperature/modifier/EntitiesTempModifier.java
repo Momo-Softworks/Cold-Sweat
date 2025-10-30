@@ -59,12 +59,19 @@ public class EntitiesTempModifier extends TempModifier
                                                    }
                                                }, 3);
                     entityTemp /= blocksBetween.get() + 1;
-                    // Add the temperature to the total
+                    // Clamp to maxEffect
                     double maxEffect = tempData.getMaxEffect();
                     double currentTemp = effects.getOrDefault(tempData, 0d);
                     entityTemp = CSMath.clamp(entityTemp, -maxEffect - currentTemp, maxEffect - currentTemp);
-                    totalTemp += entityTemp;
-                    effects.put(tempData, currentTemp + entityTemp);
+                    // Clamp between min and max temps
+                    double maxTemp = tempData.getMaxTemp();
+                    double minTemp = tempData.getMinTemp();
+                    double newEffect = currentTemp + entityTemp;
+                    newEffect = CSMath.clamp(newEffect, minTemp, maxTemp);
+                    double effectDelta = newEffect - currentTemp;
+                    // Add temp to total
+                    totalTemp += effectDelta;
+                    effects.put(tempData, newEffect);
                 }
             }
         }

@@ -87,7 +87,11 @@ public class InventoryItemsTempModifier extends TempModifier
         {
             double temp = itemData.temperature() * stack.getCount();
             double currentEffect = effectsPerItemTemp.getOrDefault(itemData, 0.0);
-            double newEffect = temp > 0 ? Math.min(itemData.maxEffect(), currentEffect + temp) : Math.max(-itemData.maxEffect(), currentEffect + temp);
+            double newEffect = currentEffect + temp;
+            // Clamp against maxEffect bounds
+            newEffect = temp > 0 ? Math.min(itemData.maxEffect(), newEffect) : Math.max(-itemData.maxEffect(), newEffect);
+            // Clamp against minTemp/maxTemp bounds
+            newEffect = Math.max(itemData.minTemp(), Math.min(itemData.maxTemp(), newEffect));
 
             effectsPerItemTemp.put(itemData, newEffect);
         }
