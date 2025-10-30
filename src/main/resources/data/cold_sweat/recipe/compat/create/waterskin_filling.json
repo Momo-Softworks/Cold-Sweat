@@ -11,14 +11,14 @@
       "item": "cold_sweat:waterskin"
     },
     {
-      "amount": 250,
+      "type": "fluid_stack",
       "fluid": "minecraft:water",
-      "nbt": {}
+      "amount": 250
     }
   ],
   "results": [
     {
-      "item": "cold_sweat:filled_waterskin"
+      "id": "cold_sweat:filled_waterskin"
     }
   ]
 }
