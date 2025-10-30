@@ -4,6 +4,7 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.data.codec.configuration.EntityTempData;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
+import com.momosoftworks.coldsweat.data.codec.requirement.WorldTempRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
@@ -19,7 +20,9 @@ public class EntityTempBuilderJS
     public double temperature = 0;
     public double range = 0;
     public Temperature.Units units = Temperature.Units.MC;
-    public double maxEffect = 0;
+    public double maxEffect = Double.POSITIVE_INFINITY;
+    public double maxTemperature = Double.POSITIVE_INFINITY;
+    public double minTemperature = Double.NEGATIVE_INFINITY;
     public NegatableList<EntityRequirement> entityPredicate = new NegatableList<>();
     public NegatableList<EntityRequirement> otherEntityPredicate = new NegatableList<>();
     public boolean affectsSelf = false;
@@ -63,6 +66,18 @@ public class EntityTempBuilderJS
         return this;
     }
 
+    public EntityTempBuilderJS maxTemperature(double maxTemperature)
+    {
+        this.maxTemperature = Temperature.convert(maxTemperature, units, Temperature.Units.MC, true);
+        return this;
+    }
+
+    public EntityTempBuilderJS minTemperature(double minTemperature)
+    {
+        this.minTemperature = Temperature.convert(minTemperature, units, Temperature.Units.MC, true);
+        return this;
+    }
+
     public EntityTempBuilderJS entityPredicate(Predicate<Entity> entityPredicate)
     {
         this.entityPredicate.add(new EntityRequirement(entityPredicate), false);
@@ -83,7 +98,8 @@ public class EntityTempBuilderJS
 
     public EntityTempData build()
     {
-        EntityTempData data = new EntityTempData(this.entityPredicate, this.temperature, this.range, this.units, this.otherEntityPredicate, this.maxEffect, this.affectsSelf);
+        EntityTempData data = new EntityTempData(this.entityPredicate, this.temperature, this.range, this.units, this.otherEntityPredicate, this.maxEffect,
+                                                 new WorldTempRequirement(this.maxTemperature), new WorldTempRequirement(this.minTemperature), this.affectsSelf);
         data.setConfigType(ConfigData.Type.KUBEJS);
         return data;
     }
