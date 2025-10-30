@@ -402,7 +402,7 @@ public class ItemSettingsConfig
             ITEM_TEMPERATURES = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Defines items that affect the player's temperature when in the inventory",
-                         " ├── Format: [[\"item_id\", temperature, \"slotRange\", \"trait\", *\"{nbt}\", *maxEffect], [...], etc]",
+                         " ├── Format: [[\"item_id\", temperature, \"slotRange\", \"trait\", *\"{nbt}\", *maxEffect, *tempLimit], [...], etc]",
                          " └── [* = optional]",
                          " • item_id: The item's ID (i.e. \"minecraft:lava_bucket\").",
                          " • temperature: The temperature change the item will apply to the entity. For core temperature, this is applied every tick",
@@ -410,6 +410,8 @@ public class ItemSettingsConfig
                          " • trait: The temperature trait to apply the effect to. Typical values are \"core\" for body temperature or \"world\" for ambient temperature. More on the mod documentation page.",
                          " • *nbt: The NBT data the item must have to apply to the entity.",
                          " • *max_effect: The maximum temperature effect the item can apply to the entity.",
+                         " • *tempLimit: The maximum temperature at which this item temp will have any effect.",
+                         "   (Based on the given trait. Represents the minimum temp if the item temp is negative)",
                          " ⌄ ")
                 .defineListAllowEmpty(List.of("Item Temperatures"), () -> List.of(
                 ),

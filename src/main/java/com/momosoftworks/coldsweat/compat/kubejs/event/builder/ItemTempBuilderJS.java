@@ -30,7 +30,9 @@ public class ItemTempBuilderJS
 {
     public final Set<Either<IntegerBounds, ItemTempData.SlotType>> slots = new HashSet<>();
     public double temperature = 0;
-    public double maxEffect = Double.MAX_VALUE;
+    public double maxEffect = Double.POSITIVE_INFINITY;
+    public double maxTemp;
+    public double minTemp;
     public Temperature.Trait trait = Temperature.Trait.WORLD;
     public NegatableList<ItemRequirement> itemPredicate = new NegatableList<>();
     public NegatableList<EntityRequirement> entityPredicate = new NegatableList<>();
@@ -61,6 +63,18 @@ public class ItemTempBuilderJS
     public ItemTempBuilderJS maxEffect(double maxEffect)
     {
         this.maxEffect = maxEffect;
+        return this;
+    }
+
+    public ItemTempBuilderJS maxTemp(double maxTemp)
+    {
+        this.maxTemp = maxTemp;
+        return this;
+    }
+
+    public ItemTempBuilderJS minTemp(double minTemp)
+    {
+        this.minTemp = minTemp;
         return this;
     }
 
@@ -129,7 +143,8 @@ public class ItemTempBuilderJS
     public ItemTempData build()
     {
         ItemTempData data = new ItemTempData(this.itemPredicate, ImmutableList.copyOf(this.slots),
-                                             this.temperature, this.trait, maxEffect, this.entityPredicate,
+                                             this.temperature, this.trait, this.maxEffect,
+                                             this.maxTemp, this.minTemp, this.entityPredicate,
                                              this.attributes, this.immuneTempModifiers);
         data.setConfigType(ConfigData.Type.KUBEJS);
         return data;

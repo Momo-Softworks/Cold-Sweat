@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.data.codec.requirement;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 
@@ -38,10 +39,10 @@ public record WorldTempRequirement(Either<Double, String> temperature)
     {   this(Either.right(temperature));
     }
 
-    public double get()
+    public double get(Temperature.Units units)
     {
         if (temperature.left().isPresent())
-        {   return temperature.left().get();
+        {   return Temperature.convert(temperature.left().get(), units, Temperature.Units.MC, true);
         }
         return VARIABLES.get(temperature.right().get()).get();
     }
