@@ -86,6 +86,12 @@ public class EntityTempData extends ConfigData implements RequirementHolder
     public double maxEffect()
     {   return maxEffect;
     }
+    public WorldTempRequirement maxTemp()
+    {   return maxTemp;
+    }
+    public WorldTempRequirement minTemp()
+    {   return minTemp;
+    }
     public boolean affectsSelf()
     {   return affectsSelf;
     }
@@ -95,6 +101,12 @@ public class EntityTempData extends ConfigData implements RequirementHolder
     }
     public double getMaxEffect()
     {   return Temperature.convert(maxEffect, units, Temperature.Units.MC, false);
+    }
+    public double getMaxTemp()
+    {   return this.maxTemp.get(this.units);
+    }
+    public double getMinTemp()
+    {   return this.minTemp.get(this.units);
     }
 
     @Nullable
