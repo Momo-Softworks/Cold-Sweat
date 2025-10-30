@@ -73,11 +73,13 @@ public class EntitySettingsConfig
         ENTITY_TEMPERATURES = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Defines temperature-emitting properties for entities",
-                         " ├── Format: [[\"entity_id\", temperature, range, *units], [\"entity_id\", temperature, range, *units], etc...]",
+                         " ├── Format: [[\"entity_id\", temperature, range, *units, *tempLimit], [...], etc...]",
                          " └── [* = optional]",
                          " • temperature: The temperature emitted by the entity",
                          " • range: The range of the effect, in blocks",
                          " • units: (Optional) The units of the temperature value (MC, F, or C). Defaults to MC",
+                         " • *tempLimit: The maximum world temperature at which this entity temp will have any effect.",
+                         "   (Represents the minimum temp if the entity temp is negative)",
                          " ⌄ ")
                 .defineListAllowEmpty(Arrays.asList("Entity Temperatures"), () -> Arrays.asList(),
                 it ->
@@ -89,7 +91,8 @@ public class EntitySettingsConfig
                                && list.get(0) instanceof String
                                && list.get(1) instanceof Number
                                && list.get(2) instanceof Number
-                               && (list.size() < 4 || list.get(3) instanceof String);
+                               && (list.size() < 4 || list.get(3) instanceof String
+                               && (list.size() < 5 || list.get(4) instanceof Number));
                     }
                     return false;
                 });
