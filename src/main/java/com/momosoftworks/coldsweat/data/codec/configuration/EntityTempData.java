@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.impl.RequirementHolder;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
+import com.momosoftworks.coldsweat.data.codec.requirement.WorldTempRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
@@ -27,11 +28,14 @@ public class EntityTempData extends ConfigData implements RequirementHolder
     final Temperature.Units units;
     final NegatableList<EntityRequirement> affectedEntity;
     final double maxEffect;
+    final WorldTempRequirement maxTemp;
+    final WorldTempRequirement minTemp;
     final boolean affectsSelf;
 
     public EntityTempData(NegatableList<EntityRequirement> entity, double temperature, double range,
                           Temperature.Units units, NegatableList<EntityRequirement> affectedEntity,
-                          double maxEffect, boolean affectsSelf, NegatableList<String> requiredMods)
+                          double maxEffect, WorldTempRequirement maxTemp, WorldTempRequirement minTemp,
+                          boolean affectsSelf, NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.entity = entity;
@@ -40,14 +44,16 @@ public class EntityTempData extends ConfigData implements RequirementHolder
         this.units = units;
         this.affectedEntity = affectedEntity;
         this.maxEffect = maxEffect;
+        this.maxTemp = maxTemp;
+        this.minTemp = minTemp;
         this.affectsSelf = affectsSelf;
     }
 
     public EntityTempData(NegatableList<EntityRequirement> entity, double temperature, double range,
                           Temperature.Units units, NegatableList<EntityRequirement> affectedEntity,
-                          double maxEffect, boolean affectsSelf)
+                          double maxEffect, WorldTempRequirement maxTemp, WorldTempRequirement minTemp, boolean affectsSelf)
     {
-        this(entity, temperature, range, units, affectedEntity, maxEffect, affectsSelf, new NegatableList<>());
+        this(entity, temperature, range, units, affectedEntity, maxEffect, maxTemp, minTemp, affectsSelf, new NegatableList<>());
     }
 
     public static final Codec<EntityTempData> CODEC = createCodec(RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -57,6 +63,8 @@ public class EntityTempData extends ConfigData implements RequirementHolder
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(EntityTempData::units),
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("affected_entity", new NegatableList<>()).forGetter(EntityTempData::affectedEntity),
             Codec.DOUBLE.optionalFieldOf("max_effect", Double.POSITIVE_INFINITY).forGetter(EntityTempData::maxEffect),
+            WorldTempRequirement.CODEC.optionalFieldOf("max_temp", WorldTempRequirement.INFINITY).forGetter(data -> data.maxTemp),
+            WorldTempRequirement.CODEC.optionalFieldOf("min_temp", WorldTempRequirement.NEGATIVE_INFINITY).forGetter(data -> data.minTemp),
             Codec.BOOL.optionalFieldOf("affects_self", false).forGetter(EntityTempData::affectsSelf)
     ).apply(instance, EntityTempData::new)));
 
@@ -107,10 +115,15 @@ public class EntityTempData extends ConfigData implements RequirementHolder
         double maxEffect = entry.size() > 4
                            ? ((Number) entry.get(4)).doubleValue()
                            : Double.POSITIVE_INFINITY;
+        double tempLimit = entry.size() > 5
+                                ? ((Number) entry.get(5)).doubleValue()
+                                : Double.POSITIVE_INFINITY;
+        WorldTempRequirement maxTemp = new WorldTempRequirement(temp > 0 ? tempLimit : Double.POSITIVE_INFINITY);
+        WorldTempRequirement minTemp = new WorldTempRequirement(temp < 0 ? -tempLimit : Double.NEGATIVE_INFINITY);
 
         EntityRequirement requirement = new EntityRequirement(entities);
 
-        return new EntityTempData(new NegatableList<>(requirement), temp, range, units, new NegatableList<>(), maxEffect, false);
+        return new EntityTempData(new NegatableList<>(requirement), temp, range, units, new NegatableList<>(), maxEffect, maxTemp, minTemp, false);
     }
 
     @Override
