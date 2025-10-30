@@ -43,12 +43,15 @@ public class ItemTempData extends ConfigData implements RequirementHolder, IForg
     final double temperature;
     final Temperature.Trait trait;
     final Double maxEffect;
+    final double maxTemp;
+    final double minTemp;
     final NegatableList<EntityRequirement> entityRequirement;
     final AttributeModifierMap attributeModifiers;
     final Map<ResourceLocation, Double> immuneTempModifiers;
 
     public ItemTempData(NegatableList<ItemRequirement> item, List<Either<IntegerBounds, SlotType>> slots, double temperature,
-                        Temperature.Trait trait, Double maxEffect, NegatableList<EntityRequirement> entityRequirement, AttributeModifierMap attributeModifiers,
+                        Temperature.Trait trait, Double maxEffect, double maxTemp, double minTemp,
+                        NegatableList<EntityRequirement> entityRequirement, AttributeModifierMap attributeModifiers,
                         Map<ResourceLocation, Double> immuneTempModifiers, NegatableList<String> requiredMods)
     {
         super(requiredMods);
@@ -57,16 +60,19 @@ public class ItemTempData extends ConfigData implements RequirementHolder, IForg
         this.temperature = temperature;
         this.trait = trait;
         this.maxEffect = maxEffect;
+        this.maxTemp = maxTemp;
+        this.minTemp = minTemp;
         this.entityRequirement = entityRequirement;
         this.attributeModifiers = attributeModifiers;
         this.immuneTempModifiers = immuneTempModifiers;
     }
 
     public ItemTempData(NegatableList<ItemRequirement> item, List<Either<IntegerBounds, SlotType>> slots, double temperature,
-                        Temperature.Trait trait, Double maxEffect, NegatableList<EntityRequirement> entityRequirement, AttributeModifierMap attributeModifiers,
+                        Temperature.Trait trait, Double maxEffect, double maxTemp, double minTemp,
+                        NegatableList<EntityRequirement> entityRequirement, AttributeModifierMap attributeModifiers,
                         Map<ResourceLocation, Double> immuneTempModifiers)
     {
-        this(item, slots, temperature, trait, maxEffect, entityRequirement, attributeModifiers, immuneTempModifiers, new NegatableList<>());
+        this(item, slots, temperature, trait, maxEffect, maxTemp, minTemp, entityRequirement, attributeModifiers, immuneTempModifiers, new NegatableList<>());
     }
 
     public static final Codec<ItemTempData> CODEC = createCodec(RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -75,6 +81,8 @@ public class ItemTempData extends ConfigData implements RequirementHolder, IForg
             Codec.DOUBLE.fieldOf("temperature").forGetter(ItemTempData::temperature),
             Temperature.Trait.CODEC.optionalFieldOf("trait", Temperature.Trait.WORLD).forGetter(ItemTempData::trait),
             Codec.DOUBLE.optionalFieldOf("max_effect", Double.POSITIVE_INFINITY).forGetter(ItemTempData::maxEffect),
+            Codec.DOUBLE.optionalFieldOf("max_temp", Double.POSITIVE_INFINITY).forGetter(data -> data.maxTemp),
+            Codec.DOUBLE.optionalFieldOf("min_temp", Double.NEGATIVE_INFINITY).forGetter(data -> data.minTemp),
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(ItemTempData::entityRequirement),
             AttributeModifierMap.CODEC.optionalFieldOf("attributes", new AttributeModifierMap()).forGetter(ItemTempData::attributeModifiers),
             Codec.unboundedMap(ResourceLocation.CODEC, Codec.DOUBLE).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(ItemTempData::immuneTempModifiers)
@@ -92,8 +100,14 @@ public class ItemTempData extends ConfigData implements RequirementHolder, IForg
     public Temperature.Trait trait()
     {   return trait;
     }
-    public Double maxEffect()
+    public double maxEffect()
     {   return maxEffect;
+    }
+    public double maxTemp()
+    {   return maxTemp;
+    }
+    public double minTemp()
+    {   return minTemp;
     }
     public NegatableList<EntityRequirement> entityRequirement()
     {   return entityRequirement;
@@ -183,10 +197,15 @@ public class ItemTempData extends ConfigData implements RequirementHolder, IForg
                                         : new NbtRequirement(new CompoundTag());
         // max effect
         double maxEffect = entry.size() > 5 ? ((Number) entry.get(5)).doubleValue() : Double.POSITIVE_INFINITY;
+        // temp limit
+        double tempLimit = entry.size() > 6 ? ((Number) entry.get(6)).doubleValue() : Double.POSITIVE_INFINITY;
+        double maxTemp = temp > 0 ? tempLimit : Double.POSITIVE_INFINITY;
+        double minTemp = temp < 0 ? -tempLimit : Double.NEGATIVE_INFINITY;
         // compile item requirement
         ItemRequirement itemRequirement = new ItemRequirement(items, nbtRequirement);
 
-        return new ItemTempData(new NegatableList<>(itemRequirement), List.of(Either.right(slotType)), temp, trait, maxEffect, new NegatableList<>(), new AttributeModifierMap(), new FastMap<>());
+        return new ItemTempData(new NegatableList<>(itemRequirement), List.of(Either.right(slotType)), temp, trait, maxEffect, maxTemp, minTemp,
+                                new NegatableList<>(), new AttributeModifierMap(), new FastMap<>());
     }
 
     public String getSlotRangeName()

@@ -139,10 +139,10 @@ public class BlockTempData extends ConfigData implements IForgeRegistryEntry<Blo
     {   return Temperature.convert(maxEffect, units, Temperature.Units.MC, false);
     }
     public double getMaxTemp()
-    {   return maxTemp.isConstant() ? Temperature.convert(maxTemp.get(), units, Temperature.Units.MC, false) : maxTemp.get();
+    {   return maxTemp.get(this.units);
     }
     public double getMinTemp()
-    {   return minTemp.isConstant() ? Temperature.convert(minTemp.get(), units, Temperature.Units.MC, false) : minTemp.get();
+    {   return minTemp.get(this.units);
     }
 
     @Nullable
