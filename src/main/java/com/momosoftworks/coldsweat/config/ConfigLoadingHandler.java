@@ -420,8 +420,14 @@ public class ConfigLoadingHandler
 
     public static <T extends ConfigData> void modifyEntries(List<T> registries, RegistryHolder<T> registry)
     {
-        AtomicInteger index = new AtomicInteger(0);
-        modifyEntries(registries, registry, list -> list.stream().map(e -> new AbstractMap.SimpleEntry<>(index.getAndIncrement(), e)).collect(Collectors.toList()),
+        modifyEntries(registries, registry, list ->
+                      {
+                          List<Map.Entry<Integer, T>> entries = new ArrayList<>();
+                          for (int i = 0; i < list.size(); i++)
+                          {   entries.add(new AbstractMap.SimpleEntry<>(i, list.get(i)));
+                          }
+                          return entries;
+                      },
                       entry -> registries.set(entry.getKey(), entry.getValue()),
                       entry -> registries.remove(entry.getKey().intValue()));
     }
