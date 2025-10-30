@@ -100,7 +100,7 @@ public class WorldSettingsConfig
             DIMENSION_TEMP_OFFSETS = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Applies an offset to the world's temperature across an entire dimension",
-                         " ├── Format: [[\"dimension_id\", temperature, *units], [\"dimension_id\", temperature, *units]... etc]",
+                         " ├── Format: [[\"dimension_id\", temperature, *units], [...], etc]",
                          " └── [* = optional]",
                          " • dimension_id: The ID of the dimension (e.g. \"minecraft:the_nether\")",
                          " • temperature: The temperature offset to apply to the dimension",
@@ -123,7 +123,7 @@ public class WorldSettingsConfig
             DIMENSION_TEMPERATURES = BUILDER
             .comment("─────────────────────────────────────────────────────────────────────────//v",
                      " Defines the temperature of a dimension, overriding biome and elevation temperature",
-                     " ├── Format: [[\"dimension_id\", temperature, *units], [\"dimension_id\", temperature, *units]... etc]",
+                     " ├── Format: [[\"dimension_id\", temperature, *units], [...], etc]",
                      " └── [* = optional]",
                      " • dimension_id: The ID of the dimension (e.g. \"minecraft:the_nether\")",
                      " • temperature: The temperature of the dimension",
@@ -171,7 +171,7 @@ public class WorldSettingsConfig
         BIOME_TEMPERATURES = BUILDER
             .comment("─────────────────────────────────────────────────────────────────────────//v",
                      " Defines the temperature of a biome, overriding the biome's default temperature",
-                     " ├── Format: [[\"biome_id\", low-temp, high-temp, *units, *waterTemp], [...], etc]",
+                     " ├── Format: [[\"biome_id\", lowTemp, highTemp, *units, *waterTemp], [...], etc]",
                      " └── [* = optional]",
                      " • biome_id: The ID of the biome (e.g. \"minecraft:desert\")",
                      " • lowTemp: The temperature of the biome at midnight",
@@ -268,12 +268,20 @@ public class WorldSettingsConfig
                     .addIf(CompatManager.isEnvironmentalLoaded(),
                             () -> Arrays.asList("environmental:marsh", 60, 80, "F")
                     ).build(),
-                it -> it instanceof List<?>
-                      && ((List<?>) it).get(0) instanceof String
-                      && (((List<?>) it).get(1) instanceof String && ((List<?>) it).get(1).equals("disable")
-                      || (((List<?>) it).get(1) instanceof Number
-                      && ((List<?>) it).get(2) instanceof Number
-                      && (((List<?>) it).size() < 4 || ((List<?>) it).get(3) instanceof String)))
+                it ->
+                {
+                    if (it instanceof List<?>)
+                    {
+                        List<?> list = (List<?>) it;
+                        return list.get(0) instanceof String
+                            && (list.get(1) instanceof String && list.get(1).equals("disable")
+                            || (list.get(1) instanceof Number
+                                && list.get(2) instanceof Number
+                                && (list.size() < 4 || list.get(3) instanceof String)
+                                && (list.size() < 5 || list.get(4) instanceof Number)));
+                    }
+                    return false;
+                }
                 );
 
         BUILDER.pop();
@@ -284,15 +292,15 @@ public class WorldSettingsConfig
             BLOCK_TEMPERATURES = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Applies temperature-emitting properties to blocks",
-                         " ├── Format: [[\"block_id\", <temperature>, <range>, <*units>, <*maxEffect>, <*predicates>, <*\"{nbt}\">, <*temperatureLimit>], [etc...], [etc...]]",
+                         " ├── Format: [[\"block_id\", temperature, range, *units, *maxEffect, *\"predicates\", *\"{nbt}\", *tempLimit], [...], etc]",
                          " └── [* = optional]",
                          " • block_id: The ID of the block (i.e. \"minecraft:lava\")",
                          " • temperature: The temperature of the block, in Minecraft units",
                          " • range: The radius of the block's temperature effect, in blocks",
                          " • *units: The units of the temperature (\"f\", \"c\", or \"mc\"). Defaults to Minecraft units (mc))",
                          " • *maxEffect: The maximum cumulative temperature change this block can cause to a player (even with multiple blocks)",
-                         " • *predicates: The state that the block has to be in for the temperature to be applied (i.e. lit=true).",
-                         "   (Multiple predicates can be used by separating them with commas [i.e. \"lit=true,waterlogged=false\"])",
+                         " • *predicates: The state that the block must have for the temperature to be applied (i.e. \"lit=true\").",
+                         "   (Define multiple predicates by separating them with commas [i.e. \"lit=true,waterlogged=false\"])",
                          " • *nbt: The NBT data that the block must have for the temperature to be applied.",
                          " • *temperatureLimit: The maximum world temperature at which this block temp will have any effect.",
                          "   (Represents the minimum temp if the block temp is negative)")
@@ -312,14 +320,14 @@ public class WorldSettingsConfig
                                           if (!(it instanceof List<?>)) return false;
                                           List<?> list = (List<?>) it;
                                           return list.size() >= 3
-                                                  && list.get(0) instanceof String
-                                                  && list.get(1) instanceof Number
-                                                  && list.get(2) instanceof Number
-                                                  && (list.size() < 4 || list.get(3) instanceof String)
-                                                  && (list.size() < 5 || list.get(4) instanceof Number)
-                                                  && (list.size() < 6 || list.get(5) instanceof String)
-                                                  && (list.size() < 7 || list.get(6) instanceof String)
-                                                  && (list.size() < 8 || list.get(7) instanceof Number);
+                                              && list.get(0) instanceof String
+                                              && list.get(1) instanceof Number
+                                              && list.get(2) instanceof Number
+                                              && (list.size() < 4 || list.get(3) instanceof String)
+                                              && (list.size() < 5 || list.get(4) instanceof Number)
+                                              && (list.size() < 6 || list.get(5) instanceof String)
+                                              && (list.size() < 7 || list.get(6) instanceof String)
+                                              && (list.size() < 8 || list.get(7) instanceof Number);
                                       });
 
             MAX_BLOCK_TEMP_RANGE = BUILDER
@@ -375,7 +383,7 @@ public class WorldSettingsConfig
             STRUCTURE_TEMPERATURES = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────",
                          " Overrides the world temperature when the player is within this structure",
-                         " ├── Format: [[\"structure_id\", temperature, *units], [\"structure_id\", temperature, *units]... etc]",
+                         " ├── Format: [[\"structure_id\", temperature, *units], [\"structure_id\", temperature, *units], [...], etc]",
                          " └── [* = optional]",
                          " • structure_id: The ID of the structure (i.e. \"minecraft:stronghold\")",
                          " • temperature: The temperature of the structure, in Minecraft units",
@@ -390,7 +398,7 @@ public class WorldSettingsConfig
             STRUCTURE_TEMP_OFFSETS = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────",
                          " Offsets the world temperature when the player is within this structure",
-                         " ├── Format: [[\"structure_id\", offset, *units], [\"structure_id\", offset, *units]... etc]",
+                         " ├── Format: [[\"structure_id\", offset, *units], [\"structure_id\", offset, *units], [...], etc]",
                          " └── [* = optional]",
                          " • structure_id: The ID of the structure (i.e. \"minecraft:stronghold\")",
                          " • offset: The temperature offset of the structure, in Minecraft units",

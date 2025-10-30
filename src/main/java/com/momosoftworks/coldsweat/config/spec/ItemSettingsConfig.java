@@ -69,7 +69,7 @@ public class ItemSettingsConfig
 
         BUILDER.comment("─────────────────────────────────────────────────────────────────────────",
                         " Defines items that can be used as fuel",
-                        " └── Format: [[\"item_id\", amount], [\"item_id\", amount], ...etc]",
+                        " └── Format: [[\"item_id\", amount], [\"item_id\", amount], [...], etc]",
                         " • item_id: The item's ID (i.e. \"minecraft:coal\").",
                         " • amount: The amount of fuel the item provides. Higher values mean the item burns longer",
                         " ⌄ ")
@@ -173,7 +173,7 @@ public class ItemSettingsConfig
             SOULSPRING_LAMP_FUELS = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Defines items that the Soulspring Lamp can use as fuel",
-                         " └── Format: [[\"item_id\", amount], [\"item_id\", amount], ...etc]",
+                         " └── Format: [[\"item_id\", amount], [\"item_id\", amount], [...], etc]",
                          " • item_id: The item's ID (i.e. \"cold_sweat:soul_sprout\").",
                          " • amount: The amount of fuel the item provides. Higher values mean the item burns longer",
                          " ⌄ ")
@@ -207,7 +207,8 @@ public class ItemSettingsConfig
             INSULATION_ITEMS = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Defines the items that can be used for insulating armor in the Sewing Table",
-                         " ├── Format: [[\"item_id\", cold, hot, *\"static\", *\"{nbt}\", *fillSlots], [\"item_id\", amount, adaptSpeed, \"adaptive\", *\"{nbt}\", *fillSlots], ...etc]",
+                         " ├── Format (Static): [[\"item_id\", cold, hot, *\"static\", *\"{nbt}\", *fillSlots], [...], etc]",
+                         " ├── Format (Adaptive): [[\"item_id\", amount, adaptSpeed, \"adaptive\", *\"{nbt}\", *fillSlots], [...], etc]",
                          " └── [* = optional]",
                          " • item_id: The item's ID (i.e. \"minecraft:iron_ingot\").",
                          " • cold: The cold insulation the item provides.",
@@ -342,7 +343,7 @@ public class ItemSettingsConfig
             INSULATION_SLOT_OVERRIDES = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Allows for overriding the number of insulation slots for specific items",
-                         " └── Format: [[\"item_id\", slotCount, *\"{nbt}\"], [\"item_id\", slotCount, *\"{nbt}\"], ...etc]",
+                         " └── Format: [[\"item_id\", slotCount, *\"{nbt}\"], [\"item_id\", slotCount, *\"{nbt}\"], [...], etc]",
                          " • item_id: The item's ID (i.e. \"minecraft:iron_helmet\").",
                          " • slot_count: The number of insulation slots the item should have.",
                          " • *nbt: If set, the item will only have the specified number of insulation slots if it has the specified NBT tag.",
@@ -436,7 +437,7 @@ public class ItemSettingsConfig
             DRYING_ITEMS = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Defines items that can be used to dry the player",
-                         " └── Format: [[\"item_id\", \"turns_into\"], [\"item_id\", \"turns_into\"], ...etc]",
+                         " └── Format: [[\"item_id\", \"turns_into\"], [...], etc]",
                          " • item_id: The item's ID (i.e. \"minecraft:sponge\").",
                          " • turns_into: The item to be turned into when the item is used (i.e. \"minecraft:wet_sponge\").",
                          " ⌄ ")
@@ -458,7 +459,7 @@ public class ItemSettingsConfig
             ITEM_TEMPERATURES = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Defines items that affect the player's temperature when in the inventory",
-                         " ├── Format: [[\"item_id\", temperature, \"slotRange\", \"trait\", *\"{nbt}\", *maxEffect], [\"item_id\", temperature, \"slotRange\", \"trait\", *\"{nbt}\", *maxEffect], ...etc]",
+                         " ├── Format: [[\"item_id\", temperature, \"slotRange\", \"trait\", *\"{nbt}\", *maxEffect], [...], etc]",
                          " └── [* = optional]",
                          " • item_id: The item's ID (i.e. \"minecraft:lava_bucket\").",
                          " • temperature: The temperature change the item will apply to the entity. For core temperature, this is applied every tick",
