@@ -14,7 +14,11 @@ import com.momosoftworks.coldsweat.api.event.vanilla.ServerConfigsLoadedEvent;
 import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.ConfiguredBlockTemp;
+import com.momosoftworks.coldsweat.compat.CompatManager;
+import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.init.TempModifierInit;
+import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
+import com.momosoftworks.coldsweat.core.network.message.SyncConfigSettingsMessage;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.RegistryHolder;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
@@ -25,7 +29,6 @@ import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.data.tag.ModDimensionTags;
 import com.momosoftworks.coldsweat.data.tag.ModEffectTags;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
-import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.RegistryMultiMap;
 import com.momosoftworks.coldsweat.util.serialization.OptionalHolder;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
@@ -50,6 +53,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.DataPackRegistryEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -58,7 +62,6 @@ import java.io.FileReader;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -70,13 +73,16 @@ public class ConfigLoadingHandler
     private static final List<OptionalHolder<?>> OPTIONAL_HOLDERS = new ArrayList<>();
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void loadConfigs(ServerConfigsLoadedEvent event)
+    public static void loadConfigsEvent(ServerConfigsLoadedEvent event)
+    {   loadConfigs(event.getServer().registryAccess());
+    }
+
+    public static void loadConfigs(RegistryAccess registryAccess)
     {
         ConfigSettings.clear();
         BlockTempRegistry.flush();
 
-        RegistryAccess registryAccess = event.getServer().registryAccess();
-        Multimap<RegistryHolder<?>, Holder<? extends ConfigData>> registries = new RegistryMultiMap<>();
+        RegistryMultiMap<RegistryHolder<?>, Holder<? extends ConfigData>> registries = new RegistryMultiMap<>();
 
         // User JSON configs (config folder)
         ColdSweat.LOGGER.info("Loading registries from configs...");
@@ -99,6 +105,11 @@ public class ConfigLoadingHandler
         // Java BlockTemps
         ColdSweat.LOGGER.info("Loading BlockTemps...");
         TempModifierInit.buildBlockRegistries();
+
+        // Send registries to players
+        TaskScheduler.scheduleServer(() ->
+        {  ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new SyncConfigSettingsMessage(registryAccess));
+        }, 1);
     }
 
     @Mod.EventBusSubscriber(value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.MOD)
