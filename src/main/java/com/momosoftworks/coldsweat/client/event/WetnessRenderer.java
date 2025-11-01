@@ -78,7 +78,8 @@ public class WetnessRenderer
 
         Minecraft.getInstance().gameRenderer.lightTexture().turnOnLightLayer();
 
-        float tempMult = (float) CSMath.blend(0.3, 6, Temperature.get(player, Temperature.Trait.WORLD), ConfigSettings.MIN_TEMP.get(), ConfigSettings.MAX_TEMP.get() * 2);
+        double midTemp = (ConfigSettings.MIN_TEMP.get() + ConfigSettings.MAX_TEMP.get()) / 2.0;
+        float tempMult = (float) CSMath.blend(1, 3, Temperature.get(player, Temperature.Trait.WORLD), midTemp, ConfigSettings.MAX_TEMP.get() * 2);
 
         // Clear water drops when the player submerges
         if (isSubmerged && !paused)
