@@ -53,7 +53,7 @@ public class EntitySettingsConfig
                 .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " List of entities that will insulate the player when riding them",
                          " A value of 0 provides no insulation; 1 provides full insulation",
-                         " └── Format: [[\"entity_id\", coldResistance, heatResistance], [\"entity_id\", coldResistance, heatResistance], [...], etc]",
+                         " └── Format: [[\"entity_id\", coldResistance, heatResistance], [...], etc]",
                          " ⌄ ")
                 .defineListAllowEmpty(List.of("Insulated Mounts"), () -> Arrays.asList(),
                 it -> it instanceof List<?> list
@@ -85,7 +85,7 @@ public class EntitySettingsConfig
         ENTITY_CLIMATES = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Defines entities that are affected by temperature and the climates they can live in",
-                         " ├── Format: [[\"entity_id\", minTemp, maxTemp, *rate, *units], [\"entity_id\", minTemp, maxTemp, *rate, *units], [...], etc]",
+                         " ├── Format: [[\"entity_id\", minTemp, maxTemp, *rate, *units], [...], etc]",
                          " └── [* = optional]",
                          " • min_temp: The minimum livable temperature, as an offset to the minimum temperature for players",
                          " • max_temp: The maximum livable temperature, as an offset to the maximum temperature for players",
@@ -162,7 +162,7 @@ public class EntitySettingsConfig
         CHAMELEON_SPAWN_BIOMES = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Defines the biomes that Chameleons can spawn in",
-                         " └── Format: [[\"biome_id\", weight], [\"biome_id\", weight], [...], etc]",
+                         " └── Format: [[\"biome_id\", weight], [...], etc]",
                          " • biome_id: The ID of the biome, e.g. \"minecraft:jungle\"",
                          " • weight: The likelihood for the entity to spawn compared to other entities, higher values mean more common spawns",
                          " ⌄ ")
@@ -213,7 +213,7 @@ public class EntitySettingsConfig
         GOAT_SPAWN_BIOMES = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Defines the biomes that Chameleons can spawn in",
-                         " └── Format: [[\"biome_id\", weight], [\"biome_id\", weight], [...], etc]",
+                         " └── Format: [[\"biome_id\", weight], [...], etc]",
                          " • biome_id: The ID of the biome, e.g. \"minecraft:jungle\"",
                          " • weight: The likelihood for the entity to spawn compared to other entities, higher values mean more common spawns",
                          " ⌄ ")
