@@ -70,7 +70,7 @@ public class ItemSettingsConfig
 
         BUILDER.comment("─────────────────────────────────────────────────────────────────────────",
                         " Defines items that can be used as fuel",
-                        " └── Format: [[\"item_id\", amount], [\"item_id\", amount], [...], etc]",
+                        " └── Format: [[\"item_id\", amount], [...], etc]",
                         " • item_id: The item's ID (i.e. \"minecraft:coal\").",
                         " • amount: The amount of fuel the item provides. Higher values mean the item burns longer",
                         " ⌄ ")
@@ -156,7 +156,7 @@ public class ItemSettingsConfig
             SOULSPRING_LAMP_FUELS = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Defines items that the Soulspring Lamp can use as fuel",
-                         " └── Format: [[\"item_id\", amount], [\"item_id\", amount], [...], etc]",
+                         " └── Format: [[\"item_id\", amount], [...], etc]",
                          " • item_id: The item's ID (i.e. \"cold_sweat:soul_sprout\").",
                          " • amount: The amount of fuel the item provides. Higher values mean the item burns longer",
                          " ⌄ ")
@@ -183,12 +183,12 @@ public class ItemSettingsConfig
             INSULATION_ITEMS = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Defines the items that can be used for insulating armor in the Sewing Table",
-                         " ├── Format (Static): [[\"item_id\", cold, hot, *\"static\", *\"{nbt}\", *fillSlots], [...], etc]",
+                         " ├── Format (Static): [[\"item_id\", cold, heat, *\"static\", *\"{nbt}\", *fillSlots], [...], etc]",
                          " ├── Format (Adaptive): [[\"item_id\", amount, adaptSpeed, \"adaptive\", *\"{nbt}\", *fillSlots], [...], etc]",
                          " └── [* = optional]",
                          " • item_id: The item's ID (i.e. \"minecraft:iron_ingot\").",
                          " • cold: The cold insulation the item provides.",
-                         " • hot: The heat insulation the item provides.",
+                         " • heat: The heat insulation the item provides.",
                          " • amount: The amount of insulation the item provides.",
                          " • adaptSpeed: The speed at which the insulation adapts to the environment.",
                          " • *static/adaptive: The type of insulation the item provides. Defaults to \"static\" if unset",
@@ -285,7 +285,7 @@ public class ItemSettingsConfig
                          " └─── Format: [head, body, legs, feet]",
                          "      • head/body/legs/feet: The number of insulation slots for that armor slot",
                          " ┌ Linear: Number of slots increases steadily with protection",
-                         " ├ Exponential: Number of slots increases rapidly with protection",
+                         " ├ Exponential: Number of slots increases exponentially with protection",
                          " ├ Logarithmic: Number of slots increases with protection, with diminishing returns",
                          " └─── Format: [multiplier, max-slots]",
                          "      • multiplier: Multiplied by the armor's protection value to get the number of insulation slots",
