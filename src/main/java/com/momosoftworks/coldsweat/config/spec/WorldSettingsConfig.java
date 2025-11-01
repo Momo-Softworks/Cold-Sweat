@@ -583,17 +583,17 @@ public class WorldSettingsConfig
                          " • *tempLimit: The maximum world temperature at which this block temp will have any effect.",
                          "   (Represents the minimum temp if the block temp is negative)")
                 .defineListAllowEmpty(List.of("Block Temperatures"), () -> List.of(
-                                            List.of("cold_sweat:boiler",       0.27, 7, "mc", 0.88, "lit=true", "", 4),
-                                            List.of("cold_sweat:icebox",      -0.27, 7, "mc", 0.88, "frosted=true", "", 0),
-                                            List.of("minecraft:lava",           0.3, 7, "mc", 6, "", "", 21.5, true),
-                                            List.of("#minecraft:fire",        0.476, 7, "mc", 0.9, "", "", 8),
-                                            List.of("#minecraft:campfires",   0.476, 7, "mc", 0.9, "lit=true", " ", 8),
-                                            List.of("minecraft:magma_block",   0.25, 3, "mc", 1.0),
-                                            List.of("minecraft:lava_cauldron",  0.5, 7, "mc", 1.5),
-                                            List.of("minecraft:ice",          -0.15, 4, "mc", 0.3, "", "", 0.05),
-                                            List.of("minecraft:packed_ice",   -0.25, 4, "mc", 1.0, "", "", -0.3),
-                                            List.of("minecraft:blue_ice",     -0.35, 4, "mc", 1.4, "", "", -0.7),
-                                            List.of("#minecraft:ice",         -0.15, 4, "mc", 0.6, "", "", -0.7)
+                                            List.of("cold_sweat:boiler",         12, 7, "f", 36, "lit=true", "", 212),
+                                            List.of("cold_sweat:icebox",        -12, 7, "f", 36, "frosted=true", "", 32),
+                                            List.of("minecraft:lava",            20, 7, "f", 200, "", "", 1000, true),
+                                            List.of("#minecraft:fire",           15, 7, "f", 45, "", "", 400),
+                                            List.of("#minecraft:campfires",      15, 7, "f", 45, "lit=true", " ", 400),
+                                            List.of("minecraft:magma_block",     12, 3, "f", 48),
+                                            List.of("minecraft:lava_cauldron",   20, 7, "f", 200, "", "", 1000, true),
+                                            List.of("minecraft:ice",             -6, 4, "f", 24, "", "", 33),
+                                            List.of("minecraft:packed_ice",     -12, 4, "f", 48, "", "", 16),
+                                            List.of("minecraft:blue_ice",       -16, 4, "f", 64, "", "", 0),
+                                            List.of("#minecraft:ice",            -6, 4, "f", 27, "", "", 33)
                                       ),
                             it -> it instanceof List<?> list
                                     && list.size() >= 3
@@ -659,7 +659,7 @@ public class WorldSettingsConfig
             STRUCTURE_TEMPERATURES = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────",
                          " Overrides the world temperature when the player is within this structure",
-                         " ├── Format: [[\"structure_id\", temperature, *units], [\"structure_id\", temperature, *units], [...], etc]",
+                         " ├── Format: [[\"structure_id\", temperature, *units], [...], etc]",
                          " └── [* = optional]",
                          " • structure_id: The ID of the structure (i.e. \"minecraft:stronghold\")",
                          " • temperature: The temperature of the structure, in Minecraft units",
@@ -674,9 +674,9 @@ public class WorldSettingsConfig
             STRUCTURE_TEMP_OFFSETS = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────",
                          " Offsets the world temperature when the player is within this structure",
-                         " ├── Format: [[\"structure_id\", offset, *units], [\"structure_id\", offset, *units], [...], etc]",
+                         " ├── Format: [[\"structure_id\", offset, *units], [...], etc]",
                          " └── [* = optional]",
-                         " • structure_id: The ID of the structure (i.e. \"minecraft:stronghold\")",
+                         " • structure_id: The ID of the structure (i.e. \"minecraft:igloo\")",
                          " • offset: The temperature offset of the structure, in Minecraft units",
                          " • *units: The units of the temperature (\"f\" for Fahrenheit, \"c\" for Celsius, \"mc\" for Minecraft units)")
                 .defineListAllowEmpty(List.of("Structure Temperature Offsets"), () -> List.of(
@@ -696,7 +696,7 @@ public class WorldSettingsConfig
                          " A temperature offset applied when in complete shade or when the sky is overcast",
                          " └── Format: [offset, *units]")
                 .defineList("Shade Temperature Offset",
-                            List.of(-0.2, "mc"),
+                            List.of(-9, "f"),
                             it -> it instanceof Number || it instanceof String);
 
             SLEEPING_OVERRIDE_BLOCKS = BUILDER
@@ -723,7 +723,7 @@ public class WorldSettingsConfig
         BUILDER.pop();
 
 
-        BUILDER.comment("\"Thermal sources\" are blocks that have a smokestack and give frigidness/warmth, like the hearth, boiler, and iceobx")
+        BUILDER.comment("\"Thermal sources\" are blocks that have a smokestack and give frigidness/warmth. like the hearth, boiler, and iceobx")
                .push("Thermal Sources");
 
             SOURCE_EFFECT_STRENGTH = BUILDER
