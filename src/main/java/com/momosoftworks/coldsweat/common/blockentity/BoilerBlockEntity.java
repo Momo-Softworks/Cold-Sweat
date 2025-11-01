@@ -242,7 +242,7 @@ public class BoilerBlockEntity extends HearthBlockEntity
 
     @Override
     public void addFuel(int amount)
-    {   this.setHotFuelAndUpdate(this.getHotFuel() + amount);
+    {   this.setHotFuel(this.getHotFuel() + amount);
     }
 
     @Override
