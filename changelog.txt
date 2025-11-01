@@ -3508,6 +3508,7 @@ Technical Changes:
 * Fixed crash when hearth-like blocks try to spawn particles and the size of their area of effect is zero
 * Fixed hearth-like blocks only expanding to about 1/6 of their maximum volume
 * Fixed recipes that require leather not being craftable
+* (1.16) Fixed missing texture for the overlay when the player is freezing
 - Fixed the "biome", "dimension", and "structure" fields in location requirement JSON requiring lists instead of a single element
 
 Technical Changes:
