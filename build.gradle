@@ -152,7 +152,7 @@ dependencies {
 
     // Runtime Mods
     //runtimeOnly fg.deobf("curse.maven:spark-361579:3767277")
-    //runtimeOnly fg.deobf("curse.maven:jei-238222:4371666")
+    runtimeOnly fg.deobf("curse.maven:jei-238222:4371666")
     //runtimeOnly fg.deobf("curse.maven:atmospheric-362393:3553332")
     //runtimeOnly fg.deobf("curse.maven:blueprint-382216:3607198")
     //runtimeOnly fg.deobf("curse.maven:coroutil-237749:3586476")
