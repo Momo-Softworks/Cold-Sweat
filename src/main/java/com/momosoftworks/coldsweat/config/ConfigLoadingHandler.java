@@ -40,7 +40,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -57,7 +56,6 @@ import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.registries.DataPackRegistryEvent;
-import org.checkerframework.checker.units.qual.K;
 
 import java.io.File;
 import java.io.FileReader;
@@ -65,7 +63,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -77,16 +74,15 @@ public class ConfigLoadingHandler
     private static final List<OptionalHolder<?>> OPTIONAL_HOLDERS = new ArrayList<>();
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void loadConfigs(ServerConfigsLoadedEvent event)
-    {   loadConfigs(event.getServer());
+    public static void loadConfigsEvent(ServerConfigsLoadedEvent event)
+    {   loadConfigs(event.getServer().registryAccess());
     }
 
-    public static void loadConfigs(MinecraftServer server)
+    public static void loadConfigs(RegistryAccess registryAccess)
     {
         ConfigSettings.clear();
         BlockTempRegistry.flush();
 
-        RegistryAccess registryAccess = server.registryAccess();
         RegistryMultiMap<RegistryHolder<?>, Holder<? extends ConfigData>> registries = new RegistryMultiMap<>();
 
         // User JSON configs (config folder)

@@ -49,7 +49,7 @@ public class ColdSweatCommand extends BaseCommand
     {
         try
         {
-            ConfigLoadingHandler.loadConfigs(context.getSource().getServer());
+            ConfigLoadingHandler.loadConfigs(context.getSource().registryAccess());
             context.getSource().sendSuccess(() -> Component.translatable("commands.cold_sweat.reload.success"), true);
         }
         catch (Exception e)
