@@ -16,7 +16,9 @@ import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.ConfiguredBlockTemp;
 import com.momosoftworks.coldsweat.compat.CompatManager;
+import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.init.TempModifierInit;
+import com.momosoftworks.coldsweat.core.network.message.SyncConfigSettingsMessage;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.RegistryHolder;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
@@ -38,6 +40,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -52,7 +55,9 @@ import net.neoforged.fml.event.lifecycle.FMLConstructModEvent;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.registries.DataPackRegistryEvent;
+import org.checkerframework.checker.units.qual.K;
 
 import java.io.File;
 import java.io.FileReader;
@@ -73,11 +78,15 @@ public class ConfigLoadingHandler
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void loadConfigs(ServerConfigsLoadedEvent event)
+    {   loadConfigs(event.getServer());
+    }
+
+    public static void loadConfigs(MinecraftServer server)
     {
         ConfigSettings.clear();
         BlockTempRegistry.flush();
 
-        RegistryAccess registryAccess = event.getServer().registryAccess();
+        RegistryAccess registryAccess = server.registryAccess();
         RegistryMultiMap<RegistryHolder<?>, Holder<? extends ConfigData>> registries = new RegistryMultiMap<>();
 
         // User JSON configs (config folder)
@@ -101,6 +110,11 @@ public class ConfigLoadingHandler
         // Java BlockTemps
         ColdSweat.LOGGER.info("Loading BlockTemps...");
         TempModifierInit.buildBlockRegistries();
+
+        // Send registries to players
+        TaskScheduler.scheduleServer(() ->
+        {  PacketDistributor.sendToAllPlayers(new SyncConfigSettingsMessage(registryAccess));
+        }, 1);
     }
 
     @EventBusSubscriber(value = Dist.CLIENT)
