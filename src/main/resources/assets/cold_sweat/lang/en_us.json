@@ -279,6 +279,8 @@
   "commands.cold_sweat.temp_modifier.many.remove.result":   "Removed modifier %s from %d entities",
   "commands.cold_sweat.dump.success": "Successfully dumped configs to %s",
   "commands.cold_sweat.dump.failure": "Failed to dump configs: %s",
+  "commands.cold_sweat.reload.success": "Configurations reloaded successfully",
+  "commands.cold_sweat.reload.failure": "Failed to reload Cold Sweat configs: %s",
 
 
   "advancements.cold_sweat.root.title": "Cold Sweat",

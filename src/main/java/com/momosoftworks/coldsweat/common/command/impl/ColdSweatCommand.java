@@ -7,6 +7,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.command.BaseCommand;
+import com.momosoftworks.coldsweat.config.ConfigLoadingHandler;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
@@ -38,7 +39,25 @@ public class ColdSweatCommand extends BaseCommand
         return builder
                 .then(Commands.literal("dumpconfigs")
                     .executes(this::executeDumpConfigs)
+                )
+                .then(Commands.literal("reload")
+                    .executes(this::executeReloadConfigs)
                 );
+    }
+
+    private int executeReloadConfigs(CommandContext<CommandSource> context)
+    {
+        try
+        {
+            ConfigLoadingHandler.loadConfigs(context.getSource().registryAccess());
+            context.getSource().sendSuccess(new TranslationTextComponent("commands.cold_sweat.reload.success"), true);
+        }
+        catch (Exception e)
+        {
+            context.getSource().sendFailure(new TranslationTextComponent("commands.cold_sweat.reload.failure", e.getMessage()));
+            ColdSweat.LOGGER.error("Error reloading Cold Sweat configs", e);
+        }
+        return 1;
     }
 
     private int executeDumpConfigs(CommandContext<CommandSource> context)
