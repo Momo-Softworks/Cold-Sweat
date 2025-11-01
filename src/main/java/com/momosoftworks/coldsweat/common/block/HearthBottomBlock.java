@@ -131,8 +131,8 @@ public class HearthBottomBlock extends Block implements EntityBlock
                         if (itemFuel > 0)
                         {
                             // Remove fuel
-                            if (isLava) te.setHotFuelAndUpdate(hearthFuel - itemFuel);
-                            else te.setColdFuelAndUpdate(hearthFuel - itemFuel);
+                            if (isLava) te.setHotFuel(hearthFuel - itemFuel);
+                            else te.setColdFuel(hearthFuel - itemFuel);
                             // Give filled bucket item
                             stack.shrink(1);
                             player.addItem(filledBucket.getDefaultInstance());
