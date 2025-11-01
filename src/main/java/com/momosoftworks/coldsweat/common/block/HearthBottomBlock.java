@@ -123,8 +123,8 @@ public class HearthBottomBlock extends Block
                         if (itemFuel > 0)
                         {
                             // Remove fuel
-                            if (isLava) hearth.setHotFuelAndUpdate(hearthFuel - itemFuel);
-                            else hearth.setColdFuelAndUpdate(hearthFuel - itemFuel);
+                            if (isLava) hearth.setHotFuel(hearthFuel - itemFuel);
+                            else hearth.setColdFuel(hearthFuel - itemFuel);
                             // Give filled bucket item
                             stack.shrink(1);
                             player.addItem(filledBucket.getDefaultInstance());
