@@ -274,7 +274,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
 
     @Override
     public void addFuel(int amount)
-    {   this.setColdFuelAndUpdate(this.getColdFuel() + amount);
+    {   this.setColdFuel(this.getColdFuel() + amount);
     }
 
     @Override

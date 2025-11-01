@@ -133,8 +133,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     boolean isHeatingOn = false;
     boolean usingHotFuel = false;
     boolean usingColdFuel = false;
-    boolean hasHotFuel = false;
-    boolean hasColdFuel = false;
+    AtomicBoolean hasHotFuel = new AtomicBoolean(false);
+    AtomicBoolean hasColdFuel = new AtomicBoolean(false);
     int insulationLevel = 0;
 
     boolean isEntityNearby = false;
@@ -370,8 +370,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         this.tickPotionEffects();
 
         // Determine what types of fuel to use
-        boolean wasUsingColdFuel = this.usingColdFuel;
-        boolean wasUsingHotFuel = this.usingHotFuel;
         if (!this.usingColdFuel && !this.usingHotFuel && !this.paths.isEmpty())
         {   this.forceUpdate();
         }
@@ -500,6 +498,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
             this.ensureState(HearthBottomBlock.SMART, this.isSmartEnabled());
             this.ensureState(HearthBottomBlock.LIT, this.isUsingHotFuel());
             this.ensureState(HearthBottomBlock.FROSTED, this.getColdFuel() > 0);
+            this.ensureState(HearthBottomBlock.HEATING, this.isHeatingOn);
+            this.ensureState(HearthBottomBlock.COOLING, this.isCoolingOn);
         }
     }
 
@@ -617,37 +617,16 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
 
     public void checkInputSignal()
     {
-        if (!this.level.isClientSide())
+        if (!this.level.isClientSide() && !this.isSmartEnabled())
         {
-            boolean isHearth = this.getBlockState().is(ModBlocks.HEARTH_BOTTOM);
-            // Hide redstone inputs for smart hearths
-            if (this.isSmartEnabled() && isHearth
-            && !this.getBlockState().getValue(HearthBottomBlock.SMART))
-            {
-                level.setBlock(this.getBlockPos(), this.getBlockState().setValue(HearthBottomBlock.SMART, true), 2);
-                return;
-            }
             // Get signals
             boolean wasHeatingOn = this.isHeatingOn;
             boolean wasCoolingOn = this.isCoolingOn;
             this.isHeatingOn = this.hasHeatingSignal();
             this.isCoolingOn = this.hasCoolingSignal();
-            // Update block state (if this is a hearth)
-            if (isHearth)
-            {
-                if (wasHeatingOn != this.isHeatingOn)
-                {   level.setBlock(this.getBlockPos(), this.getBlockState().setValue(HearthBottomBlock.HEATING, this.isHeatingOn), 3);
-                }
-                if (wasCoolingOn != this.isCoolingOn)
-                {   level.setBlock(this.getBlockPos(), this.getBlockState().setValue(HearthBottomBlock.COOLING, this.isCoolingOn), 3);
-                }
-            }
             // Calculate fuel usage
-            if (!this.isSmartEnabled())
-            {
-                this.usingColdFuel = this.hasSmokestack && this.isCoolingOn && this.getColdFuel() > 0;
-                this.usingHotFuel = this.hasSmokestack && this.isHeatingOn && this.getHotFuel() > 0;
-            }
+            this.usingColdFuel = this.hasSmokestack && this.isCoolingOn && this.getColdFuel() > 0;
+            this.usingHotFuel = this.hasSmokestack && this.isHeatingOn && this.getHotFuel() > 0;
             // Update signals for client
             this.syncInputSignal(wasHeatingOn, wasCoolingOn);
         }
@@ -1066,61 +1045,43 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     {   return this.usingHotFuel;
     }
 
-    public void setHotFuel(int amount, boolean update)
+    protected void setFuel(FluidStack fuel, int amount, AtomicBoolean hasFuel, boolean update)
     {
-        boolean shouldUpdate = update && this.hotFuel.getAmount() != amount;
+        boolean shouldUpdate = update && fuel.getAmount() != amount;
 
-        if (this.hotFuel.isEmpty())
-        {   this.hotFuel = new FluidStack(Fluids.LAVA, amount);
-        }
-        else this.hotFuel.setAmount(amount);
-
-        if (amount == 0)
-        {
-            if (this.hasHotFuel)
-            {
-                hasHotFuel = false;
-                if (level != null)
-                {   level.playSound(null, this.getBlockPos(), this.getFuelDepleteSound(), SoundSource.BLOCKS, 1, (float) Math.random() * 0.2f + 0.9f);
-                }
-            }
-        }
-        else hasHotFuel = true;
-
-        if (shouldUpdate) this.updateFuelState();
-    }
-
-    public void setHotFuelAndUpdate(int amount)
-    {   this.setHotFuel(amount, true);
-    }
-
-    public void setColdFuel(int amount, boolean update)
-    {
-        boolean shouldUpdate = update && this.coldFuel.getAmount() != amount;
-
-        if (this.coldFuel.isEmpty())
-        {   this.coldFuel = new FluidStack(Fluids.WATER, amount);
-        }
-        else this.coldFuel.setAmount(amount);
+        fuel.setAmount(amount);
 
         if (amount <= 0)
         {
-            if (this.hasColdFuel)
+            if (hasFuel.get())
             {
-                hasColdFuel = false;
+                hasFuel.set(false);
                 if (level != null)
                 {   level.playSound(null, this.getBlockPos(), this.getFuelDepleteSound(), SoundSource.BLOCKS, 1, (float) Math.random() * 0.2f + 0.9f);
                 }
             }
         }
         else
-        {   hasColdFuel = true;
+        {   hasFuel.set(true);
         }
 
-        if (shouldUpdate) this.updateFuelState();
+        if (shouldUpdate)
+        {   this.updateFuelState();
+            this.checkInputSignal();
+        }
     }
 
-    public void setColdFuelAndUpdate(int amount)
+    public void setHotFuel(int amount, boolean update)
+    {   this.setFuel(this.hotFuel, amount, this.hasHotFuel, update);
+    }
+    public void setHotFuel(int amount)
+    {   this.setHotFuel(amount, true);
+    }
+
+    public void setColdFuel(int amount, boolean update)
+    {   this.setFuel(this.coldFuel, amount, this.hasColdFuel, update);
+    }
+    public void setColdFuel(int amount)
     {   this.setColdFuel(amount, true);
     }
 
@@ -1129,10 +1090,10 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
      */
     public void addFuel(int amount)
     {   if (amount > 0)
-        {   this.setHotFuelAndUpdate(this.getHotFuel() + amount);
+        {   this.setHotFuel(this.getHotFuel() + amount);
         }
         else if (amount < 0)
-        {   this.setColdFuelAndUpdate(this.getColdFuel() + Math.abs(amount));
+        {   this.setColdFuel(this.getColdFuel() + Math.abs(amount));
         }
     }
 
