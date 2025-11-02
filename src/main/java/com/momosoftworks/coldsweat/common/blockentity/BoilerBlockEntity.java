@@ -69,7 +69,7 @@ public class BoilerBlockEntity extends HearthBlockEntity
     {
         super.tick(level, pos);
 
-        if (this.getFuel() > 0)
+        if (!level.isClientSide() && this.getFuel() > 0)
         {
             if (this.ticksExisted % (int) (20 / Math.max(1, ConfigSettings.TEMP_RATE.get())) == 0)
             {
