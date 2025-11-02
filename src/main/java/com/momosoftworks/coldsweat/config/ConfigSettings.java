@@ -230,6 +230,7 @@ public class ConfigSettings
     public static final DynamicHolder<Boolean> ENABLE_HINTS;
 
     public static final DynamicHolder<WaterEffectSetting> WATER_EFFECT_SETTING;
+    public static final DynamicHolder<Double> WATER_DROPLET_OPACITY;
     public static final DynamicHolder<IntegerBounds> WATER_DROPLET_SCALE;
 
     public static final DynamicHolder<Boolean> ANIMATED_SOULSPRING_LAMP_MODEL;
@@ -999,6 +1000,8 @@ public class ConfigSettings
 
         WATER_EFFECT_SETTING = addClientSetting(ColdSweat.createKey("water_effect_setting"), () -> WaterEffectSetting.ALL, holder -> holder.set(WaterEffectSetting.values()[ClientSettingsConfig.WATER_EFFECT_SETTING.get()]),
             (saver) -> ClientSettingsConfig.WATER_EFFECT_SETTING.set(saver.ordinal()));
+        WATER_DROPLET_OPACITY = addClientSetting(ColdSweat.createKey("water_droplet_opacity"), () -> 0.5, holder -> holder.set(ClientSettingsConfig.WATER_DROPLET_OPACITY.get()),
+            (saver) -> ClientSettingsConfig.WATER_DROPLET_OPACITY.set(saver));
         WATER_DROPLET_SCALE = addClientSetting(ColdSweat.createKey("water_droplet_scale"), () -> new IntegerBounds(40, 48), holder -> holder.set(new IntegerBounds(ClientSettingsConfig.WATER_DROPLET_SCALE.get().toArray(Integer[]::new))),
             (saver) -> ClientSettingsConfig.WATER_DROPLET_SCALE.set(List.of(saver.min(), saver.max())));
 
