@@ -109,7 +109,7 @@ public class FilledWaterskinItem extends Item
             double temperature = stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
             double effectAmount = temperature * (ConfigSettings.WATERSKIN_CONSUME_STRENGTH.get() / 50d);
             Temperature.addModifier(player, new WaterskinTempModifier(effectAmount).expires(0), Temperature.Trait.CORE, Placement.Duplicates.ALLOW);
-            double wetnessTemp = temperature > 0 ? Math.max(0.5, temperature / 200) : Math.min(-0.5, temperature / 200);
+            double wetnessTemp = 0.05 * CSMath.sign(temperature == 0 ? 1 : temperature);
             Temperature.addOrReplaceModifier(player, new WaterTempModifier(wetnessTemp).tickRate(5), Temperature.Trait.WORLD, Placement.Duplicates.BY_CLASS);
 
             WorldHelper.playEntitySound(ModSounds.WATERSKIN_POUR, player, player.getSoundSource(), 2f, (float) ((Math.random() / 5) + 0.9));
@@ -401,7 +401,7 @@ public class FilledWaterskinItem extends Item
                     // Temperature of waterskin weakens over time
                     double waterTemp = CSMath.blend(itemTemp, itemTemp / 5, tick, 20, 100);
                     double effectAmount = waterTemp * (ConfigSettings.WATERSKIN_CONSUME_STRENGTH.get() / 50d);
-                    double wetnessTemp = waterTemp > 0 ? Math.max(0.5, waterTemp / 200) : Math.min(-0.5, waterTemp / 200);
+                    double wetnessTemp = 0.05 * CSMath.sign(waterTemp+0.01);
 
                     // Move the box down at the speed of gravity
                     aabb = aabb.move(0, -acceleration, 0);
