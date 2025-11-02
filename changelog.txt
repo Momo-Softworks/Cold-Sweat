@@ -3526,3 +3526,18 @@ Technical Changes:
             - "remove": Removes the specified keys from the config. Also supports removing list elements
       ! Because this new system introduces formatting changes, existing registry removal configs will need to be updated
       * See the documentation for formatting guides and examples
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.4-b06a
+* Added command: "/coldsweat reload"
+      - Reloads all configs (TOML, JSON, KubeJS) live, without having to rejoin the world or restart the server
+- Tweaked water droplet trails to not be so long in colder temperatures
+
+Fixes:
+* Fixed crash when using registry modifiers in some cases
+- Fixed the hearth, boiler, and icebox not emitting anything if redstone power was applied before fueling the block
+
+Technical Changes:
+- Added minTemp and maxTemp fields to item temperature and entity temperature configs
+      - These changes apply to TOML, JSON, and KubeJS
