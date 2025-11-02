@@ -125,7 +125,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
         {   this.openersCounter.recheckOpeners(this.level, this.getBlockPos(), this.getBlockState());
         }
 
-        if (this.getFuel() > 0)
+        if (!level.isClientSide() && this.getFuel() > 0)
         {
             // Cool down waterskins
             if (ticksExisted % (int) (20 / Math.max(1, ConfigSettings.TEMP_RATE.get())) == 0)
