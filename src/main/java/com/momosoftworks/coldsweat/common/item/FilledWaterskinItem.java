@@ -341,13 +341,14 @@ public class FilledWaterskinItem extends Item
     {
         if (stack.getItem() instanceof FilledWaterskinItem)
         {
-            ItemStack emptyWaterskin = new ItemStack(ModItems.WATERSKIN.value());
+            ItemStack emptyWaterskin = super.getCraftingRemainingItem(stack);
 
             // Preserve NBT (except temperature)
             emptyWaterskin.applyComponents(stack.getComponents());
             emptyWaterskin.remove(ModItemComponents.WATER_TEMPERATURE);
             emptyWaterskin.remove(DataComponents.DAMAGE);
             emptyWaterskin.remove(DataComponents.MAX_DAMAGE);
+            emptyWaterskin.set(DataComponents.MAX_STACK_SIZE, emptyWaterskin.getItem().getDefaultMaxStackSize());
             if (CompatManager.isThirstLoaded())
             {   emptyWaterskin.remove(ThirstComponent.PURITY);
             }
