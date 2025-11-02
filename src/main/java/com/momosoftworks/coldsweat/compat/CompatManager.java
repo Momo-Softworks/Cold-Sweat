@@ -302,7 +302,7 @@ public class CompatManager
 
     public static abstract class Thirst
     {
-        public static boolean hasWaterPurity(ItemStack stack)
+        public static boolean hasPurity(ItemStack stack)
         {
             if (THIRST_LOADED)
             {   return WaterPurity.hasPurity(stack);
@@ -310,7 +310,7 @@ public class CompatManager
             return false;
         }
 
-        public static int getWaterPurity(ItemStack stack)
+        public static int getPurity(ItemStack stack)
         {
             if (THIRST_LOADED)
             {   return WaterPurity.getPurity(stack);
@@ -318,7 +318,7 @@ public class CompatManager
             return 0;
         }
 
-        public static ItemStack setWaterPurity(ItemStack stack, int purity)
+        public static ItemStack setPurity(ItemStack stack, int purity)
         {
             if (THIRST_LOADED)
             {   return WaterPurity.addPurity(stack, purity);
@@ -326,7 +326,7 @@ public class CompatManager
             return stack;
         }
 
-        public static ItemStack setWaterPurity(ItemStack item, BlockPos pos, Level level)
+        public static ItemStack setPurityFromBlock(ItemStack item, BlockPos pos, Level level)
         {
             if (THIRST_LOADED)
             {   return WaterPurity.addPurity(item, pos, level);
