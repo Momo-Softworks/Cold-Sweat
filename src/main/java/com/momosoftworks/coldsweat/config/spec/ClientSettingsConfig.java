@@ -53,6 +53,7 @@ public class ClientSettingsConfig
     public static final CSConfigSpec.BooleanValue ENABLE_HINTS;
 
     public static final CSConfigSpec.IntValue WATER_EFFECT_SETTING;
+    public static final CSConfigSpec.DoubleValue WATER_DROPLET_OPACITY;
     public static final CSConfigSpec.ConfigValue<List<? extends Integer>> WATER_DROPLET_SCALE;
 
     public static final CSConfigSpec.BooleanValue SHOW_FROZEN_HEALTH;
@@ -94,6 +95,11 @@ public class ClientSettingsConfig
                              " 0: Off, 1: Particles, 2: On-Screen, 3: Both",
                              " ⌄ ")
                     .defineInRange("Show Water Effect", 3, 0, 3);
+            WATER_DROPLET_OPACITY = BUILDER
+                    .comment("─────────────────────────────────────────────────────────────────────────",
+                             " The opacity of the water droplets on-screen",
+                             " ⌄ ")
+                    .defineInRange("Water Droplet Opacity", 0.5, 0.0, 1.0);
             WATER_DROPLET_SCALE = BUILDER
                     .comment("─────────────────────────────────────────────────────────────────────────",
                              " The scale of the water droplets on-screen, in scaled \"pixels\"",

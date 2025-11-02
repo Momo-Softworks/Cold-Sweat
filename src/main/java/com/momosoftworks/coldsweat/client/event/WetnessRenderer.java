@@ -69,7 +69,7 @@ public class WetnessRenderer
         }
 
         Player player = mc.player;
-        if (player == null) return;
+        if (player == null || player.isSpectator()) return;
 
         BlockPos playerPos = BlockPos.containing(player.getEyePosition());
         float playerYVelocity = (float) (player.position().y - player.yOld);
@@ -100,7 +100,7 @@ public class WetnessRenderer
 
         // Spawn a bunch of droplets when the player exits the water
         boolean justExitedWater = WAS_SUBMERGED && !isSubmerged;
-        if (justExitedWater && !player.isSpectator())
+        if (justExitedWater)
         {
             for (int i = 0; i < 10; i++)
             {
@@ -109,15 +109,6 @@ public class WetnessRenderer
                 newDrop.position.y = (float) (Math.sin(i*4+player.tickCount) / 2 + 0.5) * screenHeight; // arbitrary wave pattern for particle placement
                 newDrop.position.x = (float) (i/10.0) * screenWidth; // even distribution on x axis
                 WATER_DROPS.add(newDrop);
-                int streakLength = (int) (Math.random() * 5) + 5;
-                int x = (int)newDrop.position.x;
-                int y = (int)newDrop.position.y;
-                for (int j = 1; j < streakLength; j++)
-                {
-                    TRAILS.add(new Triplet<>(new Vector2i(x, y - j),
-                                             CSMath.blend(newDrop.alpha * 0.8f, 0, j, 1, streakLength),
-                                             newDrop.size / 2));
-                }
             }
         }
         WAS_SUBMERGED = player.isAlive() && isSubmerged;
@@ -145,9 +136,9 @@ public class WetnessRenderer
         int skyLight = player.level().getLightEngine().getLayerListener(LightLayer.SKY).getLightValue(playerPos);
         int combinedLight = LightTexture.pack(blockLight, skyLight);
 
-
-        /* Render Water Drops */
-
+        /*
+         Render Water Droplets
+         */
         RenderSystem.setShaderTexture(0, WATER_DROP);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -185,12 +176,6 @@ public class WetnessRenderer
                         drop.yMotion = getRandomVelocity(frametime);
                     }
                     else drop.yMotionUpdateCooldown -= frametime;
-
-                    // Movement due to player motion
-                    float dropMoveFromPlayerLook = -(player.yHeadRot - player.yHeadRotO) / 20;
-                    dropMoveFromPlayerLook = (float) CSMath.shrink(dropMoveFromPlayerLook, 0.5f);
-                    drop.xVelocity = (float) CSMath.maxAbs(dropMoveFromPlayerLook * (Math.random() * 0.2), drop.xVelocity);
-                    drop.xVelocity /= 1 + 0.6f * frametime;
 
                     // Randomly change the x motion
                     if (drop.XMotionUpdateCooldown <= 0)
@@ -238,8 +223,9 @@ public class WetnessRenderer
         }
 
 
-        /* Render Trails */
-
+        /*
+         Render Droplet Trails
+         */
         RenderSystem.setShaderTexture(0, WATER_DROP_TRAIL);
         bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
 
@@ -322,6 +308,7 @@ public class WetnessRenderer
                                          int width, int height, float u, float v, float uWidth, float vHeight,
                                          float alpha, int lightLevel, int waterColor)
     {
+        alpha *= ConfigSettings.WATER_DROPLET_OPACITY.get();
         float red = (waterColor >> 16 & 255)/255f;
         float green = (waterColor >> 8 & 255)/255f;
         float blue = (waterColor & 255)/255f;
