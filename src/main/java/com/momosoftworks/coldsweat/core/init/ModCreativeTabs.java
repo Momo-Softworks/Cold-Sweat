@@ -31,7 +31,7 @@ public class ModCreativeTabs
                         ModItems.WATERSKIN.value().getDefaultInstance(),
                         ObjectBuilder.build(() ->
                         {   ItemStack stack = ModItems.FILLED_WATERSKIN.value().getDefaultInstance();
-                            stack = CompatManager.Thirst.setWaterPurity(stack, 3);
+                            stack = CompatManager.Thirst.setPurity(stack, 3);
                             return stack;
                         }),
                         ModItems.GOAT_FUR.value().getDefaultInstance(),

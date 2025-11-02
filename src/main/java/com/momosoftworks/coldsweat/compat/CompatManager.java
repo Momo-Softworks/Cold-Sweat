@@ -26,12 +26,12 @@ import com.simibubi.create.content.fluids.pipes.FluidPipeBlock;
 import com.simibubi.create.content.fluids.pipes.GlassFluidPipeBlock;
 import dev.ghen.thirst.content.purity.ContainerWithPurity;
 import dev.ghen.thirst.content.purity.WaterPurity;
+import dev.ghen.thirst.content.registry.ThirstComponent;
 import dev.ghen.thirst.foundation.common.event.RegisterThirstValueEvent;
 import glitchcore.event.EventManager;
 import net.createmod.ponder.foundation.PonderIndex;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -299,51 +299,37 @@ public class CompatManager
 
     public static abstract class Thirst
     {
-        public static boolean hasWaterPurity(ItemStack stack)
+        public static boolean hasPurity(ItemStack stack)
         {
             if (THIRST_LOADED)
-            {   return WaterPurity.hasPurity(stack);
+            {   return stack.has(ThirstComponent.PURITY);
             }
             return false;
         }
 
-        public static int getWaterPurity(ItemStack stack)
+        public static int getPurity(ItemStack stack)
         {
             if (THIRST_LOADED)
-            {   return new Object()
-            {
-                public int getWaterPurity()
-                {   return WaterPurity.getPurity(stack);
-                }
-            }.getWaterPurity();
+            {   return WaterPurity.getPurity(stack);
             }
             return 0;
         }
 
-        public static ItemStack setWaterPurity(ItemStack stack, int purity)
+        public static ItemStack setPurity(ItemStack stack, int purity)
         {
             if (THIRST_LOADED)
-            {
-            return new Object()
-            {
-                public ItemStack setWaterPurity()
-                {   return WaterPurity.addPurity(stack, purity);
-                }
-            }.setWaterPurity();
+            {   stack.set(ThirstComponent.PURITY, purity);
+                return stack;
             }
             return stack;
         }
 
-        public static ItemStack setWaterPurity(ItemStack item, BlockPos pos, Level level)
+        public static ItemStack setPurityFromBlock(ItemStack item, BlockPos pos, Level level)
         {
             if (THIRST_LOADED)
-            {
-            return new Object()
-            {
-                public ItemStack setWaterPurity()
-                {   return WaterPurity.addPurity(item, pos, level);
-                }
-            }.setWaterPurity();
+            {   int purity = WaterPurity.getBlockPurity(level, pos);
+                item.set(ThirstComponent.PURITY, purity);
+                return item;
             }
             return item;
         }

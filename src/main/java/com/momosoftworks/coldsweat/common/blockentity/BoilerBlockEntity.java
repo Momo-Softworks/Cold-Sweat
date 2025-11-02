@@ -93,10 +93,10 @@ public class BoilerBlockEntity extends HearthBlockEntity
                 for (int i = 1; i < 10; i++)
                 {
                     ItemStack stack = this.getItem(i);
-                    if (CompatManager.isThirstLoaded() && CompatManager.Thirst.hasWaterPurity(stack)
-                    && CompatManager.Thirst.getWaterPurity(stack) < 3)
+                    if (CompatManager.isThirstLoaded() && CompatManager.Thirst.hasPurity(stack)
+                    && CompatManager.Thirst.getPurity(stack) < 3)
                     {
-                        CompatManager.Thirst.setWaterPurity(stack, CompatManager.Thirst.getWaterPurity(stack) + 1);
+                        CompatManager.Thirst.setPurity(stack, CompatManager.Thirst.getPurity(stack) + 1);
                         hasDrinkables = true;
                     }
                 }
@@ -116,8 +116,8 @@ public class BoilerBlockEntity extends HearthBlockEntity
             if (stack.is(ModItems.FILLED_WATERSKIN) && stack.getOrDefault(ModItemComponents.WATER_TEMPERATURE, 0.0) < 50)
             {   this.hasWaterskins = true;
             }
-            else if (CompatManager.isThirstLoaded() && CompatManager.Thirst.hasWaterPurity(stack)
-            && CompatManager.Thirst.getWaterPurity(stack) < 3)
+            else if (CompatManager.isThirstLoaded() && CompatManager.Thirst.hasPurity(stack)
+            && CompatManager.Thirst.getPurity(stack) < 3)
             {   this.hasDrinkables = true;
             }
         }
@@ -278,7 +278,7 @@ public class BoilerBlockEntity extends HearthBlockEntity
     {
         if (slot == 0)
             return this.getItemFuel(stack) != 0;
-        else return stack.is(ModItemTags.BOILER_VALID) || (CompatManager.isThirstLoaded() && CompatManager.Thirst.hasWaterPurity(stack));
+        else return stack.is(ModItemTags.BOILER_VALID) || (CompatManager.isThirstLoaded() && CompatManager.Thirst.hasPurity(stack));
     }
 
     @Override
