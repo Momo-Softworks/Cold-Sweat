@@ -63,32 +63,7 @@ public class ConfigPageTwo extends AbstractConfigPage
                 button -> ConfigSettings.HIGH_CONTRAST.set(!ConfigSettings.HIGH_CONTRAST.get()),
                 false, false, true, new TranslatableComponent("cold_sweat.config.high_contrast.desc"));
 
-        // Show Water Effect
-        this.addButton("show_water_effect", Side.LEFT, () -> getEnumButtonText(new TranslatableComponent("cold_sweat.config.show_water_effect.name"), ConfigSettings.WATER_EFFECT_SETTING.get()),
-                button -> ConfigSettings.WATER_EFFECT_SETTING.set(getNextCycle(ConfigSettings.WATER_EFFECT_SETTING.get())),
-                false, false, true, new TranslatableComponent("cold_sweat.config.show_water_effect.desc"));
-
-        // Water Droplet Scale
-        this.addSliderButton("water_droplet_scale", Side.LEFT,
-                             () -> getSliderText(new TranslatableComponent("cold_sweat.config.water_droplet_scale.name"), ConfigSettings.WATER_DROPLET_SCALE.get().min(), 5, 100, -1),
-                             5, 100,
-                             (value, button) -> ConfigSettings.WATER_DROPLET_SCALE.set(new IntegerBounds(value.intValue(), (int) (value * 1.2))),
-                             button -> button.setValue(CSMath.blend(0, 1, ConfigSettings.WATER_DROPLET_SCALE.get().min(), 5, 100)),
-                             false, true, new TranslatableComponent("cold_sweat.config.water_droplet_scale.desc"));
-
-        // Animate Soulspring Lamp
-        this.addButton("animate_soulspring_lamp", Side.LEFT,
-                       () -> getToggleButtonText(new TranslatableComponent("cold_sweat.config.animate_soulspring_lamp.name"), ConfigSettings.ANIMATED_SOULSPRING_LAMP_MODEL.get()),
-                       button ->
-                       {
-                           DynamicHolder<Boolean> setting = ConfigSettings.ANIMATED_SOULSPRING_LAMP_MODEL;
-                           setting.set(!setting.get());
-                           if (!setting.get())
-                           {    ItemProperties.register(ModItems.SOULSPRING_LAMP, new ResourceLocation(ColdSweat.MOD_ID, "soulspring_state"), RegisterItemOverrides.SOULSPRING_LAMP_PROPERTIES);
-                           }
-                           else RegisterItemOverrides.unregister(ModItems.SOULSPRING_LAMP);
-                       },
-                       false, false, true, new TranslatableComponent("cold_sweat.config.animate_soulspring_lamp.desc"));
+        this.addEmptySpace(Side.LEFT, 0.5);
 
         // Config Button Repositioning Screen
         this.addButton("button_position", Side.LEFT, () -> new TranslatableComponent("cold_sweat.config.config_button_pos.name"),
