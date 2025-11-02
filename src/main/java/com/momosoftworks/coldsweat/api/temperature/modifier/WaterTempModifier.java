@@ -59,7 +59,8 @@ public class WaterTempModifier extends TempModifier
         }
         double dryAmount = CSMath.blendExp(configDrySpeed / 1.5, configDrySpeed * 5, worldTemp, minWorldTemp, maxWorldTemp, 20);
 
-        double newTemperature = CSMath.shrink(temperature + addAmount, dryAmount);
+        double tickRate = this.getTickRate() / 5.0;
+        double newTemperature = CSMath.shrink(temperature + addAmount * tickRate, dryAmount * tickRate);
         if (newTemperature == 0)
         {   this.expires(0);
         }
