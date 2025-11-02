@@ -159,7 +159,6 @@ public class WaterskinItem extends Item
         }
         player.swing(usedHand);
         player.getCooldowns().addCooldown(ModItems.FILLED_WATERSKIN.value(), 10);
-        player.getCooldowns().addCooldown(ModItems.WATERSKIN.value(), 10);
         player.awardStat(Stats.ITEM_USED.get(thisStack.getItem()));
         level.playSound(null, filledAtPos, ModSounds.WATERSKIN_FILL.value(), SoundSource.PLAYERS, 2f, (float) Math.random() / 5 + 0.9f);
     }
