@@ -12,6 +12,7 @@ import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.InventoryHelper;
@@ -190,9 +191,8 @@ public class HearthBottomBlock extends Block
     }
 
     @Override
-    public void onPlace(BlockState state, World level, BlockPos pos, BlockState lastState, boolean p_60570_)
-    {
-        level.setBlock(pos.above(), WorldHelper.waterlog(ModBlocks.HEARTH_TOP.defaultBlockState(), level, pos.above()), 3);
+    public void setPlacedBy(World level, BlockPos pos, BlockState state, LivingEntity entity, ItemStack item)
+    {   level.setBlock(pos.above(), WorldHelper.waterlog(ModBlocks.HEARTH_TOP.defaultBlockState(), level, pos.above()), 3);
     }
 
     @Override
