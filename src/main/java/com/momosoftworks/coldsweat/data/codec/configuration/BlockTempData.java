@@ -160,7 +160,7 @@ public class BlockTempData extends ConfigData
         // Range of effect
         final double blockRange = ((Number) entry.get(2)).doubleValue();
 
-        final Temperature.Units units = entry.size() > 3 && entry.get(3) instanceof Temperature.Units
+        final Temperature.Units units = entry.size() > 3 && entry.get(3) instanceof String
                                          ? Temperature.Units.fromID((String) entry.get(3))
                                          : Temperature.Units.MC;
 
