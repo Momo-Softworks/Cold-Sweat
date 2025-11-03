@@ -17,6 +17,7 @@ import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.BucketItem;
@@ -199,9 +200,8 @@ public class HearthBottomBlock extends Block implements EntityBlock
     }
 
     @Override
-    public void onPlace(BlockState state, Level level, BlockPos pos, BlockState lastState, boolean p_60570_)
-    {
-        level.setBlock(pos.above(), WorldHelper.waterlog(ModBlocks.HEARTH_TOP.value().defaultBlockState(), level, pos.above()), 3);
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state, LivingEntity entity, ItemStack item)
+    {   level.setBlock(pos.above(), WorldHelper.waterlog(ModBlocks.HEARTH_TOP.value().defaultBlockState(), level, pos.above()), 3);
     }
 
     @Override
