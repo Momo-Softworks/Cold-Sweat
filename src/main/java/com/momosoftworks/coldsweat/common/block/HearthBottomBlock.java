@@ -197,9 +197,8 @@ public class HearthBottomBlock extends Block implements EntityBlock
     }
 
     @Override
-    public void onPlace(BlockState state, Level level, BlockPos pos, BlockState lastState, boolean p_60570_)
-    {
-        level.setBlock(pos.above(), WorldHelper.waterlog(ModBlocks.HEARTH_TOP.defaultBlockState(), level, pos.above()), 3);
+    public void setPlacedBy(Level level, BlockPos pos, BlockState state, LivingEntity entity, ItemStack item)
+    {   level.setBlock(pos.above(), WorldHelper.waterlog(ModBlocks.HEARTH_TOP.defaultBlockState(), level, pos.above()), 3);
     }
 
     @Override
