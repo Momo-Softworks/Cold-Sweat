@@ -197,12 +197,17 @@ public class BoilerBlockEntity extends HearthBlockEntity
 
     @Override
     public List<Direction> getHeatingSides()
-    {   return Arrays.asList(Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST, Direction.DOWN);
+    {   return Arrays.asList(Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST, Direction.UP, Direction.DOWN);
     }
 
     @Override
     public List<Direction> getCoolingSides()
     {   return List.of();
+    }
+
+    @Override
+    public boolean supportsCooling()
+    {   return false;
     }
 
     @Override
@@ -236,13 +241,8 @@ public class BoilerBlockEntity extends HearthBlockEntity
     }
 
     @Override
-    public void setHotFuel(int amount, boolean update)
-    {   super.setHotFuel(amount, update);
-    }
-
-    @Override
     public void addFuel(int amount)
-    {   this.setHotFuel(this.getHotFuel() + amount);
+    {   this.addHotFuel(amount, true);
     }
 
     @Override

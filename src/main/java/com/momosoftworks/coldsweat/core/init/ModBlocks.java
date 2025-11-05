@@ -3,7 +3,7 @@ package com.momosoftworks.coldsweat.core.init;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.block.*;
 import net.minecraft.world.level.block.Block;
-import net.neoforged.fml.common.EventBusSubscriber;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.neoforged.neoforge.registries.DeferredBlock;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -20,4 +20,5 @@ public class ModBlocks
     public static final DeferredBlock<Block> THERMOLITH = BLOCKS.register("thermolith", () -> new ThermolithBlock(ThermolithBlock.getProperties()));
     public static final DeferredBlock<Block> SOUL_STALK = BLOCKS.register("soul_stalk", () -> new SoulStalkBlock(SoulStalkBlock.getProperties()));
     public static final DeferredBlock<Block> SMOKESTACK = BLOCKS.register("smokestack", () -> new SmokestackBlock(SmokestackBlock.getProperties()));
+    public static final DeferredBlock<LiquidBlock> SLUSH = BLOCKS.register("slush", () -> new SlushLiquidBlock(ModFluids.SLUSH, SmokestackBlock.getProperties()));
 }

@@ -6,6 +6,9 @@ import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.config.ModUpdater;
 import com.momosoftworks.coldsweat.config.spec.*;
 import com.momosoftworks.coldsweat.core.init.*;
+import com.momosoftworks.coldsweat.util.registries.ModGameRules;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.SpawnPlacementTypes;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -13,6 +16,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.capabilities.Capabilities;
@@ -35,12 +39,15 @@ public class ColdSweat
     {
         MOD_BUS = bus;
 
+        MOD_BUS.addListener(this::clientSetup);
         MOD_BUS.addListener(this::spawnPlacements);
         MOD_BUS.addListener(this::registerCaps);
         MOD_BUS.addListener(this::updateConfigs);
 
         // Register stuff
         ModBlocks.BLOCKS.register(MOD_BUS);
+        ModFluids.FLUID_TYPES.register(MOD_BUS);
+        ModFluids.FLUIDS.register(MOD_BUS);
         ModItems.ITEMS.register(MOD_BUS);
         ModEntities.ENTITY_TYPES.register(MOD_BUS);
         ModBlockEntities.BLOCK_ENTITY_TYPES.register(MOD_BUS);
@@ -59,6 +66,9 @@ public class ColdSweat
         ModItemComponents.DATA_COMPONENTS.register(MOD_BUS);
         ModTempEffects.TEMP_EFFECTS.register(MOD_BUS);
         ModDataAttachments.DATA_ATTACHMENTS.register(MOD_BUS);
+
+        // Setup game rules
+        ModGameRules.registerGameRules();
 
         // Handle config updates
         ModUpdater.updateFileNames();
@@ -82,6 +92,15 @@ public class ColdSweat
     {   return FMLLoader.getLoadingModList().getModFileById(ColdSweat.MOD_ID).versionString();
     }
 
+    public void clientSetup(final FMLClientSetupEvent event)
+    {
+        event.enqueueWork(() ->
+        {
+            ItemBlockRenderTypes.setRenderLayer(ModFluids.SLUSH.value(), RenderType.translucent());
+            ItemBlockRenderTypes.setRenderLayer(ModFluids.FLOWING_SLUSH.value(), RenderType.translucent());
+        });
+    }
+
     public void spawnPlacements(RegisterSpawnPlacementsEvent event)
     {
         event.register(ModEntities.CHAMELEON.value(), SpawnPlacementTypes.ON_GROUND,
@@ -95,8 +114,8 @@ public class ColdSweat
             // Register fluid handlers for hearth-like blocks
             event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, blockEntityType, (hearthLike, facing) ->
             {
-                return hearthLike.isHeatingSide(facing) ? new HearthBlockEntity.HotFluidHandler(hearthLike)
-                     : hearthLike.isCoolingSide(facing) ? new HearthBlockEntity.ColdFluidHandler(hearthLike)
+                return hearthLike.isHeatingSide(facing) ? hearthLike.getFuelHandler(HearthBlockEntity.FuelType.HOT)
+                     : hearthLike.isCoolingSide(facing) ? hearthLike.getFuelHandler(HearthBlockEntity.FuelType.COLD)
                      : null;
             });
         }

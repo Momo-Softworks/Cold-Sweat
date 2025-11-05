@@ -28,6 +28,8 @@ public class ModItems
             new InsulatedMinecartItem(new Item.Properties().stacksTo(1)));
     public static final DeferredItem<Item> CHAMELEON_MOLT = ITEMS.register("chameleon_molt", () ->
             new Item(new Item.Properties()));
+    public static final DeferredItem<Item> SLUSH_BUCKET = ITEMS.register("slush_bucket", () ->
+            new BucketItem(ModFluids.SLUSH.value(), new Item.Properties().stacksTo(1).craftRemainder(Items.BUCKET)));
 
     static final Item.Properties ARMOR_PROPERTIES = new Item.Properties().stacksTo(1);
 
