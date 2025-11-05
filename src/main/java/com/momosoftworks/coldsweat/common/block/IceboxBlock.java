@@ -134,7 +134,7 @@ public class IceboxBlock extends Block implements EntityBlock
                     {   stack.shrink(1);
                     }
                 }
-                icebox.setFuel(icebox.getFuel() + itemFuel);
+                icebox.addColdFuel(itemFuel, true);
 
                 level.playSound(null, pos, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
             }

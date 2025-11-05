@@ -13,30 +13,27 @@ import com.momosoftworks.coldsweat.config.spec.*;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.core.init.*;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
-import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.compat.CompatManager;
-import com.momosoftworks.coldsweat.data.RegistryHolder;
 import com.momosoftworks.coldsweat.util.registries.ModEntities;
+import com.momosoftworks.coldsweat.util.registries.ModFluids;
+import com.momosoftworks.coldsweat.util.registries.ModGameRules;
 import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.event.entity.SpawnPlacementRegisterEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLLoader;
-import net.minecraftforge.registries.DataPackRegistryEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.lang.reflect.Method;
 
 @Mod(ColdSweat.MOD_ID)
 @Mod.EventBusSubscriber
@@ -50,12 +47,15 @@ public class ColdSweat
     public ColdSweat()
     {
         MOD_BUS.addListener(this::commonSetup);
+        MOD_BUS.addListener(this::clientSetup);
         MOD_BUS.addListener(this::spawnPlacements);
         MOD_BUS.addListener(this::registerCaps);
         MOD_BUS.addListener(this::updateConfigs);
 
         // Register stuff
         BlockInit.BLOCKS.register(MOD_BUS);
+        FluidInit.FLUID_TYPES.register(MOD_BUS);
+        FluidInit.FLUIDS.register(MOD_BUS);
         ItemInit.ITEMS.register(MOD_BUS);
         EntityInit.ENTITY_TYPES.register(MOD_BUS);
         BlockEntityInit.BLOCK_ENTITY_TYPES.register(MOD_BUS);
@@ -70,6 +70,9 @@ public class ColdSweat
         AttributeInit.ATTRIBUTES.register(MOD_BUS);
         CommandInit.ARGUMENTS.register(MOD_BUS);
         TempEffectInit.TEMP_EFFECTS.register(MOD_BUS);
+
+        // Setup game rules
+        ModGameRules.registerGameRules();
 
         // Handle config updates
         ModUpdater.updateFileNames();
@@ -92,6 +95,15 @@ public class ColdSweat
 
     public static String getVersion()
     {   return FMLLoader.getLoadingModList().getModFileById(ColdSweat.MOD_ID).versionString();
+    }
+
+    public void clientSetup(final FMLClientSetupEvent event)
+    {
+        event.enqueueWork(() ->
+        {
+            ItemBlockRenderTypes.setRenderLayer(ModFluids.SLUSH, RenderType.translucent());
+            ItemBlockRenderTypes.setRenderLayer(ModFluids.FLOWING_SLUSH, RenderType.translucent());
+        });
     }
 
     public void commonSetup(final FMLCommonSetupEvent event)
