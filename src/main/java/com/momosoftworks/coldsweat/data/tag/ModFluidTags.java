@@ -10,6 +10,7 @@ public class ModFluidTags
 {
     public static final ITag<Fluid> HOT = createTag("hot");
     public static final ITag<Fluid> COLD = createTag("cold");
+    public static final ITag<Fluid> SLUSH = createTag("slush");
 
     private static ITag<Fluid> createTag(String name)
     {   return FluidTags.bind(new ResourceLocation(ColdSweat.MOD_ID, name).toString());

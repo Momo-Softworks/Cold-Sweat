@@ -2,7 +2,7 @@ package com.momosoftworks.coldsweat;
 
 import com.momosoftworks.coldsweat.client.renderer.entity.ChameleonEntityRenderer;
 import com.momosoftworks.coldsweat.client.renderer.entity.GoatEntityRenderer;
-import com.momosoftworks.coldsweat.common.capability.*;
+import com.momosoftworks.coldsweat.common.capability.DummyCapStorage;
 import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
 import com.momosoftworks.coldsweat.common.capability.shearing.IShearableCap;
@@ -10,17 +10,16 @@ import com.momosoftworks.coldsweat.common.capability.shearing.ShearableFurCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.EntityTempCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap;
 import com.momosoftworks.coldsweat.common.command.argument.*;
-import com.momosoftworks.coldsweat.config.*;
+import com.momosoftworks.coldsweat.compat.CompatManager;
+import com.momosoftworks.coldsweat.config.ModUpdater;
 import com.momosoftworks.coldsweat.config.spec.*;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.core.init.*;
 import com.momosoftworks.coldsweat.core.itemgroup.InsulationItemsGroup;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
-import com.momosoftworks.coldsweat.compat.CompatManager;
-import com.momosoftworks.coldsweat.data.ModRegistries;
-import com.momosoftworks.coldsweat.data.RegistryHolder;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModEntities;
+import com.momosoftworks.coldsweat.util.registries.ModFluids;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
@@ -29,20 +28,20 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.InterModComms;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.*;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
+import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.SlotTypeMessage;
 import top.theillusivec4.curios.api.SlotTypePreset;
-
-import java.lang.reflect.Method;
 
 @Mod(ColdSweat.MOD_ID)
 @Mod.EventBusSubscriber
@@ -66,6 +65,7 @@ public class ColdSweat
 
         // Register stuff
         BlockInit.BLOCKS.register(MOD_BUS);
+        FluidInit.FLUIDS.register(MOD_BUS);
         ItemInit.ITEMS.register(MOD_BUS);
         EntityInit.ENTITY_TYPES.register(MOD_BUS);
         BlockEntityInit.BLOCK_ENTITY_TYPES.register(MOD_BUS);
@@ -144,6 +144,9 @@ public class ColdSweat
         RenderTypeLookup.setRenderLayer(ModBlocks.SOUL_STALK, RenderType.cutoutMipped());
         RenderingRegistry.registerEntityRenderingHandler(ModEntities.CHAMELEON, ChameleonEntityRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntities.GOAT, GoatEntityRenderer::new);
+        // Fluid render types
+        RenderTypeLookup.setRenderLayer(ModFluids.SLUSH, RenderType.translucent());
+        RenderTypeLookup.setRenderLayer(ModFluids.FLOWING_SLUSH, RenderType.translucent());
     }
 
     public void updateConfigs(FMLLoadCompleteEvent event)

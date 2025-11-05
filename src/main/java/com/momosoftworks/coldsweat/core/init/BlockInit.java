@@ -3,7 +3,9 @@ package com.momosoftworks.coldsweat.core.init;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.block.*;
 import net.minecraft.block.Block;
+import net.minecraft.block.FlowingFluidBlock;
 import net.minecraftforge.fml.RegistryObject;
+import com.momosoftworks.coldsweat.common.fluid.SlushFluid;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -22,4 +24,5 @@ public class BlockInit
     public static final RegistryObject<Block> THERMOLITH = BLOCKS.register("thermolith", () -> new ThermolithBlock(ThermolithBlock.getProperties()));
     public static final RegistryObject<Block> SOUL_STALK = BLOCKS.register("soul_stalk", () -> new SoulStalkBlock(SoulStalkBlock.getProperties()));
     public static final RegistryObject<Block> SMOKESTACK = BLOCKS.register("smokestack", () -> new SmokestackBlock(SmokestackBlock.getProperties()));
+    public static final RegistryObject<FlowingFluidBlock> SLUSH = BLOCKS.register("slush", () -> new SlushLiquidBlock(FluidInit.SLUSH, SlushFluid.getBlockProperties()));
 }

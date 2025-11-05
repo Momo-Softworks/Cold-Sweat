@@ -35,4 +35,5 @@ public class ModItems
     public static final Item CHAMELEON_LEGGINGS = ItemInit.CHAMELEON_LEGGINGS.get();
     public static final Item CHAMELEON_BOOTS = ItemInit.CHAMELEON_BOOTS.get();
     public static final Item SMOKESTACK = ItemInit.SMOKESTACK.get();
+    public static final Item SLUSH_BUCKET = ItemInit.SLUSH_BUCKET.get();
 }

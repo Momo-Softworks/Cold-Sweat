@@ -26,8 +26,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
@@ -99,79 +97,35 @@ public class HearthBottomBlock extends Block
             HearthBlockEntity hearth = (HearthBlockEntity) te;
             ItemStack stack = player.getItemInHand(hand);
 
-            // If the held item is a bucket, try to extract fluids
-            if (player.getItemInHand(hand).getItem() == Items.BUCKET)
+            // If the held item is fuel, try to insert the fuel
+            int itemFuel = hearth.getItemFuel(stack);
+            int hearthFuel = itemFuel > 0 ? hearth.getHotFuel() : hearth.getColdFuel();
+
+            if (itemFuel != 0 && hearthFuel + Math.abs(itemFuel) * 0.75 < hearth.getMaxFuel())
             {
-                Vector3d clickedPos = rayTraceResult.getLocation();
-
-                Vector3i lavaSideOffset = state.getValue(FACING).getClockWise().getNormal();
-                Vector3d lavaSidePos = CSMath.getCenterPos(pos).add(lavaSideOffset.getX() * 0.65, lavaSideOffset.getY() * 0.65, lavaSideOffset.getZ() * 0.65);
-
-                Vector3i waterSideOffset = state.getValue(FACING).getCounterClockWise().getNormal();
-                Vector3d waterSidePos = CSMath.getCenterPos(pos).add(waterSideOffset.getX() * 0.65, waterSideOffset.getY() * 0.65, waterSideOffset.getZ() * 0.65);
-
-                boolean isLava = clickedPos.distanceTo(lavaSidePos) < clickedPos.distanceTo(waterSidePos);
-                Vector3d sidePos = isLava ? lavaSidePos : waterSidePos;
-                BucketItem filledBucket = isLava ? ((BucketItem) Items.LAVA_BUCKET)
-                                                 : ((BucketItem) Items.WATER_BUCKET);
-                int itemFuel = Math.abs(hearth.getItemFuel(filledBucket.getDefaultInstance()));
-                int hearthFuel = isLava ? hearth.getHotFuel() : hearth.getColdFuel();
-
-                if (hearthFuel >= itemFuel * 0.99)
+                // Consume the item if not in creative
+                if (!player.isCreative())
                 {
-                    if (rayTraceResult.getLocation().distanceTo(sidePos) < 0.4)
-                    {
-                        if (itemFuel > 0)
-                        {
-                            // Remove fuel
-                            if (isLava) hearth.setHotFuel(hearthFuel - itemFuel);
-                            else hearth.setColdFuel(hearthFuel - itemFuel);
-                            // Give filled bucket item
-                            stack.shrink(1);
-                            player.addItem(filledBucket.getDefaultInstance());
-                            // Play bucket sound
-                            world.playSound(null, pos, filledBucket.getFluid().getAttributes().getFillSound(), SoundCategory.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
-
-                            return ActionResultType.SUCCESS;
-                        }
+                    if (stack.hasContainerItem())
+                        {   ItemStack container = stack.getContainerItem();
+                        player.setItemInHand(hand, container);
+                    }
+                    else
+                    {   stack.shrink(1);
                     }
                 }
-                // Open the GUI
-                if (!world.isClientSide)
-                    NetworkHooks.openGui((ServerPlayerEntity) player, hearth, pos);
-            }
-            else
-            {
-                // If the held item is fuel, try to insert the fuel
-                int itemFuel = hearth.getItemFuel(stack);
-                int hearthFuel = itemFuel > 0 ? hearth.getHotFuel() : hearth.getColdFuel();
+                // Add the fuel
+                hearth.addFuel(itemFuel);
 
-                if (itemFuel != 0 && hearthFuel + Math.abs(itemFuel) * 0.75 < hearth.getMaxFuel())
-                {
-                    // Consume the item if not in creative
-                    if (!player.isCreative())
-                    {
-                        if (stack.hasContainerItem())
-                        {   ItemStack container = stack.getContainerItem();
-                            player.setItemInHand(hand, container);
-                        }
-                        else
-                        {   stack.shrink(1);
-                        }
-                    }
-                    // Add the fuel
-                    hearth.addFuel(itemFuel);
-
-                    // Play the fuel filling sound
-                    world.playSound(null, pos, itemFuel > 0
+                // Play the fuel filling sound
+                world.playSound(null, pos, itemFuel > 0
                                                  ? SoundEvents.BUCKET_EMPTY_LAVA
                                                  : SoundEvents.BUCKET_EMPTY,
                                     SoundCategory.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
-                }
-                // Open the GUI
-                else if (!world.isClientSide)
-                {   NetworkHooks.openGui((ServerPlayerEntity) player, hearth, pos);
-                }
+            }
+            // Open the GUI
+            else if (!world.isClientSide)
+            {   NetworkHooks.openGui((ServerPlayerEntity) player, hearth, pos);
             }
         }
         return ActionResultType.SUCCESS;

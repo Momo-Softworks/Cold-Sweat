@@ -104,18 +104,19 @@ public class IceboxBlock extends Block
     @Override
     public ActionResultType use(BlockState state, World level, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTraceResult)
     {
-        if (level.getBlockEntity(pos) instanceof IceboxBlockEntity)
+        TileEntity te = level.getBlockEntity(pos);
+        if (te instanceof IceboxBlockEntity)
         {
-            IceboxBlockEntity te = (IceboxBlockEntity) level.getBlockEntity(pos);
+            IceboxBlockEntity icebox = (IceboxBlockEntity) level.getBlockEntity(pos);
             ItemStack stack = player.getItemInHand(hand);
             // If the player is trying to put a smokestack on top, don't do anything
             if (stack.getItem() == ModItems.SMOKESTACK && rayTraceResult.getDirection() == Direction.UP
             && level.getBlockState(pos.above()).canBeReplaced(new BlockItemUseContext(player, hand, stack, rayTraceResult)))
             {   return ActionResultType.FAIL;
             }
-            int itemFuel = te.getItemFuel(stack);
+            int itemFuel = icebox.getItemFuel(stack);
 
-            if (itemFuel != 0 && te.getFuel() + itemFuel * 0.75 < te.getMaxFuel())
+            if (itemFuel != 0 && icebox.getFuel() + itemFuel * 0.75 < icebox.getMaxFuel())
             {
                 if (!player.isCreative())
                 {
@@ -129,12 +130,12 @@ public class IceboxBlock extends Block
                     {   stack.shrink(1);
                     }
                 }
-                te.setFuel(te.getFuel() + itemFuel);
+                icebox.addColdFuel(itemFuel, true);
 
                 level.playSound(null, pos, SoundEvents.BUCKET_EMPTY, SoundCategory.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
             }
             else if (!level.isClientSide && !ChestBlock.isChestBlockedAt(level, pos))
-            {   NetworkHooks.openGui((ServerPlayerEntity) player, te, pos);
+            {   NetworkHooks.openGui((ServerPlayerEntity) player, icebox, pos);
             }
         }
         return ActionResultType.SUCCESS;
