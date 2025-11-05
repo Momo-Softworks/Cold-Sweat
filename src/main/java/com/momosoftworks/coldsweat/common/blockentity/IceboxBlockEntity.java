@@ -243,6 +243,11 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
     }
 
     @Override
+    public boolean supportsHeating()
+    {   return false;
+    }
+
+    @Override
     public int getItemFuel(ItemStack item)
     {   return CSMath.getIfNotNull(ConfigHelper.getFirstOrNull(ConfigSettings.ICEBOX_FUEL, item.getItem(), data -> data.test(item)), FuelData::fuel, 0d).intValue();
     }
@@ -274,7 +279,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
 
     @Override
     public void addFuel(int amount)
-    {   this.setColdFuel(this.getColdFuel() + amount);
+    {   this.addColdFuel(amount, true);
     }
 
     @Override

@@ -36,7 +36,7 @@ public class MixinSpoiledIcebox
     {
         if (BE instanceof IceboxBlockEntity icebox && icebox.getFuel() > 0)
         {
-            icebox.setFuel(icebox.getFuel() - 1);
+            icebox.drainColdFuel(1, true);
              return 0.0;
         }
         return instance.get(o);

@@ -32,6 +32,8 @@ public class ItemInit
             new InsulatedMinecartItem(new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT).stacksTo(1)));
     public static final RegistryObject<Item> CHAMELEON_MOLT = ITEMS.register("chameleon_molt", () ->
             new Item(new Item.Properties().tab(ColdSweatGroup.COLD_SWEAT)));
+    public static final RegistryObject<Item> SLUSH_BUCKET = ITEMS.register("slush_bucket", () ->
+            new BucketItem(FluidInit.SLUSH, new Item.Properties().stacksTo(1).craftRemainder(Items.BUCKET)));
 
     // Armor Items
     public static final Item.Properties ARMOR_PROPERTIES = new Item.Properties().stacksTo(1).tab(ColdSweatGroup.COLD_SWEAT);
