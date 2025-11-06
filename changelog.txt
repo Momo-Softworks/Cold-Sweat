@@ -3518,11 +3518,27 @@ Technical Changes:
 * Added command: "/coldsweat reload"
       - Reloads all configs (TOML, JSON, KubeJS) live, without having to rejoin the world or restart the server
 - Tweaked water droplet trails to not be so long in colder temperatures
+- Removed the cooldown when filling waterskins
+- Added option to change the opacity of water droplets on-screen
+      - Slightly reduced opacity by default
+- Rearranged some config settings in the in-game menu to be less cramped and more organized
 
 Fixes:
 * Fixed crash when using registry modifiers in some cases
 - Fixed the hearth, boiler, and icebox not emitting anything if redstone power was applied before fueling the block
+- (1.21) Fixed waterskins only being stackable to 1 after being emptied in some cases
+- Fixed desync between client and server when heating/cooling items in the boiler or icebox
 
 Technical Changes:
 - Added minTemp and maxTemp fields to item temperature and entity temperature configs
       - These changes apply to TOML, JSON, and KubeJS
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.4-b06b
+
+Fixes:
+* Fixed crash when inserting fuel into a hearth, icebox, or boiler in some cases
+* Fixed the "units" field in block temperature TOML configs not being respected
+      - Also fixes blocks being many times hotter or colder than they should be
+- Fixed the top half of the hearth appearing after a slight delay when placing
