@@ -33,6 +33,7 @@
     "MixinIce$AddDrops",
     "MixinIce$NoWaterOnBreak",
     "MixinInventoryOpenServer",
+    "MixinLimitFoodRegen",
     "MixinLivingLoad",
     "MixinMenuChanged",
     "MixinMinecart",
