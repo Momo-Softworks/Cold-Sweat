@@ -43,7 +43,7 @@ public abstract class TempEffect
     {   return this.entity.level().isClientSide ? Overlays.BLEND_BODY_TEMP : Temperature.get(entity, Temperature.Trait.BODY);
     }
 
-    protected double getEffectFactor()
+    public double getEffectFactor()
     {
         if (EntityTempManager.isImmuneToTemperature(this.entity)) return 0;
         double temperature = this.getTemperature();
