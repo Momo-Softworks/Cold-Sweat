@@ -34,7 +34,7 @@ public class InsulatorBuilderJS
     public NegatableList<EntityRequirement> entityPredicate = new NegatableList<>();
     public AttributeModifierMap attributes = new AttributeModifierMap();
     public Map<ResourceLocation, Double> immuneTempModifiers = new HashMap<>();
-    public boolean fillSlots = false;
+    public boolean fillSlots = true;
     public boolean hideIfUnmet = false;
     public String hintKey = null;
     public String hintText = null;
