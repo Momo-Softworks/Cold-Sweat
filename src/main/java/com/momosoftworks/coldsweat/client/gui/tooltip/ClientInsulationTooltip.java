@@ -6,8 +6,6 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.insulation.StaticInsulation;
-import com.momosoftworks.coldsweat.client.gui.config.AbstractConfigPage;
-import com.momosoftworks.coldsweat.client.gui.config.ConfigScreen;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
@@ -35,7 +33,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
 
     List<InsulatorData> insulation;
     Insulation.Slot slot;
-    int width = 0;
+    static int WIDTH = 0;
     ItemStack stack;
     boolean strikethrough;
 
@@ -54,7 +52,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
 
     @Override
     public int getWidth(Font font)
-    {   return width + 12;
+    {   return WIDTH;
     }
 
     @Override
@@ -113,19 +111,19 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
 
         /* Render Bars */
         poseStack.pushPose();
-        width = 0;
+        WIDTH = 0;
 
         // Positive insulation bar
         if (!posInsulation.isEmpty() || ConfigSettings.INSULATION_VISIBILITY.get().showsIfEmpty())
         {
             BarType barType = negInsulation.isEmpty() ? BarType.NONE : BarType.POSITIVE;
-            width += renderBar(graphics, x + width, y, posInsulation, extraInsulations, slot, stack, barType);
+            WIDTH += renderBar(graphics, x + WIDTH, y, posInsulation, extraInsulations, slot, stack, barType);
         }
         // Negative insulation bar
         if (!negInsulation.isEmpty())
         {
-            if (!posInsulation.isEmpty()) width += 4;
-            width += renderBar(graphics, x + width, y, negInsulation, 0, slot, stack, BarType.NEGATIVE);
+            if (!posInsulation.isEmpty()) WIDTH += 4;
+            WIDTH += renderBar(graphics, x + WIDTH, y, negInsulation, 0, slot, stack, BarType.NEGATIVE);
         }
         poseStack.popPose();
         // Render strikethrough
