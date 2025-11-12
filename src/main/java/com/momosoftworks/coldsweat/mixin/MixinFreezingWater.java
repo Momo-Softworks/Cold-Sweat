@@ -67,10 +67,11 @@ public class MixinFreezingWater
         {
             if (!ConfigSettings.USE_CUSTOM_WATER_FREEZE_BEHAVIOR.get()) return;
 
+            ci.cancel();
+
             if (WorldHelper.shouldMelt(level, pos, true)
             && !(ConfigSettings.COLD_SOUL_FIRE.get() && WorldHelper.nextToSoulFire(level, pos)))
             {   this.melt(state, level, pos);
-                ci.cancel();
             }
         }
     }
