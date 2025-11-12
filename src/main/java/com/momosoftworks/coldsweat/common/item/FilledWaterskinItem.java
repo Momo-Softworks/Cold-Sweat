@@ -144,7 +144,6 @@ public class FilledWaterskinItem extends Item
                 particleBatch.sendEntity(player);
             }, i);
         }
-        player.clearFire();
         player.getCooldowns().addCooldown(ModItems.FILLED_WATERSKIN.value(), 10);
         player.getCooldowns().addCooldown(ModItems.WATERSKIN.value(), 10);
 
