@@ -18,17 +18,14 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.neoforged.fml.util.ObfuscationReflectionHelper;
 import net.neoforged.neoforge.network.PacketDistributor;
-
-import java.lang.reflect.Field;
 
 public abstract class AbstractHearthScreen<T extends AbstractContainerMenu> extends EffectRenderingInventoryScreen<T>
 {
-    protected static final WidgetSprites PARTICLES_ENABLED_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/particle_button_on"),
-                                                                                       ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/particle_button_on_focus"));
-    protected static final WidgetSprites PARTICLES_DISABLED_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/particle_button_off"),
-                                                                                        ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/particle_button_off_focus"));
+    protected static final WidgetSprites PARTICLES_BUTTON_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/particle_button_on"),
+                                                                                      ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/particle_button_off"),
+                                                                                      ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/particle_button_on_focus"),
+                                                                                      ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/particle_button_off_focus"));
     protected static final WidgetSprites POWER_INDICATOR_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/power_indicator_off"),
                                                                                      ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/power_indicator_on"));
     protected static final ResourceLocation COLD_FUEL_GAUGE = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/sprites/hearth/fuel_gauge_cold.png");
@@ -38,7 +35,6 @@ public abstract class AbstractHearthScreen<T extends AbstractContainerMenu> exte
     Pair<BlockPos, ResourceLocation> levelPos = Pair.of(this.getBlockEntity().getBlockPos(), this.getBlockEntity().getLevel().dimension().location());
     boolean hideParticles = HearthSaveDataHandler.DISABLED_HEARTHS.contains(levelPos);
     boolean hideParticlesOld = hideParticles;
-    private WidgetSprites particleButtonSprites = hideParticles ? PARTICLES_DISABLED_SPRITES : PARTICLES_ENABLED_SPRITES;
 
     abstract HearthBlockEntity getBlockEntity();
 
@@ -51,7 +47,7 @@ public abstract class AbstractHearthScreen<T extends AbstractContainerMenu> exte
     {   super.init();
         if (this.getBlockEntity().hasSmokestack())
         {
-            particleButton = this.addRenderableWidget(new ImageButton(leftPos + 160, topPos + 8, 8, 7, particleButtonSprites, (button) ->
+            particleButton = this.addRenderableWidget(new ImageButton(leftPos + 160, topPos + 8, 8, 7, PARTICLES_BUTTON_SPRITES, (button) ->
             {
                 hideParticles = !hideParticles;
                 // If particles are disabled, add the hearth to the list of disabled hearths
@@ -62,14 +58,11 @@ public abstract class AbstractHearthScreen<T extends AbstractContainerMenu> exte
                     if (HearthSaveDataHandler.DISABLED_HEARTHS.size() > 64)
                     {   HearthSaveDataHandler.DISABLED_HEARTHS.remove(HearthSaveDataHandler.DISABLED_HEARTHS.iterator().next());
                     }
-                    particleButtonSprites = PARTICLES_DISABLED_SPRITES;
                 }
                 // Otherwise, remove it from the list
                 else
                 {   HearthSaveDataHandler.DISABLED_HEARTHS.remove(levelPos);
-                    particleButtonSprites = PARTICLES_ENABLED_SPRITES;
                 }
-                setImageButtonSprites(particleButton, particleButtonSprites);
             })
             {
                 @Override
@@ -83,6 +76,13 @@ public abstract class AbstractHearthScreen<T extends AbstractContainerMenu> exte
                         return true;
                     }
                     return false;
+                }
+
+                @Override
+                public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick)
+                {
+                    ResourceLocation resourcelocation = this.sprites.get(!hideParticles, this.isHoveredOrFocused());
+                    guiGraphics.blitSprite(resourcelocation, this.getX(), this.getY(), this.width, this.height);
                 }
             });
             particleButton.setTooltip(Tooltip.create(Component.translatable("cold_sweat.screen.hearth.show_particles")));
@@ -106,18 +106,5 @@ public abstract class AbstractHearthScreen<T extends AbstractContainerMenu> exte
 
     protected static ResourceLocation getPowerIndicatorSprite(boolean powered)
     {   return POWER_INDICATOR_SPRITES.get(true, powered);
-    }
-
-    private static void setImageButtonSprites(ImageButton button, WidgetSprites sprites)
-    {
-        try
-        {
-            Field field = ObfuscationReflectionHelper.findField(ImageButton.class, "sprites");
-            field.setAccessible(true);
-            field.set(button, sprites);
-        }
-        catch (IllegalAccessException e)
-        {   e.printStackTrace();
-        }
     }
 }
