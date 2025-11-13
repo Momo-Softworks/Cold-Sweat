@@ -25,8 +25,8 @@
     "MixinArmorBreak",
     "MixinBlockUpdate$Server",
     "MixinCampfire",
-    "MixinEntityRiding",
     "MixinEntityMove",
+    "MixinEntityRiding",
     "MixinFreezingWater",
     "MixinFreezingWater$IceMelt",
     "MixinIce$AddDrops",
@@ -49,6 +49,7 @@
     "MixinTagLoading$Manager",
     "MixinTridentRiptide",
     "compat.MixinCreateConnect",
+    "compat.MixinJEITooltip",
     "compat.MixinSereneIceMelt",
     "compat.MixinSpoiledIcebox",
     "compat.MixinSpoiledIcebox$ContainerModifier"

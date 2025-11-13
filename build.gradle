@@ -149,6 +149,10 @@ repositories {
     maven {
         url = "https://maven.teamresourceful.com/repository/maven-public/"
     }
+    maven {
+        name = "Jared's maven (JEI)"
+        url = "https://maven.blamejared.com/"
+    }
 }
 
 dependencies {
@@ -187,7 +191,7 @@ dependencies {
     implementation 'thedarkcolour:kotlinforforge:3.12.0'
 
     // JEI (Compat)
-    compileOnly fg.deobf("mezz.jei:jei-${mc_version}-forge:${jei_version}")
+    implementation fg.deobf("mezz.jei:jei-${mc_version}-forge:${jei_version}")
 
     runtimeOnly fg.deobf("curse.maven:byg-247560:4426501")
     runtimeOnly fg.deobf("curse.maven:serene-seasons-291874:4037228")
@@ -197,7 +201,6 @@ dependencies {
   //runtimeOnly fg.deobf("curse.maven:tough-as-nails-246391:3871450")
   //runtimeOnly fg.deobf("curse.maven:environmental-388992:4415514") // Causes weird issues IDK
     runtimeOnly fg.deobf("curse.maven:blueprint-382216:4442628")
-    runtimeOnly fg.deobf("curse.maven:jei-238222:4494410")
     runtimeOnly fg.deobf("curse.maven:geckolib-388172:4407241")
     runtimeOnly fg.deobf("curse.maven:corgilib-693313:4554111")
     runtimeOnly fg.deobf("curse.maven:terralith-513688:4549496")
