@@ -28,8 +28,10 @@ public abstract class AbstractHearthScreen<T extends AbstractContainerMenu> exte
                                                                                       ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/particle_button_off_focus"));
     protected static final WidgetSprites POWER_INDICATOR_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/power_indicator_off"),
                                                                                      ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/power_indicator_on"));
-    protected static final ResourceLocation COLD_FUEL_GAUGE = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/sprites/hearth/fuel_gauge_cold.png");
     protected static final ResourceLocation HOT_FUEL_GAUGE  = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/sprites/hearth/fuel_gauge_hot.png");
+    protected static final ResourceLocation HOT_FUEL_GAUGE_EMPTY = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/sprites/hearth/fuel_gauge_hot_empty.png");
+    protected static final ResourceLocation COLD_FUEL_GAUGE = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/sprites/hearth/fuel_gauge_cold.png");
+    protected static final ResourceLocation COLD_FUEL_GAUGE_EMPTY = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/sprites/hearth/fuel_gauge_cold_empty.png");
 
     ImageButton particleButton = null;
     Pair<BlockPos, ResourceLocation> levelPos = Pair.of(this.getBlockEntity().getBlockPos(), this.getBlockEntity().getLevel().dimension().location());

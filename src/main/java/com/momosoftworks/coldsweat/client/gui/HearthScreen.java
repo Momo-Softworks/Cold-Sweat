@@ -37,7 +37,9 @@ public class HearthScreen extends AbstractHearthScreen<HearthContainer>
         int coldGaugeHeight = this.menu.getColdFuel() <= 0 ? 0 : Math.round(CSMath.blend(2, 14, this.menu.getColdFuel(), 0, this.menu.te.getMaxFuel()));
 
         // Render hot/cold fuel gauges
+        graphics.blit(HOT_FUEL_GAUGE_EMPTY,  leftPos + 62,  topPos + 49,  0, 0,  14, 14, 14, 14);
         graphics.blit(HOT_FUEL_GAUGE,  leftPos + 62,  topPos + 49 + (maxGaugeHeight-hotGaugeHeight),  0, maxGaugeHeight - hotGaugeHeight,  14, hotGaugeHeight, 14, 14);
+        graphics.blit(COLD_FUEL_GAUGE_EMPTY,  leftPos + 100,  topPos + 49,  0, 0,  14, 14, 14, 14);
         graphics.blit(COLD_FUEL_GAUGE, leftPos + 100, topPos + 49 + (maxGaugeHeight-coldGaugeHeight), 0, maxGaugeHeight - coldGaugeHeight, 14, coldGaugeHeight, 14 ,14);
 
         // Render redstone indicators

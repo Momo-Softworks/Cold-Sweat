@@ -40,6 +40,7 @@ public class BoilerScreen extends AbstractHearthScreen<BoilerContainer>
         int gaugeHeight  = this.menu.getFuel() <= 0 ? 0 : Math.round(CSMath.blend(2, 14, this.menu.getFuel(), 0, this.menu.te.getMaxFuel()));
 
         // Draw fuel gauge
+        graphics.blit(HOT_FUEL_GAUGE_EMPTY, leftPos + 100, topPos + 63, 0, 0, 14, 14, 14 ,14);
         graphics.blit(HOT_FUEL_GAUGE, leftPos + 100, topPos + 63 + (maxGaugeHeight-gaugeHeight), 0, maxGaugeHeight - gaugeHeight, 14, gaugeHeight, 14 ,14);
 
         if (!ConfigSettings.SMART_HEARTH.get() && this.menu.te.hasSmokestack())
