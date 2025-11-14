@@ -2,7 +2,6 @@ package com.momosoftworks.coldsweat.config;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 
 import com.mojang.datafixers.util.Pair;
@@ -421,7 +420,7 @@ public class ConfigSettings
         WINTER_TEMPS = addSetting(ColdSweat.createKey("winter_temps"), SeasonalTempData::new, holder -> holder.set(!CompatManager.getSeasonsMods().isEmpty() ? SeasonalTempData.fromToml(WorldSettingsConfig.getWinterTemps()) : new SeasonalTempData()));
         SPRING_TEMPS = addSetting(ColdSweat.createKey("spring_temps"), SeasonalTempData::new, holder -> holder.set(!CompatManager.getSeasonsMods().isEmpty() ? SeasonalTempData.fromToml(WorldSettingsConfig.getSpringTemps()) : new SeasonalTempData()));
 
-        DEPTH_REGIONS = addSetting(ColdSweat.createKey("depth_regions"), HashMultimap::create, holder -> {});
+        DEPTH_REGIONS = addSetting(ColdSweat.createKey("depth_regions"), RegistryMultiMap::new, holder -> {});
 
         TriConsumer<FuelData.FuelType, CSConfigSpec.ConfigValue<List<? extends List<?>>>, DynamicHolder<Multimap<Item, FuelData>>> fuelAdder =
         (fuelType, config, holder) ->
