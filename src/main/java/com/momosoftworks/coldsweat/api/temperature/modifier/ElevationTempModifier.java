@@ -73,7 +73,7 @@ public class ElevationTempModifier extends TempModifier
             double distance = pair.getSecond();
             findRegion:
             {
-                for (DepthTempData data : ConfigSettings.DEPTH_REGIONS.get())
+                for (DepthTempData data : ConfigSettings.DEPTH_REGIONS.get().get(level.dimensionType()))
                 {
                     DepthTempData.TempRegion region = data.getRegion(level, pos);
                     if (region == null) continue;

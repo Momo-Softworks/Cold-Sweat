@@ -641,7 +641,10 @@ public class ConfigLoadingHandler
     {
         // Add the depth temps to the config
         for (DepthTempData depthData : depthTemps)
-        {   ConfigSettings.DEPTH_REGIONS.get().add(depthData);
+        {
+            for (DimensionType dimension : depthData.dimensions().flatList())
+            {   ConfigSettings.DEPTH_REGIONS.get().put(dimension, depthData);
+            }
         }
     }
 

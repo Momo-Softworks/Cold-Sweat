@@ -100,7 +100,7 @@ public class ConfigSettings
     public static final DynamicHolder<Map<DimensionType, DimensionTempData>> DIMENSION_OFFSETS;
     public static final DynamicHolder<Map<StructureFeature<?, ?>, StructureTempData>> STRUCTURE_TEMPS;
     public static final DynamicHolder<Map<StructureFeature<?, ?>, StructureTempData>> STRUCTURE_OFFSETS;
-    public static final DynamicHolder<List<DepthTempData>> DEPTH_REGIONS;
+    public static final DynamicHolder<Multimap<DimensionType, DepthTempData>> DEPTH_REGIONS;
     public static final DynamicHolder<Boolean> CHECK_SLEEP_CONDITIONS;
     public static final DynamicHolder<SeasonalTempData> SUMMER_TEMPS;
     public static final DynamicHolder<SeasonalTempData> AUTUMN_TEMPS;
@@ -424,7 +424,7 @@ public class ConfigSettings
         WINTER_TEMPS = addSetting(ColdSweat.createKey("winter_temps"), SeasonalTempData::new, holder -> holder.set(!CompatManager.getSeasonsMods().isEmpty() ? SeasonalTempData.fromToml(WorldSettingsConfig.getWinterTemps()) : new SeasonalTempData()));
         SPRING_TEMPS = addSetting(ColdSweat.createKey("spring_temps"), SeasonalTempData::new, holder -> holder.set(!CompatManager.getSeasonsMods().isEmpty() ? SeasonalTempData.fromToml(WorldSettingsConfig.getSpringTemps()) : new SeasonalTempData()));
 
-        DEPTH_REGIONS = addSetting(ColdSweat.createKey("depth_regions"), ArrayList::new, holder -> {});
+        DEPTH_REGIONS = addSetting(ColdSweat.createKey("depth_regions"), RegistryMultiMap::new, holder -> {});
 
         TriConsumer<FuelData.FuelType, ForgeConfigSpec.ConfigValue<List<? extends List<?>>>, DynamicHolder<Multimap<Item, FuelData>>> fuelAdder =
         (fuelType, config, holder) ->
