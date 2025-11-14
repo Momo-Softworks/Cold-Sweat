@@ -21,6 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -29,7 +30,7 @@ public class MixinTagLoading
 {
     @Shadow @Final private String directory;
 
-    private static ResourceLocation CURRENT_TAG = null;
+    private static Map<ResourceLocation, ResourceLocation> CURRENT_TAG = new HashMap<>();
 
     private static final Field MANAGER_ACCESS = ObfuscationReflectionHelper.findField(TagManager.class, "registryAccess");
     static { MANAGER_ACCESS.setAccessible(true); }
@@ -46,7 +47,7 @@ public class MixinTagLoading
     }
 
     @Inject(method = "build(Lnet/minecraft/tags/TagEntry$Lookup;Ljava/util/List;)Lcom/mojang/datafixers/util/Either;", at = @At("RETURN"), cancellable = true)
-    private <T> void onBuildStart(TagEntry.Lookup<T> p_215979_, List<TagLoader.EntryWithSource> p_215980_, CallbackInfoReturnable<Either<Collection<TagLoader.EntryWithSource>, Collection<T>>> cir)
+    private <T> void onBuildStart(TagEntry.Lookup<T> tagLoader, List<TagLoader.EntryWithSource> tagEntries, CallbackInfoReturnable<Either<Collection<TagLoader.EntryWithSource>, Collection<T>>> cir)
     {
         Either<Collection<TagLoader.EntryWithSource>, Collection<T>> list = cir.getReturnValue();
         if (list.left().isPresent()) return;
@@ -57,6 +58,21 @@ public class MixinTagLoading
             TagHelper.EVENT_TAGS.putAll(event.getTags());
         }
 
+        ResourceLocation registry = this.getRegistry();
+        ResourceLocation tag = CURRENT_TAG.get(registry);
+        Collection<T> newValues = (Collection) TagHelper.getTagValues(registry, tag);
+        if (newValues.isEmpty()) return;
+        cir.setReturnValue(Either.right(newValues));
+    }
+
+    @Inject(method = "lambda$build$6(Lnet/minecraft/tags/TagEntry$Lookup;Ljava/util/Map;Lnet/minecraft/resources/ResourceLocation;Lnet/minecraft/tags/TagLoader$SortingEntry;)V", at = @At(value = "HEAD"), remap = false)
+    private void onTagAdded(TagEntry.Lookup lookup, Map map, ResourceLocation tag, TagLoader.SortingEntry p_284683_, CallbackInfo ci)
+    {
+        CURRENT_TAG.put(this.getRegistry(), tag);
+    }
+
+    private ResourceLocation getRegistry()
+    {
         String directory = this.directory.replace("tags/", "");
         String[] components = directory.split("/");
         ResourceLocation registry;
@@ -66,14 +82,6 @@ public class MixinTagLoading
         else
         {   registry = ResourceLocation.withDefaultNamespace(directory);
         }
-        ResourceLocation tag = CURRENT_TAG;
-        Collection<T> newValues = (Collection) TagHelper.getTagValues(registry, tag);
-        if (newValues.isEmpty()) return;
-        cir.setReturnValue(Either.right(newValues));
-    }
-
-    @Inject(method = "lambda$build$6(Lnet/minecraft/tags/TagEntry$Lookup;Ljava/util/Map;Lnet/minecraft/resources/ResourceLocation;Lnet/minecraft/tags/TagLoader$SortingEntry;)V", at = @At(value = "HEAD"), remap = false)
-    private static void onTagAdded(TagEntry.Lookup lookup, Map map, ResourceLocation tag, TagLoader.SortingEntry p_284683_, CallbackInfo ci)
-    {   CURRENT_TAG = tag;
+        return registry;
     }
 }
