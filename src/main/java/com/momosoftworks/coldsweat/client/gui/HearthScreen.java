@@ -32,15 +32,9 @@ public class HearthScreen extends AbstractHearthScreen<HearthContainer>
     {   RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
         graphics.blit(HEARTH_GUI, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
 
-        int maxGaugeHeight = 14;
-        int hotGaugeHeight  = this.menu.getHotFuel() <= 0 ? 0 : Math.round(CSMath.blend(2, 14, this.menu.getHotFuel(), 0, this.menu.te.getMaxFuel()));
-        int coldGaugeHeight = this.menu.getColdFuel() <= 0 ? 0 : Math.round(CSMath.blend(2, 14, this.menu.getColdFuel(), 0, this.menu.te.getMaxFuel()));
-
         // Render hot/cold fuel gauges
-        graphics.blit(HOT_FUEL_GAUGE_EMPTY,  leftPos + 62,  topPos + 49,  0, 0,  14, 14, 14, 14);
-        graphics.blit(HOT_FUEL_GAUGE,  leftPos + 62,  topPos + 49 + (maxGaugeHeight-hotGaugeHeight),  0, maxGaugeHeight - hotGaugeHeight,  14, hotGaugeHeight, 14, 14);
-        graphics.blit(COLD_FUEL_GAUGE_EMPTY,  leftPos + 100,  topPos + 49,  0, 0,  14, 14, 14, 14);
-        graphics.blit(COLD_FUEL_GAUGE, leftPos + 100, topPos + 49 + (maxGaugeHeight-coldGaugeHeight), 0, maxGaugeHeight - coldGaugeHeight, 14, coldGaugeHeight, 14 ,14);
+        this.renderFuelGauge(HearthBlockEntity.FuelType.HOT, graphics, leftPos + 62,  topPos + 49, this.menu.getHotFuel(), this.menu.te.getMaxFuel());
+        this.renderFuelGauge(HearthBlockEntity.FuelType.COLD, graphics, leftPos + 100, topPos + 49, this.menu.getColdFuel(), this.menu.te.getMaxFuel());
 
         // Render redstone indicators
         if (!ConfigSettings.SMART_HEARTH.get())
@@ -48,8 +42,8 @@ public class HearthScreen extends AbstractHearthScreen<HearthContainer>
             boolean coolingOn = this.menu.te.isCoolingOn();
             boolean heatingOn = this.menu.te.isHeatingOn();
 
-            graphics.blitSprite(getPowerIndicatorSprite(heatingOn), leftPos + 63,  topPos + 64, 13, 4);
-            graphics.blitSprite(getPowerIndicatorSprite(coolingOn), leftPos + 101, topPos + 64, 13, 4);
+            this.renderPowerIndicator(graphics, leftPos + 63, topPos + 64, heatingOn);
+            this.renderPowerIndicator(graphics, leftPos + 101, topPos + 64, coolingOn);
 
             if (CSMath.betweenInclusive(mouseX, leftPos + 60, leftPos + 76) && CSMath.betweenInclusive(mouseY, topPos + 61, topPos + 67))
             {   this.setTooltipForNextRenderPass(Component.translatable(heatingOn ? "gui.cold_sweat.hearth.powered" : "gui.cold_sweat.hearth.unpowered"));

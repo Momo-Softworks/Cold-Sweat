@@ -5,6 +5,7 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import com.momosoftworks.coldsweat.common.event.HearthSaveDataHandler;
 import com.momosoftworks.coldsweat.core.network.message.DisableHearthParticlesMessage;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ImageButton;
@@ -106,7 +107,21 @@ public abstract class AbstractHearthScreen<T extends AbstractContainerMenu> exte
         }
     }
 
-    protected static ResourceLocation getPowerIndicatorSprite(boolean powered)
-    {   return POWER_INDICATOR_SPRITES.get(true, powered);
+    protected void renderFuelGauge(HearthBlockEntity.FuelType fuelType, GuiGraphics graphics, int x, int y, int fuel, int maxFuel)
+    {
+        ResourceLocation emptyTexture = fuelType == HearthBlockEntity.FuelType.HOT ? HOT_FUEL_GAUGE_EMPTY : COLD_FUEL_GAUGE_EMPTY;
+        ResourceLocation fullTexture = fuelType == HearthBlockEntity.FuelType.HOT ? HOT_FUEL_GAUGE : COLD_FUEL_GAUGE;
+
+        int maxGaugeHeight = 14;
+        int gaugeHeight  = fuel <= 0 ? 0 : Math.round(CSMath.blend(2, 14, fuel, 0, maxFuel));
+
+        graphics.blit(emptyTexture,  x,  y,  0, 0,  14, 14, 14, 14);
+        graphics.blit(fullTexture,  x,  y + (maxGaugeHeight-gaugeHeight),  0, maxGaugeHeight - gaugeHeight,  14, gaugeHeight, 14, 14);
+    }
+
+    protected void renderPowerIndicator(GuiGraphics graphics, int x, int y, boolean powered)
+    {
+        ResourceLocation sprite = POWER_INDICATOR_SPRITES.get(true, powered);
+        graphics.blitSprite(sprite, x, y, 13, 4);
     }
 }
