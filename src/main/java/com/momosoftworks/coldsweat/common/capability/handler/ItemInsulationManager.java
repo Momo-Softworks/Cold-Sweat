@@ -72,7 +72,8 @@ public class ItemInsulationManager
      */
     public static boolean isInsulatable(ItemStack stack)
     {
-        return stack.getItem() instanceof Equipable
+        return stack.getItem() instanceof Equipable equipable
+            && equipable.getEquipmentSlot().isArmor()
             && !ConfigSettings.INSULATION_BLACKLIST.get().contains(stack.getItem())
             && getInsulatorInsulation(stack).isEmpty();
     }
