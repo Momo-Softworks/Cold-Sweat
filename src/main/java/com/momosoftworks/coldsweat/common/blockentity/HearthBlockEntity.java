@@ -258,11 +258,11 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     {   return true;
     }
 
-    protected boolean isSmartEnabled()
+    public boolean isSmartEnabled()
     {   return ConfigSettings.SMART_HEARTH.get();
     }
 
-    protected int getFuelDrainInterval()
+    public int getFuelDrainInterval()
     {   return ConfigSettings.HEARTH_FUEL_INTERVAL.get();
     }
 

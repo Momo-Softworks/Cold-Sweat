@@ -23,16 +23,16 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 public abstract class AbstractHearthScreen<T extends AbstractContainerMenu> extends EffectRenderingInventoryScreen<T>
 {
-    protected static final WidgetSprites PARTICLES_BUTTON_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/particle_button_on"),
+    public static final WidgetSprites PARTICLES_BUTTON_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/particle_button_on"),
                                                                                       ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/particle_button_off"),
                                                                                       ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/particle_button_on_focus"),
                                                                                       ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/particle_button_off_focus"));
-    protected static final WidgetSprites POWER_INDICATOR_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/power_indicator_off"),
+    public static final WidgetSprites POWER_INDICATOR_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/power_indicator_off"),
                                                                                      ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth/power_indicator_on"));
-    protected static final ResourceLocation HOT_FUEL_GAUGE  = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/sprites/hearth/fuel_gauge_hot.png");
-    protected static final ResourceLocation HOT_FUEL_GAUGE_EMPTY = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/sprites/hearth/fuel_gauge_hot_empty.png");
-    protected static final ResourceLocation COLD_FUEL_GAUGE = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/sprites/hearth/fuel_gauge_cold.png");
-    protected static final ResourceLocation COLD_FUEL_GAUGE_EMPTY = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/sprites/hearth/fuel_gauge_cold_empty.png");
+    public static final ResourceLocation HOT_FUEL_GAUGE  = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/sprites/hearth/fuel_gauge_hot.png");
+    public static final ResourceLocation HOT_FUEL_GAUGE_EMPTY = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/sprites/hearth/fuel_gauge_hot_empty.png");
+    public static final ResourceLocation COLD_FUEL_GAUGE = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/sprites/hearth/fuel_gauge_cold.png");
+    public static final ResourceLocation COLD_FUEL_GAUGE_EMPTY = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/sprites/hearth/fuel_gauge_cold_empty.png");
 
     ImageButton particleButton = null;
     Pair<BlockPos, ResourceLocation> levelPos = Pair.of(this.getBlockEntity().getBlockPos(), this.getBlockEntity().getLevel().dimension().location());

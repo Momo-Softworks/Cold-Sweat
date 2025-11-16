@@ -103,6 +103,10 @@ repositories {
         url = "https://maven.createmod.net"
     }
     maven {
+        name = "Jared's maven (JEI)"
+        url = "https://maven.blamejared.com/"
+    }
+    maven {
         url 'https://jitpack.io'
     }
 }
@@ -120,10 +124,15 @@ dependencies {
     compileOnly("net.createmod.ponder:Ponder-NeoForge-1.21.1:1.0.39")
     compileOnly "curse.maven:primal-winter-393321:5811975"
 
+    // KubeJS (Compat)
     compileOnly "dev.latvian.mods:kubejs-neoforge:${kubejs_version}"
     compileOnly "dev.latvian.apps:tiny-java-server:${tiny_server_version}"
     compileOnly "com.github.rtyley:animated-gif-lib-for-java:animated-gif-lib-1.7"
 
+    // JEI (Compat)
+    compileOnly "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
+
+    // Runtime mods
     runtimeOnly "curse.maven:jei-238222:7057366"
     //runtimeOnly "curse.maven:spark-361579:5434153"
     runtimeOnly "curse.maven:biomes-o-plenty-220318:6631072"
