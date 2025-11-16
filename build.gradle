@@ -149,6 +149,10 @@ repositories {
     maven {
         url = "https://maven.createmod.net"
     }
+    maven {
+        name = "Jared's maven (JEI)"
+        url = "https://maven.blamejared.com/"
+    }
 }
 
 dependencies {
@@ -194,11 +198,13 @@ dependencies {
     implementation fg.deobf("dev.latvian.mods:rhino-forge:${rhino_version}")
     implementation fg.deobf("dev.architectury:architectury-forge:${architectury_version}")
 
+    // JEI (Compat)
+    compileOnly fg.deobf("mezz.jei:jei-${mc_version}-forge:${jei_version}")
+
     // Runtime mods
     //runtimeOnly fg.deobf("curse.maven:spark-361579:4738952")
     runtimeOnly fg.deobf("curse.maven:biomes-o-plenty-220318:4764804")
     runtimeOnly fg.deobf("curse.maven:terrablender-563928:5378180")
-    runtimeOnly fg.deobf("curse.maven:jei-238222:6600311")
     runtimeOnly fg.deobf("curse.maven:packet-fixer-689467:5416166")
     runtimeOnly fg.deobf("curse.maven:attributefix-280510:4844658")
     runtimeOnly fg.deobf("curse.maven:customskinloader-286924:5497382")
