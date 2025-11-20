@@ -1,12 +1,15 @@
 package com.momosoftworks.coldsweat.common.fluid;
 
-import net.minecraft.client.color.block.BlockColor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fluids.FluidAttributes;
 
+import javax.annotation.Nullable;
 import java.util.function.BiFunction;
 
 /**
@@ -47,6 +50,23 @@ public class ModFluidAttributes extends FluidAttributes
         {
             this.colorGetter = colorGetter;
             return this;
+        }
+    }
+
+    public interface BlockColor
+    {
+        int getColor(BlockState pState, @Nullable BlockAndTintGetter pLevel, @Nullable BlockPos pPos, int pTintIndex);
+
+        @OnlyIn(Dist.CLIENT)
+        default net.minecraft.client.color.block.BlockColor toMinecraft()
+        {
+            return new net.minecraft.client.color.block.BlockColor()
+            {
+                @Override
+                public int getColor(BlockState state, BlockAndTintGetter level, BlockPos pos, int tintIndex)
+                {   return this.getColor(state, level, pos, tintIndex);
+                }
+            };
         }
     }
 }
