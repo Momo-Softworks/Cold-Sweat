@@ -142,6 +142,10 @@ repositories {
     maven {
         url = "https://maven.teamresourceful.com/repository/maven-public/"
     }
+    maven {
+        name = "Jared's maven (JEI)"
+        url = "https://maven.blamejared.com/"
+    }
 }
 
 dependencies {
@@ -151,7 +155,6 @@ dependencies {
 
     // Runtime Mods
     //runtimeOnly fg.deobf("curse.maven:spark-361579:4505375")
-    runtimeOnly fg.deobf("curse.maven:jei-238222:3940240")
     runtimeOnly fg.deobf("curse.maven:byg-247560:4036050")
     runtimeOnly fg.deobf("curse.maven:biomesoplenty-220318:3759236")
     runtimeOnly fg.deobf("curse.maven:terrablender-563928:3816497")
@@ -172,7 +175,7 @@ dependencies {
     compileOnly 'thedarkcolour:kotlinforforge:3.12.0'
 
     // JEI (Compat)
-    compileOnly fg.deobf("mezz.jei:jei-${mc_version}-forge:${jei_version}")
+    implementation fg.deobf("mezz.jei:jei-${mc_version}-forge:${jei_version}")
 
     // Mod Compat
     implementation fg.deobf("curse.maven:serene-seasons-291874:3804257")

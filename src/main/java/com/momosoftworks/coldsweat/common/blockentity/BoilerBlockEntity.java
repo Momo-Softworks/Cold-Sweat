@@ -180,7 +180,7 @@ public class BoilerBlockEntity extends HearthBlockEntity
     }
 
     @Override
-    protected boolean isSmartEnabled()
+    public boolean isSmartEnabled()
     {   return ConfigSettings.SMART_BOILER.get();
     }
 
@@ -193,7 +193,7 @@ public class BoilerBlockEntity extends HearthBlockEntity
     }
 
     @Override
-    protected int getFuelDrainInterval()
+    public int getFuelDrainInterval()
     {   return ConfigSettings.BOILER_FUEL_INTERVAL.get();
     }
 

@@ -351,5 +351,12 @@
   "tooltip.hint.create_backtank": "Wearing full netherite diving suit",
   "tooltip.hint.astra_space_suit": "Wearing full space suit",
   "tooltip.hint.aqua_three_bolt": "Wearing full three-bolt suit",
-  "tooltip.open_link": "Open link"
+  "tooltip.open_link": "Open link",
+
+  "jei.cold_sweat.category.hearth_fuel": "Hearth Fuel",
+  "jei.cold_sweat.category.boiler_fuel": "Boiler Fuel",
+  "jei.cold_sweat.category.icebox_fuel": "Icebox Fuel",
+  "jei.cold_sweat.category.sewing": "Sewing Recipes",
+
+  "jei.cold_sweat.fuel_duration": "Fuels for %s"
 }
