@@ -59,19 +59,21 @@ public class FreezeHeartsEffect extends TempEffect
         int frozenHealth = (int) Math.round(CSMath.blend(0, maxHealth * heartsFreezePercentage, effect, 0, 1));
         int frozenHearts = Math.round(frozenHealth / 2f);
         boolean partialFrozen = frozenHealth % 2 == 1 && heartIndex == frozenHearts;
-        int u = isHardcore ? 7 : 0;
-        int v = partialFrozen ? halfHeart ? 21 : 14 : halfHeart ? 7 : 0;
 
         // Render frozen hearts
         if (heartIndex <= frozenHearts)
         {
             Minecraft.getInstance().textureManager.bind(HEART_TEXTURE);
+            int u, v;
             if (heartType == RenderHeartEvent.HeartType.CONTAINER)
-            {   AbstractGui.blit(event.getPoseStack(), x + 1, y + 1, 14, v, 7, 7, 21, 28);
+            {   u = 14;
+                v = partialFrozen ? 14 : 0;
             }
             else
-            {  AbstractGui.blit(event.getPoseStack(), x + 1, y + 1, u, v, 7, 7, 21, 28);
+            {   u = isHardcore ? 7 : 0;
+                v = partialFrozen ? 14 : halfHeart ? 7 : 0;
             }
+            AbstractGui.blit(event.getPoseStack(), x + 1, y + 1, u, v, 7, 7, 21, 28);
             Minecraft.getInstance().textureManager.bind(GUI_ICONS_LOCATION);
         }
     }
