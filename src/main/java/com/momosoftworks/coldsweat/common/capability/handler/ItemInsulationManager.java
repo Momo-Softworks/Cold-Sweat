@@ -64,7 +64,7 @@ public class ItemInsulationManager
                 ItemInsulationCap itemInsulationCap = new ItemInsulationCap();
                 // Optional that holds the capability instance
                 LazyOptional<IInsulatableCap> capOptional = LazyOptional.of(() -> itemInsulationCap);
-            Capability<IInsulatableCap> capability = ModCapabilities.ITEM_INSULATION;
+                Capability<IInsulatableCap> capability = ModCapabilities.ITEM_INSULATION;
 
                 ICapabilityProvider provider = new ICapabilitySerializable<CompoundNBT>()
                 {
@@ -124,21 +124,16 @@ public class ItemInsulationManager
 
             @Override
             public void refreshContainer(Container pContainerToSend, NonNullList<ItemStack> pItemsList)
-        {
+            {}
 
-        }
-
-        @Override
-        public void setContainerData(Container pContainer, int pVarToUpdate, int pNewValue)
-            {
-
-            }
+            @Override
+            public void setContainerData(Container pContainer, int pVarToUpdate, int pNewValue)
+            {}
         };
 
         @SubscribeEvent
         public static void onContainerOpen(PlayerContainerEvent.Open event)
-        {
-            event.getContainer().addSlotListener(INSULATION_LISTENER);
+        {   event.getContainer().addSlotListener(INSULATION_LISTENER);
         }
 
         static final TypedField<List<IContainerListener>> SLOT_LISTENERS = TypedField.of(ObfuscationReflectionHelper.findField(Container.class, "field_75149_d"));
