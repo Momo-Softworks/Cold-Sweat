@@ -56,18 +56,20 @@ public class FreezeHeartsEffect extends TempEffect
         int frozenHealth = (int) Math.round(CSMath.blend(0, maxHealth * heartsFreezePercentage, effect, 0, 1));
         int frozenHearts = Math.round(frozenHealth / 2f);
         boolean partialFrozen = frozenHealth % 2 == 1 && heartIndex == frozenHearts;
-        int u = isHardcore ? 7 : 0;
-        int v = partialFrozen ? halfHeart ? 21 : 14 : halfHeart ? 7 : 0;
 
         // Render frozen hearts
         if (heartIndex <= frozenHearts)
         {
+            int u, v;
             if (heartType == Gui.HeartType.CONTAINER)
-            {   event.getGuiGraphics().blit(HEART_TEXTURE, x + 1, y + 1, 14, v, 7, 7, 21, 28);
+            {   u = 14;
+                v = partialFrozen ? 14 : 0;
             }
             else
-            {  event.getGuiGraphics().blit(HEART_TEXTURE, x + 1, y + 1, u, v, 7, 7, 21, 28);
+            {   u = isHardcore ? 7 : 0;
+                v = partialFrozen ? 14 : halfHeart ? 7 : 0;
             }
+            event.getGuiGraphics().blit(HEART_TEXTURE, x + 1, y + 1, u, v, 7, 7, 21, 28);
         }
     }
 
