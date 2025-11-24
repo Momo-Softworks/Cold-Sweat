@@ -49,6 +49,14 @@ public class SoulspringLampItem extends Item
     }
 
     @Override
+    public ItemStack getDefaultInstance()
+    {
+        ItemStack stack = super.getDefaultInstance();
+        setFuel(stack, 64);
+        return stack;
+    }
+
+    @Override
     public void initializeClient(Consumer<IClientItemExtensions> consumer)
     {
         consumer.accept(new IClientItemExtensions()

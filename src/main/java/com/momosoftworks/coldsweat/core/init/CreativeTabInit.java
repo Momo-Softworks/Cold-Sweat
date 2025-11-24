@@ -41,12 +41,7 @@ public class CreativeTabInit
                         ModItems.CHAMELEON_MOLT.getDefaultInstance(),
                         ModItems.MINECART_INSULATION.getDefaultInstance(),
                         ModItems.INSULATED_MINECART.getDefaultInstance(),
-                        ObjectBuilder.build(() ->
-                        {   ItemStack stack = ModItems.SOULSPRING_LAMP.getDefaultInstance();
-                            SoulspringLampItem.setLit(stack, true);
-                            SoulspringLampItem.setFuel(stack, 64);
-                            return stack;
-                        }),
+                        ModItems.SOULSPRING_LAMP.getDefaultInstance(),
                         ModItems.SOUL_SPROUT.getDefaultInstance(),
                         ModItems.THERMOMETER.getDefaultInstance(),
                         ModItems.THERMOLITH.getDefaultInstance(),
