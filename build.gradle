@@ -166,6 +166,9 @@ dependencies {
     compileOnly fg.deobf("curse.maven:rhino-416294:3525704")
     compileOnly fg.deobf("curse.maven:architectury-api-419699:4521290")
 
+    // JEI (Compat)
+    compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}")
+
     // Mod Compat
     implementation fg.deobf("curse.maven:serene-seasons-291874:4537666")
     implementation fg.deobf("curse.maven:curios-309927:4419403")

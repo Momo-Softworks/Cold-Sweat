@@ -1,15 +1,20 @@
 package com.momosoftworks.coldsweat.client.gui;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.client.gui.config.AbstractConfigPage;
+import com.momosoftworks.coldsweat.client.gui.config.ConfigImageButton;
+import com.momosoftworks.coldsweat.client.gui.util.WidgetSprites;
 import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import com.momosoftworks.coldsweat.common.event.HearthSaveDataHandler;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.DisableHearthParticlesMessage;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SimpleSound;
+import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.DisplayEffectsScreen;
 import net.minecraft.client.gui.widget.button.ImageButton;
 import net.minecraft.entity.player.PlayerInventory;
@@ -29,7 +34,16 @@ import java.util.Arrays;
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public abstract class AbstractHearthScreen<T extends Container> extends DisplayEffectsScreen<T>
 {
-    private static final ResourceLocation HEARTH_GUI = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/screen/hearth_gui.png");
+    public static final WidgetSprites PARTICLES_BUTTON_SPRITES = new WidgetSprites(new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/sprites/hearth/particle_button_on.png"),
+                                                                                      new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/sprites/hearth/particle_button_off.png"),
+                                                                                      new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/sprites/hearth/particle_button_on_focus.png"),
+                                                                                      new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/sprites/hearth/particle_button_off_focus.png"));
+    public static final WidgetSprites POWER_INDICATOR_SPRITES = new WidgetSprites(new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/sprites/hearth/power_indicator_off.png"),
+                                                                                     new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/sprites/hearth/power_indicator_on.png"));
+    public static final ResourceLocation HOT_FUEL_GAUGE  = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/sprites/hearth/fuel_gauge_hot.png");
+    public static final ResourceLocation HOT_FUEL_GAUGE_EMPTY = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/sprites/hearth/fuel_gauge_hot_empty.png");
+    public static final ResourceLocation COLD_FUEL_GAUGE = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/sprites/hearth/fuel_gauge_cold.png");
+    public static final ResourceLocation COLD_FUEL_GAUGE_EMPTY = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/sprites/hearth/fuel_gauge_cold_empty.png");
 
     ImageButton particleButton = null;
     Pair<BlockPos, ResourceLocation> levelPos = Pair.of(this.getBlockEntity().getBlockPos(), this.getBlockEntity().getLevel().dimension().location());
@@ -47,7 +61,7 @@ public abstract class AbstractHearthScreen<T extends Container> extends DisplayE
     {   super.init();
         if (this.getBlockEntity().hasSmokestack())
         {
-            particleButton = this.addButton(new ImageButton(leftPos + 160, topPos + 8, 8, 7, 176 + (!hideParticles ? 0 : 8), 14, 7, HEARTH_GUI, (button) ->
+            particleButton = this.addButton(new ConfigImageButton(leftPos + 160, topPos + 8, 8, 7, PARTICLES_BUTTON_SPRITES, 8, 7, (button) ->
             {
                 hideParticles = !hideParticles;
                 // If particles are disabled, add the hearth to the list of disabled hearths
@@ -83,6 +97,11 @@ public abstract class AbstractHearthScreen<T extends Container> extends DisplayE
                 public void renderToolTip(MatrixStack poseStack, int mouseX, int mouseY)
                 {   AbstractHearthScreen.this.renderComponentTooltip(poseStack, Arrays.asList(new TranslationTextComponent("cold_sweat.screen.hearth.show_particles")), mouseX, mouseY);
                 }
+
+                @Override
+                protected boolean isEnabled()
+                {   return !hideParticles;
+                }
             });
         }
     }
@@ -113,5 +132,27 @@ public abstract class AbstractHearthScreen<T extends Container> extends DisplayE
             {   event.setCanceled(true);
             }
         }
+    }
+
+    protected void renderFuelGauge(HearthBlockEntity.FuelType fuelType, MatrixStack poseStack, int x, int y, int fuel, int maxFuel)
+    {
+        ResourceLocation emptyTexture = fuelType == HearthBlockEntity.FuelType.HOT ? HOT_FUEL_GAUGE_EMPTY : COLD_FUEL_GAUGE_EMPTY;
+        ResourceLocation fullTexture = fuelType == HearthBlockEntity.FuelType.HOT ? HOT_FUEL_GAUGE : COLD_FUEL_GAUGE;
+
+        int maxGaugeHeight = 14;
+        int gaugeHeight  = fuel <= 0 ? 0 : Math.round(CSMath.blend(2, 14, fuel, 0, maxFuel));
+
+        Minecraft mc = Minecraft.getInstance();
+        mc.textureManager.bind(emptyTexture);
+        AbstractGui.blit(poseStack, x, y, 0, 0, 14, 14, 14, 14);
+        mc.textureManager.bind(fullTexture);
+        AbstractGui.blit(poseStack, x, y + (maxGaugeHeight-gaugeHeight),  0, maxGaugeHeight - gaugeHeight,  14, gaugeHeight, 14, 14);
+    }
+
+    protected void renderPowerIndicator(MatrixStack poseStack, int x, int y, boolean powered)
+    {
+        ResourceLocation sprite = POWER_INDICATOR_SPRITES.get(true, powered);
+        Minecraft.getInstance().textureManager.bind(sprite);
+        AbstractGui.blit(poseStack, x, y, 0, 0, 13, 4, 13, 4);
     }
 }
