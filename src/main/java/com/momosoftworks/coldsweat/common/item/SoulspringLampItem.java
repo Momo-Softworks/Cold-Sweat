@@ -58,10 +58,18 @@ public class SoulspringLampItem extends Item
     {
         super(new Properties(){{
             tab(ColdSweatGroup.COLD_SWEAT).stacksTo(1).fireResistant().rarity(Rarity.RARE);
-            if (FMLEnvironment.dist != Dist.DEDICATED_SERVER)
+            if (FMLEnvironment.dist == Dist.CLIENT)
             {   setISTER(SoulSpringLampRenderer::new);
             }
         }});
+    }
+
+    @Override
+    public ItemStack getDefaultInstance()
+    {
+        ItemStack stack = super.getDefaultInstance();
+        setFuel(stack, 64);
+        return stack;
     }
 
     @Override
@@ -231,11 +239,7 @@ public class SoulspringLampItem extends Item
     public void fillItemCategory(ItemGroup tab, NonNullList<ItemStack> itemList)
     {
         if (this.allowdedIn(tab))
-        {
-            ItemStack stack = new ItemStack(this);
-            setLit(stack, true);
-            setFuel(stack, 64);
-            itemList.add(stack);
+        {   itemList.add(this.getDefaultInstance());
         }
     }
 
