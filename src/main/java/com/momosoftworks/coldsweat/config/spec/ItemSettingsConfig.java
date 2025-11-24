@@ -78,10 +78,10 @@ public class ItemSettingsConfig
                 .comment("─────────────────────────────────//v")
                 .defineListAllowEmpty(Arrays.asList("Boiler"), () -> ListBuilder.begin(
                                 Arrays.asList("#minecraft:planks",         10),
-                                Arrays.asList("#minecraft:coals",          37),
-                                Arrays.asList("#minecraft:logs_that_burn", 37),
-                                Arrays.asList("minecraft:dried_kelp_block", 92),
-                                Arrays.asList("minecraft:coal_block",      333),
+                                Arrays.asList("#minecraft:coals",          55),
+                                Arrays.asList("#minecraft:logs_that_burn", 40),
+                                Arrays.asList("minecraft:dried_kelp_block", 40),
+                                Arrays.asList("minecraft:coal_block",      500),
                                 Arrays.asList("minecraft:magma_block",     333),
                                 Arrays.asList("minecraft:lava_bucket",     1000)
                         ).build(),
@@ -99,7 +99,7 @@ public class ItemSettingsConfig
                 .defineListAllowEmpty(Arrays.asList("Icebox"), () -> ListBuilder.begin(
                                 Arrays.asList("minecraft:snowball",           10),
                                 Arrays.asList("minecraft:clay_ball",          37),
-                                Arrays.asList("minecraft:snow_block",         100),
+                                Arrays.asList("minecraft:snow_block",         40),
                                 Arrays.asList("minecraft:ice",                250),
                                 Arrays.asList("minecraft:clay",               333),
                                 Arrays.asList("minecraft:packed_ice",         1000)
@@ -119,16 +119,16 @@ public class ItemSettingsConfig
                 .defineListAllowEmpty(Collections.singletonList("Hearth"), () -> ListBuilder.begin(
                                 // Hot
                                 Arrays.asList("#minecraft:planks",         10),
-                                Arrays.asList("#minecraft:coals",          37),
-                                Arrays.asList("#minecraft:logs_that_burn", 37),
-                                Arrays.asList("minecraft:dried_kelp_block", 92),
-                                Arrays.asList("minecraft:coal_block",      333),
+                                Arrays.asList("#minecraft:coals",          55),
+                                Arrays.asList("#minecraft:logs_that_burn", 40),
+                                Arrays.asList("minecraft:dried_kelp_block", 40),
+                                Arrays.asList("minecraft:coal_block",      500),
                                 Arrays.asList("minecraft:magma_block",     333),
                                 Arrays.asList("minecraft:lava_bucket",     1000),
                                 // Cold
                                 Arrays.asList("minecraft:snowball",           -10),
                                 Arrays.asList("minecraft:clay_ball",          -37),
-                                Arrays.asList("minecraft:snow_block",         -100),
+                                Arrays.asList("minecraft:snow_block",         -40),
                                 Arrays.asList("minecraft:ice",                -250),
                                 Arrays.asList("minecraft:clay",               -333),
                                 Arrays.asList("minecraft:packed_ice",         -1000)
