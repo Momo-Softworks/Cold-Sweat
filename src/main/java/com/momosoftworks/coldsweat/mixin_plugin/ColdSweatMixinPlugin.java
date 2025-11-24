@@ -21,8 +21,7 @@ public class ColdSweatMixinPlugin implements IMixinConfigPlugin
             COMPAT_MIXIN_PACKAGE + "MixinCreateOverlay", () -> modLoaded("create"),
             COMPAT_MIXIN_PACKAGE + "MixinCreateConnect", () -> modLoaded("create"),
             COMPAT_MIXIN_PACKAGE + "MixinSpoiledIcebox", () -> modLoaded("spoiled"),
-            COMPAT_MIXIN_PACKAGE + "MixinSereneIceMelt", () -> modLoaded("sereneseasons"),
-            COMPAT_MIXIN_PACKAGE + "MixinJEITooltip", () -> modLoaded("jei")
+            COMPAT_MIXIN_PACKAGE + "MixinSereneIceMelt", () -> modLoaded("sereneseasons")
     );
 
     @Override

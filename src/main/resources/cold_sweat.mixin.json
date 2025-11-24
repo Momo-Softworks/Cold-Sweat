@@ -51,7 +51,6 @@
     "MixinTagLoading$Manager",
     "MixinTridentRiptide",
     "compat.MixinCreateConnect",
-    "compat.MixinJEITooltip",
     "compat.MixinSereneIceMelt",
     "compat.MixinSpoiledIcebox",
     "compat.MixinSpoiledIcebox$ContainerModifier"
