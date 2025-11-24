@@ -196,7 +196,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements ITickableTil
     }
 
     @Override
-    protected boolean isSmartEnabled()
+    public boolean isSmartEnabled()
     {   return ConfigSettings.SMART_ICEBOX.get();
     }
 
@@ -209,7 +209,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements ITickableTil
     }
 
     @Override
-    protected int getFuelDrainInterval()
+    public int getFuelDrainInterval()
     {   return ConfigSettings.ICEBOX_FUEL_INTERVAL.get();
     }
 

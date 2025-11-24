@@ -1,11 +1,11 @@
 package com.momosoftworks.coldsweat.mixin_plugin;
 
-import com.google.common.collect.ImmutableMap;
 import net.minecraftforge.fml.loading.FMLLoader;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -17,13 +17,13 @@ public class ColdSweatMixinPlugin implements IMixinConfigPlugin
     private static final String COMPAT_MIXIN_PACKAGE = "com.momosoftworks.coldsweat.mixin.compat.";
 
 
-    private static final Map<String, Supplier<Boolean>> CONDITIONS = ImmutableMap.of(
-            COMPAT_MIXIN_PACKAGE + "MixinCreateOverlay", () -> modLoaded("create"),
-            COMPAT_MIXIN_PACKAGE + "MixinCreateConnect", () -> modLoaded("create"),
-            COMPAT_MIXIN_PACKAGE + "MixinSpoiledIcebox", () -> modLoaded("spoiled"),
-            COMPAT_MIXIN_PACKAGE + "MixinSereneIceMelt", () -> modLoaded("sereneseasons"),
-            COMPAT_MIXIN_PACKAGE + "MixinGoatRenderer",  () -> modLoaded("cavesandcliffs")
-    );
+    private static final Map<String, Supplier<Boolean>> CONDITIONS = new HashMap<String, Supplier<Boolean>>(){{
+        put(COMPAT_MIXIN_PACKAGE + "MixinCreateOverlay", () -> modLoaded("create"));
+        put(COMPAT_MIXIN_PACKAGE + "MixinCreateConnect", () -> modLoaded("create"));
+        put(COMPAT_MIXIN_PACKAGE + "MixinSpoiledIcebox", () -> modLoaded("spoiled"));
+        put(COMPAT_MIXIN_PACKAGE + "MixinSereneIceMelt", () -> modLoaded("sereneseasons"));
+        put(COMPAT_MIXIN_PACKAGE + "MixinGoatRenderer",  () -> modLoaded("cavesandcliffs"));
+    }};
 
     @Override
     public void onLoad(String mixinPackage)

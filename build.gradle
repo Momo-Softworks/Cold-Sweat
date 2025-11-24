@@ -143,6 +143,10 @@ repositories {
     maven {
         url = "https://maven.teamresourceful.com/repository/maven-public/"
     }
+    maven {
+        name = "Jared's maven (JEI)"
+        url = "https://maven.blamejared.com/"
+    }
 }
 
 dependencies {
@@ -152,7 +156,6 @@ dependencies {
 
     // Runtime Mods
     //runtimeOnly fg.deobf("curse.maven:spark-361579:3767277")
-    runtimeOnly fg.deobf("curse.maven:jei-238222:4371666")
     //runtimeOnly fg.deobf("curse.maven:atmospheric-362393:3553332")
     //runtimeOnly fg.deobf("curse.maven:blueprint-382216:3607198")
     //runtimeOnly fg.deobf("curse.maven:coroutil-237749:3586476")
@@ -167,7 +170,7 @@ dependencies {
     compileOnly fg.deobf("curse.maven:architectury-api-419699:4521290")
 
     // JEI (Compat)
-    compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}")
+    implementation fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}")
 
     // Mod Compat
     implementation fg.deobf("curse.maven:serene-seasons-291874:4537666")
