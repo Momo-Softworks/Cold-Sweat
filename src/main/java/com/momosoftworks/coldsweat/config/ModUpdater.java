@@ -229,6 +229,25 @@ public class ModUpdater
             });
         }
 
+        /*
+         2.4-b06c
+         */
+        if (isBehind(configVersion, "2.4-b06c"))
+        {
+            replaceConfigSetting(ItemSettingsConfig.HEARTH_FUELS, "#minecraft:coals", list -> list.set(1, 55));
+            replaceConfigSetting(ItemSettingsConfig.HEARTH_FUELS, "#minecraft:logs_that_burn", list -> list.set(1, 40));
+            replaceConfigSetting(ItemSettingsConfig.HEARTH_FUELS, "minecraft:dried_kelp_block", list -> list.set(1, 40));
+            replaceConfigSetting(ItemSettingsConfig.HEARTH_FUELS, "minecraft:coal_block", list -> list.set(1, 500));
+            replaceConfigSetting(ItemSettingsConfig.HEARTH_FUELS, "minecraft:snow_block", list -> list.set(1, -40));
+
+            replaceConfigSetting(ItemSettingsConfig.BOILER_FUELS, "#minecraft:coals", list -> list.set(1, 55));
+            replaceConfigSetting(ItemSettingsConfig.BOILER_FUELS, "#minecraft:logs_that_burn", list -> list.set(1, 40));
+            replaceConfigSetting(ItemSettingsConfig.BOILER_FUELS, "minecraft:dried_kelp_block", list -> list.set(1, 40));
+            replaceConfigSetting(ItemSettingsConfig.BOILER_FUELS, "minecraft:coal_block", list -> list.set(1, 500));
+
+            replaceConfigSetting(ItemSettingsConfig.ICEBOX_FUELS, "minecraft:snow_block", list -> list.set(1, 40));
+        }
+
         // Update config version
         MainSettingsConfig.VERSION.set(version);
 

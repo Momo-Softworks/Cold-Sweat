@@ -79,10 +79,10 @@ public class ItemSettingsConfig
                 .comment("─────────────────────────────────//v")
                 .defineListAllowEmpty("Boiler", ListBuilder.begin(
                                 List.of("#minecraft:planks",         10),
-                                List.of("#minecraft:coals",          37),
-                                List.of("#minecraft:logs_that_burn", 37),
-                                List.of("minecraft:dried_kelp_block", 92),
-                                List.of("minecraft:coal_block",      333),
+                                List.of("#minecraft:coals",          55),
+                                List.of("#minecraft:logs_that_burn", 40),
+                                List.of("minecraft:dried_kelp_block", 40),
+                                List.of("minecraft:coal_block",      500),
                                 List.of("minecraft:magma_block",     333),
                                 List.of("minecraft:lava_bucket",     1000)
                         ).build(),
@@ -94,7 +94,7 @@ public class ItemSettingsConfig
                 .defineListAllowEmpty(List.of("Icebox"), () -> ListBuilder.begin(
                                 List.of("minecraft:snowball",           10),
                                 List.of("minecraft:clay_ball",          37),
-                                List.of("minecraft:snow_block",         100),
+                                List.of("minecraft:snow_block",         40),
                                 List.of("minecraft:ice",                250),
                                 List.of("minecraft:clay",               333),
                                 List.of("minecraft:powder_snow_bucket", 100),
@@ -108,16 +108,16 @@ public class ItemSettingsConfig
                 .defineListAllowEmpty(List.of("Hearth"), () -> ListBuilder.begin(
                                 // Hot
                                 List.of("#minecraft:planks",         10),
-                                List.of("#minecraft:coals",          37),
-                                List.of("#minecraft:logs_that_burn", 37),
-                                List.of("minecraft:dried_kelp_block", 92),
-                                List.of("minecraft:coal_block",      333),
+                                List.of("#minecraft:coals",          55),
+                                List.of("#minecraft:logs_that_burn", 40),
+                                List.of("minecraft:dried_kelp_block", 40),
+                                List.of("minecraft:coal_block",      500),
                                 List.of("minecraft:magma_block",     333),
                                 List.of("minecraft:lava_bucket",     1000),
                                 // Cold
                                 List.of("minecraft:snowball",           -10),
                                 List.of("minecraft:clay_ball",          -37),
-                                List.of("minecraft:snow_block",         -100),
+                                List.of("minecraft:snow_block",         -40),
                                 List.of("minecraft:ice",                -250),
                                 List.of("minecraft:clay",               -333),
                                 List.of("minecraft:powder_snow_bucket", -100),
