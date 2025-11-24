@@ -54,6 +54,14 @@ public class SoulspringLampItem extends Item
     }
 
     @Override
+    public ItemStack getDefaultInstance()
+    {
+        ItemStack stack = super.getDefaultInstance();
+        setFuel(stack, 64);
+        return stack;
+    }
+
+    @Override
     public void initializeClient(Consumer<IClientItemExtensions> consumer)
     {
         consumer.accept(new IClientItemExtensions()
@@ -232,11 +240,7 @@ public class SoulspringLampItem extends Item
     public void fillItemCategory(CreativeModeTab tab, NonNullList<ItemStack> itemList)
     {
         if (this.allowedIn(tab))
-        {
-            ItemStack stack = new ItemStack(this);
-            setLit(stack, true);
-            setFuel(stack, 64);
-            itemList.add(stack);
+        {   itemList.add(this.getDefaultInstance());
         }
     }
 
