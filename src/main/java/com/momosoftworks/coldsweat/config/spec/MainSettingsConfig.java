@@ -96,7 +96,7 @@ public class MainSettingsConfig
         NULLIFY_IN_PEACEFUL = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────",
                          " Nullifies temperature damage and effects when the difficulty is set to peaceful")
-                .define("Damage Scaling", defaultDiff.getOrDefault(ConfigSettings.USE_PEACEFUL_MODE, true));
+                .define("Disable in Peaceful", defaultDiff.getOrDefault(ConfigSettings.USE_PEACEFUL_MODE, true));
 
         BUILDER.pop();
 
