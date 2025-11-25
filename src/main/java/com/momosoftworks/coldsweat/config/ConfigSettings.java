@@ -78,6 +78,7 @@ public class ConfigSettings
     public static final DynamicHolder<Double> MIN_TEMP;
     public static final DynamicHolder<Double> TEMP_RATE;
     public static final DynamicHolder<Double> TEMP_DAMAGE;
+    public static final DynamicHolder<Integer> TEMPERATURE_HURT_INTERVAL;
     public static final DynamicHolder<Boolean> FIRE_RESISTANCE_ENABLED;
     public static final DynamicHolder<Boolean> ICE_RESISTANCE_ENABLED;
     public static final DynamicHolder<Boolean> USE_PEACEFUL_MODE;
@@ -283,6 +284,11 @@ public class ConfigSettings
         TEMP_DAMAGE = addSyncedSetting(ColdSweat.createKey("temp_damage"), () -> 2d, holder -> holder.set(MainSettingsConfig.TEMP_DAMAGE.get()),
         Codec.DOUBLE,
         (damage) -> MainSettingsConfig.TEMP_DAMAGE.set(damage),
+        SyncType.BOTH_WAYS);
+
+        TEMPERATURE_HURT_INTERVAL = addSyncedSetting(ColdSweat.createKey("temperature_hurt_interval"), () -> 40, holder -> holder.set(MainSettingsConfig.TEMPERATURE_HURT_INTERVAL.get()),
+        Codec.INT,
+        (interval) -> MainSettingsConfig.TEMPERATURE_HURT_INTERVAL.set(interval),
         SyncType.BOTH_WAYS);
 
         FIRE_RESISTANCE_ENABLED = addSyncedSetting(ColdSweat.createKey("fire_resistance_enabled"), () -> true, holder -> holder.set(ItemSettingsConfig.FIRE_RESISTANCE_BLOCKS_OVERHEATING.get()),

@@ -88,6 +88,12 @@ public class ConfigPageOne extends AbstractConfigPage
                 input -> input.setValue(String.valueOf(ConfigSettings.TEMP_DAMAGE.get())),
                 true, true, false, Component.translatable("cold_sweat.config.temp_damage.desc"));
 
+        // Temp Hurt Interval
+        this.addDecimalInput("temp_damage", Side.LEFT, Component.translatable("cold_sweat.config.temp_damage_interval.name"),
+                value -> ConfigSettings.TEMPERATURE_HURT_INTERVAL.set(value.intValue()),
+                input -> input.setValue(String.valueOf(ConfigSettings.TEMPERATURE_HURT_INTERVAL.get())),
+                true, true, false, Component.translatable("cold_sweat.config.temp_damage_interval.desc"));
+
         // Rate Multiplier
         this.addDecimalInput("rate", Side.LEFT, Component.translatable("cold_sweat.config.temperature_rate.name"),
                 value -> ConfigSettings.TEMP_RATE.set(Math.max(0, value)),
