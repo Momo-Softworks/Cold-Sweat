@@ -436,7 +436,7 @@ public class AbstractTempCap implements ITemperatureCap
     }
 
     public int getHurtInterval(LivingEntity entity)
-    {   return 40;
+    {   return ConfigSettings.TEMPERATURE_HURT_INTERVAL.get();
     }
 
     public void tickHurting(LivingEntity entity)

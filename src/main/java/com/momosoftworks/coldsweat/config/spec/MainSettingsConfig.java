@@ -25,6 +25,7 @@ public class MainSettingsConfig
     public static final CSConfigSpec.ConfigValue<Double> MIN_HABITABLE_TEMPERATURE;
     public static final CSConfigSpec.ConfigValue<Double> TEMP_RATE_MULTIPLIER;
     public static final CSConfigSpec.ConfigValue<Double> TEMP_DAMAGE;
+    public static final CSConfigSpec.ConfigValue<Integer> TEMPERATURE_HURT_INTERVAL;
 
     public static final CSConfigSpec.ConfigValue<Boolean> NULLIFY_IN_PEACEFUL;
 
@@ -92,6 +93,11 @@ public class MainSettingsConfig
                 .comment("─────────────────────────────────────────────────────────────────────────",
                          " Damage dealt to the player when they are too hot or too cold")
                 .defineInRange("Temperature Damage", defaultDiff.getOrDefault(ConfigSettings.TEMP_DAMAGE, 2d), 0d, Double.POSITIVE_INFINITY);
+
+        TEMPERATURE_HURT_INTERVAL = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " The time between damage (in ticks) when the player is too hot or too cold")
+                .defineInRange("Temperature Hurt Interval", defaultDiff.getOrDefault(ConfigSettings.TEMPERATURE_HURT_INTERVAL, 40), 1, Integer.MAX_VALUE);
 
         NULLIFY_IN_PEACEFUL = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────",
