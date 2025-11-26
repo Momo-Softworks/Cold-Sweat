@@ -25,13 +25,6 @@ public class ModUpdater
     public static void updateEntity(LivingEntity entity)
     {
         String entityVersion = entity.getPersistentData().getString("cs:version");
-        if (compareVersions(entityVersion, "2.3-b03a") < 0)
-        {
-            EntityTempManager.getTemperatureCap(entity).ifPresent(cap -> cap.getModifiers().forEach((trait, list) ->
-            {
-                list.removeIf(mod -> mod.getClass() == InventoryItemsTempModifier.class);
-            }));
-        }
         entity.getPersistentData().putString("cs:version", ColdSweat.getVersion());
     }
 
