@@ -28,11 +28,11 @@ public class FreezeShiverEffect extends TempEffect
         if (!Minecraft.getInstance().isPaused() && ConfigSettings.DISTORTION_EFFECTS.get())
         {
             double effect = this.getEffectFactor();
-            double partialTick = event.getRenderPartialTicks();
-            double tickTime = entity.tickCount + partialTick;
-            float shiverIntensity = (float) CSMath.blend(0, Math.sin(tickTime / 10) * 0.1f, effect, 0, 1);
-            shiverIntensity *= 0.5f + Minecraft.getInstance().getDeltaFrameTime() * 5f;
+            double tickTime = entity.tickCount + event.getRenderPartialTicks();
+            float shiverIntensity = (float) CSMath.blend(0, (Math.sin(tickTime / 10) + 1) * 0.03f + 0.01f, effect, 0, 1);
             shiverIntensity *= ConfigSettings.SHIVER_INTENSITY.get();
+            // Multiply the effect for lower framerates
+            shiverIntensity *= Minecraft.getInstance().getDeltaFrameTime() * 10;
             // Rotate camera
             float shiverRotation = (float) (Math.sin(tickTime * 2.5) * shiverIntensity);
             entity.yRot = entity.yRot + shiverRotation;
