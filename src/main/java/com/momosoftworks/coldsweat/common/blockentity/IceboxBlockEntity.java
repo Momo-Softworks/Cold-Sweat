@@ -315,20 +315,17 @@ public class IceboxBlockEntity extends HearthBlockEntity implements ITickableTil
     @Override
     public void spawnAirParticle(int x, int y, int z, Random rand)
     {
-        BlockPos pos = new BlockPos(x, y, z);
-        boolean onGround = !this.level.getBlockState(pos.below()).isAir();
         if (rand.nextFloat() > (spreading ? 0.016f : 0.032f))
         {   return;
         }
 
         float xr = rand.nextFloat();
-        float yr = onGround ? 0.1f : rand.nextFloat();
+        float yr = rand.nextFloat();
         float zr = rand.nextFloat();
         float xm = rand.nextFloat() / 20 - 0.025f;
         float zm = rand.nextFloat() / 20 - 0.025f;
 
-        level.addParticle(onGround ? ParticleTypesInit.GROUND_MIST.get()
-                                   : ParticleTypesInit.MIST.get(), false, x + xr, y + yr, z + zr, xm, 0, zm);
+        level.addParticle(ParticleTypesInit.MIST.get(), false, x + xr, y + yr, z + zr, xm, 0, zm);
     }
 
     @Override
