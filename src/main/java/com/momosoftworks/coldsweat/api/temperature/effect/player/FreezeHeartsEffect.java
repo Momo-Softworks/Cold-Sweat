@@ -72,7 +72,7 @@ public class FreezeHeartsEffect extends TempEffect
             }
             else
             {   u = isHardcore ? 7 : 0;
-                v = partialFrozen ? 14 : halfHeart ? 7 : 0;
+                v = partialFrozen ? halfHeart ? 21 : 14 : halfHeart ? 7 : 0;
             }
             AbstractContainerScreen.blit(event.getPoseStack(), x + 1, y + 1, u, v, 7, 7, 21, 28);
             RenderSystem.disableBlend();
