@@ -8,7 +8,9 @@ import net.minecraft.world.entity.Entity;
 
 import java.util.Optional;
 
-public record EntityFlagsRequirement(Optional<Boolean> onFire, Optional<Boolean> sneaking, Optional<Boolean> sprinting, Optional<Boolean> swimming, Optional<Boolean> invisible, Optional<Boolean> glowing, Optional<Boolean> baby)
+public record EntityFlagsRequirement(Optional<Boolean> onFire, Optional<Boolean> sneaking, Optional<Boolean> sprinting, Optional<Boolean> swimming,
+                                     Optional<Boolean> invisible, Optional<Boolean> glowing, Optional<Boolean> baby,
+                                     Optional<Boolean> inWater, Optional<Boolean> inLava)
 {
     public static final Codec<EntityFlagsRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.BOOL.optionalFieldOf("is_on_fire").forGetter(predicate -> predicate.onFire),
@@ -17,7 +19,9 @@ public record EntityFlagsRequirement(Optional<Boolean> onFire, Optional<Boolean>
             Codec.BOOL.optionalFieldOf("is_swimming").forGetter(predicate -> predicate.swimming),
             Codec.BOOL.optionalFieldOf("is_invisible").forGetter(predicate -> predicate.invisible),
             Codec.BOOL.optionalFieldOf("is_glowing").forGetter(predicate -> predicate.glowing),
-            Codec.BOOL.optionalFieldOf("is_baby").forGetter(predicate -> predicate.baby)
+            Codec.BOOL.optionalFieldOf("is_baby").forGetter(predicate -> predicate.baby),
+            Codec.BOOL.optionalFieldOf("is_in_water").forGetter(predicate -> predicate.inWater),
+            Codec.BOOL.optionalFieldOf("is_in_lava").forGetter(predicate -> predicate.inLava)
     ).apply(instance, EntityFlagsRequirement::new));
 
     public boolean test(Entity entity)
@@ -28,7 +32,9 @@ public record EntityFlagsRequirement(Optional<Boolean> onFire, Optional<Boolean>
             && (swimming.isEmpty() || entity.isInWater() == swimming.get())
             && (invisible.isEmpty() || entity.isInvisible() == invisible.get())
             && (glowing.isEmpty() || entity.isCurrentlyGlowing() == glowing.get())
-            && (baby.isEmpty() || (entity instanceof AgeableMob mob && mob.isBaby()) == baby.get());
+            && (baby.isEmpty() || (entity instanceof AgeableMob mob && mob.isBaby()) == baby.get())
+            && (inWater.isEmpty() || entity.isInWater() == inWater.get())
+            && (inLava.isEmpty() || entity.isInLava() == inLava.get());
     }
 
     @Override
