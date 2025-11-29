@@ -11,7 +11,6 @@ import com.momosoftworks.coldsweat.data.codec.requirement.ItemComponentsRequirem
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
@@ -25,28 +24,31 @@ public class FoodData extends ConfigData implements RequirementHolder
     final NegatableList<ItemRequirement> item;
     final Double temperature;
     final int duration;
+    final boolean stackable;
     final NegatableList<EntityRequirement> entityRequirement;
 
-    public FoodData(NegatableList<ItemRequirement> item, Double temperature, int duration,
+    public FoodData(NegatableList<ItemRequirement> item, Double temperature, int duration, boolean stackable,
                     NegatableList<EntityRequirement> entityRequirement, NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.temperature = temperature;
         this.item = item;
         this.duration = duration;
+        this.stackable = stackable;
         this.entityRequirement = entityRequirement;
     }
 
-    public FoodData(NegatableList<ItemRequirement> item, Double temperature, int duration,
+    public FoodData(NegatableList<ItemRequirement> item, Double temperature, int duration, boolean stackable,
                     NegatableList<EntityRequirement> entityRequirement)
     {
-        this(item, temperature, duration, entityRequirement, new NegatableList<>());
+        this(item, temperature, duration, stackable, entityRequirement, new NegatableList<>());
     }
 
     public static final Codec<FoodData> CODEC = createCodec(RecordCodecBuilder.mapCodec(instance -> instance.group(
             NegatableList.codec(ItemRequirement.CODEC).optionalFieldOf("item", new NegatableList<>()).forGetter(FoodData::item),
             Codec.DOUBLE.fieldOf("temperature").forGetter(FoodData::temperature),
             Codec.INT.optionalFieldOf("duration", 0).forGetter(FoodData::duration),
+            Codec.BOOL.optionalFieldOf("stackable", false).forGetter(data -> data.stackable),
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(FoodData::entityRequirement)
     ).apply(instance, FoodData::new)));
 
@@ -58,6 +60,9 @@ public class FoodData extends ConfigData implements RequirementHolder
     }
     public int duration()
     {   return duration;
+    }
+    public boolean stackable()
+    {   return stackable;
     }
     public NegatableList<EntityRequirement> entityRequirement()
     {   return entityRequirement;
@@ -87,9 +92,10 @@ public class FoodData extends ConfigData implements RequirementHolder
                                                           ? ItemComponentsRequirement.parse((String) entry.get(2))
                                                           : new ItemComponentsRequirement();
         int duration = entry.size() > 3 ? ((Number) entry.get(3)).intValue() : 0;
+        boolean stackable = entry.size() > 4 && (Boolean) entry.get(4);
         ItemRequirement itemRequirement = new ItemRequirement(items, componentsRequirement);
 
-        return new FoodData(new NegatableList<>(itemRequirement), temperature, duration, new NegatableList<>());
+        return new FoodData(new NegatableList<>(itemRequirement), temperature, duration, stackable, new NegatableList<>());
     }
 
     @Override
