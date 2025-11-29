@@ -1048,35 +1048,23 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     protected void addFuel(FuelType fuelType, int amount, boolean update)
     {
         FuelFluidHandler handler = this.getFuelHandler(fuelType);
-        FluidStack fillStack = new FluidStack(handler.getDefaultFluid(), amount);
-        int filledAmount = handler.fill(fillStack, IFluidHandler.FluidAction.EXECUTE);
-        // Update
-        if (filledAmount > 0 && update)
-        {   this.onFuelChanged(fuelType);
-        }
+        FluidStack fillStack = new FluidStack(handler.getFluid(), amount);
+        handler.fill(fillStack, IFluidHandler.FluidAction.EXECUTE, update);
     }
 
     protected void drainFuel(FuelType fuelType, int amount, boolean update)
     {
         FuelFluidHandler handler = this.getFuelHandler(fuelType);
-        FluidStack drainStack = new FluidStack(handler.getDefaultFluid(), amount);
-        FluidStack drained = handler.drain(drainStack, IFluidHandler.FluidAction.EXECUTE);
-        // Update
-        if (drained.getAmount() > 0 && update)
-        {   this.onFuelChanged(fuelType);
-        }
+        handler.drain(amount, IFluidHandler.FluidAction.EXECUTE, update);
     }
 
     protected void setFuel(FuelType fuelType, int amount, boolean update)
     {
         FuelFluidHandler handler = this.getFuelHandler(fuelType);
-        FluidStack currentFluid = handler.getFluid();
-        FluidStack newFluid = new FluidStack(fuelType.getFluid(), amount);
-        // Copy NBT
-        newFluid.setTag(currentFluid.getTag());
-        //Update
-        handler.setFluid(newFluid);
-        if (currentFluid.getAmount() != amount && update)
+        FluidStack fluid = handler.getFluid();
+        int oldAmount = fluid.getAmount();
+        fluid.setAmount(amount);
+        if (oldAmount != amount && update)
         {   this.onFuelChanged(fuelType);
         }
     }
@@ -1488,8 +1476,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         {   return fluidStack.getFluid().is(this.fuelType.getValidFluidTag());
         }
 
-        @Override
-        public int fill(FluidStack fluidStack, FluidAction fluidAction)
+        public int fill(FluidStack fluidStack, FluidAction fluidAction, boolean update)
         {
             if (fluidStack.getFluid().is(this.fuelType.getValidFluidTag()))
             {
@@ -1501,22 +1488,20 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
                     }
                     else this.fuel.grow(amount);
                 }
+                if (amount > 0 && update)
+                {   HearthBlockEntity.this.onFuelChanged(this.fuelType);
+                }
                 return amount;
             }
             return 0;
         }
 
         @Override
-        @NotNull
-        public FluidStack drain(FluidStack fluidStack, FluidAction fluidAction)
-        {
-            return this.isFluidValid(0, fluidStack)
-                 ? this.drain(fluidStack.getAmount(), fluidAction)
-                 : FluidStack.EMPTY;
+        public int fill(FluidStack fluidStack, FluidAction fluidAction)
+        {   return this.fill(fluidStack, fluidAction, true);
         }
 
-        @Override
-        public FluidStack drain(int amount, FluidAction fluidAction)
+        public FluidStack drain(int amount, FluidAction fluidAction, boolean update)
         {
             int drained = Math.min(this.fuel.getAmount(), amount);
             if (drained == 0)
@@ -1527,9 +1512,25 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
             if (fluidAction.execute() && drained > 0)
             {   this.fuel.shrink(drained);
             }
-            HearthBlockEntity.this.setChanged();
 
+            if (drained > 0 && update)
+            {   HearthBlockEntity.this.onFuelChanged(this.fuelType);
+            }
             return stack;
+        }
+
+        @Override
+        public FluidStack drain(int amount, FluidAction fluidAction)
+        {   return this.drain(amount, fluidAction, true);
+        }
+
+        @Override
+        @NotNull
+        public FluidStack drain(FluidStack fluidStack, FluidAction fluidAction)
+        {
+            return fluidStack.getFluid() == this.fuel.getFluid()
+                 ? this.drain(fluidStack.getAmount(), fluidAction, true)
+                 : FluidStack.EMPTY;
         }
     }
 }
