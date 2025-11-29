@@ -113,19 +113,14 @@ public class TempModifierInit
         event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "simple"), SimpleTempModifier::new);
 
         // Compat
-        String compatPath = "com.momosoftworks.coldsweat.api.temperature.modifier.compat.";
-        String sereneSeasons = compatPath + "SereneSeasonsTempModifier";
-        String weatherStorms = compatPath + "StormTempModifier";
-        String curios = compatPath + "CuriosTempModifier";
-
         if (CompatManager.isSereneSeasonsLoaded())
-        {   event.registerByClassName(ResourceLocation.fromNamespaceAndPath("sereneseasons", "season"), sereneSeasons);
+        {   event.register(ResourceLocation.fromNamespaceAndPath("sereneseasons", "season"), () -> new com.momosoftworks.coldsweat.api.temperature.modifier.compat.SereneSeasonsTempModifier());
         }
         if (CompatManager.isWeather2Loaded())
-        {   event.registerByClassName(ResourceLocation.fromNamespaceAndPath("weather2", "storm"), weatherStorms);
+        {   event.register(ResourceLocation.fromNamespaceAndPath("weather2", "storm"), () -> new com.momosoftworks.coldsweat.api.temperature.modifier.compat.StormTempModifier());
         }
         if (CompatManager.isCuriosLoaded())
-        {   event.registerByClassName(ResourceLocation.fromNamespaceAndPath("curios", "curios"), curios);
+        {   event.register(ResourceLocation.fromNamespaceAndPath("curios", "curios"), () -> new com.momosoftworks.coldsweat.api.temperature.modifier.compat.CuriosTempModifier());
         }
 
         ColdSweat.LOGGER.debug("Registered TempModifiers in {}ms", System.currentTimeMillis() - startMS);
