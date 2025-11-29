@@ -767,11 +767,16 @@ public class EntityTempManager
                         FoodTempModifier foodModifier = item.getItem() == ModItems.SOUL_SPROUT
                                                         ? new SoulSproutTempModifier(temperature)
                                                         : new FoodTempModifier(temperature);
-                        // Store the duration of the TempModifier
+                        // Store the item ID & duration of the TempModifier
                         foodModifier.getNBT().putString("item", ForgeRegistries.ITEMS.getKey(item.getItem()).toString());
                         foodModifier.getNBT().putInt("duration", duration);
+                        // Set duration & tick rate
+                        foodModifier.expires(duration).tickRate(duration);
                         // Add the TempModifier
-                        Temperature.addOrReplaceModifier(player, foodModifier.expires(duration).tickRate(duration), trait, Placement.Duplicates.EXACT);
+                        if (foodData.stackable())
+                        {   Temperature.addModifier(player, foodModifier, trait, Placement.Duplicates.ALLOW);
+                        }
+                        else Temperature.addOrReplaceModifier(player, foodModifier, trait, Placement.Duplicates.EXACT);
                     }
                 }
             }
