@@ -85,6 +85,10 @@ public class TempModifierInit
 
         event.register(new FurnaceBlockTemp());
         event.register(new NetherPortalBlockTemp());
+        if (CompatManager.isCreateLoaded())
+        {   event.register(new com.momosoftworks.coldsweat.api.temperature.block_temp.compat.CreateFluidTankTemp());
+            event.register(new com.momosoftworks.coldsweat.api.temperature.block_temp.compat.CreateFluidPipeTemp());
+        }
         ColdSweat.LOGGER.debug("Registered BlockTemps in {}ms", System.currentTimeMillis() - startMS);
     }
 
