@@ -18,6 +18,7 @@ public class FoodBuilderJS
 {
     public double temperature = 0;
     public int duration = 0;
+    public boolean stackable = false;
     public NegatableList<ItemRequirement> itemPredicate = new NegatableList<>();
     public NegatableList<EntityRequirement> entityPredicate = new NegatableList<>();
 
@@ -48,6 +49,16 @@ public class FoodBuilderJS
         return this;
     }
 
+    public FoodBuilderJS stackable()
+    {   return this.stackable(true);
+    }
+
+    public FoodBuilderJS stackable(boolean stackable)
+    {
+        this.stackable = stackable;
+        return this;
+    }
+
     public FoodBuilderJS itemPredicate(Predicate<ItemStack> itemPredicate)
     {
         this.itemPredicate.add(new ItemRequirement(itemPredicate), false);
@@ -62,7 +73,7 @@ public class FoodBuilderJS
 
     public FoodData build()
     {
-        FoodData data = new FoodData(this.itemPredicate,this.temperature,  this.duration, this.entityPredicate);
+        FoodData data = new FoodData(this.itemPredicate,this.temperature,  this.duration, this.stackable, this.entityPredicate);
         data.setConfigType(ConfigData.Type.KUBEJS);
         return data;
     }
