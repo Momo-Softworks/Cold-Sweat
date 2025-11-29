@@ -17,9 +17,12 @@ public class EntityFlagsRequirement
     private final Optional<Boolean> invisible;
     private final Optional<Boolean> glowing;
     private final Optional<Boolean> baby;
+    private final Optional<Boolean> inWater;
+    private final Optional<Boolean> inLava;
 
     public EntityFlagsRequirement(Optional<Boolean> onFire, Optional<Boolean> sneaking, Optional<Boolean> sprinting,
-                                  Optional<Boolean> swimming, Optional<Boolean> invisible, Optional<Boolean> glowing, Optional<Boolean> baby)
+                                  Optional<Boolean> swimming, Optional<Boolean> invisible, Optional<Boolean> glowing, Optional<Boolean> baby,
+                                  Optional<Boolean> inWater, Optional<Boolean> inLava)
     {
         this.onFire = onFire;
         this.sneaking = sneaking;
@@ -28,6 +31,8 @@ public class EntityFlagsRequirement
         this.invisible = invisible;
         this.glowing = glowing;
         this.baby = baby;
+        this.inWater = inWater;
+        this.inLava = inLava;
     }
 
     public static final Codec<EntityFlagsRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -37,7 +42,9 @@ public class EntityFlagsRequirement
             Codec.BOOL.optionalFieldOf("is_swimming").forGetter(predicate -> predicate.swimming),
             Codec.BOOL.optionalFieldOf("is_invisible").forGetter(predicate -> predicate.invisible),
             Codec.BOOL.optionalFieldOf("is_glowing").forGetter(predicate -> predicate.glowing),
-            Codec.BOOL.optionalFieldOf("is_baby").forGetter(predicate -> predicate.baby)
+            Codec.BOOL.optionalFieldOf("is_baby").forGetter(predicate -> predicate.baby),
+            Codec.BOOL.optionalFieldOf("is_in_water").forGetter(predicate -> predicate.inWater),
+            Codec.BOOL.optionalFieldOf("is_in_lava").forGetter(predicate -> predicate.inLava)
     ).apply(instance, EntityFlagsRequirement::new));
 
     public Optional<Boolean> onFire()
@@ -61,6 +68,12 @@ public class EntityFlagsRequirement
     public Optional<Boolean> baby()
     {   return baby;
     }
+    public Optional<Boolean> inWater()
+    {   return inWater;
+    }
+    public Optional<Boolean> inLava()
+    {   return inLava;
+    }
 
     public boolean test(Entity entity)
     {
@@ -70,7 +83,9 @@ public class EntityFlagsRequirement
             && (!swimming.isPresent() || entity.isInWater() == swimming.get())
             && (!invisible.isPresent() || entity.isInvisible() == invisible.get())
             && (!glowing.isPresent() || entity.isGlowing() == glowing.get())
-            && (!baby.isPresent() || (entity instanceof AgeableEntity && ((AgeableEntity) entity).isBaby()) == baby.get());
+            && (!baby.isPresent() || (entity instanceof AgeableEntity && ((AgeableEntity) entity).isBaby()) == baby.get())
+            && (!inWater.isPresent() || entity.isInWater() == inWater.get())
+            && (!inLava.isPresent() || entity.isInLava() == inLava.get());
     }
 
     @Override

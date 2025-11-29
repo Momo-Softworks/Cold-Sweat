@@ -304,18 +304,24 @@ public class WorldSettingsConfig
                          " • *nbt: The NBT data that the block must have for the temperature to be applied.",
                          " • *tempLimit: The maximum world temperature at which this block temp will have any effect.",
                          "   (Represents the minimum temp if the block temp is negative)")
-                .defineListAllowEmpty(Arrays.asList("Block Temperatures"), () -> Arrays.asList(
-                                            Arrays.asList("cold_sweat:boiler",       0.27, 7, "mc", 0.88, "lit=true", "", 4),
-                                            Arrays.asList("cold_sweat:icebox",      -0.27, 7, "mc", 0.88, "frosted=true", "", 0),
-                                            Arrays.asList("minecraft:lava",           0.3, 7, "mc", 6, "", "", 21.5, true),
-                                            Arrays.asList("#minecraft:fire",        0.476, 7, "mc", 0.9, "", "", 8),
-                                            Arrays.asList("#minecraft:campfires",   0.476, 7, "mc", 0.9, "lit=true", " ", 8),
-                                            Arrays.asList("minecraft:magma_block",   0.25, 3, "mc", 1.0),
-                                            Arrays.asList("minecraft:ice",          -0.15, 4, "mc", 0.3, "", "", 0.05),
-                                            Arrays.asList("minecraft:packed_ice",   -0.25, 4, "mc", 1.0, "", "", -0.3),
-                                            Arrays.asList("minecraft:blue_ice",     -0.35, 4, "mc", 1.4, "", "", -0.7),
-                                            Arrays.asList("#minecraft:ice",         -0.15, 4, "mc", 0.6, "", "", -0.7)
-                                      ),
+                .defineListAllowEmpty(Arrays.asList("Block Temperatures"), () -> ListBuilder.begin(
+                                            Arrays.asList("cold_sweat:boiler",         12, 7, "f", 36, "lit=true", "", 212),
+                                            Arrays.asList("cold_sweat:icebox",        -12, 7, "f", 36, "frosted=true", "", 32),
+                                            Arrays.asList("minecraft:lava",            20, 7, "f", 200, "", "", 1000, true),
+                                            Arrays.asList("#minecraft:fire",           15, 7, "f", 45, "", "", 400),
+                                            Arrays.asList("#minecraft:campfires",      15, 7, "f", 45, "lit=true", " ", 400),
+                                            Arrays.asList("minecraft:magma_block",     12, 3, "f", 48),
+                                            Arrays.asList("minecraft:lava_cauldron",   20, 7, "f", 200, "", "", 1000, true),
+                                            Arrays.asList("minecraft:ice",             -6, 4, "f", 24, "", "", 33),
+                                            Arrays.asList("minecraft:packed_ice",     -12, 4, "f", 48, "", "", 16),
+                                            Arrays.asList("minecraft:blue_ice",       -16, 4, "f", 64, "", "", 0),
+                                            Arrays.asList("#minecraft:ice",            -6, 4, "f", 27, "", "", 33)
+                                      ).addIf(CompatManager.isCreateLoaded(),
+                                            () -> Arrays.asList("create:blaze_burner", 5,  3, "f", 30, "blaze=smouldering", "", 400),
+                                            () -> Arrays.asList("create:blaze_burner", 10, 4, "f", 30, "blaze=fading", "", 400),
+                                            () -> Arrays.asList("create:blaze_burner", 15, 5, "f", 45, "blaze=kindled", "", 400),
+                                            () -> Arrays.asList("create:blaze_burner", 20, 6, "f", 60, "blaze=seething", "", 400))
+                                      .build(),
                                       it -> {
                                           if (!(it instanceof List<?>)) return false;
                                           List<?> list = (List<?>) it;
