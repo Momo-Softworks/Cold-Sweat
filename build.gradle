@@ -109,6 +109,10 @@ repositories {
     maven {
         url 'https://jitpack.io'
     }
+    maven {
+        name = "Registrate"
+        url "https://maven.tterrag.com/"
+    }
 }
 
 dependencies {
@@ -120,9 +124,12 @@ dependencies {
     implementation "curse.maven:spoiled-364918:6828999"
     implementation "curse.maven:curios-309927:6529130"
     implementation "curse.maven:iceberg-520110:6423863"
+    compileOnly "curse.maven:primal-winter-393321:5811975"
+
+    // Create (Compat)
     implementation "curse.maven:create-328085:7149903"
     compileOnly("net.createmod.ponder:Ponder-NeoForge-1.21.1:1.0.39")
-    compileOnly "curse.maven:primal-winter-393321:5811975"
+    compileOnly "com.tterrag.registrate:Registrate:MC1.20-1.3.0"
 
     // KubeJS (Compat)
     compileOnly "dev.latvian.mods:kubejs-neoforge:${kubejs_version}"
