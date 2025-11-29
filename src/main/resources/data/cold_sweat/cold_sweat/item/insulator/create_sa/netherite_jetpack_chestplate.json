@@ -1,0 +1,46 @@
+{
+  "required_mods": ["create"],
+  "type": "armor",
+  "item": {
+    "items": ["create_sa:netherite_jetpack_chestplate"]
+  },
+  "insulation": {
+    "heat": 0,
+    "cold": 0
+  },
+  "entity": {
+    "entities": ["*"],
+    "equipment": {
+      "head": {
+        "items": ["create:netherite_diving_helmet"]
+      },
+      "chest": {
+        "items": ["create_sa:netherite_jetpack_chestplate"]
+      },
+      "legs": {
+        "items": ["minecraft:netherite_leggings"]
+      },
+      "feet": {
+        "items": [
+          "create:netherite_diving_boots",
+          "minecraft:netherite_boots"
+        ]
+      }
+    }
+  },
+  "attributes": {
+    "cold_sweat:heat_dampening": [
+      {
+        "name": "cs:netherite_jetpack_chestplate",
+        "amount": 0.9,
+        "operation": "addition"
+      }
+    ]
+  },
+  "immune_temp_modifiers": {
+    "cold_sweat:water": 1.0
+  },
+  "hint": {
+    "key": "tooltip.hint.create_backtank"
+  }
+}
