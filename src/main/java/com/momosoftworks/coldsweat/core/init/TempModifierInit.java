@@ -114,28 +114,20 @@ public class TempModifierInit
         event.register(new ResourceLocation(ColdSweat.MOD_ID, "simple"), SimpleTempModifier::new);
 
         // Compat
-        String compatPath = "com.momosoftworks.coldsweat.api.temperature.modifier.compat.";
-        String sereneSeasons = compatPath + "SereneSeasonsTempModifier";
-        String weatherStorms = compatPath + "StormTempModifier";
-        String curios = compatPath + "CuriosTempModifier";
-        String valkyrienSkies = compatPath + "ValkShipBlockTempModifier";
-        String adAstra = compatPath + "AdAstraOxygenTempModifier";
-
         if (CompatManager.isSereneSeasonsLoaded())
-        {   event.registerByClassName(new ResourceLocation("sereneseasons", "season"), sereneSeasons);
+        {   event.register(new ResourceLocation("sereneseasons", "season"), () -> new com.momosoftworks.coldsweat.api.temperature.modifier.compat.SereneSeasonsTempModifier());
         }
         if (CompatManager.isWeather2Loaded())
-        {   event.registerByClassName(new ResourceLocation("weather2", "storm"), weatherStorms);
+        {   event.register(new ResourceLocation("weather2", "storm"), () -> new com.momosoftworks.coldsweat.api.temperature.modifier.compat.StormTempModifier());
         }
         if (CompatManager.isCuriosLoaded())
-        {   event.registerByClassName(new ResourceLocation("curios", "curios"), curios);
+        {   event.register(new ResourceLocation("curios", "curios"), () -> new com.momosoftworks.coldsweat.api.temperature.modifier.compat.CuriosTempModifier());
         }
         if (CompatManager.isValkyrienSkiesLoaded())
-        {   event.registerByClassName(new ResourceLocation("valkyrienskies", "ship_blocks"), valkyrienSkies);
+        {   event.register(new ResourceLocation("valkyrienskies", "ship_blocks"), () -> new com.momosoftworks.coldsweat.api.temperature.modifier.compat.ValkShipBlockTempModifier());
         }
         if (CompatManager.isAdAstraLoaded())
-        {   event.registerByClassName(new ResourceLocation("ad_astra", "oxygen"), adAstra);
-            MinecraftForge.EVENT_BUS.register(CSMath.classForName(adAstra));
+        {   event.register(new ResourceLocation("ad_astra", "oxygen"), () -> new com.momosoftworks.coldsweat.api.temperature.modifier.compat.AdAstraOxygenTempModifier());
         }
 
         ColdSweat.LOGGER.debug("Registered TempModifiers in {}ms", System.currentTimeMillis() - startMS);
