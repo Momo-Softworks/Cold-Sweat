@@ -626,7 +626,7 @@ public class WorldSettingsConfig
                          " • *nbt: The NBT data that the block must have for the temperature to be applied.",
                          " • *tempLimit: The maximum world temperature at which this block temp will have any effect.",
                          "   (Represents the minimum temp if the block temp is negative)")
-                .defineListAllowEmpty(List.of("Block Temperatures"), () -> List.of(
+                .defineListAllowEmpty(List.of("Block Temperatures"), () -> ListBuilder.begin(
                                             List.of("cold_sweat:boiler",         12, 7, "f", 36, "lit=true", "", 212),
                                             List.of("cold_sweat:icebox",        -12, 7, "f", 36, "frosted=true", "", 32),
                                             List.of("minecraft:lava",            20, 7, "f", 200, "", "", 1000, true),
@@ -638,7 +638,12 @@ public class WorldSettingsConfig
                                             List.of("minecraft:packed_ice",     -12, 4, "f", 48, "", "", 16),
                                             List.of("minecraft:blue_ice",       -16, 4, "f", 64, "", "", 0),
                                             List.of("#minecraft:ice",            -6, 4, "f", 27, "", "", 33)
-                                      ),
+                                      ).addIf(CompatManager.isCreateLoaded(),
+                                            () -> List.of("create:blaze_burner", 5,  3, "f", 30, "blaze=smouldering", "", 400),
+                                            () -> List.of("create:blaze_burner", 10, 4, "f", 30, "blaze=fading", "", 400),
+                                            () -> List.of("create:blaze_burner", 15, 5, "f", 45, "blaze=kindled", "", 400),
+                                            () -> List.of("create:blaze_burner", 20, 6, "f", 60, "blaze=seething", "", 400))
+                                      .build(),
                             it -> it instanceof List<?> list
                                     && list.size() >= 3
                                     && list.get(0) instanceof String

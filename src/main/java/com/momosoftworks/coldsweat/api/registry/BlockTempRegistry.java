@@ -86,4 +86,10 @@ public class BlockTempRegistry
         }
         return blockTemps;
     }
+
+    public static Optional<BlockTemp> getFirstBlockTempFor(BlockState blockstate, Level level, BlockPos pos)
+    {
+        Collection<BlockTemp> blockTemps = getBlockTempsFor(blockstate);
+        return blockTemps.stream().filter(temp -> temp.isValid(level, pos, blockstate)).findFirst();
+    }
 }
