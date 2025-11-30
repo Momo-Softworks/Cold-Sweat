@@ -1,5 +1,5 @@
 {
-  "required_mods": ["create"],
+  "required_mods": ["create", "create_sa"],
   "type": "armor",
   "item": {
     "items": ["create_sa:netherite_jetpack_chestplate"]
