@@ -62,16 +62,18 @@ public class NegatableList<T>
 
         return Codec.either(codec.listOf(), listCodec).comapFlatMap(
                 either -> {
-                      if (either.right().isPresent())
-                      {   return DataResult.success(either.right().get());
-                      }
-                      else return DataResult.success(new NegatableList<>(either.left().get(), false, false));
+                    if (either.right().isPresent())
+                    {   return DataResult.success(either.right().get());
+                    }
+                    else
+                    {   return DataResult.success(new NegatableList<>(either.left().get(), true, false));
+                    }
                 },
                 list -> {
-                      if (list.singleton && list.exclusions.isEmpty())
-                      {   return Either.left(list.requirements);
-                      }
-                      else return Either.right(list);
+                    if (list.singleton && list.exclusions.isEmpty())
+                    {   return Either.left(list.requirements);
+                    }
+                    else return Either.right(list);
                 });
     }
 
