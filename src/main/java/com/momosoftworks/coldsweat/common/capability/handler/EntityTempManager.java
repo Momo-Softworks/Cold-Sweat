@@ -773,9 +773,11 @@ public class EntityTempManager
                         // Set duration & tick rate
                         foodModifier.expires(duration).tickRate(duration);
                         // Add the TempModifier
-                        if (foodData.stackable())
-                        {   Temperature.addModifier(player, foodModifier, trait, Placement.Duplicates.ALLOW);
+                        if (foodData.stackLimit() > 1
+                        && Temperature.addModifier(player, foodModifier, trait, Placement.Duplicates.EXACT, foodData.stackLimit(), Placement.AFTER_LAST))
+                        {   // Successfully added modifier
                         }
+                        // Replace first occurrence of modifier
                         else Temperature.addOrReplaceModifier(player, foodModifier, trait, Placement.Duplicates.EXACT);
                     }
                 }
