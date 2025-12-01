@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.api.temperature.effect;
 
+import com.momosoftworks.coldsweat.api.util.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.gui.Overlays;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
@@ -7,6 +8,7 @@ import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.Objects;
 
@@ -36,7 +38,11 @@ public abstract class TempEffect
     }
 
     protected boolean test(Entity entity)
-    {   return Objects.equals(this.entity, entity) && this.bounds().test(Math.round((float) CSMath.clamp(this.getTemperature(), -100, 100)));
+    {
+        return Objects.equals(this.entity, entity)
+            && !entity.isSpectator()
+            && !(entity instanceof Player player && player.isCreative())
+            && this.bounds().test(Math.round((float) CSMath.clamp(this.getTemperature(), -100, 100)));
     }
 
     protected double getTemperature()
