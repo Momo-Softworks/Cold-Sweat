@@ -7,6 +7,7 @@ import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 
 import java.util.Objects;
 
@@ -36,7 +37,11 @@ public abstract class TempEffect
     }
 
     protected boolean test(Entity entity)
-    {   return Objects.equals(this.entity, entity) && this.bounds().test(Math.round((float) CSMath.clamp(this.getTemperature(), -100, 100)));
+    {
+        return Objects.equals(this.entity, entity)
+            && !entity.isSpectator()
+            && !(entity instanceof PlayerEntity && ((PlayerEntity) entity).isCreative())
+            && this.bounds().test(Math.round((float) CSMath.clamp(this.getTemperature(), -100, 100)));
     }
 
     protected double getTemperature()
