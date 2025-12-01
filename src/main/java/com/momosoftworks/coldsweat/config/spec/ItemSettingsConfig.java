@@ -380,12 +380,13 @@ public class ItemSettingsConfig
             FOOD_TEMPERATURES = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Defines items that affect the player's temperature when consumed",
-                         " ├── Format: [[\"item_id\", amount, *\"{nbt}\", *duration], [\"item_id\", amount, *\"{nbt}\", *duration], ...etc]",
+                         " ├── Format: [[\"item_id\", amount, *\"{nbt}\", *duration, *stackable], [...], etc]",
                          " └── [* = optional]",
                          " • item_id: The item's ID (i.e. \"minecraft:apple\").",
                          " • amount: The amount to change the player's temperature by. Negative values are cold, positive values are hot",
                          " • *nbt: If set, the item will only affect the player's temperature if it has the specified NBT tag.",
                          " • *duration: If set, the player's temperature will remain increased/decreased for this amount of time (in ticks).",
+                         " • *stackable: If true, consuming multiple of the same item will stack the temperature effect",
                          " ⌄ ")
                 .defineListAllowEmpty(Arrays.asList("Temperature-Affecting Foods"), () -> Arrays.asList(
                         Arrays.asList("cold_sweat:soul_sprout", -20, "{}", 1200)
