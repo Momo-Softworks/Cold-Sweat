@@ -28,31 +28,31 @@ public class FoodData extends ConfigData implements RequirementHolder, IForgeReg
     final NegatableList<ItemRequirement> item;
     final Double temperature;
     final int duration;
-    final boolean stackable;
+    final int stackLimit;
     final NegatableList<EntityRequirement> entityRequirement;
 
-    public FoodData(NegatableList<ItemRequirement> item, Double temperature, int duration, boolean stackable,
+    public FoodData(NegatableList<ItemRequirement> item, Double temperature, int duration, int stackLimit,
                     NegatableList<EntityRequirement> entityRequirement, NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.temperature = temperature;
         this.item = item;
         this.duration = duration;
-        this.stackable = stackable;
+        this.stackLimit = stackLimit;
         this.entityRequirement = entityRequirement;
     }
 
-    public FoodData(NegatableList<ItemRequirement> item, Double temperature, int duration, boolean stackable,
+    public FoodData(NegatableList<ItemRequirement> item, Double temperature, int duration, int stackLimit,
                     NegatableList<EntityRequirement> entityRequirement)
     {
-        this(item, temperature, duration, stackable, entityRequirement, new NegatableList<>());
+        this(item, temperature, duration, stackLimit, entityRequirement, new NegatableList<>());
     }
 
     public static final Codec<FoodData> CODEC = createCodec(RecordCodecBuilder.mapCodec(instance -> instance.group(
             NegatableList.codec(ItemRequirement.CODEC).optionalFieldOf("item", new NegatableList<>()).forGetter(FoodData::item),
             Codec.DOUBLE.fieldOf("temperature").forGetter(FoodData::temperature),
             Codec.INT.optionalFieldOf("duration", 0).forGetter(FoodData::duration),
-            Codec.BOOL.optionalFieldOf("stackable", false).forGetter(data -> data.stackable),
+            Codec.INT.optionalFieldOf("stack_limit", 1).forGetter(data -> data.stackLimit),
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(FoodData::entityRequirement)
     ).apply(instance, FoodData::new)));
 
@@ -65,8 +65,8 @@ public class FoodData extends ConfigData implements RequirementHolder, IForgeReg
     public int duration()
     {   return duration;
     }
-    public boolean stackable()
-    {   return stackable;
+    public int stackLimit()
+    {   return stackLimit;
     }
     public NegatableList<EntityRequirement> entityRequirement()
     {   return entityRequirement;
@@ -96,10 +96,10 @@ public class FoodData extends ConfigData implements RequirementHolder, IForgeReg
                                         ? new NbtRequirement(NBTHelper.parseCompoundNbt((String) entry.get(2)))
                                         : new NbtRequirement(new CompoundTag());
         int duration = entry.size() > 3 ? ((Number) entry.get(3)).intValue() : 0;
-        boolean stackable = entry.size() > 4 && (Boolean) entry.get(4);
+        int stackLimit = entry.size() > 4 ? (Integer) entry.get(4) : 1;
         ItemRequirement itemRequirement = new ItemRequirement(items, nbtRequirement);
 
-        return new FoodData(new NegatableList<>(itemRequirement), temperature, duration, stackable, new NegatableList<>());
+        return new FoodData(new NegatableList<>(itemRequirement), temperature, duration, stackLimit, new NegatableList<>());
     }
 
     @Override
