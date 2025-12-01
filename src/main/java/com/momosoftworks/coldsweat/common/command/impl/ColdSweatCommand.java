@@ -1,5 +1,7 @@
 package com.momosoftworks.coldsweat.common.command.impl;
 
+import com.electronwill.nightconfig.core.CommentedConfig;
+import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.google.gson.*;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
@@ -9,6 +11,7 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.command.BaseCommand;
 import com.momosoftworks.coldsweat.config.ConfigLoadingHandler;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.config.spec.ItemSettingsConfig;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -18,14 +21,18 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.RegistryOps;
+import net.minecraftforge.fml.config.ConfigTracker;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class ColdSweatCommand extends BaseCommand
 {
@@ -49,6 +56,17 @@ public class ColdSweatCommand extends BaseCommand
     {
         try
         {
+            Method openConfig = ConfigTracker.class.getDeclaredMethod("openConfig", ModConfig.class, Path.class);
+            openConfig.setAccessible(true);
+            for (Set<ModConfig> modConfigs : ConfigTracker.INSTANCE.configSets().values())
+            {
+                for (ModConfig config : modConfigs)
+                {
+                    if (config.getModId().equals(ColdSweat.MOD_ID))
+                    {   openConfig.invoke(ConfigTracker.INSTANCE, config, FMLPaths.CONFIGDIR.get());
+                    }
+                }
+            }
             ConfigLoadingHandler.loadConfigs(context.getSource().registryAccess());
             context.getSource().sendSuccess(Component.translatable("commands.cold_sweat.reload.success"), true);
         }
