@@ -276,11 +276,6 @@ public class IceboxBlockEntity extends HearthBlockEntity implements ITickableTil
     }
 
     @Override
-    protected boolean isFuelChanged()
-    {   return this.ticksExisted % 10 == 0;
-    }
-
-    @Override
     protected Container createMenu(int id, PlayerInventory playerInv)
     {   return new IceboxContainer(id, playerInv, this);
     }
