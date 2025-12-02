@@ -5,6 +5,7 @@ import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.event.RegisterModels;
+import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -84,7 +85,7 @@ public class SoulspringLampItem extends Item
             boolean shouldBeOn = false;
             try
             {
-                if (!(isSelected || living.getOffhandItem() == stack))
+                if (!(isSelected || living.getOffhandItem() == stack || CompatManager.Curios.hasCurio(living, stack)))
                 {   return;
                 }
                 double max = Temperature.get(living, Temperature.Trait.BURNING_POINT);

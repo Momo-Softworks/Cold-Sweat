@@ -218,8 +218,12 @@ public class CompatManager
 
     public static abstract class Curios
     {
-        public static boolean hasCurio(Player player, Item curio)
+        public static boolean hasCurio(LivingEntity player, Item curio)
         {   return CURIOS_LOADED && getCurios(player).stream().map(ItemStack::getItem).anyMatch(item -> item == curio);
+        }
+
+        public static boolean hasCurio(LivingEntity player, ItemStack curio)
+        {   return CURIOS_LOADED && getCurios(player).contains(curio);
         }
 
         public static List<ItemStack> getCurios(LivingEntity entity)
