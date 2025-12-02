@@ -261,11 +261,6 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
     }
 
     @Override
-    protected boolean isFuelChanged()
-    {   return this.ticksExisted % 10 == 0;
-    }
-
-    @Override
     protected AbstractContainerMenu createMenu(int id, Inventory playerInv)
     {   return new IceboxContainer(id, playerInv, this);
     }

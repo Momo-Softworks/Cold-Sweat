@@ -246,11 +246,6 @@ public class BoilerBlockEntity extends HearthBlockEntity
     }
 
     @Override
-    protected boolean isFuelChanged()
-    {   return this.ticksExisted % 10 == 0;
-    }
-
-    @Override
     protected AbstractContainerMenu createMenu(int id, Inventory playerInv)
     {   return new BoilerContainer(id, playerInv, this);
     }
