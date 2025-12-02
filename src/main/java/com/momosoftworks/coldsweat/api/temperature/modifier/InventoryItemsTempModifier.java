@@ -1,13 +1,9 @@
 package com.momosoftworks.coldsweat.api.temperature.modifier;
 
 import com.momosoftworks.coldsweat.api.util.Temperature;
-import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.data.codec.configuration.ItemTempData;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.Slot;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fml.common.Mod;
 
@@ -42,35 +38,9 @@ public class InventoryItemsTempModifier extends TempModifier
         Map<ItemTempData, Double> effectsPerItemTemp = new HashMap<>();
 
         // Get temperature of equipped items
-        for (EquipmentSlot slot : EquipmentSlot.values())
-        {
-            ItemStack stack = entity.getItemBySlot(slot);
-            if (!stack.isEmpty())
-            {
-                Item item = stack.getItem();
-                ConfigSettings.ITEM_TEMPERATURES.get().get(item).forEach(
-                itemData ->
-                {   checkAndAddItemTemp(entity, stack, -1, slot, itemData, effectsPerItemTemp);
-                });
-            }
-        }
-
-        // Get temperature of main inventory items
-        if (entity instanceof Player player)
-        {
-            for (Slot slot : player.inventoryMenu.slots)
-            {
-                ItemStack stack = slot.getItem();
-                if (!stack.isEmpty())
-                {
-                    Item item = stack.getItem();
-                    ConfigSettings.ITEM_TEMPERATURES.get().get(item).forEach(
-                    itemData ->
-                    {   checkAndAddItemTemp(entity, stack, slot.getSlotIndex(), null, itemData, effectsPerItemTemp);
-                    });
-                }
-            }
-        }
+        EntityTempManager.getItemTemperaturesOnEntity(entity).forEach((stack, data) ->
+        {   addItemTemp(entity, stack, data, effectsPerItemTemp);
+        });
 
         for (Map.Entry<ItemTempData, Double> entry : effectsPerItemTemp.entrySet())
         {
@@ -81,20 +51,16 @@ public class InventoryItemsTempModifier extends TempModifier
         }
     }
 
-    private static void checkAndAddItemTemp(LivingEntity entity, ItemStack stack, int slot, EquipmentSlot equipmentSlot,
-                                            ItemTempData itemData, Map<ItemTempData, Double> effectsPerItemTemp)
+    private static void addItemTemp(LivingEntity entity, ItemStack stack, ItemTempData itemData, Map<ItemTempData, Double> effectsPerItemTemp)
     {
-        if (itemData.test(entity, stack, slot, equipmentSlot))
-        {
-            double temp = itemData.temperature() * stack.getCount();
-            double currentEffect = effectsPerItemTemp.getOrDefault(itemData, 0.0);
-            double newEffect = currentEffect + temp;
-            // Clamp against maxEffect bounds
-            newEffect = temp > 0 ? Math.min(itemData.maxEffect(), newEffect) : Math.max(-itemData.maxEffect(), newEffect);
-            // Clamp against minTemp/maxTemp bounds
-            newEffect = Math.max(itemData.minTemp(), Math.min(itemData.maxTemp(), newEffect));
+        double temp = itemData.temperature() * stack.getCount();
+        double currentEffect = effectsPerItemTemp.getOrDefault(itemData, 0.0);
+        double newEffect = currentEffect + temp;
+        // Clamp against maxEffect bounds
+        newEffect = temp > 0 ? Math.min(itemData.maxEffect(), newEffect) : Math.max(-itemData.maxEffect(), newEffect);
+        // Clamp against minTemp/maxTemp bounds
+        newEffect = Math.max(itemData.minTemp(), Math.min(itemData.maxTemp(), newEffect));
 
-            effectsPerItemTemp.put(itemData, newEffect);
-        }
+        effectsPerItemTemp.put(itemData, newEffect);
     }
 }
