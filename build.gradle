@@ -202,7 +202,7 @@ dependencies {
     compileOnly fg.deobf("mezz.jei:jei-${mc_version}-forge:${jei_version}")
 
     // Runtime mods
-    //runtimeOnly fg.deobf("curse.maven:spark-361579:4738952")
+    runtimeOnly fg.deobf("curse.maven:spark-361579:4738952")
     runtimeOnly fg.deobf("curse.maven:biomes-o-plenty-220318:4764804")
     runtimeOnly fg.deobf("curse.maven:terrablender-563928:5378180")
     runtimeOnly fg.deobf("curse.maven:packet-fixer-689467:5416166")
