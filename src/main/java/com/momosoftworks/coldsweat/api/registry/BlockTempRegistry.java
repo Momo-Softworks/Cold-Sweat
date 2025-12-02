@@ -1,16 +1,15 @@
 package com.momosoftworks.coldsweat.api.registry;
 
 import com.google.common.collect.Multimap;
-import com.google.common.collect.MultimapBuilder;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.ConfiguredBlockTemp;
+import com.momosoftworks.coldsweat.util.math.RegistryMultiMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -18,7 +17,7 @@ import java.util.stream.Collectors;
 public class BlockTempRegistry
 {
     public static final List<BlockTemp> BLOCK_TEMPS = new ArrayList<>();
-    public static final Multimap<Block, BlockTemp> MAPPED_BLOCKS = MultimapBuilder.hashKeys().linkedHashSetValues().build();
+    public static final Multimap<Block, BlockTemp> MAPPED_BLOCKS = new RegistryMultiMap<>();
     public static final BlockTemp DEFAULT_BLOCK_TEMP = new BlockTemp()
     {
         @Override
