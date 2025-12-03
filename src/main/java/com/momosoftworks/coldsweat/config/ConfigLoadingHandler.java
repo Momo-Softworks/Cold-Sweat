@@ -220,7 +220,7 @@ public class ConfigLoadingHandler
                                 .stream().map(holder ->
                                 {
                                     ColdSweat.LOGGER.info("Enabling dimension {} for soulspring lamp", holder.value());
-                                    return holder.value();
+                                    return holder;
                                 }).toList());
 
         ConfigSettings.INSULATION_BLACKLIST.get()
@@ -232,13 +232,13 @@ public class ConfigLoadingHandler
                                     return holder.value();
                                 }).toList());
 
-        ConfigSettings.HEARTH_POTION_BLACKLIST.get()
+        ConfigSettings.HEARTH_POTION_BLACKLIST.get(registryAccess)
                 .addAll(registryAccess.registryOrThrow(Registries.MOB_EFFECT)
                                 .getTag(ModEffectTags.HEARTH_BLACKLISTED).orElseThrow()
                                 .stream().map(holder ->
                                 {
                                     ColdSweat.LOGGER.info("Adding effect {} to hearth potion blacklist", holder.value());
-                                    return holder.value();
+                                    return holder;
                                 }).toList());
 
         /*

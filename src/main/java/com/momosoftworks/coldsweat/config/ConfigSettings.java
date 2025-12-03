@@ -51,10 +51,7 @@ import org.joml.Vector2i;
 import javax.annotation.Nullable;
 import java.io.*;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -164,7 +161,7 @@ public class ConfigSettings
     public static final DynamicHolder<Integer> WATERSKIN_USES;
     public static final DynamicHolder<Double> SOULSPRING_LAMP_STRENGTH;
 
-    public static final DynamicHolder<List<DimensionType>> LAMP_DIMENSIONS;
+    public static final DynamicHolder<List<Holder<DimensionType>>> LAMP_DIMENSIONS;
 
     public static final DynamicHolder<Multimap<Item, FuelData>> BOILER_FUEL;
     public static final DynamicHolder<Multimap<Item, FuelData>> ICEBOX_FUEL;
@@ -172,7 +169,7 @@ public class ConfigSettings
     public static final DynamicHolder<Multimap<Item, FuelData>> SOULSPRING_LAMP_FUEL;
 
     public static final DynamicHolder<Boolean> HEARTH_POTIONS_ENABLED;
-    public static final DynamicHolder<List<MobEffect>> HEARTH_POTION_BLACKLIST;
+    public static final DynamicHolder<List<Holder<MobEffect>>> HEARTH_POTION_BLACKLIST;
 
     public static final DynamicHolder<Boolean> HEAT_DRAINS_BACKTANK;
     public static final DynamicHolder<Boolean> COLD_DRAINS_BACKTANK;
@@ -454,11 +451,15 @@ public class ConfigSettings
         SyncType.ONE_WAY);
 
         HEARTH_POTIONS_ENABLED = addSetting(ColdSweat.createKey("hearth_potions_enabled"), () -> true, holder -> holder.set(ItemSettingsConfig.ALLOW_POTIONS_IN_HEARTH.get()));
-        HEARTH_POTION_BLACKLIST = addSetting(ColdSweat.createKey("hearth_potion_blacklist"), ArrayList::new,
-                                             holder -> holder.get().addAll(ItemSettingsConfig.HEARTH_POTION_BLACKLIST.get()
-                                                       .stream()
-                                                       .map(entry -> BuiltInRegistries.MOB_EFFECT.get(ResourceLocation.parse(entry)))
-                                                       .collect(ArrayList::new, List::add, List::addAll)));
+        HEARTH_POTION_BLACKLIST = addSettingWithRegistries(ColdSweat.createKey("hearth_potion_blacklist"), ArrayList::new, (holder, registryAccess) ->
+        {
+            List<Holder<MobEffect>> effects = ItemSettingsConfig.HEARTH_POTION_BLACKLIST.get()
+                                        .stream()
+                                        .map(entry -> registryAccess.registryOrThrow(Registries.MOB_EFFECT).getHolder(ResourceLocation.parse(entry)).orElse(null))
+                                        .filter(Objects::nonNull)
+                                        .collect(ArrayList::new, List::add, List::addAll);
+            holder.get(registryAccess).addAll(effects);
+        });
 
         TriConsumer<CSConfigSpec.ConfigValue<List<? extends List<?>>>, DynamicHolder<Multimap<Item, InsulatorData>>, Insulation.Slot> insulatorAdder =
         (config, holder, slot) ->
@@ -610,11 +611,15 @@ public class ConfigSettings
 
         SOULSPRING_LAMP_STRENGTH = addSetting(ColdSweat.createKey("soulspring_lamp_strength"), () -> 0.6d, holder -> holder.set(ItemSettingsConfig.SOULSPRING_LAMP_STRENGTH.get()));
 
-        LAMP_DIMENSIONS = addSettingWithRegistries(ColdSweat.createKey("valid_lamp_dimensions"), ArrayList::new,
-                                                   (holder, registryAccess) -> holder.get(registryAccess).addAll(new ArrayList<>(ItemSettingsConfig.SOULSPRING_LAMP_DIMENSIONS.get()
-                                                                           .stream()
-                                                                           .map(entry -> registryAccess.registryOrThrow(Registries.DIMENSION_TYPE).get(ResourceLocation.parse(entry)))
-                                                                           .collect(ArrayList::new, List::add, List::addAll))));
+        LAMP_DIMENSIONS = addSettingWithRegistries(ColdSweat.createKey("valid_lamp_dimensions"), ArrayList::new, (holder, registryAccess) ->
+        {
+            List<Holder<DimensionType>> dimensions = new ArrayList<>(ItemSettingsConfig.SOULSPRING_LAMP_DIMENSIONS.get()
+                .stream()
+                .map(entry -> registryAccess.registryOrThrow(Registries.DIMENSION_TYPE).getHolder(ResourceLocation.parse(entry)).orElse(null))
+                .filter(Objects::nonNull)
+                .collect(ArrayList::new, List::add, List::addAll));
+            holder.get(registryAccess).addAll(dimensions);
+        });
 
         HEAT_DRAINS_BACKTANK = addSetting(ColdSweat.createKey("heat_drains_backtank"), () -> true, holder ->
         {   if (CompatManager.isCreateLoaded()) holder.set(ItemSettingsConfig.HEAT_DRAINS_BACKTANK.get());

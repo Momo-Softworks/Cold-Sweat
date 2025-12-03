@@ -93,7 +93,7 @@ public class SoulspringLampItem extends Item
                               .map(mod -> mod.getLastInput(Temperature.Trait.WORLD)).orElseGet(() -> Temperature.get(living, Temperature.Trait.WORLD));
 
                 // Is in valid dimension
-                if ((ConfigSettings.LAMP_DIMENSIONS.get(level.registryAccess()).contains(level.dimensionType()))
+                if ((ConfigSettings.LAMP_DIMENSIONS.get(level.registryAccess()).contains(level.dimensionTypeRegistration()))
                 // Is world temp more than max
                 && temp > max && getFuel(stack) > 0)
                 {
