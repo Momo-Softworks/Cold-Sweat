@@ -111,7 +111,7 @@ repositories {
     }
     maven {
         name = "Registrate"
-        url "https://maven.tterrag.com/"
+        url "https://maven.ithundxr.dev/snapshots"
     }
 }
 
@@ -129,7 +129,7 @@ dependencies {
     // Create (Compat)
     implementation "curse.maven:create-328085:7149903"
     compileOnly("net.createmod.ponder:Ponder-NeoForge-1.21.1:1.0.39")
-    compileOnly "com.tterrag.registrate:Registrate:MC1.20-1.3.0"
+    compileOnly "com.tterrag.registrate:Registrate:MC1.21-1.3.0+67"
 
     // KubeJS (Compat)
     compileOnly "dev.latvian.mods:kubejs-neoforge:${kubejs_version}"
