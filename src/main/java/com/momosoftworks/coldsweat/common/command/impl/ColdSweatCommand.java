@@ -18,14 +18,21 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.RegistryOps;
+import net.neoforged.fml.config.ConfigTracker;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.fml.loading.FMLPaths;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 
 public class ColdSweatCommand extends BaseCommand
 {
@@ -49,13 +56,25 @@ public class ColdSweatCommand extends BaseCommand
     {
         try
         {
+            Method loadConfig = ConfigTracker.class.getDeclaredMethod("loadConfig", ModConfig.class, Path.class, Function.class);
+            Field configsField = ConfigTracker.class.getDeclaredField("configsByMod");
+            loadConfig.setAccessible(true);
+            configsField.setAccessible(true);
+
+            ConcurrentHashMap<String, List<ModConfig>> configsByMod = (ConcurrentHashMap<String, List<ModConfig>>) configsField.get(ConfigTracker.INSTANCE);
+            for (ModConfig config : configsByMod.get(ColdSweat.MOD_ID))
+            {
+                loadConfig.invoke(null, config, FMLPaths.CONFIGDIR.get().resolve(config.getFileName()),
+                                  (Function<ModConfig, ModConfigEvent>) ModConfigEvent.Loading::new);
+            }
             ConfigLoadingHandler.loadConfigs(context.getSource().registryAccess());
             context.getSource().sendSuccess(() -> Component.translatable("commands.cold_sweat.reload.success"), true);
         }
         catch (Exception e)
         {
             context.getSource().sendFailure(Component.translatable("commands.cold_sweat.reload.failure", e.getMessage()));
-            ColdSweat.LOGGER.error("Error reloading Cold Sweat configs", e);
+            ColdSweat.LOGGER.error("Error reloading Cold Sweat configs", e.getMessage());
+            e.printStackTrace();
         }
         return 1;
     }
