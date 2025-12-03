@@ -6,6 +6,7 @@ import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.FriendlyByteBuf;
 import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
+import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -17,7 +18,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Objects;
-import java.util.stream.StreamSupport;
 
 public class HearthContainer extends AbstractContainerMenu
 {
@@ -35,8 +35,18 @@ public class HearthContainer extends AbstractContainerMenu
             {
                 if (te.getItemFuel(stack) != 0 || stack.is(Items.MILK_BUCKET)) return true;
                 // Check if the potion is blacklisted
-                PotionContents potioncontents = stack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
-                return StreamSupport.stream(potioncontents.getAllEffects().spliterator(), false).noneMatch(eff -> ConfigSettings.HEARTH_POTION_BLACKLIST.get().contains(eff.getEffect()));
+                if (stack.has(DataComponents.POTION_CONTENTS))
+                {
+                    PotionContents potioncontents = stack.get(DataComponents.POTION_CONTENTS);
+                    for (MobEffectInstance effect : potioncontents.getAllEffects())
+                    {
+                        if (ConfigSettings.HEARTH_POTION_BLACKLIST.get().contains(effect.getEffect()))
+                        {   return false;
+                        }
+                    }
+                    return true;
+                }
+                return false;
             }
         });
 
