@@ -581,13 +581,13 @@ public class ConfigSettings
         {
             Multimap<Item, ItemTempData> dataMap = ConfigHelper.parseTomlRegistry(ItemSettingsConfig.ITEM_TEMPERATURES,
                                                                                   ItemTempData::fromToml,
-                                                                                       data -> data.item().flatten(ItemRequirement::items),
+                                                                                  data -> data.item().flatten(ItemRequirement::items),
                                                                                   BuiltInRegistries.ITEM, ModRegistries.ITEM_TEMP_DATA);
             holder.get().putAll(dataMap);
         },
-                                             ExtraCodecs.builtinMultimapCodec(BuiltInRegistries.ITEM, ItemTempData.CODEC),
-                                             (saver) -> {},
-                                             SyncType.ONE_WAY);
+        ExtraCodecs.builtinMultimapCodec(BuiltInRegistries.ITEM, ItemTempData.CODEC),
+        (saver) -> {},
+        SyncType.ONE_WAY);
 
         WATERSKIN_CONSUME_STRENGTH = addSyncedSetting(ColdSweat.createKey("waterskin_consume_strength"), () -> 50, holder -> holder.set(ItemSettingsConfig.WATERSKIN_CONSUME_STRENGTH.get()),
         Codec.INT,
