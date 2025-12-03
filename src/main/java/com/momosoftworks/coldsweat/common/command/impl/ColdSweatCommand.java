@@ -18,14 +18,20 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
+import net.minecraftforge.fml.config.ConfigTracker;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.loading.FMLPaths;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.FileWriter;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ColdSweatCommand extends BaseCommand
 {
@@ -49,6 +55,15 @@ public class ColdSweatCommand extends BaseCommand
     {
         try
         {
+            Method openConfig = ConfigTracker.class.getDeclaredMethod("openConfig", ModConfig.class, Path.class);
+            Field configsField = ConfigTracker.class.getDeclaredField("configsByMod");
+            openConfig.setAccessible(true);
+            configsField.setAccessible(true);
+
+            ConcurrentHashMap<String, Map<ModConfig.Type, ModConfig>> configsByMod = (ConcurrentHashMap<String, Map<ModConfig.Type, ModConfig>>) configsField.get(ConfigTracker.INSTANCE);
+            for (ModConfig config : configsByMod.get(ColdSweat.MOD_ID).values())
+            {   openConfig.invoke(null, config, FMLPaths.CONFIGDIR.get());
+            }
             ConfigLoadingHandler.loadConfigs(context.getSource().registryAccess());
             context.getSource().sendSuccess(new TranslationTextComponent("commands.cold_sweat.reload.success"), true);
         }
