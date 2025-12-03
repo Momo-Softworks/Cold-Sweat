@@ -47,6 +47,7 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.EventBus;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -60,6 +61,7 @@ import net.minecraftforge.registries.RegistryBuilder;
 
 import java.io.File;
 import java.io.FileReader;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.file.Path;
 import java.util.*;
@@ -146,8 +148,16 @@ public class ConfigLoadingHandler
                 MinecraftForge.EVENT_BUS.post(addRegistriesEvent);
                 // Re-close the event bus if it was closed before
                 if (busWasClosed)
-                {   ColdSweat.LOGGER.info("The event bus was started early to gather Cold Sweat registries; it will now be stopped again until the correct loading phase.");
-                    MinecraftForge.EVENT_BUS.shutdown();
+                {
+                    ColdSweat.LOGGER.info("The event bus was started early to gather Cold Sweat registries; it will now be stopped again until the correct loading phase.");
+                    try
+                    {   Field shutdown = EventBus.class.getDeclaredField("shutdown");
+                        shutdown.setAccessible(true);
+                        shutdown.set(MinecraftForge.EVENT_BUS, true);
+                    }
+                    catch (Exception e)
+                    {   ColdSweat.LOGGER.error("Failed to re-shutdown the event bus after gathering Cold Sweat registries", e);
+                    }
                 }
 
                 // Add registries via dummy NewRegistry event
