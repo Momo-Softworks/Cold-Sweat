@@ -47,6 +47,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.EventBus;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -144,14 +145,15 @@ public class ConfigLoadingHandler
             NeoForge.EVENT_BUS.post(addRegistriesEvent);
             // Re-close the event bus if it was closed before
             if (busWasClosed)
-            {   ColdSweat.LOGGER.info("The event bus was started early to gather Cold Sweat registries; it will now be stopped again until the correct loading phase.");
+            {
+                ColdSweat.LOGGER.info("The event bus was started early to gather Cold Sweat registries; it will now be stopped again until the correct loading phase.");
                 try
-                {   Field shutdown = NeoForge.EVENT_BUS.getClass().getDeclaredField("shutdown");
+                {   Field shutdown = EventBus.class.getDeclaredField("shutdown");
                     shutdown.setAccessible(true);
                     shutdown.set(NeoForge.EVENT_BUS, true);
                 }
                 catch (Exception e)
-                {   ColdSweat.LOGGER.error("Failed to re-close NeoForge event bus after early start", e);
+                {   ColdSweat.LOGGER.error("Failed to re-shutdown the event bus after gathering Cold Sweat registries", e);
                 }
             }
 
