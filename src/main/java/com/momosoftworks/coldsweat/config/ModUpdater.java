@@ -242,10 +242,10 @@ public class ModUpdater
 
             replaceConfigSetting(ItemSettingsConfig.ICEBOX_FUELS, "minecraft:snow_block", list -> list.set(1, 40));
 
-            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, List.of("create:blaze_burner", 5,  3, "f", 30, "blaze=smouldering", "", 400));
-            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, List.of("create:blaze_burner", 10, 4, "f", 30, "blaze=fading", "", 400));
-            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, List.of("create:blaze_burner", 15, 5, "f", 45, "blaze=kindled", "", 400));
-            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, List.of("create:blaze_burner", 20, 6, "f", 60, "blaze=seething", "", 400));
+            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, Arrays.asList("create:blaze_burner", 5,  3, "f", 30, "blaze=smouldering", "", 400));
+            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, Arrays.asList("create:blaze_burner", 10, 4, "f", 30, "blaze=fading", "", 400));
+            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, Arrays.asList("create:blaze_burner", 15, 5, "f", 45, "blaze=kindled", "", 400));
+            addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, Arrays.asList("create:blaze_burner", 20, 6, "f", 60, "blaze=seething", "", 400));
         }
 
         // Update config version
