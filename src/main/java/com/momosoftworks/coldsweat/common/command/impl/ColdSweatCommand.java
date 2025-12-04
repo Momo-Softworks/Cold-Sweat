@@ -62,7 +62,7 @@ public class ColdSweatCommand extends BaseCommand
 
             ConcurrentHashMap<String, Map<ModConfig.Type, ModConfig>> configsByMod = (ConcurrentHashMap<String, Map<ModConfig.Type, ModConfig>>) configsField.get(ConfigTracker.INSTANCE);
             for (ModConfig config : configsByMod.get(ColdSweat.MOD_ID).values())
-            {   openConfig.invoke(null, config, FMLPaths.CONFIGDIR.get());
+            {   openConfig.invoke(ConfigTracker.INSTANCE, config, FMLPaths.CONFIGDIR.get());
             }
             ConfigLoadingHandler.loadConfigs(context.getSource().registryAccess());
             context.getSource().sendSuccess(new TranslationTextComponent("commands.cold_sweat.reload.success"), true);
