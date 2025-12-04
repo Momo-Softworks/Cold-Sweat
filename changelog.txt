@@ -3572,3 +3572,48 @@ Fixes:
 * Fixed the "units" field in block temperature TOML configs not being respected
       - Also fixes blocks being many times hotter or colder than they should be
 - Fixed the top half of the hearth appearing after a slight delay when placing
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.4-b06c
+* Added integration with JEI
+      - Insulation items have "sewing" recipes, showing how they can be applied to armor
+      - Fuel items for the hearth, boiler, and icebox have recipes showing how long they last
+* Added temperature properties to some components from Create:
+      - Pipes and fluid tanks now emit temperature if they contain fluids that emit temperature
+      - Boilers now emit temperature based on the temperature of the water inside them
+      - Blaze burners now emit heat when fueled
+- The netherite jetpack from Create: Stuff n' Additions now grants 90% heat dampening when the full set is worn
+- Adjusted the fuel values of some items:
+      - Coal: 37 -> 55
+      - Logs: 37 -> 40
+      - Dried Kelp Block: 92 -> 40
+      - Coal Block: 333 -> 500
+      - Snow Block: 100 -> 40
+      * These changes will be applied automatically upon updating
+- Being wet now extinguishes fire, and being on fire now dries the player
+- Added setting to change how often the player takes damage when overheating/freezing
+      - This is the base value, which will still be increased when the player is in very extreme temperatures
+- Changed the name of "Temperature Damage" to "Temp. Damage" so it fits better in the config menu
+- Create's netherite backtank no longer provides cold protection by default
+
+Fixes:
+* Fixed hunger draining due to trying to regenerate frozen health
+* Fixed temperature effects affecting players in creative or spectator mode
+- Fixed item temperatures not working in curio slots
+- Fixed temp region configs sometimes not taking precedence over the default configuration
+* Fixed half-frozen hearts rendering incorrectly in some cases
+* Fixed removed configs persisting after "/coldsweat reload" is executed
+- Fixed insulation tooltip sometimes extending past the tooltip background
+- Fixed the "Nullify in Peaceful" setting being incorrect named "Damage Scaling" in the TOML config
+- (1.21) Fixed the hearth accepting non-fuel items
+- (1.20+) Fixed shields and other equipable non-armor items being accepted in the sewing table
+- (1.16) Fixed the shiver effect behaving differently at different framerates
+
+Technical Changes:
+- The "fillSlots" setting for insulator KubeJS configs now defaults to "true" for consistency with other config formats
+- Food temperatures now have the ability to stack
+      - If multiple of the same item are consumed, their temperature effects will stack
+      - The maximum number of stacks can be controlled, and defaults to 1 (no stacking)
+- TOML configs are now re-parsed when using the "/coldsweat reload" command
+      - Before, Cold Sweat relied on Forge's built-in config tracker, which didn't always detect updates to files
