@@ -871,28 +871,32 @@ public class EntityTempManager
         return insulators;
     }
 
-    public static Map<ItemStack, Pair<ItemTempData, Either<Integer, SlotType>>> getInventoryTemperaturesOnEntity(PlayerEntity player)
+    public static Map<ItemStack, Pair<ItemTempData, Either<Integer, SlotType>>> getInventoryTemperaturesOnEntity(LivingEntity entity)
     {
         Map<ItemStack, Pair<ItemTempData, Either<Integer, SlotType>>> tempItems = new HashMap<>();
         /*
          Inventory items
          */
-        for (int i = 0; i < player.inventory.items.size(); i++)
+        if (entity instanceof PlayerEntity)
         {
-            ItemStack stack = player.inventory.items.get(i);
-            if (stack.isEmpty()) continue;
-            int slotIndex = i;
-            ConfigSettings.ITEM_TEMPERATURES.get().get(stack.getItem()).forEach(temp ->
-            {   tempItems.put(stack, Pair.of(temp, Either.left(slotIndex)));
-            });
+            PlayerEntity player = (PlayerEntity) entity;
+            for (int i = 0; i < player.inventory.items.size(); i++)
+            {
+                ItemStack stack = player.inventory.items.get(i);
+                if (stack.isEmpty()) continue;
+                int slotIndex = i;
+                ConfigSettings.ITEM_TEMPERATURES.get().get(stack.getItem()).forEach(temp ->
+                {   tempItems.put(stack, Pair.of(temp, Either.left(slotIndex)));
+                });
+            }
         }
+
         /*
          Armor items
          */
         for (EquipmentSlotType slot : EquipmentSlotType.values())
         {
-            if (slot.getType() != EquipmentSlotType.Group.ARMOR) continue;
-            ItemStack stack = player.getItemBySlot(slot);
+            ItemStack stack = entity.getItemBySlot(slot);
             if (stack.isEmpty()) continue;
             SlotType slotType = SlotType.fromEquipment(slot);
 
@@ -903,7 +907,7 @@ public class EntityTempManager
         /*
          Curios
          */
-        for (ItemStack curio : CompatManager.Curios.getCurios(player))
+        for (ItemStack curio : CompatManager.Curios.getCurios(entity))
         {
             ConfigSettings.ITEM_TEMPERATURES.get().get(curio.getItem()).forEach(temp ->
             {   tempItems.put(curio, Pair.of(temp, Either.right(SlotType.CURIO)));
@@ -912,7 +916,7 @@ public class EntityTempManager
         /*
          Offhand
          */
-        ItemStack offhand = player.getOffhandItem();
+        ItemStack offhand = entity.getOffhandItem();
         if (!offhand.isEmpty())
         {
             ConfigSettings.ITEM_TEMPERATURES.get().get(offhand.getItem()).forEach(temp ->
