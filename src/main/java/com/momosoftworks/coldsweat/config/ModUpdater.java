@@ -2,8 +2,6 @@ package com.momosoftworks.coldsweat.config;
 
 import com.google.common.io.Files;
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.api.temperature.modifier.InventoryItemsTempModifier;
-import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.config.spec.CSConfigSpec;
 import com.momosoftworks.coldsweat.config.spec.ItemSettingsConfig;
@@ -244,6 +242,12 @@ public class ModUpdater
             addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, List.of("create:blaze_burner", 10, 4, "f", 30, "blaze=fading", "", 400));
             addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, List.of("create:blaze_burner", 15, 5, "f", 45, "blaze=kindled", "", 400));
             addConfigSetting(WorldSettingsConfig.BLOCK_TEMPERATURES, List.of("create:blaze_burner", 20, 6, "f", 60, "blaze=seething", "", 400));
+
+            addConfigSetting(WorldSettingsConfig.BIOME_TEMPERATURES, List.of("minecraft:plains", 59, 82, "F"));
+            replaceConfigSetting(WorldSettingsConfig.BIOME_TEMPERATURES, "minecraft:river", list ->
+            {   list.set(1, 59);
+                list.set(2, 82);
+            });
         }
 
         // Update config version
