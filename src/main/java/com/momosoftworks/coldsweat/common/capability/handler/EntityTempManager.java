@@ -921,7 +921,6 @@ public class EntityTempManager
          */
         for (EquipmentSlot slot : EquipmentSlot.values())
         {
-            if (slot.getType() != EquipmentSlot.Type.ARMOR) continue;
             ItemStack stack = entity.getItemBySlot(slot);
             if (stack.isEmpty()) continue;
             SlotType slotType = SlotType.fromEquipment(slot);
