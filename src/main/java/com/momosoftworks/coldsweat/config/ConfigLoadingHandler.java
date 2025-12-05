@@ -93,7 +93,7 @@ public class ConfigLoadingHandler
 
         // User configs (TOML)
         ColdSweat.LOGGER.info("Loading TOML configs...");
-        ConfigSettings.load(registryAccess, true);
+        ConfigSettings.load(registryAccess, false);
         TempModifierInit.buildBlockConfigs();
 
         // Java BlockTemps
