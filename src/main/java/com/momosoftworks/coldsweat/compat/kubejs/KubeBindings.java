@@ -10,7 +10,7 @@ import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.util.serialization.DynamicHolder;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
-import dev.latvian.mods.kubejs.level.BlockContainerJS;
+import dev.latvian.mods.kubejs.level.LevelBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
@@ -100,7 +100,7 @@ public class KubeBindings
         return heatInsulation;
     }
 
-    public static double getBlockTemperature(BlockContainerJS block)
+    public static double getBlockTemperature(LevelBlock block)
     {   return WorldHelper.getBlockTemperature(block.getLevel(), block.getBlockState());
     }
 

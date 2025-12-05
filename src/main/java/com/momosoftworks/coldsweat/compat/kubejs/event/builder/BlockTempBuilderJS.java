@@ -7,13 +7,10 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.requirement.BlockRequirement;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
-import dev.latvian.mods.kubejs.level.BlockContainerJS;
+import dev.latvian.mods.kubejs.level.CachedLevelBlock;
+import dev.latvian.mods.kubejs.level.LevelBlock;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -34,7 +31,7 @@ public class BlockTempBuilderJS
     public Temperature.Units units = Temperature.Units.MC;
     public boolean logarithmic = false;
     public Map<String, Object> state = new HashMap<>();
-    public Predicate<BlockContainerJS> predicate = blockInstance -> true;
+    public Predicate<LevelBlock> predicate = blockInstance -> true;
 
     public BlockTempBuilderJS()
     {}
@@ -75,7 +72,7 @@ public class BlockTempBuilderJS
         return this;
     }
 
-    public BlockTempBuilderJS blockPredicate(Predicate<BlockContainerJS> predicate)
+    public BlockTempBuilderJS blockPredicate(Predicate<LevelBlock> predicate)
     {
         this.predicate = predicate;
         return this;
@@ -132,7 +129,7 @@ public class BlockTempBuilderJS
 
             @Override
             public boolean isValid(Level level, BlockPos pos, BlockState state)
-            {   return this.hasBlock(state.getBlock()) && predicate.test(new BlockContainerJS(level, pos)) && stateRequirement.test(state);
+            {   return this.hasBlock(state.getBlock()) && predicate.test(new CachedLevelBlock(level, pos)) && stateRequirement.test(state);
             }
         };
     }
