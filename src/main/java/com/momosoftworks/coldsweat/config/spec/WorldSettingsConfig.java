@@ -178,10 +178,11 @@ public class WorldSettingsConfig
                      " • highTemp: The temperature of the biome at noon",
                      " • *units: The units of the temperature (\"f\", \"c\", or \"mc\"). Defaults to Minecraft units (mc))")
             .defineListAllowEmpty(Arrays.asList("Biome Temperatures"), () -> ListBuilder.begin(
+                            Arrays.asList("minecraft:plains", 59, 82, "F"),
                             Arrays.asList("minecraft:soul_sand_valley", 53, 53, "F"),
                             Arrays.asList("minecraft:tall_birch_forest", 58, 72, "F"),
                             Arrays.asList("minecraft:tall_birch_hills", 58, 72, "F"),
-                            Arrays.asList("minecraft:river", 60, 70, "F"),
+                            Arrays.asList("minecraft:river", 59, 82, "F"),
                             Arrays.asList("minecraft:swamp", 72, 84, "F", -5),
                             Arrays.asList("minecraft:savanna", 70, 95, "F"),
                             Arrays.asList("minecraft:savanna_plateau", 76, 98, "F"),
