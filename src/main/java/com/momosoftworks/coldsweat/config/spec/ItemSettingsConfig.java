@@ -479,13 +479,13 @@ public class ItemSettingsConfig
                     if (!(it instanceof List<?>)) return false;
                     List<?> list = ((List<?>) it);
 
-                    return CSMath.betweenInclusive(list.size(), 4, 6)
-                        && list.get(0) instanceof String
+                    return list.get(0) instanceof String
                         && list.get(1) instanceof Number
                         && list.get(2) instanceof String
                         && list.get(3) instanceof String
                         && (list.size() < 5 || list.get(4) instanceof String)
-                        && (list.size() < 6 || list.get(5) instanceof Number);
+                        && (list.size() < 6 || list.get(5) instanceof Number)
+                        && (list.size() < 7 || list.get(6) instanceof Number);
                 });
 
         BUILDER.pop();
