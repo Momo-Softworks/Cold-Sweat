@@ -3554,6 +3554,9 @@ Fixes:
       - Boilers now emit temperature based on the temperature of the water inside them
       - Blaze burners now emit heat when fueled
 - The netherite jetpack from Create: Stuff n' Additions now grants 90% heat dampening when the full set is worn
+- Create's netherite backtank no longer provides cold protection by default
+* (1.21) Added compatibility with Weather, Storms, & Tornadoes mod
+      - This functionality is ported from 1.20 now that the mod is available for 1.21
 - Adjusted the fuel values of some items:
       - Coal: 37 -> 55
       - Logs: 37 -> 40
@@ -3565,7 +3568,8 @@ Fixes:
 - Added setting to change how often the player takes damage when overheating/freezing
       - This is the base value, which will still be increased when the player is in very extreme temperatures
 - Changed the name of "Temperature Damage" to "Temp. Damage" so it fits better in the config menu
-- Create's netherite backtank no longer provides cold protection by default
+- Adjusted the temperature of plains biomes to be warmer at night
+- Adjusted the temperature of river biomes to match plains biomes
 
 Fixes:
 * Fixed hunger draining due to trying to regenerate frozen health
