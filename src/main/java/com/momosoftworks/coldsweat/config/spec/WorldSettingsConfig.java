@@ -167,9 +167,10 @@ public class WorldSettingsConfig
                      " • *units: The units of the temperature (\"f\", \"c\", or \"mc\"). Defaults to Minecraft units (mc))",
                      " • *waterTemp: The temperature of water in the biome")
             .defineListAllowEmpty(List.of("Biome Temperatures"), () -> ListBuilder.begin(
+                            List.of("minecraft:plains", 59, 82, "F"),
                             List.of("minecraft:soul_sand_valley", 53, 53, "F"),
                             List.of("minecraft:old_growth_birch_forest", 58, 72, "F"),
-                            List.of("minecraft:river", 60, 70, "F"),
+                            List.of("minecraft:river", 59, 82, "F"),
                             List.of("minecraft:swamp", 72, 84, "F", -5),
                             List.of("minecraft:savanna", 70, 95, "F"),
                             List.of("minecraft:savanna_plateau", 76, 98, "F"),
