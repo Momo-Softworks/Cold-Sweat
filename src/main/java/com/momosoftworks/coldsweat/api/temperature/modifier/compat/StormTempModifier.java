@@ -2,8 +2,14 @@ package com.momosoftworks.coldsweat.api.temperature.modifier.compat;
 
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.world.entity.LivingEntity;
+import weather2.ServerTickHandler;
+import weather2.weathersystem.WeatherManagerServer;
+import weather2.weathersystem.storm.StormObject;
+import weather2.weathersystem.storm.WeatherObject;
+import weather2.weathersystem.storm.WeatherObjectParticleStorm;
 
 import java.util.function.Function;
 
@@ -17,7 +23,7 @@ public class StormTempModifier extends TempModifier
     @Override
     protected Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
-        /*if (!entity.level().isClientSide())
+        if (!entity.level().isClientSide())
         {
             WeatherManagerServer weatherManager = ServerTickHandler.getWeatherManagerFor(entity.level().dimension());
             float windSpeed = weatherManager.getWindManager().getWindSpeedPositional(entity.blockPosition());
@@ -49,7 +55,7 @@ public class StormTempModifier extends TempModifier
             {   stormTemp = 0;
             }
             return temp -> temp - stormTemp - windSpeed / 5;
-        }*/
+        }
         return temp -> temp;
     }
 }

@@ -118,6 +118,7 @@ repositories {
 dependencies {
     compileOnly "curse.maven:tough-as-nails-246391:5833252"
 
+    // Compat Mods
     compileOnly "curse.maven:thirst-was-taken-679270:7017923"
     implementation "curse.maven:serene-seasons-291874:6182596"
     implementation "curse.maven:glitchcore-955399:5660740"
@@ -125,6 +126,7 @@ dependencies {
     implementation "curse.maven:curios-309927:6529130"
     implementation "curse.maven:iceberg-520110:6423863"
     compileOnly "curse.maven:primal-winter-393321:5811975"
+    implementation "curse.maven:weather-storms-tornadoes-237746:6926103"
 
     // Create (Compat)
     implementation "curse.maven:create-328085:7178775"
