@@ -61,28 +61,24 @@ public class BiomeTempModifier extends TempModifier
             // Get the holder for the biome
             Biome biome = level.getBiomeManager().getBiome(blockPos);
 
-            if (!dimension.hasCeiling())
-            {
-                BiomeTempData biomeTempData = ConfigSettings.BIOME_TEMPS.get(level.registryAccess()).get(biome);
-                if (CSMath.getIfNotNull(biomeTempData, BiomeTempData::isDisabled, false))
-                {   continue;
-                }
-                // Biome temp with time of day
-                double biomeTemp = WorldHelper.getBiomeTemperature(level, biome);
-
-                // Primal Winter compat
-                if (CompatManager.isPrimalWinterLoaded() && biomeTempData != null)
-                {
-                    boolean isWinterBiome = Config.COMMON.isWinterBiome(biome.getRegistryName());
-                    boolean isWinterDimension = Config.COMMON.isWinterDimension(level.dimension().getRegistryName());
-                    if (isWinterBiome && isWinterDimension)
-                    {   biomeTemp = Math.min(biomeTemp, biomeTemp / 2);
-                    }
-                }
-                worldTemp += biomeTemp;
+            BiomeTempData biomeTempData = ConfigSettings.BIOME_TEMPS.get(level.registryAccess()).get(biome);
+            if (CSMath.getIfNotNull(biomeTempData, BiomeTempData::isDisabled, false))
+            {   continue;
             }
-            // If dimension has ceiling (don't use time)
-            else worldTemp += CSMath.averagePair(WorldHelper.getBiomeTemperatureRange(level, biome));
+            // Biome temp with time of day
+            double biomeTemp = WorldHelper.getBiomeTemperature(level, biome);
+
+            // Primal Winter compat for configured biomes
+            if (CompatManager.isPrimalWinterLoaded() && biomeTempData != null)
+            {
+                boolean isWinterBiome = Config.COMMON.isWinterBiome(biome.getRegistryName());
+                boolean isWinterDimension = Config.COMMON.isWinterDimension(level.dimension().getRegistryName());
+                if (isWinterBiome && isWinterDimension)
+                {   biomeTemp = -0.5;
+                }
+            }
+            // Add biome temperature
+            worldTemp += biomeTemp;
 
             // Tally number of biomes
             biomeCount++;

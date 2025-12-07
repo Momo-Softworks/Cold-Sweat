@@ -621,7 +621,14 @@ public abstract class WorldHelper
     }
 
     public static double getTimeMultiplier(IWorld level)
-    {   return Math.sin(level.dayTime() / (12000 / Math.PI));
+    {
+        if (level.dimensionType().hasCeiling())
+        {   return 0.5;
+        }
+        if (level.dimensionType().hasFixedTime())
+        {   return CSMath.<OptionalLong>getField(level.dimensionType(), "field_236010_o_").getAsLong();
+        }
+        return Math.sin(level.dayTime() / (12000 / Math.PI));
     }
 
     public static double getWaterTemperatureAt(World level, BlockPos pos)

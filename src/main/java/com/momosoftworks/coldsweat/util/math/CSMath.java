@@ -13,8 +13,10 @@ import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3i;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 import javax.annotation.Nullable;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
@@ -999,5 +1001,23 @@ public class CSMath
             case WEST : { return Rotation.COUNTERCLOCKWISE_90; }
             default : { return Rotation.NONE; }
         }
+    }
+
+    public static <T> T getField(Class clazz, Object instance, String field)
+    {
+        try
+        {
+            Field f = ObfuscationReflectionHelper.findField(clazz, field);
+            f.setAccessible(true);
+            return (T) f.get(instance);
+        }
+        catch (IllegalAccessException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    public static <T> T getField(Object instance, String field)
+    {   return getField(instance.getClass(), instance, field);
     }
 }
