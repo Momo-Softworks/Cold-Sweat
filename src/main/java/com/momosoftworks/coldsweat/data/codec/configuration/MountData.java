@@ -84,7 +84,9 @@ public class MountData extends ConfigData implements RequirementHolder, IForgeRe
                           ? coldInsul
                           : ((Number) entry.get(2)).doubleValue();
 
-        return new MountData(new NegatableList<>(new EntityRequirement(entities)), new NegatableList<>(), coldInsul, hotInsul, Map.of());
+        MountData result = new MountData(new NegatableList<>(new EntityRequirement(entities)), new NegatableList<>(), coldInsul, hotInsul, Map.of());
+        result.setConfigType(Type.TOML);
+        return result;
     }
 
     @Override

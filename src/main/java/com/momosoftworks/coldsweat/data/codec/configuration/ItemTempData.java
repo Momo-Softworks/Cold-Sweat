@@ -204,8 +204,10 @@ public class ItemTempData extends ConfigData implements RequirementHolder, IForg
         // compile item requirement
         ItemRequirement itemRequirement = new ItemRequirement(items, nbtRequirement);
 
-        return new ItemTempData(new NegatableList<>(itemRequirement), List.of(Either.right(slotType)), temp, trait, maxEffect, maxTemp, minTemp,
-                                new NegatableList<>(), new AttributeModifierMap(), new FastMap<>());
+        ItemTempData result = new ItemTempData(new NegatableList<>(itemRequirement), List.of(Either.right(slotType)), temp, trait, maxEffect, maxTemp, minTemp,
+                                               new NegatableList<>(), new AttributeModifierMap(), new FastMap<>());
+        result.setConfigType(Type.TOML);
+        return result;
     }
 
     public String getSlotRangeName()
