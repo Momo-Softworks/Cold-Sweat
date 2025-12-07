@@ -22,8 +22,8 @@ public class ConfiguredBlockTemp extends BlockTemp
 
     public ConfiguredBlockTemp(BlockTempData data)
     {
-        super(data.getTemperature() < 0 ? -data.getMaxEffect() : Double.NEGATIVE_INFINITY,
-              data.getTemperature() > 0 ? data.getMaxEffect() : Double.POSITIVE_INFINITY,
+        super(-data.getMaxEffect(),
+              data.getMaxEffect(),
               data.getMinTemp(),
               data.getMaxTemp(),
               data.range(),
