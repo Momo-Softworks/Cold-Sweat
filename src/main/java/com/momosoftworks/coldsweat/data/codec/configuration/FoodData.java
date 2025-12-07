@@ -95,7 +95,9 @@ public class FoodData extends ConfigData implements RequirementHolder
         int stackLimit = entry.size() > 4 ? (Integer) entry.get(4) : 1;
         ItemRequirement itemRequirement = new ItemRequirement(items, componentsRequirement);
 
-        return new FoodData(new NegatableList<>(itemRequirement), temperature, duration, stackLimit, new NegatableList<>());
+        FoodData result = new FoodData(new NegatableList<>(itemRequirement), temperature, duration, stackLimit, new NegatableList<>());
+        result.setConfigType(Type.TOML);
+        return result;
     }
 
     @Override

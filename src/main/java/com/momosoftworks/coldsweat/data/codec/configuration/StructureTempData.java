@@ -83,7 +83,9 @@ public class StructureTempData extends ConfigData
         double temp = ((Number) entry.get(1)).doubleValue();
         Temperature.Units units = entry.size() == 3 ? Temperature.Units.valueOf(((String) entry.get(2)).toUpperCase()) : Temperature.Units.MC;
 
-        return new StructureTempData(structures, temp, units, isOffset);
+        StructureTempData result = new StructureTempData(structures, temp, units, isOffset);
+        result.setConfigType(Type.TOML);
+        return result;
     }
 
     @Override

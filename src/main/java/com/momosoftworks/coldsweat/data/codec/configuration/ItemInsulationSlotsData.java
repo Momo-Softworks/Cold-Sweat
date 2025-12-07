@@ -68,7 +68,9 @@ public class ItemInsulationSlotsData extends ConfigData implements RequirementHo
                                                           : new ItemComponentsRequirement();
         ItemRequirement itemRequirement = new ItemRequirement(items, componentsRequirement);
 
-        return new ItemInsulationSlotsData(new NegatableList<>(itemRequirement), slots);
+        ItemInsulationSlotsData result = new ItemInsulationSlotsData(new NegatableList<>(itemRequirement), slots);
+        result.setConfigType(Type.TOML);
+        return result;
     }
 
     @Override

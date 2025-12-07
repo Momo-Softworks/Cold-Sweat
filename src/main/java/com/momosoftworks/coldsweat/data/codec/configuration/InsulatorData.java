@@ -174,8 +174,10 @@ public class InsulatorData extends ConfigData implements RequirementHolder
 
         ItemRequirement itemRequirement = new ItemRequirement(items, components);
 
-        return new InsulatorData(new NegatableList<>(itemRequirement), slot, insulation, new NegatableList<>(),
-                                 new AttributeModifierMap(), new HashMap<>(), fillSlots, false, Optional.empty());
+        InsulatorData result = new InsulatorData(new NegatableList<>(itemRequirement), slot, insulation, new NegatableList<>(),
+                                                 new AttributeModifierMap(), new HashMap<>(), fillSlots, false, Optional.empty());
+        result.setConfigType(Type.TOML);
+        return result;
     }
 
     public InsulatorData copy()
