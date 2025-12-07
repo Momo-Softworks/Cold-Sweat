@@ -67,7 +67,9 @@ public class ItemInsulationSlotsData extends ConfigData implements RequirementHo
                                         : new NbtRequirement(new CompoundNBT());
         ItemRequirement itemRequirement = new ItemRequirement(items, nbtRequirement);
 
-        return new ItemInsulationSlotsData(new NegatableList<>(itemRequirement), slots);
+        ItemInsulationSlotsData result = new ItemInsulationSlotsData(new NegatableList<>(itemRequirement), slots);
+        result.setConfigType(Type.TOML);
+        return result;
     }
 
     @Override

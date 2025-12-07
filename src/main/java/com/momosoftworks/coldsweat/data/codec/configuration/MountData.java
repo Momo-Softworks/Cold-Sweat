@@ -83,7 +83,9 @@ public class MountData extends ConfigData implements RequirementHolder
                           ? coldInsul
                           : ((Number) entry.get(2)).doubleValue();
 
-        return new MountData(new NegatableList<>(new EntityRequirement(entities)), new NegatableList<>(), coldInsul, hotInsul, new HashMap<>());
+        MountData result = new MountData(new NegatableList<>(new EntityRequirement(entities)), new NegatableList<>(), coldInsul, hotInsul, new HashMap<>());
+        result.setConfigType(Type.TOML);
+        return result;
     }
 
     @Override

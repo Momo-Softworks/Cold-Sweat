@@ -194,9 +194,11 @@ public class BlockTempData extends ConfigData
 
         BlockRequirement blockRequirement = new BlockRequirement(blocks, blockPredicates, nbtRequirement, Arrays.asList(), Optional.empty());
 
-        return new BlockTempData(new NegatableList<>(blockRequirement), blockTemp, blockRange, maxEffect, true,
-                                 new WorldTempRequirement(maxTemperature), new WorldTempRequirement(minTemperature),
-                                 units, new NegatableList<>(), new NegatableList<>(), logarithmic, Optional.empty());
+        BlockTempData result = new BlockTempData(new NegatableList<>(blockRequirement), blockTemp, blockRange, maxEffect, true,
+                                                 new WorldTempRequirement(maxTemperature), new WorldTempRequirement(minTemperature),
+                                                 units, new NegatableList<>(), new NegatableList<>(), logarithmic, Optional.empty());
+        result.setConfigType(Type.TOML);
+        return result;
     }
 
     @Override

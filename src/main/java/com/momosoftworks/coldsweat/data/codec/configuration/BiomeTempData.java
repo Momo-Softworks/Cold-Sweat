@@ -123,7 +123,9 @@ public class BiomeTempData extends ConfigData
             if (entry.size() >= 4) units = Temperature.Units.fromID(((String) entry.get(3)).toUpperCase());
             if (entry.size() >= 5) waterTemp = Temperature.convert(((Number) entry.get(4)).doubleValue(), units, Temperature.Units.MC, true);
         }
-        return new BiomeTempData(biomes, min, max, units, waterTemp, isOffset, isDisabled);
+        BiomeTempData result = new BiomeTempData(biomes, min, max, units, waterTemp, isOffset, isDisabled);
+        result.setConfigType(Type.TOML);
+        return result;
     }
 
     @Override

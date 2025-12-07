@@ -134,7 +134,9 @@ public class EntityTempData extends ConfigData implements RequirementHolder
 
         EntityRequirement requirement = new EntityRequirement(entities);
 
-        return new EntityTempData(new NegatableList<>(requirement), temp, range, units, new NegatableList<>(), maxEffect, maxTemp, minTemp, false);
+        EntityTempData result = new EntityTempData(new NegatableList<>(requirement), temp, range, units, new NegatableList<>(), maxEffect, maxTemp, minTemp, false);
+        result.setConfigType(Type.TOML);
+        return result;
     }
 
     @Override

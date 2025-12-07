@@ -77,7 +77,9 @@ public class FuelData extends ConfigData implements RequirementHolder
                                         : new NbtRequirement(new CompoundNBT());
         ItemRequirement itemRequirement = new ItemRequirement(items, nbtRequirement);
 
-        return new FuelData(new NegatableList<>(itemRequirement), fuelType, fuel);
+        FuelData result = new FuelData(new NegatableList<>(itemRequirement), fuelType, fuel);
+        result.setConfigType(Type.TOML);
+        return result;
     }
 
     @Override
