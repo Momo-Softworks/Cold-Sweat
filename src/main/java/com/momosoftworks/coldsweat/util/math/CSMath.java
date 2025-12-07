@@ -13,8 +13,10 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
@@ -946,5 +948,23 @@ public class CSMath
             case WEST -> { return Rotation.COUNTERCLOCKWISE_90; }
             default -> { return Rotation.NONE; }
         }
+    }
+
+    public static <T> T getField(Class<?> clazz, Object instance, String field)
+    {
+        try
+        {
+            Field f = ObfuscationReflectionHelper.findField(clazz, field);
+            f.setAccessible(true);
+            return (T) f.get(instance);
+        }
+        catch (IllegalAccessException e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    public static <T> T getField(Object instance, String field)
+    {   return getField(instance.getClass(), instance, field);
     }
 }
