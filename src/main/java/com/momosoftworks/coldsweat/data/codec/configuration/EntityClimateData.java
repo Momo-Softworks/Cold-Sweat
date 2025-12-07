@@ -87,7 +87,9 @@ public class EntityClimateData extends ConfigData implements RequirementHolder
         double rate = entry.size() > 3 ? ((Number) entry.get(3)).doubleValue() : 1.0;
         Temperature.Units units = entry.size() > 4 ? Temperature.Units.fromID(((String) entry.get(4)).toLowerCase(Locale.ROOT))
                                                    : Temperature.Units.MC;
-        return new EntityClimateData(new NegatableList<>(new EntityRequirement(entities)), minTemp, maxTemp, rate, units);
+        EntityClimateData result = new EntityClimateData(new NegatableList<>(new EntityRequirement(entities)), minTemp, maxTemp, rate, units);
+        result.setConfigType(Type.TOML);
+        return result;
     }
 
     @Override
