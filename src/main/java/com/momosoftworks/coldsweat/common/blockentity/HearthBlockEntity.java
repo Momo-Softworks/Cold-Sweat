@@ -1061,7 +1061,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     protected void setFuel(FuelType fuelType, int amount, boolean update)
     {
         FuelFluidHandler handler = this.getFuelHandler(fuelType);
-        FluidStack fluid = handler.getFluid();
+        FluidStack fluid = handler.getFluidStackOrDefault();
         int oldAmount = fluid.getAmount();
         fluid.setAmount(amount);
         if (oldAmount != amount && update)
@@ -1071,7 +1071,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
 
     protected void onFuelChanged(FuelType fuelType)
     {
-        boolean nowEmpty = this.getFuelHandler(fuelType).getFluid().isEmpty();
+        boolean nowEmpty = this.getFuelHandler(fuelType).getFluidStack().isEmpty();
         if (nowEmpty && this.level != null)
         {   this.level.playSound(null, this.getBlockPos(), this.getFuelDepleteSound(), SoundCategory.BLOCKS, 1, (float) Math.random() * 0.2f + 0.9f);
         }
@@ -1231,8 +1231,8 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
         ItemStackHelper.loadAllItems(tag, this.items);
         this.loadEffects(tag);
-        this.getFuelHandler(FuelType.COLD).setFluid(FluidStack.loadFluidStackFromNBT(tag.getCompound("ColdFuel")));
-        this.getFuelHandler(FuelType.HOT).setFluid(FluidStack.loadFluidStackFromNBT(tag.getCompound("HotFuel")));
+        this.getFuelHandler(FuelType.COLD).setFluidStack(FluidStack.loadFluidStackFromNBT(tag.getCompound("ColdFuel")));
+        this.getFuelHandler(FuelType.HOT).setFluidStack(FluidStack.loadFluidStackFromNBT(tag.getCompound("HotFuel")));
         this.insulationLevel = tag.getInt("InsulationLevel");
     }
 
@@ -1241,8 +1241,8 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     {   super.save(tag);
         ItemStackHelper.saveAllItems(tag, this.items);
         saveEffects(tag);
-        tag.put("ColdFuel", this.getFuelHandler(FuelType.COLD).getFluid().writeToNBT(new CompoundNBT()));
-        tag.put("HotFuel", this.getFuelHandler(FuelType.HOT).getFluid().writeToNBT(new CompoundNBT()));
+        tag.put("ColdFuel", this.getFuelHandler(FuelType.COLD).getFluidStack().writeToNBT(new CompoundNBT()));
+        tag.put("HotFuel", this.getFuelHandler(FuelType.HOT).getFluidStack().writeToNBT(new CompoundNBT()));
         tag.putInt("InsulationLevel", this.insulationLevel);
 
         return tag;
@@ -1449,13 +1449,23 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         {   return fuel.getAmount();
         }
 
-        public FluidStack getFluid()
+        public FluidStack getFluidStack()
         {   return fuel;
         }
-        public void setFluid(FluidStack fluidStack)
+        public FluidStack getFluidStackOrDefault()
+        {
+            if (this.fuel.getRawFluid() == Fluids.EMPTY)
+            {   return new FluidStack(this.getDefaultFluid(), 0);
+            }
+            return this.fuel;
+        }
+        public void setFluidStack(FluidStack fluidStack)
         {   this.fuel = fluidStack;
         }
 
+        public Fluid getFluid()
+        {   return this.fuel.getRawFluid();
+        }
         public Fluid getDefaultFluid()
         {   return this.fuelType.getFluid();
         }
