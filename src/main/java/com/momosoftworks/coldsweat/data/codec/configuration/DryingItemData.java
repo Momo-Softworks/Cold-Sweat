@@ -82,7 +82,7 @@ public class DryingItemData extends ConfigData implements RequirementHolder
                                  : new ResourceLocation("minecraft:block.wet_grass.step");
         ItemRequirement input = new ItemRequirement(items, new NbtRequirement());
 
-        DryingItemData result = new DryingItemData(new NegatableList<>(input), new ItemStack(result), new NegatableList<>(), ForgeRegistries.SOUND_EVENTS.getValue(sound));
+        DryingItemData result = new DryingItemData(new NegatableList<>(input), new ItemStack(useResult), new NegatableList<>(), ForgeRegistries.SOUND_EVENTS.getValue(sound));
         result.setConfigType(Type.TOML);
         return result;
     }
