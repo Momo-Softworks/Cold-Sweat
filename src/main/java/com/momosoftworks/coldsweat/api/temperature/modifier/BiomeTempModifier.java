@@ -65,29 +65,24 @@ public class BiomeTempModifier extends TempModifier
             if (holder.is(Tags.Biomes.IS_UNDERGROUND)) continue;
             if (holder.unwrapKey().isEmpty()) continue;
 
-            if (!dimension.hasCeiling() && !level.dimensionType().hasFixedTime())
-            {
-                BiomeTempData biomeTempData = ConfigSettings.BIOME_TEMPS.get(level.registryAccess()).get(holder);
-                if (CSMath.getIfNotNull(biomeTempData, BiomeTempData::isDisabled, false))
-                {   continue;
-                }
-                // Biome temp with time of day
-                double biomeTemp = WorldHelper.getBiomeTemperature(level, holder);
-
-                // Primal Winter compat
-                if (CompatManager.isPrimalWinterLoaded() && biomeTempData != null)
-                {
-                    boolean isWinterBiome = ForgePrimalWinter.CONFIG.isWinterBiome(holder.unwrapKey().get());
-                    boolean isWinterDimension = ForgePrimalWinter.CONFIG.isWinterDimension(level.dimension());
-                    if (isWinterBiome && isWinterDimension)
-                    {   biomeTemp = Math.min(biomeTemp, biomeTemp / 2);
-                    }
-                }
-                // Add biome temperature
-                worldTemp += biomeTemp;
+            BiomeTempData biomeTempData = ConfigSettings.BIOME_TEMPS.get(level.registryAccess()).get(holder);
+            if (CSMath.getIfNotNull(biomeTempData, BiomeTempData::isDisabled, false))
+            {   continue;
             }
-            // If dimension has ceiling (don't use time)
-            else worldTemp += CSMath.averagePair(WorldHelper.getBiomeTemperatureRange(level, holder));
+            // Biome temp with time of day
+            double biomeTemp = WorldHelper.getBiomeTemperature(level, holder);
+
+            // Primal Winter compat for configured biomes
+            if (CompatManager.isPrimalWinterLoaded() && biomeTempData != null)
+            {
+                boolean isWinterBiome = ForgePrimalWinter.CONFIG.isWinterBiome(holder.unwrapKey().get());
+                boolean isWinterDimension = ForgePrimalWinter.CONFIG.isWinterDimension(level.dimension());
+                if (isWinterBiome && isWinterDimension)
+                {   biomeTemp = -0.5;
+                }
+            }
+            // Add biome temperature
+            worldTemp += biomeTemp;
 
             // Tally number of biomes
             biomeCount++;
