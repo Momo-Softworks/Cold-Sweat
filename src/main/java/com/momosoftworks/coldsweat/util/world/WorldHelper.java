@@ -617,7 +617,14 @@ public abstract class WorldHelper
     }
 
     public static double getTimeMultiplier(LevelAccessor level)
-    {   return Math.sin(level.dayTime() / (12000 / Math.PI));
+    {
+        if (level.dimensionType().hasCeiling())
+        {   return 0.5;
+        }
+        if (level.dimensionType().hasFixedTime())
+        {   return level.dimensionType().fixedTime().getAsLong();
+        }
+        return Math.sin(level.dayTime() / (12000 / Math.PI));
     }
 
     public static double getWaterTemperatureAt(Level level, BlockPos pos)
