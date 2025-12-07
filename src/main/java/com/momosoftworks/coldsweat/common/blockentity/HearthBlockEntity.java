@@ -87,6 +87,7 @@ import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -1036,7 +1037,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     protected void addFuel(FuelType fuelType, int amount, boolean update)
     {
         FuelFluidHandler handler = this.getFuelHandler(fuelType);
-        FluidStack fillStack = new FluidStack(handler.getFluid().getFluid(), amount);
+        FluidStack fillStack = new FluidStack(handler.getFluidOrDefault(), amount);
         handler.fill(fillStack, IFluidHandler.FluidAction.EXECUTE, update);
     }
 
@@ -1049,9 +1050,15 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     protected void setFuel(FuelType fuelType, int amount, boolean update)
     {
         FuelFluidHandler handler = this.getFuelHandler(fuelType);
-        FluidStack fluid = handler.getFluid();
-        int oldAmount = fluid.getAmount();
-        fluid.setAmount(amount);
+        FluidStack fluidStack = handler.getFluidStack();
+        int oldAmount = fluidStack.getAmount();
+        // Set fluid amount
+        if (fluidStack.isEmpty())
+        {   fluidStack = new FluidStack(handler.getFluidOrDefault(), amount);
+            handler.setFluidStack(fluidStack);
+        }
+        else fluidStack.setAmount(amount);
+        // Update
         if (oldAmount != amount && update)
         {   this.onFuelChanged(fuelType);
         }
@@ -1059,7 +1066,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
 
     protected void onFuelChanged(FuelType fuelType)
     {
-        boolean nowEmpty = this.getFuelHandler(fuelType).getFluid().isEmpty();
+        boolean nowEmpty = this.getFuelHandler(fuelType).getFluidStack().isEmpty();
         if (nowEmpty && this.level != null)
         {   this.level.playSound(null, this.getBlockPos(), this.getFuelDepleteSound(), SoundSource.BLOCKS, 1, (float) Math.random() * 0.2f + 0.9f);
         }
@@ -1219,8 +1226,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         this.items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
         ContainerHelper.loadAllItems(tag, this.items, registries);
         this.loadEffects(tag);
-        this.getFuelHandler(FuelType.COLD).setFluid(FluidStack.parseOptional(registries, tag.getCompound("ColdFuel")));
-        this.getFuelHandler(FuelType.HOT).setFluid(FluidStack.parseOptional(registries, tag.getCompound("HotFuel")));
+        this.getFuelHandler(FuelType.COLD).setFluidStack(FluidStack.parseOptional(registries, tag.getCompound("ColdFuel")));
+        this.getFuelHandler(FuelType.HOT).setFluidStack(FluidStack.parseOptional(registries, tag.getCompound("HotFuel")));
         this.insulationLevel = tag.getInt("InsulationLevel");
     }
 
@@ -1229,11 +1236,11 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     {   super.saveAdditional(tag, registries);
         ContainerHelper.saveAllItems(tag, this.items, registries);
         saveEffects(tag);
-        FluidStack coldFuel = this.getFuelHandler(FuelType.COLD).getFluid();
+        FluidStack coldFuel = this.getFuelHandler(FuelType.COLD).getFluidStack();
         if (!coldFuel.isEmpty())
         {   tag.put("ColdFuel", coldFuel.save(registries));
         }
-        FluidStack hotFuel = this.getFuelHandler(FuelType.HOT).getFluid();
+        FluidStack hotFuel = this.getFuelHandler(FuelType.HOT).getFluidStack();
         if (!hotFuel.isEmpty())
         {   tag.put("HotFuel", hotFuel.save(registries));
         }
@@ -1429,13 +1436,24 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         {   return fuel.getAmount();
         }
 
-        public FluidStack getFluid()
+        public FluidStack getFluidStack()
         {   return fuel;
         }
-        public void setFluid(FluidStack fluidStack)
+        public void setFluidStack(FluidStack fluidStack)
         {   this.fuel = fluidStack;
         }
 
+        public Fluid getFluid()
+        {   return this.fuel.getFluid();
+        }
+        public Fluid getFluidOrDefault()
+        {
+            Fluid fluid = this.getFluid();
+            if (fluid == Fluids.EMPTY)
+            {   return this.getDefaultFluid();
+            }
+            return fluid;
+        }
         public Fluid getDefaultFluid()
         {   return this.fuelType.getFluid();
         }

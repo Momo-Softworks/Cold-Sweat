@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import org.joml.Vector3d;
 
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
@@ -962,6 +963,21 @@ public class CSMath
             case SOUTH -> { return Rotation.CLOCKWISE_180; }
             case WEST -> { return Rotation.CLOCKWISE_90; }
             default -> { return Rotation.NONE; }
+        }
+    }
+
+    public static <T> T getField(Class<?> clazz, Object instance, String field)
+    {
+        try
+        {
+            Field f = clazz.getDeclaredField(field);
+            f.setAccessible(true);
+            return (T) f.get(instance);
+        }
+        catch (NoSuchFieldException | IllegalAccessException e)
+        {
+            e.printStackTrace();
+            return null;
         }
     }
 }
