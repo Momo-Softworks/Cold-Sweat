@@ -74,18 +74,17 @@ public class DryingItemData extends ConfigData implements RequirementHolder
         }
         NegatableList<Either<TagKey<Item>, Item>> items = ConfigHelper.getItems((String) entry.get(0));
         if (items.isEmpty()) return null;
-        Item result = ForgeRegistries.ITEMS.getValue(new ResourceLocation((String) entry.get(1)));
-        if (result == null) return null;
+        Item useResult = ForgeRegistries.ITEMS.getValue(new ResourceLocation((String) entry.get(1)));
+        if (useResult == null) return null;
 
         ResourceLocation sound = entry.size() > 2
                                  ? new ResourceLocation((String) entry.get(2))
                                  : new ResourceLocation("minecraft:block.wet_grass.step");
+        ItemRequirement input = new ItemRequirement(items, new NbtRequirement());
 
-        if (result != null)
-        {   ItemRequirement input = new ItemRequirement(items, new NbtRequirement());
-            return new DryingItemData(new NegatableList<>(input), new ItemStack(result), new NegatableList<>(), ForgeRegistries.SOUND_EVENTS.getValue(sound));
-        }
-        else return null;
+        DryingItemData result = new DryingItemData(new NegatableList<>(input), new ItemStack(useResult), new NegatableList<>(), ForgeRegistries.SOUND_EVENTS.getValue(sound));
+        result.setConfigType(Type.TOML);
+        return result;
     }
 
     @Override

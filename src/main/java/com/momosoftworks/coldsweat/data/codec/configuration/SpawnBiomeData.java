@@ -97,9 +97,11 @@ public class SpawnBiomeData extends ConfigData
         }
         NegatableList<Either<TagKey<Biome>, OptionalHolder<Biome>>> biomes = ConfigHelper.parseRegistryItems(Registry.BIOME_REGISTRY, registryAccess, (String) entry.get(0));
         if (biomes.isEmpty()) return null;
-        return new SpawnBiomeData(biomes, new NegatableList<>(Either.right(entityType)),
-                                  MobCategory.CREATURE, ((Number) entry.get(1)).intValue(),
-                                  new IntegerBounds(1, 1), new NegatableList<>());
+        SpawnBiomeData result =  new SpawnBiomeData(biomes, new NegatableList<>(Either.right(entityType)),
+                                                    MobCategory.CREATURE, ((Number) entry.get(1)).intValue(),
+                                                    new IntegerBounds(1, 1), new NegatableList<>());
+        result.setConfigType(Type.TOML);
+        return result;
     }
 
     @Override

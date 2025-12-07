@@ -96,7 +96,10 @@ public class DimensionTempData extends ConfigData
         if (dimensions.isEmpty()) return null;
         double temp = ((Number) entry.get(1)).doubleValue();
         Temperature.Units units = entry.size() == 3 ? Temperature.Units.valueOf(((String) entry.get(2)).toUpperCase()) : Temperature.Units.MC;
-        return new DimensionTempData(dimensions, temp, temp, units, isOffset);
+
+        DimensionTempData result = new DimensionTempData(dimensions, temp, temp, units, isOffset);
+        result.setConfigType(Type.TOML);
+        return result;
     }
 
     @Override
