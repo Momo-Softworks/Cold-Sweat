@@ -56,7 +56,7 @@ public class NegatableList<T>
     /**
      * Provides a codec that can be either a qualified list or a list of elements.
      */
-    public static <T> Codec<NegatableList<T>> listCodec(Codec<T> codec)
+    public static <T> Codec<NegatableList<T>> listCodec(Codec<T> codec, boolean requireAll)
     {
         Codec<NegatableList<T>> listCodec = getCodec(codec);
 
@@ -66,7 +66,7 @@ public class NegatableList<T>
                     {   return DataResult.success(either.right().get());
                     }
                     else
-                    {   return DataResult.success(new NegatableList<>(either.left().get(), true, false));
+                    {   return DataResult.success(new NegatableList<>(either.left().get(), requireAll, false));
                     }
                 },
                 list -> {
@@ -75,6 +75,9 @@ public class NegatableList<T>
                     }
                     else return Either.right(list);
                 });
+    }
+    public static <T> Codec<NegatableList<T>> listCodec(Codec<T> codec)
+    {   return listCodec(codec, false);
     }
 
     public static <T, B extends ByteBuf> StreamCodec<B, NegatableList<T>> streamCodec(StreamCodec<B, T> codec)
