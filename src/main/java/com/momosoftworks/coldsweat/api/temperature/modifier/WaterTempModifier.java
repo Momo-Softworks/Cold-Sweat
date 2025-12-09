@@ -66,7 +66,8 @@ public class WaterTempModifier extends TempModifier
         else
         {   addAmount = 0;
         }
-        double dryAmount = CSMath.blendExp(configDrySpeed / 1.5, configDrySpeed * 5, worldTemp, minWorldTemp, maxWorldTemp, 20);
+        double dryAmount = WorldHelper.isInWater(entity) ? 0
+                         : CSMath.blendExp(configDrySpeed / 1.5, configDrySpeed * 5, worldTemp, minWorldTemp, maxWorldTemp, 20);
 
         double tickRate = this.getTickRate() / 5.0;
         double newTemperature = CSMath.shrink(temperature + addAmount * tickRate, dryAmount * tickRate);
