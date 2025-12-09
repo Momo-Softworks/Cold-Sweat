@@ -5,6 +5,7 @@ import com.momosoftworks.coldsweat.core.init.FluidInit;
 import com.momosoftworks.coldsweat.core.init.ItemInit;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModGameRules;
+import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -54,8 +55,8 @@ public abstract class SlushFluid extends ForgeFlowingFluid implements IClientFlu
                 .descriptionId("block.cold_sweat.slush")
                 .canSwim(false)
                 .fallDistanceModifier(0.2f)
-                .sound(SoundActions.BUCKET_FILL, SoundEvents.BUCKET_FILL_LAVA)
-                .sound(SoundActions.BUCKET_EMPTY, SoundEvents.BUCKET_EMPTY_LAVA)
+                .sound(SoundActions.BUCKET_FILL, ModSounds.BUCKET_FILL_SLUSH)
+                .sound(SoundActions.BUCKET_EMPTY, ModSounds.BUCKET_EMPTY_SLUSH)
                 .supportsBoating(true)
                 .canExtinguish(true)
                 .canHydrate(true);

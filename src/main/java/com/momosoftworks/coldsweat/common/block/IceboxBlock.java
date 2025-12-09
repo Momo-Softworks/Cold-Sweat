@@ -7,6 +7,7 @@ import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.util.registries.ModBlockEntities;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
+import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.ParticleStatus;
 import net.minecraft.core.BlockPos;
@@ -138,7 +139,7 @@ public class IceboxBlock extends Block implements EntityBlock
                 }
                 icebox.addColdFuel(itemFuel, true);
 
-                level.playSound(null, pos, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
+                level.playSound(null, pos, ModSounds.BUCKET_EMPTY_SLUSH, SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
             }
             else if (!level.isClientSide && !ChestBlock.isChestBlockedAt(level, pos))
             {   NetworkHooks.openScreen((ServerPlayer) player, icebox, pos);

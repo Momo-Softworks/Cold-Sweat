@@ -6,6 +6,7 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModBlockEntities;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
+import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -131,7 +132,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
                 // Play the fuel filling sound
                 level.playSound(null, pos, itemFuel > 0
                                              ? SoundEvents.BUCKET_EMPTY_LAVA
-                                             : SoundEvents.BUCKET_EMPTY,
+                                             : ModSounds.BUCKET_EMPTY_SLUSH,
                                   SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
             }
             // Open the GUI
