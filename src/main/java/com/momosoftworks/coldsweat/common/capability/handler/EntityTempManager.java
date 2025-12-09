@@ -540,14 +540,9 @@ public class EntityTempManager
                     && WorldHelper.isRainingAt(player.level, player.blockPosition())))
                     {   Temperature.addModifier(player, new WaterTempModifier().tickRate(5), Trait.WORLD, Placement.Duplicates.BY_CLASS);
                     }
-
-                    if (player.isOnFire() && Temperature.hasModifier(player, Trait.WORLD, WaterTempModifier.class))
-                {   player.clearFire();
-                    Temperature.removeModifiers(player, Trait.WORLD, WaterTempModifier.class);
                 }
             }
         }
-    }
 
         @SubscribeEvent
         public static void onTridentUse(LivingEntityUseItemEvent.Stop event)
