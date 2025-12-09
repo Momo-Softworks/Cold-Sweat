@@ -1058,7 +1058,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     protected void addFuel(FuelType fuelType, int amount, boolean update)
     {
         FuelFluidHandler handler = this.getFuelHandler(fuelType);
-        FluidStack fillStack = new FluidStack(handler.getFluid(), amount);
+        FluidStack fillStack = new FluidStack(handler.getFluidOrDefault(), amount);
         handler.fill(fillStack, IFluidHandler.FluidAction.EXECUTE, update);
     }
 
@@ -1071,9 +1071,15 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     protected void setFuel(FuelType fuelType, int amount, boolean update)
     {
         FuelFluidHandler handler = this.getFuelHandler(fuelType);
-        FluidStack fluid = handler.getFluidStackOrDefault();
-        int oldAmount = fluid.getAmount();
-        fluid.setAmount(amount);
+        FluidStack fluidStack = handler.getFluidStack();
+        int oldAmount = fluidStack.getAmount();
+        // Set fluid amount
+        if (fluidStack.isEmpty())
+        {   fluidStack = new FluidStack(handler.getFluidOrDefault(), amount);
+            handler.setFluidStack(fluidStack);
+        }
+        else fluidStack.setAmount(amount);
+        // Update
         if (oldAmount != amount && update)
         {   this.onFuelChanged(fuelType);
         }
@@ -1460,19 +1466,20 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         public FluidStack getFluidStack()
         {   return fuel;
         }
-        public FluidStack getFluidStackOrDefault()
-        {
-            if (this.fuel.getRawFluid() == Fluids.EMPTY)
-            {   return new FluidStack(this.getDefaultFluid(), 0);
-            }
-            return this.fuel;
-        }
         public void setFluidStack(FluidStack fluidStack)
         {   this.fuel = fluidStack;
         }
 
         public Fluid getFluid()
-        {   return this.fuel.getRawFluid();
+        {   return this.fuel.getFluid();
+        }
+        public Fluid getFluidOrDefault()
+        {
+            Fluid fluid = this.getFluid();
+            if (fluid == Fluids.EMPTY)
+            {   return this.getDefaultFluid();
+            }
+            return fluid;
         }
         public Fluid getDefaultFluid()
         {   return this.fuelType.getFluid();
