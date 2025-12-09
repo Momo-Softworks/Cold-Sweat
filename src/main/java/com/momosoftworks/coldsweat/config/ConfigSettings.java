@@ -892,7 +892,7 @@ public class ConfigSettings
             holder.set(Temperature.convert(temp, units, Temperature.Units.MC, false));
         },
         Codec.DOUBLE,
-        (saver) -> WorldSettingsConfig.DEFAULT_WATER_TEMP.set(List.of(saver, DEFAULT_WATER_TEMP_UNITS.getSerializedName())),
+        (saver) -> WorldSettingsConfig.DEFAULT_WATER_TEMP.set(List.of(Temperature.convert(saver, Temperature.Units.MC, DEFAULT_WATER_TEMP_UNITS, false), DEFAULT_WATER_TEMP_UNITS.getSerializedName())),
         SyncType.BOTH_WAYS);
 
         MAX_RAIN_SOAK = addSyncedSetting(ColdSweat.createKey("max_rain_soak"), () -> 1.0, holder -> holder.set(WorldSettingsConfig.MAX_RAIN_SOAK.get()),
