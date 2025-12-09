@@ -2,15 +2,11 @@ package com.momosoftworks.coldsweat.common.block;
 
 import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import com.momosoftworks.coldsweat.common.blockentity.IceboxBlockEntity;
-import com.momosoftworks.coldsweat.core.init.ModBlockEntities;
-import com.momosoftworks.coldsweat.core.init.ModBlocks;
-import com.momosoftworks.coldsweat.core.init.ModItems;
-import com.momosoftworks.coldsweat.core.init.ModParticleTypes;
+import com.momosoftworks.coldsweat.core.init.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.ParticleStatus;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Containers;
@@ -133,7 +129,7 @@ public class IceboxBlock extends Block implements EntityBlock
                 }
                 icebox.addColdFuel(itemFuel, true);
 
-                level.playSound(null, pos, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
+                level.playSound(null, pos, ModSounds.BUCKET_EMPTY_SLUSH.value(), SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
             }
             else if (!level.isClientSide && !ChestBlock.isChestBlockedAt(level, pos))
             {   player.openMenu(icebox, pos);

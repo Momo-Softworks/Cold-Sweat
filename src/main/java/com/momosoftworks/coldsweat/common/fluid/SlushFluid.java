@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.common.fluid;
 import com.momosoftworks.coldsweat.core.init.ModBlocks;
 import com.momosoftworks.coldsweat.core.init.ModFluids;
 import com.momosoftworks.coldsweat.core.init.ModItems;
+import com.momosoftworks.coldsweat.core.init.ModSounds;
 import com.momosoftworks.coldsweat.util.registries.ModGameRules;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
@@ -57,8 +58,8 @@ public abstract class SlushFluid extends BaseFlowingFluid implements IClientFlui
                 .descriptionId("block.cold_sweat.slush")
                 .canSwim(false)
                 .fallDistanceModifier(0.2f)
-                .sound(SoundActions.BUCKET_FILL, SoundEvents.BUCKET_FILL_LAVA)
-                .sound(SoundActions.BUCKET_EMPTY, SoundEvents.BUCKET_EMPTY_LAVA)
+                .sound(SoundActions.BUCKET_FILL, ModSounds.BUCKET_FILL_SLUSH.value())
+                .sound(SoundActions.BUCKET_EMPTY, ModSounds.BUCKET_EMPTY_SLUSH.value())
                 .supportsBoating(true)
                 .canExtinguish(true)
                 .canHydrate(true);

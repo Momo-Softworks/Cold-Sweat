@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.core.init;
 
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.mrbysco.spoiled.registration.RegistryObject;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -52,4 +53,9 @@ public class ModSounds
 
     public static final DeferredHolder<SoundEvent, SoundEvent> ARMOR_EQUIP_CHAMELEON = SOUNDS.register("item.armor.equip_chameleon_scale",
                                               () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "item.armor.equip_chameleon_scale")));
+
+    public static final DeferredHolder<SoundEvent, SoundEvent> BUCKET_FILL_SLUSH = SOUNDS.register("item.bucket.fill_slush",
+                                              () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "item.bucket.fill_slush")));
+    public static final DeferredHolder<SoundEvent, SoundEvent> BUCKET_EMPTY_SLUSH = SOUNDS.register("item.bucket.empty_slush",
+                                              () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "item.bucket.empty_slush")));
 }
