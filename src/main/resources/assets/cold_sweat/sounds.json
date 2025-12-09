@@ -234,5 +234,31 @@
         "stream": true
       }
     ]
+  },
+  "item.bucket.fill_slush":
+  {
+    "subtitle": "subtitles.item.bucket.fill",
+    "sounds":
+    [
+      {
+        "name": "cold_sweat:item/bucket/slush_bucket_fill",
+        "stream": true
+      }
+    ]
+  },
+  "item.bucket.empty_slush":
+  {
+    "subtitle": "subtitles.item.bucket.empty",
+    "sounds":
+    [
+      {
+        "name": "cold_sweat:item/bucket/slush_bucket_empty_0",
+        "stream": true
+      },
+      {
+        "name": "cold_sweat:item/bucket/slush_bucket_empty_1",
+        "stream": true
+      }
+    ]
   }
 }

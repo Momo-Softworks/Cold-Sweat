@@ -52,4 +52,9 @@ public class SoundInit
 
     public static final RegistryObject<SoundEvent> CHAMELEON_ARMOR_EQUIP_SOUND_REGISTRY = SOUNDS.register("item.armor.equip_chameleon_scale",
             () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(ColdSweat.MOD_ID, "item.armor.equip_chameleon_scale")));
+
+    public static final RegistryObject<SoundEvent> BUCKET_FILL_SLUSH = SOUNDS.register("item.bucket.fill_slush",
+                                                                                       () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(ColdSweat.MOD_ID, "item.bucket.fill_slush")));
+    public static final RegistryObject<SoundEvent> BUCKET_EMPTY_SLUSH = SOUNDS.register("item.bucket.empty_slush",
+                                                                                        () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(ColdSweat.MOD_ID, "item.bucket.empty_slush")));
 }
