@@ -1,15 +1,14 @@
 package com.momosoftworks.coldsweat.mixin;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.compat.CompatManager;
-import com.momosoftworks.coldsweat.mixin_public.PublicMixinRegistration;
+import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
+import com.momosoftworks.coldsweat.mixin_public.PublicMixinRegistration;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.RegistryOps;
@@ -25,7 +24,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.io.Reader;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Mixin(RegistryOps.class)
 public class MixinRegistration
@@ -54,7 +52,7 @@ public class MixinRegistration
                         if (json.has("required_mods"))
                         {
                             JsonElement requiredModsField = json.get("required_mods");
-                            NegatableList<String> requiredMods = NegatableList.listCodec(Codec.STRING).parse(JsonOps.INSTANCE, requiredModsField).result().orElse(new NegatableList<>());
+                            NegatableList<String> requiredMods = ConfigData.REQUIRED_MODS_CODEC.parse(JsonOps.INSTANCE, requiredModsField).result().orElse(new NegatableList<>());
                             if (!requiredMods.test(CompatManager::modLoaded))
                             {
                                 ColdSweat.LOGGER.info("Skipping registration of {} {}: required mods not met", registryKey.location(), location);
