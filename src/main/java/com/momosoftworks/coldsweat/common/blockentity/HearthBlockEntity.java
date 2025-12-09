@@ -194,30 +194,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         }
     }
 
-    @SubscribeEvent
-    public void onLevelUnloaded(WorldEvent.Unload event)
-    {
-        if (event.getWorld().equals(this.level))
-        {   this.cleanup();
-        }
-    }
-
-    @SubscribeEvent
-    public static void onChunkUnloaded(ChunkEvent.Unload event)
-    {
-        ChunkAccess chunk = event.getChunk();
-        // Remove all paths in this chunk
-        if (chunk instanceof LevelChunk levelChunk)
-        {
-            for (BlockEntity te : levelChunk.getBlockEntities().values())
-            {
-                if (te instanceof HearthBlockEntity hearth)
-                {   hearth.cleanup();
-                }
-            }
-        }
-    }
-
     /**
      * Range of the Hearth starting from an exit point
      */
@@ -935,6 +911,13 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         this.registerLocation();
         this.checkForSmokestack();
         this.checkInputSignal();
+        this.level.getLightEngine().checkBlock(this.getBlockPos());
+    }
+
+    @Override
+    public void setRemoved()
+    {   super.setRemoved();
+        this.cleanup();
     }
 
     private void registerLocation()
@@ -1359,6 +1342,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
 
     protected void cleanup()
     {
+        hotFuelHolder.invalidate();
+        coldFuelHolder.invalidate();
         HearthSaveDataHandler.HEARTH_POSITIONS.remove(Pair.of(this.getBlockPos(), this.getLevel().dimension().location()));
         MinecraftForge.EVENT_BUS.unregister(this);
         if (this.level.isClientSide)
