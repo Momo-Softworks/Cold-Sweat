@@ -24,6 +24,7 @@ import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
+import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -165,15 +166,31 @@ public class ConfigLoadingHandler
                     try (InputStream inputStream = resource.getInputStream())
                     {
                         JsonObject json = JSONUtils.parse(new InputStreamReader(inputStream));
+                        // Create registry ID
                         String relativePath = resourceLocation.getPath().replace(registryPath, "");
                         relativePath = relativePath.substring(1, relativePath.length() - 5);
                         ResourceLocation registryId = new ResourceLocation(resourceLocation.getNamespace(), relativePath);
                         RegistryKey<? extends ConfigData> registryKey = RegistryKey.create(registry.key(), registryId);
-                        // Create a reader from the input stream
+                        // Check required mods
+                        if (json.has("required_mods"))
+                        {
+                            JsonElement requiredModsField = json.get("required_mods");
+                            NegatableList<String> requiredMods = ConfigData.REQUIRED_MODS_CODEC.parse(JsonOps.INSTANCE, requiredModsField).result().orElse(new NegatableList<>());
+                            if (!requiredMods.test(CompatManager::modLoaded))
+                            {
+                                ColdSweat.LOGGER.info("Skipping registration of {} {}: required mods not met", registry.key().location(), registryId);
+                                continue;
+                            }
+                        }
+                        // Parse input JSON into registry object
                         registry.codec().parse(JsonOps.INSTANCE, json)
                                 .resultOrPartial(ColdSweat.LOGGER::error)
                                 .ifPresent(data ->
                                 {
+                                    if (!data.areRequiredModsLoaded())
+                                    {   ColdSweat.LOGGER.warn("Skipping registration of {} {}: missing required mods", registry.key(), registryId);
+                                        return;
+                                    }
                                     data.setConfigType(ConfigData.Type.JSON);
                                     data.setRegistryKey(registryKey);
                                     ((RegistryHolder) registry).register(registryId, data);
@@ -223,9 +240,6 @@ public class ConfigLoadingHandler
         // Fire pre-registry-loading event
         LoadRegistriesEvent.Pre event = new LoadRegistriesEvent.Pre(registryAccess, registries, REGISTRY_MODIFIERS);
         MinecraftForge.EVENT_BUS.post(event);
-
-        // Remove registries that don't have required loaded mods
-        registries.values().removeIf(data -> !data.areRequiredModsLoaded());
 
         // Remove registry entries that match removal criteria
         modifyRegistries(event.getRegistries());
