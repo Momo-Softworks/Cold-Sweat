@@ -28,7 +28,7 @@ public abstract class ConfigData
     protected NegatableList<String> requiredMods;
     protected ResourceKey registryKey;
 
-    protected static final Codec<NegatableList<String>> REQUIRED_MODS_CODEC = NegatableList.listCodec(Codec.STRING);
+    protected static final Codec<NegatableList<String>> REQUIRED_MODS_CODEC = NegatableList.listCodec(Codec.STRING, true);
     protected static final Codec<UUID> UUID_CODEC = Codec.STRING.xmap(UUID::fromString, UUID::toString);
     protected static final Codec<Type> TYPE_CODEC = Type.CODEC;
 
