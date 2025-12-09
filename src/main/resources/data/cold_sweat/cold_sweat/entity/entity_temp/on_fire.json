@@ -5,6 +5,7 @@
     ]
   },
   "entity": {
+    "entities": ["*"],
     "flags": {
       "is_on_fire": true
     }
