@@ -1,0 +1,12 @@
+{
+  "entity": {
+    "entities": ["minecraft:furnace_minecart"],
+    "nbt": {
+      "Fuel": "1:"
+    }
+  },
+  "temperature": 12,
+  "units": "f",
+  "range": 4,
+  "affects_self": false
+}

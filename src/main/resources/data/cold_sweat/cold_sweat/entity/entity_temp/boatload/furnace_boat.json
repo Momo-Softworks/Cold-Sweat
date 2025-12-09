@@ -1,0 +1,15 @@
+{
+  "required_mods": [
+    "boatload"
+  ],
+  "entity": {
+    "entities": ["boatload:furnace_boat"],
+    "nbt": {
+      "Fuel": "1:"
+    }
+  },
+  "temperature": 12,
+  "units": "f",
+  "range": 4,
+  "affects_self": false
+}
