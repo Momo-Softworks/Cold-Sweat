@@ -8,6 +8,7 @@ import com.mojang.serialization.Decoder;
 import com.mojang.serialization.JsonOps;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.compat.CompatManager;
+import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import net.minecraft.core.Registry;
 import net.minecraft.core.WritableRegistry;
@@ -44,7 +45,7 @@ public class MixinRegistration
             if (json.has("required_mods"))
             {
                 JsonElement requiredModsField = json.get("required_mods");
-                NegatableList<String> requiredMods = NegatableList.listCodec(Codec.STRING).parse(JsonOps.INSTANCE, requiredModsField).result().orElse(new NegatableList<>());
+                NegatableList<String> requiredMods = ConfigData.REQUIRED_MODS_CODEC.parse(JsonOps.INSTANCE, requiredModsField).result().orElse(new NegatableList<>());
                 if (!json.has("forge:conditions"))
                 {   json.add("forge:conditions", new JsonArray());
                 }
