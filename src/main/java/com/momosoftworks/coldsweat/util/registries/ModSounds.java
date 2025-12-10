@@ -27,4 +27,7 @@ public class ModSounds
     public static SoundEvent ICEBOX_CLOSE = SoundInit.ICEBOX_CLOSE_SOUND_REGISTRY.get();
 
     public static SoundEvent ARMOR_EQUIP_CHAMELEON = SoundInit.CHAMELEON_ARMOR_EQUIP_SOUND_REGISTRY.get();
+
+    public static SoundEvent BUCKET_FILL_SLUSH = SoundInit.BUCKET_FILL_SLUSH.get();
+    public static SoundEvent BUCKET_EMPTY_SLUSH = SoundInit.BUCKET_EMPTY_SLUSH.get();
 }

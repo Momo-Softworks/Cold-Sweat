@@ -87,4 +87,9 @@ public class SoundInit
             () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "entity.goat.screaming.ram_impact")));
     public static final RegistryObject<SoundEvent> ENTITY_GOAT_STEP = SOUNDS.register("entity.goat.step",
             () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "entity.goat.step")));
+
+    public static final RegistryObject<SoundEvent> BUCKET_FILL_SLUSH = SOUNDS.register("item.bucket.fill_slush",
+            () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "item.bucket.fill_slush")));
+    public static final RegistryObject<SoundEvent> BUCKET_EMPTY_SLUSH = SOUNDS.register("item.bucket.empty_slush",
+            () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "item.bucket.empty_slush")));
 }

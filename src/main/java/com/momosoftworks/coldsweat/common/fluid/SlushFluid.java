@@ -4,7 +4,9 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.core.init.BlockInit;
 import com.momosoftworks.coldsweat.core.init.FluidInit;
 import com.momosoftworks.coldsweat.core.init.ItemInit;
+import com.momosoftworks.coldsweat.core.init.SoundInit;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -59,8 +61,8 @@ public abstract class SlushFluid extends ForgeFlowingFluid
                         int white = ColorHelper.PackedColor.color(240, 255, 255, 255);
                         return CSMath.blendColors(alphaColor, white, 0.65f);
                     })
+                    .sound(SoundInit.BUCKET_FILL_SLUSH, SoundInit.BUCKET_EMPTY_SLUSH)
                     .translationKey("block.cold_sweat.slush")
-                    .sound(SoundEvents.BUCKET_FILL_LAVA, SoundEvents.BUCKET_EMPTY_LAVA)
                     .temperature(280)
                     .viscosity(2000))
                 .bucket(ItemInit.SLUSH_BUCKET)

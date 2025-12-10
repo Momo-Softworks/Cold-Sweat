@@ -9,6 +9,7 @@ import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
+import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.ParticleStatus;
 import net.minecraft.entity.player.PlayerEntity;
@@ -132,7 +133,7 @@ public class IceboxBlock extends Block
                 }
                 icebox.addColdFuel(itemFuel, true);
 
-                level.playSound(null, pos, SoundEvents.BUCKET_EMPTY, SoundCategory.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
+                level.playSound(null, pos, ModSounds.BUCKET_EMPTY_SLUSH, SoundCategory.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
             }
             else if (!level.isClientSide && !ChestBlock.isChestBlockedAt(level, pos))
             {   NetworkHooks.openGui((ServerPlayerEntity) player, icebox, pos);
