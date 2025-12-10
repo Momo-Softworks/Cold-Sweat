@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.common.fluid;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
@@ -11,6 +12,7 @@ import net.minecraftforge.fluids.FluidAttributes;
 
 import javax.annotation.Nullable;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 /**
  * Copy of FluidAttributes that allows for custom color getters.
@@ -18,15 +20,28 @@ import java.util.function.BiFunction;
 public class ModFluidAttributes extends FluidAttributes
 {
     private final BlockColor colorGetter;
+    private final Supplier<SoundEvent> fillSound;
+    private final Supplier<SoundEvent> emptySound;
 
     public ModFluidAttributes(CustomBuilder builder, Fluid fluid)
     {   super(builder, fluid);
         this.colorGetter = builder.colorGetter;
+        this.fillSound = builder.fillSound;
+        this.emptySound = builder.emptySound;
     }
 
     @Override
     public int getColor(BlockAndTintGetter level, BlockPos pos)
     {   return this.colorGetter.getColor(level.getBlockState(pos), level, pos, 0);
+    }
+
+    @Override
+    public SoundEvent getEmptySound()
+    {   return this.emptySound != null ? this.emptySound.get() : super.getEmptySound();
+    }
+    @Override
+    public SoundEvent getFillSound()
+    {   return this.fillSound != null ? this.fillSound.get() : super.getFillSound();
     }
 
     public static CustomBuilder builder(ResourceLocation stillTexture, ResourceLocation flowingTexture)
@@ -36,6 +51,8 @@ public class ModFluidAttributes extends FluidAttributes
     public static class CustomBuilder extends Builder
     {
         private BlockColor colorGetter = (state, level, pos, index) -> 0xFFFFFFFF;
+        private Supplier<SoundEvent> fillSound;
+        private Supplier<SoundEvent> emptySound;
 
         protected CustomBuilder(ResourceLocation stillTexture, ResourceLocation flowingTexture, BiFunction<CustomBuilder, Fluid, ModFluidAttributes> factory)
         {
@@ -46,9 +63,16 @@ public class ModFluidAttributes extends FluidAttributes
             });
         }
 
-        public final CustomBuilder color(BlockColor colorGetter)
+        public CustomBuilder color(BlockColor colorGetter)
         {
             this.colorGetter = colorGetter;
+            return this;
+        }
+
+        public CustomBuilder sound(Supplier<SoundEvent> fillSound, Supplier<SoundEvent> emptySound)
+        {
+            this.fillSound = fillSound;
+            this.emptySound = emptySound;
             return this;
         }
     }
