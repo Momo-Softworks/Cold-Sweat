@@ -127,6 +127,7 @@ dependencies {
     implementation "curse.maven:iceberg-520110:6423863"
     compileOnly "curse.maven:primal-winter-393321:5811975"
     implementation "curse.maven:weather-storms-tornadoes-237746:6926103"
+    implementation "curse.maven:coroutil-237749:5622966"
 
     // Create (Compat)
     implementation "curse.maven:create-328085:7178775"
@@ -134,9 +135,9 @@ dependencies {
     compileOnly "com.tterrag.registrate:Registrate:MC1.21-1.3.0+67"
 
     // KubeJS (Compat)
-    implementation "dev.latvian.mods:kubejs-neoforge:${kubejs_version}"
-    implementation "dev.latvian.apps:tiny-java-server:${tiny_server_version}"
-    implementation "com.github.rtyley:animated-gif-lib-for-java:animated-gif-lib-1.7"
+    compileOnly "dev.latvian.mods:kubejs-neoforge:${kubejs_version}"
+    compileOnly "dev.latvian.apps:tiny-java-server:${tiny_server_version}"
+    compileOnly "com.github.rtyley:animated-gif-lib-for-java:animated-gif-lib-1.7"
 
     // JEI (Compat)
     implementation "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
