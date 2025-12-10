@@ -3587,6 +3587,7 @@ Fixes:
 - Create's netherite backtank no longer provides cold protection by default
 * (1.21) Added compatibility with Weather, Storms, & Tornadoes mod
       - This functionality is ported from 1.20 now that the mod is available for 1.21
+- (1.21) Updated KubeJS support to version 2101.7.2-build.348
 - Adjusted the fuel values of some items:
       - Coal: 37 -> 55
       - Logs: 37 -> 40
@@ -3607,7 +3608,8 @@ Fixes:
 - Fixed item temperatures not working in curio slots
 - Fixed temp region configs sometimes not taking precedence over the default configuration
 * Fixed half-frozen hearts rendering incorrectly in some cases
-* Fixed removed configs persisting after "/coldsweat reload" is executed
+- Fixed item temperatures not working when configured to be in the "hand" slot
+- Fixed TOML item temperature configs being reset if the "tempLimit" argument is defined
 - Fixed insulation tooltip sometimes extending past the tooltip background
 - Fixed the "Nullify in Peaceful" setting being incorrect named "Damage Scaling" in the TOML config
 - (1.21) Fixed the hearth accepting non-fuel items
@@ -3621,3 +3623,19 @@ Technical Changes:
       - The maximum number of stacks can be controlled, and defaults to 1 (no stacking)
 - TOML configs are now re-parsed when using the "/coldsweat reload" command
       - Before, Cold Sweat relied on Forge's built-in config tracker, which didn't always detect updates to files
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.4-b06d
+- Added compatibility with Boatload:
+      - Furnace boats now emit temperature if fueled
+- Furnace minecarts now emit temperature if fueled
+
+Fixes:
+* Fixed items not increasing the fuel gauge of hearths, boiler, and iceboxes
+* Fixed negatable lists in JSON requiring all entries to pass by default (instead of only one)
+- Fixed soul fire blocks having no temperature effect limit
+- Fixed dimensions with fixed time still having day/night temperatures
+- Fixed the hearth appearing black when updating from a version prior to 2.4-b05d
+- Fixed the "Default Water Temperature" setting saving incorrectly when configs are saved
+- Fixed entities not emitting heat when on fire
