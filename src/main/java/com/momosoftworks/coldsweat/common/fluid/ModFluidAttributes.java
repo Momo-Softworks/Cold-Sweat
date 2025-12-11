@@ -21,14 +21,21 @@ import java.util.function.Supplier;
 public class ModFluidAttributes extends FluidAttributes
 {
     private final BlockColor colorGetter;
+    private final int defaultColor;
     private final Supplier<SoundEvent> fillSound;
     private final Supplier<SoundEvent> emptySound;
 
     public ModFluidAttributes(CustomBuilder builder, Fluid fluid)
     {   super(builder, fluid);
         this.colorGetter = builder.colorGetter;
+        this.defaultColor = builder.defaultColor;
         this.fillSound = builder.fillSound;
         this.emptySound = builder.emptySound;
+    }
+
+    @Override
+    public int getColor()
+    {   return this.defaultColor;
     }
 
     @Override
@@ -52,6 +59,7 @@ public class ModFluidAttributes extends FluidAttributes
     public static class CustomBuilder extends Builder
     {
         private BlockColor colorGetter = (state, level, pos, index) -> 0xFFFFFFFF;
+        private int defaultColor = 0xFFFFFFFF;
         private Supplier<SoundEvent> fillSound;
         private Supplier<SoundEvent> emptySound;
 
@@ -67,6 +75,12 @@ public class ModFluidAttributes extends FluidAttributes
         public CustomBuilder color(BlockColor colorGetter)
         {
             this.colorGetter = colorGetter;
+            return this;
+        }
+
+        public CustomBuilder defaultColor(int color)
+        {
+            this.defaultColor = color;
             return this;
         }
 
