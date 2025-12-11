@@ -65,6 +65,7 @@ public abstract class SlushFluid extends ForgeFlowingFluid
                         int white = FastColor.ARGB32.color(240, 255, 255, 255);
                         return CSMath.blendColors(alphaColor, white, 0.65f);
                     })
+                    .defaultColor(FastColor.ARGB32.color(240, 210, 240, 255))
                     .sound(SoundInit.BUCKET_FILL_SLUSH, SoundInit.BUCKET_EMPTY_SLUSH)
                     .translationKey("block.cold_sweat.slush")
                     .temperature(280)
