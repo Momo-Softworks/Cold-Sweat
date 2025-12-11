@@ -53,6 +53,11 @@ public class SlushFluidType extends FluidType
             }
 
             @Override
+            public int getTintColor()
+            {   return FastColor.ARGB32.color(240, 210, 240, 255);
+            }
+
+            @Override
             public int getTintColor(FluidState state, BlockAndTintGetter getter, BlockPos pos)
             {
                 int color = BiomeColors.getAverageWaterColor(getter, pos);
