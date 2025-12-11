@@ -112,12 +112,7 @@ public class ColdSweat
         for (BlockEntityType<? extends HearthBlockEntity> blockEntityType : List.of(ModBlockEntities.HEARTH.value(), ModBlockEntities.BOILER.value(), ModBlockEntities.ICEBOX.value()))
         {
             // Register fluid handlers for hearth-like blocks
-            event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, blockEntityType, (hearthLike, facing) ->
-            {
-                return hearthLike.isHeatingSide(facing) ? hearthLike.getFuelHandler(HearthBlockEntity.FuelType.HOT)
-                     : hearthLike.isCoolingSide(facing) ? hearthLike.getFuelHandler(HearthBlockEntity.FuelType.COLD)
-                     : null;
-            });
+            event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, blockEntityType, (hearthLike, facing) -> hearthLike.getFuelHandler());
         }
     }
 
