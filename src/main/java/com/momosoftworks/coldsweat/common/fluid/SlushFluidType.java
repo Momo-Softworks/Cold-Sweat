@@ -65,7 +65,7 @@ public class SlushFluidType extends FluidType
                 int green = FastColor.ARGB32.green(color);
                 int blue = FastColor.ARGB32.blue(color);
                 int alphaColor = FastColor.ARGB32.color(240, red, green, blue);
-                int white = FastColor.ARGB32.color(240, 255, 255, 255);
+                int white = FastColor.ARGB32.color(240, 240, 255, 255);
                 return CSMath.blendColors(alphaColor, white, 0.5f);
             }
         });
