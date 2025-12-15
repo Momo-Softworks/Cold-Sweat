@@ -62,7 +62,7 @@ public abstract class SlushFluid extends ForgeFlowingFluid
                         int green = FastColor.ARGB32.green(color);
                         int blue = FastColor.ARGB32.blue(color);
                         int alphaColor = FastColor.ARGB32.color(240, red, green, blue);
-                        int white = FastColor.ARGB32.color(240, 255, 255, 255);
+                        int white = FastColor.ARGB32.color(240, 240, 255, 255);
                         return CSMath.blendColors(alphaColor, white, 0.65f);
                     })
                     .defaultColor(FastColor.ARGB32.color(240, 210, 240, 255))
