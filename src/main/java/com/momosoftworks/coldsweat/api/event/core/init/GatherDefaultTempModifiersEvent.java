@@ -2,7 +2,8 @@ package com.momosoftworks.coldsweat.api.event.core.init;
 
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
-import com.momosoftworks.coldsweat.api.util.Placement;
+import com.momosoftworks.coldsweat.api.util.placement.Matcher;
+import com.momosoftworks.coldsweat.api.util.placement.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.ResourceLocation;
@@ -53,14 +54,14 @@ public class GatherDefaultTempModifiersEvent extends Event
     {   this.modifiers.addAll(modifiers);
     }
 
-    public void addModifier(TempModifier modifier, Placement.Duplicates duplicatePolicy, Placement params)
-    {   Temperature.addModifier(modifiers, modifier, duplicatePolicy, 1, params);
+    public void addModifier(TempModifier modifier, Matcher duplicatePolicy, Placement params)
+    {   Temperature.addModifier(modifiers, modifier, params.limitDuplicates(duplicatePolicy, 1), null, null);
     }
 
-    public void addModifiers(List<TempModifier> modifiers, Placement.Duplicates duplicatePolicy, Placement params)
+    public void addModifiers(List<TempModifier> modifiers, Matcher duplicatePolicy, Placement placement)
     {
         for (int i = modifiers.size() - 1; i >= 0; i--)
-        {   this.addModifier(modifiers.get(i), duplicatePolicy, params);
+        {   this.addModifier(modifiers.get(i), duplicatePolicy, placement);
         }
     }
 
@@ -69,16 +70,16 @@ public class GatherDefaultTempModifiersEvent extends Event
      * @param id The ID of the TempModifier to add
      * @param modifierBuilder Called on the TempModifier when it is created for additional processing
      */
-    public void addModifierById(ResourceLocation id, Consumer<TempModifier> modifierBuilder, Placement.Duplicates duplicatePolicy, Placement params)
+    public void addModifierById(ResourceLocation id, Consumer<TempModifier> modifierBuilder, Matcher duplicatePolicy, Placement placement)
     {
         Optional<TempModifier> mod = TempModifierRegistry.getValue(id);
         if (mod.isPresent())
         {   modifierBuilder.accept(mod.get());
-            addModifier(mod.get(), duplicatePolicy, params);
+            addModifier(mod.get(), duplicatePolicy, placement);
         }
     }
 
-    public void removeModifiers(TempModifier modifier, Placement.Duplicates matchPolicy)
+    public void removeModifiers(TempModifier modifier, Matcher matchPolicy)
     {   modifiers.removeIf(mod -> matchPolicy.check(mod, modifier));
     }
 }

@@ -6,7 +6,7 @@ import com.momosoftworks.coldsweat.api.event.vanilla.ItemBreakEvent;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.temperature.modifier.ArmorInsulationTempModifier;
-import com.momosoftworks.coldsweat.api.util.Placement;
+import com.momosoftworks.coldsweat.api.util.placement.Matcher;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
 import com.momosoftworks.coldsweat.common.capability.insulation.IInsulatableCap;
@@ -103,7 +103,7 @@ public class ProcessEquipmentInsulation
                 double heat = insulationEvent.getProperty("heat");
 
                 if (cold > 0 || heat > 0)
-                {   Temperature.addOrReplaceModifier(player, new ArmorInsulationTempModifier(cold, heat).tickRate(20).expires(20), Temperature.Trait.RATE, Placement.Duplicates.BY_CLASS);
+                {   Temperature.replaceOrAddModifier(player, new ArmorInsulationTempModifier(cold, heat).tickRate(20).expires(20), Temperature.Trait.RATE, Matcher.SAME_CLASS);
                 }
             }
 

@@ -8,7 +8,10 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
-import com.momosoftworks.coldsweat.api.util.Placement;
+import com.momosoftworks.coldsweat.api.util.placement.Matcher;
+import com.momosoftworks.coldsweat.api.util.placement.Mode;
+import com.momosoftworks.coldsweat.api.util.placement.Order;
+import com.momosoftworks.coldsweat.api.util.placement.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.command.BaseCommand;
 import com.momosoftworks.coldsweat.common.command.argument.*;
@@ -191,9 +194,9 @@ public class TempCommand extends BaseCommand
                                                                                                             .executes(this::executeAddModifier)
                                                                                                             .then(Commands.argument("nbt", NBTTagArgument.nbtTag())
                                                                                                                           .executes(this::executeAddModifier)
-                                                                                                                          .then(Commands.argument("mode", NicerEnumArgument.enumArgument(Placement.Mode.class))
+                                                                                                                          .then(Commands.argument("mode", NicerEnumArgument.enumArgument(Mode.class))
                                                                                                                                         .executes(this::executeAddModifier)
-                                                                                                                                        .then(Commands.argument("order", NicerEnumArgument.enumArgument(Placement.Order.class))
+                                                                                                                                        .then(Commands.argument("order", NicerEnumArgument.enumArgument(Order.class))
                                                                                                                                                       .executes(this::executeAddModifier)
                                                                                                                                                       .then(Commands.argument("match", TempModifierArgument.modifier())
                                                                                                                                                                       .executes(this::executeAddModifier)
@@ -214,9 +217,9 @@ public class TempCommand extends BaseCommand
                                                                                                             .executes(this::executeAddModifier)
                                                                                                             .then(Commands.argument("nbt", NBTTagArgument.nbtTag())
                                                                                                                           .executes(this::executeAddModifier)
-                                                                                                                          .then(Commands.argument("mode", NicerEnumArgument.enumArgument(Placement.Mode.class))
+                                                                                                                          .then(Commands.argument("mode", NicerEnumArgument.enumArgument(Mode.class))
                                                                                                                                         .executes(this::executeAddModifier)
-                                                                                                                                        .then(Commands.argument("order", NicerEnumArgument.enumArgument(Placement.Order.class))
+                                                                                                                                        .then(Commands.argument("order", NicerEnumArgument.enumArgument(Order.class))
                                                                                                                                                       .executes(this::executeAddModifier)
                                                                                                                                                       .then(Commands.argument("match", TempModifierArgument.modifier())
                                                                                                                                                                     .executes(this::executeAddModifier)
@@ -383,8 +386,8 @@ public class TempCommand extends BaseCommand
         int duration = readArgumentOrDefault(context, "duration", IntegerArgumentType::getInteger, -1);
         int tickRate = readArgumentOrDefault(context, "tickRate", IntegerArgumentType::getInteger, 1);
         CompoundNBT nbt = (CompoundNBT) readArgumentOrDefault(context, "nbt", NBTTagArgument::getNbtTag, new CompoundNBT());
-        Placement.Mode mode = readArgumentOrDefault(context, "mode", Placement.Mode.class, Placement.Mode.AFTER);
-        Placement.Order order = readArgumentOrDefault(context, "order", Placement.Order.class, Placement.Order.LAST);
+        Mode mode = readArgumentOrDefault(context, "mode", Mode.class, Mode.ADD_AFTER);
+        Order order = readArgumentOrDefault(context, "order", Order.class, Order.LAST);
         ResourceLocation otherId = readArgumentOrDefault(context, "match", ResourceLocation.class, null);
         int maxCount = readArgumentOrDefault(context, "maxCount", IntegerArgumentType::getInteger, 1);
 
@@ -392,7 +395,7 @@ public class TempCommand extends BaseCommand
     }
 
     private int executeAddModifier(CommandContext<CommandSource> context, Collection<? extends Entity> entities, Temperature.Trait trait, ResourceLocation modifierId,
-                                   int duration, int tickRate, CompoundNBT nbt, Placement.Mode mode, Placement.Order order, ResourceLocation otherId, int maxCount)
+                                   int duration, int tickRate, CompoundNBT nbt, Mode mode, Order order, ResourceLocation otherId, int maxCount)
     {
         CommandSource source = context.getSource();
         if (entities.stream().anyMatch(entity -> !(entity instanceof PlayerEntity || EntityTempManager.isTemperatureEnabled(entity))))
@@ -408,10 +411,10 @@ public class TempCommand extends BaseCommand
         modifier.expires(duration).tickRate(tickRate);
         modifier.getNBT().merge(nbt);
 
+        Placement placement = Placement.of(mode, order, mod -> otherId == null || TempModifierRegistry.getKey(mod).equals(otherId))
+                                       .limitDuplicates(Matcher.SAME_CLASS, maxCount);
         for (Entity entity : entities)
-        {
-            Temperature.addModifier(((LivingEntity) entity), modifier, trait, Placement.Duplicates.ALLOW, maxCount,
-                                    Placement.of(mode, order, mod -> otherId == null || TempModifierRegistry.getKey(mod).equals(otherId)));
+        {   Temperature.addModifier(((LivingEntity) entity), modifier, trait, placement);
         }
         if (entities.size() == 1)
         {   source.sendSuccess(new TranslationTextComponent("commands.cold_sweat.temp_modifier.single.add.result",
@@ -451,7 +454,7 @@ public class TempCommand extends BaseCommand
 
         for (Entity entity : entities)
         {
-            Temperature.removeModifiers(((LivingEntity) entity), trait, count, Placement.Order.FIRST, mod -> TempModifierRegistry.getKey(mod).equals(modifierId));
+            Temperature.removeModifiers(((LivingEntity) entity), trait, count, Order.FIRST, mod -> TempModifierRegistry.getKey(mod).equals(modifierId));
         }
         if (entities.size() == 1)
         {   source.sendSuccess(new TranslationTextComponent("commands.cold_sweat.temp_modifier.single.remove.result",

@@ -2,7 +2,7 @@ package com.momosoftworks.coldsweat.compat.kubejs;
 
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
-import com.momosoftworks.coldsweat.api.util.Placement;
+import com.momosoftworks.coldsweat.api.util.placement.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -59,7 +59,7 @@ public class KubeBindings
     public static void addModifier(Entity entity, TempModifier modifier, String trait)
     {
         if (entity instanceof LivingEntity)
-        {   Temperature.addModifier(((LivingEntity) entity), modifier, Temperature.Trait.fromID(trait), Placement.Duplicates.ALLOW);
+        {   Temperature.addModifier(((LivingEntity) entity), modifier, Temperature.Trait.fromID(trait), Placement.LAST);
         }
     }
 

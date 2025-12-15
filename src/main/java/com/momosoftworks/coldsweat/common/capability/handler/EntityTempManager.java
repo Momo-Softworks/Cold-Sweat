@@ -11,10 +11,11 @@ import com.momosoftworks.coldsweat.api.event.core.init.GatherDefaultTempModifier
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.modifier.*;
+import com.momosoftworks.coldsweat.api.util.placement.Matcher;
+import com.momosoftworks.coldsweat.api.util.placement.Placement;
+import com.momosoftworks.coldsweat.api.util.placement.Mode;
+import com.momosoftworks.coldsweat.api.util.placement.Order;
 import com.momosoftworks.coldsweat.api.util.Temperature;
-import com.momosoftworks.coldsweat.api.util.Placement;
-import com.momosoftworks.coldsweat.api.util.Placement.Mode;
-import com.momosoftworks.coldsweat.api.util.Placement.Order;
 import com.momosoftworks.coldsweat.common.capability.ModCapabilities;
 import com.momosoftworks.coldsweat.common.capability.SidedCapabilityCache;
 import com.momosoftworks.coldsweat.common.capability.temperature.EntityTempCap;
@@ -180,7 +181,7 @@ public class EntityTempManager
                 {
                     event.addModifier(Arrays.asList(Trait.WORLD, Trait.FREEZING_POINT, Trait.BURNING_POINT),
                                       new EntityClimateTempModifier().tickRate(200),
-                                      Placement.Duplicates.BY_CLASS, Placement.BEFORE_FIRST);
+                                      Placement.FIRST.noDuplicates(Matcher.SAME_CLASS));
                     return;
                 }
             }
@@ -195,40 +196,39 @@ public class EntityTempManager
             int fastTickRate = (int) (5 * tickMultiplier);
 
             event.addModifier(Trait.WORLD, new BiomeTempModifier(isPlayer ? 49 : isTempSensitive ? 16 : 9).tickRate(mediumTickRate),
-                              Placement.Duplicates.BY_CLASS, Placement.BEFORE_FIRST);
+                              Placement.FIRST.noDuplicates(Matcher.SAME_CLASS));
 
             event.addModifier(Trait.WORLD, new ElevationTempModifier(isPlayer ? 49 : isTempSensitive ? 16 : 1).tickRate(mediumTickRate),
-                              Placement.Duplicates.BY_CLASS, Placement.of(Mode.AFTER, Order.FIRST, mod -> mod instanceof BiomeTempModifier));
+                              Placement.of(Mode.ADD_AFTER, Order.FIRST, mod -> mod instanceof BiomeTempModifier).noDuplicates(Matcher.SAME_CLASS));
 
             event.addModifier(Trait.WORLD, new ShadeTempModifier().tickRate(10),
-                              Placement.Duplicates.BY_CLASS, Placement.of(Mode.BEFORE, Order.FIRST, mod -> mod instanceof ElevationTempModifier));
+                              Placement.of(Mode.ADD_BEFORE, Order.FIRST, mod -> mod instanceof ElevationTempModifier).noDuplicates(Matcher.SAME_CLASS));
 
             event.addModifier(Trait.WORLD, new BlockTempModifier(isPlayer ? -1 : 4).tickRate(fastTickRate),
-                          Placement.Duplicates.BY_CLASS, Placement.AFTER_LAST);
+                          Placement.LAST.noDuplicates(Matcher.SAME_CLASS));
 
             event.addModifier(Trait.WORLD, new EntitiesTempModifier().tickRate(mediumTickRate2),
-                              Placement.Duplicates.BY_CLASS, Placement.AFTER_LAST);
+                              Placement.LAST.noDuplicates(Matcher.SAME_CLASS));
 
-        // Serene Seasons compat
-        event.addModifierById(Trait.WORLD, new ResourceLocation("sereneseasons:season"),
-                              mod -> mod.tickRate(slowTickRate),
-                              Placement.Duplicates.BY_CLASS,
-                              Placement.of(Mode.AFTER, Order.FIRST, mod2 -> mod2 instanceof BiomeTempModifier));
-        // Weather2 Compat
-        event.addModifierById(Trait.WORLD, new ResourceLocation("weather2:storm"),
-                              mod -> mod.tickRate(slowTickRate),
-                              Placement.Duplicates.BY_CLASS,
-                              Placement.of(Mode.AFTER, Order.FIRST, mod2 -> mod2 instanceof BiomeTempModifier));
-        // Valkyrien Skies Compat
-        event.addModifierById(Trait.WORLD, new ResourceLocation("valkyrienskies:ship_blocks"),
-                              mod -> mod.tickRate(mediumTickRate2),
-                              Placement.Duplicates.BY_CLASS,
-                              Placement.of(Mode.AFTER, Order.FIRST, mod2 -> mod2 instanceof BlockTempModifier));
+            // Serene Seasons compat
+            event.addModifierById(Trait.WORLD, new ResourceLocation("sereneseasons:season"),
+                                  mod -> mod.tickRate(slowTickRate),
+                                  Placement.of(Mode.ADD_AFTER, Order.FIRST, mod2 -> mod2 instanceof BiomeTempModifier).noDuplicates(Matcher.SAME_CLASS));
+            // Weather2 Compat
+            event.addModifierById(Trait.WORLD, new ResourceLocation("weather2:storm"),
+                                  mod -> mod.tickRate(slowTickRate),
+                                  Placement.of(Mode.ADD_AFTER, Order.FIRST, mod2 -> mod2 instanceof BiomeTempModifier).noDuplicates(Matcher.SAME_CLASS));
+            // Valkyrien Skies Compat
+            event.addModifierById(Trait.WORLD, new ResourceLocation("valkyrienskies:ship_blocks"),
+                                  mod -> mod.tickRate(mediumTickRate2),
+                                  Placement.of(Mode.ADD_AFTER, Order.FIRST, mod2 -> mod2 instanceof BlockTempModifier).noDuplicates(Matcher.SAME_CLASS));
 
             if (isPlayer && !(entity instanceof DummyPlayer))
             {
-                event.addModifier(Arrays.asList(Trait.FREEZING_POINT, Trait.BURNING_POINT), new AcclimationTempModifier().tickRate(20), Placement.Duplicates.BY_CLASS, Placement.AFTER_LAST);
-                event.addModifier(Arrays.asList(VALID_MODIFIER_TRAITS), new InventoryItemsTempModifier().tickRate(5), Placement.Duplicates.BY_CLASS, Placement.AFTER_LAST);
+                event.addModifier(Arrays.asList(Trait.FREEZING_POINT, Trait.BURNING_POINT), new AcclimationTempModifier().tickRate(20),
+                                  Placement.LAST.noDuplicates(Matcher.SAME_CLASS));
+                event.addModifier(Arrays.asList(VALID_MODIFIER_TRAITS), new InventoryItemsTempModifier().tickRate(5),
+                                  Placement.LAST.noDuplicates(Matcher.SAME_CLASS));
             }
         }
 
@@ -308,11 +308,12 @@ public class EntityTempManager
                         }
                         // Remove expired modifiers
                         int expireTime = modifier.getExpireTime();
-                        boolean expired = (modifier.setTicksExisted(modifier.getTicksExisted() + 1) > expireTime && expireTime != -1);
-                        if (expired)
-                        {   cap.removeModifier(modifier, trait);
+                        modifier.setTicksExisted(modifier.getTicksExisted() + 1);
+                        if (modifier.getTicksExisted() > expireTime && expireTime != -1)
+                        {
                             modifier.onRemoved(entity, trait);
                             Temperature.updateSiblingsRemove(modifiers, entity, trait, modifier);
+                            modifiers.remove(i);
                             i--;
                         }
                     }
@@ -538,7 +539,7 @@ public class EntityTempManager
                 {
                     if (!player.isSpectator() && (WorldHelper.isInWater(player) || player.tickCount % 40 == 0
                     && WorldHelper.isRainingAt(player.level, player.blockPosition())))
-                    {   Temperature.addModifier(player, new WaterTempModifier().tickRate(5), Trait.WORLD, Placement.Duplicates.BY_CLASS);
+                    {   Temperature.addModifier(player, new WaterTempModifier().tickRate(5), Trait.WORLD, Placement.LAST.noDuplicates(Matcher.SAME_CLASS));
                     }
                 }
             }
@@ -629,7 +630,7 @@ public class EntityTempManager
                 if (oldMod == null || oldMod.getStrength() <= strength)
                 {
                     Temperature.removeModifiers(entity, Trait.WORLD, newMod.getClass());
-                    Temperature.addModifier(entity, newMod, Trait.WORLD, Placement.Duplicates.BY_CLASS);
+                    Temperature.addModifier(entity, newMod, Trait.WORLD, Placement.LAST.noDuplicates(Matcher.SAME_CLASS));
                 }
             }
         }
@@ -692,7 +693,7 @@ public class EntityTempManager
                     Entity mount = player.getVehicle();
                     // If insulated minecart
                     if (mount instanceof MinecartEntity && ((MinecartEntity) mount).getDisplayBlockState().getBlock() == ModBlocks.MINECART_INSULATION)
-                    {   Temperature.addOrReplaceModifier(player, new MountTempModifier(1, 1).tickRate(5).expires(5), Trait.RATE, Placement.Duplicates.BY_CLASS);
+                    {   Temperature.replaceOrAddModifier(player, new MountTempModifier(1, 1).tickRate(5).expires(5), Trait.RATE, Matcher.SAME_CLASS);
                     }
                     // If insulated entity (defined in config)
                     else
@@ -700,7 +701,7 @@ public class EntityTempManager
                         MountData entityInsul = ConfigSettings.INSULATED_MOUNTS.get().get(mount.getType())
                                                       .stream().filter(mnt -> mnt.test(mount)).findFirst().orElse(null);
                         if (entityInsul != null)
-                        {   Temperature.addOrReplaceModifier(player, new MountTempModifier(entityInsul.coldInsulation(), entityInsul.heatInsulation()).tickRate(5).expires(5), Trait.RATE, Placement.Duplicates.BY_CLASS);
+                        {   Temperature.replaceOrAddModifier(player, new MountTempModifier(entityInsul.coldInsulation(), entityInsul.heatInsulation()).tickRate(5).expires(5), Trait.RATE, Matcher.SAME_CLASS);
                         }
                     }
                 }
@@ -737,12 +738,9 @@ public class EntityTempManager
                         // Set duration & tick rate
                         foodModifier.expires(duration).tickRate(duration);
                         // Add the TempModifier
-                        if (foodData.stackLimit() > 1
-                        && Temperature.addModifier(player, foodModifier, trait, Placement.Duplicates.EXACT, foodData.stackLimit(), Placement.AFTER_LAST))
-                        {   // Successfully added modifier
-                        }
-                        // Replace first occurrence of modifier
-                        else Temperature.addOrReplaceModifier(player, foodModifier, trait, Placement.Duplicates.EXACT);
+                        Placement placement = Placement.LAST.limitDuplicates(Matcher.EQUALS, foodData.stackLimit())
+                                              .orElse(Placement.of(Mode.REPLACE, Order.FIRST, foodModifier::equals));
+                        Temperature.addModifier(player, foodModifier, trait, placement);
                     }
                 }
             }

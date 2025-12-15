@@ -2,7 +2,7 @@ package com.momosoftworks.coldsweat.api.event.core.init;
 
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
-import com.momosoftworks.coldsweat.api.util.Placement;
+import com.momosoftworks.coldsweat.api.util.placement.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.ResourceLocation;
@@ -47,20 +47,20 @@ public class DefaultTempModifiersEvent extends Event
     {   this.getModifiers(trait).addAll(modifiers);
     }
 
-    public void addModifier(Temperature.Trait trait, TempModifier modifier, Placement.Duplicates duplicatePolicy, Placement params)
-    {   Temperature.addModifier(this.getModifiers(trait), modifier, duplicatePolicy, 1, params);
+    public void addModifier(Temperature.Trait trait, TempModifier modifier, Placement placement)
+    {   Temperature.addModifier(this.getModifiers(trait), modifier, placement, null, null);
     }
-    public void addModifier(List<Temperature.Trait> traits, TempModifier modifier, Placement.Duplicates duplicatePolicy, Placement params)
+    public void addModifier(List<Temperature.Trait> traits, TempModifier modifier, Placement placement)
     {
         for (Temperature.Trait trait : traits)
-        {   this.addModifier(trait, modifier, duplicatePolicy, params);
+        {   this.addModifier(trait, modifier, placement);
         }
     }
 
-    public void addModifiers(Temperature.Trait trait, List<TempModifier> modifiers, Placement.Duplicates duplicatePolicy, Placement params)
+    public void addModifiers(Temperature.Trait trait, List<TempModifier> modifiers, Placement placement)
     {
         for (int i = modifiers.size() - 1; i >= 0; i--)
-        {   this.addModifier(trait, modifiers.get(i), duplicatePolicy, params);
+        {   this.addModifier(trait, modifiers.get(i), placement);
         }
     }
 
@@ -69,21 +69,21 @@ public class DefaultTempModifiersEvent extends Event
      * @param id The ID of the TempModifier to add
      * @param modifierBuilder Called on the TempModifier when it is created, for additional processing
      */
-    public void addModifierById(Temperature.Trait trait, ResourceLocation id, Consumer<TempModifier> modifierBuilder, Placement.Duplicates duplicatePolicy, Placement params)
+    public void addModifierById(Temperature.Trait trait, ResourceLocation id, Consumer<TempModifier> modifierBuilder, Placement placement)
     {
         Optional<TempModifier> mod = TempModifierRegistry.getValue(id);
         if (mod.isPresent())
         {   modifierBuilder.accept(mod.get());
-            addModifier(trait, mod.get(), duplicatePolicy, params);
+            addModifier(trait, mod.get(), placement);
         }
     }
 
-    public void addModifierById(List<Temperature.Trait> traits, ResourceLocation id, Consumer<TempModifier> modifierBuilder, Placement.Duplicates duplicatePolicy, Placement params)
+    public void addModifierById(List<Temperature.Trait> traits, ResourceLocation id, Consumer<TempModifier> modifierBuilder, Placement placement)
     {
         Optional<TempModifier> mod = TempModifierRegistry.getValue(id);
         if (mod.isPresent())
         {   modifierBuilder.accept(mod.get());
-            this.addModifier(traits, mod.get(), duplicatePolicy, params);
+            this.addModifier(traits, mod.get(), placement);
         }
     }
 
