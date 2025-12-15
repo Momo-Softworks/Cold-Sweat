@@ -3,6 +3,10 @@ package com.momosoftworks.coldsweat.api.util;
 import com.google.common.collect.ImmutableList;
 import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.api.annotation.Internal;
+import com.momosoftworks.coldsweat.api.util.placement.Placement;
+import com.momosoftworks.coldsweat.api.util.placement.Mode;
+import com.momosoftworks.coldsweat.api.util.placement.Order;
+import com.momosoftworks.coldsweat.api.util.placement.Matcher;
 import com.momosoftworks.coldsweat.api.event.common.temperautre.TempModifierEvent;
 import com.momosoftworks.coldsweat.api.event.common.temperautre.TemperatureChangedEvent;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
@@ -140,6 +144,7 @@ public class Temperature
      * @return a double representing what the temperature would be after a collection of TempModifier(s) are applied.
      * @param entity the entity this list of modifiers should use
      * @param modifiers the list of modifiers being applied to the player's temperature
+     * @param ignoreTickMultiplier Ignores the "modifier tick rate" setting and uses the normal tick rate
      */
     public static double apply(double temp, LivingEntity entity, Trait trait, Collection<TempModifier> modifiers, boolean ignoreTickMultiplier)
     {   return apply(temp, entity, trait, ignoreTickMultiplier, modifiers.toArray(new TempModifier[0]));
@@ -158,61 +163,61 @@ public class Temperature
     }
 
     /**
-     * @return The first modifier of the given class that is applied to the player.
+     * Gets all TempModifiers of the specified type on the entity.<br>
+     * @param entity is the entity being sampled
+     * @param trait determines which TempModifier list to pull from
+     * @return An <b>IMMUTABLE</b> list of all TempModifiers for the specified trait
      */
-    public static <T extends TempModifier> Optional<T> getModifier(LivingEntity entity, Trait trait, Class<T> modClass)
-    {   return EntityTempManager.getTemperatureCap(entity).map(cap -> getModifier(cap, trait, modClass)).orElse(Optional.empty());
+    public static List<TempModifier> getModifiers(LivingEntity entity, Trait trait)
+    {   return EntityTempManager.getTemperatureCap(entity).map(cap -> ImmutableList.copyOf(cap.getModifiers(trait))).orElse(ImmutableList.of());
     }
 
-    public static <T extends TempModifier> Optional<T> getModifier(ITemperatureCap cap, Trait trait, Class<T> modClass)
-    {   return (Optional<T>) cap.getModifiers(trait).stream().filter(modClass::isInstance).findFirst();
-    }
-
+    /**
+     * Gets all TempModifiers of the specified type on the entity that match the given condition.<br>
+     * @param entity is the entity being sampled
+     * @param trait determines which TempModifier list to pull from
+     * @param condition The predicate to filter the TempModifiers
+     * @return An IMMUTABLE list of all TempModifiers for the specified trait that match the condition
+     */
     public static List<TempModifier> getModifiers(LivingEntity entity, Trait trait, Predicate<TempModifier> condition)
     {   return getModifiers(entity, trait).stream().filter(condition).toList();
     }
 
+    /**
+     * @return The first modifier on the entity that matches the given condition
+     */
     public static Optional<TempModifier> getModifier(LivingEntity entity, Trait trait, Predicate<TempModifier> condition)
-    {   return getModifiers(entity, trait).stream().filter(condition).findFirst();
+    {   return getModifiers(entity, trait, condition).stream().findFirst();
     }
 
     /**
-     * Invokes addModifier() in a way that replaces the first occurrence of the modifier, if it exists.<br>
-     * Otherwise, it will add the modifier to the end of the list.<br>
+     * @return The first modifier on the entity that is an instance of the given class
+     */
+    public static <T extends TempModifier> Optional<T> getModifier(LivingEntity entity, Trait trait, Class<T> modClass)
+    {   return (Optional<T>) getModifier(entity, trait, modClass::isInstance);
+    }
+
+    /**
+     * Replaces an existing modifier if it exists on the entity; otherwise, adds the modifier to the entity.
      * @param entity The player to apply the modifier to
      * @param modifier The modifier to apply
      * @param trait The type of temperature to apply the modifier to
-     * * @param matchPolicy The strictness of the check for finding the TempModifier to replace.
+     * @param duplicateMatcher The matcher to use to find duplicates
      */
-    public static boolean addOrReplaceModifier(LivingEntity entity, TempModifier modifier, Trait trait, Placement.Duplicates matchPolicy)
-    {   return addModifier(entity, modifier, trait, Placement.Duplicates.ALLOW, 1, Placement.of(Placement.Mode.REPLACE_OR_ADD, Placement.Order.FIRST, mod -> matchPolicy.check(modifier, mod)));
+    public static boolean replaceOrAddModifier(LivingEntity entity, TempModifier modifier, Trait trait, Matcher duplicateMatcher)
+    {
+        Placement placement = Placement.of(Mode.REPLACE, Order.FIRST, mod -> duplicateMatcher.check(modifier, mod)).orElse(Placement.LAST);
+        return addModifier(entity, modifier, trait, placement);
     }
 
     /**
-     * Invokes addModifier() in a way that replaces the first occurrence of the modifier, if it exists.<br>
-     * It will not add the modifier if a suitable match is not found.<br>
+     * Adds the given modifier to the entity, with a custom placement.
      * @param entity The player to apply the modifier to
      * @param modifier The modifier to apply
      * @param trait The type of temperature to apply the modifier to
-     * @param matchPolicy The strictness of the check for finding the TempModifier to replace.
+     * @param placement The placement settings for the modifier
      */
-    public static boolean replaceModifier(LivingEntity entity, TempModifier modifier, Trait trait, Placement.Duplicates matchPolicy)
-    {   return addModifier(entity, modifier, trait, Placement.Duplicates.ALLOW, 1, Placement.of(Placement.Mode.REPLACE, Placement.Order.FIRST, mod -> matchPolicy.check(modifier, mod)));
-    }
-
-    /**
-     * Adds the given modifier to the entity.<br>
-     * If duplicates are disabled and the modifier already exists, this action will fail.
-     * @param duplicates Disallow duplicates of the same modifier if they match this policy
-     */
-    public static boolean addModifier(LivingEntity entity, TempModifier modifier, Trait trait, Placement.Duplicates duplicates)
-    {   return addModifier(entity, modifier, trait, duplicates, 1, Placement.AFTER_LAST);
-    }
-
-    /**
-     * Adds the given modifier to the entity, with a custom placement.<br>
-     */
-    public static boolean addModifier(LivingEntity entity, TempModifier modifier, Trait trait, Placement.Duplicates duplicates, int maxCount, Placement placement)
+    public static boolean addModifier(LivingEntity entity, TempModifier modifier, Trait trait, Placement placement)
     {
         TempModifierEvent.Add event = new TempModifierEvent.Add(entity, trait, modifier);
         MinecraftForge.EVENT_BUS.post(event);
@@ -223,11 +228,16 @@ public class Temperature
             {
                 ITemperatureCap cap = optCap.resolve().get();
                 List<TempModifier> modifiers = cap.getModifiers(trait);
-                if (addModifier(modifiers, event.getModifier(), duplicates, maxCount, placement))
-                {
-                    modifier.onAdded(entity, trait);
+                Consumer<TempModifier> onAdded = mod ->
+                {   modifier.onAdded(entity, trait);
                     updateSiblingsAdd(modifiers, entity, trait, modifier);
-                    updateModifiers(entity, cap);
+                };
+                Consumer<TempModifier> onRemoved = mod ->
+                {   modifier.onRemoved(entity, trait);
+                    updateSiblingsRemove(modifiers, entity, trait, modifier);
+                };
+                if (addModifier(modifiers, event.getModifier(), placement, onAdded, onRemoved))
+                {   updateModifiers(entity, cap);
                     return true;
                 }
                 return false;
@@ -237,7 +247,7 @@ public class Temperature
     }
 
     /**
-     * This method is mainly for internal use. {@link Temperature#addModifier(LivingEntity, TempModifier, Trait, Placement.Duplicates, int, Placement)} should be used instead.<br>
+     * This method is mainly for internal use. {@link Temperature#addModifier(LivingEntity, TempModifier, Trait, Placement)} should be used instead.<br>
      * <br>
      * Be warned that it does call update methods or events, including:<br>
      * - {@link TempModifierEvent.Add}<br>
@@ -245,69 +255,61 @@ public class Temperature
      * - {@link TempModifier#onSiblingAdded(LivingEntity, Trait, TempModifier)}<br>
      */
     @Internal
-    public static boolean addModifier(List<TempModifier> modifiers, TempModifier modifier, Placement.Duplicates duplicatePolicy, int maxCount, Placement placement)
+    public static boolean addModifier(List<TempModifier> modifiers, TempModifier modifier, Placement placement,
+                                      Consumer<TempModifier> onAdded, Consumer<TempModifier> onRemoved)
     {
-        boolean changed = false;
+        boolean added = false;
         Predicate<TempModifier> predicate = placement.predicate();
         if (predicate == null) predicate = mod -> true;
 
-        boolean isReplacing = placement.mode().isReplacing();
-        boolean isForward = placement.order() == Placement.Order.FIRST;
+        boolean isForward = placement.order() == Order.FIRST;
+        Matcher duplicateMatcher = placement.duplicates();
+        int maxDuplicates = placement.maxDuplicates();
 
-        int existingMatches = (int) modifiers.stream().filter(mod -> duplicatePolicy.check(modifier, mod)).count();
-
-        // The number of TempModifiers that match the predicate
-        int hits = isReplacing ? 0 : existingMatches;
-        // Get the start of the iterator & which direction it's going
-        int start = isForward ? 0 : (modifiers.size() - 1);
-        // Iterate through the list (backwards if "forward" is false)
-        for (int i = start; isForward ? i < modifiers.size() : i >= 0; i += isForward ? 1 : -1)
+        tryAdd:
         {
-            // If max insertion count is reached, break the loop
-            if (hits >= maxCount)
-            {   return changed;
+            if (duplicateMatcher != Matcher.IGNORE
+            && modifiers.stream().filter(mod -> duplicateMatcher.check(modifier, mod)).count() >= maxDuplicates)
+            {   break tryAdd;
             }
-            TempModifier modifierAt = modifiers.get(i);
-            // If the predicate is true, inject the modifier at this position (or after it if "after" is true)
-            if (predicate.test(modifierAt))
+
+            if (modifiers.isEmpty())
             {
-                if (isReplacing)
-                {   changed = modifierAt.getExpireTime() != -1 || modifier.getExpireTime() != -1 || !modifierAt.equals(modifier);
-                    modifiers.set(i, modifier);
+                if (placement.mode().isAdding())
+                {
+                    modifiers.add(modifier);
+                    if (onAdded != null) onAdded.accept(modifier);
+                    return true;
                 }
-                else
-                {   modifiers.add(i + (placement.mode() == Placement.Mode.AFTER ? 1 : 0), modifier);
-                    changed = true;
+                else break tryAdd;
+            }
+            // Get the start of the iterator & which direction it's going
+            int start = isForward ? 0 : (modifiers.size() - 1);
+            // Iterate through the list (backwards if "forward" is false)
+            for (int i = start; isForward ? i < modifiers.size() : i >= 0; i += isForward ? 1 : -1)
+            {
+                TempModifier modifierAt = modifiers.get(i);
+                // If the predicate is true, inject the modifier at this position (or after it if "after" is true)
+                if (predicate.test(modifierAt))
+                {
+                    added = true;
+                    if (placement.mode() == Mode.REPLACE)
+                    {   modifiers.set(i, modifier);
+                        if (onRemoved != null) onRemoved.accept(modifierAt);
+                    }
+                    else
+                    {   modifiers.add(i + (placement.mode() == Mode.ADD_AFTER ? 1 : 0), modifier);
+                    }
+                    if (onAdded != null) onAdded.accept(modifier);
+                    break tryAdd;
                 }
-                hits++;
             }
         }
-        if (hits > 0) return changed;
-        // Add the modifier if the insertion check fails
-        switch (placement.mode())
-        {
-            case BEFORE ->
-            {   modifiers.add(0, modifier);
-                return true;
-            }
-            case AFTER, REPLACE_OR_ADD ->
-            {   modifiers.add(modifier);
-                return true;
-            }
+        // Use fallback if modifier was not added
+        if (!added && placement.fallback() != null)
+        {   added = addModifier(modifiers, modifier, placement.fallback(), onAdded, onRemoved);
         }
-        return changed;
-    }
-
-    public static void addModifiers(LivingEntity entity, List<TempModifier> modifiers, Trait trait, Placement.Duplicates duplicatePolicy)
-    {
-        EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
-        {
-            boolean changed = false;
-            for (TempModifier modifier : modifiers)
-            {   changed |= addModifier(entity, modifier, trait, duplicatePolicy);
-            }
-            if (changed) updateModifiers(entity, cap);
-        });
+        return added;
     }
 
     /**
@@ -317,12 +319,12 @@ public class Temperature
      * @param maxCount The number of modifiers of the given type to be removed (can be higher than the number of modifiers on the player)
      * @param condition The predicate to determine which TempModifiers to remove
      */
-    public static void removeModifiers(LivingEntity entity, Trait trait, int maxCount, Placement.Order order, Predicate<TempModifier> condition)
+    public static void removeModifiers(LivingEntity entity, Trait trait, int maxCount, Order order, Predicate<TempModifier> condition)
     {
         EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
         {
             List<TempModifier> modifiers = cap.getModifiers(trait);
-            boolean forwardOrder = order == Placement.Order.FIRST;
+            boolean forwardOrder = order == Order.FIRST;
             int removed = 0;
 
             for (int i = forwardOrder ? 0 : modifiers.size() - 1; i >= 0 && i < modifiers.size(); i += forwardOrder ? 1 : -1)
@@ -355,21 +357,11 @@ public class Temperature
     }
 
     public static void removeModifiers(LivingEntity entity, Trait trait, Predicate<TempModifier> condition)
-    {   removeModifiers(entity, trait, Integer.MAX_VALUE, Placement.Order.FIRST, condition);
+    {   removeModifiers(entity, trait, Integer.MAX_VALUE, Order.FIRST, condition);
     }
 
     public static void removeModifiers(LivingEntity entity, Trait trait, Class<? extends TempModifier> clazz)
-    {   removeModifiers(entity, trait, Integer.MAX_VALUE, Placement.Order.FIRST, clazz::isInstance);
-    }
-
-    /**
-     * Gets all TempModifiers of the specified type on the entity.<br>
-     * @param entity is the entity being sampled
-     * @param trait determines which TempModifier list to pull from
-     * @return an <b>IMMUTABLE</b> list of all TempModifiers for the specified trait
-     */
-    public static List<TempModifier> getModifiers(LivingEntity entity, Trait trait)
-    {   return EntityTempManager.getTemperatureCap(entity).map(cap -> ImmutableList.copyOf(cap.getModifiers(trait))).orElse(ImmutableList.of());
+    {   removeModifiers(entity, trait, Integer.MAX_VALUE, Order.FIRST, clazz::isInstance);
     }
 
     /**
