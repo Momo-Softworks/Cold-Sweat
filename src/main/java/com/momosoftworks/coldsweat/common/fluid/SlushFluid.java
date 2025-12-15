@@ -58,7 +58,7 @@ public abstract class SlushFluid extends ForgeFlowingFluid
                         int green = ColorHelper.PackedColor.green(color);
                         int blue = ColorHelper.PackedColor.blue(color);
                         int alphaColor = ColorHelper.PackedColor.color(240, red, green, blue);
-                        int white = ColorHelper.PackedColor.color(240, 255, 255, 255);
+                        int white = ColorHelper.PackedColor.color(240, 240, 255, 255);
                         return CSMath.blendColors(alphaColor, white, 0.65f);
                     })
                     .defaultColor(ColorHelper.PackedColor.color(240, 210, 240, 255))
