@@ -780,7 +780,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
             double temp = cap.getTrait(Temperature.Trait.WORLD);
             if (CSMath.betweenInclusive(temp, min, max))
             {
-                Optional<ThermalSourceTempModifier> existingMod = Temperature.getModifier(cap, Temperature.Trait.WORLD, ThermalSourceTempModifier.class);
+                Optional<ThermalSourceTempModifier> existingMod = Temperature.getModifier(entity, Temperature.Trait.WORLD, ThermalSourceTempModifier.class);
                 if (existingMod.isPresent())
                 {
                     double lastInput = existingMod.get().getLastInput(Temperature.Trait.WORLD);
