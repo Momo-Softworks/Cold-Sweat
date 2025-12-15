@@ -59,10 +59,19 @@ public class SlushLiquidBlock extends FlowingFluidBlock
 
                 if (neighborFluid.is(FluidTags.WATER))
                 {
-                    Block resultBlock = slushState.isSource() ? Blocks.ICE : Blocks.SNOW_BLOCK;
-                    BlockPos resultPos = freezeOther ? neighborPos : pos;
+                    if (direction == Direction.DOWN)
+                    {
+                        Block resultBlock = Blocks.SNOW_BLOCK;
+                        level.setBlockAndUpdate(pos.below(), net.minecraftforge.event.ForgeEventFactory.fireFluidPlaceBlockEvent(level, pos.below(), pos, resultBlock.defaultBlockState()));
+                        SlushFluid.fizz(level, pos);
+                    }
+                    else
+                    {
+                        Block resultBlock = slushState.isSource() ? Blocks.ICE : Blocks.SNOW_BLOCK;
+                        BlockPos resultPos = freezeOther ? neighborPos : pos;
                     level.setBlockAndUpdate(resultPos, ForgeEventFactory.fireFluidPlaceBlockEvent(level, resultPos, pos, resultBlock.defaultBlockState()));
-                    SlushFluid.fizz(level, pos);
+                        SlushFluid.fizz(level, pos);
+                    }
                     return true;
                 }
             }
