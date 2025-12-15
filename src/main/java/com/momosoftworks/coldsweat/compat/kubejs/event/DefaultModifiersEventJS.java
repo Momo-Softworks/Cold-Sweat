@@ -3,7 +3,9 @@ package com.momosoftworks.coldsweat.compat.kubejs.event;
 import com.momosoftworks.coldsweat.api.event.core.init.DefaultTempModifiersEvent;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
-import com.momosoftworks.coldsweat.api.util.Placement;
+import com.momosoftworks.coldsweat.api.util.placement.Mode;
+import com.momosoftworks.coldsweat.api.util.placement.Order;
+import com.momosoftworks.coldsweat.api.util.placement.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.compat.kubejs.KubeBindings;
 import dev.latvian.mods.kubejs.entity.KubeLivingEntityEvent;
@@ -44,29 +46,28 @@ public class DefaultModifiersEventJS implements KubeLivingEntityEvent
         event.getModifiers(t).addAll(List.of(modifiers));
     }
 
-    public void addModifier(String trait, TempModifier modifier, String duplicatePolicy, Placement params)
+    public void addModifier(String trait, TempModifier modifier, Placement params)
     {
         Temperature.Trait t = KubeBindings.getTrait(trait);
-        Temperature.addModifier(event.getModifiers(t), modifier, Placement.Duplicates.byName(duplicatePolicy), 1, params);
+        Temperature.addModifier(event.getModifiers(t), modifier, params, null, null);
     }
 
-    public void addModifierById(String trait, ResourceLocation id, Consumer<TempModifier> modifierBuilder, String duplicatePolicy, Placement params)
+    public void addModifierById(String trait, ResourceLocation id, Consumer<TempModifier> modifierBuilder, Placement params)
     {
         TempModifierRegistry.getValue(id).ifPresent(mod ->
         {
             modifierBuilder.accept(mod);
-            addModifier(trait, mod, duplicatePolicy, params);
+            addModifier(trait, mod, params);
         });
     }
 
-    public void removeModifiers(String trait, TempModifier modifier, String matchPolicy)
+    public void removeModifiers(String trait, Predicate<TempModifier> predicate)
     {
         Temperature.Trait t = KubeBindings.getTrait(trait);
-        Placement.Duplicates policy = Placement.Duplicates.byName(matchPolicy);
-        event.getModifiers(t).removeIf(mod -> policy.check(mod, modifier));
+        event.getModifiers(t).removeIf(predicate);
     }
 
     public Placement placed(String mode, String order, Predicate<TempModifier> predicate)
-    {   return Placement.of(Placement.Mode.byName(mode), Placement.Order.byName(order), predicate);
+    {   return Placement.of(Mode.byName(mode), Order.byName(order), predicate);
     }
 }
