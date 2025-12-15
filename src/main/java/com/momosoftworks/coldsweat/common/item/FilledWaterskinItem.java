@@ -2,8 +2,11 @@ package com.momosoftworks.coldsweat.common.item;
 
 import com.momosoftworks.coldsweat.api.temperature.modifier.WaterTempModifier;
 import com.momosoftworks.coldsweat.api.temperature.modifier.WaterskinTempModifier;
-import com.momosoftworks.coldsweat.api.util.Placement;
+import com.momosoftworks.coldsweat.api.util.placement.Matcher;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.api.util.placement.Mode;
+import com.momosoftworks.coldsweat.api.util.placement.Order;
+import com.momosoftworks.coldsweat.api.util.placement.Placement;
 import com.momosoftworks.coldsweat.client.event.TooltipHandler;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.common.entity.data.Preference;
@@ -103,7 +106,7 @@ public class FilledWaterskinItem extends Item
 
                 double tempEffect = (EFFECT_RATE / 10) * ConfigSettings.WATERSKIN_HOTBAR_STRENGTH.get();
                 itemstack.getOrCreateTag().putDouble(FilledWaterskinItem.NBT_TEMPERATURE, newTemp);
-                Temperature.addModifier(player, new WaterskinTempModifier(tempEffect * CSMath.sign(itemTemp)).expires(5), Temperature.Trait.CORE, Placement.Duplicates.ALLOW);
+                Temperature.addModifier(player, new WaterskinTempModifier(tempEffect * CSMath.sign(itemTemp)).expires(5), Temperature.Trait.CORE, Placement.LAST);
             }
         }
     }
@@ -117,9 +120,12 @@ public class FilledWaterskinItem extends Item
         {
             double temperature = stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
             double effectAmount = temperature * (ConfigSettings.WATERSKIN_CONSUME_STRENGTH.get() / 50d);
-            Temperature.addModifier(player, new WaterskinTempModifier(effectAmount).expires(0), Temperature.Trait.CORE, Placement.Duplicates.ALLOW);
             double wetnessTemp = 0.05 * CSMath.sign(temperature == 0 ? 1 : temperature);
-            Temperature.addOrReplaceModifier(player, new WaterTempModifier(wetnessTemp).tickRate(5), Temperature.Trait.WORLD, Placement.Duplicates.BY_CLASS);
+            // Add waterskin temp modifier
+            Temperature.addModifier(player, new WaterskinTempModifier(effectAmount).expires(0), Temperature.Trait.CORE, Placement.LAST);
+            // Replace or add water temp modifier
+            Placement modPlacement = Placement.of(Mode.REPLACE, Order.FIRST, mod -> mod instanceof WaterTempModifier).orElse(Placement.LAST);
+            Temperature.addModifier(player, new WaterTempModifier(wetnessTemp).tickRate(5), Temperature.Trait.WORLD, modPlacement);
 
             WorldHelper.playEntitySound(ModSounds.WATERSKIN_POUR, player, player.getSoundSource(), 2f, (float) ((Math.random() / 5) + 0.9));
         }
@@ -256,7 +262,7 @@ public class FilledWaterskinItem extends Item
     @Override
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity)
     {   double amount = stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE) * (ConfigSettings.WATERSKIN_CONSUME_STRENGTH.get() / 50d);
-        Temperature.addModifier(entity, new WaterskinTempModifier(amount / (100 * stack.getMaxDamage())).expires(100), Temperature.Trait.CORE, Placement.Duplicates.ALLOW);
+        Temperature.addModifier(entity, new WaterskinTempModifier(amount / (100 * stack.getMaxDamage())).expires(100), Temperature.Trait.CORE, Placement.LAST);
         if (entity instanceof Player player && player.isCreative())
         {   return stack;
         }
@@ -437,8 +443,8 @@ public class FilledWaterskinItem extends Item
                     {
                         if (!affectedPlayers.contains(player))
                         {   // Apply the effect and store the player
-                            Temperature.addModifier(player, new WaterskinTempModifier(effectAmount).expires(0), Temperature.Trait.CORE, Placement.Duplicates.ALLOW);
-                            Temperature.addOrReplaceModifier(player, new WaterTempModifier(wetnessTemp).tickRate(5), Temperature.Trait.WORLD, Placement.Duplicates.BY_CLASS);
+                            Temperature.addModifier(player, new WaterskinTempModifier(effectAmount).expires(0), Temperature.Trait.CORE, Placement.LAST);
+                            Temperature.replaceOrAddModifier(player, new WaterTempModifier(wetnessTemp).tickRate(5), Temperature.Trait.WORLD, Matcher.SAME_CLASS);
                             affectedPlayers.add(player);
                         }
                     });

@@ -1,6 +1,5 @@
 package com.momosoftworks.coldsweat.api.temperature.effect;
 
-import com.momosoftworks.coldsweat.api.util.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.gui.Overlays;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
