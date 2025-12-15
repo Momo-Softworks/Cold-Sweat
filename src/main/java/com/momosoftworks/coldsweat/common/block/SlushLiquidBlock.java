@@ -66,9 +66,18 @@ public class SlushLiquidBlock extends LiquidBlock
 
                 if (neighborFluid.is(FluidTags.WATER))
                 {
-                    Block resultBlock = slushState.isSource() ? Blocks.ICE : Blocks.SNOW_BLOCK;
-                    level.setBlockAndUpdate(pos, EventHooks.fireFluidPlaceBlockEvent(level, pos, pos, resultBlock.defaultBlockState()));
-                    SlushFluid.fizz(level, pos);
+                    if (direction == Direction.DOWN)
+                    {
+                        Block resultBlock = Blocks.SNOW_BLOCK;
+                        level.setBlockAndUpdate(pos.below(), EventHooks.fireFluidPlaceBlockEvent(level, pos.below(), pos, resultBlock.defaultBlockState()));
+                        SlushFluid.fizz(level, pos);
+                    }
+                    else
+                    {
+                        Block resultBlock = slushState.isSource() ? Blocks.ICE : Blocks.SNOW_BLOCK;
+                        level.setBlockAndUpdate(pos, EventHooks.fireFluidPlaceBlockEvent(level, pos, pos, resultBlock.defaultBlockState()));
+                        SlushFluid.fizz(level, pos);
+                    }
                     return true;
                 }
             }
