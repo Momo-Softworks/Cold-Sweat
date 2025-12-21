@@ -31,9 +31,9 @@
   "attributes": {
     "cold_sweat:heat_dampening": [
       {
-        "name": "cs:netherite_jetpack_chestplate",
+        "name": "cs:netherite_jetpack_set_bonus",
         "amount": 0.9,
-        "operation": "addition"
+        "operation": "add_value"
       }
     ]
   },
