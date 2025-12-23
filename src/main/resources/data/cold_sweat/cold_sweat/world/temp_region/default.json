@@ -48,7 +48,7 @@
       "bottom": {
         "anchor": "ground_level",
         "depth": -20,
-        "temperature": 75,
+        "temperature": 60,
         "units": "f"
       }
     },
@@ -57,7 +57,7 @@
       "top": {
         "anchor": "ground_level",
         "depth": -21,
-        "temperature": 75,
+        "temperature": 60,
         "units": "f"
       },
       "bottom": {
