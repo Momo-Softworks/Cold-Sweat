@@ -3613,3 +3613,24 @@ Fixes:
 - Fixed the hearth appearing black when updating from a version prior to 2.4-b05d
 - Fixed the "Default Water Temperature" setting saving incorrectly when configs are saved
 - Fixed entities not emitting heat when on fire
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.4-b06e
+- The temperature underground is now 60 °F instead of 75 °F
+
+Fixes:
+* (1.21) Fixed error when loading compat for Create: Stuff n' Additions
+
+Technical Changes:
+* Some (breaking) changes to how TempModifiers are added to players:
+      - The new formatting is outlined in a post on the Momo Softworks Discord server. Documentation will be updated early next year
+      - These changes are done to simplify the way TempModifiers are added and make it more flexible/extensible
+      - Duplicate modifier handling is now part of the Placement, rather than being dedicated parameters in the addModifier() method
+      - The "Duplicates" enum has been renamed to "Matcher"
+      - Compressed all 5 addModifier() overloads down to just one method:
+            - addModifier(entity, modifier, trait, placement)
+            - There is also a helper method for replaceOrAddModifier
+- The hearth/boiler/icebox now store fuel as a simple integer instead of fluid stacks
+      - Keeps the system simple and allows for multiple fuel types to be used interchangeably
+      - Saved fuel data will be loaded and converted automatically upon updating
