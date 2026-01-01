@@ -116,6 +116,7 @@ public class BlockTempModifier extends TempModifier
                             {
                                 if (!blockTemp.isValid(level, blockpos, state)) continue;
                                 double temperature = blockTemp.getTemperature(level, entity, state, blockpos, distance);
+                                if (temperature == 0) continue;
                                 double tempToAdd = blockTemp.fade()
                                                    ? CSMath.blend(temperature, 0, distance, 0.5, blockTemp.range())
                                                    : temperature;
