@@ -69,6 +69,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.level.SleepFinishedTimeEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
+import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
@@ -87,8 +88,8 @@ public class EntityTempManager
 
     public static final Set<EntityType<? extends LivingEntity>> TEMPERATURE_ENABLED_ENTITIES = new HashSet<>(ImmutableSet.<EntityType<? extends LivingEntity>>builder().add(EntityType.PLAYER).build());
 
-    public static SidedCapabilityCache<ITemperatureCap, Entity> CAP_CACHE = new SidedCapabilityCache<>(ModDataAttachments.ENTITY_TEMPERATURE, Entity::isRemoved);
-    public static Map<Entity, Map<ResourceLocation, Double>> TEMP_MODIFIER_IMMUNITIES = new WeakHashMap<>();
+    public static final SidedCapabilityCache<ITemperatureCap, Entity> CAP_CACHE = new SidedCapabilityCache<>(ModDataAttachments.ENTITY_TEMPERATURE, Entity::isRemoved);
+    public static final Map<Entity, Map<ResourceLocation, Double>> TEMP_MODIFIER_IMMUNITIES = new WeakHashMap<>();
 
     @EventBusSubscriber
     public static class Events
@@ -206,9 +207,9 @@ public class EntityTempManager
         }
 
         @SubscribeEvent
-        public static synchronized void finalizeEntities(EntityLeaveLevelEvent event)
+        public static void finalizeEntities(ServerTickEvent.Post event)
         {
-            if (isTemperatureEnabled(event.getEntity()))
+            if (event.getServer().overworld().getGameTime() % 200 == 0)
             {   TEMP_MODIFIER_IMMUNITIES.entrySet().removeIf(e -> e.getKey().isRemoved());
             }
         }
