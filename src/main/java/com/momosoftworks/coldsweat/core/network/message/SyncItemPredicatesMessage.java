@@ -13,6 +13,7 @@ import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.serialization.DynamicHolder;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
@@ -85,7 +86,7 @@ public class SyncItemPredicatesMessage implements CustomPacketPayload
 
     public static void encode(SyncItemPredicatesMessage message, RegistryFriendlyByteBuf buffer)
     {
-        ItemStack.STREAM_CODEC.encode(buffer, message.stack);
+        ByteBufCodecs.fromCodecWithRegistries(ItemStack.CODEC).encode(buffer, message.stack);
         buffer.writeInt(message.inventorySlot);
         buffer.writeOptional(Optional.ofNullable(message.equipmentSlot), FriendlyByteBuf::writeEnum);
         buffer.writeMap(message.predicateMap, (buf, uuid) -> buf.writeUUID(uuid), FriendlyByteBuf::writeBoolean);
@@ -93,7 +94,7 @@ public class SyncItemPredicatesMessage implements CustomPacketPayload
 
     public static SyncItemPredicatesMessage decode(RegistryFriendlyByteBuf buffer)
     {
-        ItemStack stack = ItemStack.STREAM_CODEC.decode(buffer);
+        ItemStack stack = ByteBufCodecs.fromCodecWithRegistries(ItemStack.CODEC).decode(buffer);
         int inventorySlot = buffer.readInt();
         EquipmentSlot equipmentSlot = buffer.readOptional(buf -> buf.readEnum(EquipmentSlot.class)).orElse(null);
         Map<UUID, Boolean> predicateMap = buffer.readMap(buf -> buf.readUUID(), FriendlyByteBuf::readBoolean);
