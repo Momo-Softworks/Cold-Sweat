@@ -627,7 +627,7 @@ public class WorldSettingsConfig
 
             CUSTOM_ICE_DROPS = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────",
-                         " When set to true, modifies ice blocks to be harvestable with a pickaxe")
+                         " When set to true, modifies ice blocks to be harvestable with a pickaxe and tweaks its mining speed")
                 .define("Custom Ice Drops", true);
 
             DRYOFF_SPEED = BUILDER

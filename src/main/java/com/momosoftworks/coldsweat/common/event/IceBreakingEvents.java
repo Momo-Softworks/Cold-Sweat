@@ -67,13 +67,13 @@ public class IceBreakingEvents
         {
             // Increase speed for pickaxes (even if the tier isn't high enough)
             if (tool.canPerformAction(ToolActions.PICKAXE_DIG))
-            {   event.setNewSpeed(speed * 2);
+            {   event.setNewSpeed(speed);
             }
             // Non-pickaxes need a huge speed boost
-            else event.setNewSpeed(speed * 3);
+            else event.setNewSpeed(speed * 2);
         }
         if (state.is(Blocks.PACKED_ICE))
-        {   event.setNewSpeed(event.getNewSpeed() / 3);
+        {   event.setNewSpeed(event.getNewSpeed() / 2.2f);
         }
     }
 
