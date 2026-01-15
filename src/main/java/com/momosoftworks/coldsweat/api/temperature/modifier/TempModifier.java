@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.core.init.TempModifierInit;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
 
 import static com.momosoftworks.coldsweat.api.util.Temperature.Trait;
@@ -214,6 +215,10 @@ public abstract class TempModifier
 
     public void markClean()
     {   this.changed = false;
+    }
+
+    public ResourceLocation getID()
+    {   return TempModifierRegistry.getKey(this);
     }
 
     @Override
