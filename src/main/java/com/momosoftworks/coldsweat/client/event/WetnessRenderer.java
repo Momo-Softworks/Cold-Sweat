@@ -98,7 +98,8 @@ public class WetnessRenderer
 
         // Get the player's wetness level
         double wetness = Temperature.getModifier(mc.player, Temperature.Trait.WORLD, WaterTempModifier.class).map(mod ->
-                         {  return CSMath.blend(0, 1, Math.abs(mod.getTemperature()), 0, 0.2);
+                         {   if (Temperature.getImmunityToModifier(player, mod) == 1) return 0d;
+                             else return CSMath.blend(0, 1, Math.abs(mod.getTemperature()), 0, 0.2);
                          }).orElse(0d);
 
         // Spawn a bunch of droplets when the player exits the water
