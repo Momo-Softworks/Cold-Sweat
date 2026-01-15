@@ -82,15 +82,13 @@ public class WaterTempModifier extends TempModifier
     @Override
     public void tick(LivingEntity entity)
     {
-        if (entity.level().isClientSide() && ConfigSettings.WATER_EFFECT_SETTING.get().showParticles() && !entity.isInWater())
+        if (entity.level().isClientSide() && ConfigSettings.WATER_EFFECT_SETTING.get().showParticles() && !entity.isInWater()
+        && Math.random() < Math.abs(this.getTemperature()) * 2 && Temperature.getImmunityToModifier(entity, this) < 1.0)
         {
-            if (Math.random() < Math.abs(this.getTemperature()) * 2)
-            {
-                double randX = entity.getBbWidth() * (Math.random() - 0.5);
-                double randY = entity.getBbHeight() * Math.random();
-                double randZ = entity.getBbWidth() * (Math.random() - 0.5);
-                entity.level().addParticle(ParticleTypes.FALLING_WATER, entity.getX() + randX, entity.getY() + randY, entity.getZ() + randZ, 0, 0, 0);
-            }
+            double randX = entity.getBbWidth() * (Math.random() - 0.5);
+            double randY = entity.getBbHeight() * Math.random();
+            double randZ = entity.getBbWidth() * (Math.random() - 0.5);
+            entity.level().addParticle(ParticleTypes.FALLING_WATER, entity.getX() + randX, entity.getY() + randY, entity.getZ() + randZ, 0, 0, 0);
         }
         if (!entity.level().isClientSide && entity.isOnFire())
         {
