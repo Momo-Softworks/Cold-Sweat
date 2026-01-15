@@ -49,6 +49,7 @@ public class TempModifierRegistry
         return Optional.ofNullable(TEMP_MODIFIERS.get(id)).map(TempModifierHolder::get);
     }
 
+    @Nullable
     public static ResourceLocation getKey(TempModifier modifier)
     {   return CSMath.getIfNotNull(getHolder(modifier), TempModifierHolder::getId, null);
     }
