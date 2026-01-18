@@ -6,7 +6,7 @@ import com.momosoftworks.coldsweat.core.init.FluidInit;
 import com.momosoftworks.coldsweat.core.init.ItemInit;
 import com.momosoftworks.coldsweat.core.init.SoundInit;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.registries.ModSounds;
+import com.momosoftworks.coldsweat.util.render.PackedColorHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -54,14 +54,14 @@ public abstract class SlushFluid extends ForgeFlowingFluid
                         {   return 0xFFFFFFFF;
                         }
                         int color = BiomeColors.getAverageWaterColor(level, pos);
-                        int red = ColorHelper.PackedColor.red(color);
-                        int green = ColorHelper.PackedColor.green(color);
-                        int blue = ColorHelper.PackedColor.blue(color);
-                        int alphaColor = ColorHelper.PackedColor.color(240, red, green, blue);
-                        int white = ColorHelper.PackedColor.color(240, 240, 255, 255);
-                        return CSMath.blendColors(alphaColor, white, 0.65f);
+                        int red = PackedColorHelper.red(color);
+                        int green = PackedColorHelper.green(color);
+                        int blue = PackedColorHelper.blue(color);
+                        int alphaColor = PackedColorHelper.color(240, red, green, blue);
+                        int white = PackedColorHelper.color(240, 240, 255, 255);
+                        return PackedColorHelper.mix(alphaColor, white, 0.65f);
                     })
-                    .defaultColor(ColorHelper.PackedColor.color(240, 210, 240, 255))
+                    .defaultColor(PackedColorHelper.color(240, 210, 240, 255))
                     .sound(SoundInit.BUCKET_FILL_SLUSH, SoundInit.BUCKET_EMPTY_SLUSH)
                     .translationKey("block.cold_sweat.slush")
                     .temperature(280)

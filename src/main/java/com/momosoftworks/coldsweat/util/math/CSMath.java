@@ -1,8 +1,6 @@
 package com.momosoftworks.coldsweat.util.math;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Rotation;
@@ -541,26 +539,6 @@ public class CSMath
     {   return Math.ceil(value / multipleOf) * multipleOf;
     }
 
-    public static int blendColors(int colorA, int colorB, float ratio)
-    {
-        int aFrom = (colorA >> 24) & 0xff;
-        int rFrom = (colorA >> 16) & 0xff;
-        int gFrom = (colorA >> 8) & 0xff;
-        int bFrom = colorA & 0xff;
-
-        int aTo = (colorB >> 24) & 0xff;
-        int rTo = (colorB >> 16) & 0xff;
-        int gTo = (colorB >> 8) & 0xff;
-        int bTo = colorB & 0xff;
-
-        int a = (int) (aFrom + (aTo - aFrom) * ratio);
-        int r = (int) (rFrom + (rTo - rFrom) * ratio);
-        int g = (int) (gFrom + (gTo - gFrom) * ratio);
-        int b = (int) (bFrom + (bTo - bFrom) * ratio);
-
-        return (a << 24) | (r << 16) | (g << 8) | b;
-    }
-
     /**
      * Calculates the number that is farthest from zero.
      * @return The absolute maximum value.
@@ -969,26 +947,6 @@ public class CSMath
             }
         }
         return false;
-    }
-
-    public static void fillHorizontalGradient(MatrixStack ps, int x1, int y1, int x2, int y2, int colorFrom, int colorTo)
-    {
-        int width = x2 - x1;
-        // Break into multiple thin strips (more strips = smoother gradient)
-        int strips = 50; // Adjust for desired smoothness
-
-        for (int i = 0; i < strips; i++)
-        {
-            int stripX = x1 + (width * i / strips);
-            int nextStripX = x1 + (width * (i + 1) / strips);
-
-            // Calculate interpolated color for this strip
-            float fraction = (float) i / strips;
-            int color = blendColors(colorFrom, colorTo, fraction);
-
-            // Draw the vertical strip
-            AbstractGui.fill(ps, stripX, y1, nextStripX, y2, color);
-        }
     }
 
     public static Rotation directionToRotation(Direction direction)
