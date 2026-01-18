@@ -3645,3 +3645,15 @@ Technical Changes:
 - The hearth/boiler/icebox now store fuel as a simple integer instead of fluid stacks
       - Keeps the system simple and allows for multiple fuel types to be used interchangeably
       - Saved fuel data will be loaded and converted automatically upon updating
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.4-b06f
+- Packed ice can now be instantly mined with an efficiency V diamond pickaxe or faster
+- Water droplets no longer display if the player is fully immune to water
+
+Fixes:
+- (1.21) Fixed ice creating water when mined with an incorrect tool that has silk touch (i.e. wooden pickaxe)
+- (1.21) Fixed disconnection when hovering over an enchanted item in some cases
+- Fixed "ConcurrentModificationException" crash when caching entity temperature data in some cases
+- Fixed block temperature configs not applying correctly when multiple are defined for the same block
