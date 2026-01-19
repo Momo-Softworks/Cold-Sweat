@@ -13,7 +13,6 @@ import com.momosoftworks.coldsweat.util.item.ItemStackHelper;
 import net.minecraft.core.Holder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.Equipable;
@@ -118,25 +117,40 @@ public class ItemInsulationManager
     }
 
     /**
-     * Returns a list of {@link InsulatorData} attached to the item, including both built-in and applied insulation.<br>
-     * Use {@link com.momosoftworks.coldsweat.data.codec.impl.RequirementHolder#filterValid(List, ItemStack)} to restrict the results to only active insulators.
+     * Returns a list of {@link InsulatorData} on the item, for the given slot.<br>
+     * Use {@link com.momosoftworks.coldsweat.data.codec.impl.RequirementHolder#filterValid(List, ItemStack)} to restrict the results to only valid/active insulators.
+     * @param slots The slot(s) to get insulation for. If none specified, gets insulation for all slots.
      * @return an IMMUTABLE list of insulation the item has.
      */
-    public static List<InsulatorData> getInsulatorsForStack(ItemStack stack, Insulation.Slot slot)
+    public static List<InsulatorData> getInsulatorsForStack(ItemStack stack, Insulation.Slot... slots)
     {
         if (stack.isEmpty()) return new ArrayList<>();
 
         List<InsulatorData> insulators = new ArrayList<>();
-        // Get applied armor insulation
-        if (slot == Insulation.Slot.ARMOR && isInsulatable(stack))
+        // If no slots specified, get all insulators
+        if (slots.length == 0)
         {
-            getInsulationCap(stack).ifPresent(cap ->
-            {   insulators.addAll(getAppliedArmorInsulators(stack));
-            });
+            for (int i = 0; i < Insulation.Slot.values().length; i++)
+            {   Insulation.Slot slot = Insulation.Slot.values()[i];
+                insulators.addAll(getInsulatorsForStack(stack, slot));
+            }
+            return ImmutableList.copyOf(insulators);
         }
-        insulators.addAll(getInsulatorsForSlotType(slot).get(stack.getItem()));
+        // Get insulators for specified slots
+        for (int i = 0; i < slots.length; i++)
+        {
+            Insulation.Slot slot = slots[i];
+            // Get applied armor insulation
+            if (slot == Insulation.Slot.ARMOR && isInsulatable(stack))
+            {
+                getInsulationCap(stack).ifPresent(cap ->
+                {   insulators.addAll(getAppliedArmorInsulators(stack));
+                });
+            }
+            insulators.addAll(getInsulatorsForSlotType(slot).get(stack.getItem()));
+        }
 
-        return insulators;
+        return ImmutableList.copyOf(insulators);
     }
 
     /**
