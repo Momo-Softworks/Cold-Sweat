@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.util.math;
 
+import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
@@ -787,6 +788,34 @@ public class CSMath
         {   appended.addAll(list);
         }
         return appended;
+    }
+
+    /**
+     * Merges the given multimaps together into a single multimap.<br>
+     * The collections are merged in the order in which they are provided.
+     */
+    @SafeVarargs
+    public static <K, V> Map<K, V> merge(Map<K, V>... maps)
+    {
+        Map<K, V> merged = new HashMap<>();
+        for (Map<K, V> map : maps)
+        {   merged.putAll(map);
+        }
+        return merged;
+    }
+
+    /**
+     * Merges the given multimaps together into a single multimap.<br>
+     * The collections are merged in the order in which they are provided.
+     */
+    @SafeVarargs
+    public static <K, V> Multimap<K, V> merge(Multimap<K, V>... maps)
+    {
+        Multimap<K, V> merged = new RegistryMultiMap<>();
+        for (Multimap<K, V> map : maps)
+        {   merged.putAll(map);
+        }
+        return merged;
     }
 
     /**
