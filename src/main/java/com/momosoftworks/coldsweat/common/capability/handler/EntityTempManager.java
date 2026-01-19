@@ -483,11 +483,10 @@ public class EntityTempManager
             if (!event.getTrait().isForAttributes()) return;
 
             TempModifier modifier = event.getModifier();
-            ResourceLocation modifierKey = TempModifierRegistry.getKey(modifier);
             LivingEntity entity = event.getEntity();
 
             // Calculate modifier immunity from equipped insulators
-            double immunity = TEMP_MODIFIER_IMMUNITIES.getOrDefault(entity, Collections.emptyMap()).getOrDefault(modifierKey, 0.0);
+            double immunity = Temperature.getImmunityToModifier(entity, modifier);
             if (immunity > 0)
             {
                 Function<Double, Double> oldFunction = event.getFunction();
@@ -507,11 +506,10 @@ public class EntityTempManager
             if (!event.getTrait().isForAttributes()) return;
 
             TempModifier modifier = event.getModifier();
-            ResourceLocation modifierKey = TempModifierRegistry.getKey(modifier);
             LivingEntity entity = event.getEntity();
 
             // Calculate modifier immunity from equipped insulators
-            double immunity = TEMP_MODIFIER_IMMUNITIES.getOrDefault(entity, Collections.emptyMap()).getOrDefault(modifierKey, 0.0);
+            double immunity = Temperature.getImmunityToModifier(entity, modifier);
             if (immunity == 1)
             {   event.setCanceled(true);
             }
