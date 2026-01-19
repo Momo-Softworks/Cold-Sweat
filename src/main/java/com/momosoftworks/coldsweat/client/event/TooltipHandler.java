@@ -2,7 +2,6 @@ package com.momosoftworks.coldsweat.client.event;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.util.Temperature;
@@ -24,13 +23,11 @@ import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
 import com.momosoftworks.coldsweat.util.entity.EntityHelper;
-import com.momosoftworks.coldsweat.util.exceptions.RegistryFailureException;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.registries.ModAttributes;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
-import com.momosoftworks.coldsweat.util.serialization.ListBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
@@ -277,6 +274,9 @@ public class TooltipHandler
     public static void updateHoveredItem(RenderTooltipEvent.Pre event)
     {
         ItemStack stack = event.getStack();
+        if (ItemInsulationManager.getInsulatorsForStack(stack).isEmpty())
+        {   return;
+        }
 
         if (!HOVERED_STACK.equals(stack))
         {
@@ -298,13 +298,12 @@ public class TooltipHandler
             if (stack.isEmpty())
             {   HOVERED_STACK = stack;
             }
-            else
+            else if (HOVERED_ITEM_UPDATE_COOLDOWN <= 0)
             {
-                if (HOVERED_ITEM_UPDATE_COOLDOWN <= 0)
-                {
-                    HOVERED_STACK = stack;
-                    HOVERED_ITEM_UPDATE_COOLDOWN = 5;
-                    ColdSweatPacketHandler.INSTANCE.sendToServer(SyncItemPredicatesMessage.fromClient(stack.copy(), slotIndex, equipmentSlot));
+                HOVERED_STACK = stack;
+                HOVERED_ITEM_UPDATE_COOLDOWN = 5;
+                if (slotIndex >= 0)
+                {   ColdSweatPacketHandler.INSTANCE.sendToServer(SyncItemPredicatesMessage.fromClient(slotIndex, equipmentSlot));
                 }
             }
         }
