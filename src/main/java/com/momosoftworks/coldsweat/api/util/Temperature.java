@@ -388,7 +388,7 @@ public class Temperature
     }
 
     public static double getImmunityToModifier(LivingEntity entity, TempModifier modifier)
-    {   return EntityTempManager.TEMP_MODIFIER_IMMUNITIES.get(entity).getOrDefault(modifier.getID(), 0.0);
+    {   return EntityTempManager.TEMP_MODIFIER_IMMUNITIES.getOrDefault(entity, Collections.emptyMap()).getOrDefault(modifier.getID(), 0.0);
     }
 
     public static double getNeutralWorldTemp(LivingEntity entity)
