@@ -3668,7 +3668,9 @@ Technical Changes:
 - Water droplets no longer display if the player is fully immune to water
 
 Fixes:
+* (1.16) Fixed crash when starting a dedicated server
+* (1.21) Fixed disconnection when hovering over an enchanted item in some cases
+* Fixed "ConcurrentModificationException" crash when caching entity temperature data in some cases
+- (1.21) Fixed sewing table GUI having darker overlay than other GUIs
 - (1.21) Fixed ice creating water when mined with an incorrect tool that has silk touch (i.e. wooden pickaxe)
-- (1.21) Fixed disconnection when hovering over an enchanted item in some cases
-- Fixed "ConcurrentModificationException" crash when caching entity temperature data in some cases
 - Fixed block temperature configs not applying correctly when multiple are defined for the same block

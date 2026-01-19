@@ -252,6 +252,9 @@ public class TooltipHandler
     public static void updateHoveredItem(RenderTooltipEvent.Pre event)
     {
         ItemStack stack = event.getItemStack();
+        if (ItemInsulationManager.getInsulatorsForStack(stack).isEmpty())
+        {   return;
+        }
 
         if (!HOVERED_STACK.equals(stack))
         {
@@ -272,13 +275,12 @@ public class TooltipHandler
             if (stack.isEmpty())
             {   HOVERED_STACK = stack;
             }
-            else
+            else if (HOVERED_ITEM_UPDATE_COOLDOWN <= 0)
             {
-                if (HOVERED_ITEM_UPDATE_COOLDOWN <= 0)
-                {
-                    HOVERED_STACK = stack;
-                    HOVERED_ITEM_UPDATE_COOLDOWN = 5;
-                    ColdSweatPacketHandler.INSTANCE.sendToServer(SyncItemPredicatesMessage.fromClient(stack.copy(), slotIndex, equipmentSlot));
+                HOVERED_STACK = stack;
+                HOVERED_ITEM_UPDATE_COOLDOWN = 5;
+                if (slotIndex >= 0)
+                {   ColdSweatPacketHandler.INSTANCE.sendToServer(SyncItemPredicatesMessage.fromClient(slotIndex, equipmentSlot));
                 }
             }
         }
