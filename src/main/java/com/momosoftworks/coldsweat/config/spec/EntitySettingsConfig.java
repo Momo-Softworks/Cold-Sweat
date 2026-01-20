@@ -176,8 +176,7 @@ public class EntitySettingsConfig
                                 () -> List.of("biomesoplenty:rainforest", 20),
                                 () -> List.of("biomesoplenty:rocky_rainforest", 15),
                                 () -> List.of("biomesoplenty:fungal_jungle", 10),
-                                () -> List.of("biomesoplenty:tropics", 8),
-                                () -> List.of("biomesoplenty:outback", 2))
+                                () -> List.of("biomesoplenty:tropics", 8))
                             .addIf(CompatManager.isBiomesYoullGoLoaded(),
                                 () -> List.of("byg:tropical_rainforest", 60),
                                 () -> List.of("byg:jacaranda_forest", 3),
@@ -242,7 +241,6 @@ public class EntitySettingsConfig
                                 List.of("minecraft:grove", 5),
                                 List.of("minecraft:stony_peaks", 8))
                             .addIf(CompatManager.isBiomesOPlentyLoaded(),
-                                () -> List.of("biomesoplenty:boreal_forest", 5),
                                 () -> List.of("biomesoplenty:jade_cliffs", 4),
                                 () -> List.of("biomesoplenty:crag", 3))
                             .addIf(CompatManager.isBiomesYoullGoLoaded(),
@@ -259,7 +257,7 @@ public class EntitySettingsConfig
                                 () -> List.of("biomeswevegone:dacite_ridges", 5),
                                 () -> List.of("biomeswevegone:zelkova_forest", 3),
                                 () -> List.of("biomeswevegone:frosted_coniferous_forest", 3),
-                                () -> List.of("biomeswevegone:skyrise_vale", 5),
+                                () -> List.of("biomeswevegone:skyris_vale", 5),
                                 () -> List.of("biomeswevegone:coconino_meadow", 3))
                             .addIf(CompatManager.isTerralithLoaded(),
                                 () -> List.of("terralith:blooming_plateau", 5),
