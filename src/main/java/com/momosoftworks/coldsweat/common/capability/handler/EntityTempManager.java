@@ -429,7 +429,7 @@ public class EntityTempManager
         {
             TempModifier modifier = event.getModifier();
 
-            ResourceLocation modifierKey = TempModifierRegistry.getKey(modifier);
+            ResourceLocation modifierKey = modifier.getID();
 
             if (modifierKey != null && ConfigSettings.DISABLED_MODIFIERS.get().contains(modifierKey))
             {
