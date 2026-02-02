@@ -32,7 +32,7 @@ public class NBTHelper
     {
         // Write the modifier's data to a CompoundNBT
         CompoundNBT modifierTag = new CompoundNBT();
-        ResourceLocation modifierId = TempModifierRegistry.getKey(modifier);
+        ResourceLocation modifierId = modifier.getID();
         if (modifierId == null)
         {
             ColdSweat.LOGGER.error("Failed to get key for TempModifier: {}", modifier.getClass().getSimpleName());

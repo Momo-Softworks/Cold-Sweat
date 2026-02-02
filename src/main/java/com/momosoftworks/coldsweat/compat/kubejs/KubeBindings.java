@@ -68,7 +68,7 @@ public class KubeBindings
         if (entity instanceof LivingEntity)
         {
             ResourceLocation modifierId = new ResourceLocation(id);
-            return Temperature.getModifiers(((LivingEntity) entity), Temperature.Trait.fromID(trait), mod -> TempModifierRegistry.getKey(mod).equals(modifierId));
+            return Temperature.getModifiers(((LivingEntity) entity), Temperature.Trait.fromID(trait), mod -> mod.getID().equals(modifierId));
         }
         return null;
     }

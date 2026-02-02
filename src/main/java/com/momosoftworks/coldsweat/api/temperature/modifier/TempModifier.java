@@ -200,11 +200,6 @@ public abstract class TempModifier
     {   this.nbt = data;
     }
 
-    @Override
-    public String toString()
-    {   return TempModifierRegistry.getKey(this).toString();
-    }
-
     public void markDirty()
     {   this.changed = true;
     }
@@ -232,5 +227,10 @@ public abstract class TempModifier
                 && mod.getNBT().equals(this.getNBT());
         }
         return false;
+    }
+
+    @Override
+    public String toString()
+    {   return this.getID().toString();
     }
 }
