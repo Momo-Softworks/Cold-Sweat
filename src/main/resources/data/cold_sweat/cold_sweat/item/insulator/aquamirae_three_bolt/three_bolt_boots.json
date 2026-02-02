@@ -8,10 +8,6 @@
       "aquamirae:three_bolt_boots"
     ]
   },
-  "insulation": {
-    "heat": 0,
-    "cold": 0
-  },
   "entity": {
     "entities": [ "*" ],
     "equipment": {
