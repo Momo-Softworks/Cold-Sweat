@@ -4,10 +4,6 @@
   "item": {
     "items": ["ad_astra:jet_suit_boots"]
   },
-  "insulation": {
-    "heat": 0,
-    "cold": 0
-  },
   "entity": {
     "entities": ["*"],
     "equipment": {
