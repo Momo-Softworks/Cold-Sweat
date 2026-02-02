@@ -8,10 +8,6 @@
       "ad_astra:netherite_space_suit"
     ]
   },
-  "insulation": {
-    "heat": 0,
-    "cold": 0
-  },
   "entity": {
     "entities": ["*"],
     "equipment": {
