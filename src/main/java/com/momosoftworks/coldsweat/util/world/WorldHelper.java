@@ -62,6 +62,7 @@ import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.gen.feature.structure.StructureManager;
 import net.minecraft.world.gen.feature.structure.StructureStart;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.util.Lazy;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
@@ -643,11 +644,12 @@ public abstract class WorldHelper
     }
 
     /**
-     * Returns a cached temperature value<br>
+     * Returns a cached world temperature value for the position. Returns a "rough" value with reduced positional accuracy (within 8 blocks).<br>
+     * Cached values are kept and reused for at most 10 seconds.<br>
      * <br>
      * <b>Flags:</b><br>
-     * 1 = sensitive<br>
-     * 2 = force update<br>
+     * 1 = Sensitive (generates a fresh value if the cache is > 5 seconds old; 10 seconds otherwise)<br>
+     * 2 = Force Update (always generate fresh value; the new value will be cached)<br>
      */
     public static double getRoughTemperatureAt(World level, BlockPos pos, int flags)
     {
@@ -805,7 +807,7 @@ public abstract class WorldHelper
             if (surroundedByBlock(levelReader, pos, Blocks.ICE))
             {   return true;
             }
-            DynamicHolder<Boolean> freezingTemp = DynamicHolder.create(null, () -> getRoughTemperatureAt((ServerWorld) levelReader, pos) < 0f);
+            Lazy<Boolean> freezingTemp = Lazy.of(() -> getRoughTemperatureAt((ServerWorld) levelReader, pos) < 0f);
 
             if (!mustBeAtEdge)
             {   return freezingTemp.get();
@@ -830,18 +832,20 @@ public abstract class WorldHelper
 
     public static boolean surroundedByBlock(IWorld level, BlockPos pos, Block block)
     {
-        return level.getBlockState(pos.north()).is(block)
-            && level.getBlockState(pos.south()).is(block)
-            && level.getBlockState(pos.east()).is(block)
-            && level.getBlockState(pos.west()).is(block);
+        BlockPos.Mutable pos2 = pos.mutable();
+        return level.getBlockState(pos2.setWithOffset(pos, Direction.NORTH)).is(block)
+            && level.getBlockState(pos2.setWithOffset(pos, Direction.SOUTH)).is(block)
+            && level.getBlockState(pos2.setWithOffset(pos, Direction.EAST)).is(block)
+            && level.getBlockState(pos2.setWithOffset(pos, Direction.WEST)).is(block);
     }
 
     public static boolean surroundedByFluid(IWorld level, BlockPos pos, Fluid fluid)
     {
-        return level.getBlockState(pos.north()).getFluidState().getType() == fluid
-            && level.getBlockState(pos.south()).getFluidState().getType() == fluid
-            && level.getBlockState(pos.east()).getFluidState().getType() == fluid
-            && level.getBlockState(pos.west()).getFluidState().getType() == fluid;
+        BlockPos.Mutable pos2 = pos.mutable();
+        return level.getBlockState(pos2.setWithOffset(pos, Direction.NORTH)).getFluidState().getType() == fluid
+            && level.getBlockState(pos2.setWithOffset(pos, Direction.SOUTH)).getFluidState().getType() == fluid
+            && level.getBlockState(pos2.setWithOffset(pos, Direction.EAST)).getFluidState().getType() == fluid
+            && level.getBlockState(pos2.setWithOffset(pos, Direction.WEST)).getFluidState().getType() == fluid;
     }
 
     public static boolean nextToSoulFire(IWorld level, BlockPos pos)
