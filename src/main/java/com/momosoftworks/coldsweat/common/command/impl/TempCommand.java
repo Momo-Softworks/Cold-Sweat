@@ -417,7 +417,7 @@ public class TempCommand extends BaseCommand
         modifier.expires(duration).tickRate(tickRate);
         modifier.getNBT().merge(nbt);
 
-        Placement placement = Placement.of(mode, order, mod -> otherId == null || TempModifierRegistry.getKey(mod).equals(otherId))
+        Placement placement = Placement.of(mode, order, mod -> otherId == null || mod.getID().equals(otherId))
                                        .limitDuplicates(Matcher.SAME_CLASS, maxCount);
         for (Entity entity : entities)
         {   Temperature.addModifier(((LivingEntity) entity), modifier, trait, placement);
@@ -460,7 +460,7 @@ public class TempCommand extends BaseCommand
 
         for (Entity entity : entities)
         {
-            Temperature.removeModifiers(((LivingEntity) entity), trait, count, Order.FIRST, mod -> TempModifierRegistry.getKey(mod).equals(modifierId));
+            Temperature.removeModifiers(((LivingEntity) entity), trait, count, Order.FIRST, mod -> mod.getID().equals(modifierId));
         }
         if (entities.size() == 1)
         {   source.sendSuccess(() -> Component.translatable("commands.cold_sweat.temp_modifier.single.remove.result",
