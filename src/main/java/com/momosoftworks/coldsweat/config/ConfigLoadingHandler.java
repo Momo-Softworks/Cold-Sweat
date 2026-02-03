@@ -752,7 +752,7 @@ public class ConfigLoadingHandler
                     {   continue;
                     }
                     registry.codec().decode(registryOps, JSONUtils.parse(reader))
-                            .resultOrPartial(ColdSweat.LOGGER::error)
+                            .resultOrPartial(error -> ColdSweat.LOGGER.error("Error decoding JSON config setting in {}: {}", registryKey.location(), error))
                             .map(Pair::getFirst)
                             .ifPresent(configData ->
                             {
