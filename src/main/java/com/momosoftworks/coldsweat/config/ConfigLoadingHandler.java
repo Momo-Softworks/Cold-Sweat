@@ -860,7 +860,7 @@ public class ConfigLoadingHandler
                 try (FileReader reader = new FileReader(file))
                 {
                     codec.decode(registryOps, GsonHelper.parse(reader))
-                            .resultOrPartial(ColdSweat.LOGGER::error)
+                            .resultOrPartial(error -> ColdSweat.LOGGER.error("Error decoding JSON config setting in {}: {}", registryKey.location(), error))
                             .map(Pair::getFirst)
                             .ifPresent(configData -> output.add(Holder.direct(configData)));
                 }
