@@ -22,6 +22,9 @@ import com.momosoftworks.coldsweat.util.math.InterruptibleIterator;
 import com.momosoftworks.coldsweat.util.serialization.EnumHelper;
 import com.momosoftworks.coldsweat.util.serialization.StringRepresentable;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.TextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.fml.network.PacketDistributor;
@@ -547,26 +550,32 @@ public class Temperature
      */
     public enum Units implements StringRepresentable
     {
-        F("°F", "f"),
-        C("°C", "c"),
-        MC("MC", "mc");
+        F("f", new TranslationTextComponent("cold_sweat.units.fahrenheit.value"), new TranslationTextComponent("cold_sweat.units.fahrenheit.name")),
+        C("c", new TranslationTextComponent("cold_sweat.units.celsius.value"), new TranslationTextComponent("cold_sweat.units.celsius.name")),
+        MC("mc", new TranslationTextComponent("cold_sweat.units.minecraft.value"), new TranslationTextComponent("cold_sweat.units.minecraft.name"));
 
         public static final Codec<Units> CODEC = ExtraCodecs.enumIgnoreCase(values());
 
-        private final String name;
         private final String id;
+        private final IFormattableTextComponent name;
+        private final IFormattableTextComponent fullName;
 
-        Units(String name, String id)
+        Units(String id, IFormattableTextComponent name, IFormattableTextComponent fullName)
         {   this.name = name;
             this.id = id;
+            this.fullName = fullName;
         }
 
         public static Units fromID(String name)
         {   return EnumHelper.byName(values(), name);
         }
 
-        public String getFormattedName()
+        public IFormattableTextComponent getFormattedName()
         {   return name;
+        }
+
+        public IFormattableTextComponent getFullName()
+        {   return fullName;
         }
 
         @Override

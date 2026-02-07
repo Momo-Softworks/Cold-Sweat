@@ -202,7 +202,7 @@ public class ConfigSettings
 
     // Client Settings
     /* NULL ON THE SERVER */
-    public static final DynamicHolder<Boolean> CELSIUS;
+    public static final DynamicHolder<Temperature.Units> UNITS;
     public static final DynamicHolder<Integer> TEMP_OFFSET;
     public static final DynamicHolder<Double> TEMP_SMOOTHING;
 
@@ -940,8 +940,8 @@ public class ConfigSettings
 
         // Client
 
-        CELSIUS = addClientSetting(ColdSweat.createKey("celsius"), () -> false, holder -> holder.set(ClientSettingsConfig.USE_CELSIUS.get()),
-            (saver) -> ClientSettingsConfig.USE_CELSIUS.set(saver));
+        UNITS = addClientSetting(ColdSweat.createKey("celsius"), () -> Temperature.Units.F, holder -> holder.set(ClientSettingsConfig.USE_CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F),
+                                 (saver) -> ClientSettingsConfig.USE_CELSIUS.set(saver == Temperature.Units.C));
 
         TEMP_OFFSET = addClientSetting(ColdSweat.createKey("temp_offset"), () -> 0, holder -> holder.set(ClientSettingsConfig.TEMPERATURE_OFFSET.get()),
             (saver) -> ClientSettingsConfig.TEMPERATURE_OFFSET.set(saver));

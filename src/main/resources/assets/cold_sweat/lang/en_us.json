@@ -115,6 +115,14 @@
   "cold_sweat.screen.hearth.show_particles": "Show air particles",
 
 
+  "cold_sweat.units.fahrenheit.name":  "Fahrenheit",
+  "cold_sweat.units.celsius.name":     "Celsius",
+  "cold_sweat.units.minecraft.name":   "Minecraft Units",
+  "cold_sweat.units.fahrenheit.value": "°F",
+  "cold_sweat.units.celsius.value":    "°C",
+  "cold_sweat.units.minecraft.value":  "MC",
+
+
   "cold_sweat.config.title":                        "Cold Sweat Config",
   "cold_sweat.config.section.difficulty":           "Difficulty Settings",
   "cold_sweat.config.section.hud_settings":         "HUD Settings",
@@ -144,8 +152,6 @@
   "cold_sweat.config.difficulty.description.world_temp_off":   "World temperature %dis not%d visible without a thermometer",
 
   "cold_sweat.config.units.name":                   "Units",
-  "cold_sweat.config.celsius.name":                 "Celsius",
-  "cold_sweat.config.fahrenheit.name":              "Fahrenheit",
   "cold_sweat.config.max_temperature.name":         "Max Temperature",
   "cold_sweat.config.min_temperature.name":         "Min Temperature",
   "cold_sweat.config.temp_damage.name":             "Temp. Damage",

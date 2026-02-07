@@ -43,11 +43,10 @@ public class MixinItemFrameLabel
             double minTemp = ConfigSettings.MIN_TEMP.get();
             double maxTemp = ConfigSettings.MAX_TEMP.get();
             double worldTemp = WorldHelper.getTemperatureAt(Minecraft.getInstance().level, ENTITY.blockPosition());
-            boolean celsius = ConfigSettings.CELSIUS.get();
+            Temperature.Units units = ConfigSettings.UNITS.get();
             Style tempColor = Style.EMPTY.withColor(Color.fromRgb(Overlays.getWorldTempColor(worldTemp, minTemp, maxTemp)));
-            int convertedTemp = (int) Temperature.convert(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true) + ConfigSettings.TEMP_OFFSET.get();
-            return new StringTextComponent(convertedTemp + " " + (celsius ? Temperature.Units.C.getFormattedName()
-                                                                          : Temperature.Units.F.getFormattedName())).withStyle(tempColor);
+            int convertedTemp = (int) Temperature.convert(worldTemp, Temperature.Units.MC, units, true) + ConfigSettings.TEMP_OFFSET.get();
+            return new StringTextComponent(convertedTemp + " " + units.getFormattedName().getString()).withStyle(tempColor);
         }
         return original;
     }

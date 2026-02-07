@@ -22,7 +22,7 @@ import java.util.function.Supplier;
 public enum Preference
 {
     UNITS("Units", PacketBuffer::writeEnum, buf -> buf.readEnum(Temperature.Units.class),
-          () -> ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F),
+          () -> ConfigSettings.UNITS.get()),
     WATERSKIN_PRIMARY("WaterskinPrimary", PacketBuffer::writeEnum, buf -> buf.readEnum(WaterskinAction.class),
         ConfigSettings.WATERSKIN_USE_PRIMARY),
     WATERSKIN_SECONDARY("WaterskinSecondary", PacketBuffer::writeEnum, buf -> buf.readEnum(WaterskinAction.class),

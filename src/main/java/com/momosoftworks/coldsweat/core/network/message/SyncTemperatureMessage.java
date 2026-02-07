@@ -59,7 +59,7 @@ public class SyncTemperatureMessage
                         cap.deserializeTraits(message.traits);
                         if (message.instant && cap instanceof PlayerTempCap)
                         {   Overlays.setBodyTempInstant(cap.getTrait(Temperature.Trait.BODY));
-                            Overlays.setWorldTempInstant(Temperature.convert(cap.getTrait(Temperature.Trait.WORLD), Temperature.Units.MC, ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F, true));
+                            Overlays.setWorldTempInstant(Temperature.convert(cap.getTrait(Temperature.Trait.WORLD), Temperature.Units.MC, ConfigSettings.UNITS.get(), true));
                         }
                     });
                 }

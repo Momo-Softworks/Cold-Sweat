@@ -27,7 +27,7 @@ public class ThermometerItem extends Item
             Temperature.Units units = Preference.getOrDefault(player, Preference.UNITS, Temperature.Units.F);
             int temperature = (int) Temperature.convert(WorldHelper.getTemperatureAt(player.level, player.blockPosition()), com.momosoftworks.coldsweat.api.util.Temperature.Units.MC, units, true);
             // Display the temperature to the player
-            player.displayClientMessage(new StringTextComponent(temperature + " " + units.getFormattedName()), true);
+            player.displayClientMessage(new StringTextComponent(temperature + " " + units.getFormattedName().getString()), true);
             player.swing(hand, true);
         }
         return super.use(level, player, hand);
