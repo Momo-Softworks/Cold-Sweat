@@ -11,6 +11,8 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 public class ConfigPageOne extends AbstractConfigPage
 {
     Screen parentScreen;
@@ -39,46 +41,46 @@ public class ConfigPageOne extends AbstractConfigPage
     {
         super.init();
 
-        Temperature.Units[] properUnits = {ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F};
+        AtomicReference<Temperature.Units> properUnits = new AtomicReference<>(ConfigSettings.UNITS.get());
 
         /*
          The Options
         */
 
         // Celsius
-        this.addButton("units", Side.LEFT, () -> Component.translatable("cold_sweat.config.units.name").append(": ").append(ConfigSettings.CELSIUS.get()
-                                                   ? Component.translatable("cold_sweat.config.celsius.name")
-                                                   : Component.translatable("cold_sweat.config.fahrenheit.name")),
+        this.addButton("units", Side.LEFT, () -> Component.translatable("cold_sweat.config.units.name").append(": ").append(ConfigSettings.UNITS.get().getFullName()),
         button ->
         {
             Player player = Minecraft.getInstance().player;
 
-            ConfigSettings.CELSIUS.set(!ConfigSettings.CELSIUS.get());
+            Temperature.Units oldUnits = ConfigSettings.UNITS.get();
+            ConfigSettings.UNITS.set(ConfigSettings.UNITS.get() == Temperature.Units.C ? Temperature.Units.F : Temperature.Units.C);
 
-            properUnits[0] = ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F;
+            properUnits.set(ConfigSettings.UNITS.get());
 
             // Change the max & min temps to reflect the new setting
             ((EditBox) this.getWidgetBatch("max_temp").get(0)).setValue(String.valueOf(ConfigScreen.TWO_PLACES.format(
-                    Temperature.convert(ConfigSettings.MAX_TEMP.get(), Temperature.Units.MC, properUnits[0], true))));
+                    Temperature.convert(ConfigSettings.MAX_TEMP.get(), Temperature.Units.MC, properUnits.get(), true))));
 
             ((EditBox) this.getWidgetBatch("min_temp").get(0)).setValue(String.valueOf(ConfigScreen.TWO_PLACES.format(
-                    Temperature.convert(ConfigSettings.MIN_TEMP.get(), Temperature.Units.MC, properUnits[0], true))));
+                    Temperature.convert(ConfigSettings.MIN_TEMP.get(), Temperature.Units.MC, properUnits.get(), true))));
 
             // Update the world temp. gauge when the button is pressed
             if (player != null)
-                Overlays.setWorldTempInstant(Temperature.convert(Overlays.WORLD_TEMP, properUnits[0] == Temperature.Units.C ? Temperature.Units.F : Temperature.Units.C, properUnits[0], true));
+            {   Overlays.setWorldTempInstant(Temperature.convert(Overlays.WORLD_TEMP, oldUnits, properUnits.get(), true));
+            }
         }, false, false, true, Component.translatable("cold_sweat.config.units.desc"));
 
         // Max Temperature
         this.addDecimalInput("max_temp", Side.LEFT, Component.translatable("cold_sweat.config.max_temperature.name"),
-                value -> ConfigSettings.MAX_TEMP.set(Temperature.convert(value, properUnits[0], Temperature.Units.MC, true)),
-                input -> input.setValue(String.valueOf(Temperature.convert(ConfigSettings.MAX_TEMP.get(), Temperature.Units.MC, properUnits[0], true))),
+                value -> ConfigSettings.MAX_TEMP.set(Temperature.convert(value, properUnits.get(), Temperature.Units.MC, true)),
+                input -> input.setValue(String.valueOf(Temperature.convert(ConfigSettings.MAX_TEMP.get(), Temperature.Units.MC, properUnits.get(), true))),
                 true, false, false, Component.translatable("cold_sweat.config.max_temperature.desc"));
 
         // Min Temperature
         this.addDecimalInput("min_temp", Side.LEFT, Component.translatable("cold_sweat.config.min_temperature.name"),
-                value -> ConfigSettings.MIN_TEMP.set(Temperature.convert(value, properUnits[0], Temperature.Units.MC, true)),
-                input -> input.setValue(String.valueOf(Temperature.convert(ConfigSettings.MIN_TEMP.get(), Temperature.Units.MC, properUnits[0], true))),
+                value -> ConfigSettings.MIN_TEMP.set(Temperature.convert(value, properUnits.get(), Temperature.Units.MC, true)),
+                input -> input.setValue(String.valueOf(Temperature.convert(ConfigSettings.MIN_TEMP.get(), Temperature.Units.MC, properUnits.get(), true))),
                 true, false, false, Component.translatable("cold_sweat.config.min_temperature.desc"));
 
         // Temp Damage
