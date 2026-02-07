@@ -303,7 +303,7 @@ public class TempCommand extends BaseCommand
                                                                player -> Preference.getOrDefault(player, Preference.UNITS, Temperature.Units.F),
                                                                Temperature.Units.F);
         String unitsName = trait.isForWorld() ? " " + preferredUnits.getFormattedName() : "";
-        double convertedTemp = Temperature.convertIfNeeded(temp, trait, preferredUnits);
+        double convertedTemp = Temperature.convertIfNeeded(temp, trait, preferredUnits, true);
 
         //Compose & send message
         if (entities.size() == 1)
@@ -336,7 +336,7 @@ public class TempCommand extends BaseCommand
                                                                player -> Preference.getOrDefault(player, Preference.UNITS, Temperature.Units.F),
                                                                Temperature.Units.F);
         String unitsName = trait.isForWorld() ? " " + preferredUnits.getFormattedName() : "";
-        double convertedTemp = Temperature.convertIfNeeded(temp, trait, preferredUnits);
+        double convertedTemp = Temperature.convertIfNeeded(temp, trait, preferredUnits, true);
 
         //Compose & send message
         if (entities.size() == 1)
@@ -360,7 +360,7 @@ public class TempCommand extends BaseCommand
         for (Entity target : entities.stream().sorted(Comparator.comparing(player -> player.getName().getString())).toList())
         {   //Compose & send message
             Temperature.Units preferredUnits = CSMath.getIfNotNull(source.getPlayer(), player -> Preference.getOrDefault(player, Preference.UNITS, Temperature.Units.F), Temperature.Units.F);
-            double temp = CSMath.truncate(Temperature.convertIfNeeded(Temperature.get((LivingEntity) target, trait), trait, preferredUnits), 2);
+            double temp = CSMath.truncate(Temperature.convertIfNeeded(Temperature.get((LivingEntity) target, trait), trait, preferredUnits, true), 2);
             String unitsName = trait.isForWorld() ? " " + preferredUnits.getFormattedName() : "";
             source.sendSuccess(() -> Component.translatable("commands.cold_sweat.temperature.get.result", target.getName().getString(),
                                                             trait.getSerializedName(), temp + unitsName),
