@@ -302,7 +302,7 @@ public class TempCommand extends BaseCommand
         }
 
         Temperature.Units preferredUnits = source.getEntity() instanceof Player ? Preference.getOrDefault((Player)source.getEntity(), Preference.UNITS, Temperature.Units.F) : Temperature.Units.F;
-        String unitsName = trait.isForWorld() ? " " + preferredUnits.getFormattedName() : "";
+        String unitsName = trait.isForWorld() ? " " + preferredUnits.getFormattedName().getString() : "";
         double convertedTemp = Temperature.convertIfNeeded(temp, trait, preferredUnits, true);
 
         //Compose & send message
@@ -333,7 +333,7 @@ public class TempCommand extends BaseCommand
         }
 
         Temperature.Units preferredUnits = source.getEntity() instanceof Player ? Preference.getOrDefault((Player)source.getEntity(), Preference.UNITS, Temperature.Units.F) : Temperature.Units.F;
-        String unitsName = trait.isForWorld() ? " " + preferredUnits.getFormattedName() : "";
+        String unitsName = trait.isForWorld() ? " " + preferredUnits.getFormattedName().getString() : "";
         double convertedTemp = Temperature.convertIfNeeded(temp, trait, preferredUnits, true);
 
         //Compose & send message
@@ -360,7 +360,7 @@ public class TempCommand extends BaseCommand
         for (Entity target : entities.stream().sorted(Comparator.comparing(player -> player.getName().getString())).toList())
         {   //Compose & send message
             double temp = CSMath.truncate(Temperature.convertIfNeeded(Temperature.get((LivingEntity) target, trait), trait, preferredUnits, true), 2);
-            String unitsName = trait.isForWorld() ? " " + preferredUnits.getFormattedName() : "";
+            String unitsName = trait.isForWorld() ? " " + preferredUnits.getFormattedName().getString() : "";
             source.sendSuccess(new TranslatableComponent("commands.cold_sweat.temperature.get.result", target.getName().getString(),
                                                             trait.getSerializedName(), temp + unitsName),
                                false);
@@ -577,7 +577,7 @@ public class TempCommand extends BaseCommand
     {
         return new HoverEvent(
                 HoverEvent.Action.SHOW_TEXT,
-                new TextComponent(CSMath.truncate(getFormattedTraitValue(trait, value, units), 1) + " " + units.getFormattedName()));
+                new TextComponent(CSMath.truncate(getFormattedTraitValue(trait, value, units), 1) + " " + units.getFormattedName().getString()));
     }
 
     private int executeModifyEntityTemp(CommandSourceStack source, Collection<? extends Entity> entities, Temperature.Trait attribute,

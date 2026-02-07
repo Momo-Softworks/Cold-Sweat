@@ -6,7 +6,6 @@ import com.momosoftworks.coldsweat.client.gui.Overlays;
 import com.momosoftworks.coldsweat.common.item.ThermometerItem;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.ItemFrameRenderer;
@@ -43,11 +42,10 @@ public class MixinItemFrameLabel
             double minTemp = ConfigSettings.MIN_TEMP.get();
             double maxTemp = ConfigSettings.MAX_TEMP.get();
             double worldTemp = WorldHelper.getTemperatureAt(Minecraft.getInstance().level, ENTITY.blockPosition());
-            boolean celsius = ConfigSettings.CELSIUS.get();
+            Temperature.Units units = ConfigSettings.UNITS.get();
             Style tempColor = Style.EMPTY.withColor(Overlays.getWorldTempColor(worldTemp, minTemp, maxTemp));
-            int convertedTemp = (int) Temperature.convert(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true) + ConfigSettings.TEMP_OFFSET.get();
-            return new TextComponent(convertedTemp + " " + (celsius ? Temperature.Units.C.getFormattedName()
-                                                                    : Temperature.Units.F.getFormattedName())).withStyle(tempColor);
+            int convertedTemp = (int) Temperature.convert(worldTemp, Temperature.Units.MC, units, true) + ConfigSettings.TEMP_OFFSET.get();
+            return new TextComponent(convertedTemp + " " + units.getFormattedName().getString()).withStyle(tempColor);
         }
         return original;
     }

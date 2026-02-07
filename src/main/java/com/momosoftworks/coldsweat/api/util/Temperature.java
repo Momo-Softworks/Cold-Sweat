@@ -20,9 +20,10 @@ import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.InterruptibleIterator;
 import com.momosoftworks.coldsweat.util.serialization.EnumHelper;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.network.PacketDistributor;
@@ -546,26 +547,32 @@ public class Temperature
      */
     public enum Units implements StringRepresentable
     {
-        F("°F", "f"),
-        C("°C", "c"),
-        MC("MC", "mc");
+        F("f", new TranslatableComponent("cold_sweat.units.fahrenheit.value"), new TranslatableComponent("cold_sweat.units.fahrenheit.name")),
+        C("c", new TranslatableComponent("cold_sweat.units.celsius.value"), new TranslatableComponent("cold_sweat.units.celsius.name")),
+        MC("mc", new TranslatableComponent("cold_sweat.units.minecraft.value"), new TranslatableComponent("cold_sweat.units.minecraft.name"));
 
         public static final Codec<Units> CODEC = ExtraCodecs.enumIgnoreCase(values());
 
-        private final String name;
         private final String id;
+        private final Component name;
+        private final Component fullName;
 
-        Units(String name, String id)
+        Units(String id, Component name, Component fullName)
         {   this.name = name;
             this.id = id;
+            this.fullName = fullName;
         }
 
         public static Units fromID(String name)
         {   return EnumHelper.byName(values(), name);
         }
 
-        public String getFormattedName()
+        public Component getFormattedName()
         {   return name;
+        }
+
+        public Component getFullName()
+        {   return fullName;
         }
 
         @Override
