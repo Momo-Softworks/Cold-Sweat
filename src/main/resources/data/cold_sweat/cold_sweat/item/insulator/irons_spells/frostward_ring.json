@@ -1,0 +1,16 @@
+{
+  "required_mods": ["irons_spellbooks"],
+  "type": "curio",
+  "item": {
+    "items": ["irons_spellbooks:frostward_ring"]
+  },
+  "attributes": {
+    "cold_sweat:freezing_point": [
+      {
+        "name": "cs:irons_frostward_protection",
+        "amount": -0.33,
+        "operation": "addition"
+      }
+    ]
+  }
+}
