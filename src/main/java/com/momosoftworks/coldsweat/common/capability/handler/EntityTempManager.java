@@ -939,6 +939,21 @@ public class EntityTempManager
         }
     }
 
+    public static Trait getTraitForAttribute(Attribute attribute)
+    {
+        if (attribute == ModAttributes.WORLD_TEMPERATURE)     return Trait.WORLD;
+        if (attribute == ModAttributes.BASE_BODY_TEMPERATURE) return Trait.BASE;
+        if (attribute == ModAttributes.TEMP_RATE)             return Trait.RATE;
+        if (attribute == ModAttributes.FREEZING_POINT)        return Trait.FREEZING_POINT;
+        if (attribute == ModAttributes.BURNING_POINT)         return Trait.BURNING_POINT;
+        if (attribute == ModAttributes.HEAT_RESISTANCE)       return Trait.HEAT_RESISTANCE;
+        if (attribute == ModAttributes.COLD_RESISTANCE)       return Trait.COLD_RESISTANCE;
+        if (attribute == ModAttributes.HEAT_DAMPENING)        return Trait.HEAT_DAMPENING;
+        if (attribute == ModAttributes.COLD_DAMPENING)        return Trait.COLD_DAMPENING;
+
+        throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("\"" + ForgeRegistries.ATTRIBUTES.getKey(attribute) + "\" is not a valid temperature attribute!"));
+    }
+
     public static Collection<AttributeModifier> getAllAttributeModifiers(LivingEntity entity, ModifiableAttributeInstance attribute, @Nullable AttributeModifier.Operation operation)
     {
         Collection<AttributeModifier> modifiers = new ArrayList<>(operation == null

@@ -74,10 +74,10 @@ public class Temperature
         return value;
     }
 
-    public static double convertIfNeeded(double value, Trait trait, Units units)
+    public static double convertIfNeeded(double value, Trait trait, Units units, boolean absolute)
     {
         if (trait.isForWorld())
-        {   return convert(value, Units.MC, units, true);
+        {   return convert(value, Units.MC, units, absolute);
         }
         return value;
     }
@@ -513,8 +513,22 @@ public class Temperature
         {   return forAttributes;
         }
 
+        /**
+         * @return true if this trait is related to world temperature
+         */
         public boolean isForWorld()
         {   return this == WORLD || this == BURNING_POINT || this == FREEZING_POINT;
+        }
+
+        /**
+         * @return true if this trait is interpreted as a percentage or multiplier
+         */
+        public boolean isProportional()
+        {   return this == COLD_RESISTANCE || this == HEAT_RESISTANCE || this == COLD_DAMPENING || this == HEAT_DAMPENING || this == RATE;
+        }
+
+        public boolean isNegativeValueGood()
+        {   return this == FREEZING_POINT;
         }
 
         public static Trait fromID(String name)

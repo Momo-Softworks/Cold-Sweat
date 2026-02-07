@@ -25,7 +25,6 @@ import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
 import com.momosoftworks.coldsweat.util.entity.EntityHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.FastMap;
-import com.momosoftworks.coldsweat.util.registries.ModAttributes;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.client.Minecraft;
@@ -138,45 +137,38 @@ public class TooltipHandler
         if (attribute == null) return new StringTextComponent("");
         double value = amount;
         String attributeName = attribute.getDescriptionId().replace("attribute.", "");
+        Temperature.Trait trait = EntityTempManager.getTraitForAttribute(attribute);
 
-        if (operation == AttributeModifier.Operation.ADDITION
-                && (attribute == ModAttributes.FREEZING_POINT
-                || attribute == ModAttributes.BURNING_POINT
-                || attribute == ModAttributes.WORLD_TEMPERATURE
-                ))
-        {
-            value = Temperature.convert(value, Temperature.Units.MC, ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F, false);
-        }
+        /* Compose attribute value text */
         String operationString = operation == AttributeModifier.Operation.ADDITION ? "add" : "multiply";
-        TextFormatting color;
-        String sign;
-        if (value >= 0)
-        {
-            color = TextFormatting.BLUE;
-            sign = "+";
+        // Determine text color and value sign
+        boolean isGoodValue = (value >= 0) != trait.isNegativeValueGood();
+        TextFormatting color = isGoodValue ? TextFormatting.BLUE : TextFormatting.RED;
+        StringBuilder valueTextBuilder = new StringBuilder();
+        if (value > 0)
+        {   valueTextBuilder.append("+");
         }
-        else
-        {   color = TextFormatting.RED;
-            sign = "";
+        if (operation == AttributeModifier.Operation.ADDITION && trait.isForWorld())
+        {   value = Temperature.convertIfNeeded(value, trait, ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F, false);
         }
-        String percent;
+
         if (operation != AttributeModifier.Operation.ADDITION
-                || attribute == ModAttributes.HEAT_RESISTANCE
-                || attribute == ModAttributes.COLD_RESISTANCE
-                || attribute == ModAttributes.HEAT_DAMPENING
-                || attribute == ModAttributes.COLD_DAMPENING)
-        {   percent = "%";
-            value *= 100;
+                || trait.isProportional())
+        {   value *= 100;
         }
-        else
-        {   percent = "";
+        valueTextBuilder.append(CSMath.truncate(value, 1));
+        if (operation != AttributeModifier.Operation.ADDITION || trait.isProportional())
+        {   valueTextBuilder.append("%");
         }
-        List<Object> params = new ArrayList<>(Arrays.asList(sign + CSMath.formatDoubleOrInt(CSMath.round(value, 2)) + percent));
+
+        /* Compose tooltip component */
+        List<Object> params = new ArrayList<>(Arrays.asList(valueTextBuilder.toString()));
         IFormattableTextComponent component;
+        // Create custom component for Cold Sweat attributes
         if (EntityTempManager.isTemperatureAttribute(attribute))
         {   component = new TranslationTextComponent(String.format("attribute.cold_sweat.modifier.%s.%s", operationString, attributeName), params.toArray());
         }
-        else
+        else // Vanilla component; add custom params to it
         {
             component = getFormattedVanillaAttributeModifier(attribute, amount, operation);
             Object[] contents = ((TranslationTextComponent) component).getArgs();
@@ -185,6 +177,7 @@ public class TooltipHandler
         }
         component = component.withStyle(color);
         component = addTooltipFlags(component, forTooltip, strikethrough);
+
         return component;
     }
 
