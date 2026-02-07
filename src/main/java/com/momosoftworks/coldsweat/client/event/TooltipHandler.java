@@ -166,7 +166,7 @@ public class TooltipHandler
         {   valueTextBuilder.append("+");
         }
         if (operation == AttributeModifier.Operation.ADD_VALUE && trait.isForWorld())
-        {   value = Temperature.convertIfNeeded(value, trait, ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F, false);
+        {   value = Temperature.convertIfNeeded(value, trait, ConfigSettings.UNITS.get(), false);
         }
         if (operation != AttributeModifier.Operation.ADD_VALUE || trait.isProportional())
         {   value *= 100;

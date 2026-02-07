@@ -42,7 +42,7 @@ public class ColdSweatDisplaySources
                 double convertedTemp = Temperature.convert(temperature, Temperature.Units.MC, units, true);
 
                 String places = units == Temperature.Units.MC ? "%.2f" : "%.0f";
-                String text = String.format(places+"%s", convertedTemp, units.getFormattedName());
+                String text = String.format(places+"%s", convertedTemp, units.getFormattedName().getString());
                 return Component.literal(text);
             }
             return Component.empty();
@@ -60,9 +60,9 @@ public class ColdSweatDisplaySources
             if (!isFirstLine)
             {
                 builder.addSelectionScrollInput(0, 137, (input, label) -> {
-                    input.forOptions(List.of(Component.literal(Temperature.Units.F.getFormattedName()),
-                                             Component.literal(Temperature.Units.C.getFormattedName()),
-                                             Component.literal(Temperature.Units.MC.getFormattedName())))
+                    input.forOptions(List.of(Component.literal(Temperature.Units.F.getFormattedName().getString()),
+                                             Component.literal(Temperature.Units.C.getFormattedName().getString()),
+                                             Component.literal(Temperature.Units.MC.getFormattedName().getString())))
                             .titled(Component.translatable("cold_sweat.config.units.name"));
                 }, "Units");
             }

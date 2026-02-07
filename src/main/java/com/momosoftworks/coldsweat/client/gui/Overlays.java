@@ -33,7 +33,6 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterGuiLayersEvent;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 import org.joml.Vector2i;
-import org.spongepowered.asm.mixin.injection.struct.InjectorGroupInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,7 +90,7 @@ public class Overlays
         && !Minecraft.getInstance().options.hideGui && ConfigSettings.WORLD_GAUGE_ENABLED.get())
         {
             // Get player world temperature
-            double temp = Temperature.convert(WORLD_TEMP, ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
+            double temp = Temperature.convert(WORLD_TEMP, ConfigSettings.UNITS.get(), Temperature.Units.MC, true);
             // Get the temperature severity
             int severity = getGaugeSeverity(temp, PLAYER_MIN_TEMP, PLAYER_MAX_TEMP);
             // Set text color
@@ -228,7 +227,7 @@ public class Overlays
         && !mc.options.hideGui && ConfigSettings.WORLD_GAUGE_ENABLED.get() && shouldDrawSurvivalElements())
         {
             // Get player world temperature
-            double temp = Temperature.convert(WORLD_TEMP, ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F, Temperature.Units.MC, true);
+            double temp = Temperature.convert(WORLD_TEMP, ConfigSettings.UNITS.get(), Temperature.Units.MC, true);
             // Get the temperature severity
             int severity = getGaugeSeverity(temp, PLAYER_MIN_TEMP, PLAYER_MAX_TEMP);
             int renderOffset = CSMath.clamp(severity, -1, 1) * 2;
@@ -376,9 +375,9 @@ public class Overlays
                     /* World Temp */
 
                     // Get temperature in actual degrees
-                    boolean celsius = ConfigSettings.CELSIUS.get();
+                    Temperature.Units units = ConfigSettings.UNITS.get();
                     double worldTemp = cap.getTrait(Temperature.Trait.WORLD);
-                    double realTemp = Temperature.convert(worldTemp, Temperature.Units.MC, celsius ? Temperature.Units.C : Temperature.Units.F, true);
+                    double realTemp = Temperature.convert(worldTemp, Temperature.Units.MC, units, true);
                     // Calculate the blended world temperature for this tick
                     double diff = realTemp - WORLD_TEMP;
                     PREV_WORLD_TEMP = WORLD_TEMP;
