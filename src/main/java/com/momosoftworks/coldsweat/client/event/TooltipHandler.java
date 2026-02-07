@@ -154,44 +154,36 @@ public class TooltipHandler
     {
         if (attribute == null) return Component.empty();
         String attributeName = attribute.value().getDescriptionId().replace("attribute.", "");
+        Temperature.Trait trait = EntityTempManager.getTraitForAttribute(attribute);
 
-        if (operation == AttributeModifier.Operation.ADD_VALUE
-        && (attribute == ModAttributes.FREEZING_POINT.value()
-        || attribute == ModAttributes.BURNING_POINT.value()
-        || attribute == ModAttributes.WORLD_TEMPERATURE.value()))
-        {
-            value = Temperature.convert(value, Temperature.Units.MC, ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F, false);
-        }
+        /* Compose attribute value text */
         String operationString = operation == AttributeModifier.Operation.ADD_VALUE ? "add" : "multiply";
-        ChatFormatting color;
-        String sign;
-        if (value >= 0)
-        {
-            color = ChatFormatting.BLUE;
-            sign = "+";
+        // Determine text color and value sign
+        boolean isGoodValue = (value >= 0) != trait.isNegativeValueGood();
+        ChatFormatting color = isGoodValue ? ChatFormatting.BLUE : ChatFormatting.RED;
+        StringBuilder valueTextBuilder = new StringBuilder();
+        if (value > 0)
+        {   valueTextBuilder.append("+");
         }
-        else
-        {   color = ChatFormatting.RED;
-            sign = "";
+        if (operation == AttributeModifier.Operation.ADD_VALUE && trait.isForWorld())
+        {   value = Temperature.convertIfNeeded(value, trait, ConfigSettings.CELSIUS.get() ? Temperature.Units.C : Temperature.Units.F, false);
         }
-        String percent;
-        if (operation != AttributeModifier.Operation.ADD_VALUE
-        || attribute.equals(ModAttributes.HEAT_RESISTANCE)
-        || attribute.equals(ModAttributes.COLD_RESISTANCE)
-        || attribute.equals(ModAttributes.HEAT_DAMPENING)
-        || attribute.equals(ModAttributes.COLD_DAMPENING))
-        {   percent = "%";
-            value *= 100;
+        if (operation != AttributeModifier.Operation.ADD_VALUE || trait.isProportional())
+        {   value *= 100;
         }
-        else
-        {   percent = "";
+        valueTextBuilder.append(CSMath.truncate(value, 1));
+        if (operation != AttributeModifier.Operation.ADD_VALUE || trait.isProportional())
+        {   valueTextBuilder.append("%");
         }
-        List<Object> params = new ArrayList<>(List.of(sign + CSMath.formatDoubleOrInt(CSMath.round(value, 2)) + percent));
+
+        /* Compose tooltip component */
+        List<Object> params = new ArrayList<>(List.of(valueTextBuilder.toString()));
         MutableComponent component;
+        // Create custom component for Cold Sweat attributes
         if (EntityTempManager.isTemperatureAttribute(attribute))
         {   component = Component.translatable(String.format("attribute.cold_sweat.modifier.%s.%s", operationString, attributeName), params.toArray());
         }
-        else
+        else // Vanilla component; add custom params to it
         {
             component = getFormattedVanillaAttributeModifier(attribute, value, operation);
             TranslatableContents contents = (TranslatableContents) component.getContents();
@@ -200,6 +192,7 @@ public class TooltipHandler
         }
         component = component.withStyle(color);
         component = addTooltipFlags(component, forTooltip, strikethrough);
+
         return component;
     }
 
