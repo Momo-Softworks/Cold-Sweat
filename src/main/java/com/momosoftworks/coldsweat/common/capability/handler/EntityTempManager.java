@@ -31,7 +31,6 @@ import com.momosoftworks.coldsweat.data.codec.impl.RequirementHolder;
 import com.momosoftworks.coldsweat.data.tag.ModEntityTags;
 import com.momosoftworks.coldsweat.util.entity.DummyPlayer;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -70,6 +69,7 @@ import net.neoforged.neoforge.event.level.SleepFinishedTimeEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import org.codehaus.plexus.util.FastMap;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
@@ -385,8 +385,8 @@ public class EntityTempManager
         {
             if (event.getEntity() instanceof LivingEntity entity
             && !entity.level().isClientSide() && entity.tickCount % 20 == 0 && isTemperatureEnabled(entity))
-        {
-            Map<ResourceLocation, Double> immunities = new FastMap<>();
+            {
+                Map<ResourceLocation, Double> immunities = new FastMap<>();
                 for (Map.Entry<ItemStack, InsulatorData> entry : getInsulatorsOnEntity(entity).entrySet())
                 {
                     InsulatorData insulator = entry.getValue();

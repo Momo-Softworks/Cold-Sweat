@@ -9,7 +9,6 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.impl.RequirementHolder;
-import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.serialization.DynamicHolder;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -34,7 +33,7 @@ public class SyncItemPredicatesMessage implements CustomPacketPayload
     public static final Type<SyncItemPredicatesMessage> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "sync_item_predicates"));
     public static final StreamCodec<RegistryFriendlyByteBuf, SyncItemPredicatesMessage> CODEC = CustomPacketPayload.codec(SyncItemPredicatesMessage::encode, SyncItemPredicatesMessage::decode);
 
-    private final Map<UUID, Boolean> predicateMap = new FastMap<>();
+    private final Map<UUID, Boolean> predicateMap = new HashMap<>();
     private final int inventorySlot;
     @Nullable private final EquipmentSlot equipmentSlot;
     @Nullable private final ItemStack responseStack;
@@ -45,7 +44,7 @@ public class SyncItemPredicatesMessage implements CustomPacketPayload
 
     public static SyncItemPredicatesMessage fromServer(ItemStack stack, int inventorySlot, @Nullable EquipmentSlot equipmentSlot, Entity entity)
     {
-        SyncItemPredicatesMessage message = new SyncItemPredicatesMessage(inventorySlot, equipmentSlot, stack, new FastMap<>());
+        SyncItemPredicatesMessage message = new SyncItemPredicatesMessage(inventorySlot, equipmentSlot, stack, new HashMap<>());
 
         message.checkInsulator(stack, entity);
         message.checkInsulatingArmor(stack, entity);
@@ -211,7 +210,7 @@ public class SyncItemPredicatesMessage implements CustomPacketPayload
 
     private void checkItemRequirement(ItemStack stack, Entity entity, DynamicHolder<? extends Multimap<Item, ? extends RequirementHolder>> configSetting)
     {
-        Map<UUID, Boolean> configMap = new FastMap<>();
+        Map<UUID, Boolean> configMap = new HashMap<>();
         configSetting.get().get(stack.getItem())
         .forEach(data ->
         {

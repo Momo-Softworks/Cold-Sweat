@@ -1,8 +1,8 @@
 package com.momosoftworks.coldsweat.data.codec.util;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.mojang.serialization.Codec;
-import com.momosoftworks.coldsweat.util.math.FastMultiMap;
 import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
@@ -26,7 +26,7 @@ public class AttributeModifierMap
 
     public static final StreamCodec<RegistryFriendlyByteBuf, AttributeModifierMap> STREAM_CODEC = ByteBufCodecs.fromCodecWithRegistries(CODEC);
 
-    private final Multimap<Holder<Attribute>, AttributeModifier> map = new FastMultiMap<>();
+    private final Multimap<Holder<Attribute>, AttributeModifier> map = HashMultimap.create();
 
     public AttributeModifierMap()
     {

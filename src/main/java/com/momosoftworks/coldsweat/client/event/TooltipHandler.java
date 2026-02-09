@@ -16,7 +16,6 @@ import com.momosoftworks.coldsweat.common.item.SoulspringLampItem;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.enums.InsulationVisibility;
-import com.momosoftworks.coldsweat.core.init.ModAttributes;
 import com.momosoftworks.coldsweat.core.init.ModItemComponents;
 import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.core.network.message.SyncItemPredicatesMessage;
@@ -27,7 +26,6 @@ import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
 import com.momosoftworks.coldsweat.util.entity.EntityHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -37,8 +35,6 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.*;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.util.StringUtil;
@@ -333,7 +329,7 @@ public class TooltipHandler
                         ? dietTooltipSectionIndex + 1
                         : tooltipEndIndex;
 
-            Map<Integer, Double> foodTemps = new FastMap<>();
+            Map<Integer, Double> foodTemps = new HashMap<>();
             for (FoodData foodData : ConfigSettings.FOOD_TEMPERATURES.get().get(item))
             {
                 if (passesRequirement(foodData))

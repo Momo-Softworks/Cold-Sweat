@@ -20,7 +20,6 @@ import com.momosoftworks.coldsweat.data.tag.ModFluidTags;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.entity.DummyPlayer;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.world.SpreadPath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
@@ -71,7 +70,6 @@ import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.AABB;
@@ -80,8 +78,6 @@ import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.level.ChunkEvent;
-import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -99,7 +95,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     List<SpreadPath> paths = new ArrayList<>(this.getMaxPaths());
     // Used as a lookup table for detecting duplicate paths (faster than ArrayList#contains())
     Set<BlockPos> pathLookup = new HashSet<>(this.getMaxPaths());
-    Map<Pair<Integer, Integer>, Pair<Integer, Boolean>> seeSkyMap = new FastMap<>(this.getMaxPaths());
+    Map<Pair<Integer, Integer>, Pair<Integer, Boolean>> seeSkyMap = new HashMap<>(this.getMaxPaths());
 
     List<MobEffectInstance> effects = new ArrayList<>();
 

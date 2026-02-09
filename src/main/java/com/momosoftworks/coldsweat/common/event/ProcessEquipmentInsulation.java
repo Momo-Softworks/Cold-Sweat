@@ -16,7 +16,6 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.data.codec.impl.RequirementHolder;
-import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.resources.ResourceLocation;
@@ -40,6 +39,7 @@ import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -56,7 +56,7 @@ public class ProcessEquipmentInsulation
         && player.tickCount % 20 == 0 && !player.level().isClientSide)
         {
             AtomicInteger fullyInsulatedSlots = new AtomicInteger(0);
-            Map<String, Double> armorInsulation = new FastMap<>();
+            Map<String, Double> armorInsulation = new HashMap<>();
 
             double worldTemp = Temperature.get(player, Temperature.Trait.WORLD);
             double minTemp = Temperature.get(player, Temperature.Trait.FREEZING_POINT);
@@ -201,7 +201,7 @@ public class ProcessEquipmentInsulation
         while (filledInsulationSlots > ItemInsulationManager.getInsulationSlots(armorStack))
         {
             ItemStack removedItem = totalInsulation.getLast().getFirst();
-            cap = cap.removeInsulationItem(totalInsulation.get(totalInsulation.size() - 1).getFirst());
+            cap = cap.removeInsulationItem(removedItem);
             WorldHelper.entityDropItem(player, removedItem);
 
             filledInsulationSlots--;
