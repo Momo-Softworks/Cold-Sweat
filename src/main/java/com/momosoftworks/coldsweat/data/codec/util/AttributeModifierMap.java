@@ -2,17 +2,9 @@ package com.momosoftworks.coldsweat.data.codec.util;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import com.mojang.serialization.Codec;
-import com.momosoftworks.coldsweat.util.math.FastMultiMap;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.registries.ForgeRegistries;
-import org.antlr.v4.runtime.misc.MultiMap;
 
 import java.util.*;
 
@@ -26,7 +18,7 @@ public class AttributeModifierMap
                                      (mp, ent) -> mp.put(ent.getKey(), new ArrayList<>(ent.getValue())),
                                      HashMap::putAll));
 
-    private final Multimap<Attribute, AttributeModifier> map = new FastMultiMap<>();
+    private final Multimap<Attribute, AttributeModifier> map = HashMultimap.create();
 
     public AttributeModifierMap()
     {

@@ -15,7 +15,6 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.data.codec.impl.RequirementHolder;
-import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.advancements.Advancement;
@@ -39,7 +38,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -55,7 +54,7 @@ public class ProcessEquipmentInsulation
         && player.tickCount % 20 == 0 && !player.level.isClientSide)
         {
             AtomicInteger fullyInsulatedSlots = new AtomicInteger(0);
-            Map<String, Double> armorInsulation = new FastMap<>();
+            Map<String, Double> armorInsulation = new HashMap<>();
 
             double worldTemp = Temperature.get(player, Temperature.Trait.WORLD);
             double minTemp = Temperature.get(player, Temperature.Trait.FREEZING_POINT);

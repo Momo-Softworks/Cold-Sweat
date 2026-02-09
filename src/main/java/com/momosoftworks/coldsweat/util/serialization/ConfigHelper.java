@@ -16,11 +16,10 @@ import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import net.minecraft.core.RegistryAccess;
-import com.momosoftworks.coldsweat.util.math.FastMap;
-import com.momosoftworks.coldsweat.util.math.FastMultiMap;
 import com.momosoftworks.coldsweat.util.math.RegistryMultiMap;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
+import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -180,13 +179,13 @@ public class ConfigHelper
     public static <K, V extends ConfigData> Map<Holder<K>, V> getRegistryMap(List<? extends List<?>> source, RegistryAccess registryAccess, ResourceKey<Registry<K>> keyRegistry,
                                                                              Function<List<?>, V> valueCreator, Function<V, NegatableList<Either<TagKey<K>, OptionalHolder<K>>>> taggedListGetter)
     {
-        return getRegistryMapLike(source, registryAccess, keyRegistry, valueCreator, taggedListGetter, FastMap::new, FastMap::put);
+        return getRegistryMapLike(source, registryAccess, keyRegistry, valueCreator, taggedListGetter, HashMap::new, HashMap::put);
     }
 
     public static <K, V extends ConfigData> Multimap<Holder<K>, V> getRegistryMultimap(List<? extends List<?>> source, RegistryAccess registryAccess, ResourceKey<Registry<K>> keyRegistry,
                                                                                        Function<List<?>, V> valueCreator, Function<V, NegatableList<Either<TagKey<K>, OptionalHolder<K>>>> taggedListGetter)
     {
-        return getRegistryMapLike(source, registryAccess, keyRegistry, valueCreator, taggedListGetter, FastMultiMap::new, FastMultiMap::put);
+        return getRegistryMapLike(source, registryAccess, keyRegistry, valueCreator, taggedListGetter, RegistryMultiMap::new, RegistryMultiMap::put);
     }
 
     private static <K, V extends ConfigData, M> M getRegistryMapLike(List<? extends List<?>> source, RegistryAccess registryAccess, ResourceKey<Registry<K>> keyRegistry,

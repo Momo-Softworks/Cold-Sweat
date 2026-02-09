@@ -5,17 +5,17 @@ import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
-import com.momosoftworks.coldsweat.util.math.FastMap;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 public class ModRegistries
 {
-    private static final Map<ResourceLocation, RegistryHolder<? extends ConfigData>> REGISTRIES = new FastMap<>();
+    private static final Map<ResourceLocation, RegistryHolder<? extends ConfigData>> REGISTRIES = new HashMap<>();
 
     // Item Registries
     public static final RegistryHolder<InsulatorData> INSULATOR_DATA = createRegistry(new ResourceLocation(ColdSweat.MOD_ID, "item/insulator"), InsulatorData.CODEC, InsulatorData.class);
