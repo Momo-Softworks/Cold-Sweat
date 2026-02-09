@@ -34,7 +34,7 @@ public class RegistryMultiMap<K, V> implements Multimap<K, V>
         }
     }
 
-    private final FastMap<K, LinkedHashSet<V>> internal = new FastMap<>();
+    private final HashMap<K, LinkedHashSet<V>> internal = new HashMap<>();
     private int totalSize = 0;
 
     @Override
@@ -80,12 +80,11 @@ public class RegistryMultiMap<K, V> implements Multimap<K, V>
     }
 
     @Override
-    public boolean put(K key, V value)
+    public synchronized boolean put(K key, V value)
     {
         Set<V> values = internal.computeIfAbsent(key, k -> new LinkedHashSet<>());
         if (values.add(value))
-        {
-            totalSize++;
+        {   totalSize++;
             return true;
         }
         return false;
@@ -99,8 +98,7 @@ public class RegistryMultiMap<K, V> implements Multimap<K, V>
         {
             totalSize--;
             if (values.isEmpty())
-            {
-                internal.remove(key);
+            {   internal.remove(key);
             }
             return true;
         }
@@ -112,8 +110,7 @@ public class RegistryMultiMap<K, V> implements Multimap<K, V>
     {
         boolean changed = false;
         for (V value : values)
-        {
-            changed |= put(key, value);
+        {   changed |= put(key, value);
         }
         return changed;
     }
@@ -123,8 +120,7 @@ public class RegistryMultiMap<K, V> implements Multimap<K, V>
     {
         boolean changed = false;
         for (Map.Entry<? extends K, ? extends V> entry : multimap.entries())
-        {
-            changed |= put(entry.getKey(), entry.getValue());
+        {   changed |= put(entry.getKey(), entry.getValue());
         }
         return changed;
     }
@@ -142,19 +138,16 @@ public class RegistryMultiMap<K, V> implements Multimap<K, V>
     @Override
     public Set<V> replaceValues(K key, Iterable<? extends V> values)
     {
-        Set<V> oldValues = internal.get(key);
+        LinkedHashSet<V> oldValues = internal.get(key);
         if (oldValues == null)
-        {
-           oldValues = new LinkedHashSet<>();
+        {   oldValues = new LinkedHashSet<>();
         }
         else
-        {
-            totalSize -= oldValues.size();
+        {   totalSize -= oldValues.size();
             oldValues.clear();
         }
         for (V value : values)
-        {
-            oldValues.add(value);
+        {   oldValues.add(value);
             totalSize++;
         }
         internal.put(key, oldValues);
@@ -322,9 +315,9 @@ public class RegistryMultiMap<K, V> implements Multimap<K, V>
     }
 
     @Override
-    public FastMap<K, Collection<V>> asMap()
+    public Map<K, Collection<V>> asMap()
     {
-        FastMap<K, Collection<V>> map = new FastMap<>(internal.size());
+        Map<K, Collection<V>> map = new HashMap<>(internal.size());
         map.putAll(internal);
         return map;
     }
