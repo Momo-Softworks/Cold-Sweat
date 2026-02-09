@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.mixin;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import com.mojang.datafixers.util.Pair;
@@ -9,7 +10,6 @@ import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManag
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
-import com.momosoftworks.coldsweat.util.math.FastMultiMap;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.attributes.Attribute;
@@ -86,8 +86,8 @@ public class MixinItemTooltip
         CURRENT_SLOT_QUERY = slot;
     }
 
-    private static Multimap<Attribute, AttributeModifier> INSULATION_MODIFIERS = new FastMultiMap<>();
-    private static Multimap<Attribute, AttributeModifier> UNMET_MODIFIERS = new FastMultiMap<>();
+    private static Multimap<Attribute, AttributeModifier> INSULATION_MODIFIERS = HashMultimap.create();
+    private static Multimap<Attribute, AttributeModifier> UNMET_MODIFIERS = HashMultimap.create();
 
     @ModifyVariable(method = "getTooltipLines", at = @At(value = "STORE", ordinal = 0), ordinal = 0)
     private Multimap<Attribute, AttributeModifier> modifyAttributeModifiers(Multimap<Attribute, AttributeModifier> original, PlayerEntity player, ITooltipFlag advanced)

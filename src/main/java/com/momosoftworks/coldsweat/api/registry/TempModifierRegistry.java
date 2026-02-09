@@ -1,12 +1,12 @@
 package com.momosoftworks.coldsweat.api.registry;
 
 import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.util.exceptions.RegistryFailureException;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.math.FastBiMap;
 import net.minecraft.util.ResourceLocation;
 
 import javax.annotation.Nullable;
@@ -15,7 +15,7 @@ import java.util.function.Supplier;
 
 public class TempModifierRegistry
 {
-    static FastBiMap<ResourceLocation, TempModifierHolder> TEMP_MODIFIERS = new FastBiMap<>();
+    static BiMap<ResourceLocation, TempModifierHolder> TEMP_MODIFIERS = HashBiMap.create();
 
     public static BiMap<ResourceLocation, TempModifierHolder> getEntries()
     {   return ImmutableBiMap.copyOf(TEMP_MODIFIERS);

@@ -24,7 +24,6 @@ import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
 import com.momosoftworks.coldsweat.util.entity.EntityHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.client.Minecraft;
@@ -350,7 +349,7 @@ public class TooltipHandler
                         ? dietTooltipSectionIndex + 1
                         : tooltipEndIndex;
 
-            Map<Integer, Double> foodTemps = new FastMap<>();
+            Map<Integer, Double> foodTemps = new HashMap<>();
             for (FoodData foodData : ConfigSettings.FOOD_TEMPERATURES.get().get(item))
             {
                 if (passesRequirement(foodData))

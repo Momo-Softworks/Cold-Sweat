@@ -19,7 +19,6 @@ import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.entity.DummyEntity;
 import com.momosoftworks.coldsweat.util.entity.DummyPlayer;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.serialization.DynamicHolder;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.block.Block;
@@ -81,7 +80,7 @@ public abstract class WorldHelper
 {
     static Map<RegistryKey<World>, DummyPlayer> DUMMY_PLAYERS = new HashMap<>();
     static Map<RegistryKey<World>, DummyEntity> DUMMY_ENTITIES = new HashMap<>();
-    static Map<RegistryKey<World>, Map<BlockPos, TempSnapshot>> TEMPERATURE_CHECKS = new FastMap<>();
+    static Map<RegistryKey<World>, Map<BlockPos, TempSnapshot>> TEMPERATURE_CHECKS = new HashMap<>();
 
     @SubscribeEvent
     public static void clearCachesOnUnload(FMLServerStoppedEvent event)

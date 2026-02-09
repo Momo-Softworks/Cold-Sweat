@@ -5,7 +5,6 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.EntityTempData;
 import com.momosoftworks.coldsweat.util.entity.EntityHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -13,6 +12,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -32,7 +32,7 @@ public class EntitiesTempModifier extends TempModifier
         {    entities = entities.subList(0, 10);
         }
 
-        Map<EntityTempData, Double> effects = new FastMap<>();
+        Map<EntityTempData, Double> effects = new HashMap<>();
 
         double totalTemp = 0;
         for (Entity nearbyEnt : entities)

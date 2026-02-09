@@ -10,7 +10,6 @@ import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.impl.RequirementHolder;
-import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.serialization.DynamicHolder;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -29,7 +28,7 @@ import java.util.stream.Collectors;
 
 public class SyncItemPredicatesMessage
 {
-    private final Map<UUID, Boolean> predicateMap = new FastMap<>();
+    private final Map<UUID, Boolean> predicateMap = new HashMap<>();
     private final int inventorySlot;
     @Nullable private final EquipmentSlotType equipmentSlot;
     @Nullable private final ItemStack responseStack;
@@ -40,7 +39,7 @@ public class SyncItemPredicatesMessage
 
     public static SyncItemPredicatesMessage fromServer(ItemStack stack, int inventorySlot, @Nullable EquipmentSlotType equipmentSlot, Entity entity)
     {
-        SyncItemPredicatesMessage message = new SyncItemPredicatesMessage(inventorySlot, equipmentSlot, stack, new FastMap<>());
+        SyncItemPredicatesMessage message = new SyncItemPredicatesMessage(inventorySlot, equipmentSlot, stack, new HashMap<>());
 
         message.checkInsulator(stack, entity);
         message.checkInsulatingArmor(stack, entity);
@@ -206,7 +205,7 @@ public class SyncItemPredicatesMessage
 
     private void checkItemRequirement(ItemStack stack, Entity entity, DynamicHolder<? extends Multimap<Item, ? extends RequirementHolder>> configSetting)
     {
-        Map<UUID, Boolean> configMap = new FastMap<>();
+        Map<UUID, Boolean> configMap = new HashMap<>();
         configSetting.get().get(stack.getItem())
         .forEach(data ->
         {

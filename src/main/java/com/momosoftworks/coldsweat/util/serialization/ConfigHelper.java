@@ -13,12 +13,11 @@ import com.momosoftworks.coldsweat.data.RegistryHolder;
 import com.momosoftworks.coldsweat.data.codec.configuration.FuelData;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
-import com.momosoftworks.coldsweat.util.math.FastMap;
-import com.momosoftworks.coldsweat.util.math.FastMultiMap;
 import com.momosoftworks.coldsweat.util.math.RegistryMultiMap;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityType;
 import net.minecraft.fluid.Fluid;
+import net.minecraft.nbt.*;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.resources.IResource;
@@ -249,27 +248,27 @@ public class ConfigHelper
     public static <K, V extends ConfigData> Map<K, V> getRegistryMap(List<? extends List<?>> source, DynamicRegistries dynamicRegistries, RegistryKey<Registry<K>> keyRegistry,
                                                                              Function<List<?>, V> valueCreator, Function<V, NegatableList<Either<ITag<K>, K>>> taggedListGetter)
     {
-        return getRegistryMapLike(source, dynamicRegistries, keyRegistry, valueCreator, taggedListGetter, FastMap::new, FastMap::put);
+        return getRegistryMapLike(source, dynamicRegistries, keyRegistry, valueCreator, taggedListGetter, HashMap::new, HashMap::put);
     }
     public static <K, V extends ConfigData> Map<K, V> getRegistryMap(List<? extends List<?>> source, RegistryKey<Registry<K>> keyRegistry,
                                                                      Function<List<?>, V> valueCreator, Function<V, NegatableList<K>> taggedListGetter)
     {
         return getRegistryMapLike(source, null, keyRegistry, valueCreator,
                                   v -> new NegatableList<>(taggedListGetter.apply(v).flatList().stream().map(Either::<ITag<K>, K>right).collect(Collectors.toList())),
-                                  FastMap::new, FastMap::put);
+                                  HashMap::new, HashMap::put);
     }
 
     public static <K, V extends ConfigData> Multimap<K, V> getRegistryMultimap(List<? extends List<?>> source, DynamicRegistries dynamicRegistries, RegistryKey<Registry<K>> keyRegistry,
                                                                                Function<List<?>, V> valueCreator, Function<V, NegatableList<Either<ITag<K>, K>>> taggedListGetter)
     {
-        return getRegistryMapLike(source, dynamicRegistries, keyRegistry, valueCreator, taggedListGetter, FastMultiMap::new, FastMultiMap::put);
+        return getRegistryMapLike(source, dynamicRegistries, keyRegistry, valueCreator, taggedListGetter, RegistryMultiMap::new, RegistryMultiMap::put);
     }
     public static <K, V extends ConfigData> Multimap<K, V> getRegistryMultimap(List<? extends List<?>> source, RegistryKey<Registry<K>> keyRegistry,
                                                                                Function<List<?>, V> valueCreator, Function<V, NegatableList<K>> taggedListGetter)
     {
         return getRegistryMapLike(source, null, keyRegistry, valueCreator,
                                   v -> new NegatableList<>(taggedListGetter.apply(v).flatList().stream().map(Either::<ITag<K>, K>right).collect(Collectors.toList())),
-                                  FastMultiMap::new, FastMultiMap::put);
+                                  RegistryMultiMap::new, RegistryMultiMap::put);
     }
 
     private static <K, V extends ConfigData, M> M getRegistryMapLike(List<? extends List<?>> source, DynamicRegistries dynamicRegistries, RegistryKey<Registry<K>> keyRegistry,

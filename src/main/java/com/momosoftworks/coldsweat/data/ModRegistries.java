@@ -5,7 +5,6 @@ import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.data.codec.configuration.*;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
-import com.momosoftworks.coldsweat.util.math.FastMap;
 import net.minecraft.resources.FallbackResourceManager;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.resources.ResourcePackType;
@@ -18,13 +17,14 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.packs.ModFileResourcePack;
 
+import java.util.HashMap;
 import java.util.*;
 
 @Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD)
 public class ModRegistries
 {
     private static final FallbackResourceManager RESOURCE_MANAGER = new FallbackResourceManager(ResourcePackType.SERVER_DATA, ColdSweat.MOD_ID);
-    private static final Map<ResourceLocation, RegistryHolder<? extends ConfigData>> REGISTRIES = new FastMap<>();
+    private static final Map<ResourceLocation, RegistryHolder<? extends ConfigData>> REGISTRIES = new HashMap<>();
 
     public static IResourceManager getResourceManager()
     {   return RESOURCE_MANAGER;
