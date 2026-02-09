@@ -12,7 +12,6 @@ import com.momosoftworks.coldsweat.data.codec.configuration.BiomeTempData;
 import com.momosoftworks.coldsweat.data.tag.ModBiomeTags;
 import com.momosoftworks.coldsweat.util.entity.DummyEntity;
 import com.momosoftworks.coldsweat.util.entity.DummyPlayer;
-import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.serialization.DynamicHolder;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.BlockDataUpdateMessage;
@@ -77,7 +76,7 @@ public abstract class WorldHelper
 {
     static Map<ResourceKey<Level>, DummyPlayer> DUMMY_PLAYERS = new HashMap<>();
     static Map<ResourceKey<Level>, DummyEntity> DUMMY_ENTITIES = new HashMap<>();
-    static Map<ResourceKey<Level>, Map<BlockPos, TempSnapshot>> TEMPERATURE_CHECKS = new FastMap<>();
+    static Map<ResourceKey<Level>, Map<BlockPos, TempSnapshot>> TEMPERATURE_CHECKS = new HashMap<>();
 
     @SubscribeEvent
     public static void clearCachesOnUnload(ServerStoppedEvent event)

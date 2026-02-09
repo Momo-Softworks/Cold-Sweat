@@ -20,7 +20,6 @@ import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
-import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.math.RegistryMultiMap;
 import com.momosoftworks.coldsweat.util.serialization.*;
 import com.momosoftworks.coldsweat.compat.CompatManager;
@@ -350,7 +349,7 @@ public class ConfigSettings
         (saver, registryAccess) -> {},
         SyncType.ONE_WAY);
 
-        BIOME_OFFSETS = addSyncedSettingWithRegistries(ColdSweat.createKey("biome_offsets"), FastMap::new, (holder, registryAccess) ->
+        BIOME_OFFSETS = addSyncedSettingWithRegistries(ColdSweat.createKey("biome_offsets"), HashMap::new, (holder, registryAccess) ->
         {
             Map<Holder<Biome>, BiomeTempData> dataMap = ConfigHelper.getRegistryMap(WorldSettingsConfig.BIOME_TEMP_OFFSETS.get(), registryAccess, Registry.BIOME_REGISTRY,
                                                                                     toml -> BiomeTempData.fromToml(toml, true, registryAccess),
@@ -363,7 +362,7 @@ public class ConfigSettings
         (saver, registryAccess) -> {},
         SyncType.ONE_WAY);
 
-        DIMENSION_TEMPS = addSyncedSettingWithRegistries(ColdSweat.createKey("dimension_temps"), FastMap::new, (holder, registryAccess) ->
+        DIMENSION_TEMPS = addSyncedSettingWithRegistries(ColdSweat.createKey("dimension_temps"), HashMap::new, (holder, registryAccess) ->
         {
             Map<Holder<DimensionType>, DimensionTempData> dataMap = ConfigHelper.getRegistryMap(WorldSettingsConfig.DIMENSION_TEMPERATURES.get(), registryAccess, Registry.DIMENSION_TYPE_REGISTRY,
                                                                                                 toml -> DimensionTempData.fromToml(toml, false, registryAccess),
@@ -376,7 +375,7 @@ public class ConfigSettings
         (saver, registryAccess) -> {},
         SyncType.ONE_WAY);
 
-        DIMENSION_OFFSETS = addSyncedSettingWithRegistries(ColdSweat.createKey("dimension_offsets"), FastMap::new, (holder, registryAccess) ->
+        DIMENSION_OFFSETS = addSyncedSettingWithRegistries(ColdSweat.createKey("dimension_offsets"), HashMap::new, (holder, registryAccess) ->
         {
             Map<Holder<DimensionType>, DimensionTempData> dataMap = ConfigHelper.getRegistryMap(WorldSettingsConfig.DIMENSION_TEMP_OFFSETS.get(), registryAccess, Registry.DIMENSION_TYPE_REGISTRY,
                                                                                                 toml -> DimensionTempData.fromToml(toml, true, registryAccess),
@@ -389,7 +388,7 @@ public class ConfigSettings
         (saver, registryAccess) -> {},
         SyncType.ONE_WAY);
 
-        STRUCTURE_TEMPS = addSettingWithRegistries(ColdSweat.createKey("structure_temperatures"), FastMap::new, (holder, registryAccess) ->
+        STRUCTURE_TEMPS = addSettingWithRegistries(ColdSweat.createKey("structure_temperatures"), HashMap::new, (holder, registryAccess) ->
         {
             Map<Holder<Structure>, StructureTempData> dataMap = ConfigHelper.getRegistryMap(WorldSettingsConfig.STRUCTURE_TEMPERATURES.get(), registryAccess, Registry.STRUCTURE_REGISTRY,
                                                                                             toml -> StructureTempData.fromToml(toml, false, registryAccess),
@@ -399,7 +398,7 @@ public class ConfigSettings
             holder.get(registryAccess).putAll(dataMap);
         });
 
-        STRUCTURE_OFFSETS = addSettingWithRegistries(ColdSweat.createKey("structure_offsets"), FastMap::new, (holder, registryAccess) ->
+        STRUCTURE_OFFSETS = addSettingWithRegistries(ColdSweat.createKey("structure_offsets"), HashMap::new, (holder, registryAccess) ->
         {
             Map<Holder<Structure>, StructureTempData> dataMap = ConfigHelper.getRegistryMap(WorldSettingsConfig.STRUCTURE_TEMP_OFFSETS.get(), registryAccess, Registry.STRUCTURE_REGISTRY,
                                                                                             toml -> StructureTempData.fromToml(toml, true, registryAccess),
