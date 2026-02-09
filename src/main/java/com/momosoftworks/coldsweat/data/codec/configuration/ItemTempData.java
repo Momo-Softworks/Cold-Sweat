@@ -14,7 +14,6 @@ import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
 import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
-import com.momosoftworks.coldsweat.util.math.FastMap;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.EnumHelper;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
@@ -202,7 +201,7 @@ public class ItemTempData extends ConfigData implements RequirementHolder
         ItemRequirement itemRequirement = new ItemRequirement(items, nbtRequirement);
 
         ItemTempData result = new ItemTempData(new NegatableList<>(itemRequirement), List.of(Either.right(slotType)), temp, trait, maxEffect, maxTemp, minTemp,
-                                               new NegatableList<>(), new AttributeModifierMap(), new FastMap<>());
+                                               new NegatableList<>(), new AttributeModifierMap(), new HashMap<>());
         result.setConfigType(Type.TOML);
         return result;
     }
