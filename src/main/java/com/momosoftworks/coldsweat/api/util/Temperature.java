@@ -46,7 +46,7 @@ public class Temperature
      * @param value The temperature to convert.
      * @param from The unit to convert from.
      * @param to The unit to convert to.
-     * @param absolute Used when dealing with absolute temperature.
+     * @param absolute Signifies that {@code value} is an absolute measurement of temperature (adds/subtracts 32 when dealing with Fahrenheit).
      * @return The converted temperature.
      */
     public static double convert(double value, Units from, Units to, boolean absolute)
