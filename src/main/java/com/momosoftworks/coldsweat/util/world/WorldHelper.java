@@ -646,11 +646,11 @@ public abstract class WorldHelper
 
         Pair<Double, Double> biomeTemp = Optional.ofNullable(ConfigSettings.BIOME_TEMPS.get(registryAccess).get(biome))
                                                  .filter(data -> !data.isDisabled())
-                                                 .map(data -> Pair.of(data.minTemp(), data.maxTemp()))
+                                                 .map(data -> Pair.of(data.getMinTemp(), data.getMaxTemp()))
                                                  .orElse(Pair.of(baseTemp - variance, baseTemp + variance));
         Pair<Double, Double> configOffset = Optional.ofNullable(ConfigSettings.BIOME_OFFSETS.get(registryAccess).get(biome))
                                                     .filter(data -> !data.isDisabled())
-                                                    .map(data -> Pair.of(data.minTemp(), data.maxTemp()))
+                                                    .map(data -> Pair.of(data.getMinTemp(), data.getMaxTemp()))
                                                     .orElse(Pair.of(0d, 0d));
         return CSMath.addPairs(Pair.of(biomeTemp.getFirst(), biomeTemp.getSecond()),
                                Pair.of(configOffset.getFirst(), configOffset.getSecond()));
@@ -684,8 +684,9 @@ public abstract class WorldHelper
         if (biomeTemp == null)
         {   return defaultWaterTemp;
         }
-        return biomeTemp.isOffset() ? defaultWaterTemp + biomeTemp.waterTemp()
-                                    : biomeTemp.waterTemp();
+        double waterTemp = biomeTemp.getWaterTemp();
+        return biomeTemp.isOffset() ? defaultWaterTemp + waterTemp
+                                    : waterTemp;
     }
 
     /**
