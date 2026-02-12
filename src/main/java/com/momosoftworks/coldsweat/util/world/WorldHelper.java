@@ -803,10 +803,11 @@ public abstract class WorldHelper
         if (pos.getY() >= 0 && pos.getY() < levelReader.getMaxBuildHeight()
         && levelReader instanceof ServerWorld)
         {
+            ServerWorld serverLevel = (ServerWorld) levelReader;
             if (surroundedByBlock(levelReader, pos, Blocks.ICE))
             {   return true;
             }
-            Lazy<Boolean> freezingTemp = Lazy.of(() -> getRoughTemperatureAt((ServerWorld) levelReader, pos) < 0f);
+            Lazy<Boolean> freezingTemp = Lazy.of(() -> getRoughTemperatureAt((ServerWorld) levelReader, pos) + getWaterTemperatureAt(serverLevel, pos) <= 0f);
 
             if (!mustBeAtEdge)
             {   return freezingTemp.get();
@@ -821,10 +822,13 @@ public abstract class WorldHelper
         if (pos.getY() >= 0 && pos.getY() < levelReader.getMaxBuildHeight()
         && levelReader instanceof ServerWorld)
         {
+            ServerWorld serverLevel = (ServerWorld) levelReader;
             if (mustBeAtEdge && surroundedByBlock(levelReader, pos, Blocks.ICE))
             {   return false;
             }
-            return getRoughTemperatureAt((ServerWorld) levelReader, pos) >= 0f;
+            double waterTemp = getWaterTemperatureAt(serverLevel, pos);
+            double temperature = getRoughTemperatureAt(serverLevel, pos) + waterTemp;
+            return temperature > 0f;
         }
         return false;
     }
