@@ -89,11 +89,14 @@ public class BiomeTempData extends ConfigData
     {   return isDisabled;
     }
 
-    public double minTemp()
+    public double getMinTemp()
     {   return Temperature.convert(min, units, Temperature.Units.MC, !this.isOffset);
     }
-    public double maxTemp()
+    public double getMaxTemp()
     {   return Temperature.convert(max, units, Temperature.Units.MC, !this.isOffset);
+    }
+    public double getWaterTemp()
+    {   return Temperature.convert(waterTemp, units, Temperature.Units.MC, false);
     }
 
     @Nullable
@@ -121,7 +124,7 @@ public class BiomeTempData extends ConfigData
             min = ((Number) entry.get(1)).doubleValue();
             max = ((Number) entry.get(2)).doubleValue();
             if (entry.size() >= 4) units = Temperature.Units.fromID(((String) entry.get(3)).toUpperCase());
-            if (entry.size() >= 5) waterTemp = Temperature.convert(((Number) entry.get(4)).doubleValue(), units, Temperature.Units.MC, true);
+            if (entry.size() >= 5) waterTemp = ((Number) entry.get(4)).doubleValue();
         }
         BiomeTempData result = new BiomeTempData(biomes, min, max, units, waterTemp, isOffset, isDisabled);
         result.setConfigType(Type.TOML);
