@@ -8,8 +8,6 @@ import net.minecraft.world.level.biome.Biome;
 
 public class ModBiomeTags
 {
-    public static final TagKey<Biome> HAS_HOT_WATER = createForgeTag("has_hot_water");
-
     private static TagKey<Biome> createTag(String name)
     {   return TagKey.create(Registry.BIOME_REGISTRY, ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, name));
     }

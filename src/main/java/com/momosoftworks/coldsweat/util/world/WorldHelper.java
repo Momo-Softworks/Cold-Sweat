@@ -796,13 +796,10 @@ public abstract class WorldHelper
         if (pos.getY() >= levelReader.getMinBuildHeight() && pos.getY() < levelReader.getMaxBuildHeight()
         && levelReader instanceof ServerLevel serverLevel)
         {
-            Holder<Biome> biome = levelReader.getBiome(pos);
-            if (biome.is(ModBiomeTags.HAS_HOT_WATER)) return false;
-
             if (surroundedByBlock(levelReader, pos, Blocks.ICE))
             {   return true;
             }
-            Lazy<Boolean> freezingTemp = Lazy.of(() -> getRoughTemperatureAt(serverLevel, pos) < 0f);
+            Lazy<Boolean> freezingTemp = Lazy.of(() -> getRoughTemperatureAt(serverLevel, pos) + getWaterTemperatureAt(serverLevel, pos) <= 0f);
 
             if (!mustBeAtEdge)
             {   return freezingTemp.get();
@@ -817,13 +814,12 @@ public abstract class WorldHelper
         if (pos.getY() >= levelReader.getMinBuildHeight() && pos.getY() < levelReader.getMaxBuildHeight()
         && levelReader instanceof ServerLevel serverLevel)
         {
-            Holder<Biome> biome = levelReader.getBiome(pos);
-            if (biome.is(ModBiomeTags.HAS_HOT_WATER)) return true;
-
             if (mustBeAtEdge && surroundedByBlock(levelReader, pos, Blocks.ICE))
             {   return false;
             }
-            return getRoughTemperatureAt(serverLevel, pos) >= 0f;
+            double waterTemp = getWaterTemperatureAt(serverLevel, pos);
+            double temperature = getRoughTemperatureAt(serverLevel, pos) + waterTemp;
+            return temperature > 0f;
         }
         return false;
     }
