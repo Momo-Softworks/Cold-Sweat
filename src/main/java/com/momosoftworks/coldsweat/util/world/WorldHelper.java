@@ -801,7 +801,7 @@ public abstract class WorldHelper
             if (surroundedByBlock(levelReader, pos, Blocks.ICE))
             {   return true;
             }
-            Lazy<Boolean> freezingTemp = Lazy.of(() -> getRoughTemperatureAt(serverLevel, pos) + getWaterTemperatureAt(serverLevel, pos) <= 0f);
+            Lazy<Boolean> freezingTemp = Lazy.of(() -> getRoughTemperatureAt(serverLevel, pos) + getWaterTemperatureAt(serverLevel, pos) - ConfigSettings.DEFAULT_WATER_TEMPERATURE.get() <= 0f);
 
             if (!mustBeAtEdge)
             {   return freezingTemp.get();
@@ -819,7 +819,7 @@ public abstract class WorldHelper
             if (mustBeAtEdge && surroundedByBlock(levelReader, pos, Blocks.ICE))
             {   return false;
             }
-            double waterTemp = getWaterTemperatureAt(serverLevel, pos);
+            double waterTemp = getWaterTemperatureAt(serverLevel, pos) - ConfigSettings.DEFAULT_WATER_TEMPERATURE.get();
             double temperature = getRoughTemperatureAt(serverLevel, pos) + waterTemp;
             return temperature > 0f;
         }
