@@ -299,18 +299,24 @@ public class TempCommand extends BaseCommand
         }
 
         Temperature.Units preferredUnits = source.getEntity() instanceof PlayerEntity ? Preference.getOrDefault((PlayerEntity)source.getEntity(), Preference.UNITS, Temperature.Units.F) : Temperature.Units.F;
-        String unitsName = trait.isForWorld() ? " " + preferredUnits.getFormattedName().getString() : "";
-        double convertedTemp = Temperature.convertIfNeeded(temp, trait, preferredUnits, true);
+        String tempString;
+        if (trait.isForWorld())
+        {   double convertedTemp = Temperature.convert(temp, Temperature.Units.MC, preferredUnits, true);
+            tempString = String.format("%.1f %s", convertedTemp, preferredUnits.getFormattedName().getString());
+        }
+        else
+        {   tempString = String.format("%.1f", temp);
+        }
 
         //Compose & send message
         if (entities.size() == 1)
         {   Entity target = entities.iterator().next();
-            source.sendSuccess(new TranslationTextComponent("commands.cold_sweat.temperature.set.single.result", trait.getSerializedName(), target.getName().getString(),
-                                                            CSMath.truncate(convertedTemp, 1) + unitsName), true);
+            source.sendSuccess(new TranslationTextComponent("commands.cold_sweat.temperature.set.single.result",
+                                                            trait.getSerializedName(), target.getName().getString(), tempString), true);
         }
         else
-        {   source.sendSuccess(new TranslationTextComponent("commands.cold_sweat.temperature.set.many.result", trait.getSerializedName(), entities.size(),
-                                                            CSMath.truncate(convertedTemp, 1) + unitsName), true);
+        {   source.sendSuccess(new TranslationTextComponent("commands.cold_sweat.temperature.set.many.result",
+                                                            trait.getSerializedName(), entities.size(), tempString), true);
         }
         return entities.size();
     }
@@ -330,18 +336,24 @@ public class TempCommand extends BaseCommand
         }
 
         Temperature.Units preferredUnits = source.getEntity() instanceof PlayerEntity ? Preference.getOrDefault((PlayerEntity) source.getEntity(), Preference.UNITS, Temperature.Units.F) : Temperature.Units.F;
-        String unitsName = trait.isForWorld() ? " " + preferredUnits.getFormattedName().getString() : "";
-        double convertedTemp = Temperature.convertIfNeeded(temp, trait, preferredUnits, true);
+        String tempString;
+        if (trait.isForWorld())
+        {   double convertedTemp = Temperature.convert(temp, Temperature.Units.MC, preferredUnits, true);
+            tempString = String.format("%.1f %s", convertedTemp, preferredUnits.getFormattedName().getString());
+        }
+        else
+        {   tempString = String.format("%.1f", temp);
+        }
 
         //Compose & send message
         if (entities.size() == 1)
         {   Entity target = entities.iterator().next();
             source.sendSuccess(new TranslationTextComponent("commands.cold_sweat.temperature.set.single.result", trait.getSerializedName(), target.getName().getString(),
-                                                         CSMath.truncate(convertedTemp, 1) + unitsName), true);
+                                                         tempString), true);
         }
         else
         {   source.sendSuccess(new TranslationTextComponent("commands.cold_sweat.temperature.set.many.result", trait.getSerializedName(), entities.size(),
-                                                         CSMath.truncate(convertedTemp, 1) + unitsName), true);
+                                                         tempString), true);
         }
         return entities.size();
     }
@@ -555,24 +567,11 @@ public class TempCommand extends BaseCommand
                                     .withHoverEvent(getConvertedUnitHover(trait, newValueStore, preferredUnits)))), false);
     }
 
-    static double getFormattedTraitValue(Temperature.Trait trait, double rawValue, Temperature.Units units)
-    {
-        double converted = rawValue;
-
-        if (trait == Temperature.Trait.WORLD
-        || trait == Temperature.Trait.BURNING_POINT
-        || trait == Temperature.Trait.FREEZING_POINT)
-        {
-            converted = Temperature.convert(converted, Temperature.Units.MC, units, true);
-        }
-        return converted;
-    }
-
     static HoverEvent getConvertedUnitHover(Temperature.Trait trait, double value, Temperature.Units units)
     {
-        return new HoverEvent(
-                HoverEvent.Action.SHOW_TEXT,
-                new StringTextComponent(CSMath.truncate(getFormattedTraitValue(trait, value, units), 1) + " " + units.getFormattedName().getString()));
+        if (!trait.isForWorld()) return null;
+        return new HoverEvent(HoverEvent.Action.SHOW_TEXT,
+                              new StringTextComponent(String.format("%.1f %s", Temperature.convertIfNeeded(value, trait, units, true), units.getFormattedName().getString())));
     }
 
     private int executeModifyEntityTemp(CommandSource source, Collection<? extends Entity> entities, Temperature.Trait attribute,
