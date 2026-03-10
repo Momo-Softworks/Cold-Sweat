@@ -15,8 +15,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class HeatSwayEffect extends TempEffect
 {
-    public HeatSwayEffect(TempEffectType<?> type, LivingEntity entity, IntegerBounds bounds)
-    {   super(type, entity, bounds);
+    public HeatSwayEffect(TempEffectType<?> type, IntegerBounds bounds)
+    {   super(type, bounds);
     }
 
     static float PREV_X_SWAY = 0;
@@ -34,7 +34,7 @@ public class HeatSwayEffect extends TempEffect
     {
         Player player = Minecraft.getInstance().player;
 
-        if (!this.test(Minecraft.getInstance().player))
+        if (!this.test(player))
         {   SWAY_FACTOR = 0;
             PREV_X_SWAY = 0;
             PREV_Y_SWAY = 0;
@@ -42,7 +42,7 @@ public class HeatSwayEffect extends TempEffect
         }
 
         float frameTime = Minecraft.getInstance().getDeltaFrameTime();
-        double effect = this.getEffectFactor();
+        double effect = this.getEffectFactor(player);
 
         if (!Minecraft.getInstance().isPaused() && ConfigSettings.DISTORTION_EFFECTS.get())
         {
