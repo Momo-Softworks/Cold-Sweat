@@ -14,20 +14,20 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class FreezeShiverEffect extends TempEffect
 {
-    public FreezeShiverEffect(TempEffectType<?> type, LivingEntity entity, IntegerBounds bounds)
-    {   super(type, entity, bounds);
+    public FreezeShiverEffect(TempEffectType<?> type, IntegerBounds bounds)
+    {   super(type, bounds);
     }
 
     @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public void shiverCamera(EntityViewRenderEvent.CameraSetup event)
     {
-        if (!this.test(Minecraft.getInstance().player)) return;
-        LivingEntity entity = this.entity();
+        LivingEntity entity = Minecraft.getInstance().player;
+        if (!this.test(entity)) return;
 
         if (!Minecraft.getInstance().isPaused() && ConfigSettings.DISTORTION_EFFECTS.get())
         {
-            double effect = this.getEffectFactor();
+            double effect = this.getEffectFactor(entity);
             double tickTime = entity.tickCount + event.getPartialTicks();
             float shiverIntensity = (float) CSMath.blend(0, (Math.sin(tickTime / 10) + 1) * 0.03f + 0.01f, effect, 0, 1);
             shiverIntensity *= ConfigSettings.SHIVER_INTENSITY.get();
