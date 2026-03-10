@@ -17,17 +17,18 @@ import net.neoforged.bus.api.SubscribeEvent;
 
 public class HeatBlurEffect extends TempEffect
 {
-    public HeatBlurEffect(TempEffectType<?> type, LivingEntity entity, IntegerBounds bounds)
-    {   super(type, entity, bounds);
+    public HeatBlurEffect(TempEffectType<?> type, IntegerBounds bounds)
+    {   super(type, bounds);
     }
 
     @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public void onRenderBlur(RenderLevelEvent.Post event)
     {
-        if (!this.test(Minecraft.getInstance().player)) return;
+        LivingEntity player = Minecraft.getInstance().player;
+        if (!this.test(player)) return;
 
-        double effect = this.getEffectFactor();
+        double effect = this.getEffectFactor(player);
         float blurMultiplier = ConfigSettings.HEATSTROKE_BLUR_AMOUNT.get().floatValue();
         if (blurMultiplier == 0) return;
         PostProcessShaderManager shaderManager = PostProcessShaderManager.getInstance();

@@ -18,8 +18,8 @@ import org.joml.Vector4f;
 
 public abstract class AbstractVignetteEffect extends TempEffect
 {
-    public AbstractVignetteEffect(TempEffectType<?> type, LivingEntity entity, IntegerBounds bounds)
-    {   super(type, entity, bounds);
+    public AbstractVignetteEffect(TempEffectType<?> type, IntegerBounds bounds)
+    {   super(type, bounds);
     }
 
     protected abstract ResourceLocation getTexture();
@@ -63,9 +63,9 @@ public abstract class AbstractVignetteEffect extends TempEffect
     @OnlyIn(Dist.CLIENT)
     public void vignette(RenderGuiLayerEvent.Pre event)
     {
-        if (!this.test(Minecraft.getInstance().player)) return;
-        LivingEntity entity = this.entity();
-        float effect = (float) this.getEffectFactor();
+        LivingEntity entity = Minecraft.getInstance().player;
+        if (!this.test(entity)) return;
+        float effect = (float) this.getEffectFactor(entity);
         float tickTime = entity.tickCount + event.getPartialTick().getGameTimeDeltaPartialTick(true);
 
         if (event.getName() == VanillaGuiLayers.CAMERA_OVERLAYS)

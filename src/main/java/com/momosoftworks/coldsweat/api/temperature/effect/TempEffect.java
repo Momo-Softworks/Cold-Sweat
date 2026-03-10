@@ -13,14 +13,12 @@ import java.util.Objects;
 
 public abstract class TempEffect
 {
-    private final LivingEntity entity;
     private final IntegerBounds bounds;
     private final TempEffectType<?> type;
 
-    public TempEffect(TempEffectType<?> type, LivingEntity entity, IntegerBounds range)
+    public TempEffect(TempEffectType<?> type, IntegerBounds range)
     {
         this.type = type;
-        this.entity = entity;
         this.bounds = range;
     }
 
@@ -29,32 +27,29 @@ public abstract class TempEffect
     public TempEffectType<?> type()
     {   return this.type;
     }
-    protected LivingEntity entity()
-    {   return this.entity;
-    }
     protected IntegerBounds bounds()
     {   return this.bounds;
     }
 
-    protected boolean test(Entity entity)
+    protected boolean test(LivingEntity entity)
     {
-        return Objects.equals(this.entity, entity)
+        return entity != null
             && !entity.isSpectator()
             && !(entity instanceof Player player && player.isCreative())
-            && this.bounds().test(Math.round((float) CSMath.clamp(this.getTemperature(), -100, 100)));
+            && this.bounds().test(Math.round((float) CSMath.clamp(this.getTemperature(entity), -100, 100)));
     }
 
-    protected double getTemperature()
-    {   return this.entity.level().isClientSide ? Overlays.BLEND_BODY_TEMP : Temperature.get(entity, Temperature.Trait.BODY);
+    protected double getTemperature(LivingEntity entity)
+    {   return entity.level().isClientSide ? Overlays.BLEND_BODY_TEMP : Temperature.get(entity, Temperature.Trait.BODY);
     }
 
-    public double getEffectFactor()
+    public double getEffectFactor(LivingEntity entity)
     {
-        if (EntityTempManager.isImmuneToTemperature(this.entity)) return 0;
-        double temperature = this.getTemperature();
+        if (EntityTempManager.isImmuneToTemperature(entity)) return 0;
+        double temperature = this.getTemperature(entity);
         double minTemp = this.bounds().min();
         double maxTemp = this.bounds().max();
-        double resistance = EntityTempManager.getResistance(temperature, this.entity);
+        double resistance = EntityTempManager.getResistance(temperature, entity);
         temperature = CSMath.blend(temperature, minTemp, resistance, 0, 1);
         return CSMath.blend(0, 1, temperature, minTemp, maxTemp);
     }

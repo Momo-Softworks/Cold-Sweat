@@ -13,18 +13,19 @@ import java.util.Collection;
 
 public class DecreaseDropsEffect extends TempEffect
 {
-    public DecreaseDropsEffect(TempEffectType<?> type, LivingEntity entity, IntegerBounds bounds)
-    {   super(type, entity, bounds);
+    public DecreaseDropsEffect(TempEffectType<?> type, IntegerBounds bounds)
+    {   super(type, bounds);
     }
 
     @SubscribeEvent
     public void onDropItems(LivingDropsEvent event)
     {
-        if (!this.test(event.getEntity())) return;
+        LivingEntity entity = event.getEntity();
+        if (!this.test(entity)) return;
 
         Collection<ItemEntity> drops = event.getDrops();
         int totalCount = drops.stream().map(item -> item.getItem().getCount()).reduce(0, Integer::sum);
-        int removedDrops = CSMath.ceil(CSMath.blend(0, totalCount, this.getTemperature(), this.bounds().min(), this.bounds().max()));
+        int removedDrops = CSMath.ceil(CSMath.blend(0, totalCount, this.getTemperature(entity), this.bounds().min(), this.bounds().max()));
         // Remove random drops
         while (removedDrops > 0 && !drops.isEmpty())
         {

@@ -12,19 +12,20 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 public class FreezeMineSpeedEffect extends TempEffect
 {
-    public FreezeMineSpeedEffect(TempEffectType<?> type, LivingEntity entity, IntegerBounds bounds)
-    {   super(type, entity, bounds);
+    public FreezeMineSpeedEffect(TempEffectType<?> type, IntegerBounds bounds)
+    {   super(type, bounds);
     }
 
     @SubscribeEvent
     public void onPlayerMine(PlayerEvent.BreakSpeed event)
     {
-        if (!this.test(event.getEntity())) return;
+        LivingEntity player = event.getEntity();
+        if (!this.test(player)) return;
 
         float miningSpeed = 1 - ConfigSettings.COLD_MINING_IMPAIRMENT.get().floatValue();
         if (miningSpeed == 1) return;
 
-        float effect = (float) this.getEffectFactor();
+        float effect = (float) this.getEffectFactor(player);
         float minMiningSpeed = CSMath.blend(1, miningSpeed, effect, 0, 1);
         event.setNewSpeed(event.getNewSpeed() * minMiningSpeed);
     }

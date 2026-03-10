@@ -12,25 +12,26 @@ import net.neoforged.neoforge.event.entity.living.LivingHealEvent;
 
 public class FreezeHealingEffect extends TempEffect
 {
-    public FreezeHealingEffect(TempEffectType<?> type, LivingEntity entity, IntegerBounds bounds)
-    {   super(type, entity, bounds);
+    public FreezeHealingEffect(TempEffectType<?> type, IntegerBounds bounds)
+    {   super(type, bounds);
     }
 
     @SubscribeEvent
     public void onHeal(LivingHealEvent event)
     {
-        if (!this.test(event.getEntity())) return;
-        double effect = this.getEffectFactor();
+        LivingEntity entity = event.getEntity();
+        if (!this.test(entity)) return;
+        double effect = this.getEffectFactor(entity);
         double heartsFreezePercentage = ConfigSettings.HEARTS_FREEZING_PERCENTAGE.get();
         if (heartsFreezePercentage == 0) return;
 
-        float maxHealth = this.entity().getMaxHealth();
+        float maxHealth = entity.getMaxHealth();
 
         float maxFrozenHealth = (float) (maxHealth * heartsFreezePercentage);
         float frozenHealth = Math.round(CSMath.blend(0, maxFrozenHealth, effect, 0, 1));
         float unfrozenHealth = maxHealth - frozenHealth;
         // Cap healing to only heal up to the unfrozen health amount
-        float healAmount = CSMath.clamp(event.getAmount(), 0, Math.max(0, unfrozenHealth - this.entity().getHealth()));
+        float healAmount = CSMath.clamp(event.getAmount(), 0, Math.max(0, unfrozenHealth - entity.getHealth()));
         event.setAmount(healAmount);
     }
 
