@@ -21,8 +21,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public abstract class AbstractVignetteEffect extends TempEffect
 {
-    public AbstractVignetteEffect(TempEffectType<?> type, LivingEntity entity, IntegerBounds bounds)
-    {   super(type, entity, bounds);
+    public AbstractVignetteEffect(TempEffectType<?> type, IntegerBounds bounds)
+    {   super(type, bounds);
     }
 
     protected abstract ResourceLocation getTexture();
@@ -66,9 +66,9 @@ public abstract class AbstractVignetteEffect extends TempEffect
     @SubscribeEvent
     public void vignette(RenderGameOverlayEvent.Pre event)
     {
-        if (!this.test(Minecraft.getInstance().player)) return;
-        LivingEntity entity = this.entity();
-        float effect = (float) this.getEffectFactor();
+        LivingEntity entity = Minecraft.getInstance().player;
+        if (!this.test(entity)) return;
+        float effect = (float) this.getEffectFactor(entity);
         float tickTime = entity.tickCount + event.getPartialTicks();
 
         if (event.getType() == RenderGameOverlayEvent.ElementType.VIGNETTE)

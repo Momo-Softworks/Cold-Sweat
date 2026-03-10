@@ -39,7 +39,7 @@ public class MixinLimitFoodRegen
             TempEffect freezeHealingEffect = tempEffects.get(TempEffectInit.FREEZE_HEALING.get());
             if (freezeHealingEffect != null)
             {
-                double effect = freezeHealingEffect.getEffectFactor();
+                double effect = freezeHealingEffect.getEffectFactor(STORED_PLAYER);
                 double heartsFreezePercentage = ConfigSettings.HEARTS_FREEZING_PERCENTAGE.get();
                 if (heartsFreezePercentage == 0)
                 {   break checkFrozenHealth;

@@ -12,8 +12,8 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 
 public class FreezeVignetteEffect extends AbstractVignetteEffect
 {
-    public FreezeVignetteEffect(TempEffectType<?> type, LivingEntity entity, IntegerBounds bounds)
-    {   super(type, entity, bounds);
+    public FreezeVignetteEffect(TempEffectType<?> type, IntegerBounds bounds)
+    {   super(type, bounds);
     }
 
     static final ResourceLocation TEXTURE = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/overlay/freeze_overlay.png");

@@ -35,7 +35,7 @@ public class HandleTempEffects
                 {
                     TempEffectType effectType = holder.effect();
                     // Add effect
-                    cap.addTempEffect(effectType.create(effectType, living, holder.range()), living.level.isClientSide);
+                    cap.addTempEffect(effectType.create(effectType, holder.range()), living.level.isClientSide);
                     // Mark effect as added
                     addedEffects.add(effectType);
                 });

@@ -11,25 +11,26 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class FreezeMoveSpeedEffect extends TempEffect
 {
-    public FreezeMoveSpeedEffect(TempEffectType<?> type, LivingEntity entity, IntegerBounds bounds)
-    {   super(type, entity, bounds);
+    public FreezeMoveSpeedEffect(TempEffectType<?> type, IntegerBounds bounds)
+    {   super(type, bounds);
     }
 
     @SubscribeEvent
     public void onPlayerTick(EntityMoveEvent event)
     {
-        if (!this.test(event.getEntity())) return;
+        if (!(event.getEntity() instanceof LivingEntity)) return;
+        LivingEntity entity = (LivingEntity) event.getEntity();
+        if (!this.test(entity)) return;
 
-        float effect = (float) this.getEffectFactor();
+        float effect = (float) this.getEffectFactor(entity);
         double movementReduction = ConfigSettings.COLD_MOVEMENT_SLOWDOWN.get();
         if (movementReduction == 0) return;
 
         float movePenalty = (float) CSMath.blend(0, movementReduction, effect, 0, 1);
         if (movePenalty != 0)
         {
-            if (this.entity().isSprinting())
-            {   if (!this.entity().isOnGround())
-                    movePenalty *= 1.5f;
+            if (entity.isSprinting() && !entity.isOnGround())
+            {   movePenalty *= 1.5f;
             }
             event.setSpeed(event.getSpeed() * (Math.max(0, 1-movePenalty)));
             event.setCanceled(true);

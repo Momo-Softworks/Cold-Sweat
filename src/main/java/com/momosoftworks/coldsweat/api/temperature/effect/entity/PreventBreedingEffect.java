@@ -9,14 +9,14 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class PreventBreedingEffect extends TempEffect
 {
-    public PreventBreedingEffect(TempEffectType<?> type, LivingEntity entity, IntegerBounds bounds)
-    {   super(type, entity, bounds);
+    public PreventBreedingEffect(TempEffectType<?> type, IntegerBounds bounds)
+    {   super(type, bounds);
     }
 
     @SubscribeEvent
     public void onEntityBreed(BabyEntitySpawnEvent event)
     {
-        if (this.test(event.getParentA()) || this.test(event.getParentB()))
+        if (!this.test(event.getParentA()) || !this.test(event.getParentB()))
         {   event.setCanceled(true);
         }
     }

@@ -1,7 +1,5 @@
 package com.momosoftworks.coldsweat.api.temperature.effect.player;
 
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.vanilla.RenderHeartEvent;
 import com.momosoftworks.coldsweat.api.temperature.effect.TempEffect;
@@ -22,8 +20,8 @@ import static net.minecraft.client.gui.AbstractGui.GUI_ICONS_LOCATION;
 
 public class FreezeHeartsEffect extends TempEffect
 {
-    public FreezeHeartsEffect(TempEffectType<?> type, LivingEntity entity, IntegerBounds bounds)
-    {   super(type, entity, bounds);
+    public FreezeHeartsEffect(TempEffectType<?> type, IntegerBounds bounds)
+    {   super(type, bounds);
     }
 
     private static final ResourceLocation HEART_TEXTURE = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/overlay/hearts_frozen.png");
@@ -34,7 +32,8 @@ public class FreezeHeartsEffect extends TempEffect
     @SubscribeEvent
     public void onRenderHeart(RenderHeartEvent event)
     {
-        if (!this.test(Minecraft.getInstance().player)) return;
+        LivingEntity player = Minecraft.getInstance().player;
+        if (!this.test(player)) return;
         if (!ConfigSettings.SHOW_FROZEN_HEALTH.get()) return;
 
         RenderHeartEvent.HeartType heartType = event.getHeartType();
@@ -46,12 +45,12 @@ public class FreezeHeartsEffect extends TempEffect
         {   heartIndex += 1;
         }
 
-        double effect = this.getEffectFactor();
+        double effect = this.getEffectFactor(player);
         double heartsFreezePercentage = ConfigSettings.HEARTS_FREEZING_PERCENTAGE.get();
         if (heartsFreezePercentage == 0) return;
 
-        float maxHealth = this.entity().getMaxHealth();
-        boolean isHardcore = this.entity().level.getLevelData().isHardcore();
+        float maxHealth = player.getMaxHealth();
+        boolean isHardcore = player.level.getLevelData().isHardcore();
 
         float maxFrozenHealth = (float) (maxHealth * heartsFreezePercentage);
         if (maxFrozenHealth == 0) return;
@@ -90,5 +89,4 @@ public class FreezeHeartsEffect extends TempEffect
     public Side getSide()
     {   return Side.CLIENT;
     }
-
 }
