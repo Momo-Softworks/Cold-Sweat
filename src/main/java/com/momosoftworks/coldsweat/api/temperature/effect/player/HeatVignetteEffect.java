@@ -13,8 +13,8 @@ import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 
 public class HeatVignetteEffect extends AbstractVignetteEffect
 {
-    public HeatVignetteEffect(TempEffectType<?> type, LivingEntity entity, IntegerBounds bounds)
-    {   super(type, entity, bounds);
+    public HeatVignetteEffect(TempEffectType<?> type, IntegerBounds bounds)
+    {   super(type, bounds);
     }
 
     private static final ResourceLocation TEXTURE = new ResourceLocation(ColdSweat.MOD_ID, "textures/gui/overlay/haze.png");

@@ -852,7 +852,8 @@ public class EntityTempManager
              : Temperature.get(entity, Trait.COLD_RESISTANCE);
     }
     public static double getHeatResistance(LivingEntity player)
-    {   return player.hasEffect(MobEffects.FIRE_RESISTANCE) && ConfigSettings.FIRE_RESISTANCE_ENABLED.get() ? 1
+    {
+        return player.hasEffect(MobEffects.FIRE_RESISTANCE) && ConfigSettings.FIRE_RESISTANCE_ENABLED.get() ? 1
              : Temperature.get(player, Trait.HEAT_RESISTANCE);
     }
     public static double getResistance(double temperature, LivingEntity player)

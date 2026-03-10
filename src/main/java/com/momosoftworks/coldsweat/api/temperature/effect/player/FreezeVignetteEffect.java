@@ -12,8 +12,8 @@ import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 
 public class FreezeVignetteEffect extends AbstractVignetteEffect
 {
-    public FreezeVignetteEffect(TempEffectType<?> type, LivingEntity entity, IntegerBounds bounds)
-    {   super(type, entity, bounds);
+    public FreezeVignetteEffect(TempEffectType<?> type, IntegerBounds bounds)
+    {   super(type, bounds);
     }
 
     static final ResourceLocation TEXTURE = new ResourceLocation("textures/misc/powder_snow_outline.png");

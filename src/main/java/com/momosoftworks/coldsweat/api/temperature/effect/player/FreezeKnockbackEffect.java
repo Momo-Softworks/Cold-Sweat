@@ -11,19 +11,20 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class FreezeKnockbackEffect extends TempEffect
 {
-    public FreezeKnockbackEffect(TempEffectType<?> type, LivingEntity entity, IntegerBounds bounds)
-    {   super(type, entity, bounds);
+    public FreezeKnockbackEffect(TempEffectType<?> type, IntegerBounds bounds)
+    {   super(type, bounds);
     }
 
     @SubscribeEvent
     public void onPlayerKnockback(LivingKnockBackEvent event)
     {
-        if (!this.test(event.getEntity().getLastHurtByMob())) return;
+        LivingEntity attacker = event.getEntity().getLastHurtByMob();
+        if (!this.test(attacker)) return;
 
         float knockbackReduction = ConfigSettings.COLD_KNOCKBACK_REDUCTION.get().floatValue();
         if (knockbackReduction == 0) return;
 
-        float effect = (float) this.getEffectFactor();
+        float effect = (float) this.getEffectFactor(attacker);
         event.setStrength(event.getStrength() * CSMath.blend(1, 1 - knockbackReduction, effect, 0, 1));
     }
 

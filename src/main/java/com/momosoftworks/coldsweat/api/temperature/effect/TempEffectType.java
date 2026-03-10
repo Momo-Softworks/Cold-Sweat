@@ -14,12 +14,12 @@ public class TempEffectType<T extends TempEffect>
     {   this.constructor = constructor;
     }
 
-    public T create(TempEffectType<T> type, LivingEntity entity, IntegerBounds range)
-    {   return constructor.create(type, entity, range);
+    public T create(TempEffectType<T> type, IntegerBounds range)
+    {   return constructor.create(type, range);
     }
 
     @FunctionalInterface
     public interface Constructor<T extends TempEffect>
-    {   T create(TempEffectType<T>type, LivingEntity entity, IntegerBounds range);
+    {   T create(TempEffectType<T>type, IntegerBounds range);
     }
 }

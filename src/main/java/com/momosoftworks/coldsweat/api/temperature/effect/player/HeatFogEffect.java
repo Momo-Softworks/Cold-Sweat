@@ -17,8 +17,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class HeatFogEffect extends TempEffect
 {
-    public HeatFogEffect(TempEffectType<?> type, LivingEntity entity, IntegerBounds bounds)
-    {   super(type, entity, bounds);
+    public HeatFogEffect(TempEffectType<?> type, IntegerBounds bounds)
+    {   super(type, bounds);
     }
 
     static float FOG_FAR_DISTANCE = -1;
@@ -35,7 +35,8 @@ public class HeatFogEffect extends TempEffect
     {
         if (!(event instanceof ViewportEvent.RenderFog || event instanceof ViewportEvent.ComputeFogColor)) return;
 
-        if (!this.test(Minecraft.getInstance().player))
+        LivingEntity player = Minecraft.getInstance().player;
+        if (!this.test(player))
         {   FOG_FAR_DISTANCE = -1;
             FOG_NEAR_DISTANCE = -1;
             FOG_FAR_DISTANCE_TARGET = -1;
@@ -46,7 +47,7 @@ public class HeatFogEffect extends TempEffect
             return;
         }
 
-        double effect = this.getEffectFactor();
+        double effect = this.getEffectFactor(player);
 
         float frameTime = Minecraft.getInstance().getDeltaFrameTime();
         float farLerpSpeed = 0.08f * frameTime;
