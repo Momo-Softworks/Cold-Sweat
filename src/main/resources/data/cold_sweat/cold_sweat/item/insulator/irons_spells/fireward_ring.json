@@ -8,7 +8,7 @@
     "cold_sweat:burning_point": [
       {
         "name": "cs:irons_fireward_protection",
-        "amount": 0.33,
+        "amount": 0.45,
         "operation": "addition"
       }
     ]
