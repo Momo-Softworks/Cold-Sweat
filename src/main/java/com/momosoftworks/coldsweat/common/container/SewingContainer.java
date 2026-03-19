@@ -180,9 +180,8 @@ public class SewingContainer extends AbstractRepairContainer
         ItemStack insulatorItem = this.getItem(1);
 
         // If either input slot is taken, remove the result
-        if (wearableItem.isEmpty() || insulatorItem.isEmpty())
-        {
-            this.setItem(this.getResultSlot(), ItemStack.EMPTY);
+        if (wearableItem.isEmpty() || insulatorItem.isEmpty() || !ItemInsulationManager.isInsulatable(wearableItem))
+        {   this.setItem(this.getResultSlot(), ItemStack.EMPTY);
             return;
         }
 
@@ -196,12 +195,12 @@ public class SewingContainer extends AbstractRepairContainer
                     if (!cap.getInsulation().isEmpty())
                     {   this.setItem(this.getResultSlot(), cap.getInsulationItem(cap.getInsulation().size() - 1).copy());
                     }
+                    else this.setItem(this.getResultSlot(), ItemStack.EMPTY);
                 });
             }
             // Item is for insulation
             else if (!ConfigSettings.INSULATION_ITEMS.get().get(insulatorItem.getItem()).isEmpty()
-            && (!(insulatorItem.getItem() instanceof IArmorVanishable)
-            || MobEntity.getEquipmentSlotForItem(wearableItem) == MobEntity.getEquipmentSlotForItem(insulatorItem)))
+            && (!(insulatorItem.getItem() instanceof IArmorVanishable) || MobEntity.getEquipmentSlotForItem(wearableItem) == MobEntity.getEquipmentSlotForItem(insulatorItem)))
             {
                 ItemStack processed = wearableItem.copy();
                 if (insulateArmorItem(processed, insulatorItem))
@@ -213,6 +212,7 @@ public class SewingContainer extends AbstractRepairContainer
                     // Set slot to result
                     this.setItem(this.getResultSlot(), processed);
                 }
+                else this.setItem(this.getResultSlot(), ItemStack.EMPTY);
             }
         }
     }
