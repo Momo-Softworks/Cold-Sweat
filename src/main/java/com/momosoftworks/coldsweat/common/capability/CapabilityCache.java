@@ -4,17 +4,14 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.function.Predicate;
 
 public class CapabilityCache<C, K extends ICapabilityProvider>
 {
-    protected final Map<K, LazyOptional<C>> cache = new WeakHashMap<>();
+    protected final Map<K, LazyOptional<C>> cache = new HashMap<>();
     protected final Predicate<K> invalidator;
     protected final Supplier<Capability<C>> capability;
 
@@ -30,13 +27,15 @@ public class CapabilityCache<C, K extends ICapabilityProvider>
 
     public LazyOptional<C> get(K key)
     {
-        return cache.computeIfAbsent(key, e ->
-        {
-            this.cleanExpiredEntries();
-            LazyOptional<C> cap = e.getCapability(capability.get());
-            cap.addListener((opt) -> cache.remove(e));
-            return cap;
-        });
+        LazyOptional<C> existing = cache.get(key);
+        if (existing != null && existing.isPresent()) return existing;
+
+        this.cleanExpiredEntries();
+        LazyOptional<C> cap = key.getCapability(capability.get());
+        cap.addListener((opt) -> cache.remove(key));
+        cache.put(key, cap);
+
+        return cap;
     }
 
     public int size()
@@ -60,10 +59,9 @@ public class CapabilityCache<C, K extends ICapabilityProvider>
 
     public void ifPresent(K key, Consumer<C> consumer)
     {
-        LazyOptional<C> cap = cache.get(key);
-        if (cap != null && cap.resolve().isPresent())
-        {   consumer.accept(cap.resolve().get());
-        }
+        LazyOptional<C> cap = this.get(key);
+        if (cap == null) return;
+        cap.resolve().ifPresent(consumer);
     }
 
     public void ifLazyPresent(K key, Consumer<LazyOptional<C>> consumer)
@@ -76,20 +74,17 @@ public class CapabilityCache<C, K extends ICapabilityProvider>
 
     public void removeIf(Predicate<K> predicate)
     {
-        synchronized (cache)
+        List<K> removedKeys = new ArrayList<>(cache.size());
+        for (Map.Entry<K, LazyOptional<C>> entry : cache.entrySet())
         {
-            List<K> removedKeys = new ArrayList<>(cache.size());
-            for (Map.Entry<K, LazyOptional<C>> entry : cache.entrySet())
-            {
-                K key = entry.getKey();
-                LazyOptional<C> value = entry.getValue();
-                if (predicate.test(key) || !value.isPresent())
-                {   removedKeys.add(key);
-                }
+            K key = entry.getKey();
+            LazyOptional<C> value = entry.getValue();
+            if (predicate.test(key) || !value.isPresent())
+            {   removedKeys.add(key);
             }
-            for (int i = 0; i < removedKeys.size(); i++)
-            {   cache.remove(removedKeys.get(i));
-            }
+        }
+        for (int i = 0; i < removedKeys.size(); i++)
+        {   cache.remove(removedKeys.get(i));
         }
     }
 }
