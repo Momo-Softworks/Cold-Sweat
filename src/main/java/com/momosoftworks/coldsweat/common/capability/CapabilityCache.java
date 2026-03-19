@@ -3,17 +3,14 @@ package com.momosoftworks.coldsweat.common.capability;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.attachment.IAttachmentHolder;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class CapabilityCache<C, K extends IAttachmentHolder>
 {
-    protected final Map<K, C> cache = new WeakHashMap<>();
+    protected final Map<K, C> cache = new HashMap<>();
     protected final Predicate<K> invalidator;
     protected final Supplier<AttachmentType<C>> capability;
 
@@ -29,11 +26,14 @@ public class CapabilityCache<C, K extends IAttachmentHolder>
 
     public C get(K key)
     {
-        return cache.computeIfAbsent(key, e ->
-        {
-            this.cleanExpiredEntries();
-            return e.getData(capability);
-        });
+        C existing = cache.get(key);
+        if (existing != null) return existing;
+
+        this.cleanExpiredEntries();
+        C cap = key.getData(capability);
+        cache.put(key, cap);
+
+        return cap;
     }
 
     public int size()
@@ -57,7 +57,7 @@ public class CapabilityCache<C, K extends IAttachmentHolder>
 
     public void ifPresent(K key, Consumer<C> consumer)
     {
-        C cap = cache.get(key);
+        C cap = this.get(key);
         if (cap != null)
         {   consumer.accept(cap);
         }
@@ -65,19 +65,16 @@ public class CapabilityCache<C, K extends IAttachmentHolder>
 
     public void removeIf(Predicate<K> predicate)
     {
-        synchronized (cache)
-        {
-            List<K> removedKeys = new ArrayList<>(cache.size());
-            for (Map.Entry<K, C> entry : cache.entrySet())
+        List<K> removedKeys = new ArrayList<>(cache.size());
+        for (Map.Entry<K, C> entry : cache.entrySet())
             {
                 K key = entry.getKey();
                 if (predicate.test(key))
-                {   removedKeys.add(key);
-                }
+            {   removedKeys.add(key);
             }
-            for (int i = 0; i < removedKeys.size(); i++)
-            {   cache.remove(removedKeys.get(i));
-            }
+        }
+        for (int i = 0; i < removedKeys.size(); i++)
+        {   cache.remove(removedKeys.get(i));
         }
     }
 }
