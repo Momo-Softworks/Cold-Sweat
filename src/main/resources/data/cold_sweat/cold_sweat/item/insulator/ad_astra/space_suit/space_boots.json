@@ -4,9 +4,7 @@
   ],
   "type": "armor",
   "item": {
-    "items": [
-      "ad_astra:space_boots"
-    ]
+    "items": ["ad_astra:space_boots"]
   },
   "entity": {
     "entities": ["*"],
