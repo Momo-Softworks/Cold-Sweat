@@ -3674,3 +3674,24 @@ Fixes:
 - (1.21) Fixed sewing table GUI having darker overlay than other GUIs
 - (1.21) Fixed ice creating water when mined with an incorrect tool that has silk touch (i.e. wooden pickaxe)
 - Fixed block temperature configs not applying correctly when multiple are defined for the same block
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.4-b06g
+- The Frostward and Fireward rings from Iron's Spellbooks now give buffs that allow the player to survive in colder/hotter climates
+- Renamed some attribute modifiers for better clarity:
+      - "Cold/Heat Tolerance" -> "Freezing/Overheating Threshold"
+      - "Cold/Heat Dampening" -> "Cold/Heat Tolerance"
+      - "Freezing/Heatstroke Resistance" -> "Freeze/Overheat Damage Resistance"
+
+Fixes:
+* Fixed duplication glitch in the sewing table by swapping the input armor item before taking the result
+* Fixed sudden loss of player temperature data in some cases
+* Fixed screen stretching in some cases when the heat blur effect is applied
+* Fixed visual temperature effects not being nullified by fire and ice resistance in some cases
+- Fixed mod armor items not having the proper item tags
+* Fixed error when executing "/coldsweat dumpconfigs" on a dedicated server
+- Fixed attribute modifiers that lower the player's freezing point being shown as "harmful"
+- Fixed water potentially freezing and thawing at incorrect temperatures
+- Fixed the "/temp debug" command showing temperature units for temperature traits that don't use units
+- Fixed the Space Helmet from Ad Astra giving doubled effects, and the Space Pants giving none
