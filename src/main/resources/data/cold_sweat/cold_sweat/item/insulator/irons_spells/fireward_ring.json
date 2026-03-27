@@ -9,7 +9,7 @@
       {
         "name": "cs:irons_fireward_protection",
         "amount": 0.45,
-        "operation": "addition"
+        "operation": "add_value"
       }
     ]
   }
