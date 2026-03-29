@@ -315,7 +315,7 @@ public class TooltipHandler
             if (!isShiftDown() && ConfigSettings.ENABLE_HINTS.get())
             {   elements.add(tooltipStartIndex, Either.left(EXPAND_TOOLTIP));
             }
-            elements.add(tooltipStartIndex, Either.right(new SoulspringTooltip(stack.getOrDefault(ModItemComponents.SOULSPRING_LAMP_FUEL, 0d))));
+            elements.add(tooltipStartIndex, Either.right(new SoulspringTooltip(SoulspringLampItem.getFuel(stack))));
         }
 
         /*
@@ -547,7 +547,7 @@ public class TooltipHandler
         {
             if (screen.getSlotUnderMouse() != null && screen.getSlotUnderMouse().getItem().getItem() == ModItems.SOULSPRING_LAMP.value())
             {
-                double fuel = screen.getSlotUnderMouse().getItem().getOrDefault(ModItemComponents.SOULSPRING_LAMP_FUEL, 0d);
+                double fuel = SoulspringLampItem.getFuel(screen.getSlotUnderMouse().getItem());
                 ItemStack carriedStack = screen.getMenu().getCarried();
 
                 FuelData itemFuel = ConfigHelper.getFirstOrNull(ConfigSettings.SOULSPRING_LAMP_FUEL, carriedStack.getItem(), data -> data.test(carriedStack));

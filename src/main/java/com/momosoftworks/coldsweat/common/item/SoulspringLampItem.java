@@ -4,40 +4,42 @@ import com.momosoftworks.coldsweat.api.temperature.modifier.SoulLampTempModifier
 import com.momosoftworks.coldsweat.api.util.placement.Matcher;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.event.RegisterModels;
+import com.momosoftworks.coldsweat.common.capability.soul_lamp.SoulspringLampData;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.init.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.core.init.ModItemComponents;
+import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.core.init.ModSounds;
 import com.momosoftworks.coldsweat.core.network.message.ParticleBatchMessage;
 import com.momosoftworks.coldsweat.data.codec.configuration.FuelData;
+import com.momosoftworks.coldsweat.util.item.ItemStackHelper;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
-import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.*;
-import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
+import net.neoforged.neoforge.event.entity.living.LivingEquipmentChangeEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
 
 import java.util.List;
@@ -50,9 +52,7 @@ public class SoulspringLampItem extends Item
     public SoulspringLampItem()
     {
         super(new Properties().stacksTo(1).fireResistant().rarity(Rarity.RARE)
-                              .component(ModItemComponents.SOULSPRING_LAMP_LIT, false)
-                              .component(ModItemComponents.SOULSPRING_LAMP_FUEL, 0d)
-                              .component(DataComponents.CUSTOM_DATA, CustomData.of(new CompoundTag())));
+                              .component(ModItemComponents.SOULSPRING_LAMP_DATA, new SoulspringLampData()));
     }
 
     @Override
@@ -77,11 +77,22 @@ public class SoulspringLampItem extends Item
         });
     }
 
+    private static void updateComponents(ItemStack stack)
+    {
+        ItemStackHelper.ifPresent(stack, ModItemComponents.SOULSPRING_LAMP_FUEL, fuel ->
+        {
+            stack.remove(ModItemComponents.SOULSPRING_LAMP_FUEL);
+            setFuel(stack, fuel);
+            return fuel;
+        });
+    }
+
     @Override
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected)
     {
-        if (entity instanceof LivingEntity living && living.tickCount % 5 == 0)
+        if (!entity.level().isClientSide && entity instanceof LivingEntity living && living.tickCount % 5 == 0)
         {
+            updateComponents(stack);
             boolean shouldBeOn = false;
             try
             {
@@ -98,6 +109,7 @@ public class SoulspringLampItem extends Item
                 // Is world temp more than max
                 && temp > max && getFuel(stack) > 0)
                 {
+                    shouldBeOn = true;
                     // Drain fuel
                     if (!(living instanceof Player player && player.isCreative() || living.isSpectator()))
                     {   addFuel(stack, -0.005 * CSMath.clamp(temp - max, 1, 3));
@@ -134,30 +146,18 @@ public class SoulspringLampItem extends Item
                         {   Temperature.replaceOrAddModifier(ent, new SoulLampTempModifier().expires(5).tickRate(5), Temperature.Trait.WORLD, Matcher.SAME_CLASS);
                         }
                     }
-                    shouldBeOn = true;
                 }
             }
             finally
             {
-                if (!level.isClientSide())
+                // If the conditions are not met, turn off the lamp
+                if (isLit(stack) != shouldBeOn)
                 {
-                    CustomData itemTag = NBTHelper.getOrCreateTag(stack);
-                    // If the conditions are not met, turn off the lamp
-                    if (itemTag.copyTag().getInt("stateChangeTimer") <= 0
-                    && isLit(stack) != shouldBeOn)
-                    {
-                        stack.set(DataComponents.CUSTOM_DATA, itemTag.update(tag -> tag.putInt("stateChangeTimer", 2)));
-                        setLit(stack, shouldBeOn);
-
-                        if (getFuel(stack) < 0.5)
-                            setFuel(stack, 0);
-
-                        WorldHelper.playEntitySound(shouldBeOn ? ModSounds.SOUL_LAMP_ON.value() : ModSounds.SOUL_LAMP_OFF.value(), living, living.getSoundSource(), 1.5f, (float) Math.random() / 5f + 0.9f);
+                    setLit(stack, shouldBeOn);
+                    if (getFuel(stack) < 0.5)
+                    {   setFuel(stack, 0);
                     }
-                    else
-                    {   // Decrement the state change timer
-                        NBTHelper.incrementTag(stack, "stateChangeTimer", -1, tag -> tag > 0);
-                    }
+                    WorldHelper.playEntitySound(shouldBeOn ? ModSounds.SOUL_LAMP_ON.value() : ModSounds.SOUL_LAMP_OFF.value(), living, living.getSoundSource(), 1.5f, (float) Math.random() / 5f + 0.9f);
                 }
             }
         }
@@ -169,26 +169,23 @@ public class SoulspringLampItem extends Item
     }
 
     public static void setFuel(ItemStack stack, double fuel)
-    {   stack.set(ModItemComponents.SOULSPRING_LAMP_FUEL, fuel);
+    {   ItemStackHelper.ifPresent(stack, ModItemComponents.SOULSPRING_LAMP_DATA, lampData -> lampData.setFuel(fuel));
     }
-
     public static void addFuel(ItemStack stack, double amount)
     {   setFuel(stack, Math.min(64, getFuel(stack) + amount));
     }
-
     public static void addFuel(ItemStack stack, ItemStack fuelStack)
     {   addFuel(stack, getFuelForStack(fuelStack) * fuelStack.getCount());
     }
-
     public static double getFuel(ItemStack stack)
-    {   return stack.getOrDefault(ModItemComponents.SOULSPRING_LAMP_FUEL, 0d);
+    {   return ItemStackHelper.getOpt(stack, ModItemComponents.SOULSPRING_LAMP_DATA).map(SoulspringLampData::fuel).orElse(0d);
     }
 
     public static boolean isLit(ItemStack stack)
-    {   return stack.getOrDefault(ModItemComponents.SOULSPRING_LAMP_LIT, false);
+    {   return ItemStackHelper.getOpt(stack, ModItemComponents.SOULSPRING_LAMP_DATA).map(SoulspringLampData::lit).orElse(false);
     }
     public static void setLit(ItemStack stack, boolean lit)
-    {   stack.set(ModItemComponents.SOULSPRING_LAMP_LIT, lit);
+    {   ItemStackHelper.ifPresent(stack, ModItemComponents.SOULSPRING_LAMP_DATA, lampData -> lampData.setLit(lit));
     }
 
     public static double getFuelForStack(ItemStack item)

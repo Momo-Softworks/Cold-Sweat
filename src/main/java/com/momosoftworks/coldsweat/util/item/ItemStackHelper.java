@@ -18,6 +18,9 @@ import net.neoforged.fml.util.ObfuscationReflectionHelper;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -52,6 +55,30 @@ public class ItemStackHelper
             stack.set(componentType, component);
         }
         return component;
+    }
+
+    /**
+     * Executes the given action on the component acquired from the item, if it has it, then writes the modified component back to the item.
+     * @return The modified component
+     */
+    public static <T> T ifPresent(ItemStack stack, DataComponentType<T> componentType, Function<T, T> action)
+    {
+        T component = stack.get(componentType);
+        if (component != null)
+        {   component = action.apply(component);
+            stack.set(componentType, component);
+        }
+        return component;
+    }
+    public static <T> T ifPresent(ItemStack stack, Supplier<DataComponentType<T>> componentType, Function<T, T> action)
+    {   return ifPresent(stack, componentType.get(), action);
+    }
+
+    public static <T> Optional<T> getOpt(ItemStack stack, DataComponentType<T> componentType)
+    {   return Optional.ofNullable(stack.get(componentType));
+    }
+    public static <T> Optional<T> getOpt(ItemStack stack, Supplier<DataComponentType<T>> componentType)
+    {   return getOpt(stack, componentType.get());
     }
 
     public static EquipmentSlot getEquipmentSlot(ItemStack stack)
