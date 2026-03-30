@@ -12,7 +12,6 @@ import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.core.network.message.ParticleBatchMessage;
 import com.momosoftworks.coldsweat.data.codec.configuration.FuelData;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
-import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
@@ -20,7 +19,6 @@ import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
@@ -79,7 +77,7 @@ public class SoulspringLampItem extends Item
     @Override
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected)
     {
-        if (entity instanceof LivingEntity living && living.tickCount % 5 == 0)
+        if (!level.isClientSide && entity instanceof LivingEntity living && living.tickCount % 5 == 0)
         {
             boolean shouldBeOn = false;
             try
@@ -97,6 +95,7 @@ public class SoulspringLampItem extends Item
                 // Is world temp more than max
                 && temp > max && getFuel(stack) > 0)
                 {
+                    shouldBeOn = true;
                     // Drain fuel
                     if (!(living instanceof Player player && player.isCreative() || living.isSpectator()))
                     {   addFuel(stack, -0.005 * CSMath.clamp(temp - max, 1, 3));
@@ -133,30 +132,18 @@ public class SoulspringLampItem extends Item
                         {   Temperature.replaceOrAddModifier(ent, new SoulLampTempModifier().expires(5).tickRate(5), Temperature.Trait.WORLD, Matcher.SAME_CLASS);
                         }
                     }
-                    shouldBeOn = true;
                 }
             }
             finally
             {
-                if (!level.isClientSide)
+                // If the conditions are not met, turn off the lamp
+                if (isLit(stack) != shouldBeOn)
                 {
-                    CompoundTag itemTag = stack.getOrCreateTag();
-                    // If the conditions are not met, turn off the lamp
-                    if (itemTag.getInt("stateChangeTimer") <= 0
-                    && isLit(stack) != shouldBeOn)
-                    {
-                        itemTag.putInt("stateChangeTimer", 2);
-                        setLit(stack, shouldBeOn);
-
-                        if (getFuel(stack) < 0.5)
-                            setFuel(stack, 0);
-
-                        WorldHelper.playEntitySound(shouldBeOn ? ModSounds.NETHER_LAMP_ON : ModSounds.NETHER_LAMP_OFF, living, living.getSoundSource(), 1.5f, (float) Math.random() / 5f + 0.9f);
+                    setLit(stack, shouldBeOn);
+                    if (getFuel(stack) < 0.5)
+                    {   setFuel(stack, 0);
                     }
-                    else
-                    {   // Decrement the state change timer
-                        NBTHelper.incrementTag(stack, "stateChangeTimer", -1, tag -> tag > 0);
-                    }
+                    WorldHelper.playEntitySound(shouldBeOn ? ModSounds.SOUL_LAMP_ON : ModSounds.SOUL_LAMP_OFF, living, living.getSoundSource(), 1.5f, (float) Math.random() / 5f + 0.9f);
                 }
             }
         }
@@ -227,7 +214,7 @@ public class SoulspringLampItem extends Item
                 }
                 // Play soul stealing sound
                 if (attacker.level.isClientSide)
-                    WorldHelper.playEntitySound(ModSounds.NETHER_LAMP_ON, attacker, attacker.getSoundSource(), 1f, (float) Math.random() / 5f + 1.3f);
+                    WorldHelper.playEntitySound(ModSounds.SOUL_LAMP_ON, attacker, attacker.getSoundSource(), 1f, (float) Math.random() / 5f + 1.3f);
             }
         }
     }
