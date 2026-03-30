@@ -14,8 +14,8 @@ public class ModSounds
     public static SoundEvent CHAMELEON_TONGUE_OUT = SoundInit.CHAMELEON_TONGUE_OUT_SOUND_REGISTRY.get();
     public static SoundEvent CHAMELEON_SHED = SoundInit.CHAMELEON_SHED_SOUND_REGISTRY.get();
 
-    public static SoundEvent NETHER_LAMP_ON = SoundInit.SOUL_LAMP_ON_SOUND_REGISTRY.get();
-    public static SoundEvent NETHER_LAMP_OFF = SoundInit.SOUL_LAMP_OFF_SOUND_REGISTRY.get();
+    public static SoundEvent SOUL_LAMP_ON = SoundInit.SOUL_LAMP_ON_SOUND_REGISTRY.get();
+    public static SoundEvent SOUL_LAMP_OFF = SoundInit.SOUL_LAMP_OFF_SOUND_REGISTRY.get();
 
     public static SoundEvent WATERSKIN_POUR = SoundInit.WATERSKIN_POUR_SOUND_REGISTRY.get();
     public static SoundEvent WATERSKIN_FILL = SoundInit.WATERSKIN_FILL_SOUND_REGISTRY.get();
