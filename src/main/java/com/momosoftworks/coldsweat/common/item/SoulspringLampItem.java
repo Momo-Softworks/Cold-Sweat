@@ -15,7 +15,6 @@ import com.momosoftworks.coldsweat.core.network.message.ParticleBatchMessage;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.data.codec.configuration.FuelData;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
-import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
@@ -30,7 +29,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Rarity;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
@@ -74,7 +72,7 @@ public class SoulspringLampItem extends Item
     @Override
     public void inventoryTick(ItemStack stack, World level, Entity entity, int itemSlot, boolean isSelected)
     {
-        if (entity instanceof LivingEntity && entity.tickCount % 5 == 0)
+        if (!level.isClientSide && entity instanceof LivingEntity && entity.tickCount % 5 == 0)
         {
             LivingEntity living = (LivingEntity) entity;
             boolean shouldBeOn = false;
@@ -93,6 +91,7 @@ public class SoulspringLampItem extends Item
                 // Is world temp more than max
                 && temp > max && getFuel(stack) > 0)
                 {
+                    shouldBeOn = true;
                     // Drain fuel
                     if (!(living instanceof PlayerEntity && ((PlayerEntity) living).isCreative() || living.isSpectator()))
                     {   addFuel(stack, -0.005 * CSMath.clamp(temp - max, 1, 3));
@@ -129,30 +128,18 @@ public class SoulspringLampItem extends Item
                         {   Temperature.replaceOrAddModifier(ent, new SoulLampTempModifier().expires(5).tickRate(5), Temperature.Trait.WORLD, Matcher.SAME_CLASS);
                         }
                     }
-                    shouldBeOn = true;
                 }
             }
             finally
             {
-                if (!level.isClientSide)
+                // If the conditions are not met, turn off the lamp
+                if (isLit(stack) != shouldBeOn)
                 {
-                    CompoundNBT itemTag = stack.getOrCreateTag();
-                    // If the conditions are not met, turn off the lamp
-                    if (itemTag.getInt("stateChangeTimer") <= 0
-                    && isLit(stack) != shouldBeOn)
-                    {
-                        itemTag.putInt("stateChangeTimer", 2);
-                        setLit(stack, shouldBeOn);
-
-                        if (getFuel(stack) < 0.5)
-                            setFuel(stack, 0);
-
-                        WorldHelper.playEntitySound(shouldBeOn ? ModSounds.NETHER_LAMP_ON : ModSounds.NETHER_LAMP_OFF, living, living.getSoundSource(), 1.5f, (float) Math.random() / 5f + 0.9f);
+                    setLit(stack, shouldBeOn);
+                    if (getFuel(stack) < 0.5)
+                    {   setFuel(stack, 0);
                     }
-                    else
-                    {   // Decrement the state change timer
-                        NBTHelper.incrementTag(stack, "stateChangeTimer", -1, tag -> tag > 0);
-                    }
+                    WorldHelper.playEntitySound(shouldBeOn ? ModSounds.SOUL_LAMP_ON : ModSounds.SOUL_LAMP_OFF, living, living.getSoundSource(), 1.5f, (float) Math.random() / 5f + 0.9f);
                 }
             }
         }
@@ -224,7 +211,7 @@ public class SoulspringLampItem extends Item
                 }
                 // Play soul stealing sound
                 if (attacker.level.isClientSide)
-                    WorldHelper.playEntitySound(ModSounds.NETHER_LAMP_ON, attacker, attacker.getSoundSource(), 1f, (float) Math.random() / 5f + 1.3f);
+                    WorldHelper.playEntitySound(ModSounds.SOUL_LAMP_ON, attacker, attacker.getSoundSource(), 1f, (float) Math.random() / 5f + 1.3f);
             }
         }
     }
