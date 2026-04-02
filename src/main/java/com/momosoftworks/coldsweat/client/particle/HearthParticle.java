@@ -13,17 +13,28 @@ import org.jetbrains.annotations.Nullable;
 public class HearthParticle extends TextureSheetParticle
 {
     private SpriteSet ageSprite;
-    protected HearthParticle(ClientLevel world, double x, double y, double z, double vx, double vy, double vz, SpriteSet spriteSet)
+    VaporParticle.ParticleType type;
+
+    protected HearthParticle(ClientLevel world, double x, double y, double z, double vx, double vy, double vz, SpriteSet spriteSet, ParticleType type)
     {
         super(world, x, y, z);
         float size = 0.5f;
         this.ageSprite = spriteSet;
 
-        this.alpha = 0.0f;
         this.setSize(size, size);
         this.scale(3f + (float) Math.random());
         this.lifetime = 40;
-        this.gravity = -0.01f;
+        switch (type)
+        {
+            case WARM_AIR ->
+            {   this.gravity = -0.01f;
+                this.alpha = 0.1f;
+            }
+            case SMOKESTACK ->
+            {   this.gravity = -0.05f;
+                this.alpha = 0.25f;
+            }
+        }
         this.hasPhysics = true;
         this.setParticleSpeed(vx, vy, vz);
         this.setSpriteFromAge(spriteSet);
@@ -49,12 +60,30 @@ public class HearthParticle extends TextureSheetParticle
     }
 
     @OnlyIn(Dist.CLIENT)
-    public record Factory(SpriteSet sprite) implements ParticleProvider<SimpleParticleType>
+    public record AirParticleFactory(SpriteSet sprite) implements ParticleProvider<SimpleParticleType>
     {
         @Nullable
         @Override
         public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed)
-        {   return new HearthParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, this.sprite);
+        {   return new HearthParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, this.sprite, ParticleType.WARM_AIR);
         }
+    }
+
+    @OnlyIn(Dist.CLIENT)
+    public record SmokestackFactory(SpriteSet sprite) implements ParticleProvider<SimpleParticleType>
+    {
+        @Nullable
+        @Override
+        public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed)
+        {
+            if (ySpeed == 0) ySpeed = 0.04f;
+            return new HearthParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, this.sprite, ParticleType.SMOKESTACK);
+        }
+    }
+
+    public enum ParticleType
+    {
+        WARM_AIR,
+        SMOKESTACK
     }
 }

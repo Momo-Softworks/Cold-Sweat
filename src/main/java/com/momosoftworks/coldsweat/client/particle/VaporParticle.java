@@ -22,9 +22,9 @@ public class VaporParticle extends TextureSheetParticle
     private final boolean hasGravity;
     private boolean collidedY;
     private float maxAlpha;
-    VaporType type;
+    ParticleType type;
 
-    protected VaporParticle(ClientLevel world, double x, double y, double z, double vx, double vy, double vz, SpriteSet spriteSet, VaporType type)
+    protected VaporParticle(ClientLevel world, double x, double y, double z, double vx, double vy, double vz, SpriteSet spriteSet, ParticleType type)
     {
         super(world, x, y, z);
         this.ageSprite = spriteSet;
@@ -36,15 +36,15 @@ public class VaporParticle extends TextureSheetParticle
         this.hasPhysics = true;
         this.setParticleSpeed(vx, vy, vz);
         this.setSpriteFromAge(spriteSet);
-        this.hasGravity = type == VaporType.GROUND_MIST;
+        this.hasGravity = type == ParticleType.GROUND_MIST;
         this.type = type;
         this.gravity = switch (type)
         {
-            case STEAM -> -0.04f;
+            case SMOKESTACK -> -0.04f;
             case GROUND_MIST -> 0.04f;
-            case MIST -> 0f;
+            case COLD_AIR -> 0f;
         };
-        if (type == VaporType.MIST)
+        if (type == ParticleType.COLD_AIR)
             this.maxAlpha = 0.2f;
     }
 
@@ -77,7 +77,7 @@ public class VaporParticle extends TextureSheetParticle
 
         this.setSpriteFromAge(ageSprite);
 
-        if (type == VaporType.GROUND_MIST)
+        if (type == ParticleType.GROUND_MIST)
         {
             if (this.alpha < maxAlpha)
                 this.alpha += 0.02f;
@@ -87,7 +87,7 @@ public class VaporParticle extends TextureSheetParticle
             if (this.alpha < 0.035 && this.age > 10)
                 this.remove();
         }
-        else if (type == VaporType.MIST || type == VaporType.STEAM)
+        else if (type == ParticleType.COLD_AIR || type == ParticleType.SMOKESTACK)
         {
             if (this.alpha < maxAlpha)
                 this.alpha += maxAlpha / 20;
@@ -134,19 +134,12 @@ public class VaporParticle extends TextureSheetParticle
         }
     }
 
-    public enum VaporType
-    {
-        STEAM,
-        GROUND_MIST,
-        MIST
-    }
-
     @OnlyIn(Dist.CLIENT)
-    public static class SteamFactory implements ParticleProvider<SimpleParticleType>
+    public static class SmokestackFactory implements ParticleProvider<SimpleParticleType>
     {
         private final SpriteSet sprite;
 
-        public SteamFactory(SpriteSet spriteSet) {
+        public SmokestackFactory(SpriteSet spriteSet) {
             this.sprite = spriteSet;
         }
 
@@ -155,7 +148,7 @@ public class VaporParticle extends TextureSheetParticle
         public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed)
         {
             if (Minecraft.getInstance().options.particles != ParticleStatus.MINIMAL)
-                return new VaporParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, this.sprite, VaporType.STEAM);
+                return new VaporParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, this.sprite, ParticleType.SMOKESTACK);
             else
                 return null;
         }
@@ -173,7 +166,7 @@ public class VaporParticle extends TextureSheetParticle
         @Nullable
         @Override
         public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed)
-        {   return new VaporParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, sprite, VaporType.GROUND_MIST);
+        {   return new VaporParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, sprite, ParticleType.GROUND_MIST);
         }
     }
 
@@ -189,7 +182,14 @@ public class VaporParticle extends TextureSheetParticle
         @Nullable
         @Override
         public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed)
-        {   return new VaporParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, this.sprite, VaporType.MIST);
+        {   return new VaporParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, this.sprite, ParticleType.COLD_AIR);
         }
+    }
+
+    public enum ParticleType
+    {
+        SMOKESTACK,
+        GROUND_MIST,
+        COLD_AIR
     }
 }

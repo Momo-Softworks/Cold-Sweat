@@ -40,10 +40,10 @@ public class ParticleUtil
 
     @SubscribeEvent
     public static void registerParticles(ParticleFactoryRegisterEvent event)
-    {
-        Minecraft.getInstance().particleEngine.register(ParticleTypesInit.HEARTH_AIR.get(), HearthParticle.Factory::new);
-        Minecraft.getInstance().particleEngine.register(ParticleTypesInit.STEAM.get(), VaporParticle.SteamFactory::new);
-        Minecraft.getInstance().particleEngine.register(ParticleTypesInit.MIST.get(), VaporParticle.MistFactory::new);
+    {   Minecraft.getInstance().particleEngine.register(ParticleTypesInit.WARM_AIR.get(), HearthParticle.AirParticleFactory::new);
+        Minecraft.getInstance().particleEngine.register(ParticleTypesInit.COLD_AIR.get(), VaporParticle.MistFactory::new);
+        Minecraft.getInstance().particleEngine.register(ParticleTypesInit.SMOKESTACK_WARM.get(), HearthParticle.SmokestackFactory::new);
+        Minecraft.getInstance().particleEngine.register(ParticleTypesInit.SMOKESTACK_COLD.get(), VaporParticle.SmokestackFactory::new);
         Minecraft.getInstance().particleEngine.register(ParticleTypesInit.GROUND_MIST.get(), VaporParticle.GroundMistFactory::new);
         Minecraft.getInstance().particleEngine.register(ParticleTypesInit.MOB_COLD.get(), EntityTempParticle.Factory::new);
         Minecraft.getInstance().particleEngine.register(ParticleTypesInit.MOB_HOT.get(), EntityTempParticle.Factory::new);
