@@ -11,10 +11,14 @@ public class ParticleTypesInit
 {
     public static final DeferredRegister<ParticleType<?>> PARTICLES = DeferredRegister.create(ForgeRegistries.PARTICLE_TYPES, ColdSweat.MOD_ID);
 
-    public static final RegistryObject<BasicParticleType> HEARTH_AIR = PARTICLES.register("hearth_air", () -> new BasicParticleType(true));
-    public static final RegistryObject<BasicParticleType> STEAM = PARTICLES.register("steam", () -> new BasicParticleType(true));
+    public static final RegistryObject<BasicParticleType> WARM_AIR = PARTICLES.register("warm_air", () -> new BasicParticleType(true));
+    public static final RegistryObject<BasicParticleType> COLD_AIR = PARTICLES.register("cold_air", () -> new BasicParticleType(true));
+
+    public static final RegistryObject<BasicParticleType> SMOKESTACK_WARM = PARTICLES.register("smokestack_warm", () -> new BasicParticleType(true));
+    public static final RegistryObject<BasicParticleType> SMOKESTACK_COLD = PARTICLES.register("smokestack_cold", () -> new BasicParticleType(true));
+
     public static final RegistryObject<BasicParticleType> GROUND_MIST = PARTICLES.register("ground_mist", () -> new BasicParticleType(true));
-    public static final RegistryObject<BasicParticleType> MIST = PARTICLES.register("mist", () -> new BasicParticleType(true));
+
     public static final RegistryObject<BasicParticleType> MOB_COLD = PARTICLES.register("mob_cold", () -> new BasicParticleType(true));
     public static final RegistryObject<BasicParticleType> MOB_HOT = PARTICLES.register("mob_hot", () -> new BasicParticleType(true));
 }

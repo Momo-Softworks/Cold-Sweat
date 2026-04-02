@@ -320,7 +320,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements ITickableTil
         float xm = rand.nextFloat() / 20 - 0.025f;
         float zm = rand.nextFloat() / 20 - 0.025f;
 
-        level.addParticle(ParticleTypesInit.MIST.get(), false, x + xr, y + yr, z + zr, xm, 0, zm);
+        level.addParticle(ParticleTypesInit.COLD_AIR.get(), false, x + xr, y + yr, z + zr, xm, 0, zm);
     }
 
     @Override
