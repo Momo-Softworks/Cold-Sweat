@@ -11,10 +11,14 @@ public class ModParticleTypes
 {
     public static final DeferredRegister<ParticleType<?>> PARTICLES = DeferredRegister.create(Registries.PARTICLE_TYPE, ColdSweat.MOD_ID);
 
-    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> HEARTH_AIR = PARTICLES.register("hearth_air", () -> new SimpleParticleType(true));
-    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> STEAM = PARTICLES.register("steam", () -> new SimpleParticleType(true));
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> WARM_AIR = PARTICLES.register("warm_air", () -> new SimpleParticleType(true));
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> COLD_AIR = PARTICLES.register("cold_air", () -> new SimpleParticleType(true));
+
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> SMOKESTACK_WARM = PARTICLES.register("smokestack_warm", () -> new SimpleParticleType(true));
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> SMOKESTACK_COLD = PARTICLES.register("smokestack_cold", () -> new SimpleParticleType(true));
+
     public static final DeferredHolder<ParticleType<?>, SimpleParticleType> GROUND_MIST = PARTICLES.register("ground_mist", () -> new SimpleParticleType(true));
-    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> MIST = PARTICLES.register("mist", () -> new SimpleParticleType(true));
-    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> MOB_COLD  = PARTICLES.register("mob_cold", () -> new SimpleParticleType(true));
-    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> MOB_HOT  = PARTICLES.register("mob_hot", () -> new SimpleParticleType(true));
+
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> MOB_COLD = PARTICLES.register("mob_cold", () -> new SimpleParticleType(true));
+    public static final DeferredHolder<ParticleType<?>, SimpleParticleType> MOB_HOT = PARTICLES.register("mob_hot", () -> new SimpleParticleType(true));
 }

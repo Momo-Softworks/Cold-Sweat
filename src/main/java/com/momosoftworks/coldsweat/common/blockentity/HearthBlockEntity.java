@@ -34,7 +34,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -568,6 +568,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
             for (int i = 0; i < count; i++)
             {
                 SpreadPath path = this.paths.get(random.nextInt(this.paths.size()));
+                if (path.pos.equals(this.getBlockPos().above())) continue;
                 this.spawnAirParticle(path.x, path.y, path.z, random);
             }
         }
@@ -1148,28 +1149,26 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
             Direction face = entry.getValue();
             if (this.usingColdFuel)
             {
-                if (rand.nextDouble() < this.getColdFuel() / 3000d)
+                if (rand.nextDouble() < CSMath.blend(0, 0.2, this.getColdFuel(), 0, this.getMaxFuel()))
                 {   double d0 = pos.getX() + 0.5 + face.getStepX() * 0.35;
                     double d1 = pos.getY() + 0.5 + face.getStepY() * 0.35;
                     double d2 = pos.getZ() + 0.5 + face.getStepZ() * 0.35;
                     double d3 = (rand.nextDouble() - 0.5) / 4;
                     double d4 = (rand.nextDouble() - 0.5) / 4;
                     double d5 = (rand.nextDouble() - 0.5) / 4;
-                    level.addParticle(ModParticleTypes.STEAM.get(), d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.04D, 0.0D);
+                    level.addParticle(ModParticleTypes.SMOKESTACK_COLD.get(), d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.04D, 0.0D);
                 }
             }
             if (this.usingHotFuel)
             {
-                if (rand.nextDouble() < this.getHotFuel() / 3000d)
+                if (rand.nextDouble() < CSMath.blend(0, 0.2, this.getHotFuel(), 0, this.getMaxFuel()))
                 {   double d0 = pos.getX() + 0.5 + face.getStepX() * 0.35;
                     double d1 = pos.getY() + 0.5 + face.getStepY() * 0.35;
                     double d2 = pos.getZ() + 0.5 + face.getStepZ() * 0.35;
-                    double d3 = (rand.nextDouble() - 0.5) / 2;
-                    double d4 = (rand.nextDouble() - 0.5) / 2;
-                    double d5 = (rand.nextDouble() - 0.5) / 2;
-                    SimpleParticleType particle = rand.nextDouble() < 0.5
-                                                  ? ParticleTypes.LARGE_SMOKE
-                                                  : ParticleTypes.SMOKE;
+                    double d3 = (rand.nextDouble() - 0.5) / 4;
+                    double d4 = (rand.nextDouble() - 0.5) / 4;
+                    double d5 = (rand.nextDouble() - 0.5) / 4;
+                    SimpleParticleType particle = ModParticleTypes.SMOKESTACK_WARM.get();
                     level.addParticle(particle, d0 + d3, d1 + d4, d2 + d5, 0.0D, 0.0D, 0.0D);
                 }
             }
@@ -1177,7 +1176,15 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     }
 
     public ParticleOptions getAirParticle()
-    {   return ModParticleTypes.HEARTH_AIR.get();
+    {
+        List<ParticleOptions> options = new ArrayList<>();
+        if (this.usingColdFuel)
+        {   options.add(ModParticleTypes.COLD_AIR.get());
+        }
+        if (this.usingHotFuel)
+        {   options.add(ModParticleTypes.WARM_AIR.get());
+        }
+        return options.get(this.level.random.nextInt(options.size()));
     }
 
     public void spawnAirParticle(int x, int y, int z, RandomSource rand)
@@ -1186,7 +1193,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         if (status != ParticleStatus.ALL)
         {   return;
         }
-        if (rand.nextFloat() > (spreading ? 0.002f : 0.032f)) return;
+        double particleChance = CSMath.blend(0.2f, 0.04f, this.pathLookup.size(), 0, this.getMaxPaths());
+        if (rand.nextFloat() > particleChance) return;
 
         float xr = rand.nextFloat();
         float yr = rand.nextFloat();

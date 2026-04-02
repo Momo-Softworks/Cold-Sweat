@@ -305,7 +305,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
         float xm = rand.nextFloat() / 20 - 0.025f;
         float zm = rand.nextFloat() / 20 - 0.025f;
 
-        level.addParticle(ModParticleTypes.MIST.get(), false, x + xr, y + yr, z + zr, xm, 0, zm);
+        level.addParticle(ModParticleTypes.COLD_AIR.get(), false, x + xr, y + yr, z + zr, xm, 0, zm);
     }
 
     @Override
