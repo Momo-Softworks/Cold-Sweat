@@ -39,10 +39,11 @@ public class ParticleUtil
 
     @SubscribeEvent
     public static void registerParticles(RegisterParticleProvidersEvent event)
-    {   event.registerSpriteSet(ParticleTypesInit.HEARTH_AIR.get(), HearthParticle.Factory::new);
-        event.registerSpriteSet(ParticleTypesInit.STEAM.get(), VaporParticle.SteamFactory::new);
+    {   event.registerSpriteSet(ParticleTypesInit.WARM_AIR.get(), HearthParticle.AirParticleFactory::new);
+        event.registerSpriteSet(ParticleTypesInit.COLD_AIR.get(), VaporParticle.MistFactory::new);
+        event.registerSpriteSet(ParticleTypesInit.SMOKESTACK_WARM.get(), HearthParticle.SmokestackFactory::new);
+        event.registerSpriteSet(ParticleTypesInit.SMOKESTACK_COLD.get(), VaporParticle.SmokestackFactory::new);
         event.registerSpriteSet(ParticleTypesInit.GROUND_MIST.get(), VaporParticle.GroundMistFactory::new);
-        event.registerSpriteSet(ParticleTypesInit.MIST.get(), VaporParticle.MistFactory::new);
         event.registerSpriteSet(ParticleTypesInit.MOB_COLD.get(), EntityTempParticle.Factory::new);
         event.registerSpriteSet(ParticleTypesInit.MOB_HOT.get(), EntityTempParticle.Factory::new);
     }
