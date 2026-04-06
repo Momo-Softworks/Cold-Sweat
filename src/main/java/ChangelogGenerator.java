@@ -9,16 +9,21 @@ public class ChangelogGenerator {
 
     private static final String HEADER_STYLE = """
             color: #ffffff; 
-            font-size: 20; 
+            font-size: 22; 
             font-weight: bold;""";
 
     private static final String SECTION_STYLE = """
             color: #ffffff; 
-            font-size: 16; 
+            font-size: 18; 
+            font-weight: bold;""";
+
+    private static final String SUBSECTION_STYLE = """
+            color: #305cde; 
+            font-size: 15; 
             font-weight: bold;""";
 
     private static final String WARNING_STYLE = "color: orange;";
-    private static final String URGENT_STYLE = "color: #e06c75; font-weight: bold;";  // Softer red color
+    private static final String URGENT_STYLE = "color: #e06c75; font-weight: bold;";
 
     static class Item {
         String prefix; // "", "*", "!", "!!"
@@ -31,9 +36,18 @@ public class ChangelogGenerator {
         }
     }
 
+    static class SubSection {
+        String title; // null if this is the implicit default sub-section (no header)
+        List<Item> items = new ArrayList<>();
+
+        SubSection(String title) {
+            this.title = title;
+        }
+    }
+
     static class Section {
         String title;
-        List<Item> items = new ArrayList<>();
+        List<SubSection> subSections = new ArrayList<>();
 
         Section(String title) {
             this.title = title;
@@ -93,6 +107,8 @@ public class ChangelogGenerator {
     private static List<Section> parseSections(List<String> lines) {
         List<Section> sections = new ArrayList<>();
         Section currentSection = new Section(""); // Default section for items before first section header
+        SubSection currentSubSection = new SubSection(null); // Default sub-section (no header)
+        currentSection.subSections.add(currentSubSection);
         sections.add(currentSection);
 
         // Stack to keep track of the current item hierarchy
@@ -113,11 +129,22 @@ public class ChangelogGenerator {
                 continue;
             }
 
-            // New section (ends with : and not indented and not a list item)
-            if (trimmed.endsWith(":") && indent == 0 && !isListItem(trimmed)) {
+            // New section: ends with ":" (not ":-"), not indented, not a list item
+            if (trimmed.endsWith(":") && !trimmed.endsWith(":-") && indent == 0 && !isListItem(trimmed)) {
                 currentSection = new Section(trimmed);
+                currentSubSection = new SubSection(null);
+                currentSection.subSections.add(currentSubSection);
                 sections.add(currentSection);
-                itemStack.clear(); // Reset item stack for new section
+                itemStack.clear();
+                continue;
+            }
+
+            // New sub-section: ends with ":-", not indented, not a list item
+            if (trimmed.endsWith(":-") && indent == 0 && !isListItem(trimmed)) {
+                String subTitle = trimmed.substring(0, trimmed.length() - 1).trim();
+                currentSubSection = new SubSection(subTitle);
+                currentSection.subSections.add(currentSubSection);
+                itemStack.clear();
                 continue;
             }
 
@@ -127,7 +154,7 @@ public class ChangelogGenerator {
             // Determine where to add this item based on indentation
             if (indent == 0 || itemStack.isEmpty()) {
                 // Top-level item
-                currentSection.items.add(newItem);
+                currentSubSection.items.add(newItem);
                 itemStack.clear();
                 itemStack.add(new AbstractMap.SimpleEntry<>(newItem, indent));
             } else {
@@ -151,7 +178,7 @@ public class ChangelogGenerator {
                     }
                 } else {
                     // No parent found, add as top-level
-                    currentSection.items.add(newItem);
+                    currentSubSection.items.add(newItem);
                     itemStack.clear();
                 }
 
@@ -161,7 +188,7 @@ public class ChangelogGenerator {
         }
 
         // Remove empty default section if it wasn't used
-        if (sections.get(0).items.isEmpty()) {
+        if (sections.get(0).subSections.stream().allMatch(ss -> ss.items.isEmpty())) {
             sections.remove(0);
         }
 
@@ -199,18 +226,32 @@ public class ChangelogGenerator {
 
         // Write each section
         for (Section section : sections) {
-            // Section header
-            writer.write(String.format("<span style=\"%s\">%s</span>\n",
-                                       SECTION_STYLE, section.title));
-
-            writer.write("<ul style=\"font-size: 13;\">\n");
-
-            // Write items recursively
-            for (Item item : section.items) {
-                writeItem(writer, item, 0);
+            // Section header (may be empty for the implicit default section)
+            if (!section.title.isEmpty()) {
+                writer.write(String.format("<span style=\"%s\">%s</span><br><br>\n",
+                                           SECTION_STYLE, section.title));
             }
 
-            writer.write("</ul>\n<br>\n");
+            // Write each sub-section
+            for (SubSection subSection : section.subSections) {
+                // Sub-section header (null means no header — items sit directly under the section)
+                if (subSection.title != null) {
+                    writer.write(String.format("<span style=\"%s\">%s</span>\n",
+                                               SUBSECTION_STYLE, subSection.title));
+                }
+
+                if (!subSection.items.isEmpty()) {
+                    writer.write("<ul style=\"font-size: 13;\">\n");
+
+                    for (Item item : subSection.items) {
+                        writeItem(writer, item, 0);
+                    }
+
+                    writer.write("</ul>\n");
+                }
+            }
+
+            writer.write("<br>\n");
         }
 
         // Close document
