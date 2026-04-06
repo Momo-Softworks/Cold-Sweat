@@ -32,7 +32,7 @@ public class ModItemTags
     public static final TagKey<Item> FOOD = createForgeTag("food");
 
     @SubscribeEvent
-    public static void initDynamicTags(InitDynamicTagsEvent event)
+    public static void initDynamicTags(InitDynamicTagsEvent<Item> event)
     {
         event.fillTag(FOOD, Item::isEdible);
     }
