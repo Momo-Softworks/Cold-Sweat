@@ -2,7 +2,7 @@ package com.momosoftworks.coldsweat.api.event.core.init;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.tags.TagManager;
 import net.neoforged.bus.api.Event;
@@ -15,29 +15,31 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
 
-public class InitDynamicTagsEvent extends Event
+public class InitDynamicTagsEvent<T> extends Event
 {
-    private final RegistryAccess registryAccess;
-    private Map<TagKey<?>, Collection<Holder<?>>> tags = new HashMap<>();
+    private final Registry<T> registry;
+    private final Map<ResourceLocation, Collection<Holder<T>>> tags = new HashMap<>();
 
-    public InitDynamicTagsEvent(RegistryAccess registryAccess)
-    {   this.registryAccess = registryAccess;
+    public InitDynamicTagsEvent(Registry<T> registry)
+    {   this.registry = registry;
     }
 
-    public Map<TagKey<?>, Collection<Holder<?>>> getTags()
+    public Map<ResourceLocation, Collection<Holder<T>>> getTags()
     {   return this.tags;
     }
 
     private static final Field MANAGER_ACCESS = ObfuscationReflectionHelper.findField(TagManager.class, "registryAccess");
     static { MANAGER_ACCESS.setAccessible(true); }
 
-    public <T> void fillTag(TagKey<T> tag, Predicate<T> predicate)
+    public void fillTag(TagKey<T> tag, Predicate<T> predicate)
     {
-        Registry<T> registry = registryAccess.registryOrThrow(tag.registry());
-        registry.holders().forEach(holder ->
+        if (!tag.registry().equals(this.registry.key()))
+        {   return;
+        }
+        this.registry.holders().forEach(holder ->
         {
             if (predicate.test(holder.value()))
-            {    this.tags.computeIfAbsent(tag, t -> new ArrayList<>()).add(holder);
+            {    this.tags.computeIfAbsent(tag.location(), t -> new ArrayList<>()).add(holder);
             }
         });
     }
