@@ -53,6 +53,8 @@ minecraft {
 
         server {
             workingDirectory project.file('run')
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
             property 'forge.enabledGameTestNamespaces', 'coldsweat'
@@ -173,10 +175,10 @@ dependencies {
     implementation fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}")
 
     // Mod Compat
-    implementation fg.deobf("curse.maven:serene-seasons-291874:4537666")
+    compileOnly fg.deobf("curse.maven:serene-seasons-291874:4537666")
     implementation fg.deobf("curse.maven:curios-309927:4419403")
-    implementation fg.deobf("curse.maven:create-328085:3536025")
-    implementation fg.deobf("curse.maven:flywheel-486392:3535459")
+    compileOnly fg.deobf("curse.maven:create-328085:3536025")
+    compileOnly fg.deobf("curse.maven:flywheel-486392:3535459")
     compileOnly fg.deobf("curse.maven:spoiled-364918:3776531")
     implementation fg.deobf("curse.maven:ob-aquamirae-536254:4420334")
     implementation fg.deobf("curse.maven:obscure-api-638417:4420298")

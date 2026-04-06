@@ -191,6 +191,7 @@ public class WorldSettingsConfig
                             Arrays.asList("minecraft:shattered_savanna_plateau", 67, 90, "F"),
                             Arrays.asList("minecraft:taiga", 44, 62, "F"),
                             Arrays.asList("minecraft:snowy_taiga", 8, 30, "F", -15),
+                            Arrays.asList("minecraft:snowy_plains", 8, 30, "F", -15),
                             Arrays.asList("minecraft:desert", 48, 115, "F"),
                             Arrays.asList("minecraft:stone_shore", 50, 64, "F"),
                             Arrays.asList("minecraft:snowy_beach", 8, 30, "F", -15),
