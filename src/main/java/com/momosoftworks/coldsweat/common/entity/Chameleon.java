@@ -131,7 +131,7 @@ public class Chameleon extends Animal
     protected void defineSynchedData(SynchedEntityData.Builder builder)
     {
         super.defineSynchedData(builder);
-        builder.define(SHED_TIME, 0);
+        builder.define(SHED_TIME, -1);
         builder.define(LAST_SHED, 0);
         builder.define(HURT_TIMESTAMP, 0);
         builder.define(TRUSTED_PLAYERS, new CompoundTag());
