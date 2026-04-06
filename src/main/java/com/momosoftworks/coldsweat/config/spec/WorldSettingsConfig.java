@@ -178,6 +178,7 @@ public class WorldSettingsConfig
                             List.of("minecraft:windswept_savanna", 67, 90, "F"),
                             List.of("minecraft:taiga", 44, 62, "F"),
                             List.of("minecraft:snowy_taiga", 8, 30, "F", -15),
+                            List.of("minecraft:snowy_plains", 8, 30, "F", -15),
                             List.of("minecraft:old_growth_pine_taiga", 48, 62, "F"),
                             List.of("minecraft:old_growth_spruce_taiga", 48, 62, "F"),
                             List.of("minecraft:desert", 48, 115, "F"),
