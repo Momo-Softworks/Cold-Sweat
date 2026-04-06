@@ -35,7 +35,7 @@ public class ModItemTags
     public static final TagKey<Item> EQUIPABLE_CURIOS = createNamespaceTag("curios", "equipable");
 
     @SubscribeEvent
-    public static void initDynamicTags(InitDynamicTagsEvent event)
+    public static void initDynamicTags(InitDynamicTagsEvent<Item> event)
     {
         event.fillTag(FOOD, Item::isEdible);
     }

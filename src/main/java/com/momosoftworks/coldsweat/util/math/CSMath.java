@@ -742,7 +742,6 @@ public class CSMath
      * @return The first non-null value, or null if all values are null.
      */
     @SafeVarargs
-    @Nullable
     public static <T> T orElse(T... values)
     {   for (int i = 0; i < values.length; i++)
         {   if (values[i] != null) return values[i];
