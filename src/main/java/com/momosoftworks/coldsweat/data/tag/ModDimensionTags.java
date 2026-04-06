@@ -42,7 +42,7 @@ public class ModDimensionTags
 
 
     @SubscribeEvent
-    public static void initDynamicTags(InitDynamicTagsEvent event)
+    public static void initDynamicTags(InitDynamicTagsEvent<DimensionType> event)
     {
         event.fillTag(HAS_CEILING, DimensionType::hasCeiling);
         event.fillTag(HAS_SKY, dim -> !dim.hasCeiling());
