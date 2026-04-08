@@ -33,7 +33,7 @@ public class InitDynamicTagsEvent<T> extends Event
 
     public void fillTag(TagKey<T> tag, Predicate<T> predicate)
     {
-        if (!tag.registry().equals(this.registry.key()))
+        if (this.registry == null || !tag.registry().equals(this.registry.key()))
         {   return;
         }
         this.registry.holders().forEach(holder ->
