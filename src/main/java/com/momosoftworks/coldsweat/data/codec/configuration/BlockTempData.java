@@ -183,7 +183,7 @@ public class BlockTempData extends ConfigData
 
         double tempLimit = entry.size() > 7
                            ? ((Number) entry.get(7)).doubleValue()
-                           : Double.POSITIVE_INFINITY;
+                           : (blockTemp > 0 ? Double.POSITIVE_INFINITY : Double.NEGATIVE_INFINITY);
 
         boolean logarithmic = entry.size() > 8 && entry.get(8) instanceof Boolean
                               ? (Boolean) entry.get(8)
