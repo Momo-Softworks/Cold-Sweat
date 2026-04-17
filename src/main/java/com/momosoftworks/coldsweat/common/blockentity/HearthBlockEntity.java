@@ -53,6 +53,7 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.particles.BasicParticleType;
+import net.minecraft.particles.IParticleData;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
@@ -1179,6 +1180,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         }
     }
 
+    @Nullable
     public BasicParticleType getAirParticle()
     {
         List<BasicParticleType> options = new ArrayList<>();
@@ -1188,6 +1190,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         if (this.usingHotFuel)
         {   options.add(ParticleTypesInit.WARM_AIR.get());
         }
+        if (options.isEmpty()) return null;
         return options.get(this.level.random.nextInt(options.size()));
     }
 
@@ -1206,7 +1209,9 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         float xm = rand.nextFloat() / 20 - 0.025f;
         float zm = rand.nextFloat() / 20 - 0.025f;
 
-        level.addParticle(this.getAirParticle(), false, x + xr, y + yr, z + zr, xm, 0, zm);
+        IParticleData particle = this.getAirParticle();
+        if (particle == null) return;
+        level.addParticle(particle, false, x + xr, y + yr, z + zr, xm, 0, zm);
     }
 
     @Override
