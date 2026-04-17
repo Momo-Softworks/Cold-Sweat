@@ -1189,6 +1189,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         }
     }
 
+    @Nullable
     public ParticleOptions getAirParticle()
     {
         List<ParticleOptions> options = new ArrayList<>();
@@ -1198,6 +1199,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         if (this.usingHotFuel)
         {   options.add(ParticleTypesInit.WARM_AIR.get());
         }
+        if (options.isEmpty()) return null;
         return options.get(this.level.random.nextInt(options.size()));
     }
 
@@ -1216,7 +1218,9 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         float xm = rand.nextFloat() / 20 - 0.025f;
         float zm = rand.nextFloat() / 20 - 0.025f;
 
-        level.addParticle(this.getAirParticle(), false, x + xr, y + yr, z + zr, xm, 0, zm);
+        ParticleOptions particle = this.getAirParticle();
+        if (particle == null) return;
+        level.addParticle(particle, false, x + xr, y + yr, z + zr, xm, 0, zm);
     }
 
     @Override
