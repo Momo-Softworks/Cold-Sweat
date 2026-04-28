@@ -10,6 +10,7 @@ import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.BiomeTempData;
 import com.momosoftworks.coldsweat.data.tag.ModBiomeTags;
+import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.util.entity.DummyEntity;
 import com.momosoftworks.coldsweat.util.entity.DummyPlayer;
 import com.momosoftworks.coldsweat.util.serialization.DynamicHolder;
@@ -33,6 +34,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -629,14 +631,28 @@ public abstract class WorldHelper
 
     public static double getWaterTemperatureAt(Level level, BlockPos pos)
     {
-        double defaultWaterTemp = ConfigSettings.DEFAULT_WATER_TEMPERATURE.get();
-        BiomeTempData biomeTemp = ConfigSettings.BIOME_TEMPS.get(level.registryAccess()).get(level.getBiome(pos));
-        if (biomeTemp == null)
+        Holder<Biome> biome = level.getBiome(pos);
+        double biomeTemp = CSMath.averagePair(getBiomeTemperatureRange(level, biome));
+        double defaultWaterTemp = getDefaultWaterTemp(biomeTemp);
+        BiomeTempData biomeTempData = ConfigSettings.BIOME_TEMPS.get(level.registryAccess()).get(biome);
+        // No config for this biome
+        if (biomeTempData == null)
         {   return defaultWaterTemp;
         }
-        double waterTemp = biomeTemp.getWaterTemp();
-        return biomeTemp.isOffset() ? defaultWaterTemp + waterTemp
-                                    : waterTemp;
+        // Use configured water temp for biome
+        Optional<Double> waterTemp = biomeTempData.getWaterTemp();
+        if (biomeTempData.isOffset())
+        {   return waterTemp.orElse(0d) + defaultWaterTemp;
+        }
+        else return waterTemp.orElse(defaultWaterTemp);
+    }
+
+    public static double getDefaultWaterTemp(double biomeTemp)
+    {
+        if (biomeTemp > 2) return -0.25;
+        if (biomeTemp < -0.5) return -0.5;
+        double waterTemp = -(Math.pow(biomeTemp - 2, 4) / 156) - 0.25;
+        return waterTemp;
     }
 
     /**
@@ -655,7 +671,9 @@ public abstract class WorldHelper
         Map<BlockPos, TempSnapshot> snapshots = TEMPERATURE_CHECKS.computeIfAbsent(level.dimension(), dim -> new HashMap<>());
         int tickSpeedMultiplier = 1 + level.getGameRules().getInt(GameRules.RULE_RANDOMTICKING) / 20;
 
-        BlockPos segment = new BlockPos(pos.getX() >> 3, pos.getY() >> 3, pos.getZ() >> 3);
+        BlockPos segment = new BlockPos((pos.getX() >> 3) << 3,
+                                        (pos.getY() >> 3) << 3,
+                                        (pos.getZ() >> 3) << 3);
 
         // Use cached value if not forced update
         if (!forceUpdate)
@@ -802,8 +820,9 @@ public abstract class WorldHelper
             {   return true;
             }
             Lazy<Boolean> freezingTemp = Lazy.of(() ->
-            {   double waterTemp = getWaterTemperatureAt(serverLevel, pos) - ConfigSettings.DEFAULT_WATER_TEMPERATURE.get();
-                return getRoughTemperatureAt(serverLevel, pos) - waterTemp <= 0f;
+            {   double waterTemp = getWaterTemperatureAt(serverLevel, pos);
+                double temp = getRoughTemperatureAt(serverLevel, pos) + waterTemp;
+                return temp <= 0;
             });
 
             if (!mustBeAtEdge)
@@ -822,9 +841,9 @@ public abstract class WorldHelper
             if (mustBeAtEdge && surroundedByBlock(levelReader, pos, Blocks.ICE))
             {   return false;
             }
-            double waterTemp = getWaterTemperatureAt(serverLevel, pos) - ConfigSettings.DEFAULT_WATER_TEMPERATURE.get();
-            double temperature = getRoughTemperatureAt(serverLevel, pos) - waterTemp;
-            return temperature > 0f;
+            double waterTemp = getWaterTemperatureAt(serverLevel, pos);
+            double temp = getRoughTemperatureAt(serverLevel, pos) + waterTemp;
+            return temp > 0f;
         }
         return false;
     }
@@ -855,7 +874,7 @@ public abstract class WorldHelper
         for (int z = -1; z <= 1; z++)
         {
             BlockState state = level.getBlockState(pos2.setWithOffset(pos, x, y, z));
-            if (state.is(Blocks.SOUL_FIRE) || state.is(Blocks.SOUL_CAMPFIRE) && state.getValue(CampfireBlock.LIT))
+            if (state.is(ModBlockTags.SOUL_FIRE) && (!state.is(BlockTags.CAMPFIRES) || state.getValue(CampfireBlock.LIT)))
             {   return true;
             }
         }
