@@ -4,6 +4,7 @@ import com.momosoftworks.coldsweat.api.temperature.modifier.BlockTempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.decoration.ArmorStand;
@@ -33,15 +34,15 @@ public class ValkShipBlockTempModifier extends BlockTempModifier
 
         for (Ship ship : VSGameUtilsKt.getShipsIntersecting(level, entity.getBoundingBox().inflate(ConfigSettings.BLOCK_RANGE.get())))
         {
-            LivingEntity dummyPlayer = new ArmorStand(EntityType.ARMOR_STAND, level);
+            LivingEntity dummyPlayer = WorldHelper.getDummyPlayer(level);
             Vec3 translatedPos = CompatManager.Valkyrien.translateToShipCoords(entity.position(), ship).multiply(1, 1, 1);
             dummyPlayer.setPos(translatedPos.x, translatedPos.y, translatedPos.z);
             shipModifiers.add(super.calculate(dummyPlayer, trait));
         }
         return (temp) ->
         {
-            for (int i = 0; i < shipModifiers.size(); i++)
-            {   temp = shipModifiers.get(i).apply(temp);
+            for (Function<Double, Double> shipModifier : shipModifiers)
+            {   temp = shipModifier.apply(temp);
             }
             return temp;
         };

@@ -50,7 +50,9 @@ import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.joml.Matrix4dc;
 import org.joml.Vector3d;
+import org.joml.primitives.AABBd;
 import org.valkyrienskies.core.api.ships.Ship;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import org.valkyrienskies.mod.common.util.VectorConversionsMCKt;
@@ -352,23 +354,35 @@ public class CompatManager
             return pos;
         }
 
-        public static AABB transformIfShipPos(Level level, AABB aabb)
+        public static AABB transformShipToWorld(Level level, AABB aabb)
+        {
+            AABBd aabbd = VectorConversionsMCKt.toJOML(aabb);
+            Ship ship = VSGameUtilsKt.getShipManagingPos(level, VectorConversionsMCKt.toJOML(aabb.getCenter()));
+            if (ship == null) return aabb;
+            aabbd = aabbd.transform(ship.getShipToWorld());
+            return VectorConversionsMCKt.toMinecraft(aabbd);
+        }
+        public static AABB transformWorldToShip(Level level, AABB aabb)
         {
             AtomicReference<AABB> translated = new AtomicReference<>(aabb);
             VSGameUtilsKt.transformFromWorldToNearbyShipsAndWorld(level, aabb, translated::set);
             return translated.get();
         }
 
-        public static BlockPos transformIfShipPos(Level level, BlockPos pos)
+        public static BlockPos transformShipToWorld(Level level, BlockPos pos)
         {
-            if (VALKYRIEN_SKIES_LOADED)
-            {
-                List<Vector3d> shipTransforms = VSGameUtilsKt.transformToNearbyShipsAndWorld(level, pos.getX(), pos.getY(), pos.getZ(), 1);
-                if (shipTransforms.isEmpty()) return pos;
-                Vector3d shipCoords = shipTransforms.get(0);
-                return new BlockPos(VectorConversionsMCKt.toMinecraft(shipCoords));
-            }
-            return pos;
+            List<Vector3d> shipTransforms = VSGameUtilsKt.transformToNearbyShipsAndWorld(level, pos.getX(), pos.getY(), pos.getZ(), 1);
+            if (shipTransforms.isEmpty()) return pos;
+            Vector3d shipCoords = shipTransforms.get(0);
+            return new BlockPos(VectorConversionsMCKt.toMinecraft(shipCoords));
+        }
+        public static BlockPos transformWorldToShip(Level level, BlockPos pos)
+        {
+            Ship ship = VSGameUtilsKt.getShipManagingPos(level, pos);
+            if (ship == null) return pos;
+            Vector3d translated = new Vector3d(pos.getX(), pos.getY(), pos.getZ());
+            translated = ship.getWorldToShip().transformPosition(translated);
+            return new BlockPos(VectorConversionsMCKt.toMinecraft(translated));
         }
     }
 

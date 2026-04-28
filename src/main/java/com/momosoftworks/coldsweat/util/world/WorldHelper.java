@@ -9,11 +9,9 @@ import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.BiomeTempData;
-import com.momosoftworks.coldsweat.data.tag.ModBiomeTags;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.util.entity.DummyEntity;
 import com.momosoftworks.coldsweat.util.entity.DummyPlayer;
-import com.momosoftworks.coldsweat.util.serialization.DynamicHolder;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.BlockDataUpdateMessage;
 import com.momosoftworks.coldsweat.core.network.message.ParticleBatchMessage;
@@ -22,7 +20,6 @@ import com.momosoftworks.coldsweat.core.network.message.SyncForgeDataMessage;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.serialization.OptionalHolder;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.*;
 import net.minecraft.core.particles.ParticleOptions;
@@ -183,39 +180,79 @@ public abstract class WorldHelper
     }
 
     /**
+     * Gets the real position of the BlockPos, in world space, if it's part of a dynamic object
+     */
+    public static BlockPos shipyardToWorld(Level level, BlockPos pos)
+    {
+        if (CompatManager.isValkyrienSkiesLoaded())
+        {   return CompatManager.Valkyrien.transformShipToWorld(level, pos);
+        }
+        return pos;
+    }
+    public static BlockPos worldToShipyard(Level level, BlockPos pos)
+    {
+        if (CompatManager.isValkyrienSkiesLoaded())
+        {   return CompatManager.Valkyrien.transformWorldToShip(level, pos);
+        }
+        return pos;
+    }
+
+    /**
+     * Gets the real position of the AABB, in world space, if it's part of a dynamic object
+     */
+    public static AABB shipyardToWorld(Level level, AABB aabb)
+    {
+        if (CompatManager.isValkyrienSkiesLoaded())
+        {   return CompatManager.Valkyrien.transformShipToWorld(level, aabb);
+        }
+        return aabb;
+    }
+    public static AABB worldToShipyard(Level level, AABB aabb)
+    {
+        if (CompatManager.isValkyrienSkiesLoaded())
+        {   return CompatManager.Valkyrien.transformWorldToShip(level, aabb);
+        }
+        return aabb;
+    }
+
+    /**
      * More accurate method for detecting skylight access. Relies on block hitbox shape instead of light level.
      * @param pos The position to check
      * @param maxDistance The maximum distance to check
      * @return True if the specified position can see the sky (if no full y-axis block faces are within the detection range)
      */
-    public static boolean canSeeSky(LevelAccessor level, BlockPos pos, int maxDistance)
+    public static boolean canSeeSky(Level level, BlockPos pos, int maxDistance)
     {
-        BlockPos.MutableBlockPos pos2 = pos.mutable();
-        int iterations = Math.min(maxDistance, level.getMaxBuildHeight() - pos.getY());
+        BlockPos worldPos = shipyardToWorld(level, pos);
+        if (!worldPos.equals(pos))
+        {
+            return checkSkyColumn(level, pos, maxDistance)
+                && checkSkyColumn(level, worldPos, maxDistance);
+        }
+        return checkSkyColumn(level, pos, maxDistance);
+    }
+
+    private static boolean checkSkyColumn(Level level, BlockPos pos, int maxDistance)
+    {
         ChunkAccess chunk = getChunk(level, pos);
         if (chunk == null) return true;
 
-        for (int i = 0; i < iterations; i++)
-        {
-            try
-            {
-                BlockState state = chunk.getBlockState(pos2);
-                if (ConfigSettings.THERMAL_SOURCE_SPREAD_BLACKLIST.get().contains(state.getBlock()))
-                {   return false;
-                }
-                if (state.isAir() || state.getMaterial().isLiquid() || ConfigSettings.THERMAL_SOURCE_SPREAD_WHITELIST.get().contains(state.getBlock()))
-                {   continue;
-                }
-                VoxelShape shape = state.getShape(level, pos, CollisionContext.empty());
-                if (shape.equals(Shapes.block())) return false;
+        int maxY = Math.min(pos.getY() + maxDistance, level.getMaxBuildHeight());
+        BlockPos.MutableBlockPos cursor = pos.mutable();
 
-                if (isFullSide(CSMath.flattenShape(Direction.Axis.Y, shape), Direction.UP))
-                {   return false;
-                }
-            }
-            finally
-            {   pos2.move(0, 1, 0);
-            }
+        for (int y = pos.getY(); y < maxY; y++)
+        {
+            cursor.setY(y);
+            BlockState state = chunk.getBlockState(cursor);
+            Block block = state.getBlock();
+
+            if (ConfigSettings.THERMAL_SOURCE_SPREAD_BLACKLIST.get().contains(block)) return false;
+            if (state.isAir() || state.getMaterial().isLiquid()
+                || ConfigSettings.THERMAL_SOURCE_SPREAD_WHITELIST.get().contains(block)) continue;
+
+            VoxelShape shape = state.getShape(level, cursor, CollisionContext.empty());
+            if (shape.equals(Shapes.block())
+                || isFullSide(CSMath.flattenShape(Direction.Axis.Y, shape), Direction.UP)) return false;
         }
         return true;
     }
@@ -363,11 +400,10 @@ public abstract class WorldHelper
     }
 
     public static boolean isRainingAt(Level level, BlockPos pos)
-    {   DynamicHolder<Biome> biome = DynamicHolder.create(null, () -> level.getBiomeManager().getBiome(pos).value());
-
-        return (level.isRaining() && biome.get().getPrecipitation() == Biome.Precipitation.RAIN || CompatManager.Weather2.isRainstormAt(level, pos))
+    {
+        pos = shipyardToWorld(level, pos);
+        return level.isRaining() && level.getBiomeManager().getBiome(pos).value().getPrecipitation() == Biome.Precipitation.RAIN
             && canSeeSky(level, pos.above(), level.getMaxBuildHeight())
-            && biome.get().warmEnoughToRain(pos)
             && !CompatManager.SereneSeasons.isColdEnoughToSnow(level, pos);
     }
 
@@ -681,6 +717,7 @@ public abstract class WorldHelper
 
     public static double getWaterTemperatureAt(Level level, BlockPos pos)
     {
+        pos = shipyardToWorld(level, pos);
         Holder<Biome> biome = level.getBiome(pos);
         double biomeTemp = CSMath.averagePair(getBiomeTemperatureRange(level, biome));
         double defaultWaterTemp = getDefaultWaterTemp(biomeTemp);
@@ -701,8 +738,7 @@ public abstract class WorldHelper
     {
         if (biomeTemp > 2) return -0.25;
         if (biomeTemp < -0.5) return -0.5;
-        double waterTemp = -(Math.pow(biomeTemp - 2, 4) / 156) - 0.25;
-        return waterTemp;
+        return -(Math.pow(biomeTemp - 2, 4) / 156) - 0.25;
     }
 
     /**
@@ -715,6 +751,7 @@ public abstract class WorldHelper
      */
     public static double getRoughTemperatureAt(Level level, BlockPos pos, int flags)
     {
+        pos = shipyardToWorld(level, pos);
         boolean sensitive = (flags & 1) != 0;
         boolean forceUpdate = (flags & 2) != 0;
 
@@ -782,6 +819,7 @@ public abstract class WorldHelper
 
     public static double getTemperatureAt(Level level, BlockPos pos)
     {
+        pos = shipyardToWorld(level, pos);
         DummyPlayer dummy = getDummyPlayer(level);
         // Move the dummy to the position being tested
         dummy.setPos(CSMath.getCenterPos(pos));
@@ -857,7 +895,7 @@ public abstract class WorldHelper
 
     public static BlockState waterlog(BlockState state, Level level, BlockPos pos)
     {
-        boolean waterAt = level.getFluidState(pos).getType() == Fluids.WATER;
+        boolean waterAt = level.getFluidState(pos).is(Fluids.WATER);
         return state.setValue(BlockStateProperties.WATERLOGGED, waterAt);
     }
 
@@ -933,6 +971,7 @@ public abstract class WorldHelper
 
     public static Pair<Integer, Integer> getInsulationAt(Level level, BlockPos pos, int chunkRadius)
     {
+        pos = shipyardToWorld(level, pos);
         int maxCoolingLevel = 0;
         int maxHeatingLevel = 0;
         ChunkPos chunkPos = new ChunkPos(pos);
@@ -955,7 +994,7 @@ public abstract class WorldHelper
         return Pair.of(maxCoolingLevel, maxHeatingLevel);
     }
 
-    public static List<BlockPos> getOccupiedPositions(AABB bb)
+    public static List<BlockPos> getPositionsInAABB(AABB bb)
     {
         List<BlockPos> positions = new ArrayList<>();
         int minX = (int) Math.floor(bb.minX);
