@@ -19,6 +19,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 
 public class BiomeTempData extends ConfigData implements IForgeRegistryEntry<BiomeTempData>
 {
@@ -26,12 +27,12 @@ public class BiomeTempData extends ConfigData implements IForgeRegistryEntry<Bio
     final double min;
     final double max;
     final Temperature.Units units;
-    final double waterTemp;
+    final Optional<Double> waterTemp;
     final boolean isOffset;
     final boolean isDisabled;
 
     public BiomeTempData(NegatableList<Either<TagKey<Biome>, OptionalHolder<Biome>>> biomes, double min, double max,
-                         Temperature.Units units, double waterTemp, boolean isOffset, boolean isDisabled, NegatableList<String> requiredMods)
+                         Temperature.Units units, Optional<Double> waterTemp, boolean isOffset, boolean isDisabled, NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.biomes = biomes;
@@ -40,17 +41,16 @@ public class BiomeTempData extends ConfigData implements IForgeRegistryEntry<Bio
         this.units = units;
         this.isOffset = isOffset;
         this.isDisabled = isDisabled;
-        if (Double.isNaN(waterTemp)) waterTemp = isOffset ? 0 : ConfigSettings.DEFAULT_WATER_TEMPERATURE.get();
         this.waterTemp = waterTemp;
     }
 
     public BiomeTempData(NegatableList<Either<TagKey<Biome>, OptionalHolder<Biome>>> biomes, double min, double max,
-                         Temperature.Units units, double waterTemp, boolean isOffset, boolean isDisabled)
+                         Temperature.Units units, Optional<Double> waterTemp, boolean isOffset, boolean isDisabled)
     {
         this(biomes, min, max, units, waterTemp, isOffset, isDisabled, new NegatableList<>());
     }
 
-    public BiomeTempData(OptionalHolder<Biome> biome, double min, double max, Temperature.Units units, double waterTemp, boolean isOffset, boolean isDisabled)
+    public BiomeTempData(OptionalHolder<Biome> biome, double min, double max, Temperature.Units units, Optional<Double> waterTemp, boolean isOffset, boolean isDisabled)
     {   this(new NegatableList<>(Either.right(biome)), min, max, units, waterTemp, isOffset, isDisabled);
     }
 
@@ -65,7 +65,7 @@ public class BiomeTempData extends ConfigData implements IForgeRegistryEntry<Bio
                  .xmap(either -> either.map(left -> left, right -> right), Either::right)
                  .forGetter(BiomeTempData::max),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(BiomeTempData::units),
-            Codec.DOUBLE.optionalFieldOf("water_temp", Double.NaN).forGetter(BiomeTempData::waterTemp),
+            Codec.DOUBLE.optionalFieldOf("water_temp").forGetter(BiomeTempData::waterTemp),
             Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(BiomeTempData::isOffset),
             Codec.BOOL.optionalFieldOf("disable", false).forGetter(BiomeTempData::isDisabled)
     ).apply(instance, BiomeTempData::new)));
@@ -82,7 +82,7 @@ public class BiomeTempData extends ConfigData implements IForgeRegistryEntry<Bio
     public Temperature.Units units()
     {   return units;
     }
-    public double waterTemp()
+    public Optional<Double> waterTemp()
     {   return waterTemp;
     }
     public boolean isOffset()
@@ -98,8 +98,8 @@ public class BiomeTempData extends ConfigData implements IForgeRegistryEntry<Bio
     public double getMaxTemp()
     {   return Temperature.convert(max, units, Temperature.Units.MC, !this.isOffset);
     }
-    public double getWaterTemp()
-    {   return Temperature.convert(waterTemp, units, Temperature.Units.MC, false);
+    public Optional<Double> getWaterTemp()
+    {   return waterTemp.map(w -> Temperature.convert(w, units, Temperature.Units.MC, false));
     }
 
     @Nullable
@@ -115,7 +115,7 @@ public class BiomeTempData extends ConfigData implements IForgeRegistryEntry<Bio
         Temperature.Units units = Temperature.Units.MC;
         double min = 0;
         double max = 0;
-        double waterTemp = Double.NaN;
+        Optional<Double> waterTemp = Optional.empty();
         boolean isDisabled = false;
         // Disabled
         if (entry.get(1) instanceof String string && string.equals("disable"))
@@ -127,7 +127,7 @@ public class BiomeTempData extends ConfigData implements IForgeRegistryEntry<Bio
             min = ((Number) entry.get(1)).doubleValue();
             max = ((Number) entry.get(2)).doubleValue();
             if (entry.size() >= 4) units = Temperature.Units.fromID(((String) entry.get(3)).toUpperCase());
-            if (entry.size() >= 5) waterTemp = ((Number) entry.get(4)).doubleValue();
+            if (entry.size() >= 5) waterTemp = Optional.of(((Number) entry.get(4)).doubleValue());
         }
         BiomeTempData result = new BiomeTempData(biomes, min, max, units, waterTemp, isOffset, isDisabled);
         result.setConfigType(Type.TOML);
