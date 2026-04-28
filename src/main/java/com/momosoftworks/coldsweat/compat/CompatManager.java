@@ -42,6 +42,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
@@ -57,6 +58,10 @@ import sereneseasons.season.SeasonHooks;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.CuriosCapability;
 import top.theillusivec4.curios.api.event.CurioChangeEvent;
+import weather2.ServerTickHandler;
+import weather2.weathersystem.WeatherManagerServer;
+import weather2.weathersystem.storm.StormObject;
+import weather2.weathersystem.storm.WeatherObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -254,18 +259,18 @@ public class CompatManager
     {
         public static boolean isRainstormAt(Level level, BlockPos pos)
         {
-            /*if (WEATHER_LOADED)
+            if (WEATHER_LOADED)
             {
                 WeatherManagerServer weatherManager = ServerTickHandler.getWeatherManagerFor(level.dimension());
                 if (weatherManager == null) return false;
                 StormObject rainStorm = weatherManager.getClosestStormAny(new Vec3(pos.getX(), pos.getY(), pos.getZ()), 250);
                 if (rainStorm == null) return false;
 
-                if (WorldHelper.canSeeSky(level, pos, 60) && rainStorm.isPrecipitating() && rainStorm.levelTemperature > 0.0f
+                if (rainStorm.isPrecipitating() && rainStorm.levelTemperature > 0.0f
                 && Math.sqrt(Math.pow(pos.getX() - rainStorm.pos.x, 2) + Math.pow(pos.getX() - rainStorm.pos.x, 2)) < rainStorm.getSize())
                 {   return true;
                 }
-            }*/
+            }
             return false;
         }
 
@@ -273,7 +278,7 @@ public class CompatManager
         {
             if (WEATHER_LOADED)
             {
-                /*WeatherManagerServer weatherManager = ServerTickHandler.getWeatherManagerFor(level.dimension());
+                WeatherManagerServer weatherManager = ServerTickHandler.getWeatherManagerFor(level.dimension());
                 if (weatherManager == null) return null;
 
                 double distance = Double.POSITIVE_INFINITY;
@@ -286,8 +291,7 @@ public class CompatManager
                         closestStorm = stormObject;
                     }
                 }
-                return closestStorm;*/
-                return null;
+                return closestStorm;
             }
             return null;
         }
