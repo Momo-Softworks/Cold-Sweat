@@ -30,6 +30,7 @@ import net.minecraft.world.entity.LivingEntity;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -193,23 +194,23 @@ public class ModRegistriesEventJS implements KubeStartupEvent
     public void addBiomeTemperature(double minTemp, double maxTemp, String units, String[] biomes, double waterTemp)
     {
         this.addRegistryConfig(Registries.BIOME, ModRegistries.BIOME_TEMP_DATA, biomes,
-                parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), waterTemp, false, false));
+                parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), Optional.of(waterTemp), false, false));
     }
     public void addBiomeTemperature(double minTemp, double maxTemp, String units, String... biomes)
     {
         this.addRegistryConfig(Registries.BIOME, ModRegistries.BIOME_TEMP_DATA, biomes,
-                               parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), Double.NaN, false, false));
+                               parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), Optional.empty(), false, false));
     }
 
     public void addBiomeOffset(double minTemp, double maxTemp, String units, String[] biomes, double waterTemp)
     {
         this.addRegistryConfig(Registries.BIOME, ModRegistries.BIOME_TEMP_DATA, biomes,
-                parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), waterTemp, true, false));
+                parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), Optional.of(waterTemp), true, false));
     }
     public void addBiomeOffset(double minTemp, double maxTemp, String units, String... biomes)
     {
         this.addRegistryConfig(Registries.BIOME, ModRegistries.BIOME_TEMP_DATA, biomes,
-                               parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), Double.NaN, true, false));
+                               parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), Optional.empty(), true, false));
     }
 
     /*
