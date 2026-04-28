@@ -56,7 +56,9 @@ import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.joml.Matrix4dc;
 import org.joml.Vector3d;
+import org.joml.primitives.AABBd;
 import org.valkyrienskies.core.api.ships.Ship;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import org.valkyrienskies.mod.common.util.VectorConversionsMCKt;
@@ -278,7 +280,7 @@ public class CompatManager
                 StormObject rainStorm = weatherManager.getClosestStormAny(new Vec3(pos.getX(), pos.getY(), pos.getZ()), 250);
                 if (rainStorm == null) return false;
 
-                if (WorldHelper.canSeeSky(level, pos, 60) && rainStorm.isPrecipitating() && rainStorm.levelTemperature > 0.0f
+                if (rainStorm.isPrecipitating() && rainStorm.levelTemperature > 0.0f
                 && Math.sqrt(Math.pow(pos.getX() - rainStorm.pos.x, 2) + Math.pow(pos.getX() - rainStorm.pos.x, 2)) < rainStorm.getSize())
                 {   return true;
                 }
@@ -379,23 +381,35 @@ public class CompatManager
             return pos;
         }
 
-        public static AABB transformIfShipPos(Level level, AABB aabb)
+        public static AABB transformShipToWorld(Level level, AABB aabb)
+        {
+            AABBd aabbd = VectorConversionsMCKt.toJOML(aabb);
+            Ship ship = VSGameUtilsKt.getLoadedShipManagingPos(level, VectorConversionsMCKt.toJOML(aabb.getCenter()));
+            if (ship == null) return aabb;
+            aabbd = aabbd.transform(ship.getShipToWorld());
+            return VectorConversionsMCKt.toMinecraft(aabbd);
+        }
+        public static AABB transformWorldToShip(Level level, AABB aabb)
         {
             AtomicReference<AABB> translated = new AtomicReference<>(aabb);
             VSGameUtilsKt.transformFromWorldToNearbyShipsAndWorld(level, aabb, translated::set);
             return translated.get();
         }
 
-        public static BlockPos transformIfShipPos(Level level, BlockPos pos)
+        public static BlockPos transformShipToWorld(Level level, BlockPos pos)
         {
-            if (VALKYRIEN_SKIES_LOADED)
-            {
-                List<Vector3d> shipTransforms = VSGameUtilsKt.transformToNearbyShipsAndWorld(level, pos.getX(), pos.getY(), pos.getZ(), 1);
-                if (shipTransforms.isEmpty()) return pos;
-                Vector3d shipCoords = shipTransforms.get(0);
-                return BlockPos.containing(VectorConversionsMCKt.toMinecraft(shipCoords));
-            }
-            return pos;
+            List<Vector3d> shipTransforms = VSGameUtilsKt.transformToNearbyShipsAndWorld(level, pos.getX(), pos.getY(), pos.getZ(), 1);
+            if (shipTransforms.isEmpty()) return pos;
+            Vector3d shipCoords = shipTransforms.get(0);
+            return BlockPos.containing(VectorConversionsMCKt.toMinecraft(shipCoords));
+        }
+        public static BlockPos transformWorldToShip(Level level, BlockPos pos)
+        {
+            Ship ship = VSGameUtilsKt.getLoadedShipManagingPos(level, pos);
+            if (ship == null) return pos;
+            Vector3d translated = new Vector3d(pos.getX(), pos.getY(), pos.getZ());
+            translated = ship.getWorldToShip().transformPosition(translated);
+            return BlockPos.containing(VectorConversionsMCKt.toMinecraft(translated));
         }
     }
 

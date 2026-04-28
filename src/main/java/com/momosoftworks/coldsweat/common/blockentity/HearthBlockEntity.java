@@ -38,7 +38,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleOptions;
-import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -326,10 +325,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         {
             this.isEntityNearby = false;
             entities.clear();
-            AABB searchArea = new AABB(pos).inflate(this.getMaxRange());
-            if (CompatManager.isValkyrienSkiesLoaded())
-            {   searchArea = CompatManager.Valkyrien.transformIfShipPos(level, searchArea);
-            }
+            AABB searchArea = new AABB(WorldHelper.shipyardToWorld(level, pos)).inflate(this.getMaxRange());
 
             for (Entity entity : this.level.getEntities((Entity) null, searchArea, EntityTempManager::isTemperatureEnabled))
             {
@@ -414,10 +410,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                         AABB playerBB = entity.getBoundingBox();
                         // Ensure height is at least 2 blocks tall
                         playerBB = playerBB.setMaxY(Math.max(playerBB.maxY, playerBB.minY + 2));
-                        if (CompatManager.isValkyrienSkiesLoaded())
-                        {   playerBB = CompatManager.Valkyrien.transformIfShipPos(level, playerBB);
-                        }
-                        if (this.isAffectingPos(WorldHelper.getOccupiedPositions(playerBB))
+                        if (this.isAffectingPos(WorldHelper.getPositionsInAABB(WorldHelper.worldToShipyard(level, playerBB)))
                         && !WorldHelper.canSeeSky(level, BlockPos.containing(playerBB.getCenter()), 64))
                         {   isProvidingInsulation |= this.insulateEntity(entity);
                         }
@@ -482,8 +475,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     protected void tickPaths(int firstIndex, int lastIndex)
     {
         int pathCount = paths.size();
-        if (false)
-        Minecraft.getInstance().player.displayClientMessage(Component.literal(this.paths.size() + " " + this.paths.stream().map(p -> p.pos).distinct().count()), true);
         for (int i = firstIndex; i < Math.min(paths.size(), lastIndex); i++)
         {
             // This operation is really fast because it's an ArrayList
@@ -955,8 +946,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
 
     public boolean isAffectingPos(List<BlockPos> positions)
     {
-        boolean isSmall = positions.size() <= 1;
-        BlockPos.MutableBlockPos checkerboardPos = new BlockPos.MutableBlockPos();
+        if (positions.isEmpty()) return false;
         for (int i = 0; i < this.paths.size(); i++)
         {
             SpreadPath path = this.paths.get(i);
@@ -964,9 +954,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
             {
                 BlockPos pos = positions.get(j);
                 if (pos.equals(path.pos))
-                {   return true;
-                }
-                if (isSmall && pos.equals(checkerboardPos.set(path.pos).offset(1, 1, 1)))
                 {   return true;
                 }
             }
