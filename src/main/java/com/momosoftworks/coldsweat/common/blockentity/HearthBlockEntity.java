@@ -318,10 +318,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         {
             this.isEntityNearby = false;
             entities.clear();
-            AxisAlignedBB searchArea = new AxisAlignedBB(pos).inflate(this.getMaxRange());
-            if (CompatManager.isValkyrienSkiesLoaded())
-            {   searchArea = CompatManager.Valkyrien.transformIfShipPos(level, searchArea);
-            }
+            AxisAlignedBB searchArea = new AxisAlignedBB(WorldHelper.shipyardToWorld(level, pos)).inflate(this.getMaxRange());
 
             for (Entity entity : this.level.getEntities((Entity) null, searchArea, EntityTempManager::isTemperatureEnabled))
             {
@@ -406,10 +403,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
                         AxisAlignedBB playerBB = entity.getBoundingBox();
                         // Ensure height is at least 2 blocks tall
                         playerBB = new AxisAlignedBB(playerBB.minX, playerBB.minY, playerBB.minZ, playerBB.maxX, Math.max(playerBB.maxY, playerBB.minY + 2), playerBB.maxZ);
-                        if (CompatManager.isValkyrienSkiesLoaded())
-                        {   playerBB = CompatManager.Valkyrien.transformIfShipPos(level, playerBB);
-                        }
-                        if (this.isAffectingPos(WorldHelper.getOccupiedPositions(playerBB))
+                        if (this.isAffectingPos(WorldHelper.getPositionsInAABB(WorldHelper.worldToShipyard(level, playerBB)))
                         && !WorldHelper.canSeeSky(level, new BlockPos(playerBB.getCenter()), 64))
                         {   isProvidingInsulation |= this.insulateEntity(entity);
                         }
@@ -946,8 +940,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
 
     public boolean isAffectingPos(List<BlockPos> positions)
     {
-        boolean isSmall = positions.size() <= 1;
-        BlockPos.Mutable checkerboardPos = new BlockPos.Mutable();
+        if (positions.isEmpty()) return false;
         for (int i = 0; i < this.paths.size(); i++)
         {
             SpreadPath path = this.paths.get(i);
@@ -955,9 +948,6 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
             {
                 BlockPos pos = positions.get(j);
                 if (pos.equals(path.pos))
-                {   return true;
-                }
-                if (isSmall && pos.equals(checkerboardPos.set(path.pos).offset(1, 1, 1)))
                 {   return true;
                 }
             }

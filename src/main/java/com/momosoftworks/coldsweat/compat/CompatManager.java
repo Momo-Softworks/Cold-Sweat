@@ -34,6 +34,8 @@ import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
+import org.joml.Matrix4dc;
+import org.joml.primitives.AABBd;
 import org.joml.primitives.AABBd;
 import org.valkyrienskies.core.api.Ship;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
@@ -256,7 +258,15 @@ public class CompatManager
             return pos;
         }
 
-        public static AxisAlignedBB transformIfShipPos(World level, AxisAlignedBB aabb)
+        public static AxisAlignedBB transformShipToWorld(World level, AxisAlignedBB aabb)
+        {
+            AABBd aabbd = VectorConversionsMCKt.toJOML(aabb);
+            Ship ship = VSGameUtilsKt.getShipManagingPos(level, VectorConversionsMCKt.toJOML(aabb.getCenter()));
+            if (ship == null) return aabb;
+            aabbd = aabbd.transform(ship.getShipToWorld());
+            return VectorConversionsMCKt.toMinecraft(aabbd);
+        }
+        public static AxisAlignedBB transformWorldToShip(World level, AxisAlignedBB aabb)
         {
             AtomicReference<AxisAlignedBB> translated = new AtomicReference<>(aabb);
             StreamSupport.stream(VSGameUtilsKt.getShipsIntersecting(level, aabb).spliterator(), false).findFirst().ifPresent(ship ->
@@ -264,16 +274,20 @@ public class CompatManager
             return translated.get();
         }
 
-        public static BlockPos transformIfShipPos(World level, BlockPos pos)
+        public static BlockPos transformShipToWorld(World level, BlockPos pos)
         {
-            if (VALKYRIEN_SKIES_LOADED)
-            {
-                List<org.joml.Vector3d> shipTransforms = VSGameUtilsKt.transformToNearbyShipsAndWorld(level, pos.getX(), pos.getY(), pos.getZ(), 1);
-                if (shipTransforms.isEmpty()) return pos;
-                org.joml.Vector3d shipCoords = shipTransforms.get(0);
-                return new BlockPos(VectorConversionsMCKt.toMinecraft(shipCoords));
-            }
-            return pos;
+            List<org.joml.Vector3d> shipTransforms = VSGameUtilsKt.transformToNearbyShipsAndWorld(level, pos.getX(), pos.getY(), pos.getZ(), 1);
+            if (shipTransforms.isEmpty()) return pos;
+            org.joml.Vector3d shipCoords = shipTransforms.get(0);
+            return new BlockPos(VectorConversionsMCKt.toMinecraft(shipCoords));
+        }
+        public static BlockPos transformWorldToShip(World level, BlockPos pos)
+        {
+            Ship ship = VSGameUtilsKt.getShipManagingPos(level, pos);
+            if (ship == null) return pos;
+            org.joml.Vector3d translated = new org.joml.Vector3d(pos.getX(), pos.getY(), pos.getZ());
+            translated = ship.getWorldToShip().transformPosition(translated);
+            return new BlockPos(VectorConversionsMCKt.toMinecraft(translated));
         }
     }
 
