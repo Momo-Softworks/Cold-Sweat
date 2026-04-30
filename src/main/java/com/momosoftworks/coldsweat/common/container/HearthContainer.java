@@ -35,12 +35,12 @@ public class HearthContainer extends AbstractContainerMenu
             {
                 if (te.getItemFuel(stack) != 0 || stack.is(Items.MILK_BUCKET)) return true;
                 // Check if the potion is blacklisted
-                if (stack.has(DataComponents.POTION_CONTENTS))
+                PotionContents potioncontents = stack.get(DataComponents.POTION_CONTENTS);
+                if (potioncontents != null)
                 {
-                    PotionContents potioncontents = stack.get(DataComponents.POTION_CONTENTS);
                     for (MobEffectInstance effect : potioncontents.getAllEffects())
                     {
-                        if (ConfigSettings.HEARTH_POTION_BLACKLIST.get().contains(effect.getEffect()))
+                        if (ConfigSettings.HEARTH_POTION_BLACKLIST.get(playerInv.player.registryAccess()).contains(effect.getEffect()))
                         {   return false;
                         }
                     }

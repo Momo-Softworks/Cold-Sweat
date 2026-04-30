@@ -644,7 +644,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                                                                       new ArrayList<>());
             if (ConfigSettings.HEARTH_POTIONS_ENABLED.get()
             && !itemEffects.isEmpty() && !itemEffects.equals(effects)
-            && itemEffects.stream().noneMatch(eff -> ConfigSettings.HEARTH_POTION_BLACKLIST.get().contains(eff.getEffect())))
+            && itemEffects.stream().noneMatch(eff -> ConfigSettings.HEARTH_POTION_BLACKLIST.get(this.level.registryAccess()).contains(eff.getEffect())))
             {
                 if (fuelStack.getItem() instanceof PotionItem)
                 {   this.getItems().set(0, Items.GLASS_BOTTLE.getDefaultInstance());
