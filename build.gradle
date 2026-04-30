@@ -188,12 +188,11 @@ dependencies {
     compileOnly fg.deobf("curse.maven:resourceful-lib-570073:5659871")
 
     // Valkyrien Skies (compat)
-    compileOnly         ("org.valkyrienskies.core:api:${valk_skies_api_version}")
-    compileOnly         ("org.valkyrienskies.core:impl:${valk_skies_api_version}")
-    compileOnly         ("org.valkyrienskies.core:api-game:${valk_skies_api_version}")
-    compileOnly         ("org.valkyrienskies.core:util:${valk_skies_api_version}")
-    compileOnly fg.deobf("org.valkyrienskies:valkyrienskies-120-forge:2.3.0-beta.5+bcda04a482")
-    compileOnly fg.deobf("curse.maven:eureka-ships-654384:5321630")
+    compileOnly ("org.valkyrienskies.core:api:${valk_skies_api_version}")
+    compileOnly ("org.valkyrienskies.core:internal:${valk_skies_api_version}")
+    compileOnly ("org.valkyrienskies.core:util:${valk_skies_api_version}")
+    implementation fg.deobf("org.valkyrienskies:valkyrienskies-120-forge:2.4.11")
+    implementation fg.deobf("curse.maven:eureka-ships-654384:7979379")
     implementation 'thedarkcolour:kotlinforforge:4.10.0'
 
     // KubeJS (Compat)
