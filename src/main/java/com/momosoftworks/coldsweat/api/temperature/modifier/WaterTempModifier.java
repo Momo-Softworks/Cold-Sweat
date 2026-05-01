@@ -1,10 +1,10 @@
 package com.momosoftworks.coldsweat.api.temperature.modifier;
 
 import com.momosoftworks.coldsweat.api.util.Temperature;
-import com.momosoftworks.coldsweat.data.tag.ModBiomeTags;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -34,7 +34,8 @@ public class WaterTempModifier extends TempModifier
 
     public double getTargetTemperature(LivingEntity entity)
     {
-        Double[] waterTemps = WorldHelper.getPositionGrid(entity.blockPosition(), 9, 4).stream()
+        BlockPos entityPos = WorldHelper.sublevelToWorld(entity.level(), entity.blockPosition());
+        Double[] waterTemps = WorldHelper.getPositionGrid(entityPos, 9, 4).stream()
                               .map(pos -> WorldHelper.getWaterTemperatureAt(entity.level(), pos))
                               .toArray(Double[]::new);
         return CSMath.average(waterTemps);

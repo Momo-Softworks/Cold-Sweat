@@ -73,9 +73,7 @@ import weather2.weathersystem.WeatherManagerServer;
 import weather2.weathersystem.storm.StormObject;
 import weather2.weathersystem.storm.WeatherObject;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Mod.EventBusSubscriber
@@ -370,6 +368,10 @@ public class CompatManager
 
     public static abstract class Valkyrien
     {
+        public static boolean isInShipyard(Level level, BlockPos pos)
+        {   return VSGameUtilsKt.isBlockInShipyard(level, pos);
+        }
+        
         public static Vec3 translateToShipCoords(Vec3 pos, Ship ship)
         {
             if (ship != null)
@@ -389,23 +391,33 @@ public class CompatManager
             aabbd = aabbd.transform(ship.getShipToWorld());
             return VectorConversionsMCKt.toMinecraft(aabbd);
         }
-        public static AABB transformWorldToShip(Level level, AABB aabb)
+        public static Collection<AABB> transformWorldToShip(Level level, AABB aabb)
         {
-            AtomicReference<AABB> translated = new AtomicReference<>(aabb);
-            VSGameUtilsKt.transformFromWorldToNearbyShipsAndWorld(level, aabb, translated::set);
-            return translated.get();
+            Iterable<Ship> ships = VSGameUtilsKt.getShipsIntersecting(level, aabb);
+            if (!ships.iterator().hasNext()) return Set.of(aabb);
+            Set<AABB> subAABBs = new HashSet<>();
+            ships.forEach(ship ->
+            {
+                AABBd aabbd = VectorConversionsMCKt.toJOML(aabb);
+                Matrix4dc worldToShip = ship.getWorldToShip();
+                aabbd = aabbd.transform(worldToShip);
+                subAABBs.add(VectorConversionsMCKt.toMinecraft(aabbd));
+            });
+            return Collections.unmodifiableSet(subAABBs);
         }
 
         public static BlockPos transformShipToWorld(Level level, BlockPos pos)
         {
-            List<Vector3d> shipTransforms = VSGameUtilsKt.transformToNearbyShipsAndWorld(level, pos.getX(), pos.getY(), pos.getZ(), 1);
+            List<Vector3d> shipTransforms = VSGameUtilsKt.transformToNearbyShipsAndWorld(level, pos.getX(), pos.getY(), pos.getZ(), 0.5);
             if (shipTransforms.isEmpty()) return pos;
             Vector3d shipCoords = shipTransforms.get(0);
             return BlockPos.containing(VectorConversionsMCKt.toMinecraft(shipCoords));
         }
         public static BlockPos transformWorldToShip(Level level, BlockPos pos)
         {
-            Ship ship = VSGameUtilsKt.getLoadedShipManagingPos(level, pos);
+            Iterable<Ship> ships = VSGameUtilsKt.getShipsIntersecting(level, new AABB(pos));
+            if (!ships.iterator().hasNext()) return pos;
+            Ship ship = ships.iterator().next();
             if (ship == null) return pos;
             Vector3d translated = new Vector3d(pos.getX(), pos.getY(), pos.getZ());
             translated = ship.getWorldToShip().transformPosition(translated);

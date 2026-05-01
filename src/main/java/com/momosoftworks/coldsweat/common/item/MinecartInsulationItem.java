@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.common.item;
 
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
+import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -40,7 +41,7 @@ public class MinecartInsulationItem extends Item
                 {   player.getMainHandItem().shrink(1);
                 }
                 player.swing(InteractionHand.MAIN_HAND, true);
-                level.playSound(null, minecart.blockPosition(), SoundEvents.LLAMA_SWAG, SoundSource.PLAYERS, 1f, (float) ((Math.random() / 5) + 0.9));
+                WorldHelper.playEntitySound(SoundEvents.LLAMA_SWAG, minecart, SoundSource.PLAYERS, 1f, (float) ((Math.random() / 5) + 0.9));
                 minecart.setDisplayBlockState(ModBlocks.MINECART_INSULATION.defaultBlockState());
                 minecart.setDisplayOffset(5);
                 return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
