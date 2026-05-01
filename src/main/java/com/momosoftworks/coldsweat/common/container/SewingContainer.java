@@ -7,6 +7,7 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.advancement.trigger.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.core.init.MenuInit;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
+import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -19,6 +20,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.*;
+import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Wearable;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -137,7 +139,7 @@ public class SewingContainer extends ItemCombinerMenu
                     // Remove the last insulation item added
                     cap.removeInsulationItem(cap.getInsulationItem(cap.getInsulation().size() - 1));
                     // Play shear sound
-                    player.level.playSound(null, player.blockPosition(), SoundEvents.SHEEP_SHEAR, SoundSource.PLAYERS, 0.8F, 1.0F);
+                    WorldHelper.playEntitySound(SoundEvents.SHEEP_SHEAR, player, SoundSource.PLAYERS, 0.8F, 1.0F);
                 }
             });
             this.createResult();
@@ -152,7 +154,7 @@ public class SewingContainer extends ItemCombinerMenu
                 this.growItem(1, -1);
             }
             // Play insulation sound
-            player.level.playSound(null, player.blockPosition(), SoundEvents.LLAMA_SWAG, SoundSource.BLOCKS, 0.5f, 1f);
+            WorldHelper.playEntitySound(SoundEvents.LLAMA_SWAG, player, SoundSource.BLOCKS, 0.5f, 1f);
 
             // Trigger advancement criteria
             if (player instanceof ServerPlayer serverPlayer)
@@ -160,8 +162,11 @@ public class SewingContainer extends ItemCombinerMenu
         }
 
         // Get equip sound for the armor item
-        SoundEvent equipSound = stack.getItem().getEquipSound();
-        if (equipSound != null) player.level.playSound(null, player.blockPosition(), equipSound, SoundSource.BLOCKS, 1f, 1f);
+        if (stack.getItem() instanceof ArmorItem armor)
+        {   SoundEvent equipSound = armor.getMaterial().getEquipSound();
+            WorldHelper.playEntitySound(equipSound, player, SoundSource.BLOCKS, 1f, 1f);
+        }
+        this.createResult();
     }
 
     @Override

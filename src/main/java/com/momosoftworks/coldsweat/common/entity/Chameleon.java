@@ -502,7 +502,7 @@ public class Chameleon extends Animal
                 && this.getServer() != null)
                 {
                     Advancement advancement = this.getServer().getAdvancements().getAdvancement(new ResourceLocation(ColdSweat.MOD_ID, "chameleon_find_biome"));
-                    for (ServerPlayer player : this.level.getEntitiesOfClass(ServerPlayer.class, this.getBoundingBox().inflate(20)))
+                    for (ServerPlayer player : WorldHelper.getEntitiesOfClass(ServerPlayer.class, this.level, this.getBoundingBox().inflate(20), e -> true))
                     {
                         if (advancement != null)
                         {

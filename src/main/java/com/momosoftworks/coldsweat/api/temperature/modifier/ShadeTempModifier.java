@@ -19,7 +19,7 @@ public class ShadeTempModifier extends TempModifier
         Level level = entity.level;
         if (level.dimensionType().hasCeiling() || !level.dimensionType().hasSkyLight()) return temp -> temp;
 
-        double darkness = 1 - (level.getBrightness(LightLayer.SKY, BlockPos.containing(entity.getEyePosition())) / 15.0);
+        double darkness = 1 - (level.getBrightness(LightLayer.SKY, new BlockPos(entity.getEyePosition())) / 15.0);
         darkness *= Math.max(0, WorldHelper.getTimeMultiplier(level));
         double overcast = level.getRainLevel(1);
         double shade = Math.max(darkness, overcast);
