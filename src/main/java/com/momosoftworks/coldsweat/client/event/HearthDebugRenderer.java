@@ -152,7 +152,6 @@ public class HearthDebugRenderer
 
                         BlockState state = workingChunk.getBlockState(pos);
                         VoxelShape blockShape = state.getShape(world, pos);
-                        // if this isn't the player's hovered position
                         if (!blockShape.isEmpty() && !state.getCollisionShape(world, pos).isEmpty())
                         {
                             blockShape.forAllBoxes((minX, minY, minZ, maxX, maxY, maxZ) -> {
@@ -169,18 +168,18 @@ public class HearthDebugRenderer
                         Set<BiConsumer<Vector3f, Vector4f>> lines = Sets.newHashSet(nw, ne, sw, se, nu, nd, su, sd, eu, ed, wu, wd);
 
                         // Remove the lines if another point is on the adjacent face
-                        if (directions.contains(Direction.DOWN))
-                            Stream.of(nd, sd, ed, wd).forEach(lines::remove);
-                        if (directions.contains(Direction.UP))
-                            Stream.of(nu, su, eu, wu).forEach(lines::remove);
-                        if (directions.contains(Direction.NORTH))
-                            Stream.of(nw, ne, nu, nd).forEach(lines::remove);
-                        if (directions.contains(Direction.SOUTH))
-                            Stream.of(sw, se, su, sd).forEach(lines::remove);
-                        if (directions.contains(Direction.WEST))
-                            Stream.of(nw, sw, wu, wd).forEach(lines::remove);
-                        if (directions.contains(Direction.EAST))
-                            Stream.of(ne, se, eu, ed).forEach(lines::remove);
+                        for (Direction direction : directions)
+                        {
+                            switch (direction)
+                            {
+                                case DOWN : Stream.of(nd, sd, ed, wd).forEach(lines::remove); break;
+                                case UP : Stream.of(nu, su, eu, wu).forEach(lines::remove); break;
+                                case NORTH : Stream.of(nw, ne, nu, nd).forEach(lines::remove); break;
+                                case SOUTH : Stream.of(sw, se, su, sd).forEach(lines::remove); break;
+                                case WEST : Stream.of(nw, sw, wu, wd).forEach(lines::remove); break;
+                                case EAST : Stream.of(ne, se, eu, ed).forEach(lines::remove); break;
+                            }
+                        }
 
                         lines.forEach(line -> line.accept(new Vector3f(x, y, z), new Vector4f(r, g, b, renderAlpha)));
                     }
