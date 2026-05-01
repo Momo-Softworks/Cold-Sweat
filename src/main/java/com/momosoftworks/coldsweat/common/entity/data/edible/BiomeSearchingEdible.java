@@ -36,7 +36,8 @@ public abstract class BiomeSearchingEdible extends Edible
             Thread searchThread = new Thread(null, () ->
             {
                 // Search for a cold biome
-                Pair<BlockPos, Holder<Biome>> biomePair = ((ServerLevel) entity.level).findNearestBiome(biome -> this.biomePredicate.test(entity.level, biome), entity.blockPosition(), 2000, 32);
+                BlockPos entityPos = WorldHelper.sublevelToWorld(entity.level, entity.blockPosition());
+                Pair<BlockPos, Holder<Biome>> biomePair = ((ServerLevel) entity.level).findNearestBiome(biome -> this.biomePredicate.test(entity.level, biome), entityPos, 2000, 32);
 
                 if (biomePair != null)
                 {

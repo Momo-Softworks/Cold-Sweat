@@ -30,12 +30,13 @@ public class CaveBiomeTempModifier extends TempModifier
     {
         int sampleRoot = this.getNBT().getInt("SampleRoot");
         Level level = entity.level;
+        BlockPos entityPos = WorldHelper.sublevelToWorld(level, entity.blockPosition());
 
         // Calculate the average temperature of underground biomes
         double biomeTempTotal = 0;
         int caveBiomeCount = 0;
 
-        for (BlockPos pos : WorldHelper.getPositionCube(entity.blockPosition(), sampleRoot, 6))
+        for (BlockPos pos : WorldHelper.getPositionCube(entityPos, sampleRoot, 6))
         {
             if (!level.isInWorldBounds(pos)) continue;
             if (WorldHelper.getHeight(pos, level) <= entity.getY()) continue;
