@@ -38,10 +38,10 @@ public class BiomeTempModifier extends TempModifier
         double worldTemp = 0;
         World level = entity.level;
         DimensionType dimension = level.dimensionType();
-        BlockPos entPos = entity.blockPosition();
+        BlockPos entPos = WorldHelper.sublevelToWorld(level, entity.blockPosition());
 
         // If a structure temperature override is defined, return
-        Pair<Double, Double> structureTemp = getStructureTemp(entity.level, entity.blockPosition());
+        Pair<Double, Double> structureTemp = getStructureTemp(entity.level, entPos);
         if (structureTemp.getFirst() != null)
         {   return temp -> structureTemp.getFirst();
         }

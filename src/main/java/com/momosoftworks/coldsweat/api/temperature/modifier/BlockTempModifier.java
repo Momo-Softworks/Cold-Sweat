@@ -48,9 +48,9 @@ public class BlockTempModifier extends TempModifier
         stateCache.clear();
         triggers.clear();
 
-        World world = entity.level;
+        World level = entity.level;
         int range = this.getNBT().contains("RangeOverride", 3) ? this.getNBT().getInt("RangeOverride") : ConfigSettings.BLOCK_RANGE.get();
-        BlockPos blockPos = entity.blockPosition();
+        BlockPos blockPos = WorldHelper.sublevelToWorld(level, entity.blockPosition());
 
         int entX = blockPos.getX();
         int entY = blockPos.getY();
@@ -66,7 +66,7 @@ public class BlockTempModifier extends TempModifier
             {
                 ChunkPos chunkPos = new ChunkPos((entX + x) >> 4, (entZ + z) >> 4);
                 IChunk chunk = chunks.get(chunkPos);
-                if (chunk == null) chunks.put(chunkPos, chunk = WorldHelper.getChunk(world, chunkPos));
+                if (chunk == null) chunks.put(chunkPos, chunk = WorldHelper.getChunk(level, chunkPos));
                 if (chunk == null) continue;
 
                 for (int y = -range; y < range; y++)
@@ -106,9 +106,9 @@ public class BlockTempModifier extends TempModifier
                             Vector3d ray = pos.subtract(playerClosest);
                             Direction direction = Direction.getNearest(ray.x, ray.y, ray.z);
 
-                            WorldHelper.forBlocksInRay(playerClosest, pos, world, chunk, stateCache,
+                            WorldHelper.forBlocksInRay(playerClosest, pos, level, chunk, stateCache,
                             (rayState, bpos) ->
-                            {   if (!bpos.equals(blockpos) && WorldHelper.isSpreadBlocked(world, rayState, bpos, direction, direction))
+                            {   if (!bpos.equals(blockpos) && WorldHelper.isSpreadBlocked(level, rayState, bpos, direction, direction))
                                 {   blocks[0]++;
                                 }
                             }, 3);
@@ -118,8 +118,8 @@ public class BlockTempModifier extends TempModifier
 
                             for (BlockTemp blockTemp : blockTemps)
                             {
-                                if (!blockTemp.isValid(world, blockpos, state)) continue;
-                                double temperature = blockTemp.getTemperature(world, entity, state, blockpos, distance);
+                                if (!blockTemp.isValid(level, blockpos, state)) continue;
+                                double temperature = blockTemp.getTemperature(level, entity, state, blockpos, distance);
                                 if (temperature == 0) continue;
                                 double tempToAdd = blockTemp.fade()
                                                    ? CSMath.blend(temperature, 0, distance, 0.5, blockTemp.range())

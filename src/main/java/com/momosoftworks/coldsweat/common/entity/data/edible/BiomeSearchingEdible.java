@@ -14,6 +14,7 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.server.ServerWorld;
 
 import java.util.function.BiPredicate;
+import java.util.function.Predicate;
 
 public abstract class BiomeSearchingEdible extends Edible
 {
@@ -34,16 +35,17 @@ public abstract class BiomeSearchingEdible extends Edible
             // Create a new thread to look for the biome
             Thread searchThread = new Thread(null, () ->
             {
-                BlockPos pos = entity.blockPosition();
-                BlockPos biomePos = ((ServerWorld) entity.level).getChunkSource().getGenerator().getBiomeSource().findBiomeHorizontal(pos.getX(), pos.getY(), pos.getZ(), 2000,
+                // Search for a cold biome
+                BlockPos entityPos = WorldHelper.sublevelToWorld(entity.level, entity.blockPosition());
+                BlockPos biomePos = ((ServerWorld) entity.level).getChunkSource().getGenerator().getBiomeSource().findBiomeHorizontal(entityPos.getX(), entityPos.getY(), entityPos.getZ(), 2000,
                                                                                                                                       biome -> this.biomePredicate.test(entity.level, biome), entity.getRandom());
+
                 if (biomePos != null)
                 {
-                    Pair<BlockPos, Biome> biomePair = Pair.of(biomePos, entity.level.getBiome(biomePos));
                     TaskScheduler.scheduleServer(() ->
                     {
                         // Set the chameleon to track this position
-                        entity.setTrackingPos(biomePair.getFirst());
+                        entity.setTrackingPos(biomePos);
 
                         WorldHelper.playEntitySound(ModSounds.CHAMELEON_FIND, entity, entity.getSoundSource(), 1.2f, EntityHelper.getVoicePitch(entity));
                         WorldHelper.spawnParticleBatch(entity.level, ParticleTypes.HAPPY_VILLAGER, entity.getX(), entity.getY() + entity.getBbHeight() / 2, entity.getZ(), 1, 1, 1, 6, 0.01);

@@ -75,6 +75,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Mod.EventBusSubscriber
 public abstract class WorldHelper
@@ -183,17 +184,25 @@ public abstract class WorldHelper
         return posList;
     }
 
+    public static boolean isInSublevel(World level, BlockPos pos)
+    {
+        if (CompatManager.isValkyrienSkiesLoaded())
+        {   return CompatManager.Valkyrien.isInShipyard(level, pos);
+        }
+        return false;
+    }
+
     /**
      * Gets the real position of the BlockPos, in world space, if it's part of a dynamic object
      */
-    public static BlockPos shipyardToWorld(World level, BlockPos pos)
+    public static BlockPos sublevelToWorld(World level, BlockPos pos)
     {
         if (CompatManager.isValkyrienSkiesLoaded())
         {   return CompatManager.Valkyrien.transformShipToWorld(level, pos);
         }
         return pos;
     }
-    public static BlockPos worldToShipyard(World level, BlockPos pos)
+    public static BlockPos worldToSublevel(World level, BlockPos pos)
     {
         if (CompatManager.isValkyrienSkiesLoaded())
         {   return CompatManager.Valkyrien.transformWorldToShip(level, pos);
@@ -204,19 +213,21 @@ public abstract class WorldHelper
     /**
      * Gets the real position of the AABB, in world space, if it's part of a dynamic object
      */
-    public static AxisAlignedBB shipyardToWorld(World level, AxisAlignedBB aabb)
+    public static AxisAlignedBB sublevelToWorld(World level, AxisAlignedBB aabb)
     {
         if (CompatManager.isValkyrienSkiesLoaded())
         {   return CompatManager.Valkyrien.transformShipToWorld(level, aabb);
         }
         return aabb;
     }
-    public static AxisAlignedBB worldToShipyard(World level, AxisAlignedBB aabb)
+    public static Collection<AxisAlignedBB> worldToSublevel(World level, AxisAlignedBB aabb)
     {
         if (CompatManager.isValkyrienSkiesLoaded())
         {   return CompatManager.Valkyrien.transformWorldToShip(level, aabb);
         }
-        return aabb;
+        return new HashSet(){{
+            add(aabb);
+        }};
     }
 
     /**
@@ -227,7 +238,7 @@ public abstract class WorldHelper
      */
     public static boolean canSeeSky(World level, BlockPos pos, int maxDistance)
     {
-        BlockPos worldPos = shipyardToWorld(level, pos);
+        BlockPos worldPos = sublevelToWorld(level, pos);
         if (!worldPos.equals(pos))
         {
             return checkSkyColumn(level, pos, maxDistance)
@@ -318,13 +329,14 @@ public abstract class WorldHelper
 
     public static Optional<StructureFeature<?, ?>> getStructureAt(World level, BlockPos pos)
     {
-        if (!(level instanceof ServerWorld) || !level.isLoaded(pos)) return Optional.empty();
+        BlockPos finalPos = sublevelToWorld(level, pos);
+        if (!(level instanceof ServerWorld) || !level.isLoaded(finalPos)) return Optional.empty();
 
         ServerWorld serverLevel = ((ServerWorld) level);
         StructureManager structureManager = serverLevel.structureFeatureManager();
 
         // Iterate over all structures at the position (ignores Y level)
-        for (Map.Entry<Structure<?>, LongSet> entry : level.getChunk(pos).getAllReferences().entrySet())
+        for (Map.Entry<Structure<?>, LongSet> entry : level.getChunk(finalPos).getAllReferences().entrySet())
         {
             Structure<?> structure = entry.getKey();
             LongSet strucCoordinates = entry.getValue();
@@ -336,10 +348,10 @@ public abstract class WorldHelper
                 // Get the structure start
                 StructureStart<?> structurestart = structureManager.getStartForFeature(sectionpos, structure, level.getChunk(sectionpos.x(), sectionpos.z(), ChunkStatus.STRUCTURE_STARTS));
 
-                if (structurestart != null && structurestart.isValid() && structurestart.getBoundingBox().isInside(pos))
+                if (structurestart != null && structurestart.isValid() && structurestart.getBoundingBox().isInside(finalPos))
                 {
                     // If the structure has a piece at the position, get the temperature
-                    if (structurestart.getPieces().stream().anyMatch(piece -> piece.getBoundingBox().isInside(pos)))
+                    if (structurestart.getPieces().stream().anyMatch(piece -> piece.getBoundingBox().isInside(finalPos)))
                     {
                         ResourceLocation structureId = structure.delegate.name();
                         if (structureId == null)
@@ -386,7 +398,7 @@ public abstract class WorldHelper
 
     public static boolean isRainingAt(World level, BlockPos pos)
     {
-        pos = shipyardToWorld(level, pos);
+        pos = sublevelToWorld(level, pos);
         return level.isRaining() && level.getBiomeManager().getBiome(pos).getPrecipitation() == Biome.RainType.RAIN
             && canSeeSky(level, pos.above(), level.getMaxBuildHeight())
             && !CompatManager.SereneSeasons.isColdEnoughToSnow(level, pos);
@@ -472,7 +484,7 @@ public abstract class WorldHelper
                 pos.set(vec.x, vec.y, vec.z);
 
                 // Return the first entity in the current block, or continue if there is none
-                List<Entity> entities = level.getEntitiesOfClass(Entity.class, new AxisAlignedBB(pos), filter);
+                List<Entity> entities = getEntitiesOfClass(Entity.class, level, new AxisAlignedBB(pos), filter);
                 if (!entities.isEmpty()) return entities.get(0);
             }
         }
@@ -580,6 +592,32 @@ public abstract class WorldHelper
                             CSMath.clamp(pos.z, entity.getZ() - playerRadius, entity.getZ() + playerRadius));
     }
 
+    public static List<Entity> getEntities(World level, AxisAlignedBB aabb, Predicate<? super Entity> predicate)
+    {
+        List<Entity> entities = level.getEntities((Entity) null, aabb, predicate);
+        Collection<AxisAlignedBB> shipyardAABBs = worldToSublevel(level, aabb);
+        for (AxisAlignedBB shipyardAABB : shipyardAABBs)
+        {
+            if (!shipyardAABB.equals(aabb))
+            {   entities.addAll(level.getEntities((Entity) null, shipyardAABB, predicate));
+            }
+        }
+        return entities.stream().distinct().collect(Collectors.toList());
+    }
+
+    public static <T extends Entity> List<T> getEntitiesOfClass(Class<T> clazz, World level, AxisAlignedBB aabb, Predicate<? super Entity> predicate)
+    {
+        List<T> entities = level.getEntitiesOfClass(clazz, aabb, predicate);
+        Collection<AxisAlignedBB> shipyardAABBs = worldToSublevel(level, aabb);
+        for (AxisAlignedBB shipyardAABB : shipyardAABBs)
+        {
+            if (!shipyardAABB.equals(aabb))
+            {   entities.addAll(level.getEntitiesOfClass(clazz, shipyardAABB, predicate));
+            }
+        }
+        return entities.stream().distinct().collect(Collectors.toList());
+    }
+
     /**
      * Merges the entity's server-side persistent data into the client-side persistent data
      * @param destination The player to send the data to. If null, sends to all tracking entities
@@ -674,7 +712,7 @@ public abstract class WorldHelper
 
     public static double getWaterTemperatureAt(World level, BlockPos pos)
     {
-        pos = shipyardToWorld(level, pos);
+        pos = sublevelToWorld(level, pos);
         Biome biome = level.getBiome(pos);
         double biomeTemp = CSMath.averagePair(getBiomeTemperatureRange(level, biome));
         double defaultWaterTemp = getDefaultWaterTemp(biomeTemp);
@@ -708,7 +746,7 @@ public abstract class WorldHelper
      */
     public static double getRoughTemperatureAt(World level, BlockPos pos, int flags)
     {
-        pos = shipyardToWorld(level, pos);
+        pos = sublevelToWorld(level, pos);
         boolean sensitive = (flags & 1) != 0;
         boolean forceUpdate = (flags & 2) != 0;
 
@@ -777,7 +815,7 @@ public abstract class WorldHelper
 
     public static double getTemperatureAt(World level, BlockPos pos)
     {
-        pos = shipyardToWorld(level, pos);
+        pos = sublevelToWorld(level, pos);
         DummyPlayer dummy = getDummyPlayer(level);
         // Move the dummy to the position being tested
         Vector3d newPos = CSMath.getCenterPos(pos);
@@ -932,7 +970,7 @@ public abstract class WorldHelper
 
     public static Pair<Integer, Integer> getInsulationAt(World level, BlockPos pos, int chunkRadius)
     {
-        pos = shipyardToWorld(level, pos);
+        pos = sublevelToWorld(level, pos);
         int maxCoolingLevel = 0;
         int maxHeatingLevel = 0;
         ChunkPos chunkPos = new ChunkPos(pos);

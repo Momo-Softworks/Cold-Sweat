@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.common.item;
 
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
+import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.entity.item.minecart.MinecartEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileHelper;
@@ -46,7 +47,7 @@ public class MinecartInsulationItem extends Item
                 {   player.getMainHandItem().shrink(1);
                 }
                 player.swing(Hand.MAIN_HAND, true);
-                world.playSound(null, minecart.blockPosition(), SoundEvents.LLAMA_SWAG, SoundCategory.PLAYERS, 1f, (float) ((Math.random() / 5) + 0.9));
+                WorldHelper.playEntitySound(SoundEvents.LLAMA_SWAG, minecart, SoundCategory.PLAYERS, 1f, (float) ((Math.random() / 5) + 0.9));
                 minecart.setDisplayBlockState(ModBlocks.MINECART_INSULATION.defaultBlockState());
                 minecart.setDisplayOffset(5);
                 return ActionResult.sidedSuccess(itemStack, world.isClientSide());

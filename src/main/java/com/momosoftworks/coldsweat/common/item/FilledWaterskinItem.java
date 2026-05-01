@@ -419,7 +419,7 @@ public class FilledWaterskinItem extends Item
                     }
 
                     // Apply the waterskin modifier to all entities in the box
-                    level.getEntitiesOfClass(PlayerEntity.class, aabb).forEach(player ->
+                    WorldHelper.getEntitiesOfClass(PlayerEntity.class, level, aabb, e -> true).forEach(player ->
                                                                                {
                                                                                    if (!affectedPlayers.contains(player))
                                                                                    {   // Apply the effect and store the player

@@ -38,6 +38,7 @@ import org.joml.Matrix4dc;
 import org.joml.primitives.AABBd;
 import org.joml.primitives.AABBd;
 import org.valkyrienskies.core.api.Ship;
+import org.valkyrienskies.core.game.ChunkClaim;
 import org.valkyrienskies.mod.common.VSGameUtilsKt;
 import org.valkyrienskies.mod.common.util.VectorConversionsMCKt;
 import sereneseasons.season.SeasonHooks;
@@ -47,8 +48,7 @@ import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
 import top.theillusivec4.curios.common.capability.CurioItemCapability;
 import top.theillusivec4.curios.common.capability.ItemizedCurioCapability;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -247,6 +247,15 @@ public class CompatManager
 
     public static abstract class Valkyrien
     {
+        public static boolean isInShipyard(World level, BlockPos pos)
+        {
+            int chunkX = pos.getX() >> 4;
+            int chunkZ = pos.getZ() >> 4;
+            chunkX = ChunkClaim.Companion.getClaimXIndex(chunkX);
+            chunkZ = ChunkClaim.Companion.getClaimZIndex(chunkZ);
+            return (-7000 <= chunkX && chunkX < 7001) & (3000 <= chunkZ && chunkZ < 7001);
+        }
+
         public static Vector3d translateToShipCoords(Vector3d pos, Ship ship)
         {
             if (ship != null)
@@ -266,24 +275,38 @@ public class CompatManager
             aabbd = aabbd.transform(ship.getShipToWorld());
             return VectorConversionsMCKt.toMinecraft(aabbd);
         }
-        public static AxisAlignedBB transformWorldToShip(World level, AxisAlignedBB aabb)
+        public static Collection<AxisAlignedBB> transformWorldToShip(World level, AxisAlignedBB aabb)
         {
-            AtomicReference<AxisAlignedBB> translated = new AtomicReference<>(aabb);
-            StreamSupport.stream(VSGameUtilsKt.getShipsIntersecting(level, aabb).spliterator(), false).findFirst().ifPresent(ship ->
-                translated.set(VectorConversionsMCKt.toMinecraft(VectorConversionsMCKt.set(new AABBd(), aabb).transform(ship.getWorldToShip()))));
-            return translated.get();
+            Iterable<Ship> ships = VSGameUtilsKt.getShipsIntersecting(level, aabb);
+            if (!ships.iterator().hasNext())
+            {
+                return new HashSet(){{
+                    add(aabb);
+                }};
+            }
+            Set<AxisAlignedBB> subAABBs = new HashSet<>();
+            ships.forEach(ship ->
+            {
+                AABBd aabbd = VectorConversionsMCKt.toJOML(aabb);
+                Matrix4dc worldToShip = ship.getWorldToShip();
+                aabbd = aabbd.transform(worldToShip);
+                subAABBs.add(VectorConversionsMCKt.toMinecraft(aabbd));
+            });
+            return Collections.unmodifiableSet(subAABBs);
         }
 
         public static BlockPos transformShipToWorld(World level, BlockPos pos)
         {
-            List<org.joml.Vector3d> shipTransforms = VSGameUtilsKt.transformToNearbyShipsAndWorld(level, pos.getX(), pos.getY(), pos.getZ(), 1);
+            List<org.joml.Vector3d> shipTransforms = VSGameUtilsKt.transformToNearbyShipsAndWorld(level, pos.getX(), pos.getY(), pos.getZ(), 0.5);
             if (shipTransforms.isEmpty()) return pos;
             org.joml.Vector3d shipCoords = shipTransforms.get(0);
             return new BlockPos(VectorConversionsMCKt.toMinecraft(shipCoords));
         }
         public static BlockPos transformWorldToShip(World level, BlockPos pos)
         {
-            Ship ship = VSGameUtilsKt.getShipManagingPos(level, pos);
+            Iterable<Ship> ships = VSGameUtilsKt.getShipsIntersecting(level, new AxisAlignedBB(pos));
+            if (!ships.iterator().hasNext()) return pos;
+            Ship ship = ships.iterator().next();
             if (ship == null) return pos;
             org.joml.Vector3d translated = new org.joml.Vector3d(pos.getX(), pos.getY(), pos.getZ());
             translated = ship.getWorldToShip().transformPosition(translated);

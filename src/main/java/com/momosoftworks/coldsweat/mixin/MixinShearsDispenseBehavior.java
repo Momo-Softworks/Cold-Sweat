@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.mixin;
 
 import com.momosoftworks.coldsweat.common.capability.handler.ShearableFurManager;
+import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.dispenser.BeehiveDispenseBehavior;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.EntityPredicates;
@@ -19,7 +20,7 @@ public class MixinShearsDispenseBehavior
     private static void tryShearFurCapability(ServerWorld level, BlockPos pos, CallbackInfoReturnable<Boolean> cir)
     {
         boolean success = false;
-        for (LivingEntity living : level.getEntitiesOfClass(LivingEntity.class, new AxisAlignedBB(pos), EntityPredicates.NO_SPECTATORS))
+        for (LivingEntity living : WorldHelper.getEntitiesOfClass(LivingEntity.class, level, new AxisAlignedBB(pos), EntityPredicates.NO_SPECTATORS))
         {   success |= ShearableFurManager.shear(living, null);
         }
         if (success) cir.setReturnValue(true);

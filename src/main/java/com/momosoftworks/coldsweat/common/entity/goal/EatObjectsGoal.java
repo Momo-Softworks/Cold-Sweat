@@ -49,7 +49,7 @@ public class EatObjectsGoal extends Goal
     public void start()
     {
         // Scan for ItemEntity in a 5-block range
-        List<Entity> items = this.entity.level.getEntities(this.entity, new AxisAlignedBB(this.entity.blockPosition()).inflate(5));
+        List<Entity> items = WorldHelper.getEntities(this.entity.level, new AxisAlignedBB(this.entity.blockPosition()).inflate(5), e -> true);
         for (Entity ent : items)
         {
             if (ent instanceof ItemEntity && ((ItemEntity) ent).getThrower() != null

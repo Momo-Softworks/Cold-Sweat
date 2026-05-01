@@ -94,4 +94,9 @@ public class SpreadPath
         return o instanceof SpreadPath
         && this.pos.equals(((SpreadPath) o).pos);
     }
+
+    @Override
+    public String toString()
+    {   return "SpreadPath{pos=" + pos + ", dir=" + direction + ", frozen=" + frozen + "}";
+    }
 }

@@ -102,6 +102,8 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     List<SpreadPath> paths = new ArrayList<>(this.getMaxPaths());
     // Used as a lookup table for detecting duplicate paths (faster than ArrayList#contains())
     Set<BlockPos> pathLookup = new HashSet<>(this.getMaxPaths());
+    // Positions attempted by the spread algorithm where canSpread returned false (blocked by walls, etc.)
+    Set<BlockPos> invalidPaths = new HashSet<>();
     Map<Pair<Integer, Integer>, Pair<Integer, Boolean>> seeSkyMap = new HashMap<>(this.getMaxPaths());
 
     List<EffectInstance> effects = new ArrayList<>();
@@ -173,6 +175,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         if (oldState == null || newState == null) return;
 
         if (level == this.level
+        && pos.distSqr(this.getBlockPos()) < Math.pow(this.getMaxRange(), 2)
         && this.pathLookup.contains(pos)
         && !oldState.getCollisionShape(level, pos).equals(newState.getCollisionShape(level, pos)))
         {
@@ -318,9 +321,9 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         {
             this.isEntityNearby = false;
             entities.clear();
-            AxisAlignedBB searchArea = new AxisAlignedBB(WorldHelper.shipyardToWorld(level, pos)).inflate(this.getMaxRange());
+            AxisAlignedBB searchArea = new AxisAlignedBB(WorldHelper.sublevelToWorld(level, pos)).inflate(this.getMaxRange());
 
-            for (Entity entity : this.level.getEntities((Entity) null, searchArea, EntityTempManager::isTemperatureEnabled))
+            for (Entity entity : WorldHelper.getEntities(this.level, searchArea, EntityTempManager::isTemperatureEnabled))
             {
                 if (entity instanceof LivingEntity)
                 {   this.entities.add((LivingEntity) entity);
@@ -400,11 +403,9 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
                     {
                         LivingEntity entity = entities.get(i);
                         if (entity == null || entity instanceof DummyPlayer) continue;
-                        AxisAlignedBB playerBB = entity.getBoundingBox();
-                        // Ensure height is at least 2 blocks tall
-                        playerBB = new AxisAlignedBB(playerBB.minX, playerBB.minY, playerBB.minZ, playerBB.maxX, Math.max(playerBB.maxY, playerBB.minY + 2), playerBB.maxZ);
-                        if (this.isAffectingPos(WorldHelper.getPositionsInAABB(WorldHelper.worldToShipyard(level, playerBB)))
-                        && !WorldHelper.canSeeSky(level, new BlockPos(playerBB.getCenter()), 64))
+                        BlockPos entityPos = WorldHelper.worldToSublevel(this.level, entity.blockPosition());
+                        // Check if entity is in valid position & insulate
+                        if (this.areaContainsEntity(entity) && !WorldHelper.canSeeSky(level, entityPos, 64))
                         {   isProvidingInsulation |= this.insulateEntity(entity);
                         }
                     }
@@ -487,8 +488,9 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
                 // Remove a 3D-checkerboard of paths after the Hearth is finished spreading to reduce pointless iteration overhead
                 // The Hearth is "finished spreading" when all paths are frozen
                 if (!spreading && (Math.abs(spY % 2) == 0) == (Math.abs(spX % 2) == Math.abs(spZ % 2)))
-                {   paths.remove(i);
-                    // Go back and reiterate over the new path at this index
+                {   int last = paths.size() - 1;
+                    if (i < last) paths.set(i, paths.get(last));
+                    paths.remove(last);
                     i--;
                 }
                 // Don't do anything else with this path
@@ -539,16 +541,21 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
                         SpreadPath newPath = new SpreadPath(tryPos, direction).setOrigin(spreadPath.origin);
 
                         // Check if this position hasn't been tried before, and if it's spread-able
-                        if (pathLookup.add(tryPos) && this.canSpread(level, pathPos, tryPos, state, spreadPath.direction, direction, newPath))
+                        if (pathLookup.add(tryPos))
                         {   // Add the new path to the list
-                            this.addPath(newPath);
+                            if (this.canSpread(level, pathPos, tryPos, state, spreadPath.direction, direction, newPath))
+                            {   this.addPath(newPath);
+                            }
+                            else invalidPaths.add(tryPos);
                         }
                     }
                 }
                 // Remove this path if it has skylight access
                 else
                 {   pathLookup.remove(pathPos);
-                    paths.remove(i);
+                    int last = paths.size() - 1;
+                    if (i < last) paths.set(i, paths.get(last));
+                    paths.remove(last);
                     i--;
                     continue;
                 }
@@ -938,18 +945,28 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         }
     }
 
-    public boolean isAffectingPos(List<BlockPos> positions)
+    public boolean areaContainsEntity(Entity entity)
+    {
+        AxisAlignedBB entityBB = entity.getBoundingBox().inflate(-0.1);
+        if (entityBB.getSize() <= 1)
+        {   entityBB = entityBB.inflate(0.5);
+        }
+        List<BlockPos> entityPositions = WorldHelper.getPositionsInAABB(entityBB);
+        // Valkyrien & Sable compat; translates player's world coords to contraption space
+        if (WorldHelper.isInSublevel(this.level, this.getBlockPos()))
+        {   entityPositions = entityPositions.stream().map(p -> WorldHelper.worldToSublevel(level, p)).collect(Collectors.toList());
+        }
+        return this.areaContainsPos(entityPositions);
+    }
+
+    public boolean areaContainsPos(List<BlockPos> positions)
     {
         if (positions.isEmpty()) return false;
-        for (int i = 0; i < this.paths.size(); i++)
+        for (int i = 0; i < positions.size(); i++)
         {
-            SpreadPath path = this.paths.get(i);
-            for (int j = 0; j < positions.size(); j++)
-            {
-                BlockPos pos = positions.get(j);
-                if (pos.equals(path.pos))
-                {   return true;
-                }
+            BlockPos pos = positions.get(i);
+            if (pathLookup.contains(pos) && !invalidPaths.contains(pos))
+            {   return true;
             }
         }
         return false;
@@ -962,6 +979,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         // Clear paths & lookup
         this.paths.clear();
         this.pathLookup.clear();
+        this.invalidPaths.clear();
         if (this.forceRebuild)
         {   seeSkyMap.clear();
         }

@@ -18,10 +18,11 @@ public class StormTempModifier extends TempModifier
     {
         /*if (!entity.level.isClientSide())
         {
+            BlockPos entityPos = WorldHelper.sublevelToWorld(entity.level, entity.blockPosition());
             WeatherManagerServer weatherManager = ServerTickHandler.getWeatherManagerFor(entity.level.dimension());
             float windSpeed = weatherManager.getWindManager().getWindSpeed();
 
-            WeatherObject weather = (WeatherObject) CompatManager.Weather2.getClosestStorm(entity.level, entity.blockPosition());
+            WeatherObject weather = (WeatherObject) CompatManager.Weather2.getClosestStorm(entity.level, entityPos);
             double stormTemp;
             // If there is a blizzard/sandstorm, apply the temperature and wind speed modifiers
             if (weather instanceof WeatherObjectParticleStorm storm)

@@ -114,7 +114,7 @@ public class SoulspringLampItem extends Item
                                                    .sendEntity(living);
                     }
 
-                    for (LivingEntity ent : level.getEntitiesOfClass(LivingEntity.class, bb))
+                    for (LivingEntity ent : WorldHelper.getEntitiesOfClass(LivingEntity.class, level, bb, e -> true))
                     {
                         if (!EntityTempManager.isTemperatureEnabled(ent))
                         {   continue;
