@@ -14,7 +14,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 
 import java.util.function.BiPredicate;
-import java.util.function.Predicate;
 
 public abstract class BiomeSearchingEdible extends Edible
 {
@@ -36,7 +35,8 @@ public abstract class BiomeSearchingEdible extends Edible
             Thread searchThread = new Thread(null, () ->
             {
                 // Search for a cold biome
-                Pair<BlockPos, Holder<Biome>> biomePair = ((ServerLevel) entity.level()).findClosestBiome3d(biome -> this.biomePredicate.test(entity.level(), biome), entity.blockPosition(), 2000, 32, 64);
+                BlockPos entityPos = WorldHelper.sublevelToWorld(entity.level(), entity.blockPosition());
+                Pair<BlockPos, Holder<Biome>> biomePair = ((ServerLevel) entity.level()).findClosestBiome3d(biome -> this.biomePredicate.test(entity.level(), biome), entityPos, 2000, 32, 64);
 
                 if (biomePair != null)
                 {

@@ -49,7 +49,7 @@ public class BlockTempModifier extends TempModifier
 
         Level level = entity.level();
         int range = this.getNBT().contains("RangeOverride", 3) ? this.getNBT().getInt("RangeOverride") : ConfigSettings.BLOCK_RANGE.get();
-        BlockPos blockPos = entity.blockPosition();
+        BlockPos blockPos = WorldHelper.sublevelToWorld(level, entity.blockPosition());
 
         int entX = blockPos.getX();
         int entY = blockPos.getY();

@@ -9,6 +9,7 @@ import com.momosoftworks.coldsweat.core.init.ModBlocks;
 import com.momosoftworks.coldsweat.core.init.ModItemComponents;
 import com.momosoftworks.coldsweat.core.init.ModMenus;
 import com.momosoftworks.coldsweat.util.item.ItemStackHelper;
+import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerLevel;
@@ -112,7 +113,7 @@ public class SewingContainer extends ItemCombinerMenu
                     // Remove the last insulation item added
                     cap = cap.removeInsulationItem(cap.getInsulationItem(cap.getInsulation().size() - 1));
                     // Play shear sound
-                    player.level().playSound(null, player.blockPosition(), SoundEvents.SHEEP_SHEAR, SoundSource.PLAYERS, 0.8F, 1.0F);
+                    WorldHelper.playEntitySound(SoundEvents.SHEEP_SHEAR, player, SoundSource.PLAYERS, 0.8F, 1.0F);
                 }
                 input1.set(ModItemComponents.ARMOR_INSULATION, cap);
             });
@@ -126,7 +127,7 @@ public class SewingContainer extends ItemCombinerMenu
                 this.growItem(1, -1);
             }
             // Play insulation sound
-            player.level().playSound(null, player.blockPosition(), SoundEvents.LLAMA_SWAG.value(), SoundSource.BLOCKS, 0.5f, 1f);
+            WorldHelper.playEntitySound(SoundEvents.LLAMA_SWAG.value(), player, SoundSource.BLOCKS, 0.5f, 1f);
 
             // Trigger advancement criteria
             if (player instanceof ServerPlayer serverPlayer)
@@ -136,7 +137,7 @@ public class SewingContainer extends ItemCombinerMenu
         // Get equip sound for the armor item
         if (stack.getItem() instanceof ArmorItem armor)
         {   SoundEvent equipSound = armor.getMaterial().value().equipSound().value();
-            player.level().playSound(null, player.blockPosition(), equipSound, SoundSource.BLOCKS, 1f, 1f);
+            WorldHelper.playEntitySound(equipSound, player, SoundSource.BLOCKS, 1f, 1f);
         }
         this.createResult();
     }

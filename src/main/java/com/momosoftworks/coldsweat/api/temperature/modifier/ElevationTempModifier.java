@@ -31,6 +31,7 @@ public class ElevationTempModifier extends TempModifier
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
         Level level = entity.level();
+        BlockPos translatedPos = WorldHelper.sublevelToWorld(level, entity.blockPosition());
 
         // If a dimension temperature override is defined, return
         DimensionTempData dimTempOverride = ConfigSettings.DIMENSION_TEMPS.get(entity.level().registryAccess()).get(level.dimensionTypeRegistration());
@@ -42,13 +43,13 @@ public class ElevationTempModifier extends TempModifier
 
         // Collect a list of depths taken at regular intervals around the entity, and their distances from the player
         List<Pair<BlockPos, Double>> depthTable = new ArrayList<>();
-        for (BlockPos pos : WorldHelper.getPositionGrid(entity.blockPosition(), this.getNBT().getInt("Samples"), 10))
+        for (BlockPos pos : WorldHelper.getPositionGrid(translatedPos, this.getNBT().getInt("Samples"), 10))
         {
-            depthTable.add(Pair.of(pos, CSMath.getDistance(entity.blockPosition(), pos)));
+            depthTable.add(Pair.of(pos, CSMath.getDistance(translatedPos, pos)));
         }
 
         int normalSkylight = entity.level().getBrightness(LightLayer.SKY, entity.blockPosition());
-        int translatedSkylight = entity.level().getBrightness(LightLayer.SKY, entity.blockPosition());
+        int translatedSkylight = entity.level().getBrightness(LightLayer.SKY, translatedPos);
         int skylight = Math.min(normalSkylight, translatedSkylight);
 
         List<Pair<BlockPos, RegionEntry>> depthRegions = new ArrayList<>(depthTable.size());

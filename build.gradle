@@ -113,6 +113,10 @@ repositories {
         name = "Registrate"
         url "https://maven.ithundxr.dev/snapshots"
     }
+    maven {
+        name = "Sable Companion"
+        url = "https://maven.ryanhcode.dev/releases"
+    }
 }
 
 dependencies {
@@ -129,8 +133,17 @@ dependencies {
     implementation "curse.maven:weather-storms-tornadoes-237746:6926103"
     implementation "curse.maven:coroutil-237749:5622966"
 
+    // Sable (Compat)
+    implementation "maven.modrinth:sable:1.0.6+mc1.21.1"
+    implementation "maven.modrinth:create-aeronautics:1.0.3+mc1.21.1"
+    jarJar(api("dev.ryanhcode.sable-companion:sable-companion-common-${project.minecraft_version}:[${project.sable_companion_version},)")) {
+        version {
+            prefer project.sable_companion_version
+        }
+    }
+
     // Create (Compat)
-    implementation "curse.maven:create-328085:7178775"
+    implementation "curse.maven:create-328085:7408951"
     compileOnly("net.createmod.ponder:Ponder-NeoForge-1.21.1:1.0.39")
     compileOnly "com.tterrag.registrate:Registrate:MC1.21-1.3.0+67"
 
@@ -143,6 +156,8 @@ dependencies {
     implementation "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
 
     // Runtime mods
+    runtimeOnly "curse.maven:boatload-337396:7118750"
+    runtimeOnly "curse.maven:blueprint-382216:7148094"
     runtimeOnly "curse.maven:spark-361579:6225208"
     runtimeOnly "curse.maven:biomes-o-plenty-220318:7251965"
     runtimeOnly "curse.maven:terrablender-neoforge-940057:6054947"

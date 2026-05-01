@@ -28,6 +28,10 @@ import dev.ghen.thirst.content.purity.ContainerWithPurity;
 import dev.ghen.thirst.content.purity.WaterPurity;
 import dev.ghen.thirst.content.registry.ThirstComponent;
 import dev.ghen.thirst.foundation.common.event.RegisterThirstValueEvent;
+import dev.ryanhcode.sable.ActiveSableCompanion;
+import dev.ryanhcode.sable.companion.SableCompanion;
+import dev.ryanhcode.sable.companion.math.BoundingBox3d;
+import dev.ryanhcode.sable.sublevel.SubLevel;
 import glitchcore.event.EventManager;
 import net.createmod.ponder.foundation.PonderIndex;
 import net.minecraft.core.BlockPos;
@@ -42,6 +46,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -63,9 +68,7 @@ import weather2.weathersystem.WeatherManagerServer;
 import weather2.weathersystem.storm.StormObject;
 import weather2.weathersystem.storm.WeatherObject;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @EventBusSubscriber
 public class CompatManager
@@ -88,10 +91,13 @@ public class CompatManager
     private static final boolean ICEBERG_LOADED = modLoaded("iceberg", "1.3.0");
     private static final boolean SPOILED_LOADED = modLoaded("spoiled", "6.2.0");
     private static final boolean SUPPLEMENTARIES_LOADED = modLoaded("supplementaries");
+    private static final boolean VALKYRIEN_SKIES_LOADED = modLoaded("valkyrienskies");
     private static final boolean TOUGH_AS_NAILS_LOADED = modLoaded("toughasnails");
     private static final boolean TWILIGHT_FOREST_LOADED = modLoaded("twilightforest");
     private static final boolean AETHER_LOADED = modLoaded("aether");
     private static final boolean REGIONS_UNEXPLORED_LOADED = modLoaded("regions_unexplored");
+    private static final boolean SABLE_LOADED = modLoaded("sable");
+    private static final boolean CREATE_AERONAUTICS = modLoaded("create_aeronautics");
 
     private static final List<String> SEASONS_MODS = new ArrayList<>();
 
@@ -200,6 +206,9 @@ public class CompatManager
     public static boolean isSupplementariesLoaded()
     {   return SUPPLEMENTARIES_LOADED;
     }
+    public static boolean isValkyrienSkiesLoaded()
+    {   return VALKYRIEN_SKIES_LOADED;
+    }
     public static boolean isToughAsNailsLoaded()
     {   return TOUGH_AS_NAILS_LOADED;
     }
@@ -211,6 +220,12 @@ public class CompatManager
     }
     public static boolean isRegionsUnexploredLoaded()
     {   return REGIONS_UNEXPLORED_LOADED;
+    }
+    public static boolean isSableLoaded()
+    {   return SABLE_LOADED;
+    }
+    public static boolean isCreateAeronauticsLoaded()
+    {   return CREATE_AERONAUTICS;
     }
 
     public static abstract class Curios
@@ -360,6 +375,11 @@ public class CompatManager
     //TODO: Reimplement when Valkyrien is updated to this version
     public static abstract class Valkyrien
     {
+        public static boolean isInShipyard(Level level, BlockPos pos)
+        {
+            return false;
+        }
+
         /*public static Vec3 translateToShipCoords(Vec3 pos, Ship ship)
         {
             if (ship != null)
@@ -371,39 +391,98 @@ public class CompatManager
             return pos;
         }*/
 
-        /**
-         * If any ship is managing the given position, translate the position to the corresponding coordinates in the shipyard
-         */
-        /*public static Vec3 transformIfShipPos(Level level, Vec3 pos)
+        public static AABB transformShipToWorld(Level level, AABB aabb)
         {
-            if (VALKYRIEN_SKIES_LOADED)
-            {
-                List<Vector3d> shipTransforms = VSGameUtilsKt.transformToNearbyShipsAndWorld(level, pos.x, pos.y, pos.z, 1);
-                if (shipTransforms.isEmpty()) return pos;
-                Vector3d shipCoords = shipTransforms.get(0);
-                return VectorConversionsMCKt.toMinecraft(shipCoords);
-            }
-            return pos;
-        }*/
+            /*
+            AABBd aabbd = VectorConversionsMCKt.toJOML(aabb);
+            Ship ship = VSGameUtilsKt.getLoadedShipManagingPos(level, VectorConversionsMCKt.toJOML(aabb.getCenter()));
+            if (ship == null) return aabb;
+            aabbd = aabbd.transform(ship.getShipToWorld());
+            return VectorConversionsMCKt.toMinecraft(aabbd);
+             */
+            return aabb;
+        }
+        public static Collection<AABB> transformWorldToShip(Level level, AABB aabb)
+        {
+            /*
+            AtomicReference<AABB> translated = new AtomicReference<>(aabb);
+            VSGameUtilsKt.transformFromWorldToNearbyShipsAndWorld(level, aabb, translated::set);
+            return translated.get();
+             */
+            return Set.of(aabb);
+        }
 
-        /*public static AABB transformIfShipPos(Level level, AABB aabb)
+        public static BlockPos transformShipToWorld(Level level, BlockPos pos)
         {
-            Vec3 min = transformIfShipPos(level, new Vec3(aabb.minX, aabb.minY, aabb.minZ));
-            Vec3 max = transformIfShipPos(level, new Vec3(aabb.maxX, aabb.maxY, aabb.maxZ));
-            return new AABB(min, max);
-        }*/
-
-        /*public static BlockPos transformIfShipPos(Level level, BlockPos pos)
-        {
-            if (VALKYRIEN_SKIES_LOADED)
-            {
-                List<Vector3d> shipTransforms = VSGameUtilsKt.transformToNearbyShipsAndWorld(level, pos.getX(), pos.getY(), pos.getZ(), 1);
-                if (shipTransforms.isEmpty()) return pos;
-                Vector3d shipCoords = shipTransforms.get(0);
-                return BlockPos.containing(VectorConversionsMCKt.toMinecraft(shipCoords));
-            }
+            /*
+            List<Vector3d> shipTransforms = VSGameUtilsKt.transformToNearbyShipsAndWorld(level, pos.getX(), pos.getY(), pos.getZ(), 1);
+            if (shipTransforms.isEmpty()) return pos;
+            Vector3d shipCoords = shipTransforms.get(0);
+            return BlockPos.containing(VectorConversionsMCKt.toMinecraft(shipCoords));
+             */
             return pos;
-        }*/
+        }
+        public static BlockPos transformWorldToShip(Level level, BlockPos pos)
+        {
+            /*
+            Ship ship = VSGameUtilsKt.getLoadedShipManagingPos(level, pos);
+            if (ship == null) return pos;
+            Vector3d translated = new Vector3d(pos.getX(), pos.getY(), pos.getZ());
+            translated = ship.getWorldToShip().transformPosition(translated);
+            return BlockPos.containing(VectorConversionsMCKt.toMinecraft(translated));
+             */
+            return pos;
+        }
+    }
+
+    public static abstract class Sable
+    {
+        public static final ActiveSableCompanion COMPANION = (ActiveSableCompanion) SableCompanion.INSTANCE;
+
+        public static boolean isInPlotGrid(Level level, BlockPos pos)
+        {   return COMPANION.isInPlotGrid(level, pos);
+        }
+
+        public static AABB transformSublToWorld(Level level, AABB aabb)
+        {
+            if (!COMPANION.isInPlotGrid(level, aabb.getCenter())) return aabb;
+            SubLevel subLevel = COMPANION.getContaining(level, aabb.getCenter());
+            if (subLevel == null) return aabb;
+            Vec3 aabbMin = subLevel.logicalPose().transformPosition(new Vec3(aabb.minX, aabb.minY, aabb.minZ));
+            Vec3 aabbMax = subLevel.logicalPose().transformPosition(new Vec3(aabb.maxX, aabb.maxY, aabb.maxZ));
+            return new AABB(aabbMin, aabbMax);
+        }
+
+        public static Collection<AABB> transformWorldToSubl(Level level, AABB aabb)
+        {
+            Iterable<SubLevel> subLevels = COMPANION.getAllIntersecting(level, new BoundingBox3d(aabb));
+            if (!subLevels.iterator().hasNext()) return Set.of(aabb);
+            Set<AABB> subAABBs = new HashSet<>();
+            subLevels.forEach(subLevel ->
+            {
+                Vec3 aabbMin = subLevel.logicalPose().transformPositionInverse(new Vec3(aabb.minX, aabb.minY, aabb.minZ));
+                Vec3 aabbMax = subLevel.logicalPose().transformPositionInverse(new Vec3(aabb.maxX, aabb.maxY, aabb.maxZ));
+                subAABBs.add(new AABB(aabbMin, aabbMax));
+            });
+            return Collections.unmodifiableSet(subAABBs);
+        }
+
+        public static BlockPos transformSublToWorld(Level level, BlockPos pos)
+        {
+            if (!COMPANION.isInPlotGrid(level, pos)) return pos;
+            Vec3 transformed = COMPANION.projectOutOfSubLevel(level, new Vec3(pos.getX(), pos.getY(), pos.getZ()));
+            return BlockPos.containing(transformed);
+        }
+
+        public static BlockPos transformWorldToSubl(Level level, BlockPos pos)
+        {
+            if (COMPANION.isInPlotGrid(level, pos)) return pos;
+            Iterator<SubLevel> iter = COMPANION.getAllIntersecting(level, new BoundingBox3d(pos)).iterator();
+            if (!iter.hasNext()) return pos;
+            SubLevel subLevel = iter.next();
+            Vec3 transformed = subLevel.logicalPose().transformPositionInverse(new Vec3(pos.getX(), pos.getY(), pos.getZ()));
+            return BlockPos.containing(transformed);
+        }
     }
 
     /* Compat Events */
