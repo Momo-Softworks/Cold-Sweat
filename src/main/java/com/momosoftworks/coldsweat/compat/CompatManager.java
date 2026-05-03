@@ -297,10 +297,11 @@ public class CompatManager
 
         public static BlockPos transformShipToWorld(World level, BlockPos pos)
         {
-            List<org.joml.Vector3d> shipTransforms = VSGameUtilsKt.transformToNearbyShipsAndWorld(level, pos.getX(), pos.getY(), pos.getZ(), 0.5);
-            if (shipTransforms.isEmpty()) return pos;
-            org.joml.Vector3d shipCoords = shipTransforms.get(0);
-            return new BlockPos(VectorConversionsMCKt.toMinecraft(shipCoords));
+            Ship ship = VSGameUtilsKt.getShipManagingPos(level, pos);
+            if (ship == null) return pos;
+            org.joml.Vector3d translated = new org.joml.Vector3d(pos.getX(), pos.getY(), pos.getZ());
+            translated = ship.getShipToWorld().transformPosition(translated);
+            return new BlockPos(VectorConversionsMCKt.toMinecraft(translated));
         }
         public static BlockPos transformWorldToShip(World level, BlockPos pos)
         {
