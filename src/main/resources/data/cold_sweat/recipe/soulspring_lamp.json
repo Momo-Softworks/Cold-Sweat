@@ -31,7 +31,9 @@
     "count": 1,
     "components":
     {
-      "cold_sweat:fuel": 64
+      "cold_sweat:soulspring_data": {
+        "fuel": 64
+      }
     }
   }
 }

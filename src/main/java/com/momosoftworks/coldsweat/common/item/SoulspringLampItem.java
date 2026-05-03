@@ -19,6 +19,7 @@ import com.momosoftworks.coldsweat.util.item.ItemStackHelper;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -79,12 +80,12 @@ public class SoulspringLampItem extends Item
 
     private static void updateComponents(ItemStack stack)
     {
-        ItemStackHelper.ifPresent(stack, ModItemComponents.SOULSPRING_LAMP_FUEL, fuel ->
+        Double oldFuel = stack.get(ModItemComponents.SOULSPRING_LAMP_FUEL);
+        if (oldFuel != null)
         {
             stack.remove(ModItemComponents.SOULSPRING_LAMP_FUEL);
-            setFuel(stack, fuel);
-            return fuel;
-        });
+            setFuel(stack, oldFuel);
+        }
     }
 
     @Override
@@ -113,6 +114,7 @@ public class SoulspringLampItem extends Item
                     // Drain fuel
                     if (!(living instanceof Player player && player.isCreative() || living.isSpectator()))
                     {   addFuel(stack, -0.005 * CSMath.clamp(temp - max, 1, 3));
+                        Minecraft.getInstance().player.displayClientMessage(Component.literal("Fuel: " + getFuel(stack) + " / " + 64), true);
                     }
 
                     // Affect nearby players
