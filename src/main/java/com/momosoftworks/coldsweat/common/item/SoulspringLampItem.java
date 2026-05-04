@@ -114,7 +114,6 @@ public class SoulspringLampItem extends Item
                     // Drain fuel
                     if (!(living instanceof Player player && player.isCreative() || living.isSpectator()))
                     {   addFuel(stack, -0.005 * CSMath.clamp(temp - max, 1, 3));
-                        Minecraft.getInstance().player.displayClientMessage(Component.literal("Fuel: " + getFuel(stack) + " / " + 64), true);
                     }
 
                     // Affect nearby players
