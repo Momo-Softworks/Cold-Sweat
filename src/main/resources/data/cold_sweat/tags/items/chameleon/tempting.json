@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "#cold_sweat:chameleon/taming",
+    "#cold_sweat:chameleon/find_cold_biomes",
+    "#cold_sweat:chameleon/find_hot_biomes",
+    "#cold_sweat:chameleon/find_humid_biomes"
+  ]
+}
