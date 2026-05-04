@@ -1,4 +1,4 @@
-package com.momosoftworks.coldsweat.common.entity.goals;
+package com.momosoftworks.coldsweat.common.entity.goal;
 
 import com.momosoftworks.coldsweat.common.entity.Chameleon;
 import com.momosoftworks.coldsweat.common.entity.data.edible.ChameleonEdibles;
