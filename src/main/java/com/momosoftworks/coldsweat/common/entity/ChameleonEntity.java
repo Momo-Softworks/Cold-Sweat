@@ -7,6 +7,7 @@ import com.momosoftworks.coldsweat.common.entity.data.edible.ChameleonEdibles;
 import com.momosoftworks.coldsweat.common.entity.data.edible.Edible;
 import com.momosoftworks.coldsweat.common.entity.goal.EatObjectsGoal;
 import com.momosoftworks.coldsweat.common.entity.goal.LazyLookGoal;
+import com.momosoftworks.coldsweat.common.entity.goal.WorkingTemptGoal;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.EntityInit;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
@@ -59,6 +60,7 @@ import net.minecraft.network.datasync.DataParameter;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.*;
 
 @Mod.EventBusSubscriber
@@ -109,8 +111,7 @@ public class ChameleonEntity extends AnimalEntity
         this.goalSelector.addGoal(1, new PanicGoal(this, 1.6));
         this.goalSelector.addGoal(2, new BreedGoal(this, 1.0D));
         this.goalSelector.addGoal(3, new EatObjectsGoal(this, ModEntityTags.CHAMELEON_EATS));
-        this.goalSelector.addGoal(4, new TemptGoal(this, 1.25, Ingredient.of(ChameleonEdibles.EDIBLES.stream().map(edible -> edible.associatedItems().getValues()).flatMap(Collection::stream)
-                                                                                     .map(item -> (IItemProvider) () -> item).toArray(IItemProvider[]::new)), false));
+        this.goalSelector.addGoal(4, new WorkingTemptGoal(this, 1.25, ModItemTags.CHAMELEON_TEMPTING, false));
         this.goalSelector.addGoal(4, new FollowParentGoal(this, 1.1D));
         this.goalSelector.addGoal(5, new LazyLookGoal(this));
         this.goalSelector.addGoal(5, new LookAtGoal(this, PlayerEntity.class, 6.0F));
