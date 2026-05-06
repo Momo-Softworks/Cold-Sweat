@@ -206,7 +206,7 @@ public class WorldSettingsConfig
                             List.of("minecraft:old_growth_pine_taiga", 48, 62, "F"),
                             List.of("minecraft:old_growth_spruce_taiga", 48, 62, "F"),
                             List.of("minecraft:plains", 52, 84, "F"),
-                            List.of("minecraft:river", 59, 82, "F"),
+                            List.of("minecraft:river", "disable"),
                             List.of("minecraft:savanna", 70, 95, "F"),
                             List.of("minecraft:savanna_plateau", 76, 98, "F"),
                             List.of("minecraft:small_end_islands", 39, 70, "F"),
