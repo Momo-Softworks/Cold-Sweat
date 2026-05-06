@@ -62,7 +62,7 @@ public class BiomeTempModifier extends TempModifier
             Biome biome = level.getBiomeManager().getBiome(blockPos);
 
             BiomeTempData biomeTempData = ConfigSettings.BIOME_TEMPS.get(level.registryAccess()).get(biome);
-            if (CSMath.getIfNotNull(biomeTempData, BiomeTempData::isDisabled, false))
+            if (biomeTempData != null && biomeTempData.isDisabled())
             {   continue;
             }
             // Biome temp with time of day
@@ -82,6 +82,9 @@ public class BiomeTempModifier extends TempModifier
 
             // Tally number of biomes
             biomeCount++;
+        }
+        if (biomeCount == 0)
+        {   worldTemp = CSMath.average(ConfigSettings.MIN_TEMP.get(), ConfigSettings.MAX_TEMP.get());
         }
 
         worldTemp /= Math.max(1, biomeCount);
