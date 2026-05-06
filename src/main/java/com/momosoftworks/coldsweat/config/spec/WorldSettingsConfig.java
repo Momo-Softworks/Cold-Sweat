@@ -222,7 +222,7 @@ public class WorldSettingsConfig
                             Arrays.asList("minecraft:mushroom_fields", 61, 84, "F"),
                             Arrays.asList("minecraft:ocean", 39, 70, "F"),
                             Arrays.asList("minecraft:plains", 52, 84, "F"),
-                            Arrays.asList("minecraft:river", 59, 82, "F"),
+                            Arrays.asList("minecraft:river", "disable"),
                             Arrays.asList("minecraft:savanna", 70, 95, "F"),
                             Arrays.asList("minecraft:savanna_plateau", 76, 98, "F"),
                             Arrays.asList("minecraft:shattered_savanna", 67, 90, "F"),
