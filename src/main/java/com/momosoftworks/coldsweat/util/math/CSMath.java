@@ -373,6 +373,9 @@ public class CSMath
     {   return Math.sqrt(pos1.distSqr(pos2));
     }
 
+    public static double average(Number a, Number b)
+    {   return (a.doubleValue() + b.doubleValue()) / 2;
+    }
     public static double average(Number... values)
     {
         double sum = 0;
