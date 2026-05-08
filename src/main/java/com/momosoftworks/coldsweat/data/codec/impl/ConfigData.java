@@ -7,13 +7,16 @@ import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
+import com.momosoftworks.coldsweat.util.serialization.OptionalHolder;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.StringRepresentable;
 
 import javax.annotation.Nullable;
@@ -26,7 +29,7 @@ public abstract class ConfigData
     protected UUID id = UUID.randomUUID();
     protected Type configType = Type.JSON;
     protected NegatableList<String> requiredMods;
-    protected ResourceKey registryKey;
+    protected Holder holder;
 
     public static final Codec<NegatableList<String>> REQUIRED_MODS_CODEC = NegatableList.listCodec(Codec.STRING, true);
     public static final Codec<UUID> UUID_CODEC = Codec.STRING.xmap(UUID::fromString, UUID::toString);
@@ -55,10 +58,11 @@ public abstract class ConfigData
                 builder.add("required_mods", input.requiredMods(), REQUIRED_MODS_CODEC)
                        .add("config_type", input.configType(), TYPE_CODEC)
                        .add("id", input.uuid(), UUID_CODEC);
-                if (input.registryKey != null)
-                {   builder.add("registry_name", input.registryKey().registry(), ResourceLocation.CODEC);
-                    builder.add("registry_key", input.registryKey().location(), ResourceLocation.CODEC);
-                }
+                input.holder().flatMap(Holder::unwrapKey).ifPresent(key ->
+                {
+                    builder.add("registry_name", key.registry(), ResourceLocation.CODEC);
+                    builder.add("registry_key", key.location(), ResourceLocation.CODEC);
+                });
                 return builder;
             }
 
@@ -72,8 +76,15 @@ public abstract class ConfigData
                     instance.id = decodeFromMap("id", ops, input, UUID_CODEC, null);
                     ResourceLocation registry = decodeFromMap("registry_name", ops, input, ResourceLocation.CODEC, null);
                     ResourceLocation key = decodeFromMap("registry_key", ops, input, ResourceLocation.CODEC, null);
-                    if (registry != null && key != null)
-                    {   instance.registryKey = ResourceKey.create(ResourceKey.createRegistryKey(registry), key);
+                    // Set decoded object's holder reference if available
+                    if (registry != null && key != null && ops instanceof RegistryOps<O> registryOps)
+                    {
+                        registryOps.<T>registry(ResourceKey.createRegistryKey(registry)).ifPresent(registryGetter ->
+                        {
+                            ResourceKey<T> registryKey = ResourceKey.create(ResourceKey.createRegistryKey(registry), key);
+                            registryGetter.getHolder(registryKey).ifPresent(instance::setHolder);
+                        });
+
                     }
                     return DataResult.success(instance);
                 });
@@ -107,17 +118,8 @@ public abstract class ConfigData
     {   return requiredMods;
     }
 
-    public <T> ResourceKey<T> registryKey()
-    {   return (ResourceKey<T>) registryKey;
-    }
-
-    public <D extends ConfigData> Optional<? extends Holder<D>> getHolder(RegistryAccess registryAccess)
-    {
-        if (registryKey == null) return Optional.empty();
-        ResourceKey<? extends Registry<D>> regKey = (ResourceKey<? extends Registry<D>>) ModRegistries.getRegistryKey(((ResourceKey<D>) (ResourceKey) registryKey()).registry());
-        Registry<D> registry = registryAccess.registryOrThrow(regKey);
-
-        return registry.getHolder(registryKey());
+    public <T> Optional<Holder<T>> holder()
+    {   return Optional.ofNullable((Holder<T>) holder);
     }
 
     @Internal
@@ -131,8 +133,8 @@ public abstract class ConfigData
     }
 
     @Internal
-    public void setRegistryKey(ResourceKey<? extends ConfigData> registryKey)
-    {   this.registryKey = registryKey;
+    public <T> void setHolder(Holder<T> holder)
+    {   this.holder = holder;
     }
 
     @Override
@@ -142,6 +144,16 @@ public abstract class ConfigData
 
     public boolean areRequiredModsLoaded()
     {   return requiredMods.test(mod -> mod.equals("minecraft") || CompatManager.modLoaded(mod));
+    }
+
+    public <T> boolean is(TagKey<T> tag)
+    {
+        try
+        {   return this.<T>holder().map(h -> h.is(tag)).orElse(false);
+        }
+        catch (ClassCastException e)
+        {   return false;
+        }
     }
 
     @Override

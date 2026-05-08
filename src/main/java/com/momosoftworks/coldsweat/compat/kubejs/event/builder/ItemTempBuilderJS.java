@@ -38,6 +38,7 @@ public class ItemTempBuilderJS
     public NegatableList<EntityRequirement> entityPredicate = new NegatableList<>();
     public AttributeModifierMap attributes = new AttributeModifierMap();
     public Map<ResourceLocation, Double> immuneTempModifiers = new HashMap<>();
+    public boolean hideIfUnmet = false;
 
     public ItemTempBuilderJS()
     {}
@@ -140,12 +141,18 @@ public class ItemTempBuilderJS
         return this;
     }
 
+    public ItemTempBuilderJS hideIfUnmet(boolean hide)
+    {
+        this.hideIfUnmet = hide;
+        return this;
+    }
+
     public ItemTempData build()
     {
         ItemTempData data = new ItemTempData(this.itemPredicate, ImmutableList.copyOf(this.slots),
                                              this.temperature, this.trait, this.maxEffect,
                                              this.maxTemp, this.minTemp, this.entityPredicate,
-                                             this.attributes, this.immuneTempModifiers);
+                                             this.attributes, this.immuneTempModifiers, this.hideIfUnmet);
         data.setConfigType(ConfigData.Type.KUBEJS);
         return data;
     }

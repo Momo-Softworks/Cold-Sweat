@@ -6,10 +6,7 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.util.Temperature;
-import com.momosoftworks.coldsweat.client.gui.tooltip.ClientSoulspringTooltip;
-import com.momosoftworks.coldsweat.client.gui.tooltip.InsulationAttributeTooltip;
-import com.momosoftworks.coldsweat.client.gui.tooltip.InsulationTooltip;
-import com.momosoftworks.coldsweat.client.gui.tooltip.SoulspringTooltip;
+import com.momosoftworks.coldsweat.client.gui.tooltip.*;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
 import com.momosoftworks.coldsweat.common.item.SoulspringLampItem;
@@ -18,11 +15,15 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.enums.InsulationVisibility;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.SyncItemPredicatesMessage;
+import com.momosoftworks.coldsweat.data.codec.configuration.ItemTempData;
+import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.configuration.FoodData;
 import com.momosoftworks.coldsweat.data.codec.configuration.FuelData;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
+import com.momosoftworks.coldsweat.compat.CompatManager;
+import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.entity.EntityHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
@@ -59,13 +60,16 @@ public class TooltipHandler
 {
     public static final Style COLD = Style.EMPTY.withColor(3767039);
     public static final Style HOT = Style.EMPTY.withColor(16736574);
-    public static final Component EXPAND_TOOLTIP = new TextComponent("[").withStyle(ChatFormatting.DARK_GRAY)
+    public static final Component EXPAND_TOOLTIP_HINT = new TextComponent("[").withStyle(ChatFormatting.DARK_GRAY)
                .append(new TextComponent("Shift").withStyle(ChatFormatting.GRAY))
                .append(new TextComponent("]").withStyle(ChatFormatting.DARK_GRAY));
 
     private static int HOVERED_ITEM_UPDATE_COOLDOWN = 0;
     private static ItemStack HOVERED_STACK = ItemStack.EMPTY;
+    private static int HOVERED_SLOT = 0;
     public static HashMap<UUID, Boolean> HOVERED_STACK_PREDICATES = new HashMap<>();
+    public static boolean FETCHING_TOOLTIP = false;
+    public static List<Either<FormattedText, TooltipComponent>> LAST_TOOLTIP = new ArrayList<>();
 
     public static <T extends ConfigData> boolean passesRequirement(T element)
     {   return HOVERED_STACK_PREDICATES.getOrDefault(element.uuid(), true);
@@ -225,11 +229,7 @@ public class TooltipHandler
             if (strikethrough)
             {   params.add("strikethrough");
             }
-            MutableComponent newComponent = setComponentContents(component, params.toArray());
-            if (strikethrough)
-            {   newComponent.setStyle(Style.EMPTY.withColor(7561572));
-            }
-            return newComponent;
+            return setComponentContents(component, params.toArray());
         }
         return component;
     }
@@ -238,37 +238,48 @@ public class TooltipHandler
     public static void updateHoveredItem(RenderTooltipEvent.Pre event)
     {
         ItemStack stack = event.getItemStack();
-        if (ItemInsulationManager.getInsulatorsForStack(stack).isEmpty())
-        {   return;
-        }
 
         if (!HOVERED_STACK.equals(stack))
         {
+            if (stack.isEmpty())
+            {   HOVERED_STACK = stack;
+                LAST_TOOLTIP.clear();
+                return;
+            }
             int slotIndex = -1;
             EquipmentSlot equipmentSlot = null;
+            boolean isInventory = true;
 
             // If open screen is a container, get equipment slot and slot index
-            container:
+            findSlots:
             if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> menu)
             {
                 Slot hoveredSlot = menu.getSlotUnderMouse();
-                if (hoveredSlot == null) break container;
+                if (hoveredSlot == null) break findSlots;
 
                 slotIndex = hoveredSlot.getSlotIndex();
                 equipmentSlot = EntityHelper.getEquipmentSlot(slotIndex);
+                if (hoveredSlot.container != Minecraft.getInstance().player.getInventory())
+                {   isInventory = false;
+                }
             }
 
-            if (stack.isEmpty())
-            {   HOVERED_STACK = stack;
-            }
-            else if (HOVERED_ITEM_UPDATE_COOLDOWN <= 0)
+            if (HOVERED_ITEM_UPDATE_COOLDOWN <= 0)
             {
                 HOVERED_STACK = stack;
                 HOVERED_ITEM_UPDATE_COOLDOWN = 5;
-                if (slotIndex >= 0)
-                {   ColdSweatPacketHandler.INSTANCE.sendToServer(SyncItemPredicatesMessage.fromClient(slotIndex, equipmentSlot));
+                if (slotIndex >= 0 && SyncItemPredicatesMessage.hasDataToSend(stack))
+                {
+                    if (slotIndex != HOVERED_SLOT)
+                    {   FETCHING_TOOLTIP = true;
+                        HOVERED_SLOT = slotIndex;
+                    }
+                    ColdSweatPacketHandler.INSTANCE.sendToServer(SyncItemPredicatesMessage.fromClient(slotIndex, equipmentSlot, isInventory));
                 }
             }
+        }
+        if (FETCHING_TOOLTIP && LAST_TOOLTIP.isEmpty())
+        {   event.setCanceled(true);
         }
     }
 
@@ -283,6 +294,12 @@ public class TooltipHandler
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void addCustomTooltips(RenderTooltipEvent.GatherComponents event)
     {
+        if (FETCHING_TOOLTIP && !LAST_TOOLTIP.isEmpty())
+        {
+            event.getTooltipElements().clear();
+            event.getTooltipElements().addAll(LAST_TOOLTIP);
+            return;
+        }
         ItemStack stack = event.getItemStack();
         Item item = stack.getItem();
         var elements = event.getTooltipElements();
@@ -300,10 +317,15 @@ public class TooltipHandler
         if (stack.getItem() instanceof SoulspringLampItem)
         {
             if (!isShiftDown() && ConfigSettings.ENABLE_HINTS.get())
-            {   elements.add(tooltipStartIndex, Either.left(EXPAND_TOOLTIP));
+            {   elements.add(tooltipStartIndex, Either.left(EXPAND_TOOLTIP_HINT));
             }
             elements.add(tooltipStartIndex, Either.right(new SoulspringTooltip(stack.getOrCreateTag().getDouble("Fuel"))));
         }
+
+        /*
+         Tooltip for item temperature
+         */
+        addItemTempsTooltip(elements, stack, tooltipEndIndex);
 
         /*
          Tooltip for food temperature
@@ -345,7 +367,7 @@ public class TooltipHandler
             // Don't add our own section title if one already exists
             if (!foodTemps.isEmpty() && dietTooltipSectionIndex == -1)
             {
-                elements.add(tooltipEndIndex, Either.left(new TranslatableComponent("tooltip.cold_sweat.consumed").withStyle(ChatFormatting.GRAY)));
+                elements.add(tooltipEndIndex, Either.left(new TranslatableComponent("tooltip.cold_sweat.section.consumed").withStyle(ChatFormatting.GRAY)));
                 elements.add(tooltipEndIndex, Either.left(new TextComponent("")));
             }
         }
@@ -365,6 +387,9 @@ public class TooltipHandler
         // Add unmet requirement hints
         if (ConfigSettings.ENABLE_HINTS.get())
         {   addUnmetRequirementHints(elements, unmetLabelIndex, allUnmetInsulation);
+        }
+        if (FETCHING_TOOLTIP)
+        {   LAST_TOOLTIP = elements;
         }
     }
 
@@ -476,10 +501,10 @@ public class TooltipHandler
                         if (!strikethrough && i > unmetAttributeIndex)
                         {
                             elements.remove(i);
-                            elements.add(unmetAttributeIndex, Either.right(new InsulationAttributeTooltip(component, Minecraft.getInstance().font, strikethrough)));
+                            elements.add(unmetAttributeIndex, Either.right(new ConditionalTooltip(component, Minecraft.getInstance().font, strikethrough, Icon.INSULATION.get())));
                             i--;
                         }
-                        else elements.set(i, Either.right(new InsulationAttributeTooltip(component, Minecraft.getInstance().font, strikethrough)));
+                        else elements.set(i, Either.right(new ConditionalTooltip(component, Minecraft.getInstance().font, strikethrough, Icon.INSULATION.get())));
                     }
                 }
             }
@@ -500,14 +525,14 @@ public class TooltipHandler
                 if (!addedUnmetLabel)
                 {
                     MutableComponent unmetAttributesTooltip = new TranslatableComponent("tooltip.cold_sweat.unmet_attributes").withStyle(ChatFormatting.RED);
-                    elements.add(unmetLabelIndex, Either.right(new InsulationAttributeTooltip(unmetAttributesTooltip, Minecraft.getInstance().font, false)));
+                    elements.add(unmetLabelIndex, Either.right(new ConditionalTooltip(unmetAttributesTooltip, Minecraft.getInstance().font, false, Icon.INSULATION.get())));
                     addedUnmetLabel = true;
                 }
                 MutableComponent hintText = hint.get().getText();
                 if (!hintText.getString().isEmpty())
                 {
                     hintText.setStyle(hintText.getStyle().withColor(7561572));
-                    elements.add(unmetLabelIndex + hintIndex + 1, Either.right(new InsulationAttributeTooltip(hintText, Minecraft.getInstance().font, true)));
+                    elements.add(unmetLabelIndex + hintIndex + 1, Either.right(new ConditionalTooltip(hintText, Minecraft.getInstance().font, true, Icon.INSULATION.get())));
                 }
             }
         }
@@ -525,6 +550,98 @@ public class TooltipHandler
         else if (!insulator.hideIfUnmet())
         {   if (!isEmpty) unmetInsulation.add(insulator);
             allUnmetInsulation.add(insulator);
+        }
+    }
+
+    private static void addItemTempsTooltip(List<Either<FormattedText, TooltipComponent>> elements, ItemStack stack, int startIndex)
+    {
+        Map<List<Either<IntegerBounds, ItemTempData.SlotType>>, Map<Temperature.Trait, Double>> tempMap = new HashMap<>();
+        Map<List<Either<IntegerBounds, ItemTempData.SlotType>>, Map<Temperature.Trait, Double>> unmetTempMap = new HashMap<>();
+        for (ItemTempData tempData : ConfigSettings.ITEM_TEMPERATURES.get().get(stack.getItem()))
+        {
+            boolean passes = passesRequirement(tempData);
+            double temp = tempData.temperature();
+            Temperature.Trait trait = tempData.trait();
+            for (Either<IntegerBounds, ItemTempData.SlotType> slot : tempData.slots())
+            {
+                if (!passes && tempData.hideIfUnmet()) continue;
+                List<Either<IntegerBounds, ItemTempData.SlotType>> slotKey = CSMath.arrayList(slot);
+                tempMap.computeIfAbsent(slotKey, k -> new HashMap<>()).merge(trait, temp, Double::sum);
+                if (!passes)
+                {   unmetTempMap.computeIfAbsent(slotKey, k -> new HashMap<>()).merge(trait, temp, Double::sum);
+                }
+            }
+        }
+        // Merge entries with same values
+        Map<Map<Temperature.Trait, Double>, List<Either<IntegerBounds, ItemTempData.SlotType>>> mergedTempMap = new LinkedHashMap<>();
+        for (Map.Entry<List<Either<IntegerBounds, ItemTempData.SlotType>>, Map<Temperature.Trait, Double>> entry : tempMap.entrySet())
+        {   mergedTempMap.computeIfAbsent(entry.getValue(), k -> new ArrayList<>()).addAll(entry.getKey());
+        }
+        Map<Map<Temperature.Trait, Double>, List<Either<IntegerBounds, ItemTempData.SlotType>>> mergedUnmetTempMap = new LinkedHashMap<>();
+        for (Map.Entry<List<Either<IntegerBounds, ItemTempData.SlotType>>, Map<Temperature.Trait, Double>> entry : unmetTempMap.entrySet())
+        {   mergedUnmetTempMap.computeIfAbsent(entry.getValue(), k -> new ArrayList<>()).addAll(entry.getKey());
+        }
+        int index = startIndex;
+        if (!mergedTempMap.isEmpty())
+        {   elements.add(index++, Either.left(new TextComponent("")));
+        }
+        for (Map.Entry<Map<Temperature.Trait, Double>, List<Either<IntegerBounds, ItemTempData.SlotType>>> entry : mergedTempMap.entrySet())
+        {
+            Map<Temperature.Trait, Double> traitTempMap = entry.getKey();
+            List<Either<IntegerBounds, ItemTempData.SlotType>> slots = entry.getValue();
+            if (slots.size() == 1)
+            {
+                Either<IntegerBounds, ItemTempData.SlotType> slot = slots.get(0);
+                MutableComponent sectionTitle = slot.map(bounds -> new TranslatableComponent("tooltip.cold_sweat.section.slot_range", bounds.min(), bounds.max()),
+                                                         slotType -> new TranslatableComponent("tooltip.cold_sweat.section.slot_single", slotType.getFormattedName()));
+                elements.add(index, Either.left(sectionTitle.withStyle(ChatFormatting.GRAY)));
+            }
+            else
+            {
+                slots.sort(Comparator.comparing(slot -> slot.map(bounds -> 1, slotType -> 0)));
+                List<String> slotNames = slots.stream().map(either -> either.map(IntegerBounds::toString, ItemTempData.SlotType::getFormattedName)).toList();
+                MutableComponent sectionTitle = new TranslatableComponent("tooltip.cold_sweat.section.slots_list", slotNames);
+                elements.add(index, Either.left(sectionTitle.withStyle(ChatFormatting.GRAY)));
+            }
+            index++;
+            for (Map.Entry<Temperature.Trait, Double> tempEntry : traitTempMap.entrySet())
+            {
+                Temperature.Trait trait = tempEntry.getKey();
+                double effect = tempEntry.getValue();
+                if (trait == Temperature.Trait.CORE)
+                {   effect *= 20;
+                }
+                double tempNum = trait.isForWorld() ? Temperature.convert(effect, Temperature.Units.MC, ConfigSettings.UNITS.get(), false) : effect;
+                MutableComponent tempText = new TextComponent((tempNum > 0 ? "+" : "") + CSMath.formatDoubleOrInt(CSMath.round(tempNum, 2)));
+
+                Style style;
+                int sign = Double.compare(tempNum, 0);
+                if (trait.isProportional())
+                {
+                    if (sign < 0 == trait.isNegativeValueGood())
+                    {   style = Style.EMPTY.withColor(ChatFormatting.BLUE);
+                    }
+                    else style = Style.EMPTY.withColor(ChatFormatting.RED);
+                }
+                else
+                {
+                    if (sign > 0)
+                    {   style = HOT;
+                    }
+                    else if (sign < 0)
+                    {   style = COLD;
+                    }
+                    else style = Style.EMPTY;
+                }
+                MutableComponent tooltipText = new TranslatableComponent("tooltip.cold_sweat.temperature_effect", tempText, trait.getFormattedName());
+                if (trait == Temperature.Trait.CORE)
+                {   tooltipText = new TranslatableComponent("tooltip.cold_sweat.per_second", tooltipText);
+                }
+                if (mergedUnmetTempMap.containsKey(traitTempMap))
+                {   elements.add(index, Either.right(new ConditionalTooltip(tooltipText, Minecraft.getInstance().font, true, null)));
+                }
+                else elements.add(index, Either.left(tooltipText.withStyle(style)));
+            }
         }
     }
 

@@ -29,11 +29,9 @@ import java.util.function.Supplier;
 @OnlyIn(Dist.CLIENT)
 public class ClientInsulationTooltip implements ClientTooltipComponent
 {
-    public static final ResourceLocation TOOLTIP = new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar.png");
-    public static final ResourceLocation TOOLTIP_HC = new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar_hc.png");
-    public static final Supplier<ResourceLocation> TOOLTIP_LOCATION = () ->
-            ConfigSettings.HIGH_CONTRAST.get() ? TOOLTIP_HC
-                                               : TOOLTIP;
+    public static final ResourceLocation INSULATION_TOOLTIP_NORMAL = new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar.png");
+    public static final ResourceLocation INSULATION_TOOLTIP_CONTRAST = new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar_hc.png");
+    public static final Supplier<ResourceLocation> INSULATION_TOOLTIP = () -> ConfigSettings.HIGH_CONTRAST.get() ? INSULATION_TOOLTIP_CONTRAST : INSULATION_TOOLTIP_NORMAL;
 
     List<InsulatorData> insulation;
     Insulation.Slot slot;
@@ -83,7 +81,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
     @Override
     public void renderImage(Font font, int x, int y, PoseStack poseStack, ItemRenderer itemRenderer, int depth)
     {
-        RenderSystem.setShaderTexture(0, TOOLTIP_LOCATION.get());
+        RenderSystem.setShaderTexture(0, INSULATION_TOOLTIP.get());
 
         List<Insulation> posInsulation = new ArrayList<>();
         int extraInsulations = 0;
@@ -163,7 +161,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
     static boolean RECURSIVE = false;
     static void renderCell(PoseStack poseStack, int x, int y, Insulation insulation)
     {
-        RenderSystem.setShaderTexture(0, TOOLTIP_LOCATION.get());
+        RenderSystem.setShaderTexture(0, INSULATION_TOOLTIP.get());
         double rounded = CSMath.roundNearest(Math.abs(insulation.getValue()), 0.25);
         // Determine cell temperature
         int uvX = 0;
@@ -190,7 +188,6 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         // Render background
         renderCellBackground(poseStack, x, y);
         // Render base cell
-        RenderSystem.setShaderTexture(0, TOOLTIP_LOCATION.get());
         Screen.blit(poseStack, x, y, 0, uvX, uvY, 6, 4, 36, 28);
         // Render color overlay for adaptive insulation
         if (insulation instanceof AdaptiveInsulation adaptive && adaptive.getFactor() != 0 && !RECURSIVE)
@@ -208,19 +205,19 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
 
     static void renderCellBackground(PoseStack poseStack, int x, int y)
     {
-        RenderSystem.setShaderTexture(0, TOOLTIP_LOCATION.get());
+        RenderSystem.setShaderTexture(0, INSULATION_TOOLTIP.get());
         // Render background
         Screen.blit(poseStack, x, y, 0, 0, 0, 6, 4, 36, 28);
     }
 
     static void renderIcon(PoseStack poseStack, int x, int y, Insulation.Slot slot, BarType type)
     {
-        RenderSystem.setShaderTexture(0, TOOLTIP_LOCATION.get());
+        RenderSystem.setShaderTexture(0, INSULATION_TOOLTIP.get());
         // icon
         switch (slot)
         {
-            case ITEM ->  Screen.blit(poseStack, x, y, 0, 28, 0,  8, 8, 36, 28);
-            case ARMOR -> Screen.blit(poseStack, x, y, 0, 28, 8,  8, 8, 36, 28);
+            case ITEM ->  Icon.INSULATION.get().render(poseStack, x, y, 0);
+            case ARMOR -> Screen.blit(poseStack, x, y, 0, 28, 8, 8, 8, 36, 28);
             case CURIO -> Screen.blit(poseStack, x, y, 0, 28, 16, 8, 8, 36, 28);
         }
         // positive/negative sign
@@ -234,7 +231,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
     static int renderBar(PoseStack poseStack, int x, int y, List<Insulation> insulations, int extraSlots, Insulation.Slot slot, ItemStack stack, BarType type)
     {
         extraSlots = Math.min(ItemInsulationManager.getInsulationSlots(stack), extraSlots);
-        RenderSystem.setShaderTexture(0, TOOLTIP_LOCATION.get());
+        RenderSystem.setShaderTexture(0, INSULATION_TOOLTIP.get());
         List<Insulation> sortedInsulation = Insulation.sort(insulations);
         setAdaptations(sortedInsulation, stack);
 
@@ -446,7 +443,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
     }
     static int renderEmptyBar(PoseStack poseStack, int x, int y, int size)
     {
-        RenderSystem.setShaderTexture(0, TOOLTIP_LOCATION.get());
+        RenderSystem.setShaderTexture(0, INSULATION_TOOLTIP.get());
         for (int i = 0; i < size; i++)
         {
             BorderSegment segment = getBorderSegment(size, i);
@@ -462,7 +459,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
 
     static void renderCellBorder(PoseStack poseStack, int x, int y, BorderSegment segment, BorderType type)
     {
-        RenderSystem.setShaderTexture(1, TOOLTIP_LOCATION.get());
+        RenderSystem.setShaderTexture(1, INSULATION_TOOLTIP.get());
         switch (type)
         {
             case DIVIDER -> Screen.blit(poseStack, x, y - 1, 0, 10, 0, 1, 6, 36, 28);

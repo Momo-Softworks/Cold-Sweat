@@ -15,6 +15,6 @@ public class RegisterTooltips
     {
         MinecraftForgeClient.registerTooltipComponentFactory(SoulspringTooltip.class, tooltip -> new ClientSoulspringTooltip(tooltip.getFuel()));
         MinecraftForgeClient.registerTooltipComponentFactory(InsulationTooltip.class, tooltip -> new ClientInsulationTooltip(tooltip.getInsulation(), tooltip.getSlot(), tooltip.getItem(), tooltip.isStrikethrough()));
-        MinecraftForgeClient.registerTooltipComponentFactory(InsulationAttributeTooltip.class, tooltip -> new ClientInsulationAttributeTooltip(tooltip.getOriginal(), tooltip.getFont(), tooltip.isStrikethrough()));
+        MinecraftForgeClient.registerTooltipComponentFactory(ConditionalTooltip.class, tooltip -> new ClientConditionalTooltip(tooltip.getOriginal(), tooltip.getFont(), tooltip.isStrikethrough(), tooltip.getIcon()));
     }
 }
