@@ -807,6 +807,11 @@ public class CSMath
     {   return new ArrayList<>(list);
     }
 
+    @SafeVarargs
+    public static <T> ArrayList<T> arrayList(T... elements)
+    {   return new ArrayList<>(Arrays.asList(elements));
+    }
+
     public static Class<?> getCallerClass(int depth)
     {
         StackTraceElement[] stElements = Thread.currentThread().getStackTrace();

@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.api.util.placement.Mode;
 import com.momosoftworks.coldsweat.api.util.placement.Order;
 import com.momosoftworks.coldsweat.api.util.placement.Placement;
 import com.momosoftworks.coldsweat.client.event.TooltipHandler;
+import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.entity.data.Preference;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
@@ -48,7 +49,7 @@ import java.util.*;
 
 public class FilledWaterskinItem extends Item
 {
-    public static final double EFFECT_RATE = 0.5;
+    public static final double DRAIN_RATE = 0.5;
     public static final String NBT_TEMPERATURE = "Temperature";
 
     public FilledWaterskinItem()
@@ -82,21 +83,18 @@ public class FilledWaterskinItem extends Item
     }
 
     @Override
-    public void inventoryTick(ItemStack itemstack, World world, Entity entity, int slot, boolean isSelected)
+    public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean isSelected)
     {
-        super.inventoryTick(itemstack, world, entity, slot, isSelected);
-        if (entity.tickCount % 5 == 0 && entity instanceof PlayerEntity)
+        super.inventoryTick(stack, world, entity, slot, isSelected);
+        if (EntityTempManager.isTemperatureEnabled(entity) && entity.tickCount % 5 == 0)
         {
-            PlayerEntity player = (PlayerEntity) entity;
-            double itemTemp = itemstack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
-            if (itemTemp != 0 && slot <= 8 || player.getOffhandItem().equals(itemstack))
+            double itemTemp = stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
+            boolean shouldDrain = ConfigSettings.ITEM_TEMPERATURES.get().get(stack.getItem()).stream().anyMatch(c -> c.test(entity, stack, slot, null));
+            if (shouldDrain)
             {
-                double drainAmt = (EFFECT_RATE / 20) * ConfigSettings.WATERSKIN_NEUTRALIZE_SPEED.get();
-                double newTemp = CSMath.shrink(itemTemp, drainAmt * 5);
-
-                double tempEffect = (EFFECT_RATE / 10) * ConfigSettings.WATERSKIN_HOTBAR_STRENGTH.get();
-                itemstack.getOrCreateTag().putDouble(FilledWaterskinItem.NBT_TEMPERATURE, newTemp);
-                Temperature.addModifier(player, new WaterskinTempModifier(tempEffect * CSMath.sign(itemTemp)).expires(5), Temperature.Trait.CORE, Placement.LAST);
+                double drainAmt = (DRAIN_RATE / 20) * ConfigSettings.WATERSKIN_NEUTRALIZE_SPEED.get() * 4;
+                double newTemp = CSMath.shrink(itemTemp, drainAmt);
+                stack.getOrCreateTag().putDouble(FilledWaterskinItem.NBT_TEMPERATURE, newTemp);
             }
         }
     }
@@ -274,21 +272,29 @@ public class FilledWaterskinItem extends Item
     {
         double temp = CSMath.round(stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE), 2);
         double multiplier = ConfigSettings.WATERSKIN_CONSUME_STRENGTH.get() / 50d;
+        int useEffect = (int) (temp * multiplier);
 
         // Display filled state
         IFormattableTextComponent filledLabel = new TranslationTextComponent("item.cold_sweat.waterskin.filled").withStyle(TextFormatting.GRAY);
         if (ConfigSettings.ENABLE_HINTS.get() && !TooltipHandler.isShiftDown())
-            filledLabel.append(new StringTextComponent(" ").append(TooltipHandler.EXPAND_TOOLTIP));
+        {   filledLabel.append(new StringTextComponent(" ").append(TooltipHandler.EXPAND_TOOLTIP_HINT));
+        }
         tooltip.add(filledLabel);
 
         // Info tooltip for drinking/pouring functionality
-        int useEffect = (int) Math.round(temp * multiplier);
-        IFormattableTextComponent tempText = useEffect > 0  ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + useEffect).withStyle(TooltipHandler.HOT) :
-                                             useEffect == 0 ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + useEffect).withStyle(TextFormatting.WHITE)
-                                                            : new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", useEffect).withStyle(TooltipHandler.COLD);
-        tooltip.add(new StringTextComponent(""));
-        tooltip.add(new TranslationTextComponent("tooltip.cold_sweat.used").withStyle(TextFormatting.GRAY));
-        tooltip.add(tempText);
+        if (useEffect != 0)
+        {
+            String useTempString = useEffect >= 0 ? "+" + useEffect : "" + useEffect;
+            String traitName = Temperature.Trait.CORE.getFormattedName();
+            IFormattableTextComponent tempText = new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", useTempString, traitName);
+            tempText = tempText.withStyle(useEffect > 0 ? TooltipHandler.HOT
+                                        : useEffect == 0 ? Style.EMPTY.withColor(TextFormatting.WHITE)
+                                        : TooltipHandler.COLD);
+            tooltip.add(new StringTextComponent(""));
+            tooltip.add(new TranslationTextComponent("tooltip.cold_sweat.section.used").withStyle(TextFormatting.GRAY));
+            tooltip.add(tempText);
+        }
+
 
         if (TooltipHandler.isShiftDown())
         {
@@ -306,18 +312,6 @@ public class FilledWaterskinItem extends Item
                 {   tooltip.add(2, new TranslationTextComponent(crouchAction, new StringTextComponent(crouchKey).withStyle(TextFormatting.GRAY)).withStyle(TextFormatting.DARK_GRAY));
                 }
             }
-
-            // Info tooltip for hotbar functionality
-            String perSecond = new TranslationTextComponent("tooltip.cold_sweat.per_second").getString();
-
-            tooltip.add(new StringTextComponent(""));
-            tooltip.add(new TranslationTextComponent("tooltip.cold_sweat.hotbar").withStyle(TextFormatting.GRAY));
-            double effectRate = EFFECT_RATE * ConfigSettings.WATERSKIN_HOTBAR_STRENGTH.get();
-            IFormattableTextComponent tempEffectText = (temp > 0  ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + CSMath.round(effectRate, 2)).withStyle(TooltipHandler.HOT) :
-                                                        temp == 0 ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+0").withStyle(TextFormatting.WHITE)
-                                                                  : new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "-" + CSMath.round(effectRate, 2)).withStyle(TooltipHandler.COLD))
-                        .append(perSecond);
-            tooltip.add(tempEffectText);
         }
 
         super.appendHoverText(stack, level, tooltip, advanced);

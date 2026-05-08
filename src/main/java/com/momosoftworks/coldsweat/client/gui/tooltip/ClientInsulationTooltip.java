@@ -29,11 +29,10 @@ import java.util.function.Supplier;
 @OnlyIn(Dist.CLIENT)
 public class ClientInsulationTooltip extends Tooltip
 {
-    private static final ResourceLocation TOOLTIP = new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar.png");
-    private static final ResourceLocation TOOLTIP_HC = new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar_hc.png");
-    public static final Supplier<ResourceLocation> TOOLTIP_LOCATION = () -> ConfigSettings.HIGH_CONTRAST.get()
-                                                                            ? TOOLTIP_HC
-                                                                            : TOOLTIP;
+    private static final ResourceLocation INSULATION_TOOLTIP_NORMAL = new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar.png");
+    private static final ResourceLocation INSULATION_TOOLTIP_CONTRAST = new ResourceLocation("cold_sweat:textures/gui/tooltip/insulation_bar_hc.png");
+    public static final Supplier<ResourceLocation> INSULATION_TOOLTIP = () -> ConfigSettings.HIGH_CONTRAST.get()
+                                                                            ? INSULATION_TOOLTIP_CONTRAST : INSULATION_TOOLTIP_NORMAL;
     private static final Minecraft MC = Minecraft.getInstance();
 
     List<InsulatorData> insulation;
@@ -84,7 +83,7 @@ public class ClientInsulationTooltip extends Tooltip
     @Override
     public void renderImage(FontRenderer font, int x, int y, MatrixStack poseStack, ItemRenderer itemRenderer, int depth)
     {
-        Minecraft.getInstance().textureManager.bind(TOOLTIP_LOCATION.get());
+        MC.textureManager.bind(INSULATION_TOOLTIP.get());
 
         List<Insulation> posInsulation = new ArrayList<>();
         int extraInsulations = 0;
@@ -166,7 +165,7 @@ public class ClientInsulationTooltip extends Tooltip
     static boolean RECURSIVE = false;
     static void renderCell(MatrixStack poseStack, int x, int y, Insulation insulation)
     {
-        Minecraft.getInstance().textureManager.bind(TOOLTIP_LOCATION.get());
+        MC.textureManager.bind(INSULATION_TOOLTIP.get());
         double rounded = CSMath.roundNearest(Math.abs(insulation.getValue()), 0.25);
         // Determine cell temperature
         int uvX = 0;
@@ -195,7 +194,6 @@ public class ClientInsulationTooltip extends Tooltip
         // Render background
         renderCellBackground(poseStack, x, y);
         // Render base cell
-        MC.textureManager.bind(TOOLTIP_LOCATION.get());
         Screen.blit(poseStack, x, y, 0, uvX, uvY, 6, 4, 28, 36);
         // Render color overlay for adaptive insulation
         if (insulation instanceof AdaptiveInsulation && ((AdaptiveInsulation) insulation).getFactor() != 0 && !RECURSIVE)
@@ -214,18 +212,18 @@ public class ClientInsulationTooltip extends Tooltip
 
     static void renderCellBackground(MatrixStack poseStack, int x, int y)
     {
-        MC.textureManager.bind(TOOLTIP_LOCATION.get());
+        MC.textureManager.bind(INSULATION_TOOLTIP.get());
         // Render background
         Screen.blit(poseStack, x, y, 0, 0, 0, 6, 4, 28, 36);
     }
 
     static void renderIcon(MatrixStack poseStack, int x, int y, Insulation.Slot slot, BarType type)
     {
-        MC.textureManager.bind(TOOLTIP_LOCATION.get());
+        MC.textureManager.bind(INSULATION_TOOLTIP.get());
         // icon
         switch (slot)
         {
-            case ITEM  : Screen.blit(poseStack, x, y, 0, 28, 0,  8, 8, 28, 36); break;
+            case ITEM  : Icon.INSULATION.get().render(poseStack, x, y, 0); break;
             case ARMOR : Screen.blit(poseStack, x, y, 0, 28, 8,  8, 8, 28, 36); break;
             case CURIO : Screen.blit(poseStack, x, y, 0, 28, 16, 8, 8, 28, 36); break;
         }
@@ -240,7 +238,7 @@ public class ClientInsulationTooltip extends Tooltip
     static int renderBar(MatrixStack poseStack, int x, int y, List<Insulation> insulations, int extraSlots, Insulation.Slot slot, ItemStack stack, BarType type)
     {
         extraSlots = Math.min(ItemInsulationManager.getInsulationSlots(stack), extraSlots);
-        MC.textureManager.bind(TOOLTIP_LOCATION.get());
+        MC.textureManager.bind(INSULATION_TOOLTIP.get());
         List<Insulation> sortedInsulation = Insulation.sort(insulations);
         setAdaptations(sortedInsulation, stack);
 
@@ -456,7 +454,7 @@ public class ClientInsulationTooltip extends Tooltip
     }
     static int renderEmptyBar(MatrixStack poseStack, int x, int y, int size)
     {
-        MC.textureManager.bind(TOOLTIP_LOCATION.get());
+        MC.textureManager.bind(INSULATION_TOOLTIP.get());
         for (int i = 0; i < size; i++)
         {
             BorderSegment segment = getBorderSegment(size, i);
@@ -472,7 +470,7 @@ public class ClientInsulationTooltip extends Tooltip
 
     static void renderCellBorder(MatrixStack poseStack, int x, int y, BorderSegment segment, BorderType type)
     {
-        MC.textureManager.bind(TOOLTIP_LOCATION.get());
+        MC.textureManager.bind(INSULATION_TOOLTIP.get());
         switch (type)
         {
             case DIVIDER : Screen.blit(poseStack, x, y - 1, 0, 10, 0, 1, 6, 28, 36); break;
