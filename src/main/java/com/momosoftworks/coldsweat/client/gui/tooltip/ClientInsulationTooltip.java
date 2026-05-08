@@ -25,11 +25,9 @@ import java.util.function.Supplier;
 
 public class ClientInsulationTooltip implements ClientTooltipComponent
 {
-    public static final ResourceLocation TOOLTIP = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/tooltip/insulation_bar.png");
-    public static final ResourceLocation TOOLTIP_HC = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/tooltip/insulation_bar_hc.png");
-    public static final Supplier<ResourceLocation> TOOLTIP_LOCATION = () ->
-            ConfigSettings.HIGH_CONTRAST.get() ? TOOLTIP_HC
-                                               : TOOLTIP;
+    public static final ResourceLocation INSULATION_TOOLTIP_NORMAL = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/tooltip/insulation_bar.png");
+    public static final ResourceLocation INSULATION_TOOLTIP_CONTRAST = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/tooltip/insulation_bar_hc.png");
+    public static final Supplier<ResourceLocation> INSULATION_TOOLTIP = () -> ConfigSettings.HIGH_CONTRAST.get() ? INSULATION_TOOLTIP_CONTRAST : INSULATION_TOOLTIP_NORMAL;
 
     List<InsulatorData> insulation;
     Insulation.Slot slot;
@@ -163,7 +161,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         // Render background
         renderCellBackground(graphics, x, y);
         // Render base cell
-        graphics.blit(TOOLTIP_LOCATION.get(), x, y, 0, uvX, uvY, 6, 4, 36, 28);
+        graphics.blit(INSULATION_TOOLTIP.get(), x, y, 0, uvX, uvY, 6, 4, 36, 28);
         // Render color overlay for adaptive insulation
         if (insulation instanceof AdaptiveInsulation adaptive && adaptive.getFactor() != 0 && !RECURSIVE)
         {
@@ -181,7 +179,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
     static void renderCellBackground(GuiGraphics graphics, int x, int y)
     {
         // Render background
-        graphics.blit(TOOLTIP_LOCATION.get(), x, y, 0, 0, 0, 6, 4, 36, 28);
+        graphics.blit(INSULATION_TOOLTIP.get(), x, y, 0, 0, 0, 6, 4, 36, 28);
     }
 
     static void renderIcon(GuiGraphics graphics, int x, int y, Insulation.Slot slot, BarType type)
@@ -189,15 +187,15 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         // icon
         switch (slot)
         {
-            case ITEM ->  graphics.blit(TOOLTIP_LOCATION.get(), x, y, 0, 28, 0,  8, 8, 36, 28);
-            case ARMOR -> graphics.blit(TOOLTIP_LOCATION.get(), x, y, 0, 28, 8,  8, 8, 36, 28);
-            case CURIO -> graphics.blit(TOOLTIP_LOCATION.get(), x, y, 0, 28, 16, 8, 8, 36, 28);
+            case ITEM ->  Icon.INSULATION.get().render(graphics, x, y, 0);
+            case ARMOR -> graphics.blit(INSULATION_TOOLTIP.get(), x, y, 0, 28, 8, 8, 8, 36, 28);
+            case CURIO -> graphics.blit(INSULATION_TOOLTIP.get(), x, y, 0, 28, 16, 8, 8, 36, 28);
         }
         // positive/negative sign
         switch (type)
         {
-            case POSITIVE -> graphics.blit(TOOLTIP_LOCATION.get(), x + 3, y + 3, 0, 18, 0, 5, 5, 36, 28);
-            case NEGATIVE -> graphics.blit(TOOLTIP_LOCATION.get(), x + 3, y + 3, 0, 23, 0, 5, 5, 36, 28);
+            case POSITIVE -> graphics.blit(INSULATION_TOOLTIP.get(), x + 3, y + 3, 0, 18, 0, 5, 5, 36, 28);
+            case NEGATIVE -> graphics.blit(INSULATION_TOOLTIP.get(), x + 3, y + 3, 0, 23, 0, 5, 5, 36, 28);
         }
     }
 
@@ -422,7 +420,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         {
             BorderSegment segment = getBorderSegment(size, i);
             // background
-            graphics.blit(TOOLTIP_LOCATION.get(), x + 7 + i * 6, y + 1, 0, 0, 0, 6, 4, 36, 28);
+            graphics.blit(INSULATION_TOOLTIP.get(), x + 7 + i * 6, y + 1, 0, 0, 0, 6, 4, 36, 28);
             // border
             renderCellBorder(graphics, x + i * 6, y, segment, BorderType.OVERFLOW);
         }
@@ -435,8 +433,8 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
     {
         switch (type)
         {
-            case DIVIDER -> graphics.blit(TOOLTIP_LOCATION.get(), x, y - 1, 0, 10, 0, 1, 6, 36, 28);
-            case EMPTY_DIVIDER -> graphics.blit(TOOLTIP_LOCATION.get(), x, y - 1, 0, 11, 0, 1, 6, 36, 28);
+            case DIVIDER -> graphics.blit(INSULATION_TOOLTIP.get(), x, y - 1, 0, 10, 0, 1, 6, 36, 28);
+            case EMPTY_DIVIDER -> graphics.blit(INSULATION_TOOLTIP.get(), x, y - 1, 0, 11, 0, 1, 6, 36, 28);
             default ->
             {
                 int vOffset = switch (type)
@@ -459,9 +457,9 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
                             RECURSIVE = false;
                         }
                     }
-                    case HEAD -> graphics.blit(TOOLTIP_LOCATION.get(), x - 1, y - 1, 0, 0, vOffset, 7, 6, 36, 28);
-                    case BODY -> graphics.blit(TOOLTIP_LOCATION.get(), x + 0, y - 1, 0, 2, vOffset, 6, 6, 36, 28);
-                    case TAIL -> graphics.blit(TOOLTIP_LOCATION.get(), x + 0, y - 1, 0, 3, vOffset, 7, 6, 36, 28);
+                    case HEAD -> graphics.blit(INSULATION_TOOLTIP.get(), x - 1, y - 1, 0, 0, vOffset, 7, 6, 36, 28);
+                    case BODY -> graphics.blit(INSULATION_TOOLTIP.get(), x + 0, y - 1, 0, 2, vOffset, 6, 6, 36, 28);
+                    case TAIL -> graphics.blit(INSULATION_TOOLTIP.get(), x + 0, y - 1, 0, 3, vOffset, 7, 6, 36, 28);
                 }
             }
         }

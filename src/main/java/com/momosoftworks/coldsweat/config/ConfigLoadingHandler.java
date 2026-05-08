@@ -251,7 +251,7 @@ public class ConfigLoadingHandler
         {
             RegistryHolder<?> registry = entry.getValue();
             registryAccess.registryOrThrow(registry.key()).holders().forEach(holder ->
-            {   holder.unwrapKey().ifPresent(holderKey -> holder.value().setRegistryKey(holderKey));
+            {   holder.value().setHolder(holder);
                 registries.put(registry, holder);
             });
         }
