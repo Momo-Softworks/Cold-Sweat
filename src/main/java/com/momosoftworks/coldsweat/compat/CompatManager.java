@@ -540,8 +540,7 @@ public class CompatManager
         if (!player.isCreative() && !player.isInLava() && backTank.getItem() instanceof BacktankItem)
         {
             // Ensure player is wearing a full set of fire-resistant armor
-            List<InsulatorData> drainingInsulators = ConfigHelper.getTaggedConfigsFor(backTank.getItem(), ModInsulatorTags.DRAINS_BACKTANK,
-                                                                                      ConfigSettings.INSULATING_ARMORS.get(), player.level().registryAccess());
+            List<InsulatorData> drainingInsulators = ConfigHelper.getTaggedConfigsFor(backTank.getItem(), ModInsulatorTags.DRAINS_BACKTANK, ConfigSettings.INSULATING_ARMORS.get());
             if (drainingInsulators.stream().noneMatch(insulator -> insulator.test(player, backTank)))
             {   return;
             }

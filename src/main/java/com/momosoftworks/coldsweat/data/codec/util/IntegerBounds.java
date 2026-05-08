@@ -47,6 +47,10 @@ public record IntegerBounds(int min, int max)
         return CSMath.clamp(value, realMin, realMax);
     }
 
+    public String toString()
+    {   return String.format("[%d~%d]", this.min, this.max);
+    }
+
     @Override
     public boolean equals(Object obj)
     {

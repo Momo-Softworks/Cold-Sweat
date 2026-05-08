@@ -31,14 +31,15 @@ public class SyncItemPredicatesMessage
     private final int inventorySlot;
     @Nullable private final EquipmentSlot equipmentSlot;
     @Nullable private final ItemStack responseStack;
+    private boolean isInventory;
 
-    public static SyncItemPredicatesMessage fromClient(int inventorySlot, @Nullable EquipmentSlot equipmentSlot)
-    {   return new SyncItemPredicatesMessage(inventorySlot, equipmentSlot, null, Map.of());
+    public static SyncItemPredicatesMessage fromClient(int inventorySlot, @Nullable EquipmentSlot equipmentSlot, boolean isInventory)
+    {   return new SyncItemPredicatesMessage(inventorySlot, equipmentSlot, null, Map.of(), isInventory);
     }
 
-    public static SyncItemPredicatesMessage fromServer(ItemStack stack, int inventorySlot, @Nullable EquipmentSlot equipmentSlot, Entity entity)
+    public static SyncItemPredicatesMessage fromServer(ItemStack stack, int inventorySlot, @Nullable EquipmentSlot equipmentSlot, Entity entity, boolean isInventory)
     {
-        SyncItemPredicatesMessage message = new SyncItemPredicatesMessage(inventorySlot, equipmentSlot, stack, new HashMap<>());
+        SyncItemPredicatesMessage message = new SyncItemPredicatesMessage(inventorySlot, equipmentSlot, stack, new HashMap<>(), isInventory);
 
         message.checkInsulator(stack, entity);
         message.checkInsulatingArmor(stack, entity);
@@ -51,25 +52,28 @@ public class SyncItemPredicatesMessage
         message.checkSoulLampFuel(stack);
 
         message.checkFood(stack, entity);
-        message.checkItemTemps(stack, inventorySlot, equipmentSlot, entity);
+        message.checkItemTemps(stack, entity);
         message.checkDryingItems(stack, entity);
 
         return message;
     }
 
     private SyncItemPredicatesMessage(int inventorySlot, @Nullable EquipmentSlot equipmentSlot,
-                                       @Nullable ItemStack responseStack, Map<UUID, Boolean> predicateMap)
+                                      @Nullable ItemStack responseStack, Map<UUID, Boolean> predicateMap,
+                                      boolean isInventory)
     {
         this.inventorySlot = inventorySlot;
         this.equipmentSlot = equipmentSlot;
         this.responseStack = responseStack;
         this.predicateMap.putAll(predicateMap);
+        this.isInventory = isInventory;
     }
 
     public static void encode(SyncItemPredicatesMessage message, FriendlyByteBuf buffer)
     {
         buffer.writeInt(message.inventorySlot);
         buffer.writeOptional(Optional.ofNullable(message.equipmentSlot), FriendlyByteBuf::writeEnum);
+        buffer.writeBoolean(message.isInventory);
 
         boolean hasResponse = message.responseStack != null && !message.predicateMap.isEmpty();
         buffer.writeBoolean(hasResponse);
@@ -83,14 +87,15 @@ public class SyncItemPredicatesMessage
     {
         int inventorySlot = buffer.readInt();
         EquipmentSlot equipmentSlot = buffer.readOptional(buf -> buf.readEnum(EquipmentSlot.class)).orElse(null);
+        boolean isInventory = buffer.readBoolean();
 
         boolean hasResponse = buffer.readBoolean();
         if (hasResponse)
         {   ItemStack stack = buffer.readItem();
             Map<UUID, Boolean> predicateMap = buffer.readMap(FriendlyByteBuf::readUUID, FriendlyByteBuf::readBoolean);
-            return new SyncItemPredicatesMessage(inventorySlot, equipmentSlot, stack, predicateMap);
+            return new SyncItemPredicatesMessage(inventorySlot, equipmentSlot, stack, predicateMap, isInventory);
         }
-        else return new SyncItemPredicatesMessage(inventorySlot, equipmentSlot, null, Map.of());
+        else return new SyncItemPredicatesMessage(inventorySlot, equipmentSlot, null, Map.of(), isInventory);
     }
 
     public static void handle(SyncItemPredicatesMessage message, Supplier<NetworkEvent.Context> contextSupplier)
@@ -102,6 +107,7 @@ public class SyncItemPredicatesMessage
         {
             context.enqueueWork(() ->
             {   TooltipHandler.HOVERED_STACK_PREDICATES.putAll(message.predicateMap);
+                TooltipHandler.FETCHING_TOOLTIP = false;
             });
         }
         else if (receivingSide.isServer() && context.getSender() != null)
@@ -109,29 +115,42 @@ public class SyncItemPredicatesMessage
             context.enqueueWork(() ->
             {
                 ServerPlayer player = context.getSender();
-                ItemStack stack = getStackFromPlayer(player, message.inventorySlot, message.equipmentSlot);
-                if (!stack.isEmpty())
-                {
-                    ColdSweatPacketHandler.INSTANCE.sendTo(SyncItemPredicatesMessage.fromServer(stack, message.inventorySlot, message.equipmentSlot, player),
-                                                           player.connection.connection,
-                                                           NetworkDirection.PLAY_TO_CLIENT);
-                }
+                ItemStack stack = getStackFromMenu(player, message.inventorySlot, message.equipmentSlot, message.isInventory);
+                ColdSweatPacketHandler.INSTANCE.sendTo(SyncItemPredicatesMessage.fromServer(stack, message.inventorySlot, message.equipmentSlot, player, message.isInventory),
+                                                       player.connection.connection,
+                                                       NetworkDirection.PLAY_TO_CLIENT);
             });
         }
     }
 
-    private static ItemStack getStackFromPlayer(ServerPlayer player, int inventorySlot, @Nullable EquipmentSlot equipmentSlot)
+    private static ItemStack getStackFromMenu(ServerPlayer player, int inventorySlot, @Nullable EquipmentSlot equipmentSlot, boolean isInventory)
     {
         if (equipmentSlot != null)
         {   return player.getItemBySlot(equipmentSlot);
         }
-        if (inventorySlot >= 0 && inventorySlot < player.getInventory().getContainerSize())
+        if (isInventory && inventorySlot >= 0 && inventorySlot <= player.getInventory().getContainerSize())
         {   return player.getInventory().getItem(inventorySlot);
         }
         if (player.containerMenu != null && inventorySlot >= 0 && inventorySlot < player.containerMenu.slots.size())
         {   return player.containerMenu.getSlot(inventorySlot).getItem();
         }
         return ItemStack.EMPTY;
+    }
+
+    public static boolean hasDataToSend(ItemStack stack)
+    {
+        Item item = stack.getItem();
+        return ConfigSettings.INSULATION_ITEMS.get().containsKey(item)
+            || ConfigSettings.INSULATING_ARMORS.get().containsKey(item)
+            || ConfigSettings.INSULATING_CURIOS.get().containsKey(item)
+            || ItemInsulationManager.isInsulatable(stack)
+            || ConfigSettings.FOOD_TEMPERATURES.get().containsKey(item)
+            || ConfigSettings.BOILER_FUEL.get().containsKey(item)
+            || ConfigSettings.ICEBOX_FUEL.get().containsKey(item)
+            || ConfigSettings.HEARTH_FUEL.get().containsKey(item)
+            || ConfigSettings.SOULSPRING_LAMP_FUEL.get().containsKey(item)
+            || ConfigSettings.ITEM_TEMPERATURES.get().containsKey(item)
+            || ConfigSettings.DRYING_ITEMS.get().containsKey(item);
     }
 
     private void checkInsulator(ItemStack stack, Entity entity)
@@ -182,14 +201,14 @@ public class SyncItemPredicatesMessage
     {   this.checkItemRequirement(stack, null, ConfigSettings.SOULSPRING_LAMP_FUEL);
     }
 
-    private void checkItemTemps(ItemStack stack, int invSlot, EquipmentSlot equipmentSlot, Entity entity)
+    private void checkItemTemps(ItemStack stack, Entity entity)
     {
         if (ConfigSettings.ITEM_TEMPERATURES.get().containsKey(stack.getItem()))
         {
             Map<UUID, Boolean> insulatorMap = ConfigSettings.ITEM_TEMPERATURES.get().get(stack.getItem())
                                               .stream()
                                               .map(data ->
-                                              {   boolean test = data.test(entity, stack, invSlot, equipmentSlot);
+                                              {   boolean test = data.test(entity, stack);
                                                   return Map.entry(data.uuid(), test);
                                               })
                                               .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));

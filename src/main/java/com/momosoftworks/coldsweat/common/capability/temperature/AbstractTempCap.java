@@ -322,27 +322,13 @@ public class AbstractTempCap implements ITemperatureCap
             coreTemp += rate;
         }
 
-        // Get the sign of the player's core temperature (-1, 0, or 1)
-        int coreTempSign = CSMath.sign(coreTemp);
-        // If needed, blend the player's temperature back to 0
-        double amount = 0;
-        // Player is fully cold dampened & body is cold
-        if (isFullyColdDampened && coreTempSign < 0)
-        {   amount = ConfigSettings.TEMP_RATE.get() / 10d;
-        }
-        // Player is fully heat dampened & body is hot
-        else if (isFullyHeatDampened && coreTempSign > 0)
-        {   amount = ConfigSettings.TEMP_RATE.get() / -10d;
-        }
-        // Else if the player's core temp is not the same as the world temp
-        else if (coreTempSign != 0 && coreTempSign != worldTempSign)
-        {   amount = (coreTempSign == 1 ? worldTemp - maxTemp : worldTemp - minTemp) / 3;
-        }
-        // Blend back to 0
-        if (amount != 0)
-        {
-            double changeBy = CSMath.maxAbs(amount * ConfigSettings.TEMP_RATE.get(), ConfigSettings.TEMP_RATE.get() / 10d * -coreTempSign);
-            coreTemp += CSMath.minAbs(changeBy, -getTrait(Trait.CORE));
+        // If needed, equalize the player's temperature back to 0
+        double equilibrium = getEquilibriumDelta(coreTemp, entity);
+        int coreDeltaSign = CSMath.sign(coreTemp - this.getTrait(Trait.CORE));
+        int equilibriumSign = CSMath.sign(equilibrium);
+        // Only apply equilibrium delta if it isn't working against any CORE modifiers
+        if (coreDeltaSign == 0 || coreDeltaSign == equilibriumSign)
+        {   coreTemp += equilibrium;
         }
 
         // Write the new temperature values
@@ -388,6 +374,45 @@ public class AbstractTempCap implements ITemperatureCap
         }
         // Return
         return oldValue;
+    }
+
+    protected double getEquilibriumDelta(double coreTemp, LivingEntity entity)
+    {
+        double worldTemp = this.getTrait(Trait.WORLD);
+        double minTemp = this.getTrait(Trait.FREEZING_POINT);
+        double maxTemp = this.getTrait(Trait.BURNING_POINT);
+        double coldDampening = this.getTrait(Trait.COLD_DAMPENING);
+        double heatDampening = this.getTrait(Trait.HEAT_DAMPENING);
+        boolean immuneToTemp = isPeacefulMode(entity);
+
+        int worldTempSign = CSMath.getSignForRange(worldTemp, minTemp, maxTemp);
+        boolean isFullyColdDampened = worldTempSign < 0 && (coldDampening >= 1 || immuneToTemp);
+        boolean isFullyHeatDampened = worldTempSign > 0 && (heatDampening >= 1 || immuneToTemp);
+
+        // Get the sign of the player's core temperature (-1, 0, or 1)
+        int coreTempSign = CSMath.sign(coreTemp);
+        // If needed, blend the player's temperature back to 0
+        double amount = 0;
+        // Player is fully cold dampened & body is cold
+        if (isFullyColdDampened && coreTempSign < 0)
+        {   amount = ConfigSettings.TEMP_RATE.get() / 10d;
+        }
+        // Player is fully heat dampened & body is hot
+        else if (isFullyHeatDampened && coreTempSign > 0)
+        {   amount = ConfigSettings.TEMP_RATE.get() / -10d;
+        }
+        // Else if the player's core temp is not the same as the world temp
+        else if (coreTempSign != 0 && coreTempSign != worldTempSign)
+        {   amount = (coreTempSign == 1 ? worldTemp - maxTemp : worldTemp - minTemp) / 3;
+        }
+        // Blend back to 0
+        if (amount != 0)
+        {
+            double changeBy = CSMath.maxAbs(amount * ConfigSettings.TEMP_RATE.get(), ConfigSettings.TEMP_RATE.get() / 10d * -coreTempSign);
+            changeBy = CSMath.minAbs(changeBy, -getTrait(Trait.CORE));
+            return changeBy;
+        }
+        return 0;
     }
 
     @Override
