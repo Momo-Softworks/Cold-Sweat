@@ -1,0 +1,17 @@
+{
+  "item": {
+    "items": [
+      "cold_sweat:filled_waterskin"
+    ],
+    "nbt": {
+      "Temperature": "1:"
+    }
+  },
+  "slots": [
+    "hand",
+    "hotbar"
+  ],
+  "temperature": 0.025,
+  "trait": "core",
+  "hide_if_unmet": true
+}

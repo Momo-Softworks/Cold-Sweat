@@ -341,20 +341,14 @@ public class ConfigHelper
         return builder.toString();
     }
 
-    public static <K, T extends ConfigData> List<T> getTaggedConfigsFor(K object, TagKey<T> tag, Multimap<K, T> config, RegistryAccess registryAccess)
+    public static <K, T extends ConfigData> List<T> getTaggedConfigsFor(K object, TagKey<T> tag, Multimap<K, T> config)
     {
-        Registry<T> registry = registryAccess.registryOrThrow(tag.registry());
-
         List<T> results = new ArrayList<>();
         for (T configData : config.get(object))
         {
-            Optional.ofNullable(configData.registryKey()).flatMap(k -> registry.getHolder((ResourceKey<T>) (ResourceKey) k))
-            .ifPresent(holder ->
-            {
-                if (holder.is(tag))
-                {   results.add(configData);
-                }
-            });
+            if (configData.is(tag))
+            {   results.add(configData);
+            }
         }
         return results;
     }

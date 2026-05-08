@@ -538,6 +538,10 @@ public class Temperature
         public String getSerializedName()
         {   return id;
         }
+
+        public String getFormattedName()
+        {   return Component.translatable("trait.cold_sweat." + this.getSerializedName()).getString();
+        }
     }
 
     /**

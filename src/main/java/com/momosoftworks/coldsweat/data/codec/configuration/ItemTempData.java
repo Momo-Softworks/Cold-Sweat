@@ -18,6 +18,7 @@ import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.EnumHelper;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.StringRepresentable;
@@ -44,11 +45,12 @@ public class ItemTempData extends ConfigData implements RequirementHolder
     final NegatableList<EntityRequirement> entityRequirement;
     final AttributeModifierMap attributeModifiers;
     final Map<ResourceLocation, Double> immuneTempModifiers;
+    final boolean hideIfUnmet;
 
     public ItemTempData(NegatableList<ItemRequirement> item, List<Either<IntegerBounds, SlotType>> slots, double temperature,
                         Temperature.Trait trait, Double maxEffect, double maxTemp, double minTemp,
                         NegatableList<EntityRequirement> entityRequirement, AttributeModifierMap attributeModifiers,
-                        Map<ResourceLocation, Double> immuneTempModifiers, NegatableList<String> requiredMods)
+                        Map<ResourceLocation, Double> immuneTempModifiers, boolean hideIfUnmet, NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.item = item;
@@ -61,14 +63,15 @@ public class ItemTempData extends ConfigData implements RequirementHolder
         this.entityRequirement = entityRequirement;
         this.attributeModifiers = attributeModifiers;
         this.immuneTempModifiers = immuneTempModifiers;
+        this.hideIfUnmet = hideIfUnmet;
     }
 
     public ItemTempData(NegatableList<ItemRequirement> item, List<Either<IntegerBounds, SlotType>> slots, double temperature,
                         Temperature.Trait trait, Double maxEffect, double maxTemp, double minTemp,
                         NegatableList<EntityRequirement> entityRequirement, AttributeModifierMap attributeModifiers,
-                        Map<ResourceLocation, Double> immuneTempModifiers)
+                        Map<ResourceLocation, Double> immuneTempModifiers, boolean hideIfUnmet)
     {
-        this(item, slots, temperature, trait, maxEffect, maxTemp, minTemp, entityRequirement, attributeModifiers, immuneTempModifiers, new NegatableList<>());
+        this(item, slots, temperature, trait, maxEffect, maxTemp, minTemp, entityRequirement, attributeModifiers, immuneTempModifiers, hideIfUnmet, new NegatableList<>());
     }
 
     public static final Codec<ItemTempData> CODEC = createCodec(RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -81,7 +84,8 @@ public class ItemTempData extends ConfigData implements RequirementHolder
             Codec.DOUBLE.optionalFieldOf("min_temp", Double.NEGATIVE_INFINITY).forGetter(data -> data.minTemp),
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(ItemTempData::entityRequirement),
             AttributeModifierMap.CODEC.optionalFieldOf("attributes", new AttributeModifierMap()).forGetter(ItemTempData::attributeModifiers),
-            Codec.unboundedMap(ResourceLocation.CODEC, Codec.DOUBLE).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(ItemTempData::immuneTempModifiers)
+            Codec.unboundedMap(ResourceLocation.CODEC, Codec.DOUBLE).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(ItemTempData::immuneTempModifiers),
+            Codec.BOOL.optionalFieldOf("hide_if_unmet", false).forGetter(ItemTempData::hideIfUnmet)
     ).apply(instance, ItemTempData::new)));
 
     public NegatableList<ItemRequirement> item()
@@ -114,14 +118,22 @@ public class ItemTempData extends ConfigData implements RequirementHolder
     public Map<ResourceLocation, Double> immuneTempModifiers()
     {   return immuneTempModifiers;
     }
+    public boolean hideIfUnmet()
+    {   return hideIfUnmet;
+    }
 
     @Override
     public boolean test(Entity entity)
     {   return entityRequirement.test(rq -> rq.test(entity));
     }
 
+    @Override
+    public boolean test(ItemStack stack)
+    {   return item.test(rq -> rq.test(stack, true));
+    }
+
     public boolean test(Entity entity, ItemStack stack, int slot, @Nullable EquipmentSlot equipmentSlot)
-    {   return test(stack, slot, equipmentSlot) && test(entity);
+    {   return test(entity) && test(stack) && test(slot, equipmentSlot);
     }
 
     public boolean test(Entity entity, ItemStack stack, SlotType slot)
@@ -139,11 +151,8 @@ public class ItemTempData extends ConfigData implements RequirementHolder
         return false;
     }
 
-    public boolean test(ItemStack stack, int slot, @Nullable EquipmentSlot equipmentSlot)
+    public boolean test(int slot, @Nullable EquipmentSlot equipmentSlot)
     {
-        if (!item.test(rq -> rq.test(stack, true)))
-        {   return false;
-        }
         if (slot == -1 && equipmentSlot == null)
         {   return true;
         }
@@ -201,7 +210,7 @@ public class ItemTempData extends ConfigData implements RequirementHolder
         ItemRequirement itemRequirement = new ItemRequirement(items, nbtRequirement);
 
         ItemTempData result = new ItemTempData(new NegatableList<>(itemRequirement), List.of(Either.right(slotType)), temp, trait, maxEffect, maxTemp, minTemp,
-                                               new NegatableList<>(), new AttributeModifierMap(), new HashMap<>());
+                                               new NegatableList<>(), new AttributeModifierMap(), new HashMap<>(), false);
         result.setConfigType(Type.TOML);
         return result;
     }
@@ -232,7 +241,10 @@ public class ItemTempData extends ConfigData implements RequirementHolder
             && slots.equals(that.slots)
             && trait.equals(that.trait)
             && maxEffect.equals(that.maxEffect)
-            && entityRequirement.equals(that.entityRequirement);
+            && entityRequirement.equals(that.entityRequirement)
+            && attributeModifiers.equals(that.attributeModifiers)
+            && immuneTempModifiers.equals(that.immuneTempModifiers)
+            && hideIfUnmet == that.hideIfUnmet;
     }
 
     public enum SlotType implements StringRepresentable
@@ -289,9 +301,14 @@ public class ItemTempData extends ConfigData implements RequirementHolder
         {   return name;
         }
 
+        public String getFormattedName()
+        {   return Component.translatable(String.format("tooltip.cold_sweat.slot_type.%s", this.getSerializedName())).getString();
+        }
+
         public static SlotType byName(String name)
         {   return EnumHelper.byName(values(), name);
         }
+
 
         public static SlotType fromEquipment(EquipmentSlot slot)
         {
