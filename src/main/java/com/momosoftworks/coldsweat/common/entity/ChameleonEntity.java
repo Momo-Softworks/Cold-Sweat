@@ -16,6 +16,7 @@ import com.momosoftworks.coldsweat.core.network.message.EntityMountMessage;
 import com.momosoftworks.coldsweat.data.loot.ModLootTables;
 import com.momosoftworks.coldsweat.data.tag.ModEntityTags;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
+import com.momosoftworks.coldsweat.util.entity.EntityHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
@@ -82,6 +83,9 @@ public class ChameleonEntity extends AnimalEntity
     static final DataParameter<Boolean> SEARCHING = EntityDataManager.defineId(ChameleonEntity.class, DataSerializers.BOOLEAN);
     static final DataParameter<Integer> AGE_SECS = EntityDataManager.defineId(ChameleonEntity.class, DataSerializers.INT);
 
+    private int ageTicks = 0;
+    private int feedCooldown = 0;
+
     public float xRotHead = 0;
     public float yRotHead = 0;
     public float xRotLeftEye = 0;
@@ -92,7 +96,6 @@ public class ChameleonEntity extends AnimalEntity
     public float tailPhase = 0;
 
     float eatAnimationTimer = 0;
-    private int feedCooldown = 0;
     public float opacity = 1;
     float desiredTemp = 1f;
 
@@ -192,9 +195,9 @@ public class ChameleonEntity extends AnimalEntity
 
         if (edible != null)
         {
-            if (this.feedCooldown <= 0 && ((this.isPlayerTrusted(player) ^ this.isTamingItem(stack))
-            && this.getCooldown(edible) <= 0) || this.canFallInLove() && this.isFood(stack))
+            if (this.feedCooldown <= 0 && this.getCooldown(edible) <= 0 && edible.shouldEat(stack, this, player))
             {
+                this.feedCooldown = 10;
                 if (!player.level.isClientSide)
                 {
                     ItemStack dropStack = stack.copy();
@@ -204,16 +207,13 @@ public class ChameleonEntity extends AnimalEntity
                     {   dropped.getPersistentData().putUUID("Recipient", this.getUUID());
                     }
                     player.stopUsingItem();
+                    player.swing(hand, true);
                     this.usePlayerItem(player, stack);
-                }
-                this.feedCooldown = 10;
 
-                return ActionResultType.SUCCESS;
+                    return ActionResultType.SUCCESS;
+                }
             }
-            else
-            {   player.swing(hand);
-                return ActionResultType.CONSUME;
-            }
+            return ActionResultType.CONSUME;
         }
         else if (this.isPlayerTrusted(player) && player.getPassengers().isEmpty() && !this.level.isClientSide)
         {
@@ -228,14 +228,17 @@ public class ChameleonEntity extends AnimalEntity
 
     public static boolean makeShed(LivingEntity entity)
     {
-        if (entity instanceof ChameleonEntity)
+        if (entity instanceof ChameleonEntity && ((ChameleonEntity) entity).canShed())
         {
             ChameleonEntity chameleon = (ChameleonEntity) entity;
             if (chameleon.isShedding() && chameleon.canShed())
             {
                 chameleon.shedItems();
                 chameleon.setLastShed(chameleon.getAgeTicks());
-                chameleon.setShedTime(-1);
+                chameleon.stopShedding();
+            if (!entity.level.isClientSide)
+            {   WorldHelper.playEntitySound(ModSounds.CHAMELEON_SHED, chameleon, chameleon.getSoundSource(), chameleon.getSoundVolume(), chameleon.getVoicePitch());
+            }
                 return true;
             }
             return false;
@@ -268,7 +271,6 @@ public class ChameleonEntity extends AnimalEntity
         for (ItemStack stack : ModLootTables.getEntityDropsLootTable(this, null, ModLootTables.CHAMELEON_SHEDDING))
         {   WorldHelper.entityDropItem(this, stack, 40000);
         }
-        WorldHelper.playEntitySound(ModSounds.CHAMELEON_SHED, this, this.getSoundSource(), 1, this.getVoicePitch());
     }
 
     @Override
@@ -318,8 +320,7 @@ public class ChameleonEntity extends AnimalEntity
     }
 
     public int getEatAnimLength()
-    {
-        return 6;
+    {   return 6;
     }
 
     @Override
@@ -385,17 +386,21 @@ public class ChameleonEntity extends AnimalEntity
     {
         super.tick();
 
-        // Tick eat animation
+        this.ageTicks++;
+
+        if (this.feedCooldown > 0)
+        {   this.feedCooldown--;
+        }
+
         if (this.eatAnimationTimer > 0)
         {   this.eatAnimationTimer--;
         }
 
-        if (this.feedCooldown > 0)
-            this.feedCooldown--;
-
         // Age
         if (!this.level.isClientSide && this.tickCount % 20 == 0)
-        {   this.setAgeSecs(this.getAgeSecs() + 1);
+        {   int ageSecs = this.getAgeSecs();
+            this.setAgeSecs(ageSecs + 1);
+            this.ageTicks = ageSecs * 20;
         }
 
         // Tick shedding
@@ -406,17 +411,28 @@ public class ChameleonEntity extends AnimalEntity
             double shedChance = ConfigSettings.SHED_TIMINGS.get().chance();
             int shedTime = this.getShedTime();
 
-            if (this.tickCount % shedCheckInterval == 0 && shedTime < 0
+            if (this.tickCount % shedCheckInterval == 0 && shedTime < 0 && !this.isBaby()
             && this.random.nextDouble() < shedChance && this.getAgeTicks() - this.getLastShed() > shedCooldown)
-            {   this.setShedTime(0);
+            {   this.startShedding();
             }
             // Increment shed timer
-            if (shedTime > -1 && shedTime < this.getTimeToShed())
+            if (shedTime > -1)
             {   this.setShedTime(shedTime + 1);
+            }
+            // Trigger shedding event
+            if (shedTime == this.getTimeToShed())
+            {   WorldHelper.playEntitySound(ModSounds.CHAMELEON_SHED_READY, this, this.getSoundSource(), this.getSoundVolume(), this.getVoicePitch());
             }
             // Shed items automatically if enabled
             if (ConfigSettings.CHAMELEON_SHED_AUTOMATICALLY.get() && this.canShed())
             {   makeShed(this);
+            }
+            if (shedTime - this.getTimeToShed() > ConfigSettings.CHAMELEON_SHED_TIME_LIMIT.get())
+            {   this.stopShedding();
+                this.setLastShed(this.getAgeTicks());
+                WorldHelper.playEntitySound(ModSounds.CHAMELEON_SHED_FAIL, this, this.getSoundSource(), this.getSoundVolume(), this.getVoicePitch());
+                WorldHelper.spawnParticleBatch(this.level, new ItemParticleData(ParticleTypes.ITEM, ModItems.CHAMELEON_MOLT.getDefaultInstance()),
+                                               this.getBoundingBox().inflate(0.2), 20, 0.05);
             }
         }
         // Particles
@@ -507,6 +523,7 @@ public class ChameleonEntity extends AnimalEntity
                         }
                     }
                     this.clearTrackingPos();
+                    WorldHelper.spawnParticleBatch(this.level, ParticleTypes.HAPPY_VILLAGER, this.getBoundingBox().inflate(0.2), 20, 0.01);
                 }
             }
         }
@@ -556,33 +573,9 @@ public class ChameleonEntity extends AnimalEntity
             {
                 ItemEntity itemEntity = (ItemEntity) entity;
                 ItemStack item = itemEntity.getItem();
-                if (this.isTamingItem(item))
-                {
-                    PlayerEntity player = itemEntity.getThrower() != null ? this.level.getPlayerByUUID(itemEntity.getThrower()) : null;
-                    if (player != null)
-                    {
-                        // For taming
-                        if (!this.isPlayerTrusted(player))
-                        {
-                            if ((player.isCreative() || Math.random() < 0.3))
-                            {
-                                this.setPersistenceRequired();
-                                this.addTrustedPlayer(itemEntity.getThrower());
-                                WorldHelper.spawnParticleBatch(this.level, ParticleTypes.HEART, this.getX(), this.getY() + 0.5, this.getZ(), 1, 1, 1, 6, 0.01);
-                            }
-                            else
-                            {   WorldHelper.spawnParticleBatch(this.level, ParticleTypes.SMOKE, this.getX(), this.getY() + 0.5, this.getZ(), 1, 1, 1, 6, 0.01);
-                            }
-                        }
-                        // For breeding
-                        else if (this.canFallInLove())
-                        {   this.setInLove(player);
-                        }
-                    }
-                }
                 ChameleonEdibles.getEdible(item).ifPresent(edible ->
                 {
-                    if (edible.onEaten(this, itemEntity) == Edible.Result.SUCCESS)
+                    if (edible.onEaten(item, this, EntityHelper.getThrower(itemEntity)) == Edible.Result.SUCCESS)
                     {   this.setCooldown(edible, edible.getCooldown());
                     }
                     else
@@ -643,6 +636,17 @@ public class ChameleonEntity extends AnimalEntity
     {   this.entityData.set(SHED_TIME, shedTime);
     }
 
+    public void startShedding()
+    {
+        if (this.getShedTime() < 0)
+        {   this.setShedTime(0);
+        }
+    }
+
+    public void stopShedding()
+    {   this.setShedTime(-1);
+    }
+
     public boolean isShedding()
     {   return this.getShedTime() >= 0;
     }
@@ -676,7 +680,7 @@ public class ChameleonEntity extends AnimalEntity
         this.entityData.set(TRUSTED_PLAYERS, trustedPlayers);
     }
 
-    public boolean isPlayerTrusted(PlayerEntity player)
+    public boolean isPlayerTrusted(Entity player)
     {   return this.isPlayerTrusted(player.getUUID());
     }
 
@@ -762,7 +766,7 @@ public class ChameleonEntity extends AnimalEntity
     }
 
     public int getAgeTicks()
-    {   return this.getAgeSecs() * 20;
+    {   return ageTicks;
     }
 
     public void setAgeSecs(int ageSecs)

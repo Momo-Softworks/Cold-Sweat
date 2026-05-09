@@ -1,12 +1,13 @@
 package com.momosoftworks.coldsweat.common.entity.data.edible;
 
-import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.common.entity.ChameleonEntity;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.util.entity.EntityHelper;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -14,7 +15,6 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.server.ServerWorld;
 
 import java.util.function.BiPredicate;
-import java.util.function.Predicate;
 
 public abstract class BiomeSearchingEdible extends Edible
 {
@@ -25,7 +25,7 @@ public abstract class BiomeSearchingEdible extends Edible
     }
 
     @Override
-    public Result onEaten(ChameleonEntity entity, ItemEntity item)
+    public Result onEaten(ItemStack item, ChameleonEntity entity, Entity thrower)
     {
         if (!entity.level.isClientSide)
         {
@@ -68,11 +68,11 @@ public abstract class BiomeSearchingEdible extends Edible
             // Execute the search thread
             searchThread.start();
         }
-        return Result.FAIL;
+        return Result.SUCCESS;
     }
 
     @Override
-    public boolean shouldEat(ChameleonEntity entity, ItemEntity item)
-    {   return item.getOwner() != null && entity.isPlayerTrusted(item.getOwner());
+    public boolean shouldEat(ItemStack item, ChameleonEntity entity, Entity thrower)
+    {   return thrower != null && entity.isPlayerTrusted(thrower.getUUID());
     }
 }

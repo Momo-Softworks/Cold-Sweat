@@ -5,12 +5,10 @@
     "sounds":
     [
       {
-        "name": "cold_sweat:player/damage/freeze_0",
-        "stream": true
+        "name": "cold_sweat:player/damage/freeze_0"
       },
       {
-        "name": "cold_sweat:player/damage/freeze_1",
-        "stream": true
+        "name": "cold_sweat:player/damage/freeze_1"
       }
     ]
   },
@@ -20,16 +18,13 @@
     "sounds":
     [
       {
-        "name": "cold_sweat:entity/chameleon/chameleon_ambient_0",
-        "stream": true
+        "name": "cold_sweat:entity/chameleon/chameleon_ambient_0"
       },
       {
-        "name": "cold_sweat:entity/chameleon/chameleon_ambient_1",
-        "stream": true
+        "name": "cold_sweat:entity/chameleon/chameleon_ambient_1"
       },
       {
-        "name": "cold_sweat:entity/chameleon/chameleon_ambient_2",
-        "stream": true
+        "name": "cold_sweat:entity/chameleon/chameleon_ambient_2"
       }
     ]
   },
@@ -39,46 +34,39 @@
     "sounds":
     [
       {
-        "name": "cold_sweat:entity/chameleon/chameleon_find_0",
-        "stream": true
+        "name": "cold_sweat:entity/chameleon/chameleon_find_0"
       },
       {
-        "name": "cold_sweat:entity/chameleon/chameleon_find_1",
-        "stream": true
+        "name": "cold_sweat:entity/chameleon/chameleon_find_1"
       },
       {
-        "name": "cold_sweat:entity/chameleon/chameleon_find_2",
-        "stream": true
+        "name": "cold_sweat:entity/chameleon/chameleon_find_2"
       }
     ]
   },
   "entity.chameleon.tongue.in":
   {
-      "subtitle": "entity.chameleon.tongue.in",
+      "subtitle": "entity.chameleon.tongue",
       "sounds":
       [
         {
-          "name": "cold_sweat:entity/chameleon/chameleon_tongue_in_0",
-          "stream": true
+          "name": "cold_sweat:entity/chameleon/chameleon_tongue_in_0"
         },
         {
-          "name": "cold_sweat:entity/chameleon/chameleon_tongue_in_1",
-          "stream": true
+          "name": "cold_sweat:entity/chameleon/chameleon_tongue_in_1"
         }
       ]
   },
   "entity.chameleon.tongue.out":
   {
-    "subtitle": "entity.chameleon.tongue.out",
+    "subtitle": "entity.chameleon.tongue",
     "sounds":
     [
       {
-        "name": "cold_sweat:entity/chameleon/chameleon_tongue_out_0",
-        "stream": true
+        "name": "cold_sweat:entity/chameleon/chameleon_tongue_out_0"
       },
       {
-        "name": "cold_sweat:entity/chameleon/chameleon_tongue_out_1",
-        "stream": true
+        "name": "cold_sweat:entity/chameleon/chameleon_tongue_out_1"
       }
     ]
   },
@@ -88,8 +76,7 @@
     "sounds":
     [
       {
-        "name": "cold_sweat:entity/chameleon/chameleon_death",
-        "stream": true
+        "name": "cold_sweat:entity/chameleon/chameleon_death"
       }
     ]
   },
@@ -99,12 +86,13 @@
     "sounds":
     [
       {
-        "name": "cold_sweat:entity/chameleon/chameleon_hurt_0",
-        "stream": true
+        "name": "cold_sweat:entity/chameleon/chameleon_hurt_0"
       },
       {
-        "name": "cold_sweat:entity/chameleon/chameleon_hurt_1",
-        "stream": true
+        "name": "cold_sweat:entity/chameleon/chameleon_hurt_1"
+      },
+      {
+        "name": "cold_sweat:entity/chameleon/chameleon_hurt_2"
       }
     ]
   },
@@ -112,8 +100,23 @@
     "subtitle": "entity.chameleon.shed",
     "sounds": [
       {
-        "name": "minecraft:block/beehive/exit",
-        "stream": true
+        "name": "cold_sweat:entity/chameleon/chameleon_shed"
+      }
+    ]
+  },
+  "entity.chameleon.shed.fail": {
+    "subtitle": "entity.chameleon.shed",
+    "sounds": [
+      {
+        "name": "cold_sweat:entity/chameleon/chameleon_shed_fail"
+      }
+    ]
+  },
+  "entity.chameleon.shed.ready": {
+    "subtitle": "entity.chameleon.shed.ready",
+    "sounds": [
+      {
+        "name": "cold_sweat:entity/chameleon/chameleon_shed_ready"
       }
     ]
   },
@@ -123,8 +126,7 @@
     "sounds":
     [
       {
-        "name": "cold_sweat:item/soulspring_lamp/soulspring_lamp_on",
-        "stream": true
+        "name": "cold_sweat:item/soulspring_lamp/soulspring_lamp_on"
       }
     ]
   },
@@ -134,8 +136,7 @@
     "sounds":
     [
       {
-        "name": "cold_sweat:item/soulspring_lamp/soulspring_lamp_off",
-        "stream": true
+        "name": "cold_sweat:item/soulspring_lamp/soulspring_lamp_off"
       }
     ]
   },
@@ -145,8 +146,7 @@
     "sounds":
     [
       {
-        "name": "cold_sweat:block/hearth/hearth_fuel_deplete",
-        "stream": true
+        "name": "cold_sweat:block/hearth/hearth_fuel_deplete"
       }
     ]
   },
@@ -156,8 +156,7 @@
     "sounds":
     [
       {
-        "name": "cold_sweat:block/hearth/hearth_fuel_deplete",
-        "stream": true
+        "name": "cold_sweat:block/hearth/hearth_fuel_deplete"
       }
     ]
   },
@@ -167,8 +166,7 @@
     "sounds":
     [
       {
-        "name": "cold_sweat:block/hearth/hearth_fuel_deplete",
-        "stream": true
+        "name": "cold_sweat:block/hearth/hearth_fuel_deplete"
       }
     ]
   },
@@ -178,8 +176,7 @@
     "sounds":
     [
       {
-        "name": "cold_sweat:item/waterskin_pour",
-        "stream": true
+        "name": "cold_sweat:item/waterskin/waterskin_pour"
       }
     ]
   },
@@ -189,8 +186,7 @@
     "sounds":
     [
       {
-        "name": "cold_sweat:item/waterskin_fill",
-        "stream": true
+        "name": "cold_sweat:item/waterskin/waterskin_fill"
       }
     ]
   },
@@ -200,8 +196,7 @@
     "sounds":
     [
       {
-        "name": "cold_sweat:block/icebox/icebox_open",
-        "stream": true
+        "name": "cold_sweat:block/icebox/icebox_open"
       }
     ]
   },
@@ -211,8 +206,7 @@
     "sounds":
     [
       {
-          "name": "cold_sweat:block/icebox/icebox_close",
-          "stream": true
+          "name": "cold_sweat:block/icebox/icebox_close"
       }
     ]
   },
@@ -222,16 +216,13 @@
     "sounds":
     [
       {
-        "name": "cold_sweat:item/armor/chameleon_armor_equip_0",
-        "stream": true
+        "name": "cold_sweat:item/armor/chameleon_armor_equip_0"
       },
       {
-          "name": "cold_sweat:item/armor/chameleon_armor_equip_1",
-          "stream": true
+          "name": "cold_sweat:item/armor/chameleon_armor_equip_1"
       },
       {
-        "name": "cold_sweat:item/armor/chameleon_armor_equip_2",
-        "stream": true
+        "name": "cold_sweat:item/armor/chameleon_armor_equip_2"
       }
     ]
   },
@@ -624,8 +615,7 @@
     "sounds":
     [
       {
-        "name": "cold_sweat:item/bucket/slush_bucket_fill",
-        "stream": true
+        "name": "cold_sweat:item/bucket/slush_bucket_fill"
       }
     ]
   },
@@ -635,12 +625,10 @@
     "sounds":
     [
       {
-        "name": "cold_sweat:item/bucket/slush_bucket_empty_0",
-        "stream": true
+        "name": "cold_sweat:item/bucket/slush_bucket_empty_0"
       },
       {
-        "name": "cold_sweat:item/bucket/slush_bucket_empty_1",
-        "stream": true
+        "name": "cold_sweat:item/bucket/slush_bucket_empty_1"
       }
     ]
   }

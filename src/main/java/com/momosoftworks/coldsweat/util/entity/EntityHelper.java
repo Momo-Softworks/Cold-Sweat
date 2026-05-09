@@ -4,8 +4,10 @@ import com.momosoftworks.coldsweat.common.item.SoulspringLampItem;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.serialization.ObjectBuilder;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -15,6 +17,8 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.GameType;
+import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.LogicalSidedProvider;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
@@ -22,6 +26,7 @@ import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
+import java.util.UUID;
 import java.lang.reflect.Method;
 import java.util.stream.Stream;
 
@@ -110,5 +115,22 @@ public class EntityHelper
         else
         {   return index == 99 ? EquipmentSlotType.OFFHAND : null;
         }
+    }
+
+    public static Entity getThrower(ItemEntity itemEntity)
+    {
+        UUID throwerID = itemEntity.getThrower();
+        if (throwerID == null) return null;
+        World level = itemEntity.level;
+        if (level instanceof ServerWorld)
+        {   return ((ServerWorld) level).getEntity(throwerID);
+        }
+        else if (level instanceof ClientWorld)
+        {
+            for (Entity e : ((ClientWorld) level).entitiesForRendering())
+            {   if (e.getUUID().equals(throwerID)) return e;
+            }
+        }
+        return null;
     }
 }

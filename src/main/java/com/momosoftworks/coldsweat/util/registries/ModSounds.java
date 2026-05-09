@@ -13,6 +13,8 @@ public class ModSounds
     public static SoundEvent CHAMELEON_TONGUE_IN = SoundInit.CHAMELEON_TONGUE_IN_SOUND_REGISTRY.get();
     public static SoundEvent CHAMELEON_TONGUE_OUT = SoundInit.CHAMELEON_TONGUE_OUT_SOUND_REGISTRY.get();
     public static SoundEvent CHAMELEON_SHED = SoundInit.CHAMELEON_SHED_SOUND_REGISTRY.get();
+    public static SoundEvent CHAMELEON_SHED_READY = SoundInit.CHAMELEON_SHED_READY_SOUND_REGISTRY.get();
+    public static SoundEvent CHAMELEON_SHED_FAIL = SoundInit.CHAMELEON_SHED_FAIL_SOUND_REGISTRY.get();
 
     public static SoundEvent SOUL_LAMP_ON = SoundInit.SOUL_LAMP_ON_SOUND_REGISTRY.get();
     public static SoundEvent SOUL_LAMP_OFF = SoundInit.SOUL_LAMP_OFF_SOUND_REGISTRY.get();

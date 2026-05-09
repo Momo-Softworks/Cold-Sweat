@@ -505,6 +505,11 @@ public abstract class WorldHelper
         }
     }
 
+    public static void spawnParticleBatch(World level, IParticleData particle, AxisAlignedBB boundingBox, double count, double speed)
+    {
+        Vector3d position = boundingBox.getCenter();
+        spawnParticleBatch(level, particle, position.x, position.y, position.z, boundingBox.getXsize() / 2, boundingBox.getYsize() / 2, boundingBox.getZsize() / 2, count, speed);
+    }
     public static void spawnParticleBatch(World level, IParticleData particle, double x, double y, double z,
                                           double xSpread, double ySpread, double zSpread, double count, double speed)
     {
@@ -517,9 +522,9 @@ public abstract class WorldHelper
             {
                 Vector3d vec = new Vector3d(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize().scale(speed);
                 particles.addParticle(particle, new ParticleBatchMessage.ParticlePlacement(
-                        x + xSpread - rand.nextDouble() * (xSpread * 2),
-                        y + ySpread - rand.nextDouble() * (ySpread * 2),
-                        z + zSpread - rand.nextDouble() * (zSpread * 2), vec.x, vec.y, vec.z));
+                        x + xSpread - (rand.nextDouble() * xSpread * 2),
+                        y + ySpread - (rand.nextDouble() * ySpread * 2),
+                        z + zSpread - (rand.nextDouble() * zSpread * 2), vec.x, vec.y, vec.z));
             }
             ColdSweatPacketHandler.INSTANCE.send(PacketDistributor.DIMENSION.with(level::dimension), particles);
         }
