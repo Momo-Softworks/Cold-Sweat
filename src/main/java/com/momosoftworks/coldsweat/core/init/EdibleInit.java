@@ -15,7 +15,7 @@ public class EdibleInit
     {   event.registerEdible(new HotBiomeEdible());
         event.registerEdible(new ColdBiomeEdible());
         event.registerEdible(new HumidBiomeEdible());
-        event.registerEdible(new HealingEdible());
+        event.registerEdible(new TamingEdible());
     }
 
     @SubscribeEvent

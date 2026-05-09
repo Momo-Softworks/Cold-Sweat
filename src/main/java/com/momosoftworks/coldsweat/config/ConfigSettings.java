@@ -181,6 +181,7 @@ public class ConfigSettings
     public static final DynamicHolder<EntityDropData> FUR_TIMINGS;
     public static final DynamicHolder<EntityDropData> SHED_TIMINGS;
     public static final DynamicHolder<Boolean> CHAMELEON_SHED_AUTOMATICALLY;
+    public static final DynamicHolder<Integer> CHAMELEON_SHED_TIME_LIMIT;
     public static final DynamicHolder<Multimap<Holder<Biome>, SpawnBiomeData>> ENTITY_SPAWN_BIOMES;
     public static final DynamicHolder<Multimap<EntityType<?>, MountData>> INSULATED_MOUNTS;
     public static final DynamicHolder<Multimap<EntityType<?>, EntityTempData>> ENTITY_TEMPERATURES;
@@ -649,6 +650,11 @@ public class ConfigSettings
         CHAMELEON_SHED_AUTOMATICALLY = addSyncedSetting(ColdSweat.createKey("chameleon_sheds_automatically"), () -> false, holder -> holder.set(EntitySettingsConfig.CHAMELEON_SHED_AUTOMATICALLY.get()),
         Codec.BOOL,
         (saver) -> EntitySettingsConfig.CHAMELEON_SHED_AUTOMATICALLY.set(saver),
+        SyncType.BOTH_WAYS);
+
+        CHAMELEON_SHED_TIME_LIMIT = addSyncedSetting(ColdSweat.createKey("chameleon_shed_time_limit"), () -> 9600, holder -> holder.set(EntitySettingsConfig.CHAMELEON_SHED_TIME_LIMIT.get()),
+        Codec.INT,
+        (saver) -> EntitySettingsConfig.CHAMELEON_SHED_TIME_LIMIT.set(saver),
         SyncType.BOTH_WAYS);
 
         ENTITY_SPAWN_BIOMES = addSettingWithRegistries(ColdSweat.createKey("entity_spawn_biomes"), RegistryMultiMap::new, (holder, registryAccess) ->

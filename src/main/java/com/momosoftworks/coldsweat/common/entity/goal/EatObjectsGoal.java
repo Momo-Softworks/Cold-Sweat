@@ -4,6 +4,7 @@ import com.momosoftworks.coldsweat.common.entity.Chameleon;
 import com.momosoftworks.coldsweat.common.entity.data.edible.ChameleonEdibles;
 import com.momosoftworks.coldsweat.common.entity.data.edible.Edible;
 import com.momosoftworks.coldsweat.core.event.TaskScheduler;
+import com.momosoftworks.coldsweat.util.entity.EntityHelper;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
@@ -63,7 +64,7 @@ public class EatObjectsGoal extends Goal
                 if (edible.isPresent()
                 && (!itemEntity.getPersistentData().contains("Recipient") || itemEntity.getPersistentData().getUUID("Recipient").equals(this.entity.getUUID())))
                 {
-                    if (this.entity.getCooldown(edible.get()) <= 0 && edible.get().shouldEat(this.entity, itemEntity)
+                    if (this.entity.getCooldown(edible.get()) <= 0 && edible.get().shouldEat(item, this.entity, EntityHelper.getThrower(itemEntity))
                     || isBreedingItem(itemEntity.getItem()))
                     {
                         this.target = ent;
