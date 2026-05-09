@@ -9,7 +9,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 
@@ -24,7 +28,7 @@ public abstract class BiomeSearchingEdible extends Edible
     }
 
     @Override
-    public Result onEaten(Chameleon entity, ItemEntity item)
+    public Result onEaten(ItemStack item, Chameleon entity, Entity thrower)
     {
         if (!entity.level.isClientSide)
         {
@@ -66,11 +70,11 @@ public abstract class BiomeSearchingEdible extends Edible
             // Execute the search thread
             searchThread.start();
         }
-        return Result.FAIL;
+        return Result.SUCCESS;
     }
 
     @Override
-    public boolean shouldEat(Chameleon entity, ItemEntity item)
-    {   return item.getOwner() != null && entity.isPlayerTrusted(item.getOwner());
+    public boolean shouldEat(ItemStack item, Chameleon entity, Entity thrower)
+    {   return thrower != null && entity.isPlayerTrusted(thrower.getUUID());
     }
 }

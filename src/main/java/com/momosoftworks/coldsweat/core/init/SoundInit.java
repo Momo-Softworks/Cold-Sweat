@@ -49,6 +49,10 @@ public class SoundInit
             () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "entity.chameleon.tongue.out")));
     public static final RegistryObject<SoundEvent> CHAMELEON_SHED_SOUND_REGISTRY = SOUNDS.register("entity.chameleon.shed",
             () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "entity.chameleon.shed")));
+    public static final RegistryObject<SoundEvent> CHAMELEON_SHED_READY_SOUND_REGISTRY = SOUNDS.register("entity.chameleon.shed.ready",
+            () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "entity.chameleon.shed.ready")));
+    public static final RegistryObject<SoundEvent> CHAMELEON_SHED_FAIL_SOUND_REGISTRY = SOUNDS.register("entity.chameleon.shed.fail",
+            () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "entity.chameleon.shed.fail")));
 
     public static final RegistryObject<SoundEvent> CHAMELEON_ARMOR_EQUIP_SOUND_REGISTRY = SOUNDS.register("item.armor.equip_chameleon_scale",
             () -> new SoundEvent(new ResourceLocation(ColdSweat.MOD_ID, "item.armor.equip_chameleon_scale")));
