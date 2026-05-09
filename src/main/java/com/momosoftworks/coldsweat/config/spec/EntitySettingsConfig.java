@@ -26,6 +26,7 @@ public class EntitySettingsConfig
     public static final CSConfigSpec.ConfigValue<List<? extends List<?>>> GOAT_SPAWN_BIOMES;
 
     public static final CSConfigSpec.BooleanValue CHAMELEON_SHED_AUTOMATICALLY;
+    public static final CSConfigSpec.IntValue CHAMELEON_SHED_TIME_LIMIT;
 
     public static final CSConfigSpec.ConfigValue<List<? extends List<?>>> ENTITY_TEMPERATURES;
     public static final CSConfigSpec.ConfigValue<List<? extends List<?>>> ENTITY_CLIMATES;
@@ -152,10 +153,17 @@ public class EntitySettingsConfig
 
         CHAMELEON_SHED_AUTOMATICALLY = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────",
-                         " If true, chameleons will automatically shed their skin over time",
-                         " If false, chameleons will only shed when a player interacts with them",
+                         " If true, chameleons will automatically drop molt when ready to shed",
+                         " If false, chameleons will only drop molt when a player interacts with them",
                          " ⌄ ")
                 .define("Chameleons Shed Automatically", false);
+
+        CHAMELEON_SHED_TIME_LIMIT = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────",
+                         " The time limit for how long a chameleon can wait to be shed by a player",
+                         " Has no effect if 'Chameleons Shed Automatically' is enabled",
+                         " ⌄ ")
+                .defineInRange("Chameleon Interact Time Limit", 6000, 0, Integer.MAX_VALUE);
         BUILDER.pop();
 
         BUILDER.push("Mob Spawning");
