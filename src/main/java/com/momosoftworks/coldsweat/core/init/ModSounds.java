@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.core.init;
 
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.mrbysco.spoiled.registration.RegistryObject;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
@@ -50,6 +49,10 @@ public class ModSounds
                                               () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "entity.chameleon.tongue.out")));
     public static final DeferredHolder<SoundEvent, SoundEvent> CHAMELEON_SHED = SOUNDS.register("entity.chameleon.shed",
                                               () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "entity.chameleon.shed")));
+    public static final DeferredHolder<SoundEvent, SoundEvent> CHAMELEON_SHED_READY = SOUNDS.register("entity.chameleon.shed.ready",
+                                              () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "entity.chameleon.shed.ready")));
+    public static final DeferredHolder<SoundEvent, SoundEvent> CHAMELEON_SHED_FAIL = SOUNDS.register("entity.chameleon.shed.fail",
+                                              () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "entity.chameleon.shed.fail")));
 
     public static final DeferredHolder<SoundEvent, SoundEvent> ARMOR_EQUIP_CHAMELEON = SOUNDS.register("item.armor.equip_chameleon_scale",
                                               () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "item.armor.equip_chameleon_scale")));

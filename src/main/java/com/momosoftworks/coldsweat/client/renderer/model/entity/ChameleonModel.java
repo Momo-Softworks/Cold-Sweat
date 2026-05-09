@@ -362,14 +362,13 @@ public class ChameleonModel<T extends Chameleon> extends AgeableListModel<T>
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
 		float partialTick = Minecraft.getInstance().getTimer().getRealtimeDeltaTicks();
-		long tickCount = chameleon.tickCount;
+		long tickCount = chameleon.getAgeTicks();
 		long hurtTime = chameleon.getHurtTimestamp();
 
 		// Make the chameleon invisible after it gets hurt
-		// Don't do this if alpha is overridden
-		if (!isOverlay && chameleon.isAlive())
+		if (chameleon.isAlive())
 		{
-			if (CSMath.betweenInclusive(tickCount - hurtTime, 0, 40) && hurtTime != 0)
+			if (CSMath.betweenInclusive(tickCount - hurtTime, 0, 40) && hurtTime != 0 && chameleon.opacity > alpha * 0.15f)
 			{	chameleon.opacity = CSMath.blend(alpha, alpha * 0.15f, tickCount + partialTick - hurtTime, 0, 40);
 			}
 			else if (chameleon.opacity < alpha)
@@ -380,6 +379,7 @@ public class ChameleonModel<T extends Chameleon> extends AgeableListModel<T>
 		ModelPart tongue1 = modelParts.get("Tongue1");
 		tongue1.visible = false;
 
+        // Don't use chameleon.opacity for overlays
 		super.renderToBuffer(poseStack, vertexConsumer, packedLight, packedOverlay, FastColor.ARGB32.colorFromFloat(isOverlay ? alpha : chameleon.opacity,
                                                                                                                     red, green, blue));
 

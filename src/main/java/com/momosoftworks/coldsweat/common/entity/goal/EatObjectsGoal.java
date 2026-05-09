@@ -58,7 +58,7 @@ public class EatObjectsGoal extends Goal
                 if (edible.isPresent()
                 && (!itemEntity.getPersistentData().contains("Recipient") || itemEntity.getPersistentData().getUUID("Recipient").equals(this.entity.getUUID())))
                 {
-                    if (this.entity.getCooldown(edible.get()) <= 0 && edible.get().shouldEat(this.entity, itemEntity)
+                    if (this.entity.getCooldown(edible.get()) <= 0 && edible.get().shouldEat(item, this.entity, itemEntity.getOwner())
                     || isBreedingItem(itemEntity.getItem()))
                     {
                         this.target = ent;
