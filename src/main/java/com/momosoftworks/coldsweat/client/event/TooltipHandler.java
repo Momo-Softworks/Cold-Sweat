@@ -7,6 +7,8 @@ import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.gui.tooltip.*;
+import com.momosoftworks.coldsweat.client.gui.tooltip.Icon;
+import com.momosoftworks.coldsweat.client.gui.tooltip.util.RequirementCheck;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
 import com.momosoftworks.coldsweat.common.item.SoulspringLampItem;
@@ -66,12 +68,12 @@ public class TooltipHandler
     private static int HOVERED_ITEM_UPDATE_COOLDOWN = 0;
     private static ItemStack HOVERED_STACK = ItemStack.EMPTY;
     private static int HOVERED_SLOT = 0;
-    public static HashMap<UUID, Boolean> HOVERED_STACK_PREDICATES = new HashMap<>();
+    public static HashMap<UUID, RequirementCheck> HOVERED_STACK_PREDICATES = new HashMap<>();
     public static boolean FETCHING_TOOLTIP = false;
     public static List<Either<FormattedText, TooltipComponent>> LAST_TOOLTIP = new ArrayList<>();
 
-    public static <T extends ConfigData> boolean passesRequirement(T element)
-    {   return HOVERED_STACK_PREDICATES.getOrDefault(element.uuid(), true);
+    public static <T extends ConfigData> RequirementCheck checkRequirement(T element)
+    {   return HOVERED_STACK_PREDICATES.getOrDefault(element.uuid(), RequirementCheck.UNKNOWN);
     }
 
     public static boolean isShiftDown()
@@ -344,7 +346,9 @@ public class TooltipHandler
             Map<Integer, Double> foodTemps = new HashMap<>();
             for (FoodData foodData : ConfigSettings.FOOD_TEMPERATURES.get().get(item))
             {
-                if (passesRequirement(foodData))
+                RequirementCheck check = checkRequirement(foodData);
+                if (check.unknown()) continue;
+                if (check.passed())
                 {   foodTemps.merge(foodData.duration(), foodData.temperature(), Double::sum);
                 }
             }
@@ -548,7 +552,8 @@ public class TooltipHandler
     private static void validateInsulator(InsulatorData insulator, List<InsulatorData> insulation, List<InsulatorData> unmetInsulation, List<InsulatorData> allUnmetInsulation)
     {
         boolean isEmpty = insulator.insulation().isEmpty();
-        if (passesRequirement(insulator))
+        RequirementCheck check = checkRequirement(insulator);
+        if (check.passed() || check.unknown())
         {   if (!isEmpty) insulation.add(insulator);
         }
         else if (!insulator.hideIfUnmet())
@@ -563,15 +568,16 @@ public class TooltipHandler
         Map<List<Either<IntegerBounds, ItemTempData.SlotType>>, Map<Temperature.Trait, Double>> unmetTempMap = new HashMap<>();
         for (ItemTempData tempData : ConfigSettings.ITEM_TEMPERATURES.get().get(stack.getItem()))
         {
-            boolean passes = passesRequirement(tempData);
+            RequirementCheck check = checkRequirement(tempData);
+            if (check.unknown()) continue;
             double temp = tempData.temperature();
             Temperature.Trait trait = tempData.trait();
             for (Either<IntegerBounds, ItemTempData.SlotType> slot : tempData.slots())
             {
-                if (!passes && tempData.hideIfUnmet()) continue;
+                if (check.failed() && tempData.hideIfUnmet()) continue;
                 List<Either<IntegerBounds, ItemTempData.SlotType>> slotKey = CSMath.arrayList(slot);
                 tempMap.computeIfAbsent(slotKey, k -> new HashMap<>()).merge(trait, temp, Double::sum);
-                if (!passes)
+                if (check.failed())
                 {   unmetTempMap.computeIfAbsent(slotKey, k -> new HashMap<>()).merge(trait, temp, Double::sum);
                 }
             }
