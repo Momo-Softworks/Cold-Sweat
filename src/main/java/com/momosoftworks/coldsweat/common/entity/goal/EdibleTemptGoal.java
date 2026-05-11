@@ -1,30 +1,30 @@
 package com.momosoftworks.coldsweat.common.entity.goal;
 
-import net.minecraft.tags.TagKey;
+import com.momosoftworks.coldsweat.common.entity.Chameleon;
+import com.momosoftworks.coldsweat.common.entity.data.edible.ChameleonEdibles;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.TemptGoal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 
 /**
- * A tempt goal that actually works and uses tags, rather than Ingredients that initialize empty half the time.
+ * A tempt goal based on registered {@link com.momosoftworks.coldsweat.common.entity.data.edible.Edible}s
  */
-public class WorkingTemptGoal extends TemptGoal
+public class EdibleTemptGoal extends TemptGoal
 {
     protected static final TargetingConditions TEMP_TARGETING = TargetingConditions.forNonCombat().range(10.0D).ignoreLineOfSight();
 
-    protected final TagKey<Item> itemTag;
     protected final TargetingConditions targetingConditions;
     protected int calmDown = 0;
     protected boolean isRunning = false;
+    protected Chameleon mob;
 
-    public WorkingTemptGoal(PathfinderMob mob, double speedModifier, TagKey<Item> itemTag, boolean canScare)
+    public EdibleTemptGoal(Chameleon mob, double speedModifier, boolean canScare)
     {
         super(mob, speedModifier, Ingredient.EMPTY, canScare);
+        this.mob = mob;
         this.targetingConditions = TEMP_TARGETING.copy().selector(this::shouldFollow);
-        this.itemTag = itemTag;
     }
 
     public boolean canUse()
@@ -40,7 +40,19 @@ public class WorkingTemptGoal extends TemptGoal
     }
 
     protected boolean shouldFollow(LivingEntity entity)
-    {   return entity.getMainHandItem().is(this.itemTag) || entity.getOffhandItem().is(this.itemTag);
+    {
+        return ChameleonEdibles.EDIBLES.stream().anyMatch(edible ->
+               {
+                   for (ItemStack stack : entity.getHandSlots())
+                   {
+                       if (!stack.is(edible.associatedItems())) continue;
+                       boolean shouldEat = edible.shouldEat(stack, this.mob, entity);
+                       if (shouldEat)
+                       {   return true;
+                       }
+                   }
+                   return false;
+               });
     }
 
     @Override
