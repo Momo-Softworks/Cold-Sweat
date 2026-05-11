@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.mixin;
 
 import com.momosoftworks.coldsweat.client.event.TooltipHandler;
+import com.momosoftworks.coldsweat.client.gui.tooltip.util.RequirementCheck;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
@@ -47,7 +48,8 @@ public abstract class MixinItemTooltip
         AttributeModifierMap unmetInsulatorAttributes = new AttributeModifierMap();
         for (InsulatorData insulator : ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()))
         {
-            if (TooltipHandler.passesRequirement(insulator))
+            RequirementCheck check = TooltipHandler.checkRequirement(insulator);
+            if (check.passed() || check.unknown())
             {   insulatorAttributes.putAll(insulator.attributes());
             }
             else unmetInsulatorAttributes.putAll(insulator.attributes());
@@ -65,7 +67,8 @@ public abstract class MixinItemTooltip
         AttributeModifierMap unmetCurioAttributes = new AttributeModifierMap();
         for (InsulatorData insulator : ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem()))
         {
-            if (TooltipHandler.passesRequirement(insulator))
+            RequirementCheck check = TooltipHandler.checkRequirement(insulator);
+            if (check.passed() || check.unknown())
             {   curioAttributes.putAll(insulator.attributes());
             }
             else unmetCurioAttributes.putAll(insulator.attributes());

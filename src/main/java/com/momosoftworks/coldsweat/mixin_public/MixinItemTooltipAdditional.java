@@ -36,7 +36,7 @@ public class MixinItemTooltipAdditional
             {
                 Holder<Attribute> attribute = entry.getKey();
                 AttributeModifier modifier = entry.getValue();
-                boolean passes = TooltipHandler.passesRequirement(insulator);
+                boolean passes = TooltipHandler.checkRequirement(insulator).passed();
                 if (!passes && insulator.hideIfUnmet())
                 {   continue;
                 }
@@ -53,7 +53,7 @@ public class MixinItemTooltipAdditional
                     {
                         Holder<Attribute> attribute = entry.getKey();
                         AttributeModifier modifier = entry.getValue();
-                        boolean passes = TooltipHandler.passesRequirement(insulator);
+                        boolean passes = TooltipHandler.checkRequirement(insulator).passed();
                         if (!passes && insulator.hideIfUnmet())
                         {   continue;
                         }
