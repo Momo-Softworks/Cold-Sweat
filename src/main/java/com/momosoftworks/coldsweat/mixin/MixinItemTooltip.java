@@ -45,7 +45,7 @@ public class MixinItemTooltip
         AttributeModifierMap unmetInsulatorAttributes = new AttributeModifierMap();
         for (InsulatorData insulator : ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()))
         {
-            if (TooltipHandler.passesRequirement(insulator))
+            if (TooltipHandler.checkRequirement(insulator).passed())
             {   insulatorAttributes.putAll(insulator.attributes());
             }
             else unmetInsulatorAttributes.putAll(insulator.attributes());
@@ -63,7 +63,7 @@ public class MixinItemTooltip
         AttributeModifierMap unmetCurioAttributes = new AttributeModifierMap();
         for (InsulatorData insulator : ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem()))
         {
-            if (TooltipHandler.passesRequirement(insulator))
+            if (TooltipHandler.checkRequirement(insulator).passed())
             {   curioAttributes.putAll(insulator.attributes());
             }
             else unmetCurioAttributes.putAll(insulator.attributes());
@@ -100,7 +100,7 @@ public class MixinItemTooltip
         {
             for (InsulatorData insulator : ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem()))
             {
-                if (TooltipHandler.passesRequirement(insulator))
+                if (TooltipHandler.checkRequirement(insulator).passed())
                 {   INSULATION_MODIFIERS.putAll(insulator.attributes().getMap());
                 }
                 else
@@ -118,7 +118,7 @@ public class MixinItemTooltip
                 {
                     for (InsulatorData insulator : ConfigSettings.INSULATION_ITEMS.get().get(item.getItem()))
                     {
-                        if (TooltipHandler.passesRequirement(insulator))
+                        if (TooltipHandler.checkRequirement(insulator).passed())
                         {   INSULATION_MODIFIERS.putAll(insulator.attributes().getMap());
                         }
                         else
