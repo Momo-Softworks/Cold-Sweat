@@ -437,7 +437,9 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         renderCellBorder(poseStack, x, y, BorderSegment.HEAD, BorderType.OVERFLOW);
         renderCellBorder(poseStack, x, y, BorderSegment.BODY, BorderType.OVERFLOW);
         renderCellBorder(poseStack, x, y, BorderSegment.TAIL, BorderType.OVERFLOW);
+        poseStack.translate(0, 0, 401);
         Screen.drawString(poseStack, font, text, x + 8, y - 2, textColor);
+        poseStack.translate(0, 0, -401);
         // Return the width of the cell and text
         return 12 + font.width(text);
     }
