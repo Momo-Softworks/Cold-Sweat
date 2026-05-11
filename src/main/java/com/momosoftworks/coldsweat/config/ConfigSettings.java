@@ -150,7 +150,6 @@ public class ConfigSettings
     public static final DynamicHolder<Multimap<Item, ItemTempData>> ITEM_TEMPERATURES;
 
     public static final DynamicHolder<Integer> WATERSKIN_CONSUME_STRENGTH;
-    public static final DynamicHolder<Double> WATERSKIN_HOTBAR_STRENGTH;
     public static final DynamicHolder<Double> WATERSKIN_NEUTRALIZE_SPEED;
     public static final DynamicHolder<Integer> WATERSKIN_USES;
     public static final DynamicHolder<Double> SOULSPRING_LAMP_STRENGTH;
@@ -581,11 +580,6 @@ public class ConfigSettings
         WATERSKIN_CONSUME_STRENGTH = addSyncedSetting(ColdSweat.createKey("waterskin_consume_strength"), () -> 50, holder -> holder.set(ItemSettingsConfig.WATERSKIN_CONSUME_STRENGTH.get()),
         Codec.INT,
         (saver) -> ItemSettingsConfig.WATERSKIN_CONSUME_STRENGTH.set(saver),
-        SyncType.BOTH_WAYS);
-
-        WATERSKIN_HOTBAR_STRENGTH = addSyncedSetting(ColdSweat.createKey("waterskin_hotbar_strength"), () -> 1.0, holder -> holder.set(ItemSettingsConfig.WATERSKIN_HOTBAR_STRENGTH.get()),
-        Codec.DOUBLE,
-        (saver) -> ItemSettingsConfig.WATERSKIN_HOTBAR_STRENGTH.set(saver),
         SyncType.BOTH_WAYS);
 
         WATERSKIN_NEUTRALIZE_SPEED = addSyncedSetting(ColdSweat.createKey("waterskin_neutralize_speed"), () -> 1.0, holder -> holder.set(ItemSettingsConfig.WATERSKIN_NEUTRALIZE_SPEED.get()),
