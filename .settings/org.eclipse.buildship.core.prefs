@@ -1,4 +1,4 @@
-arguments=--init-script /home/michael/.eclipse/2139989682_linux_gtk_x86_64/configuration/org.eclipse.osgi/148/0/.cp/gradle/init/init.gradle
+arguments=--init-script /home/michael/.eclipse/2139989682_linux_gtk_x86_64/configuration/org.eclipse.osgi/363/0/.cp/gradle/init/init.gradle
 auto.sync=false
 build.scans.enabled=false
 connection.gradle.distribution=GRADLE_DISTRIBUTION(WRAPPER)
