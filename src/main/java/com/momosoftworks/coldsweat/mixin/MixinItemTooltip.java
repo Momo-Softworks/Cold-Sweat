@@ -5,6 +5,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.client.event.TooltipHandler;
+import com.momosoftworks.coldsweat.client.gui.tooltip.util.RequirementCheck;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -45,7 +46,8 @@ public class MixinItemTooltip
         AttributeModifierMap unmetInsulatorAttributes = new AttributeModifierMap();
         for (InsulatorData insulator : ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()))
         {
-            if (TooltipHandler.checkRequirement(insulator).passed())
+            RequirementCheck check = TooltipHandler.checkRequirement(insulator);
+            if (check.passed() || check.unknown())
             {   insulatorAttributes.putAll(insulator.attributes());
             }
             else unmetInsulatorAttributes.putAll(insulator.attributes());
@@ -63,7 +65,8 @@ public class MixinItemTooltip
         AttributeModifierMap unmetCurioAttributes = new AttributeModifierMap();
         for (InsulatorData insulator : ConfigSettings.INSULATING_CURIOS.get().get(stack.getItem()))
         {
-            if (TooltipHandler.checkRequirement(insulator).passed())
+            RequirementCheck check = TooltipHandler.checkRequirement(insulator);
+            if (check.passed() || check.unknown())
             {   curioAttributes.putAll(insulator.attributes());
             }
             else unmetCurioAttributes.putAll(insulator.attributes());
@@ -100,7 +103,8 @@ public class MixinItemTooltip
         {
             for (InsulatorData insulator : ConfigSettings.INSULATING_ARMORS.get().get(stack.getItem()))
             {
-                if (TooltipHandler.checkRequirement(insulator).passed())
+                RequirementCheck check = TooltipHandler.checkRequirement(insulator);
+                if (check.passed() || check.unknown())
                 {   INSULATION_MODIFIERS.putAll(insulator.attributes().getMap());
                 }
                 else
@@ -118,7 +122,8 @@ public class MixinItemTooltip
                 {
                     for (InsulatorData insulator : ConfigSettings.INSULATION_ITEMS.get().get(item.getItem()))
                     {
-                        if (TooltipHandler.checkRequirement(insulator).passed())
+                        RequirementCheck check = TooltipHandler.checkRequirement(insulator);
+                        if (check.passed() || check.unknown())
                         {   INSULATION_MODIFIERS.putAll(insulator.attributes().getMap());
                         }
                         else
