@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.core.network.message;
 import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.client.event.TooltipHandler;
+import com.momosoftworks.coldsweat.client.gui.tooltip.util.RequirementCheck;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
@@ -75,7 +76,7 @@ public class SyncItemPredicatesMessage
         buffer.writeOptional(Optional.ofNullable(message.equipmentSlot), FriendlyByteBuf::writeEnum);
         buffer.writeBoolean(message.isInventory);
 
-boolean hasResponse = message.responseStack != null && !message.predicateMap.isEmpty();
+        boolean hasResponse = message.responseStack != null && !message.predicateMap.isEmpty();
         buffer.writeBoolean(hasResponse);
         if (hasResponse)
         {   buffer.writeItem(message.responseStack);
@@ -106,7 +107,10 @@ boolean hasResponse = message.responseStack != null && !message.predicateMap.isE
         if (receivingSide.isClient())
         {
             context.enqueueWork(() ->
-            {   TooltipHandler.HOVERED_STACK_PREDICATES.putAll(message.predicateMap);
+            {
+                message.predicateMap.forEach((uuid, value) ->
+                {   TooltipHandler.HOVERED_STACK_PREDICATES.put(uuid, value ? RequirementCheck.PASSED : RequirementCheck.FAILED);
+                });
                 TooltipHandler.FETCHING_TOOLTIP = false;
             });
         }
