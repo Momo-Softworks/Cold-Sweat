@@ -391,9 +391,7 @@ public class TooltipHandler
         if (ConfigSettings.ENABLE_HINTS.get())
         {   addUnmetRequirementHints(elements, unmetLabelIndex, allUnmetInsulation);
         }
-        if (FETCHING_TOOLTIP)
-        {   LAST_TOOLTIP = elements;
-        }
+        LAST_TOOLTIP = elements;
     }
 
     private static void addInsulationTooltips(List<Either<FormattedText, TooltipComponent>> elements, int tooltipStartIndex,
