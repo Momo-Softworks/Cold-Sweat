@@ -5,8 +5,9 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.renderer.animation.AnimationManager;
 import com.momosoftworks.coldsweat.common.entity.data.edible.ChameleonEdibles;
 import com.momosoftworks.coldsweat.common.entity.data.edible.Edible;
-import com.momosoftworks.coldsweat.common.entity.goals.EatObjectsGoal;
-import com.momosoftworks.coldsweat.common.entity.goals.LazyLookGoal;
+import com.momosoftworks.coldsweat.common.entity.goal.EatObjectsGoal;
+import com.momosoftworks.coldsweat.common.entity.goal.LazyLookGoal;
+import com.momosoftworks.coldsweat.common.entity.goal.WorkingTemptGoal;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ModEntities;
 import com.momosoftworks.coldsweat.core.init.ModItems;
@@ -20,7 +21,6 @@ import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ItemParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
@@ -65,6 +65,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -111,7 +112,7 @@ public class Chameleon extends Animal
         this.goalSelector.addGoal(1, new PanicGoal(this, 1.6));
         this.goalSelector.addGoal(2, new BreedGoal(this, 1.0D));
         this.goalSelector.addGoal(3, new EatObjectsGoal(this, ModEntityTags.CHAMELEON_EATS));
-        this.goalSelector.addGoal(4, new TemptGoal(this, 1.25, stack -> ChameleonEdibles.EDIBLES.stream().anyMatch(edible -> stack.is(edible.associatedItems())), false));
+        this.goalSelector.addGoal(4, new WorkingTemptGoal(this, 1.25, ModItemTags.CHAMELEON_TEMPTING, false));
         this.goalSelector.addGoal(4, new FollowParentGoal(this, 1.1D));
         this.goalSelector.addGoal(5, new LazyLookGoal(this));
         this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class, 6.0F));
