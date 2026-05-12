@@ -180,7 +180,7 @@ public class WorldSettingsConfig
                             List.of("minecraft:deep_lukewarm_ocean", 39, 70, "F"),
                             List.of("minecraft:deep_ocean", 39, 70, "F"),
                             List.of("minecraft:desert", 48, 115, "F"),
-                            List.of("minecraft:dripstone_caves", "disabled"),
+                            List.of("minecraft:dripstone_caves", "disable"),
                             List.of("minecraft:eroded_badlands", 88, 120, "F", -5),
                             List.of("minecraft:flower_forest", 51, 76, "F"),
                             List.of("minecraft:forest", 51, 76, "F"),
