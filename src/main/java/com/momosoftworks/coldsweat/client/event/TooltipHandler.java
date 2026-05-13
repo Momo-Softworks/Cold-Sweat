@@ -374,8 +374,7 @@ public class TooltipHandler
             for (FoodData foodData : ConfigSettings.FOOD_TEMPERATURES.get().get(item))
             {
                 RequirementCheck check = checkRequirement(foodData);
-                if (check.unknown()) continue;
-                if (check.passed())
+                if (!check.failed())
                 {   foodTemps.merge(foodData.duration(), foodData.temperature(), Double::sum);
                 }
             }
@@ -385,17 +384,20 @@ public class TooltipHandler
                 double temp = entry.getValue();
                 int duration = entry.getKey();
 
-                IFormattableTextComponent consumeEffect = temp > 0
-                                                  ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp)).withStyle(HOT) :
-                                                  temp == 0
-                                                  ? new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp)) :
-                                                  new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", CSMath.formatDoubleOrInt(temp)).withStyle(COLD);
+                String tempString = temp >= 0 ? "+" + CSMath.formatDoubleOrInt(temp) : CSMath.formatDoubleOrInt(temp);
+                IFormattableTextComponent consumeEffects = new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", tempString, Temperature.Trait.CORE.getFormattedName());
+                if (temp > 0)
+                {   consumeEffects.setStyle(HOT);
+                }
+                else if (temp < 0)
+                {   consumeEffects.setStyle(COLD);
+                }
                 // Add a duration to the tooltip if it exists
                 if (duration > 0)
-                {   consumeEffect.append(" (" + StringUtils.formatTickDuration(duration) + ")");
+                {   consumeEffects.append(" (" + StringUtils.formatTickDuration(duration) + ")");
                 }
                 // Add the effect to the tooltip
-                elements.add(index, consumeEffect);
+                elements.add(index, consumeEffects);
             }
 
             // Don't add our own section title if one already exists
