@@ -16,12 +16,10 @@ import com.momosoftworks.coldsweat.core.event.TaskScheduler;
 import com.momosoftworks.coldsweat.core.init.ItemInit;
 import com.momosoftworks.coldsweat.core.itemgroup.ColdSweatGroup;
 import com.momosoftworks.coldsweat.core.network.message.ParticleBatchMessage;
-import com.momosoftworks.coldsweat.data.tag.ModItemTempTags;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.registries.ModSounds;
-import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -104,7 +102,7 @@ public class FilledWaterskinItem extends Item
         if (EntityTempManager.isTemperatureEnabled(entity) && entity.tickCount % 5 == 0)
         {
             double itemTemp = stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
-            boolean shouldDrain = ConfigHelper.getTaggedConfigsFor(stack.getItem(), ModItemTempTags.DRAINS_WATERSKIN, ConfigSettings.ITEM_TEMPERATURES.get())
+            boolean shouldDrain = ConfigSettings.ITEM_TEMPERATURES.get().get(stack.getItem())
                                   .stream().anyMatch(c -> c.test(entity, stack, slot, null));
             if (shouldDrain)
             {

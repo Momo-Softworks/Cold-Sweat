@@ -403,7 +403,7 @@ public class ItemSettingsConfig
             ITEM_TEMPERATURES = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Defines items that affect the player's temperature when in the inventory",
-                         " ├── Format: [[\"item_id\", temperature, \"slotRange\", \"trait\", *\"{nbt}\", *maxEffect, *tempLimit], [...], etc]",
+                         " ├── Format: [[\"item_id\", temperature, \"slotRange\", \"trait\", *\"{nbt}\", *maxEffect, *tempLimit, *hide_if_unmet], [...], etc]",
                          " └── [* = optional]",
                          " • item_id: The item's ID (i.e. \"minecraft:lava_bucket\").",
                          " • temperature: The temperature change the item will apply to the entity. For core temperature, this is applied every tick",
@@ -413,8 +413,11 @@ public class ItemSettingsConfig
                          " • *max_effect: The maximum temperature effect the item can apply to the entity.",
                          " • *tempLimit: The maximum temperature at which this item temp will have any effect.",
                          "   (Based on the given trait. Represents the minimum temp if the item temp is negative)",
+                         " • *hide_if_unmet: Only show the tooltip if the NBT check passes. Default to false.",
                          " ⌄ ")
                 .defineListAllowEmpty(List.of("Item Temperatures"), () -> List.of(
+                        List.of("cold_sweat:filled_waterskin",  0.025, "hand,hotbar", "core", "{'Temperature':'1:'}", 999, 999, true),
+                        List.of("cold_sweat:filled_waterskin", -0.025, "hand,hotbar", "core", "{'Temperature':':-1'}", 999, -999, true)
                 ),
                 it -> it instanceof List<?> list
                         && list.get(0) instanceof String
