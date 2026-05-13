@@ -357,8 +357,7 @@ public class TooltipHandler
             for (FoodData foodData : ConfigSettings.FOOD_TEMPERATURES.get().get(item))
             {
                 RequirementCheck check = checkRequirement(foodData);
-                if (check.unknown()) continue;
-                if (check.passed())
+                if (!check.failed())
                 {   foodTemps.merge(foodData.duration(), foodData.temperature(), Double::sum);
                 }
             }
@@ -368,11 +367,14 @@ public class TooltipHandler
                 double temp = entry.getValue();
                 int duration = entry.getKey();
 
-                MutableComponent consumeEffects = temp > 0
-                                                  ? Component.translatable("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp)).withStyle(HOT) :
-                                                  temp == 0
-                                                  ? Component.translatable("tooltip.cold_sweat.temperature_effect", "+" + CSMath.formatDoubleOrInt(temp)) :
-                                                  Component.translatable("tooltip.cold_sweat.temperature_effect", CSMath.formatDoubleOrInt(temp)).withStyle(COLD);
+                String tempString = temp >= 0 ? "+" + CSMath.formatDoubleOrInt(temp) : CSMath.formatDoubleOrInt(temp);
+                MutableComponent consumeEffects = Component.translatable("tooltip.cold_sweat.temperature_effect", tempString, Temperature.Trait.CORE.getFormattedName());
+                if (temp > 0)
+                {   consumeEffects.setStyle(HOT);
+                }
+                else if (temp < 0)
+                {   consumeEffects.setStyle(COLD);
+                }
                 // Add a duration to the tooltip if it exists
                 if (duration > 0)
                 {   consumeEffects.append(" (" + StringUtil.formatTickDuration(duration, tickRate) + ")");
