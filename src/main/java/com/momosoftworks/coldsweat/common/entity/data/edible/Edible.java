@@ -3,11 +3,8 @@ package com.momosoftworks.coldsweat.common.entity.data.edible;
 import com.momosoftworks.coldsweat.common.entity.Chameleon;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import org.valkyrienskies.core.impl.shadow.En;
 
 public abstract class Edible
 {
