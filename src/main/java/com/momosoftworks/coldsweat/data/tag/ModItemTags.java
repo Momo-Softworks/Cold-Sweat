@@ -14,7 +14,6 @@ public class ModItemTags
     public static final ITag.INamedTag<Item> NOT_INSULATABLE = createTag("not_insulatable");
 
     public static final ITag.INamedTag<Item> CHAMELEON_TAMING = createTag("chameleon/taming");
-    public static final ITag.INamedTag<Item> CHAMELEON_TEMPTING = createTag("chameleon/tempting");
     public static final ITag.INamedTag<Item> CHAMELEON_HOT = createTag("chameleon/find_hot_biomes");
     public static final ITag.INamedTag<Item> CHAMELEON_COLD = createTag("chameleon/find_cold_biomes");
     public static final ITag.INamedTag<Item> CHAMELEON_HUMID = createTag("chameleon/find_humid_biomes");
