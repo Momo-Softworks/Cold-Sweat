@@ -157,7 +157,8 @@ public class TooltipHandler
                                                                  boolean forTooltip, boolean strikethrough)
     {
         if (attribute == null) return Component.empty();
-        String attributeName = attribute.value().getDescriptionId().replace("attribute.", "");
+        String attributeID = attribute.value().getDescriptionId().replace("attribute.", "");
+        MutableComponent attributeName = Component.translatable(String.format("trait.cold_sweat.%s", attributeID));
         Temperature.Trait trait = EntityTempManager.getTraitForAttribute(attribute);
 
         /* Compose attribute value text */
@@ -185,7 +186,12 @@ public class TooltipHandler
         MutableComponent component;
         // Create custom component for Cold Sweat attributes
         if (EntityTempManager.isTemperatureAttribute(attribute))
-        {   component = Component.translatable(String.format("attribute.cold_sweat.modifier.%s.%s", operationString, attributeName), params.toArray());
+        {
+            if (trait == Temperature.Trait.WORLD && operation == AttributeModifier.Operation.ADDITION)
+            {   attributeName = attributeName.append(Temperature.Units.C.getFormattedName());
+            }
+            params.add(1, attributeName);
+            component = Component.translatable(String.format("attribute.cold_sweat.modifier.%s", operationString), params.toArray());
         }
         else // Vanilla component; add custom params to it
         {
