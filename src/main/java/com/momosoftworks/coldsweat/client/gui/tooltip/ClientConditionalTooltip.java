@@ -49,15 +49,22 @@ public class ClientConditionalTooltip implements ClientTooltipComponent
         }
         // Text
         int color = strikethrough ? 7561572 : Optional.ofNullable(this.original.getStyle().getColor()).map(TextColor::getValue).orElse(0xFFFFFF);
-        int xOffs = !strikethrough && this.original.getString().startsWith("+") ? 0 : 2;
         if (icon != null)
-        {   xOffs += 10;
+        {
+            if (this.strikethrough)
+            {   Screen.fill(ps, x - 2, y + 3, x + 9, y + 4, 0xFFF63232);
+                Screen.fill(ps, x - 1, y + 4, x + 10, y + 5, 0xFFF63232);
+                x += 2;
+            }
+            font.drawShadow(ps, this.original.getString(), x + 10, y + 1, color);
         }
-        font.drawShadow(ps, this.original.getString(), x + xOffs, y + 1, color);
-        int strikeLength = this.icon != null ? 11 : this.font.width(this.original) + 2;
-        if (strikethrough)
-        {   Screen.fill(ps, x - 2, y + 4, x - 2 + strikeLength, y + 5, 0xFFF63232);
-            Screen.fill(ps, x - 1, y + 5, x - 1 + strikeLength, y + 6, 0xFFF63232);
+        else
+        {
+            int strikeLength = font.width(this.original) + 2;
+            font.drawShadow(ps, this.original.getString(), x, y + 1, color);
+            if (strikethrough)
+            {   Screen.fill(ps, x - 1, y + 5, x - 1 + strikeLength, y + 6, 0xFFF63232);
+            }
         }
     }
 }
