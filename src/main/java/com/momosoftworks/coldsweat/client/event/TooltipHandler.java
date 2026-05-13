@@ -572,11 +572,13 @@ public class TooltipHandler
             Temperature.Trait trait = tempData.trait();
             for (Either<IntegerBounds, ItemTempData.SlotType> slot : tempData.slots())
             {
-                if (check.failed() && tempData.hideIfUnmet()) continue;
                 List<Either<IntegerBounds, ItemTempData.SlotType>> slotKey = CSMath.arrayList(slot);
-                tempMap.computeIfAbsent(slotKey, k -> new HashMap<>()).merge(trait, temp, Double::sum);
-                if (check.failed())
-                {   unmetTempMap.computeIfAbsent(slotKey, k -> new HashMap<>()).merge(trait, temp, Double::sum);
+                if (check.passed())
+                {   tempMap.computeIfAbsent(slotKey, k -> new HashMap<>()).merge(trait, temp, Double::sum);
+                }
+                else
+                {   if (tempData.hideIfUnmet()) continue;
+                    unmetTempMap.computeIfAbsent(slotKey, k -> new HashMap<>()).merge(trait, temp, Double::sum);
                 }
             }
         }
@@ -593,24 +595,37 @@ public class TooltipHandler
         if (!mergedTempMap.isEmpty())
         {   elements.add(index++, Either.left(Component.empty()));
         }
-        for (Map.Entry<Map<Temperature.Trait, Double>, List<Either<IntegerBounds, ItemTempData.SlotType>>> entry : mergedTempMap.entrySet())
+        addItemTempEntries(index, elements, mergedTempMap, mergedUnmetTempMap);
+    }
+
+    private static void addItemTempEntries(int index, List<Either<FormattedText, TooltipComponent>> elements,
+                                           Map<Map<Temperature.Trait, Double>, List<Either<IntegerBounds, ItemTempData.SlotType>>> tempMap,
+                                           Map<Map<Temperature.Trait, Double>, List<Either<IntegerBounds, ItemTempData.SlotType>>> unmetTempMap)
+    {
+        Set<List<Either<IntegerBounds, ItemTempData.SlotType>>> createdSections = new HashSet<>();
+        Set<Map.Entry<Map<Temperature.Trait, Double>, List<Either<IntegerBounds, ItemTempData.SlotType>>>> mergedEntrySet = CSMath.merge(tempMap.entrySet(), unmetTempMap.entrySet());
+        for (Map.Entry<Map<Temperature.Trait, Double>, List<Either<IntegerBounds, ItemTempData.SlotType>>> entry : mergedEntrySet)
         {
             Map<Temperature.Trait, Double> traitTempMap = entry.getKey();
             List<Either<IntegerBounds, ItemTempData.SlotType>> slots = entry.getValue();
-            if (slots.size() == 1)
+            if (!createdSections.contains(slots))
             {
-                Either<IntegerBounds, ItemTempData.SlotType> slot = slots.get(0);
-                MutableComponent sectionTitle = slot.map(bounds -> Component.translatable("tooltip.cold_sweat.section.slot_range", bounds.min(), bounds.max()),
-                                                         slotType -> Component.translatable("tooltip.cold_sweat.section.slot_single", slotType.getFormattedName()));
-                elements.add(index, Either.left(sectionTitle.withStyle(ChatFormatting.GRAY)));
+                if (slots.size() == 1)
+                {
+                    Either<IntegerBounds, ItemTempData.SlotType> slot = slots.get(0);
+                    MutableComponent sectionTitle = slot.map(bounds -> Component.translatable("tooltip.cold_sweat.section.slot_range", bounds.min(), bounds.max()),
+                                                             slotType -> Component.translatable("tooltip.cold_sweat.section.slot_single", slotType.getFormattedName()));
+                    elements.add(index, Either.left(sectionTitle.withStyle(ChatFormatting.GRAY)));
+                }
+                else
+                {
+                    slots.sort(Comparator.comparing(slot -> slot.map(bounds -> 1, slotType -> 0)));
+                    List<String> slotNames = slots.stream().map(either -> either.map(IntegerBounds::toString, ItemTempData.SlotType::getFormattedName)).toList();
+                    MutableComponent sectionTitle = Component.translatable("tooltip.cold_sweat.section.slots_list", slotNames);
+                    elements.add(index, Either.left(sectionTitle.withStyle(ChatFormatting.GRAY)));
+                }
             }
-            else
-            {
-                slots.sort(Comparator.comparing(slot -> slot.map(bounds -> 1, slotType -> 0)));
-                List<String> slotNames = slots.stream().map(either -> either.map(IntegerBounds::toString, ItemTempData.SlotType::getFormattedName)).toList();
-                MutableComponent sectionTitle = Component.translatable("tooltip.cold_sweat.section.slots_list", slotNames);
-                elements.add(index, Either.left(sectionTitle.withStyle(ChatFormatting.GRAY)));
-            }
+            createdSections.add(slots);
             index++;
             for (Map.Entry<Temperature.Trait, Double> tempEntry : traitTempMap.entrySet())
             {
@@ -645,7 +660,7 @@ public class TooltipHandler
                 if (trait == Temperature.Trait.CORE)
                 {   tooltipText = Component.translatable("tooltip.cold_sweat.per_second", tooltipText);
                 }
-                if (mergedUnmetTempMap.containsKey(traitTempMap))
+                if (unmetTempMap.entrySet().contains(entry))
                 {   elements.add(index, Either.right(new ConditionalTooltip(tooltipText, Minecraft.getInstance().font, true, null)));
                 }
                 else elements.add(index, Either.left(tooltipText.withStyle(style)));
