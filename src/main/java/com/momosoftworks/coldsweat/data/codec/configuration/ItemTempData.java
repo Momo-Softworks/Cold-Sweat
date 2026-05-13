@@ -29,6 +29,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ItemTempData extends ConfigData implements RequirementHolder
 {
@@ -186,8 +187,10 @@ public class ItemTempData extends ConfigData implements RequirementHolder
         //temp
         double temp = ((Number) entry.get(1)).doubleValue();
         // slots
-        SlotType slotType = SlotType.byName((String) entry.get(2));
-        if (slotType == null)
+        List<Either<IntegerBounds, SlotType>> slotTypes = Arrays.stream(((String) entry.get(2)).split(","))
+                                                          .map(String::trim).map(SlotType::byName)
+                                                          .map(Either::<IntegerBounds, SlotType>right).collect(Collectors.toList());
+        if (slotTypes.isEmpty())
         {   ColdSweat.LOGGER.error("Error parsing item temp config: \"{}\" is not a valid slot type", entry.get(2));
             return null;
         }
@@ -203,11 +206,13 @@ public class ItemTempData extends ConfigData implements RequirementHolder
         double tempLimit = entry.size() > 6 ? ((Number) entry.get(6)).doubleValue() : Double.POSITIVE_INFINITY;
         double maxTemp = temp > 0 ? tempLimit : Double.POSITIVE_INFINITY;
         double minTemp = temp < 0 ? -tempLimit : Double.NEGATIVE_INFINITY;
+        // hide if unmet
+        boolean hideIfUnmet = entry.size() > 7 && entry.get(7) instanceof Boolean && (Boolean) entry.get(7);
         // compile item requirement
         ItemRequirement itemRequirement = new ItemRequirement(items, nbtRequirement);
 
-        ItemTempData result = new ItemTempData(new NegatableList<>(itemRequirement), Arrays.asList(Either.right(slotType)), temp, trait, maxEffect, maxTemp, minTemp,
-                                               new NegatableList<>(), new AttributeModifierMap(), new HashMap<>(), false);
+        ItemTempData result = new ItemTempData(new NegatableList<>(itemRequirement), slotTypes, temp, trait, maxEffect, maxTemp, minTemp,
+                                               new NegatableList<>(), new AttributeModifierMap(), new HashMap<>(), hideIfUnmet);
         result.setConfigType(Type.TOML);
         return result;
     }
