@@ -353,6 +353,11 @@ public class Chameleon extends Animal
     }
 
     @Override
+    protected float getSoundVolume()
+    {   return 0.7f;
+    }
+
+    @Override
     public void playAmbientSound()
     {
         SoundEvent soundevent = this.getAmbientSound();
