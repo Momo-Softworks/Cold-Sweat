@@ -52,6 +52,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.jetbrains.annotations.Nullable;
 
@@ -200,19 +201,21 @@ public class FilledWaterskinItem extends Item
 
     private static InteractionResultHolder<ItemStack> performAction(Preference.WaterskinAction action, Level level, Player player, InteractionHand hand)
     {
+        ItemStack stack = player.getItemInHand(hand);
         switch (action)
         {
             case DRINK ->
             {   return ItemUtils.startUsingInstantly(level, player, hand);
             }
             case POUR ->
-            {   if (performPourAction(player.getItemInHand(hand), player, hand))
-                {   return InteractionResultHolder.consume(player.getItemInHand(hand));
+            {   if (performPourAction(stack, player, hand))
+                {   MinecraftForge.EVENT_BUS.post(new LivingEntityUseItemEvent.Finish(player, stack, 1, stack));
+                    return InteractionResultHolder.consume(stack);
                 }
             }
             case NONE -> {}
         }
-        return InteractionResultHolder.pass(player.getItemInHand(hand));
+        return InteractionResultHolder.pass(stack);
     }
 
     @Override
