@@ -17,7 +17,6 @@ import com.momosoftworks.coldsweat.core.init.ModItemComponents;
 import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.core.init.ModSounds;
 import com.momosoftworks.coldsweat.core.network.message.ParticleBatchMessage;
-import com.momosoftworks.coldsweat.data.tag.ModItemTempTags;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
@@ -101,7 +100,7 @@ public class FilledWaterskinItem extends Item
         if (EntityTempManager.isTemperatureEnabled(entity) && entity.tickCount % 5 == 0)
         {
             double itemTemp = stack.get(ModItemComponents.WATER_TEMPERATURE);
-            boolean shouldDrain = ConfigHelper.getTaggedConfigsFor(stack.getItem(), ModItemTempTags.DRAINS_WATERSKIN, ConfigSettings.ITEM_TEMPERATURES.get())
+            boolean shouldDrain = ConfigSettings.ITEM_TEMPERATURES.get().get(stack.getItem())
                                   .stream().anyMatch(c -> c.test(entity, stack, slot, null));
             if (shouldDrain)
             {
