@@ -18,7 +18,6 @@ import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.core.init.ModSounds;
 import com.momosoftworks.coldsweat.core.network.message.ParticleBatchMessage;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import dev.ghen.thirst.content.registry.ThirstComponent;
 import net.minecraft.ChatFormatting;
@@ -40,7 +39,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
-import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -54,6 +52,7 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 
 import java.util.*;
@@ -201,19 +200,21 @@ public class FilledWaterskinItem extends Item
 
     private static InteractionResultHolder<ItemStack> performAction(Preference.WaterskinAction action, Level level, Player player, InteractionHand hand)
     {
+        ItemStack stack = player.getItemInHand(hand);
         switch (action)
         {
             case DRINK ->
             {   return ItemUtils.startUsingInstantly(level, player, hand);
             }
             case POUR ->
-            {   if (performPourAction(player.getItemInHand(hand), player, hand))
-                {   return InteractionResultHolder.consume(player.getItemInHand(hand));
+            {   if (performPourAction(stack, player, hand))
+                {   NeoForge.EVENT_BUS.post(new LivingEntityUseItemEvent.Finish(player, stack, 1, stack));
+                    return InteractionResultHolder.consume(stack);
                 }
             }
             case NONE -> {}
         }
-        return InteractionResultHolder.pass(player.getItemInHand(hand));
+        return InteractionResultHolder.pass(stack);
     }
 
     @Override
