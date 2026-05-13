@@ -140,7 +140,8 @@ public class TooltipHandler
     {
         if (attribute == null) return new StringTextComponent("");
         double value = amount;
-        String attributeName = attribute.getDescriptionId().replace("attribute.", "");
+        String attributeID = attribute.getDescriptionId().replace("attribute.", "");
+        IFormattableTextComponent attributeName = new TranslationTextComponent(String.format("trait.cold_sweat.%s", attributeID));
         Temperature.Trait trait = EntityTempManager.getTraitForAttribute(attribute);
 
         /* Compose attribute value text */
@@ -170,7 +171,12 @@ public class TooltipHandler
         IFormattableTextComponent component;
         // Create custom component for Cold Sweat attributes
         if (EntityTempManager.isTemperatureAttribute(attribute))
-        {   component = new TranslationTextComponent(String.format("attribute.cold_sweat.modifier.%s.%s", operationString, attributeName), params.toArray());
+        {
+            if (trait == Temperature.Trait.WORLD && operation == AttributeModifier.Operation.ADDITION)
+            {   attributeName = attributeName.append(Temperature.Units.C.getFormattedName());
+            }
+            params.add(1, attributeName);
+            component = new TranslationTextComponent(String.format("attribute.cold_sweat.modifier.%s", operationString), params.toArray());
         }
         else // Vanilla component; add custom params to it
         {
