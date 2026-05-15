@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.impl.RequirementHolder;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
+import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.tags.TagKey;
@@ -43,9 +44,9 @@ public class EntityClimateData extends ConfigData implements RequirementHolder
 
     public static final Codec<EntityClimateData> CODEC = createCodec(RecordCodecBuilder.mapCodec(instance -> instance.group(
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(EntityClimateData::entity),
-            Codec.DOUBLE.fieldOf("min_temp_offset").forGetter(EntityClimateData::minTempOffset),
-            Codec.DOUBLE.fieldOf("max_temp_offset").forGetter(EntityClimateData::maxTempOffset),
-            Codec.DOUBLE.optionalFieldOf("rate", 1.0).forGetter(EntityClimateData::rate),
+            ExtraCodecs.DOUBLE.fieldOf("min_temp_offset").forGetter(EntityClimateData::minTempOffset),
+            ExtraCodecs.DOUBLE.fieldOf("max_temp_offset").forGetter(EntityClimateData::maxTempOffset),
+            ExtraCodecs.DOUBLE.optionalFieldOf("rate", 1.0).forGetter(EntityClimateData::rate),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(EntityClimateData::units)
     ).apply(instance, EntityClimateData::new)));
 

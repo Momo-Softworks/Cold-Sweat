@@ -35,7 +35,7 @@ public class HearthFuelCategory extends ColdSweatFuelCategory
     @Override
     protected ResourceLocation getFilledGaugeTexture(JeiPlugin.FuelRecipe recipe)
     {
-        if (recipe.fuelData().fuel() < 0)
+        if (recipe.getFuel() < 0)
         {   return AbstractHearthScreen.COLD_FUEL_GAUGE;
         }
         else return AbstractHearthScreen.HOT_FUEL_GAUGE;
@@ -44,7 +44,7 @@ public class HearthFuelCategory extends ColdSweatFuelCategory
     @Override
     protected ResourceLocation getEmptyGaugeTexture(JeiPlugin.FuelRecipe recipe)
     {
-        if (recipe.fuelData().fuel() < 0)
+        if (recipe.getFuel() < 0)
         {   return AbstractHearthScreen.COLD_FUEL_GAUGE_EMPTY;
         }
         else return AbstractHearthScreen.HOT_FUEL_GAUGE_EMPTY;

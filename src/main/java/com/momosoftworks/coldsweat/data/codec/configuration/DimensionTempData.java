@@ -6,6 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
+import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.OptionalHolder;
@@ -50,12 +51,12 @@ public class DimensionTempData extends ConfigData
 
     public static final Codec<DimensionTempData> CODEC = createCodec(RecordCodecBuilder.mapCodec(instance -> instance.group(
             NegatableList.listCodec(ConfigHelper.tagOrHolderCodec(Registry.DIMENSION_TYPE_REGISTRY)).fieldOf("dimensions").forGetter(DimensionTempData::dimensions),
-            Codec.mapEither(Codec.DOUBLE.fieldOf("temperature"),
-                            Codec.DOUBLE.fieldOf("min_temp"))
+            Codec.mapEither(ExtraCodecs.DOUBLE.fieldOf("temperature"),
+                            ExtraCodecs.DOUBLE.fieldOf("min_temp"))
                  .xmap(either -> either.map(left -> left, right -> right), Either::right)
                  .forGetter(DimensionTempData::min),
-            Codec.mapEither(Codec.DOUBLE.fieldOf("temperature"),
-                            Codec.DOUBLE.fieldOf("max_temp"))
+            Codec.mapEither(ExtraCodecs.DOUBLE.fieldOf("temperature"),
+                            ExtraCodecs.DOUBLE.fieldOf("max_temp"))
                  .xmap(either -> either.map(left -> left, right -> right), Either::right)
                  .forGetter(DimensionTempData::max),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(DimensionTempData::units),

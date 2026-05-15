@@ -14,6 +14,8 @@ import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
 import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
+import com.momosoftworks.coldsweat.data.codec.util.ValueGetter;
+import java.util.Map;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.EnumHelper;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
@@ -34,20 +36,20 @@ public class ItemTempData extends ConfigData implements RequirementHolder
 {
     final NegatableList<ItemRequirement> item;
     final List<Either<IntegerBounds, SlotType>> slots;
-    final double temperature;
+    final ValueGetter<Double> temperature;
     final Temperature.Trait trait;
-    final Double maxEffect;
-    final double maxTemp;
-    final double minTemp;
+    final ValueGetter<Double> maxEffect;
+    final ValueGetter<Double> maxTemp;
+    final ValueGetter<Double> minTemp;
     final NegatableList<EntityRequirement> entityRequirement;
     final AttributeModifierMap attributeModifiers;
-    final Map<ResourceLocation, Double> immuneTempModifiers;
-    final boolean hideIfUnmet;
+    final Map<ResourceLocation, ValueGetter<Double>> immuneTempModifiers;
+    final ValueGetter<Boolean> hideIfUnmet;
 
-    public ItemTempData(NegatableList<ItemRequirement> item, List<Either<IntegerBounds, SlotType>> slots, double temperature,
-                        Temperature.Trait trait, Double maxEffect, double maxTemp, double minTemp,
+    public ItemTempData(NegatableList<ItemRequirement> item, List<Either<IntegerBounds, SlotType>> slots, ValueGetter<Double> temperature,
+                        Temperature.Trait trait, ValueGetter<Double> maxEffect, ValueGetter<Double> maxTemp, ValueGetter<Double> minTemp,
                         NegatableList<EntityRequirement> entityRequirement, AttributeModifierMap attributeModifiers,
-                        Map<ResourceLocation, Double> immuneTempModifiers, boolean hideIfUnmet, NegatableList<String> requiredMods)
+                        Map<ResourceLocation, ValueGetter<Double>> immuneTempModifiers, ValueGetter<Boolean> hideIfUnmet, NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.item = item;
@@ -63,10 +65,10 @@ public class ItemTempData extends ConfigData implements RequirementHolder
         this.hideIfUnmet = hideIfUnmet;
     }
 
-    public ItemTempData(NegatableList<ItemRequirement> item, List<Either<IntegerBounds, SlotType>> slots, double temperature,
-                        Temperature.Trait trait, Double maxEffect, double maxTemp, double minTemp,
+    public ItemTempData(NegatableList<ItemRequirement> item, List<Either<IntegerBounds, SlotType>> slots, ValueGetter<Double> temperature,
+                        Temperature.Trait trait, ValueGetter<Double> maxEffect, ValueGetter<Double> maxTemp, ValueGetter<Double> minTemp,
                         NegatableList<EntityRequirement> entityRequirement, AttributeModifierMap attributeModifiers,
-                        Map<ResourceLocation, Double> immuneTempModifiers, boolean hideIfUnmet)
+                        Map<ResourceLocation, ValueGetter<Double>> immuneTempModifiers, ValueGetter<Boolean> hideIfUnmet)
     {
         this(item, slots, temperature, trait, maxEffect, maxTemp, minTemp, entityRequirement, attributeModifiers, immuneTempModifiers, hideIfUnmet, new NegatableList<>());
     }
@@ -74,15 +76,15 @@ public class ItemTempData extends ConfigData implements RequirementHolder
     public static final Codec<ItemTempData> CODEC = createCodec(RecordCodecBuilder.mapCodec(instance -> instance.group(
             NegatableList.codec(ItemRequirement.CODEC).optionalFieldOf("item", new NegatableList<>()).forGetter(ItemTempData::item),
             Codec.either(IntegerBounds.CODEC, SlotType.CODEC).listOf().fieldOf("slots").forGetter(ItemTempData::slots),
-            Codec.DOUBLE.fieldOf("temperature").forGetter(ItemTempData::temperature),
+            ValueGetter.fieldCodec("temperature", ExtraCodecs.DOUBLE, 0.0).forGetter(ItemTempData::temperature),
             Temperature.Trait.CODEC.optionalFieldOf("trait", Temperature.Trait.WORLD).forGetter(ItemTempData::trait),
-            Codec.DOUBLE.optionalFieldOf("max_effect", Double.POSITIVE_INFINITY).forGetter(ItemTempData::maxEffect),
-            Codec.DOUBLE.optionalFieldOf("max_temp", Double.POSITIVE_INFINITY).forGetter(data -> data.maxTemp),
-            Codec.DOUBLE.optionalFieldOf("min_temp", Double.NEGATIVE_INFINITY).forGetter(data -> data.minTemp),
+            ValueGetter.optionalFieldCodec("max_effect", ExtraCodecs.DOUBLE, Double.POSITIVE_INFINITY).forGetter(ItemTempData::maxEffect),
+            ValueGetter.optionalFieldCodec("max_temp", ExtraCodecs.DOUBLE, Double.POSITIVE_INFINITY).forGetter(ItemTempData::maxTemp),
+            ValueGetter.optionalFieldCodec("min_temp", ExtraCodecs.DOUBLE, Double.NEGATIVE_INFINITY).forGetter(ItemTempData::minTemp),
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(ItemTempData::entityRequirement),
             AttributeModifierMap.CODEC.optionalFieldOf("attributes", new AttributeModifierMap()).forGetter(ItemTempData::attributeModifiers),
-            Codec.unboundedMap(ResourceLocation.CODEC, Codec.DOUBLE).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(ItemTempData::immuneTempModifiers),
-            Codec.BOOL.optionalFieldOf("hide_if_unmet", false).forGetter(ItemTempData::hideIfUnmet)
+            Codec.unboundedMap(ResourceLocation.CODEC, ValueGetter.codec(ExtraCodecs.DOUBLE, 0.0)).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(ItemTempData::immuneTempModifiers),
+            ValueGetter.optionalFieldCodec("hide_if_unmet", Codec.BOOL, false).forGetter(ItemTempData::hideIfUnmet)
     ).apply(instance, ItemTempData::new)));
 
     public NegatableList<ItemRequirement> item()
@@ -91,20 +93,32 @@ public class ItemTempData extends ConfigData implements RequirementHolder
     public List<Either<IntegerBounds, SlotType>> slots()
     {   return slots;
     }
-    public double temperature()
+    public ValueGetter<Double> temperature()
     {   return temperature;
+    }
+    public double getTemperature(Entity entity, ItemStack item)
+    {   return temperature.get(Map.of("entity", entity, "item", item));
     }
     public Temperature.Trait trait()
     {   return trait;
     }
-    public double maxEffect()
+    public ValueGetter<Double> maxEffect()
     {   return maxEffect;
     }
-    public double maxTemp()
+    public double maxEffect(ItemStack stack, Entity entity)
+    {   return maxEffect.get(Map.of("item", stack, "entity", entity));
+    }
+    public ValueGetter<Double> maxTemp()
     {   return maxTemp;
     }
-    public double minTemp()
+    public double maxTemp(ItemStack stack, Entity entity)
+    {   return maxTemp.get(Map.of("item", stack, "entity", entity));
+    }
+    public ValueGetter<Double> minTemp()
     {   return minTemp;
+    }
+    public double minTemp(ItemStack stack, Entity entity)
+    {   return minTemp.get(Map.of("item", stack, "entity", entity));
     }
     public NegatableList<EntityRequirement> entityRequirement()
     {   return entityRequirement;
@@ -112,11 +126,22 @@ public class ItemTempData extends ConfigData implements RequirementHolder
     public AttributeModifierMap attributeModifiers()
     {   return attributeModifiers;
     }
-    public Map<ResourceLocation, Double> immuneTempModifiers()
+    public Map<ResourceLocation, ValueGetter<Double>> immuneTempModifiers()
     {   return immuneTempModifiers;
     }
-    public boolean hideIfUnmet()
+    public Map<ResourceLocation, Double> immuneTempModifiers(ItemStack stack, Entity entity)
+    {
+        Map<ResourceLocation, Double> result = new HashMap<>();
+        for (Map.Entry<ResourceLocation, ValueGetter<Double>> entry : immuneTempModifiers.entrySet())
+        {   result.put(entry.getKey(), entry.getValue().get(Map.of("item", stack, "entity", entity)));
+        }
+        return result;
+    }
+    public ValueGetter<Boolean> hideIfUnmet()
     {   return hideIfUnmet;
+    }
+    public boolean hideIfUnmet(ItemStack stack, Entity entity)
+    {   return hideIfUnmet.get(Map.of("item", stack, "entity", entity));
     }
 
     @Override
@@ -184,7 +209,7 @@ public class ItemTempData extends ConfigData implements RequirementHolder
         {   return null;
         }
         //temp
-        double temp = ((Number) entry.get(1)).doubleValue();
+        ValueGetter<Double> temp = ValueGetter.parse(() -> entry.get(1), ExtraCodecs.DOUBLE, 0.0);
         // slots
         List<Either<IntegerBounds, SlotType>> slotTypes = Arrays.stream(((String) entry.get(2)).split(","))
                                                           .map(String::trim).map(SlotType::byName)
@@ -200,17 +225,14 @@ public class ItemTempData extends ConfigData implements RequirementHolder
                                         ? new NbtRequirement(NBTHelper.parseCompoundNbt((String) entry.get(4)))
                                         : new NbtRequirement(new CompoundTag());
         // max effect
-        double maxEffect = entry.size() > 5 ? ((Number) entry.get(5)).doubleValue() : Double.POSITIVE_INFINITY;
-        // temp limit
-        double tempLimit = entry.size() > 6 ? ((Number) entry.get(6)).doubleValue() : Double.POSITIVE_INFINITY;
-        double maxTemp = temp > 0 ? tempLimit : Double.POSITIVE_INFINITY;
-        double minTemp = temp < 0 ? -tempLimit : Double.NEGATIVE_INFINITY;
+        ValueGetter<Double> maxEffect = ValueGetter.parse(() -> entry.get(5), ExtraCodecs.DOUBLE, Double.POSITIVE_INFINITY);
         // hide if unmet
-        boolean hideIfUnmet = entry.size() > 7 && entry.get(7) instanceof Boolean b && b;
+        ValueGetter<Boolean> hideIfUnmet = ValueGetter.parse(() -> entry.get(6), Codec.BOOL, false);
         // compile item requirement
         ItemRequirement itemRequirement = new ItemRequirement(items, nbtRequirement);
 
-        ItemTempData result = new ItemTempData(new NegatableList<>(itemRequirement), slotTypes, temp, trait, maxEffect, maxTemp, minTemp,
+        ItemTempData result = new ItemTempData(new NegatableList<>(itemRequirement), slotTypes, temp, trait, maxEffect,
+                                               ValueGetter.constant(Double.POSITIVE_INFINITY), ValueGetter.constant(Double.NEGATIVE_INFINITY),
                                                new NegatableList<>(), new AttributeModifierMap(), new HashMap<>(), hideIfUnmet);
         result.setConfigType(Type.TOML);
         return result;

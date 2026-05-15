@@ -248,7 +248,9 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
 
     @Override
     public int getItemFuel(ItemStack item)
-    {   return CSMath.getIfNotNull(ConfigHelper.getFirstOrNull(ConfigSettings.ICEBOX_FUEL, item.getItem(), data -> data.test(item)), FuelData::fuel, 0d).intValue();
+    {
+        FuelData fuelData = ConfigHelper.getFirstOrNull(ConfigSettings.ICEBOX_FUEL, item.getItem(), data -> data.test(item));
+        return CSMath.getIfNotNull(fuelData, data -> data.fuel(item), 0);
     }
 
     @Override

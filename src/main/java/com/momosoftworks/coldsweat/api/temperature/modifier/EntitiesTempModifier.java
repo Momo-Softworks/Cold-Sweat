@@ -59,12 +59,12 @@ public class EntitiesTempModifier extends TempModifier
                                                }, 3);
                     entityTemp /= blocksBetween.get() + 1;
                     // Clamp to maxEffect
-                    double maxEffect = tempData.getMaxEffect();
+                    double maxEffect = tempData.maxEffect(nearbyEnt, affectedEnt);
                     double currentTemp = effects.getOrDefault(tempData, 0d);
                     entityTemp = CSMath.clamp(entityTemp, -maxEffect - currentTemp, maxEffect - currentTemp);
                     // Clamp between min and max temps
-                    double maxTemp = tempData.getMaxTemp();
-                    double minTemp = tempData.getMinTemp();
+                    double maxTemp = tempData.maxTemp(nearbyEnt, affectedEnt);
+                    double minTemp = tempData.minTemp(nearbyEnt, affectedEnt);
                     double newEffect = currentTemp + entityTemp;
                     newEffect = CSMath.clamp(newEffect, minTemp, maxTemp);
                     double effectDelta = newEffect - currentTemp;

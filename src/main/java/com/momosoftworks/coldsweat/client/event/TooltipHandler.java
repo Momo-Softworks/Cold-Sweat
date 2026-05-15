@@ -33,6 +33,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.*;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.util.StringUtil;
@@ -55,6 +56,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class TooltipHandler
@@ -71,6 +73,8 @@ public class TooltipHandler
     public static HashMap<UUID, RequirementCheck> HOVERED_STACK_PREDICATES = new HashMap<>();
     public static boolean FETCHING_TOOLTIP = false;
     public static List<Either<FormattedText, TooltipComponent>> LAST_TOOLTIP = new ArrayList<>();
+
+    private static final Supplier<LocalPlayer> PLAYER = () -> Minecraft.getInstance().player;
 
     public static <T extends ConfigData> RequirementCheck checkRequirement(T element)
     {   return HOVERED_STACK_PREDICATES.getOrDefault(element.uuid(), RequirementCheck.UNKNOWN);
@@ -264,7 +268,7 @@ public class TooltipHandler
 
                 slotIndex = hoveredSlot.getSlotIndex();
                 equipmentSlot = EntityHelper.getEquipmentSlot(slotIndex);
-                if (hoveredSlot.container != Minecraft.getInstance().player.getInventory())
+                if (hoveredSlot.container != PLAYER.get().getInventory())
                 {   isInventory = false;
                 }
             }
@@ -335,7 +339,6 @@ public class TooltipHandler
         /*
          Tooltip for food temperature
          */
-        if (stack.getUseAnimation() == UseAnim.DRINK || stack.getUseAnimation() == UseAnim.EAT)
         {
             // Check if Diet has their own tooltip already
             int dietTooltipSectionIndex = CSMath.getIndexOf(elements, line -> line.left().map(text -> text.getString().equalsIgnoreCase(Component.translatable("tooltip.diet.eaten").getString())).orElse(false));
@@ -348,7 +351,12 @@ public class TooltipHandler
             {
                 RequirementCheck check = checkRequirement(foodData);
                 if (!check.failed())
-                {   foodTemps.merge(foodData.duration(), foodData.temperature(), Double::sum);
+                {
+                    int duration = foodData.duration(stack, PLAYER.get());
+                    double temperature = foodData.temperature(stack, PLAYER.get());
+                    if (CSMath.round(temperature, 1) != 0)
+                    {   foodTemps.merge(duration, temperature, Double::sum);
+                    }
                 }
             }
 
@@ -357,7 +365,8 @@ public class TooltipHandler
                 double temp = entry.getValue();
                 int duration = entry.getKey();
 
-                String tempString = temp >= 0 ? "+" + CSMath.formatDoubleOrInt(temp) : CSMath.formatDoubleOrInt(temp);
+                String clippedTemp = CSMath.formatDoubleOrInt(CSMath.round(temp, 1));
+                String tempString = temp >= 0 ? "+" + clippedTemp : clippedTemp;
                 MutableComponent consumeEffects = Component.translatable("tooltip.cold_sweat.temperature_effect", tempString, Temperature.Trait.CORE.getFormattedName());
                 if (temp > 0)
                 {   consumeEffects.setStyle(HOT);
@@ -373,10 +382,13 @@ public class TooltipHandler
                 elements.add(index, Either.left(consumeEffects));
             }
 
+            boolean isFood = stack.getUseAnimation() == UseAnim.EAT || stack.getUseAnimation() == UseAnim.DRINK;
             // Don't add our own section title if one already exists
-            if (!foodTemps.isEmpty() && dietTooltipSectionIndex == -1)
+            if (!foodTemps.isEmpty() && (!isFood || dietTooltipSectionIndex == -1))
             {
-                elements.add(tooltipEndIndex, Either.left(Component.translatable("tooltip.cold_sweat.section.consumed").withStyle(ChatFormatting.GRAY)));
+                MutableComponent sectionTitle = isFood ? Component.translatable("tooltip.cold_sweat.section.consumed")
+                                                       : Component.translatable("tooltip.cold_sweat.section.used");
+                elements.add(tooltipEndIndex, Either.left(sectionTitle.withStyle(ChatFormatting.GRAY)));
                 elements.add(tooltipEndIndex, Either.left(Component.empty()));
             }
         }
@@ -570,7 +582,7 @@ public class TooltipHandler
         {
             RequirementCheck check = checkRequirement(tempData);
             if (check.unknown()) continue;
-            double temp = tempData.temperature();
+            double temp = tempData.getTemperature(PLAYER.get(), stack);
             Temperature.Trait trait = tempData.trait();
             for (Either<IntegerBounds, ItemTempData.SlotType> slot : tempData.slots())
             {
@@ -579,7 +591,7 @@ public class TooltipHandler
                 {   tempMap.computeIfAbsent(slotKey, k -> new HashMap<>()).merge(trait, temp, Double::sum);
                 }
                 else
-                {   if (tempData.hideIfUnmet()) continue;
+                {   if (tempData.hideIfUnmet(stack, PLAYER.get())) continue;
                     unmetTempMap.computeIfAbsent(slotKey, k -> new HashMap<>()).merge(trait, temp, Double::sum);
                 }
             }
@@ -686,7 +698,7 @@ public class TooltipHandler
                 if (!carriedStack.isEmpty()
                 && itemFuel != null)
                 {
-                    double fuelValue = screen.getMenu().getCarried().getCount() * itemFuel.fuel();
+                    double fuelValue = screen.getMenu().getCarried().getCount() * itemFuel.fuel(carriedStack);
                     int slotX = screen.getSlotUnderMouse().x + screen.getGuiLeft();
                     int slotY = screen.getSlotUnderMouse().y + screen.getGuiTop();
 
