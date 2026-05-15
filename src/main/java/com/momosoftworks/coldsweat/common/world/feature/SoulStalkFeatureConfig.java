@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.common.world.feature;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
@@ -22,7 +23,7 @@ public record SoulStalkFeatureConfig(int tries, int minCount, int maxCount, int 
                 // Optional fields
                 Codec.INT.fieldOf("disk_width").orElse(0).forGetter(config -> config.diskWidth),
                 Codec.INT.fieldOf("disk_height").orElse(0).forGetter(config -> config.diskHeight),
-                Codec.DOUBLE.fieldOf("disk_decay").orElse(0.0).forGetter(config -> config.diskDecay),
+                ExtraCodecs.DOUBLE.fieldOf("disk_decay").orElse(0.0).forGetter(config -> config.diskDecay),
                 BlockStateProvider.CODEC.fieldOf("disk_state_provider").orElse(BlockStateProvider.simple(Blocks.AIR)).forGetter(config -> config.diskStateProvider),
                 BlockPredicate.CODEC.fieldOf("disk_replace_target").orElse(BlockPredicate.not(BlockPredicate.alwaysTrue())).forGetter(config -> config.replaceBlocks)
         ).apply(instance, SoulStalkFeatureConfig::new);

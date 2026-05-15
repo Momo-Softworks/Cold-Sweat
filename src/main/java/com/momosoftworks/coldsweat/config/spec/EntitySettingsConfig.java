@@ -61,8 +61,8 @@ public class EntitySettingsConfig
                 it -> it instanceof List<?> list
                       && list.size() == 3
                       && list.get(0) instanceof String
-                      && list.get(1) instanceof Number
-                      && list.get(2) instanceof Number);
+                      && (list.get(1) instanceof Number || list.get(1) instanceof String)
+                      && (list.get(2) instanceof Number || list.get(2) instanceof String));
 
         ENTITY_TEMPERATURES = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────//v",
@@ -79,10 +79,10 @@ public class EntitySettingsConfig
                 it -> it instanceof List<?> list
                       && list.size() >= 3
                       && list.get(0) instanceof String
-                      && list.get(1) instanceof Number
-                      && list.get(2) instanceof Number
+                      && (list.get(1) instanceof Number || list.get(1) instanceof String)
+                      && (list.get(2) instanceof Number || list.get(2) instanceof String)
                       && (list.size() < 4 || list.get(3) instanceof String)
-                      && (list.size() < 5 || list.get(4) instanceof Number));
+                      && (list.size() < 5 || list.get(4) instanceof Number || list.get(4) instanceof String));
 
         ENTITY_CLIMATES = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────//v",

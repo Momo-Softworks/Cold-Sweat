@@ -99,7 +99,7 @@ public abstract class ColdSweatFuelCategory implements IRecipeCategory<JeiPlugin
         Minecraft minecraft = Minecraft.getInstance();
         Font font = minecraft.font;
         HearthBlockEntity dummyBlockEntity = this.getDummyBlockEntity();
-        double fuel = Math.abs(recipe.fuelData().fuel());
+        double fuel = Math.abs(recipe.getFuel());
 
         Component fillAmountText = createFillAmountText(fuel, dummyBlockEntity);
         int textWidth = font.width(fillAmountText.getString());

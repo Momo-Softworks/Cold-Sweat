@@ -7,7 +7,9 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.impl.RequirementHolder;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
+import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
+import com.momosoftworks.coldsweat.data.codec.util.ValueGetter;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -24,12 +26,13 @@ public class MountData extends ConfigData implements RequirementHolder, IForgeRe
 {
     final NegatableList<EntityRequirement> entity;
     final NegatableList<EntityRequirement> rider;
-    final double coldInsulation;
-    final double heatInsulation;
-    final Map<ResourceLocation, Double> modifierImmunities;
+    final ValueGetter<Double> coldInsulation;
+    final ValueGetter<Double> heatInsulation;
+    final Map<ResourceLocation, ValueGetter<Double>> modifierImmunities;
 
-    public MountData(NegatableList<EntityRequirement> entity, NegatableList<EntityRequirement> rider, double coldInsulation, double heatInsulation,
-                     Map<ResourceLocation, Double> modifierImmunities, NegatableList<String> requiredMods)
+    public MountData(NegatableList<EntityRequirement> entity, NegatableList<EntityRequirement> rider,
+                     ValueGetter<Double> coldInsulation, ValueGetter<Double> heatInsulation,
+                     Map<ResourceLocation, ValueGetter<Double>> modifierImmunities, NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.entity = entity;
@@ -39,8 +42,9 @@ public class MountData extends ConfigData implements RequirementHolder, IForgeRe
         this.modifierImmunities = modifierImmunities;
     }
 
-    public MountData(NegatableList<EntityRequirement> entity, NegatableList<EntityRequirement> rider, double coldInsulation, double heatInsulation,
-                     Map<ResourceLocation, Double> modifierImmunities)
+    public MountData(NegatableList<EntityRequirement> entity, NegatableList<EntityRequirement> rider,
+                     ValueGetter<Double> coldInsulation, ValueGetter<Double> heatInsulation,
+                     Map<ResourceLocation, ValueGetter<Double>> modifierImmunities)
     {
         this(entity, rider, coldInsulation, heatInsulation, modifierImmunities, new NegatableList<>());
     }
@@ -48,9 +52,9 @@ public class MountData extends ConfigData implements RequirementHolder, IForgeRe
     public static Codec<MountData> CODEC = createCodec(RecordCodecBuilder.mapCodec(instance -> instance.group(
             NegatableList.codec(EntityRequirement.getCodec()).fieldOf("entity").forGetter(MountData::entity),
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("rider", new NegatableList<>()).forGetter(MountData::rider),
-            Codec.DOUBLE.optionalFieldOf("cold_insulation", 0d).forGetter(MountData::coldInsulation),
-            Codec.DOUBLE.optionalFieldOf("heat_insulation", 0d).forGetter(MountData::heatInsulation),
-            Codec.unboundedMap(ResourceLocation.CODEC, Codec.DOUBLE).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(MountData::modifierImmunities)
+            ValueGetter.optionalFieldCodec("cold_insulation", ExtraCodecs.DOUBLE, 0.0).forGetter(MountData::coldInsulation),
+            ValueGetter.optionalFieldCodec("heat_insulation", ExtraCodecs.DOUBLE, 0.0).forGetter(MountData::heatInsulation),
+            Codec.unboundedMap(ResourceLocation.CODEC, ValueGetter.codec(ExtraCodecs.DOUBLE, 0.0)).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(MountData::modifierImmunities)
     ).apply(instance, MountData::new)));
 
     public NegatableList<EntityRequirement> entity()
@@ -59,14 +63,28 @@ public class MountData extends ConfigData implements RequirementHolder, IForgeRe
     public NegatableList<EntityRequirement> rider()
     {   return rider;
     }
-    public double coldInsulation()
+    public ValueGetter<Double> coldInsulation()
     {   return coldInsulation;
     }
-    public double heatInsulation()
+    public double coldInsulation(Entity entity, Entity rider)
+    {   return coldInsulation.get(Map.of("entity", entity, "rider", rider));
+    }
+    public ValueGetter<Double> heatInsulation()
     {   return heatInsulation;
     }
-    public Map<ResourceLocation, Double> modifierImmunities()
+    public double heatInsulation(Entity entity, Entity rider)
+    {   return heatInsulation.get(Map.of("entity", entity, "rider", rider));
+    }
+    public Map<ResourceLocation, ValueGetter<Double>> modifierImmunities()
     {   return modifierImmunities;
+    }
+    public Map<ResourceLocation, Double> modifierImmunities(Entity entity, Entity rider)
+    {
+        Map<ResourceLocation, Double> result = new HashMap<>();
+        for (Map.Entry<ResourceLocation, ValueGetter<Double>> entry : modifierImmunities.entrySet())
+        {   result.put(entry.getKey(), entry.getValue().get(Map.of("entity", entity, "rider", rider)));
+        }
+        return result;
     }
 
     @Nullable
@@ -79,10 +97,9 @@ public class MountData extends ConfigData implements RequirementHolder, IForgeRe
         NegatableList<Either<TagKey<EntityType<?>>, EntityType<?>>> entities = ConfigHelper.getEntityTypes((String) entry.get(0));
         if (entities.isEmpty()) return null;
 
-        double coldInsul = ((Number) entry.get(1)).doubleValue();
-        double hotInsul = entry.size() < 3
-                          ? coldInsul
-                          : ((Number) entry.get(2)).doubleValue();
+        ValueGetter<Double> coldInsul = ValueGetter.parse(() -> entry.get(1), ExtraCodecs.DOUBLE, 0.0);
+        ValueGetter<Double> hotInsul = entry.size() < 3 ? coldInsul
+                                                        : ValueGetter.parse(() -> entry.get(2), ExtraCodecs.DOUBLE, 0.0);
 
         MountData result = new MountData(new NegatableList<>(new EntityRequirement(entities)), new NegatableList<>(), coldInsul, hotInsul, Map.of());
         result.setConfigType(Type.TOML);
@@ -109,8 +126,8 @@ public class MountData extends ConfigData implements RequirementHolder, IForgeRe
         return super.equals(obj)
             && entity.equals(that.entity)
             && rider.equals(that.rider)
-            && Double.compare(that.coldInsulation, coldInsulation) == 0
-            && Double.compare(that.heatInsulation, heatInsulation) == 0;
+            && coldInsulation.equals(that.coldInsulation)
+            && heatInsulation.equals(that.heatInsulation);
     }
 
     @Override

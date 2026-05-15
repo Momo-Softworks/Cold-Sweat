@@ -74,8 +74,8 @@ public abstract class ScalingFormula
     {
         public static final Codec<Dynamic> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 Type.CODEC.fieldOf("scaling").forGetter(Dynamic::getType),
-                Codec.DOUBLE.fieldOf("factor").forGetter(s -> s.factor),
-                Codec.DOUBLE.fieldOf("max").forGetter(s -> s.max)
+                ExtraCodecs.DOUBLE.fieldOf("factor").forGetter(s -> s.factor),
+                ExtraCodecs.DOUBLE.fieldOf("max").forGetter(s -> s.max)
         ).apply(instance, Dynamic::new));
 
         double factor;

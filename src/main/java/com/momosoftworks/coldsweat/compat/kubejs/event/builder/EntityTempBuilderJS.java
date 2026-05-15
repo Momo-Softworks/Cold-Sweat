@@ -6,6 +6,7 @@ import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.WorldTempRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
+import com.momosoftworks.coldsweat.data.codec.util.ValueGetter;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.world.entity.Entity;
@@ -13,19 +14,21 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class EntityTempBuilderJS
 {
-    public double temperature = 0;
-    public double range = 0;
+    public ValueGetter<Double> temperature = ValueGetter.constant(0.0);
+    public ValueGetter<Double> range = ValueGetter.constant(0.0);
     public Temperature.Units units = Temperature.Units.MC;
-    public double maxEffect = Double.POSITIVE_INFINITY;
-    public double maxTemperature = Double.POSITIVE_INFINITY;
-    public double minTemperature = Double.NEGATIVE_INFINITY;
+    public ValueGetter<Double> maxEffect = ValueGetter.constant(Double.POSITIVE_INFINITY);
+    public ValueGetter<Double> maxTemperature = ValueGetter.constant(Double.POSITIVE_INFINITY);
+    public ValueGetter<Double> minTemperature = ValueGetter.constant(Double.NEGATIVE_INFINITY);
     public NegatableList<EntityRequirement> entityPredicate = new NegatableList<>();
     public NegatableList<EntityRequirement> otherEntityPredicate = new NegatableList<>();
-    public boolean affectsSelf = false;
+    public ValueGetter<Boolean> affectsSelf = ValueGetter.constant(false);
 
     public EntityTempBuilderJS()
     {}
@@ -42,16 +45,22 @@ public class EntityTempBuilderJS
         return this;
     }
 
-    public EntityTempBuilderJS temperature(double temperature)
+    public EntityTempBuilderJS temperature(Function<Map<String, Object>, Double> function)
     {
-        this.temperature = temperature;
+        this.temperature = ValueGetter.of(function);
         return this;
     }
+    public EntityTempBuilderJS temperature(double temperature)
+    {   return temperature(m -> temperature);
+    }
 
-    public EntityTempBuilderJS range(double range)
+    public EntityTempBuilderJS range(Function<Map<String, Object>, Double> function)
     {
-        this.range = range;
+        this.range = ValueGetter.of(function);
         return this;
+    }
+    public EntityTempBuilderJS range(double range)
+    {   return range(m -> range);
     }
 
     public EntityTempBuilderJS units(String units)
@@ -60,22 +69,34 @@ public class EntityTempBuilderJS
         return this;
     }
 
-    public EntityTempBuilderJS maxEffect(double maxEffect)
+    public EntityTempBuilderJS maxEffect(Function<Map<String, Object>, Double> function)
     {
-        this.maxEffect = maxEffect;
+        this.maxEffect = ValueGetter.of(function);
         return this;
     }
+    public EntityTempBuilderJS maxEffect(double maxEffect)
+    {   return maxEffect(m -> maxEffect);
+    }
 
+    public EntityTempBuilderJS maxTemperature(Function<Map<String, Object>, Double> function)
+    {
+        this.maxTemperature = ValueGetter.of(function);
+        return this;
+    }
     public EntityTempBuilderJS maxTemperature(double maxTemperature)
     {
-        this.maxTemperature = Temperature.convert(maxTemperature, units, Temperature.Units.MC, true);
-        return this;
+        double converted = Temperature.convert(maxTemperature, units, Temperature.Units.MC, true);
+        return maxTemperature(m -> converted);
     }
 
-    public EntityTempBuilderJS minTemperature(double minTemperature)
+    public EntityTempBuilderJS minTemperature(Function<Map<String, Object>, Double> function)
     {
-        this.minTemperature = Temperature.convert(minTemperature, units, Temperature.Units.MC, true);
+        this.minTemperature = ValueGetter.of(function);
         return this;
+    }
+    public EntityTempBuilderJS minTemperature(double minTemperature)
+    {   double converted = Temperature.convert(minTemperature, units, Temperature.Units.MC, true);
+        return minTemperature(m -> converted);
     }
 
     public EntityTempBuilderJS entityPredicate(Predicate<Entity> entityPredicate)
@@ -90,16 +111,19 @@ public class EntityTempBuilderJS
         return this;
     }
 
-    public EntityTempBuilderJS affectsSelf(boolean affectsSelf)
+    public EntityTempBuilderJS affectsSelf(Function<Map<String, Object>, Boolean> function)
     {
-        this.affectsSelf = affectsSelf;
+        this.affectsSelf = ValueGetter.of(function);
         return this;
+    }
+    public EntityTempBuilderJS affectsSelf(boolean affectsSelf)
+    {   return affectsSelf(m -> affectsSelf);
     }
 
     public EntityTempData build()
     {
         EntityTempData data = new EntityTempData(this.entityPredicate, this.temperature, this.range, this.units, this.otherEntityPredicate, this.maxEffect,
-                                                 new WorldTempRequirement(this.maxTemperature), new WorldTempRequirement(this.minTemperature), this.affectsSelf);
+                                                 this.maxTemperature, this.minTemperature, this.affectsSelf);
         data.setConfigType(ConfigData.Type.KUBEJS);
         return data;
     }

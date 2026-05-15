@@ -215,22 +215,22 @@ public class ModRegistriesEventJS extends StartupEventJS
      Dimension Temperature
      */
 
-    public void addDimensionTemperature(double temperature, String units, String... dimensions)
+    public void addDimensionTemperature(double min, double max, String units, String... dimensions)
     {
         this.addRegistryConfig(Registry.DIMENSION_TYPE_REGISTRY, ModRegistries.DIMENSION_TEMP_DATA, dimensions,
-                parsedDimensions -> new DimensionTempData(parsedDimensions, temperature, Temperature.Units.fromID(units), false));
+                               parsedDimensions -> new DimensionTempData(parsedDimensions, min, max, Temperature.Units.fromID(units), false));
     }
-    public void addDimensionTemperature(double temperature, String... dimensions)
-    {   addDimensionTemperature(temperature, "mc", dimensions);
+    public void addDimensionTemperature(double temperature, String units, String... dimensions)
+    {   addDimensionTemperature(temperature, temperature, units, dimensions);
     }
 
-    public void addDimensionOffset(double temperature, String units, String... dimensions)
+    public void addDimensionOffset(double min, double max, String units, String... dimensions)
     {
         this.addRegistryConfig(Registry.DIMENSION_TYPE_REGISTRY, ModRegistries.DIMENSION_TEMP_DATA, dimensions,
-                parsedDimensions -> new DimensionTempData(parsedDimensions, temperature, Temperature.Units.fromID(units), true));
+                               parsedDimensions -> new DimensionTempData(parsedDimensions, min, max, Temperature.Units.fromID(units), true));
     }
-    public void addDimensionOffset(double temperature, String... dimensions)
-    {   addDimensionOffset(temperature, "mc", dimensions);
+    public void addDimensionOffset(double temperature, String units, String... dimensions)
+    {   addDimensionOffset(temperature, temperature, units, dimensions);
     }
 
     /*

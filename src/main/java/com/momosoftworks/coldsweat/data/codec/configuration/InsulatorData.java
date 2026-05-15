@@ -13,6 +13,7 @@ import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.NbtRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
+import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
@@ -79,7 +80,7 @@ public class InsulatorData extends ConfigData implements RequirementHolder, IFor
             INSULATION_CODEC.optionalFieldOf("insulation", List.of()).forGetter(InsulatorData::insulation),
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(InsulatorData::entity),
             AttributeModifierMap.CODEC.optionalFieldOf("attributes", new AttributeModifierMap()).forGetter(InsulatorData::attributes),
-            Codec.unboundedMap(ResourceLocation.CODEC, Codec.DOUBLE).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(InsulatorData::immuneTempModifiers),
+            Codec.unboundedMap(ResourceLocation.CODEC, ExtraCodecs.DOUBLE).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(InsulatorData::immuneTempModifiers),
             Codec.BOOL.optionalFieldOf("fill_slots", true).forGetter(InsulatorData::fillSlots),
             Codec.BOOL.optionalFieldOf("hide_if_unmet", false).forGetter(InsulatorData::hideIfUnmet),
             HintText.CODEC.optionalFieldOf("hint").forGetter(InsulatorData::hint)
