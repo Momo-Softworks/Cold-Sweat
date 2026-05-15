@@ -5,6 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
+import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.util.registry.DynamicRegistries;
@@ -45,7 +46,7 @@ public class StructureTempData extends ConfigData
 
     public static final Codec<StructureTempData> CODEC = createCodec(RecordCodecBuilder.mapCodec(instance -> instance.group(
             NegatableList.listCodec(ConfigHelper.dynamicCodec(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY)).fieldOf("structures").forGetter(StructureTempData::structures),
-            Codec.DOUBLE.fieldOf("temperature").forGetter(StructureTempData::temperature),
+            ExtraCodecs.DOUBLE.fieldOf("temperature").forGetter(StructureTempData::temperature),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(StructureTempData::units),
             Codec.BOOL.optionalFieldOf("offset", false).forGetter(StructureTempData::isOffset)
     ).apply(instance, StructureTempData::new)));

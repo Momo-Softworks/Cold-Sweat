@@ -6,6 +6,7 @@ import com.momosoftworks.coldsweat.data.codec.configuration.MountData;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
+import com.momosoftworks.coldsweat.data.codec.util.ValueGetter;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.entity.Entity;
@@ -13,15 +14,16 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.util.ResourceLocation;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class InsulatingMountBuilderJS
 {
     public NegatableList<EntityRequirement> entityPredicate = new NegatableList<>();
     public NegatableList<EntityRequirement> riderPredicate = new NegatableList<>();
-    public double coldInsulation = 0;
-    public double heatInsulation = 0;
-    public Map<ResourceLocation, Double> modifierImmunities = new HashMap<>();
+    public ValueGetter<Double> coldInsulation = ValueGetter.constant(0.0);
+    public ValueGetter<Double> heatInsulation = ValueGetter.constant(0.0);
+    public Map<ResourceLocation, ValueGetter<Double>> modifierImmunities = new HashMap<>();
 
     public InsulatingMountBuilderJS()
     {}
@@ -50,27 +52,36 @@ public class InsulatingMountBuilderJS
         return this;
     }
 
+    public InsulatingMountBuilderJS coldInsulation(Function<Map<String, Object>, Double> function)
+    {
+        this.coldInsulation = ValueGetter.of(function);
+        return this;
+    }
     public InsulatingMountBuilderJS coldInsulation(double coldInsulation)
-    {
-        this.coldInsulation = coldInsulation;
-        return this;
+    {   return this.coldInsulation(m -> coldInsulation);
     }
 
+    public InsulatingMountBuilderJS heatInsulation(Function<Map<String, Object>, Double> function)
+    {
+        this.heatInsulation = ValueGetter.of(function);
+        return this;
+    }
     public InsulatingMountBuilderJS heatInsulation(double heatInsulation)
-    {
-        this.heatInsulation = heatInsulation;
-        return this;
+    {   return this.heatInsulation(m -> heatInsulation);
     }
 
-    public InsulatingMountBuilderJS immuneToModifier(String modifierId, double immunity)
+    public InsulatingMountBuilderJS immuneToModifier(String modifierId, Function<Map<String, Object>, Double> immunity)
     {
         ResourceLocation location = new ResourceLocation(modifierId);
-        if (!TempModifierRegistry.containsKey(location))
+        if (!TempModifierRegistry.getEntries().containsKey(location))
         {   ColdSweat.LOGGER.warn("Tried to add immunity to non-existent temperature modifier: {}", location);
             return this;
         }
-        this.modifierImmunities.put(new ResourceLocation(modifierId), immunity);
+        modifierImmunities.put(new ResourceLocation(modifierId), new ValueGetter<>(ValueGetter.Type.EXPRESSION, "custom", immunity));
         return this;
+    }
+    public InsulatingMountBuilderJS immuneToModifier(String modifierId, double immunity)
+    {   return immuneToModifier(modifierId, m -> immunity);
     }
 
     public MountData build()

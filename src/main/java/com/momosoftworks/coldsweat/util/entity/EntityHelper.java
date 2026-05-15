@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.util.entity;
 
+import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.common.item.SoulspringLampItem;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
@@ -12,6 +13,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
@@ -22,16 +24,19 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.LogicalSidedProvider;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.lang.reflect.Method;
 import java.util.stream.Stream;
 
 public class EntityHelper
 {
+    private static final Map<Entity, Pair<CompoundNBT, Long>> ENTITY_DATA_CACHE = new HashMap<>();
+
     private EntityHelper() {}
 
     public static ItemStack getItemInHand(LivingEntity player, HandSide hand)
@@ -114,6 +119,20 @@ public class EntityHelper
         }
         else
         {   return index == 99 ? EquipmentSlotType.OFFHAND : null;
+        }
+    }
+
+    public static CompoundNBT getFullData(Entity entity)
+    {
+        long time = System.currentTimeMillis();
+        Pair<CompoundNBT, Long> pair = ENTITY_DATA_CACHE.get(entity);
+        if (pair != null && time - pair.getSecond() < 1000)
+        {   return pair.getFirst();
+        }
+        else
+        {   CompoundNBT nbt = entity.saveWithoutId(new CompoundNBT());
+            ENTITY_DATA_CACHE.put(entity, Pair.of(nbt, time));
+            return nbt;
         }
     }
 

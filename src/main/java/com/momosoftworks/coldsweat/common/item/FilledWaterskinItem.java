@@ -30,6 +30,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -109,10 +110,7 @@ public class FilledWaterskinItem extends Item
         if (!player.level.isClientSide)
         {
             double temperature = stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
-            double effectAmount = temperature * (ConfigSettings.WATERSKIN_CONSUME_STRENGTH.get() / 50d);
             double wetnessTemp = 0.05 * CSMath.sign(temperature == 0 ? 1 : temperature);
-            // Add waterskin temp modifier
-            Temperature.addModifier(player, new WaterskinTempModifier(effectAmount).expires(0), Temperature.Trait.CORE, Placement.LAST);
             // Replace or add water temp modifier
             Placement modPlacement = Placement.of(Mode.REPLACE, Order.FIRST, mod -> mod instanceof WaterTempModifier).orElse(Placement.LAST);
             Temperature.addModifier(player, new WaterTempModifier(wetnessTemp).tickRate(5), Temperature.Trait.WORLD, modPlacement);
@@ -121,6 +119,7 @@ public class FilledWaterskinItem extends Item
         }
 
         consumeWaterskin(stack, player, hand);
+        MinecraftForge.EVENT_BUS.post(new LivingEntityUseItemEvent.Finish(player, stack, 1, stack.getContainerItem()));
         player.swing(hand, true);
 
         // spawn falling water particles
@@ -200,8 +199,7 @@ public class FilledWaterskinItem extends Item
             }
             case POUR :
             {   if (performPourAction(stack, player, hand))
-                {   MinecraftForge.EVENT_BUS.post(new LivingEntityUseItemEvent.Finish(player, stack, 1, stack));
-                    return ActionResult.consume(stack);
+                {   return ActionResult.consume(stack);
                 }
                 break;
             }
@@ -273,31 +271,12 @@ public class FilledWaterskinItem extends Item
     @Override
     public void appendHoverText(ItemStack stack, World level, List<ITextComponent> tooltip, ITooltipFlag advanced)
     {
-        double temp = CSMath.round(stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE), 2);
-        double multiplier = ConfigSettings.WATERSKIN_CONSUME_STRENGTH.get() / 50d;
-        int useEffect = (int) (temp * multiplier);
-
         // Display filled state
         IFormattableTextComponent filledLabel = new TranslationTextComponent("item.cold_sweat.waterskin.filled").withStyle(TextFormatting.GRAY);
         if (ConfigSettings.ENABLE_HINTS.get() && !TooltipHandler.isShiftDown())
         {   filledLabel.append(new StringTextComponent(" ").append(TooltipHandler.EXPAND_TOOLTIP_HINT));
         }
         tooltip.add(filledLabel);
-
-        // Info tooltip for drinking/pouring functionality
-        if (useEffect != 0)
-        {
-            String useTempString = useEffect >= 0 ? "+" + useEffect : "" + useEffect;
-            String traitName = Temperature.Trait.CORE.getFormattedName();
-            IFormattableTextComponent tempText = new TranslationTextComponent("tooltip.cold_sweat.temperature_effect", useTempString, traitName);
-            tempText = tempText.withStyle(useEffect > 0 ? TooltipHandler.HOT
-                                        : useEffect == 0 ? Style.EMPTY.withColor(TextFormatting.WHITE)
-                                        : TooltipHandler.COLD);
-            tooltip.add(new StringTextComponent(""));
-            tooltip.add(new TranslationTextComponent("tooltip.cold_sweat.section.used").withStyle(TextFormatting.GRAY));
-            tooltip.add(tempText);
-        }
-
 
         if (TooltipHandler.isShiftDown())
         {
@@ -338,7 +317,7 @@ public class FilledWaterskinItem extends Item
             ItemStack emptyWaterskin = new ItemStack(ModItems.WATERSKIN);
 
             // Preserve NBT (except temperature)
-            emptyWaterskin.setTag(stack.getTag());
+            emptyWaterskin.setTag(CSMath.orElse(stack.getTag(), new CompoundNBT()).copy());
             emptyWaterskin.removeTagKey(FilledWaterskinItem.NBT_TEMPERATURE);
             emptyWaterskin.removeTagKey("Damage");
             emptyWaterskin.removeTagKey("Purity");

@@ -1,10 +1,12 @@
 package com.momosoftworks.coldsweat.data.codec.configuration;
 
+import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
+import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.util.registry.DynamicRegistries;
@@ -17,34 +19,43 @@ import java.util.List;
 public class DimensionTempData extends ConfigData
 {
     final NegatableList<DimensionType> dimensions;
-    final double temperature;
+    final double min;
+    final double max;
     final Temperature.Units units;
     final boolean isOffset;
 
     public DimensionTempData(NegatableList<DimensionType> dimensions,
-                             double temperature, Temperature.Units units, boolean isOffset,
+                             double min, double max, Temperature.Units units, boolean isOffset,
                              NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.dimensions = dimensions;
-        this.temperature = temperature;
+        this.min = min;
+        this.max = max;
         this.units = units;
         this.isOffset = isOffset;
     }
 
     public DimensionTempData(NegatableList<DimensionType> dimensions,
-                             double temperature, Temperature.Units units, boolean isOffset)
+                             double min, double max, Temperature.Units units, boolean isOffset)
     {
-        this(dimensions, temperature, units, isOffset, new NegatableList<>());
+        this(dimensions, min, max, units, isOffset, new NegatableList<>());
     }
 
-    public DimensionTempData(DimensionType dimension, double temperature, Temperature.Units units, boolean isOffset)
-    {   this(new NegatableList<>(dimension), temperature, units, isOffset);
+    public DimensionTempData(DimensionType dimension, double min, double max, Temperature.Units units, boolean isOffset)
+    {   this(new NegatableList<>(dimension), min, max, units, isOffset);
     }
 
     public static final Codec<DimensionTempData> CODEC = createCodec(RecordCodecBuilder.mapCodec(instance -> instance.group(
             NegatableList.listCodec(ConfigHelper.dynamicCodec(Registry.DIMENSION_TYPE_REGISTRY)).fieldOf("dimensions").forGetter(DimensionTempData::dimensions),
-            Codec.DOUBLE.fieldOf("temperature").forGetter(DimensionTempData::temperature),
+            Codec.mapEither(ExtraCodecs.DOUBLE.fieldOf("temperature"),
+                            ExtraCodecs.DOUBLE.fieldOf("min_temp"))
+                 .xmap(either -> either.map(left -> left, right -> right), Either::right)
+                 .forGetter(DimensionTempData::min),
+            Codec.mapEither(ExtraCodecs.DOUBLE.fieldOf("temperature"),
+                            ExtraCodecs.DOUBLE.fieldOf("max_temp"))
+                 .xmap(either -> either.map(left -> left, right -> right), Either::right)
+                 .forGetter(DimensionTempData::max),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(DimensionTempData::units),
             Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(DimensionTempData::isOffset)
     ).apply(instance, DimensionTempData::new)));
@@ -52,8 +63,11 @@ public class DimensionTempData extends ConfigData
     public NegatableList<DimensionType> dimensions()
     {   return dimensions;
     }
-    public double temperature()
-    {   return temperature;
+    public double min()
+    {   return min;
+    }
+    public double max()
+    {   return max;
     }
     public Temperature.Units units()
     {   return units;
@@ -62,8 +76,11 @@ public class DimensionTempData extends ConfigData
     {   return isOffset;
     }
 
-    public double getTemperature()
-    {   return Temperature.convert(temperature, units, Temperature.Units.MC, !isOffset);
+    public double getMinTemp()
+    {   return Temperature.convert(min, units, Temperature.Units.MC, !isOffset);
+    }
+    public double getMaxTemp()
+    {   return Temperature.convert(max, units, Temperature.Units.MC, !isOffset);
     }
 
     @Nullable
@@ -78,7 +95,7 @@ public class DimensionTempData extends ConfigData
         double temp = ((Number) entry.get(1)).doubleValue();
         Temperature.Units units = entry.size() == 3 ? Temperature.Units.valueOf(((String) entry.get(2)).toUpperCase()) : Temperature.Units.MC;
 
-        DimensionTempData result = new DimensionTempData(dimensions, temp, units, isOffset);
+        DimensionTempData result = new DimensionTempData(dimensions, temp, temp, units, isOffset);
         result.setConfigType(Type.TOML);
         return result;
     }
@@ -96,7 +113,8 @@ public class DimensionTempData extends ConfigData
 
         DimensionTempData that = (DimensionTempData) obj;
         return super.equals(obj)
-            && Double.compare(that.temperature, temperature) == 0
+            && Double.compare(that.min, min) == 0
+            && Double.compare(that.max, max) == 0
             && isOffset == that.isOffset
             && dimensions.equals(that.dimensions)
             && units == that.units;

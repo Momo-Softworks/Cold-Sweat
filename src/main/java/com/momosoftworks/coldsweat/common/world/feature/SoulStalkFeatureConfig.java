@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.common.world.feature;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.tags.BlockTags;
@@ -48,7 +49,7 @@ public class SoulStalkFeatureConfig implements IFeatureConfig
                 // Optional fields
                 Codec.INT.fieldOf("disk_width").orElse(0).forGetter(config -> config.diskWidth),
                 Codec.INT.fieldOf("disk_height").orElse(0).forGetter(config -> config.diskHeight),
-                Codec.DOUBLE.fieldOf("disk_decay").orElse(0.0).forGetter(config -> config.diskDecay),
+                ExtraCodecs.DOUBLE.fieldOf("disk_decay").orElse(0.0).forGetter(config -> config.diskDecay),
                 BlockStateProvider.CODEC.fieldOf("disk_state_provider").orElse(new SimpleBlockStateProvider(Blocks.AIR.defaultBlockState())).forGetter(config -> config.diskStateProvider),
                 ITag.codec(() -> TagCollectionManager.getInstance().getBlocks()).fieldOf("disk_replace_target").orElseGet(() -> BlockTags.SAND).forGetter(config -> config.replaceBlocks)
         ).apply(instance, SoulStalkFeatureConfig::new);

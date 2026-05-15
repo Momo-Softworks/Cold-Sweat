@@ -9,7 +9,9 @@ import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.impl.RequirementHolder;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.WorldTempRequirement;
+import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
+import com.momosoftworks.coldsweat.data.codec.util.ValueGetter;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.entity.Entity;
@@ -18,23 +20,24 @@ import net.minecraft.tags.ITag;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Map;
 
 public class EntityTempData extends ConfigData implements RequirementHolder
 {
     final NegatableList<EntityRequirement> entity;
-    final double temperature;
-    final double range;
+    final ValueGetter<Double> temperature;
+    final ValueGetter<Double> range;
     final Temperature.Units units;
     final NegatableList<EntityRequirement> affectedEntity;
-    final double maxEffect;
-    final WorldTempRequirement maxTemp;
-    final WorldTempRequirement minTemp;
-    final boolean affectsSelf;
+    final ValueGetter<Double> maxEffect;
+    final ValueGetter<Double> maxTemp;
+    final ValueGetter<Double> minTemp;
+    final ValueGetter<Boolean> affectsSelf;
 
-    public EntityTempData(NegatableList<EntityRequirement> entity, double temperature, double range,
+    public EntityTempData(NegatableList<EntityRequirement> entity, ValueGetter<Double> temperature, ValueGetter<Double> range,
                           Temperature.Units units, NegatableList<EntityRequirement> affectedEntity,
-                          double maxEffect, WorldTempRequirement maxTemp, WorldTempRequirement minTemp,
-                          boolean affectsSelf, NegatableList<String> requiredMods)
+                          ValueGetter<Double> maxEffect, ValueGetter<Double> maxTemp, ValueGetter<Double> minTemp,
+                          ValueGetter<Boolean> affectsSelf, NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.entity = entity;
@@ -48,33 +51,39 @@ public class EntityTempData extends ConfigData implements RequirementHolder
         this.affectsSelf = affectsSelf;
     }
 
-    public EntityTempData(NegatableList<EntityRequirement> entity, double temperature, double range,
+    public EntityTempData(NegatableList<EntityRequirement> entity, ValueGetter<Double> temperature, ValueGetter<Double> range,
                           Temperature.Units units, NegatableList<EntityRequirement> affectedEntity,
-                          double maxEffect, WorldTempRequirement maxTemp, WorldTempRequirement minTemp, boolean affectsSelf)
+                          ValueGetter<Double> maxEffect, ValueGetter<Double> maxTemp, ValueGetter<Double> minTemp, ValueGetter<Boolean> affectsSelf)
     {
         this(entity, temperature, range, units, affectedEntity, maxEffect, maxTemp, minTemp, affectsSelf, new NegatableList<>());
     }
 
     public static final Codec<EntityTempData> CODEC = createCodec(RecordCodecBuilder.mapCodec(instance -> instance.group(
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(EntityTempData::entity),
-            Codec.DOUBLE.fieldOf("temperature").forGetter(EntityTempData::temperature),
-            Codec.DOUBLE.fieldOf("range").forGetter(EntityTempData::range),
+            ValueGetter.fieldCodec("temperature", ExtraCodecs.DOUBLE, 0.0).forGetter(EntityTempData::temperature),
+            ValueGetter.fieldCodec("range", ExtraCodecs.DOUBLE, 0.0).forGetter(EntityTempData::range),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(EntityTempData::units),
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("affected_entity", new NegatableList<>()).forGetter(EntityTempData::affectedEntity),
-            Codec.DOUBLE.optionalFieldOf("max_effect", Double.POSITIVE_INFINITY).forGetter(EntityTempData::maxEffect),
-            WorldTempRequirement.CODEC.optionalFieldOf("max_temp", WorldTempRequirement.INFINITY).forGetter(data -> data.maxTemp),
-            WorldTempRequirement.CODEC.optionalFieldOf("min_temp", WorldTempRequirement.NEGATIVE_INFINITY).forGetter(data -> data.minTemp),
-            Codec.BOOL.optionalFieldOf("affects_self", false).forGetter(EntityTempData::affectsSelf)
+            ValueGetter.optionalFieldCodec("max_effect", ExtraCodecs.DOUBLE, Double.POSITIVE_INFINITY).forGetter(EntityTempData::maxEffect),
+            ValueGetter.optionalFieldCodec("max_temp", ExtraCodecs.DOUBLE, Double.POSITIVE_INFINITY).forGetter(data -> data.maxTemp),
+            ValueGetter.optionalFieldCodec("min_temp", ExtraCodecs.DOUBLE, Double.NEGATIVE_INFINITY).forGetter(data -> data.minTemp),
+            ValueGetter.optionalFieldCodec("affects_self", Codec.BOOL, false).forGetter(EntityTempData::affectsSelf)
     ).apply(instance, EntityTempData::new)));
 
     public NegatableList<EntityRequirement> entity()
     {   return entity;
     }
-    public double temperature()
+    public ValueGetter<Double> temperature()
     {   return temperature;
     }
-    public double range()
+    public double temperature(Entity entity, Entity affectedEntity)
+    {   return temperature.get(CSMath.mapOf("entity", entity, "target", affectedEntity));
+    }
+    public ValueGetter<Double> range()
     {   return range;
+    }
+    public double range(Entity entity, Entity affectedEntity)
+    {   return range.get(CSMath.mapOf("entity", entity, "target", affectedEntity));
     }
     public Temperature.Units units()
     {   return units;
@@ -82,30 +91,29 @@ public class EntityTempData extends ConfigData implements RequirementHolder
     public NegatableList<EntityRequirement> affectedEntity()
     {   return affectedEntity;
     }
-    public double maxEffect()
+    public ValueGetter<Double> maxEffect()
     {   return maxEffect;
     }
-    public WorldTempRequirement maxTemp()
+    public double maxEffect(Entity entity, Entity affectedEntity)
+    {   return maxEffect.get(CSMath.mapOf("entity", entity, "target", affectedEntity));
+    }
+    public ValueGetter<Double> maxTemp()
     {   return maxTemp;
     }
-    public WorldTempRequirement minTemp()
+    public double maxTemp(Entity entity, Entity affectedEntity)
+    {   return maxTemp.get(CSMath.mapOf("entity", entity, "target", affectedEntity));
+    }
+    public ValueGetter<Double> minTemp()
     {   return minTemp;
     }
-    public boolean affectsSelf()
+    public double minTemp(Entity entity, Entity affectedEntity)
+    {   return minTemp.get(CSMath.mapOf("entity", entity, "target", affectedEntity));
+    }
+    public ValueGetter<Boolean> affectsSelf()
     {   return affectsSelf;
     }
-
-    public double getTemperature()
-    {   return Temperature.convert(temperature, units, Temperature.Units.MC, false);
-    }
-    public double getMaxEffect()
-    {   return Temperature.convert(maxEffect, units, Temperature.Units.MC, false);
-    }
-    public double getMaxTemp()
-    {   return this.maxTemp.get(this.units);
-    }
-    public double getMinTemp()
-    {   return this.minTemp.get(this.units);
+    public boolean affectsSelf(Entity entity, Entity affectedEntity)
+    {   return affectsSelf.get(CSMath.mapOf("entity", entity, "target", affectedEntity));
     }
 
     @Nullable
@@ -118,23 +126,25 @@ public class EntityTempData extends ConfigData implements RequirementHolder
         NegatableList<Either<ITag<EntityType<?>>, EntityType<?>>> entities = ConfigHelper.getEntityTypes((String) entry.get(0));
         if (entities.isEmpty()) return null;
 
-        double temp = ((Number) entry.get(1)).doubleValue();
-        double range = ((Number) entry.get(2)).doubleValue();
+        ValueGetter<Double> temp = ValueGetter.parse(() -> entry.get(1), ExtraCodecs.DOUBLE, 0.0);
+        ValueGetter<Double> range = ValueGetter.parse(() -> entry.get(2), ExtraCodecs.DOUBLE, 0.0);
         Temperature.Units units = entry.size() > 3
                                   ? Temperature.Units.fromID((String) entry.get(3))
                                   : Temperature.Units.MC;
-        double maxEffect = entry.size() > 4
-                           ? ((Number) entry.get(4)).doubleValue()
-                           : Double.POSITIVE_INFINITY;
-        double tempLimit = entry.size() > 5
-                                ? ((Number) entry.get(5)).doubleValue()
-                                : Double.POSITIVE_INFINITY;
-        WorldTempRequirement maxTemp = new WorldTempRequirement(temp > 0 ? tempLimit : Double.POSITIVE_INFINITY);
-        WorldTempRequirement minTemp = new WorldTempRequirement(temp < 0 ? -tempLimit : Double.NEGATIVE_INFINITY);
+        ValueGetter<Double> maxEffect = ValueGetter.parse(() -> entry.get(4), ExtraCodecs.DOUBLE, Double.POSITIVE_INFINITY);
+        ValueGetter<Double> tempLimit = ValueGetter.parse(() -> entry.get(5), ExtraCodecs.DOUBLE, Double.POSITIVE_INFINITY);
+        ValueGetter<Double> maxTemp = ValueGetter.constant(Double.POSITIVE_INFINITY);
+        ValueGetter<Double> minTemp = ValueGetter.constant(Double.NEGATIVE_INFINITY);
+        if (entry.size() > 5)
+        {
+            double tempSign = entry.get(1) instanceof Number ? ((Number) entry.get(1)).doubleValue() : 0.0;
+            if (tempSign > 0) maxTemp = tempLimit;
+            if (tempSign < 0) minTemp = tempLimit;
+        }
 
         EntityRequirement requirement = new EntityRequirement(entities);
 
-        EntityTempData result = new EntityTempData(new NegatableList<>(requirement), temp, range, units, new NegatableList<>(), maxEffect, maxTemp, minTemp, false);
+        EntityTempData result = new EntityTempData(new NegatableList<>(requirement), temp, range, units, new NegatableList<>(), maxEffect, maxTemp, minTemp, ValueGetter.constant(false));
         result.setConfigType(Type.TOML);
         return result;
     }
@@ -146,14 +156,14 @@ public class EntityTempData extends ConfigData implements RequirementHolder
 
     public boolean test(Entity entity, Entity affectedEntity)
     {
-        return (this.affectsSelf || entity != affectedEntity)
-            && entity.distanceTo(affectedEntity) <= range
+        return (this.affectsSelf(entity, affectedEntity) || entity != affectedEntity)
+            && entity.distanceTo(affectedEntity) <= range(entity, affectedEntity)
             && this.test(entity)
             && this.affectedEntity.test(req -> req.test(affectedEntity));
     }
 
     public double getTemperatureEffect(Entity entity, Entity affectedPlayer)
-    {   return CSMath.blend(0, this.getTemperature(), entity.distanceTo(affectedPlayer), range, 0);
+    {   return CSMath.blend(0, this.temperature(entity, affectedPlayer), entity.distanceTo(affectedPlayer), this.range(entity, affectedPlayer), 0);
     }
 
     @Override
@@ -169,12 +179,14 @@ public class EntityTempData extends ConfigData implements RequirementHolder
 
         EntityTempData that = (EntityTempData) obj;
         return super.equals(obj)
-            && Double.compare(that.temperature, temperature) == 0
-            && Double.compare(that.range, range) == 0
-            && entity.equals(that.entity)
-            && units == that.units
-            && affectedEntity.equals(that.affectedEntity)
-            && Double.compare(that.maxEffect, maxEffect) == 0
-            && affectsSelf == that.affectsSelf;
+            && this.temperature.equals(that.temperature)
+            && this.range.equals(that.range)
+            && this.entity.equals(that.entity)
+            && this.units == that.units
+            && this.affectedEntity.equals(that.affectedEntity)
+            && this.maxEffect.equals(that.maxEffect)
+            && this.maxTemp.equals(that.maxTemp)
+            && this.minTemp.equals(that.minTemp)
+            && this.affectsSelf == that.affectsSelf;
     }
 }

@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.api.insulation;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.nbt.CompoundNBT;
 
@@ -12,8 +13,8 @@ import java.util.List;
 public class StaticInsulation extends Insulation
 {
     public static final Codec<StaticInsulation> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.DOUBLE.fieldOf("cold").forGetter(StaticInsulation::getCold),
-            Codec.DOUBLE.fieldOf("heat").forGetter(StaticInsulation::getHeat)
+            ExtraCodecs.DOUBLE.fieldOf("cold").forGetter(StaticInsulation::getCold),
+            ExtraCodecs.DOUBLE.fieldOf("heat").forGetter(StaticInsulation::getHeat)
     ).apply(instance, StaticInsulation::new));
 
     private final double cold;

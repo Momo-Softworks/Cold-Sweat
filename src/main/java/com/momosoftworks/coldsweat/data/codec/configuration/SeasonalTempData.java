@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.data.codec.configuration;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 
 import java.util.List;
 
@@ -22,9 +23,9 @@ public class SeasonalTempData
     }
 
     public static final Codec<SeasonalTempData> CODEC = RecordCodecBuilder.create(builder -> builder.group(
-            Codec.DOUBLE.fieldOf("start").forGetter(SeasonalTempData::start),
-            Codec.DOUBLE.fieldOf("middle").forGetter(SeasonalTempData::middle),
-            Codec.DOUBLE.fieldOf("end").forGetter(SeasonalTempData::end),
+            ExtraCodecs.DOUBLE.fieldOf("start").forGetter(SeasonalTempData::start),
+            ExtraCodecs.DOUBLE.fieldOf("middle").forGetter(SeasonalTempData::middle),
+            ExtraCodecs.DOUBLE.fieldOf("end").forGetter(SeasonalTempData::end),
             Temperature.Units.CODEC.fieldOf("units").forGetter(SeasonalTempData::units)
     ).apply(builder, SeasonalTempData::new));
 

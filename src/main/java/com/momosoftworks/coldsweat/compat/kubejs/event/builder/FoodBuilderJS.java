@@ -5,20 +5,23 @@ import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
+import com.momosoftworks.coldsweat.data.codec.util.ValueGetter;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
-import java.util.function.Predicate;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class FoodBuilderJS
 {
-    public double temperature = 0;
-    public int duration = 0;
-    public int stackLimit = 1;
+    public ValueGetter<Double> temperature = new ValueGetter<>(ValueGetter.Type.CONSTANT, null, sources -> 0.0);
+    public ValueGetter<Integer> duration = ValueGetter.constant(0);
+    public ValueGetter<Integer> stackLimit = ValueGetter.constant(1);
     public NegatableList<ItemRequirement> itemPredicate = new NegatableList<>();
     public NegatableList<EntityRequirement> entityPredicate = new NegatableList<>();
 
@@ -37,22 +40,29 @@ public class FoodBuilderJS
         return this;
     }
 
+    public FoodBuilderJS temperature(Function<Map<String, Object>, Double> getter)
+    {
+        this.temperature = new ValueGetter<>(ValueGetter.Type.EXPRESSION, "custom", getter);
+        return this;
+    }
     public FoodBuilderJS temperature(double temperature)
-    {
-        this.temperature = temperature;
-        return this;
+    {   return temperature(m -> temperature);
     }
 
+    public FoodBuilderJS duration(Function<Map<String, Object>, Integer> getter)
+    {   this.duration = new ValueGetter<>(ValueGetter.Type.EXPRESSION, "custom", getter);
+        return this;
+    }
     public FoodBuilderJS duration(int duration)
-    {
-        this.duration = duration;
-        return this;
+    {   return duration(m -> duration);
     }
 
-    public FoodBuilderJS stackLimit(int stackLimit)
-    {
-        this.stackLimit = stackLimit;
+    public FoodBuilderJS stackLimit(Function<Map<String, Object>, Integer> getter)
+    {   this.stackLimit = new ValueGetter<>(ValueGetter.Type.EXPRESSION, "custom", getter);
         return this;
+    }
+    public FoodBuilderJS stackLimit(int stackLimit)
+    {   return stackLimit(m -> stackLimit);
     }
 
     public FoodBuilderJS itemPredicate(Predicate<ItemStack> itemPredicate)

@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.data.codec.configuration;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 
 public class EntityDropData
 {
@@ -18,7 +19,7 @@ public class EntityDropData
     public static final Codec<EntityDropData> CODEC = RecordCodecBuilder.create(builder -> builder.group(
             Codec.INT.fieldOf("interval").forGetter(EntityDropData::interval),
             Codec.INT.fieldOf("cooldown").forGetter(EntityDropData::cooldown),
-            Codec.DOUBLE.fieldOf("chance").forGetter(EntityDropData::chance)
+            ExtraCodecs.DOUBLE.fieldOf("chance").forGetter(EntityDropData::chance)
     ).apply(builder, EntityDropData::new));
 
     public int interval()

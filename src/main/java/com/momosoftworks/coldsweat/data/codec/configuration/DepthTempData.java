@@ -223,14 +223,14 @@ public class DepthTempData extends ConfigData
             public static final TempContainer NONE = new TempContainer(0, ContainerType.STATIC, 1.0);
 
             private static final Codec<TempContainer> DIRECT_CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                    Codec.DOUBLE.optionalFieldOf("value", Double.NaN).forGetter(container -> container.temperature),
+                    ExtraCodecs.DOUBLE.optionalFieldOf("value", Double.NaN).forGetter(container -> container.temperature),
                     ContainerType.CODEC.optionalFieldOf("type", ContainerType.STATIC).forGetter(container -> container.type),
                     Codec.doubleRange(0, 1).optionalFieldOf("strength", 1.0).forGetter(container -> container.strength)
             ).apply(instance, TempContainer::new));
 
             public static final Codec<TempContainer> CODEC = (Codec) ExtraCodecs.anyOf(
                 DIRECT_CODEC,
-                Codec.DOUBLE.xmap(d -> new TempContainer(d, ContainerType.STATIC, 1.0), container -> container.temperature)
+                ExtraCodecs.DOUBLE.xmap(d -> new TempContainer(d, ContainerType.STATIC, 1.0), container -> container.temperature)
             );
 
             public final double temperature;

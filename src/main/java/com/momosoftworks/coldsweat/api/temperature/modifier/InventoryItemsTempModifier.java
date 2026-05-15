@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.api.temperature.modifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.ItemTempData;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -85,13 +86,16 @@ public class InventoryItemsTempModifier extends TempModifier
     {
         if (itemData.test(entity, stack, slot, equipmentSlot))
         {
-            double temp = itemData.temperature() * stack.getCount();
+            double temp = itemData.getTemperature(entity, stack) * stack.getCount();
             double currentEffect = effectsPerItemTemp.getOrDefault(itemData, 0.0);
             double newEffect = currentEffect + temp;
             // Clamp against maxEffect bounds
-            newEffect = temp > 0 ? Math.min(itemData.maxEffect(), newEffect) : Math.max(-itemData.maxEffect(), newEffect);
+            double maxEffect = itemData.maxEffect(stack, entity);
+        newEffect = temp > 0 ? Math.min(maxEffect, newEffect) : Math.max(-maxEffect, newEffect);
             // Clamp against minTemp/maxTemp bounds
-            newEffect = Math.max(itemData.minTemp(), Math.min(itemData.maxTemp(), newEffect));
+            double minTemp = itemData.minTemp(stack, entity);
+        double maxTemp = itemData.maxTemp(stack, entity);
+        newEffect = CSMath.clamp(newEffect, minTemp, maxTemp);
 
             effectsPerItemTemp.put(itemData, newEffect);
         }

@@ -66,6 +66,9 @@ public class JeiPlugin implements IModPlugin
         }
         public ItemStack input() { return input; }
         public FuelData fuelData() { return fuelData; }
+        public double getFuel()
+        {   return fuelData.fuel(input);
+        }
     }
 
     public static final class SewingRecipe

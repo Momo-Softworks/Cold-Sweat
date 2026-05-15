@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.client.renderer.animation;
 
 import com.momosoftworks.coldsweat.client.renderer.model.PartPose;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.entity.Entity;
@@ -42,7 +43,7 @@ public class AnimationManager
             }
             return map;
         } catch (Exception ignored) {}
-        return new HashMap<>();
+        return CSMath.mapOf();
     }
 
     public static void storeDefaultPoses(EntityType type, Map<String, ModelRenderer> parts)

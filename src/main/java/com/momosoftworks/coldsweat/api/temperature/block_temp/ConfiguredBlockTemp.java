@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -36,16 +37,21 @@ public class ConfiguredBlockTemp extends BlockTemp
 
     @Override
     public boolean isValid(World level, BlockPos pos, BlockState state)
-    {   return this.data.block().test(req -> req.test(level, pos, state));
+    {   return this.data.block().test(req -> req.test(level, pos, state))
+            && this.data.location().test(req -> req.test(level, pos));
     }
 
     @Override
     public double getTemperature(World level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
     {
-        if (data.location().test(req -> req.test(level, pos))
-        && data.entity().test(req -> req.test(entity)))
+        if (data.entity().test(req -> req.test(entity)))
         {
-            double temp = data.getTemperature();
+            boolean requiresBlockEntity = data.temperature().hasParameter("block");
+            TileEntity blockentity = requiresBlockEntity ? level.getBlockEntity(pos) : null;
+            if (requiresBlockEntity && blockentity == null)
+            {   throw new IllegalArgumentException(String.format("BlockTempData requires a block entity, but block %s doesn't have one: \n%s", state.getBlock(), data));
+            }
+            double temp = data.getTemperature(blockentity, state, entity);
             if (ConfigSettings.COLD_SOUL_FIRE.get() && state.is(ModBlockTags.SOUL_FIRE))
             {   temp *= -1;
             }
