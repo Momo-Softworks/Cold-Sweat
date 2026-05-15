@@ -196,7 +196,7 @@ public class DepthTempData extends ConfigData
 
             public static final Codec<TempContainer> CODEC = Codec.either(
                 RecordCodecBuilder.<TempContainer>create(instance -> instance.group(
-                    Codec.DOUBLE.optionalFieldOf("value", Double.NaN).forGetter(TempContainer::temperature),
+                    ExtraCodecs.DOUBLE.optionalFieldOf("value", Double.NaN).forGetter(TempContainer::temperature),
                     ContainerType.CODEC.optionalFieldOf("type", ContainerType.STATIC).forGetter(TempContainer::type),
                     Codec.doubleRange(0, 1).optionalFieldOf("strength", 1.0).forGetter(TempContainer::strength)
                 ).apply(instance, (temp, type, strength) ->
@@ -206,7 +206,7 @@ public class DepthTempData extends ConfigData
                     }
                     return new TempContainer(temp, type, strength);
                 })),
-                Codec.DOUBLE.xmap(d -> new TempContainer(d, ContainerType.STATIC, 1.0), TempContainer::temperature)
+                ExtraCodecs.DOUBLE.xmap(d -> new TempContainer(d, ContainerType.STATIC, 1.0), TempContainer::temperature)
             )
             .xmap(either -> either.map(c -> c, c -> c), container -> container.type == ContainerType.STATIC
                                                                      ? Either.right(container) : Either.left(container));

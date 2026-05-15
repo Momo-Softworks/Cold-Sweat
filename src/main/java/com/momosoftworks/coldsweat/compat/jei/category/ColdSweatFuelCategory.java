@@ -85,7 +85,7 @@ public abstract class ColdSweatFuelCategory implements IRecipeCategory<JeiPlugin
     public void createRecipeExtras(IRecipeExtrasBuilder builder, JeiPlugin.FuelRecipe recipe, IFocusGroup focuses)
     {
         HearthBlockEntity dummyBlockEntity = this.getDummyBlockEntity();
-        double fuel = Math.abs(recipe.fuelData().fuel());
+        double fuel = Math.abs(recipe.getFuel());
 
         Component fillAmountText = createFillAmountText(fuel, dummyBlockEntity);
         builder.addText(fillAmountText, getWidth() - 20, getHeight())

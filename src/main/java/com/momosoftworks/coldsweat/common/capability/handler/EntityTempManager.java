@@ -8,7 +8,6 @@ import com.momosoftworks.coldsweat.api.event.vanilla.ContainerChangedEvent;
 import com.momosoftworks.coldsweat.api.event.common.temperautre.TempModifierEvent;
 import com.momosoftworks.coldsweat.api.event.core.init.GatherDefaultTempModifiersEvent;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
-import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.modifier.*;
 import com.momosoftworks.coldsweat.api.util.placement.Matcher;
 import com.momosoftworks.coldsweat.api.util.placement.Placement;
@@ -458,13 +457,14 @@ public class EntityTempManager
                 {
                     // Get immunities from inventory items
                     for (Map.Entry<ItemStack, ItemTempData> entry : getItemTemperaturesOnEntity(player).entrySet())
-                    {   immunities.putAll(entry.getValue().immuneTempModifiers());
+                    {   immunities.putAll(entry.getValue().immuneTempModifiers(entry.getKey(), player));
                     }
                     // Get immunities from mount
-                    if (player.getVehicle() != null)
+                    Entity mount = player.getVehicle();
+                    if (mount != null)
                     {
-                        for (MountData mountData : ConfigSettings.INSULATED_MOUNTS.get().get(player.getVehicle().getType()))
-                        {   immunities.putAll(mountData.modifierImmunities());
+                        for (MountData mountData : ConfigSettings.INSULATED_MOUNTS.get().get(mount.getType()))
+                        {   immunities.putAll(mountData.modifierImmunities(mount, player));
                         }
                     }
                 }
@@ -721,7 +721,10 @@ public class EntityTempManager
                         MountData entityInsul = ConfigSettings.INSULATED_MOUNTS.get().get(mount.getType())
                                                       .stream().filter(mnt -> mnt.test(mount)).findFirst().orElse(null);
                         if (entityInsul != null)
-                        {   Temperature.replaceOrAddModifier(player, new MountTempModifier(entityInsul.coldInsulation(), entityInsul.heatInsulation()).tickRate(5).expires(5), Trait.RATE, Matcher.SAME_CLASS);
+                        {
+                            double coldInsulation = entityInsul.coldInsulation(mount, player);
+                            double heatInsulation = entityInsul.heatInsulation(mount, player);
+                            Temperature.replaceOrAddModifier(player, new MountTempModifier(coldInsulation, heatInsulation).tickRate(5).expires(5), Trait.RATE, Matcher.SAME_CLASS);
                         }
                     }
                 }
@@ -744,9 +747,9 @@ public class EntityTempManager
                 {
                     if (foodData != null && foodData.test(item))
                     {
-                        double temperature = foodData.temperature();
-                        int duration = foodData.duration();
-                        Trait trait = foodData.duration() > 0 ? Trait.BASE : Trait.CORE;
+                        double temperature = foodData.temperature(item, player);
+                        int duration = foodData.duration(item, player);
+                        Trait trait = duration > 0 ? Trait.BASE : Trait.CORE;
                         // Custom class for soul sprouts
                         FoodTempModifier foodModifier = item.getItem() == ModItems.SOUL_SPROUT
                                                         ? new SoulSproutTempModifier(temperature)
@@ -757,7 +760,7 @@ public class EntityTempManager
                         // Set duration & tick rate
                         foodModifier.expires(duration).tickRate(duration);
                         // Add the TempModifier
-                        Placement placement = Placement.LAST.limitDuplicates(Matcher.EQUALS, foodData.stackLimit())
+                        Placement placement = Placement.LAST.limitDuplicates(Matcher.EQUALS, foodData.stackLimit(item, player))
                                               .orElse(Placement.of(Mode.REPLACE, Order.FIRST, foodModifier::equals));
                         Temperature.addModifier(player, foodModifier, trait, placement);
                     }

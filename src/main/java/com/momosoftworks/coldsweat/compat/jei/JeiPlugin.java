@@ -59,7 +59,12 @@ public class JeiPlugin implements IModPlugin
         registration.addRecipeCategories(new SewingCategory(registration.getJeiHelpers().getGuiHelper()));
     }
 
-    public record FuelRecipe(ItemStack input, FuelData fuelData) {}
+    public record FuelRecipe(ItemStack input, FuelData fuelData)
+    {
+        public double getFuel()
+        {   return fuelData.fuel(input);
+        }
+    }
 
     public record SewingRecipe(ItemStack input, InsulatorData insulatorData) {}
 }

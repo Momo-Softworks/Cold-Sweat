@@ -11,11 +11,15 @@ import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.*;
 import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
+import com.momosoftworks.coldsweat.data.codec.util.ValueGetter;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
@@ -24,7 +28,7 @@ import java.util.*;
 public class BlockTempData extends ConfigData
 {
     final NegatableList<BlockRequirement> block;
-    final double temperature;
+    final ValueGetter<Double> temperature;
     final double range;
     final double maxEffect;
     final boolean fade;
@@ -36,7 +40,7 @@ public class BlockTempData extends ConfigData
     final boolean logarithmic;
     final Optional<TagKey<BlockTempData>> effectGroup;
 
-    public BlockTempData(NegatableList<BlockRequirement> block, double temperature, double range,
+    public BlockTempData(NegatableList<BlockRequirement> block, ValueGetter<Double> temperature, double range,
                          double maxEffect, boolean fade, WorldTempRequirement maxTemp, WorldTempRequirement minTemp,
                          Temperature.Units units, NegatableList<LocationRequirement> location,
                          NegatableList<EntityRequirement> entity, boolean logarithmic, Optional<TagKey<BlockTempData>> effectGroup, NegatableList<String> requiredMods)
@@ -56,10 +60,10 @@ public class BlockTempData extends ConfigData
         this.effectGroup = effectGroup;
     }
 
-    public BlockTempData(NegatableList<BlockRequirement> block, double temperature, double range,
+    public BlockTempData(NegatableList<BlockRequirement> block, ValueGetter<Double> temperature, double range,
                          double maxEffect, boolean fade, WorldTempRequirement maxTemp, WorldTempRequirement minTemp,
-                         Temperature.Units units, NegatableList<LocationRequirement> location, NegatableList<EntityRequirement> entity,
-                         boolean logarithmic, Optional<TagKey<BlockTempData>> effectGroup)
+                         Temperature.Units units, NegatableList<LocationRequirement> location,
+                         NegatableList<EntityRequirement> entity, boolean logarithmic, Optional<TagKey<BlockTempData>> effectGroup)
     {
         this(block, temperature, range, maxEffect, fade, maxTemp, minTemp, units, location, entity, logarithmic, effectGroup, new NegatableList<>());
     }
@@ -72,16 +76,16 @@ public class BlockTempData extends ConfigData
     public BlockTempData(BlockTemp blockTemp)
     {
         this(new NegatableList<>(new BlockRequirement(blockTemp.getAffectedBlocks().stream().map(Either::<TagKey<Block>, Block>right).toList())),
-             0, blockTemp.range(), blockTemp.maxEffect(),
-             true, new WorldTempRequirement(blockTemp.maxTemperature()), new WorldTempRequirement(blockTemp.minTemperature()), Temperature.Units.MC,
+             ValueGetter.constant(0.0), blockTemp.range(), blockTemp.maxEffect(),
+             blockTemp.fade(), new WorldTempRequirement(blockTemp.maxTemperature()), new WorldTempRequirement(blockTemp.minTemperature()), Temperature.Units.MC,
              new NegatableList<>(), new NegatableList<>(), blockTemp.logarithmic(), Optional.empty());
     }
 
     public static final Codec<BlockTempData> CODEC = createCodec(RecordCodecBuilder.mapCodec(instance -> instance.group(
             NegatableList.codec(BlockRequirement.CODEC).fieldOf("block").forGetter(BlockTempData::block),
-            Codec.DOUBLE.fieldOf("temperature").forGetter(BlockTempData::temperature),
-            Codec.DOUBLE.optionalFieldOf("range", Double.POSITIVE_INFINITY).forGetter(BlockTempData::range),
-            Codec.DOUBLE.optionalFieldOf("max_effect", Double.POSITIVE_INFINITY).forGetter(BlockTempData::maxEffect),
+            ValueGetter.fieldCodec("temperature", ExtraCodecs.DOUBLE, 0.0).forGetter(BlockTempData::temperature),
+            ExtraCodecs.DOUBLE.optionalFieldOf("range", Double.POSITIVE_INFINITY).forGetter(BlockTempData::range),
+            ExtraCodecs.DOUBLE.optionalFieldOf("max_effect", Double.POSITIVE_INFINITY).forGetter(BlockTempData::maxEffect),
             Codec.BOOL.optionalFieldOf("fade", true).forGetter(BlockTempData::fade),
             WorldTempRequirement.CODEC.optionalFieldOf("max_temp", WorldTempRequirement.INFINITY).forGetter(BlockTempData::maxTemp),
             WorldTempRequirement.CODEC.optionalFieldOf("min_temp", WorldTempRequirement.NEGATIVE_INFINITY).forGetter(BlockTempData::minTemp),
@@ -95,7 +99,7 @@ public class BlockTempData extends ConfigData
     public NegatableList<BlockRequirement> block()
     {   return block;
     }
-    public double temperature()
+    public ValueGetter<Double> temperature()
     {   return temperature;
     }
     public double range()
@@ -129,8 +133,14 @@ public class BlockTempData extends ConfigData
     {   return effectGroup;
     }
 
-    public double getTemperature()
-    {   return Temperature.convert(temperature, units, Temperature.Units.MC, false);
+    public double getTemperature(BlockEntity blockEntity, BlockState state, Entity entity)
+    {
+        Map<String, Object> params = new HashMap<>(){{
+            if (blockEntity != null) put("block", blockEntity);
+            put("state", state);
+            put("entity", entity);
+        }};
+        return Temperature.convert(temperature.get(params), units, Temperature.Units.MC, false);
     }
     public double getMaxEffect()
     {   return Temperature.convert(maxEffect, units, Temperature.Units.MC, false);
@@ -156,9 +166,9 @@ public class BlockTempData extends ConfigData
         Block[] effectBlocks = RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.BLOCKS, blocks).toArray(new Block[0]);
 
         // Temp of block
-        final double blockTemp = ((Number) entry.get(1)).doubleValue();
+        final ValueGetter<Double> blockTemp = ValueGetter.parse(() -> entry.get(1), ExtraCodecs.DOUBLE, 0.0);
         // Range of effect
-        final double blockRange = ((Number) entry.get(2)).doubleValue();
+        final double blockRange = entry.get(2) instanceof Number ? ((Number) entry.get(2)).doubleValue() : Double.POSITIVE_INFINITY;
 
         final Temperature.Units units = entry.size() > 3 && entry.get(3) instanceof String
                                          ? Temperature.Units.fromID((String) entry.get(3))
@@ -178,16 +188,16 @@ public class BlockTempData extends ConfigData
                                         ? new NbtRequirement(NBTHelper.parseCompoundNbt(str))
                                         : NbtRequirement.NONE;
 
-        double tempLimit = entry.size() > 7
-                           ? ((Number) entry.get(7)).doubleValue()
-                           : (blockTemp > 0 ? Double.POSITIVE_INFINITY : Double.NEGATIVE_INFINITY);
+        boolean logarithmic = entry.size() > 8 && entry.get(8) instanceof Boolean b && b;
 
-        boolean logarithmic = entry.size() > 8 && entry.get(8) instanceof Boolean
-                              ? (Boolean) entry.get(8)
-                              : false;
-
-        double maxTemperature = blockTemp > 0 ? tempLimit : Double.POSITIVE_INFINITY;
-        double minTemperature = blockTemp < 0 ? tempLimit : Double.NEGATIVE_INFINITY;
+        double maxTemperature = Double.POSITIVE_INFINITY;
+        double minTemperature = Double.NEGATIVE_INFINITY;
+        if (entry.size() > 7 && entry.get(7) instanceof Number tempLimit)
+        {
+            double tempSign = entry.get(1) instanceof Number n ? n.doubleValue() : 0.0;
+            if (tempSign > 0) maxTemperature = tempLimit.doubleValue();
+            if (tempSign < 0) minTemperature = tempLimit.doubleValue();
+        }
 
         BlockRequirement blockRequirement = new BlockRequirement(blocks, blockPredicates, nbtRequirement, List.of(), Optional.empty());
 
@@ -211,7 +221,7 @@ public class BlockTempData extends ConfigData
 
         BlockTempData that = (BlockTempData) obj;
         return super.equals(obj)
-            && Double.compare(that.temperature, temperature) == 0
+            && temperature.equals(that.temperature)
             && Double.compare(that.range, range) == 0
             && Double.compare(that.maxEffect, maxEffect) == 0
             && maxTemp.equals(that.maxTemp)

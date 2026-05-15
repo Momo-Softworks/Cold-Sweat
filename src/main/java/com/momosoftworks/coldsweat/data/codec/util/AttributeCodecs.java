@@ -19,7 +19,7 @@ public class AttributeCodecs
     public static Codec<AttributeModifier> MODIFIER_CODEC = RecordCodecBuilder.create(
             instance -> instance.group(
                     Codec.STRING.fieldOf("name").forGetter(AttributeModifier::getName),
-                    Codec.DOUBLE.fieldOf("amount").forGetter(AttributeModifier::getAmount),
+                    ExtraCodecs.DOUBLE.fieldOf("amount").forGetter(AttributeModifier::getAmount),
                     OPERATION_CODEC.fieldOf("operation").forGetter(AttributeModifier::getOperation)
             ).apply(instance, AttributeModifier::new)
     );

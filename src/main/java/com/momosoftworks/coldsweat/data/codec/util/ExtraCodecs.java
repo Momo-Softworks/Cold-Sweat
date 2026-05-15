@@ -22,6 +22,27 @@ import java.util.function.Supplier;
 
 public class ExtraCodecs
 {
+    /**
+     * A more lenient Double codec that can take in Integer values without exploding
+     */
+    public static final Codec<Double> DOUBLE = new Codec<Number>()
+    {
+        @Override
+        public <T> DataResult<Pair<Number, T>> decode(final DynamicOps<T> ops, final T input)
+        {   return ops.getNumberValue(input).map(n -> Pair.of(n, input));
+        }
+
+        @Override
+        public <T> DataResult<T> encode(Number input, DynamicOps<T> ops, T prefix)
+        {   return ops.mergeToPrimitive(prefix, ops.createNumeric(input));
+        }
+
+        @Override
+        public String toString()
+        {   return "Double";
+        }
+    }.xmap(Number::doubleValue, n -> n);
+
     public static Codec<Object> anyOf(Codec<?>... codecs)
     {
         return new Codec<>()
