@@ -41,6 +41,7 @@ public class BiomeTempModifier extends TempModifier
         Level level = entity.level();
         DimensionType dimension = level.dimensionType();
         BlockPos entPos = WorldHelper.sublevelToWorld(level, entity.blockPosition());
+        double timeMultiplier = WorldHelper.getTimeMultiplier(level);
 
         // If a structure temperature override is defined, return
         Pair<Double, Double> structureTemp = getStructureTemp(entity.level(), entPos);
@@ -51,11 +52,11 @@ public class BiomeTempModifier extends TempModifier
         // If the dimension temperature is overridden, return
         DimensionTempData dimTempOverride = ConfigSettings.DIMENSION_TEMPS.get(level.registryAccess()).get(level.dimensionTypeRegistration());
         if (dimTempOverride != null)
-        {   return temp -> temp + dimTempOverride.getTemperature();
+        {   return temp -> temp + CSMath.blend(dimTempOverride.getMinTemp(), dimTempOverride.getMaxTemp(), timeMultiplier, -1, 1);
         }
 
         DimensionTempData dimTempOffset = ConfigSettings.DIMENSION_OFFSETS.get(level.registryAccess()).get(level.dimensionTypeRegistration());
-        double dimOffset = dimTempOffset != null ? dimTempOffset.getTemperature() : 0;
+        double dimOffset = dimTempOffset != null ? CSMath.blend(dimTempOffset.getMinTemp(), dimTempOffset.getMaxTemp(), timeMultiplier, -1, 1) : 0;
 
         int biomeCount = 0;
         for (BlockPos blockPos : dimension.hasCeiling() ? WorldHelper.getPositionCube(entPos, (int) Math.sqrt(samples), 10) : WorldHelper.getPositionGrid(entPos, samples, 10))

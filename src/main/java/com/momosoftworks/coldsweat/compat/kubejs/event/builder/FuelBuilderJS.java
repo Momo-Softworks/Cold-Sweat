@@ -5,17 +5,20 @@ import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import net.minecraft.core.registries.BuiltInRegistries;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
+import com.momosoftworks.coldsweat.data.codec.util.ValueGetter;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class FuelBuilderJS
 {
-    public double fuel = 0;
+    public ValueGetter<Integer> fuel = ValueGetter.constant(0);
     public NegatableList<ItemRequirement> itemPredicate = new NegatableList<>();
 
     public FuelBuilderJS()
@@ -33,10 +36,13 @@ public class FuelBuilderJS
         return this;
     }
 
-    public FuelBuilderJS fuel(double temperature)
+    public FuelBuilderJS fuel(Function<Map<String, Object>, Integer> function)
     {
-        this.fuel = temperature;
+        this.fuel = ValueGetter.of(function);
         return this;
+    }
+    public FuelBuilderJS fuel(int temperature)
+    {   return fuel(m -> temperature);
     }
 
     public FuelBuilderJS itemPredicate(Predicate<ItemStack> itemPredicate)

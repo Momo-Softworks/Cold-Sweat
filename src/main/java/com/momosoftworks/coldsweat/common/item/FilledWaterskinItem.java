@@ -27,6 +27,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -118,10 +119,7 @@ public class FilledWaterskinItem extends Item
         if (!player.level().isClientSide)
         {
             double temperature = stack.getOrDefault(ModItemComponents.WATER_TEMPERATURE, 0d);
-            double effectAmount = temperature * (ConfigSettings.WATERSKIN_CONSUME_STRENGTH.get() / 50d);
             double wetnessTemp = 0.05 * CSMath.sign(temperature == 0 ? 1 : temperature);
-            // Add waterskin temp modifier
-            Temperature.addModifier(player, new WaterskinTempModifier(effectAmount).expires(0), Temperature.Trait.CORE, Placement.LAST);
             // Replace or add water temp modifier
             Placement modPlacement = Placement.of(Mode.REPLACE, Order.FIRST, mod -> mod instanceof WaterTempModifier).orElse(Placement.LAST);
             Temperature.addModifier(player, new WaterTempModifier(wetnessTemp).tickRate(5), Temperature.Trait.WORLD, modPlacement);
@@ -130,6 +128,7 @@ public class FilledWaterskinItem extends Item
         }
 
         consumeWaterskin(stack, player, hand);
+        NeoForge.EVENT_BUS.post(new LivingEntityUseItemEvent.Finish(player, stack, 1, stack.getCraftingRemainingItem()));
         player.swing(hand, true);
 
         // spawn falling water particles
@@ -208,8 +207,7 @@ public class FilledWaterskinItem extends Item
             }
             case POUR ->
             {   if (performPourAction(stack, player, hand))
-                {   NeoForge.EVENT_BUS.post(new LivingEntityUseItemEvent.Finish(player, stack, 1, stack));
-                    return InteractionResultHolder.consume(stack);
+                {   return InteractionResultHolder.consume(stack);
                 }
             }
             case NONE -> {}
@@ -284,29 +282,12 @@ public class FilledWaterskinItem extends Item
     @OnlyIn(Dist.CLIENT)
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag advanced)
     {
-        double temp = CSMath.round(stack.get(ModItemComponents.WATER_TEMPERATURE), 2);
-        double multiplier = ConfigSettings.WATERSKIN_CONSUME_STRENGTH.get() / 50d;
-        int useEffect = (int) (temp * multiplier);
-
         // Display filled state
         MutableComponent filledLabel = Component.translatable("item.cold_sweat.waterskin.filled").withStyle(ChatFormatting.GRAY);
         if (ConfigSettings.ENABLE_HINTS.get() && !TooltipHandler.isShiftDown())
         {   filledLabel.append(Component.literal(" ").append(TooltipHandler.EXPAND_TOOLTIP_HINT));
         }
         tooltip.add(filledLabel);
-
-        // Info tooltip for drinking/pouring functionality
-        if (useEffect != 0)
-        {
-            String useTempString = useEffect >= 0 ? "+" + useEffect : "" + useEffect;
-            String traitName = Temperature.Trait.CORE.getFormattedName();
-            MutableComponent tempText = Component.translatable("tooltip.cold_sweat.temperature_effect", useTempString, traitName);
-            tempText = tempText.withStyle(useEffect > 0 ? TooltipHandler.HOT
-                                        : useEffect == 0 ? Style.EMPTY.withColor(ChatFormatting.WHITE)
-                                        : TooltipHandler.COLD);
-            tooltip.add(Component.empty());
-            tooltip.add(Component.translatable("tooltip.cold_sweat.section.used").withStyle(ChatFormatting.GRAY));
-        tooltip.add(tempText);}
 
         if (TooltipHandler.isShiftDown())
         {

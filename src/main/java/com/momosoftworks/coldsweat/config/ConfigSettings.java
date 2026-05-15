@@ -261,22 +261,22 @@ public class ConfigSettings
         SyncType.BOTH_WAYS);
 
         MAX_TEMP = addSyncedSetting(ColdSweat.createKey("max_temp"), () -> 1.7, holder -> holder.set(MainSettingsConfig.MAX_HABITABLE_TEMPERATURE.get()),
-        Codec.DOUBLE,
+        ExtraCodecs.DOUBLE,
         (temp) -> MainSettingsConfig.MAX_HABITABLE_TEMPERATURE.set(temp),
         SyncType.BOTH_WAYS);
 
         MIN_TEMP = addSyncedSetting(ColdSweat.createKey("min_temp"), () -> 0.5, holder -> holder.set(MainSettingsConfig.MIN_HABITABLE_TEMPERATURE.get()),
-        Codec.DOUBLE,
+        ExtraCodecs.DOUBLE,
         (temp) -> MainSettingsConfig.MIN_HABITABLE_TEMPERATURE.set(temp),
         SyncType.BOTH_WAYS);
 
         TEMP_RATE = addSyncedSetting(ColdSweat.createKey("temp_rate"), () -> 1d, holder -> holder.set(MainSettingsConfig.TEMP_RATE_MULTIPLIER.get()),
-        Codec.DOUBLE,
+        ExtraCodecs.DOUBLE,
         (rate) -> MainSettingsConfig.TEMP_RATE_MULTIPLIER.set(rate),
         SyncType.BOTH_WAYS);
 
         TEMP_DAMAGE = addSyncedSetting(ColdSweat.createKey("temp_damage"), () -> 2d, holder -> holder.set(MainSettingsConfig.TEMP_DAMAGE.get()),
-        Codec.DOUBLE,
+        ExtraCodecs.DOUBLE,
         (damage) -> MainSettingsConfig.TEMP_DAMAGE.set(damage),
         SyncType.BOTH_WAYS);
 
@@ -317,27 +317,27 @@ public class ConfigSettings
 
 
         HEARTS_FREEZING_PERCENTAGE = addSyncedSetting(ColdSweat.createKey("hearts_freezing_percentage"), () -> 0.5, holder -> holder.set(MainSettingsConfig.FREEZING_HEARTS.get()),
-        Codec.DOUBLE,
+        ExtraCodecs.DOUBLE,
         (percentage) -> MainSettingsConfig.FREEZING_HEARTS.set(percentage),
         SyncType.BOTH_WAYS);
 
         COLD_MINING_IMPAIRMENT = addSyncedSetting(ColdSweat.createKey("cold_mining_slowdown"), () -> 0.5, holder -> holder.set(MainSettingsConfig.COLD_MINING.get()),
-        Codec.DOUBLE,
+        ExtraCodecs.DOUBLE,
         (slowdown) -> MainSettingsConfig.COLD_MINING.set(slowdown),
         SyncType.BOTH_WAYS);
 
         COLD_MOVEMENT_SLOWDOWN = addSyncedSetting(ColdSweat.createKey("cold_movement_slowdown"), () -> 0.5, holder -> holder.set(MainSettingsConfig.COLD_MOVEMENT.get()),
-        Codec.DOUBLE,
+        ExtraCodecs.DOUBLE,
         (slowdown) -> MainSettingsConfig.COLD_MOVEMENT.set(slowdown),
         SyncType.BOTH_WAYS);
 
         COLD_KNOCKBACK_REDUCTION = addSyncedSetting(ColdSweat.createKey("cold_knockback_reduction"), () -> 0.5, holder -> holder.set(MainSettingsConfig.COLD_KNOCKBACK.get()),
-        Codec.DOUBLE,
+        ExtraCodecs.DOUBLE,
         (reduction) -> MainSettingsConfig.COLD_KNOCKBACK.set(reduction),
         SyncType.BOTH_WAYS);
 
         HEATSTROKE_FOG_DISTANCE = addSyncedSetting(ColdSweat.createKey("heatstroke_fog_distance"), () -> 6d, holder -> holder.set(MainSettingsConfig.HEATSTROKE_FOG.get()),
-        Codec.DOUBLE,
+        ExtraCodecs.DOUBLE,
         (distance) -> MainSettingsConfig.HEATSTROKE_FOG.set(distance),
         SyncType.BOTH_WAYS);
 
@@ -592,7 +592,7 @@ public class ConfigSettings
         SyncType.BOTH_WAYS);
 
         WATERSKIN_NEUTRALIZE_SPEED = addSyncedSetting(ColdSweat.createKey("waterskin_neutralize_speed"), () -> 1.0, holder -> holder.set(ItemSettingsConfig.WATERSKIN_NEUTRALIZE_SPEED.get()),
-        Codec.DOUBLE,
+        ExtraCodecs.DOUBLE,
         (saver) -> ItemSettingsConfig.WATERSKIN_NEUTRALIZE_SPEED.set(saver),
         SyncType.BOTH_WAYS);
 
@@ -867,39 +867,39 @@ public class ConfigSettings
         SyncType.BOTH_WAYS);
 
         INSULATION_STRENGTH = addSyncedSetting(ColdSweat.createKey("insulation_strength"), () -> 1d, holder -> holder.set(ItemSettingsConfig.INSULATION_STRENGTH.get()),
-        Codec.DOUBLE,
+        ExtraCodecs.DOUBLE,
         (saver) -> ItemSettingsConfig.INSULATION_STRENGTH.set(saver),
         SyncType.BOTH_WAYS);
 
         DISABLED_MODIFIERS = addSetting(ColdSweat.createKey("disabled_modifiers"), ArrayList::new, holder -> holder.get().addAll(MainSettingsConfig.DISABLED_TEMP_MODIFIERS.get().stream().map(ResourceLocation::parse).toList()));
 
         MODIFIER_TICK_RATE = addSyncedSetting(ColdSweat.createKey("modifier_tick_rate"), () -> 1.0, holder -> holder.set(MainSettingsConfig.MODIFIER_TICK_RATE.get()),
-        Codec.DOUBLE,
+        ExtraCodecs.DOUBLE,
         (saver) -> MainSettingsConfig.MODIFIER_TICK_RATE.set(saver),
         SyncType.BOTH_WAYS);
 
         DRYOFF_SPEED = addSyncedSetting(ColdSweat.createKey("dryoff_speed"), () -> 0.0015, holder -> holder.set(WorldSettingsConfig.DRYOFF_SPEED.get()),
-        Codec.DOUBLE,
+        ExtraCodecs.DOUBLE,
         (saver) -> WorldSettingsConfig.DRYOFF_SPEED.set(saver),
         SyncType.BOTH_WAYS);
 
         WATER_SOAK_SPEED = addSyncedSetting(ColdSweat.createKey("water_soak_speed"), () -> 0.1, holder -> holder.set(WorldSettingsConfig.WATER_SOAK_SPEED.get()),
-        Codec.DOUBLE,
+        ExtraCodecs.DOUBLE,
         (saver) -> WorldSettingsConfig.WATER_SOAK_SPEED.set(saver),
         SyncType.BOTH_WAYS);
 
         RAIN_SOAK_SPEED = addSyncedSetting(ColdSweat.createKey("rain_soak_speed"), () -> 0.0125, holder -> holder.set(WorldSettingsConfig.RAIN_SOAK_SPEED.get()),
-        Codec.DOUBLE,
+        ExtraCodecs.DOUBLE,
         (saver) -> WorldSettingsConfig.RAIN_SOAK_SPEED.set(saver),
         SyncType.BOTH_WAYS);
 
         MAX_RAIN_SOAK = addSyncedSetting(ColdSweat.createKey("max_rain_soak"), () -> 1.0, holder -> holder.set(WorldSettingsConfig.MAX_RAIN_SOAK.get()),
-        Codec.DOUBLE,
+        ExtraCodecs.DOUBLE,
         (saver) -> WorldSettingsConfig.MAX_RAIN_SOAK.set(saver),
         SyncType.BOTH_WAYS);
 
         ACCLIMATION_SPEED = addSyncedSetting(ColdSweat.createKey("acclimation_speed"), () -> 1.0, holder -> holder.set(MainSettingsConfig.ACCLIMATION_SPEED.get()),
-        Codec.DOUBLE,
+        ExtraCodecs.DOUBLE,
         (saver) -> MainSettingsConfig.ACCLIMATION_SPEED.set(saver),
         SyncType.BOTH_WAYS);
 
@@ -908,7 +908,7 @@ public class ConfigSettings
             List<? extends Number> range = MainSettingsConfig.MIN_ACCLIMATION_RANGE.get();
             holder.set(Pair.of(range.get(0).doubleValue(), range.get(1).doubleValue()));
         },
-        ExtraCodecs.pair(Codec.DOUBLE, Codec.DOUBLE),
+        ExtraCodecs.pair(ExtraCodecs.DOUBLE, ExtraCodecs.DOUBLE),
         (saver) -> MainSettingsConfig.MIN_ACCLIMATION_RANGE.set(List.of(saver.getFirst(), saver.getSecond())),
         SyncType.BOTH_WAYS);
 
@@ -917,7 +917,7 @@ public class ConfigSettings
             List<? extends Number> range = MainSettingsConfig.MAX_ACCLIMATION_RANGE.get();
             holder.set(Pair.of(range.get(0).doubleValue(), range.get(1).doubleValue()));
         },
-        ExtraCodecs.pair(Codec.DOUBLE, Codec.DOUBLE),
+        ExtraCodecs.pair(ExtraCodecs.DOUBLE, ExtraCodecs.DOUBLE),
         (saver) -> MainSettingsConfig.MAX_ACCLIMATION_RANGE.set(List.of(saver.getFirst(), saver.getSecond())),
         SyncType.BOTH_WAYS);
 

@@ -10,6 +10,7 @@ import com.momosoftworks.coldsweat.data.codec.requirement.ItemComponentsRequirem
 import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
+import com.momosoftworks.coldsweat.data.codec.util.ValueGetter;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.EnumHelper;
 import net.minecraft.tags.TagKey;
@@ -24,9 +25,9 @@ public class FuelData extends ConfigData implements RequirementHolder
 {
     final NegatableList<ItemRequirement> item;
     final FuelType type;
-    final Double fuel;
+    final ValueGetter<Integer> fuel;
 
-    public FuelData(NegatableList<ItemRequirement> item, FuelType type, Double fuel, NegatableList<String> requiredMods)
+    public FuelData(NegatableList<ItemRequirement> item, FuelType type, ValueGetter<Integer> fuel, NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.type = type;
@@ -34,14 +35,14 @@ public class FuelData extends ConfigData implements RequirementHolder
         this.item = item;
     }
 
-    public FuelData(NegatableList<ItemRequirement> item, FuelType type, Double fuel)
+    public FuelData(NegatableList<ItemRequirement> item, FuelType type, ValueGetter<Integer> fuel)
     {   this(item, type, fuel, new NegatableList<>());
     }
 
     public static final Codec<FuelData> CODEC = createCodec(RecordCodecBuilder.mapCodec(instance -> instance.group(
             NegatableList.codec(ItemRequirement.CODEC).optionalFieldOf("item", new NegatableList<>()).forGetter(FuelData::item),
             FuelType.CODEC.fieldOf("type").forGetter(FuelData::fuelType),
-            Codec.DOUBLE.fieldOf("fuel").forGetter(FuelData::fuel)
+            ValueGetter.fieldCodec("fuel", Codec.INT, 0).forGetter(FuelData::fuel)
     ).apply(instance, FuelData::new)));
 
     public NegatableList<ItemRequirement> item()
@@ -50,8 +51,11 @@ public class FuelData extends ConfigData implements RequirementHolder
     public FuelType fuelType()
     {   return type;
     }
-    public Double fuel()
+    public ValueGetter<Integer> fuel()
     {   return fuel;
+    }
+    public int fuel(ItemStack stack)
+    {   return fuel.get(Map.of("item", stack));
     }
 
     @Override
@@ -69,7 +73,7 @@ public class FuelData extends ConfigData implements RequirementHolder
         NegatableList<Either<TagKey<Item>, Item>> items = ConfigHelper.getItems((String) entry.get(0));
         if (items.isEmpty()) return null;
 
-        double fuel = ((Number) entry.get(1)).doubleValue();
+        ValueGetter<Integer> fuel = ValueGetter.parse(() -> entry.get(1), Codec.INT, 0);
         ItemComponentsRequirement componentsRequirement = entry.size() > 2
                                                           ? ItemComponentsRequirement.parse((String) entry.get(2))
                                                           : new ItemComponentsRequirement();

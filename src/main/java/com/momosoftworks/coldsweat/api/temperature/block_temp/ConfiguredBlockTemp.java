@@ -11,7 +11,10 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+
+import java.util.Map;
 
 /**
  * Wrapper BlockTemp for {@link BlockTempData} configurations.
@@ -35,16 +38,21 @@ public class ConfiguredBlockTemp extends BlockTemp
 
     @Override
     public boolean isValid(Level level, BlockPos pos, BlockState state)
-    {   return this.data.block().test(req -> req.test(level, pos, state));
+    {   return this.data.block().test(req -> req.test(level, pos, state))
+            && this.data.location().test(req -> req.test(level, pos));
     }
 
     @Override
     public double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
     {
-        if (data.location().test(req -> req.test(level, pos))
-        && data.entity().test(req -> req.test(entity)))
+        if (data.entity().test(req -> req.test(entity)))
         {
-            double temp = data.getTemperature();
+            boolean requiresBlockEntity = data.temperature().hasParameter("block");
+            BlockEntity blockentity = requiresBlockEntity ? level.getBlockEntity(pos) : null;
+            if (requiresBlockEntity && blockentity == null)
+            {   throw new IllegalArgumentException(String.format("BlockTempData requires a block entity, but block %s doesn't have one: \n%s", state.getBlock(), data));
+            }
+            double temp = data.getTemperature(blockentity, state, entity);
             if (ConfigSettings.COLD_SOUL_FIRE.get() && state.is(ModBlockTags.SOUL_FIRE))
             {   temp *= -1;
             }

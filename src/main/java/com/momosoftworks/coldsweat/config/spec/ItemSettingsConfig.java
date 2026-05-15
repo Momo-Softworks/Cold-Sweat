@@ -2,7 +2,6 @@ package com.momosoftworks.coldsweat.config.spec;
 
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.ListBuilder;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.config.ModConfig;
@@ -87,7 +86,7 @@ public class ItemSettingsConfig
                                 List.of("minecraft:lava_bucket",     1000)
                         ).build(),
                         () -> List.of(),
-                        it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number);
+                        it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && (list.get(1) instanceof Number || list.get(1) instanceof String));
 
             ICEBOX_FUELS = BUILDER
                 .comment("─────────────────────────────────//v")
@@ -100,7 +99,7 @@ public class ItemSettingsConfig
                                 List.of("minecraft:powder_snow_bucket", 100),
                                 List.of("minecraft:packed_ice",         1000)
                         ).build(),
-                        it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number);
+                        it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && (list.get(1) instanceof Number || list.get(1) instanceof String));
 
             HEARTH_FUELS = BUILDER
                 .comment("─────────────────────────────────//v",
@@ -123,7 +122,7 @@ public class ItemSettingsConfig
                                 List.of("minecraft:powder_snow_bucket", -100),
                                 List.of("minecraft:packed_ice",         -1000)
                         ).build(),
-                        it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number);
+                        it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && (list.get(1) instanceof Number || list.get(1) instanceof String));
         BUILDER.pop();
 
 
@@ -163,7 +162,7 @@ public class ItemSettingsConfig
                 .defineListAllowEmpty(List.of("Fuel Items"), () -> ListBuilder.<List<?>>begin(
                                     List.of("cold_sweat:soul_sprout", 4)
                         ).build(),
-                        it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && list.get(1) instanceof Number);
+                        it -> it instanceof List<?> list && list.size() == 2 && list.get(0) instanceof String && (list.get(1) instanceof Number || list.get(1) instanceof String));
 
             SOULSPRING_LAMP_DIMENSIONS = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────//v",
@@ -343,13 +342,15 @@ public class ItemSettingsConfig
                          " • *stack_limit: If set, consuming multiple of the same item will apply stacking effects up to this limit.",
                          " ⌄ ")
                 .defineListAllowEmpty(List.of("Temperature-Affecting Foods"), () -> Arrays.asList(
-                        List.of("cold_sweat:soul_sprout", -20, "{}", 1200)
+                        List.of("cold_sweat:soul_sprout", -20, "{}", 1200),
+                        List.of("cold_sweat:filled_waterskin", "{item:cold_sweat:temperature}")
                 ),
                 it -> it instanceof List<?> list && list.size() >= 2
                         && list.get(0) instanceof String
-                        && list.get(1) instanceof Number
+                        && (list.get(1) instanceof Number || list.get(1) instanceof String)
                         && (list.size() < 3 || list.get(2) instanceof String)
-                        && (list.size() < 4 || list.get(3) instanceof Number));
+                        && (list.size() < 4 || list.get(3) instanceof Number || list.get(3) instanceof String)
+                        && (list.size() < 5 || list.get(4) instanceof Number || list.get(4) instanceof String));
 
             WATERSKIN_CONSUME_STRENGTH = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────",
@@ -407,7 +408,7 @@ public class ItemSettingsConfig
             ITEM_TEMPERATURES = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────//v",
                          " Defines items that affect the player's temperature when in the inventory",
-                         " ├── Format: [[\"item_id\", temperature, \"slotRange\", \"trait\", *\"{nbt}\", *maxEffect, *tempLimit, *hide_if_unmet], [...], etc]",
+                         " ├── Format: [[\"item_id\", temperature, \"slotRange\", \"trait\", *\"{nbt}\", *maxEffect, *hide_if_unmet], [...], etc]",
                          " └── [* = optional]",
                          " • item_id: The item's ID (i.e. \"minecraft:lava_bucket\").",
                          " • temperature: The temperature change the item will apply to the entity. For core temperature, this is applied every tick",
@@ -415,22 +416,21 @@ public class ItemSettingsConfig
                          " • trait: The temperature trait to apply the effect to. Typical values are \"core\" for body temperature or \"world\" for ambient temperature. More on the mod documentation page.",
                          " • *nbt: The NBT data the item must have to apply to the entity.",
                          " • *max_effect: The maximum temperature effect the item can apply to the entity.",
-                         " • *tempLimit: The maximum temperature at which this item temp will have any effect.",
                          "   (Based on the given trait. Represents the minimum temp if the item temp is negative)",
                          " • *hide_if_unmet: Only show the tooltip if the NBT check passes. Default to false.",
                          " ⌄ ")
                 .defineListAllowEmpty(List.of("Item Temperatures"), () -> List.of(
-                        List.of("cold_sweat:filled_waterskin",  0.025, "hand,hotbar", "core", "{'Temperature':'1:'}", 999, 999, true),
-                        List.of("cold_sweat:filled_waterskin", -0.025, "hand,hotbar", "core", "{'Temperature':':-1'}", 999, -999, true)
+                        List.of("cold_sweat:filled_waterskin",  0.025, "hand,hotbar", "core", "{'cold_sweat:temperature':'0.1:'}", 999, true),
+                        List.of("cold_sweat:filled_waterskin", -0.025, "hand,hotbar", "core", "{'cold_sweat:temperature':':-0.1'}", 999, true)
                 ),
                 it -> it instanceof List<?> list
                         && list.get(0) instanceof String
-                        && list.get(1) instanceof Number
+                        && (list.get(1) instanceof Number || list.get(1) instanceof String)
                         && list.get(2) instanceof String
                         && list.get(3) instanceof String
                         && (list.size() < 5 || list.get(4) instanceof String)
-                        && (list.size() < 6 || list.get(5) instanceof Number)
-                        && (list.size() < 7 || list.get(6) instanceof Number));
+                        && (list.size() < 6 || list.get(5) instanceof Number || list.get(5) instanceof String)
+                        && (list.size() < 7 || list.get(6) instanceof Boolean || list.get(6) instanceof String));
 
         BUILDER.pop();
 

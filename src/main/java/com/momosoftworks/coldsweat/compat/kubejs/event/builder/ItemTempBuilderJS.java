@@ -15,6 +15,7 @@ import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
+import com.momosoftworks.coldsweat.data.codec.util.ValueGetter;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.resources.ResourceLocation;
@@ -25,21 +26,22 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class ItemTempBuilderJS
 {
     public final Set<Either<IntegerBounds, ItemTempData.SlotType>> slots = new HashSet<>();
-    public double temperature = 0;
-    public double maxEffect = Double.POSITIVE_INFINITY;
-    public double maxTemp;
-    public double minTemp;
+    public ValueGetter<Double> temperature = new ValueGetter<>(ValueGetter.Type.CONSTANT, null, sources -> 0.0);
+    public ValueGetter<Double> maxEffect = ValueGetter.constant(Double.POSITIVE_INFINITY);
+    public ValueGetter<Double> maxTemp;
+    public ValueGetter<Double> minTemp;
     public Temperature.Trait trait = Temperature.Trait.WORLD;
     public NegatableList<ItemRequirement> itemPredicate = new NegatableList<>();
     public NegatableList<EntityRequirement> entityPredicate = new NegatableList<>();
     public AttributeModifierMap attributes = new AttributeModifierMap();
-    public Map<ResourceLocation, Double> immuneTempModifiers = new HashMap<>();
-    public boolean hideIfUnmet = false;
+    public Map<ResourceLocation, ValueGetter<Double>> immuneTempModifiers = new HashMap<>();
+    public ValueGetter<Boolean> hideIfUnmet = ValueGetter.constant(false);
 
     public ItemTempBuilderJS()
     {}
@@ -56,28 +58,37 @@ public class ItemTempBuilderJS
         return this;
     }
 
+    public ItemTempBuilderJS temperature(Function<Map<String, Object>, Double> getter)
+    {
+        this.temperature = new ValueGetter<>(ValueGetter.Type.EXPRESSION, "custom", getter);
+        return this;
+    }
     public ItemTempBuilderJS temperature(double temperature)
-    {
-        this.temperature = temperature;
-        return this;
+    {   return temperature(m -> temperature);
     }
 
+    public ItemTempBuilderJS maxEffect(Function<Map<String, Object>, Double> getter)
+    {   this.maxEffect = new ValueGetter<>(ValueGetter.Type.EXPRESSION, "custom", getter);
+        return this;
+    }
     public ItemTempBuilderJS maxEffect(double maxEffect)
-    {
-        this.maxEffect = maxEffect;
-        return this;
+    {   return maxEffect(m -> maxEffect);
     }
 
+    public ItemTempBuilderJS maxTemp(Function<Map<String, Object>, Double> getter)
+    {   this.maxTemp = new ValueGetter<>(ValueGetter.Type.EXPRESSION, "custom", getter);
+        return this;
+    }
     public ItemTempBuilderJS maxTemp(double maxTemp)
-    {
-        this.maxTemp = maxTemp;
-        return this;
+    {   return maxTemp(m -> maxTemp);
     }
 
-    public ItemTempBuilderJS minTemp(double minTemp)
-    {
-        this.minTemp = minTemp;
+    public ItemTempBuilderJS minTemp(Function<Map<String, Object>, Double> getter)
+    {   this.minTemp = new ValueGetter<>(ValueGetter.Type.EXPRESSION, "custom", getter);
         return this;
+    }
+    public ItemTempBuilderJS minTemp(double minTemp)
+    {   return minTemp(m -> minTemp);
     }
 
     public ItemTempBuilderJS trait(String trait)
@@ -131,22 +142,27 @@ public class ItemTempBuilderJS
         return this;
     }
 
-    public ItemTempBuilderJS immuneToModifier(String modifierId, double immunity)
+    public ItemTempBuilderJS immuneToModifier(String modifierId, Function<Map<String, Object>, Double> immunity)
     {
         ResourceLocation location = ResourceLocation.parse(modifierId);
         if (!TempModifierRegistry.getEntries().containsKey(location))
-        {
-            ColdSweat.LOGGER.warn("Tried to add immunity to non-existent temperature modifier: {}", location);
+        {   ColdSweat.LOGGER.warn("Tried to add immunity to non-existent temperature modifier: {}", location);
             return this;
         }
-        immuneTempModifiers.put(ResourceLocation.parse(modifierId), immunity);
+        immuneTempModifiers.put(ResourceLocation.parse(modifierId), new ValueGetter<>(ValueGetter.Type.EXPRESSION, "custom", immunity));
         return this;
     }
+    public ItemTempBuilderJS immuneToModifier(String modifierId, double immunity)
+    {   return immuneToModifier(modifierId, m -> immunity);
+    }
 
-    public ItemTempBuilderJS hideIfUnmet(boolean hide)
+    public ItemTempBuilderJS hideIfUnmet(Function<Map<String, Object>, Boolean> hideIfUnmet)
     {
-        this.hideIfUnmet = hide;
+        this.hideIfUnmet = new ValueGetter<>(ValueGetter.Type.EXPRESSION, "custom", hideIfUnmet);
         return this;
+    }
+    public ItemTempBuilderJS hideIfUnmet(boolean hideIfUnmet)
+    {   return hideIfUnmet(m -> hideIfUnmet);
     }
 
     public ItemTempData build()

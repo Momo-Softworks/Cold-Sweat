@@ -1,10 +1,18 @@
 package com.momosoftworks.coldsweat.util.item;
 
+import com.mojang.serialization.DynamicOps;
+import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
@@ -55,6 +63,14 @@ public class ItemStackHelper
             stack.set(componentType, component);
         }
         return component;
+    }
+
+    public static CompoundTag serializeComponentsUnsafe(ItemStack stack)
+    {
+        RegistryAccess registryAccess = RegistryHelper.getRegistryAccess();
+        if (registryAccess == null) return new CompoundTag();
+        DynamicOps<Tag> ops = RegistryOps.create(NbtOps.INSTANCE, RegistryHelper.getRegistryAccess());
+        return (CompoundTag) DataComponentPatch.CODEC.encodeStart(ops, stack.getComponentsPatch()).result().orElse(new CompoundTag());
     }
 
     /**

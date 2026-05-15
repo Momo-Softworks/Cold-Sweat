@@ -212,7 +212,9 @@ public class BoilerBlockEntity extends HearthBlockEntity
 
     @Override
     public int getItemFuel(ItemStack item)
-    {   return CSMath.getIfNotNull(ConfigHelper.getFirstOrNull(ConfigSettings.BOILER_FUEL, item.getItem(), data -> data.test(item)), FuelData::fuel, 0d).intValue();
+    {
+        FuelData fuelData = ConfigHelper.getFirstOrNull(ConfigSettings.BOILER_FUEL, item.getItem(), data -> data.test(item));
+        return CSMath.getIfNotNull(fuelData, data -> data.fuel(item), 0);
     }
 
     @Override
