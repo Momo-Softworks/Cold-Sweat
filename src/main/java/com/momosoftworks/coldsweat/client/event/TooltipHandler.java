@@ -255,9 +255,8 @@ public class TooltipHandler
                 LAST_TOOLTIP.clear();
                 return;
             }
-            int slotIndex = -1;
+            int slotIndex = 0;
             EquipmentSlot equipmentSlot = null;
-            boolean isInventory = true;
 
             // If open screen is a container, get equipment slot and slot index
             findSlots:
@@ -268,9 +267,6 @@ public class TooltipHandler
 
                 slotIndex = hoveredSlot.getSlotIndex();
                 equipmentSlot = EntityHelper.getEquipmentSlot(slotIndex);
-                if (hoveredSlot.container != PLAYER.get().getInventory())
-                {   isInventory = false;
-                }
             }
 
             if (HOVERED_ITEM_UPDATE_COOLDOWN <= 0)
@@ -283,7 +279,7 @@ public class TooltipHandler
                     {   FETCHING_TOOLTIP = true;
                         HOVERED_SLOT = slotIndex;
                     }
-                    ColdSweatPacketHandler.INSTANCE.sendToServer(SyncItemPredicatesMessage.fromClient(slotIndex, equipmentSlot, isInventory));
+                    ColdSweatPacketHandler.INSTANCE.sendToServer(SyncItemPredicatesMessage.fromClient(slotIndex, equipmentSlot, stack));
                 }
             }
         }
