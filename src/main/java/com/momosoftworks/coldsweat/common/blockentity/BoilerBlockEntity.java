@@ -81,7 +81,7 @@ public class BoilerBlockEntity extends HearthBlockEntity
                     double itemTemp = stack.getOrDefault(ModItemComponents.WATER_TEMPERATURE, 0d);
 
                     if (stack.is(ModItems.FILLED_WATERSKIN) && itemTemp < 50)
-                    {   stack.set(ModItemComponents.WATER_TEMPERATURE, Math.min(50, itemTemp + 1));
+                    {   stack.set(ModItemComponents.WATER_TEMPERATURE, Math.min(50, CSMath.roundDownNearest(itemTemp + 1, 1)));
                         hasWaterskins = true;
                     }
                 }
