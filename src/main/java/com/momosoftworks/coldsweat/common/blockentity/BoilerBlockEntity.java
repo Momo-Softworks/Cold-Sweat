@@ -86,7 +86,7 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
                     double itemTemp = tag.getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
 
                     if (stack.getItem() == ModItems.FILLED_WATERSKIN && itemTemp < 50)
-                    {   tag.putDouble(FilledWaterskinItem.NBT_TEMPERATURE, Math.min(50, itemTemp + 1));
+                    {   tag.putDouble(FilledWaterskinItem.NBT_TEMPERATURE, Math.min(50, CSMath.roundDownNearest(itemTemp + 1, 1)));
                         hasWaterskins = true;
                     }
                 }
