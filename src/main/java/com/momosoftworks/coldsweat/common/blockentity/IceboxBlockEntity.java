@@ -159,7 +159,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
 
                     if (stack.is(ModItems.FILLED_WATERSKIN) && itemTemp > -50)
                     {   this.hasItemStacks = true;
-                        tag.putDouble(FilledWaterskinItem.NBT_TEMPERATURE, Math.max(-50, itemTemp - 1));
+                        tag.putDouble(FilledWaterskinItem.NBT_TEMPERATURE, Math.max(-50, CSMath.roundDownNearest(itemTemp - 1, 1)));
                     }
                 }
             }
