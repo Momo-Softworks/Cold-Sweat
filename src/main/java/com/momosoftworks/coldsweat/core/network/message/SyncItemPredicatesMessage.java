@@ -32,16 +32,15 @@ public class SyncItemPredicatesMessage
     private final Map<UUID, Boolean> predicateMap = new HashMap<>();
     private final int inventorySlot;
     @Nullable private final EquipmentSlotType equipmentSlot;
-    @Nullable private final ItemStack responseStack;
-    private boolean isInventory;
+    private final ItemStack stack;
 
-    public static SyncItemPredicatesMessage fromClient(int inventorySlot, @Nullable EquipmentSlotType equipmentSlot, boolean isInventory)
-    {   return new SyncItemPredicatesMessage(inventorySlot, equipmentSlot, null, new HashMap<>(), isInventory);
+    public static SyncItemPredicatesMessage fromClient(int inventorySlot, @Nullable EquipmentSlotType equipmentSlot, ItemStack stack)
+    {   return new SyncItemPredicatesMessage(inventorySlot, equipmentSlot, stack, new HashMap<>());
     }
 
-    public static SyncItemPredicatesMessage fromServer(ItemStack stack, int inventorySlot, @Nullable EquipmentSlotType equipmentSlot, Entity entity, boolean isInventory)
+    public static SyncItemPredicatesMessage fromServer(int inventorySlot, @Nullable EquipmentSlotType equipmentSlot, ItemStack stack, Entity entity)
     {
-        SyncItemPredicatesMessage message = new SyncItemPredicatesMessage(inventorySlot, equipmentSlot, stack, new HashMap<>(), isInventory);
+        SyncItemPredicatesMessage message = new SyncItemPredicatesMessage(inventorySlot, equipmentSlot, stack, new HashMap<>());
 
         message.checkInsulator(stack, entity);
         message.checkInsulatingArmor(stack, entity);
@@ -61,43 +60,29 @@ public class SyncItemPredicatesMessage
     }
 
     private SyncItemPredicatesMessage(int inventorySlot, @Nullable EquipmentSlotType equipmentSlot,
-                                      @Nullable ItemStack responseStack, Map<UUID, Boolean> predicateMap,
-                                      boolean isInventory)
+                                      ItemStack stack, Map<UUID, Boolean> predicateMap)
     {
         this.inventorySlot = inventorySlot;
         this.equipmentSlot = equipmentSlot;
-        this.responseStack = responseStack;
+        this.stack = stack;
         this.predicateMap.putAll(predicateMap);
-        this.isInventory = isInventory;
     }
 
     public static void encode(SyncItemPredicatesMessage message, PacketBuffer buffer)
     {
         buffer.writeInt(message.inventorySlot);
         BufferHelper.writeOptional(buffer, Optional.ofNullable(message.equipmentSlot), PacketBuffer::writeEnum);
-        buffer.writeBoolean(message.isInventory);
-
-        boolean hasResponse = message.responseStack != null && !message.predicateMap.isEmpty();
-        buffer.writeBoolean(hasResponse);
-        if (hasResponse)
-        {   buffer.writeItem(message.responseStack);
-            BufferHelper.writeMap(buffer, message.predicateMap, PacketBuffer::writeUUID, PacketBuffer::writeBoolean);
-        }
+        buffer.writeItem(message.stack);
+        BufferHelper.writeMap(buffer, message.predicateMap, (buf, uuid) -> buf.writeUUID(uuid), PacketBuffer::writeBoolean);
     }
 
     public static SyncItemPredicatesMessage decode(PacketBuffer buffer)
     {
         int inventorySlot = buffer.readInt();
         EquipmentSlotType equipmentSlot = BufferHelper.readOptional(buffer, buf -> buf.readEnum(EquipmentSlotType.class)).orElse(null);
-        boolean isInventory = buffer.readBoolean();
-
-        boolean hasResponse = buffer.readBoolean();
-        if (hasResponse)
-        {   ItemStack stack = buffer.readItem();
-            Map<UUID, Boolean> predicateMap = BufferHelper.readMap(buffer, PacketBuffer::readUUID, PacketBuffer::readBoolean);
-            return new SyncItemPredicatesMessage(inventorySlot, equipmentSlot, stack, predicateMap, isInventory);
-        }
-        else return new SyncItemPredicatesMessage(inventorySlot, equipmentSlot, null, new HashMap<>(), isInventory);
+        ItemStack stack = buffer.readItem();
+        Map<UUID, Boolean> predicateMap = BufferHelper.readMap(buffer, PacketBuffer::readUUID, PacketBuffer::readBoolean);
+        return new SyncItemPredicatesMessage(inventorySlot, equipmentSlot, stack, predicateMap);
     }
 
     public static void handle(SyncItemPredicatesMessage message, Supplier<NetworkEvent.Context> contextSupplier)
@@ -120,27 +105,12 @@ public class SyncItemPredicatesMessage
             context.enqueueWork(() ->
             {
                 ServerPlayerEntity player = context.getSender();
-                ItemStack stack = getStackFromMenu(player, message.inventorySlot, message.equipmentSlot, message.isInventory);
-                ColdSweatPacketHandler.INSTANCE.sendTo(SyncItemPredicatesMessage.fromServer(stack, message.inventorySlot, message.equipmentSlot, player, message.isInventory),
+                ColdSweatPacketHandler.INSTANCE.sendTo(SyncItemPredicatesMessage.fromServer(message.inventorySlot, message.equipmentSlot, message.stack, player),
                                                        player.connection.connection,
                                                        NetworkDirection.PLAY_TO_CLIENT);
             });
         }
         context.setPacketHandled(true);
-    }
-
-    private static ItemStack getStackFromMenu(ServerPlayerEntity player, int inventorySlot, @Nullable EquipmentSlotType equipmentSlot, boolean isInventory)
-    {
-        if (equipmentSlot != null)
-        {   return player.getItemBySlot(equipmentSlot);
-        }
-        if (isInventory && inventorySlot >= 0 && inventorySlot <= player.inventory.getContainerSize())
-        {   return player.inventory.getItem(inventorySlot);
-        }
-        if (player.containerMenu != null && inventorySlot >= 0 && inventorySlot < player.containerMenu.slots.size())
-        {   return player.containerMenu.getSlot(inventorySlot).getItem();
-        }
-        return ItemStack.EMPTY;
     }
 
     public static boolean hasDataToSend(ItemStack stack)
