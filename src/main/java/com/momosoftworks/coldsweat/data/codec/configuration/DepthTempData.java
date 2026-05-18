@@ -150,8 +150,8 @@ public class DepthTempData extends ConfigData
 
         public double getTemperature(double temperature, BlockPos pos, Level level, int topHeight, int bottomHeight)
         {
-            double topTemp = Temperature.convert(top.getTemperature(temperature), top.units, Temperature.Units.MC, true);
-            double bottomTemp = Temperature.convert(bottom.getTemperature(temperature), bottom.units, Temperature.Units.MC, true);
+            double topTemp = top.getTemperature(temperature);
+            double bottomTemp = bottom.getTemperature(temperature);
             return switch (rampType)
             {
                 case CONSTANT -> pos.getY() <= bottom.getHeight(pos, level) ? bottomTemp : topTemp;
@@ -239,12 +239,13 @@ public class DepthTempData extends ConfigData
                 case STATIC ->
                 {
                     if (this.temperature.strength == 0) yield temperature;
-                    yield CSMath.blend(temperature, this.temperature.temperature, this.temperature.strength, 0, 1);
+                    double convertedTemp = Temperature.convert(this.temperature.temperature, this.units, Temperature.Units.MC, true);
+                    yield CSMath.blend(temperature, convertedTemp, this.temperature.strength, 0, 1);
                 }
                 case MIDPOINT ->
                 {
                     if (this.temperature.strength == 0) yield temperature;
-                    yield CSMath.blend(temperature, (ConfigSettings.MIN_TEMP.get() + ConfigSettings.MAX_TEMP.get()) / 2, this.temperature.strength, 0, 1);
+                    yield CSMath.blend(temperature, CSMath.average(ConfigSettings.MIN_TEMP.get(), ConfigSettings.MAX_TEMP.get()), this.temperature.strength, 0, 1);
                 }
             };
         }
