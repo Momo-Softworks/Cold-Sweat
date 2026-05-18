@@ -8,6 +8,7 @@ import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
@@ -129,6 +130,7 @@ public class WaterskinItem extends Item
         filledWaterskin.set(ModItemComponents.WATER_TEMPERATURE,
                             CSMath.clamp((WorldHelper.getTemperatureAt(level, pos)
                                                            - (CSMath.average(ConfigSettings.MAX_TEMP.get(), ConfigSettings.MIN_TEMP.get()))) * 15, -50, 50));
+        filledWaterskin.set(DataComponents.MAX_STACK_SIZE, filledWaterskin.getItem().getDefaultMaxStackSize());
         // Set purity of water based on water source, if Thirst Was Taken is loaded
         if (CompatManager.isThirstLoaded())
         {   filledWaterskin = CompatManager.Thirst.setPurityFromBlock(filledWaterskin, pos, level);
