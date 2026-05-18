@@ -74,6 +74,7 @@ public class TooltipHandler
     public static HashMap<UUID, RequirementCheck> HOVERED_STACK_PREDICATES = new HashMap<>();
     public static boolean FETCHING_TOOLTIP = false;
     public static List<ITextComponent> LAST_TOOLTIP = new ArrayList<>();
+    public static boolean SHOWING_TOOLTIP = false;
 
     private static final Supplier<ClientPlayerEntity> PLAYER = () -> Minecraft.getInstance().player;
 
@@ -269,6 +270,10 @@ public class TooltipHandler
     @SubscribeEvent
     public static void updateHoveredItem(RenderTooltipEvent.Pre event)
     {
+        if (!SHOWING_TOOLTIP)
+        {   LAST_TOOLTIP.clear();
+            SHOWING_TOOLTIP = true;
+        }
         ItemStack stack = event.getStack();
 
         if (!HOVERED_STACK.equals(stack))
@@ -377,7 +382,7 @@ public class TooltipHandler
                 {
                     int duration = foodData.duration(stack, PLAYER.get());
                     double temperature = foodData.temperature(stack, PLAYER.get());
-                    if (CSMath.round(temperature, 1) != 0)
+                    if (Math.abs(temperature) >= 0.1)
                     {   foodTemps.merge(duration, temperature, Double::sum);
                     }
                 }
@@ -788,6 +793,7 @@ public class TooltipHandler
     {
         if (event.phase == TickEvent.Phase.END)
         {   FUEL_FADE_TIMER++;
+            SHOWING_TOOLTIP = false;
         }
     }
 }
