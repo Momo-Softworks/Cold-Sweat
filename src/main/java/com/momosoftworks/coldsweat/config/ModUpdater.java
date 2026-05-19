@@ -252,9 +252,9 @@ public class ModUpdater
 
         if (isBehind(configVersion, "2.4.1"))
         {
-            addConfigSetting(ItemSettingsConfig.ITEM_TEMPERATURES, List.of("cold_sweat:filled_waterskin",  0.025, "hand,hotbar", "core", "{'Temperature':'0.1:'}", 999, true));
-            addConfigSetting(ItemSettingsConfig.ITEM_TEMPERATURES, List.of("cold_sweat:filled_waterskin", -0.025, "hand,hotbar", "core", "{'Temperature':':-0.1'}", 999, true));
-            addConfigSetting(ItemSettingsConfig.FOOD_TEMPERATURES, List.of("cold_sweat:filled_waterskin", "{item:Temperature}"));
+            addConfigSetting(ItemSettingsConfig.ITEM_TEMPERATURES, List.of("cold_sweat:filled_waterskin",  0.025, "hand,hotbar", "core", "{'cold_sweat:temperature':'0.1:'}", 999, true));
+            addConfigSetting(ItemSettingsConfig.ITEM_TEMPERATURES, List.of("cold_sweat:filled_waterskin", -0.025, "hand,hotbar", "core", "{'cold_sweat:temperature':':-0.1'}", 999, true));
+            addConfigSetting(ItemSettingsConfig.FOOD_TEMPERATURES, List.of("cold_sweat:filled_waterskin", "{item:cold_sweat:temperature}"));
         }
 
         // Update config version
