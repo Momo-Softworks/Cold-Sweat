@@ -1,7 +1,5 @@
 package com.momosoftworks.coldsweat.data.codec.util;
 
-import com.github.zafarkhaja.semver.expr.Expression;
-import com.github.zafarkhaja.semver.expr.ExpressionParser;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
@@ -10,6 +8,7 @@ import com.mojang.serialization.MapCodec;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.util.entity.EntityHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
@@ -268,7 +267,7 @@ public class ValueGetter<T>
     {
         if (source instanceof Entity) return EntityHelper.getFullData(((Entity) source));
         if (source instanceof ItemStack) return ((ItemStack) source).getOrCreateTag();
-        if (source instanceof TileEntity) return ((TileEntity) source).getTileData();
+        if (source instanceof TileEntity) return WorldHelper.getFullData((TileEntity) source);
         return null;
     }
 

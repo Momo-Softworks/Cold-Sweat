@@ -32,6 +32,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.state.properties.BlockStateProperties;
@@ -83,6 +84,8 @@ public abstract class WorldHelper
     static Map<RegistryKey<World>, DummyPlayer> DUMMY_PLAYERS = new HashMap<>();
     static Map<RegistryKey<World>, DummyEntity> DUMMY_ENTITIES = new HashMap<>();
     static Map<RegistryKey<World>, Map<BlockPos, TempSnapshot>> TEMPERATURE_CHECKS = new HashMap<>();
+
+    private static final Map<TileEntity, Pair<CompoundNBT, Long>> BLOCK_ENTITY_DATA_CACHE = new HashMap<>();
 
     @SubscribeEvent
     public static void clearCachesOnUnload(FMLServerStoppedEvent event)
@@ -1016,6 +1019,20 @@ public abstract class WorldHelper
         {   positions.add(new BlockPos(x, y, z));
         }
         return positions;
+    }
+
+    public static CompoundNBT getFullData(TileEntity blockEntity)
+    {
+        long time = System.currentTimeMillis();
+        Pair<CompoundNBT, Long> pair = BLOCK_ENTITY_DATA_CACHE.get(blockEntity);
+        if (pair != null && time - pair.getSecond() < 1000)
+        {   return pair.getFirst();
+        }
+        else
+        {   CompoundNBT nbt = blockEntity.save(new CompoundNBT());
+            BLOCK_ENTITY_DATA_CACHE.put(blockEntity, Pair.of(nbt, time));
+            return nbt;
+        }
     }
 
     public static class TempSnapshot
