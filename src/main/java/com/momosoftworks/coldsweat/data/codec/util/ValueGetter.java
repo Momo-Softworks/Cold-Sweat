@@ -8,7 +8,7 @@ import com.mojang.serialization.MapCodec;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.util.entity.EntityHelper;
 import com.momosoftworks.coldsweat.util.item.ItemStackHelper;
-import net.minecraft.core.component.DataComponentPatch;
+import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.NbtOps;
@@ -237,7 +237,7 @@ public record ValueGetter<T>(Type type, String path, Function<Map<String, Object
     {
         if (source instanceof Entity e)       return EntityHelper.getFullData(e);
         if (source instanceof ItemStack i)    return ItemStackHelper.serializeComponentsUnsafe(i);
-        if (source instanceof BlockEntity be) return be.getPersistentData();
+        if (source instanceof BlockEntity be) return WorldHelper.getFullData(be);
         return null;
     }
 
