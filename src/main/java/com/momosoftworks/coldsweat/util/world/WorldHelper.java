@@ -24,6 +24,7 @@ import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.*;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -77,6 +78,8 @@ public abstract class WorldHelper
     static Map<ResourceKey<Level>, DummyPlayer> DUMMY_PLAYERS = new HashMap<>();
     static Map<ResourceKey<Level>, DummyEntity> DUMMY_ENTITIES = new HashMap<>();
     static Map<ResourceKey<Level>, Map<BlockPos, TempSnapshot>> TEMPERATURE_CHECKS = new HashMap<>();
+
+    private static final Map<BlockEntity, Pair<CompoundTag, Long>> BLOCK_ENTITY_DATA_CACHE = new HashMap<>();
 
     @SubscribeEvent
     public static void clearCachesOnUnload(ServerStoppedEvent event)
@@ -1002,6 +1005,20 @@ public abstract class WorldHelper
         {   positions.add(new BlockPos(x, y, z));
         }
         return positions;
+    }
+
+    public static CompoundTag getFullData(BlockEntity blockEntity)
+    {
+        long time = System.currentTimeMillis();
+        Pair<CompoundTag, Long> pair = BLOCK_ENTITY_DATA_CACHE.get(blockEntity);
+        if (pair != null && time - pair.getSecond() < 1000)
+        {   return pair.getFirst();
+        }
+        else
+        {   CompoundTag nbt = blockEntity.saveWithoutMetadata();
+            BLOCK_ENTITY_DATA_CACHE.put(blockEntity, Pair.of(nbt, time));
+            return nbt;
+        }
     }
 
     public record TempSnapshot(long timestamp, double temperature) {}
