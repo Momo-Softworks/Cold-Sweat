@@ -20,6 +20,7 @@ import com.momosoftworks.coldsweat.core.network.message.SyncForgeDataMessage;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.core.*;
 import net.minecraft.core.particles.ParticleOptions;
@@ -406,7 +407,7 @@ public abstract class WorldHelper
      * @param rayTracer function to run on each found block
      * @param maxHits the maximum number of blocks to act upon before the ray expires
      */
-    public static void forBlocksInRay(Vec3 from, Vec3 to, Level level, ChunkAccess chunk, Map<BlockPos, BlockState> stateCache,
+    public static void forBlocksInRay(Vec3 from, Vec3 to, Level level, ChunkAccess chunk, Long2ObjectOpenHashMap<BlockState> stateCache,
                                       BiConsumer<BlockState, BlockPos> rayTracer, int maxHits)
     {
         // Don't bother if the ray has no length
@@ -428,7 +429,7 @@ public abstract class WorldHelper
                 pos.set(vec.x, vec.y, vec.z);
 
                 // Get the blockstate at the current position
-                BlockState state = stateCache.get(pos);
+                BlockState state = stateCache.get(pos.asLong());
 
                 if (state == null)
                 {   // Set new workingChunk if the ray travels outside the current one
@@ -438,7 +439,7 @@ public abstract class WorldHelper
                     if (workingChunk == null) continue;
 
                     state = workingChunk.getBlockState(pos);
-                    stateCache.put(pos.immutable(), state);
+                    stateCache.put(pos.asLong(), state);
                 }
 
 
@@ -453,10 +454,10 @@ public abstract class WorldHelper
     }
 
     /**
-     * Overload for {@link #forBlocksInRay(Vec3, Vec3, Level, ChunkAccess, Map, BiConsumer, int)} with less bloated params
+     * Overload for {@link #forBlocksInRay(Vec3, Vec3, Level, ChunkAccess, Long2ObjectOpenHashMap, BiConsumer, int)} with less bloated params
      */
     public static void forBlocksInRay(Vec3 from, Vec3 to, Level level, BiConsumer<BlockState, BlockPos> rayTracer, int maxHits)
-    {   forBlocksInRay(from, to, level, getChunk(level, BlockPos.containing(from)), new HashMap<>(), rayTracer, maxHits);
+    {   forBlocksInRay(from, to, level, getChunk(level, BlockPos.containing(from)), new Long2ObjectOpenHashMap<>(), rayTracer, maxHits);
     }
 
     public static Entity raycastEntity(Vec3 from, Vec3 to, Level level, Predicate<Entity> filter)
