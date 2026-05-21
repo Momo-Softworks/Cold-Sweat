@@ -26,10 +26,10 @@ public class WaterTempModifier extends TempModifier
 
     public void setTemperature(double temperature)
     {
-        this.getNBT().putDouble("Temperature", temperature);
         if (temperature != this.getTemperature())
         {   this.markDirty();
         }
+        this.getNBT().putDouble("Temperature", temperature);
     }
 
     public double getTargetTemperature(LivingEntity entity)
