@@ -23,6 +23,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.ChunkSection;
 import net.minecraft.world.chunk.IChunk;
 
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+
 import java.util.*;
 import java.util.function.Function;
 
@@ -36,15 +38,17 @@ public class BlockTempModifier extends TempModifier
     {   if (range > 0) this.getNBT().putInt("RangeOverride", range);
     }
 
-    Map<ChunkPos, IChunk> chunks = new HashMap<>(9);
+    Map<Long, IChunk> chunks = new LinkedHashMap<>(16, 0.75f, true);
     Map<BlockTemp, Double> blockTempTotals = new HashMap<>(16);
-    Map<BlockPos, BlockState> stateCache = new HashMap<>(3000);
+    Map<List<RegistryKey<BlockTempData>>, Double> groupTotals = new HashMap<>(8);
+    Long2ObjectOpenHashMap<BlockState> stateCache = new Long2ObjectOpenHashMap<>(3000);
     List<Triplet<BlockPos, BlockTemp, Double>> triggers = new ArrayList<>(16);
 
     @Override
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
         blockTempTotals.clear();
+        groupTotals.clear();
         stateCache.clear();
         triggers.clear();
 
@@ -60,27 +64,37 @@ public class BlockTempModifier extends TempModifier
         // Only tick advancements every second, because Minecraft advancements are not performant at all
         boolean shouldTickAdvancements = this.getTicksExisted() % 20 == 0;
 
+        IChunk chunk = null;
+        long chunkPos = 0;
+
         for (int x = -range; x < range; x++)
         {
+            int chunkX = (entX + x) >> 4;
             for (int z = -range; z < range; z++)
             {
-                ChunkPos chunkPos = new ChunkPos((entX + x) >> 4, (entZ + z) >> 4);
-                IChunk chunk = chunks.get(chunkPos);
-                if (chunk == null) chunks.put(chunkPos, chunk = WorldHelper.getChunk(level, chunkPos));
-                if (chunk == null) continue;
+                int chunkZ = (entZ + z) >> 4;
+                long newChunkPos = ChunkPos.asLong(chunkX, chunkZ);
+                if (chunk == null || newChunkPos != chunkPos)
+                {
+                    chunkPos = newChunkPos;
+                    chunk = chunks.get(chunkPos);
+                    if (chunk == null) chunks.put(chunkPos, chunk = WorldHelper.getChunk(level, new ChunkPos(chunkPos)));
+                    if (chunk == null) continue;
+                }
 
                 for (int y = -range; y < range; y++)
                 {
                         blockpos.set(entX + x, entY + y, entZ + z);
 
-                        BlockState state = stateCache.get(blockpos);
+                        long blockPosLong = blockpos.asLong();
+                        BlockState state = stateCache.get(blockPosLong);
                         if (state == null)
                         {   ChunkSection section = WorldHelper.getChunkSection(chunk, blockpos.getY());
                             if (section == null)
                             {   state = chunk.getBlockState(blockpos);
                             }
                             else state = section.getBlockState(blockpos.getX() & 15, blockpos.getY() & 15, blockpos.getZ() & 15);
-                            stateCache.put(blockpos.immutable(), state);
+                            stateCache.put(blockPosLong, state);
                         }
 
                         if (state.getMaterial() == Material.AIR) continue;
@@ -136,18 +150,21 @@ public class BlockTempModifier extends TempModifier
                                     // Dampen the effect with each block between the player and the source
                                     delta /= (blocks[0] + 1);
                                     // Store this block type's total effect on the player
-                                    blockTempTotals.put(blockTemp, CSMath.clamp(blockTempTotal + delta,
-                                                                                blockTemp.minEffect() + blockGroupDelta,
-                                                                                blockTemp.maxEffect() - blockGroupDelta));
+                                    double newVal = CSMath.clamp(blockTempTotal + delta,
+                                                                 blockTemp.minEffect() + blockGroupDelta,
+                                                                 blockTemp.maxEffect() - blockGroupDelta);
+                                    blockTempTotals.put(blockTemp, newVal);
+                                    updateGroupTotal(blockTemp, newVal - blockTempTotal);
                                 }
                                 else
                                 {   // Dampen the effect with each block between the player and the source
                                     tempToAdd /= (blocks[0] + 1);
                                     // Store this block type's total effect on the player
-                                    double newTotal = blockTempTotal + tempToAdd;
-                                    blockTempTotals.put(blockTemp, CSMath.clamp(newTotal,
-                                                                                blockTemp.minEffect() + blockGroupDelta,
-                                                                                blockTemp.maxEffect() - blockGroupDelta));
+                                    double newVal = CSMath.clamp(blockTempTotal + tempToAdd,
+                                                                 blockTemp.minEffect() + blockGroupDelta,
+                                                                 blockTemp.maxEffect() - blockGroupDelta);
+                                    blockTempTotals.put(blockTemp, newVal);
+                                    updateGroupTotal(blockTemp, newVal - blockTempTotal);
                                 }
                                 // Used to trigger advancements
                                 if (shouldTickAdvancements)
@@ -205,23 +222,18 @@ public class BlockTempModifier extends TempModifier
 
     private double getGroupTotal(BlockTemp blockTemp)
     {
-        if (!(blockTemp instanceof ConfiguredBlockTemp))
-        {   return this.blockTempTotals.getOrDefault(blockTemp, 0d);
-        }
+        if (!(blockTemp instanceof ConfiguredBlockTemp)) return this.blockTempTotals.getOrDefault(blockTemp, 0d);
         ConfiguredBlockTemp config = (ConfiguredBlockTemp) blockTemp;
-        double total = 0;
 
-        List<RegistryKey<BlockTempData>> group = config.getData().effectGroup().orElse(null);
-        if (group == null) return this.blockTempTotals.getOrDefault(blockTemp, 0d);
+        return config.getData().effectGroup()
+               .map(group -> groupTotals.getOrDefault(group, 0d))
+               .orElseGet(() -> this.blockTempTotals.getOrDefault(blockTemp, 0d));
+    }
 
-        if (config.getData().registryKey().map(key -> !group.contains(key)).orElse(false))
-        {   total += this.blockTempTotals.getOrDefault(blockTemp, 0d);
+    private void updateGroupTotal(BlockTemp blockTemp, double delta)
+    {
+        if (blockTemp instanceof ConfiguredBlockTemp && ((ConfiguredBlockTemp) blockTemp).getData().effectGroup().isPresent())
+        {   groupTotals.merge(((ConfiguredBlockTemp) blockTemp).getData().effectGroup().get(), delta, Double::sum);
         }
-
-        total += this.blockTempTotals.keySet().stream()
-                 .filter(bt -> bt instanceof ConfiguredBlockTemp && ((ConfiguredBlockTemp) bt).isInGroup(group))
-                 .map(bt -> (ConfiguredBlockTemp) bt).mapToDouble(b -> this.blockTempTotals.getOrDefault(b, 0d))
-                 .sum();
-        return total;
     }
 }
