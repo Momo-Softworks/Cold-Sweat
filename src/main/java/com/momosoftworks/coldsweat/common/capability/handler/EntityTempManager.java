@@ -271,21 +271,18 @@ public class EntityTempManager
         public static void tickTemperature(LivingEvent.LivingTickEvent event)
         {
             LivingEntity entity = event.getEntity();
+            boolean isServer = !entity.level.isClientSide;
             if (!TEMPERATURE_ENABLED_ENTITIES.contains(entity.getType())) return;
 
             getTemperatureCap(entity).ifPresent(cap ->
             {
                 // Tick modifiers serverside
-                if (!entity.level.isClientSide)
+                if (isServer)
                 {
                     // Tick modifiers 1/4 as much for entities
                     if (entity instanceof Player || entity.tickCount % 5 == 0)
                     {   cap.tick(entity);
                     }
-                }
-                // Tick modifiers clientside
-                else
-                {   cap.tickDummy(entity);
                 }
 
                 // Tick modifiers & removed expired
@@ -300,29 +297,33 @@ public class EntityTempManager
                         if (modifier.getTicksExisted() % modifier.getTickRate() == 0)
                         {   modifier.tick(entity);
                         }
-                        // Sync if the modifier is dirty
-                        if (modifier.isDirty())
-                        {   sync.set(true);
-                            modifier.markClean();
-                        }
-                        // Remove expired modifiers
-                        int expireTime = modifier.getExpireTime();
-                        modifier.setTicksExisted(modifier.getTicksExisted() + 1);
-                        if (modifier.getTicksExisted() > expireTime && expireTime != -1)
+                        if (isServer)
                         {
-                            modifier.onRemoved(entity, trait);
-                            Temperature.updateSiblingsRemove(modifiers, entity, trait, modifier);
-                            modifiers.remove(i);
-                            i--;
+                            // Sync if the modifier is dirty
+                            if (modifier.isDirty())
+                            {   sync.set(true);
+                                modifier.markClean();
+                            }
+                            // Remove expired modifiers
+                            int expireTime = modifier.getExpireTime();
+                            modifier.setTicksExisted(modifier.getTicksExisted() + 1);
+                            if (modifier.getTicksExisted() > expireTime && expireTime != -1)
+                            {
+                                modifier.onRemoved(entity, trait);
+                                Temperature.updateSiblingsRemove(modifiers, entity, trait, modifier);
+                                modifiers.remove(i);
+                                sync.set(true);
+                                i--;
+                            }
                         }
                     }
                 }
-                if (sync.get())
+                if (isServer && sync.get())
                 {   Temperature.updateModifiers(entity, cap);
                 }
 
                 // Spawn particles for uninhabitable entities
-                if (!entity.level.isClientSide() && hasClimateData(entity))
+                if (isServer && hasClimateData(entity))
                 {
                     if (entity.tickCount % 5 == 0 && entity.getRandom().nextDouble() < 0.1)
                     {
