@@ -1,5 +1,7 @@
 package com.momosoftworks.coldsweat.api.temperature.modifier;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.api.event.common.temperautre.TempModifierEvent;
 import com.momosoftworks.coldsweat.api.event.core.registry.TempModifierRegisterEvent;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
@@ -34,6 +36,45 @@ public abstract class TempModifier
     private final Double[] lastOutput = new Double[Trait.values().length];
     private final Function<Double, Double>[] function = new Function[Trait.values().length];
     private boolean changed = false;
+
+    /**
+     * Codec for use in configs
+     */
+    public static final Codec<TempModifier> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+        ResourceLocation.CODEC.fieldOf("type").forGetter(TempModifierRegistry::getKey),
+        CompoundTag.CODEC.optionalFieldOf("nbt", new CompoundTag()).forGetter(TempModifier::getNBT),
+        Codec.INT.optionalFieldOf("expire_time", -1).forGetter(TempModifier::getExpireTime),
+        Codec.INT.optionalFieldOf("tick_rate", 1).forGetter(TempModifier::getTickRate)
+    ).apply(instance, (type, nbt, expire, tickRate) ->
+    {
+        TempModifier mod = TempModifierRegistry.getValue(type).orElse(null);
+        if (mod == null) return null;
+        mod.nbt = nbt;
+        mod.expireTicks = expire;
+        mod.tickRate = tickRate;
+        return mod;
+    }));
+
+    /**
+     * Codec for use in complete serialization/deserialization for entities
+     */
+    public static final Codec<TempModifier> FULL_CODEC = RecordCodecBuilder.create(instance -> instance.group(
+        ResourceLocation.CODEC.fieldOf("type").forGetter(TempModifierRegistry::getKey),
+        CompoundTag.CODEC.optionalFieldOf("nbt", new CompoundTag()).forGetter(TempModifier::getNBT),
+        Codec.INT.optionalFieldOf("expire_time", -1).forGetter(TempModifier::getExpireTime),
+        Codec.INT.optionalFieldOf("tick_rate", 1).forGetter(TempModifier::getTickRate),
+        Codec.INT.optionalFieldOf("ticks_existed", 0).forGetter(TempModifier::getTicksExisted),
+        Codec.INT.optionalFieldOf("hash", 0).forGetter(TempModifier::hashCode)
+    ).apply(instance, (type, nbt, expire, tickRate, ticksExisted, hash) ->
+    {
+        TempModifier mod = TempModifierRegistry.getValue(type).orElse(null);
+        if (mod == null) return null;
+        mod.nbt = nbt;
+        mod.expireTicks = expire;
+        mod.tickRate = tickRate;
+        mod.ticksExisted = ticksExisted;
+        return mod;
+    }));
 
     /**
      * Default constructor (REQUIRED for proper registration).<br>
