@@ -239,28 +239,6 @@ public class AbstractTempCap implements ITemperatureCap
         this.tempEffects.clear();
     }
 
-    /* See Temperature class for more temperature-related methods */
-
-    /**
-     * Used for clientside ticking of TempModifiers. The result is not used.
-     */
-    @Override
-    public void tickDummy(LivingEntity entity)
-    {
-        if (!(entity instanceof Player)) return;
-
-        Temperature.apply(0, entity, Trait.WORLD, this.getModifiers(Trait.WORLD));
-        Temperature.apply(0, entity, Trait.BASE, this.getModifiers(Trait.WORLD));
-        Temperature.apply(this.getTrait(Trait.CORE), entity, Trait.CORE, this.getModifiers(Trait.CORE));
-        Temperature.apply(ConfigSettings.MAX_TEMP.get(), entity, Trait.BURNING_POINT, this.getModifiers(Trait.BURNING_POINT));
-        Temperature.apply(ConfigSettings.MIN_TEMP.get(), entity, Trait.FREEZING_POINT, this.getModifiers(Trait.FREEZING_POINT));
-        Temperature.apply(0, entity, Trait.COLD_DAMPENING, this.getModifiers(Trait.COLD_DAMPENING));
-        Temperature.apply(0, entity, Trait.HEAT_DAMPENING, this.getModifiers(Trait.HEAT_DAMPENING));
-        Temperature.apply(0, entity, Trait.COLD_RESISTANCE, this.getModifiers(Trait.COLD_RESISTANCE));
-        Temperature.apply(0, entity, Trait.HEAT_RESISTANCE, this.getModifiers(Trait.HEAT_RESISTANCE));
-        Temperature.apply(0, entity, Trait.RATE, this.getModifiers(Trait.RATE));
-    }
-
     @Override
     public void tick(LivingEntity entity)
     {
@@ -279,10 +257,6 @@ public class AbstractTempCap implements ITemperatureCap
 
         // 1 if newWorldTemp is above max, -1 if below min, 0 if between the values (safe)
         int worldTempSign = CSMath.getSignForRange(worldTemp, minTemp, maxTemp);
-
-        boolean immuneToTemp = isPeacefulMode(entity);
-        boolean isFullyColdDampened = worldTempSign < 0 && (coldDampening >= 1 || immuneToTemp);
-        boolean isFullyHeatDampened = worldTempSign > 0 && (heatDampening >= 1 || immuneToTemp);
 
         // Don't change player temperature if they're in creative/spectator mode
         if (worldTempSign != 0 && (!(entity instanceof Player player) || !player.isCreative()) && !entity.isSpectator()
