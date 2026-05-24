@@ -35,6 +35,10 @@ public class NBTHelper
 {
     private NBTHelper() {}
 
+    /**
+     * DEPRECATED. use {@link TempModifier#FULL_CODEC} instead.
+     */
+    @Deprecated(since = "2.4.1", forRemoval = true)
     public static CompoundTag modifierToTag(TempModifier modifier)
     {
         // Write the modifier's data to a CompoundTag
@@ -66,6 +70,10 @@ public class NBTHelper
         return modifierTag;
     }
 
+    /**
+     * DEPRECATED. use {@link TempModifier#FULL_CODEC} instead.
+     */
+    @Deprecated(since = "2.4.1", forRemoval = true)
     public static Optional<TempModifier> tagToModifier(CompoundTag modifierTag)
     {
         // Create a new modifier from the CompoundTag
@@ -129,7 +137,7 @@ public class NBTHelper
     }
 
     /**
-     * Gets an item's tag, without creating a new one if it is not present.<br>
+     * Gets an item's tag, without instantiating one on the item if it isn't present.<br>
      * An empty {@link CompoundTag} will be returned in that case, so a null check will not be necessary.<br>
      * <br>
      * Use {@link NBTHelper#getOrCreateTag(ItemStack)} if you need to write to the tag.<br>
@@ -173,7 +181,7 @@ public class NBTHelper
 
     @SubscribeEvent
     public static void convertTagsInContainer(PlayerContainerEvent.Open event)
-    {   updateItemTags(event.getContainer().slots.stream().map(Slot::getItem).toList());
+    {   updateItemTags(event.getContainer().getItems());
     }
 
     private static void updateItemTags(Collection<ItemStack> items)

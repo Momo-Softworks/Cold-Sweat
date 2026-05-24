@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.common.capability.temperature;
 
 import com.google.common.math.DoubleMath;
+import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.common.temperautre.TemperatureChangedEvent;
 import com.momosoftworks.coldsweat.api.temperature.effect.TempEffect;
@@ -23,6 +24,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -559,7 +561,7 @@ public class AbstractTempCap implements ITemperatureCap, INBTSerializable<Compou
         {
             ListTag modifiers = new ListTag();
             for (TempModifier modifier : this.getModifiers(trait))
-            {   modifiers.add(NBTHelper.modifierToTag(modifier));
+            {   modifiers.add(TempModifier.FULL_CODEC.encodeStart(NbtOps.INSTANCE, modifier).getOrThrow(s -> ColdSweat.LOGGER.throwing(new IllegalStateException(s))));
             }
             // Write the list of modifiers to the player's persistent data
             nbt.put(NBTHelper.getTraitTagKey(trait), modifiers);
@@ -592,7 +594,7 @@ public class AbstractTempCap implements ITemperatureCap, INBTSerializable<Compou
     public void deserializeModifiers(CompoundTag nbt)
     {
         Map<Trait, List<TempModifier>> modifiers = new EnumMap<>(Trait.class);
-        Map<Integer, Optional<TempModifier>> modifierHashes = new HashMap<>();
+        Map<Integer, TempModifier> modifierHashes = new HashMap<>();
         for (Trait trait : VALID_MODIFIER_TRAITS)
         {
             // Get the list of modifiers from the player's persistent data
@@ -602,12 +604,23 @@ public class AbstractTempCap implements ITemperatureCap, INBTSerializable<Compou
             modTags.forEach(entry ->
             {
                 CompoundTag modNBT = ((CompoundTag) entry);
-                Optional<TempModifier> modOpt = modNBT.contains("Hash")
-                                                ? modifierHashes.computeIfAbsent(modNBT.getInt("Hash"), hash -> NBTHelper.tagToModifier(modNBT))
-                                                : NBTHelper.tagToModifier(modNBT);
-                modOpt.ifPresent(modifier ->
-                {   modifiers.computeIfAbsent(trait, t -> new ArrayList<>()).add(modifier);
-                });
+                TempModifier modifier;
+                boolean isLegacy = modNBT.contains("Id"); // Legacy NBT data stored not using the codec
+                int modHash = modNBT.getInt(isLegacy ? "Hash" : "hash");
+                if (modHash == 0 || !modifierHashes.containsKey(modHash))
+                {
+                    Optional<TempModifier> modOpt = isLegacy ? NBTHelper.tagToModifier(modNBT) // Legacy modifier NBT data
+                                                             : TempModifier.FULL_CODEC.decode(NbtOps.INSTANCE, modNBT).result().map(Pair::getFirst);
+                    if (modOpt.isEmpty()) return;
+                    modifier = modOpt.get();
+                    if (modHash != 0)
+                    {   modifierHashes.put(modHash, modifier);
+                    }
+                }
+                else
+                {   modifier = modifierHashes.get(modHash);
+                }
+                modifiers.computeIfAbsent(trait, t -> new ArrayList<>()).add(modifier);
             });
         }
         // Add the modifiers to the player's modifiers
