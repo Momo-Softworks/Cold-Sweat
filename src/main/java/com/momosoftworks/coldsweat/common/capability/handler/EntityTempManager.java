@@ -751,7 +751,7 @@ public class EntityTempManager
                     {
                         double temperature = foodData.temperature(item, player);
                         int duration = foodData.duration(item, player);
-                        Trait trait = duration > 0 ? Trait.BASE : Trait.CORE;
+                        Trait modTrait = duration > 0 ? Trait.BASE : Trait.CORE;
                         // Custom class for soul sprouts
                         FoodTempModifier foodModifier = item.getItem() == ModItems.SOUL_SPROUT
                                                         ? new SoulSproutTempModifier(temperature)
@@ -764,7 +764,10 @@ public class EntityTempManager
                         // Add the TempModifier
                         Placement placement = Placement.LAST.limitDuplicates(Matcher.EQUALS, foodData.stackLimit(item, player))
                                               .orElse(Placement.of(Mode.REPLACE, Order.FIRST, foodModifier::equals));
-                        Temperature.addModifier(player, foodModifier, trait, placement);
+                        Temperature.addModifier(player, foodModifier, modTrait, placement);
+                        foodData.modifiers().forEach((trait, modifiers) ->
+                        {   modifiers.forEach(modifier -> Temperature.addModifier(player, modifier, trait, placement));
+                        });
                     }
                 }
             }
