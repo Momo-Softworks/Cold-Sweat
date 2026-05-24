@@ -1,5 +1,7 @@
 package com.momosoftworks.coldsweat.compat.kubejs.event.builder;
 
+import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
+import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.data.codec.configuration.FoodData;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
@@ -12,6 +14,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -24,6 +28,7 @@ public class FoodBuilderJS
     public ValueGetter<Integer> stackLimit = ValueGetter.constant(1);
     public NegatableList<ItemRequirement> itemPredicate = new NegatableList<>();
     public NegatableList<EntityRequirement> entityPredicate = new NegatableList<>();
+    public Map<Temperature.Trait, List<TempModifier>> modifiers = new HashMap<>();
 
     public FoodBuilderJS()
     {}
@@ -77,9 +82,16 @@ public class FoodBuilderJS
         return this;
     }
 
+    public FoodBuilderJS modifier(String trait, TempModifier modifier)
+    {
+        Temperature.Trait tempTrait = Temperature.Trait.fromID(trait);
+        this.modifiers.computeIfAbsent(tempTrait, t -> new ArrayList<>()).add(modifier);
+        return this;
+    }
+
     public FoodData build()
     {
-        FoodData data = new FoodData(this.itemPredicate, this.temperature, this.duration, this.stackLimit, this.entityPredicate);
+        FoodData data = new FoodData(this.itemPredicate, this.temperature, this.duration, this.stackLimit, this.entityPredicate, this.modifiers);
         data.setConfigType(ConfigData.Type.KUBEJS);
         return data;
     }
