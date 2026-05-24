@@ -37,12 +37,6 @@ public class PlayerTempCap extends AbstractTempCap
         }
     }
 
-    @Override
-    public void tickDummy(LivingEntity entity)
-    {
-        super.tickDummy(entity);
-    }
-
     public void calculateHudVisibility(PlayerEntity player)
     {
         showWorldTemp = !ConfigSettings.REQUIRE_THERMOMETER.get()
