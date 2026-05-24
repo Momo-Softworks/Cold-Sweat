@@ -4,6 +4,8 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
+import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.impl.RequirementHolder;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
@@ -29,9 +31,10 @@ public class FoodData extends ConfigData implements RequirementHolder
     final ValueGetter<Integer> duration;
     final ValueGetter<Integer> stackLimit;
     final NegatableList<EntityRequirement> entityRequirement;
+    final Map<Temperature.Trait, List<TempModifier>> modifiers;
 
     public FoodData(NegatableList<ItemRequirement> item, ValueGetter<Double> temperature, ValueGetter<Integer> duration, ValueGetter<Integer> stackLimit,
-                    NegatableList<EntityRequirement> entityRequirement, NegatableList<String> requiredMods)
+                    NegatableList<EntityRequirement> entityRequirement, Map<Temperature.Trait, List<TempModifier>> modifiers, NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.temperature = temperature;
@@ -39,20 +42,22 @@ public class FoodData extends ConfigData implements RequirementHolder
         this.duration = duration;
         this.stackLimit = stackLimit;
         this.entityRequirement = entityRequirement;
+        this.modifiers = modifiers;
     }
 
     public FoodData(NegatableList<ItemRequirement> item, ValueGetter<Double> temperature, ValueGetter<Integer> duration, ValueGetter<Integer> stackLimit,
-                    NegatableList<EntityRequirement> entityRequirement)
+                    NegatableList<EntityRequirement> entityRequirement, Map<Temperature.Trait, List<TempModifier>> modifiers)
     {
-        this(item, temperature, duration, stackLimit, entityRequirement, new NegatableList<>());
+        this(item, temperature, duration, stackLimit, entityRequirement, modifiers, new NegatableList<>());
     }
 
     public static final Codec<FoodData> CODEC = createCodec(RecordCodecBuilder.mapCodec(instance -> instance.group(
             NegatableList.codec(ItemRequirement.CODEC).optionalFieldOf("item", new NegatableList<>()).forGetter(FoodData::item),
-            ValueGetter.fieldCodec("temperature", ExtraCodecs.DOUBLE, 0.0).forGetter(FoodData::temperature),
+            ValueGetter.optionalFieldCodec("temperature", ExtraCodecs.DOUBLE, 0.0).forGetter(FoodData::temperature),
             ValueGetter.optionalFieldCodec("duration", Codec.INT, 0).forGetter(FoodData::duration),
             ValueGetter.optionalFieldCodec("stack_limit", Codec.INT, 1).forGetter(FoodData::stackLimit),
-            NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(FoodData::entityRequirement)
+            NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(FoodData::entityRequirement),
+            Codec.unboundedMap(Temperature.Trait.CODEC, TempModifier.CODEC.listOf()).optionalFieldOf("temp_modifiers", Map.of()).forGetter(FoodData::modifiers)
     ).apply(instance, FoodData::new)));
 
     public NegatableList<ItemRequirement> item()
@@ -78,6 +83,9 @@ public class FoodData extends ConfigData implements RequirementHolder
     }
     public NegatableList<EntityRequirement> entityRequirement()
     {   return entityRequirement;
+    }
+    public Map<Temperature.Trait, List<TempModifier>> modifiers()
+    {   return modifiers;
     }
 
     @Override
@@ -107,7 +115,7 @@ public class FoodData extends ConfigData implements RequirementHolder
         ValueGetter<Integer> stackLimit = ValueGetter.parse(() -> entry.get(4), Codec.INT, 1);
         ItemRequirement itemRequirement = new ItemRequirement(items, componentsRequirement);
 
-        FoodData result = new FoodData(new NegatableList<>(itemRequirement), temperature, duration, stackLimit, new NegatableList<>());
+        FoodData result = new FoodData(new NegatableList<>(itemRequirement), temperature, duration, stackLimit, new NegatableList<>(), Map.of());
         result.setConfigType(Type.TOML);
         return result;
     }
@@ -128,6 +136,7 @@ public class FoodData extends ConfigData implements RequirementHolder
             && item.equals(that.item)
             && temperature.equals(that.temperature)
             && duration == that.duration
-            && entityRequirement.equals(that.entityRequirement);
+            && entityRequirement.equals(that.entityRequirement)
+            && modifiers.equals(that.modifiers);
     }
 }
