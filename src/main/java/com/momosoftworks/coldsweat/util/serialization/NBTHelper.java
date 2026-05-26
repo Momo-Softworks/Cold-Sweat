@@ -12,7 +12,6 @@ import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
@@ -20,14 +19,12 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.PlayerContainerEvent;
-import org.checkerframework.checker.units.qual.K;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 @EventBusSubscriber
@@ -36,7 +33,7 @@ public class NBTHelper
     private NBTHelper() {}
 
     /**
-     * DEPRECATED. use {@link TempModifier#FULL_CODEC} instead.
+     * DEPRECATED. use {@link TempModifier#CODEC} instead.
      */
     @Deprecated(since = "2.4.1", forRemoval = true)
     public static CompoundTag modifierToTag(TempModifier modifier)
@@ -71,7 +68,7 @@ public class NBTHelper
     }
 
     /**
-     * DEPRECATED. use {@link TempModifier#FULL_CODEC} instead.
+     * DEPRECATED. use {@link TempModifier#CODEC} instead.
      */
     @Deprecated(since = "2.4.1", forRemoval = true)
     public static Optional<TempModifier> tagToModifier(CompoundTag modifierTag)
