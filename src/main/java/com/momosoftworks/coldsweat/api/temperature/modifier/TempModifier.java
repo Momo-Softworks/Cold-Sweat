@@ -15,7 +15,9 @@ import net.minecraftforge.common.MinecraftForge;
 
 import static com.momosoftworks.coldsweat.api.util.Temperature.Trait;
 
+import java.util.Objects;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * TempModifiers are applied to entities to dynamically change their temperature.<br>
@@ -38,27 +40,9 @@ public abstract class TempModifier
     private boolean changed = false;
 
     /**
-     * Codec for use in configs
-     */
-    public static final Codec<TempModifier> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-        ResourceLocation.CODEC.fieldOf("type").forGetter(TempModifierRegistry::getKey),
-        CompoundNBT.CODEC.optionalFieldOf("nbt", new CompoundNBT()).forGetter(TempModifier::getNBT),
-        Codec.INT.optionalFieldOf("expire_time", -1).forGetter(TempModifier::getExpireTime),
-        Codec.INT.optionalFieldOf("tick_rate", 1).forGetter(TempModifier::getTickRate)
-    ).apply(instance, (type, nbt, expire, tickRate) ->
-    {
-        TempModifier mod = TempModifierRegistry.getValue(type).orElse(null);
-        if (mod == null) return null;
-        mod.nbt = nbt;
-        mod.expireTicks = expire;
-        mod.tickRate = tickRate;
-        return mod;
-    }));
-
-    /**
      * Codec for use in complete serialization/deserialization for entities
      */
-    public static final Codec<TempModifier> FULL_CODEC = RecordCodecBuilder.create(instance -> instance.group(
+    public static final Codec<TempModifier> CODEC = RecordCodecBuilder.create(instance -> instance.group(
         ResourceLocation.CODEC.fieldOf("type").forGetter(TempModifierRegistry::getKey),
         CompoundNBT.CODEC.optionalFieldOf("nbt", new CompoundNBT()).forGetter(TempModifier::getNBT),
         Codec.INT.optionalFieldOf("expire_time", -1).forGetter(TempModifier::getExpireTime),
@@ -273,5 +257,79 @@ public abstract class TempModifier
     @Override
     public String toString()
     {   return this.getID().toString();
+    }
+
+    public static final class Factory implements Supplier<TempModifier>
+    {
+        public static final Codec<Factory> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                ResourceLocation.CODEC.fieldOf("type").forGetter(Factory::type),
+                CompoundNBT.CODEC.optionalFieldOf("nbt", new CompoundNBT()).forGetter(Factory::nbt),
+                Codec.INT.optionalFieldOf("expire_time", -1).forGetter(Factory::expireTime),
+                Codec.INT.optionalFieldOf("tick_rate", 1).forGetter(Factory::tickRate)
+        ).apply(instance, Factory::new));
+
+        private final ResourceLocation type;
+        private final CompoundNBT nbt;
+        private final int expireTime;
+        private final int tickRate;
+
+        public Factory(ResourceLocation type, CompoundNBT nbt, int expireTime, int tickRate)
+        {
+            this.type = type;
+            this.nbt = nbt;
+            this.expireTime = expireTime;
+            this.tickRate = tickRate;
+        }
+
+        public ResourceLocation type()
+        {   return type;
+        }
+        public CompoundNBT nbt()
+        {   return nbt;
+        }
+        public int expireTime()
+        {   return expireTime;
+        }
+        public int tickRate()
+        {   return tickRate;
+        }
+
+        @Override
+        public boolean equals(Object obj)
+        {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            Factory that = (Factory) obj;
+            return Objects.equals(this.type, that.type)
+                && Objects.equals(this.nbt, that.nbt)
+                && this.expireTime == that.expireTime
+                && this.tickRate == that.tickRate;
+        }
+
+        @Override
+        public int hashCode()
+        {   return Objects.hash(type, nbt, expireTime, tickRate);
+        }
+
+        @Override
+        public String toString()
+        {
+            return "Factory[" +
+                    "type=" + type + ", " +
+                    "nbt=" + nbt + ", " +
+                    "expireTime=" + expireTime + ", " +
+                    "tickRate=" + tickRate + ']';
+        }
+
+        @Override
+        public TempModifier get()
+        {
+            TempModifier mod = TempModifierRegistry.getValue(type).orElse(null);
+            if (mod == null) return null;
+            mod.nbt = nbt.copy();
+            mod.expireTicks = expireTime;
+            mod.tickRate = tickRate;
+            return mod;
+        }
     }
 }

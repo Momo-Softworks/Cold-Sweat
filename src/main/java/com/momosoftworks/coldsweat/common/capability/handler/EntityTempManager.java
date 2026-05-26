@@ -743,7 +743,7 @@ public class EntityTempManager
                                               .orElse(Placement.of(Mode.REPLACE, Order.FIRST, foodModifier::equals));
                         Temperature.addModifier(player, foodModifier, modTrait, placement);
                         foodData.modifiers().forEach((trait, modifiers) ->
-                        {   modifiers.forEach(modifier -> Temperature.addModifier(player, modifier, trait, placement));
+                        {   modifiers.forEach(modifier -> Temperature.addModifier(player, modifier.get(), trait, placement));
                         });
                     }
                 }

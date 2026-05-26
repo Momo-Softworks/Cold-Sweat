@@ -533,7 +533,7 @@ public class AbstractTempCap implements ITemperatureCap
         {
             ListNBT modifiers = new ListNBT();
             for (TempModifier modifier : this.getModifiers(trait))
-            {   modifiers.add(TempModifier.FULL_CODEC.encodeStart(NBTDynamicOps.INSTANCE, modifier).getOrThrow(false, ColdSweat.LOGGER::error));
+            {   modifiers.add(TempModifier.CODEC.encodeStart(NBTDynamicOps.INSTANCE, modifier).getOrThrow(false, ColdSweat.LOGGER::error));
             }
             // Write the list of modifiers to the player's persistent data
             nbt.put(NBTHelper.getTraitTagKey(trait), modifiers);
@@ -582,7 +582,7 @@ public class AbstractTempCap implements ITemperatureCap
                 if (modHash == 0 || !modifierHashes.containsKey(modHash))
                 {
                     Optional<TempModifier> modOpt = isLegacy ? NBTHelper.tagToModifier(modNBT) // Legacy modifier NBT data
-                                                             : TempModifier.FULL_CODEC.decode(NBTDynamicOps.INSTANCE, modNBT).result().map(Pair::getFirst);
+                                                             : TempModifier.CODEC.decode(NBTDynamicOps.INSTANCE, modNBT).result().map(Pair::getFirst);
                     if (!modOpt.isPresent()) return;
                     modifier = modOpt.get();
                     if (modHash != 0)

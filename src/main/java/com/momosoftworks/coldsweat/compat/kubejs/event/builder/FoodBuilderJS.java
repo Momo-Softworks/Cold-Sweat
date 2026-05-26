@@ -13,6 +13,8 @@ import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,7 +30,7 @@ public class FoodBuilderJS
     public ValueGetter<Integer> stackLimit = ValueGetter.constant(1);
     public NegatableList<ItemRequirement> itemPredicate = new NegatableList<>();
     public NegatableList<EntityRequirement> entityPredicate = new NegatableList<>();
-    public Map<Temperature.Trait, List<TempModifier>> modifiers = new HashMap<>();
+    public Map<Temperature.Trait, List<TempModifier.Factory>> modifiers = new HashMap<>();
 
     public FoodBuilderJS()
     {}
@@ -82,11 +84,8 @@ public class FoodBuilderJS
         return this;
     }
 
-    public FoodBuilderJS modifier(String trait, TempModifier modifier)
-    {
-        Temperature.Trait tempTrait = Temperature.Trait.fromID(trait);
-        this.modifiers.computeIfAbsent(tempTrait, t -> new ArrayList<>()).add(modifier);
-        return this;
+    public ModBuilder modifier(String trait, String modifier)
+    {   return new ModBuilder(Temperature.Trait.fromID(trait), modifier);
     }
 
     public FoodData build()
@@ -94,5 +93,39 @@ public class FoodBuilderJS
         FoodData data = new FoodData(this.itemPredicate, this.temperature, this.duration, this.stackLimit, this.entityPredicate, this.modifiers);
         data.setConfigType(ConfigData.Type.KUBEJS);
         return data;
+    }
+
+    public class ModBuilder
+    {
+        Temperature.Trait trait;
+        String id;
+        CompoundNBT nbt = new CompoundNBT();
+        int expireTime = -1;
+        int tickRate = 1;
+
+        public ModBuilder(Temperature.Trait trait, String id)
+        {   this.trait = trait;
+            this.id = id;
+        }
+
+        public ModBuilder nbt(CompoundNBT nbt)
+        {   this.nbt = nbt;
+            return this;
+        }
+        public ModBuilder expireTime(int expireTime)
+        {   this.expireTime = expireTime;
+            return this;
+        }
+        public ModBuilder tickRate(int tickRate)
+        {   this.tickRate = tickRate;
+            return this;
+        }
+
+        public FoodBuilderJS build()
+        {
+            TempModifier.Factory modifier = new TempModifier.Factory(new ResourceLocation(id), nbt, expireTime, tickRate);
+            FoodBuilderJS.this.modifiers.computeIfAbsent(trait, t -> new ArrayList<>()).add(modifier);
+            return FoodBuilderJS.this;
+        }
     }
 }

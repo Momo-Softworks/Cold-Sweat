@@ -8,7 +8,6 @@ import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.*;
@@ -29,7 +28,7 @@ public class NBTHelper
     private NBTHelper() {}
 
     /**
-     * DEPRECATED. use {@link TempModifier#FULL_CODEC} instead.
+     * DEPRECATED. use {@link TempModifier#CODEC} instead.
      */
     @Deprecated
     public static CompoundNBT modifierToTag(TempModifier modifier)
@@ -64,7 +63,7 @@ public class NBTHelper
     }
 
     /**
-     * DEPRECATED. use {@link TempModifier#FULL_CODEC} instead.
+     * DEPRECATED. use {@link TempModifier#CODEC} instead.
      */
     @Deprecated
     public static Optional<TempModifier> tagToModifier(CompoundNBT modifierTag)
