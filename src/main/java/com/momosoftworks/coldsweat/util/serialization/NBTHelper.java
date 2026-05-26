@@ -10,14 +10,12 @@ import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import org.checkerframework.checker.units.qual.K;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -31,7 +29,7 @@ public class NBTHelper
     private NBTHelper() {}
 
     /**
-     * DEPRECATED. use {@link TempModifier#FULL_CODEC} instead.
+     * DEPRECATED. use {@link TempModifier#CODEC} instead.
      */
     @Deprecated(since = "2.4.1", forRemoval = true)
     public static CompoundTag modifierToTag(TempModifier modifier)
@@ -66,7 +64,7 @@ public class NBTHelper
     }
 
     /**
-     * DEPRECATED. use {@link TempModifier#FULL_CODEC} instead.
+     * DEPRECATED. use {@link TempModifier#CODEC} instead.
      */
     @Deprecated(since = "2.4.1", forRemoval = true)
     public static Optional<TempModifier> tagToModifier(CompoundTag modifierTag)
