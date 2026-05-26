@@ -33,10 +33,10 @@ public class FoodData extends ConfigData implements RequirementHolder
     final ValueGetter<Integer> duration;
     final ValueGetter<Integer> stackLimit;
     final NegatableList<EntityRequirement> entityRequirement;
-    final Map<Temperature.Trait, List<TempModifier>> modifiers;
+    final Map<Temperature.Trait, List<TempModifier.Factory>> modifiers;
 
     public FoodData(NegatableList<ItemRequirement> item, ValueGetter<Double> temperature, ValueGetter<Integer> duration, ValueGetter<Integer> stackLimit,
-                    NegatableList<EntityRequirement> entityRequirement, Map<Temperature.Trait, List<TempModifier>> modifiers, NegatableList<String> requiredMods)
+                    NegatableList<EntityRequirement> entityRequirement, Map<Temperature.Trait, List<TempModifier.Factory>> modifiers, NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.temperature = temperature;
@@ -48,7 +48,7 @@ public class FoodData extends ConfigData implements RequirementHolder
     }
 
     public FoodData(NegatableList<ItemRequirement> item, ValueGetter<Double> temperature, ValueGetter<Integer> duration, ValueGetter<Integer> stackLimit,
-                    NegatableList<EntityRequirement> entityRequirement, Map<Temperature.Trait, List<TempModifier>> modifiers)
+                    NegatableList<EntityRequirement> entityRequirement, Map<Temperature.Trait, List<TempModifier.Factory>> modifiers)
     {
         this(item, temperature, duration, stackLimit, entityRequirement, modifiers, new NegatableList<>());
     }
@@ -59,7 +59,7 @@ public class FoodData extends ConfigData implements RequirementHolder
             ValueGetter.optionalFieldCodec("duration", Codec.INT, 0).forGetter(FoodData::duration),
             ValueGetter.optionalFieldCodec("stack_limit", Codec.INT, 1).forGetter(FoodData::stackLimit),
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(FoodData::entityRequirement),
-            Codec.unboundedMap(Temperature.Trait.CODEC, TempModifier.CODEC.listOf()).optionalFieldOf("temp_modifiers", Map.of()).forGetter(FoodData::modifiers)
+            Codec.unboundedMap(Temperature.Trait.CODEC, TempModifier.Factory.CODEC.listOf()).optionalFieldOf("temp_modifiers", Map.of()).forGetter(FoodData::modifiers)
     ).apply(instance, FoodData::new)));
 
     public NegatableList<ItemRequirement> item()
@@ -86,7 +86,7 @@ public class FoodData extends ConfigData implements RequirementHolder
     public NegatableList<EntityRequirement> entityRequirement()
     {   return entityRequirement;
     }
-    public Map<Temperature.Trait, List<TempModifier>> modifiers()
+    public Map<Temperature.Trait, List<TempModifier.Factory>> modifiers()
     {   return modifiers;
     }
 
