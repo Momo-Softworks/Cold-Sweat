@@ -291,7 +291,7 @@ public class AbstractTempCap implements ITemperatureCap, INBTSerializable<Compou
             // Apply temp/attribute modifiers
             rate = this.modifyFromAttribute(entity, Trait.RATE, changeBy);
             // Apply rate multiplier if entity has climate data
-            rate *= CSMath.getIfNotNull(ConfigHelper.getFirstOrNull(ConfigSettings.ENTITY_CLIMATES, entity.getType(), data -> data.test(entity)), EntityClimateData::rate, 0.25) * 4;
+            rate *= CSMath.getIfNotNull(ConfigHelper.getFirstOrNull(ConfigSettings.ENTITY_CLIMATES, entity.getType(), data -> data.test(entity)), EntityClimateData::rate, 1.0) * 4;
             // Apply the rate to entity's temperature
             coreTemp += rate;
         }
