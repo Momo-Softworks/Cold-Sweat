@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.util.entity;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.common.item.SoulspringLampItem;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
+import com.momosoftworks.coldsweat.util.math.MappedCache;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.serialization.ObjectBuilder;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -27,14 +28,12 @@ import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 public class EntityHelper
 {
-    private static final Map<Entity, Pair<CompoundTag, Long>> ENTITY_DATA_CACHE = new HashMap<>();
+    private static final MappedCache<Entity, Pair<CompoundTag, Long>> ENTITY_DATA_CACHE = new MappedCache<>(entity -> Pair.of(entity.saveWithoutId(new CompoundTag()), System.currentTimeMillis()), Entity::isRemoved);
 
     private EntityHelper() {}
 
@@ -106,14 +105,10 @@ public class EntityHelper
     {
         long time = System.currentTimeMillis();
         Pair<CompoundTag, Long> pair = ENTITY_DATA_CACHE.get(entity);
-        if (pair != null && time - pair.getSecond() < 1000)
+        if (time - pair.getSecond() < 1000)
         {   return pair.getFirst();
         }
-        else
-        {   CompoundTag nbt = entity.saveWithoutId(new CompoundTag());
-            ENTITY_DATA_CACHE.put(entity, Pair.of(nbt, time));
-            return nbt;
-        }
+        else return ENTITY_DATA_CACHE.getFresh(entity).getFirst();
     }
 
     public static Entity getThrower(ItemEntity itemEntity)
