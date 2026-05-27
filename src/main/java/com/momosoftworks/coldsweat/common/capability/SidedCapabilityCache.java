@@ -5,6 +5,7 @@ import net.neoforged.fml.util.thread.EffectiveSide;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.attachment.IAttachmentHolder;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -62,6 +63,6 @@ public class SidedCapabilityCache<C, K extends IAttachmentHolder> extends Capabi
         if (EffectiveSide.get().isClient())
         {   clientCache.ifPresent(key, consumer);
         }
-        else  super.ifPresent(key, consumer);
+        else super.ifPresent(key, consumer);
     }
 }

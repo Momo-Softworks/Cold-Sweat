@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.util.entity;
 import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.common.item.SoulspringLampItem;
+import com.momosoftworks.coldsweat.util.math.MappedCache;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -18,13 +19,11 @@ import net.neoforged.fml.LogicalSide;
 import net.neoforged.neoforge.common.util.LogicalSidedProvider;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Stream;
 
 public class EntityHelper
 {
-    private static final Map<Entity, Pair<CompoundTag, Long>> ENTITY_DATA_CACHE = new HashMap<>();
+    private static final MappedCache<Entity, Pair<CompoundTag, Long>> ENTITY_DATA_CACHE = new MappedCache<>(entity -> Pair.of(entity.saveWithoutId(new CompoundTag()), System.currentTimeMillis()), Entity::isRemoved);
 
     private EntityHelper() {}
 
@@ -79,13 +78,9 @@ public class EntityHelper
     {
         long time = System.currentTimeMillis();
         Pair<CompoundTag, Long> pair = ENTITY_DATA_CACHE.get(entity);
-        if (pair != null && time - pair.getSecond() < 1000)
+        if (time - pair.getSecond() < 1000)
         {   return pair.getFirst();
         }
-        else
-        {   CompoundTag nbt = entity.saveWithoutId(new CompoundTag());
-            ENTITY_DATA_CACHE.put(entity, Pair.of(nbt, time));
-            return nbt;
-        }
+        else return ENTITY_DATA_CACHE.getFresh(entity).getFirst();
     }
 }

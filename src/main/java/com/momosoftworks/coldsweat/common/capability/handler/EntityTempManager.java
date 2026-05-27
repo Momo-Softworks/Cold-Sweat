@@ -30,6 +30,7 @@ import com.momosoftworks.coldsweat.data.codec.impl.RequirementHolder;
 import com.momosoftworks.coldsweat.data.tag.ModEntityTags;
 import com.momosoftworks.coldsweat.util.entity.DummyPlayer;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.math.MappedCache;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -88,7 +89,7 @@ public class EntityTempManager
     public static final Set<EntityType<? extends LivingEntity>> TEMPERATURE_ENABLED_ENTITIES = new HashSet<>(ImmutableSet.<EntityType<? extends LivingEntity>>builder().add(EntityType.PLAYER).build());
 
     public static final SidedCapabilityCache<ITemperatureCap, Entity> CAP_CACHE = new SidedCapabilityCache<>(ModDataAttachments.ENTITY_TEMPERATURE, Entity::isRemoved);
-    public static final Map<Entity, Map<ResourceLocation, Double>> TEMP_MODIFIER_IMMUNITIES = new WeakHashMap<>();
+    public static final MappedCache<Entity, Map<ResourceLocation, Double>> TEMP_MODIFIER_IMMUNITIES = new MappedCache<>(entity -> new HashMap<>(), Entity::isRemoved);
 
     @EventBusSubscriber
     public static class Events
@@ -202,14 +203,6 @@ public class EntityTempManager
                         Temperature.updateModifiers(living, cap);
                     }, 1);
                 });
-            }
-        }
-
-        @SubscribeEvent
-        public static void finalizeEntities(ServerTickEvent.Post event)
-        {
-            if (event.getServer().overworld().getGameTime() % 200 == 0)
-            {   TEMP_MODIFIER_IMMUNITIES.entrySet().removeIf(e -> e.getKey().isRemoved());
             }
         }
 
@@ -412,7 +405,7 @@ public class EntityTempManager
                         }
                     }
                 }
-                TEMP_MODIFIER_IMMUNITIES.put(entity, immunities);
+                TEMP_MODIFIER_IMMUNITIES.set(entity, immunities);
             }
         }
 
