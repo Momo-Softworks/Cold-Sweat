@@ -57,12 +57,12 @@ public class SidedCapabilityCache<C, K extends ICapabilityProvider> extends Capa
     }
 
     @Override
-    public void ifPresent(K key, Consumer<C> consumer)
+    public void ifPresent(K key, Consumer<LazyOptional<C>> consumer)
     {
         if (EffectiveSide.get().isClient())
         {   clientCache.ifPresent(key, consumer);
         }
-        else  super.ifPresent(key, consumer);
+        else super.ifPresent(key, consumer);
     }
 
     @Override

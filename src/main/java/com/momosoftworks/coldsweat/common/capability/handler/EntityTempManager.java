@@ -34,6 +34,7 @@ import com.momosoftworks.coldsweat.data.codec.impl.RequirementHolder;
 import com.momosoftworks.coldsweat.data.tag.ModEntityTags;
 import com.momosoftworks.coldsweat.util.entity.DummyPlayer;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.math.MappedCache;
 import com.momosoftworks.coldsweat.util.registries.ModAttributes;
 import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModEffects;
@@ -96,7 +97,7 @@ public class EntityTempManager
     public static final Set<EntityType<? extends LivingEntity>> TEMPERATURE_ENABLED_ENTITIES = new HashSet<>(Arrays.asList(EntityType.PLAYER));
 
     public static final SidedCapabilityCache<ITemperatureCap, Entity> CAP_CACHE = new SidedCapabilityCache<>(() -> ModCapabilities.ENTITY_TEMPERATURE, ent -> ent.removed);
-    public static final Map<Entity, Map<ResourceLocation, Double>> TEMP_MODIFIER_IMMUNITIES = new WeakHashMap<>();
+    public static final MappedCache<Entity, Map<ResourceLocation, Double>> TEMP_MODIFIER_IMMUNITIES = new MappedCache<>(entity -> new HashMap<>(), e -> e.removed);
 
     @Mod.EventBusSubscriber
     public static class Events
@@ -252,14 +253,6 @@ public class EntityTempManager
                         Temperature.updateModifiers(living, cap);
                     }, 1);
                 });
-            }
-        }
-
-        @SubscribeEvent
-        public static void cleanRemovedEntities(TickEvent.ServerTickEvent event)
-        {
-            if (event.phase == TickEvent.Phase.END && WorldHelper.getServer().overworld().getGameTime() % 200 == 0)
-            {   TEMP_MODIFIER_IMMUNITIES.keySet().removeIf(ent -> ent.removed);
             }
         }
 
@@ -476,7 +469,7 @@ public class EntityTempManager
                         }
                     }
                 }
-                TEMP_MODIFIER_IMMUNITIES.put(entity, immunities);
+                TEMP_MODIFIER_IMMUNITIES.set(entity, immunities);
             }
         }
 
