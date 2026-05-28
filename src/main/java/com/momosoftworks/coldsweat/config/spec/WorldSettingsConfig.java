@@ -612,22 +612,22 @@ public class WorldSettingsConfig
                          " • *tempLimit: The maximum world temperature at which this block temp will have any effect.",
                          "   (Represents the minimum temp if the block temp is negative)")
                 .defineListAllowEmpty(List.of("Block Temperatures"), () -> ListBuilder.begin(
-                                            List.of("cold_sweat:boiler",         12, 7, "f", 36, "lit=true", "", 212),
-                                            List.of("cold_sweat:icebox",        -12, 7, "f", 36, "frosted=true", "", 32),
-                                            List.of("minecraft:lava",            20, 7, "f", 200, "", "", 1000, true),
-                                            List.of("#minecraft:fire",           15, 7, "f", 45, "", "", 400),
-                                            List.of("#minecraft:campfires",      15, 7, "f", 45, "lit=true", " ", 400),
-                                            List.of("minecraft:magma_block",     12, 3, "f", 48),
-                                            List.of("minecraft:lava_cauldron",   20, 7, "f", 200, "", "", 1000, true),
-                                            List.of("minecraft:ice",             -6, 4, "f", 24, "", "", 33),
-                                            List.of("minecraft:packed_ice",     -12, 4, "f", 48, "", "", 16),
-                                            List.of("minecraft:blue_ice",       -16, 4, "f", 64, "", "", 0),
+                                            List.of("cold_sweat:boiler",         15, 7, "f", 36, "lit=true", "", 212),
+                                            List.of("cold_sweat:icebox",        -15, 7, "f", 36, "frosted=true", "", 32),
+                                            List.of("minecraft:lava",            30, 7, "f", 200, "", "", 1000, true),
+                                            List.of("#minecraft:fire",           25, 7, "f", 50, "", "", 400),
+                                            List.of("#minecraft:campfires",      25, 7, "f", 50, "lit=true", " ", 400),
+                                            List.of("minecraft:magma_block",     20, 3, "f", 48),
+                                            List.of("minecraft:lava_cauldron",   30, 7, "f", 200, "", "", 1000, true),
+                                            List.of("minecraft:ice",            -10, 4, "f", 24, "", "", 33),
+                                            List.of("minecraft:packed_ice",     -15, 4, "f", 48, "", "", 16),
+                                            List.of("minecraft:blue_ice",       -20, 4, "f", 64, "", "", 0),
                                             List.of("#minecraft:ice",            -6, 4, "f", 27, "", "", 33)
                                       ).addIf(CompatManager.isCreateLoaded(),
                                             () -> List.of("create:blaze_burner", 5,  3, "f", 30, "blaze=smouldering", "", 400),
-                                            () -> List.of("create:blaze_burner", 10, 4, "f", 30, "blaze=fading", "", 400),
-                                            () -> List.of("create:blaze_burner", 15, 5, "f", 45, "blaze=kindled", "", 400),
-                                            () -> List.of("create:blaze_burner", 20, 6, "f", 60, "blaze=seething", "", 400))
+                                            () -> List.of("create:blaze_burner", 12, 4, "f", 30, "blaze=fading", "", 400),
+                                            () -> List.of("create:blaze_burner", 20, 5, "f", 45, "blaze=kindled", "", 400),
+                                            () -> List.of("create:blaze_burner", 30, 6, "f", 60, "blaze=seething", "", 400))
                                       .build(),
                             it -> it instanceof List<?> list
                                     && list.size() >= 3
