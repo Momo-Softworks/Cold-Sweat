@@ -437,7 +437,8 @@ public class TooltipHandler
         if (ConfigSettings.ENABLE_HINTS.get())
         {   addUnmetRequirementHints(elements, unmetLabelIndex, allUnmetInsulation);
         }
-        LAST_TOOLTIP = elements;
+        LAST_TOOLTIP.clear();
+        LAST_TOOLTIP.addAll(elements);
     }
 
     private static void addInsulationTooltips(List<ITextComponent> elements, int tooltipStartIndex,
