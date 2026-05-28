@@ -219,11 +219,7 @@ public class EntityTempManager
             {
                 // Tick modifiers serverside
                 if (isServer)
-                {
-                    // Tick modifiers 1/4 as much for entities
-                    if (entity instanceof Player || entity.tickCount % 5 == 0)
-                    {   cap.tick(entity);
-                    }
+                {   cap.tick(entity);
                 }
 
                 // Tick modifiers & removed expired
@@ -710,7 +706,7 @@ public class EntityTempManager
     }
 
     public static Optional<ITemperatureCap> getTemperatureCap(Entity entity)
-    {   return isTemperatureEnabled(entity) ? CAP_CACHE.get(entity) : Optional.empty();
+    {   return isTemperatureEnabled(entity) ? Optional.ofNullable(CAP_CACHE.get(entity)) : Optional.empty();
     }
 
     public static Map<Trait, List<TempModifier>> gatherTempModifiers(LivingEntity entity)
