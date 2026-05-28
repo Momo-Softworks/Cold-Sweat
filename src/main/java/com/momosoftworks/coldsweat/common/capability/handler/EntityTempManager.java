@@ -710,7 +710,7 @@ public class EntityTempManager
     }
 
     public static Optional<ITemperatureCap> getTemperatureCap(Entity entity)
-    {   return isTemperatureEnabled(entity) ? Optional.ofNullable(CAP_CACHE.get(entity)) : Optional.empty();
+    {   return isTemperatureEnabled(entity) ? CAP_CACHE.get(entity) : Optional.empty();
     }
 
     public static Map<Trait, List<TempModifier>> gatherTempModifiers(LivingEntity entity)

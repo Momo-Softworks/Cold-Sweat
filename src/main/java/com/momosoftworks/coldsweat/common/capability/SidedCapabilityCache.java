@@ -27,7 +27,7 @@ public class SidedCapabilityCache<C, K extends IAttachmentHolder> extends Capabi
     }
 
     @Override
-    public C get(K key)
+    public Optional<C> get(K key)
     {   return EffectiveSide.get().isClient() ? clientCache.get(key) : super.get(key);
     }
 
@@ -58,7 +58,7 @@ public class SidedCapabilityCache<C, K extends IAttachmentHolder> extends Capabi
     }
 
     @Override
-    public void ifPresent(K key, Consumer<C> consumer)
+    public void ifPresent(K key, Consumer<Optional<C>> consumer)
     {
         if (EffectiveSide.get().isClient())
         {   clientCache.ifPresent(key, consumer);
