@@ -267,11 +267,7 @@ public class EntityTempManager
             {
                 // Tick modifiers serverside
                 if (isServer)
-                {
-                    // Tick modifiers 1/4 as much for entities
-                    if (entity instanceof Player || entity.tickCount % 5 == 0)
-                    {   cap.tick(entity);
-                    }
+                {   cap.tick(entity);
                 }
 
                 // Tick modifiers & removed expired
