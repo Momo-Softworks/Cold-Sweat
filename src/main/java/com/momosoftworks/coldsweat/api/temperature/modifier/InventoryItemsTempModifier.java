@@ -33,7 +33,7 @@ public class InventoryItemsTempModifier extends TempModifier
     @Override
     public void tick(LivingEntity entity)
     {
-        if (entity.level.isClientSide) return;
+        if (entity.level().isClientSide) return;
         effectsPerTrait.clear();
 
         Map<ItemTempData, Double> effectsPerItemTemp = new HashMap<>();
