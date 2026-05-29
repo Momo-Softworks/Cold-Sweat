@@ -176,6 +176,8 @@ dependencies {
     compileOnly fg.deobf("curse.maven:tfc-cold-sweat-1130934:7259451")
     compileOnly fg.deobf("curse.maven:primal-winter-393321:4575861")
 
+    implementation fg.deobf("curse.maven:alltheleaks-1091339:7235989")
+
     // Create (compat)
     compileOnly("net.createmod.ponder:Ponder-Forge-1.20.1:1.0.37")
     implementation fg.deobf("curse.maven:create-328085:7178761")
@@ -191,9 +193,9 @@ dependencies {
     compileOnly ("org.valkyrienskies.core:api:${valk_skies_api_version}")
     compileOnly ("org.valkyrienskies.core:internal:${valk_skies_api_version}")
     compileOnly ("org.valkyrienskies.core:util:${valk_skies_api_version}")
-    implementation fg.deobf("org.valkyrienskies:valkyrienskies-120-forge:2.4.11")
-    implementation fg.deobf("curse.maven:eureka-ships-654384:7979379")
-    implementation 'thedarkcolour:kotlinforforge:4.10.0'
+    compileOnly fg.deobf("org.valkyrienskies:valkyrienskies-120-forge:2.4.11")
+    compileOnly fg.deobf("curse.maven:eureka-ships-654384:7979379")
+    compileOnly 'thedarkcolour:kotlinforforge:4.10.0'
 
     // KubeJS (Compat)
     implementation fg.deobf("dev.latvian.mods:kubejs-forge:${kubejs_version}")
