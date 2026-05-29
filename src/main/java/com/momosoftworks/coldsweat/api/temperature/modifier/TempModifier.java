@@ -91,9 +91,9 @@ public abstract class TempModifier
     }
 
     /**
-     * Determines what the provided temperature would be, given the player it is being applied to.<br>
-     * This is basically a simple in-out system. It is given a temperature, and returns a new temperature based on the PlayerEntity.<br>
-     * @param entity the entity that is being affected by the modifier.
+     * Returns a function that changes the input temperature based on the entity and trait this TempModifier is being applied to.<br>
+     * Called per trait, since one TempModifier instance can be applied to multiple traits simultaneously.<br><br>
+     * <b>ONLY CALLED ON THE SERVER SIDE.</b>
      * @return the new temperature.
      */
     protected abstract Function<Double, Double> calculate(LivingEntity entity, Trait trait);
