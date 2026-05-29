@@ -187,7 +187,7 @@ public class TooltipHandler
         // Create custom component for Cold Sweat attributes
         if (EntityTempManager.isTemperatureAttribute(attribute))
         {
-            if (trait == Temperature.Trait.WORLD && operation == AttributeModifier.Operation.ADDITION)
+            if (trait == Temperature.Trait.WORLD && operation == AttributeModifier.Operation.ADD_VALUE)
             {   attributeName = attributeName.append(Temperature.Units.C.getFormattedName());
             }
             params.add(1, attributeName);
