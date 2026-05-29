@@ -3663,3 +3663,45 @@ Fixes:
 - Fixed water potentially freezing and thawing at incorrect temperatures
 - Fixed the "/temp debug" command showing temperature units for temperature traits that don't use units
 - Fixed the Space Helmet from Ad Astra giving doubled effects, and the Space Pants giving none
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.4.1
+* Added compatibility with Sable (Create: Aeronautics)
+      - Block temperature and air-conditioning blocks now work like normal when part of contraptions
+* Made some changes to chameleons:
+      * Chameleons will now shed naturally after 5 minutes of no player interaction
+            - No items will be dropped if they shed naturally
+      * Added new ambient, hurt, and shedding sounds
+- Rivers no longer impact biome temperature
+* Item temperatures how have tooltips explaining their effects, as well as which inventory slots they apply to
+* The temperature effects of waterskins are now fully controlled by TOML configs
+      - Its temperature when held in the player's hotbar is controlled by an Item Temperature config
+      - Its temperature when used/consumed is controlled by a Food Temperature config
+- Adjusted the temperatures of most blocks to be more extreme
+- Food temperature JSON and KubeJS configs can now add temperature modifiers to the player
+      - Refer to the updated documentation for examples
+
+Fixes:
+* (1.21) Fixed soulspring lamps obtained by crafting or upgrading from a pre-2.4 world not draining fuel
+* (1.21) Fixed partially-unimplemented compatibility for Weather, Storms, & Tornadoes mod]
+* (1.21) Fixed crash when inserting a potion into the hearth
+- (1.16-1.19) Fixed the "overflow" insulation tooltip not showing text
+* Fixed crash when an air-conditioning block's smokestack is blocked
+* Fixed memory leak in which entities that had left the world were not released from memory
+- Fixed clientside lag caused by calculating temperature for other players on servers
+- Fixed "midpoint" in temperature regions not returning the right temperature
+- Fixed the player receiving the effects of being in shade when their feet are inside a block
+- Fixed tempLimit not working for TOML block configs in some cases if the temperature is a negative number
+- Fixed chameleons sometimes being attacted to players who are not holding tempting items
+- Fixed chameleons sometimes going invisible when they shouldn't
+
+Technical Changes:
+! TempModifier.calculate() is no longer called for other players/entities in the world on the clientside
+      - This dramatically reduces unnecessary clientside load in many cases, as clientside temperature calculations aren't used for anything
+* Added new system for configs, temporarily called "value getters"
+      - In place of most static values, a function that retrieves data from the entity/item can be defined instead
+      - For example, a food item's temperature can be based on NBT data on the item, rather than being a static number
+      - Some examples of this system can be seen in the new waterskin configs
+- TempModifiers are now serialized/deserialized via a codec rather than NBTHelper methods
+      - Old player data will be automatically converted to the new format upon loading
