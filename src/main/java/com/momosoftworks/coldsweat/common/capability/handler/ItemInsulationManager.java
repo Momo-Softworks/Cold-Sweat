@@ -165,12 +165,12 @@ public class ItemInsulationManager
             && getInsulatorInsulation(stack).isEmpty();
     }
 
-    public static int getSlotsFilled(Collection<InsulatorData> insulators)
+    public static int getSlotsFilled(ItemStack stack, Collection<InsulatorData> insulators)
     {
         int slots = 0;
         for (InsulatorData data : insulators)
         {
-            if (data.fillSlots())
+            if (data.fillSlots(stack))
             {   slots += Insulation.splitList(data.insulation()).size();
             }
             else slots++;
