@@ -2,19 +2,16 @@
   "required_mods": ["create"],
   "type": "armor",
   "item": {
-    "items": ["create:netherite_backtank"]
+    "items": ["create:netherite_backtank"],
+    "nbt": {
+      "Air": "1:"
+    }
   },
   "entity": {
     "entities": ["*"],
     "equipment": {
       "head": {
         "items": ["create:netherite_diving_helmet"]
-      },
-      "chest": {
-        "items": ["create:netherite_backtank"],
-        "nbt": {
-          "Air": "1:"
-        }
       },
       "legs": {
         "items": ["minecraft:netherite_leggings"]
