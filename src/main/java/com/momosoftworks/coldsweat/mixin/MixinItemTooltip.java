@@ -107,7 +107,7 @@ public class MixinItemTooltip
                 }
                 else
                 {
-                    if (insulator.hideIfUnmet())
+                    if (insulator.hideIfUnmet(stack))
                     {   continue;
                     }
                     UNMET_MODIFIERS.putAll(insulator.attributes().getMap());
@@ -126,7 +126,7 @@ public class MixinItemTooltip
                         }
                         else
                         {
-                            if (insulator.hideIfUnmet())
+                            if (insulator.hideIfUnmet(stack))
                             {   continue;
                             }
                             UNMET_MODIFIERS.putAll(insulator.attributes().getMap());
