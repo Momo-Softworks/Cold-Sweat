@@ -270,10 +270,7 @@ public class TooltipHandler
     @SubscribeEvent
     public static void updateHoveredItem(RenderTooltipEvent.Pre event)
     {
-        if (!SHOWING_TOOLTIP)
-        {   LAST_TOOLTIP.clear();
-            SHOWING_TOOLTIP = true;
-        }
+        SHOWING_TOOLTIP = true;
         ItemStack stack = event.getStack();
 
         if (!HOVERED_STACK.equals(stack))
@@ -307,8 +304,8 @@ public class TooltipHandler
                     if (slotIndex != HOVERED_SLOT)
                     {   FETCHING_TOOLTIP = true;
                         HOVERED_SLOT = slotIndex;
+                        ColdSweatPacketHandler.INSTANCE.sendToServer(SyncItemPredicatesMessage.fromClient(slotIndex, equipmentSlot, stack));
                     }
-                    ColdSweatPacketHandler.INSTANCE.sendToServer(SyncItemPredicatesMessage.fromClient(slotIndex, equipmentSlot, stack));
                 }
             }
         }
@@ -792,9 +789,12 @@ public class TooltipHandler
     @SubscribeEvent
     public static void tickSoulLampInsertTooltip(TickEvent.ClientTickEvent event)
     {
-        if (event.phase == TickEvent.Phase.END)
+        if (event.phase == TickEvent.Phase.START)
         {   FUEL_FADE_TIMER++;
             SHOWING_TOOLTIP = false;
+        }
+        else if (!SHOWING_TOOLTIP)
+        {   LAST_TOOLTIP.clear();
         }
     }
 }
