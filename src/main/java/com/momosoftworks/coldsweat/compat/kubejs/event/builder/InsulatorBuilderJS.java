@@ -14,6 +14,7 @@ import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import com.momosoftworks.coldsweat.data.codec.util.ValueGetter;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import net.minecraft.resources.ResourceLocation;
@@ -24,6 +25,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class InsulatorBuilderJS
@@ -34,8 +36,8 @@ public class InsulatorBuilderJS
     public NegatableList<EntityRequirement> entityPredicate = new NegatableList<>();
     public AttributeModifierMap attributes = new AttributeModifierMap();
     public Map<ResourceLocation, Double> immuneTempModifiers = new HashMap<>();
-    public boolean fillSlots = true;
-    public boolean hideIfUnmet = false;
+    public ValueGetter<Boolean> fillSlots = ValueGetter.constant(true);
+    public ValueGetter<Boolean> hideIfUnmet = ValueGetter.constant(false);
     public String hintKey = null;
     public String hintText = null;
 
@@ -106,16 +108,22 @@ public class InsulatorBuilderJS
         return this;
     }
 
-    public InsulatorBuilderJS fillSlots(boolean multiSlot)
+    public InsulatorBuilderJS fillSlots(Function<Map<String, Object>, Boolean> function)
     {
-        this.fillSlots = multiSlot;
+        this.fillSlots = ValueGetter.of(function);
         return this;
     }
+    public InsulatorBuilderJS fillSlots(boolean multiSlot)
+    {   return this.fillSlots(m -> multiSlot);
+    }
 
-    public InsulatorBuilderJS hideIfUnmet(boolean hide)
+    public InsulatorBuilderJS hideIfUnmet(Function<Map<String, Object>, Boolean> function)
     {
-        this.hideIfUnmet = hide;
+        this.hideIfUnmet = ValueGetter.of(function);
         return this;
+    }
+    public InsulatorBuilderJS hideIfUnmet(boolean hideIfUnmet)
+    {   return this.hideIfUnmet(m -> hideIfUnmet);
     }
 
     public InsulatorBuilderJS hintKey(String key)

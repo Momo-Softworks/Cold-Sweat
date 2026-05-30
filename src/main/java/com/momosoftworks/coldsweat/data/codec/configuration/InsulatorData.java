@@ -15,7 +15,7 @@ import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.AttributeModifierMap;
 import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
-import com.momosoftworks.coldsweat.data.codec.util.StreamCodecs;
+import com.momosoftworks.coldsweat.data.codec.util.ValueGetter;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -40,14 +40,14 @@ public class InsulatorData extends ConfigData implements RequirementHolder
     final NegatableList<EntityRequirement> entity;
     final AttributeModifierMap attributes;
     final Map<ResourceLocation, Double> immuneTempModifiers;
-    final boolean fillSlots;
-    final boolean hideIfUnmet;
+    final ValueGetter<Boolean> fillSlots;
+    final ValueGetter<Boolean> hideIfUnmet;
     final Optional<HintText> hint;
 
     public InsulatorData(NegatableList<ItemRequirement> item, Insulation.Slot slot,
                          List<Insulation> insulation, NegatableList<EntityRequirement> entity,
                          AttributeModifierMap attributes, Map<ResourceLocation, Double> immuneTempModifiers,
-                         boolean fillSlots, boolean hideIfUnmet, Optional<HintText> hint, NegatableList<String> requiredMods)
+                         ValueGetter<Boolean> fillSlots, ValueGetter<Boolean> hideIfUnmet, Optional<HintText> hint, NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.item = item;
@@ -63,7 +63,7 @@ public class InsulatorData extends ConfigData implements RequirementHolder
 
     public InsulatorData(NegatableList<ItemRequirement> item, Insulation.Slot slot, List<Insulation> insulation,
                          NegatableList<EntityRequirement> entity, AttributeModifierMap attributes,
-                         Map<ResourceLocation, Double> immuneTempModifiers, boolean fillSlots, boolean hideIfUnmet, Optional<HintText> hint)
+                         Map<ResourceLocation, Double> immuneTempModifiers, ValueGetter<Boolean> fillSlots, ValueGetter<Boolean> hideIfUnmet, Optional<HintText> hint)
     {
         this(item, slot, insulation, entity, attributes, immuneTempModifiers, fillSlots, hideIfUnmet, hint, new NegatableList<>());
     }
@@ -80,8 +80,8 @@ public class InsulatorData extends ConfigData implements RequirementHolder
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(InsulatorData::entity),
             AttributeModifierMap.CODEC.optionalFieldOf("attributes", new AttributeModifierMap()).forGetter(InsulatorData::attributes),
             Codec.unboundedMap(ResourceLocation.CODEC, ExtraCodecs.DOUBLE).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(InsulatorData::immuneTempModifiers),
-            Codec.BOOL.optionalFieldOf("fill_slots", true).forGetter(InsulatorData::fillSlots),
-            Codec.BOOL.optionalFieldOf("hide_if_unmet", false).forGetter(InsulatorData::hideIfUnmet),
+            ValueGetter.optionalFieldCodec("fill_slots", Codec.BOOL, true).forGetter(InsulatorData::fillSlots),
+            ValueGetter.optionalFieldCodec("hide_if_unmet", Codec.BOOL, false).forGetter(InsulatorData::hideIfUnmet),
             HintText.CODEC.optionalFieldOf("hint").forGetter(InsulatorData::hint)
     ).apply(instance, InsulatorData::new)));
 
@@ -105,11 +105,17 @@ public class InsulatorData extends ConfigData implements RequirementHolder
     public Map<ResourceLocation, Double> immuneTempModifiers()
     {   return immuneTempModifiers;
     }
-    public boolean fillSlots()
+    public ValueGetter<Boolean> fillSlots()
     {   return fillSlots;
     }
-    public boolean hideIfUnmet()
+    public boolean fillSlots(ItemStack stack)
+    {   return fillSlots.get(Map.of("item", stack));
+    }
+    public ValueGetter<Boolean> hideIfUnmet()
     {   return hideIfUnmet;
+    }
+    public boolean hideIfUnmet(ItemStack stack)
+    {   return hideIfUnmet.get(Map.of("item", stack));
     }
     public Optional<HintText> hint()
     {   return hint;
@@ -176,7 +182,7 @@ public class InsulatorData extends ConfigData implements RequirementHolder
         ItemRequirement itemRequirement = new ItemRequirement(items, components);
 
         InsulatorData result = new InsulatorData(new NegatableList<>(itemRequirement), slot, insulation, new NegatableList<>(),
-                                                 new AttributeModifierMap(), new HashMap<>(), fillSlots, false, Optional.empty());
+                                                 new AttributeModifierMap(), new HashMap<>(), ValueGetter.constant(fillSlots), ValueGetter.constant(false), Optional.empty());
         result.setConfigType(Type.TOML);
         return result;
     }

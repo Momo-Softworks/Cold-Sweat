@@ -64,8 +64,8 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         // Separate insulation into negative & positive
         for (InsulatorData data : insulation)
         {
-            List<Insulation> insulations = data.fillSlots() ? Insulation.splitList(data.insulation()) : data.insulation();
-            if (!data.fillSlots() && data.slot() == Insulation.Slot.ARMOR)
+            List<Insulation> insulations = data.fillSlots(stack) ? Insulation.splitList(data.insulation()) : data.insulation();
+            if (!data.fillSlots(stack) && data.slot() == Insulation.Slot.ARMOR)
             {   extraInsulations += insulations.size();
             }
             for (Insulation ins : insulations)

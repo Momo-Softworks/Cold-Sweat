@@ -37,7 +37,7 @@ public class MixinItemTooltipAdditional
                 Holder<Attribute> attribute = entry.getKey();
                 AttributeModifier modifier = entry.getValue();
                 boolean passes = TooltipHandler.checkRequirement(insulator).passed();
-                if (!passes && insulator.hideIfUnmet())
+                if (!passes && insulator.hideIfUnmet(stack))
                 {   continue;
                 }
                 event.addTooltipLines(TooltipHandler.getFormattedAttributeModifier(attribute, modifier.amount(), modifier.operation(), true, !passes));
@@ -54,7 +54,7 @@ public class MixinItemTooltipAdditional
                         Holder<Attribute> attribute = entry.getKey();
                         AttributeModifier modifier = entry.getValue();
                         boolean passes = TooltipHandler.checkRequirement(insulator).passed();
-                        if (!passes && insulator.hideIfUnmet())
+                        if (!passes && insulator.hideIfUnmet(stack))
                         {   continue;
                         }
                         event.addTooltipLines(TooltipHandler.getFormattedAttributeModifier(attribute, modifier.amount(), modifier.operation(), true, !passes));
