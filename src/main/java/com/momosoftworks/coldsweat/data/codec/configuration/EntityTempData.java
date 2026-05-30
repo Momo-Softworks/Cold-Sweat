@@ -8,7 +8,6 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.impl.RequirementHolder;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
-import com.momosoftworks.coldsweat.data.codec.requirement.WorldTempRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.data.codec.util.ValueGetter;
@@ -77,14 +76,8 @@ public class EntityTempData extends ConfigData implements RequirementHolder
     public ValueGetter<Double> temperature()
     {   return temperature;
     }
-    public double temperature(Entity entity, Entity affectedEntity)
-    {   return temperature.get(Map.of("entity", entity, "target", affectedEntity));
-    }
     public ValueGetter<Double> range()
     {   return range;
-    }
-    public double range(Entity entity, Entity affectedEntity)
-    {   return range.get(Map.of("entity", entity, "target", affectedEntity));
     }
     public Temperature.Units units()
     {   return units;
@@ -95,25 +88,32 @@ public class EntityTempData extends ConfigData implements RequirementHolder
     public ValueGetter<Double> maxEffect()
     {   return maxEffect;
     }
-    public double maxEffect(Entity entity, Entity affectedEntity)
-    {   return maxEffect.get(Map.of("entity", entity, "target", affectedEntity));
-    }
     public ValueGetter<Double> maxTemp()
     {   return maxTemp;
-    }
-    public double maxTemp(Entity entity, Entity affectedEntity)
-    {   return maxTemp.get(Map.of("entity", entity, "target", affectedEntity));
     }
     public ValueGetter<Double> minTemp()
     {   return minTemp;
     }
-    public double minTemp(Entity entity, Entity affectedEntity)
-    {   return minTemp.get(Map.of("entity", entity, "target", affectedEntity));
-    }
     public ValueGetter<Boolean> affectsSelf()
     {   return affectsSelf;
     }
-    public boolean affectsSelf(Entity entity, Entity affectedEntity)
+
+    public double getTemperature(Entity entity, Entity affectedEntity)
+    {   return Temperature.convert(temperature.get(Map.of("entity", entity, "target", affectedEntity)), this.units, Temperature.Units.MC, false);
+    }
+    public double getMaxEffect(Entity entity, Entity affectedEntity)
+    {   return Temperature.convert(maxEffect.get(Map.of("entity", entity, "target", affectedEntity)), this.units, Temperature.Units.MC, false);
+    }
+    public double getMaxTemp(Entity entity, Entity affectedEntity)
+    {   return Temperature.convert(maxTemp.get(Map.of("entity", entity, "target", affectedEntity)), this.units, Temperature.Units.MC, true);
+    }
+    public double getMinTemp(Entity entity, Entity affectedEntity)
+    {   return Temperature.convert(minTemp.get(Map.of("entity", entity, "target", affectedEntity)), this.units, Temperature.Units.MC, true);
+    }
+    public double getRange(Entity entity, Entity affectedEntity)
+    {   return range.get(Map.of("entity", entity, "target", affectedEntity));
+    }
+    public boolean isAffectsSelf(Entity entity, Entity affectedEntity)
     {   return affectsSelf.get(Map.of("entity", entity, "target", affectedEntity));
     }
 
@@ -157,14 +157,14 @@ public class EntityTempData extends ConfigData implements RequirementHolder
 
     public boolean test(Entity entity, Entity affectedEntity)
     {
-        return (this.affectsSelf(entity, affectedEntity) || entity != affectedEntity)
-            && entity.distanceTo(affectedEntity) <= range(entity, affectedEntity)
+        return (this.isAffectsSelf(entity, affectedEntity) || entity != affectedEntity)
+            && entity.distanceTo(affectedEntity) <= getRange(entity, affectedEntity)
             && this.test(entity)
             && this.affectedEntity.test(req -> req.test(affectedEntity));
     }
 
     public double getTemperatureEffect(Entity entity, Entity affectedPlayer)
-    {   return CSMath.blend(0, this.temperature(entity, affectedPlayer), entity.distanceTo(affectedPlayer), this.range(entity, affectedPlayer), 0);
+    {   return CSMath.blend(0, this.getTemperature(entity, affectedPlayer), entity.distanceTo(affectedPlayer), this.getRange(entity, affectedPlayer), 0);
     }
 
     @Override
