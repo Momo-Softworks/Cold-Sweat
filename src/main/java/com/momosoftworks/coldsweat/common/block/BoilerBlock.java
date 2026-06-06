@@ -83,11 +83,6 @@ public class BoilerBlock extends BlockContainer
     }
 
     @Override
-    public void onBlockAdded(World world, int x, int y, int z)
-    {   super.onBlockAdded(world, x, y, z);
-    }
-
-    @Override
     public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase entity, ItemStack stack)
     {
         int facing = MathHelper.floor_double((double) (entity.rotationYaw * 4.0F / 360.0F) + 0.5D) & 3;

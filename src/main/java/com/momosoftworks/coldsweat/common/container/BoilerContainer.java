@@ -125,7 +125,7 @@ public class BoilerContainer extends Container
                 // Transfer from hotbar to main inventory
                 else if (CSMath.withinRange(index, inventorySlots.size() - 9, inventorySlots.size()))
                 {
-                    if (!this.mergeItemStack(itemstack1, 10, 36, false))
+                    if (!this.mergeItemStack(itemstack1, 10, 37, false))
                     {   return null;
                     }
                     slot.onSlotChange(itemstack1, itemstack);

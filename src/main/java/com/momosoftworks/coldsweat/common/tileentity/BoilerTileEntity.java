@@ -134,7 +134,16 @@ public class BoilerTileEntity extends TileEntity implements ISidedInventory, ITi
 
     @Override
     public ItemStack decrStackSize(int slot, int by)
-    {   return inventory[slot] = ItemHelper.grow(this.getStackInSlot(slot), -by);
+    {
+        ItemStack stack = this.getStackInSlot(slot);
+        if (stack == null) return null;
+        if (stack.stackSize <= by)
+        {   this.inventory[slot] = null;
+            return stack;
+        }
+        ItemStack taken = stack.splitStack(by);
+        if (stack.stackSize == 0) this.inventory[slot] = null;
+        return taken;
     }
 
     @Override
@@ -147,9 +156,9 @@ public class BoilerTileEntity extends TileEntity implements ISidedInventory, ITi
     @Override
     public void setInventorySlotContents(int slot, ItemStack stack)
     {
-        if (stack != null)
-        {   stack.stackSize = Math.min(stack.stackSize, this.getInventoryStackLimit());
-            this.inventory[slot] = stack;
+        this.inventory[slot] = stack;
+        if (stack != null && stack.stackSize > this.getInventoryStackLimit())
+        {   stack.stackSize = this.getInventoryStackLimit();
         }
     }
 
