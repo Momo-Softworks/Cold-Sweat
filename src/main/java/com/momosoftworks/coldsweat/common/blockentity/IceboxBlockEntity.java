@@ -40,6 +40,8 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.wrapper.SidedInvWrapper;
+import blusunrize.immersiveengineering.api.tool.ExternalHeaterHandler;
+import com.momosoftworks.coldsweat.compat.CompatManager;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -361,6 +363,10 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
                 return slotHandlers[1].cast();
             else
                 return slotHandlers[2].cast();
+        }
+        if (!this.remove && CompatManager.isImmersiveEngineeringLoaded() && capability == ExternalHeaterHandler.CAPABILITY)
+        {
+            return LazyOptional.empty();
         }
         return super.getCapability(capability, face);
     }

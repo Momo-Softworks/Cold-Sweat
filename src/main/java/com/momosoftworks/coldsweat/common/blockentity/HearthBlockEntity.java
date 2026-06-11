@@ -92,6 +92,7 @@ import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import blusunrize.immersiveengineering.api.tool.ExternalHeaterHandler;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -1337,6 +1338,11 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     @Override
     public <T> LazyOptional<T> getCapability(Capability<T> capability, Direction face)
     {
+        // IE External Heater support
+        if (!this.remove && CompatManager.isImmersiveEngineeringLoaded() && capability == ExternalHeaterHandler.CAPABILITY)
+        {   return CompatManager.ImmersiveEngineering.getHeaterCap(this).cast();
+        }
+
         return capability == CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY && face != null
                ? this.isHeatingSide(face) || this.isCoolingSide(face)
                        ? fuelFluidHolder.cast()
@@ -1525,6 +1531,16 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         @NotNull
         public FluidStack drain(FluidStack fluidStack, FluidAction fluidAction)
         {   return FluidStack.EMPTY;
+        }
+    }
+
+    @Override
+    public void invalidateCaps()
+    {
+        super.invalidateCaps();
+        fuelFluidHolder.invalidate();
+        if (CompatManager.isImmersiveEngineeringLoaded())
+        {   CompatManager.ImmersiveEngineering.invalidateHeaterCap(this);
         }
     }
 }

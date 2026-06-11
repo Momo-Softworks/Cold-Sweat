@@ -1,9 +1,11 @@
 package com.momosoftworks.coldsweat.compat;
 
+import blusunrize.immersiveengineering.api.tool.ExternalHeaterHandler;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.core.init.FetchSeasonsModsEvent;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.compat.create.ColdSweatDisplayBehaviors;
 import com.momosoftworks.coldsweat.common.item.ThermometerItem;
@@ -41,6 +43,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -94,6 +97,7 @@ public class CompatManager
     private static final boolean TWILIGHT_FOREST_LOADED = modLoaded("twilightforest");
     private static final boolean AETHER_LOADED = modLoaded("aether");
     private static final boolean REGIONS_UNEXPLORED_LOADED = modLoaded("regions_unexplored");
+    private static final boolean IMMERSIVE_ENGINEERING_LOADED = modLoaded("immersiveengineering");
 
     private static final List<String> SEASONS_MODS = new ArrayList<>();
 
@@ -219,6 +223,9 @@ public class CompatManager
     }
     public static boolean isRegionsUnexploredLoaded()
     {   return REGIONS_UNEXPLORED_LOADED;
+    }
+    public static boolean isImmersiveEngineeringLoaded()
+    {   return IMMERSIVE_ENGINEERING_LOADED;
     }
 
     public static abstract class Curios
@@ -401,6 +408,40 @@ public class CompatManager
             Vector3d translated = new Vector3d(pos.getX(), pos.getY(), pos.getZ());
             translated = ship.getWorldToShip().transformPosition(translated);
             return new BlockPos(VectorConversionsMCKt.toMinecraft(translated));
+        }
+    }
+
+    public static abstract class ImmersiveEngineering
+    {
+        public static final int ENERGY_PER_FUEL = 256;
+        private static final Map<HearthBlockEntity, LazyOptional<ExternalHeaterHandler.IExternalHeatable>> HEATER_CAPS = new HashMap<>();
+
+        public static LazyOptional<ExternalHeaterHandler.IExternalHeatable> getHeaterCap(HearthBlockEntity hearthLike)
+        {
+            LazyOptional<ExternalHeaterHandler.IExternalHeatable> heaterCap = HEATER_CAPS.computeIfAbsent(hearthLike, hearth ->
+                LazyOptional.of(() -> new ExternalHeaterHandler.IExternalHeatable()
+                {
+                    @Override
+                    public int doHeatTick(int energyAvailable, boolean redstone)
+                    {
+                        if (hearth.getFuel(HearthBlockEntity.FuelType.HOT).get() < hearth.getMaxFuel())
+                        {
+                            if (energyAvailable >= ENERGY_PER_FUEL)
+                            {
+                                hearth.addHotFuel(1, true);
+                                return ENERGY_PER_FUEL;
+                            }
+                        }
+                        return 0;
+                    }
+                }));
+            heaterCap.addListener(cap -> HEATER_CAPS.remove(hearthLike));
+            return heaterCap;
+        }
+
+        public static void invalidateHeaterCap(HearthBlockEntity hearthLike)
+        {   LazyOptional<ExternalHeaterHandler.IExternalHeatable> cap = HEATER_CAPS.remove(hearthLike);
+            if (cap != null) cap.invalidate();
         }
     }
 

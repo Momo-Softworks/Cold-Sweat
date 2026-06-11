@@ -31,8 +31,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
+
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.wrapper.SidedInvWrapper;
+import blusunrize.immersiveengineering.api.tool.ExternalHeaterHandler;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -309,6 +311,19 @@ public class BoilerBlockEntity extends HearthBlockEntity
                 default -> slotHandlers[2].cast();
             };
         }
+        // IE External Heater support
+        if (!this.remove && CompatManager.isImmersiveEngineeringLoaded() && capability == ExternalHeaterHandler.CAPABILITY)
+        {   return CompatManager.ImmersiveEngineering.getHeaterCap(this).cast();
+        }
         return super.getCapability(capability, face);
+    }
+
+    @Override
+    public void invalidateCaps()
+    {
+        super.invalidateCaps();
+        if (CompatManager.isImmersiveEngineeringLoaded())
+        {   CompatManager.ImmersiveEngineering.invalidateHeaterCap(this);
+        }
     }
 }
