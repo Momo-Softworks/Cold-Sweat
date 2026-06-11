@@ -177,6 +177,7 @@ dependencies {
     implementation fg.deobf("curse.maven:curios-309927:5843737")
     implementation fg.deobf("maven.modrinth:thirst-was-reclaimed:1.19.2-3.0.1")
     compileOnly fg.deobf("curse.maven:spoiled-364918:4614777")
+    compileOnly fg.deobf("curse.maven:immersive-engineering-231951:5222176")
 
     // Ad Astra (compat)
     compileOnly "earth.terrarium.adastra:ad_astra-forge-1.19.2:1.12.7"
