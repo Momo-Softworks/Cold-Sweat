@@ -30,8 +30,10 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
+
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.wrapper.SidedInvWrapper;
+import blusunrize.immersiveengineering.api.tool.ExternalHeaterHandler;
 
 import java.util.Arrays;
 import java.util.List;

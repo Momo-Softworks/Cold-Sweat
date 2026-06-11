@@ -1,17 +1,17 @@
 package com.momosoftworks.coldsweat.compat;
 
+import blusunrize.immersiveengineering.api.tool.ExternalHeaterHandler;
 import com.blackgear.cavesandcliffs.common.entity.GoatEntity;
 import com.blackgear.cavesandcliffs.core.registries.entity.CCBEntityTypes;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.core.init.FetchSeasonsModsEvent;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
+import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.capability.handler.ShearableFurManager;
 import com.momosoftworks.coldsweat.common.item.ThermometerItem;
 import com.momosoftworks.coldsweat.compat.curios.EquipableCurio;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.data.tag.ModItemTags;
-import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.simibubi.create.content.contraptions.fluids.pipes.EncasedPipeBlock;
 import com.simibubi.create.content.contraptions.fluids.pipes.FluidPipeBlock;
 import com.simibubi.create.content.contraptions.fluids.pipes.GlassFluidPipeBlock;
@@ -27,6 +27,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -35,7 +36,6 @@ import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.joml.Matrix4dc;
-import org.joml.primitives.AABBd;
 import org.joml.primitives.AABBd;
 import org.valkyrienskies.core.api.Ship;
 import org.valkyrienskies.core.game.ChunkClaim;
@@ -49,9 +49,7 @@ import top.theillusivec4.curios.common.capability.CurioItemCapability;
 import top.theillusivec4.curios.common.capability.ItemizedCurioCapability;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 @Mod.EventBusSubscriber
 public class CompatManager
@@ -79,6 +77,7 @@ public class CompatManager
     private static final boolean TOUGH_AS_NAILS_LOADED = modLoaded("toughasnails");
     private static final boolean TWILIGHT_FOREST_LOADED = modLoaded("twilightforest");
     private static final boolean AETHER_LOADED = modLoaded("aether");
+    private static final boolean IMMERSIVE_ENGINEERING_LOADED = modLoaded("immersiveengineering");
 
     private static final List<String> SEASONS_MODS = new ArrayList<>();
 
@@ -208,6 +207,9 @@ public class CompatManager
     public static boolean isAetherLoaded()
     {   return AETHER_LOADED;
     }
+    public static boolean isImmersiveEngineeringLoaded()
+    {   return IMMERSIVE_ENGINEERING_LOADED;
+    }
 
     public static abstract class Curios
     {
@@ -284,12 +286,7 @@ public class CompatManager
         public static Collection<AxisAlignedBB> transformWorldToShip(World level, AxisAlignedBB aabb)
         {
             Iterable<Ship> ships = VSGameUtilsKt.getShipsIntersecting(level, aabb);
-            if (!ships.iterator().hasNext())
-            {
-                return new HashSet(){{
-                    add();
-                }};
-            }
+            if (!ships.iterator().hasNext()) return new HashSet<>();
             Set<AxisAlignedBB> subAABBs = new HashSet<>();
             ships.forEach(ship ->
             {
@@ -378,6 +375,31 @@ public class CompatManager
             }.create();
         }
         return null;
+    }
+
+    public static abstract class ImmersiveEngineering
+    {
+        public static final int ENERGY_PER_FUEL = 256;
+
+        public static void registerHeatableAdapter(HearthBlockEntity hearthLike)
+        {
+            ExternalHeaterHandler.registerHeatableAdapter(hearthLike.getClass(), new ExternalHeaterHandler.HeatableAdapter<HearthBlockEntity>()
+            {
+                @Override
+                public int doHeatTick(HearthBlockEntity hearth, int energyAvailable, boolean redstone)
+                {
+                    if (hearth.getFuel(HearthBlockEntity.FuelType.HOT).get() < hearth.getMaxFuel())
+                    {
+                        if (energyAvailable >= ENERGY_PER_FUEL)
+                        {
+                            hearth.addHotFuel(1, true);
+                            return ENERGY_PER_FUEL;
+                        }
+                    }
+                    return 0;
+                }
+            });
+        }
     }
 
     /* Compat Events */

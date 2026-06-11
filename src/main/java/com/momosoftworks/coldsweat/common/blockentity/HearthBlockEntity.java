@@ -87,8 +87,9 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import blusunrize.immersiveengineering.api.tool.ExternalHeaterHandler;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -901,6 +902,10 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         this.checkForSmokestack();
         this.checkInputSignal();
         this.level.getLightEngine().checkBlock(this.getBlockPos());
+        // Immersive Engineering compat
+        if (CompatManager.isImmersiveEngineeringLoaded() && this.supportsHeating())
+        {   CompatManager.ImmersiveEngineering.registerHeatableAdapter(this);
+        }
     }
 
     @Override
@@ -1521,6 +1526,16 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         @NotNull
         public FluidStack drain(FluidStack fluidStack, FluidAction fluidAction)
         {   return FluidStack.EMPTY;
+        }
+    }
+
+    @Override
+    public void invalidateCaps()
+    {
+        super.invalidateCaps();
+        fuelFluidHolder.invalidate();
+        if (CompatManager.isImmersiveEngineeringLoaded())
+        {   ExternalHeaterHandler.adapterMap.remove(this.getClass());
         }
     }
 }
