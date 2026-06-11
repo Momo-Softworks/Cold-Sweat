@@ -30,8 +30,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
+
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.wrapper.SidedInvWrapper;
+import blusunrize.immersiveengineering.api.tool.ExternalHeaterHandler;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -47,6 +49,31 @@ public class BoilerBlockEntity extends HearthBlockEntity
 
     LazyOptional<? extends IItemHandler>[] slotHandlers =
             SidedInvWrapper.create(this, Direction.UP, Direction.DOWN, Direction.NORTH);
+
+    public static final int ENERGY_PER_FUEL = 256; // FE consumed per fuel unit added
+
+    // IE External Heater compat: created lazily to avoid class loading if IE is not present
+    private LazyOptional<ExternalHeaterHandler.IExternalHeatable> heaterCap;
+    private LazyOptional<ExternalHeaterHandler.IExternalHeatable> getHeaterCap()
+    {
+        if (heaterCap == null)
+        {
+            heaterCap = LazyOptional.of(() -> (energyAvailable, redstone) ->
+            {
+                if (this.getFuel() < this.getMaxFuel())
+                {
+                    int energyToUse = Math.min(energyAvailable, ENERGY_PER_FUEL);
+                    if (energyToUse >= ENERGY_PER_FUEL)
+                    {
+                        this.addFuel(1);
+                        return ENERGY_PER_FUEL;
+                    }
+                }
+                return 0;
+            });
+        }
+        return heaterCap;
+    }
 
     public BoilerBlockEntity(BlockPos pos, BlockState state)
     {   super(ModBlockEntities.BOILER, pos, state);
@@ -307,6 +334,18 @@ public class BoilerBlockEntity extends HearthBlockEntity
                 default -> slotHandlers[2].cast();
             };
         }
+        // IE External Heater support
+        if (!this.remove && CompatManager.isIELoaded() && capability == ExternalHeaterHandler.CAPABILITY)
+        {
+            return getHeaterCap().cast();
+        }
         return super.getCapability(capability, face);
+    }
+
+    @Override
+    public void invalidateCaps()
+    {
+        super.invalidateCaps();
+        if (heaterCap != null) heaterCap.invalidate();
     }
 }

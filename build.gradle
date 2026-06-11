@@ -170,6 +170,7 @@ dependencies {
     compileOnly fg.deobf("curse.maven:tough-as-nails-246391:5815863")
     implementation fg.deobf("curse.maven:curios-309927:5367944-sources-6418456")
     compileOnly fg.deobf("curse.maven:thirst-was-taken-679270:6660408")
+    compileOnly fg.deobf("curse.maven:immersive-engineering-231951:6206989")
     implementation fg.deobf("curse.maven:glitchcore-955399:5787839")
     implementation fg.deobf("curse.maven:serene-seasons-291874:6398227")
     implementation fg.deobf("curse.maven:spoiled-364918:6828889")
