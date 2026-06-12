@@ -215,8 +215,8 @@ public class EntityTempManager
             event.addModifierById(Trait.WORLD, new ResourceLocation("weather2:storm"),
                                   mod -> mod.tickRate(slowTickRate),
                                   Placement.of(Mode.ADD_AFTER, Order.FIRST, mod2 -> mod2 instanceof BiomeTempModifier).noDuplicates(Matcher.SAME_CLASS));
-            // Valkyrien Skies Compat
-            event.addModifierById(Trait.WORLD, new ResourceLocation("valkyrienskies:ship_blocks"),
+            // Sublevel block temperature (i.e. Valkyrien Skies ships)
+            event.addModifierById(Trait.WORLD, new ResourceLocation(ColdSweat.MOD_ID, "sublevel_blocks"),
                                   mod -> mod.tickRate(mediumTickRate2),
                                   Placement.of(Mode.ADD_AFTER, Order.FIRST, mod2 -> mod2 instanceof BlockTempModifier).noDuplicates(Matcher.SAME_CLASS));
 
