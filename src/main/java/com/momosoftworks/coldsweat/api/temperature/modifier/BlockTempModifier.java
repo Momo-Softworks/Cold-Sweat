@@ -53,11 +53,11 @@ public class BlockTempModifier extends TempModifier
 
         Level level = entity.level();
         int range = this.getNBT().contains("RangeOverride", 3) ? this.getNBT().getInt("RangeOverride") : ConfigSettings.BLOCK_RANGE.get();
-        BlockPos blockPos = WorldHelper.sublevelToWorld(level, entity.blockPosition());
+        BlockPos entPos = entity.blockPosition();
 
-        int entX = blockPos.getX();
-        int entY = blockPos.getY();
-        int entZ = blockPos.getZ();
+        int entX = entPos.getX();
+        int entY = entPos.getY();
+        int entZ = entPos.getZ();
         BlockPos.MutableBlockPos blockpos = new BlockPos.MutableBlockPos();
 
         // Only tick advancements every second, because Minecraft advancements are not performant at all
@@ -218,11 +218,10 @@ public class BlockTempModifier extends TempModifier
 
     private double getGroupTotal(BlockTemp blockTemp)
     {
-        if (!(blockTemp instanceof ConfiguredBlockTemp config)) return this.blockTempTotals.getOrDefault(blockTemp, 0d);
-
-        return config.getData().effectGroup()
-               .map(group -> groupTotals.getOrDefault(group, 0d))
-               .orElseGet(() -> this.blockTempTotals.getOrDefault(blockTemp, 0d));
+        if (!(blockTemp instanceof ConfiguredBlockTemp config) || config.getData().effectGroup().isEmpty())
+        {   return this.blockTempTotals.getOrDefault(blockTemp, 0d);
+        }
+        return groupTotals.getOrDefault(config.getData().effectGroup().get(), 0d);
     }
 
     private void updateGroupTotal(BlockTemp blockTemp, double delta)

@@ -229,15 +229,20 @@ public abstract class WorldHelper
         }
         return aabb;
     }
+    /**
+     * Gets the sublevel-space areas of the dynamic objects (i.e. Valkyrien Skies ships) intersecting the given world-space area
+     * @return One transformed AABB per intersecting object, or an empty collection if there are none
+     */
     public static Collection<AABB> worldToSublevel(Level level, AABB aabb)
     {
+        Set<AABB> sublevelAreas = new HashSet<>();
         if (CompatManager.isValkyrienSkiesLoaded())
-        {   return CompatManager.Valkyrien.transformWorldToShip(level, aabb);
+        {   sublevelAreas.addAll(CompatManager.Valkyrien.transformWorldToShip(level, aabb));
         }
         if (CompatManager.isSableLoaded())
-        {   return CompatManager.Sable.transformWorldToSubl(level, aabb);
+        {   sublevelAreas.addAll(CompatManager.Sable.transformWorldToSubl(level, aabb));
         }
-        return Set.of(aabb);
+        return sublevelAreas;
     }
 
     /**
@@ -608,12 +613,8 @@ public abstract class WorldHelper
     public static List<Entity> getEntities(Level level, AABB aabb, Predicate<? super Entity> predicate)
     {
         List<Entity> entities = level.getEntities((Entity) null, aabb, predicate);
-        Collection<AABB> shipyardAABBs = worldToSublevel(level, aabb);
-        for (AABB shipyardAABB : shipyardAABBs)
-        {
-            if (!shipyardAABB.equals(aabb))
-            {   entities.addAll(level.getEntities((Entity) null, shipyardAABB, predicate));
-            }
+        for (AABB shipyardAABB : worldToSublevel(level, aabb))
+        {   entities.addAll(level.getEntities((Entity) null, shipyardAABB, predicate));
         }
         return entities.stream().distinct().toList();
     }
@@ -621,12 +622,8 @@ public abstract class WorldHelper
     public static <T extends Entity> List<T> getEntitiesOfClass(Class<T> clazz, Level level, AABB aabb, Predicate<? super Entity> predicate)
     {
         List<T> entities = level.getEntitiesOfClass(clazz, aabb, predicate);
-        Collection<AABB> shipyardAABBs = worldToSublevel(level, aabb);
-        for (AABB shipyardAABB : shipyardAABBs)
-        {
-            if (!shipyardAABB.equals(aabb))
-            {   entities.addAll(level.getEntitiesOfClass(clazz, shipyardAABB, predicate));
-            }
+        for (AABB shipyardAABB : worldToSublevel(level, aabb))
+        {   entities.addAll(level.getEntitiesOfClass(clazz, shipyardAABB, predicate));
         }
         return entities.stream().distinct().toList();
     }

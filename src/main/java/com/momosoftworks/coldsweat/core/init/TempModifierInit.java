@@ -113,6 +113,9 @@ public class TempModifierInit
         event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "simple"), SimpleTempModifier::new);
 
         // Compat
+        if (CompatManager.isSublevelCompatLoaded())
+        {   event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "sublevel_blocks"), SublevelBlockTempModifier::new);
+        }
         if (CompatManager.isSereneSeasonsLoaded())
         {   event.register(ResourceLocation.fromNamespaceAndPath("sereneseasons", "season"), () -> new com.momosoftworks.coldsweat.api.temperature.modifier.compat.SereneSeasonsTempModifier());
         }

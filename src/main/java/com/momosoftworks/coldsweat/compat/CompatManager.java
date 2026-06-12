@@ -69,6 +69,7 @@ import weather2.weathersystem.storm.StormObject;
 import weather2.weathersystem.storm.WeatherObject;
 
 import java.util.*;
+import java.util.function.UnaryOperator;
 
 @EventBusSubscriber
 public class CompatManager
@@ -208,6 +209,12 @@ public class CompatManager
     }
     public static boolean isValkyrienSkiesLoaded()
     {   return VALKYRIEN_SKIES_LOADED;
+    }
+    /**
+     * @return True if any loaded mod implements "sublevels" (movable block structures, i.e. Valkyrien Skies ships)
+     */
+    public static boolean isSublevelCompatLoaded()
+    {   return VALKYRIEN_SKIES_LOADED || SABLE_LOADED;
     }
     public static boolean isToughAsNailsLoaded()
     {   return TOUGH_AS_NAILS_LOADED;
@@ -405,11 +412,19 @@ public class CompatManager
         public static Collection<AABB> transformWorldToShip(Level level, AABB aabb)
         {
             /*
-            AtomicReference<AABB> translated = new AtomicReference<>(aabb);
-            VSGameUtilsKt.transformFromWorldToNearbyShipsAndWorld(level, aabb, translated::set);
-            return translated.get();
-             */
-            return Set.of(aabb);
+            Iterable<Ship> ships = VSGameUtilsKt.getShipsIntersecting(level, aabb);
+            if (!ships.iterator().hasNext()) return Set.of();
+            Set<AABB> subAABBs = new HashSet<>();
+            ships.forEach(ship ->
+            {
+                AABBd aabbd = VectorConversionsMCKt.toJOML(aabb);
+                Matrix4dc worldToShip = ship.getWorldToShip();
+                aabbd = aabbd.transform(worldToShip);
+                subAABBs.add(VectorConversionsMCKt.toMinecraft(aabbd));
+            });
+            return Collections.unmodifiableSet(subAABBs);
+            */
+            return Set.of();
         }
 
         public static BlockPos transformShipToWorld(Level level, BlockPos pos)
@@ -449,23 +464,37 @@ public class CompatManager
             if (!COMPANION.isInPlotGrid(level, aabb.getCenter())) return aabb;
             SubLevel subLevel = COMPANION.getContaining(level, aabb.getCenter());
             if (subLevel == null) return aabb;
-            Vec3 aabbMin = subLevel.logicalPose().transformPosition(new Vec3(aabb.minX, aabb.minY, aabb.minZ));
-            Vec3 aabbMax = subLevel.logicalPose().transformPosition(new Vec3(aabb.maxX, aabb.maxY, aabb.maxZ));
-            return new AABB(aabbMin, aabbMax);
+            return transformAABB(aabb, subLevel.logicalPose()::transformPosition);
         }
 
         public static Collection<AABB> transformWorldToSubl(Level level, AABB aabb)
         {
             Iterable<SubLevel> subLevels = COMPANION.getAllIntersecting(level, new BoundingBox3d(aabb));
-            if (!subLevels.iterator().hasNext()) return Set.of(aabb);
+            if (!subLevels.iterator().hasNext()) return Set.of();
             Set<AABB> subAABBs = new HashSet<>();
             subLevels.forEach(subLevel ->
-            {
-                Vec3 aabbMin = subLevel.logicalPose().transformPositionInverse(new Vec3(aabb.minX, aabb.minY, aabb.minZ));
-                Vec3 aabbMax = subLevel.logicalPose().transformPositionInverse(new Vec3(aabb.maxX, aabb.maxY, aabb.maxZ));
-                subAABBs.add(new AABB(aabbMin, aabbMax));
+            {   subAABBs.add(transformAABB(aabb, subLevel.logicalPose()::transformPositionInverse));
             });
             return Collections.unmodifiableSet(subAABBs);
+        }
+
+        /**
+         * Transforms all 8 corners of the AABB and returns their enclosing box.<br>
+         * Transforming only the min/max corners gives the wrong bounds if the sublevel is rotated.
+         */
+        private static AABB transformAABB(AABB aabb, UnaryOperator<Vec3> transform)
+        {
+            double minX = Double.POSITIVE_INFINITY, minY = Double.POSITIVE_INFINITY, minZ = Double.POSITIVE_INFINITY;
+            double maxX = Double.NEGATIVE_INFINITY, maxY = Double.NEGATIVE_INFINITY, maxZ = Double.NEGATIVE_INFINITY;
+            for (int i = 0; i < 8; i++)
+            {
+                Vec3 corner = transform.apply(new Vec3((i & 1) == 0 ? aabb.minX : aabb.maxX,
+                                                       (i & 2) == 0 ? aabb.minY : aabb.maxY,
+                                                       (i & 4) == 0 ? aabb.minZ : aabb.maxZ));
+                minX = Math.min(minX, corner.x); minY = Math.min(minY, corner.y); minZ = Math.min(minZ, corner.z);
+                maxX = Math.max(maxX, corner.x); maxY = Math.max(maxY, corner.y); maxZ = Math.max(maxZ, corner.z);
+            }
+            return new AABB(minX, minY, minZ, maxX, maxY, maxZ);
         }
 
         public static BlockPos transformSublToWorld(Level level, BlockPos pos)
