@@ -203,6 +203,12 @@ public class CompatManager
     public static boolean isValkyrienSkiesLoaded()
     {   return VALKYRIEN_SKIES_LOADED;
     }
+    /**
+     * @return True if any loaded mod implements "sublevels" (movable block structures, i.e. Valkyrien Skies ships)
+     */
+    public static boolean isSublevelCompatLoaded()
+    {   return VALKYRIEN_SKIES_LOADED;
+    }
     public static boolean isToughAsNailsLoaded()
     {   return TOUGH_AS_NAILS_LOADED;
     }
@@ -342,7 +348,7 @@ public class CompatManager
         public static Collection<AABB> transformWorldToShip(Level level, AABB aabb)
         {
             Iterable<Ship> ships = VSGameUtilsKt.getShipsIntersecting(level, aabb);
-            if (!ships.iterator().hasNext()) return Set.of(aabb);
+            if (!ships.iterator().hasNext()) return Set.of();
             Set<AABB> subAABBs = new HashSet<>();
             ships.forEach(ship ->
             {
