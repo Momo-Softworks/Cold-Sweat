@@ -51,73 +51,70 @@ public class EntityTempBuilderJS
         return this;
     }
     public EntityTempBuilderJS temperature(double temperature)
-    {   return temperature(m -> temperature);
+    {   this.temperature = ValueGetter.constant(temperature);
+        return this;
     }
 
     public EntityTempBuilderJS range(Function<Map<String, Object>, Double> function)
-    {
-        this.range = ValueGetter.of(function);
+    {   this.range = ValueGetter.of(function);
         return this;
     }
     public EntityTempBuilderJS range(double range)
-    {   return range(m -> range);
+    {   this.range = ValueGetter.constant(range);
+        return this;
     }
 
     public EntityTempBuilderJS units(String units)
-    {
-        this.units = Temperature.Units.fromID(units);
+    {   this.units = Temperature.Units.fromID(units);
         return this;
     }
 
     public EntityTempBuilderJS maxEffect(Function<Map<String, Object>, Double> function)
-    {
-        this.maxEffect = ValueGetter.of(function);
+    {   this.maxEffect = ValueGetter.of(function);
         return this;
     }
     public EntityTempBuilderJS maxEffect(double maxEffect)
-    {   return maxEffect(m -> maxEffect);
+    {   this.maxEffect = ValueGetter.constant(maxEffect);
+        return this;
     }
 
     public EntityTempBuilderJS maxTemperature(Function<Map<String, Object>, Double> function)
-    {
-        this.maxTemperature = ValueGetter.of(function);
+    {   this.maxTemperature = ValueGetter.of(function);
         return this;
     }
     public EntityTempBuilderJS maxTemperature(double maxTemperature)
-    {
-        double converted = Temperature.convert(maxTemperature, units, Temperature.Units.MC, true);
-        return maxTemperature(m -> converted);
+    {   double converted = Temperature.convert(maxTemperature, units, Temperature.Units.MC, true);
+        this.maxTemperature = ValueGetter.constant(converted);
+        return this;
     }
 
     public EntityTempBuilderJS minTemperature(Function<Map<String, Object>, Double> function)
-    {
-        this.minTemperature = ValueGetter.of(function);
+    {   this.minTemperature = ValueGetter.of(function);
         return this;
     }
     public EntityTempBuilderJS minTemperature(double minTemperature)
     {   double converted = Temperature.convert(minTemperature, units, Temperature.Units.MC, true);
-        return minTemperature(m -> converted);
+        this.minTemperature = ValueGetter.constant(converted);
+        return this;
     }
 
     public EntityTempBuilderJS entityPredicate(Predicate<Entity> entityPredicate)
-    {
-        this.entityPredicate.add(new EntityRequirement(entityPredicate), false);
+    {   this.entityPredicate.add(new EntityRequirement(entityPredicate), false);
         return this;
     }
 
     public EntityTempBuilderJS otherEntityPredicate(Predicate<Entity> otherEntityPredicate)
-    {
-        this.otherEntityPredicate.add(new EntityRequirement(otherEntityPredicate), false);
+    {   this.otherEntityPredicate.add(new EntityRequirement(otherEntityPredicate), false);
         return this;
     }
 
     public EntityTempBuilderJS affectsSelf(Function<Map<String, Object>, Boolean> function)
-    {
-        this.affectsSelf = ValueGetter.of(function);
+    {   this.affectsSelf = ValueGetter.of(function);
         return this;
     }
     public EntityTempBuilderJS affectsSelf(boolean affectsSelf)
-    {   return affectsSelf(m -> affectsSelf);
+    {   this.affectsSelf = ValueGetter.constant(affectsSelf);
+        return this;
     }
 
     public EntityTempData build()
