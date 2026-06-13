@@ -59,41 +59,43 @@ public class ItemTempBuilderJS
     }
 
     public ItemTempBuilderJS temperature(Function<Map<String, Object>, Double> getter)
-    {
-        this.temperature = new ValueGetter<>(ValueGetter.Type.EXPRESSION, "custom", getter);
+    {   this.temperature = ValueGetter.of(getter);
         return this;
     }
     public ItemTempBuilderJS temperature(double temperature)
-    {   return temperature(m -> temperature);
+    {   this.temperature = ValueGetter.constant(temperature);
+        return this;
     }
 
     public ItemTempBuilderJS maxEffect(Function<Map<String, Object>, Double> getter)
-    {   this.maxEffect = new ValueGetter<>(ValueGetter.Type.EXPRESSION, "custom", getter);
+    {   this.maxEffect = ValueGetter.of(getter);
         return this;
     }
     public ItemTempBuilderJS maxEffect(double maxEffect)
-    {   return maxEffect(m -> maxEffect);
+    {   this.maxEffect = ValueGetter.constant(maxEffect);
+        return this;
     }
 
     public ItemTempBuilderJS maxTemp(Function<Map<String, Object>, Double> getter)
-    {   this.maxTemp = new ValueGetter<>(ValueGetter.Type.EXPRESSION, "custom", getter);
+    {   this.maxTemp = ValueGetter.of(getter);
         return this;
     }
     public ItemTempBuilderJS maxTemp(double maxTemp)
-    {   return maxTemp(m -> maxTemp);
+    {   this.maxTemp = ValueGetter.constant(maxTemp);
+        return this;
     }
 
     public ItemTempBuilderJS minTemp(Function<Map<String, Object>, Double> getter)
-    {   this.minTemp = new ValueGetter<>(ValueGetter.Type.EXPRESSION, "custom", getter);
+    {   this.minTemp = ValueGetter.of(getter);
         return this;
     }
     public ItemTempBuilderJS minTemp(double minTemp)
-    {   return minTemp(m -> minTemp);
+    {   this.minTemp = ValueGetter.constant(minTemp);
+        return this;
     }
 
     public ItemTempBuilderJS trait(String trait)
-    {
-        this.trait = Temperature.Trait.fromID(trait);
+    {   this.trait = Temperature.Trait.fromID(trait);
         return this;
     }
 
@@ -106,8 +108,7 @@ public class ItemTempBuilderJS
     }
 
     public ItemTempBuilderJS slotsInRange(int min, int max)
-    {
-        this.slots.add(Either.left(new IntegerBounds(min, max)));
+    {   this.slots.add(Either.left(new IntegerBounds(min, max)));
         return this;
     }
 
@@ -120,14 +121,12 @@ public class ItemTempBuilderJS
     }
 
     public ItemTempBuilderJS itemPredicate(Predicate<ItemStack> itemPredicate)
-    {
-        this.itemPredicate.add(new ItemRequirement(itemPredicate), false);
+    {   this.itemPredicate.add(new ItemRequirement(itemPredicate), false);
         return this;
     }
 
     public ItemTempBuilderJS entityPredicate(Predicate<Entity> entityPredicate)
-    {
-        this.entityPredicate.add(new EntityRequirement(entityPredicate), false);
+    {   this.entityPredicate.add(new EntityRequirement(entityPredicate), false);
         return this;
     }
 
@@ -142,27 +141,30 @@ public class ItemTempBuilderJS
         return this;
     }
 
-    public ItemTempBuilderJS immuneToModifier(String modifierId, Function<Map<String, Object>, Double> immunity)
+    protected ItemTempBuilderJS immuneToModifier(String modifierId, ValueGetter<Double> immunity)
     {
         ResourceLocation location = ResourceLocation.parse(modifierId);
         if (!TempModifierRegistry.getEntries().containsKey(location))
         {   ColdSweat.LOGGER.warn("Tried to add immunity to non-existent temperature modifier: {}", location);
             return this;
         }
-        immuneTempModifiers.put(ResourceLocation.parse(modifierId), new ValueGetter<>(ValueGetter.Type.EXPRESSION, "custom", immunity));
+        immuneTempModifiers.put(ResourceLocation.parse(modifierId), immunity);
         return this;
     }
+    public ItemTempBuilderJS immuneToModifier(String modifierId, Function<Map<String, Object>, Double> immunity)
+    {   return immuneToModifier(modifierId, ValueGetter.of(immunity));
+    }
     public ItemTempBuilderJS immuneToModifier(String modifierId, double immunity)
-    {   return immuneToModifier(modifierId, m -> immunity);
+    {   return immuneToModifier(modifierId, ValueGetter.constant(immunity));
     }
 
     public ItemTempBuilderJS hideIfUnmet(Function<Map<String, Object>, Boolean> hideIfUnmet)
-    {
-        this.hideIfUnmet = new ValueGetter<>(ValueGetter.Type.EXPRESSION, "custom", hideIfUnmet);
+    {   this.hideIfUnmet = ValueGetter.of(hideIfUnmet);
         return this;
     }
     public ItemTempBuilderJS hideIfUnmet(boolean hideIfUnmet)
-    {   return hideIfUnmet(m -> hideIfUnmet);
+    {   this.hideIfUnmet = ValueGetter.constant(hideIfUnmet);
+        return this;
     }
 
     public ItemTempData build()

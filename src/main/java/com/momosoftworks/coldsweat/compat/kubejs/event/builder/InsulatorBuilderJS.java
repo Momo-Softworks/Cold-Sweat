@@ -114,7 +114,8 @@ public class InsulatorBuilderJS
         return this;
     }
     public InsulatorBuilderJS fillSlots(boolean multiSlot)
-    {   return this.fillSlots(m -> multiSlot);
+    {   this.fillSlots = ValueGetter.constant(multiSlot);
+        return this;
     }
 
     public InsulatorBuilderJS hideIfUnmet(Function<Map<String, Object>, Boolean> function)
@@ -123,7 +124,8 @@ public class InsulatorBuilderJS
         return this;
     }
     public InsulatorBuilderJS hideIfUnmet(boolean hideIfUnmet)
-    {   return this.hideIfUnmet(m -> hideIfUnmet);
+    {   this.hideIfUnmet = ValueGetter.constant(hideIfUnmet);
+        return this;
     }
 
     public InsulatorBuilderJS hintKey(String key)

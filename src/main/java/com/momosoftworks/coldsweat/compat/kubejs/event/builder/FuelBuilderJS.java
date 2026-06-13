@@ -37,17 +37,16 @@ public class FuelBuilderJS
     }
 
     public FuelBuilderJS fuel(Function<Map<String, Object>, Integer> function)
-    {
-        this.fuel = ValueGetter.of(function);
+    {   this.fuel = ValueGetter.of(function);
         return this;
     }
     public FuelBuilderJS fuel(int temperature)
-    {   return fuel(m -> temperature);
+    {   this.fuel = ValueGetter.constant(temperature);
+        return this;
     }
 
     public FuelBuilderJS itemPredicate(Predicate<ItemStack> itemPredicate)
-    {
-        this.itemPredicate.add(new ItemRequirement(itemPredicate), false);
+    {   this.itemPredicate.add(new ItemRequirement(itemPredicate), false);
         return this;
     }
 
