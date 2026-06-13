@@ -26,6 +26,14 @@ public class CapabilityCache<C, K extends ICapabilityProvider> extends MappedCac
         this.capability = capability;
     }
 
+    @Override
+    public LazyOptional<C> get(K key)
+    {
+        LazyOptional<C> existing = super.get(key);
+        if (!existing.isPresent()) return this.getFresh(key);
+        return existing;
+    }
+
     public void ifLazyPresent(K key, Consumer<LazyOptional<C>> consumer)
     {
         LazyOptional<C> cap = cache.get(key);
