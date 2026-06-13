@@ -48,12 +48,12 @@ public class FoodBuilderJS
     }
 
     public FoodBuilderJS temperature(Function<Map<String, Object>, Double> getter)
-    {
-        this.temperature = new ValueGetter<>(ValueGetter.Type.EXPRESSION, "custom", getter);
+    {   this.temperature = new ValueGetter<>(ValueGetter.Type.EXPRESSION, "custom", getter);
         return this;
     }
     public FoodBuilderJS temperature(double temperature)
-    {   return temperature(m -> temperature);
+    {   this.temperature = ValueGetter.constant(temperature);
+        return this;
     }
 
     public FoodBuilderJS duration(Function<Map<String, Object>, Integer> getter)
@@ -61,7 +61,8 @@ public class FoodBuilderJS
         return this;
     }
     public FoodBuilderJS duration(int duration)
-    {   return duration(m -> duration);
+    {   this.duration = ValueGetter.constant(duration);
+        return this;
     }
 
     public FoodBuilderJS stackLimit(Function<Map<String, Object>, Integer> getter)
@@ -69,18 +70,17 @@ public class FoodBuilderJS
         return this;
     }
     public FoodBuilderJS stackLimit(int stackLimit)
-    {   return stackLimit(m -> stackLimit);
+    {   this.stackLimit = ValueGetter.constant(stackLimit);
+        return this;
     }
 
     public FoodBuilderJS itemPredicate(Predicate<ItemStack> itemPredicate)
-    {
-        this.itemPredicate.add(new ItemRequirement(itemPredicate), false);
+    {   this.itemPredicate.add(new ItemRequirement(itemPredicate), false);
         return this;
     }
 
     public FoodBuilderJS entityPredicate(Predicate<Entity> entityPredicate)
-    {
-        this.entityPredicate.add(new EntityRequirement(entityPredicate), false);
+    {   this.entityPredicate.add(new EntityRequirement(entityPredicate), false);
         return this;
     }
 

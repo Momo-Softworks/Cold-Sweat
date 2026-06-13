@@ -41,47 +41,48 @@ public class InsulatingMountBuilderJS
     }
 
     public InsulatingMountBuilderJS entityPredicate(Predicate<Entity> entityPredicate)
-    {
-        this.entityPredicate.add(new EntityRequirement(entityPredicate), false);
+    {   this.entityPredicate.add(new EntityRequirement(entityPredicate), false);
         return this;
     }
 
     public InsulatingMountBuilderJS riderPredicate(Predicate<Entity> riderPredicate)
-    {
-        this.riderPredicate.add(new EntityRequirement(riderPredicate), false);
+    {   this.riderPredicate.add(new EntityRequirement(riderPredicate), false);
         return this;
     }
 
     public InsulatingMountBuilderJS coldInsulation(Function<Map<String, Object>, Double> function)
-    {
-        this.coldInsulation = ValueGetter.of(function);
+    {   this.coldInsulation = ValueGetter.of(function);
         return this;
     }
     public InsulatingMountBuilderJS coldInsulation(double coldInsulation)
-    {   return this.coldInsulation(m -> coldInsulation);
+    {   this.coldInsulation = ValueGetter.constant(coldInsulation);
+        return this;
     }
 
     public InsulatingMountBuilderJS heatInsulation(Function<Map<String, Object>, Double> function)
-    {
-        this.heatInsulation = ValueGetter.of(function);
+    {   this.heatInsulation = ValueGetter.of(function);
         return this;
     }
     public InsulatingMountBuilderJS heatInsulation(double heatInsulation)
-    {   return this.heatInsulation(m -> heatInsulation);
+    {   this.heatInsulation = ValueGetter.constant(heatInsulation);
+        return this;
     }
 
-    public InsulatingMountBuilderJS immuneToModifier(String modifierId, Function<Map<String, Object>, Double> immunity)
+    protected InsulatingMountBuilderJS immuneToModifier(String modifierId, ValueGetter<Double> immunity)
     {
         ResourceLocation location = new ResourceLocation(modifierId);
         if (!TempModifierRegistry.getEntries().containsKey(location))
         {   ColdSweat.LOGGER.warn("Tried to add immunity to non-existent temperature modifier: {}", location);
             return this;
         }
-        modifierImmunities.put(new ResourceLocation(modifierId), new ValueGetter<>(ValueGetter.Type.EXPRESSION, "custom", immunity));
+        modifierImmunities.put(new ResourceLocation(modifierId), immunity);
         return this;
     }
+    public InsulatingMountBuilderJS immuneToModifier(String modifierId, Function<Map<String, Object>, Double> immunity)
+    {   return immuneToModifier(modifierId, ValueGetter.of(immunity));
+    }
     public InsulatingMountBuilderJS immuneToModifier(String modifierId, double immunity)
-    {   return immuneToModifier(modifierId, m -> immunity);
+    {   return immuneToModifier(modifierId, ValueGetter.constant(immunity));
     }
 
     public MountData build()
