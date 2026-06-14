@@ -28,12 +28,6 @@
   "result":
   {
     "id": "cold_sweat:soulspring_lamp",
-    "count": 1,
-    "components":
-    {
-      "cold_sweat:soulspring_data": {
-        "fuel": 64
-      }
-    }
+    "count": 1
   }
 }

@@ -3,7 +3,7 @@ package com.momosoftworks.coldsweat.core.init;
 import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
-import com.momosoftworks.coldsweat.common.capability.soul_lamp.SoulspringLampData;
+import com.momosoftworks.coldsweat.data.item_component.SoulspringLampData;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;

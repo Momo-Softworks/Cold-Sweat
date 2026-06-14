@@ -77,7 +77,7 @@ public class SyncItemPredicatesMessage implements CustomPacketPayload
     {
         buffer.writeInt(message.inventorySlot);
         buffer.writeOptional(Optional.ofNullable(message.equipmentSlot), FriendlyByteBuf::writeEnum);
-        ItemStack.OPTIONAL_STREAM_CODEC.encode(buffer, message.stack);
+        ItemStack.OPTIONAL_STREAM_CODEC.encode(buffer, message.stack.copyWithCount(1));
         buffer.writeMap(message.predicateMap, (buf, uuid) -> buf.writeUUID(uuid), FriendlyByteBuf::writeBoolean);
     }
 
