@@ -109,6 +109,7 @@ public class SyncItemPredicatesMessage
                                                        NetworkDirection.PLAY_TO_CLIENT);
             });
         }
+        context.setPacketHandled(true);
     }
 
     public static boolean hasDataToSend(ItemStack stack)
