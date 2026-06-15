@@ -1,9 +1,9 @@
 package com.momosoftworks.coldsweat.api.temperature.modifier;
 
 import com.momosoftworks.coldsweat.api.util.Temperature;
-import net.minecraft.entity.EntityLiving;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.player.EntityPlayer;
 
 import java.util.function.Function;
 
@@ -13,21 +13,26 @@ public class MountTempModifier extends TempModifier
     {   this(0, 0);
     }
 
-    public MountTempModifier(int warming, int cooling)
-    {   this.getNBT().setDouble("Warming", warming);
-        this.getNBT().setDouble("Cooling", cooling);
+    public MountTempModifier(double coldInsul, double heatInsul)
+    {   this.getNBT().setDouble("ColdInsulation", coldInsul);
+        this.getNBT().setDouble("HeatInsulation", heatInsul);
     }
 
     @Override
     public Function<Double, Double> calculate(EntityLivingBase entity, Temperature.Type type)
     {
-        return temp -> temp > 0
-                       ? temp / (1 + this.getNBT().getDouble("Cooling"))
-                       : temp / (1 + this.getNBT().getDouble("Warming"));
+        double insulationStrength = ConfigSettings.INSULATION_STRENGTH.get();
+
+        return temp ->
+        {
+            double insulation = temp > 0
+                                ? this.getNBT().getDouble("HeatInsulation")
+                                : this.getNBT().getDouble("ColdInsulation");
+            return CSMath.blend(temp, 0, insulation * insulationStrength, 0, 1);
+        };
     }
 
     public String getID()
-    {
-        return "cold_sweat:mount";
+    {   return "cold_sweat:mount";
     }
 }

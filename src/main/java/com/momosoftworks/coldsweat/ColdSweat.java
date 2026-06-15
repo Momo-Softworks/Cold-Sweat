@@ -7,6 +7,7 @@ import com.momosoftworks.coldsweat.common.event.EntityTempManager;
 import com.momosoftworks.coldsweat.common.event.RegisterDispenserBehaviors;
 import com.momosoftworks.coldsweat.config.ClientSettingsConfig;
 import com.momosoftworks.coldsweat.config.ColdSweatConfig;
+import com.momosoftworks.coldsweat.config.EntitySettingsConfig;
 import com.momosoftworks.coldsweat.config.ItemSettingsConfig;
 import com.momosoftworks.coldsweat.config.WorldSettingsConfig;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
@@ -66,6 +67,7 @@ public class ColdSweat
         regEventHandler(new ColdSweatConfig());
         regEventHandler(new WorldSettingsConfig());
         regEventHandler(new ItemSettingsConfig());
+        regEventHandler(new EntitySettingsConfig());
         regEventHandler(new ClientSettingsConfig());
         regEventHandler(new ClientJoinSetup());
 
@@ -90,6 +92,7 @@ public class ColdSweat
         ColdSweatConfig.init(configDir);
         WorldSettingsConfig.init(configDir);
         ItemSettingsConfig.init(configDir);
+        EntitySettingsConfig.init(configDir);
         ClientSettingsConfig.init(configDir);
         ModGuiHandler.register();
     }

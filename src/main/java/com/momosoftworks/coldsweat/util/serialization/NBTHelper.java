@@ -107,6 +107,10 @@ public class NBTHelper
             case RATE  : return "rateTempModifiers";
             case FREEZING_POINT : return "maxTempModifiers";
             case BURNING_POINT  : return "minTempModifiers";
+            case COLD_RESISTANCE : return "coldResistanceModifiers";
+            case HEAT_RESISTANCE : return "heatResistanceModifiers";
+            case COLD_DAMPENING  : return "coldDampeningModifiers";
+            case HEAT_DAMPENING  : return "heatDampeningModifiers";
             default : throw new IllegalArgumentException("PlayerTempHandler.getModifierTag(): \"" + type + "\" is not a valid type!");
         }
     }
@@ -126,6 +130,10 @@ public class NBTHelper
             case BASE  : return "baseTemp";
             case FREEZING_POINT : return "maxWorldTemp";
             case BURNING_POINT  : return "minWorldTemp";
+            case COLD_RESISTANCE : return "coldResistance";
+            case HEAT_RESISTANCE : return "heatResistance";
+            case COLD_DAMPENING  : return "coldDampening";
+            case HEAT_DAMPENING  : return "heatDampening";
             default : throw new IllegalArgumentException("PlayerTempHandler.getTempTag(): \"" + type + "\" is not a valid type!");
         }
     }

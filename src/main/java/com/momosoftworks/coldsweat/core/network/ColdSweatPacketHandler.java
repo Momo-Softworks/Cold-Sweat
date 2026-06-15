@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.core.network;
 
+import com.momosoftworks.coldsweat.core.network.message.SyncConfigSettingsMessage;
 import com.momosoftworks.coldsweat.core.network.message.SyncModifiersMessage;
 import com.momosoftworks.coldsweat.core.network.message.SyncTemperaturesMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
@@ -24,6 +25,7 @@ public class ColdSweatPacketHandler
     {
         ColdSweatPacketHandler.CHANNEL.registerMessage(SyncTemperaturesMessage.Handler.class, SyncTemperaturesMessage.class, 0, Side.CLIENT);
         ColdSweatPacketHandler.CHANNEL.registerMessage(SyncModifiersMessage.Handler.class, SyncModifiersMessage.class, 1, Side.CLIENT);
+        ColdSweatPacketHandler.CHANNEL.registerMessage(SyncConfigSettingsMessage.Handler.class, SyncConfigSettingsMessage.class, 2, Side.CLIENT);
     }
 
     public static void writeCompoundNBTToBuffer(ByteBuf buf, NBTTagCompound nbt)

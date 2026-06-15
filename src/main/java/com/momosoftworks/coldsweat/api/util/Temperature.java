@@ -2,19 +2,27 @@ package com.momosoftworks.coldsweat.api.util;
 
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.common.TempModifierEvent;
+import com.momosoftworks.coldsweat.api.event.common.TemperatureChangedEvent;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.modifier.BiomeTempModifier;
 import com.momosoftworks.coldsweat.api.temperature.modifier.BlockTempModifier;
-import com.momosoftworks.coldsweat.api.temperature.modifier.DepthTempModifier;
+import com.momosoftworks.coldsweat.api.temperature.modifier.ElevationTempModifier;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
+import com.momosoftworks.coldsweat.api.util.placement.Matcher;
+import com.momosoftworks.coldsweat.api.util.placement.Mode;
+import com.momosoftworks.coldsweat.api.util.placement.Order;
+import com.momosoftworks.coldsweat.api.util.placement.Placement;
 import com.momosoftworks.coldsweat.common.event.EntityTempManager;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.network.ColdSweatPacketHandler;
 import com.momosoftworks.coldsweat.core.network.message.SyncModifiersMessage;
 import com.momosoftworks.coldsweat.core.network.message.SyncTemperaturesMessage;
 import com.momosoftworks.coldsweat.core.properties.IEntityTempProperty;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.math.InterruptableStreamer;
+import com.momosoftworks.coldsweat.util.serialization.EnumHelper;
 import com.momosoftworks.coldsweat.util.serialization.ListBuilder;
+import com.momosoftworks.coldsweat.util.serialization.StringRepresentable;
 import com.momosoftworks.coldsweat.util.world.BlockPos;
 import cpw.mods.fml.common.network.NetworkRegistry;
 import net.minecraft.entity.Entity;
@@ -28,7 +36,6 @@ import net.minecraftforge.common.MinecraftForge;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -56,19 +63,19 @@ public class Temperature
             case C : switch (to)
             {
                 case C  : return value;
-                case F  : return value * 1.8 + 32d;
-                case MC : return value / 23.333333333d;
+                case F  : return value * 1.8 + (absolute ? 32d : 0d);
+                case MC : return value / 25d;
             }
             case F : switch (to)
             {
-                case C  : return (value - 32) / 1.8;
+                case C  : return (value - (absolute ? 32d : 0d)) / 1.8;
                 case F  : return value;
-                case MC : return (value - (absolute ? 32d : 0d)) / 42d;
+                case MC : return (value - (absolute ? 32d : 0d)) / 45d;
             }
             case MC : switch (to)
             {
-                case C  : return value * 23.333333333d;
-                case F  : return value * 42d + (absolute ? 32d : 0d);
+                case C  : return value * 25d;
+                case F  : return value * 45d + (absolute ? 32d : 0d);
                 case MC : return value;
             }
         }
@@ -83,27 +90,40 @@ public class Temperature
     }
 
     public static void set(EntityLivingBase entity, Type type, double value)
-    {   EntityTempManager.getTemperatureProperty(entity).setTemp(type, value);
+    {
+        TemperatureChangedEvent event = new TemperatureChangedEvent(entity, type, get(entity, type), value);
+        if (MinecraftForge.EVENT_BUS.post(event)) return;
+        EntityTempManager.getTemperatureProperty(entity).setTemp(type, event.getTemperature());
     }
 
     public static void add(EntityLivingBase entity, double value, Type type)
-    {   IEntityTempProperty prop = EntityTempManager.getTemperatureProperty(entity);
-        prop.setTemp(type, value + prop.getTemp(type));
+    {
+        double oldTemp = get(entity, type);
+        TemperatureChangedEvent event = new TemperatureChangedEvent(entity, type, oldTemp, oldTemp + value);
+        if (MinecraftForge.EVENT_BUS.post(event)) return;
+        EntityTempManager.getTemperatureProperty(entity).setTemp(type, event.getTemperature());
     }
 
     /**
      * @return  a double representing what the Temperature would be after a TempModifier is applied.
      * @param entity the entity this modifier should use
+     * @param ignoreTickMultiplier if true, recalculates at the modifier's raw tick rate, ignoring {@code MODIFIER_TICK_RATE}
      * @param modifiers the modifier(s) being applied to the {@code Temperature}
      */
-    public static double apply(double temp, @Nonnull EntityLivingBase entity, Type type, @Nonnull TempModifier... modifiers)
+    public static double apply(double temp, @Nonnull EntityLivingBase entity, Type type, boolean ignoreTickMultiplier, @Nonnull TempModifier... modifiers)
     {
+        if (modifiers.length == 0) return temp;
+
         double temp2 = temp;
         for (TempModifier modifier : modifiers)
         {
             if (modifier == null) continue;
 
-            double newTemp = entity.ticksExisted % modifier.getTickRate() == 0 || modifier.getTicksExisted() == 0
+            int tickRate = ignoreTickMultiplier
+                           ? modifier.getTickRate()
+                           : (int) (modifier.getTickRate() / ConfigSettings.MODIFIER_TICK_RATE.get());
+
+            double newTemp = entity.ticksExisted % Math.max(1, tickRate) == 0 || modifier.getTicksExisted() == 0 || entity.ticksExisted <= 1
                     ? modifier.update(temp2, entity, type)
                     : modifier.getResult(temp2);
             if (!Double.isNaN(newTemp))
@@ -113,6 +133,11 @@ public class Temperature
         return temp2;
     }
 
+    public static double apply(double temp, @Nonnull EntityLivingBase entity, Type type, @Nonnull TempModifier... modifiers)
+    {
+        return apply(temp, entity, type, false, modifiers);
+    }
+
     /**
      * @return a double representing what the temperature would be after a collection of TempModifier(s) are applied.
      * @param entity the entity this list of modifiers should use
@@ -120,7 +145,12 @@ public class Temperature
      */
     public static double apply(double temp, @Nonnull EntityLivingBase entity, Type type, @Nonnull Collection<TempModifier> modifiers)
     {
-        return apply(temp, entity, type, modifiers.toArray(new TempModifier[0]));
+        return apply(temp, entity, type, false, modifiers.toArray(new TempModifier[0]));
+    }
+
+    public static double apply(double temp, @Nonnull EntityLivingBase entity, Type type, boolean ignoreTickMultiplier, @Nonnull Collection<TempModifier> modifiers)
+    {
+        return apply(temp, entity, type, ignoreTickMultiplier, modifiers.toArray(new TempModifier[0]));
     }
 
     static Map<World, EntitySilverfish> DUMMIES = new HashMap<>();
@@ -129,11 +159,9 @@ public class Temperature
         EntityLivingBase dummy = DUMMIES.computeIfAbsent(world, dim -> new EntitySilverfish(world));
         Vec3 vec = CSMath.atCenterOf(pos);
         dummy.setPosition(vec.xCoord, vec.yCoord, vec.zCoord);
-        return apply(0, dummy, Type.WORLD, ListBuilder.<TempModifier>begin(new BiomeTempModifier(9))
-                                                      //.addIf(CompatManager.isSereneSeasonsLoaded(),
-                                                      //    () -> TempModifierRegistry.getEntryFor("sereneseasons:season").orElse(null))
-                                                      .add(new DepthTempModifier(),
-                                                           new BlockTempModifier()).build());
+        return apply(0, dummy, Type.WORLD, true, ListBuilder.<TempModifier>begin(new BiomeTempModifier(9))
+                                                            .add(new ElevationTempModifier(),
+                                                                 new BlockTempModifier()).build());
     }
 
     /**
@@ -153,8 +181,7 @@ public class Temperature
     }
 
     public static <T extends TempModifier> Optional<T> getModifier(IEntityTempProperty cap, Type type, Class<T> modClass)
-    {
-        return (Optional<T>) cap.getModifiers(type).stream().filter(modClass::isInstance).findFirst();
+    {   return (Optional<T>) cap.getModifiers(type).stream().filter(modClass::isInstance).findFirst();
     }
 
     /**
@@ -173,147 +200,174 @@ public class Temperature
     }
 
     /**
-     * Invokes addModifier() in a way that replaces the first occurrence of the modifier, if it exists.<br>
-     * Otherwise, it will add the modifier.<br>
-     * @param entity The player to apply the modifier to
-     * @param modifier The modifier to apply
-     * @param type The type of temperature to apply the modifier to
+     * Replaces an existing modifier (matched via {@code duplicateMatcher}) if it exists on the entity;
+     * otherwise, adds the modifier to the end of the list.
      */
-    public static void addOrReplaceModifier(Entity entity, TempModifier modifier, Type type)
-    {   addModifier(entity, modifier, type, false, Addition.of(Addition.Mode.REPLACE_OR_ADD, Addition.Order.FIRST, mod -> modifier.getID().equals(mod.getID())));
+    public static boolean replaceOrAddModifier(Entity entity, TempModifier modifier, Type type, Matcher duplicateMatcher)
+    {
+        Placement placement = Placement.of(Mode.REPLACE, Order.FIRST, mod -> duplicateMatcher.check(modifier, mod)).orElse(Placement.LAST);
+        return addModifier(entity, modifier, type, placement);
     }
 
     /**
      * Invokes addModifier() in a way that replaces the first occurrence of the modifier, if it exists.<br>
-     * It will not add the modifier if an existing instance of the same TempModifier class is not found.<br>
-     * @param entity The player to apply the modifier to
-     * @param modifier The modifier to apply
-     * @param type The type of temperature to apply the modifier to
+     * Otherwise, it will add the modifier.
      */
-    public static void replaceModifier(Entity entity, TempModifier modifier, Type type)
-    {   addModifier(entity, modifier, type, false, Addition.of(Addition.Mode.REPLACE, Addition.Order.FIRST, mod -> modifier.getID().equals(mod.getID())));
+    public static boolean addOrReplaceModifier(Entity entity, TempModifier modifier, Type type)
+    {   return replaceOrAddModifier(entity, modifier, type, Matcher.SAME_CLASS);
     }
 
     /**
-     * Adds the given modifier to the player.<br>
-     * If duplicates are disabled and the modifier already exists, this action will fail.
-     * @param allowDupes allows or disallows duplicate TempModifiers to be applied
-     * (You might use this for things that have stacking effects, for example)
+     * Replaces the first matching modifier; fails (does nothing) if no matching modifier is found.
      */
-    public static void addModifier(Entity entity, TempModifier modifier, Type type, boolean allowDupes)
-    {   addModifier(entity, modifier, type, allowDupes, Addition.AT_END);
+    public static boolean replaceModifier(Entity entity, TempModifier modifier, Type type)
+    {   return addModifier(entity, modifier, type, Placement.of(Mode.REPLACE, Order.FIRST, mod -> modifier.getID().equals(mod.getID())));
     }
 
-    public static void addModifier(Entity entity, TempModifier modifier, Type type, boolean allowDupes, Addition params)
+    /**
+     * Adds the given modifier to the entity.<br>
+     * @param allowDupes allows or disallows duplicate (same-class) TempModifiers to be applied.
+     */
+    public static boolean addModifier(Entity entity, TempModifier modifier, Type type, boolean allowDupes)
+    {   return addModifier(entity, modifier, type, allowDupes ? Placement.LAST : Placement.LAST.noDuplicates(Matcher.SAME_CLASS));
+    }
+
+    /**
+     * Adds the given modifier to the entity, with a custom {@link Placement}.
+     */
+    public static boolean addModifier(Entity entity, TempModifier modifier, Type type, Placement placement)
     {
         TempModifierEvent.Add event = new TempModifierEvent.Add(modifier, entity, type);
         MinecraftForge.EVENT_BUS.post(event);
-        if (!event.isCanceled())
+        if (event.isCanceled()) return false;
+
+        TempModifier newModifier = event.getModifier();
+        if (!TempModifierRegistry.getEntries().containsKey(newModifier.getID()))
+        {   ColdSweat.LOGGER.error("Tried to reference invalid TempModifier with ID \"" + newModifier.getID() + "\"! Is it not registered?");
+            return false;
+        }
+
+        IEntityTempProperty prop = EntityTempManager.getTemperatureProperty(entity);
+        List<TempModifier> modifiers = prop.getModifiers(event.getType());
+        Type finalType = event.getType();
+
+        Consumer<TempModifier> onAdded = mod ->
         {
-            TempModifier newModifier = event.getModifier();
-            if (TempModifierRegistry.getEntries().containsKey(newModifier.getID()))
-            {
-                IEntityTempProperty prop = EntityTempManager.getTemperatureProperty(entity);
-                List<TempModifier> modifiers = prop.getModifiers(event.getType());
-                boolean changed = false;
-                try
-                {
-                    Predicate<TempModifier> predicate = params.getPredicate();
-                    if (predicate == null) predicate = mod -> true;
-
-                    boolean replace = params.mode  == Addition.Mode.REPLACE || params.mode == Addition.Mode.REPLACE_OR_ADD;
-                    boolean after   = params.mode  == Addition.Mode.AFTER;
-                    boolean forward = params.order == Addition.Order.FIRST;
-
-                    TempModifier newMod = event.getModifier();
-
-                    if (!allowDupes && modifiers.stream().anyMatch(mod -> mod.getID().equals(newMod.getID())) && !replace)
-                    {   return;
-                    }
-
-                    // Get the start of the iterator & which direction it's going
-                    int start = forward ? 0 : (modifiers.size() - 1);
-
-                    // Iterate through the list (backwards if "forward" is false)
-                    for (int i = start; forward ? i < modifiers.size() : i >= 0; i += forward ? 1 : -1)
-                    {
-                        TempModifier mod = modifiers.get(i);
-
-                        // If the predicate is true, inject the modifier at this position (or after it if "after" is true)
-                        if (predicate.test(mod))
-                        {
-                            if (replace)
-                            {   modifiers.set(i, newMod);
-                            }
-                            else
-                            {   modifiers.add(i + (after ? 1 : 0), newMod);
-                            }
-                            changed = true;
-                            return;
-                        }
-                    }
-
-                    // Add the modifier if the insertion check fails
-                    if (params.mode != Addition.Mode.REPLACE)
-                    {   modifiers.add(newMod);
-                        changed = true;
-                    }
-                }
-                finally
-                {   if (changed) updateModifiers(entity, prop);
-                }
+            if (entity instanceof EntityLivingBase)
+            {   newModifier.onAdded((EntityLivingBase) entity, finalType);
+                updateSiblingsAdd(modifiers, (EntityLivingBase) entity, finalType, newModifier);
             }
-            else
-            {   ColdSweat.LOGGER.error("Tried to reference invalid TempModifier with ID \"" + modifier.getID() + "\"! Is it not registered?");
+        };
+        Consumer<TempModifier> onRemoved = mod ->
+        {
+            if (entity instanceof EntityLivingBase)
+            {   mod.onRemoved((EntityLivingBase) entity, finalType);
+                updateSiblingsRemove(modifiers, (EntityLivingBase) entity, finalType, mod);
+            }
+        };
+
+        if (addModifier(modifiers, newModifier, placement, onAdded, onRemoved))
+        {   updateModifiers(entity, prop);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Internal: inserts {@code modifier} into {@code modifiers} according to {@code placement}.<br>
+     * Calls the {@code onAdded}/{@code onRemoved} callbacks where appropriate. Ported from 1.16.
+     */
+    public static boolean addModifier(List<TempModifier> modifiers, TempModifier modifier, Placement placement,
+                                      Consumer<TempModifier> onAdded, Consumer<TempModifier> onRemoved)
+    {
+        boolean added = false;
+        Predicate<TempModifier> predicate = placement.predicate();
+        if (predicate == null) predicate = mod -> true;
+
+        boolean isForward = placement.order() == Order.FIRST;
+        Matcher duplicateMatcher = placement.duplicates();
+        int maxDuplicates = placement.maxDuplicates();
+
+        tryAdd:
+        {
+            if (duplicateMatcher != Matcher.IGNORE
+            && modifiers.stream().filter(mod -> duplicateMatcher.check(modifier, mod)).count() >= maxDuplicates)
+            {   break tryAdd;
+            }
+
+            if (modifiers.isEmpty())
+            {
+                if (placement.mode().isAdding())
+                {   modifiers.add(modifier);
+                    if (onAdded != null) onAdded.accept(modifier);
+                    return true;
+                }
+                else break tryAdd;
+            }
+            // Get the start of the iterator & which direction it's going
+            int start = isForward ? 0 : (modifiers.size() - 1);
+            for (int i = start; isForward ? i < modifiers.size() : i >= 0; i += isForward ? 1 : -1)
+            {
+                TempModifier modifierAt = modifiers.get(i);
+                if (predicate.test(modifierAt))
+                {
+                    added = true;
+                    if (placement.mode() == Mode.REPLACE)
+                    {   modifiers.set(i, modifier);
+                        if (onRemoved != null) onRemoved.accept(modifierAt);
+                    }
+                    else
+                    {   modifiers.add(i + (placement.mode() == Mode.ADD_AFTER ? 1 : 0), modifier);
+                    }
+                    if (onAdded != null) onAdded.accept(modifier);
+                    break tryAdd;
+                }
             }
         }
+        // Use fallback if modifier was not added
+        if (!added && placement.fallback() != null)
+        {   added = addModifier(modifiers, modifier, placement.fallback(), onAdded, onRemoved);
+        }
+        return added;
     }
 
     public static void addModifiers(EntityLivingBase entity, List<TempModifier> modifiers, Type type, boolean duplicates)
     {
-        IEntityTempProperty prop = EntityTempManager.getTemperatureProperty(entity);
-        List<TempModifier> list = prop.getModifiers(type);
         for (TempModifier modifier : modifiers)
-        {
-            if (duplicates || list.stream().noneMatch(mod -> mod.getID().equals(modifier.getID())))
-            {   prop.getModifiers(type).add(modifier);
-            }
+        {   addModifier(entity, modifier, type, duplicates);
         }
-        updateModifiers(entity, prop);
     }
 
     /**
      * Removes the specified number of TempModifiers of the specified type from the player
      * @param entity The entity being sampled
      * @param type Determines which TempModifier list to pull from
-     * @param count The number of modifiers of the given type to be removed (can be higher than the number of modifiers on the player)
+     * @param count The number of modifiers of the given type to be removed
      * @param condition The predicate to determine which TempModifiers to remove
      */
     public static void removeModifiers(EntityLivingBase entity, Type type, int count, Predicate<TempModifier> condition)
     {
-        AtomicInteger removed = new AtomicInteger(0);
-
         IEntityTempProperty prop = EntityTempManager.getTemperatureProperty(entity);
-        prop.getModifiers(type).removeIf(modifier ->
+        List<TempModifier> modifiers = prop.getModifiers(type);
+        int removed = 0;
+
+        for (int i = 0; i < modifiers.size() && removed < count; )
         {
-            if (removed.get() < count)
+            TempModifier modifier = modifiers.get(i);
+            TempModifierEvent.Remove event = new TempModifierEvent.Remove(entity, modifier, type, count, condition);
+            MinecraftForge.EVENT_BUS.post(event);
+            if (!event.isCanceled() && event.getCondition().test(modifier))
             {
-                TempModifierEvent.Remove event = new TempModifierEvent.Remove(entity, modifier, type, count, condition);
-                MinecraftForge.EVENT_BUS.post(event);
-                if (!event.isCanceled())
-                {
-                    if (event.getCondition().test(modifier))
-                    {   removed.incrementAndGet();
-                        return true;
-                    }
-                }
-                return false;
+                modifiers.remove(i);
+                modifier.onRemoved(entity, type);
+                updateSiblingsRemove(modifiers, entity, type, modifier);
+                removed++;
             }
-            return false;
-        });
+            else i++;
+        }
 
         // Update modifiers if anything actually changed
-        if (removed.get() > 0)
+        if (removed > 0)
         {   updateModifiers(entity, prop);
         }
     }
@@ -326,7 +380,7 @@ public class Temperature
      * Gets all TempModifiers of the specified type on the player
      * @param entity is the entity being sampled
      * @param type determines which TempModifier list to pull from
-     * @return a NEW list of all TempModifiers of the specified type
+     * @return the (mutable) list of all TempModifiers of the specified type
      */
     public static List<TempModifier> getModifiers(EntityLivingBase entity, Type type)
     {   return EntityTempManager.getTemperatureProperty(entity).getModifiers(type);
@@ -334,8 +388,6 @@ public class Temperature
 
     /**
      * Iterates through all TempModifiers of the specified type on the player
-     * @param type determines which TempModifier list to pull from
-     * @param action the action(s) to perform on each TempModifier
      */
     public static void forEachModifier(EntityLivingBase entity, Type type, Consumer<TempModifier> action)
     {   EntityTempManager.getTemperatureProperty(entity).getModifiers(type).forEach(action);
@@ -343,6 +395,39 @@ public class Temperature
 
     public static void forEachModifier(EntityLivingBase entity, Type type, BiConsumer<TempModifier, InterruptableStreamer<TempModifier>> action)
     {   CSMath.breakableForEach(EntityTempManager.getTemperatureProperty(entity).getModifiers(type), action);
+    }
+
+    public static void clearModifiers(EntityLivingBase entity, Type type)
+    {
+        IEntityTempProperty prop = EntityTempManager.getTemperatureProperty(entity);
+        prop.clearModifiers(type);
+        updateModifiers(entity, prop);
+    }
+
+    /**
+     * @return the neutral world temperature, halfway between the entity's effective freezing and burning points.
+     */
+    public static double getNeutralWorldTemp(EntityLivingBase entity)
+    {
+        double min = ConfigSettings.MIN_TEMP.get() + get(entity, Type.FREEZING_POINT);
+        double max = ConfigSettings.MAX_TEMP.get() + get(entity, Type.BURNING_POINT);
+        return (min + max) / 2;
+    }
+
+    public static void updateSiblingsAdd(List<TempModifier> modifiers, EntityLivingBase entity, Type type, TempModifier modifier)
+    {
+        modifiers.forEach(mod ->
+        {   if (mod == modifier) return;
+            mod.onSiblingAdded(entity, type, modifier);
+        });
+    }
+
+    public static void updateSiblingsRemove(List<TempModifier> modifiers, EntityLivingBase entity, Type type, TempModifier modifier)
+    {
+        modifiers.forEach(mod ->
+        {   if (mod == modifier) return;
+            mod.onSiblingRemoved(entity, type, modifier);
+        });
     }
 
     public static void updateTemperature(EntityLivingBase entity, IEntityTempProperty prop, boolean instant)
@@ -384,43 +469,86 @@ public class Temperature
      * These are used to get temperature stored on the player and/or to apply modifiers to it. <br>
      * <br>
      * {@link #WORLD}: The temperature of the area around the player. Should ONLY be changed by TempModifiers. <br>
-     * {@link #FREEZING_POINT}: An offset to the max temperature threshold, after which a player's body temperature starts rising. <br>
-     * {@link #BURNING_POINT}: An offset to the min temperature threshold, after which a player's body temperature starts falling. <br>
-     * <br>
+     * {@link #FREEZING_POINT}: An offset to the min temperature threshold, below which a player's body temperature falls. <br>
+     * {@link #BURNING_POINT}: An offset to the max temperature threshold, above which a player's body temperature rises. <br>
      * {@link #CORE}: The core temperature of the player (This is what "body" temperature typically refers to). <br>
      * {@link #BASE}: A static offset applied to the player's core temperature. <br>
      * {@link #BODY}: The sum of the player's core and base temperatures. (CANNOT be set) <br>
      * {@link #RATE}: Only used by TempModifiers. Affects the rate at which the player's body temperature changes. <br>
+     * {@link #COLD_RESISTANCE}: Resistance to cold temperature-related damage. <br>
+     * {@link #HEAT_RESISTANCE}: Resistance to heat temperature-related damage. <br>
+     * {@link #COLD_DAMPENING}: Changes the rate of body temperature decrease. <br>
+     * {@link #HEAT_DAMPENING}: Changes the rate of body temperature increase. <br>
+     * <br>
+     * New attribute traits are appended after {@link #RATE} so the original ordinals are preserved.
      */
-    public enum Type
+    public enum Type implements StringRepresentable
     {
-        WORLD("world"),
-        FREEZING_POINT("freezing_point"),
-        BURNING_POINT("burning_point"),
-        CORE("core"),
-        BASE("base"),
-        BODY("body"),
-        RATE("rate");
+        WORLD("world", true, true, false),
+        FREEZING_POINT("freezing_point", true, true, true),
+        BURNING_POINT("burning_point", true, true, true),
+        CORE("core", true, true, false),
+        BASE("base", true, true, true),
+        BODY("body", false, false, false),
+        RATE("rate", false, true, false),
+        COLD_RESISTANCE("cold_resistance", true, true, true),
+        HEAT_RESISTANCE("heat_resistance", true, true, true),
+        COLD_DAMPENING("cold_dampening", true, true, true),
+        HEAT_DAMPENING("heat_dampening", true, true, true);
 
         private final String id;
+        private final boolean forTemperature;
+        private final boolean forModifiers;
+        private final boolean forAttributes;
 
-        Type(String id)
-        {
-            this.id = id;
+        Type(String id, boolean forTemperature, boolean forModifiers, boolean forAttributes)
+        {   this.id = id;
+            this.forTemperature = forTemperature;
+            this.forModifiers = forModifiers;
+            this.forAttributes = forAttributes;
         }
 
         public String getID()
-        {
-            return id;
+        {   return id;
         }
+
+        public boolean isForTemperature()
+        {   return forTemperature;
+        }
+
+        public boolean isForModifiers()
+        {   return forModifiers;
+        }
+
+        public boolean isForAttributes()
+        {   return forAttributes;
+        }
+
+        /**
+         * @return true if this trait represents world (ambient) temperature
+         */
+        public boolean isForWorld()
+        {   return this == WORLD || this == BURNING_POINT || this == FREEZING_POINT;
+        }
+
+        /**
+         * @return true if this trait is interpreted as a percentage or multiplier
+         */
+        public boolean isProportional()
+        {   return this == COLD_RESISTANCE || this == HEAT_RESISTANCE || this == COLD_DAMPENING || this == HEAT_DAMPENING || this == RATE;
+        }
+
+        public boolean isNegativeValueGood()
+        {   return this == FREEZING_POINT;
+        }
+
+        @Override
+        public String getSerializedName()
+        {   return id;
+        }
+
         public static Type fromID(String id)
-        {
-            for (Type type : values())
-            {
-                if (type.getID().equals(id))
-                    return type;
-            }
-            return null;
+        {   return EnumHelper.byName(values(), id);
         }
     }
 
@@ -433,51 +561,5 @@ public class Temperature
         F,
         C,
         MC
-    }
-
-    public static class Addition
-    {
-        private final Mode mode;
-        private final Order order;
-        private final Predicate<TempModifier> predicate;
-
-        public static final Addition AT_END = Addition.of(Mode.AFTER, Order.LAST, mod -> true);
-        public static final Addition AT_START = Addition.of(Mode.BEFORE, Order.FIRST, mod -> true);
-
-        public Addition(Mode mode, Order order, Predicate<TempModifier> predicate)
-        {   this.mode = mode;
-            this.order = order;
-            this.predicate = predicate;
-        }
-
-        public static Addition of(Mode mode, Order order, Predicate<TempModifier> predicate)
-        {   return new Addition(mode, order, predicate);
-        }
-
-        public Mode getRelation()
-        {   return mode;
-        }
-
-        public Predicate<TempModifier> getPredicate()
-        {   return predicate;
-        }
-
-        public Order getOrder()
-        {   return order;
-        }
-
-        public enum Order
-        {
-            FIRST,
-            LAST
-        }
-
-        public enum Mode
-        {
-            BEFORE,
-            AFTER,
-            REPLACE,
-            REPLACE_OR_ADD
-        }
     }
 }

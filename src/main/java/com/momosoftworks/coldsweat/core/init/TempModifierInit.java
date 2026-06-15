@@ -2,7 +2,6 @@ package com.momosoftworks.coldsweat.core.init;
 
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTempConfig;
-import com.momosoftworks.coldsweat.api.temperature.block_temp.LavaBlockTemp;
 import com.momosoftworks.coldsweat.config.WorldSettingsConfig;
 import com.momosoftworks.coldsweat.util.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.math.CSMath;
@@ -112,7 +111,8 @@ public class TempModifierInit
             }
         }
 
-        event.register(new LavaBlockTemp());
+        // Lava, fire, ice, etc. are defined in the "Block Temperatures" config (see WorldSettingsConfig),
+        // matching 1.16 where these block temps live in config rather than hardcoded Java classes.
         /*event.register(new FurnaceBlockTemp());
         event.register(new CampfireBlockTemp());
         event.register(new IceboxBlockTemp());
@@ -134,17 +134,23 @@ public class TempModifierInit
 
         event.register(BlockTempModifier::new);
         event.register(BiomeTempModifier::new);
-        event.register(DepthTempModifier::new);
-        event.register(InsulationTempModifier::new);
+        event.register(ElevationTempModifier::new);
+        event.register(ArmorInsulationTempModifier::new);
         event.register(MountTempModifier::new);
         event.register(WaterskinTempModifier::new);
         event.register(SoulLampTempModifier::new);
         event.register(WaterTempModifier::new);
-        event.register(HearthTempModifier::new);
+        event.register(WarmthTempModifier::new);
+        event.register(FrigidnessTempModifier::new);
         event.register(FoodTempModifier::new);
         event.register(FreezingTempModifier::new);
         event.register(FireTempModifier::new);
         event.register(SoulSproutTempModifier::new);
+        event.register(ShadeTempModifier::new);
+        event.register(EntitiesTempModifier::new);
+        event.register(InventoryItemsTempModifier::new);
+        event.register(AcclimationTempModifier::new);
+        event.register(SimpleTempModifier::new);
 
         // Compat
         if (CompatManager.isSereneSeasonsLoaded())

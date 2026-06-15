@@ -20,6 +20,7 @@ public class WorldSettingsConfig
     public static String dimensionTemps;
 
     public static double caveInsulation;
+    public static double shadeTempOffset;
 
     public static String blockTemps;
     public static int blockRange;
@@ -100,7 +101,7 @@ public class WorldSettingsConfig
          Block Temperatures
          */
         CONFIG.addCustomCategoryComment("blocks", "Format: [\"block-ids\", <temperature>, <range (max 7)>, <*true/false: falloff>, <*max effect>, <*meta_values>], [etc...], [etc...]"
-        + "\n(* = optional) (1 \u00B0MC = 42 \u00B0F/ 23.33 \u00B0C)"
+        + "\n(* = optional) (1 \u00B0MC = 45 \u00B0F/ 25 \u00B0C)"
         + "\nArguments:"
         + "\nblock-ids: multiple IDs can be used by separating them with commas (i.e: minecraft:torch,minecraft:wall_torch)"
         + "\ntemperature: the temperature of the block, in Minecraft units"
@@ -110,7 +111,7 @@ public class WorldSettingsConfig
         + "\nMultiple predicates can be used by separating them with commas (i.e: \"lit=true,waterlogged=false\")");
             blockTemps = CONFIG.getString("Block Temperatures",
                                           "blocks",
-                                          "[minecraft:fire, 0.476, 7, true, 0.8], [minecraft:ice, -0.15, 4, true, 0.5], [minecraft:packed_ice, -0.25, 4, true, 1.0]",
+                                          "[minecraft:lava,minecraft:flowing_lava, 0.667, 7, true, 4.444], [minecraft:fire, 0.556, 7, true, 1.111], [minecraft:ice, -0.222, 4, true, 0.533], [minecraft:packed_ice, -0.333, 4, true, 1.067]",
                                           "");
             blockRange = CONFIG.getInt("Block Temperature Range",
                                        "blocks",
@@ -127,6 +128,11 @@ public class WorldSettingsConfig
                                     1.0,
                                     "The amount of temperature normalization from being deep underground",
                                     0.0, 1.0).getDouble();
+        shadeTempOffset = CONFIG.get("misc",
+                                     "Shade Temperature Offset",
+                                     -0.2,
+                                     "The temperature change applied when an entity is fully shaded from the sky (in MC units)",
+                                     -1.0, 1.0).getDouble();
 
         /*
          Seasons

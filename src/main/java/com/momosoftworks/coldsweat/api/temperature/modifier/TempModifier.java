@@ -29,6 +29,7 @@ public abstract class TempModifier
     private double lastInput = 0;
     private double lastOutput = 0;
     private Function<Double, Double> function = temp -> temp;
+    private boolean changed = false;
 
     /**
      * Default constructor (REQUIRED for proper registration).<br>
@@ -77,14 +78,40 @@ public abstract class TempModifier
     }
 
     /**
+     * Called every tick on the temperature modifier.<br>
+     * Use this to handle calculations that aren't type-specific. Default no-op.
+     */
+    public void tick(EntityLivingBase entity) {}
+
+    /**
+     * Called when this TempModifier is added to the entity.<br>
+     */
+    public void onAdded(EntityLivingBase entity, Temperature.Type type) {}
+
+    /**
+     * Called when this TempModifier is removed from the entity.<br>
+     */
+    public void onRemoved(EntityLivingBase entity, Temperature.Type type) {}
+
+    /**
+     * Called when another TempModifier is added to the same type list as this one.<br>
+     */
+    public void onSiblingAdded(EntityLivingBase entity, Temperature.Type type, TempModifier sibling) {}
+
+    /**
+     * Called when another TempModifier is removed from the same type list as this one.<br>
+     */
+    public void onSiblingRemoved(EntityLivingBase entity, Temperature.Type type, TempModifier sibling) {}
+
+    /**
      * Sets the number of ticks this TempModifier will exist before it is automatically removed.<br>
      * @param ticks the number of ticks this modifier will last.
      * @return this TempModifier instance (allows for in-line building).
      */
-    public final TempModifier expires(int ticks)
+    public final <T extends TempModifier> T expires(int ticks)
     {
         expireTicks = ticks;
-        return this;
+        return (T) this;
     }
     public final int getExpireTime()
     {   return expireTicks;
@@ -107,9 +134,9 @@ public abstract class TempModifier
      * @param ticks the number of ticks between each call to {@code getResult()}.
      * @return this TempModifier instance (allows for in-line building).
      */
-    public final TempModifier tickRate(int ticks)
+    public final <T extends TempModifier> T tickRate(int ticks)
     {   tickRate = Math.max(1, ticks);
-        return this;
+        return (T) this;
     }
 
     public final int getTickRate()
@@ -138,6 +165,18 @@ public abstract class TempModifier
     public void setNBT(NBTTagCompound data)
     {
         this.nbt = data;
+    }
+
+    public void markDirty()
+    {   this.changed = true;
+    }
+
+    public boolean isDirty()
+    {   return this.changed;
+    }
+
+    public void markClean()
+    {   this.changed = false;
     }
 
     /**

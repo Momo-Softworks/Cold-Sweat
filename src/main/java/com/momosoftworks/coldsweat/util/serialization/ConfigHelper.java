@@ -85,6 +85,43 @@ public class ConfigHelper
         return map;
     }
 
+    /**
+     * Parses an entity-temperature config string into a map of normalized entity id -> (temperature, range).<br>
+     * Entries are of the form {@code ["entity_id", temperature, range]}.
+     */
+    public static Map<String, Pair<Double, Double>> getEntitiesWithValues(String source)
+    {
+        Map<String, Pair<Double, Double>> map = new HashMap<>();
+        for (Object obj : deserializeList(source))
+        {
+            if (!(obj instanceof List<?>)) continue;
+            List<?> entry = (List<?>) obj;
+            if (entry.size() < 3) continue;
+            try
+            {   String id = normalizeEntityId(stripString(entry.get(0)));
+                double temp = Double.parseDouble(stripString(entry.get(1)));
+                double range = Double.parseDouble(stripString(entry.get(2)));
+                map.put(id, Pair.of(temp, range));
+            }
+            catch (Exception e)
+            {   ColdSweat.LOGGER.error("Error parsing entity temperature config entry: " + entry, e);
+            }
+        }
+        return map;
+    }
+
+    /**
+     * Normalizes an entity id for fuzzy matching across 1.7's inconsistent naming.<br>
+     * Drops the namespace, lowercases, and strips spaces/underscores (e.g. "minecraft:snow_man" -> "snowman").
+     */
+    public static String normalizeEntityId(String id)
+    {
+        String s = id;
+        int colon = s.indexOf(':');
+        if (colon >= 0) s = s.substring(colon + 1);
+        return s.toLowerCase(Locale.ROOT).replace("_", "").replace(" ", "");
+    }
+
     public static Map<Integer, Triplet<Double, Double, Temperature.Units>> getBiomesWithValues(String source, boolean absolute)
     {
         Map<Integer, Triplet<Double, Double, Temperature.Units>> map = new HashMap<>();

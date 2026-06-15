@@ -29,6 +29,7 @@ public class BiomeTempModifier extends TempModifier
         try
         {
             World world = entity.worldObj;
+            int samples = this.getNBT().getInteger("Samples");
             int dimensionID = entity.worldObj.provider.dimensionId;
             BlockPos entPos = new BlockPos(entity.getPosition(0));
             double time = Math.sin(entity.worldObj.getWorldTime() / (12000 / Math.PI));
@@ -41,7 +42,7 @@ public class BiomeTempModifier extends TempModifier
 
             double worldTemp = 0;
             int biomeCount = 0;
-            for (BlockPos blockPos : WorldHelper.getPositionGrid(new BlockPos(entity.getPosition(0)), 36, 10))
+            for (BlockPos blockPos : WorldHelper.getPositionGrid(new BlockPos(entity.getPosition(0)), samples, 10))
             {
                 if (blockPos.distSqr(entPos) > 30*30) continue;
                 BiomeGenBase biome = entity.worldObj.getBiomeGenForCoords(blockPos.getX(), blockPos.getZ());
@@ -78,7 +79,10 @@ public class BiomeTempModifier extends TempModifier
                 else worldTemp += CSMath.average(max, min);
             }
 
-            worldTemp /= biomeCount;
+            if (biomeCount == 0)
+            {   worldTemp = CSMath.average(ConfigSettings.MIN_TEMP.get(), ConfigSettings.MAX_TEMP.get());
+            }
+            worldTemp /= Math.max(1, biomeCount);
 
             // Add dimension offset, if present
             Pair<Double, Temperature.Units> dimTempOffsetConf = ConfigSettings.DIMENSION_OFFSETS.get().get(dimensionID);
@@ -95,6 +99,6 @@ public class BiomeTempModifier extends TempModifier
 
     public String getID()
     {
-        return "cold_sweat:biome_temperature";
+        return "cold_sweat:biomes";
     }
 }

@@ -19,6 +19,7 @@ public class ItemSettingsConfig
     public static String soulLampItems;
     public static String soulLampDimensions;
     public static String temperatureFoods;
+    public static String itemTemperatures;
 
     public static String insulatingItems;
     public static String insulationBlacklist;
@@ -27,6 +28,8 @@ public class ItemSettingsConfig
     public static String insulationSlots;
 
     public static int waterskinStrength;
+    public static double insulationStrength;
+    public static double soulLampStrength;
 
     public static void loadConfig()
     {
@@ -174,12 +177,28 @@ public class ItemSettingsConfig
                                             "Defines items that affect the player's temperature when consumed"
                                         + "\nFormat: [[\"item_id\", amount], [\"item_id\", amount], ...etc]");
 
+        itemTemperatures = CONFIG.getString("Carried Item Temperatures",
+                                            "consumables",
+                                                    "",
+                                            "Defines items that affect the holder's temperature while carried in the inventory"
+                                        + "\nFormat: [[\"item_id\", amount], [\"item_id\", amount], ...etc]");
+
         waterskinStrength = CONFIG.getInt("Waterskin Strength",
                                            "consumables",
                                                 50,
                                            0,
                                            Integer.MAX_VALUE,
                                            "Defines the change in temperature that using a waterskin will cause");
+
+        insulationStrength = CONFIG.get("insulation",
+                                        "Insulation Strength",
+                                        1.0,
+                                        "A multiplier applied to all armor/mount insulation. Higher = stronger insulation").getDouble();
+
+        soulLampStrength = CONFIG.get("soulspring_lamp",
+                                      "Soulspring Lamp Strength",
+                                      0.6,
+                                      "How strongly the soulspring lamp cools the holder (0-1)", 0.0, 1.0).getDouble();
 
         if (CONFIG.hasChanged())
         {   CONFIG.save();

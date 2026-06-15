@@ -17,6 +17,9 @@ public class ColdSweatConfig
     public static Double maxHabitable;
     public static Double minHabitable;
     public static Double rateMultiplier;
+    public static Double tempDamage;
+    public static Integer tempHurtInterval;
+    public static Double modifierTickRate;
 
     public static Boolean fireResistanceEffect;
     public static Boolean iceResistanceEffect;
@@ -40,6 +43,15 @@ public class ColdSweatConfig
     public static Boolean coldMining;
     public static Boolean coldMovement;
 
+    public static Boolean coldResistanceEnabled;
+    public static Boolean heatResistanceEnabled;
+
+    public static Double acclimationSpeed;
+    public static Double minAcclimationLower;
+    public static Double minAcclimationUpper;
+    public static Double maxAcclimationLower;
+    public static Double maxAcclimationUpper;
+
     public static void loadConfig()
     {
         ConfigSettings.Difficulty defaultDiff = ConfigSettings.DEFAULT_DIFFICULTY;
@@ -61,6 +73,9 @@ public class ColdSweatConfig
                                   defaultDiff.getOrDefault("max_temp", Temperature.convertUnits(90, Temperature.Units.F, Temperature.Units.MC, true)),
                                   "Defines the maximum habitable temperature").getDouble();
         rateMultiplier = CONFIG.get("general", "Rate Multiplier", defaultDiff.getOrDefault("temp_rate", 1d), "Rate at which entities' body temperature changes").getDouble();
+        tempDamage = CONFIG.get("general", "Temperature Damage", defaultDiff.getOrDefault("temp_damage", 2d), "Damage dealt to entities when their body temperature is too hot or cold").getDouble();
+        tempHurtInterval = CONFIG.get("general", "Temperature Hurt Interval", defaultDiff.getOrDefault("temperature_hurt_interval", 40d).intValue(), "Number of ticks between instances of temperature damage").getInt();
+        modifierTickRate = CONFIG.get("general", "Modifier Tick Rate", defaultDiff.getOrDefault("modifier_tick_rate", 1d), "Multiplier for how often TempModifiers recalculate (lower = less frequent, better performance)").getDouble();
 
         /*
          Item Settings
@@ -118,6 +133,34 @@ public class ColdSweatConfig
                                 "Cold Mining Fatigue",
                                 defaultDiff.getOrDefault("cold_break_speed", true),
                                 "When set to true, the player's mining speed will be reduced when they are too cold").getBoolean();
+
+        /*
+         Insulation attribute traits
+         */
+        coldResistanceEnabled = CONFIG.get("insulation",
+                                           "Cold Resistance Enabled",
+                                           true,
+                                           "When set to true, cold resistance (from insulation/potions) reduces freezing damage").getBoolean();
+        heatResistanceEnabled = CONFIG.get("insulation",
+                                           "Heat Resistance Enabled",
+                                           true,
+                                           "When set to true, heat resistance (from insulation/potions) reduces overheating damage").getBoolean();
+
+        /*
+         Acclimation (gradual temperature adaptation)
+         */
+        acclimationSpeed = CONFIG.get("acclimation",
+                                      "Acclimation Speed",
+                                      0.0,
+                                      "How quickly an entity acclimates to its environment (in MC units per second). 0 disables acclimation").getDouble();
+        minAcclimationLower = CONFIG.get("acclimation", "Min Acclimation Lower Bound", -0.3,
+                                         "Lower bound of the freezing-point acclimation offset").getDouble();
+        minAcclimationUpper = CONFIG.get("acclimation", "Min Acclimation Upper Bound", 0.0,
+                                         "Upper bound of the freezing-point acclimation offset").getDouble();
+        maxAcclimationLower = CONFIG.get("acclimation", "Max Acclimation Lower Bound", 0.0,
+                                         "Lower bound of the burning-point acclimation offset").getDouble();
+        maxAcclimationUpper = CONFIG.get("acclimation", "Max Acclimation Upper Bound", 0.3,
+                                         "Upper bound of the burning-point acclimation offset").getDouble();
 
         /*
          Grace Period

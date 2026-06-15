@@ -138,34 +138,66 @@ public class PlayerTempProperty implements IExtendedEntityProperties, IEntityTem
         double newMaxOffset = Temperature.apply(0, player, Temperature.Type.FREEZING_POINT, getModifiers(Temperature.Type.FREEZING_POINT));
         double newMinOffset = Temperature.apply(0, player, Temperature.Type.BURNING_POINT, getModifiers(Temperature.Type.BURNING_POINT));
 
+        // Attribute traits (resistance/dampening). Computed from their modifier lists.
+        // Resistance reduces temperature *damage* (see below); dampening reduces the *rate* of temp change.
+        double coldResistance = Temperature.apply(0, player, Temperature.Type.COLD_RESISTANCE, getModifiers(Temperature.Type.COLD_RESISTANCE));
+        double heatResistance = Temperature.apply(0, player, Temperature.Type.HEAT_RESISTANCE, getModifiers(Temperature.Type.HEAT_RESISTANCE));
+        double coldDampening  = Temperature.apply(0, player, Temperature.Type.COLD_DAMPENING,  getModifiers(Temperature.Type.COLD_DAMPENING));
+        double heatDampening  = Temperature.apply(0, player, Temperature.Type.HEAT_DAMPENING,  getModifiers(Temperature.Type.HEAT_DAMPENING));
+        setTemp(Temperature.Type.COLD_RESISTANCE, coldResistance);
+        setTemp(Temperature.Type.HEAT_RESISTANCE, heatResistance);
+        setTemp(Temperature.Type.COLD_DAMPENING, coldDampening);
+        setTemp(Temperature.Type.HEAT_DAMPENING, heatDampening);
+
         double maxTemp = ConfigSettings.MAX_TEMP.get() + newMaxOffset;
         double minTemp = ConfigSettings.MIN_TEMP.get() + newMinOffset;
 
         // 1 if newWorldTemp is above max, -1 if below min, 0 if between the values (safe)
         int magnitude = CSMath.getSignForRange(newWorldTemp, minTemp, maxTemp);
 
+        // The rate of body-temperature change applied this tick (used to accelerate temperature damage)
+        double rate = 0;
+
         // Don't change player temperature if they're in creative/spectator mode
         if (magnitude != 0 && !player.capabilities.isCreativeMode)
         {
             // How much hotter/colder the player's temp is compared to max/min
             double difference = Math.abs(newWorldTemp - CSMath.clamp(newWorldTemp, minTemp, maxTemp));
-            double changeBy = (Math.max(
+            double changeBy = Math.max(
+                    // Change proportionally to the magnitude of the world temperature
+                    (difference / 7d) * ConfigSettings.TEMP_RATE.get(),
                     // Ensure a minimum speed for temperature change
-                    (difference / 7d) * ConfigSettings.TEMP_RATE.get().floatValue(),
-                    Math.abs(ConfigSettings.TEMP_RATE.get().floatValue() / 50d)
+                    Math.abs(ConfigSettings.TEMP_RATE.get() / 50d)
                     // If it's hot or cold
-            ) * magnitude)
-                    // Apply resistance from NBT
-                    * ((100 - player.getEntityData().getInteger(magnitude > 0 ? "HeatResistance" : "ColdResistance")) / 100d);
-            newCoreTemp += Temperature.apply(changeBy, player, Temperature.Type.RATE, getModifiers(Temperature.Type.RATE));
+            ) * magnitude;
+
+            // Temp is decreasing; apply cold dampening
+            if (changeBy < 0)
+            {   changeBy = (coldDampening < 0
+                            // Cold dampening is negative; increase the change by the dampening
+                            ? changeBy * (1 + Math.abs(coldDampening))
+                            // Cold dampening is positive; apply the change as a percentage of the dampening
+                            : CSMath.blend(changeBy, 0, coldDampening, 0, 1));
+            }
+            // Temp is increasing; apply heat dampening
+            else if (changeBy > 0)
+            {   changeBy = (heatDampening < 0
+                            // Heat dampening is negative; increase the change by the dampening
+                            ? changeBy * (1 + Math.abs(heatDampening))
+                            // Heat dampening is positive; apply the change as a percentage of the dampening
+                            : CSMath.blend(changeBy, 0, heatDampening, 0, 1));
+            }
+            rate = Temperature.apply(changeBy, player, Temperature.Type.RATE, getModifiers(Temperature.Type.RATE));
+            newCoreTemp += rate;
         }
-        // If the player's temperature and world temperature are not both hot or both cold, return to neutral
-        int tempSign = CSMath.getSign(newCoreTemp);
-        if (tempSign != 0 && magnitude != tempSign && getModifiers(Temperature.Type.CORE).isEmpty())
-        {
-            double factor = (tempSign == 1 ? newWorldTemp - maxTemp : newWorldTemp - minTemp) / 3;
-            double changeBy = CSMath.maxAbs(factor * ConfigSettings.TEMP_RATE.get(), ConfigSettings.TEMP_RATE.get() / 10d * -tempSign);
-            newCoreTemp += CSMath.minAbs(changeBy, -getTemp(Temperature.Type.CORE));
+
+        // If needed, equalize the player's core temperature back toward 0
+        double equilibrium = getEquilibriumDelta(newCoreTemp, newWorldTemp, minTemp, maxTemp, coldDampening, heatDampening);
+        int coreDeltaSign = CSMath.getSign(newCoreTemp - getTemp(Temperature.Type.CORE));
+        int equilibriumSign = CSMath.getSign(equilibrium);
+        // Only apply the equilibrium delta if it isn't working against any CORE modifiers
+        if (coreDeltaSign == 0 || coreDeltaSign == equilibriumSign)
+        {   newCoreTemp += equilibrium;
         }
 
         // Update whether certain UI elements are being displayed (temp isn't synced if the UI element isn't showing)
@@ -174,7 +206,7 @@ public class PlayerTempProperty implements IExtendedEntityProperties, IEntityTem
         }
 
         // Write the new temperature values
-        this.setTemperatures(player, new double[]{newWorldTemp, newMaxOffset, newMinOffset, CSMath.clamp(newCoreTemp, -150, 150), newBaseTemp});
+        this.setTemperatures(player, newWorldTemp, newMaxOffset, newMinOffset, CSMath.clamp(newCoreTemp, -150, 150), newBaseTemp);
 
         // Sync the temperature values to the client
         if ((neverSynced
@@ -191,6 +223,8 @@ public class PlayerTempProperty implements IExtendedEntityProperties, IEntityTem
 
         // Calculate body/base temperatures with modifiers
         double bodyTemp = getTemp(Temperature.Type.BODY);
+        double damage = ConfigSettings.TEMP_DAMAGE.get();
+        int hurtInterval = ConfigSettings.TEMPERATURE_HURT_INTERVAL.get();
 
         boolean hasGrace      = false;//player.getActivePotionEffect(ModEffects.GRACE) != null;
         boolean hasFireResist = false;//player.getActivePotionEffect(Effects.FIRE_RESISTANCE) != null;
@@ -199,30 +233,71 @@ public class PlayerTempProperty implements IExtendedEntityProperties, IEntityTem
         //Deal damage to the player if temperature is critical
         if (!player.capabilities.isCreativeMode)
         {
-            if (player.ticksExisted % 40 == 0 && !hasGrace)
+            if (hurtInterval >= 1 && !hasGrace)
             {
-                if (bodyTemp >= 100 && !(hasFireResist && ConfigSettings.FIRE_RESISTANCE_ENABLED.get()))
-                {   this.dealTempDamage(player, ModDamageSources.HOT, 2f);
-                }
-                else if (bodyTemp <= -100 && !(hasIceResist && ConfigSettings.ICE_RESISTANCE_ENABLED.get()))
-                {   this.dealTempDamage(player, ModDamageSources.COLD, 2f);
+                // Don't damage faster if body temp is equalizing
+                double rateFactor = CSMath.getSign(bodyTemp) == CSMath.getSign(rate) ? Math.abs(rate) : 0;
+                // Get damage interval based on rate of temp change
+                int rateInterval = (int) CSMath.blend(1, 4, rateFactor, 0, 0.7);
+
+                if (player.ticksExisted % (hurtInterval / rateInterval) == 0)
+                {
+                    if (bodyTemp >= 100 && !(hasFireResist && ConfigSettings.FIRE_RESISTANCE_ENABLED.get()))
+                    {   this.dealTempDamage(player, ModDamageSources.HOT, (float) CSMath.blend(damage, 0, heatResistance, 0, 1));
+                    }
+                    else if (bodyTemp <= -100 && !(hasIceResist && ConfigSettings.ICE_RESISTANCE_ENABLED.get()))
+                    {   this.dealTempDamage(player, ModDamageSources.COLD, (float) CSMath.blend(damage, 0, coldResistance, 0, 1));
+                    }
                 }
             }
         }
         else setTemp(Temperature.Type.CORE, 0);
     }
 
-    private void setTemperatures(EntityPlayerMP player, double[] temps)
+    /**
+     * Computes how much the player's core temperature should equalize back toward 0 this tick.<br>
+     * Mirrors 1.16's {@code AbstractTempCap.getEquilibriumDelta}: when the player is fully dampened against the
+     * current world temperature, their body returns to neutral; otherwise it drifts back when core and world
+     * temperatures disagree.
+     */
+    private double getEquilibriumDelta(double coreTemp, double worldTemp, double minTemp, double maxTemp, double coldDampening, double heatDampening)
     {
-        for (Temperature.Type type : VALID_TEMPERATURE_TYPES)
-        {
-            double oldTemp = getTemp(type);
-            double newTemp = temps[type.ordinal()];
-            //if (oldTemp != newTemp)
-            //    ModAdvancementTriggers.TEMPERATURE_CHANGED.trigger(player, this.getTemperatures());
+        int worldTempSign = CSMath.getSignForRange(worldTemp, minTemp, maxTemp);
+        boolean isFullyColdDampened = worldTempSign < 0 && coldDampening >= 1;
+        boolean isFullyHeatDampened = worldTempSign > 0 && heatDampening >= 1;
 
-            this.setTemp(type, newTemp);
+        // Get the sign of the player's core temperature (-1, 0, or 1)
+        int coreTempSign = CSMath.getSign(coreTemp);
+        // If needed, blend the player's temperature back to 0
+        double amount = 0;
+        // Player is fully cold dampened & body is cold
+        if (isFullyColdDampened && coreTempSign < 0)
+        {   amount = ConfigSettings.TEMP_RATE.get() / 10d;
         }
+        // Player is fully heat dampened & body is hot
+        else if (isFullyHeatDampened && coreTempSign > 0)
+        {   amount = ConfigSettings.TEMP_RATE.get() / -10d;
+        }
+        // Else if the player's core temp is not the same as the world temp
+        else if (coreTempSign != 0 && coreTempSign != worldTempSign)
+        {   amount = (coreTempSign == 1 ? worldTemp - maxTemp : worldTemp - minTemp) / 3;
+        }
+        // Blend back to 0
+        if (amount != 0)
+        {
+            double changeBy = CSMath.maxAbs(amount * ConfigSettings.TEMP_RATE.get(), ConfigSettings.TEMP_RATE.get() / 10d * -coreTempSign);
+            return CSMath.minAbs(changeBy, -getTemp(Temperature.Type.CORE));
+        }
+        return 0;
+    }
+
+    private void setTemperatures(EntityPlayerMP player, double world, double freezing, double burning, double core, double base)
+    {
+        this.setTemp(Temperature.Type.WORLD, world);
+        this.setTemp(Temperature.Type.FREEZING_POINT, freezing);
+        this.setTemp(Temperature.Type.BURNING_POINT, burning);
+        this.setTemp(Temperature.Type.CORE, core);
+        this.setTemp(Temperature.Type.BASE, base);
     }
 
     public void calculateVisibility(EntityPlayer player)
