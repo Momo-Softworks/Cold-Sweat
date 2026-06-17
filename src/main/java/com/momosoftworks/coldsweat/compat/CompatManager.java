@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.compat;
 
+import blusunrize.immersiveengineering.api.tool.ExternalHeaterHandler;
 import com.anthonyhilyard.iceberg.component.TitleBreakComponent;
 import com.mojang.datafixers.util.Either;
 import com.momosoftworks.coldsweat.ColdSweat;
@@ -8,6 +9,7 @@ import com.momosoftworks.coldsweat.api.event.core.registry.LoadRegistriesEvent;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.temperature.modifier.compat.SereneSeasonsTempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.compat.create.ColdSweatPonderPlugin;
 import com.momosoftworks.coldsweat.compat.curios.EquipableCurio;
@@ -38,6 +40,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.FormattedText;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -54,6 +57,7 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.fml.loading.moddiscovery.ModFileInfo;
+import net.neoforged.neoforge.capabilities.ICapabilityInvalidationListener;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -99,6 +103,7 @@ public class CompatManager
     private static final boolean REGIONS_UNEXPLORED_LOADED = modLoaded("regions_unexplored");
     private static final boolean SABLE_LOADED = modLoaded("sable");
     private static final boolean CREATE_AERONAUTICS = modLoaded("create_aeronautics");
+    private static final boolean IMMERSIVE_ENGINEERING_LOADED = modLoaded("immersiveengineering");
 
     private static final List<String> SEASONS_MODS = new ArrayList<>();
 
@@ -233,6 +238,9 @@ public class CompatManager
     }
     public static boolean isCreateAeronauticsLoaded()
     {   return CREATE_AERONAUTICS;
+    }
+    public static boolean isImmersiveEngineeringLoaded()
+    {   return IMMERSIVE_ENGINEERING_LOADED;
     }
 
     public static abstract class Curios
@@ -512,6 +520,37 @@ public class CompatManager
             SubLevel subLevel = iter.next();
             Vec3 transformed = subLevel.logicalPose().transformPositionInverse(new Vec3(pos.getX(), pos.getY(), pos.getZ()));
             return BlockPos.containing(transformed);
+        }
+    }
+
+    public static abstract class ImmersiveEngineering
+    {
+        public static final int ENERGY_PER_FUEL = 256;
+        private static final Map<HearthBlockEntity, ExternalHeaterHandler.IExternalHeatable> HEATER_CAPS = new HashMap<>();
+
+        public static ExternalHeaterHandler.IExternalHeatable getHeaterCap(HearthBlockEntity hearthLike)
+        {
+            ExternalHeaterHandler.IExternalHeatable heaterCap = HEATER_CAPS.computeIfAbsent(hearthLike, hearth ->
+                new ExternalHeaterHandler.IExternalHeatable()
+                {
+                    @Override
+                    public int doHeatTick(int energyAvailable, boolean redstone)
+                    {
+                        if (hearth.getFuel(HearthBlockEntity.FuelType.HOT).get() < hearth.getMaxFuel())
+                        {
+                            if (energyAvailable >= ENERGY_PER_FUEL)
+                            {
+                                hearth.addHotFuel(1, true);
+                                return ENERGY_PER_FUEL;
+                            }
+                        }
+                        return 0;
+                    }
+                });
+            if (hearthLike.getLevel() instanceof ServerLevel serverLevel)
+            {   serverLevel.registerCapabilityListener(hearthLike.getBlockPos(), () -> HEATER_CAPS.remove(hearthLike) != null);
+            }
+            return heaterCap;
         }
     }
 

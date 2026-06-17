@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat;
 
+import blusunrize.immersiveengineering.api.tool.ExternalHeaterHandler;
 import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import com.momosoftworks.coldsweat.common.entity.Chameleon;
 import com.momosoftworks.coldsweat.compat.CompatManager;
@@ -9,8 +10,10 @@ import com.momosoftworks.coldsweat.core.init.*;
 import com.momosoftworks.coldsweat.util.registries.ModGameRules;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.SpawnPlacementTypes;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.bus.api.IEventBus;
@@ -113,6 +116,9 @@ public class ColdSweat
         {
             // Register fluid handlers for hearth-like blocks
             event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, blockEntityType, (hearthLike, facing) -> hearthLike.getFuelHandler());
+            // Compat for Immersive Engineering
+            event.registerBlockEntity(ExternalHeaterHandler.CAPABILITY, blockEntityType, (hearthLike, facing) -> hearthLike.supportsHeating() ? CompatManager.ImmersiveEngineering.getHeaterCap(hearthLike)
+                                                                                                                                              : null);
         }
     }
 

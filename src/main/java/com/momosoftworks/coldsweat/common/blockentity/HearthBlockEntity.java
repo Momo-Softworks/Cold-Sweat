@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.common.blockentity;
 
+import blusunrize.immersiveengineering.api.tool.ExternalHeaterHandler;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.vanilla.BlockStateChangedEvent;

@@ -132,6 +132,7 @@ dependencies {
     compileOnly "curse.maven:primal-winter-393321:5811975"
     implementation "curse.maven:weather-storms-tornadoes-237746:6926103"
     implementation "curse.maven:coroutil-237749:5622966"
+    implementation "curse.maven:immersive-engineering-231951:6733669"
 
     // Sable (Compat)
     implementation "maven.modrinth:sable:1.0.6+mc1.21.1"
