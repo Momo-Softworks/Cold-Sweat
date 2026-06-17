@@ -146,6 +146,13 @@ repositories {
         name = "Jared's maven (JEI)"
         url = "https://maven.blamejared.com/"
     }
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
 }
 
 dependencies {
@@ -182,7 +189,7 @@ dependencies {
     implementation fg.deobf("curse.maven:curios-309927:4418032")
     implementation fg.deobf("curse.maven:create-328085:4625533")
     implementation fg.deobf("curse.maven:spoiled-364918:4614781")
-    compileOnly fg.deobf("curse.maven:thirst-was-taken-679270:5071551")
+    implementation fg.deobf("maven.modrinth:thirst-was-reclaimed:1.18.2-3.0.1")
     compileOnly fg.deobf("curse.maven:storms-237746:4426524")
     compileOnly fg.deobf("curse.maven:flywheel-486392:4341461")
     compileOnly fg.deobf("curse.maven:vampirism-233029:4082397")
