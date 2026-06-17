@@ -193,6 +193,12 @@ public class CompatManager
     public static boolean isValkyrienSkiesLoaded()
     {   return VALKYRIEN_SKIES_LOADED;
     }
+    /**
+     * @return True if any loaded mod implements "sublevels" (movable block structures, i.e. Valkyrien Skies ships)
+     */
+    public static boolean isSublevelCompatLoaded()
+    {   return VALKYRIEN_SKIES_LOADED;
+    }
     public static boolean isToughAsNailsLoaded()
     {   return TOUGH_AS_NAILS_LOADED;
     }
@@ -281,7 +287,7 @@ public class CompatManager
             if (!ships.iterator().hasNext())
             {
                 return new HashSet(){{
-                    add(aabb);
+                    add();
                 }};
             }
             Set<AxisAlignedBB> subAABBs = new HashSet<>();

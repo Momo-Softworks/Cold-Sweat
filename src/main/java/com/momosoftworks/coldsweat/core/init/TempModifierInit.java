@@ -122,6 +122,9 @@ public class TempModifierInit
         event.register(new ResourceLocation(ColdSweat.MOD_ID, "simple"), SimpleTempModifier::new);
 
         // Compat
+        if (CompatManager.isSublevelCompatLoaded())
+        {   event.register(new ResourceLocation(ColdSweat.MOD_ID, "sublevel_blocks"), SublevelBlockTempModifier::new);
+        }
         if (CompatManager.isSereneSeasonsLoaded())
         {   event.register(new ResourceLocation("sereneseasons", "season"), () -> new com.momosoftworks.coldsweat.api.temperature.modifier.compat.SereneSeasonsTempModifier());
         }
@@ -133,9 +136,6 @@ public class TempModifierInit
         }
         if (CompatManager.isBetterWeatherLoaded())
         {   event.register(new ResourceLocation("betterweather", "season"), () -> new com.momosoftworks.coldsweat.api.temperature.modifier.compat.BetterWeatherTempModifier());
-        }
-        if (CompatManager.isValkyrienSkiesLoaded())
-        {   event.register(new ResourceLocation("valkyrienskies", "ship_blocks"), () -> new com.momosoftworks.coldsweat.api.temperature.modifier.compat.ValkShipBlockTempModifier());
         }
 
         ColdSweat.LOGGER.debug("Registered TempModifiers in {}ms", System.currentTimeMillis() - startMS);
