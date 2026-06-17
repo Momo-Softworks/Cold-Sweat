@@ -50,31 +50,6 @@ public class BoilerBlockEntity extends HearthBlockEntity
     LazyOptional<? extends IItemHandler>[] slotHandlers =
             SidedInvWrapper.create(this, Direction.UP, Direction.DOWN, Direction.NORTH);
 
-    public static final int ENERGY_PER_FUEL = 256; // FE consumed per fuel unit added
-
-    // IE External Heater compat: created lazily to avoid class loading if IE is not present
-    private LazyOptional<ExternalHeaterHandler.IExternalHeatable> heaterCap;
-    private LazyOptional<ExternalHeaterHandler.IExternalHeatable> getHeaterCap()
-    {
-        if (heaterCap == null)
-        {
-            heaterCap = LazyOptional.of(() -> (energyAvailable, redstone) ->
-            {
-                if (this.getFuel() < this.getMaxFuel())
-                {
-                    int energyToUse = Math.min(energyAvailable, ENERGY_PER_FUEL);
-                    if (energyToUse >= ENERGY_PER_FUEL)
-                    {
-                        this.addFuel(1);
-                        return ENERGY_PER_FUEL;
-                    }
-                }
-                return 0;
-            });
-        }
-        return heaterCap;
-    }
-
     public BoilerBlockEntity(BlockPos pos, BlockState state)
     {   super(ModBlockEntities.BOILER, pos, state);
     }
@@ -335,9 +310,8 @@ public class BoilerBlockEntity extends HearthBlockEntity
             };
         }
         // IE External Heater support
-        if (!this.remove && CompatManager.isIELoaded() && capability == ExternalHeaterHandler.CAPABILITY)
-        {
-            return getHeaterCap().cast();
+        if (!this.remove && CompatManager.isImmersiveEngineeringLoaded() && capability == ExternalHeaterHandler.CAPABILITY)
+        {   return CompatManager.ImmersiveEngineering.getHeaterCap(this).cast();
         }
         return super.getCapability(capability, face);
     }
@@ -346,6 +320,8 @@ public class BoilerBlockEntity extends HearthBlockEntity
     public void invalidateCaps()
     {
         super.invalidateCaps();
-        if (heaterCap != null) heaterCap.invalidate();
+        if (CompatManager.isImmersiveEngineeringLoaded())
+        {   CompatManager.ImmersiveEngineering.invalidateHeaterCap(this);
+        }
     }
 }

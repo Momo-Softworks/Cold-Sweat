@@ -93,7 +93,6 @@ import net.minecraftforge.network.PacketDistributor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import blusunrize.immersiveengineering.api.tool.ExternalHeaterHandler;
-import com.momosoftworks.coldsweat.compat.CompatManager;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -117,29 +116,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     AtomicInteger hotFuel = new AtomicInteger();
     FuelFluidHandler fuelFluidHandler = new FuelFluidHandler();
     final LazyOptional<IFluidHandler> fuelFluidHolder = LazyOptional.of(() -> this.fuelFluidHandler);
-
-    public static final int ENERGY_PER_FUEL = 256; // FE consumed per fuel unit added
-    protected LazyOptional<ExternalHeaterHandler.IExternalHeatable> hearthHeaterCap;
-    protected LazyOptional<ExternalHeaterHandler.IExternalHeatable> getHearthHeaterCap()
-    {
-        if (hearthHeaterCap == null)
-        {
-            hearthHeaterCap = LazyOptional.of(() -> (energyAvailable, redstone) ->
-            {
-                if (this.getHotFuel() < this.getMaxFuel())
-                {
-                    int energyToUse = Math.min(energyAvailable, ENERGY_PER_FUEL);
-                    if (energyToUse >= ENERGY_PER_FUEL)
-                    {
-                        this.addFuel(FuelType.HOT, 1, true);
-                        return ENERGY_PER_FUEL;
-                    }
-                }
-                return 0;
-            });
-        }
-        return hearthHeaterCap;
-    }
 
     NonNullList<ItemStack> items = NonNullList.withSize(this.getContainerSize(), ItemStack.EMPTY);
     Pair<BlockPos, ResourceLocation> levelPos = Pair.of(null, null);
@@ -1363,9 +1339,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     public <T> LazyOptional<T> getCapability(Capability<T> capability, Direction face)
     {
         // IE External Heater support
-        if (!this.remove && CompatManager.isIELoaded() && capability == ExternalHeaterHandler.CAPABILITY)
-        {
-            return getHearthHeaterCap().cast();
+        if (!this.remove && CompatManager.isImmersiveEngineeringLoaded() && capability == ExternalHeaterHandler.CAPABILITY)
+        {   return CompatManager.ImmersiveEngineering.getHeaterCap(this).cast();
         }
 
         return capability == ForgeCapabilities.FLUID_HANDLER && face != null
@@ -1564,6 +1539,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     {
         super.invalidateCaps();
         fuelFluidHolder.invalidate();
-        if (hearthHeaterCap != null) hearthHeaterCap.invalidate();
+        if (CompatManager.isImmersiveEngineeringLoaded())
+        {   CompatManager.ImmersiveEngineering.invalidateHeaterCap(this);
+        }
     }
 }

@@ -363,7 +363,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
             else
                 return slotHandlers[2].cast();
         }
-        if (!this.remove && CompatManager.isIELoaded() && capability == ExternalHeaterHandler.CAPABILITY)
+        if (!this.remove && CompatManager.isImmersiveEngineeringLoaded() && capability == ExternalHeaterHandler.CAPABILITY)
         {
             return LazyOptional.empty();
         }
