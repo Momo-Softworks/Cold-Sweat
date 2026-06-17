@@ -153,6 +153,13 @@ repositories {
         name = "Jared's maven (JEI)"
         url = "https://maven.blamejared.com/"
     }
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
 }
 
 dependencies {
@@ -169,7 +176,7 @@ dependencies {
     compileOnly("com.tterrag.registrate:Registrate:MC1.20-1.3.3")
     compileOnly fg.deobf("curse.maven:tough-as-nails-246391:5815863")
     implementation fg.deobf("curse.maven:curios-309927:5367944-sources-6418456")
-    compileOnly fg.deobf("curse.maven:thirst-was-taken-679270:6660408")
+    implementation fg.deobf("maven.modrinth:thirst-was-reclaimed:1.20.1-3.0.1")
     compileOnly fg.deobf("curse.maven:immersive-engineering-231951:6206989")
     implementation fg.deobf("curse.maven:glitchcore-955399:5787839")
     implementation fg.deobf("curse.maven:serene-seasons-291874:6398227")
