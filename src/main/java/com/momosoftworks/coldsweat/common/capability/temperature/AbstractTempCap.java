@@ -392,7 +392,7 @@ public class AbstractTempCap implements ITemperatureCap
     @Override
     public double modifyFromAttribute(LivingEntity entity, Trait trait, List<TempModifier> modifiers, double baseValue)
     {
-        Supplier<Double> defaultSupplier = () -> Temperature.apply(baseValue, entity, trait, this.getModifiers(trait));
+        Supplier<Double> defaultSupplier = () -> Temperature.apply(baseValue, entity, trait, modifiers);
         AttributeInstance attribute = this.getAttribute(entity, trait);
 
         double newValue;
