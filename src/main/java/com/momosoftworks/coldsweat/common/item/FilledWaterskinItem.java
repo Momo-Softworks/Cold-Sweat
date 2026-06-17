@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.common.item;
 
+import cn.mlus.thirst.content.registry.ThirstComponent;
 import com.momosoftworks.coldsweat.api.temperature.modifier.WaterTempModifier;
 import com.momosoftworks.coldsweat.api.temperature.modifier.WaterskinTempModifier;
 import com.momosoftworks.coldsweat.api.util.placement.Matcher;
@@ -19,7 +20,6 @@ import com.momosoftworks.coldsweat.core.init.ModSounds;
 import com.momosoftworks.coldsweat.core.network.message.ParticleBatchMessage;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
-import dev.ghen.thirst.content.registry.ThirstComponent;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
