@@ -153,6 +153,13 @@ repositories {
         name = "Jared's maven (JEI)"
         url = "https://maven.blamejared.com/"
     }
+    maven {
+        name = "Modrinth"
+        url = "https://api.modrinth.com/maven"
+        content {
+            includeGroup "maven.modrinth"
+        }
+    }
 }
 
 dependencies {
@@ -168,7 +175,7 @@ dependencies {
 
     implementation fg.deobf("curse.maven:create-328085:5797604")
     implementation fg.deobf("curse.maven:curios-309927:5843737")
-    compileOnly fg.deobf("curse.maven:thirst-was-taken-679270:5857347")
+    implementation fg.deobf("maven.modrinth:thirst-was-reclaimed:1.19.2-3.0.1")
     compileOnly fg.deobf("curse.maven:spoiled-364918:4614777")
 
     // Ad Astra (compat)
