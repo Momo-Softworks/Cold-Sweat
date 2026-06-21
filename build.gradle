@@ -5,7 +5,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
+        classpath 'org.spongepowered:mixingradle:0.7.+'
     }
 }
 

@@ -222,10 +222,10 @@ public class BlockTempModifier extends TempModifier
 
     private double getGroupTotal(BlockTemp blockTemp)
     {
-        if (!(blockTemp instanceof ConfiguredBlockTemp) || config.getData().effectGroup().isEmpty())
+        if (!(blockTemp instanceof ConfiguredBlockTemp) || !((ConfiguredBlockTemp) blockTemp).getData().effectGroup().isPresent())
         {   return this.blockTempTotals.getOrDefault(blockTemp, 0d);
         }
-        return groupTotals.getOrDefault(config.getData().effectGroup().get(), 0d);
+        return groupTotals.getOrDefault(((ConfiguredBlockTemp) blockTemp).getData().effectGroup().get(), 0d);
     }
 
     private void updateGroupTotal(BlockTemp blockTemp, double delta)
