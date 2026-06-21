@@ -27,7 +27,6 @@ import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -335,33 +334,14 @@ public abstract class WorldHelper
         if (!(level instanceof ServerLevel serverLevel) || !level.isLoaded(pos)) return Optional.empty();
 
         StructureManager structureManager = serverLevel.structureManager();
-        Registry<Structure> structureRegistry = serverLevel.registryAccess().registryOrThrow(Registries.STRUCTURE);
-
-        // Iterate over all structures at the position (ignores Y level)
+        Registry<Structure> registry = serverLevel.registryAccess().registryOrThrow(Registries.STRUCTURE);
         for (Map.Entry<Structure, LongSet> entry : structureManager.getAllStructuresAt(pos).entrySet())
         {
             Structure structure = entry.getKey();
-            LongSet strucCoordinates = entry.getValue();
-
-            // Iterate over all chunk coordinates within the structures
-            for (long coordinate : strucCoordinates)
+            StructureStart start = structureManager.getStructureWithPieceAt(pos, structure);
+            if (start.isValid())
             {
-                SectionPos sectionpos = SectionPos.of(new ChunkPos(coordinate), level.getMinSection());
-                // Get the structure start
-                StructureStart structurestart = structureManager.getStartForStructure(sectionpos, structure, level.getChunk(sectionpos.x(), sectionpos.z(), ChunkStatus.STRUCTURE_STARTS));
-
-                if (structurestart != null && structurestart.isValid())
-                {
-                    // If the structure has a piece at the position, get the structure's holder
-                    if (structureManager.structureHasPieceAt(pos, structurestart))
-                    {
-                        ResourceLocation structureId = structureRegistry.getKey(structure);
-                        if (structureId == null)
-                        {   return Optional.empty();
-                        }
-                        return (Optional<Holder<Structure>>) (Object) structureRegistry.getHolder(ResourceKey.create(Registries.STRUCTURE, structureId));
-                    }
-                }
+                return registry.getHolder(registry.getResourceKey(structure).orElseThrow()).map(holder -> holder);
             }
         }
         return Optional.empty();
