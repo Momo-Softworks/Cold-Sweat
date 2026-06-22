@@ -8,21 +8,23 @@ import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
 import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.world.gen.feature.StructureFeature;
+import net.minecraft.world.gen.feature.structure.Structure;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Optional;
 
 public class StructureTempData extends ConfigData
 {
-    NegatableList<StructureFeature<?, ?>> structures;
+    NegatableList<Structure<?>> structures;
     double temperature;
     Temperature.Units units;
     boolean isOffset;
 
-    public StructureTempData(NegatableList<StructureFeature<?, ?>> structures, double temperature,
+    public StructureTempData(NegatableList<Structure<?>> structures, double temperature,
                              Temperature.Units units, boolean isOffset, NegatableList<String> requiredMods)
     {
         super(requiredMods);
@@ -32,26 +34,27 @@ public class StructureTempData extends ConfigData
         this.isOffset = isOffset;
     }
 
-    public StructureTempData(NegatableList<StructureFeature<?, ?>> structures, double temperature,
+    public StructureTempData(NegatableList<Structure<?>> structures, double temperature,
                              Temperature.Units units, boolean isOffset)
     {
         this(structures, temperature, units, isOffset, new NegatableList<>());
     }
 
-    public StructureTempData(StructureFeature<?, ?> structure, double temperature,
+    public StructureTempData(Structure<?> structure, double temperature,
                              Temperature.Units units, boolean isOffset)
     {
         this(new NegatableList<>(structure), temperature, units, isOffset);
     }
 
     public static final Codec<StructureTempData> CODEC = createCodec(RecordCodecBuilder.mapCodec(instance -> instance.group(
-            NegatableList.listCodec(ConfigHelper.dynamicCodec(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY)).fieldOf("structures").forGetter(StructureTempData::structures),
+            NegatableList.listCodec(Registry.STRUCTURE_FEATURE)
+                         .fieldOf("structures").forGetter(StructureTempData::structures),
             ExtraCodecs.DOUBLE.fieldOf("temperature").forGetter(StructureTempData::temperature),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(StructureTempData::units),
             Codec.BOOL.optionalFieldOf("offset", false).forGetter(StructureTempData::isOffset)
     ).apply(instance, StructureTempData::new)));
 
-    public NegatableList<StructureFeature<?, ?>> structures()
+    public NegatableList<Structure<?>> structures()
     {   return structures;
     }
     public double temperature()
@@ -75,7 +78,7 @@ public class StructureTempData extends ConfigData
         {   ColdSweat.LOGGER.error("Error parsing structure config: {} does not have enough arguments", entry);
             return null;
         }
-        NegatableList<StructureFeature<?, ?>> structures = ConfigHelper.parseRegistryItems(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, registryAccess, (String) entry.get(0));
+        NegatableList<Structure<?>> structures = ConfigHelper.parseRegistryItems(Registry.STRUCTURE_FEATURE_REGISTRY, registryAccess, (String) entry.get(0));
         if (structures.isEmpty()) return null;
         double temp = ((Number) entry.get(1)).doubleValue();
         Temperature.Units units = entry.size() == 3 ? Temperature.Units.valueOf(((String) entry.get(2)).toUpperCase()) : Temperature.Units.MC;
@@ -83,6 +86,25 @@ public class StructureTempData extends ConfigData
         StructureTempData result = new StructureTempData(structures, temp, units, isOffset);
         result.setConfigType(Type.TOML);
         return result;
+    }
+
+    public static NegatableList<Structure<?>> parseStructures(String... ids)
+    {
+        NegatableList<Structure<?>> structures = new NegatableList<>();
+        for (String id : ids)
+        {
+            id = id.trim();
+            boolean negate = id.startsWith("!");
+            if (negate) id = id.substring(1);
+            Optional<Structure<?>> structure = Registry.STRUCTURE_FEATURE.getOptional(new ResourceLocation(id));
+            if (!structure.isPresent())
+            {   ColdSweat.LOGGER.error("Error parsing structure config: {} is not a valid structure", id);
+                continue;
+            }
+            List<Structure<?>> list = negate ? structures.exclusions() : structures.requirements();
+            list.add(structure.get());
+        }
+        return structures;
     }
 
     @Override

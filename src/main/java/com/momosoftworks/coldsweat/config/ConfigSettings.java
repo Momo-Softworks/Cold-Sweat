@@ -28,6 +28,7 @@ import com.momosoftworks.coldsweat.util.math.Vec2i;
 import com.momosoftworks.coldsweat.util.registries.ModEntities;
 import com.momosoftworks.coldsweat.util.serialization.*;
 import net.minecraft.block.Block;
+import net.minecraft.data.BlockStateVariantBuilder;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.*;
@@ -40,7 +41,7 @@ import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.gen.feature.StructureFeature;
+import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.common.thread.EffectiveSide;
@@ -51,9 +52,7 @@ import javax.annotation.Nullable;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
+import java.util.function.*;
 import java.util.stream.Collectors;
 
 import static com.momosoftworks.coldsweat.util.serialization.DynamicHolder.SyncType;
@@ -95,8 +94,8 @@ public class ConfigSettings
     public static final DynamicHolder<Map<Biome, BiomeTempData>> BIOME_OFFSETS;
     public static final DynamicHolder<Map<DimensionType, DimensionTempData>> DIMENSION_TEMPS;
     public static final DynamicHolder<Map<DimensionType, DimensionTempData>> DIMENSION_OFFSETS;
-    public static final DynamicHolder<Map<StructureFeature<?, ?>, StructureTempData>> STRUCTURE_TEMPS;
-    public static final DynamicHolder<Map<StructureFeature<?, ?>, StructureTempData>> STRUCTURE_OFFSETS;
+    public static final DynamicHolder<Map<Structure<?>, StructureTempData>> STRUCTURE_TEMPS;
+    public static final DynamicHolder<Map<Structure<?>, StructureTempData>> STRUCTURE_OFFSETS;
     public static final DynamicHolder<Multimap<DimensionType, DepthTempData>> DEPTH_REGIONS;
     public static final DynamicHolder<Boolean> CHECK_SLEEP_CONDITIONS;
     public static final DynamicHolder<SeasonalTempData> SUMMER_TEMPS;
@@ -391,9 +390,9 @@ public class ConfigSettings
 
         STRUCTURE_TEMPS = addSettingWithRegistries(ColdSweat.createKey("structure_temperatures"), HashMap::new, (holder, registryAccess) ->
         {
-            Map<StructureFeature<?, ?>, StructureTempData> dataMap = ConfigHelper.getRegistryMap(WorldSettingsConfig.STRUCTURE_TEMPERATURES.get(), Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY,
-                                                                                            toml -> StructureTempData.fromToml(toml, false, registryAccess),
-                                                                                            data -> data.structures());
+            Map<Structure<?>, StructureTempData> dataMap = ConfigHelper.getRegistryMap(WorldSettingsConfig.STRUCTURE_TEMPERATURES.get(), Registry.STRUCTURE_FEATURE_REGISTRY,
+                                                                                      toml -> StructureTempData.fromToml(toml, false, registryAccess),
+                                                                                      data -> data.structures());
             ConfigLoadingHandler.modifyEntries(dataMap, ModRegistries.STRUCTURE_TEMP_DATA);
 
             holder.get(registryAccess).putAll(dataMap);
@@ -401,9 +400,9 @@ public class ConfigSettings
 
         STRUCTURE_OFFSETS = addSettingWithRegistries(ColdSweat.createKey("structure_offsets"), HashMap::new, (holder, registryAccess) ->
         {
-            Map<StructureFeature<?, ?>, StructureTempData> dataMap = ConfigHelper.getRegistryMap(WorldSettingsConfig.STRUCTURE_TEMP_OFFSETS.get(), Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY,
-                                                                                            toml -> StructureTempData.fromToml(toml, true, registryAccess),
-                                                                                            data -> data.structures());
+            Map<Structure<?>, StructureTempData> dataMap = ConfigHelper.getRegistryMap(WorldSettingsConfig.STRUCTURE_TEMP_OFFSETS.get(), Registry.STRUCTURE_FEATURE_REGISTRY,
+                                                                                      toml -> StructureTempData.fromToml(toml, true, registryAccess),
+                                                                                      data -> data.structures());
             ConfigLoadingHandler.modifyEntries(dataMap, ModRegistries.STRUCTURE_TEMP_DATA);
 
             holder.get(registryAccess).putAll(dataMap);

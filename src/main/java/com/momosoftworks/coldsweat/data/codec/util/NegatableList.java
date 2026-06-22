@@ -143,6 +143,13 @@ public class NegatableList<T>
         this.exclusions.forEach(exclusionAction);
     }
 
+    public <M> NegatableList<M> map(Function<T, M> mapper)
+    {
+        List<M> requirements = this.requirements.stream().map(mapper).collect(Collectors.toList());
+        List<M> exclusions = this.exclusions.stream().map(mapper).collect(Collectors.toList());
+        return new NegatableList<>(requirements, exclusions, this.requireAll, this.excludeAll);
+    }
+
     public <N> Optional<N> flatMap(Function<T, N> mapper, BinaryOperator<N> reducer, BiConsumer<N, N> remover)
     {
         // First map and reduce the requirements

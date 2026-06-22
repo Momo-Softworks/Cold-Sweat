@@ -235,8 +235,8 @@ public class ModRegistriesEventJS extends StartupEventJS
 
     public void addStructureTemperature(double temperature, String units, String... structures)
     {
-        this.addRegistryConfig(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, ModRegistries.STRUCTURE_TEMP_DATA, structures,
-                parsedStructures -> new StructureTempData(parsedStructures, temperature, Temperature.Units.fromID(units), false));
+        this.addRegistryConfig(Registry.STRUCTURE_FEATURE_REGISTRY, ModRegistries.STRUCTURE_TEMP_DATA, structures,
+                               parsedStructures -> new StructureTempData(parsedStructures, temperature, Temperature.Units.fromID(units), false));
     }
     public void addStructureTemperature(double temperature, String... structures)
     {   addStructureTemperature(temperature, "mc", structures);
@@ -244,8 +244,8 @@ public class ModRegistriesEventJS extends StartupEventJS
 
     public void addStructureOffset(double temperature, String units, String... structures)
     {
-        this.addRegistryConfig(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY, ModRegistries.STRUCTURE_TEMP_DATA, structures,
-                parsedStructures -> new StructureTempData(parsedStructures, temperature, Temperature.Units.fromID(units), true));
+        this.addRegistryConfig(Registry.STRUCTURE_FEATURE_REGISTRY, ModRegistries.STRUCTURE_TEMP_DATA, structures,
+                               parsedStructures -> new StructureTempData(parsedStructures, temperature, Temperature.Units.fromID(units), true));
     }
     public void addStructureOffset(double temperature, String... structures)
     {   addStructureOffset(temperature, "mc", structures);

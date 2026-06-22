@@ -15,7 +15,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.gen.feature.StructureFeature;
+import net.minecraft.world.gen.feature.structure.Structure;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -48,12 +48,12 @@ public class BiomeTempModifier extends TempModifier
         }
 
         // If the dimension temperature is overridden, return
-        DimensionTempData dimTempOverride = ConfigSettings.DIMENSION_TEMPS.get(level.registryAccess()).get(level.dimensionType());
+        DimensionTempData dimTempOverride = ConfigSettings.DIMENSION_TEMPS.get(level.registryAccess()).get(dimension);
         if (dimTempOverride != null)
         {   return temp -> temp + CSMath.blend(dimTempOverride.getMinTemp(), dimTempOverride.getMaxTemp(), timeMultiplier, -1, 1);
         }
 
-        DimensionTempData dimTempOffset = ConfigSettings.DIMENSION_OFFSETS.get(level.registryAccess()).get(level.dimensionType());
+        DimensionTempData dimTempOffset = ConfigSettings.DIMENSION_OFFSETS.get(level.registryAccess()).get(dimension);
         double dimOffset = dimTempOffset != null ? CSMath.blend(dimTempOffset.getMinTemp(), dimTempOffset.getMaxTemp(), timeMultiplier, -1, 1) : 0;
 
         int biomeCount = 0;
@@ -99,7 +99,7 @@ public class BiomeTempModifier extends TempModifier
 
     public static Pair<Double, Double> getStructureTemp(World level, BlockPos pos)
     {
-        Optional<StructureFeature<?, ?>> structure = WorldHelper.getStructureAt(level, pos);
+        Optional<Structure<?>> structure = WorldHelper.getStructureAt(level, pos);
         if (!structure.isPresent()) return Pair.of(null, 0d);
 
         Double strucTemp = CSMath.getIfNotNull(ConfigSettings.STRUCTURE_TEMPS.get(level.registryAccess()).get(structure.get()), StructureTempData::getTemperature, null);

@@ -43,7 +43,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraft.util.math.SectionPos;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
@@ -56,10 +55,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkSection;
-import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.Heightmap;
-import net.minecraft.world.gen.feature.StructureFeature;
 import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.gen.feature.structure.StructureManager;
 import net.minecraft.world.gen.feature.structure.StructureStart;
@@ -334,42 +331,21 @@ public abstract class WorldHelper
         return sections[CSMath.clamp(y >> 4, 0, sections.length - 1)];
     }
 
-    public static Optional<StructureFeature<?, ?>> getStructureAt(World level, BlockPos pos)
+    public static Optional<Structure<?>> getStructureAt(World level, BlockPos pos)
     {
-        BlockPos finalPos = sublevelToWorld(level, pos);
-        if (!(level instanceof ServerWorld) || !level.isLoaded(finalPos)) return Optional.empty();
+        pos = sublevelToWorld(level, pos);
+        if (!(level instanceof ServerWorld) || !level.isLoaded(pos)) return Optional.empty();
 
         ServerWorld serverLevel = ((ServerWorld) level);
         StructureManager structureManager = serverLevel.structureFeatureManager();
-
-        // Iterate over all structures at the position (ignores Y level)
-        for (Map.Entry<Structure<?>, LongSet> entry : level.getChunk(finalPos).getAllReferences().entrySet())
+        for (Map.Entry<Structure<?>, LongSet> entry : level.getChunk(pos).getAllReferences().entrySet())
         {
             Structure<?> structure = entry.getKey();
-            LongSet strucCoordinates = entry.getValue();
-
-            // Iterate over all chunk coordinates within the structures
-            for (long coordinate : strucCoordinates)
-            {
-                SectionPos sectionpos = SectionPos.of(new ChunkPos(coordinate), SectionPos.blockToSectionCoord(0));
-                // Get the structure start
-                StructureStart<?> structurestart = structureManager.getStartForFeature(sectionpos, structure, level.getChunk(sectionpos.x(), sectionpos.z(), ChunkStatus.STRUCTURE_STARTS));
-
-                if (structurestart != null && structurestart.isValid() && structurestart.getBoundingBox().isInside(finalPos))
-                {
-                    // If the structure has a piece at the position, get the temperature
-                    if (structurestart.getPieces().stream().anyMatch(piece -> piece.getBoundingBox().isInside(finalPos)))
-                    {
-                        ResourceLocation structureId = structure.delegate.name();
-                        if (structureId == null)
-                        {   return Optional.empty();
-                        }
-                        return Optional.ofNullable(serverLevel.registryAccess().registryOrThrow(Registry.CONFIGURED_STRUCTURE_FEATURE_REGISTRY).get(Registry.STRUCTURE_FEATURE.getKey(structure)));
-                    }
-                }
+            StructureStart<?> start = structureManager.getStructureAt(pos, true, structure);
+            if (start.isValid())
+            {   return Optional.of(structure);
             }
         }
-
         return Optional.empty();
     }
 
