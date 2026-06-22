@@ -117,8 +117,11 @@ public class ColdSweat
             // Register fluid handlers for hearth-like blocks
             event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, blockEntityType, (hearthLike, facing) -> hearthLike.getFuelHandler());
             // Compat for Immersive Engineering
-            event.registerBlockEntity(ExternalHeaterHandler.CAPABILITY, blockEntityType, (hearthLike, facing) -> hearthLike.supportsHeating() ? CompatManager.ImmersiveEngineering.getHeaterCap(hearthLike)
-                                                                                                                                              : null);
+            if (CompatManager.isImmersiveEngineeringLoaded())
+            {
+                event.registerBlockEntity(ExternalHeaterHandler.CAPABILITY, blockEntityType, (hearthLike, facing) -> hearthLike.supportsHeating() ? CompatManager.ImmersiveEngineering.getHeaterCap(hearthLike)
+                                                                                                                                                  : null);
+            }
         }
     }
 
