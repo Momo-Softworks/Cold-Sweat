@@ -3709,3 +3709,18 @@ Technical Changes:
       - Some examples of this system can be seen in the new waterskin configs
 - TempModifiers are now serialized/deserialized via a codec rather than NBTHelper methods
       - Old player data will be automatically converted to the new format upon loading
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.4.2
+- Updated Spanish translation (thanks Jeshua on GitHub)
+- Added support for using Immersive Engineering's external heater with boilers and hearths (thanks manhtuan on GitHub)
+- Updated Thirst Was Taken support to target Thirst Was Reclaimed instead
+
+Fixes:
+* (1.16-1.20) Fixed temperature data persisting and/or becoming frozen after dying or changing dimensions
+- (1.19-1.20) Fixed error logs about Cold Sweat packets
+- (1.16) Fixed structure-related configs not working
+* Fixed temperature not emitting from blocks that are part of Sable (Create: Aeronautics) objects
+* Fixed KubeJS insulator configs not working properly in some cases
+- Fixed some cases in which tooltips would flicker when hovering over items
