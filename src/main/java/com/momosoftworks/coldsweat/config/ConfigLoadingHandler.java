@@ -269,7 +269,7 @@ public class ConfigLoadingHandler
         for (Map.Entry<ResourceLocation, RegistryHolder<?>> entry : ModRegistries.getRegistries().entrySet())
         {
             RegistryHolder<?> registry = entry.getValue();
-            registries.putAll(registry, parseConfigData(registry, (Codec) registry.codec(), registryAccess));
+            registries.putAll(registry, parseConfigData(registry, registryAccess));
         }
         return registries;
     }
@@ -426,7 +426,7 @@ public class ConfigLoadingHandler
         REGISTRY_MODIFIERS.clear();
         // Gather registry removals & add them to the static map
         Set<Holder<RegistryModifierData<?>>> removals = registryAccess.registryOrThrow(ModRegistries.REGISTRY_MODIFIER_DATA.key()).holders().collect(Collectors.toSet());
-        removals.addAll(parseConfigData(ModRegistries.REGISTRY_MODIFIER_DATA, RegistryModifierData.CODEC, registryAccess));
+        removals.addAll(parseConfigData(ModRegistries.REGISTRY_MODIFIER_DATA, registryAccess));
         removals.forEach(holder ->
         {
             RegistryHolder<?> key = ModRegistries.getRegistry(holder.get().registry());
@@ -838,7 +838,7 @@ public class ConfigLoadingHandler
         });
     }
 
-    private static <T extends ConfigData> List<Holder<T>> parseConfigData(RegistryHolder<T> registry, Codec<T> codec, RegistryAccess registryAccess)
+    private static <T extends ConfigData> List<Holder<T>> parseConfigData(RegistryHolder<T> registry, RegistryAccess registryAccess)
     {
         ResourceKey<Registry<T>> registryKey = registry.key();
         List<Holder<T>> output = new ArrayList<>();
@@ -857,10 +857,13 @@ public class ConfigLoadingHandler
             {
                 try (FileReader reader = new FileReader(file))
                 {
-                    codec.decode(registryOps, GsonHelper.parse(reader))
+                    registry.codec().decode(registryOps, GsonHelper.parse(reader))
                             .resultOrPartial(error -> ColdSweat.LOGGER.error("Error decoding JSON config setting in {}: {}", registryKey.location(), error))
                             .map(Pair::getFirst)
-                            .ifPresent(configData -> output.add(Holder.direct(configData)));
+                            .ifPresent(configData ->
+                            {   configData.setConfigType(ConfigData.Type.JSON);
+                                output.add(Holder.direct(configData));
+                            });
                 }
                 catch (Exception e)
                 {   ColdSweat.LOGGER.error("Failed to parse JSON config setting in {}: {}", registryKey.location(), file.getName(), e);
