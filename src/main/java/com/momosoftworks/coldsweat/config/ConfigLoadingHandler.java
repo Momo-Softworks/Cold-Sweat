@@ -747,16 +747,14 @@ public class ConfigLoadingHandler
                 try (FileReader reader = new FileReader(file))
                 {
                     JsonObject json = JSONUtils.parse(reader);
-                    if (!shouldLoadJSON(registryKey, file.getPath(), json))
+                    if (!shouldLoadJSON(registryKey, file.getName(), json))
                     {   continue;
                     }
-                    registry.codec().decode(registryOps, JSONUtils.parse(reader))
+                    registry.codec().decode(registryOps, json)
                             .resultOrPartial(error -> ColdSweat.LOGGER.error("Error decoding JSON config setting in {}: {}", registryKey.location(), error))
                             .map(Pair::getFirst)
                             .ifPresent(configData ->
-                            {
-                                configData.setConfigType(ConfigData.Type.JSON);
-                                configData.setRegistryKey(RegistryKey.create(registryKey, new ResourceLocation(ColdSweat.MOD_ID, file.getPath())));
+                            {   configData.setConfigType(ConfigData.Type.JSON);
                                 output.add(configData);
                             });
                 }
