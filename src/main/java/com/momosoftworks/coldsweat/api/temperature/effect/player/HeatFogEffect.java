@@ -57,12 +57,14 @@ public class HeatFogEffect extends TempEffect
             RenderFogEvent fog = (RenderFogEvent) event;
             double fogDistance = ConfigSettings.HEATSTROKE_FOG_DISTANCE.get();
             if (fogDistance >= 64 || Double.isInfinite(fogDistance)) return;
-            if (fogDistance >= fog.getFarPlaneDistance()) return;
 
-            if (fog.getFarPlaneDistance() != 0)
-                FOG_FAR_DISTANCE_TARGET = (float) CSMath.blendLog(fog.getFarPlaneDistance(), fogDistance, effect, 0, 1, 4);
-            if (fog.getNearPlaneDistance() != 0)
-                FOG_NEAR_DISTANCE_TARGET = (float) CSMath.blendLog(fog.getNearPlaneDistance(), fogDistance * 0.3, effect, 0, 1, 4);
+            float nearPlaneDistance = fog.getNearPlaneDistance();
+            float farPlaneDistance = fog.getFarPlaneDistance();
+
+            if (farPlaneDistance != 0)
+                FOG_FAR_DISTANCE_TARGET = (float) CSMath.blendLog(farPlaneDistance, fogDistance, effect, 0, 1, 4);
+            if (nearPlaneDistance != 0)
+                FOG_NEAR_DISTANCE_TARGET = (float) CSMath.blendLog(nearPlaneDistance, fogDistance * 0.3, effect, 0, 1, 4);
 
             if (FOG_NEAR_DISTANCE <= 0) {
                 FOG_FAR_DISTANCE = FOG_FAR_DISTANCE_TARGET;
@@ -72,8 +74,8 @@ public class HeatFogEffect extends TempEffect
             FOG_FAR_DISTANCE = FOG_FAR_DISTANCE + (FOG_FAR_DISTANCE_TARGET - FOG_FAR_DISTANCE) * farLerpSpeed;
             FOG_NEAR_DISTANCE = FOG_NEAR_DISTANCE + (FOG_NEAR_DISTANCE_TARGET - FOG_NEAR_DISTANCE) * nearLerpSpeed;
 
-            fog.setFarPlaneDistance(FOG_FAR_DISTANCE);
-            fog.setNearPlaneDistance(FOG_NEAR_DISTANCE);
+            fog.setFarPlaneDistance(Math.min(farPlaneDistance, FOG_FAR_DISTANCE));
+            fog.setNearPlaneDistance(Math.min(nearPlaneDistance, FOG_NEAR_DISTANCE));
             fog.setCanceled(true);
         }
         else
