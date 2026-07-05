@@ -90,6 +90,8 @@ public class ConfigSettings
     public static final DynamicHolder<Double> HEATSTROKE_FOG_DISTANCE;
 
     // World Settings
+    public static final DynamicHolder<Integer> HOTTEST_TIME;
+    public static final DynamicHolder<Integer> COLDEST_TIME;
     public static final DynamicHolder<Map<Biome, BiomeTempData>> BIOME_TEMPS;
     public static final DynamicHolder<Map<Biome, BiomeTempData>> BIOME_OFFSETS;
     public static final DynamicHolder<Map<DimensionType, DimensionTempData>> DIMENSION_TEMPS;
@@ -334,6 +336,17 @@ public class ConfigSettings
         HEATSTROKE_FOG_DISTANCE = addSyncedSetting(ColdSweat.createKey("heatstroke_fog_distance"), () -> 6d, holder -> holder.set(MainSettingsConfig.HEATSTROKE_FOG.get()),
         ExtraCodecs.DOUBLE,
         (distance) -> MainSettingsConfig.HEATSTROKE_FOG.set(distance),
+        SyncType.BOTH_WAYS);
+
+
+        HOTTEST_TIME = addSyncedSetting(ColdSweat.createKey("hottest_time"), () -> 6000, holder -> holder.set(WorldSettingsConfig.HOTTEST_TIME.get()),
+        Codec.INT,
+        (time) -> WorldSettingsConfig.HOTTEST_TIME.set(time),
+        SyncType.BOTH_WAYS);
+
+        COLDEST_TIME = addSyncedSetting(ColdSweat.createKey("coldest_time"), () -> 18000, holder -> holder.set(WorldSettingsConfig.COLDEST_TIME.get()),
+        Codec.INT,
+        (time) -> WorldSettingsConfig.COLDEST_TIME.set(time),
         SyncType.BOTH_WAYS);
 
         BIOME_TEMPS = addSyncedSettingWithRegistries(ColdSweat.createKey("biome_temps"), HashMap::new, (holder, registryAccess) ->

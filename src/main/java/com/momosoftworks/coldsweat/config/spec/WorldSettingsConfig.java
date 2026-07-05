@@ -20,6 +20,9 @@ public class WorldSettingsConfig
     private static final ForgeConfigSpec SPEC;
     private static final ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
 
+    public static final ForgeConfigSpec.IntValue HOTTEST_TIME;
+    public static final ForgeConfigSpec.IntValue COLDEST_TIME;
+
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> BIOME_TEMP_OFFSETS;
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> BIOME_TEMPERATURES;
     public static final ForgeConfigSpec.ConfigValue<List<? extends List<?>>> DIMENSION_TEMP_OFFSETS;
@@ -92,6 +95,21 @@ public class WorldSettingsConfig
                         " Settings with \"//v\" will list elements vertically. Removing \"//v\" will list elements in one line",
                         "─────────────────────────────────────────────────────────────────────────");
 
+        /*
+         General
+         */
+        BUILDER.push("General");
+            HOTTEST_TIME = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────//v",
+                         " The time of day when the world is at its hottest, in ticks",
+                         " └── 0 = sunrise, 6000 = noon, 12000 = sunset, 18000 = midnight")
+                .defineInRange("Hottest Time", 6000, 0, 24000);
+            COLDEST_TIME = BUILDER
+                .comment("─────────────────────────────────────────────────────────────────────────//v",
+                         " The time of day when the world is at its coldest, in ticks",
+                         " └── 0 = sunrise, 6000 = noon, 12000 = sunset, 18000 = midnight")
+                .defineInRange("Coldest Time", 18000, 0, 24000);
+        BUILDER.pop();
         /*
          Dimensions
          */
