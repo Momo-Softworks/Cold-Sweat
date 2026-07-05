@@ -680,12 +680,38 @@ public abstract class WorldHelper
     public static double getTimeMultiplier(LevelAccessor level)
     {
         if (level.dimensionType().hasCeiling())
-        {   return 0.5;
+        {   return 0;
         }
         if (level.dimensionType().hasFixedTime())
         {   return level.dimensionType().fixedTime().getAsLong();
         }
-        return Math.sin(level.dayTime() / (12000 / Math.PI));
+
+        final long dayLength = 24000L;
+        long time = Math.floorMod(level.dayTime(), dayLength);
+        long hottestTime = ConfigSettings.HOTTEST_TIME.get();
+        long coldestTime = ConfigSettings.COLDEST_TIME.get();
+
+        if (hottestTime == coldestTime)
+        {   return 0;
+        }
+
+        long coolingLength = Math.floorMod(coldestTime - hottestTime, dayLength);
+        long warmingLength = dayLength - coolingLength;
+
+        long fromHottest = Math.floorMod(time - hottestTime, dayLength);
+
+        double angle;
+        if (fromHottest <= coolingLength)
+        {   double progress = fromHottest / (double) coolingLength;
+            angle = progress * Math.PI;
+        }
+        else
+        {   long fromColdest = fromHottest - coolingLength;
+            double progress = fromColdest / (double) warmingLength;
+            angle = Math.PI + progress * Math.PI;
+        }
+
+        return Math.cos(angle);
     }
 
     public static double getWaterTemperatureAt(Level level, BlockPos pos)
