@@ -10,7 +10,7 @@
         "depth": 1,
         "temperature": {
           "value": -273.15,
-          "strength": 0.005
+          "strength": 0.08
         },
         "units": "c"
       }
@@ -22,7 +22,7 @@
         "depth": 0,
         "temperature": {
           "value": -273.15,
-          "strength": 0.005
+          "strength": 0.08
         },
         "units": "c"
       },
