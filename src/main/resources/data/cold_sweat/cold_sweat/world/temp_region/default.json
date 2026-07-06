@@ -11,7 +11,7 @@
         "units": "c",
         "temperature": {
           "value": -273.15,
-          "strength": 0.005
+          "strength": 0.08
         },
         "units": "c"
       }
@@ -24,7 +24,7 @@
         "units": "c",
         "temperature": {
           "value": -273.15,
-          "strength": 0.005
+          "strength": 0.08
         },
         "units": "c"
       },
