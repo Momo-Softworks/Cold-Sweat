@@ -209,10 +209,10 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
     }
 
     @Override
-    protected void tickPaths(int firstIndex, int lastIndex)
+    protected void tickPaths()
     {
         if (this.hasSmokestack)
-        {   super.tickPaths(firstIndex, lastIndex);
+        {   super.tickPaths();
         }
     }
 

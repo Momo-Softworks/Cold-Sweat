@@ -307,6 +307,18 @@ public abstract class WorldHelper
         return area[0] >= 1;
     }
 
+    public static boolean adjacentInSameChunk(BlockPos pos1, Direction d)
+    {
+        BlockPos pos2 = pos1.relative(d);
+        /**
+         * The two block positions are in the same chunk if the 4th bit and above of their x and z
+         * coordinates are the same.
+         */
+        boolean sameXChunk = ((pos1.getX() ^ pos2.getX()) >> 4) == 0;
+        boolean sameZChunk = ((pos1.getZ() ^ pos2.getZ()) >> 4) == 0;
+        return sameXChunk && sameZChunk;
+    }
+
     @Nullable
     public static ChunkAccess getChunk(LevelAccessor level, BlockPos pos)
     {   return getChunk(level, pos.getX() >> 4, pos.getZ() >> 4);

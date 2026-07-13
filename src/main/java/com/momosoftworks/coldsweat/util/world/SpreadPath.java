@@ -10,7 +10,6 @@ public class SpreadPath
     public final Direction direction;
     public final BlockPos pos;
     public final int x, y, z;
-    public boolean frozen = false;
     public BlockPos origin;
 
     public SpreadPath(BlockPos pos, Direction direction)
@@ -97,6 +96,6 @@ public class SpreadPath
 
     @Override
     public String toString()
-    {   return "SpreadPath{pos=" + pos + ", dir=" + direction + ", frozen=" + frozen + "}";
+    {   return "SpreadPath{pos=" + pos + ", dir=" + direction + "}";
     }
 }

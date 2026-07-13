@@ -106,9 +106,16 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     List<SpreadPath> paths = new ArrayList<>(this.getMaxPaths());
     // Used as a lookup table for detecting duplicate paths (faster than ArrayList#contains())
     Set<BlockPos> pathLookup = new HashSet<>(this.getMaxPaths());
-    // Positions attempted by the spread algorithm where canSpread returned false (blocked by walls, etc.)
-    Set<BlockPos> invalidPaths = new HashSet<>();
+    // Positions attempted by the spread algorithm where canSpread returned false (blocked by walls, etc.
+    Set<BlockPos> spreadBlockedPaths = new HashSet<>();
+    // Positions that are exposed to skylight
+    Set<BlockPos> exposedSkyPaths = new HashSet<>();
+    // Positions attempted by the spread algorithm out of range of the hearth or any of its attached smokestacks
+
+    Set<BlockPos> outOfRange = new HashSet<>();
     Map<Pair<Integer, Integer>, Pair<Integer, Boolean>> seeSkyMap = new HashMap<>(this.getMaxPaths());
+    int partitionSize = CSMath.clamp(this.getMaxPaths() / 3, 100, 4000);
+    int spreadIndex = 0;
 
     List<MobEffectInstance> effects = new ArrayList<>();
 
@@ -141,7 +148,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     boolean registeredLocation = false;
 
     boolean showParticles = true;
-    int frozenPaths = 0;
     boolean spreading = true;
 
     boolean hasSmokestack = false;
@@ -178,8 +184,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         if (oldState == null || newState == null) return;
 
         if (level == this.level
-        && pos.distSqr(this.getBlockPos()) < Math.pow(this.getMaxRange(), 2)
-        && this.pathLookup.contains(pos)
+        && withinUpdateRange(pos)
+        && seeSkyMap.containsKey(Pair.of(pos.getX(), pos.getZ()))
         && !oldState.getCollisionShape(level, pos).equals(newState.getCollisionShape(level, pos)))
         {
             if (!level.isClientSide())
@@ -189,6 +195,22 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
             {   this.searchForPipeEnds(this.getBlockPos().above(), Direction.UP);
             }
         }
+    }
+
+    /**
+     * Returns whether an update at the given block position is close enough to have the potential to affect
+     * the hearth's spread
+     */
+    private boolean withinUpdateRange(BlockPos pos)
+    {
+        int posX = pos.getX();
+        int posY = pos.getY();
+        int posZ = pos.getZ();
+        int maxRange = this.getMaxRange();
+        return Math.abs(posX - this.x) <= maxRange
+                && Math.abs(posZ - this.z) <= maxRange
+                && posY <= this.y + this.getMaxRange() + 64 // To determine whether skylight changes
+                && posY >= this.y - this.getMaxRange();
     }
 
     /**
@@ -376,29 +398,13 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                     this.searchForPipeEnds(this.getBlockPos().above(), Direction.UP);
                 }
 
-                // Mark as not spreading if all paths are frozen
-                this.spreading = this.frozenPaths < paths.size();
-
-                /*
-                 Partition the points into logical "sub-maps" to be iterated over separately each tick
-                */
-                int pathCount = paths.size();
-                // Size of each partition (sub-list) of paths
-                int partSize = spreading ? CSMath.clamp(pathCount / 3, 100, 4000)
-                                         : CSMath.clamp(pathCount / 20, 10, 100);
-                // Number of partitions
-                int partCount = (int) Math.ceil(pathCount / (float) partSize);
-                // Index of the last point being worked on this tick
-                int lastIndex = partSize * ((this.ticksExisted % partCount) + 1);
-                // Index of the first point being worked on this tick
-                int firstIndex = Math.max(0, lastIndex - partSize);
-
+                int prevPathCount = paths.size();
                 // Spread to new blocks
                 // Only tick paths every 20 ticks or if there is only one or fewer paths (prevents hearths that can't spread causing undue lag)
-                if (this.paths.size() > 1 || this.ticksExisted % 20 == 0)
-                {   this.tickPaths(firstIndex, lastIndex);
+                if (this.spreading)
+                {   this.tickPaths();
                 }
-                if (isClient && spreading && paths.size() != pathCount)
+                if (isClient && (paths.size() != prevPathCount))
                 {   HearthDebugRenderer.updatePaths(this);
                 }
 
@@ -474,104 +480,101 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
 
     ChunkAccess workingChunk = null;
 
-    protected void tickPaths(int firstIndex, int lastIndex)
+    /**
+     * This executes the spread algorithm. It is essentially a breadth-first traversal starting at the hearth
+     * and spreading outwards. We only do a number of steps governed by the partitionSize variable
+     * on a single tick, and we use spreadIndex to keep track of where we are.
+     */
+    protected void tickPaths()
     {
-        int pathCount = paths.size();
-        for (int i = firstIndex; i < Math.min(paths.size(), lastIndex); i++)
-        {
+        for (; this.spreadIndex < Math.min(paths.size(), this.spreadIndex + partitionSize); this.spreadIndex++) {
+            // Stop once we have added maxPaths many SpreadPath's to paths
+            if (this.spreadIndex >= this.getMaxPaths()) {
+                this.spreading = false;
+                break;
+            }
             // This operation is really fast because it's an ArrayList
-            SpreadPath spreadPath = paths.get(i);
-            BlockPos pathPos = spreadPath.pos;
-            if (spreadPath.origin == null)
-            {   spreadPath.setOrigin(this.getBlockPos());
+            SpreadPath spreadPath = paths.get(spreadIndex);
+            if (spreadIndex > 0)
+            {
+                paths.add(spreadPath);
+            }
+            if (spreadPath.origin == null) {
+                spreadPath.setOrigin(this.getBlockPos());
             }
 
-            int spX = spreadPath.x;
-            int spY = spreadPath.y;
-            int spZ = spreadPath.z;
+            visitNeighbors(level, spreadPath);
+        }
+    }
 
-            // Don't try to spread if the path is frozen
-            if (spreadPath.frozen)
+    /**
+     * Try to spread from the given path to all adjacent blocks
+     */
+    private void visitNeighbors(Level level, SpreadPath path)
+    {
+        if (workingChunk == null || !workingChunk.getPos().equals(new ChunkPos(path.pos)))
+        {   workingChunk = WorldHelper.getChunk(level, path.pos);
+        }
+        BlockState state = workingChunk != null ? workingChunk.getBlockState(path.pos) : level.getBlockState(path.pos);
+
+        for (Direction direction : DIRECTIONS) {
+            if (direction == path.direction.getOpposite())
             {
-                // Remove a 3D-checkerboard of paths after the Hearth is finished spreading to reduce pointless iteration overhead
-                // The Hearth is "finished spreading" when all paths are frozen
-                if (!spreading && (Math.abs(spY % 2) == 0) == (Math.abs(spX % 2) == Math.abs(spZ % 2)))
-                {   int last = paths.size() - 1;
-                    if (i < last) paths.set(i, paths.get(last));
-                    paths.remove(last);
-                    i--;
-                }
-                // Don't do anything else with this path
+                continue;
+            }
+            BlockPos neighbor = path.pos.relative(direction);
+            // Since a block can be spread to from some directions and not others, we
+            // can't use the results of one canSpread call to determine that no block can spread to this block
+            if (this.pathLookup.contains(neighbor)
+                    || this.exposedSkyPaths.contains(neighbor)
+                    || this.outOfRange.contains(neighbor)) {
                 continue;
             }
 
-            /*
-             Try to spread to new blocks
-             */
-
             // The origin of the path is usually the hearth's position,
             // but if it's spreading through Create pipes then the origin is the end of the pipe
-            if (pathCount < this.getMaxPaths() && spreadPath.withinDistance(spreadPath.origin, this.getSpreadRange())
-            && CSMath.withinCubeDistance(spreadPath.origin, this.getBlockPos(), this.getMaxRange()))
-            {
-                /*
-                 Spreading algorithm
-                 */
-                if (workingChunk == null || !workingChunk.getPos().equals(new ChunkPos(pathPos)))
-                {   workingChunk = WorldHelper.getChunk(level, pathPos);
-                }
-                BlockState state = workingChunk != null ? workingChunk.getBlockState(pathPos) : level.getBlockState(pathPos);
+            boolean withinRange = path.origin.distSqr(neighbor) <= Math.pow(this.getSpreadRange(), 2)
+                    && CSMath.withinCubeDistance(neighbor, this.getBlockPos(), this.getMaxRange());
 
-                // Build a map of what positions can see the sky
-                Pair<Integer, Integer> flatPos = Pair.of(spX, spZ);
-                Pair<Integer, Boolean> seeSkyState = seeSkyMap.get(flatPos);
-                boolean canSeeSky;
-                if (seeSkyState == null || (seeSkyState.getFirst() < spY != seeSkyState.getSecond()))
-                {   seeSkyMap.put(flatPos, Pair.of(spY, canSeeSky = WorldHelper.canSeeSky(level, pathPos.above(), 64)));
-                }
-                else
-                {   canSeeSky = seeSkyState.getSecond();
-                }
-
-                if (!canSeeSky || isTransferPipe(state))
-                {
-                    // Try to spread in every direction from the current position
-                    for (int d = 0; d < DIRECTIONS.length; d++)
-                    {
-                        Direction direction = DIRECTIONS[d];
-
-                        // Don't try to spread backwards
-                        Direction pathDir = spreadPath.direction;
-                        if (direction == pathDir.getOpposite()) continue;
-
-                        BlockPos tryPos = pathPos.relative(direction);
-
-                        SpreadPath newPath = new SpreadPath(tryPos, direction).setOrigin(spreadPath.origin);
-
-                        // Check if this position hasn't been tried before, and if it's spread-able
-                        if (pathLookup.add(tryPos))
-                        {   // Add the new path to the list
-                            if (this.canSpread(level, pathPos, tryPos, state, spreadPath.direction, direction, newPath))
-                            {   this.addPath(newPath);
-                            }
-                            else invalidPaths.add(tryPos);
-                        }
-                    }
-                }
-                // Remove this path if it has skylight access
-                else
-                {   pathLookup.remove(pathPos);
-                    int last = paths.size() - 1;
-                    if (i < last) paths.set(i, paths.get(last));
-                    paths.remove(last);
-                    i--;
-                    continue;
-                }
+            if (!withinRange) {
+                outOfRange.add(neighbor);
+                continue;
             }
-            // Track frozen paths to know when the Hearth is done spreading
-            spreadPath.frozen = true;
-            this.frozenPaths++;
+
+            BlockState neighborState = WorldHelper.adjacentInSameChunk(path.pos, direction)
+                    ? workingChunk.getBlockState(neighbor)
+                    : level.getBlockState(neighbor);
+
+            if (canSeeSky(level, neighbor) && !isTransferPipe(neighborState)) {
+                this.exposedSkyPaths.add(neighbor);
+                continue;
+            }
+
+            SpreadPath candidate = new SpreadPath(neighbor, direction).setOrigin(path.origin);
+            boolean canSpreadToNeighbor = canSpread(level, path.pos, neighbor, state, path.direction, direction, candidate);
+            if (canSpreadToNeighbor)
+            {   this.addPath(candidate);
+                pathLookup.add(candidate.pos);
+            }
+            else
+            {
+                spreadBlockedPaths.add(neighbor);
+            }
         }
+    }
+
+    protected boolean canSeeSky(Level level, BlockPos pos)
+    {
+        Pair<Integer, Integer> flatPos = Pair.of(pos.getX(), pos.getZ());
+        Pair<Integer, Boolean> seeSkyState = seeSkyMap.get(flatPos);
+        boolean canSeeSky;
+        if (seeSkyState == null || (seeSkyState.getFirst() < pos.getY() != seeSkyState.getSecond()))
+        {   seeSkyMap.put(flatPos, Pair.of(pos.getY(), canSeeSky = WorldHelper.canSeeSky(level, pos.above(), 64)));
+        }
+        else
+        {   canSeeSky = seeSkyState.getSecond();
+        }
+        return canSeeSky;
     }
 
     protected void spawnRandomAirParticles()
@@ -972,7 +975,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         for (int i = 0; i < positions.size(); i++)
         {
             BlockPos pos = positions.get(i);
-            if (pathLookup.contains(pos) && !invalidPaths.contains(pos))
+            if (pathLookup.contains(pos))
             {   return true;
             }
         }
@@ -981,12 +984,15 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
 
     void resetPaths()
     {   // Reset cooldown
-        this.rebuildCooldown = 100;
+        this.rebuildCooldown = 20;
 
         // Clear paths & lookup
         this.paths.clear();
         this.pathLookup.clear();
-        this.invalidPaths.clear();
+        this.exposedSkyPaths.clear();
+        this.spreadBlockedPaths.clear();
+        this.outOfRange.clear();
+        this.spreadIndex = 0;
         if (this.forceRebuild)
         {   seeSkyMap.clear();
         }
@@ -997,7 +1003,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         }
 
         // Un-freeze paths so areas can be re-checked
-        this.frozenPaths = 0;
         this.spreading = true;
 
         // Tell client to reset paths too
