@@ -530,7 +530,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                 continue;
             }
 
-            BlockState neighborState = WorldHelper.adjacentInSameChunk(path.pos, direction)
+            BlockState neighborState = workingChunk != null && WorldHelper.adjacentInSameChunk(path.pos, direction)
                     ? workingChunk.getBlockState(neighbor)
                     : level.getBlockState(neighbor);
 
