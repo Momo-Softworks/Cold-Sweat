@@ -106,13 +106,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     List<SpreadPath> paths = new ArrayList<>(this.getMaxPaths());
     // Used as a lookup table for detecting duplicate paths (faster than ArrayList#contains())
     Set<BlockPos> pathLookup = new HashSet<>(this.getMaxPaths());
-    // Positions attempted by the spread algorithm where canSpread returned false (blocked by walls, etc.
-    Set<BlockPos> spreadBlockedPaths = new HashSet<>();
-    // Positions that are exposed to skylight
-    Set<BlockPos> exposedSkyPaths = new HashSet<>();
-    // Positions attempted by the spread algorithm out of range of the hearth or any of its attached smokestacks
-
-    Set<BlockPos> outOfRange = new HashSet<>();
+    // Paths that the hearth cannot spread to due to being exposed to skylight or being out of range.
+    Set<BlockPos> invalidPaths = new HashSet<>();
     Map<Pair<Integer, Integer>, Pair<Integer, Boolean>> seeSkyMap = new HashMap<>(this.getMaxPaths());
     int partitionSize = CSMath.clamp(this.getMaxPaths() / 3, 100, 4000);
     int spreadIndex = 0;
@@ -526,8 +521,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
             // Since a block can be spread to from some directions and not others, we
             // can't use the results of one canSpread call to determine that no block can spread to this block
             if (this.pathLookup.contains(neighbor)
-                    || this.exposedSkyPaths.contains(neighbor)
-                    || this.outOfRange.contains(neighbor)) {
+                    || this.invalidPaths.contains(neighbor)) {
                 continue;
             }
 
@@ -537,7 +531,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                     && CSMath.withinCubeDistance(neighbor, this.getBlockPos(), this.getMaxRange());
 
             if (!withinRange) {
-                outOfRange.add(neighbor);
+                invalidPaths.add(neighbor);
                 continue;
             }
 
@@ -546,7 +540,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                     : level.getBlockState(neighbor);
 
             if (canSeeSky(level, neighbor) && !isTransferPipe(neighborState)) {
-                this.exposedSkyPaths.add(neighbor);
+                invalidPaths.add(neighbor);
                 continue;
             }
 
@@ -555,10 +549,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
             if (canSpreadToNeighbor)
             {   this.addPath(candidate);
                 pathLookup.add(candidate.pos);
-            }
-            else
-            {
-                spreadBlockedPaths.add(neighbor);
             }
         }
     }
@@ -989,9 +979,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         // Clear paths & lookup
         this.paths.clear();
         this.pathLookup.clear();
-        this.exposedSkyPaths.clear();
-        this.spreadBlockedPaths.clear();
-        this.outOfRange.clear();
+        this.invalidPaths.clear();
         this.spreadIndex = 0;
         if (this.forceRebuild)
         {   seeSkyMap.clear();
