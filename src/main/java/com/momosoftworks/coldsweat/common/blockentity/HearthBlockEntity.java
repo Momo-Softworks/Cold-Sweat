@@ -389,7 +389,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
 
                 if (paths.isEmpty())
                 {   this.addPath(new SpreadPath(pos.above(1)).setOrigin(pos.above(1)));
-                    pathLookup.add(pos.above(1));
                     this.searchForPipeEnds(this.getBlockPos().above(), Direction.UP);
                 }
 
@@ -490,14 +489,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
             }
             // This operation is really fast because it's an ArrayList
             SpreadPath spreadPath = paths.get(spreadIndex);
-            if (spreadIndex > 0)
-            {
-                paths.add(spreadPath);
-            }
-            if (spreadPath.origin == null) {
-                spreadPath.setOrigin(this.getBlockPos());
-            }
-
             visitNeighbors(level, spreadPath);
         }
     }
@@ -513,7 +504,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         BlockState state = workingChunk != null ? workingChunk.getBlockState(path.pos) : level.getBlockState(path.pos);
 
         for (Direction direction : DIRECTIONS) {
-            if (direction == path.direction.getOpposite())
+            if (direction.equals(path.direction.getOpposite()))
             {
                 continue;
             }
@@ -548,7 +539,6 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
             boolean canSpreadToNeighbor = canSpread(level, path.pos, neighbor, state, path.direction, direction, candidate);
             if (canSpreadToNeighbor)
             {   this.addPath(candidate);
-                pathLookup.add(candidate.pos);
             }
         }
     }
@@ -1345,6 +1335,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
 
     public void addPath(SpreadPath path)
     {   paths.add(path);
+        pathLookup.add(path.pos);
     }
 
     public void addPaths(Collection<SpreadPath> newPaths)
