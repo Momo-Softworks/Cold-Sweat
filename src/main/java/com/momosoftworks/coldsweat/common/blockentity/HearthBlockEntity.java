@@ -504,6 +504,10 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         BlockState state = workingChunk != null ? workingChunk.getBlockState(path.pos) : level.getBlockState(path.pos);
 
         for (Direction direction : DIRECTIONS) {
+            if (paths.size() >= this.getMaxPaths())
+            {
+                return;
+            }
             if (direction.equals(path.direction.getOpposite()))
             {
                 continue;
