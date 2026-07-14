@@ -388,7 +388,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                 }
 
                 if (paths.isEmpty())
-                {   this.addPath(new SpreadPath(pos.above(1)).setOrigin(pos.above(1)));
+                {   this.addPath(new SpreadPath(pos.above(), pos.above()));
                     this.searchForPipeEnds(this.getBlockPos().above(), Direction.UP);
                 }
 
@@ -539,7 +539,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
                 continue;
             }
 
-            SpreadPath candidate = new SpreadPath(neighbor, direction).setOrigin(path.origin);
+            SpreadPath candidate = new SpreadPath(neighbor, direction, path.origin);
             boolean canSpreadToNeighbor = canSpread(level, path.pos, neighbor, state, path.direction, direction, candidate);
             if (canSpreadToNeighbor)
             {   this.addPath(candidate);

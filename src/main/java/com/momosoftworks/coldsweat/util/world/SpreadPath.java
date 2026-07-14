@@ -12,17 +12,18 @@ public class SpreadPath
     public final int x, y, z;
     public BlockPos origin;
 
-    public SpreadPath(BlockPos pos, Direction direction)
+    public SpreadPath(BlockPos pos, Direction direction, BlockPos origin)
     {   this.direction = direction;
         this.pos = pos;
         this.x = pos.getX();
         this.y = pos.getY();
         this.z = pos.getZ();
+        this.origin = origin;
     }
 
-    public SpreadPath(BlockPos pos)
+    public SpreadPath(BlockPos pos, BlockPos origin)
     {
-        this(pos, Direction.UP);
+        this(pos, Direction.UP, origin);
     }
 
     public SpreadPath(int x, int y, int z, Direction direction)
