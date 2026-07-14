@@ -1338,8 +1338,11 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     }
 
     public void addPath(SpreadPath path)
-    {   paths.add(path);
-        pathLookup.add(path.pos);
+    {
+        if (pathLookup.add(path.pos))
+        {
+            paths.add(path);
+        }
     }
 
     public void addPaths(Collection<SpreadPath> newPaths)
