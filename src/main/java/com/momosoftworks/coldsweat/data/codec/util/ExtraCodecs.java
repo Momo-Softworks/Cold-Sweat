@@ -2,11 +2,11 @@ package com.momosoftworks.coldsweat.data.codec.util;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.DynamicOps;
+import com.mojang.datafixers.util.Unit;
+import com.mojang.serialization.*;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
@@ -18,12 +18,14 @@ import net.minecraft.util.registry.DynamicRegistries;
 import net.minecraft.util.registry.Registry;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
+import org.apache.commons.lang3.mutable.MutableObject;
 
 import java.util.*;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
+import java.util.stream.Stream;
 
 public class ExtraCodecs
 {
@@ -156,6 +158,51 @@ public class ExtraCodecs
                 firstCodec.fieldOf("first").forGetter(Pair::getFirst),
                 secondCodec.fieldOf("second").forGetter(Pair::getSecond)
         ).apply(instance, Pair::of));
+    }
+
+    public static <A> Codec<Set<A>> setOf(Codec<A> elementCodec)
+    {
+        return new Codec<Set<A>>()
+        {
+            @Override
+            public <T> DataResult<Pair<Set<A>, T>> decode(DynamicOps<T> ops, T input)
+            {
+                return ops.getList(input).setLifecycle(Lifecycle.stable()).flatMap(stream ->
+                {
+                    final ImmutableSet.Builder<A> read = ImmutableSet.builder();
+                    final Stream.Builder<T> failed = Stream.builder();
+                    final MutableObject<DataResult<Unit>> result = new MutableObject<>(DataResult.success(Unit.INSTANCE, Lifecycle.stable()));
+
+                    stream.accept(t ->
+                    {
+                        final DataResult<Pair<A, T>> element = elementCodec.decode(ops, t);
+                        element.error().ifPresent(e -> failed.add(t));
+                        result.setValue(result.getValue().apply2stable((r, v) ->
+                        {   read.add(v.getFirst());
+                            return r;
+                        }, element));
+                    });
+
+                    final ImmutableSet<A> elements = read.build();
+                    final T errors = ops.createList(failed.build());
+
+                    final Pair<Set<A>, T> pair = Pair.of(elements, errors);
+
+                    return result.getValue().map(unit -> pair).setPartial(pair);
+                });
+            }
+
+            @Override
+            public <T> DataResult<T> encode(Set<A> input, DynamicOps<T> ops, T prefix)
+            {
+                final ListBuilder<T> builder = ops.listBuilder();
+
+                for (final A a : input)
+                {   builder.add(elementCodec.encodeStart(ops, a));
+                }
+                return builder.build(prefix);
+            }
+        };
     }
 
     public static <T> Codec<T> deferred(Supplier<Codec<T>> codecSupplier)

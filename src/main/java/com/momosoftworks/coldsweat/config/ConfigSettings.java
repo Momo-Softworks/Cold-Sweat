@@ -109,8 +109,8 @@ public class ConfigSettings
     // Block settings
     public static final DynamicHolder<Integer> BLOCK_RANGE;
     public static final DynamicHolder<Boolean> COLD_SOUL_FIRE;
-    public static final DynamicHolder<List<Block>> THERMAL_SOURCE_SPREAD_WHITELIST;
-    public static final DynamicHolder<List<Block>> THERMAL_SOURCE_SPREAD_BLACKLIST;
+    public static final DynamicHolder<Set<Block>> THERMAL_SOURCE_SPREAD_WHITELIST;
+    public static final DynamicHolder<Set<Block>> THERMAL_SOURCE_SPREAD_BLACKLIST;
     public static final DynamicHolder<Double> THERMAL_SOURCE_STRENGTH;
 
     public static final DynamicHolder<Boolean> SMART_HEARTH;
@@ -717,21 +717,21 @@ public class ConfigSettings
 
         COLD_SOUL_FIRE = addSetting(ColdSweat.createKey("cold_soul_fire"), () -> true, holder -> holder.set(WorldSettingsConfig.IS_SOUL_FIRE_COLD.get()));
 
-        THERMAL_SOURCE_SPREAD_WHITELIST = addSyncedSetting(ColdSweat.createKey("hearth_spread_whitelist"), ArrayList::new, holder ->
+        THERMAL_SOURCE_SPREAD_WHITELIST = addSyncedSetting(ColdSweat.createKey("hearth_spread_whitelist"), HashSet::new, holder ->
         {
             NegatableList<Either<ITag<Block>, Block>> blocks = ConfigHelper.getBlocks(WorldSettingsConfig.SOURCE_SPREAD_WHITELIST.get().toArray(new String[0]));
             holder.get().addAll(RegistryHelper.mapTaggableList(blocks));
         },
-        Registry.BLOCK.listOf(),
+        ExtraCodecs.setOf(Registry.BLOCK),
         saver -> {},
         SyncType.ONE_WAY);
 
-        THERMAL_SOURCE_SPREAD_BLACKLIST = addSyncedSetting(ColdSweat.createKey("hearth_spread_blacklist"), ArrayList::new, holder ->
+        THERMAL_SOURCE_SPREAD_BLACKLIST = addSyncedSetting(ColdSweat.createKey("hearth_spread_blacklist"), HashSet::new, holder ->
         {
             NegatableList<Either<ITag<Block>, Block>> blocks = ConfigHelper.getBlocks(WorldSettingsConfig.SOURCE_SPREAD_BLACKLIST.get().toArray(new String[0]));
             holder.get().addAll(RegistryHelper.mapTaggableList(blocks));
         },
-        Registry.BLOCK.listOf(),
+        ExtraCodecs.setOf(Registry.BLOCK),
         saver -> {},
         SyncType.ONE_WAY);
 
