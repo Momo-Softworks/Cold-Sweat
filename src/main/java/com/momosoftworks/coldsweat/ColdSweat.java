@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat;
 
 import blusunrize.immersiveengineering.api.tool.ExternalHeaterHandler;
+import com.momosoftworks.coldsweat.api.registry.SpreadRuleRegistry;
 import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import com.momosoftworks.coldsweat.common.entity.Chameleon;
 import com.momosoftworks.coldsweat.compat.CompatManager;
@@ -20,6 +21,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.neoforge.capabilities.Capabilities;
@@ -42,6 +44,7 @@ public class ColdSweat
     {
         MOD_BUS = bus;
 
+        MOD_BUS.addListener(this::commonSetup);
         MOD_BUS.addListener(this::clientSetup);
         MOD_BUS.addListener(this::spawnPlacements);
         MOD_BUS.addListener(this::registerCaps);
@@ -102,6 +105,10 @@ public class ColdSweat
             ItemBlockRenderTypes.setRenderLayer(ModFluids.SLUSH.value(), RenderType.translucent());
             ItemBlockRenderTypes.setRenderLayer(ModFluids.FLOWING_SLUSH.value(), RenderType.translucent());
         });
+    }
+
+    public void commonSetup(final FMLCommonSetupEvent event)
+    {   SpreadRuleRegistry.registerDefaults();
     }
 
     public void spawnPlacements(RegisterSpawnPlacementsEvent event)
