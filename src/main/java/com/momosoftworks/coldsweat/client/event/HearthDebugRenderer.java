@@ -202,7 +202,6 @@ public class HearthDebugRenderer
 
     public static void updatePaths(HearthBlockEntity hearth)
     {
-        if (!hearth.isSpreading()) return;
         BlockPos pos = hearth.getBlockPos();
         Set<BlockPos> paths = hearth.getPaths().stream().map(path -> path.pos).collect(Collectors.toSet());
 
