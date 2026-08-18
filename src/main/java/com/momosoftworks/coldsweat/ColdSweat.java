@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat;
 import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.api.event.core.registry.AddRegistriesEvent;
 import com.momosoftworks.coldsweat.api.event.vanilla.ServerConfigsLoadedEvent;
+import com.momosoftworks.coldsweat.api.registry.SpreadRuleRegistry;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
 import com.momosoftworks.coldsweat.common.capability.shearing.ShearableFurCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.EntityTempCap;
@@ -110,6 +111,8 @@ public class ColdSweat
     {
         // Setup packets
         ColdSweatPacketHandler.init();
+        // Register Hearth spread rules
+        SpreadRuleRegistry.registerDefaults();
         event.enqueueWork(() ->
         {   // Register advancement triggers
             CriteriaTriggers.register(ModAdvancementTriggers.TEMPERATURE_CHANGED);
