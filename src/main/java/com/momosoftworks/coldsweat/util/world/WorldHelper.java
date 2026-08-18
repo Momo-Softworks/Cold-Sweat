@@ -990,7 +990,7 @@ public abstract class WorldHelper
             for (BlockPos bePos : chunk.getBlockEntitiesPos())
             {
                 TileEntity be = chunk.getBlockEntity(bePos);
-                if (be instanceof HearthBlockEntity && ((HearthBlockEntity) be).getPathLookup().contains(pos))
+                if (be instanceof HearthBlockEntity && ((HearthBlockEntity) be).getPathLookup().containsKey(pos))
                 {
                     HearthBlockEntity hearth = (HearthBlockEntity) be;
                     maxCoolingLevel = Math.max(maxCoolingLevel, hearth.getCoolingLevel());

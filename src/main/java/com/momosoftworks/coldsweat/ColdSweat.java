@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat;
 
+import com.momosoftworks.coldsweat.api.registry.SpreadRuleRegistry;
 import com.momosoftworks.coldsweat.client.renderer.entity.ChameleonEntityRenderer;
 import com.momosoftworks.coldsweat.client.renderer.entity.GoatEntityRenderer;
 import com.momosoftworks.coldsweat.common.capability.DummyCapStorage;
@@ -107,6 +108,8 @@ public class ColdSweat
     {
         // Setup packets
         ColdSweatPacketHandler.init();
+        // Register Hearth spread rules
+        SpreadRuleRegistry.registerDefaults();
         event.enqueueWork(() ->
         {
             // Register advancement triggers

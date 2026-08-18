@@ -39,7 +39,7 @@ public class HearthResetMessage
                 TileEntity te = Minecraft.getInstance().level.getBlockEntity(message.blockPos);
                 if (te instanceof HearthBlockEntity)
                 {
-                    ((HearthBlockEntity) te).forceUpdate();
+                    ((HearthBlockEntity) te).resetPaths();
                 }
             });
         }
