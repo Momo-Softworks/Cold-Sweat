@@ -36,7 +36,7 @@ public class HearthResetMessage
             {
                 BlockEntity te = Minecraft.getInstance().level.getBlockEntity(message.blockPos);
                 if (te instanceof HearthBlockEntity hearth)
-                {   hearth.forceUpdate();
+                {   hearth.resetPaths();
                 }
             });
         }

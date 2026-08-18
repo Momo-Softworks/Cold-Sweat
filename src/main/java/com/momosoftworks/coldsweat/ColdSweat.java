@@ -103,6 +103,8 @@ public class ColdSweat
     {
         // Setup packets
         ColdSweatPacketHandler.init();
+        // Register Hearth spread rules
+        SpreadRuleRegistry.registerDefaults();
         event.enqueueWork(() ->
         {
             // Register advancement triggers

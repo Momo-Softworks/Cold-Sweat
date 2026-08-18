@@ -187,14 +187,6 @@ public class BoilerBlockEntity extends HearthBlockEntity
     }
 
     @Override
-    protected void tickPaths(int firstIndex, int lastIndex)
-    {
-        if (this.hasSmokestack)
-        {   super.tickPaths(firstIndex, lastIndex);
-        }
-    }
-
-    @Override
     public int getFuelDrainInterval()
     {   return ConfigSettings.BOILER_FUEL_INTERVAL.get();
     }
