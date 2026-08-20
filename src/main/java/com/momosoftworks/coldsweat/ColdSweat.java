@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat;
 
+import com.momosoftworks.coldsweat.api.registry.SpreadRuleRegistry;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
 import com.momosoftworks.coldsweat.common.capability.shearing.ShearableFurCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.EntityTempCap;
