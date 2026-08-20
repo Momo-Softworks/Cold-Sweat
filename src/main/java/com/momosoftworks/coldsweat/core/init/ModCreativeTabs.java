@@ -9,6 +9,7 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.util.item.ItemStackHelper;
 import com.momosoftworks.coldsweat.util.serialization.ObjectBuilder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.*;
@@ -97,9 +98,11 @@ public class ModCreativeTabs
         // Sort by insulation value
         list.sort(Comparator.comparingInt(entry -> entry.getValue().insulation().stream().mapToInt(Insulation::getCompareValue).min().orElse(0)));
         // Sort by armor material and slot
-        list.sort(Comparator.comparing(entry -> entry.getKey() instanceof ArmorItem armor
-                                               ? armor.getMaterial().getKey().location().toString() + (3 - ItemStackHelper.getEquipmentSlot(entry.getKey().getDefaultInstance()).getIndex())
-                                               : ""));
+        list.sort(Comparator.comparing(entry -> {
+            if (!(entry.getKey() instanceof ArmorItem armor)) return "";
+            String materialName = armor.getMaterial().unwrapKey().map(key -> key.location().toString()).orElse(BuiltInRegistries.ITEM.getKey(armor).getPath());
+            return materialName + (3 - ItemStackHelper.getEquipmentSlot(entry.getKey().getDefaultInstance()).getIndex());
+        }));
 
         InsulatorTabBuildEvent event = new InsulatorTabBuildEvent(list);
         NeoForge.EVENT_BUS.post(event);
