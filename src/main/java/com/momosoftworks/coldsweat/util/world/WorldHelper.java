@@ -242,36 +242,40 @@ public abstract class WorldHelper
      */
     public static boolean canSeeSky(World level, BlockPos pos, int maxDistance)
     {
-        BlockPos worldPos = sublevelToWorld(level, pos);
-        if (!worldPos.equals(pos))
-        {
-            return checkSkyColumn(level, pos, maxDistance)
-                && checkSkyColumn(level, worldPos, maxDistance);
-        }
-        return checkSkyColumn(level, pos, maxDistance);
-    }
-
-    private static boolean checkSkyColumn(World level, BlockPos pos, int maxDistance)
-    {
         IChunk chunk = getChunk(level, pos);
         if (chunk == null) return true;
 
         int maxY = Math.min(pos.getY() + maxDistance, level.getMaxBuildHeight());
-        BlockPos.Mutable cursor = pos.mutable();
+        BlockPos.Mutable scanPos = pos.mutable();
+        // Skip sublevel checking if no sublevels intersect the search area
+        boolean intersectsSublevels = !worldToSublevel(level, new AxisAlignedBB(pos.getX(), pos.getY(), pos.getZ(), pos.getX(), maxY, pos.getZ())).isEmpty();
 
         for (int y = pos.getY(); y < maxY; y++)
         {
-            cursor.setY(y);
-            BlockState state = chunk.getBlockState(cursor);
-            Block block = state.getBlock();
+            scanPos.setY(y);
+            List<BlockState> states = CSMath.arrayList(chunk.getBlockState(scanPos));
+            if (intersectsSublevels)
+            {   BlockPos sublevelScanPos = worldToSublevel(level, scanPos);
+                if (!sublevelScanPos.equals(scanPos))
+                {   states.add(level.getBlockState(sublevelScanPos));
+                }
+            }
+            List<Block> blocks = CSMath.mapList(states, BlockState::getBlock);
 
-            if (ConfigSettings.THERMAL_SOURCE_SPREAD_BLACKLIST.get().contains(block)) return false;
-            if (state.isAir() || state.getMaterial().isLiquid()
-                || ConfigSettings.THERMAL_SOURCE_SPREAD_WHITELIST.get().contains(block)) continue;
+            if (CSMath.containsAny(ConfigSettings.THERMAL_SOURCE_SPREAD_BLACKLIST.get(), blocks)) return false;
+            if (states.stream().allMatch(state -> state.isAir() || state.getMaterial().isLiquid())
+            || ConfigSettings.THERMAL_SOURCE_SPREAD_WHITELIST.get().containsAll(blocks))
+            {   continue;
+            }
 
-            VoxelShape shape = state.getShape(level, cursor, ISelectionContext.empty());
-            if (shape.equals(VoxelShapes.block())
-                || isFullSide(CSMath.flattenShape(Direction.Axis.Y, shape), Direction.UP)) return false;
+            for (int i = 0; i < states.size(); i++)
+            {
+                BlockState state = states.get(i);
+                VoxelShape shape = state.getShape(level, scanPos, ISelectionContext.empty());
+                if (shape.equals(VoxelShapes.block()) || isFullSide(CSMath.flattenShape(Direction.Axis.Y, shape), Direction.UP))
+                {   return false;
+                }
+            }
         }
         return true;
     }
