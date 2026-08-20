@@ -50,6 +50,7 @@ public class BlockTempModifier extends TempModifier
         groupTotals.clear();
         stateCache.clear();
         triggers.clear();
+        chunks.clear();
 
         Level level = entity.level();
         int range = this.getNBT().contains("RangeOverride", 3) ? this.getNBT().getInt("RangeOverride") : ConfigSettings.BLOCK_RANGE.get();
@@ -186,9 +187,10 @@ public class BlockTempModifier extends TempModifier
         }
 
         // Add the effects of all the blocks together and return the result
+        Map<BlockTemp, Double> totals = new HashMap<>(blockTempTotals);
         return temp ->
         {
-            for (Map.Entry<BlockTemp, Double> entry : blockTempTotals.entrySet())
+            for (Map.Entry<BlockTemp, Double> entry : totals.entrySet())
             {
                 BlockTemp blockTemp = entry.getKey();
                 double min = blockTemp.minTemperature();

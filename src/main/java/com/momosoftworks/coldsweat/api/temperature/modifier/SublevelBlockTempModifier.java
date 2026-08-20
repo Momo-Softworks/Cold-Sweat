@@ -13,13 +13,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
 
-/**
- * Applies the temperature of blocks that are part of "sublevels": movable block structures implemented by mods
- * like Valkyrien Skies, whose blocks are stored in a faraway region of the level and moved/rotated dynamically.<br>
- * <br>
- * Sublevel blocks don't align with the world grid, so scanning them from world space would skip over some of them.
- * Instead, the entity's position is translated into each sublevel's space and the scan is performed there.
- */
 public class SublevelBlockTempModifier extends BlockTempModifier
 {
     public SublevelBlockTempModifier() {}
@@ -40,8 +33,6 @@ public class SublevelBlockTempModifier extends BlockTempModifier
         }
 
         List<Function<Double, Double>> sublevelModifiers = new ArrayList<>(sublevelAreas.size());
-        // Use a non-player dummy; Valkyrien Skies cancels Player#setPosRaw() in the shipyard,
-        // moving the player to the ship's world position instead
         LivingEntity dummy = WorldHelper.getDummyEntity(level);
         for (AABB area : sublevelAreas)
         {
