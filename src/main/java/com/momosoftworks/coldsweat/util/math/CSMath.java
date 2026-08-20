@@ -832,6 +832,15 @@ public class CSMath
     {   return new ArrayList<>(Arrays.asList(elements));
     }
 
+    public static <R, T> List<R> mapList(List<T> list, Function<T, R> mapper)
+    {
+        List<R> mapped = new ArrayList<>();
+        for (int i = 0; i < list.size(); i++)
+        {   mapped.add(mapper.apply(list.get(i)));
+        }
+        return mapped;
+    }
+
     public static Class<?> getCallerClass(int depth)
     {
         StackTraceElement[] stElements = Thread.currentThread().getStackTrace();
@@ -910,10 +919,18 @@ public class CSMath
     }
 
     @SafeVarargs
-    public static <T> boolean containsAny(List<T> list, T... values)
+    public static <T> boolean containsAny(Collection<T> collection, T... values)
     {
         for (T value : values)
-        {   if (list.contains(value)) return true;
+        {   if (collection.contains(value)) return true;
+        }
+        return false;
+    }
+
+    public static <T> boolean containsAny(Collection<T> collection, Collection<T> values)
+    {
+        for (T value : values)
+        {   if (collection.contains(value)) return true;
         }
         return false;
     }
