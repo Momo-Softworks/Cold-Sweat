@@ -67,9 +67,12 @@ public class InsulationItemsGroup extends ItemGroup
         // Sort by insulation value
         list.sort(Comparator.comparingInt(entry -> entry.getValue().insulation().stream().mapToInt(Insulation::getCompareValue).min().orElse(0)));
         // Sort by armor material and slot
-        list.sort(Comparator.comparing(entry -> entry.getKey() instanceof ArmorItem
-                                               ? ((ArmorItem) entry.getKey()).getMaterial().getName() + (3 - MobEntity.getEquipmentSlotForItem(entry.getKey().getDefaultInstance()).getIndex())
-                                               : ""));
+        list.sort(Comparator.comparing(entry -> {
+            if (!(entry.getKey() instanceof ArmorItem)) return "";
+            ArmorItem armor = (ArmorItem) entry.getKey();
+            String materialName = armor.getMaterial().getName();
+            return materialName + (3 - MobEntity.getEquipmentSlotForItem(armor.getDefaultInstance()).getIndex());
+        }));
 
         InsulatorTabBuildEvent event = new InsulatorTabBuildEvent(list);
         MinecraftForge.EVENT_BUS.post(event);
