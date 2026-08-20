@@ -10,6 +10,7 @@ import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.serialization.ObjectBuilder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
@@ -89,9 +90,11 @@ public class CreativeTabInit
         // Sort by insulation value
         list.sort(Comparator.comparingInt(entry -> entry.getValue().insulation().stream().mapToInt(Insulation::getCompareValue).min().orElse(0)));
         // Sort by armor material and slot
-        list.sort(Comparator.comparing(entry -> entry.getKey() instanceof ArmorItem armor
-                                               ? armor.getMaterial().getName() + (3 - LivingEntity.getEquipmentSlotForItem(armor.getDefaultInstance()).getIndex())
-                                               : ""));
+        list.sort(Comparator.comparing(entry -> {
+            if (!(entry.getKey() instanceof ArmorItem armor)) return "";
+            String materialName = armor.getMaterial().getName();
+            return materialName + (3 - LivingEntity.getEquipmentSlotForItem(armor.getDefaultInstance()).getIndex());
+        }));
 
         InsulatorTabBuildEvent event = new InsulatorTabBuildEvent(list);
         MinecraftForge.EVENT_BUS.post(event);
