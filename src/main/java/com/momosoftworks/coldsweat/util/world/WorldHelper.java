@@ -1,5 +1,8 @@
 package com.momosoftworks.coldsweat.util.world;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
@@ -7,20 +10,23 @@ import com.momosoftworks.coldsweat.api.temperature.modifier.*;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
+import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
-import com.momosoftworks.coldsweat.data.codec.configuration.BiomeTempData;
-import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
-import com.momosoftworks.coldsweat.util.entity.DummyEntity;
-import com.momosoftworks.coldsweat.util.entity.DummyPlayer;
 import com.momosoftworks.coldsweat.core.network.message.BlockDataUpdateMessage;
 import com.momosoftworks.coldsweat.core.network.message.ParticleBatchMessage;
 import com.momosoftworks.coldsweat.core.network.message.PlayEntityAttachedSoundMessage;
 import com.momosoftworks.coldsweat.core.network.message.SyncForgeDataMessage;
+import com.momosoftworks.coldsweat.data.codec.configuration.BiomeTempData;
+import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
-import com.momosoftworks.coldsweat.compat.CompatManager;
+import com.momosoftworks.coldsweat.util.entity.DummyEntity;
+import com.momosoftworks.coldsweat.util.entity.DummyPlayer;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.LongSet;
+import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
+import it.unimi.dsi.fastutil.objects.Object2DoubleMaps;
+import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 import net.minecraft.core.*;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.registries.Registries;
@@ -46,7 +52,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunkSection;
-
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
@@ -68,7 +73,8 @@ import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.function.*;
+import java.util.function.BiConsumer;
+import java.util.function.Predicate;
 
 @EventBusSubscriber
 public abstract class WorldHelper
@@ -822,6 +828,166 @@ public abstract class WorldHelper
         {   modifiers.add(new WarmthTempModifier(maxCoolingHeating.getSecond()));
         }
         return Temperature.apply(0, dummy, Temperature.Trait.WORLD, modifiers, true);
+    }
+
+    /**
+     * Batch-computes world temperatures for a collection of BlockPos positions within the same Level
+     * (full precision, semantically aligned with {@link #getTemperatureAt}).
+     * <br/>
+     * Shares work across positions: reuses the dummy modifier chain, replaces a per-position volume scan with
+     * a single region-union scan, and de-duplicates hearth insulation lookups per chunk. This amortizes the block
+     * volume-scan cost in clustered scenes from "once per container" to "once per region + one dispatch per container",
+     * bringing the overall cost close to O(n).
+     * <br/>
+     * Note: compared with the single-pos {@code getTemperatureAt}, this method is threshold-equivalent in normal
+     * scenarios (same cold/hot direction and magnitude), but not bit-for-bit identical because block accumulation
+     * order is affected by the dispatch.
+     *
+     * @param level     the world the temperatures belong to (must be the same Level)
+     * @param positions a batch of block positions to probe (duplicates allowed; de-duplicated internally)
+     * @return the world temperature (MC units) for each de-duplicated position
+     * @throws IllegalStateException if invoked on the logical client (temperature computation exists only on the server)
+     */
+    public static Object2DoubleMap<BlockPos> getTemperaturesAt(Level level, Collection<BlockPos> positions)
+    {
+        if (level.isClientSide)
+        {   throw new IllegalStateException("Cannot query world temperatures for batch on the client side.");
+        }
+
+        // De-duplicate and complete the sublevel transform.
+        Set<BlockPos> normalized = Sets.newLinkedHashSet();
+        for (BlockPos pos : positions)
+        {   normalized.add(sublevelToWorld(level, pos));
+        }
+        if (normalized.isEmpty())
+        {   return Object2DoubleMaps.emptyMap();
+        }
+
+        DummyPlayer dummy = getDummyPlayer(level);
+
+        // Single region-union scan plus per-position dispatch, producing each pos's block-temperature function.
+        BlockTempScanBatch blockScan = new BlockTempScanBatch(level, dummy, normalized, ConfigSettings.BLOCK_RANGE.get());
+        blockScan.scan();
+
+        // De-duplicated-per-chunk hearth insulation query.
+        Map<BlockPos, Pair<Integer, Integer>> insulation = getInsulationAtBatch(level, normalized, 2);
+
+        Object2DoubleMap<BlockPos> result = new Object2DoubleOpenHashMap<>();
+        for (BlockPos pos : normalized)
+        {
+            dummy.setPos(CSMath.getCenterPos(pos));
+            List<TempModifier> modifiers = Lists.newArrayList(Temperature.getModifiers(dummy, Temperature.Trait.WORLD));
+            // Replace the original BlockTempModifier in the chain with the batch block-temperature function,
+            // preserving the chain order.
+            replaceBlockTempsWithBatch(modifiers, blockScan, pos);
+
+            Pair<Integer, Integer> maxCoolingHeating = insulation.get(pos);
+            if (maxCoolingHeating != null)
+            {
+                if (maxCoolingHeating.getFirst() > 0)
+                {   modifiers.add(new FrigidnessTempModifier(maxCoolingHeating.getFirst()));
+                }
+                if (maxCoolingHeating.getSecond() > 0)
+                {   modifiers.add(new WarmthTempModifier(maxCoolingHeating.getSecond()));
+                }
+            }
+            result.put(pos, Temperature.apply(0, dummy, Temperature.Trait.WORLD, modifiers, true));
+        }
+        return result;
+    }
+
+    /**
+     * Batch-computes "rough" world temperatures for a collection of BlockPos positions within the same Level,
+     * semantically aligned with {@link #getRoughTemperatureAt(Level, BlockPos, int)} and reusing the 8-block
+     * segment temperature cache (Rough cache).
+     *
+     * @param level     the world the temperatures belong to
+     * @param positions a batch of block positions to probe (duplicates allowed)
+     * @param flags     the same cache-flag bitmask as getRoughTemperatureAt (1=Sensitive, 2=Force Update)
+     * @return the rough world temperature (MC units) for each position
+     */
+    public static Object2DoubleMap<BlockPos> getRoughTemperaturesAt(Level level, Collection<BlockPos> positions, int flags)
+    {
+        Object2DoubleMap<BlockPos> result = new Object2DoubleOpenHashMap<>();
+        for (BlockPos pos : positions)
+        {   result.put(pos, getRoughTemperatureAt(level, pos, flags));
+        }
+        return result;
+    }
+
+    /**
+     * Replaces the original {@code BlockTempModifier} in a temperature-modifier chain with the block-temperature
+     * function produced by the batch computation (the replacement happens on a cloned list and does not touch the
+     * original modifiers mounted on the dummy).
+     */
+    private static void replaceBlockTempsWithBatch(List<TempModifier> modifiers, BlockTempScanBatch blockScan, BlockPos pos)
+    {
+        for (int i = 0; i < modifiers.size(); i++)
+        {
+            if (modifiers.get(i) instanceof BlockTempModifier)
+            {   modifiers.set(i, new BatchBlockTempModifier(blockScan.getFunction(pos)));
+            }
+        }
+    }
+
+    /**
+     * De-duplicated-per-chunk hearth insulation batch query: each chunk is read only once, and its Hearth block
+     * entities back-fill all target positions through their path lookup.
+     *
+     * @param level       the world the temperatures belong to
+     * @param positions   a batch of block positions to probe (duplicates allowed)
+     * @param chunkRadius radius (in chunks) to be searched for hearth block entities
+     *
+     * @return the (max cooling level, max heating level) for each target position
+     */
+    public static Map<BlockPos, Pair<Integer, Integer>> getInsulationAtBatch(Level level, Collection<BlockPos> positions, int chunkRadius)
+    {
+        Set<BlockPos> wholeBatch = Sets.newLinkedHashSet();
+        for (BlockPos pos : positions)
+        {   wholeBatch.add(sublevelToWorld(level, pos));
+        }
+
+        Map<BlockPos, Pair<Integer, Integer>> results = Maps.newHashMap();
+        // Collect the chunk union to scan.
+        Set<ChunkPos> chunkSet = Sets.newLinkedHashSet();
+        for (BlockPos pos : wholeBatch)
+        {
+            ChunkPos chunkPos = new ChunkPos(pos);
+            for (int x = -chunkRadius; x <= chunkRadius; x++)
+            for (int z = -chunkRadius; z <= chunkRadius; z++)
+            {   chunkSet.add(new ChunkPos(chunkPos.x + x, chunkPos.z + z));
+            }
+        }
+
+        for (ChunkPos chunkPos : chunkSet)
+        {
+            ChunkAccess chunk = getChunk(level, chunkPos.x, chunkPos.z);
+            if (chunk == null) continue;
+
+            for (BlockPos bePos : chunk.getBlockEntitiesPos())
+            {
+                BlockEntity be = chunk.getBlockEntity(bePos);
+                if (be instanceof HearthBlockEntity hearth)
+                {
+                    int cooling = hearth.getCoolingLevel();
+                    int heating = hearth.getHeatingLevel();
+                    for (BlockPos pos : wholeBatch)
+                    {
+                        if (hearth.getPathLookup().containsKey(pos))
+                        {
+                            results.compute(pos, (p, cur) -> cur == null
+                                                           ? Pair.of(cooling, heating)
+                                                           : Pair.of(Math.max(cur.getFirst(), cooling),
+                                                                     Math.max(cur.getSecond(), heating)));
+                        }
+                    }
+                }
+            }
+        }
+        for (BlockPos pos : wholeBatch)
+        {   results.putIfAbsent(pos, Pair.of(0, 0));
+        }
+        return results;
     }
 
     public static DummyPlayer getDummyPlayer(Level level)
