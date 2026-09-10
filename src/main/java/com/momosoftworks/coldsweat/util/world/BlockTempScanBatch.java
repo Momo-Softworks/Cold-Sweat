@@ -23,8 +23,8 @@ import java.util.*;
 import java.util.function.Function;
 
 /**
- * One-shot batch computation context carrying out the "scan the region union once, dispatch per-position"
- * block-temperature calculation for a batch of BlockPos positions within the same world.
+ * One-shot batch computation context carrying out the "scan the union of each position's influence box once,
+ * dispatch per-position" block-temperature calculation for a batch of BlockPos positions within the same world.
  * <br/>
  * Its lifetime is strictly bounded to a single {@link WorldHelper#getTemperaturesAt} call: the caller creates it
  * on the fly and discards it once the scan finishes. It is not held in any global cache, so it needs no cleanup
@@ -45,8 +45,10 @@ public final class BlockTempScanBatch
 	private final Set<BlockPos> positions;
 	private final int range;
 
-	// Chunk and blockstate caches shared across this batch.
+	// LRU chunk cache shared across this batch (chunks may host parts of several disjoint clusters).
 	final Map<Long, ChunkAccess> chunkCache = new LinkedHashMap<>(16, 0.75f, true);
+	// Blockstate cache used only by phase B occlusion rays (phase A reads states directly, since no block is
+	// ever visited twice across disjoint cluster boxes).
 	final Long2ObjectOpenHashMap<BlockState> stateCache = new Long2ObjectOpenHashMap<>(3000);
 
 	// Per-target-pos BlockTemp accumulated values / group-accumulated values.
@@ -72,12 +74,13 @@ public final class BlockTempScanBatch
 	}
 
 	/**
-	 * Runs the two-phase scan: phase A scans the region union and caches blockstates, phase B dispatches
-	 * accumulation to the target positions within each source block's affected radius.
+	 * Runs the two-phase scan: phase A scans the union of the per-position influence boxes once and collects the
+	 * candidate source blocks, phase B dispatches accumulation to the target positions within each source block's
+	 * affected radius.
 	 */
 	public void scan()
 	{
-		this.scanUnionRegion();
+		this.scanSources();
 		this.dispatchToPositions();
 	}
 
@@ -106,51 +109,156 @@ public final class BlockTempScanBatch
 		};
 	}
 
-	/** Phase A: scan the AABB union of all positions (expanded by range), reading and caching each blockstate. */
-	private void scanUnionRegion()
+	/**
+	 * Phase A: partition the target positions into clusters whose {@code ±range} boxes overlap, then scan each
+	 * cluster's own bounding box once. Disjoint clusters never share a block, so every block is read at most once
+	 * per batch and no block-state cache is needed here. This keeps the scanned volume proportional to the union of
+	 * the per-position boxes instead of the (potentially much larger) bounding box of all positions.
+	 */
+	private void scanSources()
 	{
-		long[] bounds = this.getRegionBounds();
-		int minX = (int) bounds[0];
-		int minY = (int) bounds[1];
-		int minZ = (int) bounds[2];
-		int maxX = (int) bounds[3];
-		int maxY = (int) bounds[4];
-		int maxZ = (int) bounds[5];
-		BlockPos.MutableBlockPos blockpos = new BlockPos.MutableBlockPos();
+		List<BlockPos> positionList = Lists.newArrayList(this.positions);
+		int count = positionList.size();
+		if (count == 0) return;
 
-		for (int x = minX; x <= maxX; x++)
+		// Union-find over positions: two positions belong to the same cluster iff their influence boxes overlap,
+		// i.e. their Chebyshev distance is at most 2 * range. Pair checks are limited to positions whose block
+		// chunks are within chunkRadius of each other, since farther positions can never overlap.
+		int[] parent = new int[count];
+		for (int i = 0; i < count; i++)
+		{   parent[i] = i;
+		}
+
+		Map<Long, List<Integer>> bucket = Maps.newHashMap();
+		for (int i = 0; i < count; i++)
 		{
-			int chunkX = x >> 4;
-			for (int z = minZ; z <= maxZ; z++)
+			BlockPos pos = positionList.get(i);
+			long chunkKey = ChunkPos.asLong(pos.getX() >> 4, pos.getZ() >> 4);
+			bucket.computeIfAbsent(chunkKey, key -> Lists.newArrayList()).add(i);
+		}
+
+		int chunkRadius = (this.range * 2 + 15) / 16;
+		for (Map.Entry<Long, List<Integer>> entry : bucket.entrySet())
+		{
+			long chunkKey = entry.getKey();
+			int chunkX = ChunkPos.getX(chunkKey);
+			int chunkZ = ChunkPos.getZ(chunkKey);
+			for (int dx = -chunkRadius; dx <= chunkRadius; dx++)
+			for (int dz = -chunkRadius; dz <= chunkRadius; dz++)
 			{
-				int chunkZ = z >> 4;
-				long chunkPos = ChunkPos.asLong(chunkX, chunkZ);
-				ChunkAccess chunk = this.chunkCache.computeIfAbsent(
-						chunkPos,
-						cp -> WorldHelper.getChunk(this.level, new ChunkPos(cp))
-				);
-				if (chunk == null) continue;
+				long neighborKey = ChunkPos.asLong(chunkX + dx, chunkZ + dz);
+				// Only process each unordered pair of buckets once (self-pairs included).
+				if (neighborKey < chunkKey) continue;
+				List<Integer> neighbor = bucket.get(neighborKey);
+				if (neighbor == null) continue;
 
-				for (int y = minY; y <= maxY; y++)
+				for (int i : entry.getValue())
+				for (int j : neighbor)
 				{
-					blockpos.set(x, y, z);
-					long blockPosLong = blockpos.asLong();
-					BlockState state = this.stateCache.get(blockPosLong);
-					if (state == null)
-					{
-						LevelChunkSection section = WorldHelper.getChunkSection(chunk, y);
-						state = section.getBlockState(x & 15, y & 15, z & 15);
-						this.stateCache.put(blockPosLong, state);
+					if (i == j || this.find(parent, i) == this.find(parent, j)) continue;
+					BlockPos a = positionList.get(i);
+					BlockPos b = positionList.get(j);
+					if (Math.abs(a.getX() - b.getX()) <= this.range * 2 &&
+							Math.abs(a.getY() - b.getY()) <= this.range * 2 &&
+							Math.abs(a.getZ() - b.getZ()) <= this.range * 2)
+					{   this.union(parent, i, j);
 					}
-					if (state.isAir()) continue;
-
-					Collection<BlockTemp> blockTemps = BlockTempRegistry.getBlockTempsFor(state);
-					if (blockTemps.isEmpty() || (blockTemps.size() == 1 && blockTemps.contains(BlockTempRegistry.DEFAULT_BLOCK_TEMP)))
-					{   continue;
-					}
-					this.sources.add(new Source(blockpos.immutable(), state));
 				}
 			}
+		}
+
+		// Accumulate cluster bounds (keyed by root index), then scan each cluster's bounding box once.
+		int[] minX = new int[count];
+		int[] minY = new int[count];
+		int[] minZ = new int[count];
+		int[] maxX = new int[count];
+		int[] maxY = new int[count];
+		int[] maxZ = new int[count];
+		Arrays.fill(minX, Integer.MAX_VALUE);
+		Arrays.fill(minY, Integer.MAX_VALUE);
+		Arrays.fill(minZ, Integer.MAX_VALUE);
+		Arrays.fill(maxX, Integer.MIN_VALUE);
+		Arrays.fill(maxY, Integer.MIN_VALUE);
+		Arrays.fill(maxZ, Integer.MIN_VALUE);
+		for (int i = 0; i < count; i++)
+		{
+			int root = this.find(parent, i);
+			BlockPos pos = positionList.get(i);
+			minX[root] = Math.min(minX[root], pos.getX());
+			minY[root] = Math.min(minY[root], pos.getY());
+			minZ[root] = Math.min(minZ[root], pos.getZ());
+			maxX[root] = Math.max(maxX[root], pos.getX());
+			maxY[root] = Math.max(maxY[root], pos.getY());
+			maxZ[root] = Math.max(maxZ[root], pos.getZ());
+		}
+		for (int i = 0; i < count; i++)
+		{
+			if (this.find(parent, i) != i) continue;
+			this.scanClusterBox(minX[i] - this.range, minY[i] - this.range, minZ[i] - this.range,
+								maxX[i] + this.range, maxY[i] + this.range, maxZ[i] + this.range);
+		}
+	}
+
+	/** Scans one cluster's bounding box chunk by chunk, reading every blockstate directly and collecting sources. */
+	private void scanClusterBox(int minX, int minY, int minZ, int maxX, int maxY, int maxZ)
+	{
+		BlockPos.MutableBlockPos blockpos = new BlockPos.MutableBlockPos();
+		for (int chunkX = minX >> 4; chunkX <= maxX >> 4; chunkX++)
+		for (int chunkZ = minZ >> 4; chunkZ <= maxZ >> 4; chunkZ++)
+		{
+			long chunkKey = ChunkPos.asLong(chunkX, chunkZ);
+			ChunkAccess chunk = this.chunkCache.get(chunkKey);
+			if (chunk == null)
+			{
+				chunk = WorldHelper.getChunk(this.level, new ChunkPos(chunkKey));
+				if (chunk == null) continue;
+				this.chunkCache.put(chunkKey, chunk);
+			}
+
+			int xStart = Math.max(minX, chunkX << 4);
+			int xEnd = Math.min(maxX, (chunkX << 4) | 15);
+			int zStart = Math.max(minZ, chunkZ << 4);
+			int zEnd = Math.min(maxZ, (chunkZ << 4) | 15);
+
+			for (int y = minY; y <= maxY; y++)
+			{
+				LevelChunkSection section = WorldHelper.getChunkSection(chunk, y);
+				int ly = y & 15;
+				for (int x = xStart; x <= xEnd; x++)
+				{
+					int lx = x & 15;
+					for (int z = zStart; z <= zEnd; z++)
+					{
+						BlockState state = section.getBlockState(lx, ly, z & 15);
+						if (state.isAir()) continue;
+
+						Collection<BlockTemp> blockTemps = BlockTempRegistry.getBlockTempsFor(state);
+						if (blockTemps.isEmpty() || (blockTemps.size() == 1 && blockTemps.contains(BlockTempRegistry.DEFAULT_BLOCK_TEMP)))
+						{   continue;
+						}
+						blockpos.set(x, y, z);
+						this.sources.add(new Source(blockpos.immutable(), state));
+					}
+				}
+			}
+		}
+	}
+
+	private int find(int[] parent, int i)
+	{
+		while (parent[i] != i)
+		{   parent[i] = parent[parent[i]];
+			i = parent[i];
+		}
+		return i;
+	}
+
+	private void union(int[] parent, int a, int b)
+	{
+		int rootA = this.find(parent, a);
+		int rootB = this.find(parent, b);
+		if (rootA != rootB)
+		{   parent[rootA] = rootB;
 		}
 	}
 
@@ -272,25 +380,6 @@ public final class BlockTempScanBatch
 
 	private ChunkAccess getChunk(BlockPos pos)
 	{   return WorldHelper.getChunk(this.level, pos);
-	}
-
-	/** Computes the AABB union covered by all positions, expanded outward by range. */
-	private long[] getRegionBounds()
-	{
-		int minX = Integer.MAX_VALUE;
-		int minY = Integer.MAX_VALUE;
-		int minZ = Integer.MAX_VALUE;
-		int maxX = Integer.MIN_VALUE;
-		int maxY = Integer.MIN_VALUE;
-		int maxZ = Integer.MIN_VALUE;
-		for (BlockPos pos : this.positions)
-		{
-			minX = Math.min(minX, pos.getX()); maxX = Math.max(maxX, pos.getX());
-			minY = Math.min(minY, pos.getY()); maxY = Math.max(maxY, pos.getY());
-			minZ = Math.min(minZ, pos.getZ()); maxZ = Math.max(maxZ, pos.getZ());
-		}
-		return new long[] { minX - this.range, minY - this.range, minZ - this.range,
-				maxX + this.range, maxY + this.range, maxZ + this.range };
 	}
 
 	// Candidate source blocks hit during phase A (state already read, so phase B does not read it again).
