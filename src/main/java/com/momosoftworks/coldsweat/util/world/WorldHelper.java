@@ -46,7 +46,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -77,7 +76,8 @@ public abstract class WorldHelper
 {
     static Map<ResourceKey<Level>, DummyPlayer> DUMMY_PLAYERS = new HashMap<>();
     static Map<ResourceKey<Level>, DummyEntity> DUMMY_ENTITIES = new HashMap<>();
-    static Map<ResourceKey<Level>, Map<BlockPos, TempSnapshot>> TEMPERATURE_CHECKS = new HashMap<>();
+    static Map<ResourceKey<Level>, Map<BlockPos, TempSnapshot>> TEMPERATURE_CACHE = new HashMap<>();
+    static Map<ResourceKey<Level>, Map<BlockPos, InsulationSnapshot>> INSULATION_CACHE = new HashMap<>();
 
     private static final Map<BlockEntity, Pair<CompoundTag, Long>> BLOCK_ENTITY_DATA_CACHE = new HashMap<>();
 
@@ -85,7 +85,8 @@ public abstract class WorldHelper
     public static void clearCachesOnUnload(ServerStoppedEvent event)
     {   DUMMY_PLAYERS.clear();
         DUMMY_ENTITIES.clear();
-        TEMPERATURE_CHECKS.clear();
+        TEMPERATURE_CACHE.clear();
+        INSULATION_CACHE.clear();
     }
 
     public static int getHeight(BlockPos pos, Level level, Heightmap.Types heightmap)
@@ -806,7 +807,7 @@ public abstract class WorldHelper
         boolean sensitive = (flags & 1) != 0;
         boolean forceUpdate = (flags & 2) != 0;
 
-        Map<BlockPos, TempSnapshot> snapshots = TEMPERATURE_CHECKS.computeIfAbsent(level.dimension(), dim -> new HashMap<>());
+        Map<BlockPos, TempSnapshot> snapshots = TEMPERATURE_CACHE.computeIfAbsent(level.dimension(), dim -> new HashMap<>());
         int tickSpeedMultiplier = 1 + level.getGameRules().getInt(GameRules.RULE_RANDOMTICKING) / 20;
 
         BlockPos segment = new BlockPos((pos.getX() >> 3) << 3,
@@ -835,12 +836,12 @@ public abstract class WorldHelper
         List<TempModifier> modifiers = new ArrayList<>(Temperature.getModifiers(dummy, Temperature.Trait.WORLD));
 
         // Get insulation from hearths
-        Pair<Integer, Integer> maxCoolingHeating = getInsulationAt(level, pos, 2);
-        if (maxCoolingHeating.getFirst() > 0)
-        {   modifiers.add(new FrigidnessTempModifier(maxCoolingHeating.getFirst()));
+        InsulationSnapshot maxCoolingHeating = getInsulationAt(level, pos, 2);
+        if (maxCoolingHeating.cooling() > 0)
+        {   modifiers.add(new FrigidnessTempModifier(maxCoolingHeating.cooling()));
         }
-        if (maxCoolingHeating.getSecond() > 0)
-        {   modifiers.add(new WarmthTempModifier(maxCoolingHeating.getSecond()));
+        if (maxCoolingHeating.heating() > 0)
+        {   modifiers.add(new WarmthTempModifier(maxCoolingHeating.heating()));
         }
         // Get & store temperature
         double tempAt = Temperature.apply(0, dummy, Temperature.Trait.WORLD, modifiers, true);
@@ -877,12 +878,12 @@ public abstract class WorldHelper
         List<TempModifier> modifiers = new ArrayList<>(Temperature.getModifiers(dummy, Temperature.Trait.WORLD));
 
         // Get insulation from hearths
-        Pair<Integer, Integer> maxCoolingHeating = getInsulationAt(level, pos, 2);
-        if (maxCoolingHeating.getFirst() > 0)
-        {   modifiers.add(new FrigidnessTempModifier(maxCoolingHeating.getFirst()));
+        InsulationSnapshot maxCoolingHeating = getInsulationAt(level, pos, 2);
+        if (maxCoolingHeating.cooling() > 0)
+        {   modifiers.add(new FrigidnessTempModifier(maxCoolingHeating.cooling()));
         }
-        if (maxCoolingHeating.getSecond() > 0)
-        {   modifiers.add(new WarmthTempModifier(maxCoolingHeating.getSecond()));
+        if (maxCoolingHeating.heating() > 0)
+        {   modifiers.add(new WarmthTempModifier(maxCoolingHeating.heating()));
         }
         return Temperature.apply(0, dummy, Temperature.Trait.WORLD, modifiers, true);
     }
@@ -930,7 +931,7 @@ public abstract class WorldHelper
     }
 
     public Map<ResourceKey<Level>, Map<BlockPos, TempSnapshot>> getWorldTempCache()
-    {   return TEMPERATURE_CHECKS;
+    {   return TEMPERATURE_CACHE;
     }
 
     public static boolean allAdjacentBlocksMatch(BlockPos pos, Predicate<BlockPos> predicate)
@@ -1020,8 +1021,12 @@ public abstract class WorldHelper
         return false;
     }
 
-    public static Pair<Integer, Integer> getInsulationAt(Level level, BlockPos pos, int chunkRadius)
+    public static InsulationSnapshot getInsulationAt(Level level, BlockPos pos, int chunkRadius)
     {
+        InsulationSnapshot snapshot = INSULATION_CACHE.computeIfAbsent(level.dimension(), dim -> new HashMap<>()).get(pos);
+        if (snapshot != null && level.getGameTime() - snapshot.timestamp < 20)
+        {   return snapshot;
+        }
         pos = sublevelToWorld(level, pos);
         int maxCoolingLevel = 0;
         int maxHeatingLevel = 0;
@@ -1042,7 +1047,9 @@ public abstract class WorldHelper
                 }
             }
         }
-        return Pair.of(maxCoolingLevel, maxHeatingLevel);
+        snapshot = new InsulationSnapshot(level.getGameTime(), maxCoolingLevel, maxHeatingLevel);
+        INSULATION_CACHE.get(level.dimension()).put(pos, snapshot);
+        return snapshot;
     }
 
     public static List<BlockPos> getPositionsInAABB(AABB bb)
@@ -1078,4 +1085,5 @@ public abstract class WorldHelper
     }
 
     public record TempSnapshot(long timestamp, double temperature) {}
+    public record InsulationSnapshot(long timestamp, int cooling, int heating) {}
 }
