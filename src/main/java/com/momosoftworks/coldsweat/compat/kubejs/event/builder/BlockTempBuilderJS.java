@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.compat.kubejs.event.builder;
 
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
+import com.momosoftworks.coldsweat.api.temperature.block_temp.SimpleBlockTemp;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.requirement.BlockRequirement;
@@ -117,8 +118,8 @@ public class BlockTempBuilderJS
     public BlockTemp build(Function function)
     {
         BlockRequirement.StateRequirement stateRequirement = new BlockRequirement.StateRequirement(state);
-        return new BlockTemp(-maxEffect, maxEffect, minTemperature, maxTemperature, range, fade,
-                             logarithmic, blocks.toArray(new Block[0]))
+        return new SimpleBlockTemp(-maxEffect, maxEffect, minTemperature, maxTemperature, range, fade,
+                                   logarithmic, blocks.toArray(new Block[0]))
         {
             @Override
             public double getTemperature(World level, LivingEntity entity, BlockState state, BlockPos pos, double distance)

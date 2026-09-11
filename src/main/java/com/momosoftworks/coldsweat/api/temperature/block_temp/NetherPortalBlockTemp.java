@@ -1,7 +1,5 @@
 package com.momosoftworks.coldsweat.api.temperature.block_temp;
 
-import com.momosoftworks.coldsweat.api.util.Temperature;
-import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.LivingEntity;
@@ -9,11 +7,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 
+import javax.annotation.Nullable;
+
 public class NetherPortalBlockTemp extends BlockTemp
 {
     public NetherPortalBlockTemp()
-    {
-        super(-1, 1, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, 7, true, Blocks.NETHER_PORTAL);
+    {   super(Blocks.NETHER_PORTAL);
     }
 
     @Override
@@ -24,12 +23,22 @@ public class NetherPortalBlockTemp extends BlockTemp
     }
 
     @Override
-    public double maxEffect()
+    public double getMaxEffect(@Nullable LivingEntity entity, World level, BlockPos pos, BlockState state)
     {   return 1;
     }
 
     @Override
-    public double minEffect()
+    public double getMinEffect(@Nullable LivingEntity entity, World level, BlockPos pos, BlockState state)
     {   return -1;
+    }
+
+    @Override
+    public double getMaxTemp(@Nullable LivingEntity entity, World level, BlockPos pos, BlockState state)
+    {   return level.dimension().location().equals(DimensionType.OVERWORLD_LOCATION.location()) ? Double.POSITIVE_INFINITY : 0;
+    }
+
+    @Override
+    public double getMinTemp(@Nullable LivingEntity entity, World level, BlockPos pos, BlockState state)
+    {   return level.dimension().location().equals(DimensionType.OVERWORLD_LOCATION.location()) ? Double.POSITIVE_INFINITY : 1;
     }
 }
