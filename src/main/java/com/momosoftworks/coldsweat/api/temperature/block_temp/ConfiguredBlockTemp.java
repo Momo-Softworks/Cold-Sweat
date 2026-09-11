@@ -19,19 +19,13 @@ import java.util.Map;
 /**
  * Wrapper BlockTemp for {@link BlockTempData} configurations.
  */
-public class ConfiguredBlockTemp extends BlockTemp
+public class ConfiguredBlockTemp extends SimpleBlockTemp
 {
     private final BlockTempData data;
 
     public ConfiguredBlockTemp(BlockTempData data)
     {
-        super(-data.getMaxEffect(),
-              data.getMaxEffect(),
-              data.getMinTemp(),
-              data.getMaxTemp(),
-              data.range(),
-              data.fade(),
-              data.logarithmic(),
+        super(-data.maxEffect(), data.getMaxEffect(), data.getMinTemp(), data.getMaxTemp(), data.range(), data.fade(), data.logarithmic(),
               RegistryHelper.mapForgeRegistryTagList(ForgeRegistries.BLOCKS, data.block().flatten(BlockRequirement::blocks)).toArray(new Block[0]));
         this.data = data;
     }
