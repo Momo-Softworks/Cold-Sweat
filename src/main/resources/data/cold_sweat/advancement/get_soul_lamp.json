@@ -2,7 +2,7 @@
   "parent": "cold_sweat:extreme_temps",
   "display": {
     "icon": {
-      "item": "minecraft:heart_of_the_sea"
+      "id": "minecraft:heart_of_the_sea"
     },
     "title": {
       "translate": "advancements.cold_sweat.get_soul_lamp.title"

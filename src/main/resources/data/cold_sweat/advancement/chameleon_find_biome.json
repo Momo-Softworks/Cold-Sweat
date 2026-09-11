@@ -2,7 +2,7 @@
   "parent": "cold_sweat:tame_chameleon",
   "display": {
     "icon": {
-      "item": "minecraft:compass"
+      "id": "minecraft:compass"
     },
     "title": {
         "translate": "advancements.cold_sweat.chameleon_find_biome.title"

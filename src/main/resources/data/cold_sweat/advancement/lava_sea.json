@@ -2,7 +2,7 @@
   "parent": "cold_sweat:huddle_close",
   "display": {
     "icon": {
-      "item": "minecraft:lava_bucket"
+      "id": "minecraft:lava_bucket"
     },
     "title": {
         "translate": "advancements.cold_sweat.lava_sea.title"

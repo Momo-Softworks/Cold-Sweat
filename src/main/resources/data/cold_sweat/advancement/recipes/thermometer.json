@@ -2,11 +2,11 @@
   "parent": "minecraft:recipes/root",
   "criteria": {
     "temperature": {
-      "trigger": "cold_sweat:temperature",
+      "trigger": "cold_sweat:temperature_changed",
       "conditions": {
         "temperature": [
           {
-            "type": "world",
+            "trait": "world",
             "range":
             {
               "below": "min_habitable",

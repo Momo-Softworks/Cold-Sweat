@@ -2,7 +2,7 @@
   "parent": "cold_sweat:extreme_temps",
   "display": {
     "icon": {
-      "item": "cold_sweat:smokestack"
+      "id": "cold_sweat:smokestack"
     },
     "title": {
       "translate": "advancements.cold_sweat.use_smokestack.title"

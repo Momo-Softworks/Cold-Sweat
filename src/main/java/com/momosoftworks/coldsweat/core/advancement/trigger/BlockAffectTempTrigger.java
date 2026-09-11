@@ -25,14 +25,14 @@ public class BlockAffectTempTrigger extends SimpleCriterionTrigger<BlockAffectTe
     {   this.trigger(player, triggerInstance -> triggerInstance.matches(player, pos, distance, totalEffect));
     }
 
-    public record Instance(Optional<ContextAwarePredicate> player, BlockPredicate block, MinMaxBounds.Doubles distance, MinMaxBounds.Doubles totalEffect, List<TriggerHelper.TempCondition> conditions) implements SimpleInstance
+    public record Instance(Optional<ContextAwarePredicate> player, Optional<BlockPredicate> block, MinMaxBounds.Doubles distance, MinMaxBounds.Doubles totalEffect, List<TriggerHelper.TempCondition> conditions) implements SimpleInstance
     {
         public static final Codec<Instance> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 ContextAwarePredicate.CODEC.optionalFieldOf("player").forGetter(Instance::player),
-                BlockPredicate.CODEC.fieldOf("block").forGetter(Instance::block),
-                MinMaxBounds.Doubles.CODEC.fieldOf("distance").forGetter(Instance::distance),
-                MinMaxBounds.Doubles.CODEC.fieldOf("total_effect").forGetter(Instance::totalEffect),
-                Codec.list(TriggerHelper.TempCondition.CODEC).fieldOf("conditions").forGetter(Instance::conditions)
+                BlockPredicate.CODEC.optionalFieldOf("block").forGetter(Instance::block),
+                MinMaxBounds.Doubles.CODEC.optionalFieldOf("distance", MinMaxBounds.Doubles.ANY).forGetter(Instance::distance),
+                MinMaxBounds.Doubles.CODEC.optionalFieldOf("total_effect", MinMaxBounds.Doubles.ANY).forGetter(Instance::totalEffect),
+                Codec.list(TriggerHelper.TempCondition.CODEC).optionalFieldOf("player_temperature", List.of()).forGetter(Instance::conditions)
         ).apply(instance, Instance::new));
 
         public boolean matches(ServerPlayer player, BlockPos pos, double distance, double totalEffect)
@@ -40,7 +40,7 @@ public class BlockAffectTempTrigger extends SimpleCriterionTrigger<BlockAffectTe
             Map<Temperature.Trait, Double> temps = Temperature.getTemperatures(player);
             return this.distance.matches(distance)
                     && this.totalEffect.matches(totalEffect)
-                    && this.block.matches(player.serverLevel(), pos)
+                    && this.block.map(b -> b.matches(player.serverLevel(), pos)).orElse(true)
                     && conditions.stream().allMatch(condition -> condition.matches(temps.getOrDefault(condition.trait(), 0.0)));
         }
     }

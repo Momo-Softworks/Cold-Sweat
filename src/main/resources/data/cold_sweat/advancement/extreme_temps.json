@@ -1,0 +1,35 @@
+{
+  "parent": "cold_sweat:root",
+  "display": {
+    "icon": {
+      "id": "minecraft:dead_bush"
+    },
+    "title": {
+      "translate": "advancements.cold_sweat.extreme_temps.title"
+    },
+    "description": {
+      "translate": "advancements.cold_sweat.extreme_temps.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "requirement": {
+      "trigger": "cold_sweat:temperature_changed",
+      "conditions": {
+        "temperature": [
+          {
+            "trait": "world",
+            "range":
+            {
+              "below": "min_habitable",
+              "above": "max_habitable"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

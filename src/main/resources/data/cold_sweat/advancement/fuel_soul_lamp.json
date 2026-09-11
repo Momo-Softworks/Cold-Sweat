@@ -2,7 +2,7 @@
   "parent": "cold_sweat:get_soul_lamp",
   "display": {
     "icon": {
-      "item": "cold_sweat:soulspring_lamp"
+      "id": "cold_sweat:soulspring_lamp"
     },
     "title": {
       "translate": "advancements.cold_sweat.soul_lamp_fuel.title"
@@ -17,7 +17,7 @@
   },
   "criteria": {
     "requirement": {
-      "trigger": "cold_sweat:soulspring_lamp_fuelled",
+      "trigger": "cold_sweat:soulspring_lamp_fueled",
       "conditions": {}
     }
   }

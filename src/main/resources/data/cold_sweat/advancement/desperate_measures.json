@@ -2,7 +2,7 @@
   "parent": "cold_sweat:huddle_close",
   "display": {
     "icon": {
-      "item": "minecraft:flint_and_steel"
+      "id": "minecraft:flint_and_steel"
     },
     "title": {
       "translate": "advancements.cold_sweat.last_resort.title"
@@ -18,11 +18,11 @@
   "criteria": {
     "freezing_on_fire":
     {
-      "trigger": "cold_sweat:temperature",
+      "trigger": "cold_sweat:temperature_changed",
       "conditions": {
         "temperature": [
           {
-            "type": "world",
+            "trait": "world",
             "range":
             {
               "below": "min_habitable"

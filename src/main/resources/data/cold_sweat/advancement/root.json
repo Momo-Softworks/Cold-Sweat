@@ -1,7 +1,7 @@
 {
   "display": {
     "icon": {
-      "item": "cold_sweat:thermometer"
+      "id": "cold_sweat:thermometer"
     },
     "title": {
         "translate": "advancements.cold_sweat.root.title"

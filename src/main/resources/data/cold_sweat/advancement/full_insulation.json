@@ -2,7 +2,7 @@
   "parent": "cold_sweat:insulate_armor",
   "display": {
     "icon": {
-      "item": "minecraft:leather_chestplate"
+      "id": "minecraft:leather_chestplate"
     },
     "title": {
         "translate": "advancements.cold_sweat.full_insulation.title"

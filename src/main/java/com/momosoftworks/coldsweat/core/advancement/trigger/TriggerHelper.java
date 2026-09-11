@@ -91,8 +91,8 @@ public class TriggerHelper
     {
         public static final Codec<TempCondition> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 Temperature.Trait.CODEC.fieldOf("trait").forGetter(TempCondition::trait),
-                Codec.doubleRange(0, Double.MAX_VALUE).optionalFieldOf("below", Double.MAX_VALUE).forGetter(TempCondition::below),
-                Codec.doubleRange(-Double.MAX_VALUE, 0).optionalFieldOf("above", -Double.MAX_VALUE).forGetter(TempCondition::above)
+                Codec.DOUBLE.optionalFieldOf("below", Double.MAX_VALUE).forGetter(TempCondition::below),
+                Codec.DOUBLE.optionalFieldOf("above", -Double.MAX_VALUE).forGetter(TempCondition::above)
         ).apply(instance, TempCondition::new));
 
         public boolean matches(double value)

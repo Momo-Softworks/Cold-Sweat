@@ -2,7 +2,7 @@
   "parent": "cold_sweat:use_smokestack",
   "display": {
     "icon": {
-      "item": "cold_sweat:hearth"
+      "id": "cold_sweat:hearth"
     },
     "title": {
         "translate": "advancements.cold_sweat.place_hearth.title"

@@ -2,7 +2,7 @@
   "parent": "cold_sweat:root",
   "display": {
     "icon": {
-      "item": "minecraft:leather"
+      "id": "minecraft:leather"
     },
     "title": {
         "translate": "advancements.cold_sweat.insulate_armor.title"

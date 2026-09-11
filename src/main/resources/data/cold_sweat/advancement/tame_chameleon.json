@@ -2,7 +2,7 @@
   "parent": "cold_sweat:root",
   "display": {
     "icon": {
-      "item": "cold_sweat:chameleon_molt"
+      "id": "cold_sweat:chameleon_molt"
     },
     "title": {
         "translate": "advancements.cold_sweat.tame_chameleon.title"
