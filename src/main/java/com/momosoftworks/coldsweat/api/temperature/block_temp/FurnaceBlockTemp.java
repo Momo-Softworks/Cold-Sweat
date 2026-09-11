@@ -7,13 +7,13 @@ import net.minecraft.world.level.block.AbstractFurnaceBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.Nullable;
 
 public class FurnaceBlockTemp extends BlockTemp
 {
     public FurnaceBlockTemp()
     {
-        super(0, 0.88, Double.NEGATIVE_INFINITY, 12.6, 7, true,
-              ForgeRegistries.BLOCKS.getValues().stream().filter(block -> block instanceof AbstractFurnaceBlock).toArray(Block[]::new));
+        super(ForgeRegistries.BLOCKS.getValues().stream().filter(block -> block instanceof AbstractFurnaceBlock).toArray(Block[]::new));
     }
 
     @Override
@@ -22,9 +22,33 @@ public class FurnaceBlockTemp extends BlockTemp
     }
 
     @Override
+    public double getMinEffect(@Nullable LivingEntity entity, Level level, BlockPos pos, BlockState state)
+    {   return 0;
+    }
+
+    @Override
+    public double getMaxEffect(@Nullable LivingEntity entity, Level level, BlockPos pos, BlockState state)
+    {   return 0.88;
+    }
+
+    @Override
+    public double getMinTemp(@Nullable LivingEntity entity, Level level, BlockPos pos, BlockState state)
+    {   return Double.NEGATIVE_INFINITY;
+    }
+
+    @Override
+    public double getMaxTemp(@Nullable LivingEntity entity, Level level, BlockPos pos, BlockState state)
+    {   return 12.6;
+    }
+
+    @Override
     public boolean hasBlock(Block block)
-    {
-        return block instanceof AbstractFurnaceBlock;
+    {   return block instanceof AbstractFurnaceBlock;
+    }
+
+    @Override
+    public boolean isLogarithmic(@Nullable LivingEntity entity, Level level, BlockPos pos, BlockState state)
+    {   return true;
     }
 
     @Override
