@@ -283,23 +283,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
 
     @Override
     public ParticleOptions getAirParticle()
-    {   return ModParticleTypes.GROUND_MIST.get();
-    }
-
-    @Override
-    public void spawnAirParticle(int x, int y, int z, RandomSource rand)
-    {
-        if (rand.nextFloat() > (spreading ? 0.016f : 0.032f))
-        {   return;
-        }
-
-        float xr = rand.nextFloat();
-        float yr = rand.nextFloat();
-        float zr = rand.nextFloat();
-        float xm = rand.nextFloat() / 20 - 0.025f;
-        float zm = rand.nextFloat() / 20 - 0.025f;
-
-        level.addParticle(ModParticleTypes.COLD_AIR.get(), false, x + xr, y + yr, z + zr, xm, 0, zm);
+    {   return ModParticleTypes.COLD_AIR.get();
     }
 
     @Override
