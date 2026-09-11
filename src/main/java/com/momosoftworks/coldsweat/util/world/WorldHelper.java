@@ -81,7 +81,8 @@ public abstract class WorldHelper
 {
     static Map<RegistryKey<World>, DummyPlayer> DUMMY_PLAYERS = new HashMap<>();
     static Map<RegistryKey<World>, DummyEntity> DUMMY_ENTITIES = new HashMap<>();
-    static Map<RegistryKey<World>, Map<BlockPos, TempSnapshot>> TEMPERATURE_CHECKS = new HashMap<>();
+    static Map<RegistryKey<World>, Map<BlockPos, TempSnapshot>> TEMPERATURE_CACHE = new HashMap<>();
+    static Map<RegistryKey<World>, Map<BlockPos, InsulationSnapshot>> INSULATION_CACHE = new HashMap<>();
 
     private static final Map<TileEntity, Pair<CompoundNBT, Long>> BLOCK_ENTITY_DATA_CACHE = new HashMap<>();
 
@@ -89,7 +90,8 @@ public abstract class WorldHelper
     public static void clearCachesOnUnload(FMLServerStoppedEvent event)
     {   DUMMY_PLAYERS.clear();
         DUMMY_ENTITIES.clear();
-        TEMPERATURE_CHECKS.clear();
+        TEMPERATURE_CACHE.clear();
+        INSULATION_CACHE.clear();
     }
 
     public static int getHeight(BlockPos pos, World level, Heightmap.Type heightmap)
@@ -760,7 +762,7 @@ public abstract class WorldHelper
         boolean sensitive = (flags & 1) != 0;
         boolean forceUpdate = (flags & 2) != 0;
 
-        Map<BlockPos, TempSnapshot> snapshots = TEMPERATURE_CHECKS.computeIfAbsent(level.dimension(), dim -> new HashMap<>());
+        Map<BlockPos, TempSnapshot> snapshots = TEMPERATURE_CACHE.computeIfAbsent(level.dimension(), dim -> new HashMap<>());
         int tickSpeedMultiplier = 1 + level.getGameRules().getInt(GameRules.RULE_RANDOMTICKING) / 20;
 
         BlockPos segment = new BlockPos((pos.getX() >> 3) << 3,
@@ -790,12 +792,12 @@ public abstract class WorldHelper
         List<TempModifier> modifiers = new ArrayList<>(Temperature.getModifiers(dummy, Temperature.Trait.WORLD));
 
         // Get insulation from hearths
-        Pair<Integer, Integer> maxCoolingHeating = getInsulationAt(level, pos, 2);
-        if (maxCoolingHeating.getFirst() > 0)
-        {   modifiers.add(new FrigidnessTempModifier(maxCoolingHeating.getFirst()));
+        InsulationSnapshot maxCoolingHeating = getInsulationAt(level, pos, 2);
+        if (maxCoolingHeating.cooling() > 0)
+        {   modifiers.add(new FrigidnessTempModifier(maxCoolingHeating.cooling()));
         }
-        if (maxCoolingHeating.getSecond() > 0)
-        {   modifiers.add(new WarmthTempModifier(maxCoolingHeating.getSecond()));
+        if (maxCoolingHeating.heating() > 0)
+        {   modifiers.add(new WarmthTempModifier(maxCoolingHeating.heating()));
         }
         // Get & store temperature
         double tempAt = Temperature.apply(0, dummy, Temperature.Trait.WORLD, modifiers, true);
@@ -833,12 +835,12 @@ public abstract class WorldHelper
         List<TempModifier> modifiers = new ArrayList<>(Temperature.getModifiers(dummy, Temperature.Trait.WORLD));
 
         // Get insulation from hearths
-        Pair<Integer, Integer> maxCoolingHeating = getInsulationAt(level, pos, 2);
-        if (maxCoolingHeating.getFirst() > 0)
-        {   modifiers.add(new FrigidnessTempModifier(maxCoolingHeating.getFirst()));
+        InsulationSnapshot maxCoolingHeating = getInsulationAt(level, pos, 2);
+        if (maxCoolingHeating.cooling() > 0)
+        {   modifiers.add(new FrigidnessTempModifier(maxCoolingHeating.cooling()));
         }
-        if (maxCoolingHeating.getSecond() > 0)
-        {   modifiers.add(new WarmthTempModifier(maxCoolingHeating.getSecond()));
+        if (maxCoolingHeating.heating() > 0)
+        {   modifiers.add(new WarmthTempModifier(maxCoolingHeating.heating()));
         }
         return Temperature.apply(0, dummy, Temperature.Trait.WORLD, modifiers, true);
     }
@@ -886,7 +888,7 @@ public abstract class WorldHelper
     }
 
     public Map<RegistryKey<World>, Map<BlockPos, TempSnapshot>> getWorldTempCache()
-    {   return TEMPERATURE_CHECKS;
+    {   return TEMPERATURE_CACHE;
     }
 
     public static boolean allAdjacentBlocksMatch(BlockPos pos, Predicate<BlockPos> predicate)
@@ -978,8 +980,12 @@ public abstract class WorldHelper
         return false;
     }
 
-    public static Pair<Integer, Integer> getInsulationAt(World level, BlockPos pos, int chunkRadius)
+    public static InsulationSnapshot getInsulationAt(World level, BlockPos pos, int chunkRadius)
     {
+        InsulationSnapshot snapshot = INSULATION_CACHE.computeIfAbsent(level.dimension(), dim -> new HashMap<>()).get(pos);
+        if (snapshot != null && level.getGameTime() - snapshot.timestamp < 20)
+        {   return snapshot;
+        }
         pos = sublevelToWorld(level, pos);
         int maxCoolingLevel = 0;
         int maxHeatingLevel = 0;
@@ -1002,7 +1008,9 @@ public abstract class WorldHelper
                 }
             }
         }
-        return Pair.of(maxCoolingLevel, maxHeatingLevel);
+        snapshot = new InsulationSnapshot(level.getGameTime(), maxCoolingLevel, maxHeatingLevel);
+        INSULATION_CACHE.get(level.dimension()).put(pos, snapshot);
+        return snapshot;
     }
 
     public static List<BlockPos> getPositionsInAABB(AxisAlignedBB bb)
@@ -1053,6 +1061,45 @@ public abstract class WorldHelper
         }
         public double temperature()
         {   return temperature;
+        }
+    }
+
+    public static final class InsulationSnapshot
+    {
+        private final long timestamp;
+        private final int cooling;
+        private final int heating;
+
+        public InsulationSnapshot(long timestamp, int cooling, int heating)
+        {   this.timestamp = timestamp;
+            this.cooling = cooling;
+            this.heating = heating;
+        }
+
+        public long timestamp()
+        {   return timestamp;
+        }
+        public int cooling()
+        {   return cooling;
+        }
+        public int heating()
+        {   return heating;
+        }
+
+        @Override
+        public boolean equals(Object obj)
+        {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            InsulationSnapshot that = (InsulationSnapshot) obj;
+            return this.timestamp == that.timestamp &&
+                this.cooling == that.cooling &&
+                this.heating == that.heating;
+        }
+
+        @Override
+        public int hashCode()
+        {   return Objects.hash(timestamp, cooling, heating);
         }
     }
 }
