@@ -5,14 +5,13 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.world.level.dimension.DimensionType;
+import org.jetbrains.annotations.Nullable;
 
 public class NetherPortalBlockTemp extends BlockTemp
 {
     public NetherPortalBlockTemp()
-    {
-        super(-1, 1, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, 7, true, Blocks.NETHER_PORTAL);
+    {   super(Blocks.NETHER_PORTAL);
     }
 
     @Override
@@ -23,12 +22,22 @@ public class NetherPortalBlockTemp extends BlockTemp
     }
 
     @Override
-    public double maxEffect()
+    public double getMaxEffect(@Nullable LivingEntity entity, Level level, BlockPos pos, BlockState state)
     {   return 1;
     }
 
     @Override
-    public double minEffect()
+    public double getMinEffect(@Nullable LivingEntity entity, Level level, BlockPos pos, BlockState state)
     {   return -1;
+    }
+
+    @Override
+    public double getMaxTemp(@Nullable LivingEntity entity, Level level, BlockPos pos, BlockState state)
+    {   return level.dimension().location().equals(DimensionType.OVERWORLD_LOCATION.location()) ? Double.POSITIVE_INFINITY : 0;
+    }
+
+    @Override
+    public double getMinTemp(@Nullable LivingEntity entity, Level level, BlockPos pos, BlockState state)
+    {   return level.dimension().location().equals(DimensionType.OVERWORLD_LOCATION.location()) ? Double.POSITIVE_INFINITY : 1;
     }
 }

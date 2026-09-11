@@ -14,13 +14,6 @@ import java.util.Set;
 public abstract class BlockTemp
 {
     private final Set<Block> validBlocks;
-    private final double maxEffect;
-    private final double minEffect;
-    private final double maxTemperature;
-    private final double minTemperature;
-    private final double range;
-    private final boolean fade;
-    private final boolean logarithmic;
 
     public abstract double getTemperature(Level level, @Nullable LivingEntity entity, BlockState state, BlockPos pos, double distance);
 
@@ -28,27 +21,8 @@ public abstract class BlockTemp
     {   return true;
     }
 
-    public BlockTemp(double minEffect, double maxEffect, double minTemp, double maxTemp, double range, boolean fade, boolean logarithmic, Block... blocks)
-    {
-        this.validBlocks = ImmutableSet.<Block>builder().add(blocks).build();
-        this.minEffect = minEffect;
-        this.maxEffect = maxEffect;
-        this.minTemperature = minTemp;
-        this.maxTemperature = maxTemp;
-        this.range = range;
-        this.fade = fade;
-        this.logarithmic = logarithmic;
-    }
-
-    public BlockTemp(double minEffect, double maxEffect, double minTemp, double maxTemp, double range, boolean fade, Block... blocks)
-    {
-        this(minEffect, maxEffect, minTemp, maxTemp, range, fade, false, blocks);
-    }
-
     public BlockTemp(Block... blocks)
-    {
-        this(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY,
-             Double.POSITIVE_INFINITY, true, false, blocks);
+    {   this.validBlocks = ImmutableSet.<Block>builder().add(blocks).build();
     }
 
     public boolean hasBlock(Block block)
@@ -59,52 +33,115 @@ public abstract class BlockTemp
     {   return validBlocks;
     }
 
+    /*
+     Property getters. By default, they delegate to their deprecated counterparts
+    */
+
     /**
-     * The maximum temperature this block can emit, no matter how many there are near the player <br>
-     * @return a double representing the temperature, in Minecraft units
+     * The maximum <b>increase</b> in world temperature that any quantify of this block can cause to an entity, in MC units
      */
+    public double getMaxEffect(@Nullable LivingEntity entity, Level level, BlockPos pos, BlockState state)
+    {   return maxEffect();
+    }
+
+    /**
+     * The maximum <b>decrease</b> in world temperature that any quantify of this block can cause to an entity, in MC units
+     */
+    public double getMinEffect(@Nullable LivingEntity entity, Level level, BlockPos pos, BlockState state)
+    {   return minEffect();
+    }
+
+    /**
+     * The maximum temperature at which this block can be effective, in MC units. <br>
+     * This block may not increase the world temperature above the returned value.
+     */
+    public double getMaxTemp(@Nullable LivingEntity entity, Level level, BlockPos pos, BlockState state)
+    {   return maxTemperature();
+    }
+
+    /**
+     * The minimum temperature at which this block can be effective, in MC units. <br>
+     * This block may not decrease the world temperature below the returned value.
+     */
+    public double getMinTemp(@Nullable LivingEntity entity, Level level, BlockPos pos, BlockState state)
+    {   return minTemperature();
+    }
+
+    /**
+     * The range of this block's effect, in blocks.
+     */
+    public double getRange(@Nullable LivingEntity entity, Level level, BlockPos pos, BlockState state)
+    {   return range();
+    }
+
+    /**
+     * Whether multiple of this block will affect the entity logarithmically (diminishing returns) or linearly.<br>
+     * Defaults to linear scaling.
+     */
+    public boolean isLogarithmic(@Nullable LivingEntity entity, Level level, BlockPos pos, BlockState state)
+    {   return logarithmic();
+    }
+
+    /**
+     * Whether the effect of this block fades over distance.
+     */
+    public boolean fades(@Nullable LivingEntity entity, Level level, BlockPos pos, BlockState state)
+    {   return fade();
+    }
+
+    /**
+     * DEPRECATED: Use {@link #getMaxEffect(LivingEntity, Level, BlockPos, BlockState)} instead
+     */
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double maxEffect()
-    {   return maxEffect;
+    {   return Double.POSITIVE_INFINITY;
     }
 
     /**
-     * The minimum temperature this block can emit, no matter how many there are near the player <br>
-     * (Useful for blocks with negative temperature) <br>
-     * @return a double representing the temperature, in Minecraft units
+     * DEPRECATED: Use {@link #getMinEffect(LivingEntity, Level, BlockPos, BlockState)} instead
      */
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double minEffect()
-    {   return minEffect;
+    {   return Double.NEGATIVE_INFINITY;
     }
 
     /**
-     * The maximum world temperature for this BlockTemp to be effective<br>
-     * @return a double representing the temperature, in Minecraft units
+     * DEPRECATED: Use {@link #getMaxTemp(LivingEntity, Level, BlockPos, BlockState)} instead
      */
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double maxTemperature()
-    {   return maxTemperature;
+    {   return Double.POSITIVE_INFINITY;
     }
 
     /**
-     * The minimum world temperature for this BlockTemp to be effective<br>
-     * @return a double representing the temperature, in Minecraft units
+     * DEPRECATED: Use {@link #getMinTemp(LivingEntity, Level, BlockPos, BlockState)} instead
      */
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double minTemperature()
-    {   return minTemperature;
+    {   return Double.NEGATIVE_INFINITY;
     }
 
     /**
-     * As more of these blocks are present, the temperature will change with diminishing returns
+     * DEPRECATED: Use {@link #isLogarithmic(LivingEntity, Level, BlockPos, BlockState)} instead
      */
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean logarithmic()
-    {   return logarithmic;
+    {   return false;
     }
 
+    /**
+     * DEPRECATED: Use {@link #getRange(LivingEntity, Level, BlockPos, BlockState)} instead
+     */
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public double range()
-    {
-        return Math.min(range, ConfigSettings.BLOCK_RANGE.get());
+    {   return ConfigSettings.BLOCK_RANGE.get();
     }
 
+    /**
+     * DEPRECATED: Use {@link #fades(LivingEntity, Level, BlockPos, BlockState)} instead
+     */
+    @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean fade()
-    {   return fade;
+    {   return true;
     }
 }
