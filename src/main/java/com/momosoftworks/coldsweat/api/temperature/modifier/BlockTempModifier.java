@@ -43,16 +43,24 @@ public class BlockTempModifier extends TempModifier
     Long2ObjectOpenHashMap<BlockState> stateCache = new Long2ObjectOpenHashMap<>(3000);
     List<Triplet<BlockPos, BlockTemp, Double>> triggers = new ArrayList<>(16);
 
+    long lastTick = 0;
+
     @Override
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
-        blockTempTotals.clear();
         groupTotals.clear();
-        stateCache.clear();
+        blockTempTotals.clear();
         triggers.clear();
-        chunks.clear();
 
         Level level = entity.level();
+        long gameTime = level.getGameTime();
+        if (lastTick != gameTime)
+        {
+            lastTick = gameTime;
+            stateCache.clear();
+            chunks.clear();
+        }
+
         int range = this.getNBT().contains("RangeOverride", 3) ? this.getNBT().getInt("RangeOverride") : ConfigSettings.BLOCK_RANGE.get();
         BlockPos entPos = entity.blockPosition();
 
