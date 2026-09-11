@@ -38,7 +38,7 @@ public class BlockTempModifier extends TempModifier
     }
 
     Map<Long, ChunkAccess> chunks = new LinkedHashMap<>(16, 0.75f, true);
-    Map<BlockTemp, Double> blockTempTotals = new HashMap<>(16);
+    Map<BlockTemp, BlockEffectData> blockTempTotals = new HashMap<>(16);
     Map<TagKey<BlockTempData>, Double> groupTotals = new HashMap<>(8);
     Long2ObjectOpenHashMap<BlockState> stateCache = new Long2ObjectOpenHashMap<>(3000);
     List<Triplet<BlockPos, BlockTemp, Double>> triggers = new ArrayList<>(16);
@@ -84,92 +84,99 @@ public class BlockTempModifier extends TempModifier
 
                 for (int y = -range; y < range; y++)
                 {
-                        blockpos.set(entX + x, entY + y, entZ + z);
+                    blockpos.set(entX + x, entY + y, entZ + z);
 
-                        long blockPosLong = blockpos.asLong();
-                        BlockState state = stateCache.get(blockPosLong);
-                        if (state == null)
-                        {   LevelChunkSection section = WorldHelper.getChunkSection(chunk, blockpos.getY());
-                            state = section.getBlockState(blockpos.getX() & 15, blockpos.getY() & 15, blockpos.getZ() & 15);
-                            stateCache.put(blockPosLong, state);
-                        }
+                    long blockPosLong = blockpos.asLong();
+                    BlockState state = stateCache.get(blockPosLong);
+                    if (state == null)
+                    {   LevelChunkSection section = WorldHelper.getChunkSection(chunk, blockpos.getY());
+                        state = section.getBlockState(blockpos.getX() & 15, blockpos.getY() & 15, blockpos.getZ() & 15);
+                        stateCache.put(blockPosLong, state);
+                    }
 
-                        if (state.isAir()) continue;
+                    if (state.isAir()) continue;
 
-                        // Get the BlockTemp associated with the block
-                        Collection<BlockTemp> blockTemps = BlockTempRegistry.getBlockTempsFor(state);
+                    // Get the BlockTemp associated with the block
+                    Collection<BlockTemp> blockTemps = BlockTempRegistry.getBlockTempsFor(state);
 
-                        if (blockTemps.isEmpty() || (blockTemps.size() == 1 && blockTemps.contains(BlockTempRegistry.DEFAULT_BLOCK_TEMP))) continue;
+                    if (blockTemps.isEmpty() || (blockTemps.size() == 1 && blockTemps.contains(BlockTempRegistry.DEFAULT_BLOCK_TEMP))) continue;
 
-                        // Are any of the block temps able to affect the entity?
-                        // This check prevents costly calculations if the block can't affect the entity anyway
-                        if (this.areAnyBlockTempsInRange(blockTemps))
-                        {
-                            // Get Vector positions of the centers of the source block and player
-                            Vec3 pos = Vec3.atCenterOf(blockpos);
+                    for (BlockTemp blockTemp : blockTemps)
+                    {   blockTempTotals.putIfAbsent(blockTemp, new BlockEffectData(entity, blockTemp, level, blockpos, state));
+                    }
 
-                            // Gets the closest point in the player's BB to the block
-                            Vec3 playerClosest = WorldHelper.getClosestPointOnEntity(entity, pos);
+                    // Are any of the block temps able to affect the entity?
+                    // This check prevents costly calculations if the block can't affect the entity anyway
+                    if (this.areAnyBlockTempsInRange(blockTemps))
+                    {
+                        // Get Vector positions of the centers of the source block and player
+                        Vec3 pos = Vec3.atCenterOf(blockpos);
 
-                            // Cast a ray between the player and the block
-                            // Lessen the effect with each block between the player and the block
-                            int[] blocks = new int[1];
-                            Vec3 ray = pos.subtract(playerClosest);
-                            Direction direction = Direction.getNearest(ray.x, ray.y, ray.z);
+                        // Gets the closest point in the player's BB to the block
+                        Vec3 playerClosest = WorldHelper.getClosestPointOnEntity(entity, pos);
 
-                            WorldHelper.forBlocksInRay(playerClosest, pos, level, chunk, stateCache,
-                            (rayState, bpos) ->
-                            {   if (!bpos.equals(blockpos) && WorldHelper.isSpreadBlocked(level, rayState, bpos, direction, direction))
-                                {   blocks[0]++;
-                                }
-                            }, 3);
+                        // Cast a ray between the player and the block
+                        // Lessen the effect with each block between the player and the block
+                        int[] blocks = new int[1];
+                        Vec3 ray = pos.subtract(playerClosest);
+                        Direction direction = Direction.getNearest(ray.x, ray.y, ray.z);
 
-                            // Get the temperature of the block given the player's distance
-                            double distance = CSMath.getDistance(playerClosest, pos);
-
-                            for (BlockTemp blockTemp : blockTemps)
-                            {
-                                if (!blockTemp.isValid(level, blockpos, state)) continue;
-                                double temperature = blockTemp.getTemperature(level, entity, state, blockpos, distance);
-                                if (temperature == 0) continue;
-                                double tempToAdd = blockTemp.fade()
-                                                   ? CSMath.blend(temperature, 0, distance, 0.5, blockTemp.range())
-                                                   : temperature;
-
-                                double blockTempTotal = blockTempTotals.getOrDefault(blockTemp, 0d);
-                                double blockGroupTotal = this.getGroupTotal(blockTemp);
-                                double blockGroupDelta = blockGroupTotal - blockTempTotal;
-
-                                if (blockTemp.logarithmic())
-                                {   // Calculate amount of increase
-                                    double newTotal = Math.pow(Math.pow(blockTempTotal, 1/LOG_FACTOR) + tempToAdd, LOG_FACTOR);
-                                    double delta = newTotal - blockTempTotal;
-                                    // Dampen the effect with each block between the player and the source
-                                    delta /= (blocks[0] + 1);
-                                    // Store this block type's total effect on the player
-                                    double newVal = CSMath.clamp(blockTempTotal + delta,
-                                                                 blockTemp.minEffect() + blockGroupDelta,
-                                                                 blockTemp.maxEffect() - blockGroupDelta);
-                                    blockTempTotals.put(blockTemp, newVal);
-                                    updateGroupTotal(blockTemp, newVal - blockTempTotal);
-                                }
-                                else
-                                {   // Dampen the effect with each block between the player and the source
-                                    tempToAdd /= (blocks[0] + 1);
-                                    // Store this block type's total effect on the player
-                                    double newVal = CSMath.clamp(blockTempTotal + tempToAdd,
-                                                                 blockTemp.minEffect() + blockGroupDelta,
-                                                                 blockTemp.maxEffect() - blockGroupDelta);
-                                    blockTempTotals.put(blockTemp, newVal);
-                                    updateGroupTotal(blockTemp, newVal - blockTempTotal);
-                                }
-                                // Used to trigger advancements
-                                if (shouldTickAdvancements)
-                                {   triggers.add(new Triplet<>(blockpos, blockTemp, distance));
-                                }
-                                break;
+                        WorldHelper.forBlocksInRay(playerClosest, pos, level, chunk, stateCache,
+                        (rayState, bpos) ->
+                        {   if (!bpos.equals(blockpos) && WorldHelper.isSpreadBlocked(level, rayState, bpos, direction, direction))
+                            {   blocks[0]++;
                             }
+                        }, 3);
+
+                        // Get the temperature of the block given the player's distance
+                        double distance = CSMath.getDistance(playerClosest, pos);
+
+                        for (BlockTemp blockTemp : blockTemps)
+                        {
+                            if (!blockTemp.isValid(level, blockpos, state)) continue;
+                            double temperature = blockTemp.getTemperature(level, entity, state, blockpos, distance);
+                            if (temperature == 0) continue;
+
+                            BlockEffectData blockEffectData = blockTempTotals.get(blockTemp);
+                            if (blockEffectData == null) continue;
+
+                            double tempToAdd = blockEffectData.fades()
+                                               ? CSMath.blend(temperature, 0, distance, 0.5, blockEffectData.range())
+                                               : temperature;
+
+                            double blockGroupTotal = this.getGroupTotal(blockTemp);
+                            double blockGroupDelta = blockGroupTotal - blockEffectData.getTotalEffect();
+
+                            if (blockTemp.isLogarithmic(entity, level, blockpos, state))
+                            {   // Calculate amount of increase
+                                double newTotal = Math.pow(Math.pow(blockEffectData.getTotalEffect(), 1/LOG_FACTOR) + tempToAdd, LOG_FACTOR);
+                                double delta = newTotal - blockEffectData.getTotalEffect();
+                                // Dampen the effect with each block between the player and the source
+                                delta /= (blocks[0] + 1);
+                                // Store this block type's total effect on the player
+                                double newVal = CSMath.clamp(blockEffectData.getTotalEffect() + delta,
+                                                             blockEffectData.minEffect() + blockGroupDelta,
+                                                             blockEffectData.maxEffect() - blockGroupDelta);
+                                blockEffectData.setTotalEffect(newVal);
+                                updateGroupTotal(blockTemp, newVal - blockEffectData.getTotalEffect());
+                            }
+                            else
+                            {   // Dampen the effect with each block between the player and the source
+                                tempToAdd /= (blocks[0] + 1);
+                                // Store this block type's total effect on the player
+                                double newVal = CSMath.clamp(blockEffectData.getTotalEffect() + tempToAdd,
+                                                             blockEffectData.minEffect() + blockGroupDelta,
+                                                             blockEffectData.maxEffect() - blockGroupDelta);
+                                blockEffectData.setTotalEffect(newVal);
+                                updateGroupTotal(blockTemp, newVal - blockEffectData.getTotalEffect());
+                            }
+                            // Used to trigger advancements
+                            if (shouldTickAdvancements)
+                            {   triggers.add(new Triplet<>(blockpos, blockTemp, distance));
+                            }
+                            break;
                         }
+                    }
                 }
             }
         }
@@ -177,7 +184,7 @@ public class BlockTempModifier extends TempModifier
         if (entity instanceof ServerPlayer player && shouldTickAdvancements)
         {
             for (Triplet<BlockPos, BlockTemp, Double> trigger : triggers)
-            {   ModAdvancementTriggers.BLOCK_AFFECTS_TEMP.value().trigger(player, trigger.getA(), trigger.getC(), blockTempTotals.get(trigger.getB()));
+            {   ModAdvancementTriggers.BLOCK_AFFECTS_TEMP.value().trigger(player, trigger.getA(), trigger.getC(), blockTempTotals.get(trigger.getB()).getTotalEffect());
             }
         }
 
@@ -187,16 +194,16 @@ public class BlockTempModifier extends TempModifier
         }
 
         // Add the effects of all the blocks together and return the result
-        Map<BlockTemp, Double> totals = new HashMap<>(blockTempTotals);
+        Map<BlockTemp, BlockEffectData> totals = new HashMap<>(blockTempTotals);
         return temp ->
         {
-            for (Map.Entry<BlockTemp, Double> entry : totals.entrySet())
+            for (Map.Entry<BlockTemp, BlockEffectData> entry : totals.entrySet())
             {
-                BlockTemp blockTemp = entry.getKey();
-                double min = blockTemp.minTemperature();
-                double max = blockTemp.maxTemperature();
+                BlockEffectData data = entry.getValue();
+                double min = data.minTemp();
+                double max = data.maxTemp();
                 if (!CSMath.betweenInclusive(temp, min, max)) continue;
-                double effectValue = entry.getValue();
+                double effectValue = data.getTotalEffect();
                 temp = CSMath.clamp(temp + effectValue, min, max);
             }
             return temp;
@@ -207,11 +214,12 @@ public class BlockTempModifier extends TempModifier
     {
         for (BlockTemp blockTemp : blockTemps)
         {
-            if (!blockTempTotals.containsKey(blockTemp))
+            BlockEffectData blockTempTotal = blockTempTotals.get(blockTemp);
+            if (blockTempTotal == null)
             {   return true;
             }
             double effectTotal = getGroupTotal(blockTemp);
-            if (CSMath.betweenInclusive(effectTotal, blockTemp.minEffect(), blockTemp.maxEffect()))
+            if (CSMath.betweenInclusive(effectTotal, blockTempTotal.minEffect(), blockTempTotal.maxEffect()))
             {   return true;
             }
         }
@@ -221,7 +229,7 @@ public class BlockTempModifier extends TempModifier
     private double getGroupTotal(BlockTemp blockTemp)
     {
         if (!(blockTemp instanceof ConfiguredBlockTemp config) || config.getData().effectGroup().isEmpty())
-        {   return this.blockTempTotals.getOrDefault(blockTemp, 0d);
+        {   return this.blockTempTotals.get(blockTemp).getTotalEffect();
         }
         return groupTotals.getOrDefault(config.getData().effectGroup().get(), 0d);
     }
@@ -230,6 +238,60 @@ public class BlockTempModifier extends TempModifier
     {
         if (blockTemp instanceof ConfiguredBlockTemp config && config.getData().effectGroup().isPresent())
         {   groupTotals.merge(config.getData().effectGroup().get(), delta, Double::sum);
+        }
+    }
+
+    protected static class BlockEffectData
+    {
+        private final double maxTemp;
+        private final double minTemp;
+        private final double maxEffect;
+        private final double minEffect;
+        private final double range;
+        private final boolean fade;
+        private double totalEffect;
+
+        public BlockEffectData(LivingEntity entity, BlockTemp blockTemp, Level level, BlockPos pos, BlockState state)
+        {
+            this.maxTemp = blockTemp.getMaxTemp(entity, level, pos, state);
+            this.minTemp = blockTemp.getMinTemp(entity, level, pos, state);
+            this.maxEffect = blockTemp.getMaxEffect(entity, level, pos, state);
+            this.minEffect = blockTemp.getMinEffect(entity, level, pos, state);
+            this.range = blockTemp.getRange(entity, level, pos, state);
+            this.fade = blockTemp.fades(entity, level, pos, state);
+            this.totalEffect = 0;
+        }
+
+        public double maxTemp()
+        {   return maxTemp;
+        }
+
+        public double minTemp()
+        {   return minTemp;
+        }
+
+        public double getTotalEffect()
+        {   return totalEffect;
+        }
+
+        public double maxEffect()
+        {   return maxEffect;
+        }
+
+        public double minEffect()
+        {   return minEffect;
+        }
+
+        public double range()
+        {   return range;
+        }
+
+        public boolean fades()
+        {   return fade;
+        }
+
+        public void setTotalEffect(double effect)
+        {   this.totalEffect = effect;
         }
     }
 }
