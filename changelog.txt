@@ -3752,3 +3752,28 @@ Fixes:
 * Fixed temperature not emitting from blocks that are part of Sable (Create: Aeronautics) objects
 * Fixed KubeJS insulator configs not working properly in some cases
 - Fixed some cases in which tooltips would flicker when hovering over items
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.4.3
+* Overhauled the hearth's spreading algorithm to more evenly distribute its area of effect
+  - Especially noticeable when being routed through pipes
+* The hottest and coldest times of day are now configurable
+  - Configurable in world.toml as "Hottest Time" and "Coldest Time"
+  - Default to 6000 (noon) and 18000 (midnight) respectively, as they have been
+- Removed built-in compatibility with Aquamirae and Boatload, as they were problematic in some versions
+  - This compat was defined purely in JSON configs, so it can be re-added by users if desired
+- Improved performance when multiple block temperature calculations happen in the same tick
+
+Fixes:
+* (1.21) Fixed advancements not loading
+* Fixed the temperature at the world's build limit not being as cold as intended
+* Fixed block temperature not working in Sable (Create: Aeronautics) contraptions in some cases
+* Fixed Create fluid tanks and pipes having unlimited maximum temperature
+- Fixed the hearth's top half being broken when assembling a Create train
+- Fixed uncommon crash when loading some armor sets in the creative menu
+- Fixed item requirements not being checked before applying attributes from insulation
+
+Technical Changes:
+- BlockTemp's "maxEffect(), minTemp(), range() etc. fields have been migrated to methods that receive full world, position, and blockstate context"
+  - This means that these values can be more intelligently calculated rather than effectively being static

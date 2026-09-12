@@ -19,8 +19,10 @@ import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.data.tag.ModInsulatorTags;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
+import com.simibubi.create.api.contraption.BlockMovementChecks;
 import com.simibubi.create.content.equipment.armor.BacktankItem;
 import com.simibubi.create.content.equipment.armor.BacktankUtil;
 import com.simibubi.create.content.fluids.pipes.EncasedPipeBlock;
@@ -33,6 +35,7 @@ import earth.terrarium.adastra.common.config.AdAstraConfig;
 import glitchcore.event.EventManager;
 import net.createmod.ponder.foundation.PonderIndex;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -615,7 +618,25 @@ public class CompatManager
     {
         @SubscribeEvent
         public static void setupModEvents(FMLCommonSetupEvent event)
-        {}
+        {
+            if (isCreateLoaded())
+            {
+                event.enqueueWork(() ->
+                {
+                    // Register top/bottom halves of hearth as being connected
+                    BlockMovementChecks.registerAttachedCheck((state, world, pos, direction) ->
+                    {
+                        if (state.getBlock() == ModBlocks.HEARTH_BOTTOM)
+                        {   return BlockMovementChecks.CheckResult.of(direction == Direction.UP);
+                        }
+                        if (state.getBlock() == ModBlocks.HEARTH_TOP)
+                        {   return BlockMovementChecks.CheckResult.of(direction == Direction.DOWN);
+                        }
+                        return BlockMovementChecks.CheckResult.PASS;
+                    });
+                });
+            }
+        }
 
         @SubscribeEvent
         public static void setupModClientEvents(FMLClientSetupEvent event)
