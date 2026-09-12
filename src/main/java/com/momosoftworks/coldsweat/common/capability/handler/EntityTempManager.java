@@ -754,7 +754,7 @@ public class EntityTempManager
         for (InsulatorData insulatorData : ItemInsulationManager.getInsulatorsForStack(from, slot))
         {   entity.getAttributes().removeAttributeModifiers(insulatorData.attributes().getMap());
         }
-        for (InsulatorData insulatorData : RequirementHolder.filterValid(ItemInsulationManager.getInsulatorsForStack(to, slot), entity))
+        for (InsulatorData insulatorData : RequirementHolder.filterValid(ItemInsulationManager.getInsulatorsForStack(to, slot), to, entity))
         {   entity.getAttributes().addTransientAttributeModifiers(insulatorData.attributes().getMap());
         }
     }

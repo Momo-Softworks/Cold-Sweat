@@ -99,13 +99,13 @@ public record ItemRequirement(NegatableList<Either<TagKey<Item>, Item>> items,
         if (!ignoreCount && !count.test(stack.getCount()))
         {   return false;
         }
-        if (!durability.test(stack.getMaxDamage() - stack.getDamageValue()))
+        else if (!durability.test(stack.getMaxDamage() - stack.getDamageValue()))
         {   return false;
         }
-        if (potion.isPresent() && !potion.get().getEffects().equals(stack.getOrDefault(DataComponents.POTION_CONTENTS, new PotionContents(Potions.AWKWARD)).potion().get().value().getEffects()))
+        else if (potion.isPresent() && !potion.get().getEffects().equals(stack.getOrDefault(DataComponents.POTION_CONTENTS, new PotionContents(Potions.AWKWARD)).potion().get().value().getEffects()))
         {   return false;
         }
-        if (!enchantments.isEmpty())
+        else if (!enchantments.isEmpty())
         {
             ItemEnchantments stackEnchantments = stack.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
             stackEnchantments.entrySet().addAll(stack.getOrDefault(DataComponents.STORED_ENCHANTMENTS, ItemEnchantments.EMPTY).entrySet());
