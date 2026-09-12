@@ -88,7 +88,7 @@ public class FilledWaterskinItem extends Item
     public void inventoryTick(ItemStack stack, World world, Entity entity, int slot, boolean isSelected)
     {
         super.inventoryTick(stack, world, entity, slot, isSelected);
-        if (EntityTempManager.isTemperatureEnabled(entity) && entity.tickCount % 5 == 0)
+        if (!world.isClientSide() && EntityTempManager.isTemperatureEnabled(entity) && entity.tickCount % 5 == 0)
         {
             double itemTemp = stack.getOrCreateTag().getDouble(FilledWaterskinItem.NBT_TEMPERATURE);
             boolean shouldDrain = ConfigSettings.ITEM_TEMPERATURES.get().get(stack.getItem()).stream().anyMatch(c -> c.test(entity, stack, slot, null));
