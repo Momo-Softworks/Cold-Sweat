@@ -19,6 +19,7 @@ import com.momosoftworks.coldsweat.util.registries.ModBlocks;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
+import com.simibubi.create.content.contraptions.BlockMovementChecks;
 import com.simibubi.create.content.equipment.armor.BacktankItem;
 import com.simibubi.create.content.equipment.armor.BacktankUtil;
 import com.simibubi.create.content.fluids.pipes.EncasedPipeBlock;
@@ -31,6 +32,7 @@ import cn.mlus.thirst.api.ThirstHelper;
 import cn.mlus.thirst.content.purity.ContainerWithPurity;
 import cn.mlus.thirst.content.purity.WaterPurity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -543,12 +545,24 @@ public class CompatManager
             {
                 new Object()
                 {
-                    public void registerDisplayBehaviors()
+                    public void registerThings()
                     {
+                        // Display behaviors
                         ColdSweatDisplayBehaviors.THERMOLITH = AllDisplayBehaviours.register(new ResourceLocation(ColdSweat.MOD_ID, "thermolith"), new ColdSweatDisplayBehaviors.Thermolith());
                         AllDisplayBehaviours.assignBlock(ColdSweatDisplayBehaviors.THERMOLITH, ModBlocks.THERMOLITH);
+                        // Register top/bottom halves of hearth as being connected
+                        BlockMovementChecks.registerAttachedCheck((state, world, pos, direction) ->
+                        {
+                            if (state.getBlock() == ModBlocks.HEARTH_BOTTOM)
+                            {   return BlockMovementChecks.CheckResult.of(direction == Direction.UP);
+                            }
+                            if (state.getBlock() == ModBlocks.HEARTH_TOP)
+                            {   return BlockMovementChecks.CheckResult.of(direction == Direction.DOWN);
+                            }
+                            return BlockMovementChecks.CheckResult.PASS;
+                        });
                     }
-                }.registerDisplayBehaviors();
+                }.registerThings();
             }
         }
 

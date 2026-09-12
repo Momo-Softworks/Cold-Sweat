@@ -61,6 +61,18 @@ public class HearthTopBlock extends SmokestackBlock
     }
 
     @Override
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving)
+    {
+        if (!isMoving && state.getBlock() != newState.getBlock())
+        {
+            if (level.getBlockState(pos.below()).getBlock() == ModBlocks.HEARTH_BOTTOM)
+            {   level.destroyBlock(pos.below(), false);
+            }
+        }
+        super.onRemove(state, level, pos, newState, isMoving);
+    }
+
+    @Override
     public ItemStack getCloneItemStack(BlockGetter getter, BlockPos pos, BlockState state)
     {   return new ItemStack(ItemInit.HEARTH.get());
     }

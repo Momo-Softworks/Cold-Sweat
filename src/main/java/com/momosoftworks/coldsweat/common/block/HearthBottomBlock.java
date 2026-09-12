@@ -179,7 +179,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
     @Override
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving)
     {
-        if (state.getBlock() != newState.getBlock() && !isMoving)
+        if (!isMoving && state.getBlock() != newState.getBlock() && !isMoving)
         {
             BlockEntity tileentity = level.getBlockEntity(pos);
             if (tileentity instanceof HearthBlockEntity)
