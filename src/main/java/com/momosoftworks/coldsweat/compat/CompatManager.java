@@ -12,9 +12,14 @@ import com.momosoftworks.coldsweat.common.capability.handler.ShearableFurManager
 import com.momosoftworks.coldsweat.common.item.ThermometerItem;
 import com.momosoftworks.coldsweat.compat.curios.EquipableCurio;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.core.init.BlockInit;
+import com.momosoftworks.coldsweat.util.registries.ModBlocks;
+import com.momosoftworks.coldsweat.util.registries.ModItems;
+import com.simibubi.create.content.contraptions.components.structureMovement.BlockMovementChecks;
 import com.simibubi.create.content.contraptions.fluids.pipes.EncasedPipeBlock;
 import com.simibubi.create.content.contraptions.fluids.pipes.FluidPipeBlock;
 import com.simibubi.create.content.contraptions.fluids.pipes.GlassFluidPipeBlock;
+import com.simibubi.create.foundation.ponder.PonderRegistry;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -22,6 +27,8 @@ import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Direction;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
@@ -31,6 +38,8 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -430,6 +439,35 @@ public class CompatManager
                     event.addCapability(CuriosCapability.ID_ITEM, CurioItemCapability.createProvider(itemizedCapability));
                 }
             });
+        }
+    }
+
+    @Mod.EventBusSubscriber(modid = ColdSweat.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
+    public static class ModEvents
+    {
+        @SubscribeEvent
+        public static void addThirstDrinks(FMLCommonSetupEvent event)
+        {
+            if (isCreateLoaded())
+            {
+                new Object()
+                {
+                    public void registerThings()
+                    {
+                        // Register top/bottom halves of hearth as being connected
+                        BlockMovementChecks.registerAttachedCheck((state, world, pos, direction) ->
+                        {
+                            if (state.getBlock() == ModBlocks.HEARTH_BOTTOM)
+                            {   return BlockMovementChecks.CheckResult.of(direction == Direction.UP);
+                            }
+                            if (state.getBlock() == ModBlocks.HEARTH_TOP)
+                            {   return BlockMovementChecks.CheckResult.of(direction == Direction.DOWN);
+                            }
+                            return BlockMovementChecks.CheckResult.PASS;
+                        });
+                    }
+                }.registerThings();
+            }
         }
     }
 }
