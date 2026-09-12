@@ -99,9 +99,6 @@ public record ItemRequirement(NegatableList<Either<TagKey<Item>, Item>> items,
         else if (potion.isPresent() && !potion.get().getEffects().equals(PotionUtils.getPotion(stack).getEffects()))
         {   return false;
         }
-        else if (!nbt.test(stack.getTag()))
-        {   return false;
-        }
         else if (!enchantments.isEmpty())
         {
             Map<Enchantment, Integer> stackEnchantments = EnchantmentHelper.deserializeEnchantments(stack.getEnchantmentTags());
