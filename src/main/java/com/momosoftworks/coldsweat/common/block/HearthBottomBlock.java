@@ -184,7 +184,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
     @Override
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving)
     {
-        if (state.getBlock() != newState.getBlock())
+        if (!isMoving && state.getBlock() != newState.getBlock())
         {
             if (level.getBlockState(pos.above()).getBlock() == ModBlocks.HEARTH_TOP.value())
             {   level.destroyBlock(pos.above(), false);

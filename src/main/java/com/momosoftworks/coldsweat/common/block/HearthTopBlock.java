@@ -73,7 +73,7 @@ public class HearthTopBlock extends SmokestackBlock
     @Override
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving)
     {
-        if (state.getBlock() != newState.getBlock())
+        if (!isMoving && state.getBlock() != newState.getBlock())
         {
             if (level.getBlockState(pos.below()).getBlock() == ModBlocks.HEARTH_BOTTOM.value())
             {   level.destroyBlock(pos.below(), false);

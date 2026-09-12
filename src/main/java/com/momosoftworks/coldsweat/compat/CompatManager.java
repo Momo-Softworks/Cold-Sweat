@@ -14,6 +14,7 @@ import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.compat.create.ColdSweatPonderPlugin;
 import com.momosoftworks.coldsweat.compat.curios.EquipableCurio;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.core.init.ModBlocks;
 import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.data.tag.ModInsulatorTags;
@@ -21,6 +22,7 @@ import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.simibubi.create.AllDataComponents;
+import com.simibubi.create.api.contraption.BlockMovementChecks;
 import com.simibubi.create.content.equipment.armor.BacktankItem;
 import com.simibubi.create.content.equipment.armor.BacktankUtil;
 import com.simibubi.create.content.fluids.pipes.EncasedPipeBlock;
@@ -37,6 +39,7 @@ import dev.ryanhcode.sable.sublevel.SubLevel;
 import glitchcore.event.EventManager;
 import net.createmod.ponder.foundation.PonderIndex;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.FormattedText;
@@ -683,7 +686,25 @@ public class CompatManager
     {
         @SubscribeEvent
         public static void setupModEvents(FMLCommonSetupEvent event)
-        {}
+        {
+            if (isCreateLoaded())
+            {
+                event.enqueueWork(() ->
+                {
+                    // Register top/bottom halves of hearth as being connected
+                    BlockMovementChecks.registerAttachedCheck((state, world, pos, direction) ->
+                    {
+                        if (state.getBlock() == ModBlocks.HEARTH_BOTTOM.value())
+                        {   return BlockMovementChecks.CheckResult.of(direction == Direction.UP);
+                        }
+                        if (state.getBlock() == ModBlocks.HEARTH_TOP.value())
+                        {   return BlockMovementChecks.CheckResult.of(direction == Direction.DOWN);
+                        }
+                        return BlockMovementChecks.CheckResult.PASS;
+                    });
+                });
+            }
+        }
 
         @SubscribeEvent
         public static void setupModClientEvents(FMLClientSetupEvent event)
