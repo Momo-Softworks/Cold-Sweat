@@ -13,7 +13,7 @@ import net.minecraft.loot.ConditionArrayParser;
 import net.minecraft.loot.ConditionArraySerializer;
 import net.minecraft.util.ResourceLocation;
 
-public class SoulLampFuelledTrigger extends AbstractCriterionTrigger<SoulLampFuelledTrigger.Instance>
+public class SoulLampFueledTrigger extends AbstractCriterionTrigger<SoulLampFueledTrigger.Instance>
 {
     static final ResourceLocation ID = new ResourceLocation(ColdSweat.MOD_ID, "soulspring_lamp_fuelled");
 

@@ -32,7 +32,7 @@ public class TemperatureChangedTrigger extends AbstractCriterionTrigger<Temperat
         {
             JsonObject entry = element.getAsJsonObject();
 
-            Temperature.Trait trait = Temperature.Trait.fromID(entry.get("type").getAsString());
+            Temperature.Trait trait = Temperature.Trait.fromID(entry.get("trait").getAsString());
 
             TriggerHelper.getTempValueOrRange(entry)
                  .ifLeft(either -> conditions.add(new TriggerHelper.TempCondition(trait, either, either)))

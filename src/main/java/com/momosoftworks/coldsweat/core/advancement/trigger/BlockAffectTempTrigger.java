@@ -30,14 +30,14 @@ public class BlockAffectTempTrigger extends AbstractCriterionTrigger<BlockAffect
 
         List<TriggerHelper.TempCondition> conditions = new ArrayList<>();
 
-        if (json.has("temperature"))
+        if (json.has("player_temperature"))
         {
-            JsonArray tempList = json.get("temperature").getAsJsonArray();
+            JsonArray tempList = json.get("player_temperature").getAsJsonArray();
             for (JsonElement element : tempList)
             {
                 JsonObject entry = element.getAsJsonObject();
 
-                Temperature.Trait trait = Temperature.Trait.fromID(entry.get("type").getAsString());
+                Temperature.Trait trait = Temperature.Trait.fromID(entry.get("trait").getAsString());
                 TriggerHelper.getTempValueOrRange(entry)
                         .ifLeft(either -> conditions.add(new TriggerHelper.TempCondition(trait, either, either)))
                         .ifRight(pair -> conditions.add(new TriggerHelper.TempCondition(trait, pair.getFirst(), pair.getSecond())));
