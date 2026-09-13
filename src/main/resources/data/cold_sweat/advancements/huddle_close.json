@@ -23,7 +23,7 @@
         "blocks": {},
         "temperature": [
           {
-            "type": "world",
+            "trait": "world",
             "range":
             {
               "below": "min_habitable"

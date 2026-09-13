@@ -16,7 +16,7 @@ import java.util.Map;
 
 public class TemperatureChangedTrigger extends SimpleCriterionTrigger<TemperatureChangedTrigger.Instance>
 {
-    static final ResourceLocation ID = new ResourceLocation(ColdSweat.MOD_ID, "temperature");
+    static final ResourceLocation ID = new ResourceLocation(ColdSweat.MOD_ID, "temperature_changed");
 
     @Override
     protected Instance createInstance(JsonObject json, EntityPredicate.Composite player, DeserializationContext context)
