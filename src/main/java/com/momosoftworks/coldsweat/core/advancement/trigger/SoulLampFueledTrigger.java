@@ -11,7 +11,7 @@ import net.minecraft.world.item.ItemStack;
 import java.util.List;
 import java.util.Optional;
 
-public class SoulLampFuelledTrigger extends SimpleCriterionTrigger<SoulLampFuelledTrigger.Instance>
+public class SoulLampFueledTrigger extends SimpleCriterionTrigger<SoulLampFueledTrigger.Instance>
 {
     @Override
     public Codec<Instance> codec()

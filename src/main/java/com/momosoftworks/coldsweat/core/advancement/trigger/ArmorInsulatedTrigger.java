@@ -25,8 +25,8 @@ public class ArmorInsulatedTrigger extends SimpleCriterionTrigger<ArmorInsulated
     {
         public static final Codec<Instance> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             ContextAwarePredicate.CODEC.optionalFieldOf("player").forGetter(Instance::player),
-            ItemPredicate.CODEC.listOf().optionalFieldOf("armor", List.of()).forGetter(Instance::armorPredicates),
-            ItemPredicate.CODEC.listOf().optionalFieldOf("insulated", List.of()).forGetter(Instance::insulatorPredicates)
+            ItemPredicate.CODEC.listOf().optionalFieldOf("armor_item", List.of()).forGetter(Instance::armorPredicates),
+            ItemPredicate.CODEC.listOf().optionalFieldOf("insulation_item", List.of()).forGetter(Instance::insulatorPredicates)
         ).apply(instance, Instance::new));
 
         public boolean matches(ItemStack armorStack, ItemStack insulatorStack)
