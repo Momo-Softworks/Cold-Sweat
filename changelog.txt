@@ -3770,9 +3770,11 @@ Fixes:
 * Fixed the temperature at the world's build limit not being as cold as intended
 * Fixed block temperature not working in Sable (Create: Aeronautics) contraptions in some cases
 * Fixed Create fluid tanks and pipes having unlimited maximum temperature
-- Fixed the hearth's top half being broken when assembling a Create train
+- Fixed the hearth's top half being broken when assembled on a Create train
 - Fixed uncommon crash when loading some armor sets in the creative menu
 - Fixed item requirements not being checked before applying attributes from insulation
+- Fixed icebox with smokestack spawning air particles less frequently than intended
+- Fixed filled waterskins sometimes becoming desynchronized on server/client
 
 Technical Changes:
 - BlockTemp's "maxEffect(), minTemp(), range() etc. fields have been migrated to methods that receive full world, position, and blockstate context"
