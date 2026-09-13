@@ -8,7 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
-public class SoulLampFuelledTrigger extends SimpleCriterionTrigger<SoulLampFuelledTrigger.Instance>
+public class SoulLampFueledTrigger extends SimpleCriterionTrigger<SoulLampFueledTrigger.Instance>
 {
     static final ResourceLocation ID = new ResourceLocation(ColdSweat.MOD_ID, "soulspring_lamp_fuelled");
 
