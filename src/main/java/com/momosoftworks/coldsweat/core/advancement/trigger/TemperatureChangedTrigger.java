@@ -25,7 +25,7 @@ public class TemperatureChangedTrigger extends AbstractCriterionTrigger<Temperat
     @Override
     protected Instance createInstance(JsonObject json, EntityPredicate.AndPredicate player, ConditionArrayParser context)
     {
-        JsonArray tempList = json.get("player_temperature").getAsJsonArray();
+        JsonArray tempList = json.get("temperature").getAsJsonArray();
         List<TriggerHelper.TempCondition> conditions = new ArrayList<>();
 
         for (JsonElement element : tempList)
