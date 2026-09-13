@@ -10,7 +10,7 @@ import net.minecraft.world.item.ItemStack;
 
 public class SoulLampFueledTrigger extends SimpleCriterionTrigger<SoulLampFueledTrigger.Instance>
 {
-    static final ResourceLocation ID = new ResourceLocation(ColdSweat.MOD_ID, "soulspring_lamp_fuelled");
+    static final ResourceLocation ID = new ResourceLocation(ColdSweat.MOD_ID, "soulspring_lamp_fueled");
 
     @Override
     protected Instance createInstance(JsonObject json, ContextAwarePredicate player, DeserializationContext context)
