@@ -15,7 +15,7 @@ import net.minecraft.util.ResourceLocation;
 
 public class SoulLampFueledTrigger extends AbstractCriterionTrigger<SoulLampFueledTrigger.Instance>
 {
-    static final ResourceLocation ID = new ResourceLocation(ColdSweat.MOD_ID, "soulspring_lamp_fuelled");
+    static final ResourceLocation ID = new ResourceLocation(ColdSweat.MOD_ID, "soulspring_lamp_fueled");
 
     @Override
     public Instance createInstance(JsonObject json, EntityPredicate.AndPredicate player, ConditionArrayParser context)

@@ -20,19 +20,21 @@ import java.util.Map;
 
 public class TemperatureChangedTrigger extends AbstractCriterionTrigger<TemperatureChangedTrigger.Instance>
 {
-    static final ResourceLocation ID = new ResourceLocation(ColdSweat.MOD_ID, "temperature");
+    static final ResourceLocation ID = new ResourceLocation(ColdSweat.MOD_ID, "temperature_changed");
 
     @Override
     protected Instance createInstance(JsonObject json, EntityPredicate.AndPredicate player, ConditionArrayParser context)
     {
-        JsonArray tempList = json.get("temperature").getAsJsonArray();
+        JsonArray tempList = json.get("player_temperature").getAsJsonArray();
         List<TriggerHelper.TempCondition> conditions = new ArrayList<>();
 
         for (JsonElement element : tempList)
         {
             JsonObject entry = element.getAsJsonObject();
 
-            Temperature.Trait trait = Temperature.Trait.fromID(entry.get("trait").getAsString());
+            JsonElement traitJson = entry.get("trait");
+            if (traitJson == null) continue;
+            Temperature.Trait trait = Temperature.Trait.fromID(traitJson.getAsString());
 
             TriggerHelper.getTempValueOrRange(entry)
                  .ifLeft(either -> conditions.add(new TriggerHelper.TempCondition(trait, either, either)))
