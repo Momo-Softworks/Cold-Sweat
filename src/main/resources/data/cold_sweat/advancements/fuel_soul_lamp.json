@@ -17,7 +17,7 @@
   },
   "criteria": {
     "requirement": {
-      "trigger": "cold_sweat:soulspring_lamp_fuelled",
+      "trigger": "cold_sweat:soulspring_lamp_fueled",
       "conditions": {}
     }
   }
