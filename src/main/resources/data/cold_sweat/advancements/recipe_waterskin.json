@@ -1,12 +1,11 @@
 {
   "criteria": {
     "temperature": {
-      "trigger": "cold_sweat:temperature",
+      "trigger": "cold_sweat:temperature_changed",
       "conditions": {
-        "temperature":
-        [
+        "temperature": [
           {
-            "type": "core",
+            "trait": "core",
             "range":
             {
               "above": 10,

@@ -18,11 +18,11 @@
   "criteria": {
     "freezing_on_fire":
     {
-      "trigger": "cold_sweat:temperature",
+      "trigger": "cold_sweat:temperature_changed",
       "conditions": {
         "temperature": [
           {
-            "type": "world",
+            "trait": "world",
             "range":
             {
               "below": "min_habitable"
