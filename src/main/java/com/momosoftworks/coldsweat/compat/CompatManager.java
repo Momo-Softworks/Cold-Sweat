@@ -60,7 +60,6 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.loading.FMLLoader;
 import net.neoforged.fml.loading.moddiscovery.ModFileInfo;
-import net.neoforged.neoforge.capabilities.ICapabilityInvalidationListener;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -689,20 +688,26 @@ public class CompatManager
         {
             if (isCreateLoaded())
             {
-                event.enqueueWork(() ->
+                new Object()
                 {
-                    // Register top/bottom halves of hearth as being connected
-                    BlockMovementChecks.registerAttachedCheck((state, world, pos, direction) ->
+                    public void registerAttachedChecks()
                     {
-                        if (state.getBlock() == ModBlocks.HEARTH_BOTTOM.value())
-                        {   return BlockMovementChecks.CheckResult.of(direction == Direction.UP);
-                        }
-                        if (state.getBlock() == ModBlocks.HEARTH_TOP.value())
-                        {   return BlockMovementChecks.CheckResult.of(direction == Direction.DOWN);
-                        }
-                        return BlockMovementChecks.CheckResult.PASS;
-                    });
-                });
+                        event.enqueueWork(() ->
+                        {
+                            // Register top/bottom halves of hearth as being connected
+                            BlockMovementChecks.registerAttachedCheck((state, world, pos, direction) ->
+                            {
+                                if (state.getBlock() == ModBlocks.HEARTH_BOTTOM.value())
+                                {   return BlockMovementChecks.CheckResult.of(direction == Direction.UP);
+                                }
+                                if (state.getBlock() == ModBlocks.HEARTH_TOP.value())
+                                {   return BlockMovementChecks.CheckResult.of(direction == Direction.DOWN);
+                                }
+                                return BlockMovementChecks.CheckResult.PASS;
+                            });
+                        });
+                    }
+                }.registerAttachedChecks();
             }
         }
 
