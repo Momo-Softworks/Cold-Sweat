@@ -3779,3 +3779,10 @@ Fixes:
 Technical Changes:
 - BlockTemp's "maxEffect(), minTemp(), range() etc. fields have been migrated to methods that receive full world, position, and blockstate context"
   - This means that these values can be more intelligently calculated rather than effectively being static
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.4.3.1
+
+Fixes:
+- (1.20 - 1.21) Fixed crash when loading the game without Create installed
