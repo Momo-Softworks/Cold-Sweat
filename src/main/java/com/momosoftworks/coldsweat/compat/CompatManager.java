@@ -385,7 +385,7 @@ public class CompatManager
         public static boolean isInShipyard(Level level, BlockPos pos)
         {   return VSGameUtilsKt.isBlockInShipyard(level, pos);
         }
-        
+
         public static Vec3 translateToShipCoords(Vec3 pos, Ship ship)
         {
             if (ship != null)
@@ -621,20 +621,26 @@ public class CompatManager
         {
             if (isCreateLoaded())
             {
-                event.enqueueWork(() ->
+                new Object()
                 {
-                    // Register top/bottom halves of hearth as being connected
-                    BlockMovementChecks.registerAttachedCheck((state, world, pos, direction) ->
+                    public void registerAttachedChecks()
                     {
-                        if (state.getBlock() == ModBlocks.HEARTH_BOTTOM)
-                        {   return BlockMovementChecks.CheckResult.of(direction == Direction.UP);
-                        }
-                        if (state.getBlock() == ModBlocks.HEARTH_TOP)
-                        {   return BlockMovementChecks.CheckResult.of(direction == Direction.DOWN);
-                        }
-                        return BlockMovementChecks.CheckResult.PASS;
-                    });
-                });
+                        event.enqueueWork(() ->
+                        {
+                            // Register top/bottom halves of hearth as being connected
+                            BlockMovementChecks.registerAttachedCheck((state, world, pos, direction) ->
+                            {
+                                if (state.getBlock() == ModBlocks.HEARTH_BOTTOM)
+                                {   return BlockMovementChecks.CheckResult.of(direction == Direction.UP);
+                                }
+                                if (state.getBlock() == ModBlocks.HEARTH_TOP)
+                                {   return BlockMovementChecks.CheckResult.of(direction == Direction.DOWN);
+                                }
+                                return BlockMovementChecks.CheckResult.PASS;
+                            });
+                        });
+                    }
+                }.registerAttachedChecks();
             }
         }
 
