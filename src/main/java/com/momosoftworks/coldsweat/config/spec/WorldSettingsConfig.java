@@ -168,13 +168,14 @@ public class WorldSettingsConfig
         BIOME_TEMP_OFFSETS = BUILDER
             .comment("─────────────────────────────────────────────────────────────────────────//v",
                      " Applies an offset to the temperature of a biome",
-                     " ├── Format: [[\"biome_id\", lowTemp, highTemp, *units, *waterTemp], [...], etc]",
+                     " ├── Format: [[\"biome_id\", lowTemp, highTemp, *units, *waterTemp, *freezingPoint], [...], etc]",
                      " └── [* = optional]",
                      " • biome_id: The ID of the biome (e.g. \"minecraft:desert\")",
                      " • lowTemp: The temperature offset at midnight",
                      " • highTemp: The temperature offset at noon",
                      " • *units: The units of the temperature (\"f\", \"c\", or \"mc\"). Defaults to Minecraft units (mc))",
-                     " • *waterTemp: Offsets the temperature of water in the biome")
+                     " • *waterTemp: Offsets the temperature of water in the biome",
+                     " • *freezingPoint: Offsets the temperature at which water freezes in the biome")
             .defineListAllowEmpty(Arrays.asList("Biome Temperature Offsets"), () -> Arrays.asList(),
                 it ->
                 {
@@ -183,13 +184,15 @@ public class WorldSettingsConfig
                     return list.get(0) instanceof String
                         && list.get(1) instanceof Number
                         && (list.size() < 3 || list.get(2) instanceof Number)
-                        && (list.size() < 4 || list.get(3) instanceof String);
+                        && (list.size() < 4 || list.get(3) instanceof String)
+                        && (list.size() < 5 || list.get(4) instanceof Number)
+                        && (list.size() < 6 || list.get(5) instanceof Number);
                 });
 
         BIOME_TEMPERATURES = BUILDER
             .comment("─────────────────────────────────────────────────────────────────────────//v",
                      " Defines the temperature of a biome, overriding the biome's default temperature",
-                     " ├── Format: [[\"biome_id\", lowTemp, highTemp, *units, *waterTemp], [...], etc]",
+                     " ├── Format: [[\"biome_id\", lowTemp, highTemp, *units, *waterTemp, *freezingPoint], [...], etc]",
                      " └── [* = optional]",
                      " • biome_id: The ID of the biome (e.g. \"minecraft:desert\")",
                      " • lowTemp: The temperature of the biome at midnight",
@@ -197,8 +200,8 @@ public class WorldSettingsConfig
                      " • *units: The units of the temperature (\"f\", \"c\", or \"mc\"). Defaults to Minecraft units (mc))",
                      " • *waterTemp: The temperature of water in the biome")
             .defineListAllowEmpty(Arrays.asList("Biome Temperatures"), () -> ListBuilder.begin(
-                            Arrays.asList("minecraft:badlands", 84, 120, "F", -5),
-                            Arrays.asList("minecraft:badlands_plateau", 84, 120, "F", -5),
+                            Arrays.asList("minecraft:badlands", 84, 120, "F", 90),
+                            Arrays.asList("minecraft:badlands_plateau", 84, 120, "F", 90),
                             Arrays.asList("minecraft:bamboo_jungle", 76, 87, "F"),
                             Arrays.asList("minecraft:bamboo_jungle_hills", 76, 87, "F"),
                             Arrays.asList("minecraft:beach", 52, 84, "F"),
@@ -214,7 +217,6 @@ public class WorldSettingsConfig
                             Arrays.asList("minecraft:desert", 48, 115, "F"),
                             Arrays.asList("minecraft:desert_hills", 48, 115, "F"),
                             Arrays.asList("minecraft:desert_lakes", 48, 115, "F"),
-                            Arrays.asList("minecraft:eroded_badlands", 88, 120, "F", -5),
                             Arrays.asList("minecraft:flower_forest", 51, 76, "F"),
                             Arrays.asList("minecraft:forest", 51, 76, "F"),
                             Arrays.asList("minecraft:frozen_ocean", 15, 31, "F"),
@@ -229,11 +231,11 @@ public class WorldSettingsConfig
                             Arrays.asList("minecraft:jungle_edge", 76, 89, "F"),
                             Arrays.asList("minecraft:jungle_hills", 76, 89, "F"),
                             Arrays.asList("minecraft:lukewarm_ocean", 39, 70, "F"),
-                            Arrays.asList("minecraft:modified_badlands_plateau", 84, 120, "F", -5),
+                            Arrays.asList("minecraft:modified_badlands_plateau", 84, 120, "F", 90),
                             Arrays.asList("minecraft:modified_gravelly_mountains", 28, 54, "F"),
                             Arrays.asList("minecraft:modified_jungle", 76, 89, "F"),
                             Arrays.asList("minecraft:modified_jungle_edge", 76, 89, "F"),
-                            Arrays.asList("minecraft:modified_wooded_badlands_plateau", 84, 120, "F", -5),
+                            Arrays.asList("minecraft:modified_wooded_badlands_plateau", 84, 120, "F", 90),
                             Arrays.asList("minecraft:mountain_edge", 28, 54, "F"),
                             Arrays.asList("minecraft:mountains", 28, 54, "F"),
                             Arrays.asList("minecraft:mushroom_field_shore", 61, 84, "F"),
@@ -255,22 +257,22 @@ public class WorldSettingsConfig
                             Arrays.asList("minecraft:sparse_jungle", 62, 87, "F"),
                             Arrays.asList("minecraft:stone_shore", 50, 64, "F"),
                             Arrays.asList("minecraft:sunflower_plains", 52, 84, "F"),
-                            Arrays.asList("minecraft:swamp", 72, 84, "F", 5),
-                            Arrays.asList("minecraft:swamp_hills", 72, 84, "F", 5),
+                            Arrays.asList("minecraft:swamp", 72, 84, "F", 78),
+                            Arrays.asList("minecraft:swamp_hills", 72, 84, "F", 78),
                             Arrays.asList("minecraft:taiga", 44, 62, "F"),
                             Arrays.asList("minecraft:taiga_hills", 44, 62, "F"),
                             Arrays.asList("minecraft:taiga_mountains", 44, 62, "F"),
                             Arrays.asList("minecraft:tall_birch_forest", 58, 72, "F"),
                             Arrays.asList("minecraft:tall_birch_hills", 58, 72, "F"),
-                            Arrays.asList("minecraft:warm_ocean", 67, 76, "F", 10),
-                            Arrays.asList("minecraft:wooded_badlands_plateau", 80, 108, "F", -5),
+                            Arrays.asList("minecraft:warm_ocean", 67, 76, "F", 82),
+                            Arrays.asList("minecraft:wooded_badlands_plateau", 80, 108, "F", 90),
                             Arrays.asList("minecraft:wooded_hills", 51, 76, "F"),
                             Arrays.asList("minecraft:wooded_mountains", 51, 76, "F"))
                      .addIf(CompatManager.isBiomesOPlentyLoaded(),
                             () -> Arrays.asList("biomesoplenty:bayou", 67, 78, "F"),
                             () -> Arrays.asList("biomesoplenty:fir_clearing", 56, 68, "F"),
-                            () -> Arrays.asList("biomesoplenty:marsh", 76, 87, "F", 5),
-                            () -> Arrays.asList("biomesoplenty:grassland_clover_patch", 56, 78, "F", -8),
+                            () -> Arrays.asList("biomesoplenty:marsh", 76, 87, "F", 78),
+                            () -> Arrays.asList("biomesoplenty:grassland_clover_patch", 56, 78, "F", 74),
                             () -> Arrays.asList("biomesoplenty:grassland", 56, 78, "F"),
                             () -> Arrays.asList("biomesoplenty:wetland", 63, 74, "F"),
                             () -> Arrays.asList("biomesoplenty:ominous_woods", 65, 72, "F"),
@@ -309,7 +311,7 @@ public class WorldSettingsConfig
                             () -> Arrays.asList("byg:dead_sea", 72, 82, "F"),
                             () -> Arrays.asList("byg:stone_forest", 43, 64, "F"),
                             () -> Arrays.asList("byg:snowy_coniferous_forest", 8, 31, "F", -15),
-                            () -> Arrays.asList("byg:snowy_coniferous_forest_hills", 8, 31, "F", -15),
+                            () -> Arrays.asList("byg:snowy_coniferous_forest_hills", 8, 31, "F", 10),
                             () -> Arrays.asList("byg:maple_taiga", 53, 71, "F"),
                             () -> Arrays.asList("byg:skyris_steeps", 42, 68, "F"),
                             () -> Arrays.asList("byg:skyris_peaks", 42, 68, "F"),
@@ -323,7 +325,7 @@ public class WorldSettingsConfig
                             () -> Arrays.asList("atmospheric:dunes_hills", 78, 115, "F"),
                             () -> Arrays.asList("atmospheric:flourishing_dunes", 68, 105, "F"),
                             () -> Arrays.asList("atmospheric:petrified_dunes", 58, 120, "F"),
-                            () -> Arrays.asList("atmospheric:rocky_dunes", 55, 125, "F", -5),
+                            () -> Arrays.asList("atmospheric:rocky_dunes", 55, 125, "F", 75),
                             () -> Arrays.asList("atmospheric:rainforest", 68, 90, "F"),
                             () -> Arrays.asList("atmospheric:rainforest_mountains", 68, 90, "F"),
                             () -> Arrays.asList("atmospheric:rainforest_plateau", 68, 90, "F"),
@@ -332,7 +334,7 @@ public class WorldSettingsConfig
                             () -> Arrays.asList("atmospheric:sparse_rainforest_plateau", 62, 83, "F"),
                             () -> Arrays.asList("atmospheric:sparse_rainforest_basin", 62, 83, "F"))
                     .addIf(CompatManager.isEnvironmentalLoaded(),
-                            () -> Arrays.asList("environmental:marsh", 60, 80, "F")
+                            () -> Arrays.asList("environmental:marsh", 60, 80, "F", 78)
                     ).build(),
                 it ->
                 {
@@ -344,7 +346,8 @@ public class WorldSettingsConfig
                             || (list.get(1) instanceof Number
                                 && list.get(2) instanceof Number
                                 && (list.size() < 4 || list.get(3) instanceof String)
-                                && (list.size() < 5 || list.get(4) instanceof Number)));
+                                && (list.size() < 5 || list.get(4) instanceof Number)
+                                && (list.size() < 6 || list.get(5) instanceof Number)));
                     }
                     return false;
                 }

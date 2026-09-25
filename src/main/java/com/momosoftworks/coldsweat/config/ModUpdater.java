@@ -1,12 +1,15 @@
 package com.momosoftworks.coldsweat.config;
 
 import com.google.common.io.Files;
+import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.config.spec.ItemSettingsConfig;
 import com.momosoftworks.coldsweat.config.spec.MainSettingsConfig;
 import com.momosoftworks.coldsweat.config.spec.WorldSettingsConfig;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.util.serialization.MapBuilder;
 import net.minecraft.entity.LivingEntity;
 import net.minecraftforge.common.ForgeConfigSpec;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
@@ -16,6 +19,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class ModUpdater
@@ -252,11 +256,80 @@ public class ModUpdater
             });
         }
 
+        /*
+         2.4.1
+         */
         if (isBehind(configVersion, "2.4.1"))
         {
             addConfigSetting(ItemSettingsConfig.ITEM_TEMPERATURES, Arrays.asList("cold_sweat:filled_waterskin",  0.025, "hand,hotbar", "core", "{'Temperature':'0.1:'}", 999, true));
             addConfigSetting(ItemSettingsConfig.ITEM_TEMPERATURES, Arrays.asList("cold_sweat:filled_waterskin", -0.025, "hand,hotbar", "core", "{'Temperature':':-0.1'}", 999, true));
             addConfigSetting(ItemSettingsConfig.FOOD_TEMPERATURES, Arrays.asList("cold_sweat:filled_waterskin", "{item:Temperature}"));
+        }
+
+        /*
+         2.4.4
+         */
+        if (isBehind(configVersion, "2.4.4"))
+        {
+            // New absolute water temperatures for default biome entries
+            Map<String, Pair<Double, Temperature.Units>> defaultWaterTemps = MapBuilder
+                .start("minecraft:badlands", Pair.of(90d, Temperature.Units.F))
+                .put("minecraft:eroded_badlands", Pair.of(90d, Temperature.Units.F))
+                .put("minecraft:wooded_badlands", Pair.of(90d, Temperature.Units.F))
+                .put("minecraft:swamp", Pair.of(78d, Temperature.Units.F))
+                .put("minecraft:warm_ocean", Pair.of(82d, Temperature.Units.F))
+                .put("biomesoplenty:marsh", Pair.of(78d, Temperature.Units.F))
+                .put("biomesoplenty:wetland", Pair.of(74d, Temperature.Units.F))
+                .put("biomesoplenty:hot_springs", Pair.of(85d, Temperature.Units.F))
+                .put("biomeswevegone:bayou", Pair.of(67d, Temperature.Units.F))
+                .put("biomeswevegone:maple_taiga", Pair.of(5d,  Temperature.Units.C))
+                .put("biomeswevegone:red_rock_valley", Pair.of(90d, Temperature.Units.F))
+                .put("biomeswevegone:rugged_badlands", Pair.of(90d, Temperature.Units.F))
+                .put("biomeswevegone:white_mangrove_marshes", Pair.of(78d, Temperature.Units.F))
+                .put("atmospheric:rocky_dunes", Pair.of(75d, Temperature.Units.F))
+                .put("environmental:marsh", Pair.of(78d, Temperature.Units.F))
+                .put("wythers:bayou", Pair.of(14d, Temperature.Units.C))
+                .put("wythers:berry_bog", Pair.of(12d, Temperature.Units.C))
+                .build();
+
+            // Convert biome water temperatures from offsets to absolute values
+            List<List<?>> biomeTemps = new ArrayList<>(WorldSettingsConfig.BIOME_TEMPERATURES.get());
+            for (int i = 0; i < biomeTemps.size(); i++)
+            {
+                List<?> entry = biomeTemps.get(i);
+                if (entry.size() < 5 || !(entry.get(1) instanceof Number) || !(entry.get(2) instanceof Number)
+                || !(entry.get(3) instanceof String) || !(entry.get(4) instanceof Number))
+                {   continue;
+                }
+                Number low = (Number) entry.get(1);
+                Number high = (Number) entry.get(2);
+                String unitsId = (String) entry.get(3);
+                Number waterOffset = (Number) entry.get(4);
+                Temperature.Units units = Temperature.Units.fromID(unitsId);
+
+                List<Object> newEntry = new ArrayList<>(entry);
+                // Use the new default value if this is a default biome entry
+                Pair<Double, Temperature.Units> defaultWaterTemp = defaultWaterTemps.get(entry.get(0));
+                if (defaultWaterTemp != null)
+                {
+                    newEntry.set(4, Temperature.convert(defaultWaterTemp.getFirst(), defaultWaterTemp.getSecond(), units, true));
+                    biomeTemps.set(i, newEntry);
+                    continue;
+                }
+                double lowF = Temperature.convert(low.doubleValue(), units, Temperature.Units.F, true);
+                double highF = Temperature.convert(high.doubleValue(), units, Temperature.Units.F, true);
+                double offsetF = Temperature.convert(waterOffset.doubleValue(), units, Temperature.Units.F, false);
+                double avgF = (lowF + highF) / 2;
+
+                double waterTempF = offsetF > 0
+                                    ? 55 + avgF / 4 + offsetF
+                                    : 20 + avgF * 0.75 + offsetF;
+
+                double converted = Math.round(Temperature.convert(waterTempF, Temperature.Units.F, units, true));
+                newEntry.set(4, converted);
+                biomeTemps.set(i, newEntry);
+            }
+            WorldSettingsConfig.BIOME_TEMPERATURES.set(biomeTemps);
         }
 
         // Update config version
