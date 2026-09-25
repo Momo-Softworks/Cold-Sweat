@@ -26,11 +26,12 @@ public class BiomeTempData extends ConfigData
     final double max;
     final Temperature.Units units;
     final Optional<Double> waterTemp;
+    final Optional<Double> freezingPoint;
     final boolean isOffset;
     final boolean isDisabled;
 
     public BiomeTempData(NegatableList<Either<TagKey<Biome>, OptionalHolder<Biome>>> biomes, double min, double max,
-                         Temperature.Units units, Optional<Double> waterTemp, boolean isOffset, boolean isDisabled, NegatableList<String> requiredMods)
+                         Temperature.Units units, Optional<Double> waterTemp, Optional<Double> freezingPoint, boolean isOffset, boolean isDisabled, NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.biomes = biomes;
@@ -40,16 +41,17 @@ public class BiomeTempData extends ConfigData
         this.isOffset = isOffset;
         this.isDisabled = isDisabled;
         this.waterTemp = waterTemp;
+        this.freezingPoint = freezingPoint;
     }
 
     public BiomeTempData(NegatableList<Either<TagKey<Biome>, OptionalHolder<Biome>>> biomes, double min, double max,
-                         Temperature.Units units, Optional<Double> waterTemp, boolean isOffset, boolean isDisabled)
+                         Temperature.Units units, Optional<Double> waterTemp, Optional<Double> freezingPoint, boolean isOffset, boolean isDisabled)
     {
-        this(biomes, min, max, units, waterTemp, isOffset, isDisabled, new NegatableList<>());
+        this(biomes, min, max, units, waterTemp, freezingPoint, isOffset, isDisabled, new NegatableList<>());
     }
 
-    public BiomeTempData(OptionalHolder<Biome> biome, double min, double max, Temperature.Units units, Optional<Double> waterTemp, boolean isOffset, boolean isDisabled)
-    {   this(new NegatableList<>(Either.right(biome)), min, max, units, waterTemp, isOffset, isDisabled);
+    public BiomeTempData(OptionalHolder<Biome> biome, double min, double max, Temperature.Units units, Optional<Double> waterTemp, Optional<Double> freezingPoint, boolean isOffset, boolean isDisabled)
+    {   this(new NegatableList<>(Either.right(biome)), min, max, units, waterTemp, freezingPoint, isOffset, isDisabled);
     }
 
     public static final Codec<BiomeTempData> CODEC = createCodec(RecordCodecBuilder.mapCodec(instance -> instance.group(
@@ -64,6 +66,7 @@ public class BiomeTempData extends ConfigData
                  .forGetter(BiomeTempData::max),
             Temperature.Units.CODEC.optionalFieldOf("units", Temperature.Units.MC).forGetter(BiomeTempData::units),
             ExtraCodecs.DOUBLE.optionalFieldOf("water_temp").forGetter(BiomeTempData::waterTemp),
+            ExtraCodecs.DOUBLE.optionalFieldOf("freezing_point").forGetter(BiomeTempData::freezingPoint),
             Codec.BOOL.optionalFieldOf("is_offset", false).forGetter(BiomeTempData::isOffset),
             Codec.BOOL.optionalFieldOf("disable", false).forGetter(BiomeTempData::isDisabled)
     ).apply(instance, BiomeTempData::new)));
@@ -83,6 +86,9 @@ public class BiomeTempData extends ConfigData
     public Optional<Double> waterTemp()
     {   return waterTemp;
     }
+    public Optional<Double> freezingPoint()
+    {   return freezingPoint;
+    }
     public boolean isOffset()
     {   return isOffset;
     }
@@ -97,7 +103,10 @@ public class BiomeTempData extends ConfigData
     {   return Temperature.convert(max, units, Temperature.Units.MC, !this.isOffset);
     }
     public Optional<Double> getWaterTemp()
-    {   return waterTemp.map(w -> Temperature.convert(w, units, Temperature.Units.MC, false));
+    {   return waterTemp.map(w -> Temperature.convert(w, units, Temperature.Units.MC, !this.isOffset));
+    }
+    public Optional<Double> getFreezingPoint()
+    {   return freezingPoint.map(f -> Temperature.convert(f, units, Temperature.Units.MC, !this.isOffset));
     }
 
     @Nullable
@@ -114,6 +123,7 @@ public class BiomeTempData extends ConfigData
         double min = 0;
         double max = 0;
         Optional<Double> waterTemp = Optional.empty();
+        Optional<Double> freezingPoint = Optional.empty();
         boolean isDisabled = false;
         // Disabled
         if (entry.get(1) instanceof String string && string.equals("disable"))
@@ -126,8 +136,9 @@ public class BiomeTempData extends ConfigData
             max = ((Number) entry.get(2)).doubleValue();
             if (entry.size() >= 4) units = Temperature.Units.fromID(((String) entry.get(3)).toUpperCase());
             if (entry.size() >= 5) waterTemp = Optional.of(((Number) entry.get(4)).doubleValue());
+            if (entry.size() >= 6) freezingPoint = Optional.of(((Number) entry.get(5)).doubleValue());
         }
-        BiomeTempData result = new BiomeTempData(biomes, min, max, units, waterTemp, isOffset, isDisabled);
+        BiomeTempData result = new BiomeTempData(biomes, min, max, units, waterTemp, freezingPoint, isOffset, isDisabled);
         result.setConfigType(Type.TOML);
         return result;
     }
@@ -148,6 +159,9 @@ public class BiomeTempData extends ConfigData
             && Double.compare(that.min, min) == 0
             && Double.compare(that.max, max) == 0
             && isOffset == that.isOffset
+            && isDisabled == that.isDisabled
+            && waterTemp.equals(that.waterTemp)
+            && freezingPoint.equals(that.freezingPoint)
             && biomes.equals(that.biomes)
             && units == that.units;
     }

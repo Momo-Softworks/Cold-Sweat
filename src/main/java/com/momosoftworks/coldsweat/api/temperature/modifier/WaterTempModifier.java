@@ -36,7 +36,7 @@ public class WaterTempModifier extends TempModifier
     {
         BlockPos entityPos = WorldHelper.sublevelToWorld(entity.level, entity.blockPosition());
         Double[] waterTemps = WorldHelper.getPositionGrid(entityPos, 9, 4).stream()
-                              .map(pos -> WorldHelper.getWaterTemperatureAt(entity.level, pos))
+                              .map(pos -> WorldHelper.getWaterTemperatureDelta(entity.level, pos))
                               .toArray(Double[]::new);
         return CSMath.average(waterTemps);
     }
