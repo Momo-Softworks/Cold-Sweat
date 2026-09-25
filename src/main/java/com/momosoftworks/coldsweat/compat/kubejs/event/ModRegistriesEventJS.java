@@ -189,26 +189,26 @@ public class ModRegistriesEventJS extends StartupEventJS
      Biome Temperature
      */
 
-    public void addBiomeTemperature(double minTemp, double maxTemp, String units, String[] biomes, double waterTemp)
+    public void addBiomeTemperature(double minTemp, double maxTemp, String units, String[] biomes, double waterTemp, double freezingPoint)
     {
         this.addRegistryConfig(Registry.BIOME_REGISTRY, ModRegistries.BIOME_TEMP_DATA, biomes,
-                parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), Optional.of(waterTemp), false, false));
+                parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), Optional.of(waterTemp), Optional.of(freezingPoint), false, false));
     }
     public void addBiomeTemperature(double minTemp, double maxTemp, String units, String... biomes)
     {
         this.addRegistryConfig(Registry.BIOME_REGISTRY, ModRegistries.BIOME_TEMP_DATA, biomes,
-                               parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), Optional.empty(), false, false));
+                               parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), Optional.empty(), Optional.empty(), false, false));
     }
 
-    public void addBiomeOffset(double minTemp, double maxTemp, String units, String[] biomes, double waterTemp)
+    public void addBiomeOffset(double minTemp, double maxTemp, String units, String[] biomes, double waterTemp, double freezingPoint)
     {
         this.addRegistryConfig(Registry.BIOME_REGISTRY, ModRegistries.BIOME_TEMP_DATA, biomes,
-                parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), Optional.of(waterTemp), true, false));
+                parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), Optional.of(waterTemp), Optional.of(freezingPoint), true, false));
     }
     public void addBiomeOffset(double minTemp, double maxTemp, String units, String... biomes)
     {
         this.addRegistryConfig(Registry.BIOME_REGISTRY, ModRegistries.BIOME_TEMP_DATA, biomes,
-                               parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), Optional.empty(), true, false));
+                               parsedBiomes -> new BiomeTempData(parsedBiomes, minTemp, maxTemp, Temperature.Units.fromID(units), Optional.empty(), Optional.empty(), true, false));
     }
 
     /*
