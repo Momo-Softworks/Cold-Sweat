@@ -719,11 +719,11 @@ public abstract class WorldHelper
         return Math.cos(angle);
     }
 
-    public static double getWaterTemperatureAt(Level level, BlockPos pos)
+    public static double getWaterTemperatureDelta(Level level, BlockPos pos)
     {
         pos = sublevelToWorld(level, pos);
         Holder<Biome> biome = level.getBiome(pos);
-        double biomeTemp = CSMath.averagePair(getBiomeTemperatureRange(level, biome));
+        double biomeTemp = getBiomeTemperature(level, biome);
         double defaultWaterTemp = getDefaultWaterTemp(biomeTemp);
         BiomeTempData biomeTempData = ConfigSettings.BIOME_TEMPS.get(level.registryAccess()).get(biome);
         // No config for this biome
@@ -731,18 +731,42 @@ public abstract class WorldHelper
         {   return defaultWaterTemp;
         }
         // Use configured water temp for biome
-        Optional<Double> waterTemp = biomeTempData.getWaterTemp();
+        Optional<Double> waterTempOpt = biomeTempData.getWaterTemp();
+        double waterTemp;
         if (biomeTempData.isOffset())
-        {   return waterTemp.orElse(0d) + defaultWaterTemp;
+        {   waterTemp = waterTempOpt.orElse(0d) + defaultWaterTemp;
         }
-        else return waterTemp.orElse(defaultWaterTemp);
+        else waterTemp = waterTempOpt.orElse(defaultWaterTemp);
+        return waterTemp - biomeTemp;
     }
 
     public static double getDefaultWaterTemp(double biomeTemp)
     {
-        if (biomeTemp > 2) return -0.25;
-        if (biomeTemp < -0.5) return -0.5;
-        return -(Math.pow(biomeTemp - 2, 4) / 156) - 0.25;
+        double offset;
+        if (biomeTemp > 2) offset = -0.25;
+        else if (biomeTemp < -0.5) offset = -0.5;
+        else offset = -(Math.pow(biomeTemp - 2, 4) / 156) - 0.25;
+
+        return biomeTemp + offset;
+    }
+
+    public static double getFreezingPoint(Level level, BlockPos pos)
+    {
+        pos = sublevelToWorld(level, pos);
+        Holder<Biome> biome = level.getBiome(pos);
+        double biomeTemp = CSMath.averagePair(getBiomeTemperatureRange(level, biome));
+        double defaultFreezingPoint = CSMath.blend(0, 0.4, biomeTemp, 1, 0);
+        BiomeTempData biomeTempData = ConfigSettings.BIOME_TEMPS.get(level.registryAccess()).get(biome);
+        // No config for this biome
+        if (biomeTempData == null)
+        {   return defaultFreezingPoint;
+        }
+        // Use configured freezing point for biome
+        Optional<Double> freezingPoint = biomeTempData.getFreezingPoint();
+        if (biomeTempData.isOffset())
+        {   return freezingPoint.orElse(0d) + defaultFreezingPoint;
+        }
+        else return freezingPoint.orElse(defaultFreezingPoint);
     }
 
     /**
@@ -908,13 +932,10 @@ public abstract class WorldHelper
         if (pos.getY() >= levelReader.getMinBuildHeight() && pos.getY() < levelReader.getMaxBuildHeight()
         && levelReader instanceof ServerLevel serverLevel)
         {
-            if (surroundedByBlock(levelReader, pos, Blocks.ICE))
-            {   return true;
-            }
             Lazy<Boolean> freezingTemp = Lazy.of(() ->
-            {   double waterTemp = getWaterTemperatureAt(serverLevel, pos);
-                double temp = getRoughTemperatureAt(serverLevel, pos) + waterTemp;
-                return temp <= 0;
+            {   double temp = getRoughTemperatureAt(serverLevel, pos);
+                double threshold = getFreezingPoint(serverLevel, pos);
+                return temp <= threshold;
             });
 
             if (!mustBeAtEdge)
@@ -933,9 +954,9 @@ public abstract class WorldHelper
             if (mustBeAtEdge && surroundedByBlock(levelReader, pos, Blocks.ICE))
             {   return false;
             }
-            double waterTemp = getWaterTemperatureAt(serverLevel, pos);
-            double temp = getRoughTemperatureAt(serverLevel, pos) + waterTemp;
-            return temp > 0f;
+            double temp = getRoughTemperatureAt(serverLevel, pos);
+            double threshold = getFreezingPoint(serverLevel, pos);
+            return temp > threshold;
         }
         return false;
     }
