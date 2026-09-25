@@ -164,33 +164,37 @@ public class WorldSettingsConfig
         BIOME_TEMP_OFFSETS = BUILDER
             .comment("─────────────────────────────────────────────────────────────────────────//v",
                      " Applies an offset to the temperature of a biome",
-                     " ├── Format: [[\"biome_id\", lowTemp, highTemp, *units, *waterTemp], [...], etc]",
+                     " ├── Format: [[\"biome_id\", lowTemp, highTemp, *units, *waterTemp, *freezingPoint], [...], etc]",
                      " └── [* = optional]",
                      " • biome_id: The ID of the biome (e.g. \"minecraft:desert\")",
                      " • lowTemp: The temperature offset at midnight",
                      " • highTemp: The temperature offset at noon",
                      " • *units: The units of the temperature (\"f\", \"c\", or \"mc\"). Defaults to Minecraft units (mc))",
-                     " • *waterTemp: Offsets the temperature of water in the biome")
+                     " • *waterTemp: Offsets the temperature of water in the biome",
+                     " • *freezingPoint: Offsets the temperature at which water freezes in the biome")
             .defineListAllowEmpty(List.of("Biome Temperature Offsets"), () -> List.of(),
                 it -> it instanceof List<?> list
                       && list.get(0) instanceof String
                       && list.get(1) instanceof Number
                       && (list.size() < 3 || list.get(2) instanceof Number)
                       && (list.size() < 4 || list.get(3) instanceof String)
+                      && (list.size() < 5 || list.get(4) instanceof Number)
+                      && (list.size() < 6 || list.get(5) instanceof Number)
                 );
 
         BIOME_TEMPERATURES = BUILDER
             .comment("─────────────────────────────────────────────────────────────────────────//v",
                      " Defines the temperature of a biome, overriding the biome's default temperature",
-                     " ├── Format: [[\"biome_id\", lowTemp, highTemp, *units, *waterTemp], [...], etc]",
+                     " ├── Format: [[\"biome_id\", lowTemp, highTemp, *units, *waterTemp, *freezingPoint], [...], etc]",
                      " └── [* = optional]",
                      " • biome_id: The ID of the biome (e.g. \"minecraft:desert\")",
                      " • lowTemp: The temperature of the biome at midnight",
                      " • highTemp: The temperature of the biome at noon",
                      " • *units: The units of the temperature (\"f\", \"c\", or \"mc\"). Defaults to Minecraft units (mc))",
-                     " • *waterTemp: The temperature of water in the biome")
+                     " • *waterTemp: The temperature of water in the biome",
+                     " • *freezingPoint: The temperature at which water freezes in the biome")
             .defineListAllowEmpty(List.of("Biome Temperatures"), () -> ListBuilder.begin(
-                            List.of("minecraft:badlands", 84, 120, "F", -5),
+                            List.of("minecraft:badlands", 84, 120, "F", 90),
                             List.of("minecraft:bamboo_jungle", 76, 87, "F"),
                             List.of("minecraft:beach", 52, 84, "F"),
                             List.of("minecraft:birch_forest", 47, 77, "F"),
@@ -204,7 +208,7 @@ public class WorldSettingsConfig
                             List.of("minecraft:deep_ocean", 39, 70, "F"),
                             List.of("minecraft:desert", 48, 115, "F"),
                             List.of("minecraft:dripstone_caves", "disable"),
-                            List.of("minecraft:eroded_badlands", 88, 120, "F", -5),
+                            List.of("minecraft:eroded_badlands", 88, 120, "F", 90),
                             List.of("minecraft:flower_forest", 51, 76, "F"),
                             List.of("minecraft:forest", 51, 76, "F"),
                             List.of("minecraft:frozen_ocean", 15, 31, "F"),
@@ -237,24 +241,24 @@ public class WorldSettingsConfig
                             List.of("minecraft:stony_peaks", 60, 94, "F"),
                             List.of("minecraft:stony_shore", 50, 64, "F"),
                             List.of("minecraft:sunflower_plains", 52, 84, "F"),
-                            List.of("minecraft:swamp", 72, 84, "F", 5),
+                            List.of("minecraft:swamp", 72, 84, "F", 78),
                             List.of("minecraft:taiga", 44, 62, "F"),
-                            List.of("minecraft:warm_ocean", 67, 76, "F", 10),
+                            List.of("minecraft:warm_ocean", 67, 76, "F", 82),
                             List.of("minecraft:windswept_forest", 48, 66, "F"),
                             List.of("minecraft:windswept_gravelly_hills", 24, 58, "F"),
                             List.of("minecraft:windswept_hills", 24, 58, "F"),
                             List.of("minecraft:windswept_savanna", 67, 90, "F"),
-                            List.of("minecraft:wooded_badlands", 80, 108, "F", -5))
+                            List.of("minecraft:wooded_badlands", 80, 108, "F", 90))
                      .addIf(CompatManager.isBiomesOPlentyLoaded(),
                             () -> List.of("biomesoplenty:bog", 41, 58, "F"),
                             () -> List.of("biomesoplenty:cold_desert", 0, 40, "F"),
                             () -> List.of("biomesoplenty:floodplain", 68, 89, "F"),
                             () -> List.of("biomesoplenty:fir_clearing", 49, 68, "F"),
-                            () -> List.of("biomesoplenty:marsh", 70, 84, "F", 5),
+                            () -> List.of("biomesoplenty:marsh", 70, 84, "F", 78),
                             () -> List.of("biomesoplenty:crag", 62, 80, "F"),
-                            () -> List.of("biomesoplenty:wetland", 63, 83, "F", -8),
+                            () -> List.of("biomesoplenty:wetland", 63, 83, "F", 74),
                             () -> List.of("biomesoplenty:field", 58, 85, "F"),
-                            () -> List.of("biomesoplenty:hot_springs", 26, 54, "F", 20),
+                            () -> List.of("biomesoplenty:hot_springs", 26, 54, "F", 85),
                             () -> List.of("biomesoplenty:coniferous_forest", 44, 67, "F"),
                             () -> List.of("biomesoplenty:seasonal_forest", 48, 64, "F"),
                             () -> List.of("biomesoplenty:pumpkin_patch", 48, 64, "F"),
@@ -285,7 +289,6 @@ public class WorldSettingsConfig
                             () -> List.of("biomesoplenty:tundra", 8, 30, "F"),
                             () -> List.of("biomesoplenty:volcanic_plains", 82, 95, "F"),
                             () -> List.of("biomesoplenty:volcano", 94, 120, "F"),
-                            () -> List.of("biomesoplenty:hot_springs", 40, 62, "F", 20),
                             () -> List.of("biomesoplenty:wooded_wasteland", 78, 95, "F"))
                     .addIf(CompatManager.isBiomesWeveGoneLoaded(),
                             () -> List.of("biomeswevegone:allium_shrubland", 58, 74, "F"),
@@ -296,7 +299,7 @@ public class WorldSettingsConfig
                             () -> List.of("biomeswevegone:atacama_outback", 60, 108, "F"),
                             () -> List.of("biomeswevegone:baobab_savanna", 70, 95, "F"),
                             () -> List.of("biomeswevegone:ironwood_gour", 69, 90, "F"),
-                            () -> List.of("biomeswevegone:bayou", 67, 86, "F", -5),
+                            () -> List.of("biomeswevegone:bayou", 67, 86, "F", 67),
                             () -> List.of("biomeswevegone:black_forest", 46, 70, "F"),
                             () -> List.of("biomeswevegone:cika_woods", 40, 67, "F"),
                             () -> List.of("biomeswevegone:canadian_shield", 38, 62, "F"),
@@ -305,7 +308,7 @@ public class WorldSettingsConfig
                             () -> List.of("biomeswevegone:tropical_rainforest", 76, 87, "F"),
                             () -> List.of("biomeswevegone:weeping_witch_forest", 56, 73, "F"),
                             () -> List.of("biomeswevegone:zelkova_forest", 44, 61, "F"),
-                            () -> List.of("biomeswevegone:maple_taiga", 15, 18, "C", -12),
+                            () -> List.of("biomeswevegone:maple_taiga", 15, 18, "C", 5),
                             () -> List.of("biomeswevegone:pumpkin_valley", 57, 78, "F"),
                             () -> List.of("biomeswevegone:coniferous_forest", 44, 58, "F"),
                             () -> List.of("biomeswevegone:frosted_coniferous_forest", 10, 31, "F"),
@@ -323,21 +326,21 @@ public class WorldSettingsConfig
                             () -> List.of("biomeswevegone:howling_peaks", 15, 33, "F"),
                             () -> List.of("biomeswevegone:mojave_desert", 60, 105, "F"),
                             () -> List.of("biomeswevegone:overgrowth_woodlands", 62, 78, "F"),
-                            () -> List.of("biomeswevegone:red_rock_valley", 84, 120, "F", -5),
+                            () -> List.of("biomeswevegone:red_rock_valley", 84, 120, "F", 90),
                             () -> List.of("biomeswevegone:redwood_thicket", 52, 81, "F"),
-                            () -> List.of("biomeswevegone:rugged_badlands", 72, 100, "F", -5),
-                            () -> List.of("biomeswevegone:white_mangrove_marshes", 70, 86, "F", -5))
+                            () -> List.of("biomeswevegone:rugged_badlands", 72, 100, "F", 90),
+                            () -> List.of("biomeswevegone:white_mangrove_marshes", 70, 86, "F", 78))
                     .addIf(CompatManager.isAtmosphericLoaded(),
                             () -> List.of("atmospheric:dunes", 78, 115, "F"),
                             () -> List.of("atmospheric:flourishing_dunes", 68, 105, "F"),
                             () -> List.of("atmospheric:petrified_dunes", 58, 120, "F"),
-                            () -> List.of("atmospheric:rocky_dunes", 55, 125, "F", -5),
+                            () -> List.of("atmospheric:rocky_dunes", 55, 125, "F", 75),
                             () -> List.of("atmospheric:rainforest", 68, 90, "F"),
                             () -> List.of("atmospheric:rainforest_basin", 68, 90, "F"),
                             () -> List.of("atmospheric:sparse_rainforest", 62, 83, "F"),
                             () -> List.of("atmospheric:sparse_rainforest_basin", 62, 83, "F"))
                     .addIf(CompatManager.isEnvironmentalLoaded(),
-                            () -> List.of("environmental:marsh", 60, 80, "F", -5))
+                            () -> List.of("environmental:marsh", 60, 80, "F", 78))
                     .addIf(CompatManager.isTerralithLoaded(),
                             () -> List.of("terralith:moonlight_valley", 57, 76, "F"),
                             () -> List.of("terralith:rocky_mountains", 45, 73, "F"),
@@ -398,8 +401,8 @@ public class WorldSettingsConfig
                             () -> List.of("wythers:bamboo_jungle_highlands", 13, 15, "C"),
                             () -> List.of("wythers:bamboo_jungle_swamp", 12, 15, "C"),
                             () -> List.of("wythers:bamboo_swamp", 12, 15, "C"),
-                            () -> List.of("wythers:bayou", 14, 18, "C", -2),
-                            () -> List.of("wythers:berry_bog", 12, 16, "C", -2),
+                            () -> List.of("wythers:bayou", 14, 18, "C", 14),
+                            () -> List.of("wythers:berry_bog", 12, 16, "C", 12),
                             () -> List.of("wythers:billabong", 12, 16, "C"),
                             () -> List.of("wythers:birch_swamp", 12, 16, "C"),
                             () -> List.of("wythers:birch_taiga", 12, 16, "C"),
@@ -636,7 +639,8 @@ public class WorldSettingsConfig
                       || (list.get(1) instanceof Number
                       && list.get(2) instanceof Number
                       && (list.size() < 4 || list.get(3) instanceof String)
-                      && (list.size() < 5 || list.get(4) instanceof Number)))
+                      && (list.size() < 5 || list.get(4) instanceof Number)
+                      && (list.size() < 6 || list.get(5) instanceof Number)))
                 );
 
         BUILDER.pop();
