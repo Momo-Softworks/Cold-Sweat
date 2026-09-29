@@ -36,6 +36,9 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
 import java.util.Optional;
+import com.momosoftworks.coldsweat.api.event.common.waterskin.WaterskinEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import org.jetbrains.annotations.Nullable;
 
 public class WaterskinItem extends Item
 {
@@ -55,7 +58,7 @@ public class WaterskinItem extends Item
         Player player = context.getPlayer();
 
         if (player == null)
-        {   WorldHelper.dropItem(level, pos, getFilledItem(context.getItemInHand(), level, pos));
+        {   WorldHelper.dropItem(level, pos, getFilledItem(context.getItemInHand(), level, pos, null, null));
             return super.useOn(context);
         }
 
@@ -86,8 +89,8 @@ public class WaterskinItem extends Item
                         {
                             FluidStack drainStack = fluidStack.copy();
                             drainStack.setAmount(FLUID_VALUE_MB);
-                            cap.drain(drainStack, IFluidHandler.FluidAction.EXECUTE);
-                            WaterskinItem.handleFillWaterskin(player, context.getItemInHand(), context.getHand(), pos);
+                            FluidStack drained = cap.drain(drainStack, IFluidHandler.FluidAction.EXECUTE);
+                            WaterskinItem.handleFillWaterskin(player, context.getItemInHand(), context.getHand(), pos, drained.isEmpty() ? drainStack : drained);
                             return;
                         }
                     }
@@ -122,6 +125,10 @@ public class WaterskinItem extends Item
     }
 
     public static ItemStack getFilledItem(ItemStack stack, Level level, BlockPos pos)
+    {   return getFilledItem(stack, level, pos, null, null);
+    }
+
+    public static ItemStack getFilledItem(ItemStack stack, Level level, BlockPos pos, @Nullable Player player, @Nullable FluidStack source)
     {
         ItemStack filledWaterskin = ModItems.FILLED_WATERSKIN.value().getDefaultInstance();
         // copy NBT to new item
@@ -135,13 +142,19 @@ public class WaterskinItem extends Item
         if (CompatManager.isThirstLoaded())
         {   filledWaterskin = CompatManager.Thirst.setPurityFromBlock(filledWaterskin, pos, level);
         }
-        return filledWaterskin;
+        WaterskinEvent.Fill event = new WaterskinEvent.Fill(level, pos, player, source, filledWaterskin);
+        NeoForge.EVENT_BUS.post(event);
+        return event.getFilledWaterskin();
     }
 
     public static void handleFillWaterskin(Player player, ItemStack thisStack, InteractionHand usedHand, BlockPos filledAtPos)
+    {   handleFillWaterskin(player, thisStack, usedHand, filledAtPos, null);
+    }
+
+    public static void handleFillWaterskin(Player player, ItemStack thisStack, InteractionHand usedHand, BlockPos filledAtPos, @Nullable FluidStack source)
     {
         Level level = player.level();
-        ItemStack filledWaterskin = getFilledItem(thisStack, level, filledAtPos);
+        ItemStack filledWaterskin = getFilledItem(thisStack, level, filledAtPos, player, source);
 
         //Replace 1 of the stack with a FilledWaterskinItem
         if (thisStack.getCount() > 1 || player.getAbilities().instabuild)

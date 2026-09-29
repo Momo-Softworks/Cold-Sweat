@@ -57,6 +57,7 @@ import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 import net.neoforged.neoforge.event.tick.LevelTickEvent;
 
 import java.util.*;
+import com.momosoftworks.coldsweat.api.event.common.waterskin.WaterskinEvent;
 
 public class FilledWaterskinItem extends Item
 {
@@ -336,7 +337,9 @@ public class FilledWaterskinItem extends Item
             if (CompatManager.isThirstLoaded())
             {   emptyWaterskin.remove(ThirstComponent.PURITY);
             }
-            return emptyWaterskin;
+            WaterskinEvent.Empty event = new WaterskinEvent.Empty(stack, emptyWaterskin);
+            NeoForge.EVENT_BUS.post(event);
+            return event.getEmptyWaterskin();
         }
         return stack;
     }
