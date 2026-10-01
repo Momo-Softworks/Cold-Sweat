@@ -19,7 +19,7 @@ public class ChameleonChestplateModel extends HumanoidModel<HumanoidRenderState>
 	}
 
 	public static LayerDefinition createArmorLayer() {
-        MeshDefinition meshdefinition = HumanoidModel.createMesh(new CubeDeformation(0f), 1.0F);
+        MeshDefinition meshdefinition = HumanoidModel.createMesh(new CubeDeformation(0f), 0.0F);
         PartDefinition partdefinition = meshdefinition.getRoot();
         float scale = 0.8f;
 
