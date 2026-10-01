@@ -4,7 +4,8 @@
     "ornaments": "cold_sweat:item/soulspring_lamp/soulspring_lamp_ornaments",
     "top": "cold_sweat:item/soulspring_lamp/soulspring_lamp_top",
     "bottom_0": "cold_sweat:item/soulspring_lamp/soulspring_lamp_bottom_0",
-    "bottom_1": "cold_sweat:item/soulspring_lamp/soulspring_lamp_bottom_1"
+    "bottom_1": "cold_sweat:item/soulspring_lamp/soulspring_lamp_bottom_1",
+    "particle": "#ornaments"
   },
   "elements": [
     {
@@ -64,15 +65,6 @@
             16
           ],
           "texture": "#ornaments"
-        },
-        "down": {
-          "uv": [
-            0,
-            0,
-            8,
-            8
-          ],
-          "texture": "#missing"
         }
       }
     },
@@ -167,15 +159,6 @@
           ],
           "texture": "#ornaments"
         },
-        "east": {
-          "uv": [
-            0,
-            0,
-            0,
-            8
-          ],
-          "texture": "#missing"
-        },
         "south": {
           "uv": [
             4,
@@ -184,33 +167,6 @@
             16
           ],
           "texture": "#ornaments"
-        },
-        "west": {
-          "uv": [
-            0,
-            0,
-            0,
-            8
-          ],
-          "texture": "#missing"
-        },
-        "up": {
-          "uv": [
-            0,
-            0,
-            3,
-            0
-          ],
-          "texture": "#missing"
-        },
-        "down": {
-          "uv": [
-            0,
-            0,
-            3,
-            0
-          ],
-          "texture": "#missing"
         }
       }
     },
@@ -227,15 +183,6 @@
         9.5
       ],
       "faces": {
-        "north": {
-          "uv": [
-            0,
-            0,
-            0,
-            8
-          ],
-          "texture": "#missing"
-        },
         "east": {
           "uv": [
             0,
@@ -245,15 +192,6 @@
           ],
           "texture": "#ornaments"
         },
-        "south": {
-          "uv": [
-            0,
-            0,
-            0,
-            8
-          ],
-          "texture": "#missing"
-        },
         "west": {
           "uv": [
             0,
@@ -262,24 +200,6 @@
             16
           ],
           "texture": "#ornaments"
-        },
-        "up": {
-          "uv": [
-            0,
-            0,
-            0,
-            3
-          ],
-          "texture": "#missing"
-        },
-        "down": {
-          "uv": [
-            0,
-            0,
-            0,
-            3
-          ],
-          "texture": "#missing"
         }
       }
     },
@@ -436,15 +356,6 @@
         11.5
       ],
       "faces": {
-        "north": {
-          "uv": [
-            0,
-            0,
-            0,
-            7
-          ],
-          "texture": "#missing"
-        },
         "east": {
           "uv": [
             0,
@@ -454,15 +365,6 @@
           ],
           "texture": "#ornaments"
         },
-        "south": {
-          "uv": [
-            0,
-            0,
-            0,
-            7
-          ],
-          "texture": "#missing"
-        },
         "west": {
           "uv": [
             0,
@@ -471,24 +373,6 @@
             7
           ],
           "texture": "#ornaments"
-        },
-        "up": {
-          "uv": [
-            0,
-            0,
-            0,
-            7
-          ],
-          "texture": "#missing"
-        },
-        "down": {
-          "uv": [
-            0,
-            0,
-            0,
-            7
-          ],
-          "texture": "#missing"
         }
       }
     },
