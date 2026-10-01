@@ -158,7 +158,7 @@ public class Overlays
                 {
                     // render new icon over old icon
                     double blend = CSMath.blend(1, 9, Math.abs(BODY_TEMP_SEVERITY), Math.abs(CSMath.floor(BODY_TEMP_SEVERITY)), Math.abs(CSMath.ceil(BODY_TEMP_SEVERITY)));
-                    graphics.blit(BODY_TEMP_GAUGE_LOCATION.get(),
+                    graphics.blit(RenderPipelines.GUI_TEXTURED, BODY_TEMP_GAUGE_LOCATION.get(),
                                   iconX, iconY + 10 - CSMath.ceil(blend), 0,
                                   // UV Y-coordinate for the icon in this stage
                                   40 - CSMath.grow(icon, bodyTempInt > 0 ? 0 : 2) * 10 - CSMath.ceil(blend),
