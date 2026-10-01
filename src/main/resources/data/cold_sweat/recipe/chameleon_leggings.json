@@ -1,20 +1,14 @@
 {
   "type": "minecraft:crafting_shaped",
-  "pattern":
-  [
+  "pattern": [
     "MMM",
     "M M",
     "M M"
   ],
-  "key":
-  {
-    "M":
-    {
-      "tag": "c:scales/chameleon"
-    }
+  "key": {
+    "M": "#c:scales/chameleon"
   },
-  "result":
-  {
+  "result": {
     "id": "cold_sweat:chameleon_leggings",
     "count": 1
   }

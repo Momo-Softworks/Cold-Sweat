@@ -1,7 +1,7 @@
 package com.momosoftworks.coldsweat.data.tag;
 
 import com.momosoftworks.coldsweat.ColdSweat;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
@@ -21,10 +21,10 @@ public class ModBlockTags
     public static final TagKey<Block> SOUL_FIRE = createCommonTag("soul_fire");
 
     private static TagKey<Block> createTag(String name)
-    {   return BlockTags.create(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, name));
+    {   return BlockTags.create(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, name));
     }
 
     private static TagKey<Block> createCommonTag(String name)
-    {   return BlockTags.create(ResourceLocation.fromNamespaceAndPath("c", name));
+    {   return BlockTags.create(Identifier.fromNamespaceAndPath("c", name));
     }
 }

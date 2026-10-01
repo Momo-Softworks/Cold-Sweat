@@ -5,10 +5,10 @@
       "id": "minecraft:lava_bucket"
     },
     "title": {
-        "translate": "advancements.cold_sweat.lava_sea.title"
+      "translate": "advancements.cold_sweat.lava_sea.title"
     },
     "description": {
-        "translate": "advancements.cold_sweat.lava_sea.description"
+      "translate": "advancements.cold_sweat.lava_sea.description"
     },
     "frame": "challenge",
     "show_toast": true,
@@ -24,7 +24,7 @@
             "condition": "minecraft:entity_properties",
             "entity": "this",
             "predicate": {
-              "location": {
+              "minecraft:location": {
                 "dimension": "minecraft:the_nether"
               }
             }

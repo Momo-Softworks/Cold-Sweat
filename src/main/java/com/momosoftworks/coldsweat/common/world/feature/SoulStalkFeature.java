@@ -11,7 +11,7 @@ import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.levelgen.blockpredicates.BlockPredicate;
 import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.stateproviders.RuleBasedBlockStateProvider;
+import net.minecraft.world.level.levelgen.feature.stateproviders.RuleBasedStateProvider;
 
 import java.util.Random;
 
@@ -40,8 +40,8 @@ public class SoulStalkFeature extends Feature<SoulStalkFeatureConfig>
                                            context.random().nextInt(config.spreadXZ()) - config.spreadXZ() / 2);
             // Get ground level
             int startY = pos.getY();
-            int minHeight = level.getMinBuildHeight();
-            int maxHeight = level.getMaxBuildHeight();
+            int minHeight = level.getMinY();
+            int maxHeight = (level.getMaxY() + 1);
             for (int i = -10; i < 10; i++)
             {   pos.setY(startY + i);
                 if (pos.getY() < minHeight) continue;
@@ -83,7 +83,7 @@ public class SoulStalkFeature extends Feature<SoulStalkFeatureConfig>
         int diskWidth = config.diskWidth();
         int diskHeight = config.diskHeight();
         double diskDecay = config.diskDecay();
-        RuleBasedBlockStateProvider diskProvider = config.diskStateProvider();
+        RuleBasedStateProvider diskProvider = config.diskStateProvider();
         BlockPredicate diskReplacer = config.replaceBlocks();
 
         if (diskWidth <= 0 || diskHeight <= 0 || diskProvider == null || diskReplacer == null)

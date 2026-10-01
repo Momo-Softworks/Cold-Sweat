@@ -1,24 +1,15 @@
 {
   "type": "minecraft:crafting_shaped",
-  "pattern":
-  [
+  "pattern": [
     "   ",
     " I ",
     " M "
   ],
-  "key":
-  {
-    "I":
-    {
-      "item": "cold_sweat:minecart_insulation"
-    },
-    "M":
-    {
-      "item": "minecraft:minecart"
-    }
+  "key": {
+    "I": "cold_sweat:minecart_insulation",
+    "M": "minecraft:minecart"
   },
-  "result":
-  {
+  "result": {
     "id": "cold_sweat:insulated_minecart",
     "count": 1
   }

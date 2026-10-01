@@ -12,14 +12,14 @@ public class ModBlocks
 {
     public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks(ColdSweat.MOD_ID);
 
-    public static final DeferredBlock<Block> BOILER = BLOCKS.register("boiler", () -> new BoilerBlock(BoilerBlock.getProperties()));
-    public static final DeferredBlock<Block> ICEBOX = BLOCKS.register("icebox", () -> new IceboxBlock(IceboxBlock.getProperties()));
-    public static final DeferredBlock<Block> SEWING_TABLE = BLOCKS.register("sewing_table", () -> new SewingTableBlock(SewingTableBlock.getProperties()));
-    public static final DeferredBlock<Block> MINECART_INSULATION = BLOCKS.register("minecart_insulation", () -> new MinecartInsulationBlock(MinecartInsulationBlock.getProperties()));
-    public static final DeferredBlock<Block> HEARTH_BOTTOM = BLOCKS.register("hearth_bottom", () -> new HearthBottomBlock(HearthBottomBlock.getProperties()));
-    public static final DeferredBlock<Block> HEARTH_TOP = BLOCKS.register("hearth_top", () -> new HearthTopBlock(HearthTopBlock.getProperties()));
-    public static final DeferredBlock<Block> THERMOLITH = BLOCKS.register("thermolith", () -> new ThermolithBlock(ThermolithBlock.getProperties()));
-    public static final DeferredBlock<Block> SOUL_STALK = BLOCKS.register("soul_stalk", () -> new SoulStalkBlock(SoulStalkBlock.getProperties()));
-    public static final DeferredBlock<Block> SMOKESTACK = BLOCKS.register("smokestack", () -> new SmokestackBlock(SmokestackBlock.getProperties()));
-    public static final DeferredBlock<LiquidBlock> SLUSH = BLOCKS.register("slush", () -> new SlushLiquidBlock(ModFluids.SLUSH, SlushFluid.getBlockProperties()));
+    public static final DeferredBlock<Block> BOILER = BLOCKS.registerBlock("boiler", BoilerBlock::new, BoilerBlock::getProperties);
+    public static final DeferredBlock<Block> ICEBOX = BLOCKS.registerBlock("icebox", IceboxBlock::new, IceboxBlock::getProperties);
+    public static final DeferredBlock<Block> SEWING_TABLE = BLOCKS.registerBlock("sewing_table", SewingTableBlock::new, SewingTableBlock::getProperties);
+    public static final DeferredBlock<Block> MINECART_INSULATION = BLOCKS.registerBlock("minecart_insulation", MinecartInsulationBlock::new, MinecartInsulationBlock::getProperties);
+    public static final DeferredBlock<Block> HEARTH_BOTTOM = BLOCKS.registerBlock("hearth_bottom", HearthBottomBlock::new, HearthBottomBlock::getProperties);
+    public static final DeferredBlock<Block> HEARTH_TOP = BLOCKS.registerBlock("hearth_top", HearthTopBlock::new, HearthTopBlock::getProperties);
+    public static final DeferredBlock<Block> THERMOLITH = BLOCKS.registerBlock("thermolith", ThermolithBlock::new, ThermolithBlock::getProperties);
+    public static final DeferredBlock<Block> SOUL_STALK = BLOCKS.registerBlock("soul_stalk", SoulStalkBlock::new, SoulStalkBlock::getProperties);
+    public static final DeferredBlock<Block> SMOKESTACK = BLOCKS.registerBlock("smokestack", SmokestackBlock::new, SmokestackBlock::getProperties);
+    public static final DeferredBlock<LiquidBlock> SLUSH = BLOCKS.registerBlock("slush", props -> new SlushLiquidBlock(ModFluids.SLUSH, props), SlushFluid::getBlockProperties);
 }

@@ -6,6 +6,7 @@ import com.momosoftworks.coldsweat.core.init.ModBiomeModifiers;
 import com.momosoftworks.coldsweat.data.codec.util.FunctionalSpawnerData;
 import com.momosoftworks.coldsweat.data.codec.configuration.SpawnBiomeData;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
+import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.MobCategory;
@@ -29,13 +30,13 @@ public record AddSpawnsBiomeModifier(boolean useConfigs) implements BiomeModifie
                 RegistryHelper.mapBuiltinRegistryTagList(BuiltInRegistries.ENTITY_TYPE, spawn.entities())
                 .forEach(entityType ->
                 {
-                    FunctionalSpawnerData spawnerData = new FunctionalSpawnerData(entityType, spawn.weight(), spawn.count().min(), spawn.count().max(),
+                    MobSpawnSettings.SpawnerData spawnerData = FunctionalSpawnerData.create(entityType, spawn.count().min(), spawn.count().max(),
                                                                                  (level, structureManager, chunkGenerator, category, data, pos) ->
                                                                                  {
                                                                                      return spawn.location().test(req -> req.test(level, pos));
                                                                                  });
-                    builder.getMobSpawnSettings().getSpawner(MobCategory.CREATURE).removeIf(oldData -> oldData.type == entityType);
-                    builder.getMobSpawnSettings().addSpawn(MobCategory.CREATURE, spawnerData);
+                    builder.getMobSpawnSettings().getSpawner(MobCategory.CREATURE).removeIf(oldData -> oldData.value().type() == entityType);
+                    builder.getMobSpawnSettings().addSpawn(MobCategory.CREATURE, spawn.weight(), spawnerData);
                 });
             }
         }

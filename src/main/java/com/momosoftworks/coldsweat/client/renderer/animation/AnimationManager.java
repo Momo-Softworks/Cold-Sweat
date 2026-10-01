@@ -19,8 +19,8 @@ public class AnimationManager
     static Field CHILDREN_FIELD = null;
 
     public static Map<Entity, Float> ANIMATION_TIMERS = new ConcurrentHashMap<>();
-    static HashMap<EntityType<?>, Map<String, PartPose>> DEFAULT_POSES = new HashMap<>();
-    static Map<Entity, Map<String, PartPose>> ANIMATION_STATES = new ConcurrentHashMap<>();
+    static Map<Object, Map<String, PartPose>> DEFAULT_POSES = new ConcurrentHashMap<>();
+    static Map<Entity, Map<Object, Map<String, PartPose>>> ANIMATION_STATES = new ConcurrentHashMap<>();
 
     static
     {
@@ -45,14 +45,17 @@ public class AnimationManager
         return Map.of();
     }
 
-    public static void storeDefaultPoses(EntityType type, Map<String, ModelPart> parts)
+    /**
+     * @param modelKey The model the poses belong to (adult and baby models have different default poses)
+     */
+    public static void storeDefaultPoses(Object modelKey, Map<String, ModelPart> parts)
     {
-        DEFAULT_POSES.put(type, parts.entrySet().stream().map(partEntry -> Map.entry(partEntry.getKey(), partEntry.getValue().storePose())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+        DEFAULT_POSES.put(modelKey, parts.entrySet().stream().map(partEntry -> Map.entry(partEntry.getKey(), partEntry.getValue().storePose())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
     }
 
-    static Map<String, PartPose> loadDefaultPoses(EntityType type, Map<String, ModelPart> parts)
+    static Map<String, PartPose> loadDefaultPoses(Object modelKey, Map<String, ModelPart> parts)
     {
-        Map<String, PartPose> defaultPoses = DEFAULT_POSES.get(type);
+        Map<String, PartPose> defaultPoses = DEFAULT_POSES.get(modelKey);
         if (defaultPoses != null)
         {
             defaultPoses.forEach((name, pose) -> parts.get(name).loadPose(pose));
@@ -60,14 +63,16 @@ public class AnimationManager
         return defaultPoses;
     }
 
-    public static void saveAnimationStates(Entity entity, Map<String, ModelPart> parts)
+    public static void saveAnimationStates(Entity entity, Object modelKey, Map<String, ModelPart> parts)
     {
-        ANIMATION_STATES.put(entity, parts.entrySet().stream().map(partEntry -> Map.entry(partEntry.getKey(), partEntry.getValue().storePose())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+        ANIMATION_STATES.computeIfAbsent(entity, e -> new ConcurrentHashMap<>()).put(modelKey, parts.entrySet().stream().map(partEntry -> Map.entry(partEntry.getKey(), partEntry.getValue().storePose())).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
     }
 
-    public static void loadAnimationStates(Entity entity, Map<String, ModelPart> parts)
+    public static void loadAnimationStates(Entity entity, Object modelKey, Map<String, ModelPart> parts)
     {
-        Map<String, PartPose> animationStates = ANIMATION_STATES.computeIfAbsent(entity, ent -> loadDefaultPoses(entity.getType(), parts));
+        Map<String, PartPose> animationStates = ANIMATION_STATES.computeIfAbsent(entity, e -> new ConcurrentHashMap<>()).get(modelKey);
+        if (animationStates == null) animationStates = loadDefaultPoses(modelKey, parts);
+        if (animationStates == null) return;
         animationStates.forEach((name, state) ->
         {
             ModelPart part = parts.get(name);
@@ -81,6 +86,6 @@ public class AnimationManager
     public static void animateEntity(Entity entity, BiFunction<Float, Float, Float> animator)
     {
         float timer = ANIMATION_TIMERS.computeIfAbsent(entity, ent -> 0f);
-        ANIMATION_TIMERS.put(entity, animator.apply(timer, Minecraft.getInstance().getTimer().getGameTimeDeltaTicks() / 20));
+        ANIMATION_TIMERS.put(entity, animator.apply(timer, Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaTicks() / 20));
     }
 }

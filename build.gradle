@@ -2,17 +2,36 @@ plugins {
     id 'java-library'
     id 'idea'
     id 'maven-publish'
-    id 'net.neoforged.moddev' version '2.0.107'
+    id 'net.neoforged.moddev' version '2.0.148'
 }
 
 version = mod_version
 group = mod_group_id
 
+base {
+    archivesName = mod_name
+}
+
 java {
-    archivesBaseName = mod_name
-    toolchain.languageVersion = JavaLanguageVersion.of(21)
+    toolchain.languageVersion = JavaLanguageVersion.of(25)
     withSourcesJar()
 }
+
+// Compat integrations whose target mods have no 26.2 release yet.
+// Remove an entry once the mod is updated and its code has been ported.
+def compatExcluded = [
+        'com/momosoftworks/coldsweat/compat/create/**',
+        'com/momosoftworks/coldsweat/compat/kubejs/**',
+        'com/momosoftworks/coldsweat/compat/jei/**',
+        'com/momosoftworks/coldsweat/compat/curios/**',
+        'com/momosoftworks/coldsweat/mixin/compat/**',
+        'com/momosoftworks/coldsweat/api/spread_rule/compat/CreatePipeSpreadRule.java',
+        'com/momosoftworks/coldsweat/api/temperature/block_temp/compat/CreateFluidPipeTemp.java',
+        'com/momosoftworks/coldsweat/api/temperature/block_temp/compat/CreateFluidTankTemp.java',
+        'com/momosoftworks/coldsweat/api/temperature/modifier/compat/SereneSeasonsTempModifier.java',
+        'com/momosoftworks/coldsweat/api/temperature/modifier/compat/StormTempModifier.java',
+]
+sourceSets.main.java { compatExcluded.each { exclude it } }
 
 neoForge {
     version = project.neo_version
@@ -32,6 +51,8 @@ neoForge {
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
         configureEach {
+            // Keep 26.2 dev worlds/configs separate from the 1.21 ones in run/
+            gameDirectory = project.file('run-26.2')
             systemProperty 'forge.logging.markers', 'REGISTRIES'
             logLevel = org.slf4j.event.Level.DEBUG
         }
@@ -120,48 +141,6 @@ repositories {
 }
 
 dependencies {
-    compileOnly "curse.maven:tough-as-nails-246391:5833252"
-
-    // Compat Mods
-    implementation "maven.modrinth:thirst-was-reclaimed:1.21.1-3.0.1-b"
-    implementation "curse.maven:serene-seasons-291874:6182596"
-    implementation "curse.maven:glitchcore-955399:5660740"
-    implementation "curse.maven:spoiled-364918:6918103"
-    implementation "curse.maven:curios-309927:6529130"
-    implementation "curse.maven:iceberg-520110:6423863"
-    compileOnly "curse.maven:primal-winter-393321:5811975"
-    compileOnly "curse.maven:weather-storms-tornadoes-237746:6926103"
-    implementation "curse.maven:coroutil-237749:5622966"
-    implementation "curse.maven:immersive-engineering-231951:6733669"
-
-    // Sable (Compat)
-    implementation "maven.modrinth:sable:1.0.6+mc1.21.1"
-    implementation "maven.modrinth:create-aeronautics:1.0.3+mc1.21.1"
-    jarJar(api("dev.ryanhcode.sable-companion:sable-companion-common-${project.minecraft_version}:[${project.sable_companion_version},)")) {
-        version {
-            prefer project.sable_companion_version
-        }
-    }
-
-    // Create (Compat)
-    implementation "curse.maven:create-328085:7408951"
-    compileOnly("net.createmod.ponder:Ponder-NeoForge-1.21.1:1.0.39")
-    compileOnly "com.tterrag.registrate:Registrate:MC1.21-1.3.0+67"
-
-    // KubeJS (Compat)
-    implementation "dev.latvian.mods:kubejs-neoforge:${kubejs_version}"
-    implementation "dev.latvian.apps:tiny-java-server:${tiny_server_version}"
-    implementation "com.github.rtyley:animated-gif-lib-for-java:animated-gif-lib-1.7"
-
-    // JEI (Compat)
-    implementation "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
-
-    // Runtime mods
-    runtimeOnly "curse.maven:boatload-337396:7118750"
-    runtimeOnly "curse.maven:blueprint-382216:7148094"
-    runtimeOnly "curse.maven:spark-361579:6225208"
-    runtimeOnly "curse.maven:biomes-o-plenty-220318:7251965"
-    runtimeOnly "curse.maven:terrablender-neoforge-940057:6054947"
 }
 
 tasks.withType(ProcessResources).configureEach {
@@ -170,7 +149,6 @@ tasks.withType(ProcessResources).configureEach {
             minecraft_version_range: minecraft_version_range,
             neo_version            : neo_version,
             neo_version_range      : neo_version_range,
-            loader_version_range   : loader_version_range,
             mod_id                 : mod_id,
             mod_name               : mod_name,
             mod_license            : mod_license,
@@ -183,6 +161,11 @@ tasks.withType(ProcessResources).configureEach {
     filesMatching(['META-INF/neoforge.mods.toml']) {
         expand replaceProperties
     }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << '-Xmaxerrs' << '100000'
 }
 
 publishing {

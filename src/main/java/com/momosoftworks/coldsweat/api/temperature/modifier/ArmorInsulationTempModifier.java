@@ -22,8 +22,8 @@ public class ArmorInsulationTempModifier extends TempModifier
     @Override
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
-        double cold = this.getNBT().getDouble("cold");
-        double hot = this.getNBT().getDouble("hot");
+        double cold = this.getNBT().getDoubleOr("cold", 0);
+        double hot = this.getNBT().getDoubleOr("hot", 0);
         double insulationStrength = ConfigSettings.INSULATION_STRENGTH.get();
 
         return temp ->

@@ -7,9 +7,10 @@ import com.momosoftworks.coldsweat.common.capability.temperature.ITemperatureCap
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ModTempEffects;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.gamerules.GameRule;
 import net.minecraft.world.food.FoodData;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -22,18 +23,18 @@ import java.util.Map;
 @Mixin(FoodData.class)
 public class MixinLimitFoodRegen
 {
-    private static Player STORED_PLAYER;
+    private static ServerPlayer STORED_PLAYER;
 
     @Inject(method = "tick", at = @At("HEAD"))
-    private void storePlayer(Player player, CallbackInfo ci)
+    private void storePlayer(ServerPlayer player, CallbackInfo ci)
     {   STORED_PLAYER = player;
     }
 
-    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/GameRules;getBoolean(Lnet/minecraft/world/level/GameRules$Key;)Z"))
-    private boolean limitRegenIfFreezing(GameRules gameRules, GameRules.Key<GameRules.BooleanValue> key)
+    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/gamerules/GameRules;get(Lnet/minecraft/world/level/gamerules/GameRule;)Ljava/lang/Object;"))
+    private Object limitRegenIfFreezing(GameRules gameRules, GameRule<?> key)
     {
         checkFrozenHealth:
-        if (key == GameRules.RULE_NATURAL_REGENERATION)
+        if (key == GameRules.NATURAL_HEALTH_REGENERATION)
         {
             Map<TempEffectType<?>, TempEffect> tempEffects = EntityTempManager.getTemperatureCap(STORED_PLAYER).map(ITemperatureCap::getTempEffects).orElse(new HashMap<>());
             TempEffect freezeHealingEffect = tempEffects.get(ModTempEffects.FREEZE_HEALING.get());
@@ -55,6 +56,6 @@ public class MixinLimitFoodRegen
                 }
             }
         }
-        return gameRules.getBoolean(key);
+        return gameRules.get(key);
     }
 }

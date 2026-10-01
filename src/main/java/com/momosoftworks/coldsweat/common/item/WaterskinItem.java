@@ -1,5 +1,9 @@
 package com.momosoftworks.coldsweat.common.item;
 
+import net.minecraft.world.entity.LivingEntity;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.ResourceHandler;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ModItemComponents;
 import com.momosoftworks.coldsweat.core.init.ModItems;
@@ -15,7 +19,6 @@ import net.minecraft.stats.Stats;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -33,7 +36,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
 import java.util.Optional;
 
@@ -41,9 +43,14 @@ public class WaterskinItem extends Item
 {
     public static final int FLUID_VALUE_MB = 250;
 
-    public WaterskinItem()
+    public static Properties getDefaultProperties()
     {
-        super(new Properties().stacksTo(16));
+        return new Properties().stacksTo(16);
+    }
+
+    public WaterskinItem(Properties properties)
+    {
+        super(properties);
     }
 
     @Override
@@ -77,38 +84,42 @@ public class WaterskinItem extends Item
             BlockEntity blockEntity = level.getBlockEntity(pos);
             if (blockEntity != null)
             {
-                Optional.ofNullable(level.getCapability(Capabilities.FluidHandler.BLOCK, pos, context.getClickedFace())).ifPresent(cap ->
+                ResourceHandler<FluidResource> cap = level.getCapability(Capabilities.Fluid.BLOCK, pos, context.getClickedFace());
+                if (cap != null)
                 {
-                    for (int i = 0; i < cap.getTanks(); i++)
+                    for (int i = 0; i < cap.size(); i++)
                     {
-                        FluidStack fluidStack = cap.getFluidInTank(i);
-                        if (fluidStack.getFluid().is(FluidTags.WATER) && fluidStack.getAmount() >= FLUID_VALUE_MB)
+                        FluidResource resource = cap.getResource(i);
+                        if (!resource.isEmpty() && resource.getFluid().is(FluidTags.WATER) && cap.getAmountAsLong(i) >= FLUID_VALUE_MB)
                         {
-                            FluidStack drainStack = fluidStack.copy();
-                            drainStack.setAmount(FLUID_VALUE_MB);
-                            cap.drain(drainStack, IFluidHandler.FluidAction.EXECUTE);
-                            WaterskinItem.handleFillWaterskin(player, context.getItemInHand(), context.getHand(), pos);
-                            return;
+                            try (Transaction transaction = Transaction.openRoot())
+                            {
+                                if (cap.extract(i, resource, FLUID_VALUE_MB, transaction) == FLUID_VALUE_MB)
+                                {
+                                    transaction.commit();
+                                    WaterskinItem.handleFillWaterskin(player, context.getItemInHand(), context.getHand(), pos);
+                                    break;
+                                }
+                            }
                         }
                     }
-                });
+                }
             }
         }
         return super.useOn(context);
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand)
+    public InteractionResult use(Level level, Player player, InteractionHand hand)
     {
-        InteractionResultHolder<ItemStack> ar = super.use(level, player, hand);
-        ItemStack itemstack = ar.getObject();
+        ItemStack itemstack = player.getItemInHand(hand);
 
         BlockHitResult blockhitresult = getPlayerPOVHitResult(level, player, ClipContext.Fluid.SOURCE_ONLY);
         BlockPos hitPos = blockhitresult.getBlockPos();
         BlockState lookingAt = level.getBlockState(hitPos);
 
         if (blockhitresult.getType() != HitResult.Type.BLOCK)
-        {   return InteractionResultHolder.pass(itemstack);
+        {   return InteractionResult.PASS;
         }
         else
         {
@@ -117,7 +128,7 @@ public class WaterskinItem extends Item
                 WaterskinItem.handleFillWaterskin(player, itemstack, hand, hitPos);
                 WorldHelper.spawnParticleBatch(level, ParticleTypes.SPLASH, hitPos.getX() + 0.5, hitPos.getY() + 1, hitPos.getZ() + 0.5, 0.5, 0.5, 0.5, 10, 0);
             }
-            return ar;
+            return super.use(level, player, hand);
         }
     }
 
@@ -160,13 +171,13 @@ public class WaterskinItem extends Item
         {   player.setItemInHand(usedHand, filledWaterskin);
         }
         player.swing(usedHand);
-        player.getCooldowns().addCooldown(ModItems.FILLED_WATERSKIN.value(), 10);
+        player.getCooldowns().addCooldown(ModItems.FILLED_WATERSKIN.toStack(), 10);
         player.awardStat(Stats.ITEM_USED.get(thisStack.getItem()));
         WorldHelper.playEntitySound(ModSounds.WATERSKIN_FILL.value(), player, SoundSource.PLAYERS, 2f, (float) Math.random() / 5 + 0.9f);
     }
 
     @Override
-    public boolean canAttackBlock(BlockState pState, Level pLevel, BlockPos pPos, Player pPlayer)
+    public boolean canDestroyBlock(ItemStack stack, BlockState state, Level level, BlockPos pos, LivingEntity user)
     {   return true;
     }
 

@@ -1,19 +1,19 @@
 package com.momosoftworks.coldsweat.client.gui;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.client.renderer.RenderPipelines;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import com.momosoftworks.coldsweat.common.container.HearthContainer;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 
 public class HearthScreen extends AbstractHearthScreen<HearthContainer>
 {
-    private static final ResourceLocation HEARTH_GUI = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/screen/hearth_gui.png");
+    private static final Identifier HEARTH_GUI = Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/screen/hearth_gui.png");
 
     @Override
     HearthBlockEntity getBlockEntity()
@@ -22,15 +22,13 @@ public class HearthScreen extends AbstractHearthScreen<HearthContainer>
 
     public HearthScreen(HearthContainer screenContainer, Inventory inv, Component titleIn)
     {
-        super(screenContainer, inv, Component.translatable("container." + ColdSweat.MOD_ID + ".hearth"));
-        this.imageWidth = 176;
-        this.imageHeight = 166;
+        super(screenContainer, inv, Component.translatable("container." + ColdSweat.MOD_ID + ".hearth"), 176, 166);
     }
 
     @Override
-    protected void renderBg(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY)
-    {   RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
-        graphics.blit(HEARTH_GUI, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight);
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks)
+    {   super.extractBackground(graphics, mouseX, mouseY, partialTicks);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, HEARTH_GUI, this.leftPos, this.topPos, 0, 0, this.imageWidth, this.imageHeight, 256, 256);
 
         // Render hot/cold fuel gauges
         this.renderFuelGauge(HearthBlockEntity.FuelType.HOT, graphics, leftPos + 62,  topPos + 49, this.menu.getHotFuel(), this.menu.te.getMaxFuel());
@@ -46,10 +44,10 @@ public class HearthScreen extends AbstractHearthScreen<HearthContainer>
             this.renderPowerIndicator(graphics, leftPos + 101, topPos + 64, coolingOn);
 
             if (CSMath.betweenInclusive(mouseX, leftPos + 60, leftPos + 76) && CSMath.betweenInclusive(mouseY, topPos + 61, topPos + 67))
-            {   this.setTooltipForNextRenderPass(Component.translatable(heatingOn ? "gui.cold_sweat.hearth.powered" : "gui.cold_sweat.hearth.unpowered"));
+            {   graphics.setTooltipForNextFrame(Component.translatable(heatingOn ? "gui.cold_sweat.hearth.powered" : "gui.cold_sweat.hearth.unpowered"), mouseX, mouseY);
             }
             if (CSMath.betweenInclusive(mouseX, leftPos + 98, leftPos + 114) && CSMath.betweenInclusive(mouseY, topPos + 61, topPos + 67))
-            {   this.setTooltipForNextRenderPass(Component.translatable(coolingOn ? "gui.cold_sweat.hearth.powered" : "gui.cold_sweat.hearth.unpowered"));
+            {   graphics.setTooltipForNextFrame(Component.translatable(coolingOn ? "gui.cold_sweat.hearth.powered" : "gui.cold_sweat.hearth.unpowered"), mouseX, mouseY);
             }
         }
     }

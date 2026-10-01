@@ -6,18 +6,10 @@
     "SIS"
   ],
   "key": {
-    "#": {
-      "item": "cold_sweat:smokestack"
-    },
-    "B": {
-      "tag": "c:ingots/nether_brick"
-    },
-    "S": {
-      "tag": "minecraft:soul_fire_base_blocks"
-    },
-    "I": {
-      "tag": "c:ingots/iron"
-    }
+    "#": "cold_sweat:smokestack",
+    "B": "#c:ingots/nether_brick",
+    "S": "#minecraft:soul_fire_base_blocks",
+    "I": "#c:ingots/iron"
   },
   "result": {
     "id": "cold_sweat:hearth",

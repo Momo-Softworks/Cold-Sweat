@@ -21,7 +21,7 @@ import com.momosoftworks.coldsweat.util.serialization.EnumHelper;
 import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.Entity;
@@ -43,13 +43,13 @@ public class ItemTempData extends ConfigData implements RequirementHolder
     final ValueGetter<Double> minTemp;
     final NegatableList<EntityRequirement> entityRequirement;
     final AttributeModifierMap attributeModifiers;
-    final Map<ResourceLocation, ValueGetter<Double>> immuneTempModifiers;
+    final Map<Identifier, ValueGetter<Double>> immuneTempModifiers;
     final ValueGetter<Boolean> hideIfUnmet;
 
     public ItemTempData(NegatableList<ItemRequirement> item, List<Either<IntegerBounds, SlotType>> slots, ValueGetter<Double> temperature,
                         Temperature.Trait trait, ValueGetter<Double> maxEffect, ValueGetter<Double> maxTemp, ValueGetter<Double> minTemp,
                         NegatableList<EntityRequirement> entityRequirement, AttributeModifierMap attributeModifiers,
-                        Map<ResourceLocation, ValueGetter<Double>> immuneTempModifiers, ValueGetter<Boolean> hideIfUnmet, NegatableList<String> requiredMods)
+                        Map<Identifier, ValueGetter<Double>> immuneTempModifiers, ValueGetter<Boolean> hideIfUnmet, NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.item = item;
@@ -68,7 +68,7 @@ public class ItemTempData extends ConfigData implements RequirementHolder
     public ItemTempData(NegatableList<ItemRequirement> item, List<Either<IntegerBounds, SlotType>> slots, ValueGetter<Double> temperature,
                         Temperature.Trait trait, ValueGetter<Double> maxEffect, ValueGetter<Double> maxTemp, ValueGetter<Double> minTemp,
                         NegatableList<EntityRequirement> entityRequirement, AttributeModifierMap attributeModifiers,
-                        Map<ResourceLocation, ValueGetter<Double>> immuneTempModifiers, ValueGetter<Boolean> hideIfUnmet)
+                        Map<Identifier, ValueGetter<Double>> immuneTempModifiers, ValueGetter<Boolean> hideIfUnmet)
     {
         this(item, slots, temperature, trait, maxEffect, maxTemp, minTemp, entityRequirement, attributeModifiers, immuneTempModifiers, hideIfUnmet, new NegatableList<>());
     }
@@ -83,7 +83,7 @@ public class ItemTempData extends ConfigData implements RequirementHolder
             ValueGetter.optionalFieldCodec("min_temp", ExtraCodecs.DOUBLE, Double.NEGATIVE_INFINITY).forGetter(ItemTempData::minTemp),
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(ItemTempData::entityRequirement),
             AttributeModifierMap.CODEC.optionalFieldOf("attributes", new AttributeModifierMap()).forGetter(ItemTempData::attributeModifiers),
-            Codec.unboundedMap(ResourceLocation.CODEC, ValueGetter.codec(ExtraCodecs.DOUBLE, 0.0)).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(ItemTempData::immuneTempModifiers),
+            Codec.unboundedMap(Identifier.CODEC, ValueGetter.codec(ExtraCodecs.DOUBLE, 0.0)).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(ItemTempData::immuneTempModifiers),
             ValueGetter.optionalFieldCodec("hide_if_unmet", Codec.BOOL, false).forGetter(ItemTempData::hideIfUnmet)
     ).apply(instance, ItemTempData::new)));
 
@@ -126,13 +126,13 @@ public class ItemTempData extends ConfigData implements RequirementHolder
     public AttributeModifierMap attributeModifiers()
     {   return attributeModifiers;
     }
-    public Map<ResourceLocation, ValueGetter<Double>> immuneTempModifiers()
+    public Map<Identifier, ValueGetter<Double>> immuneTempModifiers()
     {   return immuneTempModifiers;
     }
-    public Map<ResourceLocation, Double> immuneTempModifiers(ItemStack stack, Entity entity)
+    public Map<Identifier, Double> immuneTempModifiers(ItemStack stack, Entity entity)
     {
-        Map<ResourceLocation, Double> result = new HashMap<>();
-        for (Map.Entry<ResourceLocation, ValueGetter<Double>> entry : immuneTempModifiers.entrySet())
+        Map<Identifier, Double> result = new HashMap<>();
+        for (Map.Entry<Identifier, ValueGetter<Double>> entry : immuneTempModifiers.entrySet())
         {   result.put(entry.getKey(), entry.getValue().get(Map.of("item", stack, "entity", entity)));
         }
         return result;

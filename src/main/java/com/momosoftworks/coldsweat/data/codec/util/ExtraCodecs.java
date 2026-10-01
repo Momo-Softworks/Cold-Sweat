@@ -13,7 +13,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.StringRepresentable;
 import org.apache.commons.lang3.mutable.MutableObject;
 
@@ -161,8 +161,8 @@ public class ExtraCodecs
                 Map<K, V> holderMap = new HashMap<>();
                 // Put keys
                 for (Map.Entry<String, V> entry : keyMap.entrySet())
-                {   ResourceLocation id = ResourceLocation.parse(entry.getKey());
-                    K key = keyRegistry.get(id);
+                {   Identifier id = Identifier.parse(entry.getKey());
+                    K key = keyRegistry.getValue(id);
                     if (key != null)
                     {   holderMap.put(key, entry.getValue());
                     }
@@ -212,7 +212,7 @@ public class ExtraCodecs
             {
                 // Get registry
                 RegistryAccess registryAccess = RegistryHelper.getRegistryAccess();
-                Registry<K> reg = registryAccess.registryOrThrow(keyRegistry);
+                Registry<K> reg = registryAccess.lookupOrThrow(keyRegistry);
                 // Decode data
                 DynamicOps<T> decoderOps = registryAccess.createSerializationContext(ops);
                 Optional<Pair<Map<String, V>, T>> keyMapResult = Codec.unboundedMap(Codec.STRING, valueCodec).decode(decoderOps, input).result();
@@ -220,8 +220,8 @@ public class ExtraCodecs
                 // Put keys
                 Map<Holder<K>, V> holderMap = new HashMap<>();
                 for (Map.Entry<String, V> entry : keyMap.entrySet())
-                {   ResourceKey<K> key = ResourceKey.create(keyRegistry, ResourceLocation.parse(entry.getKey()));
-                    reg.getHolder(key).ifPresent(k -> holderMap.put(k, entry.getValue()));
+                {   ResourceKey<K> key = ResourceKey.create(keyRegistry, Identifier.parse(entry.getKey()));
+                    reg.get(key).ifPresent(k -> holderMap.put(k, entry.getValue()));
                 }
                 return DataResult.success(Pair.of(holderMap, keyMapResult.map(Pair::getSecond).orElseThrow()));
             }
@@ -233,7 +233,7 @@ public class ExtraCodecs
                 Map<String, V> keyMap = new HashMap<>();
                 // Put keys
                 for (Map.Entry<Holder<K>, V> entry : input.entrySet())
-                {   entry.getKey().unwrapKey().ifPresent(k -> keyMap.put(k.location().toString(), entry.getValue()));
+                {   entry.getKey().unwrapKey().ifPresent(k -> keyMap.put(k.identifier().toString(), entry.getValue()));
                 }
                 return Codec.unboundedMap(Codec.STRING, valueCodec).encode(keyMap, encoderOps, prefix);
             }

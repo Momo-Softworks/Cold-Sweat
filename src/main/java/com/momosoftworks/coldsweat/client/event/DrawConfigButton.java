@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.client.event;
 
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.client.gui.config.AbstractConfigPage;
 import com.momosoftworks.coldsweat.client.gui.config.ConfigScreen;
@@ -15,7 +16,7 @@ import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.screens.options.OptionsScreen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -58,7 +59,7 @@ public class DrawConfigButton
                                      {
                                          ConfigScreen.CURRENT_PAGE = 0;
                                          if (Minecraft.getInstance().player != null)
-                                         {   PacketDistributor.sendToServer(new ClientConfigAskMessage(Minecraft.getInstance().player.getUUID()));
+                                         {   ClientPacketDistributor.sendToServer(new ClientConfigAskMessage(Minecraft.getInstance().player.getUUID()));
                                          }
                                      });
             if (Minecraft.getInstance().level == null)

@@ -3,7 +3,7 @@ package com.momosoftworks.coldsweat.data.tag;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 
 public class ModInsulatorTags
@@ -11,6 +11,6 @@ public class ModInsulatorTags
     public static final TagKey<InsulatorData> DRAINS_BACKTANK = createTag("drains_backtank");
 
     private static TagKey<InsulatorData> createTag(String name)
-    {   return TagKey.create(ModRegistries.INSULATOR_DATA.key(), ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, name));
+    {   return TagKey.create(ModRegistries.INSULATOR_DATA.key(), Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, name));
     }
 }

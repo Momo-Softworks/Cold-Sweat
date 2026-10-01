@@ -18,7 +18,7 @@ public class NetherPortalBlockTemp extends BlockTemp
     @Override
     public double getTemperature(Level level, LivingEntity entity, BlockState state, BlockPos pos, double distance)
     {
-        boolean isInOverworld = level.dimension().location().equals(BuiltinDimensionTypes.OVERWORLD.location());
+        boolean isInOverworld = level.dimension().identifier().equals(BuiltinDimensionTypes.OVERWORLD.identifier());
         return isInOverworld ? 0.3 : -0.2;
     }
 

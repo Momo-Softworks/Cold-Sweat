@@ -1,6 +1,5 @@
 package com.momosoftworks.coldsweat.api.temperature.modifier;
 
-import com.alcatrazescapee.primalwinter.ForgePrimalWinter;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -36,7 +35,7 @@ public class BiomeTempModifier extends TempModifier
     @Override
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
-        int samples = this.getNBT().getInt("Samples");
+        int samples = this.getNBT().getIntOr("Samples", 0);
         double worldTemp = 0;
         Level level = entity.level();
         DimensionType dimension = level.dimensionType();
@@ -74,13 +73,9 @@ public class BiomeTempModifier extends TempModifier
             double biomeTemp = WorldHelper.getBiomeTemperature(level, holder);
 
             // Primal Winter compat for configured biomes
-            if (CompatManager.isPrimalWinterLoaded() && biomeTempData != null)
-            {
-                boolean isWinterBiome = ForgePrimalWinter.CONFIG.isWinterBiome(holder.unwrapKey().get());
-                boolean isWinterDimension = ForgePrimalWinter.CONFIG.isWinterDimension(level.dimension());
-                if (isWinterBiome && isWinterDimension)
-                {   biomeTemp = -0.5;
-                }
+            if (CompatManager.isPrimalWinterLoaded() && biomeTempData != null
+            && CompatManager.PrimalWinter.isWinterAt(level, holder))
+            {   biomeTemp = -0.5;
             }
             // Add biome temperature
             worldTemp += biomeTemp;

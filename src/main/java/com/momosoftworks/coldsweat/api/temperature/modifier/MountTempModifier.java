@@ -26,8 +26,8 @@ public class MountTempModifier extends TempModifier
         return temp ->
         {
             double insulation = temp > 0
-                                ? this.getNBT().getDouble("HeatInsulation")
-                                : this.getNBT().getDouble("ColdInsulation");
+                                ? this.getNBT().getDoubleOr("HeatInsulation", 0)
+                                : this.getNBT().getDoubleOr("ColdInsulation", 0);
             return CSMath.blend(temp, 0, insulation * insulationStrength, 0, 1);
         };
     }

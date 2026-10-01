@@ -1,5 +1,9 @@
 package com.momosoftworks.coldsweat.common.item;
 
+import javax.annotation.Nullable;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.component.TooltipDisplay;
 import com.momosoftworks.coldsweat.api.temperature.modifier.SoulLampTempModifier;
 import com.momosoftworks.coldsweat.api.util.placement.Matcher;
 import com.momosoftworks.coldsweat.api.util.Temperature;
@@ -17,7 +21,6 @@ import com.momosoftworks.coldsweat.util.item.ItemStackHelper;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -45,10 +48,15 @@ import java.util.function.Consumer;
 @EventBusSubscriber
 public class SoulspringLampItem extends Item
 {
-    public SoulspringLampItem()
+    public static Properties getDefaultProperties()
     {
-        super(new Properties().stacksTo(1).fireResistant().rarity(Rarity.RARE)
-                              .component(ModItemComponents.SOULSPRING_LAMP_DATA, new SoulspringLampData()));
+        return new Properties().stacksTo(1).fireResistant().rarity(Rarity.RARE)
+                              .component(ModItemComponents.SOULSPRING_LAMP_DATA, new SoulspringLampData());
+    }
+
+    public SoulspringLampItem(Properties properties)
+    {
+        super(properties);
     }
 
     @Override
@@ -57,20 +65,6 @@ public class SoulspringLampItem extends Item
         ItemStack stack = super.getDefaultInstance();
         setFuel(stack, 64);
         return stack;
-    }
-
-    @Override
-    public void initializeClient(Consumer<IClientItemExtensions> consumer)
-    {
-        consumer.accept(new IClientItemExtensions()
-        {
-            @Override
-            public BlockEntityWithoutLevelRenderer getCustomRenderer()
-            {
-                RegisterModels.checkForInitModels();
-                return RegisterModels.SOULSPRING_LAMP_RENDERER;
-            }
-        });
     }
 
     private static void updateComponents(ItemStack stack)
@@ -84,15 +78,15 @@ public class SoulspringLampItem extends Item
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, Level level, Entity entity, int itemSlot, boolean isSelected)
+    public void inventoryTick(ItemStack stack, ServerLevel level, Entity entity, @Nullable EquipmentSlot equipmentSlot)
     {
-        if (!entity.level().isClientSide && entity instanceof LivingEntity living && living.tickCount % 5 == 0)
+        if (!entity.level().isClientSide() && entity instanceof LivingEntity living && living.tickCount % 5 == 0)
         {
             updateComponents(stack);
             boolean shouldBeOn = false;
             try
             {
-                if (!(isSelected || living.getOffhandItem() == stack || CompatManager.Curios.hasCurio(living, stack)))
+                if (!(equipmentSlot == EquipmentSlot.MAINHAND || living.getOffhandItem() == stack || CompatManager.Curios.hasCurio(living, stack)))
                 {   return;
                 }
                 double max = Temperature.get(living, Temperature.Trait.BURNING_POINT);
@@ -204,8 +198,8 @@ public class SoulspringLampItem extends Item
 
             // If fuel < 64 and target NOT player
             if (getFuel(stack) < 64
-            && !target.getType().is(EntityTypeTags.UNDEAD)
-            && !target.getPersistentData().getBoolean("SoulSucked"))
+            && !target.is(EntityTypeTags.UNDEAD)
+            && !target.getPersistentData().getBooleanOr("SoulSucked", false))
             {
                 target.getPersistentData().putBoolean("SoulSucked", true);
 
@@ -216,14 +210,14 @@ public class SoulspringLampItem extends Item
                     target.hurt(level.damageSources().playerAttack(attacker), extraDamage);
 
                 // Spawn particles
-                if (!target.level().isClientSide)
+                if (!target.level().isClientSide())
                 {
                     int particleCount = (int) CSMath.clamp(target.getBbWidth() * target.getBbWidth() * target.getBbHeight() * 3, 5, 50);
                     WorldHelper.spawnParticleBatch(attacker.level(), ParticleTypes.SOUL, target.getX(), target.getY() + target.getBbHeight() / 2, target.getZ(),
                                                    target.getBbWidth() / 2, target.getBbHeight() / 2, target.getBbWidth() / 2, particleCount, 0.05);
                 }
                 // Play soul stealing sound
-                if (attacker.level().isClientSide)
+                if (attacker.level().isClientSide())
                 {   WorldHelper.playEntitySound(ModSounds.SOUL_LAMP_ON.value(), attacker, attacker.getSoundSource(), 1f, (float) Math.random() / 5f + 1.3f);
                 }
             }
@@ -231,17 +225,17 @@ public class SoulspringLampItem extends Item
     }
 
     @Override
-    public boolean canAttackBlock(BlockState state, Level level, BlockPos blockPos, Player player)
-    {   return !player.isCreative();
+    public boolean canDestroyBlock(ItemStack stack, BlockState state, Level level, BlockPos blockPos, LivingEntity user)
+    {   return !(user instanceof Player player && player.isCreative());
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag advanced)
+    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> tooltip, TooltipFlag advanced)
     {
         if (advanced.isAdvanced())
-        {   tooltip.add(Component.literal("Fuel: " + (int) getFuel(stack) + " / " + 64));
+        {   tooltip.accept(Component.literal("Fuel: " + (int) getFuel(stack) + " / " + 64));
         }
-        super.appendHoverText(stack, context, tooltip, advanced);
+        super.appendHoverText(stack, context, display, tooltip, advanced);
     }
 
     @Override

@@ -1,5 +1,8 @@
 package com.momosoftworks.coldsweat.common.blockentity;
 
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.entity.ContainerUser;
+import com.momosoftworks.coldsweat.util.item.ItemStackHelper;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.block.IceboxBlock;
 import com.momosoftworks.coldsweat.common.container.IceboxContainer;
@@ -44,7 +47,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
         protected void onOpen(Level level, BlockPos pos, BlockState state)
         {
             if (!IceboxBlockEntity.this.hasSmokestack())
-            {   IceboxBlockEntity.this.level.playSound(null, pos, ModSounds.ICEBOX_OPEN.value(), SoundSource.BLOCKS, 1f, level.random.nextFloat() * 0.2f + 0.9f);
+            {   IceboxBlockEntity.this.level.playSound(null, pos, ModSounds.ICEBOX_OPEN.value(), SoundSource.BLOCKS, 1f, level.getRandom().nextFloat() * 0.2f + 0.9f);
             }
         }
 
@@ -59,7 +62,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
         {   IceboxBlockEntity.this.signalOpenCount(level, pos, state, eventId, eventParam);
         }
 
-        protected boolean isOwnContainer(Player player)
+        public boolean isOwnContainer(Player player)
         {   return player.containerMenu instanceof IceboxContainer container && container.te.equals(IceboxBlockEntity.this);
         }
     };
@@ -229,13 +232,13 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
     {
         if (this.getFuel() < this.getMaxFuel() - Math.abs(amount) * 0.75)
         {
-            if (!stack.hasCraftingRemainingItem() || stack.getCount() > 1)
+            if (!ItemStackHelper.hasCraftingRemainder(stack) || stack.getCount() > 1)
             {   int consumeCount = Math.min((int) Math.floor((this.getMaxFuel() - this.getFuel()) / (double) Math.abs(amount)), stack.getCount());
                 stack.shrink(consumeCount);
                 addFuel(amount * consumeCount);
             }
             else
-            {   this.setItem(0, stack.getCraftingRemainingItem());
+            {   this.setItem(0, ItemStackHelper.getCraftingRemainder(stack));
                 addFuel(amount);
             }
         }
@@ -260,17 +263,21 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
     }
 
     @Override
-    public void startOpen(Player player)
+    public void startOpen(ContainerUser containerUser)
     {
-        super.startOpen(player);
-        this.openersCounter.incrementOpeners(player, this.level, this.getBlockPos(), this.getBlockState());
+        super.startOpen(containerUser);
+        if (!this.remove && !containerUser.getLivingEntity().isSpectator())
+        {   this.openersCounter.incrementOpeners(containerUser.getLivingEntity(), this.level, this.getBlockPos(), this.getBlockState(), containerUser.getContainerInteractionRange());
+        }
     }
 
     @Override
-    public void stopOpen(Player player)
+    public void stopOpen(ContainerUser containerUser)
     {
-        super.stopOpen(player);
-        this.openersCounter.decrementOpeners(player, this.level, this.getBlockPos(), this.getBlockState());
+        super.stopOpen(containerUser);
+        if (!this.remove && !containerUser.getLivingEntity().isSpectator())
+        {   this.openersCounter.decrementOpeners(containerUser.getLivingEntity(), this.level, this.getBlockPos(), this.getBlockState());
+        }
     }
 
     @Override
@@ -301,7 +308,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
     {
         if (slot == 0)
             return this.getItemFuel(stack) != 0;
-        else return stack.is(ModItemTags.ICEBOX_VALID) || stack.getFoodProperties(null) != null;
+        else return stack.is(ModItemTags.ICEBOX_VALID) || stack.has(DataComponents.FOOD);
     }
 
     @Override

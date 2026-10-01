@@ -1,5 +1,8 @@
 package com.momosoftworks.coldsweat.mixin;
 
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import java.util.ArrayList;
+import net.minecraft.world.item.component.TooltipDisplay;
 import com.momosoftworks.coldsweat.client.event.TooltipHandler;
 import com.momosoftworks.coldsweat.client.gui.tooltip.util.RequirementCheck;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -30,18 +33,14 @@ import java.util.function.Consumer;
 @Mixin(ItemStack.class)
 public abstract class MixinItemTooltip
 {
-    @Shadow protected abstract void addModifierTooltip(Consumer<Component> pTooltipAdder, @Nullable Player pPlayer, Holder<Attribute> pAttribute, AttributeModifier pModfier);
-
     ItemStack stack = (ItemStack) (Object) this;
 
-    @Inject(method = "getTooltipLines", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;addToTooltip(Lnet/minecraft/core/component/DataComponentType;Lnet/minecraft/world/item/Item$TooltipContext;Ljava/util/function/Consumer;Lnet/minecraft/world/item/TooltipFlag;)V",
-                                                 ordinal = 6, shift = At.Shift.AFTER),
-            locals = LocalCapture.CAPTURE_FAILHARD)
-    private void injectBeforeAttributes(Item.TooltipContext pTooltipContext, Player player, TooltipFlag pTooltipFlag, CallbackInfoReturnable<List<Component>> cir,
-                                        //locals
-                                        List<Component> tooltip, MutableComponent mutablecomponent, Consumer consumer)
+    @Inject(method = "addDetailsToTooltipComponents",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;addAttributeTooltips(Ljava/util/function/Consumer;Lnet/minecraft/world/item/component/TooltipDisplay;Lnet/minecraft/world/entity/player/Player;)V"))
+    private void injectBeforeAttributes(Item.TooltipContext context, TooltipDisplay display, @Nullable Player player, TooltipFlag tooltipFlag, Consumer<Component> builder, CallbackInfo ci)
     {
         ItemStack stack = (ItemStack) (Object) this;
+        List<Component> tooltip = new ArrayList<>();
 
         // Add insulation attributes to tooltip
         AttributeModifierMap insulatorAttributes = new AttributeModifierMap();
@@ -80,5 +79,6 @@ public abstract class MixinItemTooltip
             TooltipHandler.addModifierTooltipLines(tooltip, curioAttributes, true, false);
             TooltipHandler.addModifierTooltipLines(tooltip, unmetCurioAttributes, true, true);
         }
+        tooltip.forEach(builder);
     }
 }

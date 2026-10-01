@@ -34,7 +34,7 @@ public class SimpleTempModifier extends TempModifier
     }
 
     public double getTemperature()
-    {   return this.getNBT().getDouble("Temperature");
+    {   return this.getNBT().getDoubleOr("Temperature", 0);
     }
 
     public void setTemperature(double temperature)
@@ -43,7 +43,7 @@ public class SimpleTempModifier extends TempModifier
     }
 
     public Operation getOperation()
-    {   return Operation.byName(this.getNBT().getString("Operation"));
+    {   return Operation.byName(this.getNBT().getStringOr("Operation", ""));
     }
 
     public void setOperation(Operation operation)

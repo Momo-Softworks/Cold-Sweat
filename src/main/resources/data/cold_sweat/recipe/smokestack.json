@@ -1,20 +1,14 @@
 {
   "type": "minecraft:crafting_shaped",
-  "pattern":
-  [
+  "pattern": [
     "C C",
     "C C",
     "C C"
   ],
-  "key":
-  {
-    "C":
-    {
-      "tag": "c:cobblestones/normal"
-    }
+  "key": {
+    "C": "#c:cobblestones/normal"
   },
-  "result":
-  {
+  "result": {
     "id": "cold_sweat:smokestack",
     "count": 4
   }

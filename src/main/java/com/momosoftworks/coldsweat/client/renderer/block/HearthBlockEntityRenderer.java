@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.client.renderer.block;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.block.HearthBottomBlock;
@@ -10,27 +9,39 @@ import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 
-public class HearthBlockEntityRenderer implements BlockEntityRenderer<HearthBlockEntity>
+import javax.annotation.Nullable;
+
+public class HearthBlockEntityRenderer implements BlockEntityRenderer<HearthBlockEntity, HearthBlockEntityRenderer.HearthRenderState>
 {
-    public static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/block/hearth.png");
-    public static final ResourceLocation TEXTURE_SMART = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/block/hearth_smart.png");
-    public static final ResourceLocation TEXTURE_HEAT_ON = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/block/hearth_heat_on.png");
-    public static final ResourceLocation TEXTURE_COLD_ON = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/block/hearth_cold_on.png");
-    public static final ResourceLocation TEXTURE_FROST = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/block/hearth_frost.png");
-    public static final ResourceLocation TEXTURE_LIT = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/block/hearth_lit.png");
+    public static final Identifier TEXTURE = ColdSweat.createKey("textures/block/hearth.png");
+    public static final Identifier TEXTURE_SMART = ColdSweat.createKey("textures/block/hearth_smart.png");
+    public static final Identifier TEXTURE_HEAT_ON = ColdSweat.createKey("textures/block/hearth_heat_on.png");
+    public static final Identifier TEXTURE_COLD_ON = ColdSweat.createKey("textures/block/hearth_cold_on.png");
+    public static final Identifier TEXTURE_FROST = ColdSweat.createKey("textures/block/hearth_frost.png");
+    public static final Identifier TEXTURE_LIT = ColdSweat.createKey("textures/block/hearth_lit.png");
 
-    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth"), "main");
+    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ColdSweat.createKey("hearth"), "main");
 
     private final ModelPart body;
     private final ModelPart grate;
+
+    public static class HearthRenderState extends BlockEntityRenderState
+    {   public @Nullable BlockState blockState;
+    }
 
     public HearthBlockEntityRenderer(BlockEntityRendererProvider.Context context)
     {
@@ -50,10 +61,27 @@ public class HearthBlockEntityRenderer implements BlockEntityRenderer<HearthBloc
         return LayerDefinition.create(meshdefinition, 64, 64);
     }
 
+
     @Override
-    public void render(HearthBlockEntity blockEntity, float partialTick, PoseStack poseStack, MultiBufferSource buffer, int light, int overlay)
+    public HearthRenderState createRenderState()
+    {   return new HearthRenderState();
+    }
+
+    @Override
+    public void extractRenderState(HearthBlockEntity blockEntity, HearthRenderState state, float partialTick, Vec3 cameraPosition, @Nullable ModelFeatureRenderer.CrumblingOverlay breakProgress)
     {
-        BlockState blockstate = blockEntity.getBlockState();
+        BlockEntityRenderer.super.extractRenderState(blockEntity, state, partialTick, cameraPosition, breakProgress);
+        state.blockState = blockEntity.getBlockState();
+    }
+
+    @Override
+    public void submit(HearthRenderState state, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera)
+    {
+        BlockState blockstate = state.blockState;
+        if (blockstate == null || !blockstate.hasProperty(HorizontalDirectionalBlock.FACING)) return;
+        int light = state.lightCoords;
+        int overlay = OverlayTexture.NO_OVERLAY;
+
         poseStack.pushPose();
         float f = blockstate.getValue(HorizontalDirectionalBlock.FACING).toYRot();
         poseStack.translate(0.5F, 0.5F, 0.5F);
@@ -61,44 +89,38 @@ public class HearthBlockEntityRenderer implements BlockEntityRenderer<HearthBloc
         poseStack.mulPose(Axis.XP.rotationDegrees(180));
         poseStack.translate(0, -1, 0);
 
-        VertexConsumer baseVertexes = buffer.getBuffer(RenderType.entityCutout(getTexture(blockstate)));
+        RenderType baseType = RenderTypes.entityCutout(getTexture(blockstate));
 
         /* Main Body */
-        this.body.render(poseStack, baseVertexes, light, overlay);
-        this.grate.render(poseStack, baseVertexes, light, overlay);
+        collector.submitModelPart(this.body, poseStack, baseType, light, overlay, null);
+        collector.submitModelPart(this.grate, poseStack, baseType, light, overlay, null);
 
         /* Fuel Textures */
         // Lit texture when fuel is burning
         if (blockstate.getValue(HearthBottomBlock.LIT))
-        {   VertexConsumer litVertexes = buffer.getBuffer(RenderType.entityCutout(TEXTURE_LIT));
-            this.grate.render(poseStack, litVertexes, light, overlay);
+        {   collector.submitModelPart(this.grate, poseStack, RenderTypes.entityCutout(TEXTURE_LIT), light, overlay, null);
         }
         // Frost texture when cold fuel is present
         if (blockstate.getValue(HearthBottomBlock.FROSTED))
-        {   VertexConsumer frostedVertexes = buffer.getBuffer(RenderType.entityTranslucent(TEXTURE_FROST));
-            this.body.render(poseStack, frostedVertexes, light, overlay);
+        {   collector.submitModelPart(this.body, poseStack, RenderTypes.entityTranslucent(TEXTURE_FROST), light, overlay, null);
         }
 
         /* Redstone Power Textures */
         if (!blockstate.getValue(HearthBottomBlock.SMART))
         {
-            // Heating
+            // Redstone power to heat side
             if (blockstate.getValue(HearthBottomBlock.HEATING))
-            {   // Redstone power to heat side
-                VertexConsumer heatingVertexes = buffer.getBuffer(RenderType.entityCutout(TEXTURE_HEAT_ON));
-                this.body.render(poseStack, heatingVertexes, light, overlay);
+            {   collector.submitModelPart(this.body, poseStack, RenderTypes.entityCutout(TEXTURE_HEAT_ON), light, overlay, null);
             }
-            // Cooling
+            // Redstone power to cool side
             if (blockstate.getValue(HearthBottomBlock.COOLING))
-            {   // Redstone power to cool side
-                VertexConsumer coolingVertexes = buffer.getBuffer(RenderType.entityCutout(TEXTURE_COLD_ON));
-                this.body.render(poseStack, coolingVertexes, light, overlay);
+            {   collector.submitModelPart(this.body, poseStack, RenderTypes.entityCutout(TEXTURE_COLD_ON), light, overlay, null);
             }
         }
         poseStack.popPose();
     }
 
-    public static ResourceLocation getTexture(BlockState state)
+    public static Identifier getTexture(BlockState state)
     {   return state.getValue(HearthBottomBlock.SMART) ? TEXTURE_SMART : TEXTURE;
     }
 }

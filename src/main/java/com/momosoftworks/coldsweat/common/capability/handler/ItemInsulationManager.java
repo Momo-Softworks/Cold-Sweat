@@ -15,7 +15,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
-import net.minecraft.world.item.Equipable;
+import net.minecraft.world.item.equipment.Equippable;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
@@ -60,7 +61,7 @@ public class ItemInsulationManager
             if (slotOverride.isPresent() && slotOverride.get().test(stack))
             {   return slotOverride.get().slots();
             }
-            else return ConfigSettings.INSULATION_SLOTS.get().getSlots(((Equipable) item).getEquipmentSlot(), stack);
+            else return ConfigSettings.INSULATION_SLOTS.get().getSlots(stack.get(DataComponents.EQUIPPABLE).slot(), stack);
         }
         else return 0;
     }
@@ -71,8 +72,9 @@ public class ItemInsulationManager
      */
     public static boolean isInsulatable(ItemStack stack)
     {
-        return stack.getItem() instanceof Equipable equipable
-            && equipable.getEquipmentSlot().isArmor()
+        Equippable equippable = stack.get(DataComponents.EQUIPPABLE);
+        return equippable != null
+            && equippable.slot().isArmor()
             && !ConfigSettings.INSULATION_BLACKLIST.get().contains(stack.getItem())
             && getInsulatorInsulation(stack).isEmpty();
     }

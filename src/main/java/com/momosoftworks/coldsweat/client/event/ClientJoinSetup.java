@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.client.event;
 
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import com.momosoftworks.coldsweat.api.event.core.registry.EdiblesRegisterEvent;
 import com.momosoftworks.coldsweat.config.ConfigLoadingHandler;
 import com.momosoftworks.coldsweat.core.init.TempModifierInit;
@@ -24,7 +25,7 @@ public class ClientJoinSetup
         // Build holders
         ConfigLoadingHandler.fillOptionalHolders(event.getPlayer().connection.registryAccess());
         // Get configs
-        PacketDistributor.sendToServer(new ClientConfigAskMessage());
+        ClientPacketDistributor.sendToServer(new ClientConfigAskMessage());
         // Rebuild TempModifier registries
         TempModifierInit.buildModifierRegistries();
         NeoForge.EVENT_BUS.post(new EdiblesRegisterEvent());
@@ -34,7 +35,7 @@ public class ClientJoinSetup
     public static void onEverySpawn(EntityJoinLevelEvent event)
     {
         if (event.getEntity() == Minecraft.getInstance().player)
-        {   PacketDistributor.sendToServer(SyncPreferencesMessage.create());
+        {   ClientPacketDistributor.sendToServer(SyncPreferencesMessage.create());
         }
     }
 

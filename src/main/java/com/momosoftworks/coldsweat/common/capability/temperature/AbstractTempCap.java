@@ -26,7 +26,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.StringTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
@@ -37,7 +37,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.common.util.INBTSerializable;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -48,7 +47,7 @@ import static com.momosoftworks.coldsweat.common.capability.handler.EntityTempMa
 /**
  * Holds all the information regarding the entity's temperature. This should very rarely be used directly.
  */
-public class AbstractTempCap implements ITemperatureCap, INBTSerializable<CompoundTag>
+public class AbstractTempCap implements ITemperatureCap
 {
     boolean changed = true;
     int syncTimer = 0;
@@ -462,16 +461,16 @@ public class AbstractTempCap implements ITemperatureCap, INBTSerializable<Compou
 
         if (!hasGrace && entity.tickCount % (hurtInterval / rateInterval) == 0)
         {
-            Registry<DamageType> damageTypes = entity.level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE);
+            Registry<DamageType> damageTypes = entity.level().registryAccess().lookupOrThrow(Registries.DAMAGE_TYPE);
 
             if (bodyTemp >= 100 && !(hasFireResist && ConfigSettings.FIRE_RESISTANCE_ENABLED.get()))
             {
-                DamageSource hot = new DamageSource(damageTypes.getHolderOrThrow(ModDamageSources.HOT));
+                DamageSource hot = new DamageSource(damageTypes.getOrThrow(ModDamageSources.HOT));
                 entity.hurt(hot, (float) CSMath.blend(damage, 0, heatResistance, 0, 1));
             }
             else if (bodyTemp <= -100 && !(hasIceResist && ConfigSettings.ICE_RESISTANCE_ENABLED.get()))
             {
-                DamageSource cold = new DamageSource(damageTypes.getHolderOrThrow(ModDamageSources.COLD));
+                DamageSource cold = new DamageSource(damageTypes.getOrThrow(ModDamageSources.COLD));
                 entity.hurt(cold, (float) CSMath.blend(damage, 0, coldResistance, 0, 1));
             }
         }
@@ -546,13 +545,13 @@ public class AbstractTempCap implements ITemperatureCap, INBTSerializable<Compou
     @Override
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt)
     {   // Load the player's temperatures
-        deserializeTraits(nbt.getCompound("Traits"));
+        deserializeTraits(nbt.getCompoundOrEmpty("Traits"));
         // Load the player's modifiers
-        deserializeModifiers(nbt.getCompound("TempModifiers"));
+        deserializeModifiers(nbt.getCompoundOrEmpty("TempModifiers"));
         // Load the player's persistent attributes
-        ListTag attributes = nbt.getList("PersistentAttributes", 8);
+        ListTag attributes = nbt.getListOrEmpty("PersistentAttributes");
         for (int i = 0; i < attributes.size(); i++)
-        {   this.markPersistentAttribute(BuiltInRegistries.ATTRIBUTE.get(ResourceLocation.parse(attributes.getString(i))));
+        {   this.markPersistentAttribute(BuiltInRegistries.ATTRIBUTE.getValue(Identifier.parse(attributes.getStringOr(i, ""))));
         }
     }
 
@@ -560,7 +559,7 @@ public class AbstractTempCap implements ITemperatureCap, INBTSerializable<Compou
     public void deserializeTraits(CompoundTag nbt)
     {
         for (Trait trait : VALID_TEMPERATURE_TRAITS)
-        {   setTrait(trait, nbt.getDouble(NBTHelper.getTraitTagKey(trait)));
+        {   setTrait(trait, nbt.getDoubleOr(NBTHelper.getTraitTagKey(trait), 0));
         }
     }
 
@@ -572,7 +571,7 @@ public class AbstractTempCap implements ITemperatureCap, INBTSerializable<Compou
         for (Trait trait : VALID_MODIFIER_TRAITS)
         {
             // Get the list of modifiers from the player's persistent data
-            ListTag modTags = nbt.getList(NBTHelper.getTraitTagKey(trait), 10);
+            ListTag modTags = nbt.getListOrEmpty(NBTHelper.getTraitTagKey(trait));
 
             // For each modifier in the list
             modTags.forEach(entry ->
@@ -580,7 +579,7 @@ public class AbstractTempCap implements ITemperatureCap, INBTSerializable<Compou
                 CompoundTag modNBT = ((CompoundTag) entry);
                 TempModifier modifier;
                 boolean isLegacy = modNBT.contains("Id"); // Legacy NBT data stored not using the codec
-                int modHash = modNBT.getInt(isLegacy ? "Hash" : "hash");
+                int modHash = modNBT.getIntOr(isLegacy ? "Hash" : "hash", 0);
                 if (modHash == 0 || !modifierHashes.containsKey(modHash))
                 {
                     Optional<TempModifier> modOpt = isLegacy ? NBTHelper.tagToModifier(modNBT) // Legacy modifier NBT data

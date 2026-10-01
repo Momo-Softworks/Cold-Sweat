@@ -2,7 +2,7 @@ package com.momosoftworks.coldsweat.util.math;
 
 import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
@@ -975,7 +975,7 @@ public class CSMath
         return false;
     }
 
-    public static void fillHorizontalGradient(GuiGraphics graphics, int x1, int y1, int x2, int y2, int colorFrom, int colorTo)
+    public static void fillHorizontalGradient(GuiGraphicsExtractor graphics, int x1, int y1, int x2, int y2, int colorFrom, int colorTo)
     {
         int width = x2 - x1;
         // Break into multiple thin strips (more strips = smoother gradient)

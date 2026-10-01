@@ -12,7 +12,7 @@ import com.momosoftworks.coldsweat.data.codec.requirement.ItemRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.TagKey;
@@ -74,15 +74,15 @@ public class DryingItemData extends ConfigData implements RequirementHolder
         }
         NegatableList<Either<TagKey<Item>, Item>> items = ConfigHelper.getItems((String) entry.get(0));
         if (items.isEmpty()) return null;
-        Item useResult = BuiltInRegistries.ITEM.get(ResourceLocation.parse((String) entry.get(1)));
+        Item useResult = BuiltInRegistries.ITEM.getValue(Identifier.parse((String) entry.get(1)));
         if (useResult == null) return null;
 
-        ResourceLocation sound = entry.size() > 2
-                                 ? ResourceLocation.parse((String) entry.get(2))
-                                 : ResourceLocation.parse("minecraft:block.wet_grass.step");
+        Identifier sound = entry.size() > 2
+                                 ? Identifier.parse((String) entry.get(2))
+                                 : Identifier.parse("minecraft:block.wet_grass.step");
         ItemRequirement input = new ItemRequirement(items, new ItemComponentsRequirement());
 
-        DryingItemData result = new DryingItemData(new NegatableList<>(input), new ItemStack(useResult), new NegatableList<>(), BuiltInRegistries.SOUND_EVENT.get(sound));
+        DryingItemData result = new DryingItemData(new NegatableList<>(input), new ItemStack(useResult), new NegatableList<>(), BuiltInRegistries.SOUND_EVENT.getValue(sound));
         result.setConfigType(Type.TOML);
         return result;
     }

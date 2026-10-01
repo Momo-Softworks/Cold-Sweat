@@ -65,7 +65,7 @@ public class FilterInsulationItemsTab
                 TagKey<Item> tagKey = entry.getKey();
                 if (item.builtInRegistryHolder().is(tagKey))
                 {
-                    HolderSet<Item> tag = BuiltInRegistries.ITEM.getTag(tagKey).orElse(null);
+                    HolderSet<Item> tag = BuiltInRegistries.ITEM.get(tagKey).orElse(null);
                     int tagSize = entry.getValue().size();
 
                     if (tagSize > 6 && tag.stream().findFirst().get().value() != item)

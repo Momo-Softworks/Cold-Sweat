@@ -104,6 +104,6 @@ public class StaticInsulation extends Insulation
     }
 
     public static StaticInsulation deserialize(CompoundTag tag)
-    {   return new StaticInsulation(tag.getDouble("cold"), tag.getDouble("heat"));
+    {   return new StaticInsulation(tag.getDoubleOr("cold", 0), tag.getDoubleOr("heat", 0));
     }
 }

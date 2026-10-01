@@ -1,17 +1,20 @@
 package com.momosoftworks.coldsweat.common.block;
 
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.redstone.Orientation;
+import com.momosoftworks.coldsweat.util.item.ItemStackHelper;
 import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import com.momosoftworks.coldsweat.common.blockentity.IceboxBlockEntity;
 import com.momosoftworks.coldsweat.core.init.*;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.ParticleStatus;
+import net.minecraft.server.level.ParticleStatus;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.Item;
@@ -26,7 +29,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -37,7 +40,7 @@ import java.util.Random;
 
 public class IceboxBlock extends Block implements EntityBlock
 {
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty FROSTED = HearthBottomBlock.FROSTED;
     public static final BooleanProperty SMOKESTACK = BooleanProperty.create("smokestack");
 
@@ -81,7 +84,7 @@ public class IceboxBlock extends Block implements EntityBlock
     }
 
     public RenderShape getRenderShape(BlockState pState)
-    {   return RenderShape.ENTITYBLOCK_ANIMATED;
+    {   return RenderShape.INVISIBLE;
     }
 
     @Override
@@ -102,14 +105,14 @@ public class IceboxBlock extends Block implements EntityBlock
 
     @SuppressWarnings("deprecation")
     @Override
-    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
+    public InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
     {
         if (level.getBlockEntity(pos) instanceof IceboxBlockEntity icebox)
         {
             // If the player is trying to put a smokestack on top, don't do anything
             if (stack.getItem() == ModItems.SMOKESTACK.value() && rayTraceResult.getDirection() == Direction.UP
             && level.getBlockState(pos.above()).canBeReplaced())
-            {   return ItemInteractionResult.FAIL;
+            {   return InteractionResult.FAIL;
             }
             int itemFuel = icebox.getItemFuel(stack);
 
@@ -117,9 +120,9 @@ public class IceboxBlock extends Block implements EntityBlock
             {
                 if (!player.isCreative())
                 {
-                    if (stack.hasCraftingRemainingItem())
+                    if (ItemStackHelper.hasCraftingRemainder(stack))
                     {
-                        ItemStack container = stack.getCraftingRemainingItem();
+                        ItemStack container = ItemStackHelper.getCraftingRemainder(stack);
                         stack.shrink(1);
                         player.getInventory().add(container);
                     }
@@ -131,11 +134,11 @@ public class IceboxBlock extends Block implements EntityBlock
 
                 level.playSound(null, pos, ModSounds.BUCKET_EMPTY_SLUSH.value(), SoundSource.BLOCKS, 1.0F, 0.9f + new Random().nextFloat() * 0.2F);
             }
-            else if (!level.isClientSide && !ChestBlock.isChestBlockedAt(level, pos))
+            else if (!level.isClientSide() && !ChestBlock.isChestBlockedAt(level, pos))
             {   player.openMenu(icebox, pos);
             }
         }
-        return ItemInteractionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
 
@@ -147,7 +150,7 @@ public class IceboxBlock extends Block implements EntityBlock
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos)
+    public BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random)
     {
         if (neighborPos.equals(pos.above()) && level.getBlockEntity(pos) instanceof IceboxBlockEntity icebox)
         {
@@ -155,16 +158,16 @@ public class IceboxBlock extends Block implements EntityBlock
             boolean hasSmokeStack = icebox.checkForSmokestack();
             if (hadSmokestack != hasSmokeStack)
             {
+                // The returned state is placed by the caller
                 state = state.setValue(SMOKESTACK, hasSmokeStack);
-                level.setBlock(pos, state, 3);
-                level.blockUpdated(pos, this);
+                if (level instanceof Level realLevel) realLevel.updateNeighborsAt(pos, this);
             }
         }
-        return super.updateShape(state, direction, neighborState, level, pos, neighborPos);
+        return super.updateShape(state, level, ticks, pos, direction, neighborPos, neighborState, random);
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, BlockPos fromPos, boolean isMoving)
+    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, @Nullable Orientation fromPos, boolean isMoving)
     {
         super.neighborChanged(state, level, pos, neighborBlock, fromPos, isMoving);
         // Check for redstone power to this block
@@ -174,20 +177,12 @@ public class IceboxBlock extends Block implements EntityBlock
         }
     }
 
-    @SuppressWarnings("deprecation")
     @Override
-    public void onRemove(BlockState state, Level world, BlockPos pos, BlockState newState, boolean isMoving)
+    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean movedByPiston)
     {
-        if (state.getBlock() != newState.getBlock())
-        {
-            BlockEntity tileentity = world.getBlockEntity(pos);
-            if (tileentity instanceof IceboxBlockEntity te)
-            {
-                Containers.dropContents(world, pos, te);
-                world.updateNeighborsAt(pos, this);
-            }
-        }
-        super.onRemove(state, world, pos, newState, isMoving);
+        // Contents are dropped by BlockEntity#preRemoveSideEffects
+        level.updateNeighborsAt(pos, this);
+        super.affectNeighborsAfterRemoval(state, level, pos, movedByPiston);
     }
 
     @Override
@@ -250,7 +245,7 @@ public class IceboxBlock extends Block implements EntityBlock
     }
 
     @Override
-    public int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos)
+    public int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos, Direction direction)
     {   return AbstractContainerMenu.getRedstoneSignalFromBlockEntity(level.getBlockEntity(pos));
     }
 }

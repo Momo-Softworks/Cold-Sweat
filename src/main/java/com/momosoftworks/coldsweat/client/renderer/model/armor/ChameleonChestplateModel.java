@@ -1,17 +1,18 @@
 package com.momosoftworks.coldsweat.client.renderer.model.armor;
 
+import java.util.Set;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import com.momosoftworks.coldsweat.ColdSweat;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.resources.Identifier;
 
-public class ChameleonChestplateModel<T extends LivingEntity> extends HumanoidModel<T>
+public class ChameleonChestplateModel extends HumanoidModel<HumanoidRenderState>
 {
-	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "chameleon_chestplate"), "main");
+	public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "chameleon_chestplate"), "main");
 
 	public ChameleonChestplateModel(ModelPart root)
     {   super(root);
@@ -31,6 +32,9 @@ public class ChameleonChestplateModel<T extends LivingEntity> extends HumanoidMo
         PartDefinition right_arm_armor = right_arm.addOrReplaceChild("right_arm_armor", CubeListBuilder.create().texOffs(0, 80).addBox(-3.25F, -0.2F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(scale, scale*2, scale)), PartPose.offset(0.0F, -1.5F, 0.0F));
 
         PartDefinition left_arm_armor = left_arm.addOrReplaceChild("left_arm_armor", CubeListBuilder.create().texOffs(0, 80).mirror().addBox(-0.75F, -0.2F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(scale, scale*2, scale)).mirror(false), PartPose.offset(0.0F, -1.5F, 0.0F));
+
+        // Only render the parts for this armor slot
+        meshdefinition.getRoot().retainPartsAndChildren(Set.of("body", "left_arm", "right_arm"));
 
         return LayerDefinition.create(meshdefinition, 64, 128);
 	}

@@ -5,7 +5,7 @@ import com.momosoftworks.coldsweat.core.network.ModPacketHandlers;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -15,7 +15,7 @@ import java.util.UUID;
 
 public class ClientConfigAskMessage implements CustomPacketPayload
 {
-    public static final CustomPacketPayload.Type<ClientConfigAskMessage> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "client_config_ask"));
+    public static final CustomPacketPayload.Type<ClientConfigAskMessage> TYPE = new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "client_config_ask"));
     public static final StreamCodec<FriendlyByteBuf, ClientConfigAskMessage> CODEC = CustomPacketPayload.codec(ClientConfigAskMessage::encode, ClientConfigAskMessage::decode);
 
     UUID openerUUID;

@@ -22,7 +22,7 @@ import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
@@ -39,14 +39,14 @@ public class InsulatorData extends ConfigData implements RequirementHolder
     final List<Insulation> insulation;
     final NegatableList<EntityRequirement> entity;
     final AttributeModifierMap attributes;
-    final Map<ResourceLocation, Double> immuneTempModifiers;
+    final Map<Identifier, Double> immuneTempModifiers;
     final ValueGetter<Boolean> fillSlots;
     final ValueGetter<Boolean> hideIfUnmet;
     final Optional<HintText> hint;
 
     public InsulatorData(NegatableList<ItemRequirement> item, Insulation.Slot slot,
                          List<Insulation> insulation, NegatableList<EntityRequirement> entity,
-                         AttributeModifierMap attributes, Map<ResourceLocation, Double> immuneTempModifiers,
+                         AttributeModifierMap attributes, Map<Identifier, Double> immuneTempModifiers,
                          ValueGetter<Boolean> fillSlots, ValueGetter<Boolean> hideIfUnmet, Optional<HintText> hint, NegatableList<String> requiredMods)
     {
         super(requiredMods);
@@ -63,7 +63,7 @@ public class InsulatorData extends ConfigData implements RequirementHolder
 
     public InsulatorData(NegatableList<ItemRequirement> item, Insulation.Slot slot, List<Insulation> insulation,
                          NegatableList<EntityRequirement> entity, AttributeModifierMap attributes,
-                         Map<ResourceLocation, Double> immuneTempModifiers, ValueGetter<Boolean> fillSlots, ValueGetter<Boolean> hideIfUnmet, Optional<HintText> hint)
+                         Map<Identifier, Double> immuneTempModifiers, ValueGetter<Boolean> fillSlots, ValueGetter<Boolean> hideIfUnmet, Optional<HintText> hint)
     {
         this(item, slot, insulation, entity, attributes, immuneTempModifiers, fillSlots, hideIfUnmet, hint, new NegatableList<>());
     }
@@ -79,7 +79,7 @@ public class InsulatorData extends ConfigData implements RequirementHolder
             INSULATION_CODEC.optionalFieldOf("insulation", List.of()).forGetter(InsulatorData::insulation),
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("entity", new NegatableList<>()).forGetter(InsulatorData::entity),
             AttributeModifierMap.CODEC.optionalFieldOf("attributes", new AttributeModifierMap()).forGetter(InsulatorData::attributes),
-            Codec.unboundedMap(ResourceLocation.CODEC, ExtraCodecs.DOUBLE).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(InsulatorData::immuneTempModifiers),
+            Codec.unboundedMap(Identifier.CODEC, ExtraCodecs.DOUBLE).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(InsulatorData::immuneTempModifiers),
             ValueGetter.optionalFieldCodec("fill_slots", Codec.BOOL, true).forGetter(InsulatorData::fillSlots),
             ValueGetter.optionalFieldCodec("hide_if_unmet", Codec.BOOL, false).forGetter(InsulatorData::hideIfUnmet),
             HintText.CODEC.optionalFieldOf("hint").forGetter(InsulatorData::hint)
@@ -102,7 +102,7 @@ public class InsulatorData extends ConfigData implements RequirementHolder
     public AttributeModifierMap attributes()
     {   return attributes;
     }
-    public Map<ResourceLocation, Double> immuneTempModifiers()
+    public Map<Identifier, Double> immuneTempModifiers()
     {   return immuneTempModifiers;
     }
     public ValueGetter<Boolean> fillSlots()

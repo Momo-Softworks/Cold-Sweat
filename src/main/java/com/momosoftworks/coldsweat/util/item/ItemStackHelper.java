@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.util.item;
 
+import net.minecraft.world.item.ItemStackTemplate;
 import com.mojang.serialization.DynamicOps;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -17,7 +18,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BucketItem;
-import net.minecraft.world.item.Equipable;
+import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -97,6 +98,16 @@ public class ItemStackHelper
     {   return getOpt(stack, componentType.get());
     }
 
+    public static boolean hasCraftingRemainder(ItemStack stack)
+    {   return stack.getCraftingRemainder() != null;
+    }
+
+    public static ItemStack getCraftingRemainder(ItemStack stack)
+    {
+        ItemStackTemplate remainder = stack.getCraftingRemainder();
+        return remainder == null ? ItemStack.EMPTY : remainder.create();
+    }
+
     public static EquipmentSlot getEquipmentSlot(ItemStack stack)
     {
         final EquipmentSlot slot = stack.getEquipmentSlot();
@@ -105,9 +116,9 @@ public class ItemStackHelper
         {   return slot;
         }
         // Item is equippable
-        Equipable equipable = Equipable.get(stack);
-        if (equipable != null)
-        {   return equipable.getEquipmentSlot();
+        Equippable equippable = stack.get(DataComponents.EQUIPPABLE);
+        if (equippable != null)
+        {   return equippable.slot();
         }
 
         return EquipmentSlot.MAINHAND;

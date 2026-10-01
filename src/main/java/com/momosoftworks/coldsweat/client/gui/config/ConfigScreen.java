@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.client.gui.config;
 
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import com.momosoftworks.coldsweat.client.event.TooltipHandler;
 import com.momosoftworks.coldsweat.client.gui.config.pages.*;
 import com.momosoftworks.coldsweat.config.spec.ClientSettingsConfig;
@@ -44,7 +45,7 @@ public class ConfigScreen
     public static int LAST_PAGE = PAGES.size() - 1;
     public static int CURRENT_PAGE = 0;
 
-    public static final Supplier<Integer> SHIFT_AMOUNT = () -> TooltipHandler.isShiftDown() ? Screen.hasControlDown() ? 100 : 10 : 1;
+    public static final Supplier<Integer> SHIFT_AMOUNT = () -> TooltipHandler.isShiftDown() ? Minecraft.getInstance().hasControlDown() ? 100 : 10 : 1;
 
     public static Screen getPage(int index, Screen parentScreen)
     {   return PAGES.get(CSMath.clamp(index, FIRST_PAGE, LAST_PAGE)).apply(parentScreen);
@@ -55,8 +56,8 @@ public class ConfigScreen
         RegistryAccess registryAccess = RegistryHelper.getRegistryAccess();
         if (Minecraft.getInstance().player != null)
         {
-            PacketDistributor.sendToServer(new SyncConfigSettingsMessage(registryAccess));
-            PacketDistributor.sendToServer(SyncPreferencesMessage.create());
+            ClientPacketDistributor.sendToServer(new SyncConfigSettingsMessage(registryAccess));
+            ClientPacketDistributor.sendToServer(SyncPreferencesMessage.create());
         }
         ClientSettingsConfig.writeAndSave();
     }
@@ -64,14 +65,14 @@ public class ConfigScreen
     @SubscribeEvent
     public static void onClicked(ScreenEvent.MouseButtonPressed.Pre event)
     {
-        if (event.getButton() == 0 && Minecraft.getInstance().screen instanceof ConfigPageDifficulty)
+        if (event.getButton() == 0 && Minecraft.getInstance().gui.screen() instanceof ConfigPageDifficulty)
             IS_MOUSE_DOWN = true;
     }
 
     @SubscribeEvent
     public static void onReleased(ScreenEvent.MouseButtonReleased.Pre event)
     {
-        if (event.getButton() == 0 && Minecraft.getInstance().screen instanceof ConfigPageDifficulty)
+        if (event.getButton() == 0 && Minecraft.getInstance().gui.screen() instanceof ConfigPageDifficulty)
             IS_MOUSE_DOWN = false;
     }
 }

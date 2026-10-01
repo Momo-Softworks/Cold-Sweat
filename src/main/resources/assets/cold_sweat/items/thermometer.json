@@ -1,0 +1,68 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "cold_sweat:temperature",
+    "entries": [
+      {
+        "threshold": -1.0,
+        "model": {
+          "type": "minecraft:model",
+          "model": "cold_sweat:item/thermometer/thermometer_-3"
+        }
+      },
+      {
+        "threshold": -0.75,
+        "model": {
+          "type": "minecraft:model",
+          "model": "cold_sweat:item/thermometer/thermometer_-2"
+        }
+      },
+      {
+        "threshold": -0.5,
+        "model": {
+          "type": "minecraft:model",
+          "model": "cold_sweat:item/thermometer/thermometer_-1"
+        }
+      },
+      {
+        "threshold": -0.25,
+        "model": {
+          "type": "minecraft:model",
+          "model": "cold_sweat:item/thermometer/thermometer_0"
+        }
+      },
+      {
+        "threshold": 0.25,
+        "model": {
+          "type": "minecraft:model",
+          "model": "cold_sweat:item/thermometer/thermometer_1"
+        }
+      },
+      {
+        "threshold": 0.5,
+        "model": {
+          "type": "minecraft:model",
+          "model": "cold_sweat:item/thermometer/thermometer_2"
+        }
+      },
+      {
+        "threshold": 0.75,
+        "model": {
+          "type": "minecraft:model",
+          "model": "cold_sweat:item/thermometer/thermometer_3"
+        }
+      },
+      {
+        "threshold": 1.0,
+        "model": {
+          "type": "minecraft:model",
+          "model": "cold_sweat:item/thermometer/thermometer_4"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "cold_sweat:item/thermometer"
+    }
+  }
+}

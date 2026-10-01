@@ -1,11 +1,12 @@
 package com.momosoftworks.coldsweat.core.event;
 
+import net.minecraft.core.component.DataComponentExactPredicate;
 import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.core.init.ModPotions;
 import com.momosoftworks.coldsweat.util.item.PotionUtils;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.component.DataComponentPredicate;
+import net.minecraft.core.component.predicates.DataComponentPredicate;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -42,10 +43,6 @@ public class PotionRecipes
 
     private static Ingredient createPotion(Holder<Potion> potion)
     {
-        DataComponentIngredient ingredientComponents = new DataComponentIngredient(
-                                                          HolderSet.direct(BuiltInRegistries.ITEM.wrapAsHolder(Items.POTION)),
-                                                          DataComponentPredicate.builder().expect(DataComponents.POTION_CONTENTS, new PotionContents(potion)).build(),
-                                                          false);
-        return new Ingredient(ingredientComponents);
+        return DataComponentIngredient.of(false, DataComponents.POTION_CONTENTS, new PotionContents(potion), Items.POTION);
     }
 }

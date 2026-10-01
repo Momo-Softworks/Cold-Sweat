@@ -1,5 +1,12 @@
 package com.momosoftworks.coldsweat.util.serialization;
 
+import java.util.stream.Stream;
+import net.minecraft.nbt.NbtOps;
+import com.mojang.serialization.RecordBuilder;
+import com.mojang.serialization.MapLike;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.MapCodec;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
@@ -9,7 +16,7 @@ import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.*;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
@@ -30,6 +37,39 @@ import java.util.function.Predicate;
 @EventBusSubscriber
 public class NBTHelper
 {
+    /**
+     * Encodes a CompoundTag's entries directly as fields of the surrounding map.<br>
+     * Used to write a CompoundTag into a {@link net.minecraft.world.level.storage.ValueOutput} without nesting it.
+     */
+    public static final MapCodec<CompoundTag> COMPOUND_MAP_CODEC = new MapCodec<>()
+    {
+        @Override
+        public <T> Stream<T> keys(DynamicOps<T> ops)
+        {   return Stream.empty();
+        }
+
+        @Override
+        public <T> DataResult<CompoundTag> decode(DynamicOps<T> ops, MapLike<T> input)
+        {
+            CompoundTag tag = new CompoundTag();
+            input.entries().forEach(pair ->
+            {
+                ops.getStringValue(pair.getFirst()).result().ifPresent(key ->
+                        tag.put(key, ops.convertTo(NbtOps.INSTANCE, pair.getSecond())));
+            });
+            return DataResult.success(tag);
+        }
+
+        @Override
+        public <T> RecordBuilder<T> encode(CompoundTag input, DynamicOps<T> ops, RecordBuilder<T> prefix)
+        {
+            for (String key : input.keySet())
+            {   prefix.add(key, NbtOps.INSTANCE.convertTo(ops, input.get(key)));
+            }
+            return prefix;
+        }
+    };
+
     private NBTHelper() {}
 
     /**
@@ -40,7 +80,7 @@ public class NBTHelper
     {
         // Write the modifier's data to a CompoundTag
         CompoundTag modifierTag = new CompoundTag();
-        ResourceLocation modifierId = modifier.getID();
+        Identifier modifierId = modifier.getID();
         if (modifierId == null)
         {
             ColdSweat.LOGGER.error("Failed to get key for TempModifier: {}", modifier.getClass().getSimpleName());
@@ -74,23 +114,23 @@ public class NBTHelper
     public static Optional<TempModifier> tagToModifier(CompoundTag modifierTag)
     {
         // Create a new modifier from the CompoundTag
-        Optional<TempModifier> optional = TempModifierRegistry.getValue(ResourceLocation.parse(modifierTag.getString("Id")));
+        Optional<TempModifier> optional = TempModifierRegistry.getValue(Identifier.parse(modifierTag.getStringOr("Id", "")));
         optional.ifPresent(modifier ->
         {
-            modifier.setNBT(modifierTag.getCompound("ModifierData"));
+            modifier.setNBT(modifierTag.getCompoundOrEmpty("ModifierData"));
 
             // Set the modifier's expiration time
             if (modifierTag.contains("ExpireTicks"))
-            {   modifier.expires(modifierTag.getInt("ExpireTicks"));
+            {   modifier.expires(modifierTag.getIntOr("ExpireTicks", 0));
             }
 
             // Set the modifier's tick rate
             if (modifierTag.contains("TickRate"))
-            {   modifier.tickRate(modifierTag.getInt("TickRate"));
+            {   modifier.tickRate(modifierTag.getIntOr("TickRate", 0));
             }
 
             // Set the modifier's ticks existed
-            modifier.setTicksExisted(modifierTag.getInt("TicksExisted"));
+            modifier.setTicksExisted(modifierTag.getIntOr("TicksExisted", 0));
         });
 
         return optional;
@@ -98,7 +138,7 @@ public class NBTHelper
 
     public static void incrementTag(CompoundTag tag, String key, int amount, Predicate<Integer> predicate)
     {
-        int value = tag.getInt(key);
+        int value = tag.getIntOr(key, 0);
         if (predicate.test(value))
         {   tag.putInt(key, value + amount);
         }
@@ -122,7 +162,7 @@ public class NBTHelper
             }
         }
 
-        int value = tag.getInt(key);
+        int value = tag.getIntOr(key, 0);
         if (predicate.test(value))
         {
             tag.putInt(key, value + amount);
@@ -195,7 +235,7 @@ public class NBTHelper
                 IntTag oldTemp = ((IntTag) CSMath.orElse(tag.get("fuel"), tag.get("Fuel")));
                 if (oldTemp != null)
                 {
-                    stack.set(ModItemComponents.WATER_TEMPERATURE, oldTemp.getAsDouble());
+                    stack.set(ModItemComponents.WATER_TEMPERATURE, oldTemp.doubleValue());
                     stack.get(DataComponents.CUSTOM_DATA).update(tg ->
                     {   tg.remove("fuel");
                         tg.remove("Fuel");
@@ -207,7 +247,7 @@ public class NBTHelper
                 DoubleTag oldTemp = ((DoubleTag) CSMath.orElse(tag.get("temperature"), tag.get("Temperature")));
                 if (oldTemp != null)
                 {
-                    stack.set(ModItemComponents.WATER_TEMPERATURE, oldTemp.getAsDouble());
+                    stack.set(ModItemComponents.WATER_TEMPERATURE, oldTemp.doubleValue());
                     stack.get(DataComponents.CUSTOM_DATA).update(tg ->
                     {   tg.remove("temperature");
                         tg.remove("Temperature");
@@ -221,7 +261,7 @@ public class NBTHelper
     {
         if (tag.isBlank()) return new CompoundTag();
         try
-        {   return TagParser.parseTag(tag);
+        {   return TagParser.parseCompoundFully(tag);
         }
         catch (Exception e)
         {
@@ -248,16 +288,16 @@ public class NBTHelper
     {
         return switch (tag)
         {
-            case IntTag integer -> integer.getAsInt();
-            case FloatTag floating -> floating.getAsFloat();
-            case DoubleTag doubleTag -> doubleTag.getAsDouble();
-            case LongTag longTag -> longTag.getAsLong();
-            case ShortTag shortTag -> shortTag.getAsShort();
-            case ByteTag byteTag -> byteTag.getAsByte();
-            case ByteArrayTag byteArray -> byteArray.getAsString();
+            case IntTag integer -> integer.intValue();
+            case FloatTag floating -> floating.floatValue();
+            case DoubleTag doubleTag -> doubleTag.doubleValue();
+            case LongTag longTag -> longTag.longValue();
+            case ShortTag shortTag -> shortTag.shortValue();
+            case ByteTag byteTag -> byteTag.byteValue();
+            case ByteArrayTag byteArray -> byteArray.toString();
             case IntArrayTag intArray -> intArray.getAsIntArray();
             case LongArrayTag longArray -> longArray.getAsLongArray();
-            case StringTag string -> string.getAsString();
+            case StringTag string -> string.value();
             case CompoundTag compound ->
             {
                 // Attempt to read an enum from the compound tag
@@ -276,8 +316,8 @@ public class NBTHelper
     {
         try
         {
-            Class<?> clazz = Class.forName(tag.getString("class"));
-            return Enum.valueOf((Class<T>) clazz, tag.getString("value"));
+            Class<?> clazz = Class.forName(tag.getStringOr("class", ""));
+            return Enum.valueOf((Class<T>) clazz, tag.getStringOr("value", ""));
         }
         catch (ClassNotFoundException e)
         {   ColdSweat.LOGGER.error("Failed to read enum from compound tag: {}", e.getMessage());
@@ -307,11 +347,13 @@ public class NBTHelper
                 }
                 yield tag;
             }
-            case Enum<?> enm -> new CompoundTag()
-                {{
-                    putString("value", enm.name());
-                    putString("class", enm.getClass().getName());
-                }};
+            case Enum<?> enm ->
+            {
+                CompoundTag tag = new CompoundTag();
+                tag.putString("value", enm.name());
+                tag.putString("class", enm.getClass().getName());
+                yield tag;
+            }
             default -> null;
         };
     }

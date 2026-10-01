@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 
 import java.util.*;
 
-import static net.minecraft.advancements.critereon.NbtPredicate.getEntityTagToCompare;
+import static net.minecraft.advancements.predicates.NbtPredicate.getEntityTagToCompare;
 
 public record NbtRequirement(CompoundTag tag)
 {
@@ -77,7 +77,7 @@ public record NbtRequirement(CompoundTag tag)
         // Case 1: Compare with another CompoundTag
         if (other instanceof CompoundTag otherCompound)
         {
-            for (String key : compoundTag.getAllKeys())
+            for (String key : compoundTag.keySet())
             {
                 if (!compareNbt(compoundTag.get(key), otherCompound.get(key)))
                 {   return false;
@@ -87,7 +87,7 @@ public record NbtRequirement(CompoundTag tag)
         }
 
         // Case 2: Special comparison with cs:contains or cs:any_of
-        if (compoundTag.getAllKeys().size() != 1)
+        if (compoundTag.keySet().size() != 1)
             return false;
 
         ListTag anyOfValues = (ListTag) compoundTag.get("cs:any_of");
@@ -165,11 +165,11 @@ public record NbtRequirement(CompoundTag tag)
     {
         try
         {
-            String numberString = rangeTag.getAsString();
+            String numberString = rangeTag.value();
             String[] parts = numberString.split(":");
             if (parts.length == 0 || parts.length > 2) return false;
 
-            double value = numberTag.getAsDouble();
+            double value = numberTag.doubleValue();
             double min = parts[0].isEmpty() ? Double.NEGATIVE_INFINITY : Double.parseDouble(parts[0]);
             double max = parts.length == 1 || parts[1].isEmpty() ? Double.POSITIVE_INFINITY : Double.parseDouble(parts[1]);
 
@@ -181,7 +181,7 @@ public record NbtRequirement(CompoundTag tag)
     }
 
     private static boolean compareNumbers(NumericTag tag, NumericTag other)
-    {   return tag.getAsDouble() == other.getAsDouble();
+    {   return tag.doubleValue() == other.doubleValue();
     }
 
     @Override

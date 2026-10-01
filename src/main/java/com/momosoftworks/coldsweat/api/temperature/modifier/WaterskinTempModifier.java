@@ -17,6 +17,6 @@ public class WaterskinTempModifier extends TempModifier
 
     @Override
     public Function<Double, Double>  calculate(LivingEntity entity, Temperature.Trait trait)
-    {   return temp -> temp + this.getNBT().getDouble("Temperature");
+    {   return temp -> temp + this.getNBT().getDoubleOr("Temperature", 0);
     }
 }

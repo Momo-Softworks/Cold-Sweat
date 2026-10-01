@@ -13,28 +13,28 @@ import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.Collection;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
-public class TempModifierArgument implements ArgumentType<ResourceLocation>
+public class TempModifierArgument implements ArgumentType<Identifier>
 {
     public static TempModifierArgument modifier()
     {   return new TempModifierArgument();
     }
 
-    public static ResourceLocation getModifier(CommandContext<CommandSourceStack> context, String argument)
-    {   return context.getArgument(argument, ResourceLocation.class);
+    public static Identifier getModifier(CommandContext<CommandSourceStack> context, String argument)
+    {   return context.getArgument(argument, Identifier.class);
     }
 
     @Override
-    public ResourceLocation parse(StringReader stringReader) throws CommandSyntaxException
-    {   ResourceLocation location = ResourceLocation.read(stringReader);
-        if (location.getNamespace().equals(ResourceLocation.DEFAULT_NAMESPACE))
-        {   location = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, location.getPath());
+    public Identifier parse(StringReader stringReader) throws CommandSyntaxException
+    {   Identifier location = Identifier.read(stringReader);
+        if (location.getNamespace().equals(Identifier.DEFAULT_NAMESPACE))
+        {   location = Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, location.getPath());
         }
         return location;
     }
@@ -42,7 +42,7 @@ public class TempModifierArgument implements ArgumentType<ResourceLocation>
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder)
     {
-        Stream<String> ids = TempModifierRegistry.getEntries().keySet().stream().map(ResourceLocation::toString);
+        Stream<String> ids = TempModifierRegistry.getEntries().keySet().stream().map(Identifier::toString);
         String input = builder.getRemaining().toLowerCase(Locale.ROOT);
         ids.filter((id) -> id.toLowerCase(Locale.ROOT).contains(input))
            .forEach(builder::suggest);

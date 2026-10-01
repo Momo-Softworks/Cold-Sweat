@@ -140,6 +140,6 @@ public class AdaptiveInsulation extends Insulation
     }
 
     public static AdaptiveInsulation deserialize(CompoundTag tag)
-    {   return new AdaptiveInsulation(tag.getDouble("insulation"), tag.getDouble("factor"), tag.getDouble("speed"));
+    {   return new AdaptiveInsulation(tag.getDoubleOr("insulation", 0), tag.getDoubleOr("factor", 0), tag.getDoubleOr("speed", 0));
     }
 }

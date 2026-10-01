@@ -1,24 +1,15 @@
 {
   "type": "minecraft:crafting_shaped",
-  "pattern":
-  [
+  "pattern": [
     "  S",
     " L ",
     "L  "
   ],
-  "key":
-  {
-    "S":
-    {
-      "tag": "c:strings"
-    },
-    "L":
-    {
-      "tag": "c:leathers"
-    }
+  "key": {
+    "S": "#c:strings",
+    "L": "#c:leathers"
   },
-  "result":
-  {
+  "result": {
     "id": "cold_sweat:waterskin",
     "count": 2
   }

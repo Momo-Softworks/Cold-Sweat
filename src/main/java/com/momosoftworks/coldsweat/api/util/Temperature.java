@@ -414,7 +414,7 @@ public class Temperature
 
     public static void updateTemperature(LivingEntity entity, ITemperatureCap cap, boolean instant)
     {
-        if (!entity.level().isClientSide)
+        if (!entity.level().isClientSide())
         {   PacketDistributor.sendToPlayersTrackingEntityAndSelf(entity, new SyncTemperatureMessage(entity, cap.serializeTraits(), instant));
         }
     }
@@ -427,7 +427,7 @@ public class Temperature
 
     public static void updateModifiers(LivingEntity entity, ITemperatureCap cap)
     {
-        if (!entity.level().isClientSide)
+        if (!entity.level().isClientSide())
         {   PacketDistributor.sendToPlayersTrackingEntityAndSelf(entity, new SyncTempModifiersMessage(entity, cap.serializeModifiers()));
         }
     }

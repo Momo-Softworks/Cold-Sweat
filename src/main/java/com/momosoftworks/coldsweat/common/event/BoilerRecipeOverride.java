@@ -1,12 +1,15 @@
 package com.momosoftworks.coldsweat.common.event;
 
 import com.momosoftworks.coldsweat.ColdSweat;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.Container;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeInput;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -23,14 +26,14 @@ public class BoilerRecipeOverride
     @SubscribeEvent
     public static void onCraftingTableOpen(PlayerContainerEvent.Open event)
     {
-        if (event.getContainer() instanceof RecipeBookMenu<?, ?> crafting
+        if (event.getContainer() instanceof AbstractCraftingMenu crafting
         && crafting.getGridWidth() == 3 && crafting.getGridHeight() == 3)
         {
-            MinecraftServer server = event.getEntity().getServer();
+            MinecraftServer server = event.getEntity().level().getServer();
             if (server == null) return;
-            RecipeHolder boilerRecipe = server.getRecipeManager().byKey(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "boiler")).orElse(null);
-            if (boilerRecipe == null) return;
-            
+            RecipeHolder<?> boilerRecipe = server.getRecipeManager().byKey(ResourceKey.create(Registries.RECIPE, Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "boiler"))).orElse(null);
+            if (boilerRecipe == null || !(boilerRecipe.value() instanceof CraftingRecipe craftingRecipe)) return;
+
             crafting.addSlotListener(new ContainerListener()
             {
                 @Override
@@ -40,11 +43,12 @@ public class BoilerRecipeOverride
 
                     if (slot instanceof ResultSlot resultSlot)
                     {
-                        if (crafting.recipeMatches(boilerRecipe))
+                        CraftingContainer craftSlots = getCraftingContainer(resultSlot);
+                        if (craftSlots != null)
                         {
-                            CraftingContainer craftSlots = getCraftingContainer(resultSlot);
-                            if (craftSlots != null)
-                            {   slot.set(boilerRecipe.value().assemble(craftSlots.asCraftInput(), server.registryAccess()));
+                            CraftingInput input = craftSlots.asCraftInput();
+                            if (craftingRecipe.matches(input, event.getEntity().level()))
+                            {   slot.set(craftingRecipe.assemble(input));
                             }
                         }
                     }

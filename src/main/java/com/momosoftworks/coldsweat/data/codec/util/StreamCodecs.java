@@ -11,7 +11,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 
 import java.util.*;
@@ -100,12 +100,12 @@ public class StreamCodecs
         return StreamCodec.of((buf, tagkey) ->
                               {
                                   buf.writeResourceKey(tagkey.registry());
-                                  buf.writeResourceLocation(tagkey.location());
+                                  buf.writeIdentifier(tagkey.location());
                               },
                               buf ->
                               {
                                   ResourceKey<? extends Registry<T>> registry = buf.readResourceKey(key).registryKey();
-                                  ResourceLocation location = buf.readResourceLocation();
+                                  Identifier location = buf.readIdentifier();
                                   return TagKey.create(registry, location);
                               });
     }
@@ -121,7 +121,7 @@ public class StreamCodecs
                               buf ->
                               {
                                     if (buf.readBoolean())
-                                    {   return Either.left(TagKey.create(key, ResourceLocation.parse(buf.readUtf())));
+                                    {   return Either.left(TagKey.create(key, Identifier.parse(buf.readUtf())));
                                     }
                                     else
                                     {   return Either.right(ByteBufCodecs.registry(key).decode(buf));

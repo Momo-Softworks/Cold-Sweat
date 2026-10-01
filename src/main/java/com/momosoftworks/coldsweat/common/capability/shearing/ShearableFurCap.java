@@ -56,8 +56,8 @@ public class ShearableFurCap implements IShearableCap
     @Override
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag nbt)
     {
-        sheared = nbt.getBoolean("Sheared");
-        furGrowthCooldown = nbt.getInt("FurGrowthCooldown");
-        age = nbt.getInt("Age");
+        sheared = nbt.getBooleanOr("Sheared", false);
+        furGrowthCooldown = nbt.getIntOr("FurGrowthCooldown", 0);
+        age = nbt.getIntOr("Age", 0);
     }
 }

@@ -2,7 +2,7 @@ package com.momosoftworks.coldsweat.client.gui.tooltip;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 
 public class ConditionalTooltip implements TooltipComponent

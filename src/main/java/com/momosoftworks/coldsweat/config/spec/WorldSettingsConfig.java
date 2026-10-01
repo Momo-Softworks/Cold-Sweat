@@ -3,7 +3,7 @@ package com.momosoftworks.coldsweat.config.spec;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.util.serialization.ListBuilder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.loading.FMLPaths;
@@ -1044,15 +1044,15 @@ public class WorldSettingsConfig
         }).toList();
     }
 
-    public static synchronized void setSourceSpreadWhitelist(List<ResourceLocation> whitelist)
+    public static synchronized void setSourceSpreadWhitelist(List<Identifier> whitelist)
     {   synchronized (SOURCE_SPREAD_WHITELIST)
-        {   SOURCE_SPREAD_WHITELIST.set(whitelist.stream().map(ResourceLocation::toString).collect(Collectors.toList()));
+        {   SOURCE_SPREAD_WHITELIST.set(whitelist.stream().map(Identifier::toString).collect(Collectors.toList()));
         }
     }
 
-    public static synchronized void setSourceSpreadBlacklist(List<ResourceLocation> blacklist)
+    public static synchronized void setSourceSpreadBlacklist(List<Identifier> blacklist)
     {   synchronized (SOURCE_SPREAD_BLACKLIST)
-        {   SOURCE_SPREAD_BLACKLIST.set(blacklist.stream().map(ResourceLocation::toString).collect(Collectors.toList()));
+        {   SOURCE_SPREAD_BLACKLIST.set(blacklist.stream().map(Identifier::toString).collect(Collectors.toList()));
         }
     }
 }

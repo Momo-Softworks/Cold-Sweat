@@ -45,8 +45,7 @@ public class MixinIce
         @Inject(method = "getDrops", at = @At("HEAD"), cancellable = true)
         private void addDrops(BlockState state, LootParams.Builder params, CallbackInfoReturnable<List<ItemStack>> cir)
         {
-            ItemStack stack = params.getOptionalParameter(LootContextParams.TOOL);
-            if (stack == null) return;
+            if (!(params.getOptionalParameter(LootContextParams.TOOL) instanceof ItemStack stack)) return;
             if (ConfigSettings.USE_CUSTOM_ICE_DROPS.get() && IceBreakingEvents.isModifiableIceBlock(state)
             && stack.isCorrectToolForDrops(state))
             {

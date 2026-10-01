@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.core.network.message;
 
+import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
 import net.minecraft.client.Minecraft;
@@ -9,7 +10,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -24,7 +25,7 @@ import java.util.function.Supplier;
 
 public class ParticleBatchMessage implements CustomPacketPayload
 {
-    public static final CustomPacketPayload.Type<ParticleBatchMessage> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "particle_batch"));
+    public static final CustomPacketPayload.Type<ParticleBatchMessage> TYPE = new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "particle_batch"));
     public static final StreamCodec<RegistryFriendlyByteBuf, ParticleBatchMessage> CODEC = CustomPacketPayload.codec(ParticleBatchMessage::encode, ParticleBatchMessage::decode);
 
     private static final BinaryOperator<Vec3> MIN_POS_COMPARATOR = (a, b) -> new Vec3(Math.min(a.x, b.x), Math.min(a.y, b.y), Math.min(a.z, b.z));
@@ -106,9 +107,9 @@ public class ParticleBatchMessage implements CustomPacketPayload
                 ParticleOptions particle = entry.getFirst();
                 ParticlePlacement placement = entry.getSecond();
 
-                if (message.minSetting == -1 || Minecraft.getInstance().options.particles().get().getId() <= message.minSetting)
+                if (message.minSetting == -1 || Minecraft.getInstance().options.particles().get().ordinal() <= message.minSetting)
                 {
-                    Minecraft.getInstance().level.addParticle(particle, placement.x, placement.y, placement.z, placement.vx, placement.vy, placement.vz);
+                    ClientOnlyHelper.getClientLevel().addParticle(particle, placement.x, placement.y, placement.z, placement.vx, placement.vy, placement.vz);
                 }
             }
         });
@@ -149,12 +150,12 @@ public class ParticleBatchMessage implements CustomPacketPayload
         public static ParticlePlacement fromNBT(CompoundTag tag)
         {
             return new ParticlePlacement(
-                    tag.getDouble("x"),
-                    tag.getDouble("y"),
-                    tag.getDouble("z"),
-                    tag.getDouble("vx"),
-                    tag.getDouble("vy"),
-                    tag.getDouble("vz")
+                    tag.getDoubleOr("x", 0),
+                    tag.getDoubleOr("y", 0),
+                    tag.getDoubleOr("z", 0),
+                    tag.getDoubleOr("vx", 0),
+                    tag.getDoubleOr("vy", 0),
+                    tag.getDoubleOr("vz", 0)
             );
         }
     }

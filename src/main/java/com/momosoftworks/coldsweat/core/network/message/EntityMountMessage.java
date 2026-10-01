@@ -5,14 +5,14 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.neoforged.fml.LogicalSide;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class EntityMountMessage implements CustomPacketPayload
 {
-    public static final CustomPacketPayload.Type<EntityMountMessage> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "entity_mount"));
+    public static final CustomPacketPayload.Type<EntityMountMessage> TYPE = new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "entity_mount"));
     public static final StreamCodec<FriendlyByteBuf, EntityMountMessage> CODEC = CustomPacketPayload.codec(EntityMountMessage::encode, EntityMountMessage::decode);
 
     int entity;
@@ -48,7 +48,7 @@ public class EntityMountMessage implements CustomPacketPayload
                 Entity vehicle = mc.level.getEntity(message.vehicle);
 
                 if (message.action == Action.MOUNT)
-                {   entity.startRiding(vehicle, true);
+                {   entity.startRiding(vehicle, true, true);
                 }
                 else if (entity.getVehicle().getId() == message.vehicle)
                 {   entity.stopRiding();

@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.common.entity.goal;
 
+import java.util.List;
 import com.momosoftworks.coldsweat.common.entity.Chameleon;
 import com.momosoftworks.coldsweat.common.entity.data.edible.ChameleonEdibles;
 import net.minecraft.world.entity.LivingEntity;
@@ -22,9 +23,9 @@ public class EdibleTemptGoal extends TemptGoal
 
     public EdibleTemptGoal(Chameleon mob, double speedModifier, boolean canScare)
     {
-        super(mob, speedModifier, Ingredient.EMPTY, canScare);
+        super(mob, speedModifier, stack -> false, canScare);
         this.mob = mob;
-        this.targetingConditions = TEMP_TARGETING.copy().selector(this::shouldFollow);
+        this.targetingConditions = TEMP_TARGETING.copy().selector((target, level) -> this.shouldFollow(target));
     }
 
     public boolean canUse()
@@ -34,7 +35,7 @@ public class EdibleTemptGoal extends TemptGoal
             return false;
         }
         else
-        {   this.player = this.mob.level().getNearestPlayer(this.targetingConditions, this.mob);
+        {   this.player = getServerLevel(this.mob).getNearestPlayer(this.targetingConditions, this.mob);
             return this.player != null;
         }
     }
@@ -43,7 +44,7 @@ public class EdibleTemptGoal extends TemptGoal
     {
         return ChameleonEdibles.EDIBLES.stream().anyMatch(edible ->
                {
-                   for (ItemStack stack : entity.getHandSlots())
+                   for (ItemStack stack : List.of(entity.getMainHandItem(), entity.getOffhandItem()))
                    {
                        if (!stack.is(edible.associatedItems())) continue;
                        boolean shouldEat = edible.shouldEat(stack, this.mob, entity);

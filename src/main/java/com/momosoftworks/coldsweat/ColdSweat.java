@@ -1,6 +1,5 @@
 package com.momosoftworks.coldsweat;
 
-import blusunrize.immersiveengineering.api.tool.ExternalHeaterHandler;
 import com.momosoftworks.coldsweat.api.registry.SpreadRuleRegistry;
 import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import com.momosoftworks.coldsweat.common.entity.Chameleon;
@@ -9,10 +8,8 @@ import com.momosoftworks.coldsweat.config.ModUpdater;
 import com.momosoftworks.coldsweat.config.spec.*;
 import com.momosoftworks.coldsweat.core.init.*;
 import com.momosoftworks.coldsweat.util.registries.ModGameRules;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.SpawnPlacementTypes;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -67,14 +64,13 @@ public class ColdSweat
         ModCreativeTabs.ITEM_GROUPS.register(MOD_BUS);
         ModAttributes.ATTRIBUTES.register(MOD_BUS);
         ModCommands.ARGUMENTS.register(MOD_BUS);
-        ModArmorMaterials.ARMOR_MATERIALS.register(MOD_BUS);
         ModAdvancementTriggers.TRIGGERS.register(MOD_BUS);
         ModItemComponents.DATA_COMPONENTS.register(MOD_BUS);
         ModTempEffects.TEMP_EFFECTS.register(MOD_BUS);
         ModDataAttachments.DATA_ATTACHMENTS.register(MOD_BUS);
+        ModEntityDataSerializers.ENTITY_DATA_SERIALIZERS.register(MOD_BUS);
 
-        // Setup game rules
-        ModGameRules.registerGameRules();
+        ModGameRules.GAME_RULES.register(MOD_BUS);
 
         // Handle config updates
         ModUpdater.updateFileNames();
@@ -90,21 +86,17 @@ public class ColdSweat
         CompatManager.registerEventHandlers();
     }
 
-    public static ResourceLocation createKey(String path)
-    {   return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+    public static Identifier createKey(String path)
+    {   return Identifier.fromNamespaceAndPath(MOD_ID, path);
     }
 
     public static String getVersion()
-    {   return FMLLoader.getLoadingModList().getModFileById(ColdSweat.MOD_ID).versionString();
+    {   return FMLLoader.getCurrent().getLoadingModList().getModFileById(ColdSweat.MOD_ID).versionString();
     }
 
     public void clientSetup(final FMLClientSetupEvent event)
     {
-        event.enqueueWork(() ->
-        {
-            ItemBlockRenderTypes.setRenderLayer(ModFluids.SLUSH.value(), RenderType.translucent());
-            ItemBlockRenderTypes.setRenderLayer(ModFluids.FLOWING_SLUSH.value(), RenderType.translucent());
-        });
+        // Slush render layer is now derived from its fluid model (see RegisterClientExtensions)
     }
 
     public void commonSetup(final FMLCommonSetupEvent event)
@@ -122,13 +114,14 @@ public class ColdSweat
         for (BlockEntityType<? extends HearthBlockEntity> blockEntityType : List.of(ModBlockEntities.HEARTH.value(), ModBlockEntities.BOILER.value(), ModBlockEntities.ICEBOX.value()))
         {
             // Register fluid handlers for hearth-like blocks
-            event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, blockEntityType, (hearthLike, facing) -> hearthLike.getFuelHandler());
+            event.registerBlockEntity(Capabilities.Fluid.BLOCK, blockEntityType, (hearthLike, facing) -> hearthLike.getFuelHandler());
             // Compat for Immersive Engineering
-            if (CompatManager.isImmersiveEngineeringLoaded())
-            {
-                event.registerBlockEntity(ExternalHeaterHandler.CAPABILITY, blockEntityType, (hearthLike, facing) -> hearthLike.supportsHeating() ? CompatManager.ImmersiveEngineering.getHeaterCap(hearthLike)
-                                                                                                                                                  : null);
-            }
+            // TODO(26.2): re-enable when Immersive Engineering is updated
+            // if (CompatManager.isImmersiveEngineeringLoaded())
+            // {
+            //     event.registerBlockEntity(ExternalHeaterHandler.CAPABILITY, blockEntityType, (hearthLike, facing) -> hearthLike.supportsHeating() ? CompatManager.ImmersiveEngineering.getHeaterCap(hearthLike)
+            //                                                                                                                                       : null);
+            // }
         }
     }
 

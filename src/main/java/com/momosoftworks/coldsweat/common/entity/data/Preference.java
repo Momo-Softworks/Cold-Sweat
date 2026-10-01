@@ -61,7 +61,7 @@ public enum Preference
     @Nullable
     public static <T> T get(Player player, Preference preference)
     {
-        CompoundTag preferenceNBT = player.getPersistentData().getCompound("ColdSweatPreferences");
+        CompoundTag preferenceNBT = player.getPersistentData().getCompoundOrEmpty("ColdSweatPreferences");
         if (!preferenceNBT.contains(preference.key()))
         {   return null;
         }

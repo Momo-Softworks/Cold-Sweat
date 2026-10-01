@@ -1,24 +1,15 @@
 {
   "type": "minecraft:crafting_shaped",
-  "pattern":
-  [
+  "pattern": [
     "CCC",
     "P P",
     "PPP"
   ],
-  "key":
-  {
-    "C":
-    {
-      "tag": "c:cobblestones/normal"
-    },
-    "P":
-    {
-      "tag": "minecraft:planks"
-    }
+  "key": {
+    "C": "#c:cobblestones/normal",
+    "P": "#minecraft:planks"
   },
-  "result":
-  {
+  "result": {
     "id": "cold_sweat:icebox",
     "count": 1
   }

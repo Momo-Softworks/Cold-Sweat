@@ -1,6 +1,15 @@
 package com.momosoftworks.coldsweat.common.item;
 
-import cn.mlus.thirst.content.registry.ThirstComponent;
+import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
+import com.momosoftworks.coldsweat.util.entity.EntityHelper;
+import net.minecraft.world.item.ItemInstance;
+import net.minecraft.world.item.ItemStackTemplate;
+import javax.annotation.Nullable;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.server.level.ServerLevel;
+import java.util.function.Consumer;
+import net.minecraft.world.item.component.TooltipDisplay;
+import com.momosoftworks.coldsweat.util.item.ItemStackHelper;
 import com.momosoftworks.coldsweat.api.temperature.modifier.WaterTempModifier;
 import com.momosoftworks.coldsweat.api.temperature.modifier.WaterskinTempModifier;
 import com.momosoftworks.coldsweat.api.util.placement.Matcher;
@@ -35,7 +44,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -49,8 +57,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
@@ -62,10 +68,15 @@ public class FilledWaterskinItem extends Item
 {
     public static final double DRAIN_RATE = 0.5;
 
-    public FilledWaterskinItem()
+    public static Properties getDefaultProperties()
     {
-        super(new Properties().stacksTo(1).craftRemainder(ModItems.WATERSKIN.get())
-                              .component(ModItemComponents.WATER_TEMPERATURE, 0d));
+        return new Properties().stacksTo(1).craftRemainder(ModItems.WATERSKIN.get())
+                              .component(ModItemComponents.WATER_TEMPERATURE, 0d);
+    }
+
+    public FilledWaterskinItem(Properties properties)
+    {
+        super(properties);
 
         DispenserBlock.registerBehavior(this, DISPENSE_BEHAVIOR);
     }
@@ -94,9 +105,10 @@ public class FilledWaterskinItem extends Item
     }
 
     @Override
-    public void inventoryTick(ItemStack stack, Level world, Entity entity, int slot, boolean isSelected)
+    public void inventoryTick(ItemStack stack, ServerLevel world, Entity entity, @Nullable EquipmentSlot equipmentSlot)
     {
-        super.inventoryTick(stack, world, entity, slot, isSelected);
+        super.inventoryTick(stack, world, entity, equipmentSlot);
+        int slot = EntityHelper.getInventorySlot(entity, stack);
         if (!world.isClientSide() && EntityTempManager.isTemperatureEnabled(entity) && entity.tickCount % 5 == 0)
         {
             double itemTemp = stack.get(ModItemComponents.WATER_TEMPERATURE);
@@ -116,7 +128,7 @@ public class FilledWaterskinItem extends Item
         if (!(entity instanceof Player player && stack.is(ModItems.FILLED_WATERSKIN) && stack.has(ModItemComponents.WATER_TEMPERATURE))) return false;
 
         // Play empty sound
-        if (!player.level().isClientSide)
+        if (!player.level().isClientSide())
         {
             double temperature = stack.getOrDefault(ModItemComponents.WATER_TEMPERATURE, 0d);
             double wetnessTemp = 0.05 * CSMath.sign(temperature == 0 ? 1 : temperature);
@@ -128,7 +140,7 @@ public class FilledWaterskinItem extends Item
         }
 
         consumeWaterskin(stack, player, hand);
-        NeoForge.EVENT_BUS.post(new LivingEntityUseItemEvent.Finish(player, stack, 1, stack.getCraftingRemainingItem()));
+        NeoForge.EVENT_BUS.post(new LivingEntityUseItemEvent.Finish(player, stack, 1, ItemStackHelper.getCraftingRemainder(stack)));
         player.swing(hand, true);
 
         // spawn falling water particles
@@ -150,8 +162,8 @@ public class FilledWaterskinItem extends Item
                 particleBatch.sendEntity(player);
             }, i);
         }
-        player.getCooldowns().addCooldown(ModItems.FILLED_WATERSKIN.value(), 10);
-        player.getCooldowns().addCooldown(ModItems.WATERSKIN.value(), 10);
+        player.getCooldowns().addCooldown(ModItems.FILLED_WATERSKIN.toStack(), 10);
+        player.getCooldowns().addCooldown(ModItems.WATERSKIN.toStack(), 10);
 
         return true;
     }
@@ -159,7 +171,7 @@ public class FilledWaterskinItem extends Item
     public static ItemStack consumeWaterskin(ItemStack stack, LivingEntity entity, InteractionHand usedHand)
     {
         // Create empty waterskin item
-        ItemStack emptyStack = stack.getCraftingRemainingItem();
+        ItemStack emptyStack = ItemStackHelper.getCraftingRemainder(stack);
 
         // Add the item to the player's inventory
         if (entity instanceof Player player && player.getInventory().contains(emptyStack))
@@ -174,7 +186,7 @@ public class FilledWaterskinItem extends Item
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand)
+    public InteractionResult use(Level level, Player player, InteractionHand hand)
     {
         if (player.isCrouching())
         {   return performAction(Preference.getOrDefault(player, Preference.WATERSKIN_SECONDARY, Preference.WaterskinAction.DRINK), level, player, hand);
@@ -197,7 +209,7 @@ public class FilledWaterskinItem extends Item
         }
     }
 
-    private static InteractionResultHolder<ItemStack> performAction(Preference.WaterskinAction action, Level level, Player player, InteractionHand hand)
+    private static InteractionResult performAction(Preference.WaterskinAction action, Level level, Player player, InteractionHand hand)
     {
         ItemStack stack = player.getItemInHand(hand);
         switch (action)
@@ -207,12 +219,12 @@ public class FilledWaterskinItem extends Item
             }
             case POUR ->
             {   if (performPourAction(stack, player, hand))
-                {   return InteractionResultHolder.consume(stack);
+                {   return InteractionResult.CONSUME.heldItemTransformedTo(stack);
                 }
             }
             case NONE -> {}
         }
-        return InteractionResultHolder.pass(stack);
+        return InteractionResult.PASS;
     }
 
     @Override
@@ -234,14 +246,14 @@ public class FilledWaterskinItem extends Item
                     : Blocks.WATER_CAULDRON.defaultBlockState().setValue(LayeredCauldronBlock.LEVEL, 1);
             level.setBlock(pos, state, 3);
             // Pouring sound / visuals
-            if (!level.isClientSide)
+            if (!level.isClientSide())
             {   level.playSound(null, pos, ModSounds.WATERSKIN_FILL.value(), SoundSource.BLOCKS, 2f, (float) Math.random() / 5 + 0.9f);
                 WorldHelper.spawnParticleBatch(level, ParticleTypes.SPLASH, pos.getX() + 0.5, pos.getY() + 0.65, pos.getZ() + 0.5, 0.5, 0.5, 0.5, 10, 0);
             }
             // Consume waterskin
             if (player != null)
             {   consumeWaterskin(context.getItemInHand(), player, context.getHand());
-                player.getCooldowns().addCooldown(ModItems.WATERSKIN.value(), 10);
+                player.getCooldowns().addCooldown(ModItems.WATERSKIN.toStack(), 10);
             }
             return InteractionResult.SUCCESS;
         }
@@ -249,8 +261,8 @@ public class FilledWaterskinItem extends Item
     }
 
     @Override
-    public UseAnim getUseAnimation(ItemStack stack)
-    {   return UseAnim.DRINK;
+    public ItemUseAnimation getUseAnimation(ItemStack stack)
+    {   return ItemUseAnimation.DRINK;
     }
 
     @Override
@@ -279,15 +291,14 @@ public class FilledWaterskinItem extends Item
     }
 
     @Override
-    @OnlyIn(Dist.CLIENT)
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag advanced)
+    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> tooltip, TooltipFlag advanced)
     {
         // Display filled state
         MutableComponent filledLabel = Component.translatable("item.cold_sweat.waterskin.filled").withStyle(ChatFormatting.GRAY);
         if (ConfigSettings.ENABLE_HINTS.get() && !TooltipHandler.isShiftDown())
         {   filledLabel.append(Component.literal(" ").append(TooltipHandler.EXPAND_TOOLTIP_HINT));
         }
-        tooltip.add(filledLabel);
+        tooltip.accept(filledLabel);
 
         if (TooltipHandler.isShiftDown())
         {
@@ -295,19 +306,19 @@ public class FilledWaterskinItem extends Item
             {
                 String crouchKey = Minecraft.getInstance().options.keyShift.getKey().getDisplayName().getString();
                 String crouchAction;
-                switch (Preference.getOrDefault(Minecraft.getInstance().player, Preference.WATERSKIN_SECONDARY, Preference.WaterskinAction.POUR))
+                switch (Preference.getOrDefault(ClientOnlyHelper.getClientPlayer(), Preference.WATERSKIN_SECONDARY, Preference.WaterskinAction.POUR))
                 {
                     case DRINK -> crouchAction = "tooltip.cold_sweat.waterskin.drink";
                     case POUR -> crouchAction = "tooltip.cold_sweat.waterskin.pour";
                     default -> crouchAction = "";
                 }
                 if (!crouchAction.isEmpty())
-                {   tooltip.add(2, Component.translatable(crouchAction, Component.literal(crouchKey).withStyle(ChatFormatting.GRAY)).withStyle(ChatFormatting.DARK_GRAY));
+                {   tooltip.accept(Component.translatable(crouchAction, Component.literal(crouchKey).withStyle(ChatFormatting.GRAY)).withStyle(ChatFormatting.DARK_GRAY));
                 }
             }
         }
 
-        super.appendHoverText(stack, context, tooltip, advanced);
+        super.appendHoverText(stack, context, display, tooltip, advanced);
     }
 
     @Override
@@ -316,16 +327,19 @@ public class FilledWaterskinItem extends Item
     }
 
     @Override
-    public boolean hasCraftingRemainingItem(ItemStack stack)
-    {   return true;
+    public ItemStackTemplate getCraftingRemainder(ItemInstance instance)
+    {
+        if (instance instanceof ItemStack stack && stack.getItem() instanceof FilledWaterskinItem)
+        {   return ItemStackTemplate.fromStack(getEmptyWaterskin(stack));
+        }
+        return super.getCraftingRemainder(instance);
     }
 
-    @Override
-    public ItemStack getCraftingRemainingItem(ItemStack stack)
+    public static ItemStack getEmptyWaterskin(ItemStack stack)
     {
         if (stack.getItem() instanceof FilledWaterskinItem)
         {
-            ItemStack emptyWaterskin = super.getCraftingRemainingItem(stack);
+            ItemStack emptyWaterskin = ModItems.WATERSKIN.toStack();
 
             // Preserve NBT (except temperature)
             emptyWaterskin.applyComponents(stack.getComponents());
@@ -333,16 +347,15 @@ public class FilledWaterskinItem extends Item
             emptyWaterskin.remove(DataComponents.DAMAGE);
             emptyWaterskin.remove(DataComponents.MAX_DAMAGE);
             emptyWaterskin.set(DataComponents.MAX_STACK_SIZE, emptyWaterskin.getItem().getDefaultMaxStackSize());
-            if (CompatManager.isThirstLoaded())
-            {   emptyWaterskin.remove(ThirstComponent.PURITY);
-            }
+            CompatManager.Thirst.removePurity(emptyWaterskin);
             return emptyWaterskin;
         }
         return stack;
     }
 
-    public String getDescriptionId()
-    {   return Component.translatable("item.cold_sweat.waterskin").getString();
+    @Override
+    public Component getName(ItemStack stack)
+    {   return Component.translatable("item.cold_sweat.waterskin");
     }
 
     private static final DispenseItemBehavior DISPENSE_BEHAVIOR = (source, stack) ->
@@ -432,6 +445,6 @@ public class FilledWaterskinItem extends Item
             }
         }.start();
 
-        return stack.getCraftingRemainingItem();
+        return ItemStackHelper.getCraftingRemainder(stack);
     };
 }

@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.common.item;
 
+import net.minecraft.world.InteractionResult;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.entity.data.Preference;
@@ -8,7 +9,6 @@ import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -21,15 +21,15 @@ public class ThermometerItem extends Item
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand)
+    public InteractionResult use(Level level, Player player, InteractionHand hand)
     {   // Display the ambient temperature on right-click
-        if (CompatManager.isSupplementariesLoaded() && !player.level().isClientSide)
+        if (CompatManager.isSupplementariesLoaded() && !player.level().isClientSide())
         {
             // Get the temperature, in the player's preferred units
             Temperature.Units units = Preference.getOrDefault(player, Preference.UNITS, Temperature.Units.F);
             int temperature = (int) Temperature.convert(WorldHelper.getTemperatureAt(player.level(), player.blockPosition()), Temperature.Units.MC, units, true);
             // Display the temperature to the player
-            player.displayClientMessage(Component.literal(temperature + " " + units.getFormattedName().getString()), true);
+            player.sendOverlayMessage(Component.literal(temperature + " " + units.getFormattedName().getString()));
             player.swing(hand, true);
         }
         return super.use(level, player, hand);

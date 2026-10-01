@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.core.network.message;
 
+import net.minecraft.world.level.Level;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
@@ -9,7 +10,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
@@ -19,7 +20,7 @@ import java.nio.charset.StandardCharsets;
 
 public class PlayEntityAttachedSoundMessage implements CustomPacketPayload
 {
-    public static final CustomPacketPayload.Type<PlayEntityAttachedSoundMessage> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "play_sound"));
+    public static final CustomPacketPayload.Type<PlayEntityAttachedSoundMessage> TYPE = new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "play_sound"));
     public static final StreamCodec<FriendlyByteBuf, PlayEntityAttachedSoundMessage> CODEC = CustomPacketPayload.codec(PlayEntityAttachedSoundMessage::encode, PlayEntityAttachedSoundMessage::decode);
 
     String sound;
@@ -61,8 +62,8 @@ public class PlayEntityAttachedSoundMessage implements CustomPacketPayload
     {
         context.enqueueWork(() ->
         {
-            SoundEvent sound = BuiltInRegistries.SOUND_EVENT.get(ResourceLocation.parse(message.sound));
-            Entity entity = Minecraft.getInstance().level.getEntity(message.entityID);
+            SoundEvent sound = BuiltInRegistries.SOUND_EVENT.getValue(Identifier.parse(message.sound));
+            Entity entity = ClientOnlyHelper.getClientLevel().getEntity(message.entityID);
 
             if (entity != null && sound != null)
             {   ClientOnlyHelper.playEntitySound(sound, message.source, message.volume, message.pitch, entity);

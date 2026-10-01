@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "cold_sweat:goat_fur"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "cold_sweat:goat_fur"
+      }
+    ]
+  }
+}

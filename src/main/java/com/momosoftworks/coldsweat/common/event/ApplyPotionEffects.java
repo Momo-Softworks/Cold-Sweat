@@ -17,8 +17,8 @@ public class ApplyPotionEffects
     @SubscribeEvent
     public static void onSpawn(EntityJoinLevelEvent event)
     {
-        if (!event.getLevel().isClientSide && event.getEntity() instanceof Player
-        && ConfigSettings.GRACE_ENABLED.get() && !event.getEntity().getPersistentData().getBoolean("GivenGracePeriod"))
+        if (!event.getLevel().isClientSide() && event.getEntity() instanceof Player
+        && ConfigSettings.GRACE_ENABLED.get() && !event.getEntity().getPersistentData().getBooleanOr("GivenGracePeriod", false))
         {
             event.getEntity().getPersistentData().putBoolean("GivenGracePeriod", true);
             ((Player) event.getEntity()).addEffect(new MobEffectInstance(ModEffects.GRACE, ConfigSettings.GRACE_LENGTH.get(), 0, false, false, true));

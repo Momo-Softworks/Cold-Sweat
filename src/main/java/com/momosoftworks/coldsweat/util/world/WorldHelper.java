@@ -37,6 +37,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.*;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -90,8 +91,8 @@ public abstract class WorldHelper
 
     public static int getHeight(BlockPos pos, Level level, Heightmap.Types heightmap)
     {
-        int minHeight = level.getMinBuildHeight();
-        int maxHeight = level.getMaxBuildHeight();
+        int minHeight = level.getMinY();
+        int maxHeight = (level.getMaxY() + 1);
         int seaLevel = level.getSeaLevel();
         // If chunk isn't loaded, return sea level
         if (!level.isLoaded(pos)) return seaLevel;
@@ -101,7 +102,7 @@ public abstract class WorldHelper
 
         if (level.isClientSide())
         {
-            int y = level.getMaxBuildHeight();
+            int y = (level.getMaxY() + 1);
             BlockPos.MutableBlockPos mutable = pos.mutable();
             mutable.setY(CSMath.clamp(mutable.getY(), minHeight, maxHeight));
 
@@ -257,7 +258,7 @@ public abstract class WorldHelper
         ChunkAccess chunk = getChunk(level, pos);
         if (chunk == null) return true;
 
-        int maxY = Math.min(pos.getY() + maxDistance, level.getMaxBuildHeight());
+        int maxY = Math.min(pos.getY() + maxDistance, (level.getMaxY() + 1));
         BlockPos.MutableBlockPos scanPos = pos.mutable();
         // Skip sublevel checking if no sublevels intersect the search area
         boolean intersectsSublevels = !worldToSublevel(level, new AABB(pos.getX(), pos.getY(), pos.getZ(), pos.getX(), maxY, pos.getZ())).isEmpty();
@@ -333,7 +334,7 @@ public abstract class WorldHelper
 
     @Nullable
     public static ChunkAccess getChunk(LevelAccessor level, ChunkPos pos)
-    {   return getChunk(level, pos.x, pos.z);
+    {   return getChunk(level, pos.x(), pos.z());
     }
 
     @Nullable
@@ -353,14 +354,14 @@ public abstract class WorldHelper
         if (!(level instanceof ServerLevel serverLevel) || !level.isLoaded(pos)) return Optional.empty();
 
         StructureManager structureManager = serverLevel.structureManager();
-        Registry<Structure> registry = serverLevel.registryAccess().registryOrThrow(Registries.STRUCTURE);
+        Registry<Structure> registry = serverLevel.registryAccess().lookupOrThrow(Registries.STRUCTURE);
         for (Map.Entry<Structure, LongSet> entry : structureManager.getAllStructuresAt(pos).entrySet())
         {
             Structure structure = entry.getKey();
             StructureStart start = structureManager.getStructureWithPieceAt(pos, structure);
             if (start.isValid())
             {
-                return registry.getHolder(registry.getResourceKey(structure).orElseThrow()).map(holder -> holder);
+                return registry.get(registry.getResourceKey(structure).orElseThrow()).map(holder -> holder);
             }
         }
         return Optional.empty();
@@ -378,7 +379,7 @@ public abstract class WorldHelper
     {
         if (!entity.isSilent())
         {
-            if (entity.level().isClientSide)
+            if (entity.level().isClientSide())
             {   ClientOnlyHelper.playEntitySound(sound, source, volume, pitch, entity);
             }
             else
@@ -398,8 +399,8 @@ public abstract class WorldHelper
     public static boolean isRainingAt(Level level, BlockPos pos)
     {
         pos = sublevelToWorld(level, pos);
-        return (level.isRaining() && level.getBiomeManager().getBiome(pos).value().getPrecipitationAt(pos) == Biome.Precipitation.RAIN || CompatManager.Weather2.isRainstormAt(level, pos))
-            && canSeeSky(level, pos.above(), level.getMaxBuildHeight())
+        return (level.isRaining() && level.getBiomeManager().getBiome(pos).value().getPrecipitationAt(pos, level.getSeaLevel()) == Biome.Precipitation.RAIN || CompatManager.Weather2.isRainstormAt(level, pos))
+            && canSeeSky(level, pos.above(), (level.getMaxY() + 1))
             && !CompatManager.SereneSeasons.isColdEnoughToSnow(level, pos);
     }
 
@@ -436,7 +437,7 @@ public abstract class WorldHelper
 
                 if (state == null)
                 {   // Set new workingChunk if the ray travels outside the current one
-                    if (workingChunk == null || !workingChunk.getPos().equals(new ChunkPos(pos)))
+                    if (workingChunk == null || !workingChunk.getPos().equals(ChunkPos.containing(pos)))
                     {   workingChunk = getChunk(level, pos);
                     }
                     if (workingChunk == null) continue;
@@ -493,7 +494,7 @@ public abstract class WorldHelper
     public static void spawnParticle(Level level, ParticleOptions particle, double x, double y, double z,
                                      double xSpeed, double ySpeed, double zSpeed)
     {
-        if (!level.isClientSide)
+        if (!level.isClientSide())
         {
             ParticleBatchMessage particles = new ParticleBatchMessage();
             particles.addParticle(particle, new ParticleBatchMessage.ParticlePlacement(x, y, z, xSpeed, ySpeed, zSpeed));
@@ -514,7 +515,7 @@ public abstract class WorldHelper
     {
         Random rand = new Random();
 
-        if (!level.isClientSide)
+        if (!level.isClientSide())
         {
             ParticleBatchMessage particles = new ParticleBatchMessage();
             for (int i = 0; i < count; i++)
@@ -576,8 +577,9 @@ public abstract class WorldHelper
      */
     public static ItemEntity entityDropItem(Entity entity, ItemStack stack, int lifeTime)
     {
+        if (!(entity.level() instanceof ServerLevel serverLevel)) return null;
         Random rand = new Random();
-        ItemEntity item = entity.spawnAtLocation(stack, entity.getBbHeight());
+        ItemEntity item = entity.spawnAtLocation(serverLevel, stack, entity.getBbHeight());
         if (item != null)
         {   item.setDeltaMovement(item.getDeltaMovement().add(((rand.nextFloat() - rand.nextFloat()) * 0.1F), (rand.nextFloat() * 0.05F), ((rand.nextFloat() - rand.nextFloat()) * 0.1F)));
             item.lifespan = lifeTime;
@@ -633,8 +635,8 @@ public abstract class WorldHelper
      */
     public static void syncBlockEntityData(BlockEntity be)
     {
-        if (be.getLevel() == null || be.getLevel().isClientSide) return;
-        PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) be.getLevel(), new ChunkPos(be.getBlockPos()), new BlockDataUpdateMessage(be));
+        if (be.getLevel() == null || be.getLevel().isClientSide()) return;
+        PacketDistributor.sendToPlayersTrackingChunk((ServerLevel) be.getLevel(), ChunkPos.containing(be.getBlockPos()), new BlockDataUpdateMessage(be));
     }
 
     /**
@@ -691,7 +693,18 @@ public abstract class WorldHelper
     public static double getBiomeTemperature(LevelAccessor level, Holder<Biome> biome)
     {
         Pair<Double, Double> temps = getBiomeTemperatureRange(level, biome);
-        return CSMath.blend(temps.getFirst(), temps.getSecond(), Math.sin(level.dayTime() / (12000 / Math.PI)), -1, 1);
+        return CSMath.blend(temps.getFirst(), temps.getSecond(), Math.sin(getDayTime(level) / (12000 / Math.PI)), -1, 1);
+    }
+
+    /**
+     * @return The time of the level's default world clock, or 0 if the dimension has no clock (i.e. fixed time)
+     */
+    public static long getDayTime(LevelAccessor level)
+    {
+        if (level instanceof Level realLevel)
+        {   return realLevel.getDefaultClockTime();
+        }
+        return 0;
     }
 
     public static double getTimeMultiplier(LevelAccessor level)
@@ -699,12 +712,8 @@ public abstract class WorldHelper
         if (level.dimensionType().hasCeiling())
         {   return 0;
         }
-        if (level.dimensionType().hasFixedTime())
-        {   return level.dimensionType().fixedTime().getAsLong();
-        }
-
         final long dayLength = 24000L;
-        long time = Math.floorMod(level.dayTime(), dayLength);
+        long time = Math.floorMod(getDayTime(level), dayLength);
         long hottestTime = ConfigSettings.HOTTEST_TIME.get();
         long coldestTime = ConfigSettings.COLDEST_TIME.get();
 
@@ -796,7 +805,8 @@ public abstract class WorldHelper
         boolean forceUpdate = (flags & 2) != 0;
 
         Map<BlockPos, TempSnapshot> snapshots = TEMPERATURE_CACHE.computeIfAbsent(level.dimension(), dim -> new HashMap<>());
-        int tickSpeedMultiplier = 1 + level.getGameRules().getInt(GameRules.RULE_RANDOMTICKING) / 20;
+        int randomTickSpeed = level instanceof ServerLevel serverLevel ? serverLevel.getGameRules().get(GameRules.RANDOM_TICK_SPEED) : 3;
+        int tickSpeedMultiplier = 1 + randomTickSpeed / 20;
 
         BlockPos segment = new BlockPos((pos.getX() >> 3) << 3,
                                         (pos.getY() >> 3) << 3,
@@ -941,7 +951,7 @@ public abstract class WorldHelper
 
     public static boolean shouldFreeze(LevelAccessor levelReader, BlockPos pos, boolean mustBeAtEdge)
     {
-        if (pos.getY() >= levelReader.getMinBuildHeight() && pos.getY() < levelReader.getMaxBuildHeight()
+        if (pos.getY() >= levelReader.getMinY() && pos.getY() < (levelReader.getMaxY() + 1)
         && levelReader instanceof ServerLevel serverLevel)
         {
             Lazy<Boolean> freezingTemp = Lazy.of(() ->
@@ -960,7 +970,7 @@ public abstract class WorldHelper
 
     public static boolean shouldMelt(LevelAccessor levelReader, BlockPos pos, boolean mustBeAtEdge)
     {
-        if (pos.getY() >= levelReader.getMinBuildHeight() && pos.getY() < levelReader.getMaxBuildHeight()
+        if (pos.getY() >= levelReader.getMinY() && pos.getY() < (levelReader.getMaxY() + 1)
         && levelReader instanceof ServerLevel serverLevel)
         {
             if (mustBeAtEdge && surroundedByBlock(levelReader, pos, Blocks.ICE))
@@ -1015,11 +1025,11 @@ public abstract class WorldHelper
         pos = sublevelToWorld(level, pos);
         int maxCoolingLevel = 0;
         int maxHeatingLevel = 0;
-        ChunkPos chunkPos = new ChunkPos(pos);
+        ChunkPos chunkPos = ChunkPos.containing(pos);
         for (int x = -chunkRadius; x <= chunkRadius; x++)
         for (int z = -chunkRadius; z <= chunkRadius; z++)
         {
-            ChunkAccess chunk = getChunk(level, chunkPos.x + x, chunkPos.z + z);
+            ChunkAccess chunk = getChunk(level, chunkPos.x() + x, chunkPos.z() + z);
             if (chunk == null) continue;
 
             for (BlockPos bePos : chunk.getBlockEntitiesPos())

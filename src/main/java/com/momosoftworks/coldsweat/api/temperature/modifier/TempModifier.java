@@ -9,7 +9,7 @@ import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.core.init.TempModifierInit;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.neoforge.common.NeoForge;
 
@@ -42,7 +42,7 @@ public abstract class TempModifier
      * Codec for use in complete serialization/deserialization for entities
      */
     public static final Codec<TempModifier> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-        ResourceLocation.CODEC.fieldOf("type").forGetter(TempModifierRegistry::getKey),
+        Identifier.CODEC.fieldOf("type").forGetter(TempModifierRegistry::getKey),
         CompoundTag.CODEC.optionalFieldOf("nbt", new CompoundTag()).forGetter(TempModifier::getNBT),
         Codec.INT.optionalFieldOf("expire_time", -1).forGetter(TempModifier::getExpireTime),
         Codec.INT.optionalFieldOf("tick_rate", 1).forGetter(TempModifier::getTickRate),
@@ -236,7 +236,7 @@ public abstract class TempModifier
     {   this.changed = false;
     }
 
-    public ResourceLocation getID()
+    public Identifier getID()
     {   return TempModifierRegistry.getKey(this);
     }
 
@@ -253,10 +253,10 @@ public abstract class TempModifier
     {   return this.getID().toString();
     }
 
-    public record Factory(ResourceLocation type, CompoundTag nbt, int expireTime, int tickRate) implements Supplier<TempModifier>
+    public record Factory(Identifier type, CompoundTag nbt, int expireTime, int tickRate) implements Supplier<TempModifier>
     {
         public static final Codec<Factory> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                ResourceLocation.CODEC.fieldOf("type").forGetter(Factory::type),
+                Identifier.CODEC.fieldOf("type").forGetter(Factory::type),
                 CompoundTag.CODEC.optionalFieldOf("nbt", new CompoundTag()).forGetter(Factory::nbt),
                 Codec.INT.optionalFieldOf("expire_time", -1).forGetter(Factory::expireTime),
                 Codec.INT.optionalFieldOf("tick_rate", 1).forGetter(Factory::tickRate)

@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.config.enums;
 
+import net.minecraft.client.Minecraft;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
 import com.momosoftworks.coldsweat.util.serialization.EnumHelper;
 import net.minecraft.client.gui.screens.Screen;
@@ -37,8 +38,8 @@ public enum InsulationVisibility implements StringRepresentable
         {
             case ALWAYS -> true;
             case IF_PRESENT -> true;
-            case ON_SHIFT -> Screen.hasShiftDown();
-            case SHIFT_AND_PRESENT -> Screen.hasShiftDown();
+            case ON_SHIFT -> Minecraft.getInstance().hasShiftDown();
+            case SHIFT_AND_PRESENT -> Minecraft.getInstance().hasShiftDown();
             case NEVER -> false;
         };
     }

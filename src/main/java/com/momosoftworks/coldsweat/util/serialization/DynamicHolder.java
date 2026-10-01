@@ -10,7 +10,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.fml.util.thread.EffectiveSide;
 
 import java.util.function.*;
@@ -22,7 +22,7 @@ import java.util.function.*;
 public class DynamicHolder<T> implements Supplier<T>
 {
     private T value;
-    private ResourceLocation name;
+    private Identifier name;
     private Supplier<T> valueCreator;
     private Loader<T> loader;
     private Saver<T> saver;
@@ -30,13 +30,13 @@ public class DynamicHolder<T> implements Supplier<T>
     private SyncType syncType = SyncType.NONE;
     private boolean requireRegistries = false;
 
-    protected DynamicHolder(ResourceLocation name, Supplier<T> valueCreator, Consumer<DynamicHolder<T>> loader)
+    protected DynamicHolder(Identifier name, Supplier<T> valueCreator, Consumer<DynamicHolder<T>> loader)
     {   this.name = name;
         this.valueCreator = valueCreator;
         this.loader = (holder, registryAccess) -> loader.accept(holder);
     }
 
-    protected DynamicHolder(ResourceLocation name, Supplier<T> valueCreator, Loader<T> loader)
+    protected DynamicHolder(Identifier name, Supplier<T> valueCreator, Loader<T> loader)
     {   this.name = name;
         this.valueCreator = valueCreator;
         this.loader = loader;
@@ -48,25 +48,25 @@ public class DynamicHolder<T> implements Supplier<T>
      * @return A value holder.
      * @param <T> The type of the value.
      */
-    public static <T> DynamicHolder<T> createWithRegistries(ResourceLocation name, Supplier<T> valueCreator, Loader<T> loader)
+    public static <T> DynamicHolder<T> createWithRegistries(Identifier name, Supplier<T> valueCreator, Loader<T> loader)
     {
         DynamicHolder<T> holder = new DynamicHolder<>(name, valueCreator, loader);
         holder.requireRegistries = true;
         return holder;
     }
 
-    public static <T> DynamicHolder<T> create(ResourceLocation name, Supplier<T> valueCreator, Consumer<DynamicHolder<T>> loader, Consumer<T> saver)
+    public static <T> DynamicHolder<T> create(Identifier name, Supplier<T> valueCreator, Consumer<DynamicHolder<T>> loader, Consumer<T> saver)
     {
         DynamicHolder<T> holder = new DynamicHolder<>(name, valueCreator, loader);
         holder.saver = (val, registryAccess) -> saver.accept(val);
         return holder;
     }
 
-    public static <T> DynamicHolder<T> create(ResourceLocation name, Supplier<T> valueCreator, Consumer<DynamicHolder<T>> loader)
+    public static <T> DynamicHolder<T> create(Identifier name, Supplier<T> valueCreator, Consumer<DynamicHolder<T>> loader)
     {   return new DynamicHolder<>(name, valueCreator, loader);
     }
 
-    public static <T> DynamicHolder<T> create(ResourceLocation name, Supplier<T> valueCreator)
+    public static <T> DynamicHolder<T> create(Identifier name, Supplier<T> valueCreator)
     {   return new DynamicHolder<>(name, valueCreator, holder -> {});
     }
 
@@ -78,7 +78,7 @@ public class DynamicHolder<T> implements Supplier<T>
      * @return A synced value holder.
      * @param <T> The type of the value.
      */
-    public static <T> DynamicHolder<T> createSyncedWithRegistries(ResourceLocation name, Supplier<T> valueCreator, Loader<T> loader, Codec<T> codec, Saver<T> saver, SyncType syncType)
+    public static <T> DynamicHolder<T> createSyncedWithRegistries(Identifier name, Supplier<T> valueCreator, Loader<T> loader, Codec<T> codec, Saver<T> saver, SyncType syncType)
     {
         if (syncType == SyncType.NONE)
         {   throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("SyncType cannot be NONE for a synced DynamicHolder."));
@@ -91,7 +91,7 @@ public class DynamicHolder<T> implements Supplier<T>
         return holder;
     }
 
-    public static <T> DynamicHolder<T> createSynced(ResourceLocation name, Supplier<T> valueCreator, Consumer<DynamicHolder<T>> loader, Codec<T> codec, Consumer<T> saver, SyncType syncType)
+    public static <T> DynamicHolder<T> createSynced(Identifier name, Supplier<T> valueCreator, Consumer<DynamicHolder<T>> loader, Codec<T> codec, Consumer<T> saver, SyncType syncType)
     {
         if (syncType == SyncType.NONE)
         {   throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("SyncType cannot be NONE for a synced DynamicHolder."));
@@ -103,7 +103,7 @@ public class DynamicHolder<T> implements Supplier<T>
         return holder;
     }
 
-    public ResourceLocation getName()
+    public Identifier getName()
     {   return name;
     }
 

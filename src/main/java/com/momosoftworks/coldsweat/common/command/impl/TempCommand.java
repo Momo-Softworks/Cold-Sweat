@@ -34,7 +34,7 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -400,20 +400,20 @@ public class TempCommand extends BaseCommand
             catch (Exception ignored) { return List.of(); }
         }, List.of());
         Temperature.Trait trait = readArgumentOrDefault(context, "trait", TempModifierTraitArgument::getModifier, Temperature.Trait.BODY);
-        ResourceLocation modifierId = readArgumentOrDefault(context, "modifier", TempModifierArgument::getModifier, null);
+        Identifier modifierId = readArgumentOrDefault(context, "modifier", TempModifierArgument::getModifier, null);
         int duration = readArgumentOrDefault(context, "duration", IntegerArgumentType::getInteger, -1);
         int tickRate = readArgumentOrDefault(context, "tickRate", IntegerArgumentType::getInteger, 1);
         CompoundTag nbt = (CompoundTag) readArgumentOrDefault(context, "nbt", NbtTagArgument::getNbtTag, new CompoundTag());
         Mode mode = readArgumentOrDefault(context, "mode", Mode.class, Mode.ADD_AFTER);
         Order order = readArgumentOrDefault(context, "order", Order.class, Order.LAST);
-        ResourceLocation otherId = readArgumentOrDefault(context, "match", ResourceLocation.class, null);
+        Identifier otherId = readArgumentOrDefault(context, "match", Identifier.class, null);
         int maxCount = readArgumentOrDefault(context, "maxCount", IntegerArgumentType::getInteger, 1);
 
         return executeAddModifier(context, entities, trait, modifierId, duration, tickRate, nbt, mode, order, otherId, maxCount);
     }
 
-    private int executeAddModifier(CommandContext<CommandSourceStack> context, Collection<? extends Entity> entities, Temperature.Trait trait, ResourceLocation modifierId,
-                                   int duration, int tickRate, CompoundTag nbt, Mode mode, Order order, ResourceLocation otherId, int maxCount)
+    private int executeAddModifier(CommandContext<CommandSourceStack> context, Collection<? extends Entity> entities, Temperature.Trait trait, Identifier modifierId,
+                                   int duration, int tickRate, CompoundTag nbt, Mode mode, Order order, Identifier otherId, int maxCount)
     {
         CommandSourceStack source = context.getSource();
         if (entities.stream().anyMatch(entity -> !(entity instanceof Player || EntityTempManager.isTemperatureEnabled(entity))))
@@ -452,13 +452,13 @@ public class TempCommand extends BaseCommand
             catch (Exception ignored) { return List.of(); }
         }, List.of());
         Temperature.Trait trait = readArgumentOrDefault(context, "trait", TempModifierTraitArgument::getModifier, Temperature.Trait.BODY);
-        ResourceLocation modifierId = readArgumentOrDefault(context, "modifier", TempModifierArgument::getModifier, null);
+        Identifier modifierId = readArgumentOrDefault(context, "modifier", TempModifierArgument::getModifier, null);
         int count = readArgumentOrDefault(context, "count", IntegerArgumentType::getInteger, Integer.MAX_VALUE);
 
         return executeRemoveModifier(context, entities, trait, modifierId, count);
     }
 
-    private int executeRemoveModifier(CommandContext<CommandSourceStack> context, Collection<? extends Entity> entities, Temperature.Trait trait, ResourceLocation modifierId, int count)
+    private int executeRemoveModifier(CommandContext<CommandSourceStack> context, Collection<? extends Entity> entities, Temperature.Trait trait, Identifier modifierId, int count)
     {
         CommandSourceStack source = context.getSource();
         if (entities.stream().anyMatch(entity -> !(entity instanceof Player || EntityTempManager.isTemperatureEnabled(entity))))
@@ -564,10 +564,10 @@ public class TempCommand extends BaseCommand
                          .append(Component.literal(modifier.id().toString())
                                           .withStyle(Style.EMPTY
                                           .withColor(ChatFormatting.LIGHT_PURPLE)
-                                          .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal(modifier.id().toString())
+                                          .withHoverEvent(new HoverEvent.ShowText(Component.literal(modifier.id().toString())
                                           .append(Component.literal("\n"))
                                           .append(Component.translatable("chat.copy.click").withStyle(ChatFormatting.GRAY))))
-                                          .withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, modifier.id().toString()))))
+                                          .withClickEvent(new ClickEvent.CopyToClipboard(modifier.id().toString()))))
                          .append(Component.literal(" → ").withStyle(ChatFormatting.WHITE))
                          .append(Component.literal(CSMath.truncate(newValueStore, 2)+"")
                                           .withStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)
@@ -577,8 +577,7 @@ public class TempCommand extends BaseCommand
     static HoverEvent getConvertedUnitHover(Temperature.Trait trait, double value, Temperature.Units units)
     {
         if (!trait.isForWorld()) return null;
-        return new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                              Component.literal(String.format("%.1f %s", Temperature.convertIfNeeded(value, trait, units, true), units.getFormattedName().getString())));
+        return new HoverEvent.ShowText(Component.literal(String.format("%.1f %s", Temperature.convertIfNeeded(value, trait, units, true), units.getFormattedName().getString())));
     }
 
     private int executeModifyEntityTemp(CommandSourceStack source, Collection<? extends Entity> entities, Temperature.Trait attribute,

@@ -5,7 +5,7 @@ import com.google.common.collect.HashBiMap;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -16,18 +16,18 @@ import java.util.function.Supplier;
 
 public interface EntitySubRequirement
 {
-    BiMap<ResourceLocation, Supplier<MapCodec<? extends EntitySubRequirement>>> REQUIREMENT_MAP = HashBiMap.create(Map.of(
-            ResourceLocation.withDefaultNamespace("variant"), () -> EntityVariantRequirement.CODEC,
-            ResourceLocation.withDefaultNamespace("fishing_hook"), () -> FishingHookRequirement.CODEC,
-            ResourceLocation.withDefaultNamespace("lightning_bolt"), () -> LightningBoltRequirement.CODEC,
-            ResourceLocation.withDefaultNamespace("piglin_neutral_armor"), () -> PiglinNeutralArmorRequirement.CODEC,
-            ResourceLocation.withDefaultNamespace("player"), () -> PlayerDataRequirement.getCodec(EntityRequirement.getCodec()),
-            ResourceLocation.withDefaultNamespace("raider"), () -> RaiderRequirement.CODEC,
-            ResourceLocation.withDefaultNamespace("slime"), () -> SlimeRequirement.CODEC,
-            ResourceLocation.withDefaultNamespace("snow_boots"), () -> SnowBootsRequirement.CODEC
+    BiMap<Identifier, Supplier<MapCodec<? extends EntitySubRequirement>>> REQUIREMENT_MAP = HashBiMap.create(Map.of(
+            Identifier.withDefaultNamespace("variant"), () -> EntityVariantRequirement.CODEC,
+            Identifier.withDefaultNamespace("fishing_hook"), () -> FishingHookRequirement.CODEC,
+            Identifier.withDefaultNamespace("lightning_bolt"), () -> LightningBoltRequirement.CODEC,
+            Identifier.withDefaultNamespace("piglin_neutral_armor"), () -> PiglinNeutralArmorRequirement.CODEC,
+            Identifier.withDefaultNamespace("player"), () -> PlayerDataRequirement.getCodec(EntityRequirement.getCodec()),
+            Identifier.withDefaultNamespace("raider"), () -> RaiderRequirement.CODEC,
+            Identifier.withDefaultNamespace("slime"), () -> SlimeRequirement.CODEC,
+            Identifier.withDefaultNamespace("snow_boots"), () -> SnowBootsRequirement.CODEC
     ));
 
-    Codec<EntitySubRequirement> CODEC = ResourceLocation.CODEC.dispatch(
+    Codec<EntitySubRequirement> CODEC = Identifier.CODEC.dispatch(
             "type",
             requirement -> {
                 Supplier<MapCodec<? extends EntitySubRequirement>> matchingSupplier = REQUIREMENT_MAP.values().stream()
@@ -45,7 +45,7 @@ public interface EntitySubRequirement
             }
     );
 
-    default ResourceLocation getType() {
+    default Identifier getType() {
         return REQUIREMENT_MAP.inverse().get(this.getCodec());
     }
 

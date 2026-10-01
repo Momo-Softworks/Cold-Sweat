@@ -1,8 +1,9 @@
 package com.momosoftworks.coldsweat.client.gui.config;
 
+import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
@@ -24,10 +25,10 @@ public class ConfigLabel extends AbstractWidget implements GuiEventListener, Nar
     }
 
     @Override
-    protected void renderWidget(GuiGraphics graphics, int pmousex, int mouseY, float partialTick)
+    protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int pmousex, int mouseY, float partialTick)
     {
         int color = CSMath.getIfNotNull(this.getMessage().getStyle().getColor(), TextColor::getValue, 0xFFFFFF);
-        graphics.drawString(Minecraft.getInstance().font, this.getMessage(), this.getX(), this.getY(), color, true);
+        graphics.text(Minecraft.getInstance().font, this.getMessage(), this.getX(), this.getY(), ClientOnlyHelper.legacyTextColor(color), true);
     }
 
     @Override

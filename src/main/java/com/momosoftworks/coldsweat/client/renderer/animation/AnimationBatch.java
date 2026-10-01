@@ -6,7 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -51,13 +51,13 @@ public class AnimationBatch
         this.getAnimation(name).setPositions(animationTime, part, offset).setRotations(animationTime, part, offset);
     }
 
-    public static AnimationBatch loadFromFile(ResourceLocation path)
+    public static AnimationBatch loadFromFile(Identifier path)
     {
         AnimationBatch batch = new AnimationBatch();
 
         try
         {
-            // Load the file pointed by the ResourceLocation
+            // Load the file pointed by the Identifier
             InputStream inputStream = Minecraft.getInstance().getResourceManager().getResource(path).orElseThrow().open();
 
             // Parse the file as JSON

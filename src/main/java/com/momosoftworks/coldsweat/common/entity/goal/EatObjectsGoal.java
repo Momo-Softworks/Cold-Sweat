@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.common.entity.goal;
 
+import net.minecraft.core.UUIDUtil;
 import com.momosoftworks.coldsweat.common.entity.Chameleon;
 import com.momosoftworks.coldsweat.common.entity.data.edible.ChameleonEdibles;
 import com.momosoftworks.coldsweat.common.entity.data.edible.Edible;
@@ -56,7 +57,7 @@ public class EatObjectsGoal extends Goal
                 ItemStack item = itemEntity.getItem();
                 Optional<Edible> edible = ChameleonEdibles.getEdible(item);
                 if (edible.isPresent()
-                && (!itemEntity.getPersistentData().contains("Recipient") || itemEntity.getPersistentData().getUUID("Recipient").equals(this.entity.getUUID())))
+                && (!itemEntity.getPersistentData().contains("Recipient") || itemEntity.getPersistentData().read("Recipient", UUIDUtil.CODEC).map(uuid -> uuid.equals(this.entity.getUUID())).orElse(false)))
                 {
                     if (this.entity.getCooldown(edible.get()) <= 0 && edible.get().shouldEat(item, this.entity, itemEntity.getOwner())
                     || isBreedingItem(itemEntity.getItem()))
@@ -67,7 +68,7 @@ public class EatObjectsGoal extends Goal
                     }
                 }
             }
-            else if (ent.getType().is(this.wantedEntities))
+            else if (ent.getType().builtInRegistryHolder().is(this.wantedEntities))
             {
                 this.target = ent;
                 this.lookPos = ent.position();
@@ -140,7 +141,7 @@ public class EatObjectsGoal extends Goal
                                     if (!stack.isEmpty())
                                     {   ItemEntity remainingStack = WorldHelper.entityDropItem(this.entity, stack);
                                         remainingStack.setThrower(thrower);
-                                        remainingStack.getPersistentData().putUUID("Recipient", this.entity.getUUID());
+                                        remainingStack.getPersistentData().store("Recipient", UUIDUtil.CODEC, this.entity.getUUID());
                                     }
                                 }
                             }

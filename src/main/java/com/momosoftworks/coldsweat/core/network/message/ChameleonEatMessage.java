@@ -1,17 +1,19 @@
 package com.momosoftworks.coldsweat.core.network.message;
 
+import net.minecraft.world.level.Level;
+import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.entity.Chameleon;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class ChameleonEatMessage implements CustomPacketPayload
 {
-    public static final CustomPacketPayload.Type<ChameleonEatMessage> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "chameleon_eat"));
+    public static final CustomPacketPayload.Type<ChameleonEatMessage> TYPE = new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "chameleon_eat"));
     public static final StreamCodec<FriendlyByteBuf, ChameleonEatMessage> CODEC = CustomPacketPayload.codec(ChameleonEatMessage::encode, ChameleonEatMessage::decode);
 
     int entityId;
@@ -32,7 +34,7 @@ public class ChameleonEatMessage implements CustomPacketPayload
     {
         context.enqueueWork(() ->
         {
-            if (Minecraft.getInstance().level.getEntity(message.entityId) instanceof Chameleon chameleon)
+            if (ClientOnlyHelper.getClientLevel().getEntity(message.entityId) instanceof Chameleon chameleon)
             {   chameleon.eatAnimation();
             }
         });

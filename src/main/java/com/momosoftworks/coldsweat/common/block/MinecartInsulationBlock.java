@@ -1,5 +1,8 @@
 package com.momosoftworks.coldsweat.common.block;
 
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 
 import com.momosoftworks.coldsweat.core.init.ModItems;
 import net.minecraft.core.BlockPos;
@@ -53,7 +56,7 @@ public class MinecartInsulationBlock extends Block
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState otherState, LevelAccessor level, BlockPos blockPos, BlockPos otherBlockPos)
+    public BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos blockPos, Direction direction, BlockPos otherBlockPos, BlockState otherState, RandomSource random)
     {
         return Blocks.AIR.defaultBlockState();
     }

@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.config;
 
+import net.minecraft.world.entity.EntityTypes;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Multimap;
@@ -33,7 +34,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.entity.EntityType;
@@ -63,8 +64,8 @@ import static com.momosoftworks.coldsweat.util.serialization.DynamicHolder.SyncT
  */
 public class ConfigSettings
 {
-    public static final BiMap<ResourceLocation, DynamicHolder<?>> CONFIG_SETTINGS = HashBiMap.create();
-    public static final BiMap<ResourceLocation, DynamicHolder<?>> CLIENT_SETTINGS = HashBiMap.create();
+    public static final BiMap<Identifier, DynamicHolder<?>> CONFIG_SETTINGS = HashBiMap.create();
+    public static final BiMap<Identifier, DynamicHolder<?>> CLIENT_SETTINGS = HashBiMap.create();
 
     public static Difficulty DEFAULT_DIFFICULTY = Difficulty.NORMAL;
 
@@ -189,7 +190,7 @@ public class ConfigSettings
 
     // Misc Settings
     public static final DynamicHolder<Double> INSULATION_STRENGTH;
-    public static final DynamicHolder<List<ResourceLocation>> DISABLED_MODIFIERS;
+    public static final DynamicHolder<List<Identifier>> DISABLED_MODIFIERS;
     public static final DynamicHolder<Double> MODIFIER_TICK_RATE;
     public static final DynamicHolder<Double> DRYOFF_SPEED;
     public static final DynamicHolder<Double> WATER_SOAK_SPEED;
@@ -465,7 +466,7 @@ public class ConfigSettings
         {
             List<Holder<MobEffect>> effects = ItemSettingsConfig.HEARTH_POTION_BLACKLIST.get()
                                         .stream()
-                                        .map(entry -> registryAccess.registryOrThrow(Registries.MOB_EFFECT).getHolder(ResourceLocation.parse(entry)).orElse(null))
+                                        .map(entry -> registryAccess.lookupOrThrow(Registries.MOB_EFFECT).get(Identifier.parse(entry)).orElse(null))
                                         .filter(Objects::nonNull)
                                         .collect(ArrayList::new, List::add, List::addAll);
             holder.get(registryAccess).addAll(effects);
@@ -545,7 +546,7 @@ public class ConfigSettings
         INSULATION_BLACKLIST = addSetting(ColdSweat.createKey("insulation_blacklist"), ArrayList::new,
                                           holder -> holder.get().addAll(ItemSettingsConfig.INSULATION_BLACKLIST.get()
                                                     .stream()
-                                                    .map(entry -> BuiltInRegistries.ITEM.get(ResourceLocation.parse(entry)))
+                                                    .map(entry -> BuiltInRegistries.ITEM.getValue(Identifier.parse(entry)))
                                                     .collect(ArrayList::new, List::add, List::addAll)));
 
         DRYING_ITEMS = addSyncedSetting(ColdSweat.createKey("drying_items"), RegistryMultiMap::new, holder ->
@@ -620,7 +621,7 @@ public class ConfigSettings
         {
             List<Holder<DimensionType>> dimensions = new ArrayList<>(ItemSettingsConfig.SOULSPRING_LAMP_DIMENSIONS.get()
                 .stream()
-                .map(entry -> registryAccess.registryOrThrow(Registries.DIMENSION_TYPE).getHolder(ResourceLocation.parse(entry)).orElse(null))
+                .map(entry -> registryAccess.lookupOrThrow(Registries.DIMENSION_TYPE).get(Identifier.parse(entry)).orElse(null))
                 .filter(Objects::nonNull)
                 .collect(ArrayList::new, List::add, List::addAll));
             holder.get(registryAccess).addAll(dimensions);
@@ -686,7 +687,7 @@ public class ConfigSettings
 
             // Parse goat and chameleon biomes
             configReader.accept(EntitySettingsConfig.CHAMELEON_SPAWN_BIOMES.get(), ModEntities.CHAMELEON.get());
-            configReader.accept(EntitySettingsConfig.GOAT_SPAWN_BIOMES.get(), EntityType.GOAT);
+            configReader.accept(EntitySettingsConfig.GOAT_SPAWN_BIOMES.get(), EntityTypes.GOAT);
         });
 
         INSULATED_MOUNTS = addSetting(ColdSweat.createKey("insulated_entities"), RegistryMultiMap::new, holder ->
@@ -884,7 +885,7 @@ public class ConfigSettings
         (saver) -> ItemSettingsConfig.INSULATION_STRENGTH.set(saver),
         SyncType.BOTH_WAYS);
 
-        DISABLED_MODIFIERS = addSetting(ColdSweat.createKey("disabled_modifiers"), ArrayList::new, holder -> holder.get().addAll(MainSettingsConfig.DISABLED_TEMP_MODIFIERS.get().stream().map(ResourceLocation::parse).toList()));
+        DISABLED_MODIFIERS = addSetting(ColdSweat.createKey("disabled_modifiers"), ArrayList::new, holder -> holder.get().addAll(MainSettingsConfig.DISABLED_TEMP_MODIFIERS.get().stream().map(Identifier::parse).toList()));
 
         MODIFIER_TICK_RATE = addSyncedSetting(ColdSweat.createKey("modifier_tick_rate"), () -> 1.0, holder -> holder.set(MainSettingsConfig.MODIFIER_TICK_RATE.get()),
         ExtraCodecs.DOUBLE,
@@ -1068,11 +1069,11 @@ public class ConfigSettings
             (saver) -> ClientSettingsConfig.WATERSKIN_DRINK_SECONDARY.set(saver.getSerializedName()));
     }
 
-    public static ResourceLocation getKey(DynamicHolder<?> setting)
+    public static Identifier getKey(DynamicHolder<?> setting)
     {   return CONFIG_SETTINGS.inverse().get(setting);
     }
 
-    public static DynamicHolder<?> getSetting(ResourceLocation key)
+    public static DynamicHolder<?> getSetting(Identifier key)
     {   return CONFIG_SETTINGS.get(key);
     }
 
@@ -1118,11 +1119,11 @@ public class ConfigSettings
 
         public static final Codec<Difficulty> CODEC = ExtraCodecs.enumIgnoreCase(values());
 
-        private final Supplier<Map<ResourceLocation, Supplier<?>>> settingsSupplier;
-        private Map<ResourceLocation, Supplier<?>> settings;
+        private final Supplier<Map<Identifier, Supplier<?>>> settingsSupplier;
+        private Map<Identifier, Supplier<?>> settings;
         String name;
 
-        Difficulty(String name, Supplier<Map<ResourceLocation, Supplier<?>>> settings)
+        Difficulty(String name, Supplier<Map<Identifier, Supplier<?>>> settings)
         {   this.settingsSupplier = settings;
             this.name = name;
         }
@@ -1131,7 +1132,7 @@ public class ConfigSettings
         {   if (settings == null) settings = settingsSupplier.get();
         }
 
-        public <T> T getSetting(ResourceLocation id)
+        public <T> T getSetting(Identifier id)
         {
             this.ensureSettingsGenerated();
             return (T) settings.get(id).get();
@@ -1143,7 +1144,7 @@ public class ConfigSettings
             return (T) settings.get(getKey(config)).get();
         }
 
-        public <T> T getOrDefault(ResourceLocation id, T defaultValue)
+        public <T> T getOrDefault(Identifier id, T defaultValue)
         {
             this.ensureSettingsGenerated();
             return (T) settings.getOrDefault(id, () -> defaultValue).get();
@@ -1193,32 +1194,32 @@ public class ConfigSettings
         }
     }
 
-    public static <T> DynamicHolder<T> addSetting(ResourceLocation id, Supplier<T> defaultVal, Consumer<DynamicHolder<T>> loader)
+    public static <T> DynamicHolder<T> addSetting(Identifier id, Supplier<T> defaultVal, Consumer<DynamicHolder<T>> loader)
     {   DynamicHolder<T> holder = DynamicHolder.create(id, defaultVal, loader);
         CONFIG_SETTINGS.put(id, holder);
         return holder;
     }
 
-    public static <T> DynamicHolder<T> addSettingWithRegistries(ResourceLocation id, Supplier<T> defaultVal, DynamicHolder.Loader<T> loader)
+    public static <T> DynamicHolder<T> addSettingWithRegistries(Identifier id, Supplier<T> defaultVal, DynamicHolder.Loader<T> loader)
     {   DynamicHolder<T> holder = DynamicHolder.createWithRegistries(id, defaultVal, loader);
         CONFIG_SETTINGS.put(id, holder);
         return holder;
     }
 
-    public static <T> DynamicHolder<T> addSyncedSetting(ResourceLocation id, Supplier<T> defaultVal, Consumer<DynamicHolder<T>> loader, Codec<T> codec, Consumer<T> saver, SyncType syncType)
+    public static <T> DynamicHolder<T> addSyncedSetting(Identifier id, Supplier<T> defaultVal, Consumer<DynamicHolder<T>> loader, Codec<T> codec, Consumer<T> saver, SyncType syncType)
     {   DynamicHolder<T> holder = DynamicHolder.createSynced(id, defaultVal, loader, codec, saver, syncType);
         CONFIG_SETTINGS.put(id, holder);
         return holder;
     }
 
-    public static <T> DynamicHolder<T> addSyncedSettingWithRegistries(ResourceLocation id, Supplier<T> defaultVal, DynamicHolder.Loader<T> loader, Codec<T> codec,
+    public static <T> DynamicHolder<T> addSyncedSettingWithRegistries(Identifier id, Supplier<T> defaultVal, DynamicHolder.Loader<T> loader, Codec<T> codec,
                                                                       DynamicHolder.Saver<T> saver, SyncType syncType)
     {   DynamicHolder<T> holder = DynamicHolder.createSyncedWithRegistries(id, defaultVal, loader, codec, saver, syncType);
         CONFIG_SETTINGS.put(id, holder);
         return holder;
     }
 
-    public static <T> DynamicHolder<T> addClientSetting(ResourceLocation id, Supplier<T> defaultVal, Consumer<DynamicHolder<T>> loader, Consumer<T> saver)
+    public static <T> DynamicHolder<T> addClientSetting(Identifier id, Supplier<T> defaultVal, Consumer<DynamicHolder<T>> loader, Consumer<T> saver)
     {
         if (EffectiveSide.get().isClient())
         {
@@ -1283,7 +1284,7 @@ public class ConfigSettings
 
     public static void clear()
     {
-        for (Map.Entry<ResourceLocation, DynamicHolder<?>> entry : CONFIG_SETTINGS.entrySet())
+        for (Map.Entry<Identifier, DynamicHolder<?>> entry : CONFIG_SETTINGS.entrySet())
         {   entry.getValue().reset();
         }
     }

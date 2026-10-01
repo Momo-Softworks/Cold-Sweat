@@ -5,7 +5,7 @@ import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.placement.Matcher;
 import com.momosoftworks.coldsweat.api.util.placement.Placement;
 import com.momosoftworks.coldsweat.api.util.Temperature;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.bus.api.Event;
 
@@ -68,7 +68,7 @@ public class GatherDefaultTempModifiersEvent extends Event
      * @param id The ID of the TempModifier to add
      * @param modifierBuilder Called on the TempModifier when it is created for additional processing
      */
-    public void addModifierById(ResourceLocation id, Consumer<TempModifier> modifierBuilder, Matcher duplicatePolicy, Placement placement)
+    public void addModifierById(Identifier id, Consumer<TempModifier> modifierBuilder, Matcher duplicatePolicy, Placement placement)
     {
         Optional<TempModifier> mod = TempModifierRegistry.getValue(id);
         if (mod.isPresent())

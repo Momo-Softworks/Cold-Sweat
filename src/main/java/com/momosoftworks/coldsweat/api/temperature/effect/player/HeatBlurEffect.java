@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.api.temperature.effect.player;
 
-import com.mojang.blaze3d.shaders.Uniform;
+import net.minecraft.world.level.Level;
+import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.api.event.vanilla.RenderLevelEvent;
 import com.momosoftworks.coldsweat.api.temperature.effect.TempEffect;
 import com.momosoftworks.coldsweat.api.temperature.effect.TempEffectType;
@@ -10,8 +11,6 @@ import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.LivingEntity;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.SubscribeEvent;
 
 
@@ -21,34 +20,29 @@ public class HeatBlurEffect extends TempEffect
     {   super(type, bounds);
     }
 
-    @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public void onRenderBlur(RenderLevelEvent.Post event)
     {
-        LivingEntity player = Minecraft.getInstance().player;
-        if (!this.test(player)) return;
+        PostProcessShaderManager shaderManager = PostProcessShaderManager.getInstance();
+        LivingEntity player = ClientOnlyHelper.getClientPlayer();
+        if (!this.test(player))
+        {   shaderManager.clearEffect();
+            return;
+        }
 
         double effect = this.getEffectFactor(player);
         float blurMultiplier = ConfigSettings.HEATSTROKE_BLUR_AMOUNT.get().floatValue();
-        if (blurMultiplier == 0) return;
-        PostProcessShaderManager shaderManager = PostProcessShaderManager.getInstance();
-
-        if (ConfigSettings.DISTORTION_EFFECTS.get())
-        {
-            float blur = (float) CSMath.blend(0, 12, effect, 0, 1) * blurMultiplier;
-            if (!shaderManager.hasEffect("heat_blur"))
-            {   shaderManager.loadEffect("heat_blur", PostProcessShaderManager.BLOBS);
-            }
-            Uniform blurRadius = shaderManager.getPostPasses("heat_blur").get(0).getEffect().getUniform("Radius");
-            if (blurRadius != null)
-            {   blurRadius.set(blur);
-            }
-        }
-        else if (shaderManager.hasEffect("heat_blur"))
-        {   shaderManager.closeEffect("heat_blur");
+        if (blurMultiplier == 0 || !ConfigSettings.DISTORTION_EFFECTS.get())
+        {   shaderManager.clearEffect();
+            return;
         }
 
-        shaderManager.process(event.getPartialTick());
+        // Effect strength is quantized into pre-baked post effects (uniforms can't be set at runtime anymore)
+        int blurLevel = Math.round(CSMath.clamp((float) CSMath.blend(0, 12, effect, 0, 1) * blurMultiplier, 0, PostProcessShaderManager.MAX_HEAT_BLUR_LEVEL));
+        if (blurLevel > 0)
+        {   shaderManager.setEffect(PostProcessShaderManager.getHeatBlurEffect(blurLevel));
+        }
+        else shaderManager.clearEffect();
     }
 
     @Override

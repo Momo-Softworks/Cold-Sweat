@@ -5,9 +5,9 @@ import com.momosoftworks.coldsweat.client.event.HearthDebugRenderer;
 import com.momosoftworks.coldsweat.client.gui.config.pages.ConfigPageOne;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.resources.sounds.EntityBoundSoundInstance;
 import net.minecraft.core.BlockPos;
@@ -30,7 +30,7 @@ import java.util.HashMap;
 public class ClientOnlyHelper
 {
     public static void playEntitySound(SoundEvent sound, SoundSource source, float volume, float pitch, Entity entity)
-    {   Minecraft.getInstance().getSoundManager().play(new EntityBoundSoundInstance(sound, source, volume, pitch, entity, entity.level().random.nextLong()));
+    {   Minecraft.getInstance().getSoundManager().play(new EntityBoundSoundInstance(sound, source, volume, pitch, entity, entity.level().getRandom().nextLong()));
     }
 
     public static Level getClientLevel()
@@ -46,7 +46,7 @@ public class ClientOnlyHelper
     }
 
     public static void openConfigScreen()
-    {   Minecraft.getInstance().setScreen(new ConfigPageOne(Minecraft.getInstance().screen));
+    {   Minecraft.getInstance().gui.setScreen(new ConfigPageOne(Minecraft.getInstance().gui.screen()));
     }
 
     public static Player getClientPlayer()
@@ -66,7 +66,7 @@ public class ClientOnlyHelper
 
     public static boolean isPlayerModelSlim(RenderLayer<?, ?> layer)
     {
-        if (layer.getParentModel() instanceof PlayerModel<?> playerModel)
+        if (layer.getParentModel() instanceof PlayerModel playerModel)
         {
             try
             {   return (boolean) SLIM.get(playerModel);
@@ -80,7 +80,7 @@ public class ClientOnlyHelper
 
     public static boolean isPlayerModelSlim(HumanoidModel<?> model)
     {
-        if (model instanceof PlayerModel<?> playerModel)
+        if (model instanceof PlayerModel playerModel)
         {
             try
             {   return (boolean) SLIM.get(playerModel);
@@ -92,31 +92,25 @@ public class ClientOnlyHelper
         return false;
     }
 
-    public static void renderVerticalCropText(String text, int x, int y, int height, int color, GuiGraphics graphics)
+    /**
+     * Before 1.21.6, text colors with (near) zero alpha were drawn as opaque. They are now skipped entirely,
+     * so RGB-only colors must be promoted to ARGB.
+     */
+    public static int legacyTextColor(int color)
+    {   return (color & 0xFC000000) == 0 ? color | 0xFF000000 : color;
+    }
+
+    public static void renderVerticalCropText(String text, int x, int y, int height, int color, GuiGraphicsExtractor graphics)
     {
         Font font = Minecraft.getInstance().font;
         Minecraft mc = Minecraft.getInstance();
 
         if (height > 0)
         {
-            // Enable scissor test to only render the bottom portion of the text
-            int guiScale = (int) mc.getWindow().getGuiScale();
-            int windowHeight = mc.getWindow().getHeight();
-
-            // Convert coordinates to screen space for the scissor test
-            int scissorX = x * guiScale;
-            int scissorY = windowHeight - (y + font.lineHeight) * guiScale;
-            int scissorWidth = font.width(text) * guiScale;
-            int scissorHeight = height * guiScale;
-
-            // Enable scissor test (this limits rendering to just the specified rectangle)
-            RenderSystem.enableScissor(scissorX, scissorY, scissorWidth, scissorHeight);
-
-            // Draw the white text (only the portion inside the scissor region will be visible)
-            graphics.drawString(font, text, x, y, color, false);
-
-            // Disable scissor test
-            RenderSystem.disableScissor();
+            // Only render the bottom portion of the text
+            graphics.enableScissor(x, y + font.lineHeight - height, x + font.width(text), y + font.lineHeight);
+            graphics.text(font, text, x, y, legacyTextColor(color), false);
+            graphics.disableScissor();
         }
     }
 }

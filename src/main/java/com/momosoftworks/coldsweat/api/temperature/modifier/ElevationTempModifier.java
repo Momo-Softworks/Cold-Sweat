@@ -43,7 +43,7 @@ public class ElevationTempModifier extends TempModifier
 
         // Collect a list of depths taken at regular intervals around the entity, and their distances from the player
         List<Pair<BlockPos, Double>> depthTable = new ArrayList<>();
-        for (BlockPos pos : WorldHelper.getPositionGrid(translatedPos, this.getNBT().getInt("Samples"), 10))
+        for (BlockPos pos : WorldHelper.getPositionGrid(translatedPos, this.getNBT().getIntOr("Samples", 0), 10))
         {
             depthTable.add(Pair.of(pos, CSMath.getDistance(translatedPos, pos)));
         }
@@ -58,7 +58,7 @@ public class ElevationTempModifier extends TempModifier
         {
             BlockPos originalPos = pair.getFirst();
             int originalY = originalPos.getY();
-            int minY = level.getMinBuildHeight();
+            int minY = level.getMinY();
             int groundLevel = WorldHelper.getHeight(originalPos, level, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES);
                             // If original is between bedrock and ground level, clamp to those bounds
             int adjustedY = CSMath.betweenInclusive(originalY, minY, groundLevel) ? CSMath.clamp(originalY + skylight - 4, minY, groundLevel)

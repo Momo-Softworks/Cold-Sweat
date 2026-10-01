@@ -1,18 +1,13 @@
 package com.momosoftworks.coldsweat.compat;
 
-import blusunrize.immersiveengineering.api.tool.ExternalHeaterHandler;
-import com.anthonyhilyard.iceberg.component.TitleBreakComponent;
 import com.mojang.datafixers.util.Either;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.core.init.FetchSeasonsModsEvent;
 import com.momosoftworks.coldsweat.api.event.core.registry.LoadRegistriesEvent;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
-import com.momosoftworks.coldsweat.api.temperature.modifier.compat.SereneSeasonsTempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
-import com.momosoftworks.coldsweat.compat.create.ColdSweatPonderPlugin;
-import com.momosoftworks.coldsweat.compat.curios.EquipableCurio;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ModBlocks;
 import com.momosoftworks.coldsweat.core.init.ModItems;
@@ -21,23 +16,6 @@ import com.momosoftworks.coldsweat.data.tag.ModInsulatorTags;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
-import com.simibubi.create.AllDataComponents;
-import com.simibubi.create.api.contraption.BlockMovementChecks;
-import com.simibubi.create.content.equipment.armor.BacktankItem;
-import com.simibubi.create.content.equipment.armor.BacktankUtil;
-import com.simibubi.create.content.fluids.pipes.EncasedPipeBlock;
-import com.simibubi.create.content.fluids.pipes.FluidPipeBlock;
-import com.simibubi.create.content.fluids.pipes.GlassFluidPipeBlock;
-import cn.mlus.thirst.content.purity.ContainerWithPurity;
-import cn.mlus.thirst.content.purity.WaterPurity;
-import cn.mlus.thirst.content.registry.ThirstComponent;
-import cn.mlus.thirst.foundation.common.event.RegisterThirstValueEvent;
-import dev.ryanhcode.sable.ActiveSableCompanion;
-import dev.ryanhcode.sable.companion.SableCompanion;
-import dev.ryanhcode.sable.companion.math.BoundingBox3d;
-import dev.ryanhcode.sable.sublevel.SubLevel;
-import glitchcore.event.EventManager;
-import net.createmod.ponder.foundation.PonderIndex;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
@@ -51,6 +29,7 @@ import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -64,15 +43,6 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
-import sereneseasons.api.season.SeasonChangedEvent;
-import sereneseasons.season.SeasonHooks;
-import top.theillusivec4.curios.api.CuriosApi;
-import top.theillusivec4.curios.api.CuriosCapability;
-import top.theillusivec4.curios.api.event.CurioChangeEvent;
-import weather2.ServerTickHandler;
-import weather2.weathersystem.WeatherManagerServer;
-import weather2.weathersystem.storm.StormObject;
-import weather2.weathersystem.storm.WeatherObject;
 
 import java.util.*;
 import java.util.function.UnaryOperator;
@@ -115,7 +85,7 @@ public class CompatManager
         if (disabledMods.contains(modID))
         {   return false;
         }
-        ModFileInfo mod = FMLLoader.getLoadingModList().getModFileById(modID);
+        ModFileInfo mod = FMLLoader.getCurrent().getLoadingModList().getModFileById(modID);
         if (mod == null)
         {   return false;
         }
@@ -249,11 +219,8 @@ public class CompatManager
     {
         public static boolean hasCurio(LivingEntity player, Item curio)
         {
-            return CURIOS_LOADED
-                && Optional.ofNullable(player.getCapability(CuriosCapability.INVENTORY))
-                           .map(cap -> cap.findFirstCurio(curio))
-                           .map(Optional::isPresent)
-                           .orElse(false);
+            // TODO(26.2): restore when Curios is updated to 26.2 (see 1.21-FG branch)
+            return false;
         }
 
         public static boolean hasCurio(LivingEntity player, ItemStack curio)
@@ -262,17 +229,8 @@ public class CompatManager
 
         public static List<ItemStack> getCurios(LivingEntity entity)
         {
-            if (!CURIOS_LOADED) return new ArrayList<>();
-            return Optional.ofNullable(entity.getCapability(CuriosCapability.INVENTORY))
-                           .map(curiosHandler -> curiosHandler.getEquippedCurios())
-                           .map(stacks ->
-                           {
-                               List<ItemStack> list = new ArrayList<>();
-                               for (int i = 0; i < stacks.getSlots(); i++)
-                               {   list.add(stacks.getStackInSlot(i));
-                               }
-                               return list;
-                           }).orElse(new ArrayList<>());
+            // TODO(26.2): restore when Curios is updated to 26.2 (see 1.21-FG branch)
+            return new ArrayList<>();
         }
     }
 
@@ -280,10 +238,8 @@ public class CompatManager
     {
         public static boolean isFluidPipe(BlockState state)
         {
-            return CompatManager.isCreateLoaded()
-                && (state.getBlock() instanceof FluidPipeBlock
-                 || state.getBlock() instanceof GlassFluidPipeBlock
-                 || state.getBlock() instanceof EncasedPipeBlock);
+            // TODO(26.2): restore when Create is updated to 26.2 (see 1.21-FG branch)
+            return false;
         }
     }
 
@@ -291,40 +247,13 @@ public class CompatManager
     {
         public static boolean isRainstormAt(Level level, BlockPos pos)
         {
-            if (WEATHER_LOADED)
-            {
-                WeatherManagerServer weatherManager = ServerTickHandler.getWeatherManagerFor(level.dimension());
-                if (weatherManager == null) return false;
-                StormObject rainStorm = weatherManager.getClosestStormAny(new Vec3(pos.getX(), pos.getY(), pos.getZ()), 250);
-                if (rainStorm == null) return false;
-
-                if (rainStorm.isPrecipitating() && rainStorm.levelTemperature > 0.0f
-                && Math.sqrt(Math.pow(pos.getX() - rainStorm.pos.x, 2) + Math.pow(pos.getX() - rainStorm.pos.x, 2)) < rainStorm.getSize())
-                {   return true;
-                }
-            }
+            // TODO(26.2): restore when Weather2 is updated to 26.2 (see 1.21-FG branch)
             return false;
         }
 
         public static Object getClosestStorm(Level level, BlockPos pos)
         {
-            if (WEATHER_LOADED)
-            {
-                WeatherManagerServer weatherManager = ServerTickHandler.getWeatherManagerFor(level.dimension());
-                if (weatherManager == null) return null;
-
-                double distance = Double.POSITIVE_INFINITY;
-                WeatherObject closestStorm = null;
-                for (WeatherObject stormObject : weatherManager.getStormObjects())
-                {
-                    double newDistance = stormObject.pos.distanceTo(new Vec3(pos.getX(), pos.getY(), pos.getZ()));
-                    if (newDistance < distance)
-                    {   distance = newDistance;
-                        closestStorm = stormObject;
-                    }
-                }
-                return closestStorm;
-            }
+            // TODO(26.2): restore when Weather2 is updated to 26.2 (see 1.21-FG branch)
             return null;
         }
     }
@@ -333,7 +262,19 @@ public class CompatManager
     {
         public static boolean isColdEnoughToSnow(Level level, BlockPos pos)
         {
-            return SERENE_SEASONS_LOADED && SeasonHooks.coldEnoughToSnowSeasonal(level, level.getBiome(pos), pos);
+            // TODO(26.2): restore when Serene Seasons is updated to 26.2 (see 1.21-FG branch)
+            return false;
+        }
+    }
+
+    public static abstract class PrimalWinter
+    {
+        public static boolean isWinterAt(Level level, Holder<Biome> biome)
+        {
+            // TODO(26.2): restore when Primal Winter is updated to 26.2 (see 1.21-FG branch)
+            //  return ForgePrimalWinter.CONFIG.isWinterBiome(biome.unwrapKey().get())
+            //      && ForgePrimalWinter.CONFIG.isWinterDimension(level.dimension());
+            return false;
         }
     }
 
@@ -341,37 +282,32 @@ public class CompatManager
     {
         public static boolean hasPurity(ItemStack stack)
         {
-            if (THIRST_LOADED)
-            {   return stack.has(ThirstComponent.PURITY);
-            }
+            // TODO(26.2): restore when Thirst is updated to 26.2 (see 1.21-FG branch)
             return false;
         }
 
         public static int getPurity(ItemStack stack)
         {
-            if (THIRST_LOADED)
-            {   return WaterPurity.getPurity(stack);
-            }
+            // TODO(26.2): restore when Thirst is updated to 26.2 (see 1.21-FG branch)
             return 0;
         }
 
         public static ItemStack setPurity(ItemStack stack, int purity)
         {
-            if (THIRST_LOADED)
-            {   stack.set(ThirstComponent.PURITY, purity);
-                return stack;
-            }
+            // TODO(26.2): restore when Thirst is updated to 26.2 (see 1.21-FG branch)
             return stack;
         }
 
         public static ItemStack setPurityFromBlock(ItemStack item, BlockPos pos, Level level)
         {
-            if (THIRST_LOADED)
-            {   int purity = WaterPurity.getBlockPurity(level, pos);
-                item.set(ThirstComponent.PURITY, purity);
-                return item;
-            }
+            // TODO(26.2): restore when Thirst is updated to 26.2 (see 1.21-FG branch)
             return item;
+        }
+
+        public static ItemStack removePurity(ItemStack stack)
+        {
+            // TODO(26.2): restore when Thirst is updated to 26.2 (see 1.21-FG branch)
+            return stack;
         }
     }
 
@@ -379,12 +315,7 @@ public class CompatManager
     {
         public static int getTooltipStartIndex(List<Either<FormattedText, TooltipComponent>> tooltip)
         {
-            if (isIcebergLoaded())
-            {
-                int index = CSMath.getIndexOf(tooltip, element -> element.right().map(component -> component instanceof TitleBreakComponent).orElse(false));
-                if (index == -1) return 0;
-                return index;
-            }
+            // TODO(26.2): restore when Iceberg is updated to 26.2 (see 1.21-FG branch)
             return 0;
         }
     }
@@ -463,269 +394,43 @@ public class CompatManager
 
     public static abstract class Sable
     {
-        public static final ActiveSableCompanion COMPANION = (ActiveSableCompanion) SableCompanion.INSTANCE;
-
+        // TODO(26.2): restore when Sable is updated to 26.2 (see 1.21-FG branch)
         public static boolean isInPlotGrid(Level level, BlockPos pos)
-        {   return COMPANION.isInPlotGrid(level, pos);
+        {   return false;
         }
 
         public static AABB transformSublToWorld(Level level, AABB aabb)
-        {
-            if (!COMPANION.isInPlotGrid(level, aabb.getCenter())) return aabb;
-            SubLevel subLevel = COMPANION.getContaining(level, aabb.getCenter());
-            if (subLevel == null) return aabb;
-            return transformAABB(aabb, subLevel.logicalPose()::transformPosition);
+        {   return aabb;
         }
 
         public static Collection<AABB> transformWorldToSubl(Level level, AABB aabb)
-        {
-            Iterable<SubLevel> subLevels = COMPANION.getAllIntersecting(level, new BoundingBox3d(aabb));
-            if (!subLevels.iterator().hasNext()) return Set.of();
-            Set<AABB> subAABBs = new HashSet<>();
-            subLevels.forEach(subLevel ->
-            {   subAABBs.add(transformAABB(aabb, subLevel.logicalPose()::transformPositionInverse));
-            });
-            return Collections.unmodifiableSet(subAABBs);
-        }
-
-        /**
-         * Transforms all 8 corners of the AABB and returns their enclosing box.<br>
-         * Transforming only the min/max corners gives the wrong bounds if the sublevel is rotated.
-         */
-        private static AABB transformAABB(AABB aabb, UnaryOperator<Vec3> transform)
-        {
-            double minX = Double.POSITIVE_INFINITY, minY = Double.POSITIVE_INFINITY, minZ = Double.POSITIVE_INFINITY;
-            double maxX = Double.NEGATIVE_INFINITY, maxY = Double.NEGATIVE_INFINITY, maxZ = Double.NEGATIVE_INFINITY;
-            for (int i = 0; i < 8; i++)
-            {
-                Vec3 corner = transform.apply(new Vec3((i & 1) == 0 ? aabb.minX : aabb.maxX,
-                                                       (i & 2) == 0 ? aabb.minY : aabb.maxY,
-                                                       (i & 4) == 0 ? aabb.minZ : aabb.maxZ));
-                minX = Math.min(minX, corner.x); minY = Math.min(minY, corner.y); minZ = Math.min(minZ, corner.z);
-                maxX = Math.max(maxX, corner.x); maxY = Math.max(maxY, corner.y); maxZ = Math.max(maxZ, corner.z);
-            }
-            return new AABB(minX, minY, minZ, maxX, maxY, maxZ);
+        {   return Set.of();
         }
 
         public static BlockPos transformSublToWorld(Level level, BlockPos pos)
-        {
-            if (!COMPANION.isInPlotGrid(level, pos)) return pos;
-            Vec3 transformed = COMPANION.projectOutOfSubLevel(level, new Vec3(pos.getX(), pos.getY(), pos.getZ()));
-            return BlockPos.containing(transformed);
+        {   return pos;
         }
 
         public static BlockPos transformWorldToSubl(Level level, BlockPos pos)
-        {
-            if (COMPANION.isInPlotGrid(level, pos)) return pos;
-            Iterator<SubLevel> iter = COMPANION.getAllIntersecting(level, new BoundingBox3d(pos)).iterator();
-            if (!iter.hasNext()) return pos;
-            SubLevel subLevel = iter.next();
-            Vec3 transformed = subLevel.logicalPose().transformPositionInverse(new Vec3(pos.getX(), pos.getY(), pos.getZ()));
-            return BlockPos.containing(transformed);
+        {   return pos;
         }
     }
 
     public static abstract class ImmersiveEngineering
     {
+        // TODO(26.2): restore heater capability when Immersive Engineering is updated to 26.2 (see 1.21-FG branch)
         public static final int ENERGY_PER_FUEL = 256;
-        private static final Map<HearthBlockEntity, ExternalHeaterHandler.IExternalHeatable> HEATER_CAPS = new HashMap<>();
-
-        public static ExternalHeaterHandler.IExternalHeatable getHeaterCap(HearthBlockEntity hearthLike)
-        {
-            ExternalHeaterHandler.IExternalHeatable heaterCap = HEATER_CAPS.computeIfAbsent(hearthLike, hearth ->
-                new ExternalHeaterHandler.IExternalHeatable()
-                {
-                    @Override
-                    public int doHeatTick(int energyAvailable, boolean redstone)
-                    {
-                        if (hearth.getFuel(HearthBlockEntity.FuelType.HOT).get() < hearth.getMaxFuel())
-                        {
-                            if (energyAvailable >= ENERGY_PER_FUEL)
-                            {
-                                hearth.addHotFuel(1, true);
-                                return ENERGY_PER_FUEL;
-                            }
-                        }
-                        return 0;
-                    }
-                });
-            if (hearthLike.getLevel() instanceof ServerLevel serverLevel)
-            {   serverLevel.registerCapabilityListener(hearthLike.getBlockPos(), () -> HEATER_CAPS.remove(hearthLike) != null);
-            }
-            return heaterCap;
-        }
     }
 
     /* Compat Events */
 
     public static void registerEventHandlers()
     {
-        if (CURIOS_LOADED)
-        {
-            NeoForge.EVENT_BUS.register(new Object()
-            {
-                @SubscribeEvent
-                public void onCurioChange(CurioChangeEvent event)
-                {
-                    EntityTempManager.updateInsulationAttributeModifiers(event.getEntity(), event.getFrom(), event.getTo(), Insulation.Slot.CURIO);
-                }
-            });
-
-            NeoForge.EVENT_BUS.register(new Object()
-            {
-                @SubscribeEvent
-                public void registerEquipableCurios(LoadRegistriesEvent.Pre event)
-                {
-                    BuiltInRegistries.ITEM.getTag(ModItemTags.EQUIPABLE_CURIOS).ifPresent(tag ->
-                    {
-                        for (Holder<Item> item : tag)
-                        {
-                            if (CuriosApi.getCurio(item.value().getDefaultInstance()).isPresent()) continue;
-                            CuriosApi.registerCurio(item.value(), new EquipableCurio());
-                        }
-                    });
-                }
-            });
-        }
-
-        if (THIRST_LOADED)
-        {
-            NeoForge.EVENT_BUS.register(new Object()
-            {
-                @SubscribeEvent
-                public void registerThirstItems(RegisterThirstValueEvent event)
-                {
-                    event.addDrink(ModItems.FILLED_WATERSKIN.value(), 6, 3);
-                    event.addContainer(new ContainerWithPurity(ModItems.WATERSKIN.value(),
-                                                               ModItems.FILLED_WATERSKIN.value()));
-                }
-            });
-        }
-
-        if (SERENE_SEASONS_LOADED)
-        {
-            // Register event to GlitchCore's stupid redundant proprietary event bus
-            new Object()
-            {
-                public void registerListener()
-                {
-                    EventManager.<SeasonChangedEvent.Standard>addListener(event ->
-                    {
-                        for (Player player : event.getLevel().players())
-                        {
-                            Temperature.getModifier(player, Temperature.Trait.WORLD, SereneSeasonsTempModifier.class)
-                                       .ifPresent(mod -> mod.update(mod.getLastInput(Temperature.Trait.WORLD), player, Temperature.Trait.WORLD));
-                        }
-                    });
-                }
-            }.registerListener();
-        }
+        // TODO(26.2): restore Curios, Thirst and Serene Seasons event handlers when ported (see 1.21-FG branch)
     }
 
     public static boolean USING_BACKTANK = false;
 
-    @SubscribeEvent
-    public static void drainCreateBacktank(PlayerTickEvent.Post event)
-    {
-        Player player = event.getEntity();
-        if (!CompatManager.isCreateLoaded()) return;
-
-        ItemStack backTank = player.getItemBySlot(EquipmentSlot.CHEST);
-        if (!(backTank.getItem() instanceof BacktankItem)) return;
-
-        double worldTemp = Temperature.get(player, Temperature.Trait.WORLD);
-        double minTemp = Temperature.get(player, Temperature.Trait.FREEZING_POINT);
-        double maxTemp = Temperature.get(player, Temperature.Trait.BURNING_POINT);
-
-        if (CSMath.betweenExclusive(worldTemp, minTemp, maxTemp)) return;
-        if (worldTemp < minTemp && !ConfigSettings.COLD_DRAINS_BACKTANK.get()) return;
-        if (worldTemp > maxTemp && !ConfigSettings.HEAT_DRAINS_BACKTANK.get()) return;
-
-        if (USING_BACKTANK && player.level().isClientSide)
-        {
-            player.getPersistentData().putInt("VisualBacktankAir", BacktankUtil.getAllWithAir(player).stream()
-                                                                               .map(BacktankUtil::getAir)
-                                                                               .reduce(0, Integer::sum) - 1);
-        }
-
-        if (player.tickCount % 20 != 0)
-        {   return;
-        }
-
-        if (!player.isCreative() && !player.isInLava() && backTank.getItem() instanceof BacktankItem)
-        {
-            // Ensure player is wearing a full set of fire-resistant armor
-            List<InsulatorData> drainingInsulators = ConfigHelper.getTaggedConfigsFor(backTank.getItem(), ModInsulatorTags.DRAINS_BACKTANK, ConfigSettings.INSULATING_ARMORS.get());
-            if (drainingInsulators.stream().noneMatch(insulator -> insulator.test(player, backTank)))
-            {   return;
-            }
-
-            if (player.level().isClientSide)
-                USING_BACKTANK = true;
-
-            if (backTank.getOrDefault(AllDataComponents.BACKTANK_AIR, 0) > 0)
-            {   // Drain air
-                BacktankUtil.consumeAir(player, backTank, 1);
-                //Update backtank air status
-                if (player.level().isClientSide)
-                {
-                    player.getPersistentData().putInt("VisualBacktankAir", BacktankUtil.getAllWithAir(player).stream()
-                                                                                             .map(BacktankUtil::getAir)
-                                                                                             .reduce(0, Integer::sum));
-                }
-            }
-        }
-        else if (player.level().isClientSide)
-        {   USING_BACKTANK = false;
-        }
-    }
-
-    @EventBusSubscriber(modid = ColdSweat.MOD_ID)
-    public static class ModEvents
-    {
-        @SubscribeEvent
-        public static void setupModEvents(FMLCommonSetupEvent event)
-        {
-            if (isCreateLoaded())
-            {
-                new Object()
-                {
-                    public void registerAttachedChecks()
-                    {
-                        event.enqueueWork(() ->
-                        {
-                            // Register top/bottom halves of hearth as being connected
-                            BlockMovementChecks.registerAttachedCheck((state, world, pos, direction) ->
-                            {
-                                if (state.getBlock() == ModBlocks.HEARTH_BOTTOM.value())
-                                {   return BlockMovementChecks.CheckResult.of(direction == Direction.UP);
-                                }
-                                if (state.getBlock() == ModBlocks.HEARTH_TOP.value())
-                                {   return BlockMovementChecks.CheckResult.of(direction == Direction.DOWN);
-                                }
-                                return BlockMovementChecks.CheckResult.PASS;
-                            });
-                        });
-                    }
-                }.registerAttachedChecks();
-            }
-        }
-
-        @SubscribeEvent
-        public static void setupModClientEvents(FMLClientSetupEvent event)
-        {
-            event.enqueueWork(() ->
-            {
-                if (isCreateLoaded())
-                {
-                    new Object()
-                    {
-                        public void registerPonderPlugin()
-                        {   PonderIndex.addPlugin(new ColdSweatPonderPlugin());
-                        }
-                    }.registerPonderPlugin();
-                }
-            });
-        }
-    }
+    // TODO(26.2): restore Create backtank draining, contraption attachment checks, and Ponder plugin
+    //  when Create is updated to 26.2 (see 1.21-FG branch)
 }

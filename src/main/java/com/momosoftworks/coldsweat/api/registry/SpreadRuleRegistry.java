@@ -3,7 +3,6 @@ package com.momosoftworks.coldsweat.api.registry;
 import com.momosoftworks.coldsweat.api.spread_rule.DefaultSpreadRule;
 import com.momosoftworks.coldsweat.api.spread_rule.SmokestackSpreadRule;
 import com.momosoftworks.coldsweat.api.spread_rule.SpreadRule;
-import com.momosoftworks.coldsweat.api.spread_rule.compat.CreatePipeSpreadRule;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -36,9 +35,10 @@ public class SpreadRuleRegistry
     {
         RULES.clear();
         register(new SmokestackSpreadRule());
-        if (CompatManager.isCreateLoaded())
-        {   register(new CreatePipeSpreadRule());
-        }
+        // TODO(26.2): re-enable when Create is updated
+        // if (CompatManager.isCreateLoaded())
+        // {   register(new CreatePipeSpreadRule());
+        // }
         // Must be registered last: matches() is unconditional
         register(new DefaultSpreadRule());
     }

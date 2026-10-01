@@ -53,7 +53,7 @@ public class EntitiesTempModifier extends TempModifier
                                                level,
                                                (state, pos) ->
                                                {
-                                                   if (state.isSolidRender(level, pos))
+                                                   if (state.isSolidRender())
                                                    {    blocksBetween.getAndIncrement();
                                                    }
                                                }, 3);

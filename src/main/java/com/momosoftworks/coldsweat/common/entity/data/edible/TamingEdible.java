@@ -26,7 +26,7 @@ public class TamingEdible extends Edible
         Player player = thrower != null ? entity.level().getPlayerByUUID(thrower.getUUID()) : null;
         if (player != null)
         {
-            if (entity.level().isClientSide) return Result.FAIL;
+            if (entity.level().isClientSide()) return Result.FAIL;
             // For taming
             if (!entity.isPlayerTrusted(player))
             {

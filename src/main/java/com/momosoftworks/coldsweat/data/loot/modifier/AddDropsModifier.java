@@ -29,7 +29,7 @@ public class AddDropsModifier extends LootModifier
 
     protected AddDropsModifier(LootItemCondition[] conditionsIn, List<LootEntry> additions, List<Item> removals)
     {
-        super(conditionsIn);
+        super(conditionsIn, IGlobalLootModifier.DEFAULT_PRIORITY);
         this.additions = additions;
         this.removals = removals;
     }
@@ -38,8 +38,8 @@ public class AddDropsModifier extends LootModifier
     @Override
     protected ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> generatedLoot, LootContext context)
     {
-        int lootLevel = context.hasParam(LootContextParams.ENCHANTMENT_LEVEL)
-                        ? context.getParam(LootContextParams.ENCHANTMENT_LEVEL)
+        int lootLevel = context.hasParameter(LootContextParams.ENCHANTMENT_LEVEL)
+                        ? context.getParameter(LootContextParams.ENCHANTMENT_LEVEL)
                         : 1;
         for (LootEntry entry : additions)
         {

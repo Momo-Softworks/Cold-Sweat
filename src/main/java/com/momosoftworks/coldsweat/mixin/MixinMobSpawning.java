@@ -22,9 +22,7 @@ public class MixinMobSpawning
                                                    MobSpawnSettings.SpawnerData spawnerData, BlockPos pos, CallbackInfoReturnable<Boolean> cir)
     {
         boolean canSpawn = cir.getReturnValue();
-        if (spawnerData instanceof FunctionalSpawnerData functional)
-        {   canSpawn = canSpawn && functional.canSpawn(level, structureManager, chunkGenerator, category, spawnerData, pos);
-        }
+        canSpawn = canSpawn && FunctionalSpawnerData.canSpawn(level, structureManager, chunkGenerator, category, spawnerData, pos);
         cir.setReturnValue(canSpawn);
     }
 }

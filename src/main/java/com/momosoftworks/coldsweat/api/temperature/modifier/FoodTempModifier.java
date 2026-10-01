@@ -26,11 +26,11 @@ public class FoodTempModifier extends TempModifier
         if (this.isOverridden(trait))
         {   return temp -> temp;
         }
-        return temp -> temp + this.getNBT().getDouble("temperature");
+        return temp -> temp + this.getNBT().getDoubleOr("temperature", 0);
     }
 
     public boolean isOverridden(Temperature.Trait trait)
-    {   return this.getNBT().getCompound("Overridden").getInt(trait.getSerializedName()) > 0;
+    {   return this.getNBT().getCompoundOrEmpty("Overridden").getIntOr(trait.getSerializedName(), 0) > 0;
     }
 
     private void incrementOverridden(Temperature.Trait trait, boolean add)
@@ -38,15 +38,15 @@ public class FoodTempModifier extends TempModifier
         if (!this.getNBT().contains("Overridden"))
         {   this.getNBT().put("Overridden", new CompoundTag());
         }
-        NBTHelper.incrementTag(this.getNBT().getCompound("Overridden"), trait.getSerializedName(), add ? 1 : -1, o -> true);
+        NBTHelper.incrementTag(this.getNBT().getCompoundOrEmpty("Overridden"), trait.getSerializedName(), add ? 1 : -1, o -> true);
     }
 
     private void updateOverridden(LivingEntity entity, Temperature.Trait trait, TempModifier sibling, boolean add)
     {
-        double temperature = this.getNBT().getDouble("temperature");
+        double temperature = this.getNBT().getDoubleOr("temperature", 0);
         if (sibling instanceof FoodTempModifier)
         {
-            double siblingTemp = sibling.getNBT().getDouble("temperature");
+            double siblingTemp = sibling.getNBT().getDoubleOr("temperature", 0);
             if (CSMath.sign(temperature) == CSMath.sign(siblingTemp) && Math.abs(siblingTemp) > Math.abs(temperature))
             {   this.incrementOverridden(trait, add);
                 this.markDirty();

@@ -1,22 +1,20 @@
 package com.momosoftworks.coldsweat.client.particle;
 
+import net.minecraft.util.RandomSource;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.ParticleStatus;
+import net.minecraft.server.level.ParticleStatus;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.Nonnull;
 import java.util.List;
 
-@OnlyIn(Dist.CLIENT)
-public class VaporParticle extends TextureSheetParticle
+public class VaporParticle extends SingleQuadParticle
 {
     private final SpriteSet ageSprite;
     private final boolean hasGravity;
@@ -26,7 +24,7 @@ public class VaporParticle extends TextureSheetParticle
 
     protected VaporParticle(ClientLevel world, double x, double y, double z, double vx, double vy, double vz, SpriteSet spriteSet, ParticleType type)
     {
-        super(world, x, y, z);
+        super(world, x, y, z, spriteSet.first());
         this.ageSprite = spriteSet;
         this.alpha = 0.0f;
         this.maxAlpha = (float) (Math.random() / 3 + 0.5f);
@@ -48,10 +46,9 @@ public class VaporParticle extends TextureSheetParticle
             this.maxAlpha = 0.2f;
     }
 
-    @Nonnull
     @Override
-    public ParticleRenderType getRenderType()
-    {   return ParticleUtil.PARTICLE_SHEET_TRANSPARENT;
+    protected Layer getLayer()
+    {   return Layer.TRANSLUCENT;
     }
 
     @Override
@@ -106,7 +103,7 @@ public class VaporParticle extends TextureSheetParticle
         double d1 = y;
         double d2 = z;
         if (this.hasPhysics && (x != 0.0D || y != 0.0D || z != 0.0D)) {
-            Vec3 vec3 = Entity.collideBoundingBox((Entity)null, new Vec3(x, y, z), this.getBoundingBox(), this.level, List.of());
+            Vec3 vec3 = Entity.collideBoundingBox((Entity) null, new Vec3(x, y, z), this.getBoundingBox(), this.level, List.of());
             x = vec3.x;
             y = vec3.y;
             z = vec3.z;
@@ -134,7 +131,6 @@ public class VaporParticle extends TextureSheetParticle
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
     public static class SmokestackFactory implements ParticleProvider<SimpleParticleType>
     {
         private final SpriteSet sprite;
@@ -145,7 +141,7 @@ public class VaporParticle extends TextureSheetParticle
 
         @Nullable
         @Override
-        public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed)
+        public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed, RandomSource random)
         {
             if (Minecraft.getInstance().options.particles().get() != ParticleStatus.MINIMAL)
                 return new VaporParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, this.sprite, ParticleType.SMOKESTACK);
@@ -154,7 +150,6 @@ public class VaporParticle extends TextureSheetParticle
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
     public static class GroundMistFactory implements ParticleProvider<SimpleParticleType>
     {
         private final SpriteSet sprite;
@@ -165,12 +160,11 @@ public class VaporParticle extends TextureSheetParticle
 
         @Nullable
         @Override
-        public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed)
+        public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed, RandomSource random)
         {   return new VaporParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, sprite, ParticleType.GROUND_MIST);
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
     public static class MistFactory implements ParticleProvider<SimpleParticleType>
     {
         private final SpriteSet sprite;
@@ -181,7 +175,7 @@ public class VaporParticle extends TextureSheetParticle
 
         @Nullable
         @Override
-        public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed)
+        public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed, RandomSource random)
         {   return new VaporParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, this.sprite, ParticleType.COLD_AIR);
         }
     }

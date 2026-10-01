@@ -13,7 +13,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.StringRepresentable;
 
@@ -57,8 +57,8 @@ public abstract class ConfigData
                        .add("id", input.uuid(), UUID_CODEC);
                 input.holder().flatMap(Holder::unwrapKey).ifPresent(key ->
                 {
-                    builder.add("registry_name", key.registry(), ResourceLocation.CODEC);
-                    builder.add("registry_key", key.location(), ResourceLocation.CODEC);
+                    builder.add("registry_name", key.registry(), Identifier.CODEC);
+                    builder.add("registry_key", key.identifier(), Identifier.CODEC);
                 });
                 return builder;
             }
@@ -71,8 +71,8 @@ public abstract class ConfigData
                     instance.requiredMods = decodeFromMap("required_mods", ops, input, REQUIRED_MODS_CODEC, new NegatableList<>());
                     instance.configType = decodeFromMap("config_type", ops, input, TYPE_CODEC, Type.JSON);
                     instance.id = decodeFromMap("id", ops, input, UUID_CODEC, null);
-                    ResourceLocation registry = decodeFromMap("registry_name", ops, input, ResourceLocation.CODEC, null);
-                    ResourceLocation key = decodeFromMap("registry_key", ops, input, ResourceLocation.CODEC, null);
+                    Identifier registry = decodeFromMap("registry_name", ops, input, Identifier.CODEC, null);
+                    Identifier key = decodeFromMap("registry_key", ops, input, Identifier.CODEC, null);
                     // Set decoded object's holder reference if available
                     if (registry != null && key != null && ops instanceof RegistryOps<O> registryOps)
                     {

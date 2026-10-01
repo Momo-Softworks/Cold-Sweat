@@ -9,7 +9,7 @@ import com.momosoftworks.coldsweat.util.serialization.RegistryHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -40,11 +40,11 @@ public class AddPiglinBartersModifier extends LootModifier
     private final List<LootEntry> additions;
 
     protected AddPiglinBartersModifier(LootItemCondition[] conditions, List<LootEntry> additions)
-    {   super(conditions);
+    {   super(conditions, IGlobalLootModifier.DEFAULT_PRIORITY);
         this.additions = additions;
     }
 
-    static ResourceLocation PIGLIN_BARTER_LOCATION = ResourceLocation.withDefaultNamespace("gameplay/piglin_bartering");
+    static Identifier PIGLIN_BARTER_LOCATION = Identifier.withDefaultNamespace("gameplay/piglin_bartering");
     static Field POOLS;
     static Field ENTRIES;
     static

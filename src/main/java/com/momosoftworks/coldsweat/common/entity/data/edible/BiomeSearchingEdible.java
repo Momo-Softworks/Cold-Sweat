@@ -30,7 +30,7 @@ public abstract class BiomeSearchingEdible extends Edible
     @Override
     public Result onEaten(ItemStack item, Chameleon entity, Entity thrower)
     {
-        if (!entity.level().isClientSide)
+        if (!entity.level().isClientSide())
         {
             // Flag for searching
             entity.setSearching(true);

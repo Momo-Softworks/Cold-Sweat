@@ -2,7 +2,7 @@ package com.momosoftworks.coldsweat.data.tag;
 
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.compat.CompatManager;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -30,11 +30,11 @@ public class ModItemTags
     public static final TagKey<Item> EQUIPABLE_CURIOS = createNamespaceTag("curios", "equipable");
 
     private static TagKey<Item> createTag(String name)
-    {   return ItemTags.create(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, name));
+    {   return ItemTags.create(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, name));
     }
 
     private static TagKey<Item> createCommonTag(String name)
-    {   return ItemTags.create(ResourceLocation.fromNamespaceAndPath("c", name));
+    {   return ItemTags.create(Identifier.fromNamespaceAndPath("c", name));
     }
 
     private static TagKey<Item> createNamespaceTag(String namespace, String name)
@@ -42,6 +42,6 @@ public class ModItemTags
         if (!CompatManager.modLoaded(namespace))
         {   return null;
         }
-        return ItemTags.create(ResourceLocation.fromNamespaceAndPath(namespace, name));
+        return ItemTags.create(Identifier.fromNamespaceAndPath(namespace, name));
     }
 }

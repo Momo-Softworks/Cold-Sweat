@@ -18,7 +18,7 @@ public class MixinBlockUpdate
     {
         ServerLevel level = (ServerLevel) (Object) this;
 
-        @Inject(method = "onBlockStateChange", at = @At("HEAD"))
+        @Inject(method = "updatePOIOnBlockStateChange", at = @At("HEAD"))
         private void onBlockUpdate(BlockPos pos, BlockState oldState, BlockState newState, CallbackInfo ci)
         {
             if (!oldState.equals(newState))

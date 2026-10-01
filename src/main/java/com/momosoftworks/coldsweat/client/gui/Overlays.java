@@ -1,7 +1,10 @@
 package com.momosoftworks.coldsweat.client.gui;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.client.renderer.RenderPipelines;
+import org.joml.Matrix3x2fStack;
+import net.minecraft.util.ARGB;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.temperature.modifier.FoodTempModifier;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
@@ -15,13 +18,12 @@ import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.LayeredDraw;
+import net.neoforged.neoforge.client.gui.GuiLayer;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -42,23 +44,23 @@ import java.util.function.Supplier;
 @EventBusSubscriber(value = Dist.CLIENT)
 public class Overlays
 {
-    public static final ResourceLocation BODY_TEMP_GAUGE = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/body_temp_gauge.png");
-    public static final ResourceLocation BODY_TEMP_GAUGE_HC = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/body_temp_gauge_hc.png");
-    public static final ResourceLocation WORLD_TEMP_GAUGE = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/world_temp_gauge.png");
-    public static final ResourceLocation WORLD_TEMP_GAUGE_HC = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/world_temp_gauge_hc.png");
-    public static final ResourceLocation VAGUE_TEMP_GAUGE = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/vague_temp_gauge.png");
-    public static final ResourceLocation VAGUE_TEMP_GAUGE_HC = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/vague_temp_gauge_hc.png");
-    public static final ResourceLocation VAGUE_TEMP_GAUGE_STANDALONE = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/vague_temp_gauge_standalone.png");
-    public static final ResourceLocation VAGUE_TEMP_GAUGE_STANDALONE_HC = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/vague_temp_gauge_standalone_hc.png");
-    public static final ResourceLocation FOOD_EFFECT = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/food_effect_background.png");
+    public static final Identifier BODY_TEMP_GAUGE = Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/body_temp_gauge.png");
+    public static final Identifier BODY_TEMP_GAUGE_HC = Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/body_temp_gauge_hc.png");
+    public static final Identifier WORLD_TEMP_GAUGE = Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/world_temp_gauge.png");
+    public static final Identifier WORLD_TEMP_GAUGE_HC = Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/world_temp_gauge_hc.png");
+    public static final Identifier VAGUE_TEMP_GAUGE = Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/vague_temp_gauge.png");
+    public static final Identifier VAGUE_TEMP_GAUGE_HC = Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/vague_temp_gauge_hc.png");
+    public static final Identifier VAGUE_TEMP_GAUGE_STANDALONE = Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/vague_temp_gauge_standalone.png");
+    public static final Identifier VAGUE_TEMP_GAUGE_STANDALONE_HC = Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/vague_temp_gauge_standalone_hc.png");
+    public static final Identifier FOOD_EFFECT = Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/food_effect_background.png");
 
-    public static final Supplier<ResourceLocation> BODY_TEMP_GAUGE_LOCATION  = () ->
+    public static final Supplier<Identifier> BODY_TEMP_GAUGE_LOCATION  = () ->
             ConfigSettings.HIGH_CONTRAST.get() ? BODY_TEMP_GAUGE_HC
                                                : BODY_TEMP_GAUGE;
-    public static final Supplier<ResourceLocation> WORLD_TEMP_GAUGE_LOCATION = () ->
+    public static final Supplier<Identifier> WORLD_TEMP_GAUGE_LOCATION = () ->
             ConfigSettings.HIGH_CONTRAST.get() ? WORLD_TEMP_GAUGE_HC
                                                : WORLD_TEMP_GAUGE;
-    public static final Supplier<ResourceLocation> VAGUE_TEMP_GAUGE_LOCATION = () ->
+    public static final Supplier<Identifier> VAGUE_TEMP_GAUGE_LOCATION = () ->
             ConfigSettings.BODY_ICON_ENABLED.get()
             ? ConfigSettings.HIGH_CONTRAST.get() ? VAGUE_TEMP_GAUGE_HC : VAGUE_TEMP_GAUGE
             : ConfigSettings.HIGH_CONTRAST.get() ? VAGUE_TEMP_GAUGE_STANDALONE_HC: VAGUE_TEMP_GAUGE_STANDALONE;
@@ -79,7 +81,7 @@ public class Overlays
     static int PREV_BODY_ICON = 0;
     static double BODY_TEMP_SEVERITY = 0;
 
-    public static LayeredDraw.Layer WORLD_TEMP_OVERLAY = (graphics, deltaTracker) ->
+    public static GuiLayer WORLD_TEMP_OVERLAY = (graphics, deltaTracker) ->
     {
         int width = graphics.guiWidth();
         int height = graphics.guiHeight();
@@ -87,7 +89,7 @@ public class Overlays
         LocalPlayer player = Minecraft.getInstance().player;
         if (player != null && ADVANCED_WORLD_TEMP
         && Minecraft.getInstance().gameMode.getPlayerMode() != GameType.SPECTATOR
-        && !Minecraft.getInstance().options.hideGui && ConfigSettings.WORLD_GAUGE_ENABLED.get())
+        && !Minecraft.getInstance().gui.hud.isHidden() && ConfigSettings.WORLD_GAUGE_ENABLED.get())
         {
             // Get player world temperature
             double temp = Temperature.convert(WORLD_TEMP, ConfigSettings.UNITS.get(), Temperature.Units.MC, true);
@@ -98,17 +100,8 @@ public class Overlays
 
             /* Render gauge */
 
-            RenderSystem.enableBlend();
-            RenderSystem.defaultBlendFunc();
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-
             // Render frame
-            graphics.blit(WORLD_TEMP_GAUGE_LOCATION.get(),
-                          (width / 2) + 93 + ConfigSettings.WORLD_GAUGE_POS.get().x(),
-                          height - 19 + ConfigSettings.WORLD_GAUGE_POS.get().y(), 0, 64 - severity * 16, 25, 16, 25, 144);
-
-            RenderSystem.disableBlend();
+            graphics.blit(RenderPipelines.GUI_TEXTURED, WORLD_TEMP_GAUGE_LOCATION.get(), (width / 2) + 93 + ConfigSettings.WORLD_GAUGE_POS.get().x(), height - 19 + ConfigSettings.WORLD_GAUGE_POS.get().y(), 0, 64 - severity * 16, 25, 16, 25, 144);
 
             // Sets the text bobbing offset (or none if disabled)
             int bob = ConfigSettings.ICON_BOBBING.get() && !CSMath.betweenInclusive(temp, PLAYER_MIN_TEMP, PLAYER_MAX_TEMP) && player.tickCount % 2 == 0 ? 1 : 0;
@@ -116,13 +109,11 @@ public class Overlays
             // Render text
             int blendedTemp = (int) CSMath.blend(PREV_WORLD_TEMP, WORLD_TEMP, deltaTracker.getGameTimeDeltaPartialTick(true), 0, 1);
 
-            graphics.drawString(font, (blendedTemp + ConfigSettings.TEMP_OFFSET.get())+"",
-                    /* X */ width / 2 + 106 + (Integer.toString(blendedTemp + ConfigSettings.TEMP_OFFSET.get()).length() * -3) + ConfigSettings.WORLD_GAUGE_POS.get().x(),
-                    /* Y */ height - 15 - bob + ConfigSettings.WORLD_GAUGE_POS.get().y(), color, false);
+            graphics.text(font, (blendedTemp + ConfigSettings.TEMP_OFFSET.get())+"", /* X */ width / 2 + 106 + (Integer.toString(blendedTemp + ConfigSettings.TEMP_OFFSET.get()).length() * -3) + ConfigSettings.WORLD_GAUGE_POS.get().x(), /* Y */ height - 15 - bob + ConfigSettings.WORLD_GAUGE_POS.get().y(), ClientOnlyHelper.legacyTextColor(color), false);
         }
     };
 
-    public static LayeredDraw.Layer BODY_TEMP_OVERLAY = (graphics, deltaTracker) ->
+    public static GuiLayer BODY_TEMP_OVERLAY = (graphics, deltaTracker) ->
     {
         Minecraft mc = Minecraft.getInstance();
         int width = graphics.guiWidth();
@@ -132,7 +123,7 @@ public class Overlays
         BLEND_BODY_TEMP = CSMath.blend(PREV_BODY_TEMP, BODY_TEMP, deltaTracker.getGameTimeDeltaPartialTick(true), 0, 1);
         double bodyTempInt = CSMath.roundNearest(BLEND_BODY_TEMP, 1);
 
-        if (shouldDrawSurvivalElements() && !Minecraft.getInstance().options.hideGui)
+        if (shouldDrawSurvivalElements() && !Minecraft.getInstance().gui.hud.isHidden())
         {
             // Get text color
             int color = bodyTempInt > 0 ? 16744509
@@ -147,10 +138,8 @@ public class Overlays
             int bobLevel = Math.min(Math.abs(((int) BODY_TEMP_SEVERITY)), 3);
             int threatOffset = !ConfigSettings.ICON_BOBBING.get() ? 0
                              : bobLevel == 2 ? ICON_BOB
-                             : bobLevel == 3 ? Minecraft.getInstance().cameraEntity.tickCount % 2
+                             : bobLevel == 3 ? Minecraft.getInstance().getCameraEntity().tickCount % 2
                              : 0;
-
-            RenderSystem.defaultBlendFunc();
 
             // Render old icon (if blending)
             if (ConfigSettings.BODY_ICON_ENABLED.get())
@@ -162,7 +151,7 @@ public class Overlays
                                   : 47;
                 int iconY = height - iconYOffset - threatOffset + ConfigSettings.BODY_ICON_POS.get().y();
                 // Render icon
-                graphics.blit(BODY_TEMP_GAUGE_LOCATION.get(), iconX, iconY, 0, 40 - icon * 10, 10, 10, 10, 90);
+                graphics.blit(RenderPipelines.GUI_TEXTURED, BODY_TEMP_GAUGE_LOCATION.get(), iconX, iconY, 0, 40 - icon * 10, 10, 10, 10, 90);
 
                 // Render new icon if temperature changing
                 if (CSMath.betweenExclusive(Math.abs(bodyTempInt), 0, 100))
@@ -189,19 +178,19 @@ public class Overlays
                 int y = scaledHeight - 31 - 10 + ConfigSettings.BODY_READOUT_POS.get().y();
 
                 // Draw the outline
-                graphics.drawString(font, s, x + 1, y, colorBG, false);
-                graphics.drawString(font, s, x - 1, y, colorBG, false);
-                graphics.drawString(font, s, x, y + 1, colorBG, false);
-                graphics.drawString(font, s, x, y - 1, colorBG, false);
+                graphics.text(font, s, x + 1, y, ClientOnlyHelper.legacyTextColor(colorBG), false);
+                graphics.text(font, s, x - 1, y, ClientOnlyHelper.legacyTextColor(colorBG), false);
+                graphics.text(font, s, x, y + 1, ClientOnlyHelper.legacyTextColor(colorBG), false);
+                graphics.text(font, s, x, y - 1, ClientOnlyHelper.legacyTextColor(colorBG), false);
 
                 // Draw the readout
-                graphics.drawString(font, s, x, y, color, false);
+                graphics.text(font, s, x, y, ClientOnlyHelper.legacyTextColor(color), false);
 
                 // Render white overlay if temp is > 100
                 if (Math.abs(bodyTempInt) > 100)
                 {
                     // Calculate the height of the white overlay
-                    int textHeight = font.wordWrapHeight(s, 100);
+                    int textHeight = font.wordWrapHeight(FormattedText.of(s), 100);
                     int overlayHeight = (int) CSMath.roundUpNearest(CSMath.blend(2, textHeight, Math.abs(bodyTempInt), 100, 150), 1);
                     // Overlay color
                     int overlayColor = overlayHeight > 3 ? bodyTempInt > 0 ? 16777132 : 11599871
@@ -215,16 +204,16 @@ public class Overlays
         }
     };
 
-    public static LayeredDraw.Layer VAGUE_TEMP_OVERLAY = (graphics, deltaTracker) ->
+    public static GuiLayer VAGUE_TEMP_OVERLAY = (graphics, deltaTracker) ->
     {
-        PoseStack poseStack = graphics.pose();
+        Matrix3x2fStack poseStack = graphics.pose();
         Minecraft mc = Minecraft.getInstance();
         int width = graphics.guiWidth();
         int height = graphics.guiHeight();
         Player player = mc.player;
 
         if (player != null && !ADVANCED_WORLD_TEMP && mc.gameMode.getPlayerMode() != GameType.SPECTATOR
-        && !mc.options.hideGui && ConfigSettings.WORLD_GAUGE_ENABLED.get() && shouldDrawSurvivalElements())
+        && !mc.gui.hud.isHidden() && ConfigSettings.WORLD_GAUGE_ENABLED.get() && shouldDrawSurvivalElements())
         {
             // Get player world temperature
             double temp = Temperature.convert(WORLD_TEMP, ConfigSettings.UNITS.get(), Temperature.Units.MC, true);
@@ -232,11 +221,7 @@ public class Overlays
             int severity = getGaugeSeverity(temp, PLAYER_MIN_TEMP, PLAYER_MAX_TEMP);
             int renderOffset = CSMath.clamp(severity, -1, 1) * 2;
 
-            poseStack.pushPose();
-            RenderSystem.enableBlend();
-            RenderSystem.defaultBlendFunc();
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
+            poseStack.pushMatrix();
 
             int bobLevel = Math.min(Math.abs(((int) BODY_TEMP_SEVERITY)), 3);
             int threatOffset = !ConfigSettings.ICON_BOBBING.get()
@@ -244,34 +229,27 @@ public class Overlays
                                : bobLevel == 2
                                  ? ICON_BOB
                                  : bobLevel == 3
-                                   ? Minecraft.getInstance().cameraEntity.tickCount % 2
+                                   ? Minecraft.getInstance().getCameraEntity().tickCount % 2
                                    : 0;
 
             // Render frame
-            graphics.blit(VAGUE_TEMP_GAUGE_LOCATION.get(),
-                          (width / 2) - 8 + ConfigSettings.BODY_ICON_POS.get().x(),
-                          height - 50 + ConfigSettings.BODY_ICON_POS.get().y() - renderOffset - threatOffset,
-                          0, 64 - severity * 16, 16, 16, 16, 144);
-
-            RenderSystem.disableBlend();
-            poseStack.popPose();
+            graphics.blit(RenderPipelines.GUI_TEXTURED, VAGUE_TEMP_GAUGE_LOCATION.get(), (width / 2) - 8 + ConfigSettings.BODY_ICON_POS.get().x(), height - 50 + ConfigSettings.BODY_ICON_POS.get().y() - renderOffset - threatOffset, 0, 64 - severity * 16, 16, 16, 16, 144);
+            poseStack.popMatrix();
         }
     };
 
-    public static LayeredDraw.Layer FOOD_EFFECTS_OVERLAY = (graphics, deltaTracker) ->
+    public static GuiLayer FOOD_EFFECTS_OVERLAY = (graphics, deltaTracker) ->
     {
         if (!ConfigSettings.FOOD_EFFECTS_ENABLED.get()) return;
-
-        RenderSystem.enableBlend();
         Minecraft mc = Minecraft.getInstance();
         Player player = mc.player;
         int width = graphics.guiWidth();
         int height = graphics.guiHeight();
         float partialTick = deltaTracker.getGameTimeDeltaPartialTick(true);
 
-        graphics.pose().pushPose();
+        graphics.pose().pushMatrix();
         Vector2i pos = ConfigSettings.FOOD_EFFECTS_POS.get();
-        graphics.pose().translate(pos.x, pos.y, 0);
+        graphics.pose().translate(pos.x, pos.y);
         int offset = 0;
         for (Map.Entry<Temperature.Trait, List<TempModifier>> entry : Temperature.getModifiers(player).entrySet())
         {
@@ -282,10 +260,10 @@ public class Overlays
                                                      .map(mod -> (FoodTempModifier) mod)
                                                      // Sort by absolute value, positive temps first
                                                      .sorted((m1, m2) -> {
-                                                         int sign1 = CSMath.sign(m1.getNBT().getDouble("temperature"));
-                                                         int sign2 = CSMath.sign(m2.getNBT().getDouble("temperature"));
+                                                         int sign1 = CSMath.sign(m1.getNBT().getDoubleOr("temperature", 0));
+                                                         int sign2 = CSMath.sign(m2.getNBT().getDoubleOr("temperature", 0));
                                                          if (sign1 != sign2) return Integer.compare(sign1, sign2);
-                                                         return Double.compare(Math.abs(m1.getNBT().getDouble("temperature")), Math.abs(m2.getNBT().getDouble("temperature")));
+                                                         return Double.compare(Math.abs(m1.getNBT().getDoubleOr("temperature", 0)), Math.abs(m2.getNBT().getDoubleOr("temperature", 0)));
                                                      }).toList();
             for (TempModifier modifier : sortedModifiers)
             {
@@ -294,14 +272,14 @@ public class Overlays
                     int x = width - 10;
                     int y = height - 10 - offset;
 
-                    if (food.getNBT().getDouble("duration") == 0) continue;
+                    if (food.getNBT().getDoubleOr("duration", 0) == 0) continue;
                     int timeLeft = food.getExpireTime() - food.getTicksExisted();
-                    double temp = food.getNBT().getDouble("temperature");
+                    double temp = food.getNBT().getDoubleOr("temperature", 0);
                     boolean overridden = food.isOverridden(trait);
 
                     // Render background
                     // background is 76x24
-                    graphics.blit(FOOD_EFFECT, x - 76, y - 24, 0, 0, 76, 24, 76, 24);
+                    graphics.blit(RenderPipelines.GUI_TEXTURED, FOOD_EFFECT, x - 76, y - 24, 0, 0, 76, 24, 76, 24);
 
                     String sign = temp > 0 ? "↑" : "↓";
                     String tempString = CSMath.formatDoubleOrInt(CSMath.round(temp, 2));
@@ -312,48 +290,47 @@ public class Overlays
                     int contentHeight = 16;
                     x -= 76;
 
-                    graphics.pose().pushPose();
-                    graphics.pose().translate(76/2 - contentWidth / 2, 24/2 - contentHeight / 2, 0);
+                    graphics.pose().pushMatrix();
+                    graphics.pose().translate(76/2 - contentWidth / 2, 24/2 - contentHeight / 2);
                     float brightness = overridden ? 0.35f : 1f;
-                    RenderSystem.setShaderColor(brightness, brightness, brightness, 1);
+                    int tint = ARGB.colorFromFloat(1, brightness, brightness, brightness);
 
                     // Draw timer
+                    int timerTint = tint;
                     if (timeLeft < 200)
                     {
                         float alpha = (float) CSMath.blend(1, Math.sin((food.getTicksExisted()+partialTick) / 1.5) / 2 + 0.5, timeLeft, 200, 0);
-                        RenderSystem.setShaderColor(brightness, brightness, brightness, alpha);
+                        timerTint = ARGB.colorFromFloat(alpha, brightness, brightness, brightness);
                     }
-                    graphics.drawString(mc.font, timerString, x, y - mc.font.lineHeight - 11, ChatFormatting.WHITE.getColor(), true);
-                    RenderSystem.setShaderColor(brightness, brightness, brightness, 1);
+                    graphics.text(mc.font, timerString, x, y - mc.font.lineHeight - 11, ARGB.multiply(ClientOnlyHelper.legacyTextColor(TextColor.fromLegacyFormat(ChatFormatting.WHITE).getValue()), timerTint), true);
                     x += mc.font.width(timerString) + 2;
 
                     // Draw item
-                    Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(food.getNBT().getString("item")));
-                    graphics.renderItem(item.getDefaultInstance(), x, y - 24);
+                    Item item = BuiltInRegistries.ITEM.getValue(Identifier.parse(food.getNBT().getStringOr("item", "")));
+                    graphics.item(item.getDefaultInstance(), x, y - 24);
                     x += 16 + 2;
 
                     // Draw temperature text
                     Style style = temp > 0 ? TooltipHandler.HOT : temp < 0 ? TooltipHandler.COLD : Style.EMPTY;
                     Component tempText = Component.literal(tempString).withStyle(style);
 
-                    graphics.drawString(mc.font, tempText, x, y - mc.font.lineHeight - 11, tempText.getStyle().getColor().getValue(), true);
+                    graphics.text(mc.font, tempText, x, y - mc.font.lineHeight - 11, ARGB.multiply(ClientOnlyHelper.legacyTextColor(tempText.getStyle().getColor().getValue()), tint), true);
 
                     offset += 25;
-                    graphics.pose().popPose();
-                    RenderSystem.setShaderColor(1, 1, 1, 1);
+                    graphics.pose().popMatrix();
                 }
             }
         }
-        graphics.pose().popPose();
+        graphics.pose().popMatrix();
     };
 
     @SubscribeEvent
     public static void registerOverlays(RegisterGuiLayersEvent event)
     {
-        event.registerAbove(VanillaGuiLayers.HOTBAR, ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "vague_temp"), VAGUE_TEMP_OVERLAY);
-        event.registerAbove(VanillaGuiLayers.HOTBAR, ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "body_temp"), BODY_TEMP_OVERLAY);
-        event.registerAbove(VanillaGuiLayers.HOTBAR, ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "world_temp"), WORLD_TEMP_OVERLAY);
-        event.registerBelow(VanillaGuiLayers.HOTBAR, ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "food_effects"), FOOD_EFFECTS_OVERLAY);
+        event.registerAbove(VanillaGuiLayers.HOTBAR, Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "vague_temp"), VAGUE_TEMP_OVERLAY);
+        event.registerAbove(VanillaGuiLayers.HOTBAR, Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "body_temp"), BODY_TEMP_OVERLAY);
+        event.registerAbove(VanillaGuiLayers.HOTBAR, Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "world_temp"), WORLD_TEMP_OVERLAY);
+        event.registerBelow(VanillaGuiLayers.HOTBAR, Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "food_effects"), FOOD_EFFECTS_OVERLAY);
     }
 
     @EventBusSubscriber(value = Dist.CLIENT)

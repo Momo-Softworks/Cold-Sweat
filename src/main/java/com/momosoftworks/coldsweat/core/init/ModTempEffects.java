@@ -6,13 +6,13 @@ import com.momosoftworks.coldsweat.api.temperature.effect.entity.DecreaseDropsEf
 import com.momosoftworks.coldsweat.api.temperature.effect.entity.PreventBreedingEffect;
 import com.momosoftworks.coldsweat.api.temperature.effect.player.*;
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class ModTempEffects
 {
-    public static final DeferredRegister<TempEffectType<?>> TEMP_EFFECTS = DeferredRegister.create(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "temp_effect"), ColdSweat.MOD_ID);
+    public static final DeferredRegister<TempEffectType<?>> TEMP_EFFECTS = DeferredRegister.create(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "temp_effect"), ColdSweat.MOD_ID);
     public static final Registry<TempEffectType<?>> REGISTRY = TEMP_EFFECTS.makeRegistry(builder -> {});
 
     public static final DeferredHolder<TempEffectType<?>, TempEffectType<?>> FREEZE_HEALING = TEMP_EFFECTS.register("freeze_healing", () -> new TempEffectType<>(FreezeHealingEffect::new));

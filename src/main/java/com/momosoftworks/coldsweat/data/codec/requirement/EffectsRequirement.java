@@ -31,7 +31,7 @@ public record EffectsRequirement(Map<Holder<MobEffect>, Instance> effects)
                         {
                             entry.getKey().map(
                             tag ->
-                            {   BuiltInRegistries.MOB_EFFECT.getTag(tag).get().stream().forEach(effect -> effects.put(effect, entry.getValue()));
+                            {   BuiltInRegistries.MOB_EFFECT.get(tag).get().stream().forEach(effect -> effects.put(effect, entry.getValue()));
                                 return null;
                             },
                             effect -> effects.put(effect, entry.getValue()));

@@ -145,8 +145,8 @@ public class ColdSweatCommand extends BaseCommand
             }
             else
             {   fileLinkStyle = Style.EMPTY.withColor(ChatFormatting.GRAY)
-                                           .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, dumpPath.toAbsolutePath().toString()))
-                                           .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("mco.notification.visitUrl.buttonText.default")));
+                                           .withClickEvent(new ClickEvent.OpenFile(dumpPath.toAbsolutePath().toString()))
+                                           .withHoverEvent(new HoverEvent.ShowText(Component.translatable("mco.notification.visitUrl.buttonText.default")));
             }
             context.getSource().sendSuccess(() -> Component.translatable("commands.cold_sweat.dump.success", Component.literal(dumpPath.toString()).setStyle(fileLinkStyle)), true);
         }

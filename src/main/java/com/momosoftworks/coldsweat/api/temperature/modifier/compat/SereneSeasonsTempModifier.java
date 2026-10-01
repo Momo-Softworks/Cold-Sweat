@@ -9,7 +9,7 @@ import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.world.entity.LivingEntity;
 import sereneseasons.api.season.ISeasonState;
 import sereneseasons.api.season.SeasonHelper;
-import sereneseasons.init.ModConfig;
+import net.neoforged.fml.config.ModConfig;
 
 import java.util.function.Function;
 

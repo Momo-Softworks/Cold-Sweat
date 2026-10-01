@@ -1,10 +1,9 @@
 package com.momosoftworks.coldsweat.mixin;
 
-import com.momosoftworks.coldsweat.common.capability.handler.ShearableFurManager;
-import com.momosoftworks.coldsweat.common.capability.shearing.IShearableCap;
+import com.momosoftworks.coldsweat.client.renderer.RenderStateData;
 import net.minecraft.client.renderer.entity.GoatRenderer;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.animal.goat.Goat;
+import net.minecraft.client.renderer.entity.state.GoatRenderState;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -13,13 +12,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(GoatRenderer.class)
 public class MixinGoatRenderer
 {
-    private static final ResourceLocation SHEARED_GOAT_TEXTURE = ResourceLocation.withDefaultNamespace("textures/entity/goat/goat_shaven.png");
+    private static final Identifier SHEARED_GOAT_TEXTURE = Identifier.withDefaultNamespace("textures/entity/goat/goat_shaven.png");
 
-    @Inject(method = "getTextureLocation(Lnet/minecraft/world/entity/animal/goat/Goat;)Lnet/minecraft/resources/ResourceLocation;",
+    @Inject(method = "getTextureLocation(Lnet/minecraft/client/renderer/entity/state/GoatRenderState;)Lnet/minecraft/resources/Identifier;",
             at = @At("HEAD"), cancellable = true)
-    private void getTextureLocation(Goat goat, CallbackInfoReturnable<ResourceLocation> cir)
+    private void getTextureLocation(GoatRenderState state, CallbackInfoReturnable<Identifier> cir)
     {
-        if (ShearableFurManager.getFurCap(goat).map(IShearableCap::isSheared).orElse(false))
+        if (Boolean.TRUE.equals(state.getRenderData(RenderStateData.GOAT_SHEARED)))
         {   cir.setReturnValue(SHEARED_GOAT_TEXTURE);
         }
     }

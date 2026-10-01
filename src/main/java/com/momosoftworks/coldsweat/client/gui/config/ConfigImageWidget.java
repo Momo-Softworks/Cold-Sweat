@@ -1,20 +1,21 @@
 package com.momosoftworks.coldsweat.client.gui.config;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.narration.NarratedElementType;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class ConfigImageWidget extends AbstractWidget implements GuiEventListener, NarratableEntry
 {
-    ResourceLocation texture;
+    Identifier texture;
     int x, y, width, height, u, v;
 
-    public ConfigImageWidget(ResourceLocation texture, int x, int y, int width, int height, int u, int v)
+    public ConfigImageWidget(Identifier texture, int x, int y, int width, int height, int u, int v)
     {
         super(x, y, width, height, Component.empty());
         this.texture = texture;
@@ -27,8 +28,8 @@ public class ConfigImageWidget extends AbstractWidget implements GuiEventListene
     }
 
     @Override
-    public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick)
-    {   graphics.blit(texture, this.x, this.y, u, v, width, height, width, height);
+    protected void extractWidgetRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick)
+    {   graphics.blit(RenderPipelines.GUI_TEXTURED, texture, this.x, this.y, u, v, width, height, width, height);
     }
 
     @Override

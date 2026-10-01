@@ -1,0 +1,12 @@
+{
+  "gives": {
+    "id": "cold_sweat:hoglin_hide"
+  },
+  "max_uses": 99999999.0,
+  "reputation_discount": 1.0,
+  "wants": {
+    "count": 4.0,
+    "id": "minecraft:emerald"
+  },
+  "xp": 15.0
+}

@@ -1,5 +1,9 @@
 package com.momosoftworks.coldsweat.common.capability.handler;
 
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.entity.EntityTypes;
+import com.momosoftworks.coldsweat.util.entity.EntityHelper;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
@@ -35,7 +39,7 @@ import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
@@ -47,11 +51,11 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.vehicle.Minecart;
+import net.minecraft.world.entity.vehicle.minecart.Minecart;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TridentItem;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -85,10 +89,10 @@ public class EntityTempManager
     public static final Trait[] VALID_MODIFIER_TRAITS = Arrays.stream(Trait.values()).filter(Trait::isForModifiers).toArray(Trait[]::new);
     public static final Trait[] VALID_ATTRIBUTE_TRAITS = Arrays.stream(Trait.values()).filter(Trait::isForAttributes).toArray(Trait[]::new);
 
-    public static final Set<EntityType<? extends LivingEntity>> TEMPERATURE_ENABLED_ENTITIES = new HashSet<>(ImmutableSet.<EntityType<? extends LivingEntity>>builder().add(EntityType.PLAYER).build());
+    public static final Set<EntityType<? extends LivingEntity>> TEMPERATURE_ENABLED_ENTITIES = new HashSet<>(ImmutableSet.<EntityType<? extends LivingEntity>>builder().add(EntityTypes.PLAYER).build());
 
     public static final SidedCapabilityCache<ITemperatureCap, Entity> CAP_CACHE = new SidedCapabilityCache<>(ModDataAttachments.ENTITY_TEMPERATURE, Entity::isRemoved);
-    public static final MappedCache<Entity, Map<ResourceLocation, Double>> TEMP_MODIFIER_IMMUNITIES = new MappedCache<>(entity -> new HashMap<>(), Entity::isRemoved);
+    public static final MappedCache<Entity, Map<Identifier, Double>> TEMP_MODIFIER_IMMUNITIES = new MappedCache<>(entity -> new HashMap<>(), Entity::isRemoved);
 
     @EventBusSubscriber
     public static class Events
@@ -110,13 +114,13 @@ public class EntityTempManager
         {
             LivingEntity entity = event.getEntity();
             boolean isPlayer = entity instanceof Player;
-            boolean isTempSensitive = entity.getType().is(ModEntityTags.TEMPERATURE_SENSITIVE);
+            boolean isTempSensitive = entity.getType().builtInRegistryHolder().is(ModEntityTags.TEMPERATURE_SENSITIVE);
 
             // Use a far more performant (less accurate) check for climate-enabled entities
             if (hasClimateData(entity))
             {
                 boolean isAdvanced = ConfigSettings.ADVANCED_ENTITY_TEMPERATURE.get();
-                boolean wasAdvanced = entity.getPersistentData().getBoolean("AdvancedTemperature");
+                boolean wasAdvanced = entity.getPersistentData().getBooleanOr("AdvancedTemperature", false);
                 // Clear modifiers if the "Advanced" setting was changed
                 if (isAdvanced != wasAdvanced)
                 {   Temperature.getModifiers(entity).clear();
@@ -160,15 +164,15 @@ public class EntityTempManager
                               Placement.LAST.noDuplicates(Matcher.SAME_CLASS));
 
             // Serene Seasons compat
-            event.addModifierById(Trait.WORLD, ResourceLocation.parse("sereneseasons:season"),
+            event.addModifierById(Trait.WORLD, Identifier.parse("sereneseasons:season"),
                                   mod -> mod.tickRate(slowTickRate),
                                   Placement.of(Mode.ADD_AFTER, Order.FIRST, mod2 -> mod2 instanceof BiomeTempModifier).noDuplicates(Matcher.SAME_CLASS));
             // Weather2 Compat
-            event.addModifierById(Trait.WORLD, ResourceLocation.parse("weather2:storm"),
+            event.addModifierById(Trait.WORLD, Identifier.parse("weather2:storm"),
                                   mod -> mod.tickRate(slowTickRate),
                                   Placement.of(Mode.ADD_AFTER, Order.FIRST, mod2 -> mod2 instanceof BiomeTempModifier).noDuplicates(Matcher.SAME_CLASS));
             // Sublevel block temperature (i.e. Valkyrien Skies ships)
-            event.addModifierById(Trait.WORLD, ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "sublevel_blocks"),
+            event.addModifierById(Trait.WORLD, Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "sublevel_blocks"),
                                   mod -> mod.tickRate(mediumTickRate2),
                                   Placement.of(Mode.ADD_AFTER, Order.FIRST, mod2 -> mod2 instanceof BlockTempModifier).noDuplicates(Matcher.SAME_CLASS));
 
@@ -212,7 +216,7 @@ public class EntityTempManager
         public static void tickTemperature(EntityTickEvent.Pre event)
         {
             if (!(event.getEntity() instanceof LivingEntity entity) || !TEMPERATURE_ENABLED_ENTITIES.contains(entity.getType())) return;
-            boolean isServer = !entity.level().isClientSide;
+            boolean isServer = !entity.level().isClientSide();
 
             getTemperatureCap(entity).ifPresent(cap ->
             {
@@ -293,7 +297,7 @@ public class EntityTempManager
             Player oldPlayer = event.getOriginal();
             Player newPlayer = event.getEntity();
 
-            if (!newPlayer.level().isClientSide)
+            if (!newPlayer.level().isClientSide())
             {
                 // Get the old player's capability
                 getTemperatureCap(oldPlayer).map(ITemperatureCap::getPersistentAttributes).orElse(new HashSet<>())
@@ -345,7 +349,7 @@ public class EntityTempManager
                             if (slot.container == player.getInventory()
                             && (ConfigSettings.INSULATION_ITEMS.get().containsKey(stack.getItem())))
                             {
-                                player.awardRecipesByKey(List.of(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "sewing_table")));
+                                player.awardRecipesByKey(List.of(ResourceKey.create(Registries.RECIPE, Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "sewing_table"))));
                             }
                         }
                     }
@@ -359,7 +363,7 @@ public class EntityTempManager
         {
             TempModifier modifier = event.getModifier();
 
-            ResourceLocation modifierKey = modifier.getID();
+            Identifier modifierKey = modifier.getID();
 
             if (modifierKey != null && ConfigSettings.DISABLED_MODIFIERS.get().contains(modifierKey))
             {
@@ -374,7 +378,7 @@ public class EntityTempManager
             if (event.getEntity() instanceof LivingEntity entity
             && !entity.level().isClientSide() && entity.tickCount % 20 == 0 && isTemperatureEnabled(entity))
             {
-                Map<ResourceLocation, Double> immunities = new HashMap<>();
+                Map<Identifier, Double> immunities = new HashMap<>();
                 for (Map.Entry<ItemStack, InsulatorData> entry : getInsulatorsOnEntity(entity).entrySet())
                 {
                     InsulatorData insulator = entry.getValue();
@@ -455,7 +459,7 @@ public class EntityTempManager
             Player player = event.getEntity();
 
             // Water / Rain
-            if (!player.level().isClientSide)
+            if (!player.level().isClientSide())
             {
                 if (player.tickCount % 5 == 0)
                 {
@@ -477,7 +481,7 @@ public class EntityTempManager
                     if (!hasIcePotion)
                     {
                         Temperature.getModifier(player, Trait.RATE, ArmorInsulationTempModifier.class).ifPresent(insulModifier ->
-                        {   insulation.updateAndGet(v -> (v + insulModifier.getNBT().getDouble("Hot") + insulModifier.getNBT().getDouble("Cold")));
+                        {   insulation.updateAndGet(v -> (v + insulModifier.getNBT().getDoubleOr("Hot", 0) + insulModifier.getNBT().getDoubleOr("Cold", 0)));
                         });
                     }
 
@@ -498,7 +502,7 @@ public class EntityTempManager
             {
                 TaskScheduler.scheduleServer(() ->
                 {
-                    if (stack.getItem() instanceof TridentItem && EnchantmentHelper.getTridentSpinAttackStrength(stack, entity) > 0 && !entity.isInWaterOrBubble())
+                    if (stack.getItem() instanceof TridentItem && EnchantmentHelper.getTridentSpinAttackStrength(stack, entity) > 0 && !entity.isInWater())
                     {   Temperature.removeModifiers(entity, Trait.WORLD, WaterTempModifier.class);
                     }
                 }, 5);
@@ -510,7 +514,7 @@ public class EntityTempManager
         {
             if (event.getEntity().tickCount % 20 == 0)
             {
-                for (ItemStack item : event.getEntity().getInventory().items)
+                for (ItemStack item : event.getEntity().getInventory().getNonEquipmentItems())
                 {   updateInventoryTempAttributes(item, item, event.getEntity());
                 }
             }
@@ -530,7 +534,7 @@ public class EntityTempManager
             Entity entity = event.getEntity();
             if (entity instanceof LivingEntity living && entity.tickCount % 20 == 0)
             {
-                for (ItemStack armor : living.getArmorSlots())
+                for (ItemStack armor : EntityHelper.getArmorItems(living))
                 {
                     if (!armor.isEmpty())
                     {   updateInsulationAttributeModifiers(living, armor, armor, Insulation.Slot.ARMOR);
@@ -543,7 +547,7 @@ public class EntityTempManager
         public static void updateInsulationAttributesOnEquipmentChange(LivingEquipmentChangeEvent event)
         {
             updateInsulationAttributeModifiers(event.getEntity(), event.getFrom(), event.getTo(), Insulation.Slot.ARMOR);
-            for (ItemStack armor : event.getEntity().getArmorSlots())
+            for (ItemStack armor : EntityHelper.getArmorItems(event.getEntity()))
             {
                 if (!armor.isEmpty())
                 {   updateInsulationAttributeModifiers(event.getEntity(), armor, armor, Insulation.Slot.ARMOR);
@@ -571,7 +575,7 @@ public class EntityTempManager
             LivingEntity entity = event.getEntity();
             MobEffectInstance effect = event.getEffectInstance();
 
-            if (!entity.level().isClientSide && isTemperatureEnabled(entity)
+            if (!entity.level().isClientSide() && isTemperatureEnabled(entity)
             && (effect.getEffect() == ModEffects.FRIGIDNESS || effect.getEffect() == ModEffects.WARMTH))
             {
                 boolean isWarmth = effect.getEffect() == ModEffects.WARMTH;
@@ -593,7 +597,7 @@ public class EntityTempManager
             LivingEntity entity = event.getEntity();
             MobEffectInstance effect = event.getEffectInstance();
 
-            if (effect != null && !entity.level().isClientSide && isTemperatureEnabled(entity)
+            if (effect != null && !entity.level().isClientSide() && isTemperatureEnabled(entity)
             && (effect.getEffect() == ModEffects.FRIGIDNESS || effect.getEffect() == ModEffects.WARMTH))
             {
                 Optional<ThermalSourceTempModifier> modifier = Temperature.getModifier(entity, Trait.WORLD, ThermalSourceTempModifier.class);
@@ -671,8 +675,8 @@ public class EntityTempManager
         {
             ItemStack item = event.getItem();
             if (event.getEntity() instanceof Player player
-            && (item.getUseAnimation() == UseAnim.DRINK || item.getUseAnimation() == UseAnim.EAT)
-            && !event.getEntity().level().isClientSide)
+            && (item.getUseAnimation() == ItemUseAnimation.DRINK || item.getUseAnimation() == ItemUseAnimation.EAT)
+            && !event.getEntity().level().isClientSide())
             {
                 // If food item defined in config
                 for (FoodData foodData : ConfigSettings.FOOD_TEMPERATURES.get().get(item.getItem()))
@@ -830,9 +834,9 @@ public class EntityTempManager
          */
         if (entity instanceof Player player)
         {
-            for (int i = 0; i < player.getInventory().items.size(); i++)
+            for (int i = 0; i < player.getInventory().getNonEquipmentItems().size(); i++)
             {
-                ItemStack stack = player.getInventory().items.get(i);
+                ItemStack stack = player.getInventory().getNonEquipmentItems().get(i);
                 if (stack.isEmpty()) continue;
                 int slotIndex = i;
                 ConfigSettings.ITEM_TEMPERATURES.get().get(stack.getItem()).forEach(temp ->
@@ -955,12 +959,12 @@ public class EntityTempManager
         if (!trait.isForAttributes())
         {   throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("\"" + trait + "\" is not a valid trait!"));
         }
-        return new AttributeModifier(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, trait.getSerializedName() + "_modifier"), value, operation);
+        return new AttributeModifier(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, trait.getSerializedName() + "_modifier"), value, operation);
     }
 
     public static boolean isTemperatureAttribute(Holder<Attribute> attribute)
     {
-        return attribute.getKey().location().getNamespace().equals(ColdSweat.MOD_ID);
+        return attribute.getKey().identifier().getNamespace().equals(ColdSweat.MOD_ID);
     }
 
     public static List<AttributeInstance> getAllTemperatureAttributes(LivingEntity entity)

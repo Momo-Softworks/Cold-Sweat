@@ -37,7 +37,7 @@ public class PreventPlayerSleep
             {   return;
             }
             // Prevent sleep with message
-            player.displayClientMessage(Component.translatable("cold_sweat.message.sleep.body." + (bodyTemp > 99 ? "hot" : "cold")), true);
+            player.sendOverlayMessage(Component.translatable("cold_sweat.message.sleep.body." + (bodyTemp > 99 ? "hot" : "cold")));
             event.setProblem(Player.BedSleepingProblem.OTHER_PROBLEM);
         }
         // If the player's world temperature is critical
@@ -49,7 +49,7 @@ public class PreventPlayerSleep
             {   return;
             }
             // Prevent sleep with message
-            player.displayClientMessage(Component.translatable("cold_sweat.message.sleep.world." + (worldTemp > maxTemp ? "hot" : "cold")), true);
+            player.sendOverlayMessage(Component.translatable("cold_sweat.message.sleep.world." + (worldTemp > maxTemp ? "hot" : "cold")));
             event.setProblem(Player.BedSleepingProblem.OTHER_PROBLEM);
         }
     }

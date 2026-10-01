@@ -1,5 +1,9 @@
 package com.momosoftworks.coldsweat.api.temperature.effect.player;
 
+import net.minecraft.world.level.Level;
+import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.gui.Hud;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.vanilla.RenderHeartEvent;
 import com.momosoftworks.coldsweat.api.temperature.effect.TempEffect;
@@ -10,10 +14,8 @@ import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.RenderFrameEvent;
 
@@ -23,24 +25,23 @@ public class FreezeHeartsEffect extends TempEffect
     {   super(type, bounds);
     }
 
-    private static final ResourceLocation HEART_TEXTURE = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/hearts_frozen.png");
+    private static final Identifier HEART_TEXTURE = Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/hearts_frozen.png");
     // Ticks up as hearts are rendered, representing the "index" of the current heart
     private int heartIndex = 0;
 
-    @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public void onRenderHeart(RenderHeartEvent event)
     {
-        LivingEntity player = Minecraft.getInstance().player;
+        LivingEntity player = ClientOnlyHelper.getClientPlayer();
         if (!this.test(player)) return;
         if (!ConfigSettings.SHOW_FROZEN_HEALTH.get()) return;
 
-        Gui.HeartType heartType = event.getHeartType();
+        Hud.HeartType heartType = event.getHeartType();
         boolean halfHeart = event.isHalfHeart();
         int x = event.getX();
         int y = event.getY();
         // This check ensures that this only gets called once per heart
-        if (heartType == Gui.HeartType.CONTAINER)
+        if (heartType == Hud.HeartType.CONTAINER)
         {   heartIndex += 1;
         }
 
@@ -62,7 +63,7 @@ public class FreezeHeartsEffect extends TempEffect
         if (heartIndex <= frozenHearts)
         {
             int u, v;
-            if (heartType == Gui.HeartType.CONTAINER)
+            if (heartType == Hud.HeartType.CONTAINER)
             {   u = 14;
                 v = partialFrozen ? 14 : 0;
             }
@@ -70,7 +71,7 @@ public class FreezeHeartsEffect extends TempEffect
             {   u = isHardcore ? 7 : 0;
                 v = partialFrozen ? halfHeart ? 21 : 14 : halfHeart ? 7 : 0;
             }
-            event.getGuiGraphics().blit(HEART_TEXTURE, x + 1, y + 1, u, v, 7, 7, 21, 28);
+            event.getGuiGraphics().blit(RenderPipelines.GUI_TEXTURED, HEART_TEXTURE, x + 1, y + 1, u, v, 7, 7, 21, 28);
         }
     }
 

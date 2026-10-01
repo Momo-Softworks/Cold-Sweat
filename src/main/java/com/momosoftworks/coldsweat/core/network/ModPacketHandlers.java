@@ -19,11 +19,11 @@ public class ModPacketHandlers
         registrar.playToClient(BlockDataUpdateMessage.TYPE, BlockDataUpdateMessage.CODEC, BlockDataUpdateMessage::handle);
         registrar.playToClient(ChameleonEatMessage.TYPE, ChameleonEatMessage.CODEC, ChameleonEatMessage::handle);
         registrar.playToServer(ClientConfigAskMessage.TYPE, ClientConfigAskMessage.CODEC, ClientConfigAskMessage::handle);
-        registrar.playBidirectional(DisableHearthParticlesMessage.TYPE, DisableHearthParticlesMessage.CODEC, DisableHearthParticlesMessage::handle);
+        registrar.playBidirectional(DisableHearthParticlesMessage.TYPE, DisableHearthParticlesMessage.CODEC, DisableHearthParticlesMessage::handle, DisableHearthParticlesMessage::handle);
         registrar.playToClient(HearthResetMessage.TYPE, HearthResetMessage.CODEC, HearthResetMessage::handle);
         registrar.playToClient(ParticleBatchMessage.TYPE, ParticleBatchMessage.CODEC, ParticleBatchMessage::handle);
         registrar.playToClient(PlayEntityAttachedSoundMessage.TYPE, PlayEntityAttachedSoundMessage.CODEC, PlayEntityAttachedSoundMessage::handle);
-        registrar.playBidirectional(SyncConfigSettingsMessage.TYPE, SyncConfigSettingsMessage.CODEC, SyncConfigSettingsMessage::handle);
+        registrar.playBidirectional(SyncConfigSettingsMessage.TYPE, SyncConfigSettingsMessage.CODEC, SyncConfigSettingsMessage::handle, SyncConfigSettingsMessage::handle);
         registrar.playToClient(SyncContainerSlotMessage.TYPE, SyncContainerSlotMessage.CODEC, SyncContainerSlotMessage::handle);
         registrar.playToClient(SyncForgeDataMessage.TYPE, SyncForgeDataMessage.CODEC, SyncForgeDataMessage::handle);
         registrar.playToServer(SyncPreferencesMessage.TYPE, SyncPreferencesMessage.CODEC, SyncPreferencesMessage::handle);
@@ -31,6 +31,6 @@ public class ModPacketHandlers
         registrar.playToClient(SyncTemperatureMessage.TYPE, SyncTemperatureMessage.CODEC, SyncTemperatureMessage::handle);
         registrar.playToClient(SyncTempModifiersMessage.TYPE, SyncTempModifiersMessage.CODEC, SyncTempModifiersMessage::handle);
         registrar.playToClient(EntityMountMessage.TYPE, EntityMountMessage.CODEC, EntityMountMessage::handle);
-        registrar.playBidirectional(SyncItemPredicatesMessage.TYPE, SyncItemPredicatesMessage.CODEC, SyncItemPredicatesMessage::handle);
+        registrar.playBidirectional(SyncItemPredicatesMessage.TYPE, SyncItemPredicatesMessage.CODEC, SyncItemPredicatesMessage::handle, SyncItemPredicatesMessage::handle);
     }
 }

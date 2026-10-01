@@ -12,7 +12,7 @@ import com.momosoftworks.coldsweat.data.codec.requirement.EntityRequirement;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 
 import java.util.List;
@@ -72,10 +72,10 @@ public class TempEffectsData extends ConfigData implements RequirementHolder
         private final TempEffectType<T> effect;
         private final IntegerBounds range;
 
-        private static final Codec<TempEffectType<?>> EFFECT_CODEC = ResourceLocation.CODEC.xmap(
+        private static final Codec<TempEffectType<?>> EFFECT_CODEC = Identifier.CODEC.xmap(
                 rl -> CSMath.getIfNotNull(ModTempEffects.REGISTRY, reg ->
                 {
-                    TempEffectType<?> effectType = reg.get(rl);
+                    TempEffectType<?> effectType = reg.getValue(rl);
                     if (effectType == null)
                     {   ColdSweat.LOGGER.error("Error parsing temp effect: \"{}\" not found", rl);
                     }

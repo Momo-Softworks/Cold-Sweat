@@ -1,5 +1,7 @@
 package com.momosoftworks.coldsweat.common.command;
 
+import net.minecraft.server.permissions.PermissionLevel;
+import net.minecraft.server.permissions.Permission;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -10,7 +12,8 @@ public class BaseCommand
     boolean enabled;
 
     public BaseCommand(String name, int permissionLevel, boolean enabled)
-    {   this.builder = Commands.literal(name).requires(source -> source.hasPermission(permissionLevel));
+    {   Permission permission = new Permission.HasCommandLevel(PermissionLevel.byId(permissionLevel));
+        this.builder = Commands.literal(name).requires(source -> source.permissions().hasPermission(permission));
         this.enabled = enabled;
     }
 

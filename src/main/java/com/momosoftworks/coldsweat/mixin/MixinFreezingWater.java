@@ -5,7 +5,7 @@ import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.biome.Biome;
@@ -29,7 +29,7 @@ public class MixinFreezingWater
         if (!ConfigSettings.USE_CUSTOM_WATER_FREEZE_BEHAVIOR.get()) return;
         if (!(levelReader instanceof ServerLevel level)) return;
 
-        if (level.getGameRules().getInt(GameRules.RULE_RANDOMTICKING) == 0)
+        if (level.getGameRules().get(GameRules.RANDOM_TICK_SPEED) == 0)
         {   cir.setReturnValue(false);
             return;
         }

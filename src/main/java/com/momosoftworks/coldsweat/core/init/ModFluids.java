@@ -3,7 +3,6 @@ package com.momosoftworks.coldsweat.core.init;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.fluid.SlushFluid;
 import com.momosoftworks.coldsweat.common.fluid.SlushFluidType;
-import com.mrbysco.spoiled.registration.RegistryObject;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraft.world.level.material.Fluid;

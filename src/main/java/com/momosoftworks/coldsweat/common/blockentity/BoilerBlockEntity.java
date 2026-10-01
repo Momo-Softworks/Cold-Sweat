@@ -1,5 +1,7 @@
 package com.momosoftworks.coldsweat.common.blockentity;
 
+import net.minecraft.world.level.storage.ValueInput;
+import com.momosoftworks.coldsweat.util.item.ItemStackHelper;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.block.BoilerBlock;
 import com.momosoftworks.coldsweat.common.container.BoilerContainer;
@@ -44,8 +46,8 @@ public class BoilerBlockEntity extends HearthBlockEntity
     }
 
     @Override
-    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider registries)
-    {   handleUpdateTag(pkt.getTag(), registries);
+    public void onDataPacket(Connection net, ValueInput input)
+    {   this.handleUpdateTag(input);
     }
 
     @Override
@@ -214,13 +216,13 @@ public class BoilerBlockEntity extends HearthBlockEntity
     {
         if (this.getFuel() < this.getMaxFuel() - Math.abs(amount) * 0.75)
         {
-            if (!stack.hasCraftingRemainingItem() || stack.getCount() > 1)
+            if (!ItemStackHelper.hasCraftingRemainder(stack) || stack.getCount() > 1)
             {   int consumeCount = Math.min((int) Math.floor((this.getMaxFuel() - this.getFuel()) / (double) Math.abs(amount)), stack.getCount());
                 stack.shrink(consumeCount);
                 addFuel(amount * consumeCount);
             }
             else
-            {   this.setItem(0, stack.getCraftingRemainingItem());
+            {   this.setItem(0, ItemStackHelper.getCraftingRemainder(stack));
                 addFuel(amount);
             }
         }

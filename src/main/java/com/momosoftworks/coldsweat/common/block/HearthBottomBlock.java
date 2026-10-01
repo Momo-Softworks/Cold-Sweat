@@ -1,5 +1,7 @@
 package com.momosoftworks.coldsweat.common.block;
 
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.redstone.Orientation;
 import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ModBlockEntities;
@@ -17,7 +19,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -36,18 +37,16 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 
 import javax.annotation.Nullable;
 import java.util.Random;
 
 public class HearthBottomBlock extends Block implements EntityBlock
 {
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty COOLING = BooleanProperty.create("cooling");
     public static final BooleanProperty HEATING = BooleanProperty.create("heating");
     public static final BooleanProperty LIT = BlockStateProperties.LIT;
@@ -89,7 +88,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
     }
 
     public RenderShape getRenderShape(BlockState pState)
-    {   return RenderShape.ENTITYBLOCK_ANIMATED;
+    {   return RenderShape.INVISIBLE;
     }
 
     @Nullable
@@ -109,7 +108,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
 
     @SuppressWarnings("deprecation")
     @Override
-    public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
+    public InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
     {
         if (level.getBlockEntity(pos) instanceof HearthBlockEntity te)
         {
@@ -122,9 +121,9 @@ public class HearthBottomBlock extends Block implements EntityBlock
                 // Consume the item if not in creative
                 if (!player.isCreative())
                 {
-                    if (stack.hasCraftingRemainingItem())
+                    if (ItemStackHelper.hasCraftingRemainder(stack))
                     {
-                        ItemStack container = stack.getCraftingRemainingItem();
+                        ItemStack container = ItemStackHelper.getCraftingRemainder(stack);
                         player.setItemInHand(hand, container);
                     }
                     else
@@ -142,10 +141,9 @@ public class HearthBottomBlock extends Block implements EntityBlock
             }
             else player.openMenu(te, pos);
         }
-        return ItemInteractionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
-    @OnlyIn(Dist.CLIENT)
     @Override
     public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource random)
     {
@@ -164,7 +162,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, BlockPos fromPos, boolean isMoving)
+    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, @Nullable Orientation fromPos, boolean isMoving)
     {
         super.neighborChanged(state, level, pos, neighborBlock, fromPos, isMoving);
         if (level.getBlockState(pos.above()).getBlock() != ModBlocks.HEARTH_TOP.value())
@@ -180,22 +178,14 @@ public class HearthBottomBlock extends Block implements EntityBlock
         }
     }
 
-    @SuppressWarnings("deprecation")
     @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving)
+    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean movedByPiston)
     {
-        if (!isMoving && state.getBlock() != newState.getBlock())
-        {
-            if (level.getBlockState(pos.above()).getBlock() == ModBlocks.HEARTH_TOP.value())
-            {   level.destroyBlock(pos.above(), false);
-            }
-
-            BlockEntity tileentity = level.getBlockEntity(pos);
-            if (tileentity instanceof HearthBlockEntity)
-            {   Containers.dropContents(level, pos, (HearthBlockEntity) tileentity);
-            }
+        // Contents are dropped by BlockEntity#preRemoveSideEffects
+        if (!movedByPiston && level.getBlockState(pos.above()).getBlock() == ModBlocks.HEARTH_TOP.value())
+        {   level.destroyBlock(pos.above(), false);
         }
-        super.onRemove(state, level, pos, newState, isMoving);
+        super.affectNeighborsAfterRemoval(state, level, pos, movedByPiston);
     }
 
     @Override
@@ -232,7 +222,7 @@ public class HearthBottomBlock extends Block implements EntityBlock
     }
 
     @Override
-    public int getAnalogOutputSignal(BlockState pState, Level level, BlockPos pos)
+    public int getAnalogOutputSignal(BlockState pState, Level level, BlockPos pos, Direction direction)
     {   return AbstractContainerMenu.getRedstoneSignalFromBlockEntity(level.getBlockEntity(pos));
     }
 }

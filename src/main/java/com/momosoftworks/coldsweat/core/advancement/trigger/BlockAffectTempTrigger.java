@@ -3,10 +3,10 @@ package com.momosoftworks.coldsweat.core.advancement.trigger;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.momosoftworks.coldsweat.api.util.Temperature;
-import net.minecraft.advancements.critereon.BlockPredicate;
-import net.minecraft.advancements.critereon.ContextAwarePredicate;
-import net.minecraft.advancements.critereon.MinMaxBounds;
-import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
+import net.minecraft.advancements.predicates.BlockPredicate;
+import net.minecraft.advancements.predicates.ContextAwarePredicate;
+import net.minecraft.advancements.predicates.MinMaxBounds;
+import net.minecraft.advancements.triggers.SimpleCriterionTrigger;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -40,7 +40,7 @@ public class BlockAffectTempTrigger extends SimpleCriterionTrigger<BlockAffectTe
             Map<Temperature.Trait, Double> temps = Temperature.getTemperatures(player);
             return this.distance.matches(distance)
                     && this.totalEffect.matches(totalEffect)
-                    && this.block.map(b -> b.matches(player.serverLevel(), pos)).orElse(true)
+                    && this.block.map(b -> b.matches(player.level(), pos)).orElse(true)
                     && conditions.stream().allMatch(condition -> condition.matches(temps.getOrDefault(condition.trait(), 0.0)));
         }
     }

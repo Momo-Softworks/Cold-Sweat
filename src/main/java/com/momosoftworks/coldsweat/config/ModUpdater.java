@@ -23,7 +23,7 @@ public class ModUpdater
 {
     public static void updateEntity(LivingEntity entity)
     {
-        String entityVersion = entity.getPersistentData().getString("cs:version");
+        String entityVersion = entity.getPersistentData().getStringOr("cs:version", "");
         entity.getPersistentData().putString("cs:version", ColdSweat.getVersion());
     }
 

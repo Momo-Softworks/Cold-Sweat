@@ -11,7 +11,7 @@ import com.momosoftworks.coldsweat.data.codec.util.ExtraCodecs;
 import com.momosoftworks.coldsweat.data.codec.util.NegatableList;
 import com.momosoftworks.coldsweat.data.codec.util.ValueGetter;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -28,11 +28,11 @@ public class MountData extends ConfigData implements RequirementHolder
     final NegatableList<EntityRequirement> rider;
     final ValueGetter<Double> coldInsulation;
     final ValueGetter<Double> heatInsulation;
-    final Map<ResourceLocation, ValueGetter<Double>> modifierImmunities;
+    final Map<Identifier, ValueGetter<Double>> modifierImmunities;
 
     public MountData(NegatableList<EntityRequirement> entity, NegatableList<EntityRequirement> rider,
                      ValueGetter<Double> coldInsulation, ValueGetter<Double> heatInsulation,
-                     Map<ResourceLocation, ValueGetter<Double>> modifierImmunities, NegatableList<String> requiredMods)
+                     Map<Identifier, ValueGetter<Double>> modifierImmunities, NegatableList<String> requiredMods)
     {
         super(requiredMods);
         this.entity = entity;
@@ -44,7 +44,7 @@ public class MountData extends ConfigData implements RequirementHolder
 
     public MountData(NegatableList<EntityRequirement> entity, NegatableList<EntityRequirement> rider,
                      ValueGetter<Double> coldInsulation, ValueGetter<Double> heatInsulation,
-                     Map<ResourceLocation, ValueGetter<Double>> modifierImmunities)
+                     Map<Identifier, ValueGetter<Double>> modifierImmunities)
     {
         this(entity, rider, coldInsulation, heatInsulation, modifierImmunities, new NegatableList<>());
     }
@@ -54,7 +54,7 @@ public class MountData extends ConfigData implements RequirementHolder
             NegatableList.codec(EntityRequirement.getCodec()).optionalFieldOf("rider", new NegatableList<>()).forGetter(MountData::rider),
             ValueGetter.optionalFieldCodec("cold_insulation", ExtraCodecs.DOUBLE, 0.0).forGetter(MountData::coldInsulation),
             ValueGetter.optionalFieldCodec("heat_insulation", ExtraCodecs.DOUBLE, 0.0).forGetter(MountData::heatInsulation),
-            Codec.unboundedMap(ResourceLocation.CODEC, ValueGetter.codec(ExtraCodecs.DOUBLE, 0.0)).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(MountData::modifierImmunities)
+            Codec.unboundedMap(Identifier.CODEC, ValueGetter.codec(ExtraCodecs.DOUBLE, 0.0)).optionalFieldOf("immune_temp_modifiers", new HashMap<>()).forGetter(MountData::modifierImmunities)
     ).apply(instance, MountData::new)));
 
     public NegatableList<EntityRequirement> entity()
@@ -75,13 +75,13 @@ public class MountData extends ConfigData implements RequirementHolder
     public double heatInsulation(Entity entity, Entity rider)
     {   return heatInsulation.get(Map.of("entity", entity, "rider", rider));
     }
-    public Map<ResourceLocation, ValueGetter<Double>> modifierImmunities()
+    public Map<Identifier, ValueGetter<Double>> modifierImmunities()
     {   return modifierImmunities;
     }
-    public Map<ResourceLocation, Double> modifierImmunities(Entity entity, Entity rider)
+    public Map<Identifier, Double> modifierImmunities(Entity entity, Entity rider)
     {
-        Map<ResourceLocation, Double> result = new HashMap<>();
-        for (Map.Entry<ResourceLocation, ValueGetter<Double>> entry : modifierImmunities.entrySet())
+        Map<Identifier, Double> result = new HashMap<>();
+        for (Map.Entry<Identifier, ValueGetter<Double>> entry : modifierImmunities.entrySet())
         {   result.put(entry.getKey(), entry.getValue().get(Map.of("entity", entity, "rider", rider)));
         }
         return result;

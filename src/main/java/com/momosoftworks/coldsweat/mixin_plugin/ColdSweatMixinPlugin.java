@@ -69,6 +69,6 @@ public class ColdSweatMixinPlugin implements IMixinConfigPlugin
     }
 
     public static boolean modLoaded(String modId)
-    {   return FMLLoader.getLoadingModList().getModFileById(modId) != null;
+    {   return FMLLoader.getCurrent().getLoadingModList().getModFileById(modId) != null;
     }
 }

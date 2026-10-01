@@ -1,16 +1,17 @@
 package com.momosoftworks.coldsweat.mixin;
 
+import net.minecraft.server.level.ServerLevel;
 import com.momosoftworks.coldsweat.core.init.ModBlocks;
 import com.momosoftworks.coldsweat.core.init.ModItems;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.vehicle.AbstractMinecart;
-import net.minecraft.world.entity.vehicle.Minecart;
+import net.minecraft.world.entity.vehicle.minecart.AbstractMinecart;
+import net.minecraft.world.entity.vehicle.minecart.Minecart;
 import net.minecraft.world.entity.vehicle.VehicleEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -21,20 +22,20 @@ public class MixinMinecart
 {
     VehicleEntity vehicle = (VehicleEntity) (Object) this;
 
-    @Inject(method = "hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z",
+    @Inject(method = "hurtServer(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)Z",
             at = @At
             (
                 value = "INVOKE",
-                target = "Lnet/minecraft/world/entity/vehicle/VehicleEntity;destroy(Lnet/minecraft/world/damagesource/DamageSource;)V"
+                target = "Lnet/minecraft/world/entity/vehicle/VehicleEntity;destroy(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;)V"
             ), cancellable = true)
-    public void hurt(DamageSource source, float amount, CallbackInfoReturnable<Boolean> ci)
+    public void hurt(ServerLevel level, DamageSource source, float amount, CallbackInfoReturnable<Boolean> ci)
     {
         if (vehicle instanceof Minecart minecart)
         {
             ItemStack carryStack = minecart.getDisplayBlockState().getBlock().asItem().getDefaultInstance();
             if (!carryStack.isEmpty())
             {
-                if (minecart.level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS))
+                if (level.getGameRules().get(GameRules.ENTITY_DROPS))
                 {
                     if (minecart.getDisplayBlockState().getBlock() == ModBlocks.MINECART_INSULATION.value())
                     {
@@ -42,7 +43,7 @@ public class MixinMinecart
                         if (minecart.hasCustomName())
                         {   itemstack.set(DataComponents.CUSTOM_NAME, minecart.getCustomName());
                         }
-                        minecart.spawnAtLocation(itemstack);
+                        minecart.spawnAtLocation(level, itemstack);
                     }
                     else
                     {
@@ -50,8 +51,8 @@ public class MixinMinecart
                         if (minecart.hasCustomName())
                         {   itemstack.set(DataComponents.CUSTOM_NAME, minecart.getCustomName());
                         }
-                        minecart.spawnAtLocation(itemstack);
-                        minecart.spawnAtLocation(carryStack);
+                        minecart.spawnAtLocation(level, itemstack);
+                        minecart.spawnAtLocation(level, carryStack);
                     }
                 }
                 minecart.remove(Entity.RemovalReason.KILLED);

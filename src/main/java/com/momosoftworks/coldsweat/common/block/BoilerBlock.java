@@ -1,12 +1,17 @@
 package com.momosoftworks.coldsweat.common.block;
 
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
+import net.minecraft.world.level.redstone.Orientation;
+import com.momosoftworks.coldsweat.util.item.ItemStackHelper;
 import com.momosoftworks.coldsweat.common.blockentity.BoilerBlockEntity;
 import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import com.momosoftworks.coldsweat.core.init.ModBlockEntities;
 import com.momosoftworks.coldsweat.core.init.ModBlocks;
 import com.momosoftworks.coldsweat.core.init.ModItems;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.ParticleStatus;
+import net.minecraft.server.level.ParticleStatus;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -15,7 +20,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.Item;
@@ -32,17 +37,15 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Random;
 
 public class BoilerBlock extends Block implements EntityBlock
 {
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty LIT = BlockStateProperties.LIT;
 
     public static Properties getProperties()
@@ -84,15 +87,15 @@ public class BoilerBlock extends Block implements EntityBlock
     }
 
     @Override
-    public ItemInteractionResult useItemOn(ItemStack pStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
+    public InteractionResult useItemOn(ItemStack pStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
     {
         ItemStack stack = player.getItemInHand(hand);
         // If the player is trying to put a smokestack on top, don't do anything
         if (stack.getItem() == ModItems.SMOKESTACK.value() && rayTraceResult.getDirection() == Direction.UP
         && level.getBlockState(pos.above()).canBeReplaced())
-        {   return ItemInteractionResult.FAIL;
+        {   return InteractionResult.FAIL;
         }
-        if (!level.isClientSide)
+        if (!level.isClientSide())
         {
             if (level.getBlockEntity(pos) instanceof BoilerBlockEntity blockEntity)
             {
@@ -102,9 +105,9 @@ public class BoilerBlock extends Block implements EntityBlock
                 {
                     if (!player.isCreative())
                     {
-                        if (stack.hasCraftingRemainingItem())
+                        if (ItemStackHelper.hasCraftingRemainder(stack))
                         {
-                            ItemStack container = stack.getCraftingRemainingItem();
+                            ItemStack container = ItemStackHelper.getCraftingRemainder(stack);
                             stack.shrink(1);
                             player.getInventory().add(container);
                         }
@@ -121,24 +124,24 @@ public class BoilerBlock extends Block implements EntityBlock
                 }
             }
         }
-        return ItemInteractionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos)
+    public BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighborState, RandomSource random)
     {
         if (direction == Direction.UP && level.getBlockEntity(pos) instanceof BoilerBlockEntity boiler)
         {
             boolean hadSmokestack = boiler.hasSmokestack();
             if (hadSmokestack != boiler.checkForSmokestack())
-            {   level.blockUpdated(pos, this);
+            {   if (level instanceof Level realLevel) realLevel.updateNeighborsAt(pos, this);
             }
         }
-        return super.updateShape(state, direction, neighborState, level, pos, neighborPos);
+        return super.updateShape(state, level, ticks, pos, direction, neighborPos, neighborState, random);
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, BlockPos fromPos, boolean isMoving)
+    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, @Nullable Orientation fromPos, boolean isMoving)
     {
         super.neighborChanged(state, level, pos, neighborBlock, fromPos, isMoving);
         // Check for redstone power to this block
@@ -148,19 +151,12 @@ public class BoilerBlock extends Block implements EntityBlock
         }
     }
 
-    @SuppressWarnings("deprecation")
     @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving)
+    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean movedByPiston)
     {
-        if (state.getBlock() != newState.getBlock())
-        {
-            BlockEntity blockEntity = level.getBlockEntity(pos);
-            if (blockEntity instanceof BoilerBlockEntity te)
-            {   Containers.dropContents(level, pos, te);
-                level.updateNeighborsAt(pos, this);
-            }
-        }
-        super.onRemove(state, level, pos, newState, isMoving);
+        // Contents are dropped by BlockEntity#preRemoveSideEffects
+        level.updateNeighborsAt(pos, this);
+        super.affectNeighborsAfterRemoval(state, level, pos, movedByPiston);
     }
 
     @Override
@@ -178,7 +174,6 @@ public class BoilerBlock extends Block implements EntityBlock
     {   return this.defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite()).setValue(LIT, false);
     }
 
-    @OnlyIn(Dist.CLIENT)
     @Override
     public void animateTick(BlockState state, Level level, BlockPos pos, RandomSource rand)
     {
@@ -226,7 +221,7 @@ public class BoilerBlock extends Block implements EntityBlock
     }
 
     @Override
-    public int getAnalogOutputSignal(BlockState pState, Level level, BlockPos pos)
+    public int getAnalogOutputSignal(BlockState pState, Level level, BlockPos pos, Direction direction)
     {   return AbstractContainerMenu.getRedstoneSignalFromBlockEntity(level.getBlockEntity(pos));
     }
 }

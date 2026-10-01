@@ -110,7 +110,7 @@ public record LocationRequirement(IntegerBounds x, IntegerBounds y, IntegerBound
             if (!this.structure.test(either ->
             {
                 StructureStart structureStart = either.map(tag -> structureManager.getStructureWithPieceAt(pos, tag),
-                                                           key -> structureManager.getStructureWithPieceAt(pos, level.registryAccess().registryOrThrow(Registries.STRUCTURE).get(key)));
+                                                           key -> structureManager.getStructureWithPieceAt(pos, level.registryAccess().lookupOrThrow(Registries.STRUCTURE).getValue(key)));
                 return structureStart != null && structureStart != StructureStart.INVALID_START;
             }))
             {   return false;

@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.RegistryHolder;
 import com.momosoftworks.coldsweat.data.codec.impl.ConfigData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.Event;
 
 /**
@@ -19,12 +19,12 @@ public class AddRegistriesEvent extends Event
     /**
      * Creates a Cold Sweat registry.
      */
-    public <V extends ConfigData> RegistryHolder<V> createRegistry(ResourceLocation registry, Codec<V> codec)
+    public <V extends ConfigData> RegistryHolder<V> createRegistry(Identifier registry, Codec<V> codec)
     {   return ModRegistries.createRegistry(registry, codec);
     }
 
     @Deprecated // Class parameter is no longer required
-    public <V extends ConfigData> RegistryHolder<V> createRegistry(ResourceLocation registry, Codec<V> codec, Class<V> type)
+    public <V extends ConfigData> RegistryHolder<V> createRegistry(Identifier registry, Codec<V> codec, Class<V> type)
     {   return ModRegistries.createRegistry(registry, codec);
     }
 }

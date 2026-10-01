@@ -12,7 +12,7 @@ import com.momosoftworks.coldsweat.config.ConfigLoadingHandler;
 import com.momosoftworks.coldsweat.config.spec.WorldSettingsConfig;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.codec.configuration.BlockTempData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -78,10 +78,11 @@ public class TempModifierInit
 
         event.register(new FurnaceBlockTemp());
         event.register(new NetherPortalBlockTemp());
-        if (CompatManager.isCreateLoaded())
-        {   event.register(new com.momosoftworks.coldsweat.api.temperature.block_temp.compat.CreateFluidTankTemp());
-            event.register(new com.momosoftworks.coldsweat.api.temperature.block_temp.compat.CreateFluidPipeTemp());
-        }
+        // TODO(26.2): re-enable when Create is updated
+        // if (CompatManager.isCreateLoaded())
+        // {   event.register(new com.momosoftworks.coldsweat.api.temperature.block_temp.compat.CreateFluidTankTemp());
+        //     event.register(new com.momosoftworks.coldsweat.api.temperature.block_temp.compat.CreateFluidPipeTemp());
+        // }
         ColdSweat.LOGGER.debug("Registered BlockTemps in {}ms", System.currentTimeMillis() - startMS);
     }
 
@@ -91,39 +92,40 @@ public class TempModifierInit
     {
         long startMS = System.currentTimeMillis();
 
-        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "blocks"), BlockTempModifier::new);
-        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "biomes"), BiomeTempModifier::new);
-        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "shade"), ShadeTempModifier::new);
-        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "elevation"), ElevationTempModifier::new);
-        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "cave_biomes"), CaveBiomeTempModifier::new);
-        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "armor"), ArmorInsulationTempModifier::new);
-        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "mount"), MountTempModifier::new);
-        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "waterskin"), WaterskinTempModifier::new);
-        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "soulspring_lamp"), SoulLampTempModifier::new);
-        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "water"), WaterTempModifier::new);
-        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "warming"), WarmthTempModifier::new);
-        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "cooling"), FrigidnessTempModifier::new);
-        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "food"), FoodTempModifier::new);
-        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "freezing"), FreezingTempModifier::new);
-        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "soul_sprout"), SoulSproutTempModifier::new);
-        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "inventory_items"), InventoryItemsTempModifier::new);
-        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "entities"), EntitiesTempModifier::new);
-        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "acclimation"), AcclimationTempModifier::new);
-        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "climate"), EntityClimateTempModifier::new);
-        event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "simple"), SimpleTempModifier::new);
+        event.register(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "blocks"), BlockTempModifier::new);
+        event.register(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "biomes"), BiomeTempModifier::new);
+        event.register(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "shade"), ShadeTempModifier::new);
+        event.register(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "elevation"), ElevationTempModifier::new);
+        event.register(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "cave_biomes"), CaveBiomeTempModifier::new);
+        event.register(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "armor"), ArmorInsulationTempModifier::new);
+        event.register(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "mount"), MountTempModifier::new);
+        event.register(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "waterskin"), WaterskinTempModifier::new);
+        event.register(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "soulspring_lamp"), SoulLampTempModifier::new);
+        event.register(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "water"), WaterTempModifier::new);
+        event.register(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "warming"), WarmthTempModifier::new);
+        event.register(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "cooling"), FrigidnessTempModifier::new);
+        event.register(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "food"), FoodTempModifier::new);
+        event.register(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "freezing"), FreezingTempModifier::new);
+        event.register(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "soul_sprout"), SoulSproutTempModifier::new);
+        event.register(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "inventory_items"), InventoryItemsTempModifier::new);
+        event.register(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "entities"), EntitiesTempModifier::new);
+        event.register(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "acclimation"), AcclimationTempModifier::new);
+        event.register(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "climate"), EntityClimateTempModifier::new);
+        event.register(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "simple"), SimpleTempModifier::new);
 
         // Compat
         if (CompatManager.isSublevelCompatLoaded())
-        {   event.register(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "sublevel_blocks"), SublevelBlockTempModifier::new);
+        {   event.register(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "sublevel_blocks"), SublevelBlockTempModifier::new);
         }
-        if (CompatManager.isSereneSeasonsLoaded())
-        {   event.register(ResourceLocation.fromNamespaceAndPath("sereneseasons", "season"), () -> new com.momosoftworks.coldsweat.api.temperature.modifier.compat.SereneSeasonsTempModifier());
-        }
-        if (CompatManager.isWeather2Loaded())
-        {   event.register(ResourceLocation.fromNamespaceAndPath("weather2", "storm"), () -> new com.momosoftworks.coldsweat.api.temperature.modifier.compat.StormTempModifier());
-        }
+        // TODO(26.2): re-enable when Serene Seasons / Weather2 compat is ported
+        // if (CompatManager.isSereneSeasonsLoaded())
+        // {   event.register(Identifier.fromNamespaceAndPath("sereneseasons", "season"), () -> new com.momosoftworks.coldsweat.api.temperature.modifier.compat.SereneSeasonsTempModifier());
+        // }
+        // if (CompatManager.isWeather2Loaded())
+        // {   event.register(Identifier.fromNamespaceAndPath("weather2", "storm"), () -> new com.momosoftworks.coldsweat.api.temperature.modifier.compat.StormTempModifier());
+        // }
         if (CompatManager.isCuriosLoaded())
-        {   event.register(ResourceLocation.fromNamespaceAndPath("curios", "curios"), () -> new com.momosoftworks.coldsweat.api.temperature.modifier.compat.CuriosTempModifier());
+        {   event.register(Identifier.fromNamespaceAndPath("curios", "curios"), () -> new com.momosoftworks.coldsweat.api.temperature.modifier.compat.CuriosTempModifier());
         }
 
         ColdSweat.LOGGER.debug("Registered TempModifiers in {}ms", System.currentTimeMillis() - startMS);

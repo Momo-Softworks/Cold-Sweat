@@ -1,7 +1,6 @@
 package com.momosoftworks.coldsweat.client.gui.config.pages;
 
 import com.momosoftworks.coldsweat.ColdSweat;
-import com.momosoftworks.coldsweat.client.event.RegisterItemOverrides;
 import com.momosoftworks.coldsweat.client.gui.config.AbstractConfigPage;
 import com.momosoftworks.coldsweat.client.gui.config.ConfigScreen;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -11,9 +10,8 @@ import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.DynamicHolder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import javax.annotation.Nullable;
 
@@ -68,11 +66,8 @@ public class ConfigPageThree extends AbstractConfigPage
                        button ->
                        {
                            DynamicHolder<Boolean> setting = ConfigSettings.ANIMATED_SOULSPRING_LAMP_MODEL;
+                           // The item model reads this setting directly (see SoulspringLampState)
                            setting.set(!setting.get());
-                           if (!setting.get())
-                           {    ItemProperties.register(ModItems.SOULSPRING_LAMP.value(), ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "soulspring_state"), RegisterItemOverrides.SOULSPRING_LAMP_PROPERTIES);
-                           }
-                           else RegisterItemOverrides.unregister(ModItems.SOULSPRING_LAMP.value());
                        },
                        false, false, true, Component.translatable("cold_sweat.config.animate_soulspring_lamp.desc"));
 

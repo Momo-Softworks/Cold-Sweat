@@ -16,15 +16,13 @@
     "hidden": true
   },
   "criteria": {
-    "freezing_on_fire":
-    {
+    "freezing_on_fire": {
       "trigger": "cold_sweat:temperature_changed",
       "conditions": {
         "temperature": [
           {
             "trait": "world",
-            "range":
-            {
+            "range": {
               "below": "min_habitable"
             }
           }
@@ -34,7 +32,7 @@
             "condition": "minecraft:entity_properties",
             "entity": "this",
             "predicate": {
-              "flags": {
+              "minecraft:flags": {
                 "is_on_fire": true
               }
             },

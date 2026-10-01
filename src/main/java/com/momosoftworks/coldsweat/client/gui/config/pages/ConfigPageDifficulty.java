@@ -1,5 +1,7 @@
 package com.momosoftworks.coldsweat.client.gui.config.pages;
 
+import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
+import net.minecraft.client.renderer.RenderPipelines;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
@@ -7,13 +9,13 @@ import com.momosoftworks.coldsweat.client.gui.config.ConfigScreen;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.ItemStack;
 
@@ -40,7 +42,7 @@ public class ConfigPageDifficulty extends Screen
     private static final List<Component> CUSTOM_DESCRIPTION = Collections.singletonList(
                     Component.translatable("cold_sweat.config.difficulty.description.custom"));
 
-    static final ResourceLocation CONFIG_BUTTONS_LOCATION = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/screen/config_gui.png");
+    static final Identifier CONFIG_BUTTONS_LOCATION = Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/screen/config_gui.png");
 
     private final Screen parentScreen;
 
@@ -117,10 +119,10 @@ public class ConfigPageDifficulty extends Screen
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks)
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks)
     {
         // Render Button(s)
-        super.render(graphics, mouseX, mouseY, partialTicks);
+        super.extractRenderState(graphics, mouseX, mouseY, partialTicks);
 
         ConfigSettings.Difficulty difficulty = ConfigSettings.DIFFICULTY.get();
 
@@ -145,29 +147,24 @@ public class ConfigPageDifficulty extends Screen
         // Draw Text Box
         int middleX = this.width / 2;
         int middleY = this.height / 2;
-        graphics.renderTooltip(font, descLines, ItemStack.EMPTY.getTooltipImage(), middleX - longestLine / 2 - 10, middleY - 16);
+        graphics.setTooltipForNextFrame(font, descLines, ItemStack.EMPTY.getTooltipImage(), middleX - longestLine / 2 - 10, middleY - 16);
 
         // Set the mouse's position for ConfigScreen (used for click events)
         ConfigScreen.MOUSE_X = mouseX;
         ConfigScreen.MOUSE_Y = mouseY;
 
         // Draw Title
-        graphics.drawCenteredString(this.font, this.title.getString(), this.width / 2, ConfigScreen.TITLE_HEIGHT, 0xFFFFFF);
-
-        RenderSystem.setShaderTexture(0, CONFIG_BUTTONS_LOCATION);
+        graphics.centeredText(this.font, this.title.getString(), this.width / 2, ConfigScreen.TITLE_HEIGHT, ClientOnlyHelper.legacyTextColor(0xFFFFFF));
 
         // Draw Slider Bar
-        graphics.blit(CONFIG_BUTTONS_LOCATION, this.width / 2 - 76, this.height / 2 - 53, 12,
-                isMouseOverSlider(mouseX, mouseY) ? 134 : 128, 152, 6);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, CONFIG_BUTTONS_LOCATION, this.width / 2 - 76, this.height / 2 - 53, 12, isMouseOverSlider(mouseX, mouseY) ? 134 : 128, 152, 6, 256, 256);
 
         // Draw Slider Head
-        graphics.blit(CONFIG_BUTTONS_LOCATION, this.width / 2 - 78 + (difficulty.ordinal() * 37), this.height / 2 - 58,
-                isMouseOverSlider(mouseX, mouseY) ? 0 : 6, 128, 6, 16);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, CONFIG_BUTTONS_LOCATION, this.width / 2 - 78 + (difficulty.ordinal() * 37), this.height / 2 - 58, isMouseOverSlider(mouseX, mouseY) ? 0 : 6, 128, 6, 16, 256, 256);
 
         // Draw Difficulty Title
         Component difficultyName = getFormattedName(difficulty);
-        graphics.drawString(font, difficultyName, this.width / 2 - (font.width(difficultyName) / 2),
-                             this.height / 2 - 84, getDifficultyColor(difficulty), true);
+        graphics.text(font, difficultyName, this.width / 2 - (font.width(difficultyName) / 2), this.height / 2 - 84, ClientOnlyHelper.legacyTextColor(getDifficultyColor(difficulty)), true);
     }
 
     @Override
@@ -176,7 +173,7 @@ public class ConfigPageDifficulty extends Screen
         super.onClose();
         ConfigSettings.DIFFICULTY.get().load();
         ConfigScreen.saveConfig();
-        ConfigScreen.MC.setScreen(parentScreen);
+        ConfigScreen.MC.gui.setScreen(parentScreen);
     }
 
     boolean isMouseOverSlider(double mouseX, double mouseY)
@@ -195,7 +192,7 @@ public class ConfigPageDifficulty extends Screen
             ConfigSettings.Difficulty newDifficulty = ConfigSettings.Difficulty.values()[((int) Math.round(CSMath.blend(0, 4, x, this.width / 2.0 - 76, this.width / 2.0 + 76)))];
 
             if (newDifficulty != ConfigSettings.DIFFICULTY.get())
-            {   ConfigScreen.MC.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvent.createFixedRangeEvent(ResourceLocation.withDefaultNamespace("block.note_block.hat"), 1.8f), 0.5f));
+            {   ConfigScreen.MC.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvent.createFixedRangeEvent(Identifier.withDefaultNamespace("block.note_block.hat"), 1.8f), 0.5f));
             }
             ConfigSettings.DIFFICULTY.set(newDifficulty);
         }

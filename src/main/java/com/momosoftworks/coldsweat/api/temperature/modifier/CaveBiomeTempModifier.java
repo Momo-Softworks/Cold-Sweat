@@ -28,7 +28,7 @@ public class CaveBiomeTempModifier extends TempModifier
     @Override
     protected Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
-        int sampleRoot = this.getNBT().getInt("SampleRoot");
+        int sampleRoot = this.getNBT().getIntOr("SampleRoot", 0);
         Level level = entity.level();
         BlockPos entityPos = WorldHelper.sublevelToWorld(level, entity.blockPosition());
 

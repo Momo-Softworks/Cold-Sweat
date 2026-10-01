@@ -6,7 +6,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -20,15 +20,15 @@ import java.util.Set;
 @EventBusSubscriber
 public class HearthSaveDataHandler
 {
-    public static final Set<Pair<BlockPos, ResourceLocation>> HEARTH_POSITIONS = new HashSet<>();
-    public static final Set<Pair<BlockPos, ResourceLocation>> DISABLED_HEARTHS = new HashSet<>();
+    public static final Set<Pair<BlockPos, Identifier>> HEARTH_POSITIONS = new HashSet<>();
+    public static final Set<Pair<BlockPos, Identifier>> DISABLED_HEARTHS = new HashSet<>();
 
     public static CompoundTag serializeDisabledHearths()
     {
         CompoundTag tag = new CompoundTag();
         ListTag disabledHearths = new ListTag();
 
-        for (Pair<BlockPos, ResourceLocation> pair : DISABLED_HEARTHS)
+        for (Pair<BlockPos, Identifier> pair : DISABLED_HEARTHS)
         {
             CompoundTag hearthData = new CompoundTag();
             hearthData.putLong("Pos", pair.getFirst().asLong());
@@ -42,10 +42,10 @@ public class HearthSaveDataHandler
     public static void deserializeDisabledHearths(CompoundTag disabledHearths)
     {
         DISABLED_HEARTHS.clear();
-        for (Tag tag : disabledHearths.getList("DisabledHearths", 10))
+        for (Tag tag : disabledHearths.getListOrEmpty("DisabledHearths"))
         {
             CompoundTag hearthData = (CompoundTag) tag;
-            DISABLED_HEARTHS.add(Pair.of(BlockPos.of(hearthData.getLong("Pos")), ResourceLocation.parse(hearthData.getString("Level"))));
+            DISABLED_HEARTHS.add(Pair.of(BlockPos.of(hearthData.getLongOr("Pos", 0)), Identifier.parse(hearthData.getStringOr("Level", ""))));
         }
     }
 
@@ -55,10 +55,10 @@ public class HearthSaveDataHandler
     @SubscribeEvent
     public static void loadDisabledHearths(EntityJoinLevelEvent event)
     {
-        if (!event.getEntity().level().isClientSide && event.getEntity() instanceof ServerPlayer player)
+        if (!event.getEntity().level().isClientSide() && event.getEntity() instanceof ServerPlayer player)
         {
             CompoundTag disabledHearths = new CompoundTag();
-            disabledHearths.put("DisabledHearths", player.getPersistentData().getList("DisabledHearths", 10));
+            disabledHearths.put("DisabledHearths", player.getPersistentData().getListOrEmpty("DisabledHearths"));
             PacketDistributor.sendToPlayer(player, new DisableHearthParticlesMessage(disabledHearths));
         }
     }
@@ -68,7 +68,7 @@ public class HearthSaveDataHandler
     {
         if (!event.getEntity().level().isClientSide())
         {
-            ListTag disabledHearths = event.getOriginal().getPersistentData().getList("DisabledHearths", 10);
+            ListTag disabledHearths = event.getOriginal().getPersistentData().getListOrEmpty("DisabledHearths");
             event.getEntity().getPersistentData().put("DisabledHearths", disabledHearths);
         }
     }

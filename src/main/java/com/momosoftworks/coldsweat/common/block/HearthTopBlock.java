@@ -1,11 +1,13 @@
 package com.momosoftworks.coldsweat.common.block;
 
+import net.minecraft.server.level.ServerLevel;
+import javax.annotation.Nullable;
+import net.minecraft.world.level.redstone.Orientation;
 import com.momosoftworks.coldsweat.core.init.ModBlocks;
 import com.momosoftworks.coldsweat.core.init.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -36,7 +38,7 @@ public class HearthTopBlock extends SmokestackBlock
     @Override
     public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult rayTraceResult)
     {
-        if (!level.isClientSide && level.getBlockState(pos.below()).getBlock() instanceof HearthBottomBlock hearthBottomBlock
+        if (!level.isClientSide() && level.getBlockState(pos.below()).getBlock() instanceof HearthBottomBlock hearthBottomBlock
         && !super.useWithoutItem(state, level, pos, player, rayTraceResult).consumesAction())
         {   return hearthBottomBlock.useWithoutItem(level.getBlockState(pos.below()), level, pos.below(), player, rayTraceResult);
         }
@@ -44,12 +46,12 @@ public class HearthTopBlock extends SmokestackBlock
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
+    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
     {
         if (stack.is(ModItems.SMOKESTACK) && level.getBlockState(pos.relative(rayTraceResult.getDirection())).canBeReplaced())
-        {   return ItemInteractionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
+        {   return InteractionResult.PASS;
         }
-        ItemInteractionResult baseResult = super.useItemOn(stack, state, level, pos, player, hand, rayTraceResult);
+        InteractionResult baseResult = super.useItemOn(stack, state, level, pos, player, hand, rayTraceResult);
         if (baseResult.consumesAction())
         {   return baseResult;
         }
@@ -57,33 +59,29 @@ public class HearthTopBlock extends SmokestackBlock
         && !super.useItemOn(stack, state, level, pos, player, hand, rayTraceResult).consumesAction())
         {   return hearthBottomBlock.useItemOn(stack, level.getBlockState(pos.below()), level, pos.below(), player, hand, rayTraceResult);
         }
-        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        return InteractionResult.TRY_WITH_EMPTY_HAND;
     }
 
     @SuppressWarnings("deprecation")
     @Override
-    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving)
+    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, @Nullable Orientation fromPos, boolean isMoving)
     {   super.neighborChanged(state, level, pos, block, fromPos, isMoving);
         if (level.getBlockState(pos.below()).getBlock() != ModBlocks.HEARTH_BOTTOM.value())
         {   this.destroy(level, pos, state);
         }
     }
 
-    @SuppressWarnings("deprecation")
     @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving)
+    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean movedByPiston)
     {
-        if (!isMoving && state.getBlock() != newState.getBlock())
-        {
-            if (level.getBlockState(pos.below()).getBlock() == ModBlocks.HEARTH_BOTTOM.value())
-            {   level.destroyBlock(pos.below(), false);
-            }
+        if (!movedByPiston && level.getBlockState(pos.below()).getBlock() == ModBlocks.HEARTH_BOTTOM.value())
+        {   level.destroyBlock(pos.below(), false);
         }
-        super.onRemove(state, level, pos, newState, isMoving);
+        super.affectNeighborsAfterRemoval(state, level, pos, movedByPiston);
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader level, BlockPos pos, Player player)
+    public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state, boolean includeData, Player player)
     {   return new ItemStack(ModItems.HEARTH.get());
     }
 }

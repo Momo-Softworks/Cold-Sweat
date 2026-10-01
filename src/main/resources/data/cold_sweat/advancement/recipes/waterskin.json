@@ -4,12 +4,10 @@
     "temperature": {
       "trigger": "cold_sweat:temperature_changed",
       "conditions": {
-        "temperature":
-        [
+        "temperature": [
           {
             "type": "core",
-            "range":
-            {
+            "range": {
               "above": 10,
               "below": -10
             }
@@ -22,7 +20,7 @@
               "condition": "minecraft:entity_properties",
               "entity": "this",
               "predicate": {
-                "effects": {
+                "minecraft:effects": {
                   "cold_sweat:grace": {}
                 }
               }

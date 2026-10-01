@@ -1,61 +1,21 @@
 package com.momosoftworks.coldsweat.common.item;
 
-import com.momosoftworks.coldsweat.client.event.RegisterModels;
-import com.momosoftworks.coldsweat.client.renderer.model.armor.GoatChestplateModel;
 import com.momosoftworks.coldsweat.core.init.ModItems;
-import com.momosoftworks.coldsweat.util.math.CSMath;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.core.Holder;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.ArmorMaterial;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 
-import java.util.function.Consumer;
-
-public class GoatArmorItem extends ArmorItem
+/**
+ * Custom armor model is registered in {@link com.momosoftworks.coldsweat.client.event.RegisterClientItemExtensions}
+ */
+public class GoatArmorItem extends Item
 {
-    public GoatArmorItem(Holder<ArmorMaterial> material, Type type, Properties properties)
-    {   super(material, type, properties);
-    }
-
-    @Override
-    public void initializeClient(Consumer<IClientItemExtensions> consumer)
-    {
-        consumer.accept(new IClientItemExtensions()
-        {
-            @Override
-            public HumanoidModel<?> getHumanoidArmorModel(LivingEntity entityLiving, ItemStack itemStack, EquipmentSlot armorSlot, HumanoidModel<?> playerModel)
-            {
-                RegisterModels.checkForInitModels();
-                return switch (armorSlot)
-                {
-                    case HEAD -> RegisterModels.GOAT_HELMET_MODEL;
-                    case CHEST ->
-                    {
-                        GoatChestplateModel<?> model = RegisterModels.GOAT_CHESTPLATE_MODEL;
-                        ModelPart fluff = model.body.getChild("fluff");
-                        float headPitch = entityLiving.getViewXRot(Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true));
-
-                        fluff.xRot = CSMath.toRadians(CSMath.clamp(headPitch, 0, 60f)) / 2;
-                        fluff.x = fluff.zRot * 2;
-                        yield model;
-                    }
-                    case LEGS -> RegisterModels.GOAT_LEGGINGS_MODEL;
-                    case FEET -> RegisterModels.GOAT_BOOTS_MODEL;
-                    default -> null;
-                };
-            }
-        });
+    public GoatArmorItem(Properties properties)
+    {   super(properties);
     }
 
     @Override
     public boolean canWalkOnPowderedSnow(ItemStack stack, LivingEntity wearer)
-    {
-        return stack.is(ModItems.GOAT_FUR_BOOTS);
+    {   return stack.is(ModItems.GOAT_FUR_BOOTS);
     }
 }

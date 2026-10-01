@@ -40,7 +40,7 @@ public abstract class TempEffect
     }
 
     protected double getTemperature(LivingEntity entity)
-    {   return entity.level().isClientSide ? Overlays.BLEND_BODY_TEMP : Temperature.get(entity, Temperature.Trait.BODY);
+    {   return entity.level().isClientSide() ? Overlays.BLEND_BODY_TEMP : Temperature.get(entity, Temperature.Trait.BODY);
     }
 
     public double getEffectFactor(LivingEntity entity)

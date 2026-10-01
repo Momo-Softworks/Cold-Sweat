@@ -1,5 +1,9 @@
 package com.momosoftworks.coldsweat.mixin;
 
+import net.minecraft.world.item.crafting.CampfireCookingRecipe;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
+import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.server.level.ServerLevel;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ModItemComponents;
 import com.momosoftworks.coldsweat.core.init.ModItems;
@@ -23,9 +27,9 @@ public class MixinCampfire
     /**
      * Heat waterskins gradually
      */
-    @Inject(method = "cookTick(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/entity/CampfireBlockEntity;)V",
-            at = @At(value = "HEAD"))
-    private static void onItemCook(Level level, BlockPos pos, BlockState state, CampfireBlockEntity blockEntity, CallbackInfo ci)
+    @Inject(method = "cookTick", at = @At(value = "HEAD"))
+    private static void onItemCook(ServerLevel level, BlockPos pos, BlockState state, CampfireBlockEntity blockEntity,
+                                   RecipeManager.CachedCheck<SingleRecipeInput, CampfireCookingRecipe> recipeCache, CallbackInfo ci)
     {
         double maxStrength = ConfigSettings.WATERSKIN_CONSUME_STRENGTH.get() * 0.6;
         double tempRate = ConfigSettings.TEMP_RATE.get();
@@ -53,7 +57,7 @@ public class MixinCampfire
     /**
      * Ensure waterskin temperature is not reset when cooking finishes
      */
-    @ModifyArg(method = "cookTick(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/level/block/entity/CampfireBlockEntity;)V",
+    @ModifyArg(method = "cookTick",
                at = @At(value = "INVOKE", target = "Lnet/minecraft/world/Containers;dropItemStack(Lnet/minecraft/world/level/Level;DDDLnet/minecraft/world/item/ItemStack;)V"), index = 4)
     private static ItemStack onItemFinishedCooking(Level level, double x, double y, double z, ItemStack result)
     {

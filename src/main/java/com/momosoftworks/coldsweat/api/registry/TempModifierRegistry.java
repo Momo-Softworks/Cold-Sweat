@@ -7,7 +7,7 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.util.exceptions.RegistryFailureException;
 import com.momosoftworks.coldsweat.util.math.CSMath;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -15,13 +15,13 @@ import java.util.function.Supplier;
 
 public class TempModifierRegistry
 {
-    static BiMap<ResourceLocation, TempModifierHolder> TEMP_MODIFIERS = HashBiMap.create();
+    static BiMap<Identifier, TempModifierHolder> TEMP_MODIFIERS = HashBiMap.create();
 
-    public static BiMap<ResourceLocation, TempModifierHolder> getEntries()
+    public static BiMap<Identifier, TempModifierHolder> getEntries()
     {   return ImmutableBiMap.copyOf(TEMP_MODIFIERS);
     }
 
-    public static void register(ResourceLocation id, Supplier<TempModifier> supplier)
+    public static void register(Identifier id, Supplier<TempModifier> supplier)
     {
         TempModifierHolder holder = new TempModifierHolder(supplier, id);
         if (TEMP_MODIFIERS.containsKey(id) || TEMP_MODIFIERS.values().stream().anyMatch(holder::equals))
@@ -44,16 +44,16 @@ public class TempModifierRegistry
      * Returns a new instance of the TempModifier with the given ID.<br>
      * If a TempModifier with this ID is not in the registry, this method returns null and logs an error.<br>
      */
-    public static Optional<TempModifier> getValue(ResourceLocation id)
+    public static Optional<TempModifier> getValue(Identifier id)
     {
         return Optional.ofNullable(TEMP_MODIFIERS.get(id)).map(TempModifierHolder::get);
     }
 
-    public static ResourceLocation getKey(TempModifier modifier)
+    public static Identifier getKey(TempModifier modifier)
     {   return CSMath.getIfNotNull(getHolder(modifier), TempModifierHolder::getId, null);
     }
 
-    public static boolean containsKey(ResourceLocation id)
+    public static boolean containsKey(Identifier id)
     {   return TEMP_MODIFIERS.containsKey(id);
     }
 
@@ -73,9 +73,9 @@ public class TempModifierRegistry
     {
         private final Supplier<TempModifier> supplier;
         private final Class<? extends TempModifier> clazz;
-        private final ResourceLocation id;
+        private final Identifier id;
 
-        public TempModifierHolder(Supplier<TempModifier> supplier, ResourceLocation id)
+        public TempModifierHolder(Supplier<TempModifier> supplier, Identifier id)
         {   this.supplier = supplier;
             this.clazz = supplier.get().getClass();
             this.id = id;
@@ -89,7 +89,7 @@ public class TempModifierRegistry
         {   return clazz;
         }
 
-        public ResourceLocation getId()
+        public Identifier getId()
         {   return id;
         }
 

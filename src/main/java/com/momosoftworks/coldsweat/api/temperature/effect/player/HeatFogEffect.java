@@ -1,5 +1,7 @@
 package com.momosoftworks.coldsweat.api.temperature.effect.player;
 
+import net.minecraft.world.level.Level;
+import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.api.temperature.effect.TempEffect;
 import com.momosoftworks.coldsweat.api.temperature.effect.TempEffectType;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
@@ -8,8 +10,6 @@ import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.LivingEntity;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
@@ -28,24 +28,21 @@ public class HeatFogEffect extends TempEffect
     static float FOG_GREEN = -1;
     static float FOG_BLUE = -1;
 
-    @OnlyIn(Dist.CLIENT)
     @SubscribeEvent(priority = EventPriority.LOW)
     private void renderHeatFogA(ViewportEvent.RenderFog event)
     {   renderHeatFog(event);
     }
 
-    @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     private void renderHeatFogB(ViewportEvent.ComputeFogColor event)
     {   renderHeatFog(event);
     }
 
-    @OnlyIn(Dist.CLIENT)
     private void renderHeatFog(ViewportEvent event)
     {
         if (!(event instanceof ViewportEvent.RenderFog || event instanceof ViewportEvent.ComputeFogColor)) return;
 
-        LivingEntity player = Minecraft.getInstance().player;
+        LivingEntity player = ClientOnlyHelper.getClientPlayer();
         if (!this.test(player))
         {   FOG_FAR_DISTANCE = -1;
             FOG_NEAR_DISTANCE = -1;
@@ -59,7 +56,7 @@ public class HeatFogEffect extends TempEffect
 
         double effect = this.getEffectFactor(player);
 
-        float frameTime = Minecraft.getInstance().getTimer().getRealtimeDeltaTicks();
+        float frameTime = Minecraft.getInstance().getDeltaTracker().getRealtimeDeltaTicks();
         float farLerpSpeed = 0.08f * frameTime;
         float nearLerpSpeed = 0.08f * frameTime;
 
@@ -86,7 +83,6 @@ public class HeatFogEffect extends TempEffect
 
             fog.setFarPlaneDistance(Math.min(farPlaneDistance, FOG_FAR_DISTANCE));
             fog.setNearPlaneDistance(Math.min(nearPlaneDistance, FOG_NEAR_DISTANCE));
-            fog.setCanceled(true);
         }
         else
         {

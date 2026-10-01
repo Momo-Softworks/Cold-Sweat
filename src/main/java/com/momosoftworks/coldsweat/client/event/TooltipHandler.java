@@ -1,7 +1,10 @@
 package com.momosoftworks.coldsweat.client.event;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.util.ARGB;
+import net.minecraft.client.gui.screens.inventory.tooltip.TooltipRenderUtil;
+import org.joml.Matrix3x2fStack;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
+import net.minecraft.client.renderer.RenderPipelines;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
@@ -28,9 +31,9 @@ import com.momosoftworks.coldsweat.util.entity.EntityHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.player.LocalPlayer;
@@ -48,7 +51,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -90,7 +93,7 @@ public class TooltipHandler
     }
 
     public static boolean isShiftDown()
-    {   return Screen.hasShiftDown() || ConfigSettings.EXPAND_TOOLTIPS.get();
+    {   return Minecraft.getInstance().hasShiftDown() || ConfigSettings.EXPAND_TOOLTIPS.get();
     }
 
     public static int getTooltipTitleIndex(List<Either<FormattedText, TooltipComponent>> tooltip, ItemStack stack)
@@ -272,7 +275,7 @@ public class TooltipHandler
 
             // If open screen is a container, get equipment slot and slot index
             findSlots:
-            if (Minecraft.getInstance().screen instanceof AbstractContainerScreen<?> menu)
+            if (Minecraft.getInstance().gui.screen() instanceof AbstractContainerScreen<?> menu)
             {
                 Slot hoveredSlot = menu.getSlotUnderMouse();
                 if (hoveredSlot == null) break findSlots;
@@ -290,7 +293,7 @@ public class TooltipHandler
                     if (slotIndex != HOVERED_SLOT)
                     {   FETCHING_TOOLTIP = true;
                         HOVERED_SLOT = slotIndex;
-                        PacketDistributor.sendToServer(SyncItemPredicatesMessage.fromClient(slotIndex, equipmentSlot, stack));
+                        ClientPacketDistributor.sendToServer(SyncItemPredicatesMessage.fromClient(slotIndex, equipmentSlot, stack));
                     }
                 }
             }
@@ -393,7 +396,7 @@ public class TooltipHandler
                 elements.add(index, Either.left(consumeEffects));
             }
 
-            boolean isFood = stack.getUseAnimation() == UseAnim.EAT || stack.getUseAnimation() == UseAnim.DRINK;
+            boolean isFood = stack.getUseAnimation() == ItemUseAnimation.EAT || stack.getUseAnimation() == ItemUseAnimation.DRINK;
             // Don't add our own section title if one already exists
             if (!foodTemps.isEmpty() && (!isFood || dietTooltipSectionIndex == -1))
             {
@@ -710,30 +713,28 @@ public class TooltipHandler
                     int slotX = screen.getSlotUnderMouse().x + screen.getGuiLeft();
                     int slotY = screen.getSlotUnderMouse().y + screen.getGuiTop();
 
-                    GuiGraphics graphics = event.getGuiGraphics();
-                    PoseStack ps = graphics.pose();
-                    ps.pushPose();
+                    GuiGraphicsExtractor graphics = event.getGuiGraphics();
+                    Matrix3x2fStack ps = graphics.pose();
+                    // Draw above slot contents
+                    graphics.nextStratum();
+                    ps.pushMatrix();
                     if (event.getMouseY() < slotY + 8)
-                    {   ps.translate(0, 32, 0);
+                    {   ps.translate(0, 32);
                     }
 
-                    graphics.renderTooltip(Minecraft.getInstance().font, List.of(Component.literal("       ")), Optional.empty(), slotX - 18, slotY + 1);
-
-                    RenderSystem.defaultBlendFunc();
+                    // Tooltip-style backdrop (tooltips are now deferred to the end of the frame, so draw it directly)
+                    TooltipRenderUtil.extractTooltipBackground(graphics, slotX - 6, slotY - 11, 28, 8, null);
 
                     // Render background
-                    graphics.blit(ClientSoulspringTooltip.TOOLTIP_LOCATION.get(), slotX - 7, slotY - 11, 401, 0, 0, 30, 8, 30, 34);
+                    graphics.blit(RenderPipelines.GUI_TEXTURED, ClientSoulspringTooltip.TOOLTIP_LOCATION.get(), slotX - 7, slotY - 11, 0, 0, 30, 8, 30, 34);
 
                     // Render ghost overlay
-                    RenderSystem.enableBlend();
-                    RenderSystem.setShaderColor(1f, 1f, 1f, 0.15f + (float) ((Math.sin(FUEL_FADE_TIMER / 5f) + 1f) / 2f) * 0.4f);
-                    graphics.blit(ClientSoulspringTooltip.TOOLTIP_LOCATION.get(), slotX - 7, slotY - 11, 401, 0, 8, Math.min(30, (int) ((fuel + fuelValue) / 2.1333f)), 8, 30, 34);
-                    RenderSystem.disableBlend();
+                    float ghostAlpha = 0.15f + (float) ((Math.sin(FUEL_FADE_TIMER / 5f) + 1f) / 2f) * 0.4f;
+                    graphics.blit(RenderPipelines.GUI_TEXTURED, ClientSoulspringTooltip.TOOLTIP_LOCATION.get(), slotX - 7, slotY - 11, 0, 8, Math.min(30, (int) ((fuel + fuelValue) / 2.1333f)), 8, 30, 34, ARGB.white(ghostAlpha));
 
                     // Render fuel
-                    RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1f);
-                    graphics.blit(ClientSoulspringTooltip.TOOLTIP_LOCATION.get(), slotX - 7, slotY - 11, 401, 0, 16, (int) (fuel / 2.1333f), 8, 30, 34);
-                    ps.popPose();
+                    graphics.blit(RenderPipelines.GUI_TEXTURED, ClientSoulspringTooltip.TOOLTIP_LOCATION.get(), slotX - 7, slotY - 11, 0, 16, (int) (fuel / 2.1333f), 8, 30, 34);
+                    ps.popMatrix();
                 }
             }
         }

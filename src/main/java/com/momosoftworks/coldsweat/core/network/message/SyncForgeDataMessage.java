@@ -6,14 +6,14 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class SyncForgeDataMessage implements CustomPacketPayload
 {
-    public static final Type<SyncForgeDataMessage> TYPE = new Type<>(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "sync_forge_data"));
+    public static final Type<SyncForgeDataMessage> TYPE = new Type<>(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "sync_forge_data"));
     public static final StreamCodec<FriendlyByteBuf, SyncForgeDataMessage> CODEC = CustomPacketPayload.codec(SyncForgeDataMessage::encode, SyncForgeDataMessage::decode);
 
     CompoundTag forgeData;
@@ -24,7 +24,7 @@ public class SyncForgeDataMessage implements CustomPacketPayload
     {
         this.forgeData = entity.getPersistentData();
         this.entityID = entity.getId();
-        this.dimension = entity.level().dimension().location().toString();
+        this.dimension = entity.level().dimension().identifier().toString();
     }
 
     public SyncForgeDataMessage(CompoundTag forgeData, int entityID, String dimension)
@@ -49,7 +49,7 @@ public class SyncForgeDataMessage implements CustomPacketPayload
     {
         context.enqueueWork(() ->
         {
-            if (ClientOnlyHelper.getClientLevel().dimension().location().toString().equals(message.dimension))
+            if (ClientOnlyHelper.getClientLevel().dimension().identifier().toString().equals(message.dimension))
             {
                 Level level = ClientOnlyHelper.getClientLevel();
                 if (level != null)

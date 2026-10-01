@@ -16,8 +16,8 @@ import java.util.function.Consumer;
 @Mixin(ItemStack.class)
 public class MixinArmorBreak
 {
-    @Inject(method = "hurtAndBreak(ILnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/LivingEntity;Ljava/util/function/Consumer;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;shrink(I)V"))
-    private void onHurtAndBreak(int damage, ServerLevel level, LivingEntity entity, Consumer<Item> onBroken, CallbackInfo ci)
+    @Inject(method = "applyDamage(ILnet/minecraft/world/entity/LivingEntity;Ljava/util/function/Consumer;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;shrink(I)V"))
+    private void onHurtAndBreak(int newDamage, LivingEntity entity, Consumer<Item> onBroken, CallbackInfo ci)
     {   NeoForge.EVENT_BUS.post(new ItemBreakEvent((ItemStack) (Object) this, entity, onBroken));
     }
 }

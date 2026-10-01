@@ -22,8 +22,8 @@ public class CuriosTempModifier extends TempModifier
     @Override
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
-        double cold = this.getNBT().getDouble("cold");
-        double heat = this.getNBT().getDouble("heat");
+        double cold = this.getNBT().getDoubleOr("cold", 0);
+        double heat = this.getNBT().getDoubleOr("heat", 0);
         return temp ->
         {
             double insulation = temp > 0 ? heat : cold;

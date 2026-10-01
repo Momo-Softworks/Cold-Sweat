@@ -256,8 +256,8 @@ public record ValueGetter<T>(Type type, String path, Function<Map<String, Object
     private static double tagToDouble(Tag tag)
     {
         if (tag == null) return 0.0;
-        if (tag instanceof NumericTag num) return num.getAsDouble();
-        try { return Double.parseDouble(tag.getAsString()); }
+        if (tag instanceof NumericTag num) return num.doubleValue();
+        try { return Double.parseDouble(tag.asString().orElse("")); }
         catch (NumberFormatException e) { return 0.0; }
     }
 

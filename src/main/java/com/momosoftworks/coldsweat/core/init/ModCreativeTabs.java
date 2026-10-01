@@ -1,5 +1,7 @@
 package com.momosoftworks.coldsweat.core.init;
 
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.equipment.Equippable;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.client.InsulatorTabBuildEvent;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
@@ -99,8 +101,9 @@ public class ModCreativeTabs
         list.sort(Comparator.comparingInt(entry -> entry.getValue().insulation().stream().mapToInt(Insulation::getCompareValue).min().orElse(0)));
         // Sort by armor material and slot
         list.sort(Comparator.comparing(entry -> {
-            if (!(entry.getKey() instanceof ArmorItem armor)) return "";
-            String materialName = armor.getMaterial().unwrapKey().map(key -> key.location().toString()).orElse(BuiltInRegistries.ITEM.getKey(armor).getPath());
+            Equippable equippable = entry.getKey().components().get(DataComponents.EQUIPPABLE);
+            if (equippable == null || equippable.assetId().isEmpty()) return "";
+            String materialName = equippable.assetId().get().identifier().toString();
             return materialName + (3 - ItemStackHelper.getEquipmentSlot(entry.getKey().getDefaultInstance()).getIndex());
         }));
 

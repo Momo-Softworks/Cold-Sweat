@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.mixin;
 
+import com.momosoftworks.coldsweat.util.entity.EntityHelper;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
@@ -26,7 +27,7 @@ public abstract class MixinPreventFreezing
     {
         int[] freezeImmuneItems = new int[] {0};
 
-        for (ItemStack armorItem : self.getArmorSlots())
+        for (ItemStack armorItem : EntityHelper.getArmorItems(self))
         {
             Optional<ItemInsulationCap> cap = ItemInsulationManager.getInsulationCap(armorItem);
             if (cap.isPresent())

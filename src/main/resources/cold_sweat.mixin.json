@@ -1,8 +1,7 @@
 {
   "required": true,
   "package": "com.momosoftworks.coldsweat.mixin",
-  "compatibilityLevel": "JAVA_21",
-  "refmap": "cold_sweat.mixin-refmap.json",
+  "compatibilityLevel": "JAVA_25",
   "client": [
     "MixinAfterLevelRender",
     "MixinBlockUpdate$Client",
@@ -13,7 +12,6 @@
     "MixinInventoryOpenClient",
     "MixinItemFrameLabel",
     "MixinItemTooltip",
-    "MixinPickEntity",
     "MixinSoulLampRendering",
     "MixinSoulLampRendering$EquipAnimation",
     "MixinSoulLampRendering$HeldItem",
@@ -36,6 +34,7 @@
     "MixinMenuChanged",
     "MixinMinecart",
     "MixinMobSpawning",
+    "MixinPickEntity",
     "MixinPreServerLoad",
     "MixinPreventFreezing",
     "MixinRegistration",
@@ -43,15 +42,8 @@
     "MixinSoulCampfire",
     "MixinSoulFire",
     "MixinTagLoading",
-    "MixinTagLoading$Manager",
-    "MixinTridentRiptide",
-    "compat.MixinCreateConnect",
-    "compat.MixinCreateOverlay",
-    "compat.MixinKubeScanner",
-    "compat.MixinSereneIceMelt",
-    "compat.MixinSpoiledIcebox",
-    "compat.MixinSpoiledIcebox$ContainerModifier",
-    "compat.MixinTaNThermoregulator"
+    "MixinTagLoading$DynamicRegistries",
+    "MixinTridentRiptide"
   ],
   "minVersion": "0.8",
   "plugin": "com.momosoftworks.coldsweat.mixin_plugin.ColdSweatMixinPlugin"

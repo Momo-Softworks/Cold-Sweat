@@ -1,5 +1,8 @@
 package com.momosoftworks.coldsweat.client.gui.config;
 
+import net.minecraft.server.permissions.Permissions;
+import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
+import net.minecraft.client.renderer.RenderPipelines;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -7,13 +10,13 @@ import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.*;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.StringRepresentable;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -50,7 +53,7 @@ public abstract class AbstractConfigPage extends Screen
     @SubscribeEvent
     public static void onMouseClicked(ScreenEvent.MouseButtonPressed.Post event)
     {
-        if (Minecraft.getInstance().screen instanceof AbstractConfigPage screen)
+        if (Minecraft.getInstance().gui.screen() instanceof AbstractConfigPage screen)
         {   screen.children().forEach(child ->
             {
                 if (child instanceof AbstractWidget widget && !widget.isMouseOver(event.getMouseX(), event.getMouseY()))
@@ -75,48 +78,48 @@ public abstract class AbstractConfigPage extends Screen
 
     private static final String GUI_TEXTURE_PATH = "config/";
 
-    public static final ResourceLocation CLIENTSIDE_ICON_TEXTURE = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/sprites/config/clientside_icon.png");
-    public static final ResourceLocation DIVIDER_TEXTURE = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/sprites/config/divider.png");
+    public static final Identifier CLIENTSIDE_ICON_TEXTURE = Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/sprites/config/clientside_icon.png");
+    public static final Identifier DIVIDER_TEXTURE = Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/sprites/config/divider.png");
 
-    public static final WidgetSprites CONFIG_BUTTON_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_button"),
-                                                                                ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_button_disabled"),
-                                                                                ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_button_focus"));
+    public static final WidgetSprites CONFIG_BUTTON_SPRITES = new WidgetSprites(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_button"),
+                                                                                Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_button_disabled"),
+                                                                                Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "config_button_focus"));
 
-    public static final WidgetSprites DIRECTION_RIGHT_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_right"),
-                                                                                  ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_right_focus"));
+    public static final WidgetSprites DIRECTION_RIGHT_SPRITES = new WidgetSprites(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_right"),
+                                                                                  Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_right_focus"));
 
-    public static final WidgetSprites DIRECTION_LEFT_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_left"),
-                                                                                 ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_left_focus"));
+    public static final WidgetSprites DIRECTION_LEFT_SPRITES = new WidgetSprites(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_left"),
+                                                                                 Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_left_focus"));
 
-    public static final WidgetSprites DIRECTION_UP_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_up"),
-                                                                               ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_up_focus"));
+    public static final WidgetSprites DIRECTION_UP_SPRITES = new WidgetSprites(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_up"),
+                                                                               Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_up_focus"));
 
-    public static final WidgetSprites DIRECTION_DOWN_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_down"),
-                                                                                 ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_down_focus"));
+    public static final WidgetSprites DIRECTION_DOWN_SPRITES = new WidgetSprites(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_down"),
+                                                                                 Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_down_focus"));
 
-    public static final WidgetSprites DIRECTION_RESET_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_reset"),
-                                                                                  ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_reset_focus"));
+    public static final WidgetSprites DIRECTION_RESET_SPRITES = new WidgetSprites(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_reset"),
+                                                                                  Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_reset_focus"));
 
-    public static final WidgetSprites DIRECTION_RESET_SMALL_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_reset_small"),
-                                                                                        ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_reset_small_focus"));
+    public static final WidgetSprites DIRECTION_RESET_SMALL_SPRITES = new WidgetSprites(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_reset_small"),
+                                                                                        Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_reset_small_focus"));
 
-    public static final WidgetSprites DIRECTION_VISIBILITY_ON_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_visibility_on"),
-                                                                                          ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_visibility_on_focus"));
+    public static final WidgetSprites DIRECTION_VISIBILITY_ON_SPRITES = new WidgetSprites(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_visibility_on"),
+                                                                                          Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_visibility_on_focus"));
 
-    public static final WidgetSprites DIRECTION_VISIBILITY_OFF_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_visibility_off"),
-                                                                                           ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_visibility_off_focus"));
+    public static final WidgetSprites DIRECTION_VISIBILITY_OFF_SPRITES = new WidgetSprites(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_visibility_off"),
+                                                                                           Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "direction_panel_visibility_off_focus"));
 
-    public static final WidgetSprites NEXT_PAGE_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "next_page"),
-                                                                            ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "next_page_focus"));
+    public static final WidgetSprites NEXT_PAGE_SPRITES = new WidgetSprites(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "next_page"),
+                                                                            Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "next_page_focus"));
 
-    public static final WidgetSprites PREV_PAGE_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "prev_page"),
-                                                                            ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "prev_page_focus"));
+    public static final WidgetSprites PREV_PAGE_SPRITES = new WidgetSprites(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "prev_page"),
+                                                                            Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "prev_page_focus"));
 
-    public static final WidgetSprites SLIDER_BAR_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "slider_bar"),
-                                                                             ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "slider_bar_focus"));
+    public static final WidgetSprites SLIDER_BAR_SPRITES = new WidgetSprites(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "slider_bar"),
+                                                                             Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "slider_bar_focus"));
 
-    public static final WidgetSprites SLIDER_HEAD_SPRITES = new WidgetSprites(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "slider_head"),
-                                                                              ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "slider_head_focus"));
+    public static final WidgetSprites SLIDER_HEAD_SPRITES = new WidgetSprites(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "slider_head"),
+                                                                              Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, GUI_TEXTURE_PATH + "slider_head_focus"));
 
     ImageButton nextNavButton;
     ImageButton prevNavButton;
@@ -189,7 +192,7 @@ public abstract class AbstractConfigPage extends Screen
     {
         Component label = dynamicLabel.get();
 
-        boolean shouldBeActive = !requireOP || MINECRAFT.player == null || MINECRAFT.player.hasPermissions(2);
+        boolean shouldBeActive = !requireOP || MINECRAFT.player == null || MINECRAFT.player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
         int widgetX = this.width / 2 + (side == Side.LEFT ? -179 : 56);
         int widgetY = this.height / 4 - 8 + (side == Side.LEFT ? leftSideLength : rightSideLength);
         // Extend the button if the text is too long
@@ -246,7 +249,7 @@ public abstract class AbstractConfigPage extends Screen
                                    boolean requireOP, boolean setsCustomDifficulty, boolean clientside,
                                    Component... tooltip)
     {
-        boolean shouldBeActive = !requireOP || MINECRAFT.player == null || MINECRAFT.player.hasPermissions(2);
+        boolean shouldBeActive = !requireOP || MINECRAFT.player == null || MINECRAFT.player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
         int labelOffset = font.width(label.getString()) > 90 ?
                           font.width(label.getString()) - 86 : 0;
         int boxWidth = Math.max(51 - labelOffset, 30);
@@ -339,7 +342,7 @@ public abstract class AbstractConfigPage extends Screen
         int widgetX = this.width / 2 + (side == Side.LEFT ? -97 : 136);
         int widgetY = this.height / 4 + (side == Side.LEFT ? this.leftSideLength : this.rightSideLength);
 
-        boolean shouldBeActive = !requireOP || MINECRAFT.player == null || MINECRAFT.player.hasPermissions(2);
+        boolean shouldBeActive = !requireOP || MINECRAFT.player == null || MINECRAFT.player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
 
         int labelWidth = font.width(label.getString());
         int labelOffset = labelWidth > 84
@@ -452,7 +455,7 @@ public abstract class AbstractConfigPage extends Screen
                                    Component... tooltip)
     {
         Component label = dynamicLabel.get();
-        boolean shouldBeActive = !requireOP || this.minecraft.player == null || this.minecraft.player.hasPermissions(2);
+        boolean shouldBeActive = !requireOP || this.minecraft.player == null || this.minecraft.player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
         int widgetX = this.width / 2 + (side == Side.LEFT ? -179 : 56);
         int widgetY = this.height / 4 - 8 + (side == Side.LEFT ? leftSideLength : rightSideLength);
         int buttonWidth = 152 + Math.max(0, font.width(label) - 140);
@@ -535,7 +538,7 @@ public abstract class AbstractConfigPage extends Screen
             nextNavButton = new ImageButton(this.width - 32, 12, 20, 20, NEXT_PAGE_SPRITES,
                 button ->
                 {   ConfigScreen.CURRENT_PAGE++;
-                    MINECRAFT.setScreen(ConfigScreen.getPage(ConfigScreen.CURRENT_PAGE, parentScreen));
+                    MINECRAFT.gui.setScreen(ConfigScreen.getPage(ConfigScreen.CURRENT_PAGE, parentScreen));
                 });
             if (ConfigScreen.CURRENT_PAGE < ConfigScreen.LAST_PAGE)
                 this.addRenderableWidget(nextNavButton);
@@ -543,7 +546,7 @@ public abstract class AbstractConfigPage extends Screen
             prevNavButton = new ImageButton(this.width - 76, 12, 20, 20, PREV_PAGE_SPRITES,
                     button ->
                     {   ConfigScreen.CURRENT_PAGE--;
-                        MINECRAFT.setScreen(ConfigScreen.getPage(ConfigScreen.CURRENT_PAGE, parentScreen));
+                        MINECRAFT.gui.setScreen(ConfigScreen.getPage(ConfigScreen.CURRENT_PAGE, parentScreen));
                     });
             if (ConfigScreen.CURRENT_PAGE > ConfigScreen.FIRST_PAGE)
                 this.addRenderableWidget(prevNavButton);
@@ -551,32 +554,31 @@ public abstract class AbstractConfigPage extends Screen
     }
 
     @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks)
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks)
     {
-        super.render(graphics, mouseX, mouseY, partialTicks);
+        super.extractRenderState(graphics, mouseX, mouseY, partialTicks);
         Font font = this.font;
 
         // Page Title
-        graphics.drawCenteredString(this.font, this.title.getString(), this.width / 2, TITLE_HEIGHT, 0xFFFFFF);
+        graphics.centeredText(this.font, this.title.getString(), this.width / 2, TITLE_HEIGHT, ClientOnlyHelper.legacyTextColor(0xFFFFFF));
 
         // Page Number
         if (showNavigation())
-        {   graphics.drawString(this.font, net.minecraft.network.chat.Component.literal((ConfigScreen.CURRENT_PAGE + 1) + "/" + (ConfigScreen.LAST_PAGE + 1)),
-                                this.width - 53, 18, 16777215, true);
+        {   graphics.text(this.font, net.minecraft.network.chat.Component.literal((ConfigScreen.CURRENT_PAGE + 1) + "/" + (ConfigScreen.LAST_PAGE + 1)), this.width - 53, 18, ClientOnlyHelper.legacyTextColor(16777215), true);
         }
 
         // Section 1 Title
-        graphics.drawString(this.font, this.sectionOneTitle(), this.width / 2 - 204, this.height / 4 - 28, 16777215, true);
+        graphics.text(this.font, this.sectionOneTitle(), this.width / 2 - 204, this.height / 4 - 28, ClientOnlyHelper.legacyTextColor(16777215), true);
 
         // Section 1 Divider
-        graphics.blit(DIVIDER_TEXTURE, this.width / 2 - 202, this.height / 4 - 16, 0, 0, 1, 154);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, DIVIDER_TEXTURE, this.width / 2 - 202, this.height / 4 - 16, 0, 0, 1, 154, 256, 256);
 
         if (this.sectionTwoTitle() != null)
         {   // Section 2 Title
-            graphics.drawString(this.font, this.sectionTwoTitle(), this.width / 2 + 32, this.height / 4 - 28, 16777215, true);
+            graphics.text(this.font, this.sectionTwoTitle(), this.width / 2 + 32, this.height / 4 - 28, ClientOnlyHelper.legacyTextColor(16777215), true);
 
             // Section 2 Divider
-            graphics.blit(DIVIDER_TEXTURE, this.width / 2 + 34, this.height / 4 - 16, 0, 0, 1, 154);
+            graphics.blit(RenderPipelines.GUI_TEXTURED, DIVIDER_TEXTURE, this.width / 2 + 34, this.height / 4 - 16, 0, 0, 1, 154, 256, 256);
         }
 
 
@@ -616,7 +618,7 @@ public abstract class AbstractConfigPage extends Screen
                                               : List.of(Component.translatable("cold_sweat.config.require_op").withStyle(ChatFormatting.RED));
                 if (tooltipList != null && !tooltipList.isEmpty())
                 {
-                    graphics.renderTooltip(font, tooltipList, Optional.empty(), mouseX, mouseY);
+                    graphics.setTooltipForNextFrame(font, tooltipList, Optional.empty(), mouseX, mouseY);
                 }
                 break;
             }
@@ -668,7 +670,7 @@ public abstract class AbstractConfigPage extends Screen
 
     @Override
     public void onClose()
-    {   MINECRAFT.setScreen(this.parentScreen);
+    {   MINECRAFT.gui.setScreen(this.parentScreen);
         ConfigScreen.saveConfig();
     }
 

@@ -8,7 +8,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
@@ -16,7 +16,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class SyncShearableDataMessage implements CustomPacketPayload
 {
-    public static final CustomPacketPayload.Type<SyncShearableDataMessage> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "sync_shearable_data"));
+    public static final CustomPacketPayload.Type<SyncShearableDataMessage> TYPE = new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "sync_shearable_data"));
     public static final StreamCodec<FriendlyByteBuf, SyncShearableDataMessage> CODEC = CustomPacketPayload.codec(SyncShearableDataMessage::encode, SyncShearableDataMessage::decode);
 
     private final int entityId;

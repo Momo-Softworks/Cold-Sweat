@@ -5,10 +5,10 @@
       "id": "cold_sweat:chameleon_molt"
     },
     "title": {
-        "translate": "advancements.cold_sweat.tame_chameleon.title"
+      "translate": "advancements.cold_sweat.tame_chameleon.title"
     },
     "description": {
-        "translate": "advancements.cold_sweat.tame_chameleon.description"
+      "translate": "advancements.cold_sweat.tame_chameleon.description"
     },
     "frame": "task",
     "show_toast": true,
@@ -24,7 +24,7 @@
             "condition": "minecraft:entity_properties",
             "entity": "this",
             "predicate": {
-              "type": "cold_sweat:chameleon"
+              "minecraft:entity_type": "cold_sweat:chameleon"
             }
           }
         ]

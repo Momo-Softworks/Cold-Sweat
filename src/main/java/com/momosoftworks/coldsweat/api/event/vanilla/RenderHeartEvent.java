@@ -1,20 +1,21 @@
 package com.momosoftworks.coldsweat.api.event.vanilla;
 
+import net.minecraft.client.gui.Hud;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.neoforged.bus.api.Event;
 
 public class RenderHeartEvent extends Event
 {
-    GuiGraphics guiGraphics;
-    Gui.HeartType heartType;
+    GuiGraphicsExtractor guiGraphics;
+    Hud.HeartType heartType;
     int x;
     int y;
     boolean hardcode;
     boolean blink;
     boolean halfHeart;
 
-    public RenderHeartEvent(GuiGraphics guiGraphics, Gui.HeartType heartType, int x, int y, boolean hardcode, boolean blink, boolean halfHeart)
+    public RenderHeartEvent(GuiGraphicsExtractor guiGraphics, Hud.HeartType heartType, int x, int y, boolean hardcode, boolean blink, boolean halfHeart)
     {
         this.guiGraphics = guiGraphics;
         this.heartType = heartType;
@@ -25,10 +26,10 @@ public class RenderHeartEvent extends Event
         this.halfHeart = halfHeart;
     }
 
-    public GuiGraphics getGuiGraphics()
+    public GuiGraphicsExtractor getGuiGraphics()
     {   return guiGraphics;
     }
-    public Gui.HeartType getHeartType()
+    public Hud.HeartType getHeartType()
     {   return heartType;
     }
     public int getX()

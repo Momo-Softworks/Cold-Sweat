@@ -2,7 +2,6 @@ package com.momosoftworks.coldsweat.client.gui.config.pages;
 
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.client.event.DrawConfigButton;
-import com.momosoftworks.coldsweat.client.event.RegisterItemOverrides;
 import com.momosoftworks.coldsweat.client.gui.config.AbstractConfigPage;
 import com.momosoftworks.coldsweat.client.gui.config.ConfigScreen;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -13,9 +12,8 @@ import com.momosoftworks.coldsweat.util.serialization.DynamicHolder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.options.OptionsScreen;
-import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.joml.Vector2i;
 
 import javax.annotation.Nullable;
@@ -67,7 +65,7 @@ public class ConfigPageTwo extends AbstractConfigPage
                        button ->
                        {
                            DrawConfigButton.EDIT_MODE = true;
-                           this.minecraft.setScreen(new OptionsScreen(this, this.minecraft.options));
+                           this.minecraft.gui.setScreen(new OptionsScreen(this, this.minecraft.options, this.minecraft.level != null));
                        },
                        false, false, true, Component.translatable("cold_sweat.config.config_button_pos.desc"));
 

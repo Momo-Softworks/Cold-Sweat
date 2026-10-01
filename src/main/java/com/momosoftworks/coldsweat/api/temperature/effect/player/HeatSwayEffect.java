@@ -1,5 +1,7 @@
 package com.momosoftworks.coldsweat.api.temperature.effect.player;
 
+import net.minecraft.world.level.Level;
+import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.api.temperature.effect.TempEffect;
 import com.momosoftworks.coldsweat.api.temperature.effect.TempEffectType;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -8,8 +10,6 @@ import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.client.event.ViewportEvent;
 
@@ -28,11 +28,10 @@ public class HeatSwayEffect extends TempEffect
     static float TIME_SINCE_NEW_SWAY = 0;
     static float SWAY_FACTOR = 0;
 
-    @OnlyIn(Dist.CLIENT)
     @SubscribeEvent
     public void swayCamera(ViewportEvent.ComputeCameraAngles event)
     {
-        Player player = Minecraft.getInstance().player;
+        Player player = ClientOnlyHelper.getClientPlayer();
 
         if (!this.test(player))
         {   SWAY_FACTOR = 0;
@@ -41,7 +40,7 @@ public class HeatSwayEffect extends TempEffect
             return;
         }
 
-        float frameTime = Minecraft.getInstance().getTimer().getRealtimeDeltaTicks();
+        float frameTime = Minecraft.getInstance().getDeltaTracker().getRealtimeDeltaTicks();
         double effect = this.getEffectFactor(player);
 
         if (!Minecraft.getInstance().isPaused() && ConfigSettings.DISTORTION_EFFECTS.get())

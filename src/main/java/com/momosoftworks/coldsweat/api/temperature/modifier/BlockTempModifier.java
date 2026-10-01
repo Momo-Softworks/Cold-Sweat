@@ -61,7 +61,7 @@ public class BlockTempModifier extends TempModifier
             chunks.clear();
         }
 
-        int range = this.getNBT().contains("RangeOverride", 3) ? this.getNBT().getInt("RangeOverride") : ConfigSettings.BLOCK_RANGE.get();
+        int range = this.getNBT().contains("RangeOverride") ? this.getNBT().getIntOr("RangeOverride", 0) : ConfigSettings.BLOCK_RANGE.get();
         BlockPos entPos = entity.blockPosition();
 
         int entX = entPos.getX();
@@ -81,12 +81,12 @@ public class BlockTempModifier extends TempModifier
             for (int z = -range; z < range; z++)
             {
                 int chunkZ = (entZ + z) >> 4;
-                long newChunkPos = ChunkPos.asLong(chunkX, chunkZ);
+                long newChunkPos = ChunkPos.pack(chunkX, chunkZ);
                 if (chunk == null || newChunkPos != chunkPos)
                 {
                     chunkPos = newChunkPos;
                     chunk = chunks.get(chunkPos);
-                    if (chunk == null) chunks.put(chunkPos, chunk = WorldHelper.getChunk(level, new ChunkPos(chunkPos)));
+                    if (chunk == null) chunks.put(chunkPos, chunk = WorldHelper.getChunk(level, ChunkPos.unpack(chunkPos)));
                     if (chunk == null) continue;
                 }
 
@@ -127,7 +127,7 @@ public class BlockTempModifier extends TempModifier
                         // Lessen the effect with each block between the player and the block
                         int[] blocks = new int[1];
                         Vec3 ray = pos.subtract(playerClosest);
-                        Direction direction = Direction.getNearest(ray.x, ray.y, ray.z);
+                        Direction direction = Direction.getApproximateNearest(ray.x, ray.y, ray.z);
 
                         WorldHelper.forBlocksInRay(playerClosest, pos, level, chunk, stateCache,
                         (rayState, bpos) ->

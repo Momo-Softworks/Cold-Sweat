@@ -1,17 +1,18 @@
 package com.momosoftworks.coldsweat.client.renderer.model.armor;
 
+import java.util.Set;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import com.momosoftworks.coldsweat.ColdSweat;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.resources.Identifier;
 
-public class GoatHelmetModel<T extends LivingEntity> extends HumanoidModel<T>
+public class GoatHelmetModel extends HumanoidModel<HumanoidRenderState>
 {
-    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "goat_cap"), "main");
+    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "goat_cap"), "main");
 
 
     public GoatHelmetModel(ModelPart root)
@@ -27,6 +28,9 @@ public class GoatHelmetModel<T extends LivingEntity> extends HumanoidModel<T>
 
         PartDefinition cap = head.addOrReplaceChild("cap", CubeListBuilder.create().texOffs(16, 80).addBox(-4.0F, -6.5F, -7.0F, 8.0F, 8.0F, 8.0F,
                                                                                                            new CubeDeformation(scale)), PartPose.offset(0.0F, -1.5F, 3.0F));
+
+        // Only render the parts for this armor slot
+        meshdefinition.getRoot().retainPartsAndChildren(Set.of("head"));
 
         return LayerDefinition.create(meshdefinition, 64, 128);
     }

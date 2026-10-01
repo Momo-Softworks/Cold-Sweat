@@ -18,11 +18,11 @@ public abstract class ThermalSourceTempModifier extends TempModifier
     public abstract int getStrength();
 
     protected int getCooling()
-    {   return this.getNBT().getInt("Cooling");
+    {   return this.getNBT().getIntOr("Cooling", 0);
     }
 
     protected int getWarming()
-    {   return this.getNBT().getInt("Warming");
+    {   return this.getNBT().getIntOr("Warming", 0);
     }
 
     @Override

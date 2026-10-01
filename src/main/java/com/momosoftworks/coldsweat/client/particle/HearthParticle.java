@@ -1,23 +1,21 @@
 package com.momosoftworks.coldsweat.client.particle;
 
+import net.minecraft.util.RandomSource;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.ParticleStatus;
+import net.minecraft.server.level.ParticleStatus;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.*;
 import net.minecraft.core.particles.SimpleParticleType;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
 import org.jetbrains.annotations.Nullable;
 
-@OnlyIn(Dist.CLIENT)
-public class HearthParticle extends TextureSheetParticle
+public class HearthParticle extends SingleQuadParticle
 {
     private SpriteSet ageSprite;
     VaporParticle.ParticleType type;
 
     protected HearthParticle(ClientLevel world, double x, double y, double z, double vx, double vy, double vz, SpriteSet spriteSet, ParticleType type)
     {
-        super(world, x, y, z);
+        super(world, x, y, z, spriteSet.first());
         float size = 0.5f;
         this.ageSprite = spriteSet;
 
@@ -41,8 +39,8 @@ public class HearthParticle extends TextureSheetParticle
     }
 
     @Override
-    public ParticleRenderType getRenderType()
-    {   return ParticleUtil.PARTICLE_SHEET_TRANSPARENT;
+    protected Layer getLayer()
+    {   return Layer.TRANSLUCENT;
     }
 
     @Override
@@ -59,22 +57,20 @@ public class HearthParticle extends TextureSheetParticle
             this.remove();
     }
 
-    @OnlyIn(Dist.CLIENT)
     public record AirParticleFactory(SpriteSet sprite) implements ParticleProvider<SimpleParticleType>
     {
         @Nullable
         @Override
-        public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed)
+        public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed, RandomSource random)
         {   return new HearthParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, this.sprite, ParticleType.WARM_AIR);
         }
     }
 
-    @OnlyIn(Dist.CLIENT)
     public record SmokestackFactory(SpriteSet sprite) implements ParticleProvider<SimpleParticleType>
     {
         @Nullable
         @Override
-        public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed)
+        public Particle createParticle(SimpleParticleType type, ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed, RandomSource random)
         {
             if (ySpeed == 0) ySpeed = 0.04f;
             return new HearthParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, this.sprite, ParticleType.SMOKESTACK);

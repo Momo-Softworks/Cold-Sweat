@@ -25,7 +25,7 @@ public class SublevelBlockTempModifier extends BlockTempModifier
     public Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
     {
         Level level = entity.level();
-        int range = this.getNBT().contains("RangeOverride", 3) ? this.getNBT().getInt("RangeOverride") : ConfigSettings.BLOCK_RANGE.get();
+        int range = this.getNBT().contains("RangeOverride") ? this.getNBT().getIntOr("RangeOverride", 0) : ConfigSettings.BLOCK_RANGE.get();
 
         Collection<AABB> sublevelAreas = WorldHelper.worldToSublevel(level, AABB.ofSize(entity.getBoundingBox().getCenter(), range*2, range*2, range*2));
         if (sublevelAreas.isEmpty())

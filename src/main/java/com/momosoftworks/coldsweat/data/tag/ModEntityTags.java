@@ -2,7 +2,7 @@ package com.momosoftworks.coldsweat.data.tag;
 
 import com.momosoftworks.coldsweat.ColdSweat;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 
@@ -13,6 +13,6 @@ public class ModEntityTags
     public static final TagKey<EntityType<?>> CHAMELEON_EATS = createTag("chameleon_eats");
 
     private static TagKey<EntityType<?>> createTag(String name)
-    {   return TagKey.create(Registries.ENTITY_TYPE, ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, name));
+    {   return TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, name));
     }
 }

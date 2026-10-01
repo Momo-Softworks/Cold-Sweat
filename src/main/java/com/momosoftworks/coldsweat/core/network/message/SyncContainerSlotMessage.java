@@ -9,14 +9,14 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class SyncContainerSlotMessage implements CustomPacketPayload
 {
-    public static final CustomPacketPayload.Type<SyncContainerSlotMessage> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "sync_container_slot"));
+    public static final CustomPacketPayload.Type<SyncContainerSlotMessage> TYPE = new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "sync_container_slot"));
     public static final StreamCodec<FriendlyByteBuf, SyncContainerSlotMessage> CODEC = CustomPacketPayload.codec(SyncContainerSlotMessage::encode, SyncContainerSlotMessage::decode);
 
     int slot;
@@ -38,14 +38,14 @@ public class SyncContainerSlotMessage implements CustomPacketPayload
     public static void encode(SyncContainerSlotMessage msg, FriendlyByteBuf buffer)
     {
         buffer.writeInt(msg.slot);
-        buffer.writeNbt(msg.stack.save(RegistryHelper.getRegistryAccess()));
+        buffer.writeNbt(ItemStack.OPTIONAL_CODEC.encodeStart(RegistryHelper.getRegistryAccess().createSerializationContext(NbtOps.INSTANCE), msg.stack).getOrThrow());
         buffer.writeVarInt(msg.containerId);
     }
 
     public static SyncContainerSlotMessage decode(FriendlyByteBuf buffer)
     {
         int slot = buffer.readInt();
-        ItemStack stack = ItemStack.CODEC.decode(NbtOps.INSTANCE, buffer.readNbt()).result().orElseThrow().getFirst();
+        ItemStack stack = ItemStack.OPTIONAL_CODEC.decode(RegistryHelper.getRegistryAccess().createSerializationContext(NbtOps.INSTANCE), buffer.readNbt()).result().orElseThrow().getFirst();
         int containerId = buffer.readVarInt();
         return new SyncContainerSlotMessage(slot, stack, containerId);
     }

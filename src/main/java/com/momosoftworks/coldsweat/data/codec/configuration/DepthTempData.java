@@ -226,8 +226,8 @@ public class DepthTempData extends ConfigData
             return switch (anchor)
             {
                 case CONSTANT -> depth;
-                case WORLD_TOP -> level.getMaxBuildHeight() + depth;
-                case WORLD_BOTTOM -> level.getMinBuildHeight() + depth;
+                case WORLD_TOP -> (level.getMaxY() + 1) + depth;
+                case WORLD_BOTTOM -> level.getMinY() + depth;
                 case GROUND_LEVEL -> WorldHelper.getHeight(checkPos, level, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES) + depth;
             };
         }

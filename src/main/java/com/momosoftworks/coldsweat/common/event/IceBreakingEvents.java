@@ -1,9 +1,12 @@
 package com.momosoftworks.coldsweat.common.event;
 
+import net.minecraft.tags.ItemTags;
+import net.neoforged.neoforge.event.level.block.BreakBlockEvent;
+import com.momosoftworks.coldsweat.data.tag.ModDimensionTags;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.loot.ModLootTables;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
@@ -26,7 +29,7 @@ public class IceBreakingEvents
      * Re-enable spawning water if the player breaks ice without the correct tool
      */
     @SubscribeEvent
-    public static void onIceBreak(BlockEvent.BreakEvent event)
+    public static void onIceBreak(BreakBlockEvent event)
     {
         if (!ConfigSettings.USE_CUSTOM_ICE_DROPS.get()) return;
 
@@ -41,7 +44,7 @@ public class IceBreakingEvents
         && !EnchantmentHelper.hasTag(stack, EnchantmentTags.PREVENTS_ICE_MELTING)
         && !player.getAbilities().instabuild
         && (belowState.blocksMotion() || belowState.liquid())
-        && !ilevel.dimensionType().ultraWarm())
+        && !ModDimensionTags.isUltraWarm(ilevel.dimensionType()))
         {   ilevel.setBlock(pos, IceBlock.meltsInto(), 3);
         }
     }
@@ -63,7 +66,7 @@ public class IceBreakingEvents
         && !player.getMainHandItem().isCorrectToolForDrops(state))
         {
             // Increase speed for pickaxes (even if the tier isn't high enough)
-            if (tool.canPerformAction(ItemAbilities.PICKAXE_DIG))
+            if (tool.is(ItemTags.PICKAXES))
             {   event.setNewSpeed(speed);
             }
             // Non-pickaxes need a huge speed boost
@@ -84,7 +87,7 @@ public class IceBreakingEvents
         ItemStack tool = player.getItemInHand(InteractionHand.MAIN_HAND);
 
         if (isModifiableIceBlock(state))
-        {   event.setCanHarvest(tool.canPerformAction(ItemAbilities.PICKAXE_DIG) && event.getEntity().getMainHandItem().isCorrectToolForDrops(state));
+        {   event.setCanHarvest(tool.is(ItemTags.PICKAXES) && event.getEntity().getMainHandItem().isCorrectToolForDrops(state));
         }
     }
 
@@ -95,7 +98,7 @@ public class IceBreakingEvents
             || state.is(Blocks.BLUE_ICE);
     }
 
-    public static ResourceLocation getLootTableForIce(BlockState state)
+    public static Identifier getLootTableForIce(BlockState state)
     {
         if (state.is(Blocks.ICE))
         {   return ModLootTables.CUSTOM_ICE_DROP;

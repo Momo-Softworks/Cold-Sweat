@@ -1,5 +1,8 @@
 package com.momosoftworks.coldsweat.common.event;
 
+import com.momosoftworks.coldsweat.ColdSweat;
+import net.minecraft.resources.Identifier;
+import java.util.Optional;
 import com.momosoftworks.coldsweat.api.event.vanilla.ChatComponentClickedEvent;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import net.minecraft.ChatFormatting;
@@ -27,13 +30,13 @@ public class SystemMessageHandler
         if (Minecraft.getInstance().gameMode != GAME_MODE && Minecraft.getInstance().gameMode.getPlayerMode().isCreative()
         && ConfigSettings.SHOW_CREATIVE_WARNING.get() && !Minecraft.getInstance().isLocalServer())
         {
-            player.displayClientMessage(getSystemPrefix()
+            player.sendSystemMessage(getSystemPrefix()
                                 .append(Component.translatable("message.cold_sweat.warning").append(" ").withStyle(ChatFormatting.BOLD, ChatFormatting.RED))
                                 .append(Component.translatable("message.cold_sweat.creative_warning_message").append(" ").withStyle(ChatFormatting.GRAY))
                                 .append(Component.translatable("message.cold_sweat.disable")
                                                  .withStyle(Style.EMPTY
                                                  .withColor(ChatFormatting.LIGHT_PURPLE)
-                                                 .withClickEvent(new ClickEvent(ClickEvent.Action.CHANGE_PAGE, "cold sweat disable message")))), false);
+                                                 .withClickEvent(new ClickEvent.Custom(DISABLE_WARNING_ID, Optional.empty())))));
             GAME_MODE = Minecraft.getInstance().gameMode;
         }
     }
@@ -43,13 +46,15 @@ public class SystemMessageHandler
     public static void onPlayerClickChatMessage(ChatComponentClickedEvent event)
     {
         if (ConfigSettings.SHOW_CREATIVE_WARNING.get()
-        && event.getStyle().getClickEvent() != null && event.getStyle().getClickEvent().getValue().equals("cold sweat disable message"))
+        && event.getStyle().getClickEvent() instanceof ClickEvent.Custom custom && custom.id().equals(DISABLE_WARNING_ID))
         {
             ConfigSettings.SHOW_CREATIVE_WARNING.set(false);
-            event.getPlayer().displayClientMessage(getSystemPrefix()
-                                           .append(Component.translatable("message.cold_sweat.disable_feedback").withStyle(ChatFormatting.GRAY)), false);
+            event.getPlayer().sendSystemMessage(getSystemPrefix()
+                                           .append(Component.translatable("message.cold_sweat.disable_feedback").withStyle(ChatFormatting.GRAY)));
         }
     }
+
+    private static final Identifier DISABLE_WARNING_ID = ColdSweat.createKey("disable_creative_warning");
 
     public static MutableComponent getSystemPrefix()
     {   return Component.literal("[").append(Component.translatable("message.cold_sweat.mod_name")).append("]: ").withStyle(ChatFormatting.LIGHT_PURPLE);

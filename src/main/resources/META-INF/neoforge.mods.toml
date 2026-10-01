@@ -1,5 +1,3 @@
-modLoader="javafml"
-loaderVersion="${loader_version_range}"
 license="GNU General Public License v3.1"
 
 [[mods]]
@@ -20,14 +18,14 @@ license="GNU General Public License v3.1"
 
 [[dependencies.cold_sweat]]
    modId="neoforge"
-   mandatory=true
+   type="required"
    versionRange="${neo_version_range}"
    ordering="NONE"
    side="BOTH"
 
 [[dependencies.cold_sweat]]
    modId="minecraft"
-   mandatory=true
+   type="required"
    versionRange="${minecraft_version_range}"
    ordering="NONE"
    side="BOTH"

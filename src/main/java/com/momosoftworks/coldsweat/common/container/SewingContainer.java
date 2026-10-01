@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.common.container;
 
+import net.minecraft.world.item.equipment.Equippable;
 import com.momosoftworks.coldsweat.api.event.common.insulation.InsulateItemEvent;
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
@@ -21,8 +22,6 @@ import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.*;
-import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.block.state.BlockState;
@@ -47,12 +46,11 @@ public class SewingContainer extends ItemCombinerMenu
 
     public SewingContainer(@Nullable MenuType<?> menuType, int containerId, Inventory inventory, ContainerLevelAccess chunkAccess)
     {
-        super(menuType, containerId, inventory, chunkAccess);
+        super(menuType, containerId, inventory, chunkAccess, createInputSlotDefinitions());
         this.playerInventory = inventory;
     }
 
-    @Override
-    protected ItemCombinerMenuSlotDefinition createInputSlotDefinitions()
+    private static ItemCombinerMenuSlotDefinition createInputSlotDefinitions()
     {
         return ItemCombinerMenuSlotDefinition.create()
         .withSlot(0, 43, 26, ItemInsulationManager::isInsulatable)
@@ -135,8 +133,9 @@ public class SewingContainer extends ItemCombinerMenu
         }
 
         // Get equip sound for the armor item
-        if (stack.getItem() instanceof ArmorItem armor)
-        {   SoundEvent equipSound = armor.getMaterial().value().equipSound().value();
+        Equippable equippable = stack.get(DataComponents.EQUIPPABLE);
+        if (equippable != null)
+        {   SoundEvent equipSound = equippable.equipSound().value();
             WorldHelper.playEntitySound(equipSound, player, SoundSource.BLOCKS, 1f, 1f);
         }
         this.createResult();
@@ -181,7 +180,7 @@ public class SewingContainer extends ItemCombinerMenu
             }
             // Item is for insulation
             else if (!ConfigSettings.INSULATION_ITEMS.get().get(insulatorItem.getItem()).isEmpty()
-            && (!(insulatorItem.getItem() instanceof Equipable otherArmor) || wearableItem.getEquipmentSlot() == otherArmor.getEquipmentSlot()))
+            && (!insulatorItem.has(DataComponents.EQUIPPABLE) || ItemStackHelper.getEquipmentSlot(wearableItem) == insulatorItem.get(DataComponents.EQUIPPABLE).slot()))
             {
                 ItemStack processed = wearableItem.copy();
                 if (insulateArmorItem(processed, insulatorItem))

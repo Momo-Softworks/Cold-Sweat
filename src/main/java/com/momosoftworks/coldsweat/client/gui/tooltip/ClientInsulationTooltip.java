@@ -1,7 +1,9 @@
 package com.momosoftworks.coldsweat.client.gui.tooltip;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
+import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.util.ARGB;
+import org.joml.Matrix3x2fStack;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.insulation.AdaptiveInsulation;
 import com.momosoftworks.coldsweat.api.insulation.Insulation;
@@ -12,11 +14,11 @@ import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
@@ -25,9 +27,9 @@ import java.util.function.Supplier;
 
 public class ClientInsulationTooltip implements ClientTooltipComponent
 {
-    public static final ResourceLocation INSULATION_TOOLTIP_NORMAL = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/tooltip/insulation_bar.png");
-    public static final ResourceLocation INSULATION_TOOLTIP_CONTRAST = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/tooltip/insulation_bar_hc.png");
-    public static final Supplier<ResourceLocation> INSULATION_TOOLTIP = () -> ConfigSettings.HIGH_CONTRAST.get() ? INSULATION_TOOLTIP_CONTRAST : INSULATION_TOOLTIP_NORMAL;
+    public static final Identifier INSULATION_TOOLTIP_NORMAL = Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/tooltip/insulation_bar.png");
+    public static final Identifier INSULATION_TOOLTIP_CONTRAST = Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/tooltip/insulation_bar_hc.png");
+    public static final Supplier<Identifier> INSULATION_TOOLTIP = () -> ConfigSettings.HIGH_CONTRAST.get() ? INSULATION_TOOLTIP_CONTRAST : INSULATION_TOOLTIP_NORMAL;
 
     List<InsulatorData> insulation;
     Insulation.Slot slot;
@@ -44,7 +46,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
     }
 
     @Override
-    public int getHeight()
+    public int getHeight(Font font)
     {   return 10;
     }
 
@@ -54,9 +56,9 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
     }
 
     @Override
-    public void renderImage(Font font, int x, int y, GuiGraphics graphics)
+    public void extractImage(Font font, int x, int y, int width, int height, GuiGraphicsExtractor graphics)
     {
-        PoseStack poseStack = graphics.pose();
+        Matrix3x2fStack poseStack = graphics.pose();
         List<Insulation> posInsulation = new ArrayList<>();
         int extraInsulations = 0;
         List<Insulation> negInsulation = new ArrayList<>();
@@ -108,7 +110,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         }
 
         /* Render Bars */
-        poseStack.pushPose();
+        poseStack.pushMatrix();
         WIDTH = 0;
 
         // Positive insulation bar
@@ -123,7 +125,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
             if (!posInsulation.isEmpty()) WIDTH += 4;
             WIDTH += renderBar(graphics, x + WIDTH, y, negInsulation, 0, slot, stack, BarType.NEGATIVE);
         }
-        poseStack.popPose();
+        poseStack.popMatrix();
         // Render strikethrough
         if (this.strikethrough)
         {
@@ -133,7 +135,9 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
     }
 
     static boolean RECURSIVE = false;
-    static void renderCell(GuiGraphics graphics, int x, int y, Insulation insulation)
+    // Replaces the shader color used for the adaptive insulation overlay
+    static int CELL_COLOR = -1;
+    static void renderCell(GuiGraphicsExtractor graphics, int x, int y, Insulation insulation)
     {
         double rounded = CSMath.roundNearest(Math.abs(insulation.getValue()), 0.25);
         // Determine cell temperature
@@ -161,53 +165,51 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         // Render background
         renderCellBackground(graphics, x, y);
         // Render base cell
-        graphics.blit(INSULATION_TOOLTIP.get(), x, y, 0, uvX, uvY, 6, 4, 36, 28);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, INSULATION_TOOLTIP.get(), x, y, uvX, uvY, 6, 4, 36, 28, CELL_COLOR);
         // Render color overlay for adaptive insulation
         if (insulation instanceof AdaptiveInsulation adaptive && adaptive.getFactor() != 0 && !RECURSIVE)
         {
             double blend = Math.abs(adaptive.getFactor());
-            RenderSystem.enableBlend();
-            RenderSystem.setShaderColor(1, 1, 1, (float) blend);
+            CELL_COLOR = ARGB.white((float) blend);
             RECURSIVE = true;
             renderCell(graphics, x, y, insulation);
-            RenderSystem.disableBlend();
-            RenderSystem.setShaderColor(1, 1, 1, 1f);
+            CELL_COLOR = -1;
         }
         RECURSIVE = false;
     }
 
-    static void renderCellBackground(GuiGraphics graphics, int x, int y)
+    static void renderCellBackground(GuiGraphicsExtractor graphics, int x, int y)
     {
         // Render background
-        graphics.blit(INSULATION_TOOLTIP.get(), x, y, 0, 0, 0, 6, 4, 36, 28);
+        graphics.blit(RenderPipelines.GUI_TEXTURED, INSULATION_TOOLTIP.get(), x, y, 0, 0, 6, 4, 36, 28, CELL_COLOR);
     }
 
-    static void renderIcon(GuiGraphics graphics, int x, int y, Insulation.Slot slot, BarType type)
+    static void renderIcon(GuiGraphicsExtractor graphics, int x, int y, Insulation.Slot slot, BarType type)
     {
         // icon
         switch (slot)
         {
             case ITEM ->  Icon.INSULATION.get().render(graphics, x, y, 0);
-            case ARMOR -> graphics.blit(INSULATION_TOOLTIP.get(), x, y, 0, 28, 8, 8, 8, 36, 28);
-            case CURIO -> graphics.blit(INSULATION_TOOLTIP.get(), x, y, 0, 28, 16, 8, 8, 36, 28);
+            case ARMOR -> graphics.blit(RenderPipelines.GUI_TEXTURED, INSULATION_TOOLTIP.get(), x, y, 28, 8, 8, 8, 36, 28);
+            case CURIO -> graphics.blit(RenderPipelines.GUI_TEXTURED, INSULATION_TOOLTIP.get(), x, y, 28, 16, 8, 8, 36, 28);
         }
         // positive/negative sign
         switch (type)
         {
-            case POSITIVE -> graphics.blit(INSULATION_TOOLTIP.get(), x + 3, y + 3, 0, 18, 0, 5, 5, 36, 28);
-            case NEGATIVE -> graphics.blit(INSULATION_TOOLTIP.get(), x + 3, y + 3, 0, 23, 0, 5, 5, 36, 28);
+            case POSITIVE -> graphics.blit(RenderPipelines.GUI_TEXTURED, INSULATION_TOOLTIP.get(), x + 3, y + 3, 18, 0, 5, 5, 36, 28);
+            case NEGATIVE -> graphics.blit(RenderPipelines.GUI_TEXTURED, INSULATION_TOOLTIP.get(), x + 3, y + 3, 23, 0, 5, 5, 36, 28);
         }
     }
 
-    static int renderBar(GuiGraphics graphics, int x, int y, List<Insulation> insulations, int extraSlots, Insulation.Slot slot, ItemStack stack, BarType type)
+    static int renderBar(GuiGraphicsExtractor graphics, int x, int y, List<Insulation> insulations, int extraSlots, Insulation.Slot slot, ItemStack stack, BarType type)
     {
         extraSlots = Math.min(ItemInsulationManager.getInsulationSlots(stack), extraSlots);
-        PoseStack poseStack = graphics.pose();
+        Matrix3x2fStack poseStack = graphics.pose();
         List<Insulation> sortedInsulation = Insulation.sort(insulations);
         setAdaptations(sortedInsulation, stack);
 
         Mode mode;
-        if (Screen.hasControlDown() || sortedInsulation.stream().map(Insulation::split).mapToInt(List::size).sum() > 10)
+        if (Minecraft.getInstance().hasControlDown() || sortedInsulation.stream().map(Insulation::split).mapToInt(List::size).sum() > 10)
         {   mode = Mode.OVERFLOW;
         }
         else if (insulations.stream().anyMatch(insul -> insul.split().size() > 1))
@@ -221,7 +223,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         int slots = Math.max(armorSlots, insulations.size());
 
         /* Insulation */
-        poseStack.pushPose();
+        poseStack.pushMatrix();
         int finalWidth;
         if (mode == Mode.OVERFLOW)
         {   finalWidth = renderOverflowBar(graphics, x + 8, y, sortedInsulation, slots);
@@ -232,14 +234,14 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         else
         {   finalWidth = renderNormalBar(graphics, x + 7, y, sortedInsulation, slots + extraSlots);
         }
-        poseStack.popPose();
+        poseStack.popMatrix();
         renderIcon(graphics, x, y, slot, type);
         // Return the width of the tooltip
         if (mode != Mode.OVERFLOW) finalWidth += 2;
         return finalWidth + 6;
     }
 
-    static int renderNormalBar(GuiGraphics graphics, int x, int y, List<Insulation> insulations, int slots)
+    static int renderNormalBar(GuiGraphicsExtractor graphics, int x, int y, List<Insulation> insulations, int slots)
     {
         // Cells
         for (int i = 0; i < insulations.size(); i++)
@@ -262,7 +264,7 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         return Math.max(insulations.size(), slots) * 6;
     }
 
-    static int renderCompoundBar(GuiGraphics graphics, int x, int y, List<Insulation> insulations, int extraSlots, int slots)
+    static int renderCompoundBar(GuiGraphicsExtractor graphics, int x, int y, List<Insulation> insulations, int extraSlots, int slots)
     {
         int cellX = 0;
         int compoundCount = 0;
@@ -332,10 +334,10 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         return cellX;
     }
 
-    static int renderOverflowBar(GuiGraphics graphics, int x, int y, List<Insulation> insulations, int slots)
+    static int renderOverflowBar(GuiGraphicsExtractor graphics, int x, int y, List<Insulation> insulations, int slots)
     {
         int width = 0;
-        PoseStack poseStack = graphics.pose();
+        Matrix3x2fStack poseStack = graphics.pose();
         Font font = Minecraft.getInstance().font;
         // tally up the insulation from the sorted list into cold, hot, neutral, and adaptive
         double cold = 0;
@@ -365,41 +367,41 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         }
         int textColor = 10526880;
 
-        poseStack.pushPose();
+        poseStack.pushMatrix();
         if (insulations.size() < slots)
         {
             int xOffs = renderEmptyBar(graphics, x, y + 2, slots - insulations.size());
             width += xOffs;
-            poseStack.translate(xOffs, 0, 0);
+            poseStack.translate(xOffs, 0);
         }
         if (cold > 0)
         {
             int xOffs = renderOverflowCell(graphics, font, x + 1, y + 2, new StaticInsulation(cold, 0), textColor);
             width += xOffs;
-            poseStack.translate(xOffs, 0, 0);
+            poseStack.translate(xOffs, 0);
         }
         if (heat > 0)
         {
             int xOffs = renderOverflowCell(graphics, font, x + 1, y + 2, new StaticInsulation(0, heat), textColor);
             width += xOffs;
-            poseStack.translate(xOffs, 0, 0);
+            poseStack.translate(xOffs, 0);
         }
         if (neutral > 0)
         {
             int xOffs = renderOverflowCell(graphics, font, x + 1, y + 2, new StaticInsulation(neutral, neutral), textColor);
             width += xOffs;
-            poseStack.translate(xOffs, 0, 0);
+            poseStack.translate(xOffs, 0);
         }
         if (adaptive > 0)
         {
             int xOffs = renderOverflowCell(graphics, font, x + 1, y + 2, new AdaptiveInsulation(adaptive, 0), textColor);
             width += xOffs;
-            poseStack.translate(xOffs, 0, 0);
+            poseStack.translate(xOffs, 0);
         }
-        poseStack.popPose();
+        poseStack.popMatrix();
         return width;
     }
-    static int renderOverflowCell(GuiGraphics graphics, Font font, int x, int y, Insulation insulation, int textColor)
+    static int renderOverflowCell(GuiGraphicsExtractor graphics, Font font, int x, int y, Insulation insulation, int textColor)
     {
         Number insul = CSMath.truncate(insulation.getValue() / 2, 2);
         if (CSMath.isInteger(insul)) insul = insul.intValue();
@@ -409,32 +411,32 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
         renderCellBorder(graphics, x, y, BorderSegment.HEAD, BorderType.OVERFLOW);
         renderCellBorder(graphics, x, y, BorderSegment.BODY, BorderType.OVERFLOW);
         renderCellBorder(graphics, x, y, BorderSegment.TAIL, BorderType.OVERFLOW);
-        graphics.drawString(font, text, x + 8, y - 2, textColor);
+        graphics.text(font, text, x + 8, y - 2, ClientOnlyHelper.legacyTextColor(textColor));
         // Return the width of the cell and text
         return 12 + font.width(text);
     }
-    static int renderEmptyBar(GuiGraphics graphics, int x, int y, int size)
+    static int renderEmptyBar(GuiGraphicsExtractor graphics, int x, int y, int size)
     {
-        PoseStack poseStack = graphics.pose();
+        Matrix3x2fStack poseStack = graphics.pose();
         for (int i = 0; i < size; i++)
         {
             BorderSegment segment = getBorderSegment(size, i);
             // background
-            graphics.blit(INSULATION_TOOLTIP.get(), x + 7 + i * 6, y + 1, 0, 0, 0, 6, 4, 36, 28);
+            graphics.blit(RenderPipelines.GUI_TEXTURED, INSULATION_TOOLTIP.get(), x + 7 + i * 6, y + 1, 0, 0, 6, 4, 36, 28);
             // border
             renderCellBorder(graphics, x + i * 6, y, segment, BorderType.OVERFLOW);
         }
-        poseStack.pushPose();
-        poseStack.popPose();
+        poseStack.pushMatrix();
+        poseStack.popMatrix();
         return size * 6 + 4;
     }
 
-    static void renderCellBorder(GuiGraphics graphics, int x, int y, BorderSegment segment, BorderType type)
+    static void renderCellBorder(GuiGraphicsExtractor graphics, int x, int y, BorderSegment segment, BorderType type)
     {
         switch (type)
         {
-            case DIVIDER -> graphics.blit(INSULATION_TOOLTIP.get(), x, y - 1, 0, 10, 0, 1, 6, 36, 28);
-            case EMPTY_DIVIDER -> graphics.blit(INSULATION_TOOLTIP.get(), x, y - 1, 0, 11, 0, 1, 6, 36, 28);
+            case DIVIDER -> graphics.blit(RenderPipelines.GUI_TEXTURED, INSULATION_TOOLTIP.get(), x, y - 1, 10, 0, 1, 6, 36, 28);
+            case EMPTY_DIVIDER -> graphics.blit(RenderPipelines.GUI_TEXTURED, INSULATION_TOOLTIP.get(), x, y - 1, 11, 0, 1, 6, 36, 28);
             default ->
             {
                 int vOffset = switch (type)
@@ -457,9 +459,9 @@ public class ClientInsulationTooltip implements ClientTooltipComponent
                             RECURSIVE = false;
                         }
                     }
-                    case HEAD -> graphics.blit(INSULATION_TOOLTIP.get(), x - 1, y - 1, 0, 0, vOffset, 7, 6, 36, 28);
-                    case BODY -> graphics.blit(INSULATION_TOOLTIP.get(), x + 0, y - 1, 0, 2, vOffset, 6, 6, 36, 28);
-                    case TAIL -> graphics.blit(INSULATION_TOOLTIP.get(), x + 0, y - 1, 0, 3, vOffset, 7, 6, 36, 28);
+                    case HEAD -> graphics.blit(RenderPipelines.GUI_TEXTURED, INSULATION_TOOLTIP.get(), x - 1, y - 1, 0, vOffset, 7, 6, 36, 28);
+                    case BODY -> graphics.blit(RenderPipelines.GUI_TEXTURED, INSULATION_TOOLTIP.get(), x + 0, y - 1, 2, vOffset, 6, 6, 36, 28);
+                    case TAIL -> graphics.blit(RenderPipelines.GUI_TEXTURED, INSULATION_TOOLTIP.get(), x + 0, y - 1, 3, vOffset, 7, 6, 36, 28);
                 }
             }
         }

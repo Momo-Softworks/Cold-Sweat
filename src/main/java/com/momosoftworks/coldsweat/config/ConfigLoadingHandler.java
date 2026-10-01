@@ -39,7 +39,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -190,8 +190,8 @@ public class ConfigLoadingHandler
          Read mod-related tags for config settings
          */
         ConfigSettings.THERMAL_SOURCE_SPREAD_WHITELIST.get()
-                .addAll(registryAccess.registryOrThrow(Registries.BLOCK)
-                                .getTag(ModBlockTags.HEARTH_SPREAD_WHITELIST).orElseThrow()
+                .addAll(registryAccess.lookupOrThrow(Registries.BLOCK)
+                                .get(ModBlockTags.HEARTH_SPREAD_WHITELIST).orElseThrow()
                                 .stream().map(holder ->
                                 {
                                     ColdSweat.LOGGER.info("Adding block {} to hearth spread whitelist", holder.value());
@@ -199,8 +199,8 @@ public class ConfigLoadingHandler
                                 }).toList());
 
         ConfigSettings.THERMAL_SOURCE_SPREAD_BLACKLIST.get().
-                addAll(registryAccess.registryOrThrow(Registries.BLOCK)
-                               .getTag(ModBlockTags.HEARTH_SPREAD_BLACKLIST).orElseThrow()
+                addAll(registryAccess.lookupOrThrow(Registries.BLOCK)
+                               .get(ModBlockTags.HEARTH_SPREAD_BLACKLIST).orElseThrow()
                                .stream().map(holder ->
                                {
                                    ColdSweat.LOGGER.info("Adding block {} to hearth spread blacklist", holder.value());
@@ -208,8 +208,8 @@ public class ConfigLoadingHandler
                                }).toList());
 
         ConfigSettings.SLEEP_CHECK_IGNORE_BLOCKS.get()
-                .addAll(registryAccess.registryOrThrow(Registries.BLOCK)
-                                .getTag(ModBlockTags.IGNORE_SLEEP_CHECK).orElseThrow()
+                .addAll(registryAccess.lookupOrThrow(Registries.BLOCK)
+                                .get(ModBlockTags.IGNORE_SLEEP_CHECK).orElseThrow()
                                 .stream().map(holder ->
                                 {
                                     ColdSweat.LOGGER.info("Disabling sleeping conditions check for block {}", holder.value());
@@ -217,8 +217,8 @@ public class ConfigLoadingHandler
                                 }).toList());
 
         ConfigSettings.LAMP_DIMENSIONS.get(registryAccess)
-                .addAll(registryAccess.registryOrThrow(Registries.DIMENSION_TYPE)
-                                .getTag(ModDimensionTags.SOUL_LAMP_VALID).orElseThrow()
+                .addAll(registryAccess.lookupOrThrow(Registries.DIMENSION_TYPE)
+                                .get(ModDimensionTags.SOUL_LAMP_VALID).orElseThrow()
                                 .stream().map(holder ->
                                 {
                                     ColdSweat.LOGGER.info("Enabling dimension {} for soulspring lamp", holder.value());
@@ -226,8 +226,8 @@ public class ConfigLoadingHandler
                                 }).toList());
 
         ConfigSettings.INSULATION_BLACKLIST.get()
-                .addAll(registryAccess.registryOrThrow(Registries.ITEM)
-                                .getTag(ModItemTags.NOT_INSULATABLE).orElseThrow()
+                .addAll(registryAccess.lookupOrThrow(Registries.ITEM)
+                                .get(ModItemTags.NOT_INSULATABLE).orElseThrow()
                                 .stream().map(holder ->
                                 {
                                     ColdSweat.LOGGER.info("Adding item {} to insulation blacklist", holder.value());
@@ -235,8 +235,8 @@ public class ConfigLoadingHandler
                                 }).toList());
 
         ConfigSettings.HEARTH_POTION_BLACKLIST.get(registryAccess)
-                .addAll(registryAccess.registryOrThrow(Registries.MOB_EFFECT)
-                                .getTag(ModEffectTags.HEARTH_BLACKLISTED).orElseThrow()
+                .addAll(registryAccess.lookupOrThrow(Registries.MOB_EFFECT)
+                                .get(ModEffectTags.HEARTH_BLACKLISTED).orElseThrow()
                                 .stream().map(holder ->
                                 {
                                     ColdSweat.LOGGER.info("Adding effect {} to hearth potion blacklist", holder.value());
@@ -247,10 +247,10 @@ public class ConfigLoadingHandler
          Fetch JSON registries
         */
         Multimap<RegistryHolder<?>, Holder<? extends ConfigData>> registries = new RegistryMultiMap<>();
-        for (Map.Entry<ResourceLocation, RegistryHolder<?>> entry : ModRegistries.getRegistries().entrySet())
+        for (Map.Entry<Identifier, RegistryHolder<?>> entry : ModRegistries.getRegistries().entrySet())
         {
             RegistryHolder<?> registry = entry.getValue();
-            registryAccess.registryOrThrow(registry.key()).holders().forEach(holder ->
+            registryAccess.lookupOrThrow(registry.key()).listElements().forEach(holder ->
             {   holder.value().setHolder(holder);
                 registries.put(registry, holder);
             });
@@ -273,7 +273,7 @@ public class ConfigLoadingHandler
          Parse user-defined JSON data from the configs folder
         */
         Multimap<RegistryHolder<?>, Holder<? extends ConfigData>> registries = new RegistryMultiMap<>();
-        for (Map.Entry<ResourceLocation, RegistryHolder<?>> entry : ModRegistries.getRegistries().entrySet())
+        for (Map.Entry<Identifier, RegistryHolder<?>> entry : ModRegistries.getRegistries().entrySet())
         {
             RegistryHolder<?> registry = entry.getValue();
             registries.putAll(registry, parseConfigData(registry, registryAccess));
@@ -392,7 +392,7 @@ public class ConfigLoadingHandler
         {
             Holder<? extends ConfigData> entry = iterator.next();
             if (entry.unwrapKey().isPresent())
-            {   messageBuilder.append(entry.unwrapKey().get().location());
+            {   messageBuilder.append(entry.unwrapKey().get().identifier());
             }
             if (iterator.hasNext())
             {   messageBuilder.append(", ");
@@ -421,7 +421,7 @@ public class ConfigLoadingHandler
         {
             List<? extends Holder<? extends ConfigData>> sortedHolders = new ArrayList<>(registries.get(key));
             sortedHolders.sort(Comparator.comparing(holder ->
-            {   return holder.unwrapKey().map(k -> k.location().getPath().startsWith("default") ? 1 : 0).orElse(0);
+            {   return holder.unwrapKey().map(k -> k.identifier().getPath().startsWith("default") ? 1 : 0).orElse(0);
             }));
             registries.replaceValues(key, (List) sortedHolders);
         }
@@ -432,7 +432,7 @@ public class ConfigLoadingHandler
         // Clear the static map
         REGISTRY_MODIFIERS.clear();
         // Gather registry removals & add them to the static map
-        Set<Holder<RegistryModifierData<?>>> removals = registryAccess.registryOrThrow(ModRegistries.REGISTRY_MODIFIER_DATA.key()).holders().collect(Collectors.toSet());
+        Set<Holder<RegistryModifierData<?>>> removals = registryAccess.lookupOrThrow(ModRegistries.REGISTRY_MODIFIER_DATA.key()).listElements().collect(Collectors.toSet());
         removals.addAll(parseConfigData(ModRegistries.REGISTRY_MODIFIER_DATA, registryAccess));
         removals.forEach(holder ->
         {
@@ -562,9 +562,9 @@ public class ConfigLoadingHandler
         for (int i = 0; i < OPTIONAL_HOLDERS.size(); i++)
         {
             OptionalHolder<?> holder = OPTIONAL_HOLDERS.get(i);
-            Registry<?> registry = registries.computeIfAbsent(holder.key(), key -> registryAccess.registry(ResourceKey.createRegistryKey(holder.key().registry())).orElse(null));
+            Registry<?> registry = registries.computeIfAbsent(holder.key(), key -> registryAccess.lookup(ResourceKey.createRegistryKey(holder.key().registry())).orElse(null));
             if (registry == null) continue;
-            registry.getHolder((ResourceKey) holder.key()).ifPresent(h -> holder.setValue((Holder) h));
+            registry.get((ResourceKey) holder.key()).ifPresent(h -> holder.setValue((Holder) h));
         }
     }
 
@@ -865,8 +865,8 @@ public class ConfigLoadingHandler
         List<Holder<T>> output = new ArrayList<>();
         DynamicOps<JsonElement> registryOps = RegistryOps.create(JsonOps.INSTANCE, registryAccess);
 
-        String configFolder = registryKey.location().getNamespace().replace("_", "");
-        Path coldSweatDataPath = FMLPaths.CONFIGDIR.get().resolve(configFolder + "/data").resolve(registryKey.location().getPath());
+        String configFolder = registryKey.identifier().getNamespace().replace("_", "");
+        Path coldSweatDataPath = FMLPaths.CONFIGDIR.get().resolve(configFolder + "/data").resolve(registryKey.identifier().getPath());
         File jsonDirectory = coldSweatDataPath.toFile();
 
         if (!jsonDirectory.exists())
@@ -880,7 +880,7 @@ public class ConfigLoadingHandler
                 try (FileReader reader = new FileReader(file))
                 {
                     registry.codec().decode(registryOps, GsonHelper.parse(reader))
-                            .resultOrPartial(error -> ColdSweat.LOGGER.error("Error decoding JSON config setting in {}: {}", registryKey.location(), error))
+                            .resultOrPartial(error -> ColdSweat.LOGGER.error("Error decoding JSON config setting in {}: {}", registryKey.identifier(), error))
                             .map(Pair::getFirst)
                             .ifPresent(configData ->
                             {   configData.setConfigType(ConfigData.Type.JSON);
@@ -888,7 +888,7 @@ public class ConfigLoadingHandler
                             });
                 } catch (Exception e)
                 {
-                    ColdSweat.LOGGER.error("Failed to parse JSON config setting in {}: {}", registryKey.location(), file.getName(), e);
+                    ColdSweat.LOGGER.error("Failed to parse JSON config setting in {}: {}", registryKey.identifier(), file.getName(), e);
                 }
             }
         }

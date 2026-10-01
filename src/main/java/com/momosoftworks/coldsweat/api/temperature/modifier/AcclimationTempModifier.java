@@ -28,7 +28,7 @@ public class AcclimationTempModifier extends TempModifier
             case FREEZING_POINT ->
             {
                 Pair<Double, Double> minAcclimationRange = ConfigSettings.MIN_ACCLIMATION_RANGE.get();
-                double minAcclimation = this.getNBT().getDouble("MinAcclimation");
+                double minAcclimation = this.getNBT().getDoubleOr("MinAcclimation", 0);
                 double acclimationDelta = tempFactor < -0.5 ? -acclimateSpeed
                                         : tempFactor < 0.5 ? acclimateSpeed / 2
                                         : acclimateSpeed;
@@ -39,12 +39,12 @@ public class AcclimationTempModifier extends TempModifier
                 double newMinAcclimation = CSMath.clamp(minAcclimation + acclimationDelta, lowerBound, upperBound);
                 this.getNBT().putDouble("MinAcclimation", newMinAcclimation);
 
-                return temp -> temp + this.getNBT().getDouble("MinAcclimation");
+                return temp -> temp + this.getNBT().getDoubleOr("MinAcclimation", 0);
             }
             case BURNING_POINT ->
             {
                 Pair<Double, Double> maxAcclimationRange = ConfigSettings.MAX_ACCLIMATION_RANGE.get();
-                double maxAcclimation = this.getNBT().getDouble("MaxAcclimation");
+                double maxAcclimation = this.getNBT().getDoubleOr("MaxAcclimation", 0);
                 double acclimationDelta = tempFactor > 0.5 ? acclimateSpeed
                                         : tempFactor > -0.5 ? -acclimateSpeed / 2
                                         : -acclimateSpeed;
@@ -55,7 +55,7 @@ public class AcclimationTempModifier extends TempModifier
                 double newMaxAcclimation = CSMath.clamp(maxAcclimation + acclimationDelta, lowerBound, upperBound);
                 this.getNBT().putDouble("MaxAcclimation", newMaxAcclimation);
 
-                return temp -> temp + this.getNBT().getDouble("MaxAcclimation");
+                return temp -> temp + this.getNBT().getDoubleOr("MaxAcclimation", 0);
             }
             default ->
             {   return temp -> temp;

@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.data.codec.requirement.sub_type;
 
+import com.momosoftworks.coldsweat.util.entity.EntityHelper;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -25,7 +26,7 @@ public class PiglinNeutralArmorRequirement implements EntitySubRequirement
     {
         if (entity instanceof LivingEntity living)
         {
-            for (ItemStack armor : living.getArmorSlots())
+            for (ItemStack armor : EntityHelper.getArmorItems(living))
             {
                 if (!armor.isEmpty() && armor.makesPiglinsNeutral(living))
                 {   return true;

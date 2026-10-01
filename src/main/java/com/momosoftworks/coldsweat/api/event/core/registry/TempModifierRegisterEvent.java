@@ -4,7 +4,7 @@ import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.util.exceptions.RegistryFailureException;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.Event;
 
 import java.lang.reflect.Constructor;
@@ -26,7 +26,7 @@ public class TempModifierRegisterEvent extends Event
      *
      * @param modifier the {@link TempModifier} to add.
      */
-    public void register(ResourceLocation id, Supplier<TempModifier> modifier)
+    public void register(Identifier id, Supplier<TempModifier> modifier)
     {   TempModifierRegistry.register(id, modifier);
     }
 
@@ -38,7 +38,7 @@ public class TempModifierRegisterEvent extends Event
      * @param classPath The path to the TempModifier class, e.g. "com.examplemod.TempModifier"
      * @param initArgs Arguments to pass to the TempModifier's constructor.
      */
-    public void registerByClassName(ResourceLocation id, String classPath, Object... initArgs)
+    public void registerByClassName(Identifier id, String classPath, Object... initArgs)
     {
         try
         {

@@ -30,7 +30,7 @@ public class ThermolithBlockEntity extends BlockEntity
 
     public void tick(Level level, BlockState state, BlockPos pos)
     {
-        if (level.getGameTime() % 20 == 0 && !level.isClientSide)
+        if (level.getGameTime() % 20 == 0 && !level.isClientSide())
         {
             // Handle signal output / neighbor updates
             double temperature = WorldHelper.getTemperatureAt(level, pos);

@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.common.fluid;
 
+import net.minecraft.server.level.ServerLevel;
 import com.momosoftworks.coldsweat.core.init.ModBlocks;
 import com.momosoftworks.coldsweat.core.init.ModFluids;
 import com.momosoftworks.coldsweat.core.init.ModItems;
@@ -43,7 +44,7 @@ public abstract class SlushFluid extends BaseFlowingFluid implements IClientFlui
         return BlockBehaviour.Properties.of()
                 .mapColor(MapColor.ICE)
                 .replaceable()
-                .noCollission()
+                .noCollision()
                 .randomTicks()
                 .strength(100.0F)
                 .pushReaction(PushReaction.DESTROY)
@@ -77,8 +78,8 @@ public abstract class SlushFluid extends BaseFlowingFluid implements IClientFlui
     }
 
     @Override
-    public boolean canConvertToSource(FluidState state, Level level, BlockPos pos)
-    {   return level.getGameRules().getBoolean(ModGameRules.RULE_SLUSH_SOURCE_CONVERSION);
+    public boolean canConvertToSource(FluidState state, ServerLevel level, BlockPos pos)
+    {   return level.getGameRules().get(ModGameRules.RULE_SLUSH_SOURCE_CONVERSION.get());
     }
 
     @Override
@@ -103,7 +104,7 @@ public abstract class SlushFluid extends BaseFlowingFluid implements IClientFlui
     {
         if (ilevel instanceof Level level)
         {
-            Vec3 centerPos = pos.getCenter();
+            Vec3 centerPos = Vec3.atCenterOf(pos);
             BlockParticleOption particleData = new BlockParticleOption(ParticleTypes.BLOCK, Blocks.SNOW_BLOCK.defaultBlockState());
             WorldHelper.spawnParticleBatch(level, particleData, centerPos.x, centerPos.y, centerPos.z, 0.6, 0.6, 0.6, 15, 0.1);
             level.playSound(null, pos, SoundEvents.SNOW_BREAK, SoundSource.BLOCKS);

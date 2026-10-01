@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.client.event;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import net.minecraft.util.ARGB;
+import net.minecraft.client.renderer.RenderPipelines;
 import com.mojang.blaze3d.vertex.*;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.temperature.modifier.WaterTempModifier;
@@ -9,22 +10,18 @@ import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.util.IntegerBounds;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.BiomeColors;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.material.Fluids;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RenderGuiEvent;
-import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector2i;
 import oshi.util.tuples.Triplet;
@@ -35,8 +32,8 @@ import java.util.List;
 @EventBusSubscriber(Dist.CLIENT)
 public class WetnessRenderer
 {
-    private static final ResourceLocation WATER_DROP = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/droplet.png");
-    private static final ResourceLocation WATER_DROP_TRAIL = ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/droplet_trail.png");
+    private static final Identifier WATER_DROP = Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/droplet.png");
+    private static final Identifier WATER_DROP_TRAIL = Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "textures/gui/overlay/droplet_trail.png");
     private static final List<Droplet> WATER_DROPS = new ArrayList<>();
     private static final List<Triplet<Vector2i, Float, Integer>> TRAILS = new ArrayList<>();
     private static boolean WAS_SUBMERGED = false;
@@ -59,7 +56,7 @@ public class WetnessRenderer
         if (!ConfigSettings.WATER_EFFECT_SETTING.get().showGui()) return;
 
         Minecraft mc = Minecraft.getInstance();
-        float frametime = mc.getTimer().getRealtimeDeltaTicks();
+        float frametime = mc.getDeltaTracker().getRealtimeDeltaTicks();
         int screenWidth = mc.getWindow().getGuiScaledWidth();
         int screenHeight = mc.getWindow().getGuiScaledHeight();
         boolean paused = mc.isPaused();
@@ -73,9 +70,8 @@ public class WetnessRenderer
 
         BlockPos playerPos = BlockPos.containing(player.getEyePosition());
         float playerYVelocity = (float) (player.position().y - player.yOld);
-        boolean isSubmerged = player.getEyeInFluidType() == Fluids.WATER.getFluidType();
+        boolean isSubmerged = player.isEyeInFluid(Fluids.WATER.getFluidType());
 
-        Minecraft.getInstance().gameRenderer.lightTexture().turnOnLightLayer();
 
         double midTemp = (ConfigSettings.MIN_TEMP.get() + ConfigSettings.MAX_TEMP.get()) / 2.0;
         float tempMult = (float) CSMath.blend(1, 3, Temperature.get(player, Temperature.Trait.WORLD), midTemp, ConfigSettings.MAX_TEMP.get() * 2);
@@ -121,29 +117,13 @@ public class WetnessRenderer
             WATER_DROPS.add(createDrop(screenWidth));
         }
 
-        int waterColor = BiomeColors.getAverageWaterColor(player.level(), playerPos);
+        int waterColor = BiomeColors.getAverageWaterColor(mc.level, playerPos);
 
-        // Setup rendering state
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.setShader(GameRenderer::getParticleShader);
+        GuiGraphicsExtractor graphics = event.getGuiGraphics();
 
-        GuiGraphics graphics = event.getGuiGraphics();
-        PoseStack poseStack = graphics.pose();
-        poseStack.pushPose();
-
-        // Get light level at player position for lighting calculation
-        int blockLight = player.level().getLightEngine().getLayerListener(LightLayer.BLOCK).getLightValue(playerPos);
-        int skyLight = player.level().getLightEngine().getLayerListener(LightLayer.SKY).getLightValue(playerPos);
-        int combinedLight = LightTexture.pack(blockLight, skyLight);
-
-        /*
-         Render Water Droplets
-         */
-        RenderSystem.setShaderTexture(0, WATER_DROP);
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-
-        BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
+        // Approximate the lightmap the droplets used to be rendered with
+        float brightness = player.level().getMaxLocalRawBrightness(playerPos) / 15f;
+        float lightFactor = 0.2f + 0.8f * brightness;
 
         // Handle rendering & movement of water drops
         for (int i = 0; i < WATER_DROPS.size(); i++)
@@ -157,8 +137,8 @@ public class WetnessRenderer
             if (alpha > 0)
             {
                 // Render the water drop with lighting
-                renderQuadDirect(poseStack, bufferBuilder, (int) CSMath.roundNearest(pos.x, 3f/uiScale), (int)pos.y,
-                                 scaledSize, scaledSize, 0, 0, 1, 1, alpha, combinedLight, waterColor);
+                renderQuad(graphics, WATER_DROP, (int) CSMath.roundNearest(pos.x, 3f/uiScale), (int)pos.y,
+                           scaledSize, scaledSize, alpha, lightFactor, waterColor);
 
                 // Update the drop's position and alpha
                 if (!paused)
@@ -218,18 +198,10 @@ public class WetnessRenderer
                 i--;
             }
         }
-        MeshData meshData = bufferBuilder.build();
-        if (meshData != null)
-        {   BufferUploader.drawWithShader(meshData);
-        }
-
 
         /*
          Render Droplet Trails
          */
-        RenderSystem.setShaderTexture(0, WATER_DROP_TRAIL);
-        bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
-
         for (int i = 0; i < TRAILS.size(); i++)
         {
             Triplet<Vector2i, Float, Integer> trail = TRAILS.get(i);
@@ -239,8 +211,8 @@ public class WetnessRenderer
 
             if (alpha > 0)
             {
-                renderQuadDirect(poseStack, bufferBuilder, (int) CSMath.roundNearest(pos.x, 3f/uiScale * 4), pos.y,
-                                 size / uiScale * 3, 1, 0, 0, 1, 1, alpha, combinedLight, waterColor);
+                renderQuad(graphics, WATER_DROP_TRAIL, (int) CSMath.roundNearest(pos.x, 3f/uiScale * 4), pos.y,
+                           size / uiScale * 3, 1, alpha, lightFactor, waterColor);
                 if (!paused)
                 {
                     if (wetness <= 0)
@@ -257,13 +229,6 @@ public class WetnessRenderer
                 i--;
             }
         }
-        meshData = bufferBuilder.build();
-        if (meshData != null)
-        {   BufferUploader.drawWithShader(meshData);
-        }
-        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-        Minecraft.getInstance().gameRenderer.lightTexture().turnOffLightLayer();
-        poseStack.popPose();
     }
 
     private static float getRandomVelocity(float frametime)
@@ -305,19 +270,16 @@ public class WetnessRenderer
     {   return side == Droplet.Side.LEFT ? LEFT_DROPLETS : RIGHT_DROPLETS;
     }
 
-    private static void renderQuadDirect(PoseStack poseStack, BufferBuilder buffer, int x, int y,
-                                         int width, int height, float u, float v, float uWidth, float vHeight,
-                                         float alpha, int lightLevel, int waterColor)
+    private static void renderQuad(GuiGraphicsExtractor graphics, Identifier texture, int x, int y, int width, int height,
+                                   float alpha, float lightFactor, int waterColor)
     {
         alpha *= ConfigSettings.WATER_DROPLET_OPACITY.get();
-        float red = (waterColor >> 16 & 255)/255f;
-        float green = (waterColor >> 8 & 255)/255f;
-        float blue = (waterColor & 255)/255f;
-        Matrix4f lastPose = poseStack.last().pose();
-        buffer.addVertex(lastPose, x, y, 0).setUv(u, v).setColor(red, green, blue, alpha).setLight(lightLevel);
-        buffer.addVertex(lastPose, x, y + height, 0).setUv(u, v + vHeight).setColor(red, green, blue, alpha).setLight(lightLevel);
-        buffer.addVertex(lastPose, x + width, y + height, 0).setUv(u + uWidth, v + vHeight).setColor(red, green, blue, alpha).setLight(lightLevel);
-        buffer.addVertex(lastPose, x + width, y, 0).setUv(u + uWidth, v).setColor(red, green, blue, alpha).setLight(lightLevel);
+        if (alpha <= 0 || width <= 0 || height <= 0) return;
+        float red = (waterColor >> 16 & 255) / 255f * lightFactor;
+        float green = (waterColor >> 8 & 255) / 255f * lightFactor;
+        float blue = (waterColor & 255) / 255f * lightFactor;
+        // Stretch the whole texture over the quad
+        graphics.blit(RenderPipelines.GUI_TEXTURED, texture, x, y, 0f, 0f, width, height, width, height, ARGB.colorFromFloat(Math.min(1, alpha), red, green, blue));
     }
 
     protected static class Droplet
@@ -325,7 +287,7 @@ public class WetnessRenderer
         public Vector2f position;
         public float alpha;
         public int size;
-        public float yMotion = getRandomVelocity(Minecraft.getInstance().getTimer().getRealtimeDeltaTicks() / 5);
+        public float yMotion = getRandomVelocity(Minecraft.getInstance().getDeltaTracker().getRealtimeDeltaTicks() / 5);
         public float xMotion = (float) Math.random() * 0.02f - 0.01f;
         public float xVelocity = 0;
         public float yMotionUpdateCooldown = (float) Math.random() * 16f + 8f;

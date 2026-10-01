@@ -45,7 +45,7 @@ public class SewingTableBlock extends Block implements MenuProvider
     @Override
     public InteractionResult useWithoutItem(BlockState state, Level worldIn, BlockPos pos, Player player, BlockHitResult rayTraceResult)
     {
-        if (worldIn.isClientSide)
+        if (worldIn.isClientSide())
         {   return InteractionResult.SUCCESS;
         }
         else

@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.core.event;
 
+import net.minecraft.world.entity.EntityTypes;
 import com.momosoftworks.coldsweat.api.event.core.init.EnableTemperatureEvent;
 import com.momosoftworks.coldsweat.api.event.vanilla.ServerConfigsLoadedEvent;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
@@ -33,15 +34,15 @@ public class AddTempAttributes
         @SubscribeEvent
         public static void addPlayerAttributes(EntityAttributeModificationEvent event)
         {
-            event.add(EntityType.PLAYER, ModAttributes.COLD_DAMPENING, Double.NaN);
-            event.add(EntityType.PLAYER, ModAttributes.HEAT_DAMPENING, Double.NaN);
-            event.add(EntityType.PLAYER, ModAttributes.COLD_RESISTANCE, Double.NaN);
-            event.add(EntityType.PLAYER, ModAttributes.HEAT_RESISTANCE, Double.NaN);
-            event.add(EntityType.PLAYER, ModAttributes.BURNING_POINT, Double.NaN);
-            event.add(EntityType.PLAYER, ModAttributes.FREEZING_POINT, Double.NaN);
-            event.add(EntityType.PLAYER, ModAttributes.BASE_BODY_TEMPERATURE, Double.NaN);
-            event.add(EntityType.PLAYER, ModAttributes.WORLD_TEMPERATURE, Double.NaN);
-            event.add(EntityType.PLAYER, ModAttributes.TEMP_RATE, Double.NaN);
+            event.add(EntityTypes.PLAYER, ModAttributes.COLD_DAMPENING, Double.NaN);
+            event.add(EntityTypes.PLAYER, ModAttributes.HEAT_DAMPENING, Double.NaN);
+            event.add(EntityTypes.PLAYER, ModAttributes.COLD_RESISTANCE, Double.NaN);
+            event.add(EntityTypes.PLAYER, ModAttributes.HEAT_RESISTANCE, Double.NaN);
+            event.add(EntityTypes.PLAYER, ModAttributes.BURNING_POINT, Double.NaN);
+            event.add(EntityTypes.PLAYER, ModAttributes.FREEZING_POINT, Double.NaN);
+            event.add(EntityTypes.PLAYER, ModAttributes.BASE_BODY_TEMPERATURE, Double.NaN);
+            event.add(EntityTypes.PLAYER, ModAttributes.WORLD_TEMPERATURE, Double.NaN);
+            event.add(EntityTypes.PLAYER, ModAttributes.TEMP_RATE, Double.NaN);
         }
     }
 
@@ -80,7 +81,7 @@ public class AddTempAttributes
             {   continue;
             }
 
-            if (type == EntityType.PLAYER) continue;
+            if (type == EntityTypes.PLAYER) continue;
 
             EnableTemperatureEvent enableEvent = new EnableTemperatureEvent(type);
             NeoForge.EVENT_BUS.post(enableEvent);

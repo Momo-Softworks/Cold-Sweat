@@ -1,5 +1,8 @@
 package com.momosoftworks.coldsweat.common.block;
 
+import javax.annotation.Nullable;
+import net.minecraft.world.entity.InsideBlockEffectApplier;
+import net.minecraft.world.level.redstone.Orientation;
 import com.momosoftworks.coldsweat.common.fluid.SlushFluid;
 import com.momosoftworks.coldsweat.data.tag.ModFluidTags;
 import net.minecraft.core.BlockPos;
@@ -23,12 +26,12 @@ public class SlushLiquidBlock extends LiquidBlock
     {   super(fluid.get(), properties);
     }
 
-    public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity)
+    public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier effectApplier, boolean isPrecise)
     {
         if (entity.canFreeze())
         {   entity.setIsInPowderSnow(true);
         }
-        super.entityInside(state, level, pos, entity);
+        super.entityInside(state, level, pos, entity, effectApplier, isPrecise);
     }
 
     @Override
@@ -41,7 +44,7 @@ public class SlushLiquidBlock extends LiquidBlock
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving)
+    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, @Nullable Orientation fromPos, boolean isMoving)
     {
         if (this.shouldFreeze(level, pos, state))
         {   return;

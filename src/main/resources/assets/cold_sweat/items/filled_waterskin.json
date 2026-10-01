@@ -1,0 +1,26 @@
+{
+  "model": {
+    "type": "minecraft:range_dispatch",
+    "property": "cold_sweat:water_temperature",
+    "entries": [
+      {
+        "threshold": -25.0,
+        "model": {
+          "type": "minecraft:model",
+          "model": "cold_sweat:item/filled_waterskin"
+        }
+      },
+      {
+        "threshold": 25.0,
+        "model": {
+          "type": "minecraft:model",
+          "model": "cold_sweat:item/waterskin/filled_waterskin_hot"
+        }
+      }
+    ],
+    "fallback": {
+      "type": "minecraft:model",
+      "model": "cold_sweat:item/waterskin/filled_waterskin_cold"
+    }
+  }
+}

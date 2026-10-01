@@ -1,9 +1,10 @@
 package com.momosoftworks.coldsweat.core.init;
 
+import net.minecraft.resources.ResourceKey;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.entity.Chameleon;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -16,5 +17,5 @@ public class ModEntities
     //chameleon
     public static final DeferredHolder<EntityType<?>, EntityType<Chameleon>> CHAMELEON = ENTITY_TYPES.register("chameleon",
                         () -> EntityType.Builder.of(Chameleon::new, MobCategory.CREATURE).sized(0.75f, 0.65f).eyeHeight(0.35f)
-                                                .build(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "chameleon").toString()));
+                                                .build(ResourceKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "chameleon"))));
 }

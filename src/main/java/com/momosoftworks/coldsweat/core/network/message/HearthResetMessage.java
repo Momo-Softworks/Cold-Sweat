@@ -1,5 +1,7 @@
 package com.momosoftworks.coldsweat.core.network.message;
 
+import net.minecraft.world.level.Level;
+import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import net.minecraft.client.Minecraft;
@@ -7,13 +9,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class HearthResetMessage implements CustomPacketPayload
 {
-    public static final CustomPacketPayload.Type<HearthResetMessage> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth_reset"));
+    public static final CustomPacketPayload.Type<HearthResetMessage> TYPE = new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "hearth_reset"));
     public static final StreamCodec<FriendlyByteBuf, HearthResetMessage> CODEC = CustomPacketPayload.codec(HearthResetMessage::encode, HearthResetMessage::decode);
 
     BlockPos blockPos;
@@ -34,7 +36,7 @@ public class HearthResetMessage implements CustomPacketPayload
     {
         context.enqueueWork(() ->
         {
-            BlockEntity te = Minecraft.getInstance().level.getBlockEntity(message.blockPos);
+            BlockEntity te = ClientOnlyHelper.getClientLevel().getBlockEntity(message.blockPos);
             if (te instanceof HearthBlockEntity hearth)
             {   hearth.resetPaths();
             }

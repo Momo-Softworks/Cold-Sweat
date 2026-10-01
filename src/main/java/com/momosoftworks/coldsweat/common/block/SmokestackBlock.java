@@ -1,5 +1,8 @@
 package com.momosoftworks.coldsweat.common.block;
 
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
 import com.momosoftworks.coldsweat.data.tag.ModItemTags;
 import com.momosoftworks.coldsweat.util.serialization.EnumHelper;
@@ -10,7 +13,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -66,7 +68,7 @@ public class SmokestackBlock extends Block implements SimpleWaterloggedBlock
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
+    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
     {
         if (!player.isCrouching())
         {
@@ -80,7 +82,7 @@ public class SmokestackBlock extends Block implements SimpleWaterloggedBlock
                     if (!player.isCreative())
                     {   stack.shrink(1);
                     }
-                    return ItemInteractionResult.CONSUME;
+                    return InteractionResult.CONSUME;
                 }
             }
         }
@@ -88,7 +90,7 @@ public class SmokestackBlock extends Block implements SimpleWaterloggedBlock
     }
 
     @Override
-    public boolean propagatesSkylightDown(BlockState state, BlockGetter level, BlockPos pos)
+    public boolean propagatesSkylightDown(BlockState state)
     {   return !state.getValue(ENCASED) && state.getValue(FACING) != Facing.BEND;
     }
 
@@ -127,7 +129,7 @@ public class SmokestackBlock extends Block implements SimpleWaterloggedBlock
     {   builder.add(FACING, END, BASE, ENCASED, WATERLOGGED);
     }
 
-    protected Facing calculateFacing(Facing facing, BlockPos pos, LevelAccessor level)
+    protected Facing calculateFacing(Facing facing, BlockPos pos, LevelReader level)
     {
         Direction newDir = null;
         for (Direction dir : Direction.values())
@@ -164,7 +166,7 @@ public class SmokestackBlock extends Block implements SimpleWaterloggedBlock
         return facing;
     }
 
-    protected BlockState calculateConnections(BlockState state, BlockPos pos, LevelAccessor level)
+    protected BlockState calculateConnections(BlockState state, BlockPos pos, LevelReader level)
     {
         Facing facing = state.getValue(FACING);
         if (facing == Facing.BEND)
@@ -194,23 +196,22 @@ public class SmokestackBlock extends Block implements SimpleWaterloggedBlock
         return state;
     }
 
-    protected BlockState updateFluid(LevelAccessor level, BlockState state, BlockPos pos)
+    protected BlockState updateFluid(LevelReader level, ScheduledTickAccess ticks, BlockState state, BlockPos pos)
     {
         if (state.getValue(FACING) == Facing.BEND || state.getValue(ENCASED))
         {   return state.setValue(WATERLOGGED, false);
         }
         if (state.getValue(WATERLOGGED))
-        {   level.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
+        {   ticks.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
         }
         return state;
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction neighborDir, BlockState neighborState,
-                                  LevelAccessor level, BlockPos pos, BlockPos neighborPos)
+    public BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos, Direction neighborDir, BlockPos neighborPos, BlockState neighborState, RandomSource random)
     {
         // Update fluid
-        state = this.updateFluid(level, state, pos);
+        state = this.updateFluid(level, ticks, state, pos);
         // Update facing direction
         Facing facing = calculateFacing(state.getValue(FACING), pos, level);
         state = state.setValue(FACING, facing);
@@ -237,19 +238,19 @@ public class SmokestackBlock extends Block implements SimpleWaterloggedBlock
     }
 
     @Override
-    public boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player, boolean willHarvest, FluidState fluid)
+    public boolean onDestroyedByPlayer(BlockState state, Level level, BlockPos pos, Player player, ItemStack toolStack, boolean willHarvest, FluidState fluid)
     {
         if (state.getValue(ENCASED))
         {
             // Update fluid
-            state = this.updateFluid(level, state, pos);
+            state = this.updateFluid(level, level, state, pos);
             // Replace with normal smokestack
             level.setBlock(pos, calculateConnections(state, pos, level).setValue(ENCASED, false), 3);
             level.addDestroyBlockEffect(pos, state);
             level.playSound(null, pos, this.getSoundType(state, level, pos, player).getBreakSound(), SoundSource.BLOCKS, 1f, 0.8f);
             return false;
         }
-        else return super.onDestroyedByPlayer(state, level, pos, player, willHarvest, fluid);
+        else return super.onDestroyedByPlayer(state, level, pos, player, toolStack, willHarvest, fluid);
     }
 
     public enum Facing implements StringRepresentable

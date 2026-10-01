@@ -1,17 +1,18 @@
 package com.momosoftworks.coldsweat.client.renderer.model.armor;
 
+import java.util.Set;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import com.momosoftworks.coldsweat.ColdSweat;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.resources.Identifier;
 
-public class HoglinChestplateModel<T extends LivingEntity> extends HumanoidModel<T>
+public class HoglinChestplateModel extends HumanoidModel<HumanoidRenderState>
 {
-    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hoglin_chestplate"), "main");
+    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "hoglin_chestplate"), "main");
 
     public HoglinChestplateModel(ModelPart root)
     {   super(root);
@@ -45,6 +46,9 @@ public class HoglinChestplateModel<T extends LivingEntity> extends HumanoidModel
                                      .texOffs(24, 112).mirror().addBox(8.75F, -23.75F, -2.0F, 4.0F, 12.0F, 4.0F, new CubeDeformation(scale, scale * 1.5f, scale)).mirror(false)
                                      .texOffs(2, 90).mirror().addBox(9.0F, -28F, 0.0F, 7.0F, 6.0F, 0.0F, new CubeDeformation(scale, scale, 0)).mirror(false),
                                                                 PartPose.offset(-13.25F, 22.0F, 0.0F));
+
+        // Only render the parts for this armor slot
+        meshdefinition.getRoot().retainPartsAndChildren(Set.of("body", "left_arm", "right_arm"));
 
         return LayerDefinition.create(meshdefinition, 64, 128);
     }

@@ -1,23 +1,34 @@
 package com.momosoftworks.coldsweat.client.renderer.model.armor;
 
+import com.momosoftworks.coldsweat.util.math.CSMath;
+import java.util.Set;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import com.momosoftworks.coldsweat.ColdSweat;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.resources.Identifier;
 
-public class GoatChestplateModel<T extends LivingEntity> extends HumanoidModel<T>
+public class GoatChestplateModel extends HumanoidModel<HumanoidRenderState>
 {
-    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "goat_parka"), "main");
+    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "goat_parka"), "main");
 
     ModelPart fluff;
 
     public GoatChestplateModel(ModelPart root)
     {   super(root);
         this.fluff = root.getChild("body").getChild("fluff");
+    }
+
+    @Override
+    public void setupAnim(HumanoidRenderState state)
+    {
+        super.setupAnim(state);
+        // Fluff tilts with the wearer's head pitch
+        this.fluff.xRot = CSMath.toRadians(CSMath.clamp(state.xRot, 0, 60f)) / 2;
+        this.fluff.x = this.fluff.zRot * 2;
     }
 
     public static LayerDefinition createArmorLayer() {
@@ -44,6 +55,9 @@ public class GoatChestplateModel<T extends LivingEntity> extends HumanoidModel<T
         PartDefinition left_sleeve = left_arm.addOrReplaceChild("left_sleeve", CubeListBuilder.create()
                               .texOffs(0, 80).mirror().addBox(8.75F, -23.75F, -2.0F, 4.0F, 12.0F, 4.0F,
                                                              new CubeDeformation(scale, scale * 1.5f, scale)).mirror(false), PartPose.offset(-9.5F, 22.0F, 0.0F));
+
+        // Only render the parts for this armor slot
+        meshdefinition.getRoot().retainPartsAndChildren(Set.of("body", "left_arm", "right_arm"));
 
         return LayerDefinition.create(meshdefinition, 64, 128);
     }

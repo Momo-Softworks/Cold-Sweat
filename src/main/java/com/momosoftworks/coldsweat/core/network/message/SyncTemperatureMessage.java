@@ -1,5 +1,7 @@
 package com.momosoftworks.coldsweat.core.network.message;
 
+import net.minecraft.world.level.Level;
+import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.gui.Overlays;
@@ -11,13 +13,13 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public class SyncTemperatureMessage implements CustomPacketPayload
 {
-    public static final CustomPacketPayload.Type<SyncTemperatureMessage> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "sync_temperature"));
+    public static final CustomPacketPayload.Type<SyncTemperatureMessage> TYPE = new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "sync_temperature"));
     public static final StreamCodec<FriendlyByteBuf, SyncTemperatureMessage> CODEC = CustomPacketPayload.codec(SyncTemperatureMessage::encode, SyncTemperatureMessage::decode);
 
     int entityId;
@@ -50,7 +52,7 @@ public class SyncTemperatureMessage implements CustomPacketPayload
     {
         context.enqueueWork(() ->
         {
-            LivingEntity entity = (LivingEntity) Minecraft.getInstance().level.getEntity(message.entityId);
+            LivingEntity entity = (LivingEntity) ClientOnlyHelper.getClientLevel().getEntity(message.entityId);
 
             if (entity != null)
             {

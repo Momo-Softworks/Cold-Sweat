@@ -21,7 +21,7 @@ public class WaterTempModifier extends TempModifier
     }
 
     public double getTemperature()
-    {   return this.getNBT().getDouble("Temperature");
+    {   return this.getNBT().getDoubleOr("Temperature", 0);
     }
 
     public void setTemperature(double temperature)
@@ -91,7 +91,7 @@ public class WaterTempModifier extends TempModifier
             double randZ = entity.getBbWidth() * (Math.random() - 0.5);
             entity.level().addParticle(ParticleTypes.FALLING_WATER, entity.getX() + randX, entity.getY() + randY, entity.getZ() + randZ, 0, 0, 0);
         }
-        if (!entity.level().isClientSide && entity.isOnFire())
+        if (!entity.level().isClientSide() && entity.isOnFire())
         {
             this.setTemperature(CSMath.shrink(this.getTemperature(),  0.1));
             entity.clearFire();

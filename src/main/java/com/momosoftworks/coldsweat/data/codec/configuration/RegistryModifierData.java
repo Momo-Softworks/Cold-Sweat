@@ -14,7 +14,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,10 +28,10 @@ public class RegistryModifierData<T extends ConfigData> extends ConfigData
     private final ResourceKey<Registry<T>> registry;
     private final List<ConfigData.Type> registryTypes;
     private final NegatableList<NbtRequirement> matches;
-    private final List<ResourceLocation> entries;
+    private final List<Identifier> entries;
     private final List<Operation> operations;
 
-    public RegistryModifierData(ResourceKey<Registry<T>> registry, List<ConfigData.Type> registryTypes, NegatableList<NbtRequirement> matches, List<ResourceLocation> entries, List<Operation> operations)
+    public RegistryModifierData(ResourceKey<Registry<T>> registry, List<ConfigData.Type> registryTypes, NegatableList<NbtRequirement> matches, List<Identifier> entries, List<Operation> operations)
     {
         super(new NegatableList<>());
         this.registry = registry;
@@ -45,10 +45,10 @@ public class RegistryModifierData<T extends ConfigData> extends ConfigData
                                                                           .xmap(either -> either.map(List::of, r -> r), Either::right);
 
     public static final Codec<RegistryModifierData<?>> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ResourceLocation.CODEC.xmap(s -> (ResourceKey)ModRegistries.getRegistryKey(s), key -> key.location()).fieldOf("registry").forGetter(data -> data.registry()),
+            Identifier.CODEC.xmap(s -> (ResourceKey)ModRegistries.getRegistryKey(s), key -> key.identifier()).fieldOf("registry").forGetter(data -> data.registry()),
             CONFIG_TYPE_CODEC.optionalFieldOf("config_type", List.of()).forGetter(RegistryModifierData::configTypes),
             NegatableList.listCodec(NbtRequirement.CODEC).optionalFieldOf("matches", new NegatableList<>()).forGetter(RegistryModifierData::matches),
-            ResourceLocation.CODEC.listOf().optionalFieldOf("entries", List.of()).forGetter(RegistryModifierData::entries),
+            Identifier.CODEC.listOf().optionalFieldOf("entries", List.of()).forGetter(RegistryModifierData::entries),
             Operation.CODEC.listOf().optionalFieldOf("operations", List.of()).forGetter(data -> data.operations)
     ).apply(instance, RegistryModifierData::new));
 
@@ -61,7 +61,7 @@ public class RegistryModifierData<T extends ConfigData> extends ConfigData
     public NegatableList<NbtRequirement> matches()
     {   return matches;
     }
-    public List<ResourceLocation> entries()
+    public List<Identifier> entries()
     {   return entries;
     }
     public List<Operation> modifications()
@@ -92,7 +92,7 @@ public class RegistryModifierData<T extends ConfigData> extends ConfigData
         {   return false;
         }
         // Check if object ID is in the entries list
-        ResourceLocation key = holder.unwrapKey().map(ResourceKey::location).orElse(null);
+        Identifier key = holder.unwrapKey().map(ResourceKey::identifier).orElse(null);
         if (key != null && entries.contains(key))
         {   return true;
         }
@@ -164,7 +164,7 @@ public class RegistryModifierData<T extends ConfigData> extends ConfigData
                 }
                 case REPLACE ->
                 {
-                    for (String key : this.data.getAllKeys())
+                    for (String key : this.data.keySet())
                     {
                         if (elementTag.contains(key))
                         {   elementTag.put(key, data.get(key));
@@ -196,7 +196,7 @@ public class RegistryModifierData<T extends ConfigData> extends ConfigData
         private static CompoundTag mergeCompounds(CompoundTag original, CompoundTag toMerge)
         {
             CompoundTag merged = original.copy();
-            for (String key : toMerge.getAllKeys())
+            for (String key : toMerge.keySet())
             {
                 Tag originalValue = merged.get(key);
                 Tag toMergeValue = toMerge.get(key);
@@ -208,11 +208,11 @@ public class RegistryModifierData<T extends ConfigData> extends ConfigData
                     else if (originalValue instanceof ListTag originalList && toMergeValue instanceof ListTag toMergeList)
                     {   merged.put(key, mergeLists(originalList, toMergeList));
                     }
-                    else if (originalValue instanceof NumericTag originalNumber && toMergeValue instanceof StringTag operation && operation.getAsString().length() > 2)
+                    else if (originalValue instanceof NumericTag originalNumber && toMergeValue instanceof StringTag operation && operation.value().length() > 2)
                     {
-                        double operand = Double.parseDouble(operation.getAsString().substring(2));
-                        double numberValue = originalNumber.getAsDouble();
-                        switch (operation.getAsString().substring(0, 2))
+                        double operand = Double.parseDouble(operation.value().substring(2));
+                        double numberValue = originalNumber.doubleValue();
+                        switch (operation.value().substring(0, 2))
                         {
                             case "+=" -> numberValue += operand;
                             case "-=" -> numberValue -= operand;
@@ -245,9 +245,9 @@ public class RegistryModifierData<T extends ConfigData> extends ConfigData
         {
             Set<Tag> merged = new HashSet<>(original.copy());
             merged.addAll(toMerge);
-            return new ListTag()
-            {{  this.addAll(merged);
-            }};
+            ListTag list = new ListTag();
+            list.addAll(merged);
+            return list;
         }
 
         /**
@@ -258,7 +258,7 @@ public class RegistryModifierData<T extends ConfigData> extends ConfigData
         private static CompoundTag appendCompound(CompoundTag original, CompoundTag toAppend)
         {
             CompoundTag appended = original.copy();
-            for (String key : toAppend.getAllKeys())
+            for (String key : toAppend.keySet())
             {
                 Tag originalValue = appended.get(key);
                 Tag toAppendValue = toAppend.get(key);
@@ -275,7 +275,7 @@ public class RegistryModifierData<T extends ConfigData> extends ConfigData
         private static CompoundTag removeCompound(CompoundTag original, CompoundTag toRemove)
         {
             CompoundTag modified = original.copy();
-            for (String key : toRemove.getAllKeys())
+            for (String key : toRemove.keySet())
             {
                 Tag originalValue = modified.get(key);
                 Tag toRemoveValue = toRemove.get(key);

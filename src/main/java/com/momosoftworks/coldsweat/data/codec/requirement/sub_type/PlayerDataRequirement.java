@@ -13,7 +13,9 @@ import com.momosoftworks.coldsweat.util.entity.EntityHelper;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.CriterionProgress;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.StatType;
@@ -32,8 +34,8 @@ import java.util.Map;
 import java.util.Optional;
 
 public record PlayerDataRequirement(IntegerBounds level, Optional<GameType> gameType, NegatableList<StatRequirement> stats,
-                                    Optional<Map<ResourceLocation, Boolean>> recipes,
-                                    Optional<Map<ResourceLocation, Either<AdvancementCompletionRequirement, AdvancementCriteriaRequirement>>> advancements,
+                                    Optional<Map<Identifier, Boolean>> recipes,
+                                    Optional<Map<Identifier, Either<AdvancementCompletionRequirement, AdvancementCriteriaRequirement>>> advancements,
                                     EntityRequirement lookingAt) implements EntitySubRequirement, RequirementHolder
 {
     @Override
@@ -47,8 +49,8 @@ public record PlayerDataRequirement(IntegerBounds level, Optional<GameType> game
                 IntegerBounds.CODEC.optionalFieldOf("level", IntegerBounds.NONE).forGetter(requirement -> requirement.level),
                 GameType.CODEC.optionalFieldOf("game_mode").forGetter(PlayerDataRequirement::gameType),
                 NegatableList.listCodec(StatRequirement.CODEC).optionalFieldOf("stats", new NegatableList<>()).forGetter(PlayerDataRequirement::stats),
-                Codec.unboundedMap(ResourceLocation.CODEC, Codec.BOOL).optionalFieldOf("recipes").forGetter(PlayerDataRequirement::recipes),
-                Codec.unboundedMap(ResourceLocation.CODEC, Codec.either(AdvancementCompletionRequirement.CODEC, AdvancementCriteriaRequirement.CODEC)).optionalFieldOf("advancements").forGetter(PlayerDataRequirement::advancements),
+                Codec.unboundedMap(Identifier.CODEC, Codec.BOOL).optionalFieldOf("recipes").forGetter(PlayerDataRequirement::recipes),
+                Codec.unboundedMap(Identifier.CODEC, Codec.either(AdvancementCompletionRequirement.CODEC, AdvancementCriteriaRequirement.CODEC)).optionalFieldOf("advancements").forGetter(PlayerDataRequirement::advancements),
                 lastCodec.optionalFieldOf("looking_at", EntityRequirement.NONE).forGetter(PlayerDataRequirement::lookingAt)
         ).apply(instance, PlayerDataRequirement::new));
     }
@@ -70,18 +72,18 @@ public record PlayerDataRequirement(IntegerBounds level, Optional<GameType> game
         }
         if (recipes.isPresent())
         {
-            for (Map.Entry<ResourceLocation, Boolean> entry : recipes.get().entrySet())
+            for (Map.Entry<Identifier, Boolean> entry : recipes.get().entrySet())
             {
-                if (serverPlayer.getRecipeBook().contains(entry.getKey()) != entry.getValue())
+                if (serverPlayer.getRecipeBook().contains(ResourceKey.create(Registries.RECIPE, entry.getKey())) != entry.getValue())
                 {   return false;
                 }
             }
         }
         if (advancements.isPresent())
         {
-            for (Map.Entry<ResourceLocation, Either<AdvancementCompletionRequirement, AdvancementCriteriaRequirement>> entry : advancements.get().entrySet())
+            for (Map.Entry<Identifier, Either<AdvancementCompletionRequirement, AdvancementCriteriaRequirement>> entry : advancements.get().entrySet())
             {
-                AdvancementProgress progress = serverPlayer.getAdvancements().getOrStartProgress(serverPlayer.getServer().getAdvancements().get(entry.getKey()));
+                AdvancementProgress progress = serverPlayer.getAdvancements().getOrStartProgress(serverPlayer.level().getServer().getAdvancements().get(entry.getKey()));
                 if (entry.getValue().map(complete -> complete.test(progress), criteria -> criteria.test(progress)))
                 {   return false;
                 }
@@ -124,16 +126,16 @@ public record PlayerDataRequirement(IntegerBounds level, Optional<GameType> game
             && lookingAt.equals(that.lookingAt);
     }
 
-    public record StatRequirement(StatType<?> type, ResourceLocation statId, Stat<?> stat, IntegerBounds value)
+    public record StatRequirement(StatType<?> type, Identifier statId, Stat<?> stat, IntegerBounds value)
     {
         public static final Codec<StatRequirement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 BuiltInRegistries.STAT_TYPE.byNameCodec().fieldOf("type").forGetter(stat -> stat.type),
-                ResourceLocation.CODEC.fieldOf("stat").forGetter(stat -> stat.statId),
+                Identifier.CODEC.fieldOf("stat").forGetter(stat -> stat.statId),
                 IntegerBounds.CODEC.fieldOf("value").forGetter(stat -> stat.value)
         ).apply(instance, StatRequirement::new));
 
-        public StatRequirement(StatType<?> type, ResourceLocation statId, IntegerBounds value)
-        {   this(type, statId, (Stat<?>) type.getRegistry().get(statId), value);
+        public StatRequirement(StatType<?> type, Identifier statId, IntegerBounds value)
+        {   this(type, statId, (Stat<?>) type.getRegistry().getValue(statId), value);
         }
 
         public StatType<?> type()

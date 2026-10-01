@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.common.block;
 
+import net.minecraft.world.level.ScheduledTickAccess;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ModBlocks;
 import com.momosoftworks.coldsweat.data.tag.ModBlockTags;
@@ -22,7 +23,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -77,7 +77,7 @@ public class SoulStalkBlock extends Block
                 .randomTicks()
                 .lightLevel(state -> state.getValue(SECTION).hasFruit() ? 4 : 0)
                 .noOcclusion()
-                .noCollission();
+                .noCollision();
     }
 
     public static Item.Properties getItemProperties()
@@ -88,7 +88,7 @@ public class SoulStalkBlock extends Block
     @SubscribeEvent
     public static void registerDispenserBehaviors(ServerStartedEvent event)
     {
-        for (Holder<Item> item : BuiltInRegistries.ITEM.getTag(ModItemTags.GROWS_SOUL_STALK).get())
+        for (Holder<Item> item : BuiltInRegistries.ITEM.get(ModItemTags.GROWS_SOUL_STALK).get())
         {   DispenserBlock.registerBehavior(item.value(), GROWABLE_DISPENSE_BEHAVIOR);
         }
     }
@@ -156,10 +156,10 @@ public class SoulStalkBlock extends Block
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
+    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult)
     {
         ItemStack holding = player.getItemInHand(hand);
-        if (!level.isClientSide && holding.is(ModItemTags.GROWS_SOUL_STALK))
+        if (!level.isClientSide() && holding.is(ModItemTags.GROWS_SOUL_STALK))
         {
             if (getHeight(level, pos) >= MAX_HEIGHT)
             {   return super.useItemOn(stack, state, level, pos, player, hand, rayTraceResult);
@@ -180,7 +180,7 @@ public class SoulStalkBlock extends Block
             else
             {   level.playSound(null, pos, SoundEvents.WEEPING_VINES_PLACE, SoundSource.BLOCKS, 0.6f, 1.5f);
             }
-            return ItemInteractionResult.CONSUME;
+            return InteractionResult.CONSUME;
         }
         return super.useItemOn(stack, state, level, pos, player, hand, rayTraceResult);
     }
@@ -258,7 +258,7 @@ public class SoulStalkBlock extends Block
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState otherState, LevelAccessor level, BlockPos pos, BlockPos otherPos)
+    public BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos, Direction direction, BlockPos otherPos, BlockState otherState, RandomSource random)
     {
         if (level.isClientSide()) return state;
         if (!this.canSurvive(state, level, pos))
@@ -292,7 +292,9 @@ public class SoulStalkBlock extends Block
                 }
             }
         }
-        this.ensureProperState(level, pos);
+        if (level instanceof LevelAccessor accessor)
+        {   this.ensureProperState(accessor, pos);
+        }
         return state;
     }
 

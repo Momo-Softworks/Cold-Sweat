@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.core.network.message;
 
+import net.minecraft.server.permissions.Permissions;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.config.spec.EntitySettingsConfig;
@@ -13,7 +14,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 
@@ -22,7 +23,7 @@ import java.util.UUID;
 
 public class SyncConfigSettingsMessage implements CustomPacketPayload
 {
-    public static final CustomPacketPayload.Type<SyncConfigSettingsMessage> TYPE = new CustomPacketPayload.Type<>(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "sync_config_settings"));
+    public static final CustomPacketPayload.Type<SyncConfigSettingsMessage> TYPE = new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "sync_config_settings"));
     public static final StreamCodec<FriendlyByteBuf, SyncConfigSettingsMessage> CODEC = CustomPacketPayload.codec(SyncConfigSettingsMessage::encode, SyncConfigSettingsMessage::decode);
 
     CompoundTag configValues;
@@ -60,7 +61,7 @@ public class SyncConfigSettingsMessage implements CustomPacketPayload
 
             if (context.flow().isServerbound())
             {
-                if (context.player().hasPermissions(2))
+                if (context.player().permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
                 {
                     ConfigSettings.decode(message.configValues);
                     ConfigSettings.saveValues(registryAccess);

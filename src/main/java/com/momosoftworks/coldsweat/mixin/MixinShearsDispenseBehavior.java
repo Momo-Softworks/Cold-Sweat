@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ShearsDispenseItemBehavior.class)
 public class MixinShearsDispenseBehavior
 {
-    @Inject(method = "tryShearLivingEntity", at = @At("TAIL"), cancellable = true)
+    @Inject(method = "tryShearEntity", at = @At("TAIL"), cancellable = true)
     private static void tryShearFurCapability(ServerLevel level, BlockPos pos, ItemStack stack, CallbackInfoReturnable<Boolean> cir)
     {
         boolean success = false;

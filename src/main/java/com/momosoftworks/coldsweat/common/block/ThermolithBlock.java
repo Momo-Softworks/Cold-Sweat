@@ -1,10 +1,11 @@
 package com.momosoftworks.coldsweat.common.block;
 
+import net.minecraft.server.level.ServerLevel;
 import com.momosoftworks.coldsweat.common.blockentity.ThermolithBlockEntity;
 import com.momosoftworks.coldsweat.core.init.ModBlockEntities;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.ParticleStatus;
+import net.minecraft.server.level.ParticleStatus;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.DustParticleOptions;
@@ -21,7 +22,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -34,7 +35,7 @@ import java.util.function.ToIntFunction;
 
 public class ThermolithBlock extends Block implements EntityBlock
 {
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
     private static final Map<Direction, VoxelShape> SHAPES = new HashMap<>();
 
@@ -138,11 +139,10 @@ public class ThermolithBlock extends Block implements EntityBlock
     {   return true;
     }
 
-    @SuppressWarnings("deprecation")
     @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved)
+    protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel level, BlockPos pos, boolean movedByPiston)
     {
-        super.onRemove(state, level, pos, newState, moved);
+        super.affectNeighborsAfterRemoval(state, level, pos, movedByPiston);
         ThermolithBlock.updateFacingNeighbors(level, state, pos);
     }
 
@@ -169,12 +169,12 @@ public class ThermolithBlock extends Block implements EntityBlock
             // nextInt ensures particles don't spawn inside the block
             double pX = xAxis ? random.nextInt(2) * 0.8 + offset: 0.5;
             double pZ = xAxis ? 0.5 : random.nextInt(2) * 0.8 + offset;
-            level.addParticle(new DustParticleOptions(Vec3.fromRGB24(4895036).toVector3f(), random.nextFloat() * 0.5f + 0.5f), pos.getX() + pX, pos.getY() + pY, pos.getZ() + pZ, 0, 0, 0);
+            level.addParticle(new DustParticleOptions(4895036, random.nextFloat() * 0.5f + 0.5f), pos.getX() + pX, pos.getY() + pY, pos.getZ() + pZ, 0, 0, 0);
 
             if (random.nextDouble() < 0.5)
             {   float rX = xAxis ? (float) (Math.random()) * 0.8f + offset : 0.5f;
                 float rZ = xAxis ? 0.5f : (float) (Math.random()) * 0.8f + offset;
-                level.addParticle(new DustParticleOptions(Vec3.fromRGB24(4895036).toVector3f(), random.nextFloat() * 0.5f + 0.5f), pos.getX() + rX, pos.getY() + 1.05, pos.getZ() + rZ, 0, 0, 0);
+                level.addParticle(new DustParticleOptions(4895036, random.nextFloat() * 0.5f + 0.5f), pos.getX() + rX, pos.getY() + 1.05, pos.getZ() + rZ, 0, 0, 0);
             }
         }
     }

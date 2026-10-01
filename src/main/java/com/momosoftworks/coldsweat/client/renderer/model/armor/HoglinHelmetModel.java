@@ -1,17 +1,18 @@
 package com.momosoftworks.coldsweat.client.renderer.model.armor;
 
+import java.util.Set;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import com.momosoftworks.coldsweat.ColdSweat;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.resources.Identifier;
 
-public class HoglinHelmetModel<T extends LivingEntity> extends HumanoidModel<T>
+public class HoglinHelmetModel extends HumanoidModel<HumanoidRenderState>
 {
-    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "hoglin_helmet"), "main");
+    public static final ModelLayerLocation LAYER_LOCATION = new ModelLayerLocation(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "hoglin_helmet"), "main");
 
     public HoglinHelmetModel(ModelPart root)
     {   super(root);
@@ -40,6 +41,9 @@ public class HoglinHelmetModel<T extends LivingEntity> extends HumanoidModel<T>
         PartDefinition headpiece = mainHead.addOrReplaceChild("headpiece", CubeListBuilder.create()
                 .texOffs(0, 64).addBox(-5.0F, -6.5F, -1.5F, 10.0F, 13.0F, 13.0F,
                                         new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -9.5717F, -2.1651F, -1.5708F, 0.0F, 0.0F));
+
+        // Only render the parts for this armor slot
+        meshdefinition.getRoot().retainPartsAndChildren(Set.of("head"));
 
         return LayerDefinition.create(meshdefinition, 64, 128);
     }

@@ -1,20 +1,14 @@
 {
   "type": "minecraft:crafting_shaped",
-  "pattern":
-  [
+  "pattern": [
     "FFF",
     "F F",
     "F F"
   ],
-  "key":
-  {
-    "F":
-    {
-      "tag": "c:furs/goat"
-    }
+  "key": {
+    "F": "#c:furs/goat"
   },
-  "result":
-  {
+  "result": {
     "id": "cold_sweat:goat_fur_leggings",
     "count": 1
   }

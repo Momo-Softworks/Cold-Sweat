@@ -5,7 +5,7 @@ import com.momosoftworks.coldsweat.core.advancement.trigger.ArmorInsulatedTrigge
 import com.momosoftworks.coldsweat.core.advancement.trigger.BlockAffectTempTrigger;
 import com.momosoftworks.coldsweat.core.advancement.trigger.SoulLampFueledTrigger;
 import com.momosoftworks.coldsweat.core.advancement.trigger.TemperatureChangedTrigger;
-import net.minecraft.advancements.CriterionTrigger;
+import net.minecraft.advancements.triggers.CriterionTrigger;
 import net.minecraft.core.registries.Registries;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;

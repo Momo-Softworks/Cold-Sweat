@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.common.event;
 
+import com.momosoftworks.coldsweat.util.entity.EntityHelper;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.common.insulation.InsulationTickEvent;
@@ -18,7 +19,7 @@ import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.data.codec.impl.RequirementHolder;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
 import net.minecraft.advancements.AdvancementHolder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -30,7 +31,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Equipable;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -53,7 +54,7 @@ public class ProcessEquipmentInsulation
     {
         Player player = event.getEntity();
         if (player instanceof ServerPlayer serverPlayer
-        && player.tickCount % 20 == 0 && !player.level().isClientSide)
+        && player.tickCount % 20 == 0 && !player.level().isClientSide())
         {
             AtomicInteger fullyInsulatedSlots = new AtomicInteger(0);
             Map<String, Double> armorInsulation = new HashMap<>();
@@ -62,9 +63,9 @@ public class ProcessEquipmentInsulation
             double minTemp = Temperature.get(player, Temperature.Trait.FREEZING_POINT);
             double maxTemp = Temperature.get(player, Temperature.Trait.BURNING_POINT);
 
-            for (ItemStack armorStack : player.getArmorSlots())
+            for (ItemStack armorStack : EntityHelper.getArmorItems(player))
             {
-                if (armorStack.getItem() instanceof Equipable)
+                if (armorStack.has(DataComponents.EQUIPPABLE))
                 {
                     // Add the armor's built-in insulation value
                     applyBuiltinArmorInsulation(armorInsulation, armorStack, player, worldTemp, minTemp, maxTemp);
@@ -111,9 +112,9 @@ public class ProcessEquipmentInsulation
             // Award advancement for full insulation
             if (fullyInsulatedSlots.get() >= 4)
             {
-                if (serverPlayer.getServer() != null)
+                if (serverPlayer.level().getServer() != null)
                 {
-                    AdvancementHolder advancement = serverPlayer.getServer().getAdvancements().get(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "full_insulation"));
+                    AdvancementHolder advancement = serverPlayer.level().getServer().getAdvancements().get(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "full_insulation"));
                     if (advancement != null)
                     {   serverPlayer.getAdvancements().award(advancement, "requirement");
                     }

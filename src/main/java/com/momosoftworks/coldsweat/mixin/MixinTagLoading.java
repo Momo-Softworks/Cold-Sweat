@@ -1,84 +1,65 @@
 package com.momosoftworks.coldsweat.mixin;
 
-import com.mojang.datafixers.util.Either;
 import com.momosoftworks.coldsweat.api.event.core.init.InitDynamicTagsEvent;
-import com.momosoftworks.coldsweat.mixin_interface.RegistryTagLoader;
-import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.RegistryLoadTask;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.tags.TagEntry;
+import net.minecraft.tags.TagKey;
 import net.minecraft.tags.TagLoader;
-import net.minecraft.tags.TagManager;
-import net.neoforged.neoforge.common.NeoForge;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
+import java.util.Optional;
 
+/**
+ * Fires {@link InitDynamicTagsEvent} whenever a registry's tags are loaded.
+ */
 @Mixin(TagLoader.class)
-public class MixinTagLoading<T> implements RegistryTagLoader<T>
+public class MixinTagLoading
 {
+    /** The registry whose tags are currently being reloaded on this thread */
     @Unique
-    private Registry<T> registry;
-    @Unique
-    private final Map<ResourceLocation, Collection<Holder<T>>> tags = new HashMap<>();
-    @Unique
-    private ResourceLocation currentTag = null;
+    private static final ThreadLocal<Registry<?>> COLD_SWEAT$LOADING_REGISTRY = new ThreadLocal<>();
 
-    @Mixin(TagManager.class)
-    public static final class Manager
+    // Static/reloadable registries (blocks, items, etc.)
+    @Inject(method = "loadPendingTags", at = @At("HEAD"))
+    private static void storeLoadingRegistry(ResourceManager manager, Registry<?> registry, CallbackInfoReturnable<Optional<?>> cir)
+    {   COLD_SWEAT$LOADING_REGISTRY.set(registry);
+    }
+
+    @Inject(method = "loadPendingTags", at = @At("RETURN"))
+    private static void clearLoadingRegistry(ResourceManager manager, Registry<?> registry, CallbackInfoReturnable<Optional<?>> cir)
+    {   COLD_SWEAT$LOADING_REGISTRY.remove();
+    }
+
+    @ModifyVariable(method = "wrapTags", at = @At("HEAD"), argsOnly = true)
+    private static Map<Identifier, List<Holder<Object>>> addDynamicTags(Map<Identifier, List<Holder<Object>>> tags)
     {
-        @Inject(method = "createLoader", at = @At("RETURN"), locals = LocalCapture.CAPTURE_FAILHARD)
-        public <V> void injectLoaderRegistry(ResourceManager pResourceManager, Executor pBackgroundExecutor, RegistryAccess.RegistryEntry<V> pEntry, CallbackInfoReturnable<CompletableFuture<TagManager.LoadResult<V>>> cir,
-                                             // locals
-                                             ResourceKey<? extends Registry<V>> resourcekey, Registry<V> registry, TagLoader<Holder<V>> tagloader)
-        {
-            ((RegistryTagLoader) tagloader).setRegistry(registry);
-        }
+        Registry<Object> registry = (Registry<Object>) COLD_SWEAT$LOADING_REGISTRY.get();
+        if (registry == null) return tags;
+        return InitDynamicTagsEvent.applyDynamicTags(registry, tags);
     }
 
-    @Override
-    public Registry<T> getRegistry()
-    {   return registry;
-    }
-    @Override
-    public void setRegistry(Registry<T> registry)
-    {   this.registry = registry;
-    }
-
-    @Inject(method = "build(Lnet/minecraft/tags/TagEntry$Lookup;Ljava/util/List;)Lcom/mojang/datafixers/util/Either;", at = @At("RETURN"), cancellable = true)
-    private void onBuildStart(TagEntry.Lookup<Holder<T>> p_215979_, List<TagLoader.EntryWithSource> p_215980_, CallbackInfoReturnable<Either<Collection<TagLoader.EntryWithSource>, Collection<Holder<T>>>> cir)
+    // Datapack (dynamic) registries (dimension types, biomes, etc.)
+    @Mixin(RegistryLoadTask.class)
+    public static abstract class DynamicRegistries<T>
     {
-        Either<Collection<TagLoader.EntryWithSource>, Collection<Holder<T>>> list = cir.getReturnValue();
-        if (list.left().isPresent()) return;
-        if (tags.isEmpty())
-        {
-            InitDynamicTagsEvent<T> event = new InitDynamicTagsEvent<>(registry);
-            NeoForge.EVENT_BUS.post(event);
-            tags.putAll(event.getTags());
+        @Shadow
+        protected abstract Registry<T> readOnlyRegistry();
+
+        @ModifyVariable(method = "registerTags", at = @At("HEAD"), argsOnly = true)
+        private Map<TagKey<T>, List<Holder<T>>> addDynamicTags(Map<TagKey<T>, List<Holder<T>>> pendingTags)
+        {   return InitDynamicTagsEvent.applyDynamicTagKeys(this.readOnlyRegistry(), pendingTags);
         }
-
-        Collection<Holder<T>> newValues = CSMath.orElse(this.tags.get(currentTag), List.of());
-        if (newValues.isEmpty()) return;
-        cir.setReturnValue(Either.right(newValues));
-    }
-
-    @Inject(method = "lambda$build$6(Lnet/minecraft/tags/TagEntry$Lookup;Ljava/util/Map;Lnet/minecraft/resources/ResourceLocation;Lnet/minecraft/tags/TagLoader$SortingEntry;)V", at = @At(value = "HEAD"), remap = false)
-    private void onTagAdded(TagEntry.Lookup lookup, Map map, ResourceLocation tag, TagLoader.SortingEntry p_284683_, CallbackInfo ci)
-    {   currentTag = tag;
     }
 }

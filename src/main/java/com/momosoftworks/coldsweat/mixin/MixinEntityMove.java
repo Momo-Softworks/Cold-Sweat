@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 public abstract class MixinEntityMove
 {
     @Shadow
-    private static Vec3 getInputVector(Vec3 pRelative, float pMotionScaler, float pFacing)
+    protected static Vec3 getInputVector(Vec3 pRelative, float pMotionScaler, float pFacing)
     {   return null;
     }
 

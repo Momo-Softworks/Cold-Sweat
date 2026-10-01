@@ -1,6 +1,6 @@
 package com.momosoftworks.coldsweat.api.event.core;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.Event;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.IRegistryExtension;
@@ -23,12 +23,12 @@ public class MissingMappingsEvent extends Event
         {   this.registry = registry;
         }
 
-        private ResourceLocation oldId()
-        {   return ResourceLocation.fromNamespaceAndPath(oldNamespace, oldPath);
+        private Identifier oldId()
+        {   return Identifier.fromNamespaceAndPath(oldNamespace, oldPath);
         }
 
-        private ResourceLocation newId()
-        {   return ResourceLocation.fromNamespaceAndPath(newNamespace, newPath);
+        private Identifier newId()
+        {   return Identifier.fromNamespaceAndPath(newNamespace, newPath);
         }
 
         public Builder<T> namespace(String newNamespace)
@@ -37,7 +37,7 @@ public class MissingMappingsEvent extends Event
             return this;
         }
 
-        public Builder<T> from(ResourceLocation oldId)
+        public Builder<T> from(Identifier oldId)
         {   this.oldNamespace = oldId.getNamespace();
             this.oldPath = oldId.getPath();
             return this;
@@ -56,7 +56,7 @@ public class MissingMappingsEvent extends Event
             return this;
         }
 
-        public void to(ResourceLocation newId)
+        public void to(Identifier newId)
         {   this.registry.addAlias(this.oldId(), newId);
         }
 

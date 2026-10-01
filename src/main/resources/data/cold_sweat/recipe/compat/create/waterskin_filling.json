@@ -7,9 +7,7 @@
     }
   ],
   "ingredients": [
-    {
-      "item": "cold_sweat:waterskin"
-    },
+    "cold_sweat:waterskin",
     {
       "type": "fluid_stack",
       "fluid": "minecraft:water",

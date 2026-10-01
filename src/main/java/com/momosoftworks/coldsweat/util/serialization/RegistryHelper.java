@@ -7,7 +7,7 @@ import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.*;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -26,7 +26,7 @@ public class RegistryHelper
 
     @Nullable
     public static <T> Registry<T> getRegistry(ResourceKey<Registry<T>> registry)
-    {   return CSMath.getIfNotNull(getRegistryAccess(), access -> access.registryOrThrow(registry), null);
+    {   return CSMath.getIfNotNull(getRegistryAccess(), access -> access.lookupOrThrow(registry), null);
     }
 
     @EventBusSubscriber
@@ -64,14 +64,14 @@ public class RegistryHelper
         {
             either.ifLeft(tagKey ->
                           {
-                              Optional<HolderSet.Named<T>> tag = registry.getTag(tagKey);
+                              Optional<HolderSet.Named<T>> tag = registry.get(tagKey);
                               tag.ifPresent(tag1 -> list.addAll(tag1.stream().map(Holder::value).toList()));
                           });
             either.ifRight(list::add);
         }
         for (Either<TagKey<T>, T> either : eitherList.exclusions())
         {
-            either.ifLeft(tagKey -> registry.getTag(tagKey).ifPresent(tag -> list.removeAll(tag.stream().map(Holder::value).toList())));
+            either.ifLeft(tagKey -> registry.get(tagKey).ifPresent(tag -> list.removeAll(tag.stream().map(Holder::value).toList())));
             either.ifRight(object -> list.remove(object));
         }
         return list;
@@ -83,7 +83,7 @@ public class RegistryHelper
 
     public static <T> List<OptionalHolder<T>> mapRegistryTagList(ResourceKey<Registry<T>> registry, NegatableList<Either<TagKey<T>, OptionalHolder<T>>> eitherList, @Nullable RegistryAccess registryAccess)
     {
-        Registry<T> reg = registryAccess != null ? registryAccess.registryOrThrow(registry) : getRegistry(registry);
+        Registry<T> reg = registryAccess != null ? registryAccess.lookupOrThrow(registry) : getRegistry(registry);
         List<OptionalHolder<T>> list = new ArrayList<>();
         if (reg == null) return list;
 
@@ -91,7 +91,7 @@ public class RegistryHelper
         {
             either.ifLeft(tagKey ->
             {
-                Optional<HolderSet.Named<T>> tag = reg.getTag(tagKey);
+                Optional<HolderSet.Named<T>> tag = reg.get(tagKey);
                 tag.ifPresent(tag1 -> list.addAll(tag1.stream().map(OptionalHolder::ofHolder).toList()));
             });
             either.ifRight(list::add);
@@ -100,7 +100,7 @@ public class RegistryHelper
         {
             either.ifLeft(tagKey ->
             {
-                Optional<HolderSet.Named<T>> tag = reg.getTag(tagKey);
+                Optional<HolderSet.Named<T>> tag = reg.get(tagKey);
                 tag.ifPresent(tag1 -> list.removeAll(tag1.stream().map(OptionalHolder::ofHolder).toList()));
             });
             either.ifRight(list::remove);
@@ -112,10 +112,10 @@ public class RegistryHelper
     {   return mapRegistryTagList(registry, new NegatableList<>(eitherList), registryAccess);
     }
 
-    public static <T> Optional<T> getVanillaRegistryValue(ResourceKey<Registry<T>> registry, ResourceLocation id)
+    public static <T> Optional<T> getVanillaRegistryValue(ResourceKey<Registry<T>> registry, Identifier id)
     {
         try
-        {   return Optional.ofNullable(getRegistry(registry)).map(reg -> reg.get(id));
+        {   return Optional.ofNullable(getRegistry(registry)).map(reg -> reg.getValue(id));
         }
         catch (Exception e)
         {   return Optional.empty();
@@ -123,8 +123,8 @@ public class RegistryHelper
     }
 
     @Nullable
-    public static ResourceLocation getKey(Holder<?> holder)
-    {   return holder.unwrapKey().map(ResourceKey::location).orElse(null);
+    public static Identifier getKey(Holder<?> holder)
+    {   return holder.unwrapKey().map(ResourceKey::identifier).orElse(null);
     }
 
     private static final Field OWNER_FIELD = ObfuscationReflectionHelper.findField(Holder.Reference.class, "owner");

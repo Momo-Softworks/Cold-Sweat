@@ -62,7 +62,7 @@ public class ShearableFurManager
         ItemStack stack = event.getItemStack();
 
         if (entity instanceof LivingEntity living && (!(living instanceof AgeableMob ageable) || !ageable.isBaby())
-        && !entity.level().isClientSide && stack.is(Tags.Items.TOOLS_SHEAR))
+        && !entity.level().isClientSide() && stack.is(Tags.Items.TOOLS_SHEAR))
         {
             IShearableCap cap = getFurCap(living).orElse(null);
             if (cap == null) return;
@@ -81,7 +81,7 @@ public class ShearableFurManager
             // Random chance to ram the player when sheared
 
             if (living instanceof Goat goat && !player.getAbilities().instabuild && goat.level().getDifficulty() != Difficulty.PEACEFUL
-            && !goat.level().isClientSide && goat.getRandom().nextDouble() < 0.4)
+            && !goat.level().isClientSide() && goat.getRandom().nextDouble() < 0.4)
             {
                 // Set ram cooldown ticks
                 goat.getBrain().setMemory(MemoryModuleType.RAM_COOLDOWN_TICKS, 30);
@@ -98,7 +98,7 @@ public class ShearableFurManager
                 TaskScheduler.scheduleServer(() ->
                 {
                     ClientboundEntityEventPacket packet = new ClientboundEntityEventPacket(goat, (byte) 58);
-                    ((ServerChunkCache) goat.level().getChunkSource()).broadcastAndSend(goat, packet);
+                    ((ServerChunkCache) goat.level().getChunkSource()).sendToTrackingPlayersAndSelf(goat, packet);
                 }, 5);
 
                 // Look at player
@@ -143,7 +143,7 @@ public class ShearableFurManager
             cap.setAge(cap.age() + 1);
 
             // Entity is goat, current tick is a multiple of the regrow time, and random chance succeeds
-            if (!entity.level().isClientSide
+            if (!entity.level().isClientSide()
             && cap.isSheared()
             && cap.age() % Math.max(1, furConfig.interval()) == 0
             && cap.furGrowthCooldown() == 0
@@ -196,7 +196,7 @@ public class ShearableFurManager
 
     public static void syncData(LivingEntity entity, ServerPlayer player)
     {
-        if (!entity.level().isClientSide)
+        if (!entity.level().isClientSide())
         {
             getFurCap(entity).ifPresent(cap ->
             {

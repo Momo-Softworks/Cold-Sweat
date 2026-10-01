@@ -1,0 +1,44 @@
+{
+  "model": {
+    "type": "minecraft:condition",
+    "property": "cold_sweat:animated_soulspring_lamp",
+    "on_true": {
+      "type": "minecraft:special",
+      "base": "cold_sweat:item/soulspring_lamp",
+      "model": {
+        "type": "cold_sweat:soulspring_lamp"
+      }
+    },
+    "on_false": {
+      "type": "minecraft:range_dispatch",
+      "property": "cold_sweat:soulspring_state",
+      "entries": [
+        {
+          "threshold": 1.0,
+          "model": {
+            "type": "minecraft:model",
+            "model": "cold_sweat:item/soulspring_lamp/soulspring_lamp_1"
+          }
+        },
+        {
+          "threshold": 2.0,
+          "model": {
+            "type": "minecraft:model",
+            "model": "cold_sweat:item/soulspring_lamp/soulspring_lamp_2"
+          }
+        },
+        {
+          "threshold": 3.0,
+          "model": {
+            "type": "minecraft:model",
+            "model": "cold_sweat:item/soulspring_lamp/soulspring_lamp_3"
+          }
+        }
+      ],
+      "fallback": {
+        "type": "minecraft:model",
+        "model": "cold_sweat:item/soulspring_lamp/soulspring_lamp_0"
+      }
+    }
+  }
+}

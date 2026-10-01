@@ -1,5 +1,11 @@
 package com.momosoftworks.coldsweat.common.entity;
 
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.core.UUIDUtil;
+import com.momosoftworks.coldsweat.util.serialization.NBTHelper;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.level.storage.ValueInput;
+import com.momosoftworks.coldsweat.core.init.ModEntityDataSerializers;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.client.renderer.animation.AnimationManager;
@@ -30,7 +36,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -47,12 +53,12 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.EntityHitResult;
-import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.Vec2;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -72,11 +78,11 @@ public class Chameleon extends Animal
     static final EntityDataAccessor<Integer> SHED_TIME = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.INT);
     static final EntityDataAccessor<Integer> LAST_SHED = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.INT);
     static final EntityDataAccessor<Integer> HURT_TIMESTAMP = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.INT);
-    static final EntityDataAccessor<CompoundTag> TRUSTED_PLAYERS = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.COMPOUND_TAG);
+    static final EntityDataAccessor<CompoundTag> TRUSTED_PLAYERS = SynchedEntityData.defineId(Chameleon.class, ModEntityDataSerializers.COMPOUND_TAG);
     static final EntityDataAccessor<BlockPos> TRACKING_POS = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.BLOCK_POS);
     static final EntityDataAccessor<Integer> EAT_TIMESTAMP = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.INT);
     static final EntityDataAccessor<Float> TEMPERATURE = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.FLOAT);
-    static final EntityDataAccessor<CompoundTag> EDIBLE_COOLDOWNS = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.COMPOUND_TAG);
+    static final EntityDataAccessor<CompoundTag> EDIBLE_COOLDOWNS = SynchedEntityData.defineId(Chameleon.class, ModEntityDataSerializers.COMPOUND_TAG);
     static final EntityDataAccessor<Boolean> SEARCHING = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.BOOLEAN);
     static final EntityDataAccessor<Integer> AGE_SECS = SynchedEntityData.defineId(Chameleon.class, EntityDataSerializers.INT);
 
@@ -144,14 +150,14 @@ public class Chameleon extends Animal
     }
 
     @Override
-    public boolean isInvulnerableTo(@NotNull DamageSource source)
+    public boolean isInvulnerableTo(ServerLevel level, @NotNull DamageSource source)
     {
         if (this.getVehicle() instanceof Player player)
         {   DamageSources damageSources = player.level().damageSources();
             if (source.equals(damageSources.inWall()) || source.equals(damageSources.fall())) return true;
-            return player.isCreative() || player.isInvulnerableTo(source);
+            return player.isCreative() || player.isInvulnerableTo(level, source);
         }
-        return super.isInvulnerableTo(source);
+        return super.isInvulnerableTo(level, source);
     }
 
     @Override
@@ -163,12 +169,12 @@ public class Chameleon extends Animal
         {
             this.getCombatTracker().recordDamage(source, 1);
             Component deathMessage = this.getCombatTracker().getDeathMessage();
-            ListTag trustedPlayers = this.getTrustedPlayers().getList("Players", 8);
+            ListTag trustedPlayers = this.getTrustedPlayers().getListOrEmpty("Players");
 
-            if (!this.level().isClientSide && this.level().getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES))
+            if (this.level() instanceof ServerLevel serverLevel && serverLevel.getGameRules().get(GameRules.SHOW_DEATH_MESSAGES))
             {   trustedPlayers.forEach(string ->
                 {
-                    Player player = this.level().getPlayerByUUID(UUID.fromString(string.getAsString()));
+                    Player player = this.level().getPlayerByUUID(UUID.fromString(string.asString().orElse("")));
                     if (player != null)
                     {   player.sendSystemMessage(deathMessage);
                     }
@@ -195,13 +201,13 @@ public class Chameleon extends Animal
             if (this.feedCooldown <= 0 && this.getCooldown(edible) <= 0 && edible.shouldEat(stack, this, player))
             {
                 this.feedCooldown = 10;
-                if (!player.level().isClientSide)
+                if (!player.level().isClientSide())
                 {
                     ItemStack dropStack = stack.copy();
                     dropStack.setCount(1);
                     ItemEntity dropped = player.drop(dropStack, true);
                     if (dropped != null)
-                    {   dropped.getPersistentData().putUUID("Recipient", this.getUUID());
+                    {   dropped.getPersistentData().store("Recipient", UUIDUtil.CODEC, this.getUUID());
                     }
                     player.stopUsingItem();
                     player.swing(hand, true);
@@ -212,12 +218,12 @@ public class Chameleon extends Animal
             }
             return InteractionResult.CONSUME;
         }
-        else if (this.isPlayerTrusted(player) && player.getPassengers().isEmpty() && !this.level().isClientSide)
+        else if (this.isPlayerTrusted(player) && player.getPassengers().isEmpty() && !this.level().isClientSide())
         {
             if (this.startRiding(player) && player instanceof ServerPlayer serverPlayer)
             {   serverPlayer.connection.send(new EntityMountMessage(this.getId(), player.getId(), EntityMountMessage.Action.MOUNT));
             }
-            return InteractionResult.sidedSuccess(this.level().isClientSide);
+            return InteractionResult.SUCCESS;
         }
 
         return InteractionResult.PASS;
@@ -230,7 +236,7 @@ public class Chameleon extends Animal
             chameleon.shedItems();
             chameleon.setLastShed(chameleon.getAgeTicks());
             chameleon.stopShedding();
-            if (!entity.level().isClientSide)
+            if (!entity.level().isClientSide())
             {   WorldHelper.playEntitySound(ModSounds.CHAMELEON_SHED.value(), chameleon, chameleon.getSoundSource(), chameleon.getSoundVolume(), chameleon.getVoicePitch());
             }
             return true;
@@ -246,7 +252,7 @@ public class Chameleon extends Animal
     @Override
     public boolean canFallInLove()
     {   return super.canFallInLove() && !this.isBaby() && !this.isInLove()
-            && !this.getPersistentData().getBoolean("HasBred");
+            && !this.getPersistentData().getBooleanOr("HasBred", false);
     }
 
     @Override
@@ -309,7 +315,7 @@ public class Chameleon extends Animal
     @Nullable
     @Override
     public AgeableMob getBreedOffspring(@NotNull ServerLevel level, @NotNull AgeableMob parent)
-    {   return ModEntities.CHAMELEON.get().create(level);
+    {   return ModEntities.CHAMELEON.get().create(level, EntitySpawnReason.BREEDING);
     }
 
     @Override
@@ -347,7 +353,7 @@ public class Chameleon extends Animal
     public void playAmbientSound()
     {
         SoundEvent soundevent = this.getAmbientSound();
-        if (!this.level().isClientSide && soundevent != null && !this.isSearching())
+        if (!this.level().isClientSide() && soundevent != null && !this.isSearching())
         {   // This method plays a sound that actually follows the entity
             WorldHelper.playEntitySound(soundevent, this, this.getSoundSource(), this.getSoundVolume(), this.getVoicePitch());
         }
@@ -388,14 +394,14 @@ public class Chameleon extends Animal
         }
 
         // Age
-        if (!this.level().isClientSide && this.tickCount % 20 == 0)
+        if (!this.level().isClientSide() && this.tickCount % 20 == 0)
         {   int ageSecs = this.getAgeSecs();
             this.setAgeSecs(ageSecs + 1);
             this.ageTicks = ageSecs * 20;
         }
 
         // Tick shedding
-        if (!this.level().isClientSide)
+        if (!this.level().isClientSide())
         {
             int shedCheckInterval = ConfigSettings.SHED_TIMINGS.get().interval();
             int shedCooldown = ConfigSettings.SHED_TIMINGS.get().cooldown();
@@ -423,7 +429,7 @@ public class Chameleon extends Animal
             {   this.stopShedding();
                 this.setLastShed(this.getAgeTicks());
                 WorldHelper.playEntitySound(ModSounds.CHAMELEON_SHED_FAIL.value(), this, this.getSoundSource(), this.getSoundVolume(), this.getVoicePitch());
-                WorldHelper.spawnParticleBatch(this.level(), new ItemParticleOption(ParticleTypes.ITEM, ModItems.CHAMELEON_MOLT.toStack()),
+                WorldHelper.spawnParticleBatch(this.level(), new ItemParticleOption(ParticleTypes.ITEM, ModItems.CHAMELEON_MOLT.value()),
                                                this.getBoundingBox().inflate(0.2), 20, 0.05);
             }
         }
@@ -431,7 +437,7 @@ public class Chameleon extends Animal
         else if (this.random.nextDouble() < 0.2 && this.canShed())
         {
             // spawn shedding particles
-            WorldHelper.spawnParticle(this.level(), new ItemParticleOption(ParticleTypes.ITEM, ModItems.CHAMELEON_MOLT.toStack()),
+            WorldHelper.spawnParticle(this.level(), new ItemParticleOption(ParticleTypes.ITEM, ModItems.CHAMELEON_MOLT.value()),
                     this.getX() + (this.random.nextDouble() - 0.5) * this.getBbWidth(),
                     this.getY() + this.random.nextDouble() * this.getBbHeight(),
                     this.getZ() + (this.random.nextDouble() - 0.5) * this.getBbWidth(),
@@ -453,7 +459,7 @@ public class Chameleon extends Animal
         this.setTemperature(this.getTemperature() + (this.desiredTemp - this.getTemperature()) * 0.03f);
 
         // Handle dismounting
-        if (this.getVehicle() instanceof Player player && !this.level().isClientSide)
+        if (this.getVehicle() instanceof Player player && !this.level().isClientSide())
         {
             if (player.isCrouching())
             {
@@ -501,9 +507,9 @@ public class Chameleon extends Animal
                 if ((Math.sqrt(Math.pow(this.getX() - this.getTrackingPos().getX(), 2)
                              + Math.pow(this.getZ() - this.getTrackingPos().getZ(), 2)) < 20
                 || this.getTrackingPos().equals(BlockPos.ZERO))
-                && this.getServer() != null)
+                && this.level().getServer() != null)
                 {
-                    AdvancementHolder advancement = this.getServer().getAdvancements().get(ResourceLocation.fromNamespaceAndPath(ColdSweat.MOD_ID, "chameleon_find_biome"));
+                    AdvancementHolder advancement = this.level().getServer().getAdvancements().get(Identifier.fromNamespaceAndPath(ColdSweat.MOD_ID, "chameleon_find_biome"));
                     for (ServerPlayer player : WorldHelper.getEntitiesOfClass(ServerPlayer.class, this.level(), this.getBoundingBox().inflate(20), e -> true))
                     {
                         if (advancement != null)
@@ -520,12 +526,12 @@ public class Chameleon extends Animal
         }
 
         // Tick cooldowns
-        if (!level().isClientSide)
+        if (!level().isClientSide())
         {
             CompoundTag cooldowns = this.getCooldowns();
-            for (String tag : cooldowns.getAllKeys())
+            for (String tag : cooldowns.keySet())
             {
-                int time = cooldowns.getInt(tag);
+                int time = cooldowns.getIntOr(tag, 0);
                 if (time > 0)
                     cooldowns.putInt(tag, time - 1);
             }
@@ -534,24 +540,24 @@ public class Chameleon extends Animal
     }
 
     @Override
-    public boolean hurt(DamageSource source, float amount)
+    public boolean hurtServer(ServerLevel level, DamageSource source, float amount)
     {
-        if (source.getEntity() != null && !this.isInvulnerableTo(source))
+        if (source.getEntity() != null && !this.isInvulnerableTo(level, source))
         {   this.setHurtTimestamp(this.tickCount);
         }
-        return super.hurt(source, amount);
+        return super.hurtServer(level, source, amount);
     }
 
     @Nullable
     @Override
-    public Entity changeDimension(DimensionTransition teleportData)
+    public Entity teleport(TeleportTransition teleportData)
     {   this.clearTrackingPos();
-        return super.changeDimension(teleportData);
+        return super.teleport(teleportData);
     }
 
     public void onEatEntity(Entity entity)
     {
-        if (!level().isClientSide)
+        if (!level().isClientSide())
         {
             if (entity instanceof ItemEntity itemEntity)
             {
@@ -570,7 +576,7 @@ public class Chameleon extends Animal
         }
     }
 
-    public static boolean canSpawn(EntityType<Chameleon> type, LevelAccessor level, MobSpawnType spawnType, BlockPos pos, RandomSource random)
+    public static boolean canSpawn(EntityType<Chameleon> type, LevelAccessor level, EntitySpawnReason spawnType, BlockPos pos, RandomSource random)
     {   return true;
     }
 
@@ -584,7 +590,7 @@ public class Chameleon extends Animal
     {
         if (this.eatAnimationTimer <= 0)
         {
-            if (!this.level().isClientSide)
+            if (!this.level().isClientSide())
             {   PacketDistributor.sendToPlayersTrackingEntity(this, new ChameleonEatMessage(this.getId()));
             }
             else
@@ -632,7 +638,7 @@ public class Chameleon extends Animal
     public void addTrustedPlayer(UUID player)
     {
         CompoundTag trustedPlayers = this.getTrustedPlayers();
-        ListTag players = trustedPlayers.getList("Players", 8);
+        ListTag players = trustedPlayers.getListOrEmpty("Players");
         StringTag uuid = StringTag.valueOf(player.toString());
         if (!players.contains(uuid))
         {   players.add(uuid);
@@ -645,7 +651,7 @@ public class Chameleon extends Animal
     public void removeTrustedPlayer(UUID player)
     {
         CompoundTag trustedPlayers = this.getTrustedPlayers();
-        trustedPlayers.getList("Players", 8).removeIf(tag -> tag.getAsString().equals(player.toString()));
+        trustedPlayers.getListOrEmpty("Players").removeIf(tag -> tag.asString().orElse("").equals(player.toString()));
         this.entityData.set(TRUSTED_PLAYERS, trustedPlayers);
     }
 
@@ -654,7 +660,7 @@ public class Chameleon extends Animal
     }
 
     public boolean isPlayerTrusted(UUID player)
-    {   return this.getTrustedPlayers().getList("Players", 8).contains(StringTag.valueOf(player.toString()));
+    {   return this.getTrustedPlayers().getListOrEmpty("Players").contains(StringTag.valueOf(player.toString()));
     }
 
     public int getLastShed()
@@ -723,7 +729,7 @@ public class Chameleon extends Animal
 
     public Integer getCooldown(Edible edible)
     {
-        return this.entityData.get(EDIBLE_COOLDOWNS).getInt(edible.getName());
+        return this.entityData.get(EDIBLE_COOLDOWNS).getIntOr(edible.getName(), 0);
     }
 
     public CompoundTag getCooldowns()
@@ -751,9 +757,11 @@ public class Chameleon extends Animal
 
 
     @Override
-    public CompoundTag saveWithoutId(CompoundTag tag)
+    protected void addAdditionalSaveData(ValueOutput output)
     {
-        super.saveWithoutId(tag);
+        super.addAdditionalSaveData(output);
+        // Built as a CompoundTag and merged into the output, to keep the save format unchanged
+        CompoundTag tag = new CompoundTag();
 
         tag.put("TrustedPlayers", Objects.requireNonNullElseGet(this.getTrustedPlayers().get("Players"), ListTag::new));
         tag.putInt("LastShed", this.getLastShed());
@@ -765,50 +773,50 @@ public class Chameleon extends Animal
         // Tracking pos
         if (this.isTracking())
             tag.putLong("TrackingPos", this.getTrackingPos().asLong());
-        else tag.remove("TrackingPos");
 
         // Edible cooldowns
         ListTag edibleCooldowns = new ListTag();
-        for (String key : this.getCooldowns().getAllKeys())
+        for (String key : this.getCooldowns().keySet())
         {
             CompoundTag cooldownTag = new CompoundTag();
             cooldownTag.putString("Edible", key);
-            cooldownTag.putInt("Cooldown", this.getCooldowns().getInt(key));
+            cooldownTag.putInt("Cooldown", this.getCooldowns().getIntOr(key, 0));
             edibleCooldowns.add(cooldownTag);
         }
         tag.put("EdibleCooldowns", edibleCooldowns);
 
         tag.putFloat("Temperature", this.getTemperature());
-        return tag;
+        output.store(NBTHelper.COMPOUND_MAP_CODEC, tag);
     }
 
     @Override
-    public void load(CompoundTag nbt)
+    protected void readAdditionalSaveData(ValueInput input)
     {
-        super.load(nbt);
+        super.readAdditionalSaveData(input);
+        CompoundTag nbt = input.read(NBTHelper.COMPOUND_MAP_CODEC).orElseGet(CompoundTag::new);
 
         CompoundTag players = new CompoundTag();
         players.put("Players", Objects.requireNonNullElseGet(nbt.get("TrustedPlayers"), ListTag::new));
         this.entityData.set(TRUSTED_PLAYERS, players, true);
 
-        this.setLastShed(nbt.getInt("LastShed"));
-        this.setShedTime(nbt.getInt("ShedTime"));
-        this.setHurtTimestamp(nbt.getInt("HurtTimestamp"));
-        this.setAgeSecs(nbt.getInt("AgeInSeconds"));
-        this.setEatTimestamp(nbt.getInt("EatTimestamp"));
+        this.setLastShed(nbt.getIntOr("LastShed", 0));
+        this.setShedTime(nbt.getIntOr("ShedTime", 0));
+        this.setHurtTimestamp(nbt.getIntOr("HurtTimestamp", 0));
+        this.setAgeSecs(nbt.getIntOr("AgeInSeconds", 0));
+        this.setEatTimestamp(nbt.getIntOr("EatTimestamp", 0));
 
         if (nbt.contains("TrackingPos"))
-            this.setTrackingPos(BlockPos.of(nbt.getLong("TrackingPos")));
+            this.setTrackingPos(BlockPos.of(nbt.getLongOr("TrackingPos", 0)));
 
-        ListTag edibleCooldowns = nbt.getList("EdibleCooldowns", 10);
+        ListTag edibleCooldowns = nbt.getListOrEmpty("EdibleCooldowns");
         for (int i = 0; i < edibleCooldowns.size(); i++)
         {
-            CompoundTag cooldownTag = edibleCooldowns.getCompound(i);
-            ChameleonEdibles.EDIBLES.stream().filter(ed -> ed.getName().equals(cooldownTag.getString("Item"))).findFirst().ifPresent(edible ->
-            {   this.setCooldown(edible, cooldownTag.getInt("Cooldown"));
+            CompoundTag cooldownTag = edibleCooldowns.getCompoundOrEmpty(i);
+            ChameleonEdibles.EDIBLES.stream().filter(ed -> ed.getName().equals(cooldownTag.getStringOr("Item", ""))).findFirst().ifPresent(edible ->
+            {   this.setCooldown(edible, cooldownTag.getIntOr("Cooldown", 0));
             });
         }
-        this.setTemperature(nbt.getFloat("Temperature"));
+        this.setTemperature(nbt.getFloatOr("Temperature", 0));
         this.desiredTemp = this.getTemperature();
     }
 }

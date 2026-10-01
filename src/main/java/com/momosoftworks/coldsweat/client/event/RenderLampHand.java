@@ -1,5 +1,10 @@
 package com.momosoftworks.coldsweat.client.event;
 
+import com.momosoftworks.coldsweat.client.renderer.SoulLampPose;
+import net.minecraft.world.entity.player.PlayerModelPart;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.entity.player.AvatarRenderer;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -11,8 +16,6 @@ import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
@@ -44,7 +47,7 @@ public class RenderLampHand
             if (player == null) return;
 
             boolean isRightHand = EntityHelper.getArmFromHand(event.getHand(), player) == HumanoidArm.RIGHT;
-            PlayerRenderer playerRenderer = (PlayerRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player);
+            AvatarRenderer<AbstractClientPlayer> playerRenderer = (AvatarRenderer<AbstractClientPlayer>) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player);
             ItemInHandRenderer handRenderer = Minecraft.getInstance().gameRenderer.itemInHandRenderer;
 
             ms.pushPose();
@@ -94,15 +97,15 @@ public class RenderLampHand
             }
 
             // Render the item/hand
-            renderHand(ms, event.getMultiBufferSource(), event.getPackedLight(), player, isRightHand, event.getHand(), handRenderer, playerRenderer, event.getItemStack());
+            renderHand(ms, event.getSubmitNodeCollector(), event.getPackedLight(), player, isRightHand, event.getHand(), handRenderer, playerRenderer, event.getItemStack());
             ms.popPose();
             ms.popPose();
         }
     }
 
-    public static void transformArm(LivingEntity entity, ModelPart arm, HumanoidArm side)
+    public static void transformArm(SoulLampPose pose, ModelPart arm, HumanoidArm side)
     {
-        if (entity instanceof Player player && EntityHelper.holdingLamp(player, side))
+        if (pose.holdingLamp(side))
         {
             // Turn the player's arm so their "palm" is face-down
             float sideMultiplier = side == HumanoidArm.RIGHT ? 1 : -1;
@@ -110,23 +113,22 @@ public class RenderLampHand
             arm.yRot = -arm.xRot * sideMultiplier - (float) (0.5*Math.PI) * sideMultiplier * 1.04f;
             arm.xRot = (float) -Math.PI/2;
             arm.x -= 1 * sideMultiplier;
-            if (player.isCrouching())
+            if (pose.crouching())
             {   arm.xRot -= 0.4f;
             }
 
             // Better swinging animation
-            if (player.swinging && side == EntityHelper.getArmFromHand(player.swingingArm, player))
-            {   swingArm(arm, player, side);
+            if (pose.swingingArm() == side)
+            {   swingArm(arm, pose, side);
             }
         }
     }
 
-    private static void swingArm(ModelPart arm, LivingEntity player, HumanoidArm side)
+    private static void swingArm(ModelPart arm, SoulLampPose pose, HumanoidArm side)
     {
         float sideMultiplier = side == HumanoidArm.RIGHT ? 1 : -1;
-        float partialTick = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true);
-        float attackAnim = player.getAttackAnim(partialTick);
-        float playerPitch = player.getViewXRot(partialTick);
+        float attackAnim = pose.attackAnim();
+        float playerPitch = pose.pitch();
         float pitchFactor = getSwingHorizontalOffset(side, playerPitch);
         float windUpTime = 0.3f;
         float windUpPoint = 1.5f;
@@ -169,8 +171,8 @@ public class RenderLampHand
         return pitchFactor;
     }
 
-    private static void renderHand(PoseStack ms, MultiBufferSource bufferSource, int light, LocalPlayer player, boolean isRightHand,
-                                   InteractionHand hand, ItemInHandRenderer handRenderer, PlayerRenderer playerRenderer, ItemStack itemStack)
+    private static void renderHand(PoseStack ms, SubmitNodeCollector collector, int light, LocalPlayer player, boolean isRightHand,
+                                   InteractionHand hand, ItemInHandRenderer handRenderer, AvatarRenderer<AbstractClientPlayer> playerRenderer, ItemStack itemStack)
     {
         boolean isSelected = player.getItemInHand(hand).is(ModItems.SOULSPRING_LAMP);
         // Render arm
@@ -198,7 +200,7 @@ public class RenderLampHand
             {   ms.translate(-0.3925, 0.06, 0.38);
                 ms.mulPose(Axis.YP.rotationDegrees(-90));
             }
-            playerRenderer.renderRightHand(ms, bufferSource, light, player);
+            playerRenderer.renderRightHand(ms, collector, light, player.getSkin().body().texturePath(), player.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE), player);
         }
         else
         {
@@ -212,7 +214,7 @@ public class RenderLampHand
             {   ms.translate(-0.325, 0.06, 0.38);
                 ms.mulPose(Axis.YP.rotationDegrees(87));
             }
-            playerRenderer.renderLeftHand(ms, bufferSource, light, player);
+            playerRenderer.renderLeftHand(ms, collector, light, player.getSkin().body().texturePath(), player.isModelPartShown(PlayerModelPart.LEFT_SLEEVE), player);
         }
         ms.popPose();
 
@@ -225,13 +227,13 @@ public class RenderLampHand
         {
             ms.mulPose(Axis.ZP.rotationDegrees(90));
             ms.translate(-0.1, 0.125, 0);
-            handRenderer.renderItem(player, itemStack, ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, false, ms, bufferSource, light);
+            handRenderer.renderItem(player, itemStack, ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, ms, collector, light);
         }
         else
         {
             ms.mulPose(Axis.ZP.rotationDegrees(90));
             ms.translate(-0.1, 0.125, 0);
-            handRenderer.renderItem(player, itemStack, ItemDisplayContext.THIRD_PERSON_LEFT_HAND, false, ms, bufferSource, light);
+            handRenderer.renderItem(player, itemStack, ItemDisplayContext.THIRD_PERSON_LEFT_HAND, ms, collector, light);
         }
         ms.popPose();
         ms.popPose();
