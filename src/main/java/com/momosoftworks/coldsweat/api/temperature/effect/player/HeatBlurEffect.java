@@ -37,10 +37,10 @@ public class HeatBlurEffect extends TempEffect
             return;
         }
 
-        // Effect strength is quantized into pre-baked post effects (uniforms can't be set at runtime anymore)
-        int blurLevel = Math.round(CSMath.clamp((float) CSMath.blend(0, 12, effect, 0, 1) * blurMultiplier, 0, PostProcessShaderManager.MAX_HEAT_BLUR_LEVEL));
-        if (blurLevel > 0)
-        {   shaderManager.setEffect(PostProcessShaderManager.getHeatBlurEffect(blurLevel));
+        float blur = (float) CSMath.blend(0, 12, effect, 0, 1) * blurMultiplier;
+        if (blur >= 1)
+        {   shaderManager.setEffect(PostProcessShaderManager.HEAT_BLUR);
+            shaderManager.setUniforms(PostProcessShaderManager.HEAT_BLUR, 0, "BlobConfig", builder -> builder.putFloat(blur));
         }
         else shaderManager.clearEffect();
     }
