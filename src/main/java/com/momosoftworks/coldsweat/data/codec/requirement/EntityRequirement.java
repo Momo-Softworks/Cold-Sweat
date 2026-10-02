@@ -126,8 +126,7 @@ public record EntityRequirement(NegatableList<Either<TagKey<EntityType<?>>, Enti
                 Codec.unboundedMap(Temperature.Trait.CODEC, DoubleBounds.CODEC).optionalFieldOf("temperature", new HashMap<>()).forGetter(requirement -> requirement.temperature)
         ).apply(instance, EntityRequirement::new));
 
-        REQUIREMENT_CODEC_STACK.add(codec);
-    }
+        REQUIREMENT_CODEC_STACK.add(Codec.of(codec, codec, "EntityRequirement"));
 
     public boolean test(Entity entity)
     {
