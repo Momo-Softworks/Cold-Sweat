@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.common.item;
 
 import cn.mlus.thirst.content.registry.ThirstComponent;
+import com.momosoftworks.coldsweat.api.event.common.item.WaterskinEvent;
 import com.momosoftworks.coldsweat.api.temperature.modifier.WaterTempModifier;
 import com.momosoftworks.coldsweat.api.temperature.modifier.WaterskinTempModifier;
 import com.momosoftworks.coldsweat.api.util.placement.Matcher;
@@ -160,6 +161,9 @@ public class FilledWaterskinItem extends Item
     {
         // Create empty waterskin item
         ItemStack emptyStack = stack.getCraftingRemainingItem();
+        WaterskinEvent.Empty event = new WaterskinEvent.Empty(stack, emptyStack, entity instanceof Player player ? player : null);
+        NeoForge.EVENT_BUS.post(event);
+        emptyStack = event.getResultWaterskin();
 
         // Add the item to the player's inventory
         if (entity instanceof Player player && player.getInventory().contains(emptyStack))

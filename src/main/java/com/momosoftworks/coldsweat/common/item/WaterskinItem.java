@@ -1,5 +1,6 @@
 package com.momosoftworks.coldsweat.common.item;
 
+import com.momosoftworks.coldsweat.api.event.common.item.WaterskinEvent;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ModItemComponents;
 import com.momosoftworks.coldsweat.core.init.ModItems;
@@ -32,6 +33,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
@@ -86,8 +88,8 @@ public class WaterskinItem extends Item
                         {
                             FluidStack drainStack = fluidStack.copy();
                             drainStack.setAmount(FLUID_VALUE_MB);
-                            cap.drain(drainStack, IFluidHandler.FluidAction.EXECUTE);
-                            WaterskinItem.handleFillWaterskin(player, context.getItemInHand(), context.getHand(), pos);
+                            FluidStack drainedFluid = cap.drain(drainStack, IFluidHandler.FluidAction.EXECUTE);
+                            WaterskinItem.handleFillWaterskin(player, context.getItemInHand(), context.getHand(), pos, drainedFluid);
                             return;
                         }
                     }
@@ -139,9 +141,15 @@ public class WaterskinItem extends Item
     }
 
     public static void handleFillWaterskin(Player player, ItemStack thisStack, InteractionHand usedHand, BlockPos filledAtPos)
+    {   handleFillWaterskin(player, thisStack, usedHand, filledAtPos, new FluidStack(Fluids.WATER, FLUID_VALUE_MB));
+    }
+    public static void handleFillWaterskin(Player player, ItemStack thisStack, InteractionHand usedHand, BlockPos filledAtPos, FluidStack filledFluid)
     {
         Level level = player.level();
         ItemStack filledWaterskin = getFilledItem(thisStack, level, filledAtPos);
+        WaterskinEvent.Fill event = new WaterskinEvent.Fill(thisStack, filledWaterskin, player, level, filledAtPos, filledFluid);
+        NeoForge.EVENT_BUS.post(event);
+        filledWaterskin = event.getResultWaterskin();
 
         //Replace 1 of the stack with a FilledWaterskinItem
         if (thisStack.getCount() > 1 || player.getAbilities().instabuild)
