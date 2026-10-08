@@ -127,6 +127,7 @@ public record EntityRequirement(NegatableList<Either<TagKey<EntityType<?>>, Enti
         ).apply(instance, EntityRequirement::new));
 
         REQUIREMENT_CODEC_STACK.add(Codec.of(codec, codec, "EntityRequirement"));
+    }
 
     public boolean test(Entity entity)
     {
