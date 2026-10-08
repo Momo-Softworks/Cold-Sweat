@@ -342,7 +342,7 @@ public class FilledWaterskinItem extends Item
             ItemStack emptyWaterskin = ModItems.WATERSKIN.toStack();
 
             // Preserve NBT (except temperature)
-            emptyWaterskin.applyComponents(stack.getComponents());
+            emptyWaterskin.applyComponents(stack.getComponentsPatch());
             emptyWaterskin.remove(ModItemComponents.WATER_TEMPERATURE);
             emptyWaterskin.remove(DataComponents.DAMAGE);
             emptyWaterskin.remove(DataComponents.MAX_DAMAGE);

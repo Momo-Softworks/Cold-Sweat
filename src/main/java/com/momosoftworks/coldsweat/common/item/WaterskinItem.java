@@ -136,7 +136,7 @@ public class WaterskinItem extends Item
     {
         ItemStack filledWaterskin = ModItems.FILLED_WATERSKIN.value().getDefaultInstance();
         // copy NBT to new item
-        filledWaterskin.applyComponents(stack.getComponents());
+        filledWaterskin.applyComponents(stack.getComponentsPatch());
         // Set temperature based on temperature of the biome
         filledWaterskin.set(ModItemComponents.WATER_TEMPERATURE,
                             CSMath.clamp((WorldHelper.getTemperatureAt(level, pos)
