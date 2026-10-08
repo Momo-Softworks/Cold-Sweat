@@ -23,6 +23,7 @@
     "MixinArmorBreak",
     "MixinBlockUpdate$Server",
     "MixinCampfire",
+    "MixinChameleonRidePlayer",
     "MixinEntityMove",
     "MixinFreezingWater",
     "MixinFreezingWater$IceMelt",
