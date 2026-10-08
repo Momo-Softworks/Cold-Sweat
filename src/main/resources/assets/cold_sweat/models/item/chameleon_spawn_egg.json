@@ -1,7 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "cold_sweat:item/chameleon_spawn_egg/spawn_egg",
-    "layer1": "cold_sweat:item/chameleon_spawn_egg/spawn_egg_overlay"
+    "layer0": "cold_sweat:item/chameleon_spawn_egg"
   }
 }
