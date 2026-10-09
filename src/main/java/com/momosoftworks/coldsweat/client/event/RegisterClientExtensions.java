@@ -4,6 +4,8 @@ import java.util.function.Function;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.client.resources.model.EquipmentClientInfo;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
@@ -14,6 +16,7 @@ import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.core.init.ModFluids;
 import com.momosoftworks.coldsweat.util.math.CSMath;
+import com.momosoftworks.coldsweat.config.ConfigSettings;
 import net.minecraft.client.renderer.BiomeColors;
 import net.minecraft.client.renderer.block.BlockAndTintGetter;
 import net.minecraft.client.renderer.block.FluidModel;
@@ -67,6 +70,13 @@ public class RegisterClientExtensions
                            ModItems.HOGLIN_HELMET.get(), ModItems.HOGLIN_CHESTPLATE.get(), ModItems.HOGLIN_LEGGINGS.get(), ModItems.HOGLIN_BOOTS.get());
         event.registerItem(armorModel(RegisterModels::getGoatArmorModel),
                            ModItems.GOAT_FUR_HELMET.get(), ModItems.GOAT_FUR_CHESTPLATE.get(), ModItems.GOAT_FUR_LEGGINGS.get(), ModItems.GOAT_FUR_BOOTS.get());
+        event.registerItem(new IClientItemExtensions()
+        {
+            @Override
+            public HumanoidModel.ArmPose getArmPose(LivingEntity entity, InteractionHand hand, ItemStack stack)
+            {   return ConfigSettings.POSE_SOULSPRING_LAMP.get() ? RenderLampHand.LAMP_ARM_POSE.getValue() : null;
+            }
+        }, ModItems.SOULSPRING_LAMP.get());
     }
 
     private static IClientItemExtensions armorModel(Function<EquipmentSlot, HumanoidModel<HumanoidRenderState>> modelGetter)

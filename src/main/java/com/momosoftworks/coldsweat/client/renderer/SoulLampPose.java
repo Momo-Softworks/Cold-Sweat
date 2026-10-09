@@ -1,11 +1,9 @@
 package com.momosoftworks.coldsweat.client.renderer;
 
-import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.client.event.HandleSoulLampAnim;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.entity.EntityHelper;
-import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.util.context.ContextKey;
@@ -22,16 +20,22 @@ import javax.annotation.Nullable;
 /**
  * Data needed to pose an entity's arms while it holds a soulspring lamp.<br>
  * Models only have access to render states, so this is attached to the state when it's extracted.
+ *
+ * @param rightRaise How far the right arm is raised to hold the lamp, from 0 to 1
+ * @param leftRaise How far the left arm is raised to hold the lamp, from 0 to 1
  */
 public record SoulLampPose(boolean rightLamp, boolean leftLamp,
-                           float rightArmRot, float leftArmRot,
-                           boolean crouching, @Nullable HumanoidArm swingingArm,
-                           float attackAnim, float pitch)
+                           float rightRaise, float leftRaise,
+                           boolean isPlayer)
 {
     public static final ContextKey<SoulLampPose> KEY = new ContextKey<>(ColdSweat.createKey("soul_lamp_pose"));
 
     public boolean holdingLamp(HumanoidArm arm)
     {   return arm == HumanoidArm.RIGHT ? rightLamp : leftLamp;
+    }
+
+    public float getArmRaise(HumanoidArm arm)
+    {   return arm == HumanoidArm.RIGHT ? rightRaise : leftRaise;
     }
 
     @Nullable
@@ -44,17 +48,12 @@ public record SoulLampPose(boolean rightLamp, boolean leftLamp,
     {
         boolean rightLamp = EntityHelper.holdingLamp(entity, HumanoidArm.RIGHT);
         boolean leftLamp = EntityHelper.holdingLamp(entity, HumanoidArm.LEFT);
-        Pair<Float, Float> rightRot = HandleSoulLampAnim.RIGHT_ARM_ROTATIONS.getOrDefault(entity, Pair.of(0f, 0f));
-        Pair<Float, Float> leftRot = HandleSoulLampAnim.LEFT_ARM_ROTATIONS.getOrDefault(entity, Pair.of(0f, 0f));
-        float rightArmRot = CSMath.toRadians(CSMath.blend(rightRot.getSecond(), rightRot.getFirst(), partialTick, 0, 1));
-        float leftArmRot = CSMath.blend(CSMath.toRadians(leftRot.getSecond()), CSMath.toRadians(leftRot.getFirst()), partialTick, 0, 1);
-        if (!rightLamp && !leftLamp && CSMath.betweenInclusive(rightArmRot, -0.01, 0.01) && CSMath.betweenInclusive(leftArmRot, -0.01, 0.01))
+        float rightRaise = HandleSoulLampAnim.getArmRaise(entity, HumanoidArm.RIGHT, partialTick);
+        float leftRaise = HandleSoulLampAnim.getArmRaise(entity, HumanoidArm.LEFT, partialTick);
+        if (!rightLamp && !leftLamp && rightRaise <= 0.01f && leftRaise <= 0.01f)
         {   return null;
         }
-
-        HumanoidArm swingingArm = entity instanceof Player player && player.swinging ? EntityHelper.getArmFromHand(player.swingingArm, player) : null;
-        return new SoulLampPose(rightLamp, leftLamp, rightArmRot, leftArmRot, entity.isCrouching(), swingingArm,
-                                entity.getAttackAnim(partialTick), entity.getViewXRot(partialTick));
+        return new SoulLampPose(rightLamp, leftLamp, rightRaise, leftRaise, entity instanceof Player);
     }
 
     @EventBusSubscriber(value = Dist.CLIENT)

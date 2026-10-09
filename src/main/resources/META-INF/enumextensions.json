@@ -1,0 +1,13 @@
+{
+  "entries": [
+    {
+      "enum": "net/minecraft/client/model/HumanoidModel$ArmPose",
+      "name": "COLD_SWEAT_SOULSPRING_LAMP",
+      "constructor": "(ZZLnet/neoforged/neoforge/client/IArmPoseTransformer;)V",
+      "parameters": {
+        "class": "com/momosoftworks/coldsweat/client/event/RenderLampHand",
+        "field": "LAMP_ARM_POSE"
+      }
+    }
+  ]
+}

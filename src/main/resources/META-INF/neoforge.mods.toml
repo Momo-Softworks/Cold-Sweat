@@ -9,6 +9,7 @@ license="GNU General Public License v3.1"
     Cold Sweat is a highly-extensible temperature mod for Minecraft. See the documentation here:
     https://mikul.gitbook.io/cold-sweat/
     '''
+    enumExtensions="META-INF/enumextensions.json"
 
 [[mixins]]
     config="cold_sweat.mixin.json"
