@@ -45,6 +45,32 @@ public class MixinSoulLampRendering
     @Shadow
     public ModelPart leftArm;
 
+    @Shadow
+    private void poseRightArm(LivingEntity entity) {}
+
+    @Shadow
+    private void poseLeftArm(LivingEntity entity) {}
+
+    /**
+     * Vanilla only poses the arm that is using an item, so the lamp arm would drop while eating/drinking with the other hand
+     */
+    @Inject(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/HumanoidModel;setupAttackAnimation(Lnet/minecraft/world/entity/LivingEntity;F)V"))
+    public void poseIdleLampArm(LivingEntity entity, float limbSwing, float limbSwingAmount, float age, float headYaw, float headPitch, CallbackInfo ci)
+    {
+        if (!ConfigSettings.POSE_SOULSPRING_LAMP.get() || !entity.isUsingItem()) return;
+
+        HumanoidArm idleArm = entity.getUsedItemHand() == InteractionHand.MAIN_HAND ? entity.getMainArm().getOpposite() : entity.getMainArm();
+        if (!EntityHelper.holdingLamp(entity, idleArm)) return;
+
+        if (idleArm == HumanoidArm.RIGHT)
+        {   this.poseRightArm(entity);
+        }
+        else
+        {   this.poseLeftArm(entity);
+        }
+    }
+
     @Inject(method = "poseRightArm",
             at = @At("TAIL"))
     public void poseRightArm(LivingEntity entity, CallbackInfo ci)

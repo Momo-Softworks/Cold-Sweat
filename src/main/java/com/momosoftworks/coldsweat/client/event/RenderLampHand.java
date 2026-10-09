@@ -4,26 +4,33 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ModItems;
+import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.entity.EntityHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.PlayerModelPart;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.client.ClientHooks;
 import net.neoforged.neoforge.client.event.RenderHandEvent;
 
 import java.lang.Math;
@@ -31,6 +38,10 @@ import java.lang.Math;
 @EventBusSubscriber(Dist.CLIENT)
 public class RenderLampHand
 {
+    // Matches the arm pose produced by transformArm() when the lamp is fully raised
+    private static final float ARM_Y_ROT = -0.0148f;
+    private static final float ARM_Z_ROT = (float) (Math.PI / 2) + 0.05f;
+
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onHandRender(RenderHandEvent event)
     {
@@ -172,48 +183,26 @@ public class RenderLampHand
     private static void renderHand(PoseStack ms, MultiBufferSource bufferSource, int light, LocalPlayer player, boolean isRightHand,
                                    InteractionHand hand, ItemInHandRenderer handRenderer, PlayerRenderer playerRenderer, ItemStack itemStack)
     {
-        boolean isSelected = player.getItemInHand(hand).is(ModItems.SOULSPRING_LAMP);
         // Render arm
         ms.pushPose();
         ms.pushPose();
         ms.scale(1, 1.2f, 1);
         ms.mulPose(Axis.XP.rotationDegrees(-25));
         ms.translate(0, -0.2, 0.25);
-        // The hand moves a little bit when being put away. I don't know why
-        if (!isSelected)
-        {   ms.translate(0, isRightHand ? -0.012 : 0.015, 0);
-            ms.mulPose(Axis.ZP.rotationDegrees(2.4f * (isRightHand ? -1 : 1)));
-            ms.mulPose(Axis.XP.rotationDegrees(2.3f));
-        }
         // Render arm for the correct side
         if (isRightHand)
         {
-            if (isSelected)
-            {
-                ms.translate(-0.365, -0.2, -0.075);
-                ms.mulPose(Axis.YP.rotationDegrees(-90));
-                ms.mulPose(Axis.ZP.rotationDegrees(-90));
-            }
-            else
-            {   ms.translate(-0.3925, 0.06, 0.38);
-                ms.mulPose(Axis.YP.rotationDegrees(-90));
-            }
-            playerRenderer.renderRightHand(ms, bufferSource, light, player);
+            ms.translate(-0.365, -0.2, -0.075);
+            ms.mulPose(Axis.YP.rotationDegrees(-90));
+            ms.mulPose(Axis.ZP.rotationDegrees(-90));
         }
         else
         {
-            if (isSelected)
-            {
-                ms.translate(-0.335, -0.2, -0.075);
-                ms.mulPose(Axis.YP.rotationDegrees(90));
-                ms.mulPose(Axis.ZP.rotationDegrees(90));
-            }
-            else
-            {   ms.translate(-0.325, 0.06, 0.38);
-                ms.mulPose(Axis.YP.rotationDegrees(87));
-            }
-            playerRenderer.renderLeftHand(ms, bufferSource, light, player);
+            ms.translate(-0.335, -0.2, -0.075);
+            ms.mulPose(Axis.YP.rotationDegrees(90));
+            ms.mulPose(Axis.ZP.rotationDegrees(90));
         }
+        renderArm(ms, bufferSource, light, player, isRightHand, playerRenderer);
         ms.popPose();
 
         // Render lamp item
@@ -235,5 +224,33 @@ public class RenderLampHand
         }
         ms.popPose();
         ms.popPose();
+    }
+
+    /**
+     * Renders the player's arm with a fixed pose, instead of going through {@link PlayerRenderer#renderRightHand},
+     * which runs {@code setupAnim()} and lets the third-person arm pose leak into the first-person arm.
+     * That pose isn't applied at all while the other hand is using an item (i.e. eating) or while the lamp is being put away.
+     */
+    private static void renderArm(PoseStack ms, MultiBufferSource bufferSource, int light, LocalPlayer player, boolean isRightHand, PlayerRenderer playerRenderer)
+    {
+        HumanoidArm side = isRightHand ? HumanoidArm.RIGHT : HumanoidArm.LEFT;
+        // Allow other mods to render the arm (i.e. first-person armor)
+        if (ClientHooks.renderSpecificFirstPersonArm(ms, bufferSource, light, player, side)) return;
+
+        PlayerModel<AbstractClientPlayer> model = playerRenderer.getModel();
+        ModelPart arm = isRightHand ? model.rightArm : model.leftArm;
+        ModelPart sleeve = isRightHand ? model.rightSleeve : model.leftSleeve;
+        float sideMultiplier = isRightHand ? 1 : -1;
+
+        arm.resetPose();
+        arm.setPos(-6 * sideMultiplier, ClientOnlyHelper.isPlayerModelSlim(model) ? 2 : 3, 0);
+        // Palm faces downward
+        arm.setRotation(0, ARM_Y_ROT * sideMultiplier, ARM_Z_ROT * sideMultiplier);
+        sleeve.copyFrom(arm);
+        sleeve.visible = player.isModelPartShown(isRightHand ? PlayerModelPart.RIGHT_SLEEVE : PlayerModelPart.LEFT_SLEEVE);
+
+        ResourceLocation skin = player.getSkin().texture();
+        arm.render(ms, bufferSource.getBuffer(RenderType.entitySolid(skin)), light, OverlayTexture.NO_OVERLAY);
+        sleeve.render(ms, bufferSource.getBuffer(RenderType.entityTranslucent(skin)), light, OverlayTexture.NO_OVERLAY);
     }
 }
