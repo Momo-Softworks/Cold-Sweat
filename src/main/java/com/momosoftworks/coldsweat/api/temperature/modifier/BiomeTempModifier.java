@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.api.temperature.modifier;
 
 import com.alcatrazescapee.primalwinter.ForgePrimalWinter;
+import com.alcatrazescapee.primalwinter.config.ServerConfig;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
@@ -73,13 +74,18 @@ public class BiomeTempModifier extends TempModifier
             // Biome temp with time of day
             double biomeTemp = WorldHelper.getBiomeTemperature(level, holder);
 
-            // Primal Winter compat for configured biomes
-            if (CompatManager.isPrimalWinterLoaded() && biomeTempData != null)
+            // Primal Winter compat for configured dimensions
+            if (biomeTempData != null)
             {
-                boolean isWinterBiome = ForgePrimalWinter.CONFIG.isWinterBiome(holder.unwrapKey().get());
-                boolean isWinterDimension = ForgePrimalWinter.CONFIG.isWinterDimension(level.dimension());
-                if (isWinterBiome && isWinterDimension)
-                {   biomeTemp = -0.5;
+                if (CompatManager.isColderPrimalWinterLoaded())
+                {   if (ServerConfig.isWinterDimension(level.dimension())) biomeTemp = -0.5;
+                }
+                else if (CompatManager.isPrimalWinterLoaded())
+                {   boolean isWinterBiome = ForgePrimalWinter.CONFIG.isWinterBiome(holder.unwrapKey().get());
+                    boolean isWinterDimension = ForgePrimalWinter.CONFIG.isWinterDimension(level.dimension());
+                    if (isWinterBiome && isWinterDimension)
+                    {   biomeTemp = -0.5;
+                    }
                 }
             }
             // Add biome temperature
