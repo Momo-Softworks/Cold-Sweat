@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 import com.momosoftworks.coldsweat.api.event.core.registry.AddRegistriesEvent;
 import com.momosoftworks.coldsweat.api.event.vanilla.ServerConfigsLoadedEvent;
 import com.momosoftworks.coldsweat.api.registry.SpreadRuleRegistry;
+import com.momosoftworks.coldsweat.client.event.RenderLampHand;
 import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCap;
 import com.momosoftworks.coldsweat.common.capability.shearing.ShearableFurCap;
 import com.momosoftworks.coldsweat.common.capability.temperature.EntityTempCap;
@@ -109,6 +110,7 @@ public class ColdSweat
         {
             ItemBlockRenderTypes.setRenderLayer(ModFluids.SLUSH, RenderType.translucent());
             ItemBlockRenderTypes.setRenderLayer(ModFluids.FLOWING_SLUSH, RenderType.translucent());
+            RenderLampHand.createLampArmPose();
         });
     }
 
