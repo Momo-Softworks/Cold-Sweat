@@ -4,7 +4,6 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.momosoftworks.coldsweat.client.event.RenderLampHand;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
-import com.momosoftworks.coldsweat.util.entity.EntityHelper;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.layers.HeldItemLayer;
@@ -12,9 +11,7 @@ import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -49,21 +46,16 @@ public class MixinSoulLampRendering
     private HandSide getAttackArm(LivingEntity entity) { return null; }
 
     /**
-     * Vanilla only poses the arm that is using an item, so the lamp arm would drop while eating/drinking with the other hand
+     * Vanilla doesn't pose the lamp arm while the other arm is using an item, and a loaded crossbow's pose overwrites it
      */
     @Inject(method = "setupAnim(Lnet/minecraft/entity/LivingEntity;FFFFF)V",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/model/BipedModel;setupAttackAnimation(Lnet/minecraft/entity/LivingEntity;F)V"))
     public void poseIdleLampArm(LivingEntity entity, float limbSwing, float limbSwingAmount, float age, float headYaw, float headPitch, CallbackInfo ci)
     {
-        if (!ConfigSettings.POSE_SOULSPRING_LAMP.get() || !entity.isUsingItem()) return;
-
-        HandSide idleArm = entity.getUsedItemHand() == Hand.MAIN_HAND ? entity.getMainArm().getOpposite() : entity.getMainArm();
-        if (!EntityHelper.holdingLamp(entity, idleArm)) return;
-
-        if (idleArm == HandSide.RIGHT)
+        if (RenderLampHand.shouldReposeArm(model, entity, HandSide.RIGHT))
         {   this.poseRightArm(entity);
         }
-        else
+        if (RenderLampHand.shouldReposeArm(model, entity, HandSide.LEFT))
         {   this.poseLeftArm(entity);
         }
     }
@@ -86,10 +78,8 @@ public class MixinSoulLampRendering
         }
     }
 
-    private static boolean shouldPoseLampArm(LivingEntity entity, HandSide side, BipedModel.ArmPose pose)
-    {
-        return ConfigSettings.POSE_SOULSPRING_LAMP.get() && entity instanceof PlayerEntity
-            && pose == BipedModel.ArmPose.ITEM && EntityHelper.holdingLamp(entity, side);
+    private boolean shouldPoseLampArm(LivingEntity entity, HandSide side, BipedModel.ArmPose pose)
+    {   return pose == BipedModel.ArmPose.ITEM && RenderLampHand.isLampArmPosed(model, entity, side);
     }
 
     @Inject(method = "poseRightArm", at = @At("TAIL"))
@@ -106,10 +96,10 @@ public class MixinSoulLampRendering
     public void storeLampArmPose(LivingEntity entity, float age, CallbackInfo ci)
     {
         lampArmRot = null;
-        if (!ConfigSettings.POSE_SOULSPRING_LAMP.get() || model.attackTime <= 0 || !(entity instanceof PlayerEntity)) return;
+        if (model.attackTime <= 0) return;
 
         HandSide side = this.getAttackArm(entity);
-        if (EntityHelper.holdingLamp(entity, side))
+        if (RenderLampHand.isLampArmPosed(model, entity, side))
         {   ModelRenderer arm = side == HandSide.RIGHT ? this.rightArm : this.leftArm;
             lampArmRot = new float[] { arm.xRot, arm.yRot, arm.zRot };
         }
@@ -142,6 +132,19 @@ public class MixinSoulLampRendering
     public static class HeldItem
     {
         HeldItemLayer<?, ?> self = (HeldItemLayer<?, ?>) (Object) this;
+
+        /**
+         * Hides the lamp while the other arm is in a two-handed pose
+         */
+        @Inject(method = "renderArmWithItem", at = @At("HEAD"), cancellable = true)
+        public void hideLampForTwoHandedPose(LivingEntity entity, ItemStack stack, ItemCameraTransforms.TransformType transformType, HandSide arm, MatrixStack ms,
+                                             IRenderTypeBuffer bufferSource, int light, CallbackInfo ci)
+        {
+            if (stack.getItem() == ModItems.SOULSPRING_LAMP && self.getParentModel() instanceof BipedModel
+            && RenderLampHand.isLampHidden((BipedModel<?>) self.getParentModel(), entity, arm))
+            {   ci.cancel();
+            }
+        }
 
         @Inject(method = "renderArmWithItem",
                 at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/model/IHasArm;translateToHand(Lnet/minecraft/util/HandSide;Lcom/mojang/blaze3d/matrix/MatrixStack;)V"))

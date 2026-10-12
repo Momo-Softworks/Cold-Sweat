@@ -21,6 +21,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerModelPart;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
@@ -226,13 +227,46 @@ public class RenderLampHand
      */
     public static void offsetArm(BipedModel<?> model, LivingEntity entity, HandSide side)
     {
-        if (!(entity instanceof PlayerEntity) || !EntityHelper.holdingLamp(entity, side)) return;
+        if (!isLampArmPosed(model, entity, side)) return;
 
         ModelRenderer arm = getArm(model, side);
         arm.x -= side == HandSide.RIGHT ? 1 : -1;
         if (model instanceof PlayerModel<?> && !ClientOnlyHelper.isPlayerModelSlim(model))
         {   arm.y += 1;
         }
+    }
+
+    /**
+     * The lamp is hidden while the other arm is in a two-handed pose, so that pose can use this arm.<br>
+     * Loaded crossbows are exempt, since they can be fired with one hand.
+     */
+    public static boolean isLampHidden(BipedModel<?> model, LivingEntity entity, HandSide side)
+    {
+        if (!ConfigSettings.POSE_SOULSPRING_LAMP.get() || !EntityHelper.holdingLamp(entity, side)) return false;
+
+        BipedModel.ArmPose otherPose = side == HandSide.RIGHT ? model.leftArmPose : model.rightArmPose;
+        return otherPose.isTwoHanded() && otherPose != BipedModel.ArmPose.CROSSBOW_HOLD;
+    }
+
+    /**
+     * @return Whether the arm is posed with the lamp
+     */
+    public static boolean isLampArmPosed(BipedModel<?> model, LivingEntity entity, HandSide side)
+    {
+        return ConfigSettings.POSE_SOULSPRING_LAMP.get() && entity instanceof PlayerEntity
+            && EntityHelper.holdingLamp(entity, side) && !isLampHidden(model, entity, side);
+    }
+
+    /**
+     * Vanilla doesn't pose the lamp arm while the other arm is using an item, and a loaded crossbow's pose overwrites it
+     */
+    public static boolean shouldReposeArm(BipedModel<?> model, LivingEntity entity, HandSide side)
+    {
+        if (!isLampArmPosed(model, entity, side)) return false;
+
+        HandSide usedArm = entity.getUsedItemHand() == Hand.MAIN_HAND ? entity.getMainArm() : entity.getMainArm().getOpposite();
+        BipedModel.ArmPose otherPose = side == HandSide.RIGHT ? model.leftArmPose : model.rightArmPose;
+        return entity.isUsingItem() && usedArm != side || otherPose.isTwoHanded();
     }
 
     private static float getWindUp(float attackAnim)
