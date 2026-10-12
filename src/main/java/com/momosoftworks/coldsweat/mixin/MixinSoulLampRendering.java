@@ -48,7 +48,8 @@ public class MixinSoulLampRendering
     private void poseLeftArm(HumanoidRenderState state) {}
 
     /**
-     * Vanilla skips posing an arm if the other arm's pose affects it (i.e. drawing a bow), so the lamp arm would drop
+     * Vanilla skips posing an arm if the other arm's pose affects it (i.e. throwing a trident), so the lamp arm would drop.<br>
+     * Two-handed poses take the lamp arm instead, which is handled by {@link SoulLampPose}
      */
     @Inject(method = "setupAnim(Lnet/minecraft/client/renderer/entity/state/HumanoidRenderState;)V",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/HumanoidModel;setupAttackAnimation(Lnet/minecraft/client/renderer/entity/state/HumanoidRenderState;)V"))
@@ -108,6 +109,19 @@ public class MixinSoulLampRendering
     @Mixin(ItemInHandLayer.class)
     public static class HeldItem
     {
+        /**
+         * Hides the lamp while the other arm is in a two-handed pose
+         */
+        @Inject(method = "submitArmWithItem", at = @At("HEAD"), cancellable = true)
+        public void hideLampForTwoHandedPose(ArmedEntityRenderState state, ItemStackRenderState item, ItemStack itemStack, HumanoidArm arm,
+                                             PoseStack poseStack, SubmitNodeCollector collector, int light, CallbackInfo ci)
+        {
+            SoulLampPose pose = SoulLampPose.of(state);
+            if (pose != null && pose.isLampHidden(arm) && itemStack.is(ModItems.SOULSPRING_LAMP))
+            {   ci.cancel();
+            }
+        }
+
         /**
          * Slim arms hold the lamp slightly closer to the body
          */

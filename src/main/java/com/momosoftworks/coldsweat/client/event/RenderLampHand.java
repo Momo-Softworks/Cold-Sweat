@@ -126,7 +126,7 @@ public class RenderLampHand
         ms.scale(1, 1, 0.8f);
         ms.mulPose(Axis.ZP.rotationDegrees(90));
         ms.translate(-0.1, 0.125, 0);
-        renderLamp(ms, event.getSubmitNodeCollector(), event.getPackedLight(), player, isRightHand, event.getItemStack());
+        renderLamp(ms, event.getSubmitNodeCollector(), event.getPackedLight(), player, event.getItemStack());
         ms.popPose();
 
         ms.popPose();
@@ -159,10 +159,10 @@ public class RenderLampHand
         collector.submitModelPart(arm, ms, RenderTypes.entityTranslucent(skin), light, OverlayTexture.NO_OVERLAY, null);
     }
 
-    private static void renderLamp(PoseStack ms, SubmitNodeCollector collector, int light, LocalPlayer player, boolean isRightHand, ItemStack itemStack)
+    private static void renderLamp(PoseStack ms, SubmitNodeCollector collector, int light, LocalPlayer player, ItemStack itemStack)
     {
-        ItemDisplayContext context = isRightHand ? ItemDisplayContext.THIRD_PERSON_RIGHT_HAND : ItemDisplayContext.THIRD_PERSON_LEFT_HAND;
-        Minecraft.getInstance().gameRenderer.itemInHandRenderer.renderItem(player, itemStack, context, ms, collector, light);
+        // Left-hand contexts mirror the model, which flips the lamp upside-down. The pose stack already accounts for the side
+        Minecraft.getInstance().gameRenderer.itemInHandRenderer.renderItem(player, itemStack, ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, ms, collector, light);
     }
 
     /* Third-person */
