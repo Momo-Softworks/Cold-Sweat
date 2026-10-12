@@ -1,19 +1,15 @@
 package com.momosoftworks.coldsweat.mixin;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.datafixers.util.Pair;
-import com.momosoftworks.coldsweat.client.event.HandleSoulLampAnim;
 import com.momosoftworks.coldsweat.client.event.RenderLampHand;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.entity.EntityHelper;
-import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.layers.HeldItemLayer;
 import net.minecraft.client.renderer.entity.model.BipedModel;
-import net.minecraft.client.renderer.entity.model.PlayerModel;
+import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -26,13 +22,14 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(BipedModel.class)
 public class MixinSoulLampRendering
 {
-    BipedModel model = (BipedModel) (Object) this;
+    BipedModel<?> model = (BipedModel<?>) (Object) this;
+
+    // xRot, yRot, zRot of the lamp arm before vanilla's swing
+    float[] lampArmRot;
 
     @Final
     @Shadow
@@ -42,169 +39,119 @@ public class MixinSoulLampRendering
     @Shadow
     public ModelRenderer leftArm;
 
-    @Inject(method = "poseRightArm",
-            at = @At("TAIL"))
-    public void poseRightArm(LivingEntity entity, CallbackInfo ci)
+    @Shadow
+    private void poseRightArm(LivingEntity entity) {}
+
+    @Shadow
+    private void poseLeftArm(LivingEntity entity) {}
+
+    @Shadow
+    private HandSide getAttackArm(LivingEntity entity) { return null; }
+
+    /**
+     * Vanilla only poses the arm that is using an item, so the lamp arm would drop while eating/drinking with the other hand
+     */
+    @Inject(method = "setupAnim(Lnet/minecraft/entity/LivingEntity;FFFFF)V",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/model/BipedModel;setupAttackAnimation(Lnet/minecraft/entity/LivingEntity;F)V"))
+    public void poseIdleLampArm(LivingEntity entity, float limbSwing, float limbSwingAmount, float age, float headYaw, float headPitch, CallbackInfo ci)
     {
-        if (!ConfigSettings.POSE_SOULSPRING_LAMP.get()) return;
+        if (!ConfigSettings.POSE_SOULSPRING_LAMP.get() || !entity.isUsingItem()) return;
 
-        boolean holdingLamp = EntityHelper.holdingLamp(entity, HandSide.RIGHT);
-        Pair<Float, Float> armRot = HandleSoulLampAnim.RIGHT_ARM_ROTATIONS.getOrDefault(entity, Pair.of(0f, 0f));
-        float rightArmRot = CSMath.toRadians(CSMath.blend(armRot.getSecond(), armRot.getFirst(), Minecraft.getInstance().getFrameTime(), 0, 1));
+        HandSide idleArm = entity.getUsedItemHand() == Hand.MAIN_HAND ? entity.getMainArm().getOpposite() : entity.getMainArm();
+        if (!EntityHelper.holdingLamp(entity, idleArm)) return;
 
-        if (!CSMath.betweenInclusive(rightArmRot, -0.01, 0.01))
-        {
-            switch (model.rightArmPose)
-            {
-                case EMPTY :
-                {
-                    this.rightArm.xRot = this.rightArm.xRot - rightArmRot;
-                    this.rightArm.zRot = this.rightArm.zRot - (holdingLamp ? 0.05F : 0f);
-                    this.rightArm.yRot = 0;
-                    break;
-                }
-                case ITEM :
-                {
-                    this.rightArm.xRot = (holdingLamp ? this.rightArm.xRot * 0.15f - 0.35f : this.rightArm.xRot) - rightArmRot;
-                    this.rightArm.zRot = this.rightArm.zRot - (holdingLamp ? 0.05F : 0f);
-                    this.rightArm.yRot = 0;
-                    break;
-                }
-            }
+        if (idleArm == HandSide.RIGHT)
+        {   this.poseRightArm(entity);
         }
-        RenderLampHand.transformArm(entity, this.rightArm, HandSide.RIGHT);
+        else
+        {   this.poseLeftArm(entity);
+        }
     }
 
-    @Inject(method = "poseLeftArm",
-            at = @At("TAIL"))
-    public void poseLeftArm(LivingEntity entity, CallbackInfo ci)
+    @Inject(method = "poseRightArm", at = @At("HEAD"), cancellable = true)
+    public void poseRightLampArm(LivingEntity entity, CallbackInfo ci)
+    {
+        if (shouldPoseLampArm(entity, HandSide.RIGHT, model.rightArmPose))
+        {   RenderLampHand.poseArm(model, entity, HandSide.RIGHT);
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "poseLeftArm", at = @At("HEAD"), cancellable = true)
+    public void poseLeftLampArm(LivingEntity entity, CallbackInfo ci)
+    {
+        if (shouldPoseLampArm(entity, HandSide.LEFT, model.leftArmPose))
+        {   RenderLampHand.poseArm(model, entity, HandSide.LEFT);
+            ci.cancel();
+        }
+    }
+
+    private static boolean shouldPoseLampArm(LivingEntity entity, HandSide side, BipedModel.ArmPose pose)
+    {
+        return ConfigSettings.POSE_SOULSPRING_LAMP.get() && entity instanceof PlayerEntity
+            && pose == BipedModel.ArmPose.ITEM && EntityHelper.holdingLamp(entity, side);
+    }
+
+    @Inject(method = "poseRightArm", at = @At("TAIL"))
+    public void lowerRightArm(LivingEntity entity, CallbackInfo ci)
+    {   RenderLampHand.lowerArm(model, entity, HandSide.RIGHT);
+    }
+
+    @Inject(method = "poseLeftArm", at = @At("TAIL"))
+    public void lowerLeftArm(LivingEntity entity, CallbackInfo ci)
+    {   RenderLampHand.lowerArm(model, entity, HandSide.LEFT);
+    }
+
+    @Inject(method = "setupAttackAnimation", at = @At("HEAD"))
+    public void storeLampArmPose(LivingEntity entity, float age, CallbackInfo ci)
+    {
+        lampArmRot = null;
+        if (!ConfigSettings.POSE_SOULSPRING_LAMP.get() || model.attackTime <= 0 || !(entity instanceof PlayerEntity)) return;
+
+        HandSide side = this.getAttackArm(entity);
+        if (EntityHelper.holdingLamp(entity, side))
+        {   ModelRenderer arm = side == HandSide.RIGHT ? this.rightArm : this.leftArm;
+            lampArmRot = new float[] { arm.xRot, arm.yRot, arm.zRot };
+        }
+    }
+
+    @Inject(method = "setupAttackAnimation", at = @At("TAIL"))
+    public void swingLampArm(LivingEntity entity, float age, CallbackInfo ci)
+    {
+        if (lampArmRot == null) return;
+
+        HandSide side = this.getAttackArm(entity);
+        // Discard vanilla's swing, but keep the arm's position
+        ModelRenderer arm = side == HandSide.RIGHT ? this.rightArm : this.leftArm;
+        arm.xRot = lampArmRot[0];
+        arm.yRot = lampArmRot[1];
+        arm.zRot = lampArmRot[2];
+        RenderLampHand.swingArm(model, side, model.attackTime);
+    }
+
+    @Inject(method = "setupAnim(Lnet/minecraft/entity/LivingEntity;FFFFF)V", at = @At("TAIL"))
+    public void offsetLampArms(LivingEntity entity, float limbSwing, float limbSwingAmount, float age, float headYaw, float headPitch, CallbackInfo ci)
     {
         if (!ConfigSettings.POSE_SOULSPRING_LAMP.get()) return;
 
-        boolean holdingLamp = EntityHelper.holdingLamp(entity, HandSide.LEFT);
-        Pair<Float, Float> armRot = HandleSoulLampAnim.LEFT_ARM_ROTATIONS.getOrDefault(entity, Pair.of(0f, 0f));
-        float leftArmRot = CSMath.blend(CSMath.toRadians(armRot.getSecond()), CSMath.toRadians(armRot.getFirst()), Minecraft.getInstance().getFrameTime(), 0, 1);
-
-        if (!CSMath.betweenInclusive(leftArmRot, -0.01, 0.01))
-        {
-            switch (model.leftArmPose)
-            {
-                case EMPTY :
-                {
-                    this.leftArm.xRot = this.leftArm.xRot - leftArmRot;
-                    this.leftArm.zRot = this.leftArm.zRot + (holdingLamp ? 0.05F : 0f);
-                    this.leftArm.yRot = 0.0F;
-                    break;
-                }
-                case ITEM :
-                {
-                    this.leftArm.xRot = (holdingLamp ? this.leftArm.xRot * 0.15f - 0.35f : this.leftArm.xRot) - leftArmRot;
-                    this.leftArm.zRot = this.leftArm.zRot + (holdingLamp ? 0.05F : 0f);
-                    this.leftArm.yRot = 0.0F;
-                    break;
-                }
-            }
-        }
-        RenderLampHand.transformArm(entity, this.leftArm, HandSide.LEFT);
+        RenderLampHand.offsetArm(model, entity, HandSide.RIGHT);
+        RenderLampHand.offsetArm(model, entity, HandSide.LEFT);
     }
 
     @Mixin(HeldItemLayer.class)
     public static class HeldItem
     {
-        HeldItemLayer self = (HeldItemLayer) (Object) this;
+        HeldItemLayer<?, ?> self = (HeldItemLayer<?, ?>) (Object) this;
 
-        private static boolean WAS_RIGHT_HAND_ADJUSTED = false;
-
-        @Inject(method = "render(Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;ILnet/minecraft/entity/LivingEntity;FFFFFF)V",
-                at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/layers/HeldItemLayer;renderArmWithItem(Lnet/minecraft/entity/LivingEntity;"
-                                                  + "Lnet/minecraft/item/ItemStack;"
-                                                  + "Lnet/minecraft/client/renderer/model/ItemCameraTransforms$TransformType;"
-                                                  + "Lnet/minecraft/util/HandSide;"
-                                                  + "Lcom/mojang/blaze3d/matrix/MatrixStack;"
-                                                  + "Lnet/minecraft/client/renderer/IRenderTypeBuffer;I)V", ordinal = 0),
-                locals = LocalCapture.CAPTURE_FAILHARD)
-        public void shiftRightArmLamp(MatrixStack ms, IRenderTypeBuffer bufferSource, int light, LivingEntity entity, float limbSwing, float limbSwingAmount,
-                                      float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo ci,
-                                      // locals
-                                      boolean isMainArm, ItemStack leftHand, ItemStack rightHand)
+        @Inject(method = "renderArmWithItem",
+                at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/model/IHasArm;translateToHand(Lnet/minecraft/util/HandSide;Lcom/mojang/blaze3d/matrix/MatrixStack;)V"))
+        public void shiftSlimArmLamp(LivingEntity entity, ItemStack stack, ItemCameraTransforms.TransformType transformType, HandSide arm, MatrixStack ms,
+                                     IRenderTypeBuffer bufferSource, int light, CallbackInfo ci)
         {
             if (!ConfigSettings.POSE_SOULSPRING_LAMP.get()) return;
 
-            if (rightHand.getItem() == ModItems.SOULSPRING_LAMP && ClientOnlyHelper.isPlayerModelSlim(self))
-            {   ms.translate(-0.5/16f, 0, 0);
-                WAS_RIGHT_HAND_ADJUSTED = true;
-            }
-        }
-
-        @Inject(method = "render(Lcom/mojang/blaze3d/matrix/MatrixStack;Lnet/minecraft/client/renderer/IRenderTypeBuffer;ILnet/minecraft/entity/LivingEntity;FFFFFF)V",
-                at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/layers/HeldItemLayer;renderArmWithItem(Lnet/minecraft/entity/LivingEntity;"
-                                                  + "Lnet/minecraft/item/ItemStack;"
-                                                  + "Lnet/minecraft/client/renderer/model/ItemCameraTransforms$TransformType;"
-                                                  + "Lnet/minecraft/util/HandSide;"
-                                                  + "Lcom/mojang/blaze3d/matrix/MatrixStack;"
-                                                  + "Lnet/minecraft/client/renderer/IRenderTypeBuffer;I)V", ordinal = 1),
-                locals = LocalCapture.CAPTURE_FAILHARD)
-        public void shiftLeftArmLamp(MatrixStack ms, IRenderTypeBuffer bufferSource, int light, LivingEntity entity, float limbSwing, float limbSwingAmount,
-                                     float partialTicks, float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo ci,
-                                     // locals
-                                     boolean isMainArm, ItemStack leftHand, ItemStack rightHand)
-        {
-            if (!ConfigSettings.POSE_SOULSPRING_LAMP.get()) return;
-
-            // Move the PS back to its original position
-            if (WAS_RIGHT_HAND_ADJUSTED)
-            {   ms.translate(0.5/16f, 0, 0);
-                WAS_RIGHT_HAND_ADJUSTED = false;
-            }
-            if (leftHand.getItem() == ModItems.SOULSPRING_LAMP && ClientOnlyHelper.isPlayerModelSlim(self))
-            {   ms.translate(0.5/16f, 0, 0);
-            }
-        }
-    }
-
-    @Mixin(BipedModel.class)
-    public static class ShiftWidePlayerArm
-    {
-        BipedModel self = (BipedModel) (Object) this;
-
-        @Inject(method = "setupAnim(Lnet/minecraft/entity/LivingEntity;FFFFF)V", at = @At("TAIL"))
-        public void shiftWidePlayerArm(LivingEntity entity, float limbSwing, float limbSwingAmount, float age, float headYaw, float headPitch, CallbackInfo ci)
-        {
-            if (!ConfigSettings.POSE_SOULSPRING_LAMP.get()) return;
-
-            if (self instanceof PlayerModel && !ClientOnlyHelper.isPlayerModelSlim(self))
-            {
-                PlayerModel playerModel = ((PlayerModel<?>) self);
-                if (EntityHelper.holdingLamp(entity, HandSide.RIGHT))
-                {
-                    playerModel.rightArm.y += 1;
-                    if (entity instanceof PlayerEntity && entity.getAttackAnim(Minecraft.getInstance().getFrameTime()) > 0
-                    && EntityHelper.getArmFromHand(entity.swingingArm, ((PlayerEntity) entity)) == HandSide.RIGHT)
-                    {   playerModel.rightArm.x -= 1;
-                    }
-                }
-                if (EntityHelper.holdingLamp(entity, HandSide.LEFT))
-                {
-                    playerModel.leftArm.y += 1;
-                    if (entity instanceof PlayerEntity && entity.getAttackAnim(Minecraft.getInstance().getFrameTime()) > 0
-                    && EntityHelper.getArmFromHand(entity.swingingArm, ((PlayerEntity) entity)) == HandSide.LEFT)
-                    {   playerModel.leftArm.x += 1;
-                    }
-                }
-            }
-        }
-    }
-
-    @Mixin(PlayerEntity.class)
-    public static class EquipAnimation
-    {
-        @Inject(method = "getCurrentItemAttackStrengthDelay", at = @At("HEAD"), cancellable = true)
-        public void reduceEquipDelay(CallbackInfoReturnable<Float> cir)
-        {
-            if (!ConfigSettings.POSE_SOULSPRING_LAMP.get()) return;
-
-            if (((LivingEntity) (Object) this).getItemInHand(Hand.MAIN_HAND).getItem() == ModItems.SOULSPRING_LAMP)
-            {   cir.setReturnValue(0f);
+            if (stack.getItem() == ModItems.SOULSPRING_LAMP && ClientOnlyHelper.isPlayerModelSlim(self))
+            {   ms.translate((arm == HandSide.RIGHT ? -0.5 : 0.5) / 16f, 0, 0);
             }
         }
     }

@@ -2,26 +2,31 @@ package com.momosoftworks.coldsweat.client.event;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
+import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
 import com.momosoftworks.coldsweat.util.entity.EntityHelper;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.client.renderer.FirstPersonRenderer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
 import net.minecraft.client.renderer.entity.model.BipedModel;
+import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerModelPart;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -32,126 +37,221 @@ import java.lang.Math;
 @Mod.EventBusSubscriber(Dist.CLIENT)
 public class RenderLampHand
 {
+    private static final float MAX_ARM_RAISE = CSMath.toRadians(70);
+
+    // Matches the third-person arm pose when the lamp is fully raised
+    private static final float FIRST_PERSON_ARM_Y_ROT = -0.0148f;
+    private static final float FIRST_PERSON_ARM_Z_ROT = (float) (Math.PI / 2) + 0.05f;
+
+    // Whether each hand has finished raising the lamp, indexed by Hand
+    private static final boolean[] HAND_RAISED = new boolean[2];
+
+    /* First-person */
+
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onHandRender(RenderHandEvent event)
     {
-        if (event.getItemStack().getItem() == ModItems.SOULSPRING_LAMP
-        && ConfigSettings.POSE_SOULSPRING_LAMP.get())
-        {
-            event.setCanceled(true);
-
-            MatrixStack ms = event.getMatrixStack();
-            ClientPlayerEntity player = Minecraft.getInstance().player;
-            if (player == null) return;
-
-            boolean isRightHand = EntityHelper.getArmFromHand(event.getHand(), player) == HandSide.RIGHT;
-            PlayerRenderer playerRenderer = (PlayerRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player);
-            FirstPersonRenderer handRenderer = Minecraft.getInstance().gameRenderer.itemInHandRenderer;
-
-            ms.pushPose();
-
-            // Idle position on the screen
-            ms.translate(0, 0.2, -0.3);
-
-            // Swing animation
-            ms.pushPose();
-            float swingProgress = event.getSwingProgress();
-            float equipProgress = event.getEquipProgress();
-            float handX = isRightHand ? 1.0F : -1.0F;
-            // Position hand on screen
-            ms.translate(isRightHand ? 0 : -0.698,
-                         0.6,
-                         isRightHand ? 0.7 : 0.76);
-            float sqrtSwing = MathHelper.sqrt(swingProgress);
-            float handSwingX = -0.3F * MathHelper.sin(sqrtSwing * (float)Math.PI);
-            float handSwingY = 0.4F * MathHelper.sin(sqrtSwing * ((float)Math.PI * 2F));
-            float handSwingZ = -0.4F * MathHelper.sin(swingProgress * (float)Math.PI);
-            float swingSize = isRightHand
-                              ? (equipProgress != 0 && equipProgress < 1 ? 2 : 4)
-                              : (equipProgress != 0 && equipProgress < 1 ? 1.5f : 7);
-            ms.translate(handX * (handSwingX + 0.64000005F), handSwingY/swingSize + -0.6F + equipProgress * -0.6F, handSwingZ/(swingSize*6) + -0.71999997F);
-            ms.mulPose(Vector3f.YP.rotationDegrees(handX * 45.0F));
-            float handFlailZ = MathHelper.sin(swingProgress * swingProgress * (float)Math.PI);
-            float handFlailX = MathHelper.sin(sqrtSwing * (float)Math.PI);
-            ms.mulPose(Vector3f.YP.rotationDegrees(handX * handFlailX * (isRightHand ? 1f : 20.0F)));
-            ms.mulPose(Vector3f.XP.rotationDegrees(handX * handFlailX * (isRightHand ? -10.0F : 1f)));
-            ms.mulPose(Vector3f.ZP.rotationDegrees(handX * handFlailZ * 20f));
-
-            ms.mulPose(Vector3f.XP.rotationDegrees(90));
-            if (isRightHand)
-            {   ms.mulPose(Vector3f.ZP.rotationDegrees(-130));
-            }
-            else
-            {   ms.mulPose(Vector3f.ZP.rotationDegrees(-230));
-            }
-
-            // Scale and translate hand so it's smaller on-screen
-            ms.scale(0.5f, 0.5f, 0.5f);
-            if (isRightHand)
-            {   ms.translate(0.5, -0.1, 0.5);
-            }
-            else
-            {   ms.translate(-1.2, -0.1, 0.5);
-            }
-
-            // Render the item/hand
-            renderHand(ms, event.getBuffers(), event.getLight(), player, isRightHand, event.getHand(), handRenderer, playerRenderer, event.getItemStack());
-            ms.popPose();
-            ms.popPose();
+        if (event.getItemStack().getItem() != ModItems.SOULSPRING_LAMP
+        || !ConfigSettings.POSE_SOULSPRING_LAMP.get())
+        {   return;
         }
+        event.setCanceled(true);
+
+        ClientPlayerEntity player = Minecraft.getInstance().player;
+        if (player == null) return;
+
+        MatrixStack ms = event.getMatrixStack();
+        boolean isRightHand = EntityHelper.getArmFromHand(event.getHand(), player) == HandSide.RIGHT;
+        float handX = isRightHand ? 1 : -1;
+        float swingProgress = event.getSwingProgress();
+        float equipProgress = event.getEquipProgress();
+
+        // Vanilla lowers the hand while the attack cooldown recovers
+        int handIndex = event.getHand().ordinal();
+        if (event.getItemStack() != player.getItemInHand(event.getHand()) || player.isHandsBusy())
+        {   HAND_RAISED[handIndex] = false;
+        }
+        else if (equipProgress == 0)
+        {   HAND_RAISED[handIndex] = true;
+        }
+        if (HAND_RAISED[handIndex])
+        {   equipProgress = 0;
+        }
+
+        ms.pushPose();
+
+        // Position hand on screen
+        float sqrtSwing = MathHelper.sqrt(swingProgress);
+        float handSwingX = -0.3F * MathHelper.sin(sqrtSwing * (float) Math.PI);
+        float handSwingY = 0.1F * MathHelper.sin(sqrtSwing * (float) Math.PI * 2);
+        float handSwingZ = -0.0167F * MathHelper.sin(swingProgress * (float) Math.PI);
+        ms.translate(handX * (handSwingX + 0.64F), handSwingY + 0.2F - equipProgress * 0.6F, handSwingZ - 0.32F);
+        ms.mulPose(Vector3f.YP.rotationDegrees(handX * 45));
+
+        // Swing animation
+        float handFlailX = MathHelper.sin(sqrtSwing * (float) Math.PI);
+        float handFlailZ = MathHelper.sin(swingProgress * swingProgress * (float) Math.PI);
+        ms.mulPose(Vector3f.YP.rotationDegrees(handX * handFlailX));
+        ms.mulPose(Vector3f.XP.rotationDegrees(handFlailX * -10));
+        ms.mulPose(Vector3f.ZP.rotationDegrees(handX * handFlailZ * 20));
+
+        // Hold the lamp out in front, palm down
+        ms.mulPose(Vector3f.XP.rotationDegrees(90));
+        ms.mulPose(Vector3f.ZP.rotationDegrees(handX * -130));
+        ms.scale(0.5f, 0.5f, 0.5f);
+        ms.translate(handX * 0.5, -0.1, 0.5);
+
+        // Render arm
+        ms.pushPose();
+        ms.scale(1, 1.2f, 1);
+        ms.mulPose(Vector3f.XP.rotationDegrees(-25));
+        ms.translate(handX * -0.365, -0.4, 0.175);
+        ms.mulPose(Vector3f.YP.rotationDegrees(handX * -90));
+        ms.mulPose(Vector3f.ZP.rotationDegrees(handX * -90));
+        PlayerRenderer playerRenderer = (PlayerRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player);
+        renderArm(ms, event.getBuffers(), event.getLight(), player, isRightHand, playerRenderer);
+        ms.popPose();
+
+        // Render lamp item
+        ms.pushPose();
+        ms.mulPose(Vector3f.XP.rotationDegrees(-90));
+        ms.translate(handX * -0.35, 0.1, 0.625);
+        ms.scale(1, 1, 0.8f);
+        ms.mulPose(Vector3f.ZP.rotationDegrees(90));
+        ms.translate(-0.1, 0.125, 0);
+        renderLamp(ms, event.getBuffers(), event.getLight(), player, isRightHand, event.getItemStack());
+        ms.popPose();
+
+        ms.popPose();
     }
 
-    public static void transformArm(LivingEntity entity, ModelRenderer arm, HandSide side)
+    /**
+     * Renders the player's arm with a fixed pose, instead of going through {@link PlayerRenderer#renderRightHand},
+     * which runs {@code setupAnim()} and lets the third-person arm pose leak into the first-person arm.
+     */
+    private static void renderArm(MatrixStack ms, IRenderTypeBuffer bufferSource, int light, ClientPlayerEntity player, boolean isRightHand, PlayerRenderer playerRenderer)
     {
-        if (entity instanceof PlayerEntity && EntityHelper.holdingLamp(entity, side))
-        {
-            PlayerEntity player = ((PlayerEntity) entity);
-            // Turn the player's arm so their "palm" is face-down
-            float sideMultiplier = side == HandSide.RIGHT ? 1 : -1;
-            arm.zRot += (float) (0.5*Math.PI) * sideMultiplier;
-            arm.yRot = -arm.xRot * sideMultiplier - (float) (0.5*Math.PI) * sideMultiplier * 1.04f;
-            arm.xRot = (float) -Math.PI/2;
-            arm.x -= 1 * sideMultiplier;
-            if (player.isCrouching())
-            {   arm.xRot -= 0.4f;
-            }
+        HandSide side = isRightHand ? HandSide.RIGHT : HandSide.LEFT;
+        // Allow other mods to render the arm (i.e. first-person armor)
+        if (ForgeHooksClient.renderSpecificFirstPersonArm(ms, bufferSource, light, player, side)) return;
 
-            // Better swinging animation
-            if (player.swinging && side == EntityHelper.getArmFromHand(player.swingingArm, player))
-            {   swingArm(arm, player, side);
-            }
-        }
+        PlayerModel<AbstractClientPlayerEntity> model = playerRenderer.getModel();
+        ModelRenderer arm = isRightHand ? model.rightArm : model.leftArm;
+        ModelRenderer sleeve = isRightHand ? model.rightSleeve : model.leftSleeve;
+        float sideMultiplier = isRightHand ? 1 : -1;
+
+        arm.setPos(-6 * sideMultiplier, ClientOnlyHelper.isPlayerModelSlim(model) ? 2 : 3, 0);
+        arm.xRot = 0;
+        arm.yRot = FIRST_PERSON_ARM_Y_ROT * sideMultiplier;
+        arm.zRot = FIRST_PERSON_ARM_Z_ROT * sideMultiplier;
+        sleeve.copyFrom(arm);
+        sleeve.visible = player.isModelPartShown(isRightHand ? PlayerModelPart.RIGHT_SLEEVE : PlayerModelPart.LEFT_SLEEVE);
+
+        ResourceLocation skin = player.getSkinTextureLocation();
+        arm.render(ms, bufferSource.getBuffer(RenderType.entitySolid(skin)), light, OverlayTexture.NO_OVERLAY);
+        sleeve.render(ms, bufferSource.getBuffer(RenderType.entityTranslucent(skin)), light, OverlayTexture.NO_OVERLAY);
     }
 
-    private static void swingArm(ModelRenderer arm, LivingEntity player, HandSide side)
+    private static void renderLamp(MatrixStack ms, IRenderTypeBuffer bufferSource, int light, ClientPlayerEntity player, boolean isRightHand, ItemStack itemStack)
     {
+        ItemCameraTransforms.TransformType context = isRightHand ? ItemCameraTransforms.TransformType.THIRD_PERSON_RIGHT_HAND : ItemCameraTransforms.TransformType.THIRD_PERSON_LEFT_HAND;
+        Minecraft.getInstance().gameRenderer.itemInHandRenderer.renderItem(player, itemStack, context, false, ms, bufferSource, light);
+    }
+
+    /* Third-person */
+
+    /**
+     * Applied in place of vanilla's arm pose when a player's arm is holding the lamp
+     */
+    public static void poseArm(BipedModel<?> model, LivingEntity entity, HandSide side)
+    {
+        ModelRenderer arm = getArm(model, side);
         float sideMultiplier = side == HandSide.RIGHT ? 1 : -1;
-        float partialTick = Minecraft.getInstance().getFrameTime();
-        float attackAnim = player.getAttackAnim(partialTick);
-        float playerPitch = player.getViewXRot(partialTick);
-        float pitchFactor = getSwingHorizontalOffset(side, playerPitch);
+        float raise = HandleSoulLampAnim.getArmRaise(entity, side, getPartialTick()) * MAX_ARM_RAISE;
+
+        // Applied to yRot, since the arm is rolled onto its side
+        float armHeight = (arm.xRot * 0.5f - (float) Math.PI / 10) * 0.15f - 0.35f - raise;
+        arm.xRot = (float) -Math.PI / 2;
+        arm.yRot = -(armHeight + (float) Math.PI / 2 * 1.04f) * sideMultiplier;
+        arm.zRot = ((float) Math.PI / 2 - 0.05f) * sideMultiplier;
+        // Cancel vanilla's crouching offset
+        if (model.crouching)
+        {   arm.xRot -= 0.4f;
+        }
+    }
+
+    /**
+     * Lowers the arm after the lamp is put away
+     */
+    public static void lowerArm(BipedModel<?> model, LivingEntity entity, HandSide side)
+    {
+        if (!ConfigSettings.POSE_SOULSPRING_LAMP.get() || EntityHelper.holdingLamp(entity, side)) return;
+
+        BipedModel.ArmPose pose = side == HandSide.RIGHT ? model.rightArmPose : model.leftArmPose;
+        float raise = HandleSoulLampAnim.getArmRaise(entity, side, getPartialTick()) * MAX_ARM_RAISE;
+        if (raise > 0.01f && (pose == BipedModel.ArmPose.EMPTY || pose == BipedModel.ArmPose.ITEM))
+        {   getArm(model, side).xRot -= raise;
+        }
+    }
+
+    /**
+     * Replaces vanilla's swing animation for the lamp arm
+     */
+    public static void swingArm(BipedModel<?> model, HandSide side, float attackAnim)
+    {
+        ModelRenderer arm = getArm(model, side);
+        float sideMultiplier = side == HandSide.RIGHT ? 1 : -1;
+        float pitch = CSMath.toDegrees(model.head.xRot);
+        float swingSin = MathHelper.sin(attackAnim * (float) Math.PI);
+
+        // xRot swings the arm sideways and yRot swings it vertically, since the arm is rolled onto its side
+        float windUp = getWindUp(attackAnim) / getSwingHorizontalOffset(side, pitch);
+        float sweep = MathHelper.sin((1 - (float) Math.pow(1 - attackAnim, 4)) * (float) Math.PI) * 1.2f
+                    + swingSin * (0.7f - model.head.xRot) * 0.75f;
+        arm.xRot += windUp - sweep;
+
+        float pitchSwingHeight = pitch < 0 ? pitch/20 : pitch/60;
+        arm.yRot += (float) (Math.pow(attackAnim - 0.5, 2) - 0.25) * pitchSwingHeight * sideMultiplier;
+        arm.zRot += swingSin * (side == HandSide.RIGHT ? -0.4f : 0.1f);
+
+        // Follow the body's twist
+        arm.yRot += model.body.yRot * 3;
+        if (side == HandSide.LEFT)
+        {   arm.xRot += model.body.yRot;
+        }
+    }
+
+    /**
+     * Applied after vanilla positions the arms
+     */
+    public static void offsetArm(BipedModel<?> model, LivingEntity entity, HandSide side)
+    {
+        if (!(entity instanceof PlayerEntity) || !EntityHelper.holdingLamp(entity, side)) return;
+
+        ModelRenderer arm = getArm(model, side);
+        arm.x -= side == HandSide.RIGHT ? 1 : -1;
+        if (model instanceof PlayerModel<?> && !ClientOnlyHelper.isPlayerModelSlim(model))
+        {   arm.y += 1;
+        }
+    }
+
+    private static float getWindUp(float attackAnim)
+    {
         float windUpTime = 0.3f;
         float windUpPoint = 1.5f;
         float midSwingTime = 0.7f;
 
         if (attackAnim < windUpTime / 3)
-        {
-            arm.xRot += CSMath.blendLog(0f, windUpPoint, attackAnim, 0, windUpTime / 3,1 ) / pitchFactor;
+        {   return CSMath.blendLog(0f, windUpPoint, attackAnim, 0, windUpTime / 3, 1);
         }
         else if (attackAnim < windUpTime)
-        {
-            arm.xRot += CSMath.blendLog(windUpPoint, 1f, attackAnim, windUpTime / 3, windUpTime, 1) / pitchFactor;
+        {   return CSMath.blendLog(windUpPoint, 1f, attackAnim, windUpTime / 3, windUpTime, 1);
         }
         else if (attackAnim < midSwingTime)
-        {   arm.xRot += CSMath.blend(1f, 0.2f, attackAnim, windUpTime, midSwingTime) / pitchFactor;
+        {   return CSMath.blend(1f, 0.2f, attackAnim, windUpTime, midSwingTime);
         }
         else
-        {   arm.xRot += CSMath.blendExp(0.2f, 0f, attackAnim, midSwingTime, 1) / pitchFactor;
-        }
-        float pitchSwingHeight = playerPitch < 0 ? playerPitch/20 : playerPitch/60;
-        arm.yRot += (Math.pow(attackAnim - 0.5, 2) - 0.25) * pitchSwingHeight * sideMultiplier;
-        if (side == HandSide.LEFT)
-        {   arm.zRot += Math.sin(attackAnim*Math.PI)*0.5f;
+        {   return CSMath.blendExp(0.2f, 0f, attackAnim, midSwingTime, 1);
         }
     }
 
@@ -171,71 +271,11 @@ public class RenderLampHand
         return pitchFactor;
     }
 
-    private static void renderHand(MatrixStack ms, IRenderTypeBuffer bufferSource, int light, AbstractClientPlayerEntity player, boolean isRightHand,
-                                   Hand hand, FirstPersonRenderer handRenderer, PlayerRenderer playerRenderer, ItemStack itemStack)
-    {
-        boolean isSelected = player.getItemInHand(hand).getItem() == ModItems.SOULSPRING_LAMP;
-        // Render arm
-        ms.pushPose();
-        ms.pushPose();
-        ms.scale(1, 1.2f, 1);
-        ms.mulPose(Vector3f.XP.rotationDegrees(-25));
-        ms.translate(0, -0.2, 0.25);
-        // The hand moves a little bit when being put away. I don't know why
-        if (!isSelected)
-        {   ms.translate(0, isRightHand ? -0.012 : 0.015, 0);
-            ms.mulPose(Vector3f.ZP.rotationDegrees(2.4f * (isRightHand ? -1 : 1)));
-            ms.mulPose(Vector3f.XP.rotationDegrees(2.3f));
-        }
-        // Render arm for the correct side
-        if (isRightHand)
-        {
-            if (isSelected)
-            {
-                ms.translate(-0.365, -0.2, -0.075);
-                ms.mulPose(Vector3f.YP.rotationDegrees(-90));
-                ms.mulPose(Vector3f.ZP.rotationDegrees(-90));
-            }
-            else
-            {   ms.translate(-0.3925, 0.06, 0.38);
-                ms.mulPose(Vector3f.YP.rotationDegrees(-90));
-            }
-            playerRenderer.renderRightHand(ms, bufferSource, light, player);
-        }
-        else
-        {
-            if (isSelected)
-            {
-                ms.translate(-0.335, -0.2, -0.075);
-                ms.mulPose(Vector3f.YP.rotationDegrees(90));
-                ms.mulPose(Vector3f.ZP.rotationDegrees(90));
-            }
-            else
-            {   ms.translate(-0.325, 0.06, 0.38);
-                ms.mulPose(Vector3f.YP.rotationDegrees(87));
-            }
-            playerRenderer.renderLeftHand(ms, bufferSource, light, player);
-        }
-        ms.popPose();
+    private static ModelRenderer getArm(BipedModel<?> model, HandSide side)
+    {   return side == HandSide.RIGHT ? model.rightArm : model.leftArm;
+    }
 
-        // Render lamp item
-        ms.pushPose();
-        ms.mulPose(Vector3f.XP.rotationDegrees(-90));
-        ms.translate(-0.35, 0.1, 0.625);
-        ms.scale(1, 1, 0.8f);
-        if (isRightHand)
-        {
-            ms.mulPose(Vector3f.ZP.rotationDegrees(90));
-            ms.translate(-0.1, 0.125, 0);
-            handRenderer.renderItem(player, itemStack, ItemCameraTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, false, ms, bufferSource, light);
-        }
-        else
-        {
-            ms.mulPose(Vector3f.ZP.rotationDegrees(90));
-            ms.translate(-0.1, 0.125, 0);
-            handRenderer.renderItem(player, itemStack, ItemCameraTransforms.TransformType.THIRD_PERSON_LEFT_HAND, false, ms, bufferSource, light);
-        }
-        ms.popPose();
-        ms.popPose();
+    private static float getPartialTick()
+    {   return Minecraft.getInstance().getFrameTime();
     }
 }
