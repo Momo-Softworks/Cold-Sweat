@@ -6,10 +6,10 @@ import com.momosoftworks.coldsweat.compat.jei.JeiPlugin;
 import com.momosoftworks.coldsweat.core.init.ModBlocks;
 import com.momosoftworks.coldsweat.core.init.ModItems;
 import mezz.jei.api.helpers.IGuiHelper;
-import mezz.jei.api.recipe.RecipeType;
+import mezz.jei.api.recipe.types.IRecipeType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class HearthFuelCategory extends ColdSweatFuelCategory
 {
@@ -18,7 +18,7 @@ public class HearthFuelCategory extends ColdSweatFuelCategory
     }
 
     @Override
-    public RecipeType<JeiPlugin.FuelRecipe> getRecipeType()
+    public IRecipeType<JeiPlugin.FuelRecipe> getRecipeType()
     {   return JeiPlugin.HEARTH_RECIPE_TYPE;
     }
 
@@ -33,7 +33,7 @@ public class HearthFuelCategory extends ColdSweatFuelCategory
     }
 
     @Override
-    protected ResourceLocation getFilledGaugeTexture(JeiPlugin.FuelRecipe recipe)
+    protected Identifier getFilledGaugeTexture(JeiPlugin.FuelRecipe recipe)
     {
         if (recipe.getFuel() < 0)
         {   return AbstractHearthScreen.COLD_FUEL_GAUGE;
@@ -42,7 +42,7 @@ public class HearthFuelCategory extends ColdSweatFuelCategory
     }
 
     @Override
-    protected ResourceLocation getEmptyGaugeTexture(JeiPlugin.FuelRecipe recipe)
+    protected Identifier getEmptyGaugeTexture(JeiPlugin.FuelRecipe recipe)
     {
         if (recipe.getFuel() < 0)
         {   return AbstractHearthScreen.COLD_FUEL_GAUGE_EMPTY;

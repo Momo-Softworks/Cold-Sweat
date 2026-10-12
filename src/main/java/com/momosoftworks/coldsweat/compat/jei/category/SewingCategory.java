@@ -5,12 +5,15 @@ import com.momosoftworks.coldsweat.compat.jei.JeiPlugin;
 import com.momosoftworks.coldsweat.core.init.ModItemComponents;
 import com.momosoftworks.coldsweat.core.init.ModItems;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
+import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
+import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
+import mezz.jei.api.recipe.types.IRecipeType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -27,7 +30,7 @@ public class SewingCategory implements IRecipeCategory<JeiPlugin.SewingRecipe>
     }
 
     @Override
-    public RecipeType getRecipeType()
+    public IRecipeType<JeiPlugin.SewingRecipe> getRecipeType()
     {   return JeiPlugin.SEWING_RECIPE_TYPE;
     }
 
@@ -64,22 +67,27 @@ public class SewingCategory implements IRecipeCategory<JeiPlugin.SewingRecipe>
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, JeiPlugin.SewingRecipe recipe, IFocusGroup focuses)
     {
-        builder.addInputSlot(8, 10)
-                .setStandardSlotBackground()
-                .addItemStacks(List.of(recipe.input()));
+        IRecipeSlotBuilder insulatorSlot = builder.addSlot(RecipeIngredientRole.INPUT, 8, 10)
+            .setStandardSlotBackground()
+            .addItemStacks(recipe.inputs());
 
-        builder.addInputSlot(53, 10)
-                .setStandardSlotBackground()
-                .addItemStacks(List.of(INSULATABLE_ITEM));
+        builder.addSlot(RecipeIngredientRole.INPUT, 53, 10)
+            .setStandardSlotBackground()
+            .addItemStacks(List.of(INSULATABLE_ITEM));
 
-        ItemStack insulatedItem = INSULATABLE_ITEM.copy();
-        ItemInsulationManager.getInsulationCap(insulatedItem).ifPresent(cap ->
+        List<ItemStack> insulationResults = recipe.inputs().stream().map(insulator ->
         {
-            insulatedItem.set(ModItemComponents.ARMOR_INSULATION, cap.addInsulationItem(recipe.input()));
-        });
+            ItemStack armorItem = INSULATABLE_ITEM.copy();
+            ItemInsulationManager.getInsulationCap(armorItem).ifPresent(cap ->
+            {   armorItem.set(ModItemComponents.ARMOR_INSULATION, cap.addInsulationItem(insulator));
+            });
+            return armorItem;
+        }).toList();
 
-        builder.addOutputSlot(105, 10)
-                .setStandardSlotBackground()
-                .addItemStacks(List.of(insulatedItem));
+        IRecipeSlotBuilder outputSlot = builder.addSlot(RecipeIngredientRole.OUTPUT, 105, 10)
+            .setStandardSlotBackground()
+            .addItemStacks(insulationResults);
+
+        builder.createFocusLink(insulatorSlot, outputSlot);
     }
 }

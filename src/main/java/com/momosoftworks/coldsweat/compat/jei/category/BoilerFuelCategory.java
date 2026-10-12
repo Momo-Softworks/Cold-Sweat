@@ -8,9 +8,10 @@ import com.momosoftworks.coldsweat.core.init.ModBlocks;
 import com.momosoftworks.coldsweat.core.init.ModItems;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.RecipeType;
+import mezz.jei.api.recipe.types.IRecipeType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class BoilerFuelCategory extends ColdSweatFuelCategory
 {
@@ -19,7 +20,7 @@ public class BoilerFuelCategory extends ColdSweatFuelCategory
     }
 
     @Override
-    public RecipeType<JeiPlugin.FuelRecipe> getRecipeType()
+    public IRecipeType<JeiPlugin.FuelRecipe> getRecipeType()
     {   return JeiPlugin.BOILER_RECIPE_TYPE;
     }
 
@@ -34,12 +35,12 @@ public class BoilerFuelCategory extends ColdSweatFuelCategory
     }
 
     @Override
-    protected ResourceLocation getFilledGaugeTexture(JeiPlugin.FuelRecipe recipe)
+    protected Identifier getFilledGaugeTexture(JeiPlugin.FuelRecipe recipe)
     {   return AbstractHearthScreen.HOT_FUEL_GAUGE;
     }
 
     @Override
-    protected ResourceLocation getEmptyGaugeTexture(JeiPlugin.FuelRecipe recipe)
+    protected Identifier getEmptyGaugeTexture(JeiPlugin.FuelRecipe recipe)
     {   return AbstractHearthScreen.HOT_FUEL_GAUGE_EMPTY;
     }
 }

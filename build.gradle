@@ -22,7 +22,6 @@ java {
 def compatExcluded = [
         'com/momosoftworks/coldsweat/compat/create/**',
         'com/momosoftworks/coldsweat/compat/kubejs/**',
-        'com/momosoftworks/coldsweat/compat/jei/**',
         'com/momosoftworks/coldsweat/compat/curios/**',
         'com/momosoftworks/coldsweat/mixin/compat/**',
         'com/momosoftworks/coldsweat/api/spread_rule/compat/CreatePipeSpreadRule.java',
@@ -141,6 +140,7 @@ repositories {
 }
 
 dependencies {
+    implementation "mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
 }
 
 tasks.withType(ProcessResources).configureEach {
