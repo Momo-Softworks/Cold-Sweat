@@ -2,6 +2,7 @@ package com.momosoftworks.coldsweat.compat.jei.category;
 
 import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import com.momosoftworks.coldsweat.compat.jei.JeiPlugin;
+import com.momosoftworks.coldsweat.data.codec.util.ValueGetter;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
@@ -19,8 +20,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.item.ItemStack;
-
-import java.util.List;
 
 public abstract class ColdSweatFuelCategory implements IRecipeCategory<JeiPlugin.FuelRecipe>
 {
@@ -77,15 +76,15 @@ public abstract class ColdSweatFuelCategory implements IRecipeCategory<JeiPlugin
     public void setRecipe(IRecipeLayoutBuilder builder, JeiPlugin.FuelRecipe recipe, IFocusGroup focuses)
     {
         builder.addInputSlot(1, 17)
-                .setStandardSlotBackground()
-                .addItemStacks(List.of(recipe.input()));
+            .setStandardSlotBackground()
+            .addItemStacks(recipe.inputs());
     }
 
     @Override
     public void createRecipeExtras(IRecipeExtrasBuilder builder, JeiPlugin.FuelRecipe recipe, IFocusGroup focuses)
     {
         HearthBlockEntity dummyBlockEntity = this.getDummyBlockEntity();
-        double fuel = Math.abs(recipe.getFuel());
+        double fuel = recipe.fuelData().fuel().type() == ValueGetter.Type.CONSTANT ? Math.abs(recipe.getFuel()) : -1;
 
         Component fillAmountText = createFillAmountText(fuel, dummyBlockEntity);
         builder.addText(fillAmountText, getWidth() - 20, getHeight())
@@ -94,7 +93,7 @@ public abstract class ColdSweatFuelCategory implements IRecipeCategory<JeiPlugin
                 .setTextAlignment(VerticalAlignment.CENTER)
                 .setColor(0xFF808080);
 
-        int gaugeHeight  = fuel <= 0 ? 0 : (int) Math.round(CSMath.blend(2, 14, fuel, 0, dummyBlockEntity.getMaxFuel()));
+        int gaugeHeight = fuel <= 0 ? 0 : (int) Math.round(CSMath.blend(2, 14, fuel, 0, dummyBlockEntity.getMaxFuel()));
         int maxGaugeHeight = 14;
         DrawableResource fuelGauge = new DrawableResource(this.getFilledGaugeTexture(recipe), 0, 14-gaugeHeight, 14, gaugeHeight, 0, 0, 0, 0, 14, 14);
         DrawableResource emptyFuelGauge = new DrawableResource(this.getEmptyGaugeTexture(recipe), 0, 0, 14, 14, 0, 0, 0, 0, 14, 14);
@@ -104,6 +103,9 @@ public abstract class ColdSweatFuelCategory implements IRecipeCategory<JeiPlugin
 
     private static Component createFillAmountText(double fuelAmount, HearthBlockEntity dummyBlockEntity)
     {
+        if (fuelAmount == -1)
+        {   return Component.translatable("jei.cold_sweat.fuel_duration_depends");
+        }
         int fuelInterval = dummyBlockEntity.getFuelDrainInterval();
         int durationTicks = (int) Math.round(fuelAmount * fuelInterval);
         return Component.translatable("jei.cold_sweat.fuel_duration", StringUtil.formatTickDuration(durationTicks));

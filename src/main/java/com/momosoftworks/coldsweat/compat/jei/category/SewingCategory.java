@@ -4,10 +4,12 @@ import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManag
 import com.momosoftworks.coldsweat.compat.jei.JeiPlugin;
 import com.momosoftworks.coldsweat.util.registries.ModItems;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
+import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
+import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.network.chat.Component;
@@ -63,23 +65,29 @@ public class SewingCategory implements IRecipeCategory<JeiPlugin.SewingRecipe>
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, JeiPlugin.SewingRecipe recipe, IFocusGroup focuses)
     {
-        builder.addInputSlot(8, 10)
-                .setStandardSlotBackground()
-                .addItemStacks(List.of(recipe.input()));
+        IRecipeSlotBuilder insulatorSlot = builder.addSlot(RecipeIngredientRole.INPUT, 8, 10)
+            .setStandardSlotBackground()
+            .addItemStacks(recipe.inputs());
 
-        builder.addInputSlot(53, 10)
-                .setStandardSlotBackground()
-                .addItemStacks(List.of(INSULATABLE_ITEM));
+        builder.addSlot(RecipeIngredientRole.INPUT, 53, 10)
+            .setStandardSlotBackground()
+            .addItemStacks(List.of(INSULATABLE_ITEM));
 
-        ItemStack insulatedItem = INSULATABLE_ITEM.copy();
-        ItemInsulationManager.getInsulationCap(insulatedItem).ifPresent(cap ->
+        List<ItemStack> insulatorItems = recipe.inputs().stream().map(insulator ->
         {
-            cap.addInsulationItem(recipe.input());
-            insulatedItem.getOrCreateTag().merge(cap.serializeNBT());
-        });
+            ItemStack armorItem = INSULATABLE_ITEM.copy();
+            ItemInsulationManager.getInsulationCap(armorItem).ifPresent(cap ->
+            {
+                cap.addInsulationItem(insulator);
+                armorItem.getOrCreateTag().merge(cap.serializeNBT());
+            });
+            return armorItem;
+        }).toList();
 
-        builder.addOutputSlot(105, 10)
-                .setStandardSlotBackground()
-                .addItemStacks(List.of(insulatedItem));
+        IRecipeSlotBuilder outputSlot = builder.addSlot(RecipeIngredientRole.OUTPUT, 105, 10)
+            .setStandardSlotBackground()
+            .addItemStacks(insulatorItems);
+
+        builder.createFocusLink(insulatorSlot, outputSlot);
     }
 }
