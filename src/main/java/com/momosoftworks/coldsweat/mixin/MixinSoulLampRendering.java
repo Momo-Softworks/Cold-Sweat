@@ -5,16 +5,13 @@ import com.momosoftworks.coldsweat.client.event.RenderLampHand;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ModItems;
 import com.momosoftworks.coldsweat.util.ClientOnlyHelper;
-import com.momosoftworks.coldsweat.util.entity.EntityHelper;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Final;
@@ -52,21 +49,26 @@ public class MixinSoulLampRendering
     private HumanoidArm getAttackArm(LivingEntity entity) { return null; }
 
     /**
-     * Vanilla only poses the arm that is using an item, so the lamp arm would drop while eating/drinking with the other hand
+     * Two-handed poses take the lamp arm. Must run before vanilla poses the arms
+     */
+    @Inject(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V", at = @At("HEAD"))
+    public void updateLampArmPoses(LivingEntity entity, float limbSwing, float limbSwingAmount, float age, float headYaw, float headPitch, CallbackInfo ci)
+    {
+        RenderLampHand.updateArmPose(model, entity, HumanoidArm.RIGHT);
+        RenderLampHand.updateArmPose(model, entity, HumanoidArm.LEFT);
+    }
+
+    /**
+     * Vanilla doesn't pose the lamp arm while the other arm is using an item, and a loaded crossbow's pose overwrites it
      */
     @Inject(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/HumanoidModel;setupAttackAnimation(Lnet/minecraft/world/entity/LivingEntity;F)V"))
     public void poseIdleLampArm(LivingEntity entity, float limbSwing, float limbSwingAmount, float age, float headYaw, float headPitch, CallbackInfo ci)
     {
-        if (!ConfigSettings.POSE_SOULSPRING_LAMP.get() || !entity.isUsingItem()) return;
-
-        HumanoidArm idleArm = entity.getUsedItemHand() == InteractionHand.MAIN_HAND ? entity.getMainArm().getOpposite() : entity.getMainArm();
-        if (!EntityHelper.holdingLamp(entity, idleArm)) return;
-
-        if (idleArm == HumanoidArm.RIGHT)
+        if (RenderLampHand.shouldReposeArm(model, entity, HumanoidArm.RIGHT))
         {   this.poseRightArm(entity);
         }
-        else
+        if (RenderLampHand.shouldReposeArm(model, entity, HumanoidArm.LEFT))
         {   this.poseLeftArm(entity);
         }
     }
@@ -85,10 +87,10 @@ public class MixinSoulLampRendering
     public void storeLampArmPose(LivingEntity entity, float age, CallbackInfo ci)
     {
         lampArmPose = null;
-        if (!ConfigSettings.POSE_SOULSPRING_LAMP.get() || model.attackTime <= 0 || !(entity instanceof Player)) return;
+        if (model.attackTime <= 0) return;
 
         HumanoidArm side = this.getAttackArm(entity);
-        if (EntityHelper.holdingLamp(entity, side))
+        if (RenderLampHand.isLampArmPosed(model, entity, side))
         {   lampArmPose = (side == HumanoidArm.RIGHT ? this.rightArm : this.leftArm).storePose();
         }
     }
@@ -117,6 +119,19 @@ public class MixinSoulLampRendering
     public static class HeldItem
     {
         ItemInHandLayer<?, ?> self = (ItemInHandLayer<?, ?>) (Object) this;
+
+        /**
+         * Hides the lamp while the other arm is in a two-handed pose
+         */
+        @Inject(method = "renderArmWithItem", at = @At("HEAD"), cancellable = true)
+        public void hideLampForTwoHandedPose(LivingEntity entity, ItemStack stack, ItemDisplayContext context, HumanoidArm arm, PoseStack ms,
+                                             MultiBufferSource bufferSource, int light, CallbackInfo ci)
+        {
+            if (stack.is(ModItems.SOULSPRING_LAMP) && self.getParentModel() instanceof HumanoidModel<?> model
+            && RenderLampHand.isLampHidden(model, entity, arm))
+            {   ci.cancel();
+            }
+        }
 
         @Inject(method = "renderArmWithItem",
                 at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/ArmedModel;translateToHand(Lnet/minecraft/world/entity/HumanoidArm;Lcom/mojang/blaze3d/vertex/PoseStack;)V"))
