@@ -20,6 +20,7 @@ import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -224,13 +225,46 @@ public class RenderLampHand
      */
     public static void offsetArm(HumanoidModel<?> model, LivingEntity entity, HumanoidArm side)
     {
-        if (!(entity instanceof Player) || !EntityHelper.holdingLamp(entity, side)) return;
+        if (!isLampArmPosed(model, entity, side)) return;
 
         ModelPart arm = getArm(model, side);
         arm.x -= side == HumanoidArm.RIGHT ? 1 : -1;
         if (model instanceof PlayerModel<?> && !ClientOnlyHelper.isPlayerModelSlim(model))
         {   arm.y += 1;
         }
+    }
+
+    /**
+     * The lamp is hidden while the other arm is in a two-handed pose, so that pose can use this arm.<br>
+     * Loaded crossbows are exempt, since they can be fired with one hand.
+     */
+    public static boolean isLampHidden(HumanoidModel<?> model, LivingEntity entity, HumanoidArm side)
+    {
+        if (!ConfigSettings.POSE_SOULSPRING_LAMP.get() || !EntityHelper.holdingLamp(entity, side)) return false;
+
+        HumanoidModel.ArmPose otherPose = side == HumanoidArm.RIGHT ? model.leftArmPose : model.rightArmPose;
+        return otherPose.isTwoHanded() && otherPose != HumanoidModel.ArmPose.CROSSBOW_HOLD;
+    }
+
+    /**
+     * @return Whether the arm is posed with the lamp
+     */
+    public static boolean isLampArmPosed(HumanoidModel<?> model, LivingEntity entity, HumanoidArm side)
+    {
+        return ConfigSettings.POSE_SOULSPRING_LAMP.get() && entity instanceof Player
+            && EntityHelper.holdingLamp(entity, side) && !isLampHidden(model, entity, side);
+    }
+
+    /**
+     * Vanilla doesn't pose the lamp arm while the other arm is using an item, and a loaded crossbow's pose overwrites it
+     */
+    public static boolean shouldReposeArm(HumanoidModel<?> model, LivingEntity entity, HumanoidArm side)
+    {
+        if (!isLampArmPosed(model, entity, side)) return false;
+
+        HumanoidArm usedArm = entity.getUsedItemHand() == InteractionHand.MAIN_HAND ? entity.getMainArm() : entity.getMainArm().getOpposite();
+        HumanoidModel.ArmPose otherPose = side == HumanoidArm.RIGHT ? model.leftArmPose : model.rightArmPose;
+        return entity.isUsingItem() && usedArm != side || otherPose.isTwoHanded();
     }
 
     private static float getWindUp(float attackAnim)
