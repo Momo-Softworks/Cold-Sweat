@@ -8,7 +8,9 @@ import com.momosoftworks.coldsweat.compat.jei.category.SewingCategory;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.codec.configuration.FuelData;
 import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
+import com.momosoftworks.coldsweat.util.registries.ModItems;
 import mezz.jei.api.IModPlugin;
+import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.item.ItemStack;
@@ -27,6 +29,15 @@ public class JeiPlugin implements IModPlugin
     @Override
     public ResourceLocation getPluginUid()
     {   return ColdSweat.createKey("jei_plugin");
+    }
+
+    @Override
+    public void registerRecipeCatalysts(IRecipeCatalystRegistration registration)
+    {
+        registration.addRecipeCatalyst(ModItems.HEARTH.getDefaultInstance(), HEARTH_RECIPE_CATEGORY);
+        registration.addRecipeCatalyst(ModItems.BOILER.getDefaultInstance(), BOILER_RECIPE_CATEGORY);
+        registration.addRecipeCatalyst(ModItems.ICEBOX.getDefaultInstance(), ICEBOX_RECIPE_CATEGORY);
+        registration.addRecipeCatalyst(ModItems.SEWING_TABLE.getDefaultInstance(), SEWING_RECIPE_CATEGORY);
     }
 
     @Override
