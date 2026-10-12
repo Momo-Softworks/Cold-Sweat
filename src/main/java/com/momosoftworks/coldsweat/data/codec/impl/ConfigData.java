@@ -99,7 +99,9 @@ public abstract class ConfigData
 
     private static <T, O> T decodeFromMap(String key, DynamicOps<O> ops, MapLike<O> input, Codec<T> codec, T defaultValue)
     {
-        return codec.decode(ops, input.get(key)).result().map(Pair::getFirst).orElse(defaultValue);
+        O value = input.get(key);
+        if (value == null) return defaultValue;
+        return codec.decode(ops, value).result().map(Pair::getFirst).orElse(defaultValue);
     }
 
     public UUID uuid()
