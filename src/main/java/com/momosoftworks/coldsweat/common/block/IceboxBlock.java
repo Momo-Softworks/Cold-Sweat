@@ -227,8 +227,7 @@ public class IceboxBlock extends Block implements EntityBlock
         ParticleStatus status = Minecraft.getInstance().options.particles().get();
         if (status == ParticleStatus.MINIMAL) return;
 
-        IceboxBlockEntity icebox = (IceboxBlockEntity) level.getBlockEntity(pos);
-        if (icebox != null && icebox.isUsingColdFuel())
+        if (state.getValue(FROSTED))
         {   createMistParticles(level, pos);
         }
     }
