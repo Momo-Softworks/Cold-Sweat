@@ -377,5 +377,6 @@
   "jei.cold_sweat.category.icebox_fuel": "Icebox Fuel",
   "jei.cold_sweat.category.sewing": "Sewing Recipes",
 
-  "jei.cold_sweat.fuel_duration": "Fuels for %s"
+  "jei.cold_sweat.fuel_duration": "Fuels for %s",
+  "jei.cold_sweat.fuel_duration_depends": "Fuel duration depends on item data"
 }
