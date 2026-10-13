@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.momosoftworks.coldsweat.common.blockentity.HearthBlockEntity;
 import com.momosoftworks.coldsweat.compat.jei.JeiPlugin;
 import com.momosoftworks.coldsweat.compat.jei.drawable.ItemDrawable;
+import com.momosoftworks.coldsweat.data.codec.util.ValueGetter;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.IRecipeLayout;
@@ -23,7 +24,7 @@ import net.minecraft.util.StringUtils;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 public abstract class ColdSweatFuelCategory implements IRecipeCategory<JeiPlugin.FuelRecipe>
 {
@@ -96,7 +97,7 @@ public abstract class ColdSweatFuelCategory implements IRecipeCategory<JeiPlugin
         Minecraft minecraft = Minecraft.getInstance();
         FontRenderer font = minecraft.font;
         HearthBlockEntity dummyBlockEntity = this.getDummyBlockEntity();
-        double fuel = Math.abs(recipe.getFuel());
+        double fuel = recipe.fuelData().fuel().type() == ValueGetter.Type.CONSTANT ? Math.abs(recipe.getFuel()) : -1;
 
         IFormattableTextComponent fillAmountText = createFillAmountText(fuel, dummyBlockEntity);
         int textWidth = font.width(fillAmountText.getString());
@@ -105,7 +106,7 @@ public abstract class ColdSweatFuelCategory implements IRecipeCategory<JeiPlugin
         int textY = this.height - 20;
         font.draw(poseStack, fillAmountText, textX, textY, 0xFF808080);
 
-        int gaugeHeight  = fuel <= 0 ? 0 : (int) Math.round(CSMath.blend(2, 14, fuel, 0, dummyBlockEntity.getMaxFuel()));
+        int gaugeHeight = fuel <= 0 ? 0 : (int) Math.round(CSMath.blend(2, 14, fuel, 0, dummyBlockEntity.getMaxFuel()));
         int maxGaugeHeight = 14;
         DrawableResource fuelGauge = new DrawableResource(this.getFilledGaugeTexture(recipe), 0, 14-gaugeHeight, 14, gaugeHeight, 0, 0, 0, 0, 14, 14);
         DrawableResource emptyFuelGauge = new DrawableResource(this.getEmptyGaugeTexture(recipe), 0, 0, 14, 14, 0, 0, 0, 0, 14, 14);
@@ -118,11 +119,14 @@ public abstract class ColdSweatFuelCategory implements IRecipeCategory<JeiPlugin
 
     @Override
     public void setIngredients(JeiPlugin.FuelRecipe recipe, IIngredients ingredients)
-    {   ingredients.setInputs(VanillaTypes.ITEM, Arrays.asList(recipe.input()));
+    {   ingredients.setInputLists(VanillaTypes.ITEM, Collections.singletonList(recipe.inputs()));
     }
 
     private static IFormattableTextComponent createFillAmountText(double fuelAmount, HearthBlockEntity dummyBlockEntity)
     {
+        if (fuelAmount == -1)
+        {   return new TranslationTextComponent("jei.cold_sweat.fuel_duration_depends");
+        }
         int fuelInterval = dummyBlockEntity.getFuelDrainInterval();
         int durationTicks = (int) Math.round(fuelAmount * fuelInterval);
         return new TranslationTextComponent("jei.cold_sweat.fuel_duration", StringUtils.formatTickDuration(durationTicks));

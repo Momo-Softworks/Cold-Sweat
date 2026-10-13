@@ -11,6 +11,7 @@ import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IGuiItemStackGroup;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.ingredients.IIngredients;
+import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.gui.elements.DrawableResource;
 import net.minecraft.item.ItemStack;
@@ -19,6 +20,9 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.TranslationTextComponent;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class SewingCategory implements IRecipeCategory<JeiPlugin.SewingRecipe>
 {
@@ -83,25 +87,45 @@ public class SewingCategory implements IRecipeCategory<JeiPlugin.SewingRecipe>
         guiItemStacks.init(1, true, 53, 10);
         guiItemStacks.init(2, false, 105, 10);
 
-        guiItemStacks.set(0, Arrays.asList(recipe.input()));
+        List<ItemStack> insulatorItems = recipe.inputs();
+        List<ItemStack> insulatedItems = getInsulatedItems(insulatorItems);
+
+        // Link the insulator and output slots so the output matches the focused insulator
+        IFocus<ItemStack> focus = builder.getFocus(VanillaTypes.ITEM);
+        if (focus != null && focus.getMode() == IFocus.Mode.INPUT)
+        {
+            for (int i = 0; i < insulatorItems.size(); i++)
+            {
+                if (ItemStack.isSame(insulatorItems.get(i), focus.getValue()))
+                {   insulatedItems = Collections.singletonList(insulatedItems.get(i));
+                    insulatorItems = Collections.singletonList(insulatorItems.get(i));
+                    break;
+                }
+            }
+        }
+
+        guiItemStacks.set(0, insulatorItems);
         guiItemStacks.set(1, Arrays.asList(INSULATABLE_ITEM));
-        guiItemStacks.set(2, Arrays.asList(getInsulatedItem(recipe.input())));
+        guiItemStacks.set(2, insulatedItems);
     }
 
     @Override
     public void setIngredients(JeiPlugin.SewingRecipe recipe, IIngredients ingredients)
-    {   ingredients.setInputs(VanillaTypes.ITEM, Arrays.asList(recipe.input(), INSULATABLE_ITEM));
-        ingredients.setOutput(VanillaTypes.ITEM, getInsulatedItem(recipe.input()));
+    {   ingredients.setInputLists(VanillaTypes.ITEM, Arrays.asList(recipe.inputs(), Arrays.asList(INSULATABLE_ITEM)));
+        ingredients.setOutputLists(VanillaTypes.ITEM, Collections.singletonList(getInsulatedItems(recipe.inputs())));
     }
 
-    private static ItemStack getInsulatedItem(ItemStack input)
+    private static List<ItemStack> getInsulatedItems(List<ItemStack> insulators)
     {
-        ItemStack insulatedItem = INSULATABLE_ITEM.copy();
-        ItemInsulationManager.getInsulationCap(insulatedItem).ifPresent(cap ->
+        return insulators.stream().map(insulator ->
         {
-            cap.addInsulationItem(input);
-            insulatedItem.getOrCreateTag().merge(cap.serializeNBT());
-        });
-        return insulatedItem;
+            ItemStack insulatedItem = INSULATABLE_ITEM.copy();
+            ItemInsulationManager.getInsulationCap(insulatedItem).ifPresent(cap ->
+            {
+                cap.addInsulationItem(insulator);
+                insulatedItem.getOrCreateTag().merge(cap.serializeNBT());
+            });
+            return insulatedItem;
+        }).collect(Collectors.toList());
     }
 }
