@@ -118,3 +118,4 @@ run/
 !gradle-wrapper.jar
 /!libs
 /runs/
+/bin/
