@@ -14,6 +14,8 @@ import java.util.Set;
 public abstract class BlockTemp
 {
     private final Set<Block> validBlocks;
+    @Nullable
+    private final LegacyProperties legacyProperties;
 
     public abstract double getTemperature(Level level, @Nullable LivingEntity entity, BlockState state, BlockPos pos, double distance);
 
@@ -22,7 +24,27 @@ public abstract class BlockTemp
     }
 
     public BlockTemp(Block... blocks)
-    {   this.validBlocks = ImmutableSet.<Block>builder().add(blocks).build();
+    {
+        this.validBlocks = ImmutableSet.<Block>builder().add(blocks).build();
+        this.legacyProperties = null;
+    }
+
+    /**
+     * DEPRECATED: Override the dynamic property getters (i.e. {@link #getMaxEffect(LivingEntity, Level, BlockPos, BlockState)}) instead
+     */
+    @Deprecated(since = "2.4.3", forRemoval = true)
+    public BlockTemp(double minEffect, double maxEffect, double minTemp, double maxTemp, double range, boolean fade, boolean logarithmic, Block... blocks)
+    {
+        this.validBlocks = ImmutableSet.<Block>builder().add(blocks).build();
+        this.legacyProperties = new LegacyProperties(minEffect, maxEffect, minTemp, maxTemp, range, fade, logarithmic);
+    }
+
+    /**
+     * DEPRECATED: Override the dynamic property getters (i.e. {@link #getMaxEffect(LivingEntity, Level, BlockPos, BlockState)}) instead
+     */
+    @Deprecated(since = "2.4.3", forRemoval = true)
+    public BlockTemp(double minEffect, double maxEffect, double minTemp, double maxTemp, double range, boolean fade, Block... blocks)
+    {   this(minEffect, maxEffect, minTemp, maxTemp, range, fade, false, blocks);
     }
 
     public boolean hasBlock(Block block)
@@ -94,7 +116,7 @@ public abstract class BlockTemp
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
     public double maxEffect()
-    {   return Double.POSITIVE_INFINITY;
+    {   return legacyProperties != null ? legacyProperties.maxEffect() : Double.POSITIVE_INFINITY;
     }
 
     /**
@@ -102,7 +124,7 @@ public abstract class BlockTemp
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
     public double minEffect()
-    {   return Double.NEGATIVE_INFINITY;
+    {   return legacyProperties != null ? legacyProperties.minEffect() : Double.NEGATIVE_INFINITY;
     }
 
     /**
@@ -110,7 +132,7 @@ public abstract class BlockTemp
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
     public double maxTemperature()
-    {   return Double.POSITIVE_INFINITY;
+    {   return legacyProperties != null ? legacyProperties.maxTemperature() : Double.POSITIVE_INFINITY;
     }
 
     /**
@@ -118,7 +140,7 @@ public abstract class BlockTemp
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
     public double minTemperature()
-    {   return Double.NEGATIVE_INFINITY;
+    {   return legacyProperties != null ? legacyProperties.minTemperature() : Double.NEGATIVE_INFINITY;
     }
 
     /**
@@ -126,7 +148,7 @@ public abstract class BlockTemp
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean logarithmic()
-    {   return false;
+    {   return legacyProperties != null ? legacyProperties.logarithmic() : false;
     }
 
     /**
@@ -134,7 +156,7 @@ public abstract class BlockTemp
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
     public double range()
-    {   return ConfigSettings.BLOCK_RANGE.get();
+    {   return legacyProperties != null ? legacyProperties.range() : ConfigSettings.BLOCK_RANGE.get();
     }
 
     /**
@@ -142,6 +164,13 @@ public abstract class BlockTemp
      */
     @Deprecated(since = "2.4.3", forRemoval = true)
     public boolean fade()
-    {   return true;
+    {   return legacyProperties != null ? legacyProperties.fade() : true;
     }
+
+    /**
+     * Holds the statically-defined properties passed to {@link BlockTemp}'s deprecated constructors.<br>
+     * Exists only for backwards compatibility, and will be removed alongside those constructors.
+     */
+    @Deprecated(since = "2.4.3", forRemoval = true)
+    record LegacyProperties(double minEffect, double maxEffect, double minTemperature, double maxTemperature, double range, boolean fade, boolean logarithmic) {}
 }
