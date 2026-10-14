@@ -52,6 +52,7 @@ public class WaterTempModifier extends TempModifier
         double temperature = this.getTemperature();
         double target = this.getTargetTemperature(entity);
         double addAmount;
+        double dryAmount = 0;
         if (WorldHelper.isInWater(entity))
         {
             if (temperature < target)
@@ -62,13 +63,12 @@ public class WaterTempModifier extends TempModifier
             }
         }
         else if (WorldHelper.isRainingAt(entity.level(), entity.blockPosition()))
-        {   addAmount = Math.max(-ConfigSettings.RAIN_SOAK_SPEED.get(), -ConfigSettings.MAX_RAIN_SOAK.get() - temperature);
+        {   addAmount = CSMath.smallest(-ConfigSettings.RAIN_SOAK_SPEED.get(), -ConfigSettings.MAX_RAIN_SOAK.get() - temperature);
         }
         else
         {   addAmount = 0;
+            dryAmount = CSMath.blendExp(configDrySpeed / 1.5, configDrySpeed * 5, worldTemp, minWorldTemp, maxWorldTemp, 20);
         }
-        double dryAmount = WorldHelper.isInWater(entity) ? 0
-                         : CSMath.blendExp(configDrySpeed / 1.5, configDrySpeed * 5, worldTemp, minWorldTemp, maxWorldTemp, 20);
 
         double tickRate = this.getTickRate() / 5.0;
         double newTemperature = CSMath.shrink(temperature + addAmount * tickRate, dryAmount * tickRate);
