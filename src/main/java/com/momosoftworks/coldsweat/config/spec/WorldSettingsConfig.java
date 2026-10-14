@@ -703,7 +703,7 @@ public class WorldSettingsConfig
 
             MAX_RAIN_SOAK = BUILDER
                 .comment("─────────────────────────────────────────────────────────────────────────",
-                         " The maximum soak level a player can reach from rain alone (0.0 - 1.0)")
+                         " The maximum temperature effect of rain soaking on the player, in MC units")
                 .defineInRange("Max Rain Soak", 0.2, 0.0, Double.POSITIVE_INFINITY);
 
         BUILDER.pop();
