@@ -597,6 +597,36 @@ public class CSMath
     }
 
     /**
+     * Returns the number that's closer to zero, regardless of sign.
+     */
+    public static double smallest(double... values)
+    {
+        double smallest = values[0];
+        for (double value : values)
+        {
+            if (Math.abs(value) < Math.abs(smallest))
+            {   smallest = value;
+            }
+        }
+        return smallest;
+    }
+
+    /**
+     * Returns the number that's furthest from zero, regardless of sign.
+     */
+    public static double largest(double... values)
+    {
+        double largest = values[0];
+        for (double value : values)
+        {
+            if (Math.abs(value) > Math.abs(largest))
+            {   largest = value;
+            }
+        }
+        return largest;
+    }
+
+    /**
      * Lowers the absolute value of the given number by {@code amount}.
      */
     public static double shrink(double value, double amount)
