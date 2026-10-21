@@ -671,6 +671,13 @@ public class CSMath
     }
 
     /**
+     * Moves {@code value} toward {@code target} by at most {@code maxStep}, without overshooting.
+     */
+    public static double approach(double value, double target, double maxStep)
+    {   return value < target ? Math.min(value + maxStep, target) : Math.max(value - maxStep, target);
+    }
+
+    /**
      * Integer overload for {@link #shrink(double, double)}
      */
     public static int shrink(int value, int amount)
