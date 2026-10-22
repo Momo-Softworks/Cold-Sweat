@@ -160,7 +160,7 @@ public class BoilerBlockEntity extends HearthBlockEntity
     }
 
     @Override
-    public int getInsulationTime()
+    public int getWarmupTime()
     {   return ConfigSettings.BOILER_WARM_UP_TIME.get();
     }
 
