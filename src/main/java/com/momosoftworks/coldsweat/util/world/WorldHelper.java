@@ -82,7 +82,7 @@ public abstract class WorldHelper
     static Map<RegistryKey<World>, DummyPlayer> DUMMY_PLAYERS = new HashMap<>();
     static Map<RegistryKey<World>, DummyEntity> DUMMY_ENTITIES = new HashMap<>();
     static Map<RegistryKey<World>, Map<BlockPos, TempSnapshot>> TEMPERATURE_CACHE = new HashMap<>();
-    static Map<RegistryKey<World>, Map<BlockPos, InsulationSnapshot>> INSULATION_CACHE = new HashMap<>();
+    static Map<RegistryKey<World>, Map<BlockPos, HearthSnapshot>> HEARTH_CACHE = new HashMap<>();
 
     private static final Map<TileEntity, Pair<CompoundNBT, Long>> BLOCK_ENTITY_DATA_CACHE = new HashMap<>();
 
@@ -91,7 +91,7 @@ public abstract class WorldHelper
     {   DUMMY_PLAYERS.clear();
         DUMMY_ENTITIES.clear();
         TEMPERATURE_CACHE.clear();
-        INSULATION_CACHE.clear();
+        HEARTH_CACHE.clear();
     }
 
     public static int getHeight(BlockPos pos, World level, Heightmap.Type heightmap)
@@ -815,16 +815,9 @@ public abstract class WorldHelper
         // Get modifiers
         List<TempModifier> modifiers = new ArrayList<>(Temperature.getModifiers(dummy, Temperature.Trait.WORLD));
 
-        // Get insulation from hearths
-        InsulationSnapshot maxCoolingHeating = getInsulationAt(level, pos, 2);
-        if (maxCoolingHeating.cooling() > 0)
-        {   modifiers.add(new FrigidnessTempModifier(maxCoolingHeating.cooling()));
-        }
-        if (maxCoolingHeating.heating() > 0)
-        {   modifiers.add(new WarmthTempModifier(maxCoolingHeating.heating()));
-        }
         // Get & store temperature
         double tempAt = Temperature.apply(0, dummy, Temperature.Trait.WORLD, modifiers, true);
+        tempAt = applyHearthInsulation(level, pos, dummy, tempAt);
         snapshots.put(segment, new TempSnapshot(level.getGameTime(), tempAt));
 
         return tempAt;
@@ -858,15 +851,8 @@ public abstract class WorldHelper
         dummy.setPos(newPos.x, newPos.y, newPos.z);
         List<TempModifier> modifiers = new ArrayList<>(Temperature.getModifiers(dummy, Temperature.Trait.WORLD));
 
-        // Get insulation from hearths
-        InsulationSnapshot maxCoolingHeating = getInsulationAt(level, pos, 2);
-        if (maxCoolingHeating.cooling() > 0)
-        {   modifiers.add(new FrigidnessTempModifier(maxCoolingHeating.cooling()));
-        }
-        if (maxCoolingHeating.heating() > 0)
-        {   modifiers.add(new WarmthTempModifier(maxCoolingHeating.heating()));
-        }
-        return Temperature.apply(0, dummy, Temperature.Trait.WORLD, modifiers, true);
+        double temp = Temperature.apply(0, dummy, Temperature.Trait.WORLD, modifiers, true);
+        return applyHearthInsulation(level, pos, dummy, temp);
     }
 
     public static DummyPlayer getDummyPlayer(World level)
@@ -1001,16 +987,21 @@ public abstract class WorldHelper
         return false;
     }
 
-    public static InsulationSnapshot getInsulationAt(World level, BlockPos pos, int chunkRadius)
+    /**
+     * @param chunkRadius The radius of chunks to check for hearths.
+     * @return A list of all hearths that can affect the given position.
+     */
+    public static List<HearthBlockEntity> getHearthsAffectingPos(World level, BlockPos pos, int chunkRadius)
     {
-        InsulationSnapshot snapshot = INSULATION_CACHE.computeIfAbsent(level.dimension(), dim -> new HashMap<>()).get(pos);
+        HearthSnapshot snapshot = HEARTH_CACHE.computeIfAbsent(level.dimension(), dim -> new HashMap<>()).get(pos);
         if (snapshot != null && level.getGameTime() - snapshot.timestamp < 20)
-        {   return snapshot;
+        {   return snapshot.hearths();
         }
         pos = sublevelToWorld(level, pos);
-        int maxCoolingLevel = 0;
-        int maxHeatingLevel = 0;
+
+        List<HearthBlockEntity> hearths = new ArrayList<>();
         ChunkPos chunkPos = new ChunkPos(pos);
+
         for (int x = -chunkRadius; x <= chunkRadius; x++)
         for (int z = -chunkRadius; z <= chunkRadius; z++)
         {
@@ -1021,17 +1012,43 @@ public abstract class WorldHelper
             for (BlockPos bePos : chunk.getBlockEntitiesPos())
             {
                 TileEntity be = chunk.getBlockEntity(bePos);
-                if (be instanceof HearthBlockEntity && ((HearthBlockEntity) be).getPathLookup().containsKey(pos))
-                {
-                    HearthBlockEntity hearth = (HearthBlockEntity) be;
-                    maxCoolingLevel = Math.max(maxCoolingLevel, hearth.getCoolingLevel());
-                    maxHeatingLevel = Math.max(maxHeatingLevel, hearth.getHeatingLevel());
+                // Null entries are positions the hearth failed to spread to
+                if (be instanceof HearthBlockEntity && ((HearthBlockEntity)be).getPathLookup().get(pos) != null)
+                {   hearths.add(((HearthBlockEntity)be));
                 }
             }
         }
-        snapshot = new InsulationSnapshot(level.getGameTime(), maxCoolingLevel, maxHeatingLevel);
-        INSULATION_CACHE.get(level.dimension()).put(pos, snapshot);
-        return snapshot;
+        snapshot = new HearthSnapshot(level.getGameTime(), hearths);
+        HEARTH_CACHE.get(level.dimension()).put(pos, snapshot);
+        return hearths;
+    }
+
+    /**
+     * Applies the insulation that nearby hearths would give a default entity at this position
+     * @param temp The temperature at this position, excluding hearth insulation
+     */
+    public static double applyHearthInsulation(World level, BlockPos pos, LivingEntity dummy, double temp)
+    {
+        double minTemp = ConfigSettings.MIN_TEMP.get();
+        double maxTemp = ConfigSettings.MAX_TEMP.get();
+        int cooling = 0;
+        int heating = 0;
+        for (HearthBlockEntity hearth : getHearthsAffectingPos(level, pos, 2))
+        {
+            if (hearth.isRemoved() || hearth.getLevel() != level) continue;
+
+            HearthBlockEntity.Insulation insulation = hearth.getInsulationFor(temp, minTemp, maxTemp);
+            cooling = Math.max(cooling, insulation.cooling());
+            heating = Math.max(heating, insulation.heating());
+        }
+        List<TempModifier> modifiers = new ArrayList<>(2);
+        if (cooling > 0)
+        {   modifiers.add(new FrigidnessTempModifier(cooling));
+        }
+        if (heating > 0)
+        {   modifiers.add(new WarmthTempModifier(heating));
+        }
+        return Temperature.apply(temp, dummy, Temperature.Trait.WORLD, modifiers, true);
     }
 
     public static List<BlockPos> getPositionsInAABB(AxisAlignedBB bb)
@@ -1083,44 +1100,42 @@ public abstract class WorldHelper
         public double temperature()
         {   return temperature;
         }
-    }
 
-    public static final class InsulationSnapshot
+        @Override
+        public boolean equals(Object obj)
+        {
+            if (obj == this) return true;
+            if (obj == null) return false;
+            return obj.getClass() == TempSnapshot.class
+                && ((TempSnapshot) obj).timestamp == this.timestamp
+                && ((TempSnapshot) obj).temperature == this.temperature;
+        }
+    }
+    public static class HearthSnapshot
     {
         private final long timestamp;
-        private final int cooling;
-        private final int heating;
+        private final List<HearthBlockEntity> hearths;
 
-        public InsulationSnapshot(long timestamp, int cooling, int heating)
+        public HearthSnapshot(long timestamp, List<HearthBlockEntity> hearths)
         {   this.timestamp = timestamp;
-            this.cooling = cooling;
-            this.heating = heating;
+            this.hearths = hearths;
         }
 
         public long timestamp()
         {   return timestamp;
         }
-        public int cooling()
-        {   return cooling;
-        }
-        public int heating()
-        {   return heating;
+        public List<HearthBlockEntity> hearths()
+        {   return hearths;
         }
 
         @Override
         public boolean equals(Object obj)
         {
             if (obj == this) return true;
-            if (obj == null || obj.getClass() != this.getClass()) return false;
-            InsulationSnapshot that = (InsulationSnapshot) obj;
-            return this.timestamp == that.timestamp &&
-                this.cooling == that.cooling &&
-                this.heating == that.heating;
-        }
-
-        @Override
-        public int hashCode()
-        {   return Objects.hash(timestamp, cooling, heating);
+            if (obj == null) return false;
+            return obj.getClass() == HearthSnapshot.class
+                && ((HearthSnapshot) obj).timestamp == this.timestamp
+                && ((HearthSnapshot) obj).hearths == this.hearths;
         }
     }
 }

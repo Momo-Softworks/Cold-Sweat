@@ -3,6 +3,7 @@ package com.momosoftworks.coldsweat.common.blockentity;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.vanilla.BlockStateChangedEvent;
+import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.registry.SpreadRuleRegistry;
 import com.momosoftworks.coldsweat.api.spread_rule.SpreadContext;
 import com.momosoftworks.coldsweat.api.spread_rule.SpreadRule;
@@ -32,12 +33,7 @@ import com.momosoftworks.coldsweat.util.registries.ModSounds;
 import com.momosoftworks.coldsweat.util.serialization.ConfigHelper;
 import com.momosoftworks.coldsweat.util.world.SpreadPath;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
-import com.simibubi.create.content.contraptions.fluids.pipes.EncasedPipeBlock;
-import com.simibubi.create.content.contraptions.fluids.pipes.FluidPipeBlock;
-import com.simibubi.create.content.contraptions.fluids.pipes.GlassFluidPipeBlock;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.RotatedPillarBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.settings.ParticleStatus;
 import net.minecraft.entity.Entity;
@@ -95,7 +91,6 @@ import blusunrize.immersiveengineering.api.tool.ExternalHeaterHandler;
 
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -227,11 +222,43 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     {   if (this.getWarmupTime() <= 0) return this.getMaxInsulationLevel();
         return (int) CSMath.blend(1, this.getMaxInsulationLevel(), this.getWarmupAmount(), 0, this.getWarmupTime());
     }
-    public int getCoolingLevel()
-    {   return usingColdFuel ? this.getInsulationLevel() : 0;
+
+    /**
+     * @param temp The entity's temperature, excluding hearth insulation
+     * @return The insulation this hearth would give to an entity at the given temperature
+     */
+    public Insulation getInsulationFor(double temp, double minTemp, double maxTemp)
+    {
+        int level = this.getInsulationLevel();
+        if (!this.isSmartEnabled())
+        {   return new Insulation(this.usingColdFuel ? level : 0, this.usingHotFuel ? level : 0);
+        }
+        return new Insulation(temp > maxTemp && this.getColdFuel() > 0 ? level : 0,
+                              temp < minTemp && this.getHotFuel() > 0 ? level : 0);
     }
-    public int getHeatingLevel()
-    {   return usingHotFuel ? this.getInsulationLevel() : 0;
+
+    protected Insulation getInsulationFor(LivingEntity entity)
+    {
+        return EntityTempManager.getTemperatureCap(entity).map(cap ->
+        {
+            double min = cap.getTrait(Temperature.Trait.FREEZING_POINT);
+            double max = cap.getTrait(Temperature.Trait.BURNING_POINT);
+            double temp = cap.getTrait(Temperature.Trait.WORLD);
+            // Use the temperature from before hearth insulation was applied
+            if (CSMath.betweenInclusive(temp, min, max))
+            {
+                Optional<ThermalSourceTempModifier> existingMod = Temperature.getModifier(entity, Temperature.Trait.WORLD, ThermalSourceTempModifier.class);
+                if (existingMod.isPresent())
+                {
+                    double lastInput = existingMod.get().getLastInput(Temperature.Trait.WORLD);
+                    double lastOutput = existingMod.get().getLastOutput(Temperature.Trait.WORLD);
+                    if (!(lastInput == lastOutput && lastInput == 0))
+                    {   temp = lastInput;
+                    }
+                }
+            }
+            return this.getInsulationFor(temp, min, max);
+        }).orElse(Insulation.NONE);
     }
 
     /**
@@ -407,7 +434,9 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
                 // Give insulation to players
                 if (!isClient && this.ticksExisted % 20 == 0)
                 {
-                    boolean isProvidingInsulation = false;
+                    if (this.isSmartEnabled())
+                    {   this.clearFuelUsage();
+                    }
                     // Provide insulation to players & calculate fuel usage
                     for (int i = 0; i < entities.size(); i++)
                     {
@@ -416,11 +445,8 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
                         BlockPos entityPos = WorldHelper.worldToSublevel(this.level, entity.blockPosition());
                         // Check if entity is in valid position & insulate
                         if (this.areaContainsEntity(entity) && !WorldHelper.canSeeSky(level, entityPos, 64))
-                        {   isProvidingInsulation |= this.insulateEntity(entity);
+                        {   this.insulateEntity(entity);
                         }
-                    }
-                    if (this.isSmartEnabled() && !isProvidingInsulation)
-                    {   this.clearFuelUsage();
                     }
                 }
 
@@ -765,48 +791,19 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
                                                 effect.getAmplifier(), effect.isAmbient(), effect.isVisible(), effect.showIcon()));
         }
 
-        if (!this.isSmartEnabled() || this.shouldInsulateEntity(entity))
-        {
-            int effectLevel = this.getInsulationLevel() - 1;
-            if (usingColdFuel)
-            {   entity.addEffect(new EffectInstance(ModEffects.FRIGIDNESS, 60, effectLevel, false, false, true));
-            }
-            if (usingHotFuel)
-            {   entity.addEffect(new EffectInstance(ModEffects.WARMTH, 60, effectLevel, false, false, true));
-            }
-            return this.usingColdFuel || this.usingHotFuel;
+        Insulation insulation = this.getInsulationFor(entity);
+        if (insulation.cooling() > 0)
+        {   entity.addEffect(new EffectInstance(ModEffects.FRIGIDNESS, 60, insulation.cooling() - 1, false, false, true));
         }
-        return false;
-    }
-
-    protected boolean shouldInsulateEntity(LivingEntity entity)
-    {
-        AtomicBoolean shouldInsulate = new AtomicBoolean(false);
-        EntityTempManager.getTemperatureCap(entity).ifPresent(cap ->
-                                                              {
-                                                                  double min = cap.getTrait(Temperature.Trait.FREEZING_POINT);
-                                                                  double max = cap.getTrait(Temperature.Trait.BURNING_POINT);
-                                                                  double temp = cap.getTrait(Temperature.Trait.WORLD);
-                                                                  if (CSMath.betweenInclusive(temp, min, max))
-                                                                  {
-                                                                      Optional<ThermalSourceTempModifier> existingMod = Temperature.getModifier(entity, Temperature.Trait.WORLD, ThermalSourceTempModifier.class);
-                                                                      if (existingMod.isPresent())
-                                                                      {
-                                                                          double lastInput = existingMod.get().getLastInput(Temperature.Trait.WORLD);
-                                                                          double lastOutput = existingMod.get().getLastOutput(Temperature.Trait.WORLD);
-                                                                          if (!(lastInput == lastOutput && lastInput == 0))
-                                                                          {   temp = lastInput;
-                                                                          }
-                                                                      }
-                                                                  }
-
-                                                                  // Tell the hearth to use hot fuel
-                                                                  usingHotFuel |= this.getHotFuel() > 0 && temp < min;
-                                                                  // Tell the hearth to use cold fuel
-                                                                  usingColdFuel |= this.getColdFuel() > 0 && temp > max;
-                                                                  shouldInsulate.set(!CSMath.betweenInclusive(temp, min, max));
-                                                              });
-        return shouldInsulate.get();
+        if (insulation.heating() > 0)
+        {   entity.addEffect(new EffectInstance(ModEffects.WARMTH, 60, insulation.heating() - 1, false, false, true));
+        }
+        // Smart hearths only use fuel types that are needed
+        if (this.isSmartEnabled())
+        {   this.usingColdFuel |= insulation.cooling() > 0;
+            this.usingHotFuel |= insulation.heating() > 0;
+        }
+        return insulation.cooling() > 0 || insulation.heating() > 0;
     }
 
     protected void traversePipes()
@@ -1656,6 +1653,40 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         @Override
         public int hashCode()
         {   return Objects.hash(y, canSeeSky);
+        }
+    }
+
+    /**
+     * Strengths of the Frigidness and Warmth effects given by a hearth
+     */
+    public static class Insulation
+    {
+        private final int cooling;
+        private final int heating;
+
+        public static final Insulation NONE = new Insulation(0, 0);
+
+        public Insulation(int cooling, int heating)
+        {   this.cooling = cooling;
+            this.heating = heating;
+        }
+
+        public int cooling()
+        {   return cooling;
+        }
+
+        public int heating()
+        {   return heating;
+        }
+
+        @Override
+        public boolean equals(Object obj)
+        {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            Insulation that = (Insulation) obj;
+            return this.cooling == that.cooling &&
+                this.heating == that.heating;
         }
     }
 }
