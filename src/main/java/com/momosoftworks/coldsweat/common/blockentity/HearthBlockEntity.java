@@ -127,12 +127,11 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     boolean isHeatingOn = false;
     boolean usingHotFuel = false;
     boolean usingColdFuel = false;
-    int insulationLevel = 0;
+    int warmupAmount = 0;
 
     boolean isEntityNearby = false;
     List<LivingEntity> entities = new ArrayList<>();
     int rebuildCooldown = 0;
-    boolean forceRebuild = false;
     Set<BlockPos> queuedUpdates = new LinkedHashSet<>();
     public int ticksExisted = 0;
 
@@ -216,15 +215,23 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
     /**
      * The "warm-up" time for the Hearth to reach maximum insulation
      */
-    public int getInsulationTime()
+    public int getWarmupTime()
     {   return ConfigSettings.HEARTH_WARM_UP_TIME.get();
     }
 
+    public int getWarmupAmount()
+    {   return warmupAmount;
+    }
+
+    public int getInsulationLevel()
+    {   if (this.getWarmupTime() <= 0) return this.getMaxInsulationLevel();
+        return (int) CSMath.blend(1, this.getMaxInsulationLevel(), this.getWarmupAmount(), 0, this.getWarmupTime());
+    }
     public int getCoolingLevel()
-    {   return usingColdFuel ? insulationLevel : 0;
+    {   return usingColdFuel ? this.getInsulationLevel() : 0;
     }
     public int getHeatingLevel()
-    {   return usingHotFuel ? insulationLevel : 0;
+    {   return usingHotFuel ? this.getInsulationLevel() : 0;
     }
 
     /**
@@ -365,8 +372,8 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         if (this.getColdFuel() > 0 || this.getHotFuel() > 0)
         {
             // Gradually increases insulation amount
-            if (insulationLevel < this.getInsulationTime())
-            {   insulationLevel++;
+            if (warmupAmount < this.getWarmupTime())
+            {   warmupAmount++;
             }
 
             if ((this.usingColdFuel || this.usingHotFuel || (this.isSmartEnabled() && this.isEntityNearby)))
@@ -760,8 +767,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
 
         if (!this.isSmartEnabled() || this.shouldInsulateEntity(entity))
         {
-            int maxEffect = this.getMaxInsulationLevel() - 1;
-            int effectLevel = (int) Math.min(maxEffect, (insulationLevel / (double) this.getInsulationTime()) * maxEffect);
+            int effectLevel = this.getInsulationLevel() - 1;
             if (usingColdFuel)
             {   entity.addEffect(new EffectInstance(ModEffects.FRIGIDNESS, 60, effectLevel, false, false, true));
             }
@@ -1208,7 +1214,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         {   this.coldFuel.set(tag.getInt("ColdFuel"));
             this.hotFuel.set(tag.getInt("HotFuel"));
         }
-        this.insulationLevel = tag.getInt("InsulationLevel");
+        this.warmupAmount = tag.getInt("InsulationLevel");
     }
 
     private boolean loadFuelOld(CompoundNBT tag)
@@ -1228,7 +1234,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         saveEffects(tag);
         tag.putInt("ColdFuel", this.getColdFuel());
         tag.putInt("HotFuel", this.getHotFuel());
-        tag.putInt("InsulationLevel", this.insulationLevel);
+        tag.putInt("InsulationLevel", this.warmupAmount);
 
         return tag;
     }
@@ -1262,7 +1268,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         tag.putInt("ColdFuel", this.getColdFuel());
         tag.putBoolean("ShouldUseColdFuel", this.usingColdFuel);
         tag.putBoolean("ShouldUseHotFuel", this.usingHotFuel);
-        tag.putInt("InsulationLevel", insulationLevel);
+        tag.putInt("InsulationLevel", warmupAmount);
         tag.putBoolean("IsCooling", this.isCoolingOn);
         tag.putBoolean("IsHeating", this.isHeatingOn);
         tag.putBoolean("HasSmokestack", this.hasSmokestack);
@@ -1277,7 +1283,7 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
         this.setColdFuel(tag.getInt("ColdFuel"), false);
         this.usingColdFuel = tag.getBoolean("ShouldUseColdFuel");
         this.usingHotFuel = tag.getBoolean("ShouldUseHotFuel");
-        this.insulationLevel = tag.getInt("InsulationLevel");
+        this.warmupAmount = tag.getInt("InsulationLevel");
         this.isCoolingOn = tag.getBoolean("IsCooling");
         this.isHeatingOn = tag.getBoolean("IsHeating");
         this.hasSmokestack = tag.getBoolean("HasSmokestack");

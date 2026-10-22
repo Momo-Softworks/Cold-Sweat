@@ -136,7 +136,7 @@ public class BoilerBlockEntity extends HearthBlockEntity implements ITickableTil
     }
 
     @Override
-    public int getInsulationTime()
+    public int getWarmupTime()
     {   return ConfigSettings.BOILER_WARM_UP_TIME.get();
     }
 
