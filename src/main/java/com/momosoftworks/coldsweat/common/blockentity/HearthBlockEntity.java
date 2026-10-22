@@ -20,7 +20,6 @@ import com.momosoftworks.coldsweat.common.block.SmokestackBlock;
 import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.common.container.HearthContainer;
 import com.momosoftworks.coldsweat.common.event.HearthSaveDataHandler;
-import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.*;
 import com.momosoftworks.coldsweat.core.network.message.HearthResetMessage;
@@ -120,12 +119,11 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     boolean isHeatingOn = false;
     boolean usingHotFuel = false;
     boolean usingColdFuel = false;
-    int insulationLevel = 0;
+    int warmupAmount = 0;
 
     boolean isEntityNearby = false;
     List<LivingEntity> entities = new ArrayList<>();
     int rebuildCooldown = 0;
-    boolean forceRebuild = false;
     Set<BlockPos> queuedUpdates = new LinkedHashSet<>();
     public int ticksExisted = 0;
 
@@ -208,15 +206,23 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
     /**
      * The "warm-up" time for the Hearth to reach maximum insulation
      */
-    public int getInsulationTime()
+    public int getWarmupTime()
     {   return ConfigSettings.HEARTH_WARM_UP_TIME.get();
     }
 
+    public int getWarmupAmount()
+    {   return warmupAmount;
+    }
+
+    public int getInsulationLevel()
+    {   if (this.getWarmupTime() <= 0) return this.getMaxInsulationLevel();
+        return (int) CSMath.blend(1, this.getMaxInsulationLevel(), this.getWarmupAmount(), 0, this.getWarmupTime());
+    }
     public int getCoolingLevel()
-    {   return usingColdFuel ? insulationLevel : 0;
+    {   return usingColdFuel ? this.getInsulationLevel() : 0;
     }
     public int getHeatingLevel()
-    {   return usingHotFuel ? insulationLevel : 0;
+    {   return usingHotFuel ? this.getInsulationLevel() : 0;
     }
 
     /**
@@ -362,8 +368,8 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         if (this.getColdFuel() > 0 || this.getHotFuel() > 0)
         {
             // Gradually increases insulation amount
-            if (insulationLevel < this.getInsulationTime())
-            {   insulationLevel++;
+            if (warmupAmount < this.getWarmupTime())
+            {   warmupAmount++;
             }
 
             if ((this.usingColdFuel || this.usingHotFuel || (this.isSmartEnabled() && this.isEntityNearby)))
@@ -758,8 +764,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
 
         if (!this.isSmartEnabled() || this.shouldInsulateEntity(entity))
         {
-            int maxEffect = this.getMaxInsulationLevel() - 1;
-            int effectLevel = (int) Math.min(maxEffect, (insulationLevel / (double) this.getInsulationTime()) * maxEffect);
+            int effectLevel = this.getInsulationLevel() - 1;
             if (usingColdFuel)
             {   entity.addEffect(new MobEffectInstance(ModEffects.FRIGIDNESS, 60, effectLevel, false, false, true));
             }
@@ -1205,7 +1210,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         {   this.coldFuel.set(input.getIntOr("ColdFuel", 0));
             this.hotFuel.set(input.getIntOr("HotFuel", 0));
         }
-        this.insulationLevel = input.getIntOr("InsulationLevel", 0);
+        this.warmupAmount = input.getIntOr("InsulationLevel", 0);
     }
 
     private boolean loadFuelOld(ValueInput input)
@@ -1227,7 +1232,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         saveEffects(output);
         output.putInt("ColdFuel", this.getColdFuel());
         output.putInt("HotFuel", this.getHotFuel());
-        output.putInt("InsulationLevel", this.insulationLevel);
+        output.putInt("InsulationLevel", this.warmupAmount);
     }
 
     void saveEffects(ValueOutput output)
@@ -1250,7 +1255,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         output.putInt("ColdFuel", this.getColdFuel());
         output.putBoolean("ShouldUseColdFuel", this.usingColdFuel);
         output.putBoolean("ShouldUseHotFuel", this.usingHotFuel);
-        output.putInt("InsulationLevel", insulationLevel);
+        output.putInt("InsulationLevel", warmupAmount);
         output.putBoolean("IsCooling", this.isCoolingOn);
         output.putBoolean("IsHeating", this.isHeatingOn);
         output.putBoolean("HasSmokestack", this.hasSmokestack);
@@ -1265,7 +1270,7 @@ public class HearthBlockEntity extends RandomizableContainerBlockEntity implemen
         this.setColdFuel(input.getIntOr("ColdFuel", 0), false);
         this.usingColdFuel = input.getBooleanOr("ShouldUseColdFuel", false);
         this.usingHotFuel = input.getBooleanOr("ShouldUseHotFuel", false);
-        this.insulationLevel = input.getIntOr("InsulationLevel", 0);
+        this.warmupAmount = input.getIntOr("InsulationLevel", 0);
         this.isCoolingOn = input.getBooleanOr("IsCooling", false);
         this.isHeatingOn = input.getBooleanOr("IsHeating", false);
         this.hasSmokestack = input.getBooleanOr("HasSmokestack", false);
