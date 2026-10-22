@@ -185,7 +185,7 @@ public class IceboxBlockEntity extends HearthBlockEntity implements LidBlockEnti
     }
 
     @Override
-    public int getInsulationTime()
+    public int getWarmupTime()
     {   return ConfigSettings.ICEBOX_WARM_UP_TIME.get();
     }
 
