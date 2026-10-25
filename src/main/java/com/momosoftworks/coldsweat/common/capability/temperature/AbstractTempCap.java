@@ -402,26 +402,19 @@ public class AbstractTempCap implements ITemperatureCap
         }
         else
         {
-            double base = CSMath.safeDouble(attribute.getBaseValue()).orElseGet(defaultSupplier);
+            double base = EntityTempManager.getAttributeOverride(attribute).orElseGet(defaultSupplier);
 
-            if (modifiers.isEmpty())
-            {   newValue = base;
+            for (AttributeModifier mod : this.getAttributeModifiers(attribute, AttributeModifier.Operation.ADDITION))
+            {   base += mod.getAmount();
             }
-            else
-            {
-                for (AttributeModifier mod : this.getAttributeModifiers(attribute, AttributeModifier.Operation.ADDITION))
-                {   base += mod.getAmount();
-                }
-                double value = base;
-                for (AttributeModifier mod : this.getAttributeModifiers(attribute, AttributeModifier.Operation.MULTIPLY_BASE))
-                {   value += base * mod.getAmount();
-                }
-                for (AttributeModifier mod : this.getAttributeModifiers(attribute, AttributeModifier.Operation.MULTIPLY_TOTAL))
-                {
-                        value *= 1.0D + mod.getAmount();
-                }
-                newValue = value;
+            double value = base;
+            for (AttributeModifier mod : this.getAttributeModifiers(attribute, AttributeModifier.Operation.MULTIPLY_BASE))
+            {   value += base * mod.getAmount();
             }
+            for (AttributeModifier mod : this.getAttributeModifiers(attribute, AttributeModifier.Operation.MULTIPLY_TOTAL))
+            {   value *= 1.0D + mod.getAmount();
+            }
+            newValue = value;
         }
         return newValue;
     }
