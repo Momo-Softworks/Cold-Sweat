@@ -335,29 +335,29 @@ public class EntityTempManager
             });
         }
 
-        /**
-         * Transfer the player's capability when traveling from the End
-         */
         @SubscribeEvent
-        public static void carryOverPersistentAttributes(PlayerEvent.Clone event)
+        public static void keepPersistentAttributes(PlayerEvent.Clone event)
         {
             PlayerEntity oldPlayer = event.getOriginal();
             PlayerEntity newPlayer = event.getPlayer();
 
             if (!newPlayer.level.isClientSide)
             {
-                // Get the old player's capability
-                getTemperatureCap(oldPlayer).map(ITemperatureCap::getPersistentAttributes).orElse(new HashSet<>())
-            .forEach(attr ->
-            {
-                ModifiableAttributeInstance newAttr = newPlayer.getAttribute(attr);
-                    ModifiableAttributeInstance oldAttr = oldPlayer.getAttribute(attr);
-                if (newAttr != null && oldAttr != null)
+                Collection<Attribute> persistentAttributes = getTemperatureCap(oldPlayer).map(ITemperatureCap::getPersistentAttributes).orElse(new HashSet<>());
+                for (ModifiableAttributeInstance newAttr : getAllTemperatureAttributes(newPlayer))
                 {
-                    newAttr.setBaseValue(oldAttr.getBaseValue());
-                    getTemperatureCap(newPlayer).ifPresent(cap -> cap.markPersistentAttribute(attr));
+                    Attribute attr = newAttr.getAttribute();
+                    ModifiableAttributeInstance oldAttr = oldPlayer.getAttribute(attr);
+                    if (persistentAttributes.contains(attr) && oldAttr != null)
+                    {
+                        newAttr.setBaseValue(oldAttr.getBaseValue());
+                        getTemperatureCap(newPlayer).ifPresent(cap -> cap.markPersistentAttribute(attr));
+                    }
+                    // Vanilla carries over all base values; reset non-persistent ones on death
+                    else if (event.isWasDeath())
+                    {   newAttr.setBaseValue(attr.getDefaultValue());
+                    }
                 }
-            });
             }
         }
 
@@ -933,6 +933,14 @@ public class EntityTempManager
 
             default : throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("\"" + trait + "\" is not a valid trait!"));
         }
+    }
+
+    /**
+     * @return the attribute's base value, or empty if it is unset (0).<br>
+     * NaN is also treated as unset, as it was the default value in older versions.
+     */
+    public static Optional<Double> getAttributeOverride(ModifiableAttributeInstance attribute)
+    {   return CSMath.safeDouble(attribute.getBaseValue()).filter(value -> value != 0);
     }
 
     public static Trait getTraitForAttribute(Attribute attribute)

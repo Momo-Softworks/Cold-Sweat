@@ -497,7 +497,7 @@ public class TempCommand extends BaseCommand
 
         source.sendSuccess(new TranslationTextComponent("commands.cold_sweat.temperature.debug", living.getDisplayName(), trait.getSerializedName()).withStyle(TextFormatting.WHITE), false);
 
-        if (attribute != null && CSMath.safeDouble(attribute.getBaseValue()).isPresent())
+        if (attribute != null && EntityTempManager.getAttributeOverride(attribute).isPresent())
         {
             source.sendSuccess(new StringTextComponent(ForgeRegistries.ATTRIBUTES.getKey(attribute.getAttribute()).toString()).withStyle(TextFormatting.GOLD)
                        .append(new StringTextComponent(" → ").withStyle(TextFormatting.WHITE))
@@ -637,7 +637,7 @@ public class TempCommand extends BaseCommand
                 {   ModifiableAttributeInstance instance = EntityTempManager.getAttribute(attribute, ((LivingEntity) entity));
                     if (instance == null) return;
                     instance.getModifiers().forEach(instance::removeModifier);
-                    EntityTempManager.getAttribute(attribute, ((LivingEntity) entity)).setBaseValue(Double.NaN);
+                    instance.setBaseValue(instance.getAttribute().getDefaultValue());
                     cap.clearPersistentAttribute(instance.getAttribute());
                 });
             }
