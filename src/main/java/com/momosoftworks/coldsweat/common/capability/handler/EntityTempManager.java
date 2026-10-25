@@ -63,7 +63,6 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.util.ObfuscationReflectionHelper;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.EntityJoinLevelEvent;
-import net.neoforged.neoforge.event.entity.EntityLeaveLevelEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEntityUseItemEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEquipmentChangeEvent;
 import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
@@ -72,7 +71,6 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.level.SleepFinishedTimeEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.event.tick.PlayerTickEvent;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
@@ -288,29 +286,29 @@ public class EntityTempManager
             });
         }
 
-        /**
-         * Transfer the player's capability when traveling from the End
-         */
         @SubscribeEvent
-        public static void carryOverPersistentAttributes(PlayerEvent.Clone event)
+        public static void keepPersistentAttributes(PlayerEvent.Clone event)
         {
             Player oldPlayer = event.getOriginal();
             Player newPlayer = event.getEntity();
 
             if (!newPlayer.level().isClientSide())
             {
-                // Get the old player's capability
-                getTemperatureCap(oldPlayer).map(ITemperatureCap::getPersistentAttributes).orElse(new HashSet<>())
-            .forEach(attr ->
-            {
-                AttributeInstance newAttr = newPlayer.getAttribute(Holder.direct(attr));
-                    AttributeInstance oldAttr = oldPlayer.getAttribute(Holder.direct(attr));
-                if (newAttr != null && oldAttr != null)
+                Collection<Attribute> persistentAttributes = getTemperatureCap(oldPlayer).map(ITemperatureCap::getPersistentAttributes).orElse(new HashSet<>());
+                for (AttributeInstance newAttr : getAllTemperatureAttributes(newPlayer))
                 {
-                    newAttr.setBaseValue(oldAttr.getBaseValue());
-                    getTemperatureCap(newPlayer).ifPresent(cap -> cap.markPersistentAttribute(attr));
+                    Attribute attr = newAttr.getAttribute().value();
+                    AttributeInstance oldAttr = oldPlayer.getAttribute(newAttr.getAttribute());
+                    if (persistentAttributes.contains(attr) && oldAttr != null)
+                    {
+                        newAttr.setBaseValue(oldAttr.getBaseValue());
+                        getTemperatureCap(newPlayer).ifPresent(cap -> cap.markPersistentAttribute(attr));
+                    }
+                    // Vanilla carries over all base values; reset non-persistent ones on death
+                    else if (event.isWasDeath())
+                    {   newAttr.setBaseValue(attr.getDefaultValue());
+                    }
                 }
-            });
             }
         }
 
@@ -912,6 +910,14 @@ public class EntityTempManager
 
             default -> throw ColdSweat.LOGGER.throwing(new IllegalArgumentException("\"" + trait + "\" is not a valid trait!"));
         };
+    }
+
+    /**
+     * @return the attribute's base value, or empty if it is unset (0).<br>
+     * NaN is also treated as unset, as it was the default value in older versions.
+     */
+    public static Optional<Double> getAttributeOverride(AttributeInstance attribute)
+    {   return CSMath.safeDouble(attribute.getBaseValue()).filter(value -> value != 0);
     }
 
     public static Trait getTraitForAttribute(Holder<Attribute> attribute)

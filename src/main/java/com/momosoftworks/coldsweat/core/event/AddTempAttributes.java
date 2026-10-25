@@ -34,15 +34,15 @@ public class AddTempAttributes
         @SubscribeEvent
         public static void addPlayerAttributes(EntityAttributeModificationEvent event)
         {
-            event.add(EntityTypes.PLAYER, ModAttributes.COLD_DAMPENING, Double.NaN);
-            event.add(EntityTypes.PLAYER, ModAttributes.HEAT_DAMPENING, Double.NaN);
-            event.add(EntityTypes.PLAYER, ModAttributes.COLD_RESISTANCE, Double.NaN);
-            event.add(EntityTypes.PLAYER, ModAttributes.HEAT_RESISTANCE, Double.NaN);
-            event.add(EntityTypes.PLAYER, ModAttributes.BURNING_POINT, Double.NaN);
-            event.add(EntityTypes.PLAYER, ModAttributes.FREEZING_POINT, Double.NaN);
-            event.add(EntityTypes.PLAYER, ModAttributes.BASE_BODY_TEMPERATURE, Double.NaN);
-            event.add(EntityTypes.PLAYER, ModAttributes.WORLD_TEMPERATURE, Double.NaN);
-            event.add(EntityTypes.PLAYER, ModAttributes.TEMP_RATE, Double.NaN);
+            event.add(EntityTypes.PLAYER, ModAttributes.COLD_DAMPENING, 0.0);
+            event.add(EntityTypes.PLAYER, ModAttributes.HEAT_DAMPENING, 0.0);
+            event.add(EntityTypes.PLAYER, ModAttributes.COLD_RESISTANCE, 0.0);
+            event.add(EntityTypes.PLAYER, ModAttributes.HEAT_RESISTANCE, 0.0);
+            event.add(EntityTypes.PLAYER, ModAttributes.BURNING_POINT, 0.0);
+            event.add(EntityTypes.PLAYER, ModAttributes.FREEZING_POINT, 0.0);
+            event.add(EntityTypes.PLAYER, ModAttributes.BASE_BODY_TEMPERATURE, 0.0);
+            event.add(EntityTypes.PLAYER, ModAttributes.WORLD_TEMPERATURE, 0.0);
+            event.add(EntityTypes.PLAYER, ModAttributes.TEMP_RATE, 0.0);
         }
     }
 
@@ -93,15 +93,15 @@ public class AddTempAttributes
             if (attributes == null) continue;
             AttributeSupplier.Builder builder = new AttributeSupplier.Builder(attributes);
 
-            builder.add(ModAttributes.COLD_DAMPENING, Double.NaN);
-            builder.add(ModAttributes.HEAT_DAMPENING, Double.NaN);
-            builder.add(ModAttributes.COLD_RESISTANCE, Double.NaN);
-            builder.add(ModAttributes.HEAT_RESISTANCE, Double.NaN);
-            builder.add(ModAttributes.BURNING_POINT, Double.NaN);
-            builder.add(ModAttributes.FREEZING_POINT, Double.NaN);
-            builder.add(ModAttributes.BASE_BODY_TEMPERATURE, Double.NaN);
-            builder.add(ModAttributes.WORLD_TEMPERATURE, Double.NaN);
-            builder.add(ModAttributes.TEMP_RATE, Double.NaN);
+            builder.add(ModAttributes.COLD_DAMPENING, 0.0);
+            builder.add(ModAttributes.HEAT_DAMPENING, 0.0);
+            builder.add(ModAttributes.COLD_RESISTANCE, 0.0);
+            builder.add(ModAttributes.HEAT_RESISTANCE, 0.0);
+            builder.add(ModAttributes.BURNING_POINT, 0.0);
+            builder.add(ModAttributes.FREEZING_POINT, 0.0);
+            builder.add(ModAttributes.BASE_BODY_TEMPERATURE, 0.0);
+            builder.add(ModAttributes.WORLD_TEMPERATURE, 0.0);
+            builder.add(ModAttributes.TEMP_RATE, 0.0);
 
             getForgeAttributes().put(type, builder.build());
         }
