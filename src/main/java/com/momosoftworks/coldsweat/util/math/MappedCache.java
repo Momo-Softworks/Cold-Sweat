@@ -1,6 +1,6 @@
 package com.momosoftworks.coldsweat.util.math;
 
-import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -8,7 +8,7 @@ import java.util.function.Predicate;
 
 public class MappedCache<K, V>
 {
-    protected final Map<K, V> cache = new HashMap<>();
+    protected final Map<K, V> cache = new IdentityHashMap<>();
     protected final Predicate<K> invalidator;
     protected final Function<K, V> getter;
 
