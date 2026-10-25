@@ -2,62 +2,36 @@ package com.momosoftworks.coldsweat.mixin;
 
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiGraphics;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 @Mixin(value = Gui.class)
 public class MixinXPBar
 {
-    @Inject(method = "renderExperienceBar",
-            at = @At(value = "INVOKE",
-                     target = "Lnet/minecraft/client/gui/GuiGraphics;drawString(Lnet/minecraft/client/gui/Font;Ljava/lang/String;IIIZ)I",
-                     ordinal = 0))
-    public void shiftExperienceBar(GuiGraphics graphics, int x, CallbackInfo ci)
-    {
-        graphics.pose().pushPose();
-        // Render XP bar
-        if (ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get())
-        {   graphics.pose().translate(0, 4, 0);
-        }
-    }
-
-    @Inject(method = "renderExperienceBar",
-            at = @At
-            (   value = "INVOKE",
-                target = "Lnet/minecraft/util/profiling/ProfilerFiller;pop()V",
-                ordinal = 0
-            ),
-            slice = @Slice
-            (   from = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Font;width(Ljava/lang/String;)I"),
-                to   = @At(value = "RETURN")
-            ))
-    public void experienceBarPop(GuiGraphics graphics, int px, CallbackInfo ci)
-    {
-        graphics.pose().popPose();
+    @ModifyArg(method = "renderExperienceBar",
+               at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphics;drawString(Lnet/minecraft/client/gui/Font;Ljava/lang/String;IIIZ)I"),
+               index = 3)
+    private int offsetExperienceLevel(int y)
+    {   return ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get() ? y + 4 : y;
     }
 
     @Mixin(Gui.class)
     public static class MixinItemLabel
     {
-        @Inject(method = "renderSelectedItemName(Lnet/minecraft/client/gui/GuiGraphics;I)V",
-                at = @At(value = "HEAD"), remap = false)
-        public void shiftItemName(GuiGraphics graphics, int height, CallbackInfo ci)
-        {
-            graphics.pose().pushPose();
-            if (ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get())
-            {   graphics.pose().translate(0, -4, 0);
-            }
+        // Shifting both arguments of Math.max(yShift, 59) shifts its result by the same amount
+        @ModifyArg(method = "renderSelectedItemName(Lnet/minecraft/client/gui/GuiGraphics;I)V",
+                   at = @At(value = "INVOKE", target = "Ljava/lang/Math;max(II)I"),
+                   index = 0, remap = false)
+        private int offsetItemNameShift(int yShift)
+        {   return ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get() ? yShift + 4 : yShift;
         }
 
-        @Inject(method = "renderSelectedItemName(Lnet/minecraft/client/gui/GuiGraphics;I)V",
-                at = @At(value = "TAIL"), remap = false)
-        public void itemNamePop(GuiGraphics graphics, int height, CallbackInfo ci)
-        {
-            graphics.pose().popPose();
+        @ModifyArg(method = "renderSelectedItemName(Lnet/minecraft/client/gui/GuiGraphics;I)V",
+                   at = @At(value = "INVOKE", target = "Ljava/lang/Math;max(II)I"),
+                   index = 1, remap = false)
+        private int offsetItemNameMinShift(int minShift)
+        {   return ConfigSettings.CUSTOM_HOTBAR_LAYOUT.get() ? minShift + 4 : minShift;
         }
     }
 }
