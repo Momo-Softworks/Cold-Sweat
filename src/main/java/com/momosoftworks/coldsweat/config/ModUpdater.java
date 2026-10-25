@@ -4,6 +4,7 @@ import com.google.common.io.Files;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.util.Temperature;
+import com.momosoftworks.coldsweat.common.capability.handler.EntityTempManager;
 import com.momosoftworks.coldsweat.compat.CompatManager;
 import com.momosoftworks.coldsweat.config.spec.CSConfigSpec;
 import com.momosoftworks.coldsweat.config.spec.ItemSettingsConfig;
@@ -11,6 +12,7 @@ import com.momosoftworks.coldsweat.config.spec.MainSettingsConfig;
 import com.momosoftworks.coldsweat.config.spec.WorldSettingsConfig;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.neoforged.fml.loading.FMLPaths;
 
 import java.io.File;
@@ -25,6 +27,14 @@ public class ModUpdater
     {
         String entityVersion = entity.getPersistentData().getString("cs:version");
         entity.getPersistentData().putString("cs:version", ColdSweat.getVersion());
+
+        // Reset attributes using the old NaN default
+        for (AttributeInstance attribute : EntityTempManager.getAllTemperatureAttributes(entity))
+        {
+            if (Double.isNaN(attribute.getBaseValue()))
+            {   attribute.setBaseValue(attribute.getAttribute().value().getDefaultValue());
+            }
+        }
     }
 
     public static void updateConfigs()

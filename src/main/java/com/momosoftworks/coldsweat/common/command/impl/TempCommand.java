@@ -503,7 +503,7 @@ public class TempCommand extends BaseCommand
 
         source.sendSuccess(() -> Component.translatable("commands.cold_sweat.temperature.debug", living.getDisplayName(), trait.getSerializedName()).withStyle(ChatFormatting.WHITE), false);
 
-        if (attribute != null && CSMath.safeDouble(attribute.getBaseValue()).isPresent())
+        if (attribute != null && EntityTempManager.getAttributeOverride(attribute).isPresent())
         {
             source.sendSuccess(() ->
                                Component.literal(BuiltInRegistries.ATTRIBUTE.getKey(attribute.getAttribute().value()).toString()).withStyle(ChatFormatting.GOLD)
@@ -650,7 +650,7 @@ public class TempCommand extends BaseCommand
                         AttributeInstance instance = EntityTempManager.getAttribute(attribute, living);
                         if (instance == null) break checkAttribute;
                         instance.removeModifiers();
-                        EntityTempManager.getAttribute(attribute, living).setBaseValue(Double.NaN);
+                        instance.setBaseValue(instance.getAttribute().value().getDefaultValue());
                         cap.clearPersistentAttribute(instance.getAttribute().value());
                     }
                 });
