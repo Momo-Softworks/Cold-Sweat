@@ -74,7 +74,6 @@ public abstract class AbstractConfigPage extends Screen
     private static final int TITLE_HEIGHT = ConfigScreen.TITLE_HEIGHT;
     private static final int BOTTOM_BUTTON_HEIGHT_OFFSET = ConfigScreen.BOTTOM_BUTTON_HEIGHT_OFFSET;
     private static final int BOTTOM_BUTTON_WIDTH = ConfigScreen.BOTTOM_BUTTON_WIDTH;
-    public static Minecraft MINECRAFT = Minecraft.getInstance();
 
     private static final String GUI_TEXTURE_PATH = "config/";
 
@@ -192,7 +191,7 @@ public abstract class AbstractConfigPage extends Screen
     {
         Component label = dynamicLabel.get();
 
-        boolean shouldBeActive = !requireOP || MINECRAFT.player == null || MINECRAFT.player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
+        boolean shouldBeActive = !requireOP || Minecraft.getInstance().player == null || Minecraft.getInstance().player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
         int widgetX = this.width / 2 + (side == Side.LEFT ? -179 : 56);
         int widgetY = this.height / 4 - 8 + (side == Side.LEFT ? leftSideLength : rightSideLength);
         // Extend the button if the text is too long
@@ -249,7 +248,7 @@ public abstract class AbstractConfigPage extends Screen
                                    boolean requireOP, boolean setsCustomDifficulty, boolean clientside,
                                    Component... tooltip)
     {
-        boolean shouldBeActive = !requireOP || MINECRAFT.player == null || MINECRAFT.player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
+        boolean shouldBeActive = !requireOP || Minecraft.getInstance().player == null || Minecraft.getInstance().player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
         int labelOffset = font.width(label.getString()) > 90 ?
                           font.width(label.getString()) - 86 : 0;
         int boxWidth = Math.max(51 - labelOffset, 30);
@@ -342,7 +341,7 @@ public abstract class AbstractConfigPage extends Screen
         int widgetX = this.width / 2 + (side == Side.LEFT ? -97 : 136);
         int widgetY = this.height / 4 + (side == Side.LEFT ? this.leftSideLength : this.rightSideLength);
 
-        boolean shouldBeActive = !requireOP || MINECRAFT.player == null || MINECRAFT.player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
+        boolean shouldBeActive = !requireOP || Minecraft.getInstance().player == null || Minecraft.getInstance().player.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER);
 
         int labelWidth = font.width(label.getString());
         int labelOffset = labelWidth > 84
@@ -538,7 +537,7 @@ public abstract class AbstractConfigPage extends Screen
             nextNavButton = new ImageButton(this.width - 32, 12, 20, 20, NEXT_PAGE_SPRITES,
                 button ->
                 {   ConfigScreen.CURRENT_PAGE++;
-                    MINECRAFT.gui.setScreen(ConfigScreen.getPage(ConfigScreen.CURRENT_PAGE, parentScreen));
+                    Minecraft.getInstance().gui.setScreen(ConfigScreen.getPage(ConfigScreen.CURRENT_PAGE, parentScreen));
                 });
             if (ConfigScreen.CURRENT_PAGE < ConfigScreen.LAST_PAGE)
                 this.addRenderableWidget(nextNavButton);
@@ -546,7 +545,7 @@ public abstract class AbstractConfigPage extends Screen
             prevNavButton = new ImageButton(this.width - 76, 12, 20, 20, PREV_PAGE_SPRITES,
                     button ->
                     {   ConfigScreen.CURRENT_PAGE--;
-                        MINECRAFT.gui.setScreen(ConfigScreen.getPage(ConfigScreen.CURRENT_PAGE, parentScreen));
+                        Minecraft.getInstance().gui.setScreen(ConfigScreen.getPage(ConfigScreen.CURRENT_PAGE, parentScreen));
                     });
             if (ConfigScreen.CURRENT_PAGE > ConfigScreen.FIRST_PAGE)
                 this.addRenderableWidget(prevNavButton);
@@ -670,7 +669,7 @@ public abstract class AbstractConfigPage extends Screen
 
     @Override
     public void onClose()
-    {   MINECRAFT.gui.setScreen(this.parentScreen);
+    {   Minecraft.getInstance().gui.setScreen(this.parentScreen);
         ConfigScreen.saveConfig();
     }
 
