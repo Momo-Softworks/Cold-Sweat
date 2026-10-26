@@ -2,7 +2,6 @@ package com.momosoftworks.coldsweat.compat.jei.category;
 
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
 import com.momosoftworks.coldsweat.compat.jei.JeiPlugin;
-import com.momosoftworks.coldsweat.core.init.ModItemComponents;
 import com.momosoftworks.coldsweat.core.init.ModItems;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
@@ -11,7 +10,6 @@ import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
-import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.api.recipe.types.IRecipeType;
 import net.minecraft.network.chat.Component;
@@ -78,9 +76,7 @@ public class SewingCategory implements IRecipeCategory<JeiPlugin.SewingRecipe>
         List<ItemStack> insulationResults = recipe.inputs().stream().map(insulator ->
         {
             ItemStack armorItem = INSULATABLE_ITEM.copy();
-            ItemInsulationManager.getInsulationCap(armorItem).ifPresent(cap ->
-            {   armorItem.set(ModItemComponents.ARMOR_INSULATION, cap.addInsulationItem(insulator));
-            });
+            ItemInsulationManager.modifyInsulationCap(armorItem, cap -> cap.addInsulationItem(insulator));
             return armorItem;
         }).toList();
 

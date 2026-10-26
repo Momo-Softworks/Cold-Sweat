@@ -11,6 +11,7 @@ import com.momosoftworks.coldsweat.data.codec.configuration.InsulatorData;
 import com.momosoftworks.coldsweat.data.codec.configuration.ItemInsulationSlotsData;
 import com.momosoftworks.coldsweat.util.item.ItemStackHelper;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -29,6 +30,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 
 public class ItemInsulationManager
 {
@@ -43,10 +46,18 @@ public class ItemInsulationManager
 
     public static Optional<ItemInsulationCap> getInsulationCap(ItemStack stack)
     {
-        if (isInsulatable(stack) && !stack.has(ModItemComponents.ARMOR_INSULATION))
-        {   stack.set(ModItemComponents.ARMOR_INSULATION, new ItemInsulationCap());
-        }
-        return Optional.ofNullable(stack.get(ModItemComponents.ARMOR_INSULATION));
+        if (!isInsulatable(stack)) return Optional.empty();
+        return Optional.of(stack.getOrDefault(ModItemComponents.ARMOR_INSULATION, ItemInsulationCap.EMPTY));
+    }
+
+    public static void setInsulationCap(ItemStack stack, ItemInsulationCap cap)
+    {
+        if (cap.insulation().isEmpty()) stack.remove(ModItemComponents.ARMOR_INSULATION);
+        else stack.set(ModItemComponents.ARMOR_INSULATION, cap);
+    }
+
+    public static void modifyInsulationCap(ItemStack stack, UnaryOperator<ItemInsulationCap> function)
+    {   getInsulationCap(stack).ifPresent(cap -> setInsulationCap(stack, function.apply(cap)));
     }
 
     /**
@@ -71,12 +82,15 @@ public class ItemInsulationManager
      * The item must be equipable and not have any built-in insulation.
      */
     public static boolean isInsulatable(ItemStack stack)
+    {   return isInsulatable(stack.getItem(), stack.getComponents());
+    }
+    public static boolean isInsulatable(Item item, DataComponentGetter components)
     {
-        Equippable equippable = stack.get(DataComponents.EQUIPPABLE);
+        Equippable equippable = components.get(DataComponents.EQUIPPABLE);
         return equippable != null
             && equippable.slot().isArmor()
-            && !ConfigSettings.INSULATION_BLACKLIST.get().contains(stack.getItem())
-            && getInsulatorInsulation(stack).isEmpty();
+            && !ConfigSettings.INSULATION_BLACKLIST.get().contains(item)
+            && getInsulatorInsulation(item).isEmpty();
     }
 
     public static int getSlotsFilled(ItemStack stack, Collection<InsulatorData> insulators)
@@ -106,13 +120,13 @@ public class ItemInsulationManager
      * Gives a collection of all insulation that the item can grant to armor.
      * @return an IMMUTABLE list of insulation the item has.
      */
-    public static List<Insulation> getInsulatorInsulation(ItemStack stack)
+    public static List<Insulation> getInsulatorInsulation(Item item)
     {
-        if (!ConfigSettings.INSULATION_ITEMS.get().containsKey(stack.getItem()))
+        if (!ConfigSettings.INSULATION_ITEMS.get().containsKey(item))
         {   return ImmutableList.of();
         }
 
-        return ConfigSettings.INSULATION_ITEMS.get().get(stack.getItem()).stream()
+        return ConfigSettings.INSULATION_ITEMS.get().get(item).stream()
                .map(InsulatorData::insulation)
                .flatMap(List::stream)
                .filter(ins -> !ins.isEmpty()).toList();
