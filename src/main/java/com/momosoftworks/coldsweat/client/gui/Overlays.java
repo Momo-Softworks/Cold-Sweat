@@ -17,6 +17,7 @@ import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
+import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StringUtils;
 import net.minecraft.util.text.TextFormatting;
@@ -97,9 +98,14 @@ public class Overlays
 
             // Set gauge texture
             Minecraft.getInstance().textureManager.bind(WORLD_TEMP_GAUGE_LOCATION.get());
+            // Place the gauge on the left side of the hotbar if the player is left-handed
+            int gaugeX = player.getMainArm() == HandSide.LEFT
+                         ? (width / 2) - 118
+                         : (width / 2) + 93;
 
             // Render frame
-            AbstractGui.blit(poseStack, (width / 2) + 93 + ConfigSettings.WORLD_GAUGE_POS.get().x(),
+            AbstractGui.blit(poseStack,
+                              gaugeX + ConfigSettings.WORLD_GAUGE_POS.get().x(),
                               height - 19 + ConfigSettings.WORLD_GAUGE_POS.get().y(), 0, 64 - severity * 16, 25, 16, 25, 144);
 
             RenderSystem.disableBlend();
@@ -111,7 +117,7 @@ public class Overlays
             int blendedTemp = (int) CSMath.blend(PREV_WORLD_TEMP, WORLD_TEMP, Minecraft.getInstance().getFrameTime(), 0, 1);
 
             Minecraft.getInstance().font.draw(poseStack, (blendedTemp + ConfigSettings.TEMP_OFFSET.get())+"",
-                    /* X */ width / 2 + 106 + (Integer.toString(blendedTemp + ConfigSettings.TEMP_OFFSET.get()).length() * -3) + ConfigSettings.WORLD_GAUGE_POS.get().x(),
+                    /* X */ gaugeX + 13 + (Integer.toString(blendedTemp + ConfigSettings.TEMP_OFFSET.get()).length() * -3) + ConfigSettings.WORLD_GAUGE_POS.get().x(),
                     /* Y */ height - 15 - bob + ConfigSettings.WORLD_GAUGE_POS.get().y(), color);
             poseStack.popPose();
         }
