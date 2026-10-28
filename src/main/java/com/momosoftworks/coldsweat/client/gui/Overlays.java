@@ -25,6 +25,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.StringUtil;
+import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.GameType;
@@ -100,8 +101,13 @@ public class Overlays
 
             /* Render gauge */
 
+            // Place the gauge on the left side of the hotbar if the player is left-handed
+            int gaugeX = player.getMainArm() == HumanoidArm.LEFT
+                         ? (width / 2) - 118
+                         : (width / 2) + 93;
+
             // Render frame
-            graphics.blit(RenderPipelines.GUI_TEXTURED, WORLD_TEMP_GAUGE_LOCATION.get(), (width / 2) + 93 + ConfigSettings.WORLD_GAUGE_POS.get().x(), height - 19 + ConfigSettings.WORLD_GAUGE_POS.get().y(), 0, 64 - severity * 16, 25, 16, 25, 144);
+            graphics.blit(RenderPipelines.GUI_TEXTURED, WORLD_TEMP_GAUGE_LOCATION.get(), gaugeX + ConfigSettings.WORLD_GAUGE_POS.get().x(), height - 19 + ConfigSettings.WORLD_GAUGE_POS.get().y(), 0, 64 - severity * 16, 25, 16, 25, 144);
 
             // Sets the text bobbing offset (or none if disabled)
             int bob = ConfigSettings.ICON_BOBBING.get() && !CSMath.betweenInclusive(temp, PLAYER_MIN_TEMP, PLAYER_MAX_TEMP) && player.tickCount % 2 == 0 ? 1 : 0;
@@ -109,7 +115,7 @@ public class Overlays
             // Render text
             int blendedTemp = (int) CSMath.blend(PREV_WORLD_TEMP, WORLD_TEMP, deltaTracker.getGameTimeDeltaPartialTick(true), 0, 1);
 
-            graphics.text(font, (blendedTemp + ConfigSettings.TEMP_OFFSET.get())+"", /* X */ width / 2 + 106 + (Integer.toString(blendedTemp + ConfigSettings.TEMP_OFFSET.get()).length() * -3) + ConfigSettings.WORLD_GAUGE_POS.get().x(), /* Y */ height - 15 - bob + ConfigSettings.WORLD_GAUGE_POS.get().y(), ClientOnlyHelper.legacyTextColor(color), false);
+            graphics.text(font, (blendedTemp + ConfigSettings.TEMP_OFFSET.get())+"", /* X */ gaugeX + 13 + (Integer.toString(blendedTemp + ConfigSettings.TEMP_OFFSET.get()).length() * -3) + ConfigSettings.WORLD_GAUGE_POS.get().x(), /* Y */ height - 15 - bob + ConfigSettings.WORLD_GAUGE_POS.get().y(), ClientOnlyHelper.legacyTextColor(color), false);
         }
     };
 
