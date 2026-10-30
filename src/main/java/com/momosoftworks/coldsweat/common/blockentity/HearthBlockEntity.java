@@ -3,7 +3,6 @@ package com.momosoftworks.coldsweat.common.blockentity;
 import com.mojang.datafixers.util.Pair;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.event.vanilla.BlockStateChangedEvent;
-import com.momosoftworks.coldsweat.api.insulation.Insulation;
 import com.momosoftworks.coldsweat.api.registry.SpreadRuleRegistry;
 import com.momosoftworks.coldsweat.api.spread_rule.SpreadContext;
 import com.momosoftworks.coldsweat.api.spread_rule.SpreadRule;
@@ -1687,6 +1686,11 @@ public class HearthBlockEntity extends LockableLootTileEntity implements ITickab
             Insulation that = (Insulation) obj;
             return this.cooling == that.cooling &&
                 this.heating == that.heating;
+        }
+
+        @Override
+        public int hashCode()
+        {   return Objects.hash(cooling, heating);
         }
     }
 }
