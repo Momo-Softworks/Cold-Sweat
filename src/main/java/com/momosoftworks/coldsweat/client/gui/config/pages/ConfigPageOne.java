@@ -111,7 +111,7 @@ public class ConfigPageOne extends AbstractConfigPage
 
         // Temp Effects Button...
         this.addButton("temp_effects", Side.RIGHT, () -> new TranslatableComponent("cold_sweat.config.temp_effects.name"),
-                button -> MINECRAFT.setScreen(new ConfigPageTempEffects(this)),
+                button -> Minecraft.getInstance().setScreen(new ConfigPageTempEffects(this)),
                 true, false, false, new TranslatableComponent("cold_sweat.config.temp_effects.desc"));
 
 
