@@ -3760,3 +3760,54 @@ Fixes:
 Technical Changes:
 - BlockTemp's "maxEffect(), minTemp(), range() etc. fields have been migrated to methods that receive full world, position, and blockstate context"
   - This means that these values can be more intelligently calculated rather than effectively being static
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.4.3.1
+
+Fixes:
+- (1.20 - 1.21) Fixed crash when loading the game without Create installed
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.4.4
+* Updated for Minecraft 26.2 (ALPHA!)
+* Revamped how water temperature mechanics work:
+    - Each biome now has an explicit "freezing point" temperature at which water freezes into ice
+        - This temperature is typically higher for colder biomes, and lower for warmer biomes
+        - This can be defined in TOML, JSON, and KubeJS configs
+        - This is to help reduce cases of water freezing and melting when it shouldn't
+    - Water temperature now represents an absolute value, rather than an offset to the biome's temperature
+        - For example, a biome can have a temperature of 80 degrees, and a water temperature of 60 degrees
+        - Water is now the same temperature regardless of time of day (since it's no longer linked to biome temperature)
+        - Existing configs that define water temperature as an offset will be automatically converted to the new system
+- The icebox will now always produce mist particles like it did in older versions, not just when powered or when cooling waterskins
+- Cold Sweat's JEI recipes will now combine recipes for items that belong to the same tag
+
+Fixes:
+- Fixed entity configs taking up more memory than they should (thanks to RinkyDinkyNooble on GitHub)
+- Fixed the soulspring lamp not being held correctly while eating or using two-handed items (bow, crossbow, etc.)
+- Fixed boiler, icebox, hearth, and sewing JEI recipes not being discoverable by clicking the block in JEI
+- Fixed mods crashing if they rely on Cold Sweat's pre-2.4.3 block temperature system
+
+
+------------------------------------------------------------------------------------------------------------------------
+2.4.5
+- The world temperature gauge now flips to the other side of the hotbar if the player is left-handed (to make way for the offhand slot)
+
+Fixes:
+* (26.2) Fixed crash or hanging when opening the in-game config menu
+* Fixed temperature decreasing indefinitely when wet
+* Fixed crash with OwO Lib (Accessories) when equipping armor in vanity slots
+- Fixed thermometer not displaying the correct temperature when in an item frame in some cases
+- Fixed player temperature becoming stuck when their attributes are reset improperly (i.e. by other mods)
+- Fixed player temperature potentially becoming stuck after respawning, rejoining, or changing dimensions
+- (1.21, 26.2) Fixed insulation component randomly being added to armor items
+
+Technical Changes:
+- Simplified the mixins responsible for shifting hotbar elements, to reduce the chance of conflicts with other mods
+- Changed hearth's insulation-related method names to be more idiomatic:
+  - getInsulationTime() -> getWarmupTime()
+  - Added getWarmupAmount(): returns hearth's warm up amount (0 - 1200)
+  - Added getInsulationLevel(): returns the current potion effect level
+  - getCoolingLevel()/getHeatingLevel(): now return the level of their respective potion effects, rather than the warmup amount
