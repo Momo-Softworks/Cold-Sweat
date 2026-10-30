@@ -104,12 +104,12 @@ public class ConfigPageOne extends AbstractConfigPage
         // Difficulty button...
         this.addButton("difficulty", Side.RIGHT, () -> Component.translatable("cold_sweat.config.difficulty.name").append(
                         " (" + ConfigSettings.Difficulty.getFormattedName(ConfigSettings.DIFFICULTY.get()).getString() + ")..."),
-                button -> MINECRAFT.setScreen(new ConfigPageDifficulty(this)),
+                button -> Minecraft.getInstance().setScreen(new ConfigPageDifficulty(this)),
                 true, false, false, Component.translatable("cold_sweat.config.difficulty.desc"));
 
         // Temp Effects Button...
         this.addButton("temp_effects", Side.RIGHT, () -> Component.translatable("cold_sweat.config.temp_effects.name"),
-                button -> MINECRAFT.setScreen(new ConfigPageTempEffects(this)),
+                button -> Minecraft.getInstance().setScreen(new ConfigPageTempEffects(this)),
                 true, false, false, Component.translatable("cold_sweat.config.temp_effects.desc"));
 
 
