@@ -6,7 +6,6 @@ import com.momosoftworks.coldsweat.common.capability.insulation.ItemInsulationCa
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.core.init.ModAdvancementTriggers;
 import com.momosoftworks.coldsweat.core.init.ModBlocks;
-import com.momosoftworks.coldsweat.core.init.ModItemComponents;
 import com.momosoftworks.coldsweat.core.init.ModMenus;
 import com.momosoftworks.coldsweat.util.item.ItemStackHelper;
 import com.momosoftworks.coldsweat.util.world.WorldHelper;
@@ -102,7 +101,7 @@ public class SewingContainer extends ItemCombinerMenu
         // If insulation is being removed
         if (isRemovingInsulation())
         {
-            ItemInsulationManager.getInsulationCap(input1).ifPresent(cap ->
+            ItemInsulationManager.modifyInsulationCap(input1, cap ->
             {
                 if (!cap.getInsulation().isEmpty())
                 {   // Damage shears
@@ -115,7 +114,7 @@ public class SewingContainer extends ItemCombinerMenu
                     // Play shear sound
                     WorldHelper.playEntitySound(SoundEvents.SHEEP_SHEAR, player, SoundSource.PLAYERS, 0.8F, 1.0F);
                 }
-                input1.set(ModItemComponents.ARMOR_INSULATION, cap);
+                return cap;
             });
         }
         // If insulation is being added
@@ -243,7 +242,7 @@ public class SewingContainer extends ItemCombinerMenu
             }
         }
 
-        armorItem.set(ModItemComponents.ARMOR_INSULATION, cap);
+        ItemInsulationManager.setInsulationCap(armorItem, cap);
         return true;
     }
 

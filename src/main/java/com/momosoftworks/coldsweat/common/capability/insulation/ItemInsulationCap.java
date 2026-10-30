@@ -33,6 +33,8 @@ public record ItemInsulationCap(List<Pair<ItemStack, List<InsulatorData>>> insul
 
     public static final StreamCodec<RegistryFriendlyByteBuf, ItemInsulationCap> STREAM_CODEC = ByteBufCodecs.fromCodecWithRegistries(CODEC);
 
+    public static final ItemInsulationCap EMPTY = new ItemInsulationCap(Collections.emptyList());
+
     public ItemInsulationCap()
     {   this(new ArrayList<>());
     }

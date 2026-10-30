@@ -21,7 +21,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.neoforge.event.ModifyDefaultComponentsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerContainerEvent;
 
 import javax.annotation.Nullable;
@@ -29,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.UnaryOperator;
 
 public class ItemInsulationManager
 {
@@ -39,15 +39,22 @@ public class ItemInsulationManager
         public static void handleInventoryOpen(PlayerContainerEvent event)
         {   event.getEntity().getPersistentData().putBoolean("InventoryOpen", event instanceof PlayerContainerEvent.Open);
         }
-
-        @SubscribeEvent
-        public static void addInsulationCap(ModifyDefaultComponentsEvent event)
-        {   event.modifyMatching(ItemInsulationManager::isInsulatable, components -> components.set(ModItemComponents.ARMOR_INSULATION.get(), new ItemInsulationCap()));
-        }
     }
 
     public static Optional<ItemInsulationCap> getInsulationCap(ItemStack stack)
-    {   return Optional.ofNullable(stack.get(ModItemComponents.ARMOR_INSULATION));
+    {
+        if (!isInsulatable(stack)) return Optional.empty();
+        return Optional.of(stack.getOrDefault(ModItemComponents.ARMOR_INSULATION, ItemInsulationCap.EMPTY));
+    }
+
+    public static void setInsulationCap(ItemStack stack, ItemInsulationCap cap)
+    {
+        if (cap.insulation().isEmpty()) stack.remove(ModItemComponents.ARMOR_INSULATION);
+        else stack.set(ModItemComponents.ARMOR_INSULATION, cap);
+    }
+
+    public static void modifyInsulationCap(ItemStack stack, UnaryOperator<ItemInsulationCap> function)
+    {   getInsulationCap(stack).ifPresent(cap -> setInsulationCap(stack, function.apply(cap)));
     }
 
     /**

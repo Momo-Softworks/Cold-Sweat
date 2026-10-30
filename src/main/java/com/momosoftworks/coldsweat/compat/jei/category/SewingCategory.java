@@ -2,7 +2,6 @@ package com.momosoftworks.coldsweat.compat.jei.category;
 
 import com.momosoftworks.coldsweat.common.capability.handler.ItemInsulationManager;
 import com.momosoftworks.coldsweat.compat.jei.JeiPlugin;
-import com.momosoftworks.coldsweat.core.init.ModItemComponents;
 import com.momosoftworks.coldsweat.core.init.ModItems;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
@@ -73,10 +72,7 @@ public class SewingCategory implements IRecipeCategory<JeiPlugin.SewingRecipe>
                 .addItemStacks(List.of(INSULATABLE_ITEM));
 
         ItemStack insulatedItem = INSULATABLE_ITEM.copy();
-        ItemInsulationManager.getInsulationCap(insulatedItem).ifPresent(cap ->
-        {
-            insulatedItem.set(ModItemComponents.ARMOR_INSULATION, cap.addInsulationItem(recipe.input()));
-        });
+        ItemInsulationManager.modifyInsulationCap(insulatedItem, cap -> cap.addInsulationItem(recipe.input()));
 
         builder.addOutputSlot(105, 10)
                 .setStandardSlotBackground()
