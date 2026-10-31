@@ -1,5 +1,8 @@
 package com.momosoftworks.coldsweat.api.event.core.registry;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Maps;
 import com.momosoftworks.coldsweat.ColdSweat;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
@@ -21,13 +24,25 @@ import java.util.function.Supplier;
  */
 public class TempModifierRegisterEvent extends Event
 {
+    private final BiMap<ResourceLocation, TempModifierRegistry.TempModifierHolder> modifiers = HashBiMap.create();
+
     /**
      * Adds a new {@link TempModifier} to the registry.
      *
      * @param modifier the {@link TempModifier} to add.
      */
     public void register(ResourceLocation id, Supplier<TempModifier> modifier)
-    {   TempModifierRegistry.register(id, modifier);
+    {
+        TempModifierRegistry.TempModifierHolder holder = new TempModifierRegistry.TempModifierHolder(modifier, id);
+        TempModifierRegistry.assertUnique(modifiers, holder);
+        modifiers.put(id, holder);
+    }
+
+    /**
+     * @return the TempModifiers registered so far by this event.
+     */
+    public BiMap<ResourceLocation, TempModifierRegistry.TempModifierHolder> getModifiers()
+    {   return Maps.unmodifiableBiMap(modifiers);
     }
 
     /**

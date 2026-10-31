@@ -1,6 +1,7 @@
 package com.momosoftworks.coldsweat.client.event;
 
 import com.momosoftworks.coldsweat.api.event.core.registry.EdiblesRegisterEvent;
+import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.config.ConfigLoadingHandler;
 import com.momosoftworks.coldsweat.core.init.TempModifierInit;
 import com.momosoftworks.coldsweat.core.network.message.ClientConfigAskMessage;
@@ -26,7 +27,7 @@ public class ClientJoinSetup
         // Get configs
         PacketDistributor.sendToServer(new ClientConfigAskMessage());
         // Rebuild TempModifier registries
-        TempModifierInit.buildModifierRegistries();
+        TempModifierRegistry.rebuild();
         NeoForge.EVENT_BUS.post(new EdiblesRegisterEvent());
     }
 

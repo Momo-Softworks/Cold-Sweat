@@ -5,6 +5,7 @@ import com.momosoftworks.coldsweat.api.event.common.temperautre.TempModifierEven
 import com.momosoftworks.coldsweat.api.event.common.temperautre.TemperatureChangedEvent;
 import com.momosoftworks.coldsweat.api.event.core.init.DefaultTempModifiersEvent;
 import com.momosoftworks.coldsweat.api.event.core.registry.LoadRegistriesEvent;
+import com.momosoftworks.coldsweat.api.event.core.registry.TempModifierRegisterEvent;
 import com.momosoftworks.coldsweat.compat.kubejs.event.*;
 import dev.latvian.mods.kubejs.event.EventGroup;
 import dev.latvian.mods.kubejs.event.EventHandler;
@@ -17,6 +18,7 @@ public class KubeEventHandlers
     public static final EventGroup COLD_SWEAT = EventGroup.of("ColdSweatEvents");
 
     public static final EventHandler REGISTER = COLD_SWEAT.server("registries", () -> ModRegistriesEventJS.class);
+    public static final EventHandler REGISTER_MODIFIERS = COLD_SWEAT.server("registerTempModifiers", () -> TempModifierRegisterEventJS.class);
     public static final EventHandler GATHER_DEFAULT_MODIFIERS = COLD_SWEAT.server("gatherDefaultModifiers", () -> DefaultModifiersEventJS.class);
 
     public static final EventHandler TEMP_CHANGED = COLD_SWEAT.common("temperatureChanged", () -> TempChangedEventJS.class);
@@ -29,6 +31,14 @@ public class KubeEventHandlers
     {
         if (REGISTER.hasListeners())
         {   REGISTER.post(new ModRegistriesEventJS(event));
+        }
+    }
+
+    @SubscribeEvent
+    public static void registerTempModifiers(TempModifierRegisterEvent event)
+    {
+        if (REGISTER_MODIFIERS.hasListeners())
+        {   REGISTER_MODIFIERS.post(new TempModifierRegisterEventJS(event));
         }
     }
 

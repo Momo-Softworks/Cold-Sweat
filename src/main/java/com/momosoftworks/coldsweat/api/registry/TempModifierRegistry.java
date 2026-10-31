@@ -4,10 +4,12 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableBiMap;
 import com.momosoftworks.coldsweat.ColdSweat;
+import com.momosoftworks.coldsweat.api.event.core.registry.TempModifierRegisterEvent;
 import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.util.exceptions.RegistryFailureException;
 import com.momosoftworks.coldsweat.util.math.CSMath;
 import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.common.NeoForge;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -15,29 +17,67 @@ import java.util.function.Supplier;
 
 public class TempModifierRegistry
 {
-    static BiMap<ResourceLocation, TempModifierHolder> TEMP_MODIFIERS = HashBiMap.create();
+    static volatile BiMap<ResourceLocation, TempModifierHolder> TEMP_MODIFIERS = ImmutableBiMap.of();
 
     public static BiMap<ResourceLocation, TempModifierHolder> getEntries()
-    {   return ImmutableBiMap.copyOf(TEMP_MODIFIERS);
+    {   return TEMP_MODIFIERS;
     }
 
-    public static void register(ResourceLocation id, Supplier<TempModifier> supplier)
+    /**
+     * Adds a TempModifier to the current registry.<br>
+     * Entries added this way are discarded by the next {@link #rebuild()}.
+     *
+     * @deprecated Register TempModifiers through {@link TempModifierRegisterEvent} instead.
+     */
+    @Deprecated(since = "2.4.5", forRemoval = true)
+    public static synchronized void register(ResourceLocation id, Supplier<TempModifier> supplier)
     {
         TempModifierHolder holder = new TempModifierHolder(supplier, id);
-        if (TEMP_MODIFIERS.containsKey(id) || TEMP_MODIFIERS.values().stream().anyMatch(holder::equals))
+        assertUnique(TEMP_MODIFIERS, holder);
+
+        BiMap<ResourceLocation, TempModifierHolder> entries = HashBiMap.create(TEMP_MODIFIERS);
+        entries.put(id, holder);
+        TEMP_MODIFIERS = ImmutableBiMap.copyOf(entries);
+    }
+
+    /**
+     * Throws if {@code entries} already has a TempModifier with the holder's ID or class.
+     */
+    public static void assertUnique(BiMap<ResourceLocation, TempModifierHolder> entries, TempModifierHolder holder)
+    {
+        TempModifierHolder existing = entries.containsKey(holder.getId())
+                                      ? entries.get(holder.getId())
+                                      : entries.values().stream().filter(holder::equals).findFirst().orElse(null);
+        if (existing != null)
         {
-            throw ColdSweat.LOGGER.throwing(new RegistryFailureException(id, "TempModifier", String.format("Found duplicate TempModifier entries: %s (%s) %s (%s)", holder.getModifierClass().getName(), id,
-                                                                           TEMP_MODIFIERS.get(id).getModifierClass().getName(), id), null));
+            throw ColdSweat.LOGGER.throwing(new RegistryFailureException(holder.getId(), "TempModifier", String.format("Found duplicate TempModifier entries: %s (%s) %s (%s)", holder.getModifierClass().getName(), holder.getId(),
+                                                                                       existing.getModifierClass().getName(), existing.getId()), null));
         }
-        TEMP_MODIFIERS.put(id, holder);
+    }
+
+    /**
+     * Fires {@link TempModifierRegisterEvent} and replaces the registry with its results all at once.<br>
+     * The previous registry stays readable until then, and is kept if registration fails.
+     */
+    public static void rebuild()
+    {
+        TempModifierRegisterEvent event = new TempModifierRegisterEvent();
+        try { NeoForge.EVENT_BUS.post(event); }
+        catch (Exception e)
+        {
+            ColdSweat.LOGGER.error("Registering TempModifiers failed!");
+            throw e;
+        }
+        synchronized (TempModifierRegistry.class)
+        {   TEMP_MODIFIERS = ImmutableBiMap.copyOf(event.getModifiers());
+        }
     }
 
     /**
      * Clears the registry of all items. This effectively "un-registers" all TempModifiers.
      */
-    public static void flush()
-    {
-        TEMP_MODIFIERS.clear();
+    public static synchronized void flush()
+    {   TEMP_MODIFIERS = ImmutableBiMap.of();
     }
 
     /**

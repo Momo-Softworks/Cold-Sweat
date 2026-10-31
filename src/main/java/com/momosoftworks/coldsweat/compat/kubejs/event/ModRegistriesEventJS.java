@@ -6,10 +6,10 @@ import com.momosoftworks.coldsweat.api.event.core.registry.LoadRegistriesEvent;
 import com.momosoftworks.coldsweat.api.registry.BlockTempRegistry;
 import com.momosoftworks.coldsweat.api.registry.TempModifierRegistry;
 import com.momosoftworks.coldsweat.api.temperature.block_temp.BlockTemp;
-import com.momosoftworks.coldsweat.api.temperature.modifier.TempModifier;
 import com.momosoftworks.coldsweat.api.util.Temperature;
 import com.momosoftworks.coldsweat.compat.kubejs.event.builder.*;
 import com.momosoftworks.coldsweat.compat.kubejs.util.TempModifierDataJS;
+import com.momosoftworks.coldsweat.compat.kubejs.util.TempModifierJS;
 import com.momosoftworks.coldsweat.config.ConfigSettings;
 import com.momosoftworks.coldsweat.data.ModRegistries;
 import com.momosoftworks.coldsweat.data.RegistryHolder;
@@ -26,7 +26,6 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.entity.LivingEntity;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -332,6 +331,10 @@ public class ModRegistriesEventJS implements KubeStartupEvent
      TempModifier
      */
 
+    /**
+     * @deprecated Use the {@code ColdSweatEvents.registerTempModifiers} event instead.
+     */
+    @Deprecated
     public void addTempModifier(String id, Function<TempModifierDataJS, Function<Double, Double>> constructor)
     {
         ResourceLocation key = ResourceLocation.parse(id);
@@ -339,18 +342,7 @@ public class ModRegistriesEventJS implements KubeStartupEvent
         {   ColdSweat.LOGGER.error("KubeJS: Non-Minecraft namespace required for TempModifier IDs (i.e. mymod:my_modifier)");
             return;
         }
-        class TempModifierJS extends TempModifier
-        {
-            public TempModifierJS()
-            {}
-
-            @Override
-            protected Function<Double, Double> calculate(LivingEntity entity, Temperature.Trait trait)
-            {
-                return constructor.apply(new TempModifierDataJS(entity, trait));
-            }
-        }
-
-        TempModifierRegistry.register(key, TempModifierJS::new);
+        ColdSweat.LOGGER.warn("KubeJS: Registering TempModifier {} through ColdSweatEvents.registries is deprecated. Use ColdSweatEvents.registerTempModifiers instead.", key);
+        TempModifierRegistry.register(key, () -> new TempModifierJS(constructor));
     }
 }

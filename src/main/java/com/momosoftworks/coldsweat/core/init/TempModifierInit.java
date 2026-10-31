@@ -28,20 +28,7 @@ public class TempModifierInit
 {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void fireRegisterModifiers(ServerAboutToStartEvent event)
-    {   buildModifierRegistries();
-    }
-
-    // Trigger registry events
-    public static void buildModifierRegistries()
-    {
-        TempModifierRegistry.flush();
-
-        try { NeoForge.EVENT_BUS.post(new TempModifierRegisterEvent()); }
-        catch (Exception e)
-        {
-            ColdSweat.LOGGER.error("Registering TempModifiers failed!");
-            throw e;
-        }
+    {   TempModifierRegistry.rebuild();
     }
 
     public static void buildBlockRegistries()
